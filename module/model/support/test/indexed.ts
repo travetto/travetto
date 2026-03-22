@@ -55,6 +55,9 @@ class User4 {
 
 @Suite()
 export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSupport> {
+
+  indexLimitSkew = 0;
+
   @Test()
   async writeAndRead() {
     const service = await this.service;
@@ -226,21 +229,23 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   async paginateByIndex() {
     const service = await this.service;
 
-    for (const [i, color] of (['a', 'b', 'c', 'd', 'e']).entries()) {
+    const allColors = 'abcdefghijklmnopqrstuvwxyzABCDEFGHJIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+,<.>/?;:\'"[{]}|\\`~'.repeat(2).split('');
+
+    for (const [i, color] of allColors.entries()) {
       await service.create(User3, User3.from({ name: 'page', age: (i + 1) * 10, color }));
     }
 
-    const limit = 2;
-    const allColors: string[] = [];
+    const limit = 7;
+    const items: string[] = [];
     let offset: string | undefined;
 
     do {
       const page = await service.listPageByIndex(User3, 'userAge', { body: { name: 'page' }, limit, offset });
-      allColors.push(...page.items.map(u => u.color!));
+      items.push(...page.items.map(u => u.color!));
       offset = page.nextOffset;
     } while (offset);
 
-    assert(allColors.length === 5);
-    assert.deepEqual(allColors, ['a', 'b', 'c', 'd', 'e']);
+    assert(items.length === allColors.length);
+    assert.deepEqual(items, allColors);
   }
 }

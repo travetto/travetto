@@ -14,6 +14,7 @@ import type { RedisModelConfig } from './config.ts';
 type RedisScan = { key: string } | { match: string };
 type RedisClient = ReturnType<typeof createClient>;
 type RedisMulti = ReturnType<RedisClient['multi']>;
+type ScanState = { cursor?: string, ids: string[] };
 
 /**
  * A model service backed by redis
@@ -41,38 +42,39 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     return key;
   }
 
+  async #scan(
+    operation: 'scan' | 'sScan' | 'zScan', cursor: string, search: RedisScan, count = 100
+  ): Promise<ScanState> {
+    const key = 'key' in search ? search.key : '';
+    const flags = { COUNT: count, ...('match' in search ? { MATCH: search.match } : {}) };
+
+    const output = await (operation === 'scan' ?
+      this.client.scan(cursor, flags).then(result => ({ cursor: result.cursor, results: result.keys })) :
+      operation === 'sScan' ?
+        this.client.sScan(key!, cursor, flags).then(result => ({ cursor: result.cursor, results: result.members })) :
+        this.client.zScan(key!, cursor, flags).then(result => ({ cursor: result.cursor, results: result.members.map(item => item.value) } as const)));
+    return { cursor: output.cursor === '0' ? undefined : output.cursor, ids: output.results };
+  }
+
   async * #streamValues<T extends ModelType>(
     operation: 'scan' | 'sScan' | 'zScan',
     search: RedisScan,
-    options: Omit<ModelIndexedListPageOptions<T, string>, 'limit'> & { limit?: number } = {},
-    count = 100
-  ): AsyncIterable<{ cursor?: string, ids: string[] }> {
-
-    const key = 'key' in search ? search.key : '';
-
+    options: Omit<ModelIndexedListPageOptions<T>, 'limit'> & { limit?: number } = {},
+    count = 10
+  ): AsyncIterable<ScanState> {
     const limit = options.limit ?? Number.MAX_SAFE_INTEGER;
-    let cursor: string | undefined = options.offset ?? '0';
+    let matched: ScanState = { cursor: options.offset ?? '0', ids: [] };
     let produced = 0;
 
     do {
       const remaining = limit - produced;
-      const flags = { COUNT: Math.min(remaining, count), ...('match' in search ? { MATCH: search.match } : {}) };
-
-      const [nextCursor, results]: [string, string[]] = await (
-        operation === 'scan' ?
-          this.client.scan(cursor, flags).then(result => [result.cursor, result.keys] as const) :
-          operation === 'sScan' ?
-            this.client.sScan(key, cursor, flags).then(result => [result.cursor, result.members] as const) :
-            this.client.zScan(key, cursor, flags).then(result => [result.cursor, result.members.map(item => item.value)] as const)
-      );
-
-      cursor = nextCursor === '0' ? undefined : nextCursor;
-      produced += results.length;
-      yield { cursor, ids: results };
-    } while (cursor && produced < limit);
+      matched = await this.#scan(operation, matched.cursor!, search, Math.min(remaining, count));
+      yield matched;
+      produced += matched.ids.length;
+    } while (matched.cursor && produced < limit);
   }
 
-  #scanIndex<T extends ModelType>(cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T, string>): AsyncIterable<{ cursor?: string, ids: string[] }> {
+  #scanIndex<T extends ModelType>(cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>): AsyncIterable<ScanState> {
     ModelCrudUtil.ensureNotSubType(cls);
 
     const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);

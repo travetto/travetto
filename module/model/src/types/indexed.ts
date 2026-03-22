@@ -9,9 +9,9 @@ export type ModelIndexedListPageOptions<T extends ModelType, O = string> = {
   offset?: O;
 };
 
-export type ModelIndexListPageResult<T extends ModelType, O = string> = {
+export type ModelIndexListPageResult<T extends ModelType> = {
   items: T[];
-  nextOffset?: O;
+  nextOffset?: string;
 };
 
 /**
