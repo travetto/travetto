@@ -2,9 +2,10 @@ import {
   type ModelType,
   type BulkOperation, type BulkResponse, type ModelCrudSupport, type ModelStorageSupport, type ModelBulkSupport,
   NotFoundError, ModelRegistryIndex, ExistsError, type OptionalId, type ModelIdSource,
-  ModelExpiryUtil, ModelCrudUtil, ModelStorageUtil, ModelBulkUtil,
+  ModelExpiryUtil, ModelCrudUtil, ModelStorageUtil, ModelBulkUtil, ModelIndexedUtil,
+  type ModelIndexedSupport, type ModelIndexedListPageOptions, type ModelIndexListPageResult,
 } from '@travetto/model';
-import { castTo, type Class } from '@travetto/runtime';
+import { castTo, type Class, type DeepPartial, JSONUtil } from '@travetto/runtime';
 import { DataUtil } from '@travetto/schema';
 import type { AsyncContext } from '@travetto/context';
 import { Injectable, PostConstruct } from '@travetto/di';
@@ -33,6 +34,7 @@ export class SQLModelService implements
   ModelCrudSupport, ModelStorageSupport,
   ModelBulkSupport, ModelQuerySupport,
   ModelQueryCrudSupport, ModelQueryFacetSupport,
+  ModelIndexedSupport,
   ModelQuerySuggestSupport {
 
   #manager: TableManager;
@@ -326,4 +328,70 @@ export class SQLModelService implements
       return result;
     });
   }
+  // Indexed support
+
+  @Connected()
+  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
+    const where = ModelIndexedUtil.projectIndex(cls, idx, body);
+    const results = await this.query(cls, castTo({ where }));
+    if (results.length === 1) {
+      return results[0];
+    }
+    throw new NotFoundError(`${cls.name}: ${idx}`, key);
+  }
+
+  @Transactional()
+  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void> {
+    const { id } = await this.getByIndex(cls, idx, body);
+    await this.delete(cls, id);
+  }
+
+  @ConnectedIterator()
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+    const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const where = ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: undefined });
+    const sort = idxConfig.type === 'sorted' ? this.#getIndexSort(cls, idx, body) : undefined;
+    for (const item of await this.query(cls, castTo({ where, sort }))) {
+      yield item;
+    }
+  }
+
+  @Transactional()
+  async upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T> {
+    return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
+  }
+
+  @Transactional()
+  async updateByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: T): Promise<T> {
+    return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
+  }
+
+  @Transactional()
+  async updatePartialByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
+    return this.update(cls, item);
+  }
+
+  @Connected()
+  async listPageByIndex<T extends ModelType>(
+    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>
+  ): Promise<ModelIndexListPageResult<T>> {
+    const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
+    const limit = options.limit;
+    const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const where = ModelIndexedUtil.projectIndex(cls, idx, options.body, { emptySortValue: undefined });
+    const sort = idxConfig.type === 'sorted' ? this.#getIndexSort(cls, idx, options.body) : undefined;
+    const items = await this.query(cls, castTo({ where, sort, limit, offset }));
+    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
+  }
+
+  #getIndexSort<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): Record<string, 1 | -1>[] {
+    const { sorted } = ModelIndexedUtil.computeIndexParts(cls, idx, body, { emptySortValue: undefined });
+    if (sorted) {
+      return [{ [sorted.path.join('.')]: sorted.dir === 1 ? 1 : -1 }];
+    }
+    return [];
+  }
+
 }
