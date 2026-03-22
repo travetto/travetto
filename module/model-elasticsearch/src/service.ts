@@ -66,29 +66,29 @@ export class ElasticsearchModelService implements
       sort: ElasticsearchQueryUtil.getSort(config.fields),
     });
 
-    let produced = 0;
 
-    while (search.hits.hits.length > 0) {
-      const count = search.hits.hits.length;
-      produced += count;
-      let hits = search.hits.hits;
-      if (produced > options.limit) {
-        hits = hits.slice(0, options.limit - (produced - count));
-      }
+    let hits = search.hits.hits.slice(0, options.limit);
+    let produced = hits.length;
 
+    if (hits.length) {
       yield { hits, nextOffset: hits.at(-1)?.sort };
-      if (search._scroll_id) {
-        search = await this.client.scroll({ scroll_id: search._scroll_id, scroll: '2m' });
-      } else {
-        break;
+    }
+
+    while (produced < options.limit && search._scroll_id && hits.length) {
+      search = await this.client.scroll({ scroll_id: search._scroll_id, scroll: '2m' });
+      hits = search.hits.hits;
+      produced += hits.length;
+      if (produced > options.limit) {
+        hits = hits.slice(0, options.limit - (produced - hits.length));
+      }
+      if (hits.length) {
+        yield { hits, nextOffset: hits.at(-1)?.sort };
       }
     }
-    try {
-      if (search._scroll_id) {
-        // Clear scroll
-        await this.client.clearScroll({ scroll_id: search._scroll_id });
-      }
-    } catch { }
+
+    if (search._scroll_id) {
+      await this.client.clearScroll({ scroll_id: search._scroll_id }).catch(() => { });
+    }
   }
 
   @PostConstruct()
