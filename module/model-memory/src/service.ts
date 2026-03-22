@@ -7,7 +7,8 @@ import { Config } from '@travetto/config';
 import {
   type ModelType, type IndexConfig, type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, type ModelIndexedSupport,
   ModelRegistryIndex, NotFoundError, ExistsError, type OptionalId, type ModelBlobSupport,
-  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil
+  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
+  IndexNotSupported, type ModelIndexListPageResult, type ModelIndexedListPageOptions
 } from '@travetto/model';
 
 const ModelBlobNamespace = '__blobs';
@@ -40,7 +41,10 @@ function getFirstId(data: Map<string, unknown> | Set<string>, value?: string | n
  * Standard in-memory support
  */
 @Injectable()
-export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
+export class MemoryModelService implements
+  ModelCrudSupport, ModelBlobSupport,
+  ModelExpirySupport, ModelStorageSupport,
+  ModelIndexedSupport {
 
   #store = new Map<string, StoreType>();
   #indices = {
@@ -128,6 +132,21 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
       return id;
     }
     throw new NotFoundError(cls, key);
+  }
+
+  #getIndexIds<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): string[] {
+    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body, { emptySortValue: null });
+    const index = this.#indices[config.type].get(indexName(cls, idx))?.get(key);
+    const isReversed = config.type === 'sorted' && config.fields.some(field => Object.values(field)[0] === -1);
+
+    if (!index) {
+      throw new IndexNotSupported(cls, config);
+    }
+
+    return index instanceof Set ?
+      [...index] :
+      [...index.entries()].toSorted((a, b) => isReversed ? +b[1] - +a[1] : +a[1] - +b[1]).map(([a,]) => a);
   }
 
   @PostConstruct()
@@ -319,21 +338,33 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
-    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body, { emptySortValue: null });
-    const index = this.#indices[config.type].get(indexName(cls, idx))?.get(key);
+  async updateByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: T): Promise<T> {
+    return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
+  }
 
-    if (index) {
-      if (index instanceof Set) {
-        for (const id of index) {
-          yield this.get(cls, id);
-        }
-      } else {
-        for (const id of [...index.entries()].toSorted((a, b) => +a[1] - +b[1]).map(([a,]) => a)) {
-          yield this.get(cls, id);
-        }
-      }
+  async updatePartialByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
+    return this.update(cls, item);
+  }
+
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+    const ids = this.#getIndexIds(cls, idx, body);
+    for (const id of ids) {
+      yield this.get(cls, id);
     }
+  }
+
+  async listPageByIndex<T extends ModelType>(
+    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>
+  ): Promise<ModelIndexListPageResult<T>> {
+    const ids = this.#getIndexIds(cls, idx, options.body);
+    const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
+    const limit = options.limit;
+
+    const items: T[] = [];
+    for (const id of ids.slice(offset, offset + limit)) {
+      items.push(await this.get(cls, id));
+    }
+    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
   }
 }

@@ -29,6 +29,7 @@ class RedisExpirySuite extends ModelExpirySuite {
 class RedisIndexedSuite extends ModelIndexedSuite {
   serviceClass = RedisModelService;
   configClass = RedisModelConfig;
+  indexLimitSkew = 5;
 }
 
 @Suite()

@@ -30,6 +30,7 @@ class User2 {
 
 @Model()
 @Index({ type: 'sorted', name: 'userAge', fields: [{ name: 1 }, { age: 1 }] })
+@Index({ type: 'sorted', name: 'userAgeReverse', fields: [{ name: 1 }, { age: -1 }] })
 class User3 {
   id: string;
   name: string;
@@ -55,6 +56,9 @@ class User4 {
 
 @Suite()
 export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSupport> {
+
+  indexLimitSkew = 0;
+
   @Test()
   async writeAndRead() {
     const service = await this.service;
@@ -125,7 +129,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     assert(arr[1].color === 'blue' && arr[1].name === 'bob');
     assert(arr[2].color === 'green' && arr[2].name === 'bob');
 
-    await assert.rejects(() => this.toArray(service.listByIndex(User3, 'userAge', {})), IndexNotSupported);
+    await assert.rejects(() => this.toArray(service.listByIndex(User3, 'userAge')), IndexNotSupported);
   }
 
   @Test()
@@ -136,7 +140,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await service.create(User4, User4.from({ child: { name: 'bob', age: 30 }, color: 'red' }));
     await service.create(User4, User4.from({ child: { name: 'bob', age: 50 }, color: 'green' }));
 
-    const arr = await this.toArray(service.listByIndex(User4, 'childAge', User4.from({ child: { name: 'bob' } })));
+    const arr = await this.toArray(service.listByIndex(User4, 'childAge', { child: { name: 'bob' } }));
     assert(arr[0].color === 'red' && arr[0].child.name === 'bob' && arr[0].child.age === 30);
     assert(arr[1].color === 'blue' && arr[1].child.name === 'bob' && arr[1].child.age === 40);
     assert(arr[2].color === 'green' && arr[2].child.name === 'bob' && arr[2].child.age === 50);
@@ -186,5 +190,87 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     const arr3 = await this.toArray(service.listByIndex(User4, 'childAge', { child: { name: 'bob' } }));
     assert(arr3.length === 1);
     assert(arr3[0].id === user4.id);
+  }
+
+  @Test()
+  async updateByIndex() {
+    const service = await this.service;
+
+    const created = await service.create(User3, User3.from({ name: 'alice', age: 25, color: 'blue' }));
+
+    const updated = await service.updateByIndex(User3, 'userAge', { ...created, color: 'red' });
+
+    assert(updated.id === created.id);
+    assert(updated.name === 'alice');
+    assert(updated.age === 25);
+    assert(updated.color === 'red');
+
+    const found = await service.getByIndex(User3, 'userAge', { name: 'alice', age: 25 });
+    assert(found.color === 'red');
+  }
+
+  @Test()
+  async updatePartialByIndex() {
+    const service = await this.service;
+
+    const created = await service.create(User3, User3.from({ name: 'carol', age: 35, color: 'green' }));
+
+    const updated = await service.updatePartialByIndex(User3, 'userAge', { name: 'carol', age: 35, color: 'yellow' });
+
+    assert(updated.id === created.id);
+    assert(updated.name === 'carol');
+    assert(updated.age === 35);
+    assert(updated.color === 'yellow');
+
+    const found = await service.getByIndex(User3, 'userAge', { name: 'carol', age: 35 });
+    assert(found.color === 'yellow');
+  }
+
+  @Test()
+  async paginateByIndex() {
+    const service = await this.service;
+
+    const allColors = 'abcdefghijklmnopqrstuvwxyzABCDEFGHJIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+,<.>/?;:\'"[{]}|\\`~'.repeat(2).split('');
+
+    for (const [i, color] of allColors.entries()) {
+      await service.create(User3, User3.from({ name: 'page', age: (i + 1) * 10, color }));
+    }
+
+    const limit = 7;
+    const items: string[] = [];
+    let offset: string | undefined;
+
+    do {
+      const page = await service.listPageByIndex(User3, 'userAge', { body: { name: 'page' }, limit, offset });
+      items.push(...page.items.map(u => u.color!));
+      offset = page.nextOffset;
+    } while (offset);
+
+    assert(items.length === allColors.length);
+    assert.deepEqual(items, allColors);
+  }
+
+  @Test()
+  async paginateByIndexReverse() {
+    const service = await this.service;
+
+    const allColors = 'abcdefghijklmnopqrstuvwxyzABCDEFGHJIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+,<.>/?;:\'"[{]}|\\`~'.repeat(2).split('');
+
+    for (const [i, color] of allColors.entries()) {
+      await service.create(User3, User3.from({ name: 'page', age: (i + 1) * 10, color }));
+    }
+
+    const limit = 7;
+    const items: string[] = [];
+    let offset: string | undefined;
+
+    do {
+      const page = await service.listPageByIndex(User3, 'userAgeReverse', { body: { name: 'page' }, limit, offset });
+      items.push(...page.items.map(u => u.color!));
+      offset = page.nextOffset;
+    } while (offset);
+
+    assert(items.length === allColors.length);
+    assert.deepEqual(items, allColors.toReversed());
   }
 }

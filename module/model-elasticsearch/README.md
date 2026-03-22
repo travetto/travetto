@@ -13,13 +13,13 @@ npm install @travetto/model-elasticsearch
 yarn add @travetto/model-elasticsearch
 ```
 
-This module provides an [elasticsearch](https://elastic.co)-based implementation of the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [elasticsearch](https://elastic.co). In development mode, [ElasticsearchModelService](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/service.ts#L36) will also modify the [elasticsearch](https://elastic.co) schema in real time to minimize impact to development. 
+This module provides an [elasticsearch](https://elastic.co)-based implementation of the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [elasticsearch](https://elastic.co). In development mode, [ElasticsearchModelService](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/service.ts#L37) will also modify the [elasticsearch](https://elastic.co) schema in real time to minimize impact to development. 
 
 Supported features:
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11)
    *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64)
    *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10)
-   *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L11)
+   *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L22)
    *  [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/crud.ts#L11)
    *  [Facet](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/facet.ts#L14)
    *  [Query](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/query.ts#L10)

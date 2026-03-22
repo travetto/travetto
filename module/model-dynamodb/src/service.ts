@@ -1,12 +1,13 @@
-import { type AttributeValue, DynamoDB, type PutItemCommandInput, type PutItemCommandOutput } from '@aws-sdk/client-dynamodb';
+import { type AttributeValue, DynamoDB, type PutItemCommandInput, type PutItemCommandOutput, type QueryCommandOutput } from '@aws-sdk/client-dynamodb';
 
-import { JSONUtil, ShutdownManager, TimeUtil, type Class, type DeepPartial } from '@travetto/runtime';
+import { castTo, JSONUtil, ShutdownManager, TimeUtil, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelStorageSupport,
   type ModelIndexedSupport, type ModelType, NotFoundError, ExistsError,
-  IndexNotSupported, type OptionalId,
-  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil
+  IndexNotSupported, type OptionalId, type ModelIndexedListPageOptions,
+  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
+  type ModelIndexListPageResult,
 } from '@travetto/model';
 
 import type { DynamoDBModelConfig } from './config.ts';
@@ -34,6 +35,49 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     return table;
   }
 
+  async * #scanIndex<T extends ModelType>(
+    cls: Class, idx: string, options: ModelIndexedListPageOptions<T, Record<string, AttributeValue>>
+  ): AsyncIterable<QueryCommandOutput & { LastEvaluatedOffset?: string }> {
+    ModelCrudUtil.ensureNotSubType(cls);
+
+    const indexConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const idxName = indexConfig.simpleName!;
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, indexConfig, options.body, { emptySortValue: null });
+    const expression = { [`:${idxName}`]: DynamoDBUtil.toValue(key) };
+    const isReversed = indexConfig.type === 'sorted' && indexConfig.fields.some(field => Object.values(field)[0] === -1);
+
+    let startKey = options.offset;
+    let produced = 0;
+
+    do {
+      const remaining = options.limit - produced;
+      const batch = await this.client.query({
+        TableName: this.#resolveTable(cls),
+        IndexName: idxName,
+        ProjectionExpression: 'body',
+        KeyConditionExpression: `${idxName}__ = :${idxName}`,
+        ExpressionAttributeValues: expression,
+        Limit: Math.min(remaining, 100),
+        ExclusiveStartKey: startKey,
+        ScanIndexForward: !isReversed,
+      });
+
+      if (batch.Count && batch.Items) {
+        produced += batch.Count;
+
+        if (produced > options.limit) {
+          const items = batch.Items.slice(0, remaining);
+          yield { ...batch, Items: items, };
+        } else {
+          yield batch;
+        }
+        startKey = batch.LastEvaluatedKey;
+      } else {
+        startKey = undefined;
+      }
+    } while (startKey && produced < options.limit);
+  }
+
   async #putItem<T extends ModelType>(cls: Class<T>, id: string, item: T, mode: 'create' | 'update' | 'upsert'): Promise<PutItemCommandOutput> {
     const config = ModelRegistryIndex.getConfig(cls);
     let expiry: number | undefined;
@@ -50,7 +94,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         const indices: Record<string, unknown> = {};
         for (const idx of config.indices ?? []) {
           const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
-          const property = DynamoDBUtil.simpleName(idx.name);
+          const property = idx.simpleName!;
           indices[`${property}__`] = DynamoDBUtil.toValue(key);
           if (sort) {
             indices[`${property}_sort__`] = DynamoDBUtil.toValue(+sort);
@@ -73,7 +117,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         const expr: string[] = [];
         for (const idx of config.indices ?? []) {
           const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
-          const property = DynamoDBUtil.simpleName(idx.name);
+          const property = idx.simpleName!;
           indices[`:${property}`] = DynamoDBUtil.toValue(key);
           expr.push(`${property}__ = :${property}`);
           if (sort) {
@@ -299,7 +343,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       throw new IndexNotSupported(cls, idxConfig, 'Sorted indices require the sort field');
     }
 
-    const idxName = DynamoDBUtil.simpleName(idx);
+    const idxName = idxConfig.simpleName!;
 
     const query = {
       TableName: this.#resolveTable(cls),
@@ -335,45 +379,60 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
 
+  async updateByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: T): Promise<T> {
+    return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
+  }
+
+  async updatePartialByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
+    return this.update(cls, item);
+  }
+
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
-
-    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, config, body, { emptySortValue: null });
-
-    const idxName = DynamoDBUtil.simpleName(idx);
-
-    let done = false;
-    let token: Record<string, AttributeValue> | undefined;
-    while (!done) {
-      const batch = await this.client.query({
-        TableName: this.#resolveTable(cls),
-        IndexName: idxName,
-        ProjectionExpression: 'body',
-        KeyConditionExpression: `${idxName}__ = :${idxName}`,
-        ExpressionAttributeValues: {
-          [`:${idxName}`]: DynamoDBUtil.toValue(key)
-        },
-        ExclusiveStartKey: token
-      });
-
-      if (batch.Count && batch.Items) {
-        for (const item of batch.Items) {
-          try {
-            yield await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);
-          } catch (error) {
-            if (!(error instanceof NotFoundError)) {
-              throw error;
-            }
+    for await (const batch of this.#scanIndex(cls, idx, { limit: Number.MAX_SAFE_INTEGER, body })) {
+      for (const item of batch.Items ?? []) {
+        try {
+          yield await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);
+        } catch (error) {
+          if (!(error instanceof NotFoundError)) {
+            throw error;
           }
         }
       }
+    }
+  }
 
-      if (!batch.Count || !batch.LastEvaluatedKey) {
-        done = true;
-      } else {
-        token = batch.LastEvaluatedKey;
+  async listPageByIndex<T extends ModelType>(cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>): Promise<ModelIndexListPageResult<T>> {
+    const items: T[] = [];
+    const offset = options.offset ? JSONUtil.fromBase64<Record<string, AttributeValue>>(options.offset) : undefined;
+    for await (const batch of this.#scanIndex(cls, idx, { ...options, offset })) {
+      console.error(batch.LastEvaluatedKey);
+      for (const item of batch.Items ?? []) {
+        try {
+          items.push(await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!));
+          if (options?.limit && items.length >= options.limit) {
+            break;
+          }
+        } catch (error) {
+          if (!(error instanceof NotFoundError)) {
+            throw error;
+          }
+        }
       }
     }
+
+    let nextOffset;
+    if (items.length) {
+      const indexConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+      const last: T = items.at(-1)!;
+      const { key, sort } = ModelIndexedUtil.computeIndexKey<T>(cls, indexConfig, castTo(last), { emptySortValue: null });
+      nextOffset = JSONUtil.toBase64({
+        [`${indexConfig.simpleName!}__`]: DynamoDBUtil.toValue(key),
+        ...(sort ? { [`${indexConfig.simpleName!}_sort__`]: DynamoDBUtil.toValue(+sort) } : {}),
+        id: DynamoDBUtil.toValue(last.id)
+      });
+    }
+
+    return { items, nextOffset };
   }
 }

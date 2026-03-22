@@ -3,13 +3,15 @@ import {
   type Db, GridFSBucket, MongoClient, type GridFSFile, type Collection,
   type ObjectId, type RootFilterOperators, type Filter,
   type WithId as MongoWithId,
+  type FindCursor,
 } from 'mongodb';
 
 import {
   ModelRegistryIndex, type ModelType, type OptionalId, type ModelCrudSupport, type ModelStorageSupport,
   type ModelExpirySupport, type ModelBulkSupport, type ModelIndexedSupport, type BulkOperation, type BulkResponse,
   NotFoundError, ExistsError, type ModelBlobSupport,
-  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil
+  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
+  type ModelIndexedListPageOptions, type ModelIndexListPageResult,
 } from '@travetto/model';
 import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
@@ -21,6 +23,7 @@ import {
 import {
   ShutdownManager, type Class, type DeepPartial, TypedObject,
   castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType, BinaryUtil, BinaryMetadataUtil,
+  JSONUtil,
 } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 
@@ -53,6 +56,21 @@ export class MongoModelService implements
   config: MongoModelConfig;
 
   constructor(config: MongoModelConfig) { this.config = config; }
+
+  async #buildIndexQuery<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): Promise<FindCursor> {
+    const store = await this.getStore(cls);
+    const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+
+    const where = this.getWhereFilter(
+      cls,
+      castTo(ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
+    );
+
+    const sort = castTo<{ [ListIndexSymbol]: PlainIdx }>(idxConfig)[ListIndexSymbol] ??= MongoUtil.getPlainIndex(idxConfig);
+    return store.find(where, { timeout: true })
+      .batchSize(100)
+      .sort(castTo(sort));
+  }
 
   restoreId(item: { id?: string, _id?: unknown }): void {
     if (item._id) {
@@ -439,21 +457,37 @@ export class MongoModelService implements
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
 
+  async updateByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: T): Promise<T> {
+    return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
+  }
+
+  async updatePartialByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
+    return this.update(cls, item);
+  }
+
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
-    const store = await this.getStore(cls);
-    const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-
-    const where = this.getWhereFilter(
-      cls,
-      castTo(ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
-    );
-
-    const sort = castTo<{ [ListIndexSymbol]: PlainIdx }>(idxConfig)[ListIndexSymbol] ??= MongoUtil.getPlainIndex(idxConfig);
-    const cursor = store.find(where, { timeout: true }).batchSize(100).sort(castTo(sort));
+    const cursor = await this.#buildIndexQuery(cls, idx, body);
 
     for await (const item of cursor) {
       yield await this.postLoad(cls, item);
     }
+  }
+
+  async listPageByIndex<T extends ModelType>(
+    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>
+  ): Promise<ModelIndexListPageResult<T>> {
+    const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
+    const limit = options.limit;
+    const cursor = (await this.#buildIndexQuery(cls, idx, options.body))
+      .limit(limit)
+      .skip(offset);
+
+    const items: T[] = [];
+    for await (const item of cursor) {
+      items.push(await this.postLoad(cls, item));
+    }
+    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
   }
 
   // Query

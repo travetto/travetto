@@ -20,13 +20,6 @@ type DynamoIndexConfig = {
 export class DynamoDBUtil {
 
   /**
-   * Converts an index name to a simplified format by removing non-alphanumeric characters
-   */
-  static simpleName(idx: string): string {
-    return idx.replace(/[^A-Za-z0-9]/g, '');
-  }
-
-  /**
    * Converts a JavaScript value to a DynamoDB AttributeValue format
    * @param value The value to convert (string, number, boolean, Date, null, or undefined)
    * @returns The DynamoDB AttributeValue representation
@@ -56,7 +49,7 @@ export class DynamoDBUtil {
     const indices: GlobalSecondaryIndex[] = [];
 
     for (const idx of config.indices ?? []) {
-      const idxName = this.simpleName(idx.name);
+      const idxName = idx.simpleName!;
       attributes.push({ AttributeName: `${idxName}__`, AttributeType: 'S' });
 
       const keys: KeySchemaElement[] = [{
@@ -67,7 +60,7 @@ export class DynamoDBUtil {
       if (idx.type === 'sorted') {
         keys.push({
           AttributeName: `${idxName}_sort__`,
-          KeyType: 'RANGE'
+          KeyType: 'RANGE',
         });
         attributes.push({ AttributeName: `${idxName}_sort__`, AttributeType: 'N' });
       }

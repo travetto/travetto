@@ -51,6 +51,9 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
       config.postLoad = [...parent.postLoad ?? [], ...config.postLoad ?? []];
       config.prePersist = [...parent.prePersist ?? [], ...config.prePersist ?? []];
     }
+    for (const idx of config.indices ?? []) {
+      idx.simpleName ??= idx.name.replace(/[^A-Za-z0-9_]+/g, '_');
+    }
   }
 
   get(): ModelConfig {
