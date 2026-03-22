@@ -62,7 +62,7 @@ export const text = <>
     </c.SubSection>
 
     <c.SubSection title='Indexed' >
-      Additionally, an implementation may support the ability for basic {Links.Indexed} queries. This is not the full featured query support of {d.module('ModelQuery')}, but allowing for indexed lookups.  This does not support listing by index, but may be added at a later date.
+      Additionally, an implementation may support the ability for basic {Links.Indexed} queries. This is not the full featured query support of {d.module('ModelQuery')}, but allowing for indexed lookups.  This allows for listing, through indexed data, as well as "pagination" through indexed data, via aa token that allows the next query to pick up where the last one left off. This allows for patterns like virtual scrolling, but does not allow for standard count/offset pagination.
 
       <c.Code src={toConcrete<ModelIndexedSupport>()} title='Indexed Contract' />
     </c.SubSection>
