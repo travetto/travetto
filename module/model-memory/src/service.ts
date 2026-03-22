@@ -138,6 +138,7 @@ export class MemoryModelService implements
     const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body, { emptySortValue: null });
     const index = this.#indices[config.type].get(indexName(cls, idx))?.get(key);
+    const isReversed = config.type === 'sorted' && config.fields.some(field => Object.values(field)[0] === -1);
 
     if (!index) {
       throw new IndexNotSupported(cls, config);
@@ -145,7 +146,7 @@ export class MemoryModelService implements
 
     return index instanceof Set ?
       [...index] :
-      [...index.entries()].toSorted((a, b) => +a[1] - +b[1]).map(([a,]) => a);
+      [...index.entries()].toSorted((a, b) => isReversed ? +b[1] - +a[1] : +a[1] - +b[1]).map(([a,]) => a);
   }
 
   @PostConstruct()

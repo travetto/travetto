@@ -30,6 +30,7 @@ class User2 {
 
 @Model()
 @Index({ type: 'sorted', name: 'userAge', fields: [{ name: 1 }, { age: 1 }] })
+@Index({ type: 'sorted', name: 'userAgeReverse', fields: [{ name: 1 }, { age: -1 }] })
 class User3 {
   id: string;
   name: string;
@@ -247,5 +248,29 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
 
     assert(items.length === allColors.length);
     assert.deepEqual(items, allColors);
+  }
+
+  @Test()
+  async paginateByIndexReverse() {
+    const service = await this.service;
+
+    const allColors = 'abcdefghijklmnopqrstuvwxyzABCDEFGHJIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+,<.>/?;:\'"[{]}|\\`~'.repeat(2).split('');
+
+    for (const [i, color] of allColors.entries()) {
+      await service.create(User3, User3.from({ name: 'page', age: (i + 1) * 10, color }));
+    }
+
+    const limit = 7;
+    const items: string[] = [];
+    let offset: string | undefined;
+
+    do {
+      const page = await service.listPageByIndex(User3, 'userAgeReverse', { body: { name: 'page' }, limit, offset });
+      items.push(...page.items.map(u => u.color!));
+      offset = page.nextOffset;
+    } while (offset);
+
+    assert(items.length === allColors.length);
+    assert.deepEqual(items, allColors.toReversed());
   }
 }

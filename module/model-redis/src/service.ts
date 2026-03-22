@@ -11,10 +11,11 @@ import { Injectable, PostConstruct } from '@travetto/di';
 
 import type { RedisModelConfig } from './config.ts';
 
-type RedisScan = { key: string } | { match: string };
+type RedisScan = ({ key: string } | { match: string }) & { reverse?: boolean };
 type RedisClient = ReturnType<typeof createClient>;
 type RedisMulti = ReturnType<RedisClient['multi']>;
 type ScanState = { cursor?: string, ids: string[] };
+type ScanOp = 'scan' | 'sScan' | 'zRange';
 
 /**
  * A model service backed by redis
@@ -42,28 +43,32 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     return key;
   }
 
-  async #scan(
-    operation: 'scan' | 'sScan' | 'zScan', cursor: string, search: RedisScan, count = 100
-  ): Promise<ScanState> {
+  async #scan(operation: ScanOp, cursor: string, search: RedisScan, count = 100): Promise<ScanState> {
     const key = 'key' in search ? search.key : '';
     const flags = { COUNT: count, ...('match' in search ? { MATCH: search.match } : {}) };
 
-    const output = await (operation === 'scan' ?
-      this.client.scan(cursor, flags).then(result => ({ cursor: result.cursor, results: result.keys })) :
-      operation === 'sScan' ?
-        this.client.sScan(key!, cursor, flags).then(result => ({ cursor: result.cursor, results: result.members })) :
-        this.client.zScan(key!, cursor, flags).then(result => ({ cursor: result.cursor, results: result.members.map(item => item.value) } as const)));
-    return { cursor: output.cursor === '0' ? undefined : output.cursor, ids: output.results };
+    let output: ScanState;
+    switch (operation) {
+      case 'scan': output = await this.client.scan(cursor ?? '0', flags).then(result => ({ cursor: result.cursor, ids: result.keys })); break;
+      case 'sScan': output = await this.client.sScan(key!, cursor ?? '0', flags).then(result => ({ cursor: result.cursor, ids: result.members })); break;
+      case 'zRange': {
+        const offset = cursor ? +cursor : 0;
+        const bounds: [number, number] = search.reverse ?
+          [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY] :
+          [Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY];
+        const result = await this.client.zRange(key!, ...bounds, { BY: 'SCORE', REV: search.reverse, LIMIT: { offset, count } });
+        output = { cursor: result.length ? (offset + result.length).toString() : undefined, ids: result };
+        break;
+      }
+    }
+    return { ...output, cursor: output.cursor === '0' ? undefined : output.cursor };
   }
 
   async * #streamValues<T extends ModelType>(
-    operation: 'scan' | 'sScan' | 'zScan',
-    search: RedisScan,
-    options: Omit<ModelIndexedListPageOptions<T>, 'limit'> & { limit?: number } = {},
-    count = 10
+    operation: ScanOp, search: RedisScan, options: ModelIndexedListPageOptions<T>, count = 10
   ): AsyncIterable<ScanState> {
     const limit = options.limit ?? Number.MAX_SAFE_INTEGER;
-    let matched: ScanState = { cursor: options.offset ?? '0', ids: [] };
+    let matched: ScanState = { cursor: options.offset, ids: [] };
     let produced = 0;
 
     do {
@@ -80,12 +85,10 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idxConfig, options.body, { emptySortValue: null });
     const fullKey = this.#resolveKey(cls, idx, key);
+    const isReversed = idxConfig.type === 'sorted' && idxConfig.fields.some(field => Object.values(field)[0] === -1);
 
-    const stream = idxConfig.type === 'unsorted' ?
-      this.#streamValues('sScan', { key: fullKey }, options) :
-      this.#streamValues('zScan', { key: fullKey }, options);
-
-    return stream;
+    const operation = idxConfig.type === 'unsorted' ? 'sScan' : 'zRange';
+    return this.#streamValues(operation, { key: fullKey, reverse: isReversed }, options);
   }
 
   async * #getBodies<T extends ModelType>(cls: Class<T>, ids: string[], transform: (id: string) => string): AsyncIterable<T> {
@@ -123,7 +126,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
       switch (idx.type) {
         case 'unsorted': multi.sAdd(fullKey, item.id); break;
-        case 'sorted': multi.zAdd(fullKey, { score: +sort!, value: item.id }); break;
+        case 'sorted': {
+          multi.zAdd(fullKey, { score: +sort!, value: item.id }); break;
+        }
       }
     }
   }
@@ -277,7 +282,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
-    for await (const { ids } of this.#streamValues('scan', { match: `${this.#resolveKey(cls)}:*` })) {
+    for await (const { ids } of this.#streamValues('scan', { match: `${this.#resolveKey(cls)}:*` }, { limit: Number.MAX_SAFE_INTEGER })) {
       yield* this.#getBodies(cls, ids, id => id);
     }
   }
@@ -297,7 +302,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     if (!this.config.namespace) {
       await this.client.flushDb();
     } else {
-      for await (const { ids } of this.#streamValues('scan', { match: `${this.#resolveKey('')}*` })) {
+      for await (const { ids } of this.#streamValues('scan', { match: `${this.#resolveKey('')}*` }, { limit: Number.MAX_SAFE_INTEGER })) {
         if (ids.length) {
           await this.client.del(ids);
         }
@@ -306,7 +311,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async truncateModel<T extends ModelType>(model: Class<T>): Promise<void> {
-    for await (const { ids } of this.#streamValues('scan', { match: `${this.#resolveKey(model)}:*` })) {
+    for await (const { ids } of this.#streamValues('scan', { match: `${this.#resolveKey(model)}:*` }, { limit: Number.MAX_SAFE_INTEGER })) {
       if (ids.length) {
         await this.client.del(ids);
       }
