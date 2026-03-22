@@ -50,12 +50,14 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     let produced = 0;
 
     do {
+      const remaining = options.limit - produced;
       const batch = await this.client.query({
         TableName: this.#resolveTable(cls),
         IndexName: idxName,
         ProjectionExpression: 'body',
         KeyConditionExpression: `${idxName}__ = :${idxName}`,
         ExpressionAttributeValues: expression,
+        Limit: Math.min(remaining, 100),
         ExclusiveStartKey: startKey,
       });
 
@@ -63,10 +65,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         produced += batch.Count;
 
         if (produced > options.limit) {
-          const remaining = options.limit - (produced - batch.Count);
           const items = batch.Items.slice(0, remaining);
           yield { ...batch, Items: items, };
-          return;
         } else {
           yield batch;
         }
@@ -74,7 +74,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       } else {
         startKey = undefined;
       }
-    } while (startKey);
+    } while (startKey && produced < options.limit);
   }
 
   async #putItem<T extends ModelType>(cls: Class<T>, id: string, item: T, mode: 'create' | 'update' | 'upsert'): Promise<PutItemCommandOutput> {
@@ -405,7 +405,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     const items: T[] = [];
     const offset = options.offset ? JSONUtil.fromBase64<Record<string, AttributeValue>>(options.offset) : undefined;
     for await (const batch of this.#scanIndex(cls, idx, { ...options, offset })) {
-      console.error!(batch.LastEvaluatedKey);
+      console.error(batch.LastEvaluatedKey);
       for (const item of batch.Items ?? []) {
         try {
           items.push(await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!));
@@ -423,8 +423,13 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     let nextOffset;
     if (items.length) {
       const indexConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-      const { key } = ModelIndexedUtil.computeIndexKey<T>(cls, indexConfig, castTo(items.at(-1)!), { emptySortValue: null });
-      nextOffset = JSONUtil.toBase64(DynamoDBUtil.toValue(key));
+      const last: T = items.at(-1)!;
+      const { key, sort } = ModelIndexedUtil.computeIndexKey<T>(cls, indexConfig, castTo(last), { emptySortValue: null });
+      nextOffset = JSONUtil.toBase64({
+        [`${indexConfig.simpleName!}__`]: DynamoDBUtil.toValue(key),
+        ...(sort ? { [`${indexConfig.simpleName!}_sort__`]: DynamoDBUtil.toValue(+sort) } : {}),
+        id: DynamoDBUtil.toValue(last.id)
+      });
     }
 
     return { items, nextOffset };
