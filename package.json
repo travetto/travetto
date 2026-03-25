@@ -40,7 +40,6 @@
   ],
   "overrides": {
     "debug": "4.4.3",
-    "typescript": "6.0.1-rc",
     "minimatch": "^10.2.2"
   },
   "devDependencies": {
