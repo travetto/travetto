@@ -1,7 +1,42 @@
-import type { Class, DeepPartial } from '@travetto/runtime';
+import type { Any, Class, DeepPartial, IntrinsicType } from '@travetto/runtime';
 
 import type { ModelType, OptionalId } from '../types/model.ts';
 import type { ModelBasicSupport } from './basic.ts';
+
+export type DeepPartialWithType<T, V> = {
+  [P in keyof T]?: (T[P] extends (IntrinsicType | undefined) ? (V | undefined) :
+    (T[P] extends Any[] ? (DeepPartialWithType<T[P][number], V> | null | undefined)[] : DeepPartialWithType<T[P], V>));
+};
+
+
+type UniqueIndex<T extends ModelType, K extends DeepPartialWithType<T, true>> = {
+  cls: Class<T>;
+  keys: K;
+  unique: true;
+};
+
+type UnsortedIndex<T extends ModelType, K extends DeepPartialWithType<T, true>> = {
+  cls: Class<T>;
+  keys: K;
+  unique: false;
+};
+
+type ScopedSortedIndex<T extends ModelType, K extends DeepPartialWithType<T, true>, S extends DeepPartialWithType<T, true>> = {
+  cls: Class<T>;
+  keys: K;
+  sort: S;
+  unique: false;
+  reversed: boolean;
+};
+
+type SortedIndex<T extends ModelType, S extends DeepPartialWithType<T, true>> = {
+  cls: Class<T>;
+  keys: undefined;
+  sort: S;
+  unique: false;
+  reversed: boolean;
+};
+
 
 export type ModelIndexedListPageOptions<T extends ModelType, O = string> = {
   body?: DeepPartial<T>;
