@@ -27,7 +27,7 @@
   "dependencies": {
     "@travetto/email": "^8.0.0-alpha.9",
     "@types/nodemailer": "^7.0.11",
-    "nodemailer": "^8.0.3"
+    "nodemailer": "^8.0.4"
   },
   "devDependencies": {
     "@aws-sdk/client-sesv2": "^3.1014.0"
