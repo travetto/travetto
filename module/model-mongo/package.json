@@ -29,7 +29,7 @@
     "@travetto/config": "^8.0.0-alpha.9",
     "@travetto/model": "^8.0.0-alpha.9",
     "@travetto/model-query": "^8.0.0-alpha.9",
-    "mongodb": "^7.1.0"
+    "mongodb": "^7.1.1"
   },
   "peerDependencies": {
     "@travetto/cli": "^8.0.0-alpha.14"
