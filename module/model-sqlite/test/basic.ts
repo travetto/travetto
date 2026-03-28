@@ -10,6 +10,7 @@ import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
+import { ModelIndexedSuite } from '@travetto/model/support/test/indexed';
 
 class Config {
   @InjectableFactory({ primary: true })
@@ -42,6 +43,13 @@ class SqliteBulkSuite extends ModelBulkSuite {
 @WithSuiteContext()
 @Suite()
 class SqliteExpirySuite extends ModelExpirySuite {
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
+}
+
+@WithSuiteContext()
+@Suite()
+class SqliteIndexedSuite extends ModelIndexedSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

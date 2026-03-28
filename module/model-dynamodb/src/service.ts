@@ -44,7 +44,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     const idxName = indexConfig.simpleName!;
     const { key } = ModelIndexedUtil.computeIndexKey(cls, indexConfig, options.body, { emptySortValue: null });
     const expression = { [`:${idxName}`]: DynamoDBUtil.toValue(key) };
-    const isReversed = indexConfig.type === 'sorted' && indexConfig.fields.some(field => Object.values(field)[0] === -1);
+    const isReversed = ModelIndexedUtil.isIndexSimpleReversed(cls, indexConfig);
 
     let startKey = options.offset;
     let produced = 0;
@@ -388,7 +388,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     return this.update(cls, item);
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+  async * listByKeyedIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     for await (const batch of this.#scanIndex(cls, idx, { limit: Number.MAX_SAFE_INTEGER, body })) {
       for (const item of batch.Items ?? []) {
         try {

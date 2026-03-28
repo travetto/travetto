@@ -440,7 +440,7 @@ export class ElasticsearchModelService implements
     return this.update(cls, item);
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+  async * listByKeyedIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     for await (const { hits } of this.#scrollIndex(cls, idx, { body, limit: Number.MAX_SAFE_INTEGER })) {
       for (const hit of hits) {
         try {

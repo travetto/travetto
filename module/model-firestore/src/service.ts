@@ -172,7 +172,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return this.update(cls, item);
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+  async * listByKeyedIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     const query = this.#buildIndexQuery(cls, idx, body);
 
     for (const item of (await query.get()).docs) {
