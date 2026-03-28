@@ -351,7 +351,7 @@ export class MemoryModelService implements
     return this.update(cls, item);
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+  async * listByKeyedIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     const ids = this.#getIndexIds(cls, idx, body);
     for (const id of ids) {
       yield this.get(cls, id);

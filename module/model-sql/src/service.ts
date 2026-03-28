@@ -348,7 +348,7 @@ export class SQLModelService implements
   }
 
   @ConnectedIterator()
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+  async * listByKeyedIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
     const where = ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: undefined });
     const sort = idxConfig.type === 'sorted' ? this.#getIndexSort(cls, idx, body) : undefined;

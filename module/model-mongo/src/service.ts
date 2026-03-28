@@ -466,7 +466,7 @@ export class MongoModelService implements
     return this.update(cls, item);
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+  async * listByKeyedIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     const cursor = await this.#buildIndexQuery(cls, idx, body);
 
     for await (const item of cursor) {
