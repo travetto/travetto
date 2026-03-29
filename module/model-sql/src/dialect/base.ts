@@ -2,7 +2,7 @@
 import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex, type Point } from '@travetto/schema';
 import { type Class, RuntimeError, TypedObject, TimeUtil, castTo, castKey, toConcrete, JSONUtil } from '@travetto/runtime';
 import { type SelectClause, type Query, type SortClause, type WhereClause, type RetainQueryPrimitiveFields, ModelQueryUtil, isModelQueryIndex } from '@travetto/model-query';
-import { IndexNotSupported, isModelIndexedIndex, type BulkResponse, type IndexConfig, type ModelType } from '@travetto/model';
+import { IndexNotSupported, isModelIndexedIndex, type AllIndexes, type BulkResponse, type IndexConfig, type ModelType } from '@travetto/model';
 
 import { SQLModelUtil } from '../util.ts';
 import type { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types.ts';
@@ -31,6 +31,20 @@ function makeField(name: string, type: Class, required: boolean, extra: Partial<
     ...(required ? { required: { active: true } } : {}),
     ...extra
   };
+}
+
+function flattenIndex<T extends ModelType>(idx: AllIndexes<T>): [string, boolean][] {
+  const out: [string, boolean][] = [];
+  for (const [key, value] of [
+    ...Object.entries('keys' in idx ? idx.keys : {}),
+    ...Object.entries('sort' in idx ? idx.sort : {})
+  ]) {
+    if (typeof value !== 'number') {
+      throw new IndexNotSupported(null!, idx, 'Nested fields are not supported in ModelIndexed indices SQL');
+    }
+    out.push([key, value === 1]);
+  }
+  return out;
 }
 
 /**
@@ -733,8 +747,10 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    * Get CREATE INDEX sql
    */
   getCreateIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig): string {
+    const constraint = this.getIndexName(cls, idx);
+    const table = this.namespace(SQLModelUtil.classToStack(cls));
+
     if (isModelQueryIndex(idx)) {
-      const table = this.namespace(SQLModelUtil.classToStack(cls));
       const fields: [string, boolean][] = idx.fields.map(field => {
         const key = TypedObject.keys(field)[0];
         const value = field[key];
@@ -743,12 +759,17 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
         }
         return [castTo(key), typeof value === 'number' ? value === 1 : (!!value)];
       });
-      const constraint = this.getIndexName(cls, idx);
       return `CREATE ${idx.type === 'query:unique' ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields
         .map(([name, sel]) => `${this.identifier(name)} ${sel ? 'ASC' : 'DESC'}`)
         .join(', ')});`;
     } else if (isModelIndexedIndex(idx)) {
-      // TODO: Fill this out
+      const fields = flattenIndex(idx).map(([key, value]) => `${this.identifier(key)} ${value ? 'ASC' : 'DESC'}`).join(', ');
+      switch (idx.type) {
+        case 'indexed:unique': return `CREATE UNIQUE INDEX ${constraint} ON ${this.identifier(table)} (${fields});`;
+        case 'indexed:sortedKeyed':
+        case 'indexed:keyed':
+        case 'indexed:sorted': return `CREATE INDEX ${constraint} ON ${this.identifier(table)} (${fields});`;
+      }
     } else {
       throw new IndexNotSupported(cls, idx, 'Only indexed and query indices are supported in SQL');
     }
