@@ -3,9 +3,9 @@ import { createClient } from '@redis/client';
 import { castTo, JSONUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import {
   type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelType, type ModelStorageSupport,
-  NotFoundError, ExistsError, type ModelIndexedSupport, type OptionalId, type ModelIndexedListPageOptions,
+  NotFoundError, ExistsError, type ModelIndexedSupport, type OptionalId, type ListPageOptions,
   ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
-  type ModelIndexListPageResult,
+  type ListPageResult,
 } from '@travetto/model';
 import { Injectable, PostConstruct } from '@travetto/di';
 
@@ -65,7 +65,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async * #streamValues<T extends ModelType>(
-    operation: ScanOp, search: RedisScan, options: ModelIndexedListPageOptions<T>, count = 10
+    operation: ScanOp, search: RedisScan, options: ListPageOptions<T>, count = 10
   ): AsyncIterable<ScanState> {
     const limit = options.limit ?? Number.MAX_SAFE_INTEGER;
     let matched: ScanState = { cursor: options.offset, ids: [] };
@@ -79,7 +79,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     } while (matched.cursor && produced < limit);
   }
 
-  #scanIndex<T extends ModelType>(cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>): AsyncIterable<ScanState> {
+  #scanIndex<T extends ModelType>(cls: Class<T>, idx: string, options: ListPageOptions<T>): AsyncIterable<ScanState> {
     ModelCrudUtil.ensureNotSubType(cls);
 
     const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
@@ -347,8 +347,8 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async listPageByIndex<T extends ModelType>(
-    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>
-  ): Promise<ModelIndexListPageResult<T>> {
+    cls: Class<T>, idx: string, options: ListPageOptions<T>
+  ): Promise<ListPageResult<T>> {
     const items: T[] = [];
     let lastCursor: string | undefined;
     for await (const { ids, cursor } of this.#scanIndex(cls, idx, options)) {

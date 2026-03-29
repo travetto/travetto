@@ -1,13 +1,21 @@
 import { type AttributeValue, DynamoDB, type PutItemCommandInput, type PutItemCommandOutput, type QueryCommandOutput } from '@aws-sdk/client-dynamodb';
 
-import { castTo, JSONUtil, ShutdownManager, TimeUtil, type Class, type DeepPartial } from '@travetto/runtime';
+import { castTo, JSONUtil, ShutdownManager, TimeUtil, type Any, type Class } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelStorageSupport,
   type ModelIndexedSupport, type ModelType, NotFoundError, ExistsError,
-  IndexNotSupported, type OptionalId, type ModelIndexedListPageOptions,
+  IndexNotSupported, type OptionalId, type ListPageOptions,
   ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
-  type ModelIndexListPageResult,
+  type ListPageResult,
+  type KeyedIndexSelection,
+  type KeyedIndex,
+  type KeyedIndexBody,
+  type KeyedIndexWithPartialBody,
+  type SortedIndexSelection,
+  type SortedIndex,
+  type SortedKeyedIndex,
+  type UniqueIndex,
 } from '@travetto/model';
 
 import type { DynamoDBModelConfig } from './config.ts';
@@ -36,15 +44,16 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async * #scanIndex<T extends ModelType>(
-    cls: Class, idx: string, options: ModelIndexedListPageOptions<T, Record<string, AttributeValue>>
+    cls: Class,
+    idx: SortedIndex<T, Any> | KeyedIndex<T, Any> | SortedKeyedIndex<T, Any, Any>,
+    body: KeyedIndexBody<T, Any>,
+    options: ListPageOptions<Record<string, AttributeValue>>
   ): AsyncIterable<QueryCommandOutput & { LastEvaluatedOffset?: string }> {
     ModelCrudUtil.ensureNotSubType(cls);
-
-    const indexConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const idxName = indexConfig.simpleName!;
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, indexConfig, options.body, { emptySortValue: null });
+    const idxName = idx.name!;
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body, { emptySortValue: null });
     const expression = { [`:${idxName}`]: DynamoDBUtil.toValue(key) };
-    const isReversed = ModelIndexedUtil.isIndexSimpleReversed(cls, indexConfig);
+    const isReversed = 'reversed' in idx && idx.reversed;
 
     let startKey = options.offset;
     let produced = 0;
@@ -332,18 +341,19 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   // Indexed
-  async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<string> {
+  async #getIdByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: | UniqueIndex<T, K> | KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
 
-    const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idxConfig, body);
-
-    if (idxConfig.type === 'sorted' && sort === undefined) {
-      throw new IndexNotSupported(cls, idxConfig, 'Sorted indices require the sort field');
+    if ('sort' in idx && sort === undefined) {
+      throw new IndexNotSupported(cls, idx, 'Sorted indices require the sort field');
     }
 
-    const idxName = idxConfig.simpleName!;
+    const idxName = idx.name;
 
     const query = {
       TableName: this.#resolveTable(cls),
@@ -367,29 +377,48 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   // Indexed
-  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
+  async getByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<T> {
     return this.get(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
-  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void> {
+  async deleteByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<void> {
     return this.delete(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
-  upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T> {
+  upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: UniqueIndex<T, K>,
+    body: OptionalId<T>
+  ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
 
-  async updateByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: T): Promise<T> {
+  async updateByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: T): Promise<T> {
     return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
   }
 
-  async updatePartialByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
+  async updatePartialByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T> {
     const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
     return this.update(cls, item);
   }
 
-  async * listByKeyedIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
-    for await (const batch of this.#scanIndex(cls, idx, { limit: Number.MAX_SAFE_INTEGER, body })) {
+  async * listByKeyedIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): AsyncIterable<T> {
+    for await (const batch of this.#scanIndex(cls, idx, body, { limit: Number.MAX_SAFE_INTEGER })) {
       for (const item of batch.Items ?? []) {
         try {
           yield await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);
@@ -402,10 +431,13 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     }
   }
 
-  async listPageByIndex<T extends ModelType>(cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>): Promise<ModelIndexListPageResult<T>> {
+  async listBySortedIndex<
+    T extends ModelType,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>> {
     const items: T[] = [];
     const offset = options.offset ? JSONUtil.fromBase64<Record<string, AttributeValue>>(options.offset) : undefined;
-    for await (const batch of this.#scanIndex(cls, idx, { ...options, offset })) {
+    for await (const batch of this.#scanIndex(cls, idx, {}, { ...options, offset })) {
       console.error(batch.LastEvaluatedKey);
       for (const item of batch.Items ?? []) {
         try {
@@ -423,12 +455,53 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
     let nextOffset;
     if (items.length) {
-      const indexConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
       const last: T = items.at(-1)!;
-      const { key, sort } = ModelIndexedUtil.computeIndexKey<T>(cls, indexConfig, castTo(last), { emptySortValue: null });
+      const { key, sort } = ModelIndexedUtil.computeIndexKey<T>(cls, idx, castTo(last), { emptySortValue: null });
       nextOffset = JSONUtil.toBase64({
-        [`${indexConfig.simpleName!}__`]: DynamoDBUtil.toValue(key),
-        ...(sort ? { [`${indexConfig.simpleName!}_sort__`]: DynamoDBUtil.toValue(+sort) } : {}),
+        [`${idx.name!}__`]: DynamoDBUtil.toValue(key),
+        ...(sort ? { [`${idx.name!}_sort__`]: DynamoDBUtil.toValue(+sort) } : {}),
+        id: DynamoDBUtil.toValue(last.id)
+      });
+    }
+
+    return { items, nextOffset };
+  }
+
+  async listBySortedKeyedIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedKeyedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    options: ListPageOptions
+  ): Promise<ListPageResult<T>> {
+    const items: T[] = [];
+    const offset = options.offset ? JSONUtil.fromBase64<Record<string, AttributeValue>>(options.offset) : undefined;
+    for await (const batch of this.#scanIndex(cls, idx, body, { ...options, offset })) {
+      console.error(batch.LastEvaluatedKey);
+      for (const item of batch.Items ?? []) {
+        try {
+          items.push(await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!));
+          if (options?.limit && items.length >= options.limit) {
+            break;
+          }
+        } catch (error) {
+          if (!(error instanceof NotFoundError)) {
+            throw error;
+          }
+        }
+      }
+    }
+
+    let nextOffset;
+    if (items.length) {
+      const last: T = items.at(-1)!;
+      const { key, sort } = ModelIndexedUtil.computeIndexKey<T>(cls, idx, castTo(last), { emptySortValue: null });
+      nextOffset = JSONUtil.toBase64({
+        [`${idx.name!}__`]: DynamoDBUtil.toValue(key),
+        ...(sort ? { [`${idx.name!}_sort__`]: DynamoDBUtil.toValue(+sort) } : {}),
         id: DynamoDBUtil.toValue(last.id)
       });
     }

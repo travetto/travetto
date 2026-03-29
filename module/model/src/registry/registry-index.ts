@@ -1,5 +1,5 @@
 import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { RuntimeError, castTo, type Class } from '@travetto/runtime';
+import { RuntimeError, castTo, type Any, type Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { IndexConfig, IndexType, ModelConfig } from './types.ts';
@@ -7,6 +7,7 @@ import type { ModelType } from '../types/model.ts';
 import { ModelRegistryAdapter } from './registry-adapter.ts';
 import { IndexNotSupported } from '../error/invalid-index.ts';
 import { NotFoundError } from '../error/not-found.ts';
+import type { KeyedIndex } from '../types/indexed.ts';
 
 type IndexResult<T extends ModelType, K extends IndexType[]> = IndexConfig<T> & { type: K[number] };
 
@@ -37,8 +38,8 @@ export class ModelRegistryIndex implements RegistryIndex {
     return this.#instance.getIndices(cls, supportedTypes);
   }
 
-  static getIndex<T extends ModelType, K extends IndexType[]>(cls: Class<T>, name: string, supportedTypes?: K): IndexResult<T, K> {
-    return this.#instance.getIndex(cls, name, supportedTypes);
+  static getIndex<T extends ModelType, K extends IndexType[]>(idx: KeyedIndex<T, Any>, supportedTypes?: K): IndexResult<T, K> {
+    return this.#instance.getIndex(idx.cls, name, supportedTypes);
   }
 
   static getExpiryFieldName<T extends ModelType>(cls: Class<T>): keyof T {

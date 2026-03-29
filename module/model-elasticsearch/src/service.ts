@@ -4,8 +4,8 @@ import type * as estypes from '@elastic/elasticsearch/api/types';
 import {
   type ModelCrudSupport, type BulkOperation, type BulkResponse, type ModelBulkSupport, type ModelExpirySupport,
   type ModelIndexedSupport, type ModelType, type ModelStorageSupport, NotFoundError, ModelRegistryIndex, type OptionalId,
-  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, type ModelIndexedListPageOptions,
-  type ModelIndexListPageResult,
+  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, type ListPageOptions,
+  type ListPageResult,
 } from '@travetto/model';
 import { ShutdownManager, type DeepPartial, type Class, castTo, asFull, TypedObject, asConstructable, JSONUtil } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
@@ -49,7 +49,7 @@ export class ElasticsearchModelService implements
 
   constructor(config: ElasticsearchModelConfig) { this.config = config; }
 
-  async * #scrollIndex<T extends ModelType>(cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T, estypes.SortResults>): AsyncIterable<{
+  async * #scrollIndex<T extends ModelType>(cls: Class<T>, idx: string, options: ListPageOptions<T, estypes.SortResults>): AsyncIterable<{
     hits: estypes.SearchResponse<T>['hits']['hits'];
     nextOffset?: estypes.SortResults | undefined;
   }> {
@@ -455,8 +455,8 @@ export class ElasticsearchModelService implements
   }
 
   async listPageByIndex<T extends ModelType>(
-    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>
-  ): Promise<ModelIndexListPageResult<T>> {
+    cls: Class<T>, idx: string, options: ListPageOptions<T>
+  ): Promise<ListPageResult<T>> {
     const offset = options.offset ? JSONUtil.fromBase64<estypes.SortResults>(options.offset) : undefined;
     const items: T[] = [];
     let lastNextOffset: estypes.SortResults | undefined;

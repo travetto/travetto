@@ -3,7 +3,7 @@ import {
   type BulkOperation, type BulkResponse, type ModelCrudSupport, type ModelStorageSupport, type ModelBulkSupport,
   NotFoundError, ModelRegistryIndex, ExistsError, type OptionalId, type ModelIdSource,
   ModelExpiryUtil, ModelCrudUtil, ModelStorageUtil, ModelBulkUtil, ModelIndexedUtil,
-  type ModelIndexedSupport, type ModelIndexedListPageOptions, type ModelIndexListPageResult,
+  type ModelIndexedSupport, type ListPageOptions, type ListPageResult,
 } from '@travetto/model';
 import { castTo, type Class, type DeepPartial, JSONUtil } from '@travetto/runtime';
 import { DataUtil } from '@travetto/schema';
@@ -375,8 +375,8 @@ export class SQLModelService implements
 
   @Connected()
   async listPageByIndex<T extends ModelType>(
-    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>
-  ): Promise<ModelIndexListPageResult<T>> {
+    cls: Class<T>, idx: string, options: ListPageOptions<T>
+  ): Promise<ListPageResult<T>> {
     const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     const limit = options.limit;
     const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);

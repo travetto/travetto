@@ -8,7 +8,7 @@ import {
   type ModelType, type IndexConfig, type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, type ModelIndexedSupport,
   ModelRegistryIndex, NotFoundError, ExistsError, type OptionalId, type ModelBlobSupport,
   ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
-  IndexNotSupported, type ModelIndexListPageResult, type ModelIndexedListPageOptions
+  IndexNotSupported, type ListPageResult, type ListPageOptions
 } from '@travetto/model';
 
 const ModelBlobNamespace = '__blobs';
@@ -359,8 +359,8 @@ export class MemoryModelService implements
   }
 
   async listPageByIndex<T extends ModelType>(
-    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>
-  ): Promise<ModelIndexListPageResult<T>> {
+    cls: Class<T>, idx: string, options: ListPageOptions<T>
+  ): Promise<ListPageResult<T>> {
     const ids = this.#getIndexIds(cls, idx, options.body);
     const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     const limit = options.limit;

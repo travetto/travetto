@@ -11,7 +11,7 @@ import {
   type ModelExpirySupport, type ModelBulkSupport, type ModelIndexedSupport, type BulkOperation, type BulkResponse,
   NotFoundError, ExistsError, type ModelBlobSupport,
   ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
-  type ModelIndexedListPageOptions, type ModelIndexListPageResult,
+  type ListPageOptions, type ListPageResult,
 } from '@travetto/model';
 import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
@@ -475,8 +475,8 @@ export class MongoModelService implements
   }
 
   async listPageByIndex<T extends ModelType>(
-    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>
-  ): Promise<ModelIndexListPageResult<T>> {
+    cls: Class<T>, idx: string, options: ListPageOptions<T>
+  ): Promise<ListPageResult<T>> {
     const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     const limit = options.limit;
     const cursor = (await this.#buildIndexQuery(cls, idx, options.body))

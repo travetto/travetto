@@ -5,7 +5,7 @@ import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport,
   type ModelIndexedSupport, type ModelType, NotFoundError, type OptionalId,
-  ModelCrudUtil, ModelIndexedUtil, type ModelIndexedListPageOptions, type ModelIndexListPageResult,
+  ModelCrudUtil, ModelIndexedUtil, type ListPageOptions, type ListPageResult,
 } from '@travetto/model';
 
 import type { FirestoreModelConfig } from './config.ts';
@@ -181,8 +181,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async listPageByIndex<T extends ModelType>(
-    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>
-  ): Promise<ModelIndexListPageResult<T>> {
+    cls: Class<T>, idx: string, options: ListPageOptions<T>
+  ): Promise<ListPageResult<T>> {
     const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     const limit = options.limit;
     const query = this.#buildIndexQuery(cls, idx, options.body)
