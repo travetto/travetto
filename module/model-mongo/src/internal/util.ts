@@ -5,7 +5,7 @@ import {
 
 import { RuntimeError, CodecUtil, castTo, type Class, toConcrete, BinaryUtil } from '@travetto/runtime';
 import { type DistanceUnit, type PageableModelQuery, type WhereClause, isModelQueryIndex, ModelQueryUtil } from '@travetto/model-query';
-import { type ModelType, type IndexConfig, isModelIndexedIndex } from '@travetto/model';
+import { type ModelType, type IndexConfig, isModelIndexedIndex, IndexNotSupported } from '@travetto/model';
 import { DataUtil, SchemaRegistryIndex, type Point } from '@travetto/schema';
 
 const PointConcrete = toConcrete<Point>();
@@ -197,7 +197,7 @@ export class MongoUtil {
         case 'indexed:unique': return [flattenKeys(idx.keys), { name, unique: true }];
       }
     } else {
-      throw new RuntimeError('Unsupported index type', { details: { idx } });
+      throw new IndexNotSupported(cls, idx);
     }
   }
 

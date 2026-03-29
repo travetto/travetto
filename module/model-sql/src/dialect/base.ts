@@ -1,8 +1,8 @@
 /* eslint-disable @stylistic/indent */
 import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex, type Point } from '@travetto/schema';
 import { type Class, RuntimeError, TypedObject, TimeUtil, castTo, castKey, toConcrete, JSONUtil } from '@travetto/runtime';
-import { type SelectClause, type Query, type SortClause, type WhereClause, type RetainQueryPrimitiveFields, ModelQueryUtil } from '@travetto/model-query';
-import type { BulkResponse, IndexConfig, ModelType } from '@travetto/model';
+import { type SelectClause, type Query, type SortClause, type WhereClause, type RetainQueryPrimitiveFields, ModelQueryUtil, isModelQueryIndex } from '@travetto/model-query';
+import { IndexNotSupported, isModelIndexedIndex, type BulkResponse, type IndexConfig, type ModelType } from '@travetto/model';
 
 import { SQLModelUtil } from '../util.ts';
 import type { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types.ts';
@@ -733,19 +733,27 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    * Get CREATE INDEX sql
    */
   getCreateIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig): string {
-    const table = this.namespace(SQLModelUtil.classToStack(cls));
-    const fields: [string, boolean][] = idx.fields.map(field => {
-      const key = TypedObject.keys(field)[0];
-      const value = field[key];
-      if (DataUtil.isPlainObject(value)) {
-        throw new Error('Unable to supported nested fields for indices');
-      }
-      return [castTo(key), typeof value === 'number' ? value === 1 : (!!value)];
-    });
-    const constraint = this.getIndexName(cls, idx);
-    return `CREATE ${idx.type === 'unique' ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields
-      .map(([name, sel]) => `${this.identifier(name)} ${sel ? 'ASC' : 'DESC'}`)
-      .join(', ')});`;
+    if (isModelQueryIndex(idx)) {
+      const table = this.namespace(SQLModelUtil.classToStack(cls));
+      const fields: [string, boolean][] = idx.fields.map(field => {
+        const key = TypedObject.keys(field)[0];
+        const value = field[key];
+        if (DataUtil.isPlainObject(value)) {
+          throw new IndexNotSupported(cls, idx, 'Only indexed and query indices are supported in SQL');
+        }
+        return [castTo(key), typeof value === 'number' ? value === 1 : (!!value)];
+      });
+      const constraint = this.getIndexName(cls, idx);
+      return `CREATE ${idx.type === 'query:unique' ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields
+        .map(([name, sel]) => `${this.identifier(name)} ${sel ? 'ASC' : 'DESC'}`)
+        .join(', ')});`;
+    } else if (isModelIndexedIndex(idx)) {
+      const table = this.namespace(SQLModelUtil.classToStack(cls));
+      const constraint = this.getIndexName(cls, idx);
+      return `CREATE INDEX ${constraint} ON ${this.identifier(table)} (${this.identifier(idx.field)});`;
+    } else {
+      throw new IndexNotSupported(cls, idx, 'Only indexed and query indices are supported in SQL');
+    }
   }
 
   /**
