@@ -18,8 +18,8 @@ import {
   type ModelQueryFacet,
 } from '@travetto/model-query';
 import {
-  type ModelIndexedSupport, type KeyedIndexSelection, type MultipleItemIndex, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type SortedKeyedIndex, type ListPageResult, type SortedIndex,
+  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type ListPageResult, type SortedIndex,
 } from '@travetto/model-indexed';
 
 import {
@@ -64,14 +64,14 @@ export class MongoModelService implements
     S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: MultipleItemIndex<T, K, S>,
-    body?: KeyedIndexBody<T, K>
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>
   ): Promise<FindCursor> {
     const store = await this.getStore(cls);
 
     const where = this.getWhereFilter(
       cls,
-      castTo(ModelIndexedUtil.projectIndex(cls, idx, castTo(body), { emptySortValue: { $exists: true } }))
+      castTo(ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
     );
 
     let q = store.find(where, { timeout: true })
@@ -507,27 +507,20 @@ export class MongoModelService implements
     return this.update(cls, item);
   }
 
-  listByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedKeyedIndex<T, K, S>, options: ListPageOptions & { body: KeyedIndexBody<T, K> }): Promise<ListPageResult<T>>;
-  listByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>>;
   async listByIndex<
     T extends ModelType,
+    K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: SortedKeyedIndex<T, Any, S> | SortedIndex<T, S>,
-    options: ListPageOptions & { body?: Any },
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    options?: ListPageOptions,
   ): Promise<ListPageResult<T>> {
     {
-      const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-      const limit = options.limit;
-      const cursor = (await this.#buildIndexQuery(cls, idx, options.body))
+      const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
+      const limit = options?.limit ?? 100;
+      const cursor = (await this.#buildIndexQuery(cls, idx, body))
         .limit(limit)
         .skip(offset);
 

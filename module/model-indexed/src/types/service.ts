@@ -1,12 +1,13 @@
 import type { ModelType, ModelBasicSupport, OptionalId } from '@travetto/model';
 import type { Class } from '@travetto/runtime';
 import type {
-  KeyedIndexSelection, SingleItemIndex, KeyedIndexBody, KeyedIndexWithPartialBody,
-  SortedIndexSelection, SortedKeyedIndex, SortedIndex
+  KeyedIndexSelection, KeyedIndexBody, KeyedIndexWithPartialBody,
+  SortedIndexSelection, SortedIndex,
+  SingleItemIndex
 } from './indexes.ts';
 
 export type ListPageOptions<O = string> = {
-  limit: number;
+  limit?: number;
   offset?: O;
 };
 
@@ -81,15 +82,12 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * List entity by ranged index as defined by fields of idx
    * @param cls The type to search by
    * @param idx The index to search against
+   * @param body The payload of fields needed to search
    * @param options The configuration for listing
    */
   listByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedKeyedIndex<T, K, S>, options: ListPageOptions, body: KeyedIndexBody<T, K>): Promise<ListPageResult<T>>;
-  listByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>>;
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options: ListPageOptions): Promise<ListPageResult<T>>;
 }

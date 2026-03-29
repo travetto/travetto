@@ -6,8 +6,8 @@ import {
   type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport, type ModelType, NotFoundError, type OptionalId, ModelCrudUtil,
 } from '@travetto/model';
 import {
-  type ModelIndexedSupport, type KeyedIndexSelection, type MultipleItemIndex, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type SortedKeyedIndex, type ListPageResult, type SortedIndex
+  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, , type ListPageResult, type SortedIndex
 } from '@travetto/model-indexed';
 
 import type { FirestoreModelConfig } from './config.ts';
@@ -42,10 +42,11 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   #buildIndexQuery<
     T extends ModelType,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: MultipleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Query {
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>): Query {
     ModelCrudUtil.ensureNotSubType(cls);
-    const { fields, sorted } = ModelIndexedUtil.computeIndexParts(cls, idx, castTo(body), { emptySortValue: null });
+    const { fields, sorted } = ModelIndexedUtil.computeIndexParts(cls, idx, body, { emptySortValue: null });
     let query = fields.reduce<Query>((result, { path, value }) =>
       result.where(path.join('.'), '==', value), this.#getCollection(cls));
 
@@ -196,26 +197,19 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return this.update(cls, item);
   }
 
-  listByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedKeyedIndex<T, K, S>, options: ListPageOptions & { body: KeyedIndexBody<T, K> }): Promise<ListPageResult<T>>;
-  listByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>>;
   async listByIndex<
     T extends ModelType,
+    K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: SortedKeyedIndex<T, Any, S> | SortedIndex<T, S>,
-    options: ListPageOptions & { body?: Any },
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    options?: ListPageOptions,
   ): Promise<ListPageResult<T>> {
-    const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-    const limit = options.limit;
-    const query = this.#buildIndexQuery(cls, idx, options.body)
+    const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
+    const limit = options?.limit ?? 100;
+    const query = this.#buildIndexQuery(cls, idx, body)
       .limit(limit)
       .offset(offset);
 

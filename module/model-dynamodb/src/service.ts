@@ -9,8 +9,8 @@ import {
 } from '@travetto/model';
 import {
   isModelIndexedIndex, ModelIndexedUtil, type KeyedIndexBody, type KeyedIndexSelection, type KeyedIndexWithPartialBody,
-  type ListPageOptions, type ListPageResult, type ModelIndexedSupport, type MultipleItemIndex, type SingleItemIndex,
-  type SortedIndex, type SortedIndexSelection, type SortedKeyedIndex
+  type ListPageOptions, type ListPageResult, type ModelIndexedSupport, type SingleItemIndex,
+  type SortedIndex, type SortedIndexSelection
 } from '@travetto/model-indexed';
 
 import type { DynamoDBModelConfig } from './config.ts';
@@ -38,22 +38,26 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     return table;
   }
 
-  async * #scanIndex<T extends ModelType>(
+  async * #scanIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+  >(
     cls: Class,
-    idx: MultipleItemIndex<T>,
-    body: KeyedIndexBody<T, Any>,
-    options: ListPageOptions<Record<string, AttributeValue>>
+    idx: SortedIndex<T, K, Any>,
+    body: KeyedIndexBody<T, K>,
+    options?: ListPageOptions<Record<string, AttributeValue>>
   ): AsyncIterable<QueryCommandOutput & { LastEvaluatedOffset?: string }> {
     ModelCrudUtil.ensureNotSubType(cls);
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body, { emptySortValue: null });
     const expression = { [`:${idx.name}`]: DynamoDBUtil.toValue(key) };
     const isReversed = 'reversed' in idx && idx.reversed;
+    const limit = options?.limit ?? 100;
 
-    let startKey = options.offset;
+    let startKey = options?.offset ?? undefined;
     let produced = 0;
 
     do {
-      const remaining = options.limit - produced;
+      const remaining = limit - produced;
       const batch = await this.client.query({
         TableName: this.#resolveTable(cls),
         IndexName: idx.name,
@@ -68,7 +72,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       if (batch.Count && batch.Items) {
         produced += batch.Count;
 
-        if (produced > options.limit) {
+        if (produced > limit) {
           const items = batch.Items.slice(0, remaining);
           yield { ...batch, Items: items, };
         } else {
@@ -78,7 +82,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       } else {
         startKey = undefined;
       }
-    } while (startKey && produced < options.limit);
+    } while (startKey && produced < limit);
   }
 
   async #putItem<T extends ModelType>(cls: Class<T>, id: string, item: T, mode: 'create' | 'update' | 'upsert'): Promise<PutItemCommandOutput> {
@@ -97,12 +101,10 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         const indices: Record<string, unknown> = {};
         for (const idx of Object.values(config.indices ?? {})) {
           if (isModelIndexedIndex(idx)) {
-            const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
+            const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(item));
             switch (idx.type) {
-              case 'indexed:unique':
               case 'indexed:keyed': indices[`${idx.name}__`] = DynamoDBUtil.toValue(key); break;
-              case 'indexed:sorted': indices[`${idx.name}_sort__`] = DynamoDBUtil.toValue(+sort!); break;
-              case 'indexed:sortedKeyed': {
+              case 'indexed:sorted': {
                 indices[`${idx.name}__`] = DynamoDBUtil.toValue(key);
                 indices[`${idx.name}_sort__`] = DynamoDBUtil.toValue(+sort!);
                 break;
@@ -130,20 +132,14 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
         for (const idx of Object.values(config.indices ?? {})) {
           if (isModelIndexedIndex(idx)) {
-            const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
+            const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(item));
             switch (idx.type) {
-              case 'indexed:unique':
               case 'indexed:keyed': {
                 indices[`${idx.name}__`] = DynamoDBUtil.toValue(key);
                 expr.push(`${idx.name}__ = :${idx.name}`);
                 break;
               }
               case 'indexed:sorted': {
-                indices[`${idx.name}_sort__`] = DynamoDBUtil.toValue(+sort!);
-                expr.push(`${idx.name}_sort__ = :${idx.name}_sort`);
-                break;
-              }
-              case 'indexed:sortedKeyed': {
                 indices[`${idx.name}__`] = DynamoDBUtil.toValue(key);
                 indices[`${idx.name}_sort__`] = DynamoDBUtil.toValue(+sort!);
                 expr.push(`${idx.name}__ = :${idx.name}`);
@@ -435,26 +431,19 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     return this.update(cls, item);
   }
 
-  listByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedKeyedIndex<T, K, S>, options: ListPageOptions & { body: KeyedIndexBody<T, K> }): Promise<ListPageResult<T>>;
-  listByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>>;
   async listByIndex<
     T extends ModelType,
+    K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: SortedKeyedIndex<T, Any, S> | SortedIndex<T, S>,
-    options: ListPageOptions & { body?: Any },
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    options?: ListPageOptions,
   ): Promise<ListPageResult<T>> {
     const items: T[] = [];
-    const offset = options.offset ? JSONUtil.fromBase64<Record<string, AttributeValue>>(options.offset) : undefined;
-    for await (const batch of this.#scanIndex(cls, idx, options.body, { ...options, offset })) {
+    const offset = options?.offset ? JSONUtil.fromBase64<Record<string, AttributeValue>>(options.offset) : undefined;
+    for await (const batch of this.#scanIndex(cls, idx, body, { ...options, offset })) {
       console.error(batch.LastEvaluatedKey);
       for (const item of batch.Items ?? []) {
         try {
@@ -473,7 +462,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     let nextOffset;
     if (items.length) {
       const last: T = items.at(-1)!;
-      const { key, sort } = ModelIndexedUtil.computeIndexKey<T>(cls, idx, castTo(last), { emptySortValue: null });
+      const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(last), { emptySortValue: null });
       nextOffset = JSONUtil.toBase64({
         ...(key ? { [`${idx.name}__`]: DynamoDBUtil.toValue(key) } : {}),
         ...(sort ? { [`${idx.name}_sort__`]: DynamoDBUtil.toValue(+sort) } : {}),

@@ -33,25 +33,19 @@ export type KeyedIndexWithPartialBody<T, K> = {
   // 2. All other fields in T (not in K) become OPTIONAL
   DeepPartial<Omit<T, keyof K>>;
 
-export interface UniqueIndex<T extends ModelType, K extends KeyedIndexSelection<T>> extends IndexConfig<'indexed:unique'> {
+export interface KeyedIndex<
+  T extends ModelType,
+  K extends KeyedIndexSelection<T>
+> extends IndexConfig<'indexed:keyed'> {
   keys: K;
-  unique: true;
+  unique: boolean;
 }
 
-export interface KeyedIndex<T extends ModelType, K extends KeyedIndexSelection<T>> extends IndexConfig<'indexed:keyed'> {
-  keys: K;
-}
-
-export interface SortedIndex<T extends ModelType, S extends SortedIndexSelection<T>> extends IndexConfig<'indexed:sorted'> {
-  sort: S;
-  reversed: boolean;
-}
-
-export interface SortedKeyedIndex<
+export interface SortedIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T>,
   S extends SortedIndexSelection<T>
-> extends IndexConfig<'indexed:sortedKeyed'> {
+> extends IndexConfig<'indexed:sorted'> {
   keys: K;
   sort: S;
   reversed: boolean;
@@ -60,17 +54,9 @@ export interface SortedKeyedIndex<
 export type SingleItemIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T> = Any
-> = UniqueIndex<T, K> | KeyedIndex<T, K> | SortedKeyedIndex<T, K, Any>;
-
-export type MultipleItemIndex<
-  T extends ModelType,
-  K extends KeyedIndexSelection<T> = Any,
-  S extends SortedIndexSelection<T> = Any
-> = SortedIndex<T, S> | SortedKeyedIndex<T, K, S>;
+> = KeyedIndex<T, K> | SortedIndex<T, K, any>;
 
 export type AllIndexes<
   T extends ModelType,
-  K extends KeyedIndexSelection<T> = Any,
-  S extends SortedIndexSelection<T> = Any
-> =
-  SortedIndex<T, S> | UniqueIndex<T, K> | SortedKeyedIndex<T, K, S> | KeyedIndex<T, K>;
+  K extends KeyedIndexSelection<T> = Any
+> = KeyedIndex<T, K> | SortedIndex<T, K, any>;

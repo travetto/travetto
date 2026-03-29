@@ -11,8 +11,8 @@ import {
   IndexNotSupported,
 } from '@travetto/model';
 import {
-  type ModelIndexedSupport, type KeyedIndexSelection, type MultipleItemIndex, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type SortedKeyedIndex, type ListPageResult, type SortedIndex,
+  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type ListPageResult, type SortedIndex,
   type AllIndexes,
   isModelIndexedIndex
 } from '@travetto/model-indexed';
@@ -92,10 +92,8 @@ export class MemoryModelService implements
         const idxName = indexName(cls, idx);
         const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(item));
         switch (idx.type) {
-          case 'indexed:unique': this.#indices[idx.type].get(idxName)?.delete(key); break;
-          case 'indexed:sorted': this.#indices[idx.type].get(idxName)?.get(key)?.delete(id); break;
+          case 'indexed:sorted':
           case 'indexed:keyed': this.#indices[idx.type].get(idxName)?.get(key)?.delete(id); break;
-          case 'indexed:sortedKeyed': this.#indices[idx.type].get(idxName)?.get(key)?.delete(id); break;
         }
       }
     } catch (error) {
@@ -113,19 +111,16 @@ export class MemoryModelService implements
       const idxName = indexName(cls, idx);
       const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(item));
       switch (idx.type) {
-        case 'indexed:unique': {
-          const existing = this.#indices[idx.type].get(idxName)?.get(key);
-          if (existing && existing !== item.id) {
-            throw new ExistsError(cls, key);
-          }
-          this.#indices[idx.type].getOrInsert(idxName, new Map()).set(key, item.id);
-          break;
-        }
         case 'indexed:keyed': {
+          if (idx.unique) {
+            const existing = this.#indices[idx.type].get(idxName)?.get(key);
+            if (existing && existing.size > 0 && !existing.has(item.id)) {
+              throw new ExistsError(cls, key);
+            }
+          }
           this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Set()).add(item.id);
           break;
         }
-        case 'indexed:sortedKeyed':
         case 'indexed:sorted': {
           this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Map()).set(item.id, +sort!);
           break;
@@ -176,8 +171,9 @@ export class MemoryModelService implements
 
   #getIndexIds<
     T extends ModelType,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: MultipleItemIndex<T, K>, body?: KeyedIndexBody<T, K>): string[] {
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>): string[] {
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body), { emptySortValue: null });
     if (!isModelIndexedIndex(idx)) {
       throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with MemoryModelService');
@@ -411,26 +407,19 @@ export class MemoryModelService implements
     return this.update(cls, item);
   }
 
-  listByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedKeyedIndex<T, K, S>, options: ListPageOptions & { body: KeyedIndexBody<T, K> }): Promise<ListPageResult<T>>;
-  listByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>>;
   async listByIndex<
     T extends ModelType,
+    K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: SortedKeyedIndex<T, Any, S> | SortedIndex<T, S>,
-    options: ListPageOptions & { body?: Any },
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    options?: ListPageOptions
   ): Promise<ListPageResult<T>> {
-    const ids = this.#getIndexIds(cls, idx, options.body);
+    const ids = this.#getIndexIds(cls, idx, body);
     const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-    const limit = options?.limit ?? 50;
+    const limit = options?.limit ?? 100;
 
     const items: T[] = [];
     for (const id of ids.slice(offset, offset + limit)) {

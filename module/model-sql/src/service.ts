@@ -5,7 +5,7 @@ import {
 } from '@travetto/model';
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type SortedKeyedIndex, type ListPageResult, type SortedIndex
+  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type ListPageResult, type SortedIndex
 } from '@travetto/model-indexed';
 import { type Any, castTo, type Class, JSONUtil } from '@travetto/runtime';
 import { DataUtil } from '@travetto/schema';
@@ -53,12 +53,13 @@ export class SQLModelService implements
   #getIndexSort<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: SortedIndex<T, Any> | SortedKeyedIndex<T, K, Any>,
+    idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>
   ): Record<string, 1 | -1>[] {
-    const { sorted } = ModelIndexedUtil.computeIndexParts(cls, idx, castTo(body), { emptySortValue: undefined });
+    const { sorted } = ModelIndexedUtil.computeIndexParts(cls, idx, body, { emptySortValue: undefined });
     if (sorted) {
       return [{ [sorted.path.join('.')]: sorted.dir === 1 ? 1 : -1 }];
     }
@@ -399,28 +400,21 @@ export class SQLModelService implements
     return this.update(cls, item);
   }
 
-  listByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedKeyedIndex<T, K, S>, options: ListPageOptions & { body: KeyedIndexBody<T, K> }): Promise<ListPageResult<T>>;
-  listByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>>;
   @Connected()
   async listByIndex<
     T extends ModelType,
+    K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: SortedKeyedIndex<T, Any, S> | SortedIndex<T, S>,
-    options: ListPageOptions & { body?: Any },
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    options?: ListPageOptions
   ): Promise<ListPageResult<T>> {
-    const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-    const limit = options.limit;
-    const where = ModelIndexedUtil.projectIndex(cls, idx, castTo(options.body), { emptySortValue: undefined });
-    const sort = this.#getIndexSort(cls, idx, options.body);
+    const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
+    const limit = options?.limit ?? 100;
+    const where = ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: undefined });
+    const sort = this.#getIndexSort(cls, idx, body);
     const items = await this.query(cls, castTo({ where, sort, limit, offset }));
     return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
   }

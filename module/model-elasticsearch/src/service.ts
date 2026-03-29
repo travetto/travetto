@@ -15,8 +15,8 @@ import {
   ModelQueryCrudUtil, type ModelQueryFacet,
 } from '@travetto/model-query';
 import {
-  type ModelIndexedSupport, type KeyedIndexSelection, type MultipleItemIndex, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type SortedKeyedIndex, type ListPageResult, type SortedIndex
+  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type ListPageResult, type SortedIndex
 } from '@travetto/model-indexed';
 
 import type { ElasticsearchModelConfig } from './config.ts';
@@ -53,40 +53,43 @@ export class ElasticsearchModelService implements
   async * #scrollIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: MultipleItemIndex<T, K>,
+    idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options: ListPageOptions<estypes.SortResults>
+    options?: ListPageOptions<estypes.SortResults>
   ): AsyncIterable<{
     hits: estypes.SearchResponse<T>['hits']['hits'];
     nextOffset?: estypes.SortResults | undefined;
   }> {
+    const limit = options?.limit ?? 100;
+
     let search = await this.execSearch<T>(cls, {
-      ...(options.offset ?
-        { size: options.limit, search_after: options.offset } :
+      ...(options?.offset ?
+        { size: limit, search_after: options.offset } :
         { scroll: '2m', size: 100 }
       ),
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
-          ModelIndexedUtil.projectIndex(cls, idx, castTo(body), { emptySortValue: { $exists: true } }))
+          ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
       ),
       sort: 'sort' in idx ? ElasticsearchQueryUtil.getSort(idx.sort) : undefined,
     });
 
-    let hits = search.hits.hits.slice(0, options.limit);
+    let hits = search.hits.hits.slice(0, limit);
     let produced = hits.length;
 
     if (hits.length) {
       yield { hits, nextOffset: hits.at(-1)?.sort };
     }
 
-    while (produced < options.limit && search._scroll_id && hits.length) {
+    while (produced < limit && search._scroll_id && hits.length) {
       search = await this.client.scroll({ scroll_id: search._scroll_id, scroll: '2m' });
       hits = search.hits.hits;
       produced += hits.length;
-      if (produced > options.limit) {
-        hits = hits.slice(0, options.limit - (produced - hits.length));
+      if (produced > limit) {
+        hits = hits.slice(0, limit - (produced - hits.length));
       }
       if (hits.length) {
         yield { hits, nextOffset: hits.at(-1)?.sort };
@@ -464,27 +467,20 @@ export class ElasticsearchModelService implements
     return this.update(cls, item);
   }
 
-  listByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedKeyedIndex<T, K, S>, options: ListPageOptions & { body: KeyedIndexBody<T, K> }): Promise<ListPageResult<T>>;
-  listByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>>;
   async listByIndex<
     T extends ModelType,
+    K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: SortedKeyedIndex<T, Any, S> | SortedIndex<T, S>,
-    options: ListPageOptions & { body?: Any },
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    options?: ListPageOptions,
   ): Promise<ListPageResult<T>> {
-    const offset = options.offset ? JSONUtil.fromBase64<estypes.SortResults>(options.offset) : undefined;
+    const offset = options?.offset ? JSONUtil.fromBase64<estypes.SortResults>(options.offset) : undefined;
     const items: T[] = [];
     let lastNextOffset: estypes.SortResults | undefined;
-    for await (const { hits, nextOffset } of this.#scrollIndex(cls, idx, options.body, { ...options, offset })) {
+    for await (const { hits, nextOffset } of this.#scrollIndex(cls, idx, body, { ...options, offset })) {
       lastNextOffset = nextOffset;
       for (const hit of hits) {
         try {

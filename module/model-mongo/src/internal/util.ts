@@ -192,10 +192,8 @@ export class MongoUtil {
       return [out, { name, unique: idx.type === 'query:unique', }];
     } else if (isModelIndexedIndex(idx)) {
       switch (idx.type) {
-        case 'indexed:sorted': return [flattenKeys(idx.sort), { name }];
-        case 'indexed:keyed': return [flattenKeys(idx.keys), { name }];
-        case 'indexed:sortedKeyed': return [{ ...flattenKeys(idx.keys), ...flattenKeys(idx.sort) }, { name }];
-        case 'indexed:unique': return [flattenKeys(idx.keys), { name, unique: true }];
+        case 'indexed:keyed': return [flattenKeys(idx.keys), { name, unique: idx.unique }];
+        case 'indexed:sorted': return [flattenKeys(idx.keys), { name }];
       }
     } else {
       throw new IndexNotSupported(cls, idx);

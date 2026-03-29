@@ -36,6 +36,7 @@ function makeField(name: string, type: Class, required: boolean, extra: Partial<
 
 function flattenIndex<T extends ModelType>(idx: AllIndexes<T>): [string, boolean][] {
   const out: [string, boolean][] = [];
+  const seen = new Set<string>();
   for (const [key, value] of [
     ...Object.entries('keys' in idx ? idx.keys : {}),
     ...Object.entries('sort' in idx ? idx.sort : {})
@@ -43,7 +44,10 @@ function flattenIndex<T extends ModelType>(idx: AllIndexes<T>): [string, boolean
     if (typeof value !== 'number') {
       throw new IndexNotSupported(null!, idx, 'Nested fields are not supported in ModelIndexed indices SQL');
     }
-    out.push([key, value === 1]);
+    if (!seen.has(key)) {
+      seen.add(key);
+      out.push([key, value === 1]);
+    }
   }
   return out;
 }
@@ -766,9 +770,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     } else if (isModelIndexedIndex(idx)) {
       const fields = flattenIndex(idx).map(([key, value]) => `${this.identifier(key)} ${value ? 'ASC' : 'DESC'}`).join(', ');
       switch (idx.type) {
-        case 'indexed:unique': return `CREATE UNIQUE INDEX ${constraint} ON ${this.identifier(table)} (${fields});`;
-        case 'indexed:sortedKeyed':
-        case 'indexed:keyed':
+        case 'indexed:keyed': return `CREATE ${idx.unique ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields});`;
         case 'indexed:sorted': return `CREATE INDEX ${constraint} ON ${this.identifier(table)} (${fields});`;
       }
     } else {

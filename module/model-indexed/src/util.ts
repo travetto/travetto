@@ -2,7 +2,7 @@ import { castTo, type Class, type DeepPartial, hasFunction, TypedObject } from '
 import { type ModelType, IndexNotSupported, type ModelCrudSupport, type OptionalId, NotFoundError } from '@travetto/model';
 
 import type { ModelIndexedSupport } from './types/service.ts';
-import type { AllIndexes, SingleItemIndex } from './types/indexes.ts';
+import type { AllIndexes, KeyedIndexBody, KeyedIndexSelection, SingleItemIndex } from './types/indexes.ts';
 
 type ComputeConfig = {
   includeSortInFields?: boolean;
@@ -31,10 +31,13 @@ export class ModelIndexedUtil {
    * @param idx Index config
    * @param item Item to read values from
    */
-  static computeIndexParts<T extends ModelType>(
+  static computeIndexParts<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+  >(
     cls: Class<T>,
-    idx: AllIndexes<T>,
-    item: DeepPartial<T> = {},
+    idx: AllIndexes<T, K>,
+    item: KeyedIndexBody<T, K>,
     opts: ComputeConfig = {}
   ): { fields: IndexFieldPart[], sorted: IndexSortPart | undefined } {
     const sortField = 'sort' in idx ? idx.sort : undefined;
@@ -86,9 +89,14 @@ export class ModelIndexedUtil {
    * @param cls Type to get index for
    * @param idx Index config
    */
-  static projectIndex<T extends ModelType>(cls: Class<T>, idx: AllIndexes<T>, item?: DeepPartial<T>, config?: ComputeConfig): Record<string, unknown> {
+  static projectIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>
+  >(
+    cls: Class<T>, idx: AllIndexes<T, K>, item: KeyedIndexBody<T, K>, config?: ComputeConfig
+  ): Record<string, unknown> {
     const response: Record<string, unknown> = {};
-    for (const { path, value } of this.computeIndexParts(cls, idx, item ?? {}, config).fields) {
+    for (const { path, value } of this.computeIndexParts(cls, idx, item, config).fields) {
       let sub: Record<string, unknown> = response;
       const all = path.slice(0);
       const last = all.pop()!;
@@ -106,10 +114,13 @@ export class ModelIndexedUtil {
    * @param idx Index config
    * @param item item to process
    */
-  static computeIndexKey<T extends ModelType>(
+  static computeIndexKey<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>
+  >(
     cls: Class<T>,
-    idx: AllIndexes<T>,
-    item: DeepPartial<T> = {},
+    idx: AllIndexes<T, K>,
+    item: KeyedIndexBody<T, K>,
     config?: ComputeConfig & { separator?: string }
   ): { type: string, key: string, sort?: number | Date } {
     const { fields, sorted } = this.computeIndexParts(cls, idx, item, { ...(config ?? {}), includeSortInFields: false });
