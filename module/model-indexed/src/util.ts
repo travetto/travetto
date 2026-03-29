@@ -1,10 +1,8 @@
 import { castTo, type Class, type DeepPartial, hasFunction, TypedObject } from '@travetto/runtime';
+import { type ModelType, IndexNotSupported, type ModelCrudSupport, type OptionalId, NotFoundError } from '@travetto/model';
 
-import { IndexNotSupported } from '../error/invalid-index.ts';
-import { NotFoundError } from '../error/not-found.ts';
-import type { ModelCrudSupport } from '../types/crud.ts';
-import type { AllIndexes, ModelIndexedSupport, SingleItemIndex } from '../types/indexed.ts';
-import type { ModelType, OptionalId } from '../types/model.ts';
+import type { ModelIndexedSupport } from './types/service.ts';
+import type { AllIndexes, SingleItemIndex } from './types/indexes.ts';
 
 type ComputeConfig = {
   includeSortInFields?: boolean;

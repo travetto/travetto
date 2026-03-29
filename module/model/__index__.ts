@@ -8,7 +8,6 @@ export * from './src/types/basic.ts';
 export * from './src/types/blob.ts';
 export * from './src/types/bulk.ts';
 export * from './src/types/crud.ts';
-export * from './src/types/indexed.ts';
 export * from './src/types/expiry.ts';
 export * from './src/types/storage.ts';
 
@@ -16,7 +15,6 @@ export * from './src/util/blob.ts';
 export * from './src/util/bulk.ts';
 export * from './src/util/crud.ts';
 export * from './src/util/expiry.ts';
-export * from './src/util/indexed.ts';
 export * from './src/util/storage.ts';
 
 export * from './src/error/exists.ts';

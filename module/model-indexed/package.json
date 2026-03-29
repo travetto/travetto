@@ -1,0 +1,51 @@
+{
+  "name": "@travetto/model-indexed",
+  "version": "8.0.0-alpha.9",
+  "type": "module",
+  "description": "Basic indexing support for model sources that support it.",
+  "keywords": [
+    "datastore",
+    "indexing",
+    "typescript",
+    "travetto"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "__index__.ts",
+    "src",
+    "support"
+  ],
+  "main": "__index__.ts",
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/model-indexed"
+  },
+  "dependencies": {
+    "@travetto/model": "^8.0.0-alpha.9",
+    "@travetto/registry": "^8.0.0-alpha.9",
+    "@travetto/schema": "^8.0.0-alpha.9"
+  },
+  "peerDependencies": {
+    "@travetto/cli": "^8.0.0-alpha.14",
+    "@travetto/test": "^8.0.0-alpha.9"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/cli": {
+      "optional": true
+    },
+    "@travetto/test": {
+      "optional": true
+    }
+  },
+  "travetto": {
+    "displayName": "Data Model Indexing Support"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

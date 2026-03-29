@@ -3,11 +3,11 @@ import { d, c } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
 import {
   type ModelBasicSupport, type ModelBlobSupport, type ModelBulkSupport, type ModelCrudSupport,
-  type ModelExpirySupport, ModelRegistryIndex, type ModelType
+  type ModelExpirySupport, type ModelIndexedSupport, ModelRegistryIndex, type ModelType
 } from '@travetto/model';
 
 import { Model } from './src/registry/decorator.ts';
-import { Links } from './support/doc.support.ts';
+import { Links } from './support/doc.support.tsx';
 
 const ModelTypeContract = toConcrete<ModelType>();
 
@@ -59,6 +59,12 @@ export const text = <>
       The {Links.Crud} contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in {d.module('Auth')}, is an example of a module that only needs create, read and delete, and so any implementation of {d.module('Model')} that honors this contract, can be used with the {d.module('Auth')} model extension.
 
       <c.Code src={toConcrete<ModelCrudSupport>()} title='Crud Contract' />
+    </c.SubSection>
+
+    <c.SubSection title='Indexed' >
+      Additionally, an implementation may support the ability for basic {Links.Indexed} queries. This is not the full featured query support of {d.module('ModelQuery')}, but allowing for indexed lookups.  This allows for listing, through indexed data, as well as "pagination" through indexed data, via aa token that allows the next query to pick up where the last one left off. This allows for patterns like virtual scrolling, but does not allow for standard count/offset pagination.
+
+      <c.Code src={toConcrete<ModelIndexedSupport>()} title='Indexed Contract' />
     </c.SubSection>
 
     <c.SubSection title='Expiry'>
