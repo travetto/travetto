@@ -1,7 +1,6 @@
 import {
   type Class, type TimeSpan, castTo, type BinaryMetadata,
   type ByteRange, type BinaryType, BinaryUtil, type BinaryArray, JSONUtil, BinaryMetadataUtil,
-  type Any,
 } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import { Config } from '@travetto/config';

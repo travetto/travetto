@@ -1,6 +1,6 @@
 import { createClient } from '@redis/client';
 
-import { castTo, JSONUtil, ShutdownManager, type Any, type Class } from '@travetto/runtime';
+import { castTo, JSONUtil, ShutdownManager, type Class } from '@travetto/runtime';
 import {
   type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelType, type ModelStorageSupport, NotFoundError,
   ExistsError, type OptionalId, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil,

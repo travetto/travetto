@@ -7,7 +7,7 @@ import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type ListPageResult, type SortedIndex
 } from '@travetto/model-indexed';
-import { type Any, castTo, type Class, JSONUtil } from '@travetto/runtime';
+import { castTo, type Class, JSONUtil } from '@travetto/runtime';
 import { DataUtil } from '@travetto/schema';
 import type { AsyncContext } from '@travetto/context';
 import { Injectable, PostConstruct } from '@travetto/di';

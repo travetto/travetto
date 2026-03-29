@@ -1,6 +1,6 @@
 import { type AttributeValue, DynamoDB, type PutItemCommandInput, type PutItemCommandOutput, type QueryCommandOutput } from '@aws-sdk/client-dynamodb';
 
-import { castTo, JSONUtil, ShutdownManager, TimeUtil, type Any, type Class } from '@travetto/runtime';
+import { castTo, JSONUtil, ShutdownManager, TimeUtil, type Class } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelStorageSupport,
@@ -41,9 +41,10 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async * #scanIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
   >(
     cls: Class,
-    idx: SortedIndex<T, K, Any>,
+    idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
     options?: ListPageOptions<Record<string, AttributeValue>>
   ): AsyncIterable<QueryCommandOutput & { LastEvaluatedOffset?: string }> {

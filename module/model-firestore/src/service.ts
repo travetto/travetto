@@ -1,6 +1,6 @@
 import { type DocumentData, FieldValue, Firestore, type Query } from '@google-cloud/firestore';
 
-import { castTo, JSONUtil, ShutdownManager, type Any, type Class } from '@travetto/runtime';
+import { castTo, JSONUtil, ShutdownManager, type Class } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport, type ModelType, NotFoundError, type OptionalId, ModelCrudUtil,
