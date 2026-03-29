@@ -2,6 +2,7 @@ import type { Any, Class, DeepPartial, IntrinsicType } from '@travetto/runtime';
 
 import type { ModelType, OptionalId } from '../types/model.ts';
 import type { ModelBasicSupport } from './basic.ts';
+import type { IndexConfig } from '../registry/types.ts';
 
 type TypeProjection<T, V> = {
   [P in keyof T]?:
@@ -13,7 +14,7 @@ type TypeProjection<T, V> = {
 };
 
 export type KeyedIndexSelection<T> = TypeProjection<T, true>;
-export type SortedIndexSelection<T> = TypeProjection<T, true | 1 | -1>;
+export type SortedIndexSelection<T> = TypeProjection<T, 1 | -1>;
 
 export type KeyedIndexBody<T, K> = {
   [P in keyof K]: (P extends keyof T ?
@@ -35,25 +36,16 @@ export type KeyedIndexWithPartialBody<T, K> = {
   // 2. All other fields in T (not in K) become OPTIONAL
   DeepPartial<Omit<T, keyof K>>;
 
-export interface KeyedIndex<T extends ModelType, K extends KeyedIndexSelection<T>> {
-  cls: Class<T>;
-  name: string;
-  type: 'indexed:keyed';
+export interface KeyedIndex<T extends ModelType, K extends KeyedIndexSelection<T>> extends IndexConfig<'indexed:keyed'> {
   keys: K;
 }
 
-export interface UniqueIndex<T extends ModelType, K extends KeyedIndexSelection<T>> {
-  cls: Class<T>;
-  name: string;
-  type: 'indexed:unique';
+export interface UniqueIndex<T extends ModelType, K extends KeyedIndexSelection<T>> extends IndexConfig<'indexed:unique'> {
   keys: K;
   unique: true;
 }
 
-export interface SortedIndex<T extends ModelType, S extends SortedIndexSelection<T>> {
-  cls: Class<T>;
-  name: string;
-  type: 'indexed:sorted';
+export interface SortedIndex<T extends ModelType, S extends SortedIndexSelection<T>> extends IndexConfig<'indexed:sorted'> {
   sort: S;
   reversed: boolean;
 }
@@ -62,16 +54,13 @@ export interface SortedKeyedIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T>,
   S extends SortedIndexSelection<T>
-> {
-  cls: Class<T>;
-  name: string;
-  type: 'indexed:sortedKeyed';
+> extends IndexConfig<'indexed:sortedKeyed'> {
   keys: K;
   sort: S;
   reversed: boolean;
 }
 
-export const isAllIndex = <T extends ModelType>(idx: Any): idx is AllIndexes<T> =>
+export const isModelIndexedIndex = <T extends ModelType>(idx: Any): idx is AllIndexes<T> =>
   typeof idx === 'object' && idx !== null && 'type' in idx && idx.type.startsWith('indexed:');
 
 export type AllIndexes<T extends ModelType> =

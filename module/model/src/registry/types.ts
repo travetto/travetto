@@ -9,7 +9,7 @@ export type PrePersistScope = 'full' | 'partial' | 'all';
 /**
  * Index options
  */
-export type IndexConfig = {
+export type IndexConfig<V extends string = string> = {
   /**
    * Index name
    */
@@ -17,7 +17,11 @@ export type IndexConfig = {
   /**
    * Type
    */
-  type: string;
+  type: V;
+  /**
+   * Class the index belongs to
+   */
+  class: Class<ModelType>;
 };
 
 /**

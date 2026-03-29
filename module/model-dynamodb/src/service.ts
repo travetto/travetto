@@ -16,7 +16,7 @@ import {
   type SortedIndex,
   type SortedKeyedIndex,
   type UniqueIndex,
-  isAllIndex,
+  isModelIndexedIndex,
 } from '@travetto/model';
 
 import type { DynamoDBModelConfig } from './config.ts';
@@ -102,7 +102,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       if (mode === 'create') {
         const indices: Record<string, unknown> = {};
         for (const idx of Object.values(config.indices ?? {})) {
-          if (isAllIndex(idx)) {
+          if (isModelIndexedIndex(idx)) {
             const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
             switch (idx.type) {
               case 'indexed:unique':
@@ -135,7 +135,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         const expr: string[] = [];
 
         for (const idx of Object.values(config.indices ?? {})) {
-          if (isAllIndex(idx)) {
+          if (isModelIndexedIndex(idx)) {
             const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
             switch (idx.type) {
               case 'indexed:unique':

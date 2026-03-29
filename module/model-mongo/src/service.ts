@@ -12,6 +12,14 @@ import {
   NotFoundError, ExistsError, type ModelBlobSupport,
   ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
   type ListPageOptions, type ListPageResult,
+  type KeyedIndex,
+  type KeyedIndexBody,
+  type KeyedIndexSelection,
+  type KeyedIndexWithPartialBody,
+  type SortedIndex,
+  type SortedIndexSelection,
+  type SortedKeyedIndex,
+  type UniqueIndex,
 } from '@travetto/model';
 import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
@@ -21,16 +29,14 @@ import {
 } from '@travetto/model-query';
 
 import {
-  ShutdownManager, type Class, type DeepPartial, TypedObject,
+  ShutdownManager, type Class, TypedObject,
   castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType, BinaryUtil, BinaryMetadataUtil,
   JSONUtil,
 } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 
-import { MongoUtil, type PlainIdx, type WithId } from './internal/util.ts';
+import { MongoUtil, type WithId } from './internal/util.ts';
 import type { MongoModelConfig } from './config.ts';
-
-const ListIndexSymbol = Symbol();
 
 type BlobRaw = GridFSFile & { metadata?: BinaryMetadata };
 
@@ -57,19 +63,42 @@ export class MongoModelService implements
 
   constructor(config: MongoModelConfig) { this.config = config; }
 
-  async #buildIndexQuery<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): Promise<FindCursor> {
+  async #buildIndexQuery<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: KeyedIndex<T, K> | SortedIndex<T, S> | SortedKeyedIndex<T, K, S>,
+    body?: KeyedIndexBody<T, K>
+  ): Promise<FindCursor> {
     const store = await this.getStore(cls);
-    const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
 
     const where = this.getWhereFilter(
       cls,
-      castTo(ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
+      castTo(ModelIndexedUtil.projectIndex(cls, idx, castTo(body), { emptySortValue: { $exists: true } }))
     );
 
-    const sort = castTo<{ [ListIndexSymbol]: PlainIdx }>(idxConfig)[ListIndexSymbol] ??= MongoUtil.getPlainIndex(idxConfig);
-    return store.find(where, { timeout: true })
-      .batchSize(100)
-      .sort(castTo(sort));
+    let q = store.find(where, { timeout: true })
+      .batchSize(100);
+
+    // TODO: We could cache this
+    if ('sort' in idx) {
+      const path = [];
+      let obj = idx.sort;
+      let last: -1 | 1 = 1;
+      while (obj) {
+        const [k, v] = Object.entries(obj)[0];
+        path.push(k);
+        if (typeof v === 'object' && v !== null) {
+          obj = v;
+        } else {
+          last = v;
+        }
+      }
+      q = q.sort([path.join('.'), last]);
+    }
+    return q;
   }
 
   restoreId(item: { id?: string, _id?: unknown }): void {
@@ -149,7 +178,7 @@ export class MongoModelService implements
 
   async upsertModel(cls: Class): Promise<void> {
     const col = await this.getStore(cls);
-    const indices = MongoUtil.getIndices(cls, ModelRegistryIndex.getConfig(cls).indices);
+    const indices = ModelRegistryIndex.getIndices(cls).map(idx => MongoUtil.getIndex(cls, idx));
     const existingIndices = (await col.indexes().catch(() => [])).filter(idx => idx.name !== '_id_');
 
     const pendingMap = Object.fromEntries(indices.map(pair => [pair[1].name!, pair]));
@@ -423,28 +452,35 @@ export class MongoModelService implements
   }
 
   // Indexed
-  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
+  async getByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<T> {
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
     const store = await this.getStore(cls);
     const result = await store.findOne(
       this.getWhereFilter(
         cls,
-        castTo(ModelIndexedUtil.projectIndex(cls, idx, body))
+        castTo(ModelIndexedUtil.projectIndex(cls, idx, castTo(body)))
       )
     );
     if (!result) {
       throw new NotFoundError(`${cls.name}: ${idx}`, key);
     }
     return await this.postLoad(cls, result);
+
   }
 
-  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void> {
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
+  async deleteByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<void> {
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
     const store = await this.getStore(cls);
     const result = await store.deleteOne(
       this.getWhereFilter(
         cls,
-        castTo(ModelIndexedUtil.projectIndex(cls, idx, body))
+        castTo(ModelIndexedUtil.projectIndex(cls, idx, castTo(body)))
       )
     );
     if (result.deletedCount) {
@@ -453,20 +489,33 @@ export class MongoModelService implements
     throw new NotFoundError(`${cls.name}: ${idx}`, key);
   }
 
-  async upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T> {
+  upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: UniqueIndex<T, K>,
+    body: OptionalId<T>
+  ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
 
-  async updateByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: T): Promise<T> {
+  updateByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: T): Promise<T> {
     return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
   }
 
-  async updatePartialByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
+  async updatePartialByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T> {
     const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
     return this.update(cls, item);
   }
 
-  async * listByKeyedIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+  async * listByKeyedIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): AsyncIterable<T> {
     const cursor = await this.#buildIndexQuery(cls, idx, body);
 
     for await (const item of cursor) {
@@ -474,12 +523,13 @@ export class MongoModelService implements
     }
   }
 
-  async listPageByIndex<T extends ModelType>(
-    cls: Class<T>, idx: string, options: ListPageOptions<T>
-  ): Promise<ListPageResult<T>> {
+  async listBySortedIndex<
+    T extends ModelType,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>> {
     const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     const limit = options.limit;
-    const cursor = (await this.#buildIndexQuery(cls, idx, options.body))
+    const cursor = (await this.#buildIndexQuery(cls, idx, castTo({})))
       .limit(limit)
       .skip(offset);
 
@@ -488,6 +538,30 @@ export class MongoModelService implements
       items.push(await this.postLoad(cls, item));
     }
     return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
+  }
+
+  async listBySortedKeyedIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedKeyedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    options: ListPageOptions
+  ): Promise<ListPageResult<T>> {
+    const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
+    const limit = options.limit;
+    const cursor = (await this.#buildIndexQuery(cls, idx, body))
+      .limit(limit)
+      .skip(offset);
+
+    const items: T[] = [];
+    for await (const item of cursor) {
+      items.push(await this.postLoad(cls, item));
+    }
+    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
+
   }
 
   // Query

@@ -19,7 +19,7 @@ import {
   type SortedKeyedIndex,
   type SortedIndex,
   type AllIndexes,
-  isAllIndex
+  isModelIndexedIndex
 } from '@travetto/model';
 
 const ModelBlobNamespace = '__blobs';
@@ -91,7 +91,7 @@ export class MemoryModelService implements
     try {
       const item = await this.get(cls, id);
       for (const idx of ModelRegistryIndex.getIndices(cls)) {
-        if (!isAllIndex(idx)) {
+        if (!isModelIndexedIndex(idx)) {
           continue; // Only support ModelIndexed indices
         }
         const idxName = indexName(cls, idx);
@@ -112,7 +112,7 @@ export class MemoryModelService implements
 
   async #writeIndices<T extends ModelType>(cls: Class<T>, item: T): Promise<void> {
     for (const idx of ModelRegistryIndex.getIndices(cls)) {
-      if (!isAllIndex(idx)) {
+      if (!isModelIndexedIndex(idx)) {
         continue; // Only support ModelIndexed indices
       }
       const idxName = indexName(cls, idx);
@@ -158,7 +158,7 @@ export class MemoryModelService implements
     K extends KeyedIndexSelection<T>
   >(cls: Class<T>, idx: UniqueIndex<T, K> | KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<string> {
     const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
-    if (!isAllIndex(idx)) {
+    if (!isModelIndexedIndex(idx)) {
       throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with MemoryModelService');
     }
 
@@ -184,7 +184,7 @@ export class MemoryModelService implements
     K extends KeyedIndexSelection<T>
   >(cls: Class<T>, idx: KeyedIndex<T, K> | SortedIndex<T, Any> | SortedKeyedIndex<T, K, Any>, body?: KeyedIndexBody<T, K>): string[] {
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body), { emptySortValue: null });
-    if (!isAllIndex(idx)) {
+    if (!isModelIndexedIndex(idx)) {
       throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with MemoryModelService');
     }
     const index = this.#indices[idx.type].get(indexName(cls, idx))?.get(key);
@@ -210,7 +210,7 @@ export class MemoryModelService implements
 
     for (const cls of ModelRegistryIndex.getClasses()) {
       for (const idx of Object.values(ModelRegistryIndex.getConfig(cls).indices ?? {})) {
-        if (!isAllIndex(idx)) {
+        if (!isModelIndexedIndex(idx)) {
           console.error(`Indices of type ${idx.type} are not supported for`, { cls: cls.Ⲑid, name: idx.name, type: idx.type });
         }
       }
@@ -362,7 +362,7 @@ export class MemoryModelService implements
 
   async upsertModel<T extends ModelType>(cls: Class<T>): Promise<void> {
     for (const idx of ModelRegistryIndex.getIndices(cls)) {
-      if (isAllIndex(idx)) {
+      if (isModelIndexedIndex(idx)) {
         this.#indices[idx.type].set(indexName(cls, idx), new Map());
       }
     }

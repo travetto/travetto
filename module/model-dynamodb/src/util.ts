@@ -4,7 +4,7 @@ import type {
 } from '@aws-sdk/client-dynamodb';
 
 import type { Class } from '@travetto/runtime';
-import { isAllIndex, ModelCrudUtil, ModelExpiryUtil, ModelRegistryIndex, NotFoundError, type ModelType } from '@travetto/model';
+import { isModelIndexedIndex, ModelCrudUtil, ModelExpiryUtil, ModelRegistryIndex, NotFoundError, type ModelType } from '@travetto/model';
 
 /**
  * Configuration for DynamoDB indices
@@ -49,7 +49,7 @@ export class DynamoDBUtil {
     const toCreate: GlobalSecondaryIndex[] = [];
 
     for (const idx of indexes) {
-      if (!isAllIndex(idx) || idx.type === 'indexed:unique') {
+      if (!isModelIndexedIndex(idx) || idx.type === 'indexed:unique') {
         console.warn('Non-indexed indices are not supported in DynamoDB for', { cls: cls.Ⲑid, idx: idx.name });
         continue;
       }

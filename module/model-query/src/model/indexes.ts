@@ -1,4 +1,4 @@
-import { ModelRegistryIndex, type ModelType } from '@travetto/model';
+import { ModelRegistryIndex, type IndexConfig, type ModelType } from '@travetto/model';
 import { RuntimeError, type Class, type Primitive, type ValidFields } from '@travetto/runtime';
 
 type RetainPrimitiveFields<T> = Pick<T, ValidFields<T, Primitive | Date>>;
@@ -13,30 +13,17 @@ export type IndexField<T extends ModelType> = IndexClauseRaw<RetainPrimitiveFiel
 /**
  * Supported index types
  */
-export type QueryIndexType = 'unique' | 'unsorted' | 'sorted';
+export type QueryIndexType = 'query:unique' | 'query:unsorted' | 'query:sorted';
 
 /**
  * Index options
  */
-export type QueryIndexConfig<T extends ModelType> = {
-  /**
-   * Index name
-   */
-  name: string;
-  /**
-   * Index simple name, filled out
-   */
-  simpleName?: string;
+export interface QueryIndexConfig<T extends ModelType> extends IndexConfig<QueryIndexType> {
   /**
    * Fields and sort order
    */
   fields: IndexClauseRaw<RetainPrimitiveFields<T>>[];
-  /**
-   * Type
-   */
-  type: QueryIndexType;
 };
-
 
 /**
  * Defines an index on a model
@@ -50,3 +37,6 @@ export function QueryIndex<T extends ModelType>(index: QueryIndexConfig<T>) {
     ModelRegistryIndex.getForRegister(cls).register({ indices: { [index.name]: index } });
   };
 }
+
+export const isModelQueryIndex = (idx: unknown): idx is QueryIndexConfig<ModelType> =>
+  typeof idx === 'object' && idx !== null && 'type' in idx && typeof idx.type === 'string' && idx.type.startsWith('query:');

@@ -14,7 +14,7 @@ import {
   type SortedIndexSelection,
   type SortedIndex,
   type SortedKeyedIndex,
-  isAllIndex,
+  isModelIndexedIndex,
 } from '@travetto/model';
 import { Injectable, PostConstruct } from '@travetto/di';
 
@@ -128,7 +128,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   #removeIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
     for (const idx of Object.values(ModelRegistryIndex.getIndices(cls))) {
-      if (isAllIndex(idx)) {
+      if (isModelIndexedIndex(idx)) {
         const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
         const fullKey = this.#resolveKey(cls, idx.name, key);
         switch (idx.type) {
@@ -142,7 +142,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   #addIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
     for (const idx of Object.values(ModelRegistryIndex.getIndices(cls))) {
-      if (isAllIndex(idx)) {
+      if (isModelIndexedIndex(idx)) {
         const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
         const fullKey = this.#resolveKey(cls, idx.name, key);
 
@@ -244,7 +244,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     ShutdownManager.signal.addEventListener('abort', () => this.client.close());
     for (const cls of ModelRegistryIndex.getClasses()) {
       for (const idx of ModelRegistryIndex.getIndices(cls)) {
-        if (!isAllIndex(idx) || idx.type === 'indexed:unique') {
+        if (!isModelIndexedIndex(idx) || idx.type === 'indexed:unique') {
           console.warn('Non-indexed indices are not supported in redis for', { cls: cls.Ⲑid, idx: idx.name });
         }
       }
