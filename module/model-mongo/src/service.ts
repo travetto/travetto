@@ -455,7 +455,7 @@ export class MongoModelService implements
   async getByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<T> {
+  >(cls: Class<T>, idx: UniqueIndex<T, K> | KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<T> {
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
     const store = await this.getStore(cls);
     const result = await store.findOne(
@@ -474,7 +474,7 @@ export class MongoModelService implements
   async deleteByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<void> {
+  >(cls: Class<T>, idx: UniqueIndex<T, K> | KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<void> {
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
     const store = await this.getStore(cls);
     const result = await store.deleteOne(
@@ -491,7 +491,7 @@ export class MongoModelService implements
 
   upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>>(
     cls: Class<T>,
-    idx: UniqueIndex<T, K>,
+    idx: UniqueIndex<T, K> | KeyedIndex<T, K>,
     body: OptionalId<T>
   ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
@@ -500,14 +500,14 @@ export class MongoModelService implements
   updateByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: T): Promise<T> {
+  >(cls: Class<T>, idx: UniqueIndex<T, K> | KeyedIndex<T, K>, body: T): Promise<T> {
     return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
   }
 
   async updatePartialByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T> {
+  >(cls: Class<T>, idx: UniqueIndex<T, K> | KeyedIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T> {
     const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
     return this.update(cls, item);
   }

@@ -3,7 +3,7 @@ import { type Any, castTo, type Class, type DeepPartial, hasFunction, TypedObjec
 import { IndexNotSupported } from '../error/invalid-index.ts';
 import { NotFoundError } from '../error/not-found.ts';
 import type { ModelCrudSupport } from '../types/crud.ts';
-import type { AllIndexes, ModelIndexedSupport, UniqueIndex } from '../types/indexed.ts';
+import type { AllIndexes, KeyedIndex, ModelIndexedSupport, UniqueIndex } from '../types/indexed.ts';
 import type { ModelType, OptionalId } from '../types/model.ts';
 
 type ComputeConfig = {
@@ -128,7 +128,7 @@ export class ModelIndexedUtil {
    */
   static async naiveUpsert<T extends ModelType>(
     service: ModelIndexedSupport & ModelCrudSupport,
-    cls: Class<T>, idx: UniqueIndex<T, Any>, body: OptionalId<T>
+    cls: Class<T>, idx: UniqueIndex<T, Any> | KeyedIndex<T, Any>, body: OptionalId<T>
   ): Promise<T> {
     try {
       return await this.naiveUpdate(service, cls, idx, body);
@@ -150,7 +150,7 @@ export class ModelIndexedUtil {
   */
   static async naiveUpdate<T extends ModelType>(
     service: ModelIndexedSupport & ModelCrudSupport,
-    cls: Class<T>, idx: UniqueIndex<T, Any>, body: OptionalId<T>
+    cls: Class<T>, idx: UniqueIndex<T, Any> | KeyedIndex<T, Any>, body: OptionalId<T>
   ): Promise<T> {
     const { id } = await service.getByIndex(cls, idx, castTo(body));
     body.id = id;

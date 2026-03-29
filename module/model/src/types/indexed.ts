@@ -61,6 +61,16 @@ export interface SortedKeyedIndex<
   reversed: boolean;
 }
 
+export type SingleItemIndex<
+  T extends ModelType,
+  K extends KeyedIndexSelection<T> = Any
+> = KeyedIndex<T, K> | UniqueIndex<T, K>;
+
+export type MultipleItemIndex<
+  T extends ModelType,
+  K extends KeyedIndexSelection<T> = Any,
+  S extends SortedIndexSelection<T> = Any
+> = SortedIndex<T, S> | SortedKeyedIndex<T, K, S> | KeyedIndex<T, K>;
 
 /**
  * Defines a keyed index for a model
@@ -172,7 +182,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   getByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<T>;
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<T>;
 
   /**
    * Delete entity by index as defined by fields of idx and the body fields
@@ -183,7 +193,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   deleteByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<void>;
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<void>;
 
   /**
    * Upsert by index, allowing the index to act as a primary key
@@ -193,7 +203,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    */
   upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>>(
     cls: Class<T>,
-    idx: UniqueIndex<T, K>,
+    idx: SingleItemIndex<T, K>,
     body: OptionalId<T>
   ): Promise<T>;
 
@@ -206,7 +216,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   updateByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: T): Promise<T>;
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: T): Promise<T>;
 
   /**
    * Update partial by index
@@ -217,7 +227,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   updatePartialByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T>;
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T>;
 
   /**
    * List entity by ranged index as defined by fields of idx and the body fields

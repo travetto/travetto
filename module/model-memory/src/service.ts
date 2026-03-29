@@ -1,7 +1,6 @@
 import {
   type Class, type TimeSpan, castTo, type BinaryMetadata,
   type ByteRange, type BinaryType, BinaryUtil, type BinaryArray, JSONUtil, BinaryMetadataUtil,
-  type Any
 } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -11,7 +10,6 @@ import {
   ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
   IndexNotSupported, type ListPageResult, type ListPageOptions,
   type KeyedIndexSelection,
-  type UniqueIndex,
   type KeyedIndexBody,
   type KeyedIndexWithPartialBody,
   type KeyedIndex,
@@ -19,7 +17,9 @@ import {
   type SortedKeyedIndex,
   type SortedIndex,
   type AllIndexes,
-  isModelIndexedIndex
+  isModelIndexedIndex,
+  type SingleItemIndex,
+  type MultipleItemIndex
 } from '@travetto/model';
 
 const ModelBlobNamespace = '__blobs';
@@ -156,7 +156,7 @@ export class MemoryModelService implements
   async #getIdByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: UniqueIndex<T, K> | KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<string> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<string> {
     const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
     if (!isModelIndexedIndex(idx)) {
       throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with MemoryModelService');
@@ -182,7 +182,7 @@ export class MemoryModelService implements
   #getIndexIds<
     T extends ModelType,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: KeyedIndex<T, K> | SortedIndex<T, Any> | SortedKeyedIndex<T, K, Any>, body?: KeyedIndexBody<T, K>): string[] {
+  >(cls: Class<T>, idx: MultipleItemIndex<T, K>, body?: KeyedIndexBody<T, K>): string[] {
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body), { emptySortValue: null });
     if (!isModelIndexedIndex(idx)) {
       throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with MemoryModelService');
@@ -381,7 +381,7 @@ export class MemoryModelService implements
   async getByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<T> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<T> {
     return this.get(cls, await this.#getIdByIndex(cls, idx, body));
 
   }
@@ -389,13 +389,13 @@ export class MemoryModelService implements
   async deleteByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<void> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<void> {
     await this.delete(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
   upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>>(
     cls: Class<T>,
-    idx: UniqueIndex<T, K>,
+    idx: SingleItemIndex<T, K>,
     body: OptionalId<T>
   ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
@@ -404,14 +404,14 @@ export class MemoryModelService implements
   updateByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: T): Promise<T> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: T): Promise<T> {
     return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
   }
 
   async updatePartialByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T> {
     const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
     return this.update(cls, item);
   }

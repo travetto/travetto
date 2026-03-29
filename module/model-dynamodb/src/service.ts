@@ -15,8 +15,9 @@ import {
   type SortedIndexSelection,
   type SortedIndex,
   type SortedKeyedIndex,
-  type UniqueIndex,
   isModelIndexedIndex,
+  type SingleItemIndex,
+  type MultipleItemIndex,
 } from '@travetto/model';
 
 import type { DynamoDBModelConfig } from './config.ts';
@@ -46,7 +47,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async * #scanIndex<T extends ModelType>(
     cls: Class,
-    idx: SortedIndex<T, Any> | KeyedIndex<T, Any> | SortedKeyedIndex<T, Any, Any>,
+    idx: MultipleItemIndex<T>,
     body: KeyedIndexBody<T, Any>,
     options: ListPageOptions<Record<string, AttributeValue>>
   ): AsyncIterable<QueryCommandOutput & { LastEvaluatedOffset?: string }> {
@@ -371,7 +372,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async #getIdByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: | UniqueIndex<T, K> | KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<string> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
 
     const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
@@ -407,20 +408,20 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async getByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<T> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<T> {
     return this.get(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
   async deleteByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<void> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<void> {
     return this.delete(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
   upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>>(
     cls: Class<T>,
-    idx: UniqueIndex<T, K>,
+    idx: SingleItemIndex<T, K>,
     body: OptionalId<T>
   ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
@@ -429,14 +430,14 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async updateByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: T): Promise<T> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: T): Promise<T> {
     return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
   }
 
   async updatePartialByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T> {
     const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
     return this.update(cls, item);
   }
