@@ -40,7 +40,8 @@
   ],
   "overrides": {
     "debug": "4.4.3",
-    "minimatch": "^10.2.2"
+    "minimatch": "^10.2.2",
+    "typescript": "^6.0.0"
   },
   "devDependencies": {
     "@travetto/repo": "^8.0.0-alpha.6",

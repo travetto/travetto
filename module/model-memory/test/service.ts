@@ -10,7 +10,6 @@ import { ModelIndexedSuite } from '@travetto/model/support/test/indexed.ts';
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
 import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
-import { sortedIndex, sortedKeyedIndex } from '@travetto/model';
 
 const KB = 2 ** 20;
 

@@ -64,7 +64,7 @@ export class MySQLDialect extends SQLDialect {
   /**
    * Get DROP INDEX sql
    */
-  getDropIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string): string {
+  getDropIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig | string): string {
     const constraint = typeof idx === 'string' ? idx : this.getIndexName(cls, idx);
     return `DROP INDEX ${this.identifier(constraint)} ON ${this.table(SQLModelUtil.classToStack(cls))};`;
   }

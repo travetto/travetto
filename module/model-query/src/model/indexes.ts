@@ -29,12 +29,12 @@ export interface QueryIndexConfig<T extends ModelType> extends IndexConfig<Query
  * Defines an index on a model
  * @kind decorator
  */
-export function QueryIndex<T extends ModelType>(index: QueryIndexConfig<T>) {
+export function QueryIndex<T extends ModelType>(index: Omit<QueryIndexConfig<T>, 'class'>) {
   if (index.fields.some(field => field === 'id')) {
     throw new RuntimeError('Cannot create an index with the id field');
   }
   return function (cls: Class<T>): void {
-    ModelRegistryIndex.getForRegister(cls).register({ indices: { [index.name]: index } });
+    ModelRegistryIndex.getForRegister(cls).register({ indices: { [index.name]: { ...index, class: cls } } });
   };
 }
 

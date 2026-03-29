@@ -7,7 +7,7 @@ import {
 } from '@travetto/model';
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, , type ListPageResult, type SortedIndex,
+  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex,
   type SingleItemIndexBody,
   type SingleItemPartialIndexBody
 } from '@travetto/model-indexed';

@@ -1,4 +1,5 @@
-import { ExpiresAt, Index, Model, type ModelExpirySupport, NotFoundError, ModelStorageUtil, ModelIndexedUtil } from '@travetto/model';
+import { ExpiresAt, Model, type ModelExpirySupport, NotFoundError, ModelStorageUtil } from '@travetto/model';
+import { ModelIndexedUtil, sortedIndex } from '@travetto/model-indexed';
 import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
 import { RuntimeError, JSONUtil, TimeUtil } from '@travetto/runtime';
@@ -9,11 +10,6 @@ import { type CacheAware, CacheConfigSymbol, CacheModelSymbol, EvictConfigSymbol
 
 const INFINITE_MAX_AGE = TimeUtil.duration('10y', 'ms');
 
-@Index({
-  name: 'keySpace',
-  type: 'unsorted',
-  fields: [{ keySpace: 1 }]
-})
 @Model({ autoCreate: 'production' })
 export class CacheRecord {
   id: string;
@@ -24,6 +20,8 @@ export class CacheRecord {
   expiresAt: Date;
   issuedAt: Date;
 }
+
+const keySpaceIndex = sortedIndex(CacheRecord, { keySpace: true }, { expiresAt: 1 }, 'keySpace');
 
 /**
  * Cache source
@@ -104,9 +102,14 @@ export class CacheService {
   async deleteAll(keySpace: string): Promise<void> {
     if (ModelIndexedUtil.isSupported(this.#modelService)) {
       const removes: Promise<void>[] = [];
-      for await (const item of this.#modelService.listByKeyedIndex(CacheRecord, 'keySpace', { keySpace })) {
-        removes.push(this.#modelService.delete(CacheRecord, item.id));
-      }
+      let offset: string | undefined;
+      do {
+        const { items, nextOffset } = await this.#modelService.listByIndex(CacheRecord, keySpaceIndex, { keySpace }, { offset });
+        for (const item of items) {
+          removes.push(this.#modelService.delete(CacheRecord, item.id));
+        }
+        offset = nextOffset;
+      } while (offset);
       await Promise.all(removes);
     } else {
       throw new RuntimeError('Unable to delete all on an un-indexed database');
