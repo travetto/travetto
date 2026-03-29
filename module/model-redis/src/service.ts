@@ -1,11 +1,20 @@
 import { createClient } from '@redis/client';
 
-import { castTo, JSONUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
+import { castTo, JSONUtil, ShutdownManager, type Any, type Class } from '@travetto/runtime';
 import {
   type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelType, type ModelStorageSupport,
   NotFoundError, ExistsError, type ModelIndexedSupport, type OptionalId, type ListPageOptions,
   ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
   type ListPageResult,
+  type KeyedIndexBody,
+  type UniqueIndex,
+  type KeyedIndexSelection,
+  type KeyedIndexWithPartialBody,
+  type KeyedIndex,
+  type SortedIndexSelection,
+  type SortedIndex,
+  type SortedKeyedIndex,
+  isAllIndex,
 } from '@travetto/model';
 import { Injectable, PostConstruct } from '@travetto/di';
 
@@ -64,8 +73,8 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     return { ...output, cursor: output.cursor === '0' ? undefined : output.cursor };
   }
 
-  async * #streamValues<T extends ModelType>(
-    operation: ScanOp, search: RedisScan, options: ListPageOptions<T>, count = 10
+  async * #streamValues(
+    operation: ScanOp, search: RedisScan, options: ListPageOptions, count = 10
   ): AsyncIterable<ScanState> {
     const limit = options.limit ?? Number.MAX_SAFE_INTEGER;
     let matched: ScanState = { cursor: options.offset, ids: [] };
@@ -79,16 +88,25 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     } while (matched.cursor && produced < limit);
   }
 
-  #scanIndex<T extends ModelType>(cls: Class<T>, idx: string, options: ListPageOptions<T>): AsyncIterable<ScanState> {
+  #scanIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+  >(
+    cls: Class<T>,
+    idx: KeyedIndex<T, K> | SortedIndex<T, Any> | SortedKeyedIndex<T, K, Any>,
+    body: KeyedIndexBody<T, K>, options: ListPageOptions
+  ): AsyncIterable<ScanState> {
     ModelCrudUtil.ensureNotSubType(cls);
-
-    const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idxConfig, options.body, { emptySortValue: null });
-    const fullKey = this.#resolveKey(cls, idx, key);
-    const isReversed = ModelIndexedUtil.isIndexSimpleReversed(cls, idxConfig);
-
-    const operation = idxConfig.type === 'unsorted' ? 'sScan' : 'zRange';
-    return this.#streamValues(operation, { key: fullKey, reverse: isReversed }, options);
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body), { emptySortValue: null });
+    const fullKey = this.#resolveKey(cls, idx.name, key);
+    switch (idx.type) {
+      case 'indexed:keyed': return this.#streamValues('sScan', { key: fullKey }, options);
+      case 'indexed:sortedKeyed':
+      case 'indexed:sorted': {
+        const reverse = 'reversed' in idx && idx.reversed;
+        return this.#streamValues('zRange', { key: fullKey, reverse }, options);
+      }
+    }
   }
 
   async * #getBodies<T extends ModelType>(cls: Class<T>, ids: string[], transform: (id: string) => string): AsyncIterable<T> {
@@ -109,25 +127,29 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   #removeIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
-    for (const idx of ModelRegistryIndex.getIndices(cls, ['sorted', 'unsorted'])) {
-      const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
-      const fullKey = this.#resolveKey(cls, idx.name, key);
-      switch (idx.type) {
-        case 'unsorted': multi.sRem(fullKey, item.id); break;
-        case 'sorted': multi.zRem(fullKey, item.id); break;
+    for (const idx of Object.values(ModelRegistryIndex.getIndices(cls))) {
+      if (isAllIndex(idx)) {
+        const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
+        const fullKey = this.#resolveKey(cls, idx.name, key);
+        switch (idx.type) {
+          case 'indexed:keyed': multi.sRem(fullKey, item.id); break;
+          case 'indexed:sortedKeyed':
+          case 'indexed:sorted': multi.zRem(fullKey, item.id); break;
+        }
       }
     }
   }
 
   #addIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
-    for (const idx of ModelRegistryIndex.getIndices(cls, ['sorted', 'unsorted'])) {
-      const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
-      const fullKey = this.#resolveKey(cls, idx.name, key);
+    for (const idx of Object.values(ModelRegistryIndex.getIndices(cls))) {
+      if (isAllIndex(idx)) {
+        const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
+        const fullKey = this.#resolveKey(cls, idx.name, key);
 
-      switch (idx.type) {
-        case 'unsorted': multi.sAdd(fullKey, item.id); break;
-        case 'sorted': {
-          multi.zAdd(fullKey, { score: +sort!, value: item.id }); break;
+        switch (idx.type) {
+          case 'indexed:keyed': multi.sAdd(fullKey, item.id); break;
+          case 'indexed:sortedKeyed':
+          case 'indexed:sorted': multi.zAdd(fullKey, { score: +sort!, value: item.id }); break;
         }
       }
     }
@@ -186,20 +208,27 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
   }
 
-  async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<string> {
+  async #getIdByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: UniqueIndex<T, K> | KeyedIndex<T, K> | SortedIndex<T, Any> | SortedKeyedIndex<T, K, Any>,
+    body: KeyedIndexBody<T, K>
+  ): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const idxConfig = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idxConfig, body);
-    const fullKey = this.#resolveKey(cls, idxConfig.name, key);
+    const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
+    const fullKey = this.#resolveKey(cls, idx.name, key);
     let id: string | undefined;
-    if (idxConfig.type === 'unsorted') {
-      id = (await this.client.sRandMember(fullKey))!;
-    } else {
-      const result = await this.client.zRangeByScore(
-        fullKey, +sort!, +sort!
-      );
-      id = result[0];
+    switch (idx.type) {
+      case 'indexed:keyed': id = await this.client.sRandMember(fullKey) ?? undefined; break;
+      case 'indexed:sortedKeyed':
+      case 'indexed:sorted': {
+        const result = await this.client.zRangeByScore(fullKey, +sort!, +sort!);
+        id = result[0];
+        break;
+      }
     }
     if (id) {
       return id;
@@ -214,12 +243,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     await ModelStorageUtil.storageInitialization(this);
     ShutdownManager.signal.addEventListener('abort', () => this.client.close());
     for (const cls of ModelRegistryIndex.getClasses()) {
-      for (const idx of ModelRegistryIndex.getConfig(cls).indices ?? []) {
-        switch (idx.type) {
-          case 'unique': {
-            console.error('Unique indices are not supported in redis for', { cls: cls.Ⲑid, idx: idx.name });
-            break;
-          }
+      for (const idx of ModelRegistryIndex.getIndices(cls)) {
+        if (!isAllIndex(idx) || idx.type === 'indexed:unique') {
+          console.warn('Non-indexed indices are not supported in redis for', { cls: cls.Ⲑid, idx: idx.name });
         }
       }
     }
@@ -319,39 +345,82 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   // Indexed
-  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
+
+  async getByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<T> {
     return this.get(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
-  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void> {
+  async deleteByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<void> {
     return this.delete(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
-  upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T> {
+
+  upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: UniqueIndex<T, K>,
+    body: OptionalId<T>
+  ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
 
-  async updateByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: T): Promise<T> {
+  updateByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: T): Promise<T> {
     return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
   }
 
-  async updatePartialByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
+  async updatePartialByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T> {
     const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
     return this.update(cls, item);
   }
 
-  async * listByKeyedIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
-    for await (const { ids } of this.#scanIndex(cls, idx, { body, limit: Number.MAX_SAFE_INTEGER })) {
+  async * listByKeyedIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): AsyncIterable<T> {
+    for await (const { ids } of this.#scanIndex(cls, idx, body, { limit: Number.MAX_SAFE_INTEGER })) {
       yield* this.#getBodies(cls, ids, id => this.#resolveKey(cls, id));
     }
   }
 
-  async listPageByIndex<T extends ModelType>(
-    cls: Class<T>, idx: string, options: ListPageOptions<T>
+  async listBySortedIndex<
+    T extends ModelType,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>> {
+    const items: T[] = [];
+    let lastCursor: string | undefined;
+    for await (const { ids, cursor } of this.#scanIndex(cls, idx, castTo<Any>({}), options)) {
+      items.push(
+        ...await Array.fromAsync(this.#getBodies(cls, ids, id => this.#resolveKey(cls, id)))
+      );
+      lastCursor = cursor;
+    }
+    return { items, nextOffset: lastCursor };
+  }
+
+  async listBySortedKeyedIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedKeyedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    options: ListPageOptions
   ): Promise<ListPageResult<T>> {
     const items: T[] = [];
     let lastCursor: string | undefined;
-    for await (const { ids, cursor } of this.#scanIndex(cls, idx, options)) {
+    for await (const { ids, cursor } of this.#scanIndex(cls, idx, body, options)) {
       items.push(
         ...await Array.fromAsync(this.#getBodies(cls, ids, id => this.#resolveKey(cls, id)))
       );

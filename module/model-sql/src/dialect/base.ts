@@ -717,14 +717,14 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   /**
    * Get all create indices need for a given class
    */
-  getCreateAllIndicesSQL<T extends ModelType>(cls: Class<T>, indices: IndexConfig<T>[]): string[] {
+  getCreateAllIndicesSQL<T extends ModelType>(cls: Class<T>, indices: IndexConfig[]): string[] {
     return indices.map(idx => this.getCreateIndexSQL(cls, idx));
   }
 
   /**
    * Get index name
    */
-  getIndexName<T extends ModelType>(cls: Class<T>, idx: IndexConfig<ModelType>): string {
+  getIndexName<T extends ModelType>(cls: Class<T>, idx: IndexConfig): string {
     const table = this.namespace(SQLModelUtil.classToStack(cls));
     return ['idx', table, idx.name.toLowerCase().replaceAll('-', '_')].join('_');
   }
@@ -732,7 +732,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   /**
    * Get CREATE INDEX sql
    */
-  getCreateIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>): string {
+  getCreateIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig): string {
     const table = this.namespace(SQLModelUtil.classToStack(cls));
     const fields: [string, boolean][] = idx.fields.map(field => {
       const key = TypedObject.keys(field)[0];
@@ -751,7 +751,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   /**
    * Get DROP INDEX sql
    */
-  getDropIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string): string {
+  getDropIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig | string): string {
     const constraint = typeof idx === 'string' ? idx : this.getIndexName(cls, idx);
     return `DROP INDEX ${this.identifier(constraint)} ;`;
   }
@@ -1074,7 +1074,7 @@ ${this.getWhereSQL(cls, where!)}`;
   /**
    * Determine if an index has changed
    */
-  isIndexChanged(requested: IndexConfig<ModelType>, existing: SQLTableDescription['indices'][number]): boolean {
+  isIndexChanged(requested: IndexConfig, existing: SQLTableDescription['indices'][number]): boolean {
     let result =
       (existing.is_unique && requested.type !== 'unique')
       || requested.fields.length !== existing.columns.length;

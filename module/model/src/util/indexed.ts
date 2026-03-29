@@ -2,11 +2,9 @@ import { type Any, castTo, type Class, type DeepPartial, hasFunction, TypedObjec
 
 import { IndexNotSupported } from '../error/invalid-index.ts';
 import { NotFoundError } from '../error/not-found.ts';
-import type { IndexConfig } from '../registry/types.ts';
 import type { ModelCrudSupport } from '../types/crud.ts';
 import type { AllIndexes, ModelIndexedSupport, UniqueIndex } from '../types/indexed.ts';
 import type { ModelType, OptionalId } from '../types/model.ts';
-import { ModelRegistryIndex } from '../registry/registry-index.ts';
 
 type ComputeConfig = {
   includeSortInFields?: boolean;
@@ -83,21 +81,6 @@ export class ModelIndexedUtil {
     }
 
     return { fields, sorted };
-  }
-
-  /**
-   * Is the index reversed (ie, has a boolean or numeric field as the last part of a sorted index)
-   */
-  static isIndexSimpleReversed<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string): boolean {
-    const config = typeof idx === 'string' ? ModelRegistryIndex.getIndex(cls, idx) : idx;
-    if (config.type !== 'sorted') {
-      return false;
-    }
-    if (config.fields.length !== 2) {
-      return false;
-    }
-    const lastField = config.fields.at(-1);
-    return typeof lastField === 'object' && castTo<unknown[]>([-1, false]).includes(Object.values(lastField)[0]);
   }
 
   /**
