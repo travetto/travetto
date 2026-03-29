@@ -68,5 +68,9 @@ export type MultipleItemIndex<
   S extends SortedIndexSelection<T> = Any
 > = SortedIndex<T, S> | SortedKeyedIndex<T, K, S>;
 
-export type AllIndexes<T extends ModelType> =
-  SortedIndex<T, Any> | UniqueIndex<T, Any> | SortedKeyedIndex<T, Any, Any> | KeyedIndex<T, Any>;
+export type AllIndexes<
+  T extends ModelType,
+  K extends KeyedIndexSelection<T> = Any,
+  S extends SortedIndexSelection<T> = Any
+> =
+  SortedIndex<T, S> | UniqueIndex<T, K> | SortedKeyedIndex<T, K, S> | KeyedIndex<T, K>;

@@ -31,6 +31,7 @@
     "@elastic/elasticsearch": "^9.3.4",
     "@travetto/config": "^8.0.0-alpha.9",
     "@travetto/model": "^8.0.0-alpha.9",
+    "@travetto/model-indexed": "^8.0.0-alpha.9",
     "@travetto/model-query": "^8.0.0-alpha.9"
   },
   "peerDependencies": {

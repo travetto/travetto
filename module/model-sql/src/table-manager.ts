@@ -45,7 +45,7 @@ export class TableManager {
     for (const command of this.#dialect.getCreateAllTablesSQL(cls)) {
       out.push(command);
     }
-    const indices = ModelRegistryIndex.getConfig(cls).indices;
+    const indices = ModelRegistryIndex.getIndices(cls);
     if (indices) {
       for (const command of this.#dialect.getCreateAllIndicesSQL(cls, indices)) {
         out.push(command);
@@ -64,7 +64,8 @@ export class TableManager {
       const existingFields = new Map(found?.columns.map(column => [column.name, column]) ?? []);
       const existingIndices = new Map(found?.indices.map(index => [index.name, index]) ?? []);
       const model = path.length === 1 ? ModelRegistryIndex.getConfig(type) : undefined;
-      const requestedIndices = new Map((model?.indices ?? []).map(index => [this.#dialect.getIndexName(type, index), index]) ?? []);
+      const indices = model ? ModelRegistryIndex.getIndices(type) : undefined;
+      const requestedIndices = new Map((indices ?? []).map(index => [this.#dialect.getIndexName(type, index), index]) ?? []);
 
       // Manage fields
       if (!existingFields.size) {

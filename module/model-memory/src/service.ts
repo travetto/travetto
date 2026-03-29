@@ -6,22 +6,16 @@ import {
 import { Injectable, PostConstruct } from '@travetto/di';
 import { Config } from '@travetto/config';
 import {
-  type ModelType, type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, type ModelIndexedSupport,
-  ModelRegistryIndex, NotFoundError, ExistsError, type OptionalId, type ModelBlobSupport,
-  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
-  IndexNotSupported, type ListPageResult, type ListPageOptions,
-  type KeyedIndexSelection,
-  type KeyedIndexBody,
-  type KeyedIndexWithPartialBody,
-  type KeyedIndex,
-  type SortedIndexSelection,
-  type SortedKeyedIndex,
-  type SortedIndex,
-  type AllIndexes,
-  isModelIndexedIndex,
-  type SingleItemIndex,
-  type MultipleItemIndex
+  type ModelType, type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, ModelRegistryIndex,
+  NotFoundError, ExistsError, type OptionalId, type ModelBlobSupport, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil,
+  IndexNotSupported,
 } from '@travetto/model';
+import {
+  type ModelIndexedSupport, type KeyedIndexSelection, type MultipleItemIndex, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type SortedKeyedIndex, type ListPageResult, type SortedIndex,
+  type AllIndexes,
+  isModelIndexedIndex
+} from '@travetto/model-indexed';
 
 const ModelBlobNamespace = '__blobs';
 const ModelBlobMetaNamespace = `${ModelBlobNamespace}_meta`;

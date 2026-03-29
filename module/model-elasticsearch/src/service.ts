@@ -3,29 +3,21 @@ import type * as estypes from '@elastic/elasticsearch/api/types';
 
 import {
   type ModelCrudSupport, type BulkOperation, type BulkResponse, type ModelBulkSupport, type ModelExpirySupport,
-  type ModelIndexedSupport, type ModelType, type ModelStorageSupport, NotFoundError, ModelRegistryIndex, type OptionalId,
-  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, type ListPageOptions,
-  type ListPageResult,
-  type KeyedIndexSelection,
-  type SortedIndexSelection,
-  type SortedIndex,
-  type SortedKeyedIndex,
-  type KeyedIndexBody,
-  type SingleItemIndex,
-  type KeyedIndexWithPartialBody,
-  type KeyedIndex,
-  type MultipleItemIndex,
+  type ModelType, type ModelStorageSupport, NotFoundError, ModelRegistryIndex, type OptionalId,
+  ModelCrudUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil
 } from '@travetto/model';
 import { ShutdownManager, type Class, castTo, asFull, TypedObject, asConstructable, JSONUtil, type Any } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
-  type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport,
-  type ModelQuerySupport, type PageableModelQuery, type Query, type ValidStringFields,
-  QueryVerifier, type ModelQuerySuggestSupport,
-  ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
-  type ModelQueryFacet,
+  type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport, type PageableModelQuery,
+  type Query, type ValidStringFields, QueryVerifier, type ModelQuerySuggestSupport, ModelQueryUtil, ModelQuerySuggestUtil,
+  ModelQueryCrudUtil, type ModelQueryFacet,
 } from '@travetto/model-query';
+import {
+  type ModelIndexedSupport, type KeyedIndexSelection, type MultipleItemIndex, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type SortedKeyedIndex, type ListPageResult, type SortedIndex
+} from '@travetto/model-indexed';
 
 import type { ElasticsearchModelConfig } from './config.ts';
 import type { EsBulkError } from './internal/types.ts';

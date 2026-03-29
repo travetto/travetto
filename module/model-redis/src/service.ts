@@ -2,20 +2,15 @@ import { createClient } from '@redis/client';
 
 import { castTo, JSONUtil, ShutdownManager, type Any, type Class } from '@travetto/runtime';
 import {
-  type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelType, type ModelStorageSupport,
-  NotFoundError, ExistsError, type ModelIndexedSupport, type OptionalId, type ListPageOptions,
-  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
-  type ListPageResult,
-  type KeyedIndexBody,
-  type UniqueIndex,
-  type KeyedIndexSelection,
-  type KeyedIndexWithPartialBody,
-  type KeyedIndex,
-  type SortedIndexSelection,
-  type SortedIndex,
-  type SortedKeyedIndex,
-  isModelIndexedIndex,
+  type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelType, type ModelStorageSupport, NotFoundError,
+  ExistsError, type OptionalId, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil,
 } from '@travetto/model';
+import {
+  type ModelIndexedSupport, type KeyedIndexSelection, type MultipleItemIndex, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type SortedKeyedIndex, type ListPageResult, type SortedIndex,
+  isModelIndexedIndex, type AllIndexes,
+} from '@travetto/model-indexed';
+
 import { Injectable, PostConstruct } from '@travetto/di';
 
 import type { RedisModelConfig } from './config.ts';
@@ -93,14 +88,14 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     K extends KeyedIndexSelection<T>,
   >(
     cls: Class<T>,
-    idx: KeyedIndex<T, K> | SortedIndex<T, Any> | SortedKeyedIndex<T, K, Any>,
+    idx: MultipleItemIndex<T, K, Any>,
     body: KeyedIndexBody<T, K>, options: ListPageOptions
   ): AsyncIterable<ScanState> {
     ModelCrudUtil.ensureNotSubType(cls);
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body), { emptySortValue: null });
     const fullKey = this.#resolveKey(cls, idx.name, key);
     switch (idx.type) {
-      case 'indexed:keyed': return this.#streamValues('sScan', { key: fullKey }, options);
+      // case 'indexed:keyed': return this.#streamValues('sScan', { key: fullKey }, options);
       case 'indexed:sortedKeyed':
       case 'indexed:sorted': {
         const reverse = 'reversed' in idx && idx.reversed;
@@ -213,7 +208,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     K extends KeyedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: UniqueIndex<T, K> | KeyedIndex<T, K> | SortedIndex<T, Any> | SortedKeyedIndex<T, K, Any>,
+    idx: AllIndexes<T, K>,
     body: KeyedIndexBody<T, K>
   ): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
@@ -349,21 +344,21 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   async getByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: UniqueIndex<T, K> | KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<T> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<T> {
     return this.get(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
   async deleteByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: UniqueIndex<T, K> | KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<void> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<void> {
     return this.delete(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
 
   upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>>(
     cls: Class<T>,
-    idx: UniqueIndex<T, K>,
+    idx: SingleItemIndex<T, K>,
     body: OptionalId<T>
   ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
@@ -372,14 +367,14 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   updateByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: T): Promise<T> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: T): Promise<T> {
     return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
   }
 
   async updatePartialByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: UniqueIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T> {
     const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
     return this.update(cls, item);
   }

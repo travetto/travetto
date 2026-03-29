@@ -2,7 +2,8 @@
 import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex, type Point } from '@travetto/schema';
 import { type Class, RuntimeError, TypedObject, TimeUtil, castTo, castKey, toConcrete, JSONUtil } from '@travetto/runtime';
 import { type SelectClause, type Query, type SortClause, type WhereClause, type RetainQueryPrimitiveFields, ModelQueryUtil, isModelQueryIndex } from '@travetto/model-query';
-import { IndexNotSupported, isModelIndexedIndex, type AllIndexes, type BulkResponse, type IndexConfig, type ModelType } from '@travetto/model';
+import { IndexNotSupported, type BulkResponse, type IndexConfig, type ModelType } from '@travetto/model';
+import { isModelIndexedIndex, type AllIndexes } from '@travetto/model-indexed';
 
 import { SQLModelUtil } from '../util.ts';
 import type { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types.ts';

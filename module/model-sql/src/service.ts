@@ -1,18 +1,12 @@
 import {
   type ModelType,
-  type BulkOperation, type BulkResponse, type ModelCrudSupport, type ModelStorageSupport, type ModelBulkSupport,
-  NotFoundError, ModelRegistryIndex, ExistsError, type OptionalId, type ModelIdSource,
-  ModelExpiryUtil, ModelCrudUtil, ModelStorageUtil, ModelBulkUtil, ModelIndexedUtil,
-  type ModelIndexedSupport, type ListPageOptions, type ListPageResult,
-  type KeyedIndex,
-  type KeyedIndexBody,
-  type KeyedIndexSelection,
-  type KeyedIndexWithPartialBody,
-  type SortedIndex,
-  type SortedIndexSelection,
-  type SortedKeyedIndex,
-  type SingleItemIndex,
+  type BulkOperation, type BulkResponse, type ModelCrudSupport, type ModelStorageSupport, type ModelBulkSupport, NotFoundError,
+  ModelRegistryIndex, ExistsError, type OptionalId, type ModelIdSource, ModelExpiryUtil, ModelCrudUtil, ModelStorageUtil, ModelBulkUtil,
 } from '@travetto/model';
+import {
+  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type SortedKeyedIndex, type ListPageResult, type SortedIndex
+} from '@travetto/model-indexed';
 import { type Any, castTo, type Class, JSONUtil } from '@travetto/runtime';
 import { DataUtil } from '@travetto/schema';
 import type { AsyncContext } from '@travetto/context';
@@ -405,7 +399,6 @@ export class SQLModelService implements
     return this.update(cls, item);
   }
 
-  @Connected()
   listByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>,
@@ -415,6 +408,7 @@ export class SQLModelService implements
     T extends ModelType,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>>;
+  @Connected()
   async listByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>

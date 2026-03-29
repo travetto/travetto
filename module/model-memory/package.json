@@ -29,6 +29,7 @@
     "@travetto/config": "^8.0.0-alpha.9",
     "@travetto/di": "^8.0.0-alpha.9",
     "@travetto/model": "^8.0.0-alpha.9",
+    "@travetto/model-indexed": "^8.0.0-alpha.9",
     "@travetto/schema": "^8.0.0-alpha.9"
   },
   "peerDependencies": {

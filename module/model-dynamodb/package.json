@@ -28,7 +28,8 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1019.0",
     "@travetto/config": "^8.0.0-alpha.9",
-    "@travetto/model": "^8.0.0-alpha.9"
+    "@travetto/model": "^8.0.0-alpha.9",
+    "@travetto/model-indexed": "^8.0.0-alpha.9"
   },
   "peerDependencies": {
     "@travetto/cli": "^8.0.0-alpha.14"

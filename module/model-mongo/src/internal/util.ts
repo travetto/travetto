@@ -5,8 +5,9 @@ import {
 
 import { RuntimeError, CodecUtil, castTo, type Class, toConcrete, BinaryUtil } from '@travetto/runtime';
 import { type DistanceUnit, type PageableModelQuery, type WhereClause, isModelQueryIndex, ModelQueryUtil } from '@travetto/model-query';
-import { type ModelType, type IndexConfig, isModelIndexedIndex, IndexNotSupported } from '@travetto/model';
+import { type ModelType, type IndexConfig, IndexNotSupported } from '@travetto/model';
 import { DataUtil, SchemaRegistryIndex, type Point } from '@travetto/schema';
+import { isModelIndexedIndex } from '@travetto/model-indexed';
 
 const PointConcrete = toConcrete<Point>();
 

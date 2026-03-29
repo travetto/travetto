@@ -3,19 +3,12 @@ import { type DocumentData, FieldValue, Firestore, type Query } from '@google-cl
 import { castTo, JSONUtil, ShutdownManager, type Any, type Class } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
-  type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport,
-  type ModelIndexedSupport, type ModelType, NotFoundError, type OptionalId,
-  ModelCrudUtil, ModelIndexedUtil, type ListPageOptions, type ListPageResult,
-  type KeyedIndex,
-  type KeyedIndexBody,
-  type KeyedIndexSelection,
-  type KeyedIndexWithPartialBody,
-  type SingleItemIndex,
-  type SortedIndex,
-  type SortedIndexSelection,
-  type SortedKeyedIndex,
-  type MultipleItemIndex,
+  type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport, type ModelType, NotFoundError, type OptionalId, ModelCrudUtil,
 } from '@travetto/model';
+import {
+  type ModelIndexedSupport, type KeyedIndexSelection, type MultipleItemIndex, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type SortedKeyedIndex, type ListPageResult, type SortedIndex
+} from '@travetto/model-indexed';
 
 import type { FirestoreModelConfig } from './config.ts';
 

@@ -7,19 +7,9 @@ import {
 } from 'mongodb';
 
 import {
-  ModelRegistryIndex, type ModelType, type OptionalId, type ModelCrudSupport, type ModelStorageSupport,
-  type ModelExpirySupport, type ModelBulkSupport, type ModelIndexedSupport, type BulkOperation, type BulkResponse,
-  NotFoundError, ExistsError, type ModelBlobSupport,
-  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
-  type ListPageOptions, type ListPageResult,
-  type KeyedIndex,
-  type KeyedIndexBody,
-  type KeyedIndexSelection,
-  type KeyedIndexWithPartialBody,
-  type SortedIndex,
-  type SortedIndexSelection,
-  type SortedKeyedIndex,
-  type UniqueIndex,
+  ModelRegistryIndex, type ModelType, type OptionalId, type ModelCrudSupport, type ModelStorageSupport, type ModelExpirySupport,
+  type ModelBulkSupport, type BulkOperation, type BulkResponse, NotFoundError, ExistsError, type ModelBlobSupport,
+  ModelCrudUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
 } from '@travetto/model';
 import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
@@ -27,6 +17,10 @@ import {
   QueryVerifier, ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
   type ModelQueryFacet,
 } from '@travetto/model-query';
+import {
+  type ModelIndexedSupport, type KeyedIndexSelection, type MultipleItemIndex, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type SortedKeyedIndex, type ListPageResult, type SortedIndex,
+} from '@travetto/model-indexed';
 
 import {
   ShutdownManager, type Class, TypedObject,
@@ -70,7 +64,7 @@ export class MongoModelService implements
     S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: KeyedIndex<T, K> | SortedIndex<T, S> | SortedKeyedIndex<T, K, S>,
+    idx: MultipleItemIndex<T, K, S>,
     body?: KeyedIndexBody<T, K>
   ): Promise<FindCursor> {
     const store = await this.getStore(cls);
@@ -456,7 +450,7 @@ export class MongoModelService implements
   async getByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: UniqueIndex<T, K> | KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<T> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<T> {
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
     const store = await this.getStore(cls);
     const result = await store.findOne(
@@ -475,7 +469,7 @@ export class MongoModelService implements
   async deleteByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: UniqueIndex<T, K> | KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<void> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<void> {
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
     const store = await this.getStore(cls);
     const result = await store.deleteOne(
@@ -492,7 +486,7 @@ export class MongoModelService implements
 
   upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>>(
     cls: Class<T>,
-    idx: UniqueIndex<T, K> | KeyedIndex<T, K>,
+    idx: SingleItemIndex<T, K>,
     body: OptionalId<T>
   ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
@@ -501,14 +495,14 @@ export class MongoModelService implements
   updateByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: UniqueIndex<T, K> | KeyedIndex<T, K>, body: T): Promise<T> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: T): Promise<T> {
     return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
   }
 
   async updatePartialByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: UniqueIndex<T, K> | KeyedIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T> {
     const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
     return this.update(cls, item);
   }

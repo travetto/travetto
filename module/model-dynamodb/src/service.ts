@@ -4,21 +4,14 @@ import { castTo, JSONUtil, ShutdownManager, TimeUtil, type Any, type Class } fro
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelStorageSupport,
-  type ModelIndexedSupport, type ModelType, NotFoundError, ExistsError,
-  IndexNotSupported, type OptionalId, type ListPageOptions,
-  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
-  type ListPageResult,
-  type KeyedIndexSelection,
-  type KeyedIndex,
-  type KeyedIndexBody,
-  type KeyedIndexWithPartialBody,
-  type SortedIndexSelection,
-  type SortedIndex,
-  type SortedKeyedIndex,
-  isModelIndexedIndex,
-  type SingleItemIndex,
-  type MultipleItemIndex,
+  type ModelType, NotFoundError, ExistsError, IndexNotSupported, type OptionalId, ModelCrudUtil,
+  ModelExpiryUtil, ModelStorageUtil,
 } from '@travetto/model';
+import {
+  isModelIndexedIndex, ModelIndexedUtil, type KeyedIndexBody, type KeyedIndexSelection, type KeyedIndexWithPartialBody,
+  type ListPageOptions, type ListPageResult, type ModelIndexedSupport, type MultipleItemIndex, type SingleItemIndex,
+  type SortedIndex, type SortedIndexSelection, type SortedKeyedIndex
+} from '@travetto/model-indexed';
 
 import type { DynamoDBModelConfig } from './config.ts';
 import { DynamoDBUtil } from './util.ts';
