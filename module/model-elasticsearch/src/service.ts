@@ -76,7 +76,7 @@ export class ElasticsearchModelService implements
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
           ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
       ),
-      sort: 'sort' in idx ? ElasticsearchQueryUtil.getSort(idx.sort) : undefined,
+      sort: 'sort' in idx ? ElasticsearchQueryUtil.getSort(idx) : undefined,
     });
 
     let hits = search.hits.hits.slice(0, limit);

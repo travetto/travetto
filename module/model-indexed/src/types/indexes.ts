@@ -11,11 +11,11 @@ type TypeProjection<T, V> = {
 };
 
 export type KeyedIndexSelection<T> = TypeProjection<T, true>;
-export type SortedIndexSelection<T> = TypeProjection<T, true | false>;
+export type SortedIndexSelection<T> = TypeProjection<T, 1 | -1>;
 
 export type KeyedIndexBody<T, K> = {
   [P in keyof K]: (P extends keyof T ?
-    (K[P] extends boolean | undefined ? T[P] :
+    (K[P] extends true | 1 | -1 ? T[P] :
       (T[P] extends Any[] | null | undefined ? T[P] :
         KeyedIndexBody<T[P], NonNullable<K[P]>>))
     : never);
@@ -34,7 +34,7 @@ type Merge<A, B> = {
 
 export type KeyedIndexWithPartialBody<T, K> = {
   [P in keyof K]: (P extends keyof T ?
-    (K[P] extends true | undefined ? T[P] :
+    (K[P] extends true | 1 | -1 ? T[P] :
       (T[P] extends Any[] | null | undefined ? T[P] :
         // Recurse for nested objects
         KeyedIndexWithPartialBody<T[P], NonNullable<K[P]>>)
