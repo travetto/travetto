@@ -1,15 +1,10 @@
 import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { RuntimeError, castTo, type Any, type Class } from '@travetto/runtime';
+import { RuntimeError, castTo, type Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import type { IndexConfig, IndexType, ModelConfig } from './types.ts';
+import type { IndexConfig, ModelConfig } from './types.ts';
 import type { ModelType } from '../types/model.ts';
 import { ModelRegistryAdapter } from './registry-adapter.ts';
-import { IndexNotSupported } from '../error/invalid-index.ts';
-import { NotFoundError } from '../error/not-found.ts';
-import type { KeyedIndex } from '../types/indexed.ts';
-
-type IndexResult<T extends ModelType, K extends IndexType[]> = IndexConfig<T> & { type: K[number] };
 
 /**
  * Model registry index for managing model configurations across classes
@@ -34,12 +29,8 @@ export class ModelRegistryIndex implements RegistryIndex {
     return this.#instance.getStoreName(cls);
   }
 
-  static getIndices<T extends ModelType, K extends IndexType[]>(cls: Class<T>, supportedTypes?: K): IndexResult<T, K>[] {
-    return this.#instance.getIndices(cls, supportedTypes);
-  }
-
-  static getIndex<T extends ModelType, K extends IndexType[]>(idx: KeyedIndex<T, Any>, supportedTypes?: K): IndexResult<T, K> {
-    return this.#instance.getIndex(idx.cls, name, supportedTypes);
+  static getIndices<T extends ModelType>(cls: Class<T>): IndexConfig[] {
+    return this.#instance.getIndices(cls);
   }
 
   static getExpiryFieldName<T extends ModelType>(cls: Class<T>): keyof T {
@@ -96,24 +87,10 @@ export class ModelRegistryIndex implements RegistryIndex {
   }
 
   /**
-   * Get Index
-   */
-  getIndex<T extends ModelType, K extends IndexType[]>(cls: Class<T>, name: string, supportedTypes?: K): IndexResult<T, K> {
-    const config = this.getConfig(cls).indices?.find((idx): idx is IndexConfig<T> => idx.name === name);
-    if (!config) {
-      throw new NotFoundError(`${cls.name} Index`, `${name}`);
-    }
-    if (supportedTypes && !supportedTypes.includes(config.type)) {
-      throw new IndexNotSupported(cls, config, `${config.type} indices are not supported.`);
-    }
-    return config;
-  }
-
-  /**
    * Get Indices
    */
-  getIndices<T extends ModelType, K extends IndexType[]>(cls: Class<T>, supportedTypes?: K): IndexResult<T, K>[] {
-    return (this.getConfig(cls).indices ?? []).filter((idx): idx is IndexConfig<T> => !supportedTypes || supportedTypes.includes(idx.type));
+  getIndices<T extends ModelType>(cls: Class<T>): IndexConfig[] {
+    return Object.values(this.getConfig(cls).indices ?? []);
   }
 
   /**

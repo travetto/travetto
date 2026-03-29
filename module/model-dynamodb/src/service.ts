@@ -16,6 +16,7 @@ import {
   type SortedIndex,
   type SortedKeyedIndex,
   type UniqueIndex,
+  isAllIndex,
 } from '@travetto/model';
 
 import type { DynamoDBModelConfig } from './config.ts';
@@ -50,9 +51,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     options: ListPageOptions<Record<string, AttributeValue>>
   ): AsyncIterable<QueryCommandOutput & { LastEvaluatedOffset?: string }> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const idxName = idx.name!;
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body, { emptySortValue: null });
-    const expression = { [`:${idxName}`]: DynamoDBUtil.toValue(key) };
+    const expression = { [`:${idx.name}`]: DynamoDBUtil.toValue(key) };
     const isReversed = 'reversed' in idx && idx.reversed;
 
     let startKey = options.offset;
@@ -62,9 +62,9 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       const remaining = options.limit - produced;
       const batch = await this.client.query({
         TableName: this.#resolveTable(cls),
-        IndexName: idxName,
+        IndexName: idx.name,
         ProjectionExpression: 'body',
-        KeyConditionExpression: `${idxName}__ = :${idxName}`,
+        KeyConditionExpression: `${idx.name}__ = :${idx.name}`,
         ExpressionAttributeValues: expression,
         Limit: Math.min(remaining, 100),
         ExclusiveStartKey: startKey,
@@ -101,12 +101,17 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     try {
       if (mode === 'create') {
         const indices: Record<string, unknown> = {};
-        for (const idx of config.indices ?? []) {
-          const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
-          const property = idx.simpleName!;
-          indices[`${property}__`] = DynamoDBUtil.toValue(key);
-          if (sort) {
-            indices[`${property}_sort__`] = DynamoDBUtil.toValue(+sort);
+        for (const idx of Object.values(config.indices ?? {})) {
+          if (isAllIndex(idx)) {
+            const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
+            if (key) {
+              indices[`${idx.name}__`] = DynamoDBUtil.toValue(key);
+            }
+            if (sort) {
+              indices[`${idx.name}_sort__`] = DynamoDBUtil.toValue(+sort);
+            }
+          } else {
+            throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with DynamoDB');
           }
         }
         const query: PutItemCommandInput = {
@@ -124,14 +129,20 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       } else {
         const indices: Record<string, unknown> = {};
         const expr: string[] = [];
-        for (const idx of config.indices ?? []) {
-          const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
-          const property = idx.simpleName!;
-          indices[`:${property}`] = DynamoDBUtil.toValue(key);
-          expr.push(`${property}__ = :${property}`);
-          if (sort) {
-            indices[`:${property}_sort`] = DynamoDBUtil.toValue(+sort);
-            expr.push(`${property}_sort__ = :${property}_sort`);
+
+        for (const idx of Object.values(config.indices ?? {})) {
+          if (isAllIndex(idx)) {
+            const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
+            if (key) {
+              indices[`${idx.name}__`] = DynamoDBUtil.toValue(key);
+              expr.push(`${idx.name}__ = :${idx.name}`);
+            }
+            if (sort) {
+              indices[`${idx.name}_sort__`] = DynamoDBUtil.toValue(+sort);
+              expr.push(`${idx.name}_sort__ = :${idx.name}_sort`);
+            }
+          } else {
+            throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with DynamoDB');
           }
         }
 
@@ -458,8 +469,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       const last: T = items.at(-1)!;
       const { key, sort } = ModelIndexedUtil.computeIndexKey<T>(cls, idx, castTo(last), { emptySortValue: null });
       nextOffset = JSONUtil.toBase64({
-        [`${idx.name!}__`]: DynamoDBUtil.toValue(key),
-        ...(sort ? { [`${idx.name!}_sort__`]: DynamoDBUtil.toValue(+sort) } : {}),
+        ...(key ? { [`${idx.name}__`]: DynamoDBUtil.toValue(key) } : {}),
+        ...(sort ? { [`${idx.name}_sort__`]: DynamoDBUtil.toValue(+sort) } : {}),
         id: DynamoDBUtil.toValue(last.id)
       });
     }
@@ -500,8 +511,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       const last: T = items.at(-1)!;
       const { key, sort } = ModelIndexedUtil.computeIndexKey<T>(cls, idx, castTo(last), { emptySortValue: null });
       nextOffset = JSONUtil.toBase64({
-        [`${idx.name!}__`]: DynamoDBUtil.toValue(key),
-        ...(sort ? { [`${idx.name!}_sort__`]: DynamoDBUtil.toValue(+sort) } : {}),
+        ...(key ? { [`${idx.name}__`]: DynamoDBUtil.toValue(key) } : {}),
+        ...(sort ? { [`${idx.name}_sort__`]: DynamoDBUtil.toValue(+sort) } : {}),
         id: DynamoDBUtil.toValue(last.id)
       });
     }

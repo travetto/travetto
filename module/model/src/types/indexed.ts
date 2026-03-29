@@ -38,14 +38,14 @@ export type KeyedIndexWithPartialBody<T, K> = {
 export interface KeyedIndex<T extends ModelType, K extends KeyedIndexSelection<T>> {
   cls: Class<T>;
   name: string;
-  type: 'keyed';
+  type: 'indexed:keyed';
   keys: K;
 }
 
 export interface UniqueIndex<T extends ModelType, K extends KeyedIndexSelection<T>> {
   cls: Class<T>;
   name: string;
-  type: 'unique';
+  type: 'indexed:unique';
   keys: K;
   unique: true;
 }
@@ -53,7 +53,7 @@ export interface UniqueIndex<T extends ModelType, K extends KeyedIndexSelection<
 export interface SortedIndex<T extends ModelType, S extends SortedIndexSelection<T>> {
   cls: Class<T>;
   name: string;
-  type: 'sorted';
+  type: 'indexed:sorted';
   sort: S;
   reversed: boolean;
 }
@@ -65,11 +65,14 @@ export interface SortedKeyedIndex<
 > {
   cls: Class<T>;
   name: string;
-  type: 'sortedKeyed';
+  type: 'indexed:sortedKeyed';
   keys: K;
   sort: S;
   reversed: boolean;
 }
+
+export const isAllIndex = <T extends ModelType>(idx: Any): idx is AllIndexes<T> =>
+  typeof idx === 'object' && idx !== null && 'type' in idx && idx.type.startsWith('indexed:');
 
 export type AllIndexes<T extends ModelType> =
   KeyedIndex<T, Any> | SortedIndex<T, Any> | UniqueIndex<T, Any> | SortedKeyedIndex<T, Any, Any>;

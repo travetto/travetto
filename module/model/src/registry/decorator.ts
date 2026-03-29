@@ -1,8 +1,8 @@
-import { RuntimeError, castTo, type Class, getClass } from '@travetto/runtime';
+import { castTo, type Class, getClass } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelType } from '../types/model.ts';
-import type { DataHandler, IndexConfig, ModelConfig, PrePersistScope } from './types.ts';
+import type { DataHandler, ModelConfig, PrePersistScope } from './types.ts';
 import { ModelRegistryIndex } from './registry-index.ts';
 
 /**
@@ -21,19 +21,6 @@ export function Model(config: Partial<ModelConfig<ModelType>> | string = {}) {
       SchemaRegistryIndex.getForRegister(cls).registerField('id', { required: { active: false } });
     }
     return cls;
-  };
-}
-
-/**
- * Defines an index on a model
- * @kind decorator
- */
-export function Index<T extends ModelType>(...indices: IndexConfig<T>[]) {
-  if (indices.some(config => config.fields.some(field => field === 'id'))) {
-    throw new RuntimeError('Cannot create an index with the id field');
-  }
-  return function (cls: Class<T>): void {
-    ModelRegistryIndex.getForRegister(cls).register({ indices });
   };
 }
 

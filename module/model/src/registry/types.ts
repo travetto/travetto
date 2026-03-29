@@ -1,22 +1,24 @@
-import type { Class, Primitive, ValidFields } from '@travetto/runtime';
+import type { Class } from '@travetto/runtime';
 
 import type { ModelType } from '../types/model.ts';
-
-type RetainPrimitiveFields<T> = Pick<T, ValidFields<T, Primitive | Date>>;
-
-export type SortClauseRaw<T> = {
-  [P in keyof T]?:
-  T[P] extends object ? SortClauseRaw<RetainPrimitiveFields<T[P]>> : 1 | -1;
-};
-
-type IndexClauseRaw<T> = {
-  [P in keyof T]?:
-  T[P] extends object ? IndexClauseRaw<RetainPrimitiveFields<T[P]>> : 1 | -1 | true;
-};
 
 export type DataHandler<T = unknown> = (inst: T) => (Promise<T | void> | T | void);
 
 export type PrePersistScope = 'full' | 'partial' | 'all';
+
+/**
+ * Index options
+ */
+export type IndexConfig = {
+  /**
+   * Index name
+   */
+  name: string;
+  /**
+   * Type
+   */
+  type: string;
+};
 
 /**
  * Model config
@@ -33,7 +35,7 @@ export class ModelConfig<T extends ModelType = ModelType> {
   /**
    * Indices
    */
-  indices?: IndexConfig<T>[];
+  indices?: Record<string, IndexConfig>;
   /**
    * Vendor specific extras
    */
@@ -55,32 +57,3 @@ export class ModelConfig<T extends ModelType = ModelType> {
    */
   postLoad?: DataHandler<unknown>[];
 }
-
-/**
- * Supported index types
- */
-export type IndexType = 'unique' | 'unsorted' | 'sorted';
-
-/**
- * Index options
- */
-export type IndexConfig<T extends ModelType> = {
-  /**
-   * Index name
-   */
-  name: string;
-  /**
-   * Index simple name, filled out 
-   */
-  simpleName?: string;
-  /**
-   * Fields and sort order
-   */
-  fields: IndexClauseRaw<RetainPrimitiveFields<T>>[];
-  /**
-   * Type
-   */
-  type: IndexType;
-};
-
-export type IndexField<T extends ModelType> = IndexClauseRaw<RetainPrimitiveFields<T>>;
