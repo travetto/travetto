@@ -11,11 +11,11 @@ type TypeProjection<T, V> = {
 };
 
 export type KeyedIndexSelection<T> = TypeProjection<T, true>;
-export type SortedIndexSelection<T> = TypeProjection<T, 1 | -1>;
+export type SortedIndexSelection<T> = TypeProjection<T, true | false>;
 
 export type KeyedIndexBody<T, K> = {
   [P in keyof K]: (P extends keyof T ?
-    (K[P] extends true | 1 | -1 | undefined ? T[P] :
+    (K[P] extends boolean | undefined ? T[P] :
       (T[P] extends Any[] | null | undefined ? T[P] :
         KeyedIndexBody<T[P], NonNullable<K[P]>>))
     : never);

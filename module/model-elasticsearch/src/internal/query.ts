@@ -1,11 +1,12 @@
 import type * as estypes from '@elastic/elasticsearch/api/types';
 
-import { castTo, type Class, TypedObject } from '@travetto/runtime';
+import { type Any, castTo, type Class, TypedObject } from '@travetto/runtime';
 import { type WhereClause, type SelectClause, type SortClause, type Query, ModelQueryUtil } from '@travetto/model-query';
-import { type ModelType, type SortedIndexSelection, ModelRegistryIndex } from '@travetto/model';
+import { type ModelType, ModelRegistryIndex } from '@travetto/model';
 import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import { type EsSchemaConfig } from './types.ts';
+import type { SortedIndex } from '@travetto/model-indexed';
 
 /**
  * Support tools for dealing with elasticsearch specific requirements
@@ -51,7 +52,7 @@ export class ElasticsearchQueryUtil {
   /**
    * Build sort mechanism
    */
-  static getSort<T extends ModelType>(sort: SortClause<T>[] | SortedIndexSelection<T>): estypes.Sort {
+  static getSort<T extends ModelType>(sort: SortClause<T>[] | SortedIndex<T, Any, Any>): estypes.Sort {
     if (Array.isArray(sort)) {
       return sort.map<estypes.SortOptions>(option => {
         const item = this.extractSimple(option);
@@ -61,7 +62,7 @@ export class ElasticsearchQueryUtil {
       });
     } else {
       return Object.fromEntries(
-        Object.entries(this.extractSimple(sort)).map(([key, value]) => [key, { order: value === 1 ? 'asc' : 'desc' }])
+        Object.entries(this.extractSimple(sort)).map(([key, value]) => [key, { order: value ? 'asc' : 'desc' }])
       );
     }
   }
