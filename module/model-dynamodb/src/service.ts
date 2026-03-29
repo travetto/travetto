@@ -104,14 +104,18 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         for (const idx of Object.values(config.indices ?? {})) {
           if (isAllIndex(idx)) {
             const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
-            if (key) {
-              indices[`${idx.name}__`] = DynamoDBUtil.toValue(key);
-            }
-            if (sort) {
-              indices[`${idx.name}_sort__`] = DynamoDBUtil.toValue(+sort);
+            switch (idx.type) {
+              case 'indexed:unique':
+              case 'indexed:keyed': indices[`${idx.name}__`] = DynamoDBUtil.toValue(key); break;
+              case 'indexed:sorted': indices[`${idx.name}_sort__`] = DynamoDBUtil.toValue(+sort!); break;
+              case 'indexed:sortedKeyed': {
+                indices[`${idx.name}__`] = DynamoDBUtil.toValue(key);
+                indices[`${idx.name}_sort__`] = DynamoDBUtil.toValue(+sort!);
+                break;
+              }
             }
           } else {
-            throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with DynamoDB');
+            console.warn('Unsupported index type on update', { cls: cls.name, idx });
           }
         }
         const query: PutItemCommandInput = {
@@ -133,16 +137,28 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         for (const idx of Object.values(config.indices ?? {})) {
           if (isAllIndex(idx)) {
             const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
-            if (key) {
-              indices[`${idx.name}__`] = DynamoDBUtil.toValue(key);
-              expr.push(`${idx.name}__ = :${idx.name}`);
-            }
-            if (sort) {
-              indices[`${idx.name}_sort__`] = DynamoDBUtil.toValue(+sort);
-              expr.push(`${idx.name}_sort__ = :${idx.name}_sort`);
+            switch (idx.type) {
+              case 'indexed:unique':
+              case 'indexed:keyed': {
+                indices[`${idx.name}__`] = DynamoDBUtil.toValue(key);
+                expr.push(`${idx.name}__ = :${idx.name}`);
+                break;
+              }
+              case 'indexed:sorted': {
+                indices[`${idx.name}_sort__`] = DynamoDBUtil.toValue(+sort!);
+                expr.push(`${idx.name}_sort__ = :${idx.name}_sort`);
+                break;
+              }
+              case 'indexed:sortedKeyed': {
+                indices[`${idx.name}__`] = DynamoDBUtil.toValue(key);
+                indices[`${idx.name}_sort__`] = DynamoDBUtil.toValue(+sort!);
+                expr.push(`${idx.name}__ = :${idx.name}`);
+                expr.push(`${idx.name}_sort__ = :${idx.name}_sort`);
+                break;
+              }
             }
           } else {
-            throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with DynamoDB');
+            console.warn('Unsupported index type on update', { cls: cls.name, idx });
           }
         }
 
