@@ -748,9 +748,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
         .map(([name, sel]) => `${this.identifier(name)} ${sel ? 'ASC' : 'DESC'}`)
         .join(', ')});`;
     } else if (isModelIndexedIndex(idx)) {
-      const table = this.namespace(SQLModelUtil.classToStack(cls));
-      const constraint = this.getIndexName(cls, idx);
-      return `CREATE INDEX ${constraint} ON ${this.identifier(table)} (${this.identifier(idx.field)});`;
+      // TODO: Fill this out
     } else {
       throw new IndexNotSupported(cls, idx, 'Only indexed and query indices are supported in SQL');
     }
@@ -1083,17 +1081,24 @@ ${this.getWhereSQL(cls, where!)}`;
    * Determine if an index has changed
    */
   isIndexChanged(requested: IndexConfig, existing: SQLTableDescription['indices'][number]): boolean {
-    let result =
-      (existing.is_unique && requested.type !== 'unique')
-      || requested.fields.length !== existing.columns.length;
+    if (isModelQueryIndex(requested)) {
+      let result =
+        (existing.is_unique && requested.type !== 'query:unique')
+        || requested.fields.length !== existing.columns.length;
 
-    for (let i = 0; i < requested.fields.length && !result; i++) {
-      const [[key, value]] = Object.entries(requested.fields[i]);
-      const desc = value === -1;
-      result ||= key !== existing.columns[i].name && desc !== existing.columns[i].desc;
+      for (let i = 0; i < requested.fields.length && !result; i++) {
+        const [[key, value]] = Object.entries(requested.fields[i]);
+        const desc = value === -1;
+        result ||= key !== existing.columns[i].name && desc !== existing.columns[i].desc;
+      }
+
+      return result;
+    } else if (isModelIndexedIndex(requested)) {
+      // TODO: Fill this out
+      return false;
+    } else {
+      throw new IndexNotSupported(requested.class, requested, 'Only indexed and query indices are supported in SQL');
     }
-
-    return result;
   }
 
   /**
