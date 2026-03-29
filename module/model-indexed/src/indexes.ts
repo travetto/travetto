@@ -9,15 +9,16 @@ import type { KeyedIndexSelection, KeyedIndex, SortedIndexSelection, SortedIndex
 export function keyedIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T>
->(cls: Class<T>, selection: K, name?: string): KeyedIndex<T, K> {
+>(cls: Class<T>, selection: K, name?: string): KeyedIndex<T, K, {}> {
   if ('id' in selection) {
     throw new RuntimeError('Cannot create an index with the id field');
   }
-  const idx: KeyedIndex<T, K> = {
+  const idx: KeyedIndex<T, K, {}> = {
     type: 'indexed:keyed',
     name: name ?? `${cls.Ⲑid}__${Object.keys(selection).join('_')}`,
     keys: selection,
     class: cls,
+    sort: {},
     unique: false
   };
   ModelRegistryIndex.getForRegister(cls).register({ indices: { [idx.name]: idx } });
@@ -30,18 +31,20 @@ export function keyedIndex<
 export function uniqueIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T>
->(cls: Class<T>, selection: K, name?: string) {
+>(cls: Class<T>, selection: K, name?: string): KeyedIndex<T, K, {}> {
   if ('id' in selection) {
     throw new RuntimeError('Cannot create an index with the id field');
   }
-  const idx: KeyedIndex<T, K> = {
+  const idx: KeyedIndex<T, K, {}> = {
     type: 'indexed:keyed',
     name: name ?? `${cls.Ⲑid}__${Object.keys(selection).join('_')}`,
     keys: selection, class: cls,
+    sort: {},
     unique: true
   };
 
-  return ModelRegistryIndex.getForRegister(cls).register({ indices: { [idx.name]: idx } });
+  ModelRegistryIndex.getForRegister(cls).register({ indices: { [idx.name]: idx } });
+  return idx;
 }
 
 /**

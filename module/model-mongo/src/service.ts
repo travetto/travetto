@@ -20,13 +20,14 @@ import {
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type ListPageResult, type SortedIndex,
+  type SingleItemIndexBody,
+  type SingleItemPartialIndexBody,
 } from '@travetto/model-indexed';
 
 import {
   ShutdownManager, type Class, TypedObject,
   castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType, BinaryUtil, BinaryMetadataUtil,
   JSONUtil,
-  type Any,
 } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 
@@ -450,7 +451,8 @@ export class MongoModelService implements
   async getByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<T> {
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<T> {
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
     const store = await this.getStore(cls);
     const result = await store.findOne(
@@ -469,7 +471,8 @@ export class MongoModelService implements
   async deleteByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<void> {
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<void> {
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
     const store = await this.getStore(cls);
     const result = await store.deleteOne(
@@ -484,26 +487,28 @@ export class MongoModelService implements
     throw new NotFoundError(`${cls.name}: ${idx}`, key);
   }
 
-  upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>>(
-    cls: Class<T>,
-    idx: SingleItemIndex<T, K>,
-    body: OptionalId<T>
-  ): Promise<T> {
+  upsertByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: OptionalId<T>): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
 
   updateByIndex<
     T extends ModelType,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: T): Promise<T> {
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: T): Promise<T> {
     return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
   }
 
   async updatePartialByIndex<
     T extends ModelType,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: SingleItemPartialIndexBody<T, K, S>): Promise<T> {
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
     return this.update(cls, item);
   }
 

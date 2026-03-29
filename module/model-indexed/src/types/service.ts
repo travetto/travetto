@@ -1,9 +1,11 @@
 import type { ModelType, ModelBasicSupport, OptionalId } from '@travetto/model';
-import type { Class } from '@travetto/runtime';
+import type { Any, Class, DeepPartial } from '@travetto/runtime';
 import type {
   KeyedIndexSelection, KeyedIndexBody, KeyedIndexWithPartialBody,
   SortedIndexSelection, SortedIndex,
-  SingleItemIndex
+  SingleItemIndex,
+  SingleItemIndexBody,
+  SingleItemPartialIndexBody
 } from './indexes.ts';
 
 export type ListPageOptions<O = string> = {
@@ -31,7 +33,8 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   getByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<T>;
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<T>;
 
   /**
    * Delete entity by index as defined by fields of idx and the body fields
@@ -42,7 +45,8 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   deleteByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<void>;
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<void>;
 
   /**
    * Upsert by index, allowing the index to act as a primary key
@@ -50,11 +54,11 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param idx The index to use
    * @param body The document to potentially store
    */
-  upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>>(
-    cls: Class<T>,
-    idx: SingleItemIndex<T, K>,
-    body: OptionalId<T>
-  ): Promise<T>;
+  upsertByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: OptionalId<T>): Promise<T>;
 
   /**
    * Update by index
@@ -64,8 +68,9 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    */
   updateByIndex<
     T extends ModelType,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: T): Promise<T>;
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: T): Promise<T>;
 
   /**
    * Update partial by index
@@ -75,8 +80,9 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    */
   updatePartialByIndex<
     T extends ModelType,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T>;
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemPartialIndexBody<T, K, S>): Promise<T>;
 
   /**
    * List entity by ranged index as defined by fields of idx
@@ -89,5 +95,5 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
     T extends ModelType,
     S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options: ListPageOptions): Promise<ListPageResult<T>>;
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ListPageOptions): Promise<ListPageResult<T>>;
 }

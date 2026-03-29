@@ -2,7 +2,7 @@ import { castTo, type Class, type DeepPartial, hasFunction, TypedObject } from '
 import { type ModelType, IndexNotSupported, type ModelCrudSupport, type OptionalId, NotFoundError } from '@travetto/model';
 
 import type { ModelIndexedSupport } from './types/service.ts';
-import type { AllIndexes, KeyedIndexBody, KeyedIndexSelection, SingleItemIndex } from './types/indexes.ts';
+import type { AllIndexes, KeyedIndexBody, KeyedIndexSelection, SingleItemIndex, SingleItemIndexBody, SortedIndexSelection } from './types/indexes.ts';
 
 type ComputeConfig = {
   includeSortInFields?: boolean;
@@ -135,9 +135,13 @@ export class ModelIndexedUtil {
    * @param idx
    * @param body
    */
-  static async naiveUpsert<T extends ModelType>(
+  static async naiveUpsert<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
     service: ModelIndexedSupport & ModelCrudSupport,
-    cls: Class<T>, idx: SingleItemIndex<T>, body: OptionalId<T>
+    cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: OptionalId<T>
   ): Promise<T> {
     try {
       return await this.naiveUpdate(service, cls, idx, body);
@@ -157,9 +161,13 @@ export class ModelIndexedUtil {
   * @param idx
   * @param body
   */
-  static async naiveUpdate<T extends ModelType>(
+  static async naiveUpdate<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
     service: ModelIndexedSupport & ModelCrudSupport,
-    cls: Class<T>, idx: SingleItemIndex<T>, body: OptionalId<T>
+    cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: OptionalId<T>
   ): Promise<T> {
     const { id } = await service.getByIndex(cls, idx, castTo(body));
     body.id = id;

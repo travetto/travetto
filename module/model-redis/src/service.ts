@@ -9,6 +9,8 @@ import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type ListPageResult, type SortedIndex,
   isModelIndexedIndex, type AllIndexes,
+  type SingleItemPartialIndexBody,
+  type SingleItemIndexBody,
 } from '@travetto/model-indexed';
 
 import { Injectable, PostConstruct } from '@travetto/di';
@@ -203,12 +205,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   async #getIdByIndex<
     T extends ModelType,
-    K extends KeyedIndexSelection<T>
-  >(
-    cls: Class<T>,
-    idx: AllIndexes<T, K>,
-    body: KeyedIndexBody<T, K>
-  ): Promise<string> {
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
 
     const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
@@ -341,38 +340,41 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   async getByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<T> {
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<T> {
     return this.get(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
   async deleteByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexBody<T, K>): Promise<void> {
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<void> {
     return this.delete(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
-
-  upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>>(
-    cls: Class<T>,
-    idx: SingleItemIndex<T, K>,
-    body: OptionalId<T>
-  ): Promise<T> {
+  upsertByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: OptionalId<T>): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
 
   updateByIndex<
     T extends ModelType,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: T): Promise<T> {
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: T): Promise<T> {
     return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
   }
 
   async updatePartialByIndex<
     T extends ModelType,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemPartialIndexBody<T, K, S>): Promise<T> {
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
     return this.update(cls, item);
   }
 

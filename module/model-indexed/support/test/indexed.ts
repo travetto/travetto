@@ -7,7 +7,7 @@ import { Model, NotFoundError, IndexNotSupported } from '@travetto/model';
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
 import type { ModelIndexedSupport } from '../../src/types/service.ts';
-import { keyedIndex, sortedKeyedIndex } from '../../src/indexes.ts';
+import { keyedIndex, sortedIndex } from '../../src/indexes.ts';
 
 
 @Model('index_user')
@@ -32,8 +32,8 @@ class User3 {
   color?: string;
 }
 
-const userAgeIndex = sortedKeyedIndex(User3, { name: true }, { age: 1 }, 'userAge');
-const userAgeReversedIndex = sortedKeyedIndex(User3, { name: true }, { age: -1 }, 'userAgeReverse');
+const userAgeIndex = sortedIndex(User3, { name: true }, { age: 1 }, 'userAge');
+const userAgeReversedIndex = sortedIndex(User3, { name: true }, { age: -1 }, 'userAgeReverse');
 
 @Schema()
 class Child {
@@ -49,8 +49,8 @@ class User4 {
   child: Child;
 }
 
-const childAgeIndex = sortedKeyedIndex(User4, { child: { name: true } }, { child: { age: 1 } }, 'childAge');
-const nameCreatedIndex = sortedKeyedIndex(User4, { child: { name: true } }, { createdDate: 1 }, 'nameCreated');
+const childAgeIndex = sortedIndex(User4, { child: { name: true } }, { child: { age: 1 } }, 'childAge');
+const nameCreatedIndex = sortedIndex(User4, { child: { name: true } }, { createdDate: 1 }, 'nameCreated');
 
 @Suite()
 export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSupport> {
@@ -104,6 +104,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
 
     assert(!found2.color);
 
+    // @ts-expect-error
     await assert.rejects(() => service.getByIndex(User3, userAgeIndex, { name: 'bob' }));
   }
 
@@ -115,13 +116,14 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await service.create(User3, User3.from({ name: 'bob', age: 30, color: 'red' }));
     await service.create(User3, User3.from({ name: 'bob', age: 50, color: 'green' }));
 
-    const { items: arr } = await service.listByIndex(User3, userAgeIndex, { body: { name: 'bob' } });
+    const { items: arr } = await service.listByIndex(User3, userAgeIndex, { name: 'bob' });
 
     assert(arr[0].color === 'red' && arr[0].name === 'bob');
     assert(arr[1].color === 'blue' && arr[1].name === 'bob');
     assert(arr[2].color === 'green' && arr[2].name === 'bob');
 
-    await assert.rejects(() => service.listByIndex(User3, userAgeIndex, { body: {} }), IndexNotSupported);
+    // @ts-expect-error
+    await assert.rejects(() => service.listByIndex(User3, userAgeIndex, {}), IndexNotSupported);
   }
 
   @Test()
@@ -132,12 +134,13 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await service.create(User4, User4.from({ child: { name: 'bob', age: 30 }, color: 'red' }));
     await service.create(User4, User4.from({ child: { name: 'bob', age: 50 }, color: 'green' }));
 
-    const { items: arr } = await service.listByIndex(User4, childAgeIndex, { body: { child: { name: 'bob' } } });
+    const { items: arr } = await service.listByIndex(User4, childAgeIndex, { child: { name: 'bob' } });
     assert(arr[0].color === 'red' && arr[0].child.name === 'bob' && arr[0].child.age === 30);
     assert(arr[1].color === 'blue' && arr[1].child.name === 'bob' && arr[1].child.age === 40);
     assert(arr[2].color === 'green' && arr[2].child.name === 'bob' && arr[2].child.age === 50);
 
-    await assert.rejects(() => service.listByIndex(User4, childAgeIndex, { body: {} }), IndexNotSupported);
+    // @ts-expect-error
+    await assert.rejects(() => service.listByIndex(User4, childAgeIndex, {}), IndexNotSupported);
   }
 
   @Test()
@@ -148,13 +151,14 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await service.create(User4, User4.from({ child: { name: 'bob', age: 30 }, createdDate: TimeUtil.fromNow('2d'), color: 'red' }));
     await service.create(User4, User4.from({ child: { name: 'bob', age: 50 }, createdDate: TimeUtil.fromNow('-1d'), color: 'green' }));
 
-    const { items: arr } = await service.listByIndex(User4, nameCreatedIndex, { body: { child: { name: 'bob' } } });
+    const { items: arr } = await service.listByIndex(User4, nameCreatedIndex, { child: { name: 'bob' } });
 
     assert(arr[0].color === 'green' && arr[0].child.name === 'bob' && arr[0].child.age === 50);
     assert(arr[1].color === 'red' && arr[1].child.name === 'bob' && arr[1].child.age === 30);
     assert(arr[2].color === 'blue' && arr[2].child.name === 'bob' && arr[2].child.age === 40);
 
-    await assert.rejects(() => service.listByIndex(User4, nameCreatedIndex, { body: {} }), IndexNotSupported);
+    // @ts-expect-error
+    await assert.rejects(() => service.listByIndex(User4, nameCreatedIndex, {}), IndexNotSupported);
   }
 
   @Test()
@@ -165,7 +169,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     const user2 = await service.upsertByIndex(User4, childAgeIndex, { child: { name: 'bob', age: 40 }, color: 'green' });
     const user3 = await service.upsertByIndex(User4, childAgeIndex, { child: { name: 'bob', age: 40 }, color: 'red' });
 
-    const { items: arr } = await service.listByIndex(User4, childAgeIndex, { body: { child: { name: 'bob' } } });
+    const { items: arr } = await service.listByIndex(User4, childAgeIndex, { child: { name: 'bob' } });
     assert(arr.length === 1);
 
     assert(user1.id === user2.id);
@@ -174,12 +178,12 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     assert(user3.color === 'red');
 
     const user4 = await service.upsertByIndex(User4, childAgeIndex, { child: { name: 'bob', age: 30 }, color: 'red' });
-    const { items: arr2 } = await service.listByIndex(User4, childAgeIndex, { body: { child: { name: 'bob' } } });
+    const { items: arr2 } = await service.listByIndex(User4, childAgeIndex, { child: { name: 'bob' } });
     assert(arr2.length === 2);
 
     await service.deleteByIndex(User4, childAgeIndex, user1);
 
-    const { items: arr3 } = await service.listByIndex(User4, childAgeIndex, { body: { child: { name: 'bob' } } });
+    const { items: arr3 } = await service.listByIndex(User4, childAgeIndex, { child: { name: 'bob' } });
     assert(arr3.length === 1);
     assert(arr3[0].id === user4.id);
   }
@@ -233,7 +237,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     let offset: string | undefined;
 
     do {
-      const page = await service.listByIndex(User3, userAgeIndex, { body: { name: 'page' }, limit, offset });
+      const page = await service.listByIndex(User3, userAgeIndex, { name: 'page' }, { limit, offset });
       items.push(...page.items.map(u => u.color!));
       offset = page.nextOffset;
     } while (offset);
@@ -257,7 +261,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     let offset: string | undefined;
 
     do {
-      const page = await service.listByIndex(User3, userAgeReverseIndex, { body: { name: 'page' }, limit, offset });
+      const page = await service.listByIndex(User3, userAgeReversedIndex, { name: 'page' }, { limit, offset });
       items.push(...page.items.map(u => u.color!));
       offset = page.nextOffset;
     } while (offset);
