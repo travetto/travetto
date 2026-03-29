@@ -384,43 +384,26 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     return this.update(cls, item);
   }
 
-  async * listByKeyedIndex<
+  listByIndex<
     T extends ModelType,
+    S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): AsyncIterable<T> {
-    for await (const { ids } of this.#scanIndex(cls, idx, body, { limit: Number.MAX_SAFE_INTEGER })) {
-      yield* this.#getBodies(cls, ids, id => this.#resolveKey(cls, id));
-    }
-  }
-
-  async listBySortedIndex<
+  >(cls: Class<T>, idx: SortedKeyedIndex<T, K, S>, options: ListPageOptions & { body: KeyedIndexBody<T, K> }): Promise<ListPageResult<T>>;
+  listByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>> {
-    const items: T[] = [];
-    let lastCursor: string | undefined;
-    for await (const { ids, cursor } of this.#scanIndex(cls, idx, castTo<Any>({}), options)) {
-      items.push(
-        ...await Array.fromAsync(this.#getBodies(cls, ids, id => this.#resolveKey(cls, id)))
-      );
-      lastCursor = cursor;
-    }
-    return { items, nextOffset: lastCursor };
-  }
-
-  async listBySortedKeyedIndex<
+  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>>;
+  async listByIndex<
     T extends ModelType,
-    K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: SortedKeyedIndex<T, K, S>,
-    body: KeyedIndexBody<T, K>,
-    options: ListPageOptions
+    idx: SortedKeyedIndex<T, Any, S> | SortedIndex<T, S>,
+    options: ListPageOptions & { body?: Any },
   ): Promise<ListPageResult<T>> {
     const items: T[] = [];
     let lastCursor: string | undefined;
-    for await (const { ids, cursor } of this.#scanIndex(cls, idx, body, options)) {
+    for await (const { ids, cursor } of this.#scanIndex(cls, idx, options.body, options)) {
       items.push(
         ...await Array.fromAsync(this.#getBodies(cls, ids, id => this.#resolveKey(cls, id)))
       );

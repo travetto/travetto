@@ -472,60 +472,27 @@ export class ElasticsearchModelService implements
     return this.update(cls, item);
   }
 
-  async * listByKeyedIndex<
+  listByIndex<
     T extends ModelType,
+    S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): AsyncIterable<T> {
-    for await (const { hits } of this.#scrollIndex(cls, idx, body, { limit: Number.MAX_SAFE_INTEGER })) {
-      for (const hit of hits) {
-        try {
-          yield this.postLoad(cls, hit);
-        } catch (error) {
-          if (!(error instanceof NotFoundError)) {
-            throw error;
-          }
-        }
-      }
-    }
-  }
-
-  async listBySortedIndex<
+  >(cls: Class<T>, idx: SortedKeyedIndex<T, K, S>, options: ListPageOptions & { body: KeyedIndexBody<T, K> }): Promise<ListPageResult<T>>;
+  listByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>> {
-    const offset = options.offset ? JSONUtil.fromBase64<estypes.SortResults>(options.offset) : undefined;
-    const items: T[] = [];
-    let lastNextOffset: estypes.SortResults | undefined;
-    for await (const { hits, nextOffset } of this.#scrollIndex(cls, idx, castTo<Any>({}), { ...options, offset })) {
-      lastNextOffset = nextOffset;
-      for (const hit of hits) {
-        try {
-          items.push(await this.postLoad(cls, hit));
-        } catch (error) {
-          if (!(error instanceof NotFoundError)) {
-            throw error;
-          }
-        }
-      }
-    }
-    return { items, nextOffset: lastNextOffset ? JSONUtil.toBase64(lastNextOffset) : undefined };
-
-  }
-
-  async listBySortedKeyedIndex<
+  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>>;
+  async listByIndex<
     T extends ModelType,
-    K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: SortedKeyedIndex<T, K, S>,
-    body: KeyedIndexBody<T, K>,
-    options: ListPageOptions
+    idx: SortedKeyedIndex<T, Any, S> | SortedIndex<T, S>,
+    options: ListPageOptions & { body?: Any },
   ): Promise<ListPageResult<T>> {
     const offset = options.offset ? JSONUtil.fromBase64<estypes.SortResults>(options.offset) : undefined;
     const items: T[] = [];
     let lastNextOffset: estypes.SortResults | undefined;
-    for await (const { hits, nextOffset } of this.#scrollIndex(cls, idx, body, { ...options, offset })) {
+    for await (const { hits, nextOffset } of this.#scrollIndex(cls, idx, options.body, { ...options, offset })) {
       lastNextOffset = nextOffset;
       for (const hit of hits) {
         try {
@@ -538,7 +505,6 @@ export class ElasticsearchModelService implements
       }
     }
     return { items, nextOffset: lastNextOffset ? JSONUtil.toBase64(lastNextOffset) : undefined };
-
   }
 
 

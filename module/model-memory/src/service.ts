@@ -1,6 +1,7 @@
 import {
   type Class, type TimeSpan, castTo, type BinaryMetadata,
   type ByteRange, type BinaryType, BinaryUtil, type BinaryArray, JSONUtil, BinaryMetadataUtil,
+  type Any,
 } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -416,44 +417,26 @@ export class MemoryModelService implements
     return this.update(cls, item);
   }
 
-  async * listByKeyedIndex<
+  listByIndex<
     T extends ModelType,
+    S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): AsyncIterable<T> {
-    const ids = this.#getIndexIds(cls, idx, body);
-    for (const id of ids) {
-      yield this.get(cls, id);
-    }
-  }
-
-  async listBySortedIndex<
+  >(cls: Class<T>, idx: SortedKeyedIndex<T, K, S>, options: ListPageOptions & { body: KeyedIndexBody<T, K> }): Promise<ListPageResult<T>>;
+  listByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>> {
-    const ids = this.#getIndexIds(cls, idx);
-    const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-    const limit = options.limit;
-
-    const items: T[] = [];
-    for (const id of ids.slice(offset, offset + limit)) {
-      items.push(await this.get(cls, id));
-    }
-    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
-  }
-
-  async listBySortedKeyedIndex<
+  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>>;
+  async listByIndex<
     T extends ModelType,
-    K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: SortedKeyedIndex<T, K, S>,
-    body: KeyedIndexBody<T, K>,
-    options: ListPageOptions
+    idx: SortedKeyedIndex<T, Any, S> | SortedIndex<T, S>,
+    options: ListPageOptions & { body?: Any },
   ): Promise<ListPageResult<T>> {
-    const ids = this.#getIndexIds(cls, idx, body);
-    const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-    const limit = options.limit;
+    const ids = this.#getIndexIds(cls, idx, options.body);
+    const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
+    const limit = options?.limit ?? 50;
 
     const items: T[] = [];
     for (const id of ids.slice(offset, offset + limit)) {

@@ -203,48 +203,26 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return this.update(cls, item);
   }
 
-  async * listByKeyedIndex<
+  listByIndex<
     T extends ModelType,
+    S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): AsyncIterable<T> {
-    const query = this.#buildIndexQuery(cls, idx, body);
-
-    for (const item of (await query.get()).docs) {
-      yield await ModelCrudUtil.load(cls, item.data()!);
-    }
-  }
-
-  async listBySortedIndex<
+  >(cls: Class<T>, idx: SortedKeyedIndex<T, K, S>, options: ListPageOptions & { body: KeyedIndexBody<T, K> }): Promise<ListPageResult<T>>;
+  listByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>> {
-    const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-    const limit = options.limit;
-    const query = this.#buildIndexQuery(cls, idx, castTo<Any>({}))
-      .limit(limit)
-      .offset(offset);
-
-    const items: T[] = [];
-    for (const item of (await query.get()).docs) {
-      items.push(await ModelCrudUtil.load(cls, item.data()!));
-    }
-
-    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
-  }
-
-  async listBySortedKeyedIndex<
+  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>>;
+  async listByIndex<
     T extends ModelType,
-    K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: SortedKeyedIndex<T, K, S>,
-    body: KeyedIndexBody<T, K>,
-    options: ListPageOptions
+    idx: SortedKeyedIndex<T, Any, S> | SortedIndex<T, S>,
+    options: ListPageOptions & { body?: Any },
   ): Promise<ListPageResult<T>> {
     const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     const limit = options.limit;
-    const query = this.#buildIndexQuery(cls, idx, body)
+    const query = this.#buildIndexQuery(cls, idx, options.body)
       .limit(limit)
       .offset(offset);
 

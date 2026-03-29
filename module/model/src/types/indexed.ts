@@ -1,4 +1,4 @@
-import { RuntimeError, type Any, type Class, type DeepPartial, type IntrinsicType } from '@travetto/runtime';
+import { castTo, RuntimeError, type Any, type Class, type DeepPartial, type IntrinsicType } from '@travetto/runtime';
 
 import type { ModelType, OptionalId } from '../types/model.ts';
 import type { ModelBasicSupport } from './basic.ts';
@@ -37,13 +37,13 @@ export type KeyedIndexWithPartialBody<T, K> = {
   // 2. All other fields in T (not in K) become OPTIONAL
   DeepPartial<Omit<T, keyof K>>;
 
-export interface KeyedIndex<T extends ModelType, K extends KeyedIndexSelection<T>> extends IndexConfig<'indexed:keyed'> {
-  keys: K;
-}
-
 export interface UniqueIndex<T extends ModelType, K extends KeyedIndexSelection<T>> extends IndexConfig<'indexed:unique'> {
   keys: K;
   unique: true;
+}
+
+export interface KeyedIndex<T extends ModelType, K extends KeyedIndexSelection<T>> extends IndexConfig<'indexed:keyed'> {
+  keys: K;
 }
 
 export interface SortedIndex<T extends ModelType, S extends SortedIndexSelection<T>> extends IndexConfig<'indexed:sorted'> {
@@ -64,13 +64,13 @@ export interface SortedKeyedIndex<
 export type SingleItemIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T> = Any
-> = KeyedIndex<T, K> | UniqueIndex<T, K>;
+> = UniqueIndex<T, K> | KeyedIndex<T, K> | SortedKeyedIndex<T, K, Any>;
 
 export type MultipleItemIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T> = Any,
   S extends SortedIndexSelection<T> = Any
-> = SortedIndex<T, S> | SortedKeyedIndex<T, K, S> | KeyedIndex<T, K>;
+> = SortedIndex<T, S> | SortedKeyedIndex<T, K, S>;
 
 /**
  * Defines a keyed index for a model
@@ -86,7 +86,7 @@ export function keyedIndex<
     type: 'indexed:keyed',
     name: name ?? `${cls.Ⲑid}__${Object.keys(selection).join('_')}`,
     keys: selection,
-    class: cls
+    class: cls,
   };
   ModelRegistryIndex.getForRegister(cls).register({ indices: { [idx.name]: idx } });
   return idx;
@@ -98,13 +98,18 @@ export function keyedIndex<
 export function uniqueIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T>
->(index: KeyedIndex<T, K>) {
-  if ('id' in index.keys) {
+>(cls: Class<T>, selection: K, name?: string) {
+  if ('id' in selection) {
     throw new RuntimeError('Cannot create an index with the id field');
   }
-  return function (cls: Class<T>): void {
-    ModelRegistryIndex.getForRegister(cls).register({ indices: { [index.name]: index } });
+  const idx: UniqueIndex<T, K> = {
+    type: 'indexed:unique',
+    name: name ?? `${cls.Ⲑid}__${Object.keys(selection).join('_')}`,
+    keys: selection, class: cls,
+    unique: true
   };
+
+  return ModelRegistryIndex.getForRegister(cls).register({ indices: { [idx.name]: idx } });
 }
 
 /**
@@ -155,7 +160,7 @@ export const isModelIndexedIndex = <T extends ModelType>(idx: Any): idx is AllIn
   typeof idx === 'object' && idx !== null && 'type' in idx && idx.type.startsWith('indexed:');
 
 export type AllIndexes<T extends ModelType> =
-  KeyedIndex<T, Any> | SortedIndex<T, Any> | UniqueIndex<T, Any> | SortedKeyedIndex<T, Any, Any>;
+  SortedIndex<T, Any> | UniqueIndex<T, Any> | SortedKeyedIndex<T, Any, Any> | KeyedIndex<T, Any>;
 
 export type ListPageOptions<O = string> = {
   limit: number;
@@ -230,42 +235,18 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: KeyedIndexWithPartialBody<T, K>): Promise<T>;
 
   /**
-   * List entity by ranged index as defined by fields of idx and the body fields
-   * @param cls The type to search by
-   * @param idx The index to search against
-   * @param body The configuration for listing
-   */
-  listByKeyedIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): AsyncIterable<T>;
-
-  /**
    * List entity by ranged index as defined by fields of idx
    * @param cls The type to search by
    * @param idx The index to search against
    * @param options The configuration for listing
    */
-  listBySortedIndex<
+  listByIndex<
+    T extends ModelType,
+    S extends SortedIndexSelection<T>,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: SortedKeyedIndex<T, K, S>, options: ListPageOptions, body: KeyedIndexBody<T, K>): Promise<ListPageResult<T>>;
+  listByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>>;
-
-  /**
-   * List entity by ranged index as defined by fields of idx and the body fields
-   * @param cls The type to search by
-   * @param idx The index to search against
-   * @param body The field to key by
-   * @param options The configuration for listing
-   */
-  listBySortedKeyedIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(
-    cls: Class<T>,
-    idx: SortedKeyedIndex<T, K, S>,
-    body: KeyedIndexBody<T, K>,
-    options: ListPageOptions
-  ): Promise<ListPageResult<T>>;
 }

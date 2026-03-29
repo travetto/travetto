@@ -442,72 +442,26 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     return this.update(cls, item);
   }
 
-  async * listByKeyedIndex<
+  listByIndex<
     T extends ModelType,
+    S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): AsyncIterable<T> {
-    for await (const batch of this.#scanIndex(cls, idx, body, { limit: Number.MAX_SAFE_INTEGER })) {
-      for (const item of batch.Items ?? []) {
-        try {
-          yield await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);
-        } catch (error) {
-          if (!(error instanceof NotFoundError)) {
-            throw error;
-          }
-        }
-      }
-    }
-  }
-
-  async listBySortedIndex<
+  >(cls: Class<T>, idx: SortedKeyedIndex<T, K, S>, options: ListPageOptions & { body: KeyedIndexBody<T, K> }): Promise<ListPageResult<T>>;
+  listByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>> {
-    const items: T[] = [];
-    const offset = options.offset ? JSONUtil.fromBase64<Record<string, AttributeValue>>(options.offset) : undefined;
-    for await (const batch of this.#scanIndex(cls, idx, {}, { ...options, offset })) {
-      console.error(batch.LastEvaluatedKey);
-      for (const item of batch.Items ?? []) {
-        try {
-          items.push(await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!));
-          if (options?.limit && items.length >= options.limit) {
-            break;
-          }
-        } catch (error) {
-          if (!(error instanceof NotFoundError)) {
-            throw error;
-          }
-        }
-      }
-    }
-
-    let nextOffset;
-    if (items.length) {
-      const last: T = items.at(-1)!;
-      const { key, sort } = ModelIndexedUtil.computeIndexKey<T>(cls, idx, castTo(last), { emptySortValue: null });
-      nextOffset = JSONUtil.toBase64({
-        ...(key ? { [`${idx.name}__`]: DynamoDBUtil.toValue(key) } : {}),
-        ...(sort ? { [`${idx.name}_sort__`]: DynamoDBUtil.toValue(+sort) } : {}),
-        id: DynamoDBUtil.toValue(last.id)
-      });
-    }
-
-    return { items, nextOffset };
-  }
-
-  async listBySortedKeyedIndex<
+  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>>;
+  async listByIndex<
     T extends ModelType,
-    K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: SortedKeyedIndex<T, K, S>,
-    body: KeyedIndexBody<T, K>,
-    options: ListPageOptions
+    idx: SortedKeyedIndex<T, Any, S> | SortedIndex<T, S>,
+    options: ListPageOptions & { body?: Any },
   ): Promise<ListPageResult<T>> {
     const items: T[] = [];
     const offset = options.offset ? JSONUtil.fromBase64<Record<string, AttributeValue>>(options.offset) : undefined;
-    for await (const batch of this.#scanIndex(cls, idx, body, { ...options, offset })) {
+    for await (const batch of this.#scanIndex(cls, idx, options.body, { ...options, offset })) {
       console.error(batch.LastEvaluatedKey);
       for (const item of batch.Items ?? []) {
         try {

@@ -405,43 +405,28 @@ export class SQLModelService implements
     return this.update(cls, item);
   }
 
-  @ConnectedIterator()
-  async * listByKeyedIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): AsyncIterable<T> {
-    const where = ModelIndexedUtil.projectIndex(cls, idx, castTo(body), { emptySortValue: undefined });
-    yield* await this.query(cls, castTo({ where }));
-  }
-
   @Connected()
-  async listBySortedIndex<
+  listByIndex<
+    T extends ModelType,
+    S extends SortedIndexSelection<T>,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: SortedKeyedIndex<T, K, S>, options: ListPageOptions & { body: KeyedIndexBody<T, K> }): Promise<ListPageResult<T>>;
+  listByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>> {
-    const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-    const limit = options.limit;
-    const where = ModelIndexedUtil.projectIndex(cls, idx, {}, { emptySortValue: undefined });
-    const sort = this.#getIndexSort(cls, idx, castTo<Any>({}));
-    const items = await this.query(cls, castTo({ where, sort, limit, offset }));
-    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
-  }
-
-  @Connected()
-  async listBySortedKeyedIndex<
+  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>>;
+  async listByIndex<
     T extends ModelType,
-    K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: SortedKeyedIndex<T, K, S>,
-    body: KeyedIndexBody<T, K>,
-    options: ListPageOptions
+    idx: SortedKeyedIndex<T, Any, S> | SortedIndex<T, S>,
+    options: ListPageOptions & { body?: Any },
   ): Promise<ListPageResult<T>> {
     const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     const limit = options.limit;
-    const where = ModelIndexedUtil.projectIndex(cls, idx, castTo(body), { emptySortValue: undefined });
-    const sort = this.#getIndexSort(cls, idx, castTo(body));
+    const where = ModelIndexedUtil.projectIndex(cls, idx, castTo(options.body), { emptySortValue: undefined });
+    const sort = this.#getIndexSort(cls, idx, options.body);
     const items = await this.query(cls, castTo({ where, sort, limit, offset }));
     return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
   }

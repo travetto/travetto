@@ -32,6 +32,7 @@ import {
   ShutdownManager, type Class, TypedObject,
   castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType, BinaryUtil, BinaryMetadataUtil,
   JSONUtil,
+  type Any,
 } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 
@@ -512,56 +513,37 @@ export class MongoModelService implements
     return this.update(cls, item);
   }
 
-  async * listByKeyedIndex<
+  listByIndex<
     T extends ModelType,
+    S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: KeyedIndex<T, K>, body: KeyedIndexBody<T, K>): AsyncIterable<T> {
-    const cursor = await this.#buildIndexQuery(cls, idx, body);
-
-    for await (const item of cursor) {
-      yield await this.postLoad(cls, item);
-    }
-  }
-
-  async listBySortedIndex<
+  >(cls: Class<T>, idx: SortedKeyedIndex<T, K, S>, options: ListPageOptions & { body: KeyedIndexBody<T, K> }): Promise<ListPageResult<T>>;
+  listByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>> {
-    const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-    const limit = options.limit;
-    const cursor = (await this.#buildIndexQuery(cls, idx, castTo({})))
-      .limit(limit)
-      .skip(offset);
-
-    const items: T[] = [];
-    for await (const item of cursor) {
-      items.push(await this.postLoad(cls, item));
-    }
-    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
-  }
-
-  async listBySortedKeyedIndex<
+  >(cls: Class<T>, idx: SortedIndex<T, S>, options: ListPageOptions): Promise<ListPageResult<T>>;
+  async listByIndex<
     T extends ModelType,
-    K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: SortedKeyedIndex<T, K, S>,
-    body: KeyedIndexBody<T, K>,
-    options: ListPageOptions
+    idx: SortedKeyedIndex<T, Any, S> | SortedIndex<T, S>,
+    options: ListPageOptions & { body?: Any },
   ): Promise<ListPageResult<T>> {
-    const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-    const limit = options.limit;
-    const cursor = (await this.#buildIndexQuery(cls, idx, body))
-      .limit(limit)
-      .skip(offset);
+    {
+      const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
+      const limit = options.limit;
+      const cursor = (await this.#buildIndexQuery(cls, idx, options.body))
+        .limit(limit)
+        .skip(offset);
 
-    const items: T[] = [];
-    for await (const item of cursor) {
-      items.push(await this.postLoad(cls, item));
+      const items: T[] = [];
+      for await (const item of cursor) {
+        items.push(await this.postLoad(cls, item));
+      }
+      return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
+
     }
-    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
-
   }
 
   // Query
