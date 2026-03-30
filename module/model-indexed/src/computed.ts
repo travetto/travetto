@@ -74,7 +74,7 @@ export class ModelIndexedComputedIndex<
   }
 
   get sort(): number | Date | undefined {
-    return this.sorted[0].value;
+    return this.sorted[0]?.value;
   }
 
   project(): Record<string, unknown> {

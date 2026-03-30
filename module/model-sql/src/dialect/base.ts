@@ -42,7 +42,7 @@ function flattenIndex<T extends ModelType>(idx: AllIndexes<T>): [string, boolean
     ...Object.entries('sort' in idx ? idx.sort : {})
   ]) {
     if (typeof value !== 'number') {
-      throw new IndexNotSupported(null!, idx, 'Nested fields are not supported in ModelIndexed indices SQL');
+      throw new IndexNotSupported(idx.class, idx, 'Nested fields are not supported in ModelIndexed indices SQL');
     }
     if (!seen.has(key)) {
       seen.add(key);

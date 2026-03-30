@@ -69,6 +69,7 @@ export class ExecutionManager {
       await execute?.();
     } catch (error) {
       console.error!(error);
+      process.exitCode ??= 1
     } finally {
       await ShutdownManager.shutdown();
     }
