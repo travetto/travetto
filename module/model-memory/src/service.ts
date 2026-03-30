@@ -53,9 +53,7 @@ export class MemoryModelService implements
   #store = new Map<string, StoreType>();
   #indices = {
     'indexed:sorted': new Map<string, Map<string, Map<string, number>>>(),
-    'indexed:sortedKeyed': new Map<string, Map<string, Map<string, number>>>(),
     'indexed:keyed': new Map<string, Map<string, Set<string>>>(),
-    'indexed:unique': new Map<string, Map<string, string>>()
   };
 
   idSource = ModelCrudUtil.uuidSource();
@@ -147,9 +145,6 @@ export class MemoryModelService implements
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<string> {
     const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
-    if (!isModelIndexedIndex(idx)) {
-      throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with MemoryModelService');
-    }
 
     const index = this.#indices[idx.type].get(indexName(cls, idx))?.get(key);
     let id: string | undefined;
@@ -158,8 +153,6 @@ export class MemoryModelService implements
         id = getFirstId(index, +sort!); // Grab first id
       } else if (index instanceof Set) {
         id = getFirstId(index); // Grab first id
-      } else {
-        id = index;
       }
     }
     if (id) {
@@ -179,9 +172,9 @@ export class MemoryModelService implements
     }
     const index = this.#indices[idx.type].get(indexName(cls, idx))?.get(key);
 
-    let sortMethod = (a: [string, number], b: [string, number]): number => +a[1] - +b[1];
+    let sortMethod = (a: [string, number], b: [string, number]): number => a[1] - b[1];
     if ('reversed' in idx && idx.reversed) {
-      sortMethod = (a: [string, number], b: [string, number]): number => +b[1] - +a[1];
+      sortMethod = (a: [string, number], b: [string, number]): number => b[1] - a[1];
     }
 
     if (!index) {

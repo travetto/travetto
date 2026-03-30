@@ -453,7 +453,6 @@ export class MongoModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<T> {
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
     const store = await this.getStore(cls);
     const result = await store.findOne(
       this.getWhereFilter(
@@ -462,6 +461,7 @@ export class MongoModelService implements
       )
     );
     if (!result) {
+      const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body), { includeSortInFields: true });
       throw new NotFoundError(`${cls.name}: ${idx}`, key);
     }
     return await this.postLoad(cls, result);
@@ -473,7 +473,6 @@ export class MongoModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<void> {
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
     const store = await this.getStore(cls);
     const result = await store.deleteOne(
       this.getWhereFilter(
@@ -481,10 +480,10 @@ export class MongoModelService implements
         castTo(ModelIndexedUtil.projectIndex(cls, idx, castTo(body)))
       )
     );
-    if (result.deletedCount) {
-      return;
+    if (!result.deletedCount) {
+      const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
+      throw new NotFoundError(`${cls.name}: ${idx}`, key);
     }
-    throw new NotFoundError(`${cls.name}: ${idx}`, key);
   }
 
   upsertByIndex<

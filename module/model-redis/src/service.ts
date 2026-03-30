@@ -7,10 +7,8 @@ import {
 } from '@travetto/model';
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type ListPageResult, type SortedIndex,
-  isModelIndexedIndex, type AllIndexes,
-  type SingleItemPartialIndexBody,
-  type SingleItemIndexBody,
+  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex, isModelIndexedIndex,
+  type SingleItemPartialIndexBody, type SingleItemIndexBody,
 } from '@travetto/model-indexed';
 
 import { Injectable, PostConstruct } from '@travetto/di';

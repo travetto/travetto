@@ -1,11 +1,8 @@
 import type { ModelType, ModelBasicSupport, OptionalId } from '@travetto/model';
-import type { Any, Class, DeepPartial } from '@travetto/runtime';
+import type { Class } from '@travetto/runtime';
 import type {
-  KeyedIndexSelection, KeyedIndexBody, KeyedIndexWithPartialBody,
-  SortedIndexSelection, SortedIndex,
-  SingleItemIndex,
-  SingleItemIndexBody,
-  SingleItemPartialIndexBody
+  KeyedIndexSelection, KeyedIndexBody, SortedIndexSelection, SortedIndex,
+  SingleItemIndex, SingleItemIndexBody, SingleItemPartialIndexBody
 } from './indexes.ts';
 
 export type ListPageOptions<O = string> = {

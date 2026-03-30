@@ -1,8 +1,8 @@
-import { castTo, type Class, type DeepPartial, hasFunction, TypedObject } from '@travetto/runtime';
+import { castTo, type Class, hasFunction, TypedObject } from '@travetto/runtime';
 import { type ModelType, IndexNotSupported, type ModelCrudSupport, type OptionalId, NotFoundError } from '@travetto/model';
 
 import type { ModelIndexedSupport } from './types/service.ts';
-import type { AllIndexes, KeyedIndexBody, KeyedIndexSelection, SingleItemIndex, SingleItemIndexBody, SortedIndexSelection } from './types/indexes.ts';
+import type { AllIndexes, KeyedIndexBody, KeyedIndexSelection, SingleItemIndex, SortedIndexSelection } from './types/indexes.ts';
 
 type ComputeConfig = {
   includeSortInFields?: boolean;
@@ -34,9 +34,10 @@ export class ModelIndexedUtil {
   static computeIndexParts<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: AllIndexes<T, K>,
+    idx: AllIndexes<T, K, S>,
     item: KeyedIndexBody<T, K>,
     opts: ComputeConfig = {}
   ): { fields: IndexFieldPart[], sorted: IndexSortPart | undefined } {

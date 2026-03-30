@@ -414,7 +414,7 @@ export class ElasticsearchModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<T> {
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body), { includeSortInFields: true });
     const result = await this.execSearch<T>(cls, {
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
@@ -433,7 +433,7 @@ export class ElasticsearchModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<void> {
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body), { includeSortInFields: true });
     const result = await this.client.deleteByQuery({
       index: this.manager.getIdentity(cls).index,
       query: ElasticsearchQueryUtil.getSearchQuery(cls,

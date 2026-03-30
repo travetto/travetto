@@ -5,8 +5,7 @@ import {
 } from '@travetto/model';
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type ListPageResult, type SortedIndex,
-  type SingleItemIndexBody,
+  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex, type SingleItemIndexBody,
   type SingleItemPartialIndexBody
 } from '@travetto/model-indexed';
 import { castTo, type Class, JSONUtil } from '@travetto/runtime';
@@ -50,22 +49,6 @@ export class SQLModelService implements
 
   get client(): SQLDialect {
     return this.#dialect;
-  }
-
-  #getIndexSort<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(
-    cls: Class<T>,
-    idx: SortedIndex<T, K, S>,
-    body: KeyedIndexBody<T, K>
-  ): Record<string, 1 | -1>[] {
-    const { sorted } = ModelIndexedUtil.computeIndexParts(cls, idx, body, { emptySortValue: undefined });
-    if (sorted) {
-      return [{ [sorted.path.join('.')]: sorted.dir === 1 ? 1 : -1 }];
-    }
-    return [];
   }
 
   constructor(
@@ -348,6 +331,7 @@ export class SQLModelService implements
       return result;
     });
   }
+
   // Indexed support
   @Connected()
   async getByIndex<
@@ -355,13 +339,13 @@ export class SQLModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<T> {
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
     const where = ModelIndexedUtil.projectIndex(cls, idx, castTo(body));
     const results = await this.query(cls, castTo({ where }));
-    if (results.length === 1) {
-      return results[0];
+    if (results.length !== 1) {
+      const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body), { includeSortInFields: true });
+      throw new NotFoundError(`${cls.name}: ${idx}`, key);
     }
-    throw new NotFoundError(`${cls.name}: ${idx}`, key);
+    return results[0];
   }
 
   @Connected()
@@ -420,7 +404,13 @@ export class SQLModelService implements
     const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     const limit = options?.limit ?? 100;
     const where = ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: undefined });
-    const sort = this.#getIndexSort(cls, idx, body);
+
+    let sort: Record<string, unknown>[] = [];
+    const { sorted } = ModelIndexedUtil.computeIndexParts(cls, idx, body, { emptySortValue: undefined });
+    if (sorted) {
+      sort = [{ [sorted.path.join('.')]: sorted.dir === 1 ? 1 : -1 }];
+    }
+
     const items = await this.query(cls, castTo({ where, sort, limit, offset }));
     return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
   }
