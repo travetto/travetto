@@ -26,6 +26,7 @@ import type { SQLDialect } from './dialect/base.ts';
 import { TableManager } from './table-manager.ts';
 import type { Connection } from './connection/base.ts';
 import type { InsertWrapper } from './internal/types.ts';
+import { ModelIndexedComputedIndex } from '@travetto/model-indexed/src/computed.ts';
 
 /**
  * Core for SQL Model Source.  Should not have any direct queries,
@@ -339,10 +340,10 @@ export class SQLModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<T> {
-    const where = ModelIndexedUtil.projectIndex(cls, idx, castTo(body));
+    const where = new ModelIndexedComputedIndex(cls, idx, castTo(body)).project();
     const results = await this.query(cls, castTo({ where }));
     if (results.length !== 1) {
-      const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body), { includeSortInFields: true });
+      const { key } = new ModelIndexedComputedIndex(cls, idx, castTo(body), { includeSortInFields: true });
       throw new NotFoundError(`${cls.name}: ${idx}`, key);
     }
     return results[0];
@@ -403,15 +404,14 @@ export class SQLModelService implements
   ): Promise<ListPageResult<T>> {
     const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     const limit = options?.limit ?? 100;
-    const where = ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: undefined });
+    const computed = new ModelIndexedComputedIndex(cls, idx, body, { emptySortValue: undefined });
 
     let sort: Record<string, unknown>[] = [];
-    const { sorted } = ModelIndexedUtil.computeIndexParts(cls, idx, body, { emptySortValue: undefined });
-    if (sorted) {
-      sort = [{ [sorted.path.join('.')]: sorted.dir === 1 ? 1 : -1 }];
+    for (const field of computed.sorted) {
+      sort = [{ [field.path.join('.')]: field.templateValue === 1 }];
     }
 
-    const items = await this.query(cls, castTo({ where, sort, limit, offset }));
+    const items = await this.query(cls, castTo({ where: computed.project(), sort, limit, offset }));
     return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
   }
 }

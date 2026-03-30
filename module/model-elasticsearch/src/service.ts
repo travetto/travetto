@@ -26,6 +26,7 @@ import type { EsBulkError } from './internal/types.ts';
 import { ElasticsearchQueryUtil } from './internal/query.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
 import { IndexManager } from './index-manager.ts';
+import { ModelIndexedComputedIndex } from '@travetto/model-indexed/src/computed.ts';
 
 const ELASTICSEARCH_REPLACER = {
   replacer(this: unknown, key: string, value: unknown): unknown {
@@ -74,7 +75,7 @@ export class ElasticsearchModelService implements
       ),
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
-          ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
+          new ModelIndexedComputedIndex(cls, idx, body, { emptySortValue: { $exists: true } }).project())
       ),
       sort: 'sort' in idx ? ElasticsearchQueryUtil.getSort(idx) : undefined,
     });
@@ -414,14 +415,14 @@ export class ElasticsearchModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<T> {
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body), { includeSortInFields: true });
     const result = await this.execSearch<T>(cls, {
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
-          ModelIndexedUtil.projectIndex(cls, idx, castTo(body)))
+          new ModelIndexedComputedIndex(cls, idx, castTo(body)).project())
       )
     });
     if (!result.hits.hits.length) {
+      const { key } = new ModelIndexedComputedIndex(cls, idx, castTo(body), { includeSortInFields: true });
       throw new NotFoundError(`${cls.name}: ${idx}`, key);
     }
     return this.postLoad(cls, result.hits.hits[0]);
@@ -433,19 +434,18 @@ export class ElasticsearchModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<void> {
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body), { includeSortInFields: true });
     const result = await this.client.deleteByQuery({
       index: this.manager.getIdentity(cls).index,
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
-          ModelIndexedUtil.projectIndex(cls, idx, castTo(body)))
+          new ModelIndexedComputedIndex(cls, idx, castTo(body)).project())
       ),
       refresh: true
     });
-    if (result.deleted) {
-      return;
+    if (!result.deleted) {
+      const { key } = new ModelIndexedComputedIndex(cls, idx, castTo(body), { includeSortInFields: true });
+      throw new NotFoundError(`${cls.name}: ${idx}`, key);
     }
-    throw new NotFoundError(`${cls.name}: ${idx}`, key);
   }
 
   upsertByIndex<

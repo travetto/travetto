@@ -13,6 +13,7 @@ import {
 } from '@travetto/model-indexed';
 
 import type { FirestoreModelConfig } from './config.ts';
+import { ModelIndexedComputedIndex } from '@travetto/model-indexed/src/computed.ts';
 
 const clone = JSONUtil.clone;
 const setMissingValues = <T>(input: T, missingValue: unknown): T =>
@@ -48,12 +49,12 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>): Query {
     ModelCrudUtil.ensureNotSubType(cls);
-    const { fields, sorted } = ModelIndexedUtil.computeIndexParts(cls, idx, body, { emptySortValue: null });
+    const { fields, sorted } = new ModelIndexedComputedIndex(cls, idx, body, { emptySortValue: null });
     let query = fields.reduce<Query>((result, { path, value }) =>
       result.where(path.join('.'), '==', value), this.#getCollection(cls));
 
-    if (sorted) {
-      query = query.orderBy(sorted.path.join('.'), sorted.dir === 1 ? 'asc' : 'desc');
+    for (const field of sorted) {
+      query = query.orderBy(field.path.join('.'), field.templateValue === 1 ? 'asc' : 'desc');
     }
     return query;
   }
@@ -147,7 +148,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const { fields } = ModelIndexedUtil.computeIndexParts(cls, idx, castTo(body), { includeSortInFields: true });
+    const { fields } = new ModelIndexedComputedIndex(cls, idx, castTo(body), { includeSortInFields: true });
     const query = fields.reduce<Query>(
       (result, { path, value }) => result.where(path.join('.'), '==', value),
       this.#getCollection(cls)
@@ -158,7 +159,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     if (item && !item.empty) {
       return item.docs[0].id;
     }
-    throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body), { separator: '; ' })?.key);
+    throw new NotFoundError(`${cls.name} Index=${idx}`, new ModelIndexedComputedIndex(cls, idx, castTo(body), { separator: '; ' })?.key);
   }
 
   // Indexed contract

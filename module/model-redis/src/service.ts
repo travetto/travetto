@@ -14,6 +14,7 @@ import {
 import { Injectable, PostConstruct } from '@travetto/di';
 
 import type { RedisModelConfig } from './config.ts';
+import { ModelIndexedComputedIndex } from '@travetto/model-indexed/src/computed.ts';
 
 type RedisScan = ({ key: string } | { match: string }) & { reverse?: boolean };
 type RedisClient = ReturnType<typeof createClient>;
@@ -94,7 +95,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     options?: ListPageOptions
   ): AsyncIterable<ScanState> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body, { emptySortValue: null });
+    const { key } = new ModelIndexedComputedIndex(cls, idx, body, { emptySortValue: null });
     const fullKey = this.#resolveKey(cls, idx.name, key);
     switch (idx.type) {
       // case 'indexed:keyed': return this.#streamValues('sScan', { key: fullKey }, options);
@@ -124,7 +125,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   #removeIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
     for (const idx of Object.values(ModelRegistryIndex.getIndices(cls))) {
       if (isModelIndexedIndex(idx)) {
-        const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
+        const { key } = new ModelIndexedComputedIndex(cls, idx, item);
         const fullKey = this.#resolveKey(cls, idx.name, key);
         switch (idx.type) {
           case 'indexed:keyed': multi.sRem(fullKey, item.id); break;
@@ -137,7 +138,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   #addIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
     for (const idx of Object.values(ModelRegistryIndex.getIndices(cls))) {
       if (isModelIndexedIndex(idx)) {
-        const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
+        const { key, sort } = new ModelIndexedComputedIndex(cls, idx, item);
         const fullKey = this.#resolveKey(cls, idx.name, key);
 
         switch (idx.type) {
@@ -208,7 +209,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
+    const { key, sort } = new ModelIndexedComputedIndex(cls, idx, castTo(body));
     const fullKey = this.#resolveKey(cls, idx.name, key);
     let id: string | undefined;
     switch (idx.type) {

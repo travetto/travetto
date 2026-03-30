@@ -33,6 +33,7 @@ import { Injectable, PostConstruct } from '@travetto/di';
 
 import { MongoUtil, type WithId } from './internal/util.ts';
 import type { MongoModelConfig } from './config.ts';
+import { ModelIndexedComputedIndex } from '@travetto/model-indexed/src/computed.ts';
 
 type BlobRaw = GridFSFile & { metadata?: BinaryMetadata };
 
@@ -72,7 +73,7 @@ export class MongoModelService implements
 
     const where = this.getWhereFilter(
       cls,
-      castTo(ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
+      castTo(new ModelIndexedComputedIndex(cls, idx, body, { emptySortValue: { $exists: true } }).project())
     );
 
     let q = store.find(where, { timeout: true })
@@ -457,11 +458,11 @@ export class MongoModelService implements
     const result = await store.findOne(
       this.getWhereFilter(
         cls,
-        castTo(ModelIndexedUtil.projectIndex(cls, idx, castTo(body)))
+        castTo(new ModelIndexedComputedIndex(cls, idx, castTo(body)).project())
       )
     );
     if (!result) {
-      const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body), { includeSortInFields: true });
+      const { key } = new ModelIndexedComputedIndex(cls, idx, castTo(body), { includeSortInFields: true });
       throw new NotFoundError(`${cls.name}: ${idx}`, key);
     }
     return await this.postLoad(cls, result);
@@ -477,11 +478,11 @@ export class MongoModelService implements
     const result = await store.deleteOne(
       this.getWhereFilter(
         cls,
-        castTo(ModelIndexedUtil.projectIndex(cls, idx, castTo(body)))
+        castTo(new ModelIndexedComputedIndex(cls, idx, castTo(body)).project())
       )
     );
     if (!result.deletedCount) {
-      const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
+      const { key } = new ModelIndexedComputedIndex(cls, idx, castTo(body));
       throw new NotFoundError(`${cls.name}: ${idx}`, key);
     }
   }

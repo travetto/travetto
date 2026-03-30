@@ -14,6 +14,7 @@ import {
   type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex,
   type AllIndexes, isModelIndexedIndex, type SingleItemIndexBody, type SingleItemPartialIndexBody
 } from '@travetto/model-indexed';
+import { ModelIndexedComputedIndex } from '@travetto/model-indexed/src/computed';
 
 const ModelBlobNamespace = '__blobs';
 const ModelBlobMetaNamespace = `${ModelBlobNamespace}_meta`;
@@ -86,7 +87,7 @@ export class MemoryModelService implements
           continue; // Only support ModelIndexed indices
         }
         const idxName = indexName(cls, idx);
-        const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(item));
+        const { key } = new ModelIndexedComputedIndex(cls, idx, castTo(item));
         switch (idx.type) {
           case 'indexed:sorted':
           case 'indexed:keyed': this.#indices[idx.type].get(idxName)?.get(key)?.delete(id); break;
@@ -105,7 +106,7 @@ export class MemoryModelService implements
         continue; // Only support ModelIndexed indices
       }
       const idxName = indexName(cls, idx);
-      const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(item));
+      const { key, sort } = new ModelIndexedComputedIndex(cls, idx, castTo(item));
       switch (idx.type) {
         case 'indexed:keyed': {
           if (idx.unique) {
@@ -144,7 +145,7 @@ export class MemoryModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<string> {
-    const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
+    const { key, sort } = new ModelIndexedComputedIndex(cls, idx, castTo(body));
 
     const index = this.#indices[idx.type].get(indexName(cls, idx))?.get(key);
     let id: string | undefined;
@@ -166,7 +167,7 @@ export class MemoryModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>): string[] {
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body), { emptySortValue: null });
+    const { key } = new ModelIndexedComputedIndex(cls, idx, castTo(body), { emptySortValue: null });
     if (!isModelIndexedIndex(idx)) {
       throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with MemoryModelService');
     }

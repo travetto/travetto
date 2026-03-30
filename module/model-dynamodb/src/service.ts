@@ -17,6 +17,7 @@ import {
 
 import type { DynamoDBModelConfig } from './config.ts';
 import { DynamoDBUtil } from './util.ts';
+import { ModelIndexedComputedIndex } from '@travetto/model-indexed/src/computed.ts';
 
 const EXP_ATTR = 'expires_at__';
 
@@ -51,7 +52,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     options?: ListPageOptions<Record<string, AttributeValue>>
   ): AsyncIterable<QueryCommandOutput & { LastEvaluatedOffset?: string }> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body, { emptySortValue: null });
+    const { key } = new ModelIndexedComputedIndex(cls, idx, body, { emptySortValue: null });
     const expression = { [`:${idx.name}`]: DynamoDBUtil.toValue(key) };
     const isReversed = 'reversed' in idx && idx.reversed;
     const limit = options?.limit ?? 100;
@@ -104,7 +105,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         const indices: Record<string, unknown> = {};
         for (const idx of Object.values(config.indices ?? {})) {
           if (isModelIndexedIndex(idx)) {
-            const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(item));
+            const { key, sort } = new ModelIndexedComputedIndex(cls, idx, castTo(item));
             switch (idx.type) {
               case 'indexed:keyed': indices[`${idx.name}__`] = DynamoDBUtil.toValue(key); break;
               case 'indexed:sorted': {
@@ -135,7 +136,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
         for (const idx of Object.values(config.indices ?? {})) {
           if (isModelIndexedIndex(idx)) {
-            const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(item));
+            const { key, sort } = new ModelIndexedComputedIndex(cls, idx, castTo(item));
             switch (idx.type) {
               case 'indexed:keyed': {
                 indices[`${idx.name}__`] = DynamoDBUtil.toValue(key);
@@ -368,7 +369,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(body));
+    const { key, sort } = new ModelIndexedComputedIndex(cls, idx, castTo(body));
 
     if ('sort' in idx && sort === undefined) {
       throw new IndexNotSupported(cls, idx, 'Sorted indices require the sort field');
@@ -470,7 +471,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     let nextOffset;
     if (items.length) {
       const last: T = items.at(-1)!;
-      const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(last), { emptySortValue: null });
+      const { key, sort } = new ModelIndexedComputedIndex(cls, idx, castTo(last), { emptySortValue: null });
       nextOffset = JSONUtil.toBase64({
         ...(key ? { [`${idx.name}__`]: DynamoDBUtil.toValue(key) } : {}),
         ...(sort ? { [`${idx.name}_sort__`]: DynamoDBUtil.toValue(+sort) } : {}),
