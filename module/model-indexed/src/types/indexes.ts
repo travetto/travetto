@@ -45,8 +45,8 @@ export type KeyedIndexWithPartialBody<T, K> = {
   DeepPartial<Omit<T, keyof K>>;
 
 
-export type SingleItemIndexBody<T, K, S> = KeyedIndexBody<T, Merge<K, S>>;
-export type SingleItemPartialIndexBody<T, K, S> = KeyedIndexWithPartialBody<T, Merge<K, S>>;
+export type FullKeyedIndexBody<T, K, S> = KeyedIndexBody<T, Merge<K, S>>;
+export type FullKeyedIndexWithPartialBody<T, K, S> = KeyedIndexWithPartialBody<T, Merge<K, S>>;
 
 export interface KeyedIndex<
   T extends ModelType,

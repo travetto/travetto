@@ -12,7 +12,7 @@ import {
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex,
-  type AllIndexes, isModelIndexedIndex, type SingleItemIndexBody, type SingleItemPartialIndexBody
+  type AllIndexes, isModelIndexedIndex, type FullKeyedIndexBody, type FullKeyedIndexWithPartialBody
 } from '@travetto/model-indexed';
 import { ModelIndexedComputedIndex } from '@travetto/model-indexed/src/computed';
 
@@ -144,7 +144,7 @@ export class MemoryModelService implements
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<string> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<string> {
     const { key, sort } = new ModelIndexedComputedIndex(cls, idx, castTo(body));
 
     const index = this.#indices[idx.type].get(indexName(cls, idx))?.get(key);
@@ -366,7 +366,7 @@ export class MemoryModelService implements
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<T> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
     return this.get(cls, await this.#getIdByIndex(cls, idx, body));
 
   }
@@ -375,7 +375,7 @@ export class MemoryModelService implements
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<void> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<void> {
     await this.delete(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
@@ -399,7 +399,7 @@ export class MemoryModelService implements
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemPartialIndexBody<T, K, S>): Promise<T> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexWithPartialBody<T, K, S>): Promise<T> {
     const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
     return this.update(cls, item);
   }

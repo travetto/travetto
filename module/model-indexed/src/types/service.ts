@@ -2,7 +2,7 @@ import type { ModelType, ModelBasicSupport, OptionalId } from '@travetto/model';
 import type { Class } from '@travetto/runtime';
 import type {
   KeyedIndexSelection, KeyedIndexBody, SortedIndexSelection, SortedIndex,
-  SingleItemIndex, SingleItemIndexBody, SingleItemPartialIndexBody
+  SingleItemIndex, FullKeyedIndexBody, FullKeyedIndexWithPartialBody
 } from './indexes.ts';
 
 export type ListPageOptions<O = string> = {
@@ -31,7 +31,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<T>;
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T>;
 
   /**
    * Delete entity by index as defined by fields of idx and the body fields
@@ -43,7 +43,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<void>;
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<void>;
 
   /**
    * Upsert by index, allowing the index to act as a primary key
@@ -79,7 +79,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemPartialIndexBody<T, K, S>): Promise<T>;
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexWithPartialBody<T, K, S>): Promise<T>;
 
   /**
    * List entity by ranged index as defined by fields of idx

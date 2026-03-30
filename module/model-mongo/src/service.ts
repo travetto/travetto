@@ -20,8 +20,8 @@ import {
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type ListPageResult, type SortedIndex,
-  type SingleItemIndexBody,
-  type SingleItemPartialIndexBody,
+  type FullKeyedIndexBody,
+  type FullKeyedIndexWithPartialBody,
 } from '@travetto/model-indexed';
 
 import {
@@ -453,7 +453,7 @@ export class MongoModelService implements
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<T> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
     const store = await this.getStore(cls);
     const result = await store.findOne(
       this.getWhereFilter(
@@ -473,7 +473,7 @@ export class MongoModelService implements
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: SingleItemIndexBody<T, K, S>): Promise<void> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<void> {
     const store = await this.getStore(cls);
     const result = await store.deleteOne(
       this.getWhereFilter(
@@ -507,7 +507,7 @@ export class MongoModelService implements
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: SingleItemPartialIndexBody<T, K, S>): Promise<T> {
+  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: FullKeyedIndexWithPartialBody<T, K, S>): Promise<T> {
     const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
     return this.update(cls, item);
   }
