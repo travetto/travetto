@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 import { Schema } from '@travetto/schema';
 import { TimeUtil } from '@travetto/runtime';
-import { Model, NotFoundError, IndexNotSupported } from '@travetto/model';
+import { Model, NotFoundError } from '@travetto/model';
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
 import type { ModelIndexedSupport } from '../../src/types/service.ts';
