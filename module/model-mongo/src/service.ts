@@ -171,7 +171,10 @@ export class MongoModelService implements
 
   async upsertModel(cls: Class): Promise<void> {
     const col = await this.getStore(cls);
-    const indices = ModelRegistryIndex.getIndices(cls).map(idx => MongoUtil.getIndex(cls, idx));
+    const indices = [
+      ...ModelRegistryIndex.getIndices(cls).map(idx => MongoUtil.getIndex(cls, idx)),
+      ...MongoUtil.getExtraIndices(cls)
+    ];
     const existingIndices = (await col.indexes().catch(() => [])).filter(idx => idx.name !== '_id_');
 
     const pendingMap = Object.fromEntries(indices.map(pair => [pair[1].name!, pair]));
