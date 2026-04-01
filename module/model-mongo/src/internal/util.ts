@@ -7,7 +7,7 @@ import { RuntimeError, CodecUtil, castTo, type Class, toConcrete, BinaryUtil } f
 import { type DistanceUnit, type PageableModelQuery, type WhereClause, isModelQueryIndex, ModelQueryUtil } from '@travetto/model-query';
 import { type ModelType, type IndexConfig, IndexNotSupported } from '@travetto/model';
 import { DataUtil, SchemaRegistryIndex, type Point } from '@travetto/schema';
-import { isModelIndexedIndex } from '@travetto/model-indexed';
+import { isModelIndexedIndex, ModelIndexedComputedIndex } from '@travetto/model-indexed';
 
 const PointConcrete = toConcrete<Point>();
 
@@ -186,14 +186,19 @@ export class MongoUtil {
   static getIndex(cls: Class, idx: IndexConfig): [BasicIdx, CreateIndexesOptions] {
     const name = this.namespaceIndex(cls, idx.name);
     if (isModelQueryIndex(idx)) {
-      const out: Record<string, -1 | 0 | 1> = idx.fields.reduce((acc, field) =>
-        ({ ...acc, ...flattenKeys(castTo(field)) }), {} as Record<string, -1 | 0 | 1>);
+      const out = idx.fields.reduce(
+        (acc, field) => ({ ...acc, ...flattenKeys(castTo(field)) }),
+        castTo<Record<string, -1 | 0 | 1>>({}));
 
       return [out, { name, unique: idx.type === 'query:unique', }];
     } else if (isModelIndexedIndex(idx)) {
+      const computed = ModelIndexedComputedIndex.get(idx, {});
+      const filter = Object.fromEntries(
+        computed.allFields.map(({ path, templateValue, part }) => [path.join('.'), part === 'key' ? 0 : templateValue === true ? 1 : templateValue])
+      );
       switch (idx.type) {
-        case 'indexed:keyed': return [flattenKeys(idx.keys), { name, unique: idx.unique }];
-        case 'indexed:sorted': return [flattenKeys(idx.keys), { name }];
+        case 'indexed:keyed': return [filter, { name, unique: idx.unique }];
+        case 'indexed:sorted': return [filter, { name }];
       }
     } else {
       throw new IndexNotSupported(cls, idx);

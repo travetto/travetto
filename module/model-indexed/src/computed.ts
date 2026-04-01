@@ -8,9 +8,17 @@ import {
 
 const DEFAULT_SEP = '\u8203';
 
-type PathValue<T = unknown> = { path: string[], value: unknown, templateValue: T, state: 'found' | 'missing' | 'empty' | 'mismatch' };
+type TemplateValue = 1 | -1 | true;
+type PathValue<T extends TemplateValue = TemplateValue> = {
+  path: string[];
+  value: unknown;
+  part: 'key' | 'sort';
+  templateValue: T;
+  state: 'found' | 'missing' | 'empty' | 'mismatch';
+};
 
-function processFields<T = unknown>(
+function processFields<T extends TemplateValue = TemplateValue>(
+  part: 'key' | 'sort',
   template: Record<string, T>,
   item: Record<string, unknown>,
   checkValueType?: (value: unknown) => boolean,
@@ -21,20 +29,20 @@ function processFields<T = unknown>(
     const path = prefix.length ? [...prefix, key] : [key];
     const itemValue = item[key];
     if (!(key in item)) {
-      out.push({ path, value: undefined!, templateValue: value, state: 'missing' });
+      out.push({ path, value: undefined!, templateValue: value, state: 'missing', part });
     } else if (typeof value === 'object' && value !== null) {
       if (typeof itemValue === 'object' && itemValue !== null) {
-        out.push(...processFields<T>(castTo(value), castTo(itemValue), checkValueType, path));
+        out.push(...processFields<T>(part, castTo(value), castTo(itemValue), checkValueType, path));
       } else if (itemValue === undefined || itemValue === null) {
-        out.push({ path, value: undefined, templateValue: value, state: 'empty' });
+        out.push({ path, value: undefined, templateValue: value, state: 'empty', part });
       } else {
-        out.push({ path, value: itemValue, templateValue: value, state: 'mismatch' });
+        out.push({ path, value: itemValue, templateValue: value, state: 'mismatch', part });
       }
     } else {
       if (checkValueType && !checkValueType(itemValue)) {
-        out.push({ path, value: itemValue, templateValue: value, state: 'mismatch' });
+        out.push({ path, value: itemValue, templateValue: value, state: 'mismatch', part });
       } else {
-        out.push({ path, value: itemValue, templateValue: value, state: 'found' });
+        out.push({ path, value: itemValue, templateValue: value, state: 'found', part });
       }
     }
   }
@@ -51,14 +59,13 @@ function validate<T extends ModelType>(idx: AllIndexes<T>, fields: PathValue[]):
   }
 }
 
-
 function getFields<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
   idx: AllIndexes<T, K, S>,
   body: Body<T>,
-): [fields: PathValue<unknown>[], sorted: PathValue<-1 | 1>[]] {
-  const fields = processFields<true>(castTo(idx.keys) ?? {}, body);
-  const sorted = processFields<-1 | 1>(castTo(idx.sort) ?? {}, body, value => typeof value === 'number' || value instanceof Date);
-  return [fields, sorted];
+): [keyFields: PathValue<true>[], sortFields: PathValue<-1 | 1>[]] {
+  const keyFields = processFields<true>('key', castTo(idx.keys) ?? {}, body);
+  const sortFields = processFields<-1 | 1>('sort', castTo(idx.sort) ?? {}, body, value => typeof value === 'number' || value instanceof Date);
+  return [keyFields, sortFields];
 }
 
 type Body<T extends ModelType> = KeyedIndexBody<T, Any> | FullKeyedIndexBody<T, Any, Any> | Partial<T>;
@@ -73,18 +80,18 @@ export class ModelIndexedComputedIndex {
     return new ModelIndexedComputedIndex(idx, ...getFields(idx, body));
   }
 
-  keyedFields: PathValue<unknown>[];
+  keyedFields: PathValue<true>[];
   sortFields: PathValue<-1 | 1>[];
   idx: AllIndexes<ModelType>;
 
   constructor(
     idx: AllIndexes<ModelType>,
-    fields: PathValue<unknown>[],
-    sorted: PathValue<-1 | 1>[],
+    keyedFields: PathValue<true>[],
+    sortFields: PathValue<-1 | 1>[],
   ) {
     this.idx = idx;
-    this.keyedFields = fields;
-    this.sortFields = sorted;
+    this.keyedFields = keyedFields;
+    this.sortFields = sortFields;
   }
 
   get allFields(): PathValue[] {

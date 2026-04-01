@@ -1,7 +1,10 @@
 import { type ModelType, ModelRegistryIndex } from '@travetto/model';
 import { type Class, RuntimeError, type Any } from '@travetto/runtime';
-import type { AllIndexes } from './types/indexes.ts';
-import type { KeyedIndexSelection, KeyedIndex, SortedIndexSelection, SortedIndex } from './types/indexes.ts';
+
+import {
+  type AllIndexes, type KeyedIndexSelection, type KeyedIndex,
+  type SortedIndexSelection, type SortedIndex, IndexedFieldError
+} from './types/indexes.ts';
 
 /**
  * Defines a keyed index for a model
@@ -10,9 +13,6 @@ export function keyedIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T>
 >(cls: Class<T>, selection: K, name?: string): KeyedIndex<T, K, {}> {
-  if ('id' in selection) {
-    throw new RuntimeError('Cannot create an index with the id field');
-  }
   const idx: KeyedIndex<T, K, {}> = {
     type: 'indexed:keyed',
     name: name ?? `${cls.Ⲑid}__${Object.keys(selection).join('_')}`,
@@ -21,6 +21,9 @@ export function keyedIndex<
     sort: {},
     unique: false
   };
+  if ('id' in selection) {
+    throw new IndexedFieldError(cls, idx, 'id', 'Invalid field for index creation');
+  }
   ModelRegistryIndex.getForRegister(cls).register({ indices: { [idx.name]: idx } });
   return idx;
 }
@@ -32,9 +35,6 @@ export function uniqueIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T>
 >(cls: Class<T>, selection: K, name?: string): KeyedIndex<T, K, {}> {
-  if ('id' in selection) {
-    throw new RuntimeError('Cannot create an index with the id field');
-  }
   const idx: KeyedIndex<T, K, {}> = {
     type: 'indexed:keyed',
     name: name ?? `${cls.Ⲑid}__${Object.keys(selection).join('_')}`,
@@ -42,7 +42,9 @@ export function uniqueIndex<
     sort: {},
     unique: true
   };
-
+  if ('id' in selection) {
+    throw new IndexedFieldError(cls, idx, 'id', 'Invalid field for index creation');
+  }
   ModelRegistryIndex.getForRegister(cls).register({ indices: { [idx.name]: idx } });
   return idx;
 }
@@ -64,7 +66,6 @@ export function sortedIndex<
     keys,
     sort,
     class: cls,
-    reversed: false
   };
   ModelRegistryIndex.getForRegister(cls).register({ indices: { [idx.name]: idx } });
   return idx;
