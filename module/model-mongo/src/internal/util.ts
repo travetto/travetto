@@ -25,14 +25,14 @@ const RADIANS_TO: Record<DistanceUnit, number> = {
 export type WithId<T, I = unknown> = T & { _id?: I };
 export type BasicIdx = Record<string, IndexDirection>;
 
-function flattenKeys(obj: Record<string, unknown>, prefix = ''): Record<string, 1 | -1 | 0> {
-  const out: Record<string, 1 | -1 | 0> = {};
+function flattenKeys(obj: Record<string, unknown>, prefix = ''): Record<string, 1 | -1> {
+  const out: Record<string, 1 | -1> = {};
   for (const [key, value] of Object.entries(obj)) {
     const path = prefix ? `${prefix}.${key}` : key;
     if (typeof value === 'object' && value !== null) {
       Object.assign(out, flattenKeys(castTo(value), path));
     } else {
-      out[path] = typeof value === 'boolean' ? (value ? 1 : 0) : castTo<-1 | 1 | 0>(value);
+      out[path] = typeof value === 'boolean' ? (value ? 1 : -1) : castTo<-1 | 1>(value);
     }
   }
   return out;
@@ -194,7 +194,7 @@ export class MongoUtil {
     } else if (isModelIndexedIndex(idx)) {
       const computed = ModelIndexedComputedIndex.get(idx, {});
       const filter = Object.fromEntries(
-        computed.allFields.map(({ path, templateValue, part }) => [path.join('.'), part === 'key' ? 0 : templateValue === true ? 1 : templateValue])
+        computed.allFields.map(({ path, templateValue }) => [path.join('.'), templateValue === -1 ? -1 : 1])
       );
       switch (idx.type) {
         case 'indexed:keyed': return [filter, { name, unique: idx.unique }];
