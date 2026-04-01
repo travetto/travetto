@@ -12,8 +12,7 @@ import {
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex,
-  type AllIndexes, isModelIndexedIndex, type FullKeyedIndexBody, type FullKeyedIndexWithPartialBody,
-  MissingIndexedFieldError, ModelIndexedComputedIndex,
+  type AllIndexes, isModelIndexedIndex, type FullKeyedIndexBody, type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex,
 } from '@travetto/model-indexed';
 
 const ModelBlobNamespace = '__blobs';
@@ -87,10 +86,10 @@ export class MemoryModelService implements
           continue; // Only support ModelIndexed indices
         }
         const idxName = indexName(cls, idx);
-        const { key } = ModelIndexedComputedIndex.getSingle(idx, item);
+        const computed = ModelIndexedComputedIndex.getSingle(idx, item);
         switch (idx.type) {
           case 'indexed:sorted':
-          case 'indexed:keyed': this.#indices[idx.type].get(idxName)?.get(key)?.delete(id); break;
+          case 'indexed:keyed': this.#indices[idx.type].get(idxName)?.get(computed.getKey())?.delete(id); break;
         }
       }
     } catch (error) {
@@ -106,7 +105,8 @@ export class MemoryModelService implements
         continue; // Only support ModelIndexed indices
       }
       const idxName = indexName(cls, idx);
-      const { key, sort } = ModelIndexedComputedIndex.getSingle(idx, item);
+      const computed = ModelIndexedComputedIndex.getSingle(idx, item);
+      const key = computed.getKey();
       switch (idx.type) {
         case 'indexed:keyed': {
           if (idx.unique) {
@@ -119,7 +119,7 @@ export class MemoryModelService implements
           break;
         }
         case 'indexed:sorted': {
-          this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Map()).set(item.id, sort!);
+          this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Map()).set(item.id, computed.getSort());
           break;
         }
       }
@@ -145,16 +145,13 @@ export class MemoryModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<string> {
-    const { key, sort } = ModelIndexedComputedIndex.getSingle(idx, body);
+    const computed = ModelIndexedComputedIndex.getSingle(idx, body);
 
-    const index = this.#indices[idx.type].get(indexName(cls, idx))?.get(key);
+    const index = this.#indices[idx.type].get(indexName(cls, idx))?.get(computed.getKey());
     let id: string | undefined;
     if (index) {
       if (index instanceof Map) {
-        if (sort === undefined) {
-          throw new MissingIndexedFieldError(cls, idx, key);
-        }
-        id = getFirstId(index, sort); // Grab first id
+        id = getFirstId(index, computed.getSort()); // Grab first id
       } else if (index instanceof Set) {
         id = getFirstId(index); // Grab first id
       }
@@ -162,7 +159,7 @@ export class MemoryModelService implements
     if (id) {
       return id;
     }
-    throw new NotFoundError(cls, key);
+    throw new NotFoundError(cls, computed.getKeyWithSort());
   }
 
   #getIndexIds<
@@ -170,22 +167,16 @@ export class MemoryModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: AllIndexes<T, K, S>, body: KeyedIndexBody<T, K>): string[] {
-    const { key } = ModelIndexedComputedIndex.getMulti(idx, body, { emptySortValue: null });
+    const computed = ModelIndexedComputedIndex.getMulti(idx, body);
     if (!isModelIndexedIndex(idx)) {
       throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with MemoryModelService');
     }
 
     const base = this.#indices[idx.type].get(indexName(cls, idx));
-    if (!base) {
-      throw new IndexNotSupported(cls, idx, 'Index not found for class');
-    } else if (!key) {
-      throw new MissingIndexedFieldError(cls, idx, key);
-    } else if (!base.has(key)) {
-      throw new MissingIndexedFieldError(cls, idx, key);
-    }
-
-    const index = base.get(key)!;
-    if (index instanceof Map) {
+    const index = base?.get(computed.getKey());
+    if (!index) {
+      return [];
+    } else if (index instanceof Map) {
       return [...index.entries()].toSorted((a, b) => a[1] - b[1]).map(([id,]) => id);
     } else {
       return [...index];

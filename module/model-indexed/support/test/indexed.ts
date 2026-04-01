@@ -8,7 +8,7 @@ import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
 import type { ModelIndexedSupport } from '../../src/types/service.ts';
 import { keyedIndex, sortedIndex } from '../../src/indexes.ts';
-import { MissingIndexedFieldError } from '../../__index__.ts';
+import { IndexedFieldError } from '../../__index__.ts';
 
 
 @Model('index_user')
@@ -124,7 +124,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     assert(arr[2].color === 'green' && arr[2].name === 'bob');
 
     // @ts-expect-error
-    await assert.rejects(() => service.listByIndex(User3, userAgeIndex, {}), MissingIndexedFieldError);
+    await assert.rejects(() => service.listByIndex(User3, userAgeIndex, {}), IndexedFieldError);
   }
 
   @Test()
@@ -141,7 +141,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     assert(arr[2].color === 'green' && arr[2].child.name === 'bob' && arr[2].child.age === 50);
 
     // @ts-expect-error
-    await assert.rejects(() => service.listByIndex(User4, childAgeIndex, {}), MissingIndexedFieldError);
+    await assert.rejects(() => service.listByIndex(User4, childAgeIndex, {}), IndexedFieldError);
   }
 
   @Test()
@@ -159,7 +159,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     assert(arr[2].color === 'blue' && arr[2].child.name === 'bob' && arr[2].child.age === 40);
 
     // @ts-expect-error
-    await assert.rejects(() => service.listByIndex(User4, nameCreatedIndex, {}), MissingIndexedFieldError);
+    await assert.rejects(() => service.listByIndex(User4, nameCreatedIndex, {}), IndexedFieldError);
   }
 
   @Test()

@@ -68,7 +68,7 @@ export class MongoModelService implements
     body: KeyedIndexBody<T, K>
   ): Promise<FindCursor> {
     const store = await this.getStore(cls);
-    const computed = ModelIndexedComputedIndex.getMulti(idx, body, { emptySortValue: { $exists: true } });
+    const computed = ModelIndexedComputedIndex.getMulti(idx, body);
 
     const where = this.getWhereFilter(cls, castTo(computed.project()));
 
@@ -455,10 +455,10 @@ export class MongoModelService implements
     const computed = ModelIndexedComputedIndex.getSingle(idx, body);
 
     const result = await store.findOne(
-      this.getWhereFilter(cls, castTo(computed.fullProject()))
+      this.getWhereFilter(cls, castTo(computed.projectWithSort()))
     );
     if (!result) {
-      throw new NotFoundError(`${cls.name}: ${idx}`, computed.fullKey);
+      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKeyWithSort());
     }
     return await this.postLoad(cls, result);
 
@@ -473,13 +473,10 @@ export class MongoModelService implements
     const computed = ModelIndexedComputedIndex.getSingle(idx, body);
 
     const result = await store.deleteOne(
-      this.getWhereFilter(
-        cls,
-        castTo(computed.fullProject())
-      )
+      this.getWhereFilter(cls, castTo(computed.projectWithSort()))
     );
     if (!result.deletedCount) {
-      throw new NotFoundError(`${cls.name}: ${idx}`, computed.fullKey);
+      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKeyWithSort());
     }
   }
 

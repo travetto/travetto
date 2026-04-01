@@ -79,9 +79,9 @@ export type AllIndexes<
   S extends SortedIndexSelection<T> = Any
 > = KeyedIndex<T, K, S> | SortedIndex<T, K, S>;
 
-export class MissingIndexedFieldError<T extends ModelType> extends RuntimeError {
-  constructor(cls: Class<T>, idx: AllIndexes<T>, fieldPath: string) {
-    super(`Missing field value for index ${idx.name} on ${cls.name} at path ${fieldPath}`, {
+export class IndexedFieldError<T extends ModelType> extends RuntimeError {
+  constructor(cls: Class<T>, idx: AllIndexes<T>, fieldPath: string, message: string) {
+    super(`${message}:  ${idx.name} on ${cls.name} at path ${fieldPath}`, {
       details: { cls: cls.name, index: idx.name, fieldPath }
     });
   }

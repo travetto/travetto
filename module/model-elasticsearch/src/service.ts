@@ -65,7 +65,7 @@ export class ElasticsearchModelService implements
     nextOffset?: estypes.SortResults | undefined;
   }> {
     const limit = options?.limit ?? 100;
-    const computed = ModelIndexedComputedIndex.getMulti(idx, body, { emptySortValue: { $exists: true } });
+    const computed = ModelIndexedComputedIndex.getMulti(idx, body);
 
     let search = await this.execSearch<T>(cls, {
       ...(options?.offset ?
@@ -417,11 +417,11 @@ export class ElasticsearchModelService implements
 
     const result = await this.execSearch<T>(cls, {
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
-        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.fullProject())
+        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.projectWithSort())
       )
     });
     if (!result.hits.hits.length) {
-      throw new NotFoundError(`${cls.name}: ${idx}`, computed.key);
+      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKeyWithSort());
     }
     return this.postLoad(cls, result.hits.hits[0]);
 
@@ -436,12 +436,12 @@ export class ElasticsearchModelService implements
     const result = await this.client.deleteByQuery({
       index: this.manager.getIdentity(cls).index,
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
-        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.fullProject())
+        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.projectWithSort())
       ),
       refresh: true
     });
     if (!result.deleted) {
-      throw new NotFoundError(`${cls.name}: ${idx}`, computed.fullKey);
+      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey());
     }
   }
 
