@@ -12,7 +12,7 @@ import {
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex,
-  type AllIndexes, isModelIndexedIndex, type FullKeyedIndexBody, type FullKeyedIndexWithPartialBody
+  type AllIndexes, isModelIndexedIndex, type FullKeyedIndexBody, type FullKeyedIndexWithPartialBody,
 } from '@travetto/model-indexed';
 import { ModelIndexedComputedIndex } from '@travetto/model-indexed/src/computed';
 
@@ -55,7 +55,7 @@ export class MemoryModelService implements
   #indices = {
     'indexed:sorted': new Map<string, Map<string, Map<string, number>>>(),
     'indexed:keyed': new Map<string, Map<string, Set<string>>>(),
-  };
+  } as const;
 
   idSource = ModelCrudUtil.uuidSource();
   config: MemoryModelConfig;
@@ -166,25 +166,22 @@ export class MemoryModelService implements
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>): string[] {
+  >(cls: Class<T>, idx: AllIndexes<T, K, S>, body: KeyedIndexBody<T, K>): string[] {
     const { key } = new ModelIndexedComputedIndex(cls, idx, castTo(body), { emptySortValue: null });
     if (!isModelIndexedIndex(idx)) {
       throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with MemoryModelService');
     }
     const index = this.#indices[idx.type].get(indexName(cls, idx))?.get(key);
-
-    let sortMethod = (a: [string, number], b: [string, number]): number => a[1] - b[1];
-    if ('reversed' in idx && idx.reversed) {
-      sortMethod = (a: [string, number], b: [string, number]): number => b[1] - a[1];
-    }
-
     if (!index) {
-      throw new IndexNotSupported(cls, idx);
+      throw new NotFoundError(cls, key);
     }
-
-    return index instanceof Set ?
-      [...index] :
-      [...index.entries()].toSorted(sortMethod).map(([a,]) => a);
+    if (idx.type === 'indexed:sorted') {
+      const index2 = this.#indices[idx.type].get(indexName(cls, idx))?.get(key);
+      return [...index2!.entries()].toSorted((a, b) => a[1] - b[1]).map(([id,]) => id);
+    } else {
+      const index2 = this.#indices[idx.type].get(indexName(cls, idx))?.get(key);
+      return [...index2!];
+    }
   }
 
   @PostConstruct()

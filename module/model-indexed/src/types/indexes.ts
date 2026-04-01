@@ -1,5 +1,5 @@
 import type { ModelType, IndexConfig } from '@travetto/model';
-import type { IntrinsicType, Any, DeepPartial } from '@travetto/runtime';
+import { type IntrinsicType, type Any, type DeepPartial, RuntimeError, type Class } from '@travetto/runtime';
 
 type TypeProjection<T, V> = {
   [P in keyof T]?:
@@ -65,7 +65,6 @@ export interface SortedIndex<
 > extends IndexConfig<'indexed:sorted'> {
   keys: K;
   sort: S;
-  reversed: boolean;
 }
 
 export type SingleItemIndex<
@@ -79,3 +78,11 @@ export type AllIndexes<
   K extends KeyedIndexSelection<T> = Any,
   S extends SortedIndexSelection<T> = Any
 > = KeyedIndex<T, K, S> | SortedIndex<T, K, S>;
+
+export class MissingIndexedFieldError<T extends ModelType> extends RuntimeError {
+  constructor(cls: Class<T>, idx: AllIndexes<T>, fieldPath: string) {
+    super(`Missing field value for index ${idx.name} on ${cls.name} at path ${fieldPath}`, {
+      details: { cls: cls.name, index: idx.name, fieldPath }
+    });
+  }
+}

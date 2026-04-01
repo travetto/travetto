@@ -54,7 +54,6 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     ModelCrudUtil.ensureNotSubType(cls);
     const { key } = new ModelIndexedComputedIndex(cls, idx, body, { emptySortValue: null });
     const expression = { [`:${idx.name}`]: DynamoDBUtil.toValue(key) };
-    const isReversed = 'reversed' in idx && idx.reversed;
     const limit = options?.limit ?? 100;
 
     let startKey = options?.offset ?? undefined;
@@ -70,7 +69,6 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         ExpressionAttributeValues: expression,
         Limit: Math.min(remaining, 100),
         ExclusiveStartKey: startKey,
-        ScanIndexForward: !isReversed,
       });
 
       if (batch.Count && batch.Items) {
