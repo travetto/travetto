@@ -192,9 +192,9 @@ export class MongoUtil {
 
       return [out, { name, unique: idx.type === 'query:unique', }];
     } else if (isModelIndexedIndex(idx)) {
-      const computed = ModelIndexedComputedIndex.get(idx, {});
+      const computed = ModelIndexedComputedIndex.get(idx);
       const filter = Object.fromEntries(
-        computed.allFields.map(({ path, templateValue }) => [path.join('.'), templateValue === -1 ? -1 : 1])
+        computed.allParts.map(({ template: { path, value } }) => [path.join('.'), value === -1 ? -1 : 1])
       );
       switch (idx.type) {
         case 'indexed:keyed': return [filter, { name, unique: idx.unique }];

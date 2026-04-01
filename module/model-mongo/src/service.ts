@@ -77,7 +77,7 @@ export class MongoModelService implements
 
     // TODO: We could cache this
     if ('sort' in idx) {
-      q = q.sort(computed.sortFields.map(({ templateValue, path }) => [path.join('.'), templateValue] as const));
+      q = q.sort(computed.sortParts.map(({ template: { path, value } }) => [path.join('.'), value] as const));
     }
     return q;
   }

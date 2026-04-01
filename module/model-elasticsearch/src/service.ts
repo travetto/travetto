@@ -75,7 +75,7 @@ export class ElasticsearchModelService implements
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.project())
       ),
-      sort: 'sort' in idx ? ElasticsearchQueryUtil.getSort(idx) : undefined,
+      sort: ElasticsearchQueryUtil.getSort(idx)
     });
 
     let hits = search.hits.hits.slice(0, limit);

@@ -4,24 +4,9 @@ import { type Any, castTo, type Class, TypedObject } from '@travetto/runtime';
 import { type WhereClause, type SelectClause, type SortClause, type Query, ModelQueryUtil } from '@travetto/model-query';
 import { type ModelType, ModelRegistryIndex } from '@travetto/model';
 import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
-import type { SortedIndex } from '@travetto/model-indexed';
+import { ModelIndexedComputedIndex, type SortedIndex } from '@travetto/model-indexed';
 
 import { type EsSchemaConfig } from './types.ts';
-
-function toSortOrdered(o: Record<string, unknown>): estypes.SortOptions {
-  const out: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(o)) {
-    if (typeof value === 'object' && value !== null) {
-      Object.assign(out, toSortOrdered(castTo(value)));
-    } else if (value === 1 || value === true) {
-      out[key] = 'asc';
-    } else if (value === -1 || value === false) {
-      out[key] = 'desc';
-    }
-  }
-  return castTo(out);
-}
-
 
 /**
  * Support tools for dealing with elasticsearch specific requirements
@@ -29,7 +14,7 @@ function toSortOrdered(o: Record<string, unknown>): estypes.SortOptions {
 export class ElasticsearchQueryUtil {
 
   /**
-   * Convert `a.b.c` to `a : { b : { c : ... }}`
+   * Convert `a : { b : { c : ... }}` to `a.b.c`
    */
   static extractSimple<T>(input: T, path: string = ''): Record<string, unknown> {
     const out: Record<string, unknown> = {};
@@ -76,7 +61,10 @@ export class ElasticsearchQueryUtil {
         return { [key]: { order: value === 1 || value === true ? 'asc' : 'desc' } };
       });
     } else {
-      return toSortOrdered(sort.sort);
+      const computed = ModelIndexedComputedIndex.get(sort);
+      return computed.sortParts.map<estypes.SortOptions>(field =>
+        ({ [field.template.path.join('.')]: { order: field.template.value === 1 ? 'asc' : 'desc' } })
+      );
     }
   }
 
