@@ -417,7 +417,11 @@ export class ElasticsearchModelService implements
 
     const result = await this.execSearch<T>(cls, {
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
-        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.project({ sort: true }))
+        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.project({
+          sort: true,
+          emptyValue: { $exists: true }
+        }))
+
       )
     });
     if (!result.hits.hits.length) {
@@ -436,7 +440,10 @@ export class ElasticsearchModelService implements
     const result = await this.client.deleteByQuery({
       index: this.manager.getIdentity(cls).index,
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
-        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.project({ sort: true }))
+        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.project({
+          sort: true,
+          emptyValue: { $exists: true }
+        }))
       ),
       refresh: true
     });

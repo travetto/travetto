@@ -4,9 +4,24 @@ import { type Any, castTo, type Class, TypedObject } from '@travetto/runtime';
 import { type WhereClause, type SelectClause, type SortClause, type Query, ModelQueryUtil } from '@travetto/model-query';
 import { type ModelType, ModelRegistryIndex } from '@travetto/model';
 import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
+import type { SortedIndex } from '@travetto/model-indexed';
 
 import { type EsSchemaConfig } from './types.ts';
-import type { SortedIndex } from '@travetto/model-indexed';
+
+function toSortOrdered(o: Record<string, unknown>): estypes.SortOptions {
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(o)) {
+    if (typeof value === 'object' && value !== null) {
+      Object.assign(out, toSortOrdered(castTo(value)));
+    } else if (value === 1 || value === true) {
+      out[key] = 'asc';
+    } else if (value === -1 || value === false) {
+      out[key] = 'desc';
+    }
+  }
+  return castTo(out);
+}
+
 
 /**
  * Support tools for dealing with elasticsearch specific requirements
@@ -61,9 +76,7 @@ export class ElasticsearchQueryUtil {
         return { [key]: { order: value === 1 || value === true ? 'asc' : 'desc' } };
       });
     } else {
-      return Object.fromEntries(
-        Object.entries(this.extractSimple(sort)).map(([key, value]) => [key, { order: value ? 'asc' : 'desc' }])
-      );
+      return toSortOrdered(sort.sort);
     }
   }
 

@@ -127,8 +127,8 @@ export class ModelIndexedComputedIndex {
     }
   }
 
-  project(config: IndexProcessConfig<{ emptyValue?: unknown, emptySortValue?: unknown }> = {}): Record<string, unknown> {
-    const { keyed = true, sort = false, emptyValue = null, emptySortValue = null } = config;
+  project(config: IndexProcessConfig<{ emptyValue?: unknown }> = {}): Record<string, unknown> {
+    const { keyed = true, sort = false, emptyValue = null } = config;
     const response: Record<string, unknown> = {};
     if (keyed) {
       for (const { path, value, state } of this.keyedFields) {
@@ -149,7 +149,7 @@ export class ModelIndexedComputedIndex {
         for (const part of all) {
           sub = castTo(sub[part] ??= {});
         }
-        sub[last] = state === 'empty' ? emptySortValue : value;
+        sub[last] = state === 'empty' ? emptyValue : value;
       }
     }
     return response;
