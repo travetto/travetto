@@ -122,27 +122,27 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   #removeIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
-    for (const idx of Object.values(ModelRegistryIndex.getIndices(cls))) {
+    for (const idx of ModelRegistryIndex.getIndices(cls)) {
       if (isModelIndexedIndex(idx)) {
         const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
-        const fullKey = this.#resolveKey(cls, idx.name, computed.getKey());
+        const resolvedKey = this.#resolveKey(cls, idx.name, computed.getKey());
         switch (idx.type) {
-          case 'indexed:keyed': multi.sRem(fullKey, item.id); break;
-          case 'indexed:sorted': multi.zRem(fullKey, item.id); break;
+          case 'indexed:keyed': multi.sRem(resolvedKey, item.id); break;
+          case 'indexed:sorted': multi.zRem(resolvedKey, item.id); break;
         }
       }
     }
   }
 
   #addIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
-    for (const idx of Object.values(ModelRegistryIndex.getIndices(cls))) {
+    for (const idx of ModelRegistryIndex.getIndices(cls)) {
       if (isModelIndexedIndex(idx)) {
         const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
-        const fullKey = this.#resolveKey(cls, idx.name, computed.getKey());
+        const resolvedKey = this.#resolveKey(cls, idx.name, computed.getKey());
 
         switch (idx.type) {
-          case 'indexed:keyed': multi.sAdd(fullKey, item.id); break;
-          case 'indexed:sorted': multi.zAdd(fullKey, { score: computed.getSort(), value: item.id }); break;
+          case 'indexed:keyed': multi.sAdd(resolvedKey, item.id); break;
+          case 'indexed:sorted': multi.zAdd(resolvedKey, { score: computed.getSort(), value: item.id }); break;
         }
       }
     }
@@ -151,10 +151,11 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   async #store<T extends ModelType>(cls: Class<T>, item: T, action: 'write' | 'delete'): Promise<void> {
     const key = this.#resolveKey(cls, item.id);
     const config = ModelRegistryIndex.getConfig(cls);
+    const indices = ModelRegistryIndex.getIndices(cls);
     const existing = await this.get(cls, item.id).catch(() => undefined);
 
     // Store with indices
-    if (config.indices?.length) {
+    if (indices.length) {
       const multi = this.client.multi();
       if (existing) {
         this.#removeIndices(cls, existing, multi);
@@ -209,13 +210,14 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     ModelCrudUtil.ensureNotSubType(cls);
 
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
-    const fullKey = this.#resolveKey(cls, idx.name, computed.getKey());
+    const resolvedKey = this.#resolveKey(cls, idx.name, computed.getKey());
     let id: string | undefined;
     switch (idx.type) {
-      case 'indexed:keyed': id = await this.client.sRandMember(fullKey) ?? undefined; break;
+      case 'indexed:keyed': id = await this.client.sRandMember(resolvedKey) ?? undefined; break;
       case 'indexed:sorted': {
         const sort = computed.getSort();
-        const result = await this.client.zRangeByScore(fullKey, sort, sort);
+        console.error('Resolved sort value', { sort, resolvedKey });
+        const result = await this.client.zRangeByScore(resolvedKey, sort, sort);
         id = result[0];
         break;
       }
