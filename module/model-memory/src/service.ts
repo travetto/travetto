@@ -13,6 +13,7 @@ import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex,
   type AllIndexes, isModelIndexedIndex, type FullKeyedIndexBody, type FullKeyedIndexWithPartialBody,
+  MissingIndexedFieldError,
 } from '@travetto/model-indexed';
 import { ModelIndexedComputedIndex } from '@travetto/model-indexed/src/computed';
 
@@ -119,7 +120,7 @@ export class MemoryModelService implements
           break;
         }
         case 'indexed:sorted': {
-          this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Map()).set(item.id, +sort!);
+          this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Map()).set(item.id, sort!);
           break;
         }
       }
@@ -151,7 +152,10 @@ export class MemoryModelService implements
     let id: string | undefined;
     if (index) {
       if (index instanceof Map) {
-        id = getFirstId(index, +sort!); // Grab first id
+        if (sort === undefined) {
+          throw new MissingIndexedFieldError(cls, idx, key);
+        }
+        id = getFirstId(index, sort); // Grab first id
       } else if (index instanceof Set) {
         id = getFirstId(index); // Grab first id
       }
@@ -171,16 +175,21 @@ export class MemoryModelService implements
     if (!isModelIndexedIndex(idx)) {
       throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with MemoryModelService');
     }
-    const index = this.#indices[idx.type].get(indexName(cls, idx))?.get(key);
-    if (!index) {
-      throw new NotFoundError(cls, key);
+
+    const base = this.#indices[idx.type].get(indexName(cls, idx));
+    if (!base) {
+      throw new IndexNotSupported(cls, idx, 'Index not found for class');
+    } else if (!key) {
+      throw new MissingIndexedFieldError(cls, idx, key);
+    } else if (!base.has(key)) {
+      throw new MissingIndexedFieldError(cls, idx, key);
     }
-    if (idx.type === 'indexed:sorted') {
-      const index2 = this.#indices[idx.type].get(indexName(cls, idx))?.get(key);
-      return [...index2!.entries()].toSorted((a, b) => a[1] - b[1]).map(([id,]) => id);
+
+    const index = base.get(key)!;
+    if (index instanceof Map) {
+      return [...index.entries()].toSorted((a, b) => a[1] - b[1]).map(([id,]) => id);
     } else {
-      const index2 = this.#indices[idx.type].get(indexName(cls, idx))?.get(key);
-      return [...index2!];
+      return [...index];
     }
   }
 
