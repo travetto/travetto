@@ -6,7 +6,7 @@ import {
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex, type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody
+  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex
 } from '@travetto/model-indexed';
 import { castTo, type Class, JSONUtil } from '@travetto/runtime';
 import { DataUtil } from '@travetto/schema';
@@ -26,7 +26,6 @@ import type { SQLDialect } from './dialect/base.ts';
 import { TableManager } from './table-manager.ts';
 import type { Connection } from './connection/base.ts';
 import type { InsertWrapper } from './internal/types.ts';
-import { ModelIndexedComputedIndex } from '@travetto/model-indexed/src/computed.ts';
 
 /**
  * Core for SQL Model Source.  Should not have any direct queries,
@@ -340,7 +339,7 @@ export class SQLModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
-    const computed = new ModelIndexedComputedIndex('single', idx, body);
+    const computed = ModelIndexedComputedIndex.getSingle(idx, body);
     const results = await this.query(cls, castTo({ where: computed.fullProject() }));
     if (results.length !== 1) {
       throw new NotFoundError(`${cls.name}: ${idx}`, computed.fullKey);
@@ -403,7 +402,7 @@ export class SQLModelService implements
   ): Promise<ListPageResult<T>> {
     const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     const limit = options?.limit ?? 100;
-    const computed = new ModelIndexedComputedIndex('multi', idx, body, { emptySortValue: undefined });
+    const computed = ModelIndexedComputedIndex.getMulti(idx, body, { emptySortValue: undefined });
 
     let sort: Record<string, unknown>[] = [];
     for (const field of computed.sorted) {

@@ -13,9 +13,8 @@ import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex,
   type AllIndexes, isModelIndexedIndex, type FullKeyedIndexBody, type FullKeyedIndexWithPartialBody,
-  MissingIndexedFieldError,
+  MissingIndexedFieldError, ModelIndexedComputedIndex,
 } from '@travetto/model-indexed';
-import { ModelIndexedComputedIndex } from '@travetto/model-indexed/src/computed';
 
 const ModelBlobNamespace = '__blobs';
 const ModelBlobMetaNamespace = `${ModelBlobNamespace}_meta`;
@@ -88,7 +87,7 @@ export class MemoryModelService implements
           continue; // Only support ModelIndexed indices
         }
         const idxName = indexName(cls, idx);
-        const { key } = new ModelIndexedComputedIndex('single', idx, item);
+        const { key } = ModelIndexedComputedIndex.getSingle(idx, item);
         switch (idx.type) {
           case 'indexed:sorted':
           case 'indexed:keyed': this.#indices[idx.type].get(idxName)?.get(key)?.delete(id); break;
@@ -107,7 +106,7 @@ export class MemoryModelService implements
         continue; // Only support ModelIndexed indices
       }
       const idxName = indexName(cls, idx);
-      const { key, sort } = new ModelIndexedComputedIndex('single', idx, item);
+      const { key, sort } = ModelIndexedComputedIndex.getSingle(idx, item);
       switch (idx.type) {
         case 'indexed:keyed': {
           if (idx.unique) {
@@ -146,7 +145,7 @@ export class MemoryModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<string> {
-    const { key, sort } = new ModelIndexedComputedIndex('single', idx, body);
+    const { key, sort } = ModelIndexedComputedIndex.getSingle(idx, body);
 
     const index = this.#indices[idx.type].get(indexName(cls, idx))?.get(key);
     let id: string | undefined;
@@ -171,7 +170,7 @@ export class MemoryModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: AllIndexes<T, K, S>, body: KeyedIndexBody<T, K>): string[] {
-    const { key } = new ModelIndexedComputedIndex('multi', idx, body, { emptySortValue: null });
+    const { key } = ModelIndexedComputedIndex.getMulti(idx, body, { emptySortValue: null });
     if (!isModelIndexedIndex(idx)) {
       throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with MemoryModelService');
     }

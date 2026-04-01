@@ -50,7 +50,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     options?: ListPageOptions<Record<string, AttributeValue>>
   ): AsyncIterable<QueryCommandOutput & { LastEvaluatedOffset?: string }> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const computed = new ModelIndexedComputedIndex('multi', idx, body, { emptySortValue: null });
+    const computed = ModelIndexedComputedIndex.getMulti(idx, body, { emptySortValue: null });
     const expression = { [`:${idx.name}`]: DynamoDBUtil.toValue(computed.key) };
     const limit = options?.limit ?? 100;
 
@@ -101,7 +101,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         const indices: Record<string, unknown> = {};
         for (const idx of Object.values(config.indices ?? {})) {
           if (isModelIndexedIndex(idx)) {
-            const computed = new ModelIndexedComputedIndex('single', idx, item);
+            const computed = ModelIndexedComputedIndex.getSingle(idx, item);
             switch (idx.type) {
               case 'indexed:keyed': indices[`${idx.name}__`] = DynamoDBUtil.toValue(computed.key); break;
               case 'indexed:sorted': {
@@ -132,7 +132,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
         for (const idx of Object.values(config.indices ?? {})) {
           if (isModelIndexedIndex(idx)) {
-            const computed = new ModelIndexedComputedIndex('single', idx, item);
+            const computed = ModelIndexedComputedIndex.getSingle(idx, item);
             switch (idx.type) {
               case 'indexed:keyed': {
                 indices[`${idx.name}__`] = DynamoDBUtil.toValue(computed.key);
@@ -365,7 +365,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const computed = new ModelIndexedComputedIndex('single', idx, body);
+    const computed = ModelIndexedComputedIndex.getSingle(idx, body);
 
     if ('sort' in idx && computed.sort === undefined) {
       throw new IndexNotSupported(cls, idx, 'Sorted indices require the sort field');
@@ -467,7 +467,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     let nextOffset;
     if (items.length) {
       const last: T = items.at(-1)!;
-      const computed = new ModelIndexedComputedIndex('multi', idx, last, { emptySortValue: null });
+      const computed = ModelIndexedComputedIndex.getMulti(idx, last, { emptySortValue: null });
       nextOffset = JSONUtil.toBase64({
         ...(computed.key ? { [`${idx.name}__`]: DynamoDBUtil.toValue(computed.key) } : {}),
         ...(computed.sort ? { [`${idx.name}_sort__`]: DynamoDBUtil.toValue(computed.sort) } : {}),

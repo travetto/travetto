@@ -19,9 +19,8 @@ import {
 } from '@travetto/model-query';
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type ListPageResult, type SortedIndex,
-  type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody,
+  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex, type FullKeyedIndexBody,
+  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex,
 } from '@travetto/model-indexed';
 
 import {
@@ -33,7 +32,6 @@ import { Injectable, PostConstruct } from '@travetto/di';
 
 import { MongoUtil, type WithId } from './internal/util.ts';
 import type { MongoModelConfig } from './config.ts';
-import { ModelIndexedComputedIndex } from '@travetto/model-indexed/src/computed.ts';
 
 type BlobRaw = GridFSFile & { metadata?: BinaryMetadata };
 
@@ -70,7 +68,7 @@ export class MongoModelService implements
     body: KeyedIndexBody<T, K>
   ): Promise<FindCursor> {
     const store = await this.getStore(cls);
-    const computed = new ModelIndexedComputedIndex('multi', idx, body, { emptySortValue: { $exists: true } });
+    const computed = ModelIndexedComputedIndex.getMulti(idx, body, { emptySortValue: { $exists: true } });
 
     const where = this.getWhereFilter(cls, castTo(computed.project()));
 
@@ -454,7 +452,7 @@ export class MongoModelService implements
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
     const store = await this.getStore(cls);
 
-    const computed = new ModelIndexedComputedIndex('single', idx, body);
+    const computed = ModelIndexedComputedIndex.getSingle(idx, body);
 
     const result = await store.findOne(
       this.getWhereFilter(cls, castTo(computed.fullProject()))
@@ -472,7 +470,7 @@ export class MongoModelService implements
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<void> {
     const store = await this.getStore(cls);
-    const computed = new ModelIndexedComputedIndex('single', idx, body);
+    const computed = ModelIndexedComputedIndex.getSingle(idx, body);
 
     const result = await store.deleteOne(
       this.getWhereFilter(

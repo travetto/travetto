@@ -8,11 +8,10 @@ import {
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex, type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody
+  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex
 } from '@travetto/model-indexed';
 
 import type { FirestoreModelConfig } from './config.ts';
-import { ModelIndexedComputedIndex } from '@travetto/model-indexed/src/computed.ts';
 
 const clone = JSONUtil.clone;
 const setMissingValues = <T>(input: T, missingValue: unknown): T =>
@@ -48,7 +47,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>): Query {
     ModelCrudUtil.ensureNotSubType(cls);
-    const computed = new ModelIndexedComputedIndex('multi', idx, body, { emptySortValue: null });
+    const computed = ModelIndexedComputedIndex.getMulti(idx, body, { emptySortValue: null });
 
     let query = computed.fields.reduce<Query>((result, { path, value }) =>
       result.where(path.join('.'), '==', value), this.#getCollection(cls));
@@ -147,7 +146,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const computed = new ModelIndexedComputedIndex('single', idx, body, { separator: '; ' });
+    const computed = ModelIndexedComputedIndex.getSingle(idx, body, { separator: '; ' });
     const query = computed.fullFields.reduce<Query>(
       (result, { path, value }) => result.where(path.join('.'), '==', value),
       this.#getCollection(cls)

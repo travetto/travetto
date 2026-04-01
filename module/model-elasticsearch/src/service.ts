@@ -17,7 +17,7 @@ import {
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex, type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody
+  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex
 } from '@travetto/model-indexed';
 
 import type { ElasticsearchModelConfig } from './config.ts';
@@ -25,7 +25,6 @@ import type { EsBulkError } from './internal/types.ts';
 import { ElasticsearchQueryUtil } from './internal/query.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
 import { IndexManager } from './index-manager.ts';
-import { ModelIndexedComputedIndex } from '@travetto/model-indexed/src/computed.ts';
 
 const ELASTICSEARCH_REPLACER = {
   replacer(this: unknown, key: string, value: unknown): unknown {
@@ -66,7 +65,7 @@ export class ElasticsearchModelService implements
     nextOffset?: estypes.SortResults | undefined;
   }> {
     const limit = options?.limit ?? 100;
-    const computed = new ModelIndexedComputedIndex('multi', idx, body, { emptySortValue: { $exists: true } });
+    const computed = ModelIndexedComputedIndex.getMulti(idx, body, { emptySortValue: { $exists: true } });
 
     let search = await this.execSearch<T>(cls, {
       ...(options?.offset ?
@@ -414,7 +413,7 @@ export class ElasticsearchModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
-    const computed = new ModelIndexedComputedIndex('single', idx, body);
+    const computed = ModelIndexedComputedIndex.getSingle(idx, body);
 
     const result = await this.execSearch<T>(cls, {
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
@@ -433,7 +432,7 @@ export class ElasticsearchModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<void> {
-    const computed = new ModelIndexedComputedIndex('single', idx, body);
+    const computed = ModelIndexedComputedIndex.getSingle(idx, body);
     const result = await this.client.deleteByQuery({
       index: this.manager.getIdentity(cls).index,
       query: ElasticsearchQueryUtil.getSearchQuery(cls,

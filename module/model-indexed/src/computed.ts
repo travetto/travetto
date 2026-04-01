@@ -38,33 +38,53 @@ function matchFields<V, T>(
   return out;
 }
 
+type Body<T extends ModelType> = KeyedIndexBody<T, any> | FullKeyedIndexBody<T, any, any> | Partial<T>;
+
 export class ModelIndexedComputedIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T>,
   S extends SortedIndexSelection<T>
 > {
-  mode: 'single' | 'multi';
   idx: AllIndexes<T, K, S>;
   fields: PathValue<Primitive | Date, unknown>[];
   sorted: PathValue<number | Date, -1 | 1>[];
   config: ComputeConfig;
 
-  constructor(
-    mode: 'single' | 'multi',
+  static getMulti<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     idx: AllIndexes<T, K, S>,
-    body: KeyedIndexBody<T, K> | FullKeyedIndexBody<T, K, S> | Partial<T>,
+    body: Body<T>,
+    config: ComputeConfig = {}
+  ): ModelIndexedComputedIndex<T, K, S> {
+    return new ModelIndexedComputedIndex(idx, body, config).validateForMultiple();
+  }
+
+  static getSingle<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    idx: AllIndexes<T, K, S>,
+    body: Body<T>,
+    config: ComputeConfig = {}
+  ): ModelIndexedComputedIndex<T, K, S> {
+    return new ModelIndexedComputedIndex(idx, body, config).validateForSingle();
+  }
+
+  constructor(
+    idx: AllIndexes<T, K, S>,
+    body: Body<T>,
     config: ComputeConfig = {},
   ) {
-    this.mode = mode;
     this.idx = idx;
     this.config = config;
     this.fields = ('keys' in idx) ? matchFields<Primitive | Date, true>(idx, castTo(idx.keys), body, config.emptyValue) : [];
     this.sorted = ('sort' in idx) ? matchFields<number | Date, -1 | 1>(idx, castTo(idx.sort), body, config.emptySortValue) : [];
-    this.validate();
   }
 
-  validate() {
+  validateForMultiple(): this {
     // Do validation checks here 
+    return this;
+  }
+
+  validateForSingle(): this {
+    // Do validation checks here 
+    return this;
   }
 
   get key(): string {
