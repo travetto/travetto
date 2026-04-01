@@ -47,12 +47,12 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>): Query {
     ModelCrudUtil.ensureNotSubType(cls);
-    const computed = ModelIndexedComputedIndex.getMulti(idx, body);
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ keyed: true });
 
-    let query = computed.fields.reduce<Query>((result, { path, value, state }) =>
+    let query = computed.keyedFields.reduce<Query>((result, { path, value, state }) =>
       result.where(path.join('.'), '==', (state === 'empty' ? null : value)), this.#getCollection(cls));
 
-    for (const field of computed.sorted) {
+    for (const field of computed.sortFields) {
       query = query.orderBy(field.path.join('.'), field.templateValue === 1 ? 'asc' : 'desc');
     }
     return query;
@@ -146,8 +146,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const computed = ModelIndexedComputedIndex.getSingle(idx, body);
-    const query = [...computed.fields, ...computed.sorted].reduce<Query>(
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
+    const query = computed.allFields.reduce<Query>(
       (result, { path, value }) => result.where(path.join('.'), '==', value),
       this.#getCollection(cls)
     );

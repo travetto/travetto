@@ -339,10 +339,10 @@ export class SQLModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
-    const computed = ModelIndexedComputedIndex.getSingle(idx, body);
-    const results = await this.query(cls, castTo({ where: computed.projectWithSort() }));
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
+    const results = await this.query(cls, castTo({ where: computed.project({ sort: true }) }));
     if (results.length !== 1) {
-      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKeyWithSort());
+      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
     return results[0];
   }
@@ -402,10 +402,10 @@ export class SQLModelService implements
   ): Promise<ListPageResult<T>> {
     const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     const limit = options?.limit ?? 100;
-    const computed = ModelIndexedComputedIndex.getMulti(idx, body);
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate();
 
     let sort: Record<string, unknown>[] = [];
-    for (const field of computed.sorted) {
+    for (const field of computed.sortFields) {
       sort = [{ [field.path.join('.')]: field.templateValue === 1 }];
     }
 

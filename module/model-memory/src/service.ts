@@ -86,7 +86,7 @@ export class MemoryModelService implements
           continue; // Only support ModelIndexed indices
         }
         const idxName = indexName(cls, idx);
-        const computed = ModelIndexedComputedIndex.getSingle(idx, item);
+        const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
         switch (idx.type) {
           case 'indexed:sorted':
           case 'indexed:keyed': this.#indices[idx.type].get(idxName)?.get(computed.getKey())?.delete(id); break;
@@ -105,7 +105,7 @@ export class MemoryModelService implements
         continue; // Only support ModelIndexed indices
       }
       const idxName = indexName(cls, idx);
-      const computed = ModelIndexedComputedIndex.getSingle(idx, item);
+      const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
       const key = computed.getKey();
       switch (idx.type) {
         case 'indexed:keyed': {
@@ -145,7 +145,7 @@ export class MemoryModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<string> {
-    const computed = ModelIndexedComputedIndex.getSingle(idx, body);
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
 
     const index = this.#indices[idx.type].get(indexName(cls, idx))?.get(computed.getKey());
     let id: string | undefined;
@@ -159,7 +159,7 @@ export class MemoryModelService implements
     if (id) {
       return id;
     }
-    throw new NotFoundError(cls, computed.getKeyWithSort());
+    throw new NotFoundError(cls, computed.getKey({ sort: true }));
   }
 
   #getIndexIds<
@@ -167,7 +167,7 @@ export class MemoryModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: AllIndexes<T, K, S>, body: KeyedIndexBody<T, K>): string[] {
-    const computed = ModelIndexedComputedIndex.getMulti(idx, body);
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ keyed: true });
     if (!isModelIndexedIndex(idx)) {
       throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with MemoryModelService');
     }

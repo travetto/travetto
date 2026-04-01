@@ -94,7 +94,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     options?: ListPageOptions
   ): AsyncIterable<ScanState> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const computed = ModelIndexedComputedIndex.getMulti(idx, body);
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ keyed: true });
     const fullKey = this.#resolveKey(cls, idx.name, computed.getKey());
     switch (idx.type) {
       // case 'indexed:keyed': return this.#streamValues('sScan', { key: fullKey }, options);
@@ -124,7 +124,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   #removeIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
     for (const idx of Object.values(ModelRegistryIndex.getIndices(cls))) {
       if (isModelIndexedIndex(idx)) {
-        const computed = ModelIndexedComputedIndex.getSingle(idx, item);
+        const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
         const fullKey = this.#resolveKey(cls, idx.name, computed.getKey());
         switch (idx.type) {
           case 'indexed:keyed': multi.sRem(fullKey, item.id); break;
@@ -137,7 +137,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   #addIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
     for (const idx of Object.values(ModelRegistryIndex.getIndices(cls))) {
       if (isModelIndexedIndex(idx)) {
-        const computed = ModelIndexedComputedIndex.getSingle(idx, item);
+        const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
         const fullKey = this.#resolveKey(cls, idx.name, computed.getKey());
 
         switch (idx.type) {
@@ -208,7 +208,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const computed = ModelIndexedComputedIndex.getSingle(idx, body);
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
     const fullKey = this.#resolveKey(cls, idx.name, computed.getKey());
     let id: string | undefined;
     switch (idx.type) {
@@ -223,7 +223,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     if (id) {
       return id;
     }
-    throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKeyWithSort());
+    throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
   }
 
   @PostConstruct()

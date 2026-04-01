@@ -65,7 +65,7 @@ export class ElasticsearchModelService implements
     nextOffset?: estypes.SortResults | undefined;
   }> {
     const limit = options?.limit ?? 100;
-    const computed = ModelIndexedComputedIndex.getMulti(idx, body);
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ keyed: true });
 
     let search = await this.execSearch<T>(cls, {
       ...(options?.offset ?
@@ -413,15 +413,15 @@ export class ElasticsearchModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
-    const computed = ModelIndexedComputedIndex.getSingle(idx, body);
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
 
     const result = await this.execSearch<T>(cls, {
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
-        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.projectWithSort())
+        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.project({ sort: true }))
       )
     });
     if (!result.hits.hits.length) {
-      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKeyWithSort());
+      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
     return this.postLoad(cls, result.hits.hits[0]);
 
@@ -432,16 +432,16 @@ export class ElasticsearchModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<void> {
-    const computed = ModelIndexedComputedIndex.getSingle(idx, body);
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
     const result = await this.client.deleteByQuery({
       index: this.manager.getIdentity(cls).index,
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
-        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.projectWithSort())
+        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.project({ sort: true }))
       ),
       refresh: true
     });
     if (!result.deleted) {
-      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey());
+      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
   }
 

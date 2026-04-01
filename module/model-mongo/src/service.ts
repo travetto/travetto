@@ -68,7 +68,7 @@ export class MongoModelService implements
     body: KeyedIndexBody<T, K>
   ): Promise<FindCursor> {
     const store = await this.getStore(cls);
-    const computed = ModelIndexedComputedIndex.getMulti(idx, body);
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ keyed: true });
 
     const where = this.getWhereFilter(cls, castTo(computed.project()));
 
@@ -452,13 +452,13 @@ export class MongoModelService implements
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
     const store = await this.getStore(cls);
 
-    const computed = ModelIndexedComputedIndex.getSingle(idx, body);
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
 
     const result = await store.findOne(
-      this.getWhereFilter(cls, castTo(computed.projectWithSort()))
+      this.getWhereFilter(cls, castTo(computed.project({ sort: true })))
     );
     if (!result) {
-      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKeyWithSort());
+      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
     return await this.postLoad(cls, result);
 
@@ -470,13 +470,13 @@ export class MongoModelService implements
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<void> {
     const store = await this.getStore(cls);
-    const computed = ModelIndexedComputedIndex.getSingle(idx, body);
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
 
     const result = await store.deleteOne(
-      this.getWhereFilter(cls, castTo(computed.projectWithSort()))
+      this.getWhereFilter(cls, castTo(computed.project({ sort: true })))
     );
     if (!result.deletedCount) {
-      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKeyWithSort());
+      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
   }
 

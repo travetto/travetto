@@ -52,59 +52,65 @@ function validate<T extends ModelType>(idx: AllIndexes<T>, fields: PathValue[]):
 }
 
 
-function getAndValidateFields<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+function getFields<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
   idx: AllIndexes<T, K, S>,
   body: Body<T>,
-  validateSorted = false
 ): [fields: PathValue<unknown>[], sorted: PathValue<-1 | 1>[]] {
   const fields = processFields<true>(castTo(idx.keys) ?? {}, body);
   const sorted = processFields<-1 | 1>(castTo(idx.sort) ?? {}, body, value => typeof value === 'number' || value instanceof Date);
-  validate(idx, fields);
-  if (validateSorted) {
-    validate(idx, sorted);
-  }
   return [fields, sorted];
 }
 
 type Body<T extends ModelType> = KeyedIndexBody<T, Any> | FullKeyedIndexBody<T, Any, Any> | Partial<T>;
 
+type IndexProcessConfig<T = {}> = T & { keyed?: boolean, sort?: boolean };
+
 export class ModelIndexedComputedIndex {
-  static getMulti<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+  static get<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     idx: AllIndexes<T, K, S>,
     body: Body<T>,
   ): ModelIndexedComputedIndex {
-    return new ModelIndexedComputedIndex(...getAndValidateFields(idx, body));
+    return new ModelIndexedComputedIndex(idx, ...getFields(idx, body));
   }
 
-  static getSingle<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
-    idx: AllIndexes<T, K, S>,
-    body: Body<T>,
-  ): ModelIndexedComputedIndex {
-    return new ModelIndexedComputedIndex(...getAndValidateFields(idx, body, true));
-  }
-
-  fields: PathValue<unknown>[];
-  sorted: PathValue<-1 | 1>[];
+  keyedFields: PathValue<unknown>[];
+  sortFields: PathValue<-1 | 1>[];
+  idx: AllIndexes<ModelType>;
 
   constructor(
+    idx: AllIndexes<ModelType>,
     fields: PathValue<unknown>[],
     sorted: PathValue<-1 | 1>[],
   ) {
-    this.fields = fields;
-    this.sorted = sorted;
+    this.idx = idx;
+    this.keyedFields = fields;
+    this.sortFields = sorted;
   }
 
-  getKey(sep = DEFAULT_SEP): string {
-    return this.fields.map(({ value }) => value).map(value => `${value}`).join(sep);
+  get allFields(): PathValue[] {
+    return [...this.keyedFields, ...this.sortFields];
   }
 
-  getKeyWithSort(sep = DEFAULT_SEP): string {
-    return [...this.fields, ...this.sorted].map(({ value }) => value).map(value => `${value}`).join(sep);
+  validate(config: IndexProcessConfig = {}): this {
+    const { keyed = true, sort = false } = config;
+    if (keyed) {
+      validate(this.idx, this.keyedFields);
+    }
+    if (sort) {
+      validate(this.idx, this.sortFields);
+    }
+    return this;
+  }
+
+  getKey(config: IndexProcessConfig<{ sep?: string }> = {}): string {
+    const { keyed = true, sort = false, sep = DEFAULT_SEP } = config;
+    const parts = [keyed ? this.keyedFields : [], sort ? this.sortFields : []].flat();
+    return parts.map(({ value }) => value).map(value => `${value}`).join(sep);
   }
 
   getSort(): number {
-    const { value } = this.sorted[0] ?? {};
-    const direction = (this.sorted[0]?.templateValue ?? 1);
+    const { value } = this.sortFields[0] ?? {};
+    const direction = (this.sortFields[0]?.templateValue ?? 1);
     if (value instanceof Date) {
       return value.getTime() * direction;
     } else if (typeof value === 'number') {
@@ -114,39 +120,30 @@ export class ModelIndexedComputedIndex {
     }
   }
 
-  project(emptyValue: unknown = null): Record<string, unknown> {
+  project(config: IndexProcessConfig<{ emptyValue?: unknown, emptySortValue?: unknown }> = {}): Record<string, unknown> {
+    const { keyed = true, sort = false, emptyValue = null, emptySortValue = null } = config;
     const response: Record<string, unknown> = {};
-    for (const { path, value, state } of this.fields) {
-      let sub: Record<string, unknown> = response;
-      const all = path.slice(0);
-      const last = all.pop()!;
-      for (const part of all) {
-        sub = castTo(sub[part] ??= {});
+    if (keyed) {
+      for (const { path, value, state } of this.keyedFields) {
+        let sub: Record<string, unknown> = response;
+        const all = path.slice(0);
+        const last = all.pop()!;
+        for (const part of all) {
+          sub = castTo(sub[part] ??= {});
+        }
+        sub[last] = state === 'empty' ? emptyValue : value;
       }
-      sub[last] = state === 'empty' ? emptyValue : value;
     }
-    return response;
-  }
-
-  projectWithSort(emptyValue: unknown = null, emptySortValue: unknown = null): Record<string, unknown> {
-    const response: Record<string, unknown> = {};
-    for (const { path, value, state } of this.fields) {
-      let sub: Record<string, unknown> = response;
-      const all = path.slice(0);
-      const last = all.pop()!;
-      for (const part of all) {
-        sub = castTo(sub[part] ??= {});
+    if (sort) {
+      for (const { path, value, state } of this.sortFields) {
+        let sub: Record<string, unknown> = response;
+        const all = path.slice(0);
+        const last = all.pop()!;
+        for (const part of all) {
+          sub = castTo(sub[part] ??= {});
+        }
+        sub[last] = state === 'empty' ? emptySortValue : value;
       }
-      sub[last] = state === 'empty' ? emptyValue : value;
-    }
-    for (const { path, value, state } of this.sorted) {
-      let sub: Record<string, unknown> = response;
-      const all = path.slice(0);
-      const last = all.pop()!;
-      for (const part of all) {
-        sub = castTo(sub[part] ??= {});
-      }
-      sub[last] = state === 'empty' ? emptySortValue : value;
     }
     return response;
   }

@@ -3,7 +3,7 @@ import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex, type Point } fro
 import { type Class, RuntimeError, TypedObject, TimeUtil, castTo, castKey, toConcrete, JSONUtil } from '@travetto/runtime';
 import { type SelectClause, type Query, type SortClause, type WhereClause, type RetainQueryPrimitiveFields, ModelQueryUtil, isModelQueryIndex } from '@travetto/model-query';
 import { IndexNotSupported, type BulkResponse, type IndexConfig, type ModelType } from '@travetto/model';
-import { isModelIndexedIndex, type AllIndexes } from '@travetto/model-indexed';
+import { isModelIndexedIndex, ModelIndexedComputedIndex } from '@travetto/model-indexed';
 
 import { SQLModelUtil } from '../util.ts';
 import type { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types.ts';
@@ -32,24 +32,6 @@ function makeField(name: string, type: Class, required: boolean, extra: Partial<
     ...(required ? { required: { active: true } } : {}),
     ...extra
   };
-}
-
-function flattenIndex<T extends ModelType>(idx: AllIndexes<T>): [string, boolean][] {
-  const out: [string, boolean][] = [];
-  const seen = new Set<string>();
-  for (const [key, value] of [
-    ...Object.entries('keys' in idx ? idx.keys : {}),
-    ...Object.entries('sort' in idx ? idx.sort : {})
-  ]) {
-    if (typeof value !== 'number') {
-      throw new IndexNotSupported(idx.class, idx, 'Nested fields are not supported in ModelIndexed indices SQL');
-    }
-    if (!seen.has(key)) {
-      seen.add(key);
-      out.push([key, value === 1]);
-    }
-  }
-  return out;
 }
 
 /**
@@ -768,7 +750,11 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
         .map(([name, sel]) => `${this.identifier(name)} ${sel ? 'ASC' : 'DESC'}`)
         .join(', ')});`;
     } else if (isModelIndexedIndex(idx)) {
-      const fields = flattenIndex(idx).map(([key, value]) => `${this.identifier(key)} ${value ? 'ASC' : 'DESC'}`).join(', ');
+      const computed = ModelIndexedComputedIndex.get(idx, {});
+      if (computed.allFields.find(field => field.path.length > 1)) {
+        throw new IndexNotSupported(cls, idx, 'Nested fields are not supported in ModelIndexed indices SQL');
+      }
+      const fields = computed.allFields.map(({ path, templateValue }) => `${this.identifier(path.join('_'))} ${templateValue === 1 ? 'ASC' : 'DESC'}`).join(', ');
       switch (idx.type) {
         case 'indexed:keyed': return `CREATE ${idx.unique ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields});`;
         case 'indexed:sorted': return `CREATE INDEX ${constraint} ON ${this.identifier(table)} (${fields});`;
