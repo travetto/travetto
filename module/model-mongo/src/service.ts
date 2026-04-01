@@ -77,19 +77,7 @@ export class MongoModelService implements
 
     // TODO: We could cache this
     if ('sort' in idx) {
-      const path = [];
-      let obj = idx.sort;
-      let last: -1 | 1 = 1;
-      while (obj) {
-        const [k, v] = Object.entries(obj)[0];
-        path.push(k);
-        if (typeof v === 'object' && v !== null) {
-          obj = v;
-        } else {
-          last = v;
-        }
-      }
-      q = q.sort([path.join('.'), last]);
+      q = q.sort(computed.sortFields.map(({ templateValue, path }) => [path.join('.'), templateValue]));
     }
     return q;
   }
