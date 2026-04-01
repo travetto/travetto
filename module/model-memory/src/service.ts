@@ -88,7 +88,7 @@ export class MemoryModelService implements
           continue; // Only support ModelIndexed indices
         }
         const idxName = indexName(cls, idx);
-        const { key } = new ModelIndexedComputedIndex(cls, idx, castTo(item));
+        const { key } = new ModelIndexedComputedIndex('single', idx, item);
         switch (idx.type) {
           case 'indexed:sorted':
           case 'indexed:keyed': this.#indices[idx.type].get(idxName)?.get(key)?.delete(id); break;
@@ -107,7 +107,7 @@ export class MemoryModelService implements
         continue; // Only support ModelIndexed indices
       }
       const idxName = indexName(cls, idx);
-      const { key, sort } = new ModelIndexedComputedIndex(cls, idx, castTo(item));
+      const { key, sort } = new ModelIndexedComputedIndex('single', idx, item);
       switch (idx.type) {
         case 'indexed:keyed': {
           if (idx.unique) {
@@ -146,7 +146,7 @@ export class MemoryModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<string> {
-    const { key, sort } = new ModelIndexedComputedIndex(cls, idx, castTo(body));
+    const { key, sort } = new ModelIndexedComputedIndex('single', idx, body);
 
     const index = this.#indices[idx.type].get(indexName(cls, idx))?.get(key);
     let id: string | undefined;
@@ -171,7 +171,7 @@ export class MemoryModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: AllIndexes<T, K, S>, body: KeyedIndexBody<T, K>): string[] {
-    const { key } = new ModelIndexedComputedIndex(cls, idx, castTo(body), { emptySortValue: null });
+    const { key } = new ModelIndexedComputedIndex('multi', idx, body, { emptySortValue: null });
     if (!isModelIndexedIndex(idx)) {
       throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with MemoryModelService');
     }

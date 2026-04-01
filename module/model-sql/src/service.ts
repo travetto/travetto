@@ -340,11 +340,10 @@ export class SQLModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
-    const where = new ModelIndexedComputedIndex(cls, idx, castTo(body)).project();
-    const results = await this.query(cls, castTo({ where }));
+    const computed = new ModelIndexedComputedIndex('single', idx, body);
+    const results = await this.query(cls, castTo({ where: computed.fullProject() }));
     if (results.length !== 1) {
-      const { key } = new ModelIndexedComputedIndex(cls, idx, castTo(body), { includeSortInFields: true });
-      throw new NotFoundError(`${cls.name}: ${idx}`, key);
+      throw new NotFoundError(`${cls.name}: ${idx}`, computed.fullKey);
     }
     return results[0];
   }
@@ -404,7 +403,7 @@ export class SQLModelService implements
   ): Promise<ListPageResult<T>> {
     const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     const limit = options?.limit ?? 100;
-    const computed = new ModelIndexedComputedIndex(cls, idx, body, { emptySortValue: undefined });
+    const computed = new ModelIndexedComputedIndex('multi', idx, body, { emptySortValue: undefined });
 
     let sort: Record<string, unknown>[] = [];
     for (const field of computed.sorted) {

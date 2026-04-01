@@ -16,8 +16,7 @@ import {
 } from '@travetto/model-query';
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type KeyedIndexWithPartialBody, type SortedIndexSelection, type ListPageResult, type SortedIndex,
-  type FullKeyedIndexBody,
+  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex, type FullKeyedIndexBody,
   type FullKeyedIndexWithPartialBody
 } from '@travetto/model-indexed';
 
@@ -67,6 +66,7 @@ export class ElasticsearchModelService implements
     nextOffset?: estypes.SortResults | undefined;
   }> {
     const limit = options?.limit ?? 100;
+    const computed = new ModelIndexedComputedIndex('multi', idx, body, { emptySortValue: { $exists: true } });
 
     let search = await this.execSearch<T>(cls, {
       ...(options?.offset ?
@@ -74,8 +74,7 @@ export class ElasticsearchModelService implements
         { scroll: '2m', size: 100 }
       ),
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
-        ElasticsearchQueryUtil.extractWhereTermQuery(cls,
-          new ModelIndexedComputedIndex(cls, idx, body, { emptySortValue: { $exists: true } }).project())
+        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.project())
       ),
       sort: 'sort' in idx ? ElasticsearchQueryUtil.getSort(idx) : undefined,
     });
@@ -415,15 +414,15 @@ export class ElasticsearchModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
+    const computed = new ModelIndexedComputedIndex('single', idx, body);
+
     const result = await this.execSearch<T>(cls, {
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
-        ElasticsearchQueryUtil.extractWhereTermQuery(cls,
-          new ModelIndexedComputedIndex(cls, idx, castTo(body)).project())
+        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.fullProject())
       )
     });
     if (!result.hits.hits.length) {
-      const { key } = new ModelIndexedComputedIndex(cls, idx, castTo(body), { includeSortInFields: true });
-      throw new NotFoundError(`${cls.name}: ${idx}`, key);
+      throw new NotFoundError(`${cls.name}: ${idx}`, computed.key);
     }
     return this.postLoad(cls, result.hits.hits[0]);
 
@@ -434,17 +433,16 @@ export class ElasticsearchModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<void> {
+    const computed = new ModelIndexedComputedIndex('single', idx, body);
     const result = await this.client.deleteByQuery({
       index: this.manager.getIdentity(cls).index,
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
-        ElasticsearchQueryUtil.extractWhereTermQuery(cls,
-          new ModelIndexedComputedIndex(cls, idx, castTo(body)).project())
+        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.fullProject())
       ),
       refresh: true
     });
     if (!result.deleted) {
-      const { key } = new ModelIndexedComputedIndex(cls, idx, castTo(body), { includeSortInFields: true });
-      throw new NotFoundError(`${cls.name}: ${idx}`, key);
+      throw new NotFoundError(`${cls.name}: ${idx}`, computed.fullKey);
     }
   }
 

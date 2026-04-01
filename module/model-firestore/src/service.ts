@@ -7,8 +7,7 @@ import {
 } from '@travetto/model';
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex,
-  type FullKeyedIndexBody,
+  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex, type FullKeyedIndexBody,
   type FullKeyedIndexWithPartialBody
 } from '@travetto/model-indexed';
 
@@ -49,11 +48,12 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>): Query {
     ModelCrudUtil.ensureNotSubType(cls);
-    const { fields, sorted } = new ModelIndexedComputedIndex(cls, idx, body, { emptySortValue: null });
-    let query = fields.reduce<Query>((result, { path, value }) =>
+    const computed = new ModelIndexedComputedIndex('multi', idx, body, { emptySortValue: null });
+
+    let query = computed.fields.reduce<Query>((result, { path, value }) =>
       result.where(path.join('.'), '==', value), this.#getCollection(cls));
 
-    for (const field of sorted) {
+    for (const field of computed.sorted) {
       query = query.orderBy(field.path.join('.'), field.templateValue === 1 ? 'asc' : 'desc');
     }
     return query;
@@ -147,19 +147,17 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
-
-    const { fields } = new ModelIndexedComputedIndex(cls, idx, castTo(body), { includeSortInFields: true });
-    const query = fields.reduce<Query>(
+    const computed = new ModelIndexedComputedIndex('single', idx, body, { separator: '; ' });
+    const query = computed.fullFields.reduce<Query>(
       (result, { path, value }) => result.where(path.join('.'), '==', value),
       this.#getCollection(cls)
     );
 
     const item = await query.get();
-
-    if (item && !item.empty) {
-      return item.docs[0].id;
+    if (!item || item.empty) {
+      throw new NotFoundError(`${cls.name} Index=${idx}`, computed.key);
     }
-    throw new NotFoundError(`${cls.name} Index=${idx}`, new ModelIndexedComputedIndex(cls, idx, castTo(body), { separator: '; ' })?.key);
+    return item.docs[0].id;
   }
 
   // Indexed contract

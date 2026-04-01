@@ -70,11 +70,9 @@ export class MongoModelService implements
     body: KeyedIndexBody<T, K>
   ): Promise<FindCursor> {
     const store = await this.getStore(cls);
+    const computed = new ModelIndexedComputedIndex('multi', idx, body, { emptySortValue: { $exists: true } });
 
-    const where = this.getWhereFilter(
-      cls,
-      castTo(new ModelIndexedComputedIndex(cls, idx, body, { emptySortValue: { $exists: true } }).project())
-    );
+    const where = this.getWhereFilter(cls, castTo(computed.project()));
 
     let q = store.find(where, { timeout: true })
       .batchSize(100);
@@ -455,15 +453,14 @@ export class MongoModelService implements
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
     const store = await this.getStore(cls);
+
+    const computed = new ModelIndexedComputedIndex('single', idx, body);
+
     const result = await store.findOne(
-      this.getWhereFilter(
-        cls,
-        castTo(new ModelIndexedComputedIndex(cls, idx, castTo(body)).project())
-      )
+      this.getWhereFilter(cls, castTo(computed.fullProject()))
     );
     if (!result) {
-      const { key } = new ModelIndexedComputedIndex(cls, idx, castTo(body), { includeSortInFields: true });
-      throw new NotFoundError(`${cls.name}: ${idx}`, key);
+      throw new NotFoundError(`${cls.name}: ${idx}`, computed.fullKey);
     }
     return await this.postLoad(cls, result);
 
@@ -475,15 +472,16 @@ export class MongoModelService implements
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<void> {
     const store = await this.getStore(cls);
+    const computed = new ModelIndexedComputedIndex('single', idx, body);
+
     const result = await store.deleteOne(
       this.getWhereFilter(
         cls,
-        castTo(new ModelIndexedComputedIndex(cls, idx, castTo(body)).project())
+        castTo(computed.fullProject())
       )
     );
     if (!result.deletedCount) {
-      const { key } = new ModelIndexedComputedIndex(cls, idx, castTo(body));
-      throw new NotFoundError(`${cls.name}: ${idx}`, key);
+      throw new NotFoundError(`${cls.name}: ${idx}`, computed.fullKey);
     }
   }
 
