@@ -20,6 +20,8 @@ type DynamoIndexConfig = {
  */
 export class DynamoDBUtil {
 
+  static toSafeName = (name: string): string => name.toLowerCase().replace(/[^A-Za-z0-9]+/g, '_');
+
   /**
    * Converts a JavaScript value to a DynamoDB AttributeValue format
    * @param value The value to convert (string, number, boolean, Date, null, or undefined)
@@ -57,24 +59,24 @@ export class DynamoDBUtil {
 
       const keys: KeySchemaElement[] = [];
 
+      const safeName = this.toSafeName(idx.name);
+
       switch (idx.type) {
         case 'indexed:sorted':
-          keys.push({ AttributeName: `${idx.name}_sort__`, KeyType: 'RANGE', });
-          attributes.push({ AttributeName: `${idx.name}_sort__`, AttributeType: 'N' });
+          keys.push({ AttributeName: `${safeName}__`, KeyType: 'HASH' });
+          keys.push({ AttributeName: `${safeName}_sort__`, KeyType: 'RANGE', });
+          attributes.push({ AttributeName: `${safeName}__`, AttributeType: 'S' });
+          attributes.push({ AttributeName: `${safeName}_sort__`, AttributeType: 'N' });
           break;
         case 'indexed:keyed': {
-          if (Object.keys(idx.keys).length > 0) {
-            attributes.push({ AttributeName: `${idx.name}__`, AttributeType: 'S' });
-            keys.push({ AttributeName: `${idx.name}__`, KeyType: 'HASH' });
-          }
-          attributes.push({ AttributeName: `${idx.name}_sort__`, AttributeType: 'N' });
-          keys.push({ AttributeName: `${idx.name}_sort__`, KeyType: 'RANGE', });
+          keys.push({ AttributeName: `${safeName}__`, KeyType: 'HASH' });
+          attributes.push({ AttributeName: `${safeName}__`, AttributeType: 'S' });
           break;
         }
       }
 
       toCreate.push({
-        IndexName: idx.name,
+        IndexName: safeName,
         // ProvisionedThroughput: '',
         Projection: {
           ProjectionType: 'INCLUDE',

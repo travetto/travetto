@@ -17,7 +17,7 @@ import {
 import type { DynamoDBModelConfig } from './config.ts';
 import { DynamoDBUtil } from './util.ts';
 
-const EXP_ATTR = 'expires_at__';
+const EXPIRES_ATTRIBUTE = 'expires_at__';
 
 /**
  * A model service backed by DynamoDB
@@ -50,8 +50,9 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     options?: ListPageOptions<Record<string, AttributeValue>>
   ): AsyncIterable<QueryCommandOutput & { LastEvaluatedOffset?: string }> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
-    const expression = { [`:${idx.name}`]: DynamoDBUtil.toValue(computed.getKey()) };
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate();
+    const safeName = DynamoDBUtil.toSafeName(idx.name);
+    const expression = { [`:${safeName}`]: DynamoDBUtil.toValue(computed.getKey()) };
     const limit = options?.limit ?? 100;
 
     let startKey = options?.offset ?? undefined;
@@ -61,9 +62,9 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       const remaining = limit - produced;
       const batch = await this.client.query({
         TableName: this.#resolveTable(cls),
-        IndexName: idx.name,
+        IndexName: safeName,
         ProjectionExpression: 'body',
-        KeyConditionExpression: `${idx.name}__ = :${idx.name}`,
+        KeyConditionExpression: `${safeName}__ = :${safeName}`,
         ExpressionAttributeValues: expression,
         Limit: Math.min(remaining, 100),
         ExclusiveStartKey: startKey,
@@ -85,6 +86,46 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     } while (startKey && produced < limit);
   }
 
+  async #getIdByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<string> {
+    ModelCrudUtil.ensureNotSubType(cls);
+
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
+
+    const safeName = DynamoDBUtil.toSafeName(idx.name);
+    const sorted = idx.type === 'indexed:sorted';
+
+    const query = {
+      TableName: this.#resolveTable(cls),
+      IndexName: safeName,
+      ProjectionExpression: 'id',
+      KeyConditionExpression: [sorted ? `${safeName}_sort__ = :${safeName}_sort` : '', `${safeName}__ = :${safeName}`]
+        .filter(expr => !!expr)
+        .join(' and '),
+      ExpressionAttributeValues: {
+        [`:${safeName}`]: DynamoDBUtil.toValue(computed.getKey()),
+        ...(sorted ? { [`:${safeName}_sort`]: DynamoDBUtil.toValue(computed.getSort()) } : {})
+      }
+    };
+
+    try {
+      const result = await this.client.query(query);
+
+      if (result.Count && result.Items && result.Items[0]) {
+        return result.Items[0].id.S!;
+      }
+      throw new NotFoundError(`${cls.name} Index=${idx}`, computed.getKey({ sort: true }));
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('The table does not have the specified index')) {
+        throw new NotFoundError(`${cls.name} Index=${idx}`, computed.getKey({ sort: true }));
+      }
+      throw error;
+    }
+  }
+
   async #putItem<T extends ModelType>(cls: Class<T>, id: string, item: T, mode: 'create' | 'update' | 'upsert'): Promise<PutItemCommandOutput> {
     const config = ModelRegistryIndex.getConfig(cls);
     let expiry: number | undefined;
@@ -101,12 +142,13 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         const indices: Record<string, unknown> = {};
         for (const idx of ModelRegistryIndex.getIndices(cls)) {
           if (isModelIndexedIndex(idx)) {
+            const safeName = DynamoDBUtil.toSafeName(idx.name);
             const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
             switch (idx.type) {
-              case 'indexed:keyed': indices[`${idx.name}__`] = DynamoDBUtil.toValue(computed.getKey()); break;
+              case 'indexed:keyed': indices[`${safeName}__`] = DynamoDBUtil.toValue(computed.getKey()); break;
               case 'indexed:sorted': {
-                indices[`${idx.name}__`] = DynamoDBUtil.toValue(computed.getKey());
-                indices[`${idx.name}_sort__`] = DynamoDBUtil.toValue(computed.getSort());
+                indices[`${safeName}__`] = DynamoDBUtil.toValue(computed.getKey());
+                indices[`${safeName}_sort__`] = DynamoDBUtil.toValue(computed.getSort());
                 break;
               }
             }
@@ -120,7 +162,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           Item: {
             id: DynamoDBUtil.toValue(item.id),
             body: DynamoDBUtil.toValue(JSONUtil.toUTF8(item)),
-            ...(expiry !== undefined ? { [EXP_ATTR]: DynamoDBUtil.toValue(expiry) } : {}),
+            ...(expiry !== undefined ? { [EXPIRES_ATTRIBUTE]: DynamoDBUtil.toValue(expiry) } : {}),
             ...indices
           },
           ReturnValues: 'NONE'
@@ -132,18 +174,19 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
         for (const idx of ModelRegistryIndex.getIndices(cls)) {
           if (isModelIndexedIndex(idx)) {
+            const safeName = DynamoDBUtil.toSafeName(idx.name);
             const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
             switch (idx.type) {
               case 'indexed:keyed': {
-                indices[`${idx.name}__`] = DynamoDBUtil.toValue(computed.getKey());
-                expr.push(`${idx.name}__ = :${idx.name}`);
+                indices[`:${safeName}`] = DynamoDBUtil.toValue(computed.getKey());
+                expr.push(`${safeName}__ = :${safeName}`);
                 break;
               }
               case 'indexed:sorted': {
-                indices[`${idx.name}__`] = DynamoDBUtil.toValue(computed.getKey());
-                indices[`${idx.name}_sort__`] = DynamoDBUtil.toValue(computed.getSort());
-                expr.push(`${idx.name}__ = :${idx.name}`);
-                expr.push(`${idx.name}_sort__ = :${idx.name}_sort`);
+                indices[`:${safeName}`] = DynamoDBUtil.toValue(computed.getKey());
+                indices[`:${safeName}_sort`] = DynamoDBUtil.toValue(computed.getSort());
+                expr.push(`${safeName}__ = :${safeName}`);
+                expr.push(`${safeName}_sort__ = :${safeName}_sort`);
                 break;
               }
             }
@@ -158,7 +201,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           Key: { id: { S: id } },
           UpdateExpression: `SET ${[
             'body=:body',
-            expiry !== undefined ? `${EXP_ATTR}=:expr` : undefined,
+            expiry !== undefined ? `${EXPIRES_ATTRIBUTE}=:expr` : undefined,
             ...expr
           ].filter(part => !!part).join(', ')}`,
           ExpressionAttributeValues: {
@@ -238,7 +281,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     if (ttlEnabled !== ttlRequired) {
       await this.client.updateTimeToLive({
         TableName: table,
-        TimeToLiveSpecification: { AttributeName: ttlRequired ? EXP_ATTR : undefined, Enabled: ttlRequired }
+        TimeToLiveSpecification: { AttributeName: ttlRequired ? EXPIRES_ATTRIBUTE : undefined, Enabled: ttlRequired }
       });
     }
   }
@@ -358,40 +401,6 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   // Indexed
-  async #getIdByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<string> {
-    ModelCrudUtil.ensureNotSubType(cls);
-
-    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
-
-    const idxName = idx.name;
-    const sorted = idx.type === 'indexed:sorted';
-
-    const query = {
-      TableName: this.#resolveTable(cls),
-      IndexName: idxName,
-      ProjectionExpression: 'id',
-      KeyConditionExpression: [sorted ? `${idxName}_sort__ = :${idxName}_sort` : '', `${idxName}__ = :${idxName}`]
-        .filter(expr => !!expr)
-        .join(' and '),
-      ExpressionAttributeValues: {
-        [`:${idxName}`]: DynamoDBUtil.toValue(computed.getKey()),
-        ...(sorted ? { [`:${idxName}_sort`]: DynamoDBUtil.toValue(+computed.getSort()) } : {})
-      }
-    };
-
-    const result = await this.client.query(query);
-
-    if (result.Count && result.Items && result.Items[0]) {
-      return result.Items[0].id.S!;
-    }
-    throw new NotFoundError(`${cls.name} Index=${idx}`, computed.getKey({ sort: true }));
-  }
-
-  // Indexed
   async getByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
@@ -465,9 +474,10 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     if (items.length) {
       const last: T = items.at(-1)!;
       const computed = ModelIndexedComputedIndex.get(idx, last).validate({ keyed: true });
+      const safeName = DynamoDBUtil.toSafeName(idx.name);
       nextOffset = JSONUtil.toBase64({
-        [`${idx.name}__`]: DynamoDBUtil.toValue(computed.getKey()),
-        [`${idx.name}_sort__`]: DynamoDBUtil.toValue(computed.getSort()),
+        [`${safeName}__`]: DynamoDBUtil.toValue(computed.getKey()),
+        [`${safeName}_sort__`]: DynamoDBUtil.toValue(computed.getSort()),
         id: DynamoDBUtil.toValue(last.id)
       });
     }
