@@ -1,6 +1,6 @@
 import { ExpiresAt, Model, type ModelExpirySupport, NotFoundError, ModelStorageUtil } from '@travetto/model';
 import { ModelIndexedUtil, sortedIndex } from '@travetto/model-indexed';
-import { Text } from '@travetto/schema';
+import { MaxLength, Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
 import { RuntimeError, JSONUtil, TimeUtil } from '@travetto/runtime';
 
@@ -15,6 +15,7 @@ export class CacheRecord {
   id: string;
   @Text()
   entry: string;
+  @MaxLength(500)
   keySpace: string;
   @ExpiresAt()
   expiresAt: Date;
