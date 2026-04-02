@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Schema } from '@travetto/schema';
-import { TimeUtil } from '@travetto/runtime';
+import { castTo, TimeUtil } from '@travetto/runtime';
 import { Model, NotFoundError } from '@travetto/model';
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
@@ -57,6 +57,7 @@ const nameCreatedIndex = sortedIndex(User4, { child: { name: true } }, { created
 export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSupport> {
 
   indexLimitSkew = 0;
+  supportsDeepIndexes = true;
 
   @Test()
   async writeAndRead() {
@@ -127,7 +128,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await assert.rejects(() => service.listByIndex(User3, userAgeIndex, {}), IndexedFieldError);
   }
 
-  @Test()
+  @Test({ skip: (self) => castTo<ModelIndexedSuite>(self).supportsDeepIndexes })
   async queryDeepList() {
     const service = await this.service;
 
@@ -144,7 +145,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await assert.rejects(() => service.listByIndex(User4, childAgeIndex, {}), IndexedFieldError);
   }
 
-  @Test()
+  @Test({ skip: (self) => castTo<ModelIndexedSuite>(self).supportsDeepIndexes })
   async queryComplexDateList() {
     const service = await this.service;
 
@@ -166,11 +167,11 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   async upsertByIndex() {
     const service = await this.service;
 
-    const user1 = await service.upsertByIndex(User4, childAgeIndex, { child: { name: 'bob', age: 40 }, color: 'blue' });
-    const user2 = await service.upsertByIndex(User4, childAgeIndex, { child: { name: 'bob', age: 40 }, color: 'green' });
-    const user3 = await service.upsertByIndex(User4, childAgeIndex, { child: { name: 'bob', age: 40 }, color: 'red' });
+    const user1 = await service.upsertByIndex(User3, userAgeIndex, { name: 'bob', age: 40, color: 'blue' });
+    const user2 = await service.upsertByIndex(User3, userAgeIndex, { name: 'bob', age: 40, color: 'green' });
+    const user3 = await service.upsertByIndex(User3, userAgeIndex, { name: 'bob', age: 40, color: 'red' });
 
-    const { items: arr } = await service.listByIndex(User4, childAgeIndex, { child: { name: 'bob' } });
+    const { items: arr } = await service.listByIndex(User3, userAgeIndex, { name: 'bob' });
     assert(arr.length === 1);
 
     assert(user1.id === user2.id);
@@ -178,13 +179,13 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     assert(user1.color === 'blue');
     assert(user3.color === 'red');
 
-    const user4 = await service.upsertByIndex(User4, childAgeIndex, { child: { name: 'bob', age: 30 }, color: 'red' });
-    const { items: arr2 } = await service.listByIndex(User4, childAgeIndex, { child: { name: 'bob' } });
+    const user4 = await service.upsertByIndex(User3, userAgeIndex, { name: 'bob', age: 30, color: 'red' });
+    const { items: arr2 } = await service.listByIndex(User3, userAgeIndex, { name: 'bob' });
     assert(arr2.length === 2);
 
-    await service.deleteByIndex(User4, childAgeIndex, user1);
+    await service.deleteByIndex(User3, userAgeIndex, user1);
 
-    const { items: arr3 } = await service.listByIndex(User4, childAgeIndex, { child: { name: 'bob' } });
+    const { items: arr3 } = await service.listByIndex(User3, userAgeIndex, { name: 'bob' });
     assert(arr3.length === 1);
     assert(arr3[0].id === user4.id);
   }

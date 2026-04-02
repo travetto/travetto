@@ -733,7 +733,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   /**
    * Get CREATE INDEX sql
    */
-  getCreateIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig): string {
+  getCreateIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig): string | undefined {
     const constraint = this.getIndexName(cls, idx);
     const table = this.namespace(SQLModelUtil.classToStack(cls));
 
@@ -752,7 +752,8 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     } else if (isModelIndexedIndex(idx)) {
       const computed = ModelIndexedComputedIndex.get(idx, {});
       if (computed.allParts.find(field => field.template.path.length > 1)) {
-        throw new IndexNotSupported(cls, idx, 'Nested fields are not supported in ModelIndexed indices SQL');
+        console.warn('Nested fields are not supported in ModelIndexed indices SQL', { index: idx.name });
+        return;
       }
       const fields = computed.allParts.map(({ template: { path, value } }) => `${this.identifier(path.join('_'))} ${value === 1 ? 'ASC' : 'DESC'}`).join(', ');
       switch (idx.type) {

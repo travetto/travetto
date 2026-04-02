@@ -99,10 +99,16 @@ export class TableManager {
       // Manage indices
       for (const index of requestedIndices.keys()) {
         if (!existingIndices.has(index)) {
-          sqlCommands.createIndex.push(this.#dialect.getCreateIndexSQL(type, requestedIndices.get(index)!));
+          const sql = this.#dialect.getCreateIndexSQL(type, requestedIndices.get(index)!);
+          if (sql) {
+            sqlCommands.createIndex.push(sql);
+          }
         } else if (this.#dialect.isIndexChanged(requestedIndices.get(index)!, existingIndices.get(index)!)) {
           sqlCommands.dropIndex.push(this.#dialect.getDropIndexSQL(type, existingIndices.get(index)!.name));
-          sqlCommands.createIndex.push(this.#dialect.getCreateIndexSQL(type, requestedIndices.get(index)!));
+          const sql = this.#dialect.getCreateIndexSQL(type, requestedIndices.get(index)!);
+          if (sql) {
+            sqlCommands.createIndex.push(sql);
+          }
         }
       }
 

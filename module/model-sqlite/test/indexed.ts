@@ -21,6 +21,7 @@ class Config {
 class SqliteIndexedSuite extends ModelIndexedSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
+  supportsDeepIndexes = false;
 }
 
 @WithSuiteContext()

@@ -21,6 +21,7 @@ class Config {
 class MySQLIndexedSuite extends ModelIndexedSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
+  supportsDeepIndexes = false;
 }
 
 @WithSuiteContext()
