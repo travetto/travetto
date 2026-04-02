@@ -7,7 +7,7 @@ import { RuntimeError, CodecUtil, castTo, type Class, toConcrete, BinaryUtil } f
 import { type DistanceUnit, type PageableModelQuery, type WhereClause, isModelQueryIndex, ModelQueryUtil } from '@travetto/model-query';
 import { type ModelType, type IndexConfig, IndexNotSupported } from '@travetto/model';
 import { DataUtil, SchemaRegistryIndex, type Point } from '@travetto/schema';
-import { isModelIndexedIndex, ModelIndexedComputedIndex } from '@travetto/model-indexed';
+import { isModelIndexedIndex } from '@travetto/model-indexed';
 
 const PointConcrete = toConcrete<Point>();
 
@@ -192,10 +192,10 @@ export class MongoUtil {
 
       return [out, { name, unique: idx.type === 'query:unique', }];
     } else if (isModelIndexedIndex(idx)) {
-      const computed = ModelIndexedComputedIndex.get(idx);
-      const filter = Object.fromEntries(
-        computed.allParts.map(({ template: { path, value } }) => [path.join('.'), value === -1 ? -1 : 1])
-      );
+      const filter = Object.fromEntries([
+        ...idx.keyTemplate.map(({ path }) => [path.join('.'), 1]),
+        ...idx.sortTemplate.map(({ path, value }) => [path.join('.'), value === -1 ? -1 : 1])
+      ]);
       switch (idx.type) {
         case 'indexed:keyed': return [filter, { name, unique: idx.unique }];
         case 'indexed:sorted': return [filter, { name }];

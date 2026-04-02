@@ -49,10 +49,10 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     ModelCrudUtil.ensureNotSubType(cls);
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ keyed: true });
 
-    let query = computed.keyedParts.reduce<Query>((result, { template: { path }, body: { value, state } }) =>
+    let query = computed.keyedParts.reduce<Query>((result, { path, value, state }) =>
       result.where(path.join('.'), '==', (state === 'empty' ? null : value)), this.#getCollection(cls));
 
-    for (const { template: { path, value } } of computed.sortParts) {
+    for (const { path, value } of idx.sortTemplate) {
       query = query.orderBy(path.join('.'), value === 1 ? 'asc' : 'desc');
     }
     return query;
@@ -148,7 +148,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     ModelCrudUtil.ensureNotSubType(cls);
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
     const query = computed.allParts.reduce<Query>(
-      (result, { template: { path }, body: { value } }) => result.where(path.join('.'), '==', value),
+      (result, { path, value }) => result.where(path.join('.'), '==', value),
       this.#getCollection(cls)
     );
 

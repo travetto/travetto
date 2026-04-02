@@ -3,7 +3,7 @@ import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex, type Point } fro
 import { type Class, RuntimeError, TypedObject, TimeUtil, castTo, castKey, toConcrete, JSONUtil } from '@travetto/runtime';
 import { type SelectClause, type Query, type SortClause, type WhereClause, type RetainQueryPrimitiveFields, ModelQueryUtil, isModelQueryIndex } from '@travetto/model-query';
 import { IndexNotSupported, type BulkResponse, type IndexConfig, type ModelType } from '@travetto/model';
-import { isModelIndexedIndex, ModelIndexedComputedIndex } from '@travetto/model-indexed';
+import { isModelIndexedIndex } from '@travetto/model-indexed';
 
 import { SQLModelUtil } from '../util.ts';
 import type { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types.ts';
@@ -750,12 +750,13 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
         .map(([name, sel]) => `${this.identifier(name)} ${sel ? 'ASC' : 'DESC'}`)
         .join(', ')});`;
     } else if (isModelIndexedIndex(idx)) {
-      if (idx.template.find(field => field.path.length > 1)) {
+      if ([...idx.sortTemplate, ...idx.keyTemplate].find(field => field.path.length > 1)) {
         console.debug('Nested fields are not supported in ModelIndexed indices SQL', { index: idx.name });
         return;
       }
-      const computed = ModelIndexedComputedIndex.get(idx, {});
-      const fields = computed.allParts.map(({ template: { path, value } }) => `${this.identifier(path.join('_'))} ${value === 1 ? 'ASC' : 'DESC'}`).join(', ');
+      const fields = [...idx.sortTemplate, ...idx.keyTemplate]
+        .map(({ path, value }) => `${this.identifier(path.join('_'))} ${value === -1 ? 'DESC' : 'ASC'}`)
+        .join(', ');
       switch (idx.type) {
         case 'indexed:keyed': return `CREATE ${idx.unique ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields});`;
         case 'indexed:sorted': return `CREATE INDEX ${constraint} ON ${this.identifier(table)} (${fields});`;

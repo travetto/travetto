@@ -8,26 +8,23 @@ import {
 
 const DEFAULT_SEP = '\u8203';
 
-type BodyPart = {
+type IndexPart<T extends TemplateValue = TemplateValue> = {
   state: 'missing' | 'empty' | 'mismatch' | 'found';
   value: unknown;
-};
-type IndexPart<T extends TemplateValue = TemplateValue> = {
-  body: BodyPart;
-  template: TemplatePart<T>;
+  path: string[];
+  templateValue: T;
 };
 
-function buildIndexParts<T extends TemplateValue>(
-  part: 'key' | 'sort',
-  template: TemplatePart[],
+function buildIndexParts<T extends TemplateValue = TemplateValue>(
+  template: TemplatePart<T>[],
   body: Record<string, unknown> | undefined,
   checkValueType?: (value: unknown) => boolean,
 ): IndexPart<T>[] {
   const out: IndexPart<T>[] = [];
-  for (const templatePart of template.filter(item => item.part === part)) {
+  for (const { path, value: templateValue } of template) {
     let value: unknown = body;
-    let bodyPart: BodyPart | undefined;
-    for (const pathItem of templatePart.path) {
+    let bodyPart: Pick<IndexPart, 'value' | 'state'> | undefined;
+    for (const pathItem of path) {
       if (typeof value === 'object' && value !== null) {
         if (value && pathItem in value) {
           value = castTo<Record<string, unknown>>(value)[pathItem];
@@ -49,13 +46,13 @@ function buildIndexParts<T extends TemplateValue>(
         bodyPart = { value, state: 'found' };
       }
     }
-    out.push({ template: castTo(templatePart), body: bodyPart });
+    out.push({ ...bodyPart, path, templateValue });
   }
   return out;
 }
 
 function validate<T extends ModelType>(idx: AllIndexes<T>, parts: IndexPart[]): void {
-  for (const { body: { state }, template: { path } } of parts) {
+  for (const { state, path } of parts) {
     if (state === 'missing') {
       throw new IndexedFieldError(idx.class, idx, path.join('.'), 'Missing field');
     } else if (state === 'mismatch') {
@@ -85,8 +82,8 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
     body: Body<T>,
   ) {
     this.idx = idx;
-    this.keyedParts = buildIndexParts<true>('key', idx.template, castTo(body));
-    this.sortParts = buildIndexParts<-1 | 1>('sort', idx.template, castTo(body), value => typeof value === 'number' || value instanceof Date);
+    this.keyedParts = buildIndexParts(idx.keyTemplate, castTo(body));
+    this.sortParts = buildIndexParts(idx.sortTemplate, castTo(body), value => typeof value === 'number' || value instanceof Date);
   }
 
   get allParts(): IndexPart[] {
@@ -107,12 +104,12 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
   getKey(config: IndexProcessConfig<{ sep?: string }> = {}): string {
     const { keyed = true, sort = false, sep = DEFAULT_SEP } = config;
     const parts = [keyed ? this.keyedParts : [], sort ? this.sortParts : []].flat();
-    return parts.map(({ body: { value } }) => value).map(value => `${value}`).join(sep);
+    return parts.map(({ value }) => value).map(value => `${value}`).join(sep);
   }
 
   getSort(): number {
-    const { body: { value } } = this.sortParts[0] ?? {};
-    const direction = (this.sortParts[0]?.template?.value ?? 1);
+    const { value } = this.sortParts[0] ?? {};
+    const direction = (this.sortParts[0]?.templateValue ?? 1);
     if (value instanceof Date) {
       return value.getTime() * direction;
     } else if (typeof value === 'number') {
@@ -126,7 +123,7 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
     const { keyed = true, sort = false, emptyValue = null } = config;
     const response: Record<string, unknown> = {};
     if (keyed) {
-      for (const { template: { path }, body: { value, state } } of this.keyedParts) {
+      for (const { path, value, state } of this.keyedParts) {
         let sub: Record<string, unknown> = response;
         const all = path.slice(0);
         const last = all.pop()!;
@@ -137,7 +134,7 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
       }
     }
     if (sort) {
-      for (const { template: { path }, body: { value, state } } of this.sortParts) {
+      for (const { path, value, state } of this.sortParts) {
         let sub: Record<string, unknown> = response;
         const all = path.slice(0);
         const last = all.pop()!;

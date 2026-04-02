@@ -35,7 +35,8 @@ export function keyedIndex<
     type: 'indexed:keyed',
     name: name ?? `${cls.Ⲑid}__${Object.keys(selection).join('_')}`,
     key: selection,
-    template: buildTemplateParts('key', selection),
+    keyTemplate: buildTemplateParts('key', selection),
+    sortTemplate: [],
     class: cls,
     sort: {},
     unique: false
@@ -58,7 +59,8 @@ export function uniqueIndex<
     type: 'indexed:keyed',
     name: name ?? `${cls.Ⲑid}__${Object.keys(key).join('_')}`,
     key,
-    template: buildTemplateParts('key', key),
+    keyTemplate: buildTemplateParts('key', key),
+    sortTemplate: [],
     class: cls,
     unique: true,
     sort: {},
@@ -83,7 +85,8 @@ export function sortedIndex<
     name: name ?? `${cls.Ⲑid}__${Object.keys(key).join('_')}`,
     key,
     sort,
-    template: [...buildTemplateParts('key', key), ...buildTemplateParts('sort', sort)],
+    keyTemplate: buildTemplateParts('key', key),
+    sortTemplate: buildTemplateParts('sort', sort),
     class: cls,
   };
   if ('id' in key) {

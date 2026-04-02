@@ -406,7 +406,7 @@ export class SQLModelService implements
 
     const items = await this.query(cls, castTo({
       where: computed.project(),
-      sort: computed.sortParts.map(part => ({ [part.template.path.join('.')]: part.template.value })),
+      sort: idx.sortTemplate.map(part => ({ [part.path.join('.')]: part.value })),
       limit, offset
     }));
     return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };

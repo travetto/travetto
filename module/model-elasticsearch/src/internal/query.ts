@@ -4,7 +4,7 @@ import { type Any, castTo, type Class, TypedObject } from '@travetto/runtime';
 import { type WhereClause, type SelectClause, type SortClause, type Query, ModelQueryUtil } from '@travetto/model-query';
 import { type ModelType, ModelRegistryIndex } from '@travetto/model';
 import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
-import { ModelIndexedComputedIndex, type SortedIndex } from '@travetto/model-indexed';
+import type { SortedIndex } from '@travetto/model-indexed';
 
 import { type EsSchemaConfig } from './types.ts';
 
@@ -61,9 +61,8 @@ export class ElasticsearchQueryUtil {
         return { [key]: { order: value === 1 || value === true ? 'asc' : 'desc' } };
       });
     } else {
-      const computed = ModelIndexedComputedIndex.get(sort);
-      return computed.sortParts.map<estypes.SortOptions>(field =>
-        ({ [field.template.path.join('.')]: { order: field.template.value === 1 ? 'asc' : 'desc' } })
+      return sort.sortTemplate.map<estypes.SortOptions>(field =>
+        ({ [field.path.join('.')]: { order: field.value === 1 ? 'asc' : 'desc' } })
       );
     }
   }
