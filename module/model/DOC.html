@@ -18,7 +18,7 @@
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a>, which is used for data model validation.
 <h2 id="a-simple-model">A Simple Model</h2>
 
-A model can be simply defined by usage of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">@Model</a> decorator, which opts it into the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> contracts, as well as making it available to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/registry-index.ts#L16">ModelRegistryIndex</a>.
+A model can be simply defined by usage of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">@Model</a> decorator, which opts it into the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> contracts, as well as making it available to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/registry-index.ts#L12">ModelRegistryIndex</a>.
 
   <figure class="code">
     <figcaption class="code">Basic Structure
@@ -39,7 +39,7 @@ Once the model is defined, it can be leveraged with any of the services that imp
 
 <h2 id="contracts">Contracts</h2>
 
-The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L8">Basic</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11">CRUD</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L22">Indexed</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10">Expiry</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8">Blob</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64">Bulk</a>.
+The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L8">Basic</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11">CRUD</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10">Expiry</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8">Blob</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64">Bulk</a>.
 <h3 id="basic">Basic</h3>
 
 All <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations, must honor the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L8">Basic</a> contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
@@ -126,74 +126,6 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
    * List all items
    */</span>
   <span class="token generic-function"><span class="token function">list</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> AsyncIterable<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">;</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>
-  </figure>
-
-<h3 id="indexed">Indexed</h3>
-
-Additionally, an implementation may support the ability for basic <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L22">Indexed</a> queries. This is not the full featured query support of <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-query" title="Datastore abstraction for advanced query support.">Data Model Querying</a>, but allowing for indexed lookups.  This allows for listing, through indexed data, as well as "pagination" through indexed data, via aa token that allows the next query to pick up where the last one left off. This allows for patterns like virtual scrolling, but does not allow for standard count/offset pagination.
-
-  <figure class="code">
-    <figcaption class="code">Indexed Contract
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L22">Source</a></cite>
-
-</figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelIndexedSupport</span> <span class="token keyword">extends</span> <span class="token class-name">ModelBasicSupport</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token comment">/**
-   * Get entity by index as defined by fields of idx and the body fields
-   * @param cls The type to search by
-   * @param idx The index name to search against
-   * @param body The payload of fields needed to search
-   */</span>
-  <span class="token generic-function"><span class="token function">getByIndex</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> idx<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> body<span class="token operator">:</span> DeepPartial<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">;</span>
-
-  <span class="token comment">/**
-   * Delete entity by index as defined by fields of idx and the body fields
-   * @param cls The type to search by
-   * @param idx The index name to search against
-   * @param body The payload of fields needed to search
-   */</span>
-  <span class="token generic-function"><span class="token function">deleteByIndex</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> idx<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> body<span class="token operator">:</span> DeepPartial<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
-
-  <span class="token comment">/**
-   * List entity by ranged index as defined by fields of idx and the body fields
-   * @param cls The type to search by
-   * @param idx The index name to search against
-   * @param body The configuration for listing
-   */</span>
-  <span class="token generic-function"><span class="token function">listByIndex</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> idx<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> body<span class="token operator">?</span><span class="token operator">:</span> DeepPartial<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> AsyncIterable<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">;</span>
-
-  <span class="token comment">/**
-   * Upsert by index, allowing the index to act as a primary key
-   * @param cls The type to create for
-   * @param idx The index name to use
-   * @param body The document to potentially store
-   */</span>
-  <span class="token generic-function"><span class="token function">upsertByIndex</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> idx<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> body<span class="token operator">:</span> OptionalId<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">;</span>
-
-  <span class="token comment">/**
-   * Update by index
-   * @param cls The type to update for
-   * @param idx The index to update by
-   * @param body The document to update
-   */</span>
-  <span class="token generic-function"><span class="token function">updateByIndex</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> idx<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> body<span class="token operator">:</span> <span class="token constant">T</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">;</span>
-
-  <span class="token comment">/**
-   * Update partial by index
-   * @param cls The type to update for
-   * @param idx The index to update by
-   * @param body The partial document to update
-   */</span>
-  <span class="token generic-function"><span class="token function">updatePartialByIndex</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> idx<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> body<span class="token operator">:</span> DeepPartial<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">;</span>
-
-  <span class="token comment">/**
-   * List entity by ranged index as defined by fields of idx and the body fields
-   * @param cls The type to search by
-   * @param idx The index name to search against
-   * @param options The configuration for listing
-   */</span>
-  <span class="token generic-function"><span class="token function">listPageByIndex</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> idx<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> options<span class="token operator">:</span> ModelIndexedListPageOptions<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>ModelIndexListPageResult<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">>></span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 

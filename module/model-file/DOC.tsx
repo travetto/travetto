@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c } from '@travetto/doc';
 import { FileModelService } from '@travetto/model-file';
-import { ModelQueryTypes } from '@travetto/model-query/support/doc.support.ts';
+import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
 import { ModelTypes } from '@travetto/model/support/doc.support.ts';
 
 export const text = <>
@@ -11,7 +11,7 @@ export const text = <>
   Supported features:
   <ul>
     {...ModelTypes(FileModelService)}
-    {...ModelQueryTypes(FileModelService)}
+    {...ModelIndexedTypes(FileModelService)}
   </ul>
 
 </>;

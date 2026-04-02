@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c } from '@travetto/doc';
 import { MemoryModelService } from '@travetto/model-memory';
-import { ModelQueryTypes } from '@travetto/model-query/support/doc.support.ts';
+import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
 import { ModelTypes } from '@travetto/model/support/doc.support.ts';
 
 export const text = <>
@@ -11,6 +11,6 @@ export const text = <>
   Supported features:
   <ul>
     {...ModelTypes(MemoryModelService)}
-    {...ModelQueryTypes(MemoryModelService)}
+    {...ModelIndexedTypes(MemoryModelService)}
   </ul>
 </>;

@@ -16,7 +16,7 @@ yarn add @travetto/model
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding."), which is used for data model validation.
 
 ## A Simple Model
-A model can be simply defined by usage of the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14) decorator, which opts it into the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") contracts, as well as making it available to the [ModelRegistryIndex](https://github.com/travetto/travetto/tree/main/module/model/src/registry/registry-index.ts#L16).
+A model can be simply defined by usage of the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14) decorator, which opts it into the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") contracts, as well as making it available to the [ModelRegistryIndex](https://github.com/travetto/travetto/tree/main/module/model/src/registry/registry-index.ts#L12).
 
 **Code: Basic Structure**
 ```typescript
@@ -33,7 +33,7 @@ export class SampleModel {
 Once the model is defined, it can be leveraged with any of the services that implement the various model storage contracts.  These contracts allow for persisting and fetching of the associated model object.
 
 ## Contracts
-The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L8), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L22), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10), [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64).
+The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L8), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10), [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64).
 
 ### Basic
 All [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations, must honor the [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L8) contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
@@ -113,70 +113,6 @@ export interface ModelCrudSupport extends ModelBasicSupport {
    * List all items
    */
   list<T extends ModelType>(cls: Class<T>): AsyncIterable<T>;
-}
-```
-
-### Indexed
-Additionally, an implementation may support the ability for basic [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L22) queries. This is not the full featured query support of [Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support."), but allowing for indexed lookups.  This allows for listing, through indexed data, as well as "pagination" through indexed data, via aa token that allows the next query to pick up where the last one left off. This allows for patterns like virtual scrolling, but does not allow for standard count/offset pagination.
-
-**Code: Indexed Contract**
-```typescript
-export interface ModelIndexedSupport extends ModelBasicSupport {
-  /**
-   * Get entity by index as defined by fields of idx and the body fields
-   * @param cls The type to search by
-   * @param idx The index name to search against
-   * @param body The payload of fields needed to search
-   */
-  getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T>;
-
-  /**
-   * Delete entity by index as defined by fields of idx and the body fields
-   * @param cls The type to search by
-   * @param idx The index name to search against
-   * @param body The payload of fields needed to search
-   */
-  deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void>;
-
-  /**
-   * List entity by ranged index as defined by fields of idx and the body fields
-   * @param cls The type to search by
-   * @param idx The index name to search against
-   * @param body The configuration for listing
-   */
-  listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T>;
-
-  /**
-   * Upsert by index, allowing the index to act as a primary key
-   * @param cls The type to create for
-   * @param idx The index name to use
-   * @param body The document to potentially store
-   */
-  upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T>;
-
-  /**
-   * Update by index
-   * @param cls The type to update for
-   * @param idx The index to update by
-   * @param body The document to update
-   */
-  updateByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: T): Promise<T>;
-
-  /**
-   * Update partial by index
-   * @param cls The type to update for
-   * @param idx The index to update by
-   * @param body The partial document to update
-   */
-  updatePartialByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T>;
-
-  /**
-   * List entity by ranged index as defined by fields of idx and the body fields
-   * @param cls The type to search by
-   * @param idx The index name to search against
-   * @param options The configuration for listing
-   */
-  listPageByIndex<T extends ModelType>(cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>): Promise<ModelIndexListPageResult<T>>;
 }
 ```
 

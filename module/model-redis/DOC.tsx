@@ -1,6 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c } from '@travetto/doc';
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
+import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
 
 import { RedisModelConfig } from './src/config.ts';
 import { RedisModelService } from './src/service.ts';
@@ -12,6 +13,7 @@ export const text = <>
   Supported features:
   <ul>
     {...ModelTypes(RedisModelService)}
+    {...ModelIndexedTypes(RedisModelService)}
   </ul>
 
   <ModelCustomConfig config={RedisModelConfig} />

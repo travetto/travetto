@@ -136,6 +136,7 @@ module/model-dynamodb
 module/model-elasticsearch
 module/model-file
 module/model-firestore
+module/model-indexed
 module/model-memory
 module/model-mongo
 module/model-mysql
@@ -222,6 +223,7 @@ global-test/model_auth-session <workspace-root>/global-test/model_auth-session
     module/model-elasticsearch <workspace-root>/module/model-elasticsearch
              module/model-file <workspace-root>/module/model-file
         module/model-firestore <workspace-root>/module/model-firestore
+          module/model-indexed <workspace-root>/module/model-indexed
            module/model-memory <workspace-root>/module/model-memory
             module/model-mongo <workspace-root>/module/model-mongo
             module/model-mysql <workspace-root>/module/model-mysql

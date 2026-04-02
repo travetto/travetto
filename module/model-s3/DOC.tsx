@@ -1,6 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c } from '@travetto/doc';
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
+import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
 
 import { S3ModelConfig } from './src/config.ts';
 import { S3ModelService } from './src/service.ts';
@@ -12,6 +13,7 @@ export const text = <>
   Supported features:
   <ul>
     {...ModelTypes(S3ModelService)}
+    {...ModelIndexedTypes(S3ModelService)}
   </ul>
 
   <ModelCustomConfig config={S3ModelConfig} />
