@@ -8,8 +8,6 @@ import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
 import type { ModelIndexedSupport } from '../../src/types/service.ts';
 import { keyedIndex, sortedIndex } from '../../src/indexes.ts';
-import { IndexedFieldError } from '../../__index__.ts';
-
 
 @Model('index_user')
 class User {
@@ -17,7 +15,7 @@ class User {
   name: string;
 }
 
-const userNameIndex = keyedIndex(User, { name: true }, 'userName');
+const userNameIndex = keyedIndex('userName', User, { name: true });
 
 @Model('index_user_2')
 class User2 {
@@ -33,8 +31,8 @@ class User3 {
   color?: string;
 }
 
-const userAgeIndex = sortedIndex(User3, { name: true }, { age: 1 }, 'userAge');
-const userAgeReversedIndex = sortedIndex(User3, { name: true }, { age: -1 }, 'userAgeReverse');
+const userAgeIndex = sortedIndex('userAge', User3, { name: true }, { age: 1 });
+const userAgeReversedIndex = sortedIndex('userAgeReverse', User3, { name: true }, { age: -1 });
 
 @Schema()
 class Child {
@@ -50,8 +48,8 @@ class User4 {
   child: Child;
 }
 
-const childAgeIndex = sortedIndex(User4, { child: { name: true } }, { child: { age: 1 } }, 'childAge');
-const nameCreatedIndex = sortedIndex(User4, { child: { name: true } }, { createdDate: 1 }, 'nameCreated');
+const childAgeIndex = sortedIndex('childAge', User4, { child: { name: true } }, { child: { age: 1 } });
+const nameCreatedIndex = sortedIndex('nameCreated', User4, { child: { name: true } }, { createdDate: 1 });
 
 @Suite()
 export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSupport> {

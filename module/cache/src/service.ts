@@ -22,7 +22,7 @@ export class CacheRecord {
   issuedAt: Date;
 }
 
-const keySpaceIndex = sortedIndex(CacheRecord, { keySpace: true }, { expiresAt: 1 }, 'keySpace');
+const keySpaceIndex = sortedIndex('keySpace', CacheRecord, { keySpace: true }, { expiresAt: 1 });
 
 /**
  * Cache source

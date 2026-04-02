@@ -20,7 +20,7 @@ export class IndexedWorker {
   age?: number;
 }
 
-const workerNameIndex = keyedIndex(IndexedWorker, { name: true, age: true }, 'worker-name');
+const workerNameIndex = keyedIndex('worker-name', IndexedWorker, { name: true, age: true });
 
 @Model()
 export class IndexedDoctor extends IndexedWorker {
