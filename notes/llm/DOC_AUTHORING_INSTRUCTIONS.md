@@ -110,25 +110,58 @@ Busboy, Fetch, Curl, Preact, NodeYaml
 ```
 _(This is not exhaustive — see `module/doc/src/mapping/library.ts` for the full list.)_
 
-## Using `toConcrete<T>()`
+## Using Direct References and `toConcrete<T>()`
 
-Import from `@travetto/runtime`. This resolves an interface/type to its concrete backing class at runtime, enabling:
-- **Displaying interface source** as a code block: `<c.Code src={toConcrete<MyInterface>()} />`
-- **Assigning to a variable** for repeated reference: `const MyContract = toConcrete<MyInterface>(); ... {MyContract}`
+### Direct Class/Function References
 
-When you use a `toConcrete` result directly inside JSX text (not as a `src` prop), it renders as an inline reference to that type.
-
-## Referencing Decorators and Classes Directly
-
-Import decorators/classes and use them as JSX expressions. They render as styled, linked references:
+Import classes, interfaces, decorators, and functions directly, then use them in JSX for automatic inline links:
 
 ```tsx
-import { Schema } from './src/decorator/schema.ts';
-import { Injectable } from '@travetto/di';
+import { IndexedFieldError } from './src/types/indexes.ts';
+import { keyedIndex, uniqueIndex } from './src/indexes.ts';
+import { Model } from '@travetto/model';
 
-// In JSX:
-The {Schema} decorator registers the class. It requires {Injectable} support.
+export const text = <>
+  The {Model} decorator registers your class. Use {keyedIndex} for efficient lookups.
+  
+  Errors are thrown as {IndexedFieldError} when validation fails.
+</>;
 ```
+
+This renders as styled, linked references without any wrapper functions.
+
+### Using `toConcrete<T>()` for Interfaces
+
+`toConcrete<T>()` resolves interfaces to their concrete backing classes at runtime. This enables:
+- **Displaying interface source** as a code block: `<c.Code src={toConcrete<MyInterface>()} />`
+- **Assigning to a variable** for repeated reference: `const MyContract = toConcrete<MyInterface>(); ... {MyContract}`
+- **Inline references**: When you use a `toConcrete()` result directly in JSX text (not as a `src` prop), it renders as a styled reference
+
+```tsx
+import { toConcrete } from '@travetto/runtime';
+import type { ModelIndexedSupport } from './src/types/service.ts';
+
+const ModelIndexedSupportContract = toConcrete<ModelIndexedSupport>();
+
+export const text = <>
+  Model services that implement {ModelIndexedSupportContract} provide these operations.
+  
+  <c.Code
+    title='Full Interface Definition'
+    src={ModelIndexedSupportContract}
+  />
+</>;
+```
+
+### When to Use Each Approach
+
+| Use Case | Approach | Example |
+|---|---|---|
+| Concrete classes, functions, decorators | Direct import + JSX reference | `import { Service } from '...'; {Service}` |
+| Interfaces with no concrete default | `toConcrete<T>()` | `const MyContract = toConcrete<MyInterface>();` |
+| Display interface source in code block | `toConcrete<T>()` as `src` | `<c.Code src={toConcrete<MyInterface>()} />` |
+| Inline method/property reference in prose | Use `d.*` helpers | `{d.method('getName')}` |
+| Link to external library | Use `d.library()` + `d.module()` | `{d.library('MongoDB')}`, `{d.module('ModelMongo')}` |
 
 ## Common Patterns
 
@@ -182,7 +215,68 @@ export const text = <>
 </>;
 ```
 
-### Pattern 3: CLI-Focused Module
+### Pattern 3: External Code Examples (Recommended)
+
+Prefer this pattern for modules with detailed usage documentation. **Externalize all code examples to the `doc/` folder.**
+
+```tsx
+/** @jsxImportSource @travetto/doc/support */
+import { d, c } from '@travetto/doc';
+import { toConcrete } from '@travetto/runtime';
+import type { ModelIndexedSupport } from './src/types/service.ts';
+import { keyedIndex, uniqueIndex, sortedIndex } from './src/indexes.ts';
+
+const ServiceContract = toConcrete<ModelIndexedSupport>();
+
+export const text = <>
+  <c.StdHeader />
+  
+  This module provides computed index support for fast lookups.
+
+  <c.Section title='Defining Indexes'>
+    Use {keyedIndex} to create indexes:
+
+    <c.Code
+      title='Creating a Keyed Index'
+      src='doc/keyed-index.ts'
+    />
+
+    For uniqueness constraints, use {uniqueIndex}:
+
+    <c.Code
+      title='Creating a Unique Index'
+      src='doc/unique-index.ts'
+    />
+  </c.Section>
+
+  <c.Section title='Using Indexes'>
+    Model services that implement {ServiceContract} provide these operations.
+
+    <c.Code
+      title='Service Interface'
+      src={ServiceContract}
+    />
+
+    <c.Code
+      title='Getting an Item'
+      src='doc/operations.ts'
+      startRe={/export async function getExample/}
+    />
+  </c.Section>
+</>;
+```
+
+**Structure for `doc/` folder:**
+```
+doc/
+├── keyed-index.ts      # Define keyed index
+├── unique-index.ts     # Define unique index
+├── sorted-index.ts     # Define sorted index
+├── operations.ts       # Multiple operation examples with startRe extraction
+└── ...
+```
+
+### Pattern 4: CLI-Focused Module
 
 ```tsx
 <c.Section title='CLI - command:name'>
@@ -191,7 +285,7 @@ export const text = <>
 </c.Section>
 ```
 
-### Pattern 4: Async Text with Runtime Data
+### Pattern 5: Async Text with Runtime Data
 
 ```tsx
 export const text = async () => {
@@ -203,13 +297,13 @@ export const text = async () => {
 };
 ```
 
-### Pattern 5: Shared Doc Utilities
+### Pattern 6: Shared Doc Utilities
 
 Create `support/doc.support.tsx` files for reusable documentation components shared across modules:
 
 ```tsx
 /** @jsxImportSource @travetto/doc/support */
-import { d, type DocJSXElementByFn, type DocJSXElement, DocFileUtil } from '@travetto/doc';
+import { d, type DocJSXElementByFn, DocFileUtil } from '@travetto/doc';
 import { Runtime, toConcrete } from '@travetto/runtime';
 
 const toLink = (title: string, target: Function): DocJSXElementByFn<'CodeLink'> =>
@@ -222,19 +316,91 @@ export const Links = {
 
 ## Code Source (`src` Prop) Options
 
-The `src` prop on `c.Code` and `c.Config` accepts:
+The `src` prop on `c.Code` and `c.Config` accepts multiple types of sources:
 
 | Source Type | Example | Behavior |
 |---|---|---|
-| Relative file path | `'doc/example.ts'` | Reads file from the module directory |
+| Relative file path | `'doc/example.ts'` | Reads file from the module directory. **Preferred approach.** |
 | Source file path | `'./src/config.ts'` | Reads the actual source file |
-| Class/function reference | `{MyClass}` or `src={MyClass}` | Extracts the source of that class |
-| `toConcrete<T>()` result | `src={toConcrete<MyType>()}` | Extracts the interface source |
+| Class/function reference | `{MyClass}` or `src={MyClass}` | Extracts and displays the source of that class/function |
+| `toConcrete<T>()` result | `src={toConcrete<MyType>()}` | Extracts the interface source at runtime |
+| Direct JSX reference | `{SomeClass}` or `{someFunction}` | Renders as inline reference (not in `src` prop) |
 
 ### Narrowing Displayed Code
 
-- `startRe` / `endRe` — Regex patterns to slice the displayed region of a file.
+- `startRe` / `endRe` — Regex patterns to slice the displayed region of a file. Useful for extracting specific functions from larger files.
 - `outline` — When `true`, shows only the structural outline (signatures without bodies).
+
+### Example: Using `startRe` for Targeted Extraction
+
+```tsx
+<c.Code
+  title='Getting Items'
+  src='doc/operations.ts'
+  startRe={/export async function get/}
+  endRe={/^}/}
+/>
+```
+
+## Externalizing Code Examples
+
+**Best Practice:** Always place code examples in external files under `doc/` rather than using inline template strings.
+
+### Why Externalize?
+
+1. **Type checking** — Code samples compile with the rest of the project
+2. **Refactoring safety** — Changes to module code automatically update examples
+3. **Maintainability** — Examples stay in sync; no manual string updates
+4. **Reusability** — Share examples across modules via imports
+5. **Testing** — Run examples as part of your test suite if needed
+
+### How to Externalize
+
+1. Create files in `module/your-module/doc/` folder:
+   ```
+   doc/
+   ├── basic-usage.ts
+   ├── advanced-config.ts
+   ├── error-handling.ts
+   └── ...
+   ```
+
+2. Structure files with named exports for fine-grained extraction:
+   ```tsx
+   // doc/operations.ts
+   import { Model } from '@travetto/model';
+   
+   @Model()
+   export class User {
+     id: string;
+     name: string;
+   }
+   
+   export async function getExample(service: any) {
+     const user = await service.getByIndex(User, userIndex, { name: 'John' });
+     return user;
+   }
+   
+   export async function updateExample(service: any) {
+     return await service.updateByIndex(User, userIndex, { name: 'Jane' });
+   }
+   ```
+
+3. Reference in DOC.tsx with extraction regex:
+   ```tsx
+   <c.Code
+     title='Getting Items'
+     src='doc/operations.ts'
+     startRe={/export async function getExample/}
+   />
+   ```
+
+### Organizing External Files
+
+- **One pattern per file** — `doc/lazy-loading.ts`, `doc/error-handling.ts`
+- **Multiple related examples** — Use `startRe`/`endRe` to extract specific functions
+- **Model definitions** — Separate file with all model classes used in examples
+- **Configuration examples** — `doc/config-advanced.ts`, `doc/config-minimal.ts`
 
 ## HTML Elements in JSX
 
@@ -251,12 +417,109 @@ Standard HTML elements are supported inside the JSX fragments:
 2. **Present tense** — "This module provides..." not "This module will provide..."
 3. **Reference other modules** — Use `{d.module('Name')}` to cross-link related functionality.
 4. **Reference external tech** — Use `{d.library('Name')}` for consistent external links.
-5. **Show, don't just tell** — Pair explanations with `<c.Code>` blocks pointing to real source files.
-6. **Use inline references** — Wrap field names, methods, inputs, and paths in the appropriate `d.*` helpers rather than plain text or backticks.
+5. **Show, don't just tell** — Pair explanations with `<c.Code>` blocks pointing to real source files or external examples.
+6. **Use inline references** — Use `d.*` helpers and direct JSX references for field names, methods, inputs, paths, and decorators rather than plain text or backticks.
 7. **Section hierarchy** — Use `Section` > `SubSection` > `SubSubSection`. Don't skip levels.
 8. **Notes for caveats** — Use `<c.Note>` for important warnings, caveats, or non-obvious behavior.
 9. **CLI documentation** — Always include `--help` execution output for CLI commands.
-10. **Source file paths** — Code examples should live in `doc/` subdirectories within the module, or reference actual source files.
+10. **Source file paths** — Code examples should live in external files under `doc/` subdirectories (see "Externalizing Code Examples").
+
+## Best Practices for DOC.tsx
+
+### Always Externalize Code Examples
+
+**Never use inline template strings for code samples.** Always create files in `doc/`:
+
+❌ **Avoid:**
+```tsx
+<c.Code
+  title='Creating an Index'
+  language='typescript'
+  src={`
+import { keyedIndex } from '@travetto/model-indexed';
+
+const idx = keyedIndex(Model, { name: 'idx', key: { id: true } });
+  `.trim()}
+/>
+```
+
+✅ **Do:**
+```tsx
+<c.Code
+  title='Creating an Index'
+  src='doc/keyed-index.ts'
+/>
+```
+
+### Prefer Direct References Over Strings
+
+**Use actual imports and JSX references instead of string names:**
+
+❌ **Avoid:**
+```tsx
+The {d.method('getByIndex')} method returns a single item.
+```
+
+✅ **Do:**
+```tsx
+import { getByIndex } from './src/service.ts'; // if it's a standalone function
+// Or just reference the method directly in prose
+The {d.method('getByIndex')} method returns a single item.
+```
+
+For classes/decorators/interfaces:
+
+❌ **Avoid:**
+```tsx
+The {d.class('MyService')} class provides the main functionality.
+```
+
+✅ **Do:**
+```tsx
+import { MyService } from './src/service.ts';
+// ...
+The {MyService} class provides the main functionality.
+```
+
+### Use `toConcrete<T>()` for Interfaces
+
+When documenting interfaces without a single canonical concrete implementation:
+
+```tsx
+import { toConcrete } from '@travetto/runtime';
+import type { MyInterface } from './src/types.ts';
+
+const MyInterfaceContract = toConcrete<MyInterface>();
+
+export const text = <>
+  Services implementing {MyInterfaceContract} must provide:
+  
+  <c.Code src={MyInterfaceContract} title='Full Interface' />
+</>;
+```
+
+### Keep DOC.tsx Clean and Focused
+
+- Limit to 200-300 lines maximum
+- Import references, don't embed them
+- Use `startRe`/`endRe` to extract specific functions from `doc/` files
+- Leverage `c.StdHeader` to avoid repeating module metadata
+
+### File Organization
+
+Structure your `doc/` folder logically:
+
+```
+doc/
+├── models.ts           # All @Model definitions used in examples
+├── basic-setup.ts      # Simple getting-started examples
+├── advanced-config.ts  # Complex configurations
+├── errors.ts           # Error handling examples
+├── integration.ts      # Integration patterns
+└── ...                 # One file per major pattern/section
+```
+
+Use naming to clarify purpose (e.g., `keyed-index.ts`, `sorted-index.ts` rather than `example1.ts`, `example2.ts`).
 
 ## Running Documentation Generation
 
