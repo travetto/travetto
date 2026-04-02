@@ -101,14 +101,10 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
     return this;
   }
 
-  getKey(config: IndexProcessConfig<{ sep?: string, emptyValue?: string }> = {}): string {
+  getKey(config: IndexProcessConfig<{ sep?: string }> = {}): string {
     const { keyed = true, sort = false, sep = DEFAULT_SEP } = config;
     const parts = [keyed ? this.keyedParts : [], sort ? this.sortParts : []].flat();
-    const result = parts.map(({ value }) => value).map(value => `${value}`).join(sep);
-    if (!result && config.emptyValue) {
-      return config.emptyValue;
-    }
-    return result;
+    return parts.map(({ value }) => value).map(value => `${value}`).join(sep);
   }
 
   getSort(): number {
