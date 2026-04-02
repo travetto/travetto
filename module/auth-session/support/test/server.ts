@@ -8,7 +8,7 @@ import { type AsyncContext, WithAsyncContext } from '@travetto/context';
 import { Util, type Class } from '@travetto/runtime';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
-import { ModelSuite } from '@travetto/model/support/test/suite';
+import { ModelSuite } from '@travetto/model/support/test/suite.ts';
 
 @Suite()
 @ModelSuite()

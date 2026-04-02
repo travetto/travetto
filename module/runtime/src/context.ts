@@ -6,7 +6,7 @@ import { type ManifestIndex, type ManifestContext, ManifestModuleUtil } from '@t
 import { Env } from './env.ts';
 import { RuntimeIndex } from './manifest-index.ts';
 import { describeFunction } from './function.ts';
-import type { Role } from './trv';
+import type { Role } from './trv.ts';
 import { JSONUtil } from './json.ts';
 
 /** Constrained version of {@type ManifestContext} */
