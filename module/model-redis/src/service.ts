@@ -216,7 +216,6 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       case 'indexed:keyed': id = await this.client.sRandMember(resolvedKey) ?? undefined; break;
       case 'indexed:sorted': {
         const sort = computed.getSort();
-        console.error('Resolved sort value', { sort, resolvedKey });
         const result = await this.client.zRangeByScore(resolvedKey, sort, sort);
         id = result[0];
         break;
