@@ -458,7 +458,6 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     const items: T[] = [];
     const offset = options?.offset ? JSONUtil.fromBase64<Record<string, AttributeValue>>(options.offset) : undefined;
     for await (const batch of this.#scanIndex(cls, idx, body, { ...options, offset })) {
-      console.error(batch.LastEvaluatedKey);
       for (const item of batch.Items ?? []) {
         try {
           items.push(await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!));
