@@ -99,7 +99,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     try {
       if (mode === 'create') {
         const indices: Record<string, unknown> = {};
-        for (const idx of Object.values(config.indices ?? {})) {
+        for (const idx of ModelRegistryIndex.getIndices(cls)) {
           if (isModelIndexedIndex(idx)) {
             const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
             switch (idx.type) {
@@ -130,7 +130,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         const indices: Record<string, unknown> = {};
         const expr: string[] = [];
 
-        for (const idx of Object.values(config.indices ?? {})) {
+        for (const idx of ModelRegistryIndex.getIndices(cls)) {
           if (isModelIndexedIndex(idx)) {
             const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
             switch (idx.type) {
