@@ -8,6 +8,7 @@ import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
 import type { ModelIndexedSupport } from '../../src/types/service.ts';
 import { keyedIndex, sortedIndex } from '../../src/indexes.ts';
+import { IndexedFieldError } from '../../__index__.ts';
 
 @Model('index_user')
 class User {
@@ -15,7 +16,10 @@ class User {
   name: string;
 }
 
-const userNameIndex = keyedIndex('userName', User, { name: true });
+const userNameIndex = keyedIndex(User, {
+  name: 'userName',
+  key: { name: true }
+});
 
 @Model('index_user_2')
 class User2 {
@@ -31,8 +35,16 @@ class User3 {
   color?: string;
 }
 
-const userAgeIndex = sortedIndex('userAge', User3, { name: true }, { age: 1 });
-const userAgeReversedIndex = sortedIndex('userAgeReverse', User3, { name: true }, { age: -1 });
+const userAgeIndex = sortedIndex(User3, {
+  name: 'userAge',
+  key: { name: true },
+  sort: { age: 1 }
+});
+const userAgeReversedIndex = sortedIndex(User3, {
+  name: 'userAgeReverse',
+  key: { name: true },
+  sort: { age: -1 }
+});
 
 @Schema()
 class Child {
@@ -48,8 +60,16 @@ class User4 {
   child: Child;
 }
 
-const childAgeIndex = sortedIndex('childAge', User4, { child: { name: true } }, { child: { age: 1 } });
-const nameCreatedIndex = sortedIndex('nameCreated', User4, { child: { name: true } }, { createdDate: 1 });
+const childAgeIndex = sortedIndex(User4, {
+  name: 'childAge',
+  key: { child: { name: true } },
+  sort: { child: { age: 1 } }
+});
+const nameCreatedIndex = sortedIndex(User4, {
+  name: 'nameCreated',
+  key: { child: { name: true } },
+  sort: { createdDate: 1 }
+});
 
 @Suite()
 export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSupport> {
@@ -105,7 +125,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     assert(!found2.color);
 
     // @ts-expect-error
-    await assert.rejects(() => service.getByIndex(User3, userAgeIndex, { name: 'bob' }));
+    await assert.rejects(() => service.getByIndex(User3, userAgeIndex, { name: 'bob' }), IndexedFieldError);
   }
 
   @Test()

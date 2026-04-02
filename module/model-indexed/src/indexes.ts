@@ -29,7 +29,8 @@ function buildTemplateParts<T extends TemplateValue = TemplateValue>(
 export function keyedIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T>
->(name: string, cls: Class<T>, key: K): KeyedIndex<T, K, {}> {
+>(cls: Class<T>, config: { name: string, key: K }): KeyedIndex<T, K, {}> {
+  const { name, key } = config;
   const keyTemplate = buildTemplateParts<true>('key', key);
   const idx: KeyedIndex<T, K, {}> = {
     type: 'indexed:keyed',
@@ -46,7 +47,8 @@ export function keyedIndex<
 export function uniqueIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T>
->(name: string, cls: Class<T>, key: K): KeyedIndex<T, K, {}> {
+>(cls: Class<T>, config: { name: string, key: K }): KeyedIndex<T, K, {}> {
+  const { name, key } = config;
   const keyTemplate = buildTemplateParts<true>('key', key);
   const idx: KeyedIndex<T, K, {}> = {
     type: 'indexed:keyed',
@@ -64,7 +66,8 @@ export function sortedIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T>,
   S extends SortedIndexSelection<T>
->(name: string, cls: Class<T>, key: K, sort: S): SortedIndex<T, K, S> {
+>(cls: Class<T>, config: { name: string, key: K, sort: S }): SortedIndex<T, K, S> {
+  const { name, key, sort } = config;
   const keyTemplate = buildTemplateParts<true>('key', key);
   const sortTemplate = buildTemplateParts<1 | -1>('sort', sort);
   const idx: SortedIndex<T, K, S> = {
