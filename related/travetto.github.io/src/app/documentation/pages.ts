@@ -58,6 +58,10 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/model-firestore/model-firestore.component').then(item => item.ModelFirestoreComponent)
       },
       {
+        path: 'model-indexed', title: 'Indexed',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/model-indexed/model-indexed.component').then(item => item.ModelIndexedComponent)
+      },
+      {
         path: 'model-memory', title: 'Memory',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/model-memory/model-memory.component').then(item => item.ModelMemoryComponent)
       },

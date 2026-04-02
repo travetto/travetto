@@ -103,6 +103,10 @@ export const MODULES = {
     name: '@travetto/model-firestore', folder: '@travetto/model-firestore', displayName: 'Firestore Model Support',
     description: 'Firestore backing for the travetto model module.'
   },
+  ModelIndexed: {
+    name: '@travetto/model-indexed', folder: '@travetto/model-indexed', displayName: 'Data Model Indexing Support',
+    description: 'Basic indexing support for model sources that support it.'
+  },
   ModelMemory: {
     name: '@travetto/model-memory', folder: '@travetto/model-memory', displayName: 'Memory Model Support',
     description: 'Memory backing for the travetto model module.'

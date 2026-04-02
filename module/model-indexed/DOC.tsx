@@ -35,20 +35,17 @@ export const text = <>
       A {keyedIndex} provides fast lookups by computed key values. It's useful when you want to query records by specific field combinations.
 
       <c.Code
-        title='Keyed Index Definition'
-        src='doc-exec/src/sample.ts'
-      />
-
-      The index definition specifies:
-      - {d.field('name')} — The identifier for this index
-      - {d.field('key')} — An object where each key path should be included in the index (set to {d.input('true')})
-
-      Use {keyedIndex} to create a keyed index:
-
-      <c.Code
         title='Creating a Keyed Index'
         src='doc/keyedIndex.ts'
       />
+
+      The index definition specifies:
+      <ul>
+        <li> {d.field('name')} — The identifier for this index</li>
+        <li> {d.field('key')} — An object where each key path should be included in the index (set to {d.input('true')})</li>
+      </ul>
+
+
     </c.SubSection>
 
     <c.SubSection title='Unique Indexes'>
@@ -163,23 +160,6 @@ export const text = <>
         startRe={/export async function listWithFilterExample/}
       />
     </c.SubSection>
-  </c.Section>
-
-  <c.Section title='Error Handling'>
-    The module provides the {IndexedFieldError} for field validation issues.
-
-    <c.Code
-      title='IndexedFieldError'
-      src={IndexedFieldError}
-    />
-
-    Common error scenarios:
-
-    <ul>
-      <li><strong>Missing field</strong> — A required index field is not present in the provided body</li>
-      <li><strong>Type mismatch</strong> — A field value has an unexpected type (e.g., string instead of number for a sort field)</li>
-      <li><strong>Null/undefined</strong> — A key field is null or undefined (allowed by default; configure with {d.field('emptyValue')} if needed)</li>
-    </ul>
   </c.Section>
 
   <c.Section title='Integration'>

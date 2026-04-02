@@ -30,20 +30,6 @@ Indexes are defined using factory functions provided by the module. Each index i
 ### Keyed Indexes
 A [keyedIndex](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L29) provides fast lookups by computed key values. It's useful when you want to query records by specific field combinations.
 
-**Code: Keyed Index Definition**
-```typescript
-import { Model } from '@travetto/model';
-
-@Model()
-export class SampleModel {
-  id: string;
-  name: string;
-  age: number;
-}
-```
-
-The index definition specifies: - `name` — The identifier for this index - `key` — An object where each key path should be included in the index (set to `true`) Use [keyedIndex](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L29) to create a keyed index:
-
 **Code: Creating a Keyed Index**
 ```typescript
 import { keyedIndex } from '@travetto/model-indexed';
@@ -61,6 +47,10 @@ export const userByName = keyedIndex(User, {
   key: { name: true }
 });
 ```
+
+The index definition specifies:
+   *   `name` — The identifier for this index
+   *   `key` — An object where each key path should be included in the index (set to `true`)
 
 ### Unique Indexes
 A [uniqueIndex](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L47) enforces uniqueness constraints on key fields. This is useful for emails, usernames, or any field that should be globally unique.
@@ -335,25 +325,6 @@ export async function listWithFilterExample(modelService: any) {
   return result;
 }
 ```
-
-## Error Handling
-The module provides the [IndexedFieldError](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/indexes.ts#L88) for field validation issues.
-
-**Code: IndexedFieldError**
-```typescript
-export class IndexedFieldError<T extends ModelType> extends RuntimeError {
-  constructor(cls: Class<T>, idx: AllIndexes<T>, fieldPath: string, message: string) {
-    super(`${message}:  ${idx.name} on ${cls.name} at path ${fieldPath}`, {
-      details: { cls: cls.name, index: idx.name, fieldPath }
-    });
-  }
-}
-```
-
-Common error scenarios:
-   *  **Missing field** — A required index field is not present in the provided body
-   *  **Type mismatch** — A field value has an unexpected type (e.g., string instead of number for a sort field)
-   *  **Null/undefined** — A key field is null or undefined (allowed by default; configure with `emptyValue` if needed)
 
 ## Integration
 Index registration happens automatically when models are decorated with [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14). Model services like [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module."), [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module."), and [SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") implement the [ModelIndexedSupport](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L23) interface to provide indexed access.
