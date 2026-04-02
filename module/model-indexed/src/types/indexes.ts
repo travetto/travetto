@@ -47,14 +47,18 @@ export type KeyedIndexWithPartialBody<T, K> = {
 export type FullKeyedIndexBody<T, K, S> = KeyedIndexBody<T, Merge<K, S>>;
 export type FullKeyedIndexWithPartialBody<T, K, S> = KeyedIndexWithPartialBody<T, Merge<K, S>>;
 
+export type TemplateValue = 1 | -1 | true;
+export type TemplatePart<T extends TemplateValue = TemplateValue> = { path: string[], value: T, part: 'key' | 'sort' };
+
 export interface KeyedIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T>,
   S extends SortedIndexSelection<T>
 > extends IndexConfig<'indexed:keyed'> {
-  keys: K;
+  key: K;
   sort: S;
   unique: boolean;
+  template: TemplatePart[];
 }
 
 export interface SortedIndex<
@@ -62,8 +66,9 @@ export interface SortedIndex<
   K extends KeyedIndexSelection<T>,
   S extends SortedIndexSelection<T>
 > extends IndexConfig<'indexed:sorted'> {
-  keys: K;
+  key: K;
   sort: S;
+  template: TemplatePart[];
 }
 
 export type SingleItemIndex<

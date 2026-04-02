@@ -750,11 +750,11 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
         .map(([name, sel]) => `${this.identifier(name)} ${sel ? 'ASC' : 'DESC'}`)
         .join(', ')});`;
     } else if (isModelIndexedIndex(idx)) {
-      const computed = ModelIndexedComputedIndex.get(idx, {});
-      if (computed.allParts.find(field => field.template.path.length > 1)) {
+      if (idx.template.find(field => field.path.length > 1)) {
         console.debug('Nested fields are not supported in ModelIndexed indices SQL', { index: idx.name });
         return;
       }
+      const computed = ModelIndexedComputedIndex.get(idx, {});
       const fields = computed.allParts.map(({ template: { path, value } }) => `${this.identifier(path.join('_'))} ${value === 1 ? 'ASC' : 'DESC'}`).join(', ');
       switch (idx.type) {
         case 'indexed:keyed': return `CREATE ${idx.unique ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields});`;

@@ -3,17 +3,11 @@ import { castTo, type Any } from '@travetto/runtime';
 
 import {
   type KeyedIndexSelection, type SortedIndexSelection, type AllIndexes, type KeyedIndexBody, IndexedFieldError,
-  type FullKeyedIndexBody
+  type FullKeyedIndexBody, type TemplateValue, type TemplatePart
 } from './types/indexes.ts';
 
 const DEFAULT_SEP = '\u8203';
 
-type TemplateValue = 1 | -1 | true;
-type TemplatePart<T extends TemplateValue = TemplateValue> = {
-  path: string[];
-  part: 'key' | 'sort';
-  value: T;
-};
 type BodyPart = {
   state: 'missing' | 'empty' | 'mismatch' | 'found';
   value: unknown;
@@ -23,39 +17,39 @@ type IndexPart<T extends TemplateValue = TemplateValue> = {
   template: TemplatePart<T>;
 };
 
-function buildIndexParts<T extends TemplateValue = TemplateValue>(
+function buildIndexParts<T extends TemplateValue>(
   part: 'key' | 'sort',
-  template: Record<string, T>,
-  item: Record<string, unknown> | undefined,
+  template: TemplatePart[],
+  body: Record<string, unknown> | undefined,
   checkValueType?: (value: unknown) => boolean,
-  prefix: string[] = [],
 ): IndexPart<T>[] {
   const out: IndexPart<T>[] = [];
-  for (const [key, value] of Object.entries(template)) {
-    const path = prefix.length ? [...prefix, key] : [key];
-    const itemValue = (typeof item === 'object' && item !== null) ? item[key] : undefined;
-
-    if (typeof value === 'object' && value !== null) {
-      out.push(...buildIndexParts<T>(part, castTo(value), castTo(itemValue), checkValueType, path));
-      continue;
-    }
-
-    const templatePart: TemplatePart<T> = { path, value, part };
-    let bodyPart: BodyPart;
-    if (typeof item !== 'object') {
-      bodyPart = { value: item, state: 'mismatch' };
-    } else if (item === null || item === undefined) {
-      bodyPart = { value: null, state: 'empty' };
-    } else if (!(key in item)) {
-      bodyPart = { value: undefined!, state: 'missing' };
-    } else {
-      if (checkValueType && !checkValueType(itemValue)) {
-        bodyPart = { value: itemValue, state: 'mismatch' };
+  for (const templatePart of template.filter(item => item.part === part)) {
+    let value: unknown = body;
+    let bodyPart: BodyPart | undefined;
+    for (const pathItem of templatePart.path) {
+      if (typeof value === 'object' && value !== null) {
+        if (value && pathItem in value) {
+          value = castTo<Record<string, unknown>>(value)[pathItem];
+        } else {
+          bodyPart = { value: undefined!, state: 'missing' };
+          break;
+        }
       } else {
-        bodyPart = { value: itemValue, state: 'found' };
+        bodyPart = { value: undefined!, state: 'mismatch' };
+        break;
       }
     }
-    out.push({ template: templatePart, body: bodyPart });
+    if (bodyPart === undefined) {
+      if (value === null || value === undefined) {
+        bodyPart = { value: null, state: 'empty' };
+      } else if (checkValueType && !checkValueType(value)) {
+        bodyPart = { value, state: 'mismatch' };
+      } else {
+        bodyPart = { value, state: 'found' };
+      }
+    }
+    out.push({ template: castTo(templatePart), body: bodyPart });
   }
   return out;
 }
@@ -74,29 +68,25 @@ type Body<T extends ModelType> = KeyedIndexBody<T, Any> | FullKeyedIndexBody<T, 
 
 type IndexProcessConfig<T = {}> = T & { keyed?: boolean, sort?: boolean };
 
-export class ModelIndexedComputedIndex {
+export class ModelIndexedComputedIndex<T extends ModelType> {
   static get<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     idx: AllIndexes<T, K, S>,
-    body: Body<T> = {},
-  ): ModelIndexedComputedIndex {
-    return new ModelIndexedComputedIndex(idx,
-      buildIndexParts('key', castTo(idx.keys) ?? {}, castTo(body)),
-      buildIndexParts('sort', castTo(idx.sort) ?? {}, castTo(body), value => typeof value === 'number' || value instanceof Date)
-    );
+    body: Body<T>,
+  ): ModelIndexedComputedIndex<T> {
+    return new ModelIndexedComputedIndex(idx, body);
   }
 
   keyedParts: IndexPart<true>[];
   sortParts: IndexPart<-1 | 1>[];
-  idx: AllIndexes<ModelType>;
+  idx: AllIndexes<T>;
 
   constructor(
-    idx: AllIndexes<ModelType>,
-    keyedParts: IndexPart<true>[],
-    sortParts: IndexPart<-1 | 1>[]
+    idx: AllIndexes<T>,
+    body: Body<T>,
   ) {
     this.idx = idx;
-    this.keyedParts = keyedParts;
-    this.sortParts = sortParts;
+    this.keyedParts = buildIndexParts<true>('key', idx.template, castTo(body));
+    this.sortParts = buildIndexParts<-1 | 1>('sort', idx.template, castTo(body), value => typeof value === 'number' || value instanceof Date);
   }
 
   get allParts(): IndexPart[] {
