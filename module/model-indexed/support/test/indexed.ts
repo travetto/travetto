@@ -45,6 +45,11 @@ const userAgeReversedIndex = sortedIndex(User3, {
   key: { name: true },
   sort: { age: -1 }
 });
+const userAgeNoKeyIndex = sortedIndex(User3, {
+  name: 'userAgeNoKey',
+  key: {},
+  sort: { age: 1 }
+});
 
 @Schema()
 class Child {
@@ -149,6 +154,27 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
 
     // @ts-expect-error
     await assert.rejects(() => service.listByIndex(User3, userAgeIndex, {}), IndexedFieldError);
+  }
+
+  @Test()
+  async queryListNoSelectedKeys() {
+    const service = await this.service;
+
+    await service.create(User3, User3.from({ name: 'charlie', age: 40, color: 'blue' }));
+    await service.create(User3, User3.from({ name: 'alice', age: 30, color: 'red' }));
+    await service.create(User3, User3.from({ name: 'bob', age: 50, color: 'green' }));
+
+    const { items: arr } = await service.listByIndex(User3, userAgeNoKeyIndex, {});
+
+    assert(arr[0].name === 'alice' && arr[0].age === 30);
+    assert(arr[1].name === 'charlie' && arr[1].age === 40);
+    assert(arr[2].name === 'bob' && arr[2].age === 50);
+
+    const found = await service.getByIndex(User3, userAgeNoKeyIndex, { age: 40 });
+    assert(found.name === 'charlie');
+
+    // @ts-expect-error
+    await assert.rejects(() => service.getByIndex(User3, userAgeNoKeyIndex, {}), IndexedFieldError);
   }
 
   @Test({ skip: (self) => !castTo<ModelIndexedSuite>(self).supportsDeepIndexes })

@@ -18,6 +18,7 @@ import type { DynamoDBModelConfig } from './config.ts';
 import { DynamoDBUtil } from './util.ts';
 
 const EXPIRES_ATTRIBUTE = 'expires_at__';
+const DEFAULT_EMPTY_VALUE = 'NULL';
 
 /**
  * A model service backed by DynamoDB
@@ -52,7 +53,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     ModelCrudUtil.ensureNotSubType(cls);
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
     const safeName = DynamoDBUtil.toSafeName(idx.name);
-    const expression = { [`:${safeName}`]: DynamoDBUtil.toValue(computed.getKey()) };
+    const expression = { [`:${safeName}`]: DynamoDBUtil.toValue(computed.getKey({ emptyValue: DEFAULT_EMPTY_VALUE })) };
     const limit = options?.limit ?? 100;
 
     let startKey = options?.offset ?? undefined;
@@ -106,7 +107,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         .filter(expr => !!expr)
         .join(' and '),
       ExpressionAttributeValues: {
-        [`:${safeName}`]: DynamoDBUtil.toValue(computed.getKey()),
+        [`:${safeName}`]: DynamoDBUtil.toValue(computed.getKey({ emptyValue: DEFAULT_EMPTY_VALUE })),
         ...(sorted ? { [`:${safeName}_sort`]: DynamoDBUtil.toValue(computed.getSort()) } : {})
       }
     };
@@ -145,9 +146,9 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
             const safeName = DynamoDBUtil.toSafeName(idx.name);
             const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
             switch (idx.type) {
-              case 'indexed:keyed': indices[`${safeName}__`] = DynamoDBUtil.toValue(computed.getKey()); break;
+              case 'indexed:keyed': indices[`${safeName}__`] = DynamoDBUtil.toValue(computed.getKey({ emptyValue: DEFAULT_EMPTY_VALUE })); break;
               case 'indexed:sorted': {
-                indices[`${safeName}__`] = DynamoDBUtil.toValue(computed.getKey());
+                indices[`${safeName}__`] = DynamoDBUtil.toValue(computed.getKey({ emptyValue: DEFAULT_EMPTY_VALUE }));
                 indices[`${safeName}_sort__`] = DynamoDBUtil.toValue(computed.getSort());
                 break;
               }
@@ -178,12 +179,12 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
             const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
             switch (idx.type) {
               case 'indexed:keyed': {
-                indices[`:${safeName}`] = DynamoDBUtil.toValue(computed.getKey());
+                indices[`:${safeName}`] = DynamoDBUtil.toValue(computed.getKey({ emptyValue: DEFAULT_EMPTY_VALUE }));
                 expr.push(`${safeName}__ = :${safeName}`);
                 break;
               }
               case 'indexed:sorted': {
-                indices[`:${safeName}`] = DynamoDBUtil.toValue(computed.getKey());
+                indices[`:${safeName}`] = DynamoDBUtil.toValue(computed.getKey({ emptyValue: DEFAULT_EMPTY_VALUE }));
                 indices[`:${safeName}_sort`] = DynamoDBUtil.toValue(computed.getSort());
                 expr.push(`${safeName}__ = :${safeName}`);
                 expr.push(`${safeName}_sort__ = :${safeName}_sort`);
@@ -476,7 +477,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       const computed = ModelIndexedComputedIndex.get(idx, last).validate();
       const safeName = DynamoDBUtil.toSafeName(idx.name);
       nextOffset = JSONUtil.toBase64({
-        [`${safeName}__`]: DynamoDBUtil.toValue(computed.getKey()),
+        [`${safeName}__`]: DynamoDBUtil.toValue(computed.getKey({ emptyValue: DEFAULT_EMPTY_VALUE })),
         [`${safeName}_sort__`]: DynamoDBUtil.toValue(computed.getSort()),
         id: DynamoDBUtil.toValue(last.id)
       });
