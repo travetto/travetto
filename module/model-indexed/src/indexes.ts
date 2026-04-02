@@ -23,22 +23,22 @@ function buildTemplateParts<T extends TemplateValue = TemplateValue>(
   return out;
 }
 
+const buildIndexName = (cls: Class, template: TemplatePart[]) =>
+  `${cls.name}__${template.map(item => item.path.join('.')).join('_')}`.toLowerCase();
+
 /**
  * Defines a keyed index for a model
  */
 export function keyedIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T>
->(cls: Class<T>, selection: K, name?: string): KeyedIndex<T, K, {}> {
+>(cls: Class<T>, key: K, name?: string): KeyedIndex<T, K, {}> {
+  const keyTemplate = buildTemplateParts<true>('key', key);
+  name ??= buildIndexName(cls, keyTemplate);
   const idx: KeyedIndex<T, K, {}> = {
     type: 'indexed:keyed',
-    name: name ?? `${cls.Ⲑid}__${Object.keys(selection).join('_')}`,
-    key: selection,
-    keyTemplate: buildTemplateParts('key', selection),
-    sortTemplate: [],
-    class: cls,
-    sort: {},
-    unique: false
+    class: cls, name, unique: false,
+    key, keyTemplate, sort: {}, sortTemplate: []
   };
   ModelRegistryIndex.getForRegister(cls).register({ indices: { [idx.name]: idx } });
   return idx;
@@ -51,15 +51,12 @@ export function uniqueIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T>
 >(cls: Class<T>, key: K, name?: string): KeyedIndex<T, K, {}> {
+  const keyTemplate = buildTemplateParts<true>('key', key);
+  name ??= buildIndexName(cls, keyTemplate);
   const idx: KeyedIndex<T, K, {}> = {
     type: 'indexed:keyed',
-    name: name ?? `${cls.Ⲑid}__${Object.keys(key).join('_')}`,
-    key,
-    keyTemplate: buildTemplateParts('key', key),
-    sortTemplate: [],
-    class: cls,
-    unique: true,
-    sort: {},
+    class: cls, name, unique: true,
+    key, keyTemplate, sort: {}, sortTemplate: []
   };
   ModelRegistryIndex.getForRegister(cls).register({ indices: { [idx.name]: idx } });
   return idx;
@@ -73,14 +70,13 @@ export function sortedIndex<
   K extends KeyedIndexSelection<T>,
   S extends SortedIndexSelection<T>
 >(cls: Class<T>, key: K, sort: S, name?: string): SortedIndex<T, K, S> {
+  const keyTemplate = buildTemplateParts<true>('key', key);
+  const sortTemplate = buildTemplateParts<1 | -1>('sort', sort);
+  name ??= name ?? buildIndexName(cls, keyTemplate);
   const idx: SortedIndex<T, K, S> = {
     type: 'indexed:sorted',
-    name: name ?? `${cls.Ⲑid}__${Object.keys(key).join('_')}`,
-    key,
-    sort,
-    keyTemplate: buildTemplateParts('key', key),
-    sortTemplate: buildTemplateParts('sort', sort),
-    class: cls,
+    class: cls, name, key, sort,
+    keyTemplate, sortTemplate,
   };
   ModelRegistryIndex.getForRegister(cls).register({ indices: { [idx.name]: idx } });
   return idx;
