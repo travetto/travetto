@@ -1,6 +1,6 @@
 {
   "name": "@travetto/registry",
-  "version": "8.0.0-alpha.9",
+  "version": "8.0.0-alpha.10",
   "type": "module",
   "description": "Patterns and utilities for handling registration of metadata and functionality for run-time use",
   "keywords": [
@@ -28,7 +28,7 @@
     "directory": "module/registry"
   },
   "dependencies": {
-    "@travetto/runtime": "^8.0.0-alpha.9"
+    "@travetto/runtime": "^8.0.0-alpha.10"
   },
   "travetto": {
     "displayName": "Registry"

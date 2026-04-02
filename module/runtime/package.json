@@ -1,6 +1,6 @@
 {
   "name": "@travetto/runtime",
-  "version": "8.0.0-alpha.9",
+  "version": "8.0.0-alpha.10",
   "type": "module",
   "description": "Runtime for travetto applications.",
   "keywords": [
@@ -32,7 +32,7 @@
     "temporal-polyfill-lite": "^0.3.3"
   },
   "peerDependencies": {
-    "@travetto/transformer": "^8.0.0-alpha.4"
+    "@travetto/transformer": "^8.0.0-alpha.5"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {
