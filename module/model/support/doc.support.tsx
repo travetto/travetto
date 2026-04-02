@@ -8,7 +8,6 @@ import type { ModelBlobSupport } from '../src/types/blob.ts';
 import type { ModelBulkSupport } from '../src/types/bulk.ts';
 import type { ModelCrudSupport } from '../src/types/crud.ts';
 import type { ModelExpirySupport } from '../src/types/expiry.ts';
-import type { ModelIndexedSupport } from '../src/types/indexed.ts';
 
 const toLink = (title: string, target: Function): DocJSXElementByFn<'CodeLink'> =>
   d.codeLink(title, Runtime.getSourceFile(target), new RegExp(`\\binterface\\s+${target.name}`));
@@ -17,7 +16,6 @@ export const Links = {
   Basic: toLink('Basic', toConcrete<ModelBasicSupport>()),
   Crud: toLink('CRUD', toConcrete<ModelCrudSupport>()),
   Expiry: toLink('Expiry', toConcrete<ModelExpirySupport>()),
-  Indexed: toLink('Indexed', toConcrete<ModelIndexedSupport>()),
   Bulk: toLink('Bulk', toConcrete<ModelBulkSupport>()),
   Blob: toLink('Blob', toConcrete<ModelBlobSupport>()),
 };

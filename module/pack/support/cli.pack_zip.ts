@@ -1,7 +1,7 @@
 import { CliCommand, CliUtil } from '@travetto/cli';
 
 import { PackOperation } from './bin/operation.ts';
-import { BasePackCommand, type PackOperationShape } from './pack.base';
+import { BasePackCommand, type PackOperationShape } from './pack.base.ts';
 
 /**
  * Standard zip support for pack

@@ -6,7 +6,6 @@ import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 
 import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 import { ExpiryUser, ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
-import { ModelIndexedSuite } from '@travetto/model/support/test/indexed.ts';
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
 import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
@@ -70,12 +69,6 @@ class MemoryExpirySuite extends ModelExpirySuite {
     assert(total === 0);
     assert(finalMemory / KB < 1); // Decreased by 50mb
   }
-}
-
-@Suite()
-class MemoryIndexedSuite extends ModelIndexedSuite {
-  serviceClass = MemoryModelService;
-  configClass = MemoryModelConfig;
 }
 
 @Suite()

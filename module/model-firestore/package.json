@@ -28,6 +28,7 @@
     "@google-cloud/firestore": "^8.3.0",
     "@travetto/config": "^8.0.0-alpha.9",
     "@travetto/model": "^8.0.0-alpha.9",
+    "@travetto/model-indexed": "^8.0.0-alpha.9",
     "@travetto/runtime": "^8.0.0-alpha.9"
   },
   "peerDependencies": {

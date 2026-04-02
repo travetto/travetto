@@ -31,6 +31,7 @@
     "@travetto/config": "^8.0.0-alpha.9",
     "@travetto/context": "^8.0.0-alpha.9",
     "@travetto/model": "^8.0.0-alpha.9",
+    "@travetto/model-indexed": "^8.0.0-alpha.9",
     "@travetto/model-query": "^8.0.0-alpha.9"
   },
   "peerDependencies": {

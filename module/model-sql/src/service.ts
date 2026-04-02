@@ -1,10 +1,14 @@
 import {
   type ModelType,
-  type BulkOperation, type BulkResponse, type ModelCrudSupport, type ModelStorageSupport, type ModelBulkSupport,
-  NotFoundError, ModelRegistryIndex, ExistsError, type OptionalId, type ModelIdSource,
-  ModelExpiryUtil, ModelCrudUtil, ModelStorageUtil, ModelBulkUtil,
+  type BulkOperation, type BulkResponse, type ModelCrudSupport, type ModelStorageSupport, type ModelBulkSupport, NotFoundError,
+  ModelRegistryIndex, ExistsError, type OptionalId, type ModelIdSource, ModelExpiryUtil, ModelCrudUtil, ModelStorageUtil, ModelBulkUtil,
 } from '@travetto/model';
-import { castTo, type Class } from '@travetto/runtime';
+import {
+  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex, type FullKeyedIndexBody,
+  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex
+} from '@travetto/model-indexed';
+import { castTo, type Class, JSONUtil } from '@travetto/runtime';
 import { DataUtil } from '@travetto/schema';
 import type { AsyncContext } from '@travetto/context';
 import { Injectable, PostConstruct } from '@travetto/di';
@@ -33,6 +37,7 @@ export class SQLModelService implements
   ModelCrudSupport, ModelStorageSupport,
   ModelBulkSupport, ModelQuerySupport,
   ModelQueryCrudSupport, ModelQueryFacetSupport,
+  ModelIndexedSupport,
   ModelQuerySuggestSupport {
 
   #manager: TableManager;
@@ -325,5 +330,85 @@ export class SQLModelService implements
       result.count = DataUtil.coerceType(result.count, Number);
       return result;
     });
+  }
+
+  // Indexed support
+  @Connected()
+  async getByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
+    const results = await this.query(cls, castTo({ where: computed.project({ sort: true }) }));
+    if (results.length !== 1) {
+      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
+    }
+    return results[0];
+  }
+
+  @Connected()
+  @Transactional()
+  async deleteByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<void> {
+    const { id } = await this.getByIndex(cls, idx, body);
+    await this.delete(cls, id);
+  }
+
+  @Connected()
+  @Transactional()
+  upsertByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: OptionalId<T>): Promise<T> {
+    return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
+  }
+
+  @Connected()
+  @Transactional()
+  updateByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: T): Promise<T> {
+    return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
+  }
+
+  @Connected()
+  @Transactional()
+  async updatePartialByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexWithPartialBody<T, K, S>): Promise<T> {
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
+    return this.update(cls, item);
+  }
+
+  @Connected()
+  async listByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    options?: ListPageOptions
+  ): Promise<ListPageResult<T>> {
+    const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
+    const limit = options?.limit ?? 100;
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate();
+
+    const items = await this.query(cls, castTo({
+      where: computed.project(),
+      sort: idx.sortTemplate.map(part => ({ [part.path.join('.')]: part.value })),
+      limit, offset
+    }));
+    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
   }
 }

@@ -3,20 +3,22 @@ import type * as estypes from '@elastic/elasticsearch/api/types';
 
 import {
   type ModelCrudSupport, type BulkOperation, type BulkResponse, type ModelBulkSupport, type ModelExpirySupport,
-  type ModelIndexedSupport, type ModelType, type ModelStorageSupport, NotFoundError, ModelRegistryIndex, type OptionalId,
-  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, type ModelIndexedListPageOptions,
-  type ModelIndexListPageResult,
+  type ModelType, type ModelStorageSupport, NotFoundError, ModelRegistryIndex, type OptionalId,
+  ModelCrudUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil
 } from '@travetto/model';
-import { ShutdownManager, type DeepPartial, type Class, castTo, asFull, TypedObject, asConstructable, JSONUtil } from '@travetto/runtime';
+import { ShutdownManager, type Class, castTo, asFull, TypedObject, asConstructable, JSONUtil } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
-  type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport,
-  type ModelQuerySupport, type PageableModelQuery, type Query, type ValidStringFields,
-  QueryVerifier, type ModelQuerySuggestSupport,
-  ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
-  type ModelQueryFacet,
+  type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport, type PageableModelQuery,
+  type Query, type ValidStringFields, QueryVerifier, type ModelQuerySuggestSupport, ModelQueryUtil, ModelQuerySuggestUtil,
+  ModelQueryCrudUtil, type ModelQueryFacet,
 } from '@travetto/model-query';
+import {
+  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex, type FullKeyedIndexBody,
+  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex
+} from '@travetto/model-indexed';
 
 import type { ElasticsearchModelConfig } from './config.ts';
 import type { EsBulkError } from './internal/types.ts';
@@ -49,37 +51,46 @@ export class ElasticsearchModelService implements
 
   constructor(config: ElasticsearchModelConfig) { this.config = config; }
 
-  async * #scrollIndex<T extends ModelType>(cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T, estypes.SortResults>): AsyncIterable<{
+  async * #scrollIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    options?: ListPageOptions<estypes.SortResults>
+  ): AsyncIterable<{
     hits: estypes.SearchResponse<T>['hits']['hits'];
     nextOffset?: estypes.SortResults | undefined;
   }> {
-    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const limit = options?.limit ?? 100;
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate();
+
     let search = await this.execSearch<T>(cls, {
-      ...(options.offset ?
-        { size: options.limit, search_after: options.offset } :
+      ...(options?.offset ?
+        { size: limit, search_after: options.offset } :
         { scroll: '2m', size: 100 }
       ),
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
-        ElasticsearchQueryUtil.extractWhereTermQuery(cls,
-          ModelIndexedUtil.projectIndex(cls, idx, options?.body, { emptySortValue: { $exists: true } }))
+        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.project())
       ),
-      sort: ElasticsearchQueryUtil.getSort(config.fields),
+      sort: ElasticsearchQueryUtil.getSort(idx)
     });
 
-
-    let hits = search.hits.hits.slice(0, options.limit);
+    let hits = search.hits.hits.slice(0, limit);
     let produced = hits.length;
 
     if (hits.length) {
       yield { hits, nextOffset: hits.at(-1)?.sort };
     }
 
-    while (produced < options.limit && search._scroll_id && hits.length) {
+    while (produced < limit && search._scroll_id && hits.length) {
       search = await this.client.scroll({ scroll_id: search._scroll_id, scroll: '2m' });
       hits = search.hits.hits;
       produced += hits.length;
-      if (produced > options.limit) {
-        hits = hits.slice(0, options.limit - (produced - hits.length));
+      if (produced > limit) {
+        hits = hits.slice(0, limit - (produced - hits.length));
       }
       if (hits.length) {
         yield { hits, nextOffset: hits.at(-1)?.sort };
@@ -397,70 +408,89 @@ export class ElasticsearchModelService implements
   }
 
   // Indexed
-  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
+  async getByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
+
     const result = await this.execSearch<T>(cls, {
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
-        ElasticsearchQueryUtil.extractWhereTermQuery(cls,
-          ModelIndexedUtil.projectIndex(cls, idx, body))
+        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.project({
+          sort: true,
+          emptyValue: { $exists: true }
+        }))
+
       )
     });
     if (!result.hits.hits.length) {
-      throw new NotFoundError(`${cls.name}: ${idx}`, key);
+      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
     return this.postLoad(cls, result.hits.hits[0]);
+
   }
 
-  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void> {
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
+  async deleteByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<void> {
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
     const result = await this.client.deleteByQuery({
       index: this.manager.getIdentity(cls).index,
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
-        ElasticsearchQueryUtil.extractWhereTermQuery(cls,
-          ModelIndexedUtil.projectIndex(cls, idx, body))
+        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.project({
+          sort: true,
+          emptyValue: { $exists: true }
+        }))
       ),
       refresh: true
     });
-    if (result.deleted) {
-      return;
+    if (!result.deleted) {
+      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
-    throw new NotFoundError(`${cls.name}: ${idx}`, key);
   }
 
-  async upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T> {
+  upsertByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: OptionalId<T>): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
 
-  async updateByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: T): Promise<T> {
+  updateByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: T): Promise<T> {
     return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
   }
 
-  async updatePartialByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
+  async updatePartialByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexWithPartialBody<T, K, S>): Promise<T> {
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
     return this.update(cls, item);
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
-    for await (const { hits } of this.#scrollIndex(cls, idx, { body, limit: Number.MAX_SAFE_INTEGER })) {
-      for (const hit of hits) {
-        try {
-          yield this.postLoad(cls, hit);
-        } catch (error) {
-          if (!(error instanceof NotFoundError)) {
-            throw error;
-          }
-        }
-      }
-    }
-  }
-
-  async listPageByIndex<T extends ModelType>(
-    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>
-  ): Promise<ModelIndexListPageResult<T>> {
-    const offset = options.offset ? JSONUtil.fromBase64<estypes.SortResults>(options.offset) : undefined;
+  async listByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    options?: ListPageOptions,
+  ): Promise<ListPageResult<T>> {
+    const offset = options?.offset ? JSONUtil.fromBase64<estypes.SortResults>(options.offset) : undefined;
     const items: T[] = [];
     let lastNextOffset: estypes.SortResults | undefined;
-    for await (const { hits, nextOffset } of this.#scrollIndex(cls, idx, { ...options, offset })) {
+    for await (const { hits, nextOffset } of this.#scrollIndex(cls, idx, body, { ...options, offset })) {
       lastNextOffset = nextOffset;
       for (const hit of hits) {
         try {
@@ -474,6 +504,7 @@ export class ElasticsearchModelService implements
     }
     return { items, nextOffset: lastNextOffset ? JSONUtil.toBase64(lastNextOffset) : undefined };
   }
+
 
   // Query
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {

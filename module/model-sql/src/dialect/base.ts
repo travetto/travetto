@@ -1,8 +1,9 @@
 /* eslint-disable @stylistic/indent */
 import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex, type Point } from '@travetto/schema';
 import { type Class, RuntimeError, TypedObject, TimeUtil, castTo, castKey, toConcrete, JSONUtil } from '@travetto/runtime';
-import { type SelectClause, type Query, type SortClause, type WhereClause, type RetainQueryPrimitiveFields, ModelQueryUtil } from '@travetto/model-query';
-import type { BulkResponse, IndexConfig, ModelType } from '@travetto/model';
+import { type SelectClause, type Query, type SortClause, type WhereClause, type RetainQueryPrimitiveFields, ModelQueryUtil, isModelQueryIndex } from '@travetto/model-query';
+import { IndexNotSupported, type BulkResponse, type IndexConfig, type ModelType } from '@travetto/model';
+import { isModelIndexedIndex } from '@travetto/model-indexed';
 
 import { SQLModelUtil } from '../util.ts';
 import type { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types.ts';
@@ -717,14 +718,14 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   /**
    * Get all create indices need for a given class
    */
-  getCreateAllIndicesSQL<T extends ModelType>(cls: Class<T>, indices: IndexConfig<T>[]): string[] {
-    return indices.map(idx => this.getCreateIndexSQL(cls, idx));
+  getCreateAllIndicesSQL<T extends ModelType>(cls: Class<T>, indices: IndexConfig[]): string[] {
+    return indices.map(idx => this.getCreateIndexSQL(cls, idx)).filter((sql): sql is string => !!sql);
   }
 
   /**
    * Get index name
    */
-  getIndexName<T extends ModelType>(cls: Class<T>, idx: IndexConfig<ModelType>): string {
+  getIndexName<T extends ModelType>(cls: Class<T>, idx: IndexConfig): string {
     const table = this.namespace(SQLModelUtil.classToStack(cls));
     return ['idx', table, idx.name.toLowerCase().replaceAll('-', '_')].join('_');
   }
@@ -732,26 +733,43 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   /**
    * Get CREATE INDEX sql
    */
-  getCreateIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>): string {
-    const table = this.namespace(SQLModelUtil.classToStack(cls));
-    const fields: [string, boolean][] = idx.fields.map(field => {
-      const key = TypedObject.keys(field)[0];
-      const value = field[key];
-      if (DataUtil.isPlainObject(value)) {
-        throw new Error('Unable to supported nested fields for indices');
-      }
-      return [castTo(key), typeof value === 'number' ? value === 1 : (!!value)];
-    });
+  getCreateIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig): string | undefined {
     const constraint = this.getIndexName(cls, idx);
-    return `CREATE ${idx.type === 'unique' ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields
-      .map(([name, sel]) => `${this.identifier(name)} ${sel ? 'ASC' : 'DESC'}`)
-      .join(', ')});`;
+    const table = this.namespace(SQLModelUtil.classToStack(cls));
+
+    if (isModelQueryIndex(idx)) {
+      const fields: [string, boolean][] = idx.fields.map(field => {
+        const key = TypedObject.keys(field)[0];
+        const value = field[key];
+        if (DataUtil.isPlainObject(value)) {
+          throw new IndexNotSupported(cls, idx, 'Only indexed and query indices are supported in SQL');
+        }
+        return [castTo(key), typeof value === 'number' ? value === 1 : (!!value)];
+      });
+      return `CREATE ${idx.type === 'query:unique' ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields
+        .map(([name, sel]) => `${this.identifier(name)} ${sel ? 'ASC' : 'DESC'}`)
+        .join(', ')});`;
+    } else if (isModelIndexedIndex(idx)) {
+      if ([...idx.sortTemplate, ...idx.keyTemplate].find(field => field.path.length > 1)) {
+        console.debug('Nested fields are not supported in ModelIndexed indices SQL', { index: idx.name });
+        return;
+      }
+      const fields = [...idx.sortTemplate, ...idx.keyTemplate]
+        .map(({ path, value }) => `${this.identifier(path.join('_'))} ${value === -1 ? 'DESC' : 'ASC'}`)
+        .join(', ');
+      switch (idx.type) {
+        case 'indexed:keyed': return `CREATE ${idx.unique ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields});`;
+        case 'indexed:sorted': return `CREATE INDEX ${constraint} ON ${this.identifier(table)} (${fields});`;
+      }
+    } else {
+      throw new IndexNotSupported(cls, idx, 'Only indexed and query indices are supported in SQL');
+    }
   }
 
   /**
    * Get DROP INDEX sql
    */
-  getDropIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string): string {
+  getDropIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig | string): string {
     const constraint = typeof idx === 'string' ? idx : this.getIndexName(cls, idx);
     return `DROP INDEX ${this.identifier(constraint)} ;`;
   }
@@ -1074,18 +1092,25 @@ ${this.getWhereSQL(cls, where!)}`;
   /**
    * Determine if an index has changed
    */
-  isIndexChanged(requested: IndexConfig<ModelType>, existing: SQLTableDescription['indices'][number]): boolean {
-    let result =
-      (existing.is_unique && requested.type !== 'unique')
-      || requested.fields.length !== existing.columns.length;
+  isIndexChanged(requested: IndexConfig, existing: SQLTableDescription['indices'][number]): boolean {
+    if (isModelQueryIndex(requested)) {
+      let result =
+        (existing.is_unique && requested.type !== 'query:unique')
+        || requested.fields.length !== existing.columns.length;
 
-    for (let i = 0; i < requested.fields.length && !result; i++) {
-      const [[key, value]] = Object.entries(requested.fields[i]);
-      const desc = value === -1;
-      result ||= key !== existing.columns[i].name && desc !== existing.columns[i].desc;
+      for (let i = 0; i < requested.fields.length && !result; i++) {
+        const [[key, value]] = Object.entries(requested.fields[i]);
+        const desc = value === -1;
+        result ||= key !== existing.columns[i].name && desc !== existing.columns[i].desc;
+      }
+
+      return result;
+    } else if (isModelIndexedIndex(requested)) {
+      // TODO: Fill this out
+      return false;
+    } else {
+      throw new IndexNotSupported(requested.class, requested, 'Only indexed and query indices are supported in SQL');
     }
-
-    return result;
   }
 
   /**

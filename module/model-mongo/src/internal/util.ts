@@ -3,14 +3,13 @@ import {
   type IndexDescriptionInfo
 } from 'mongodb';
 
-import { RuntimeError, CodecUtil, castTo, type Class, toConcrete, TypedObject, BinaryUtil } from '@travetto/runtime';
-import { type DistanceUnit, type PageableModelQuery, type WhereClause, ModelQueryUtil } from '@travetto/model-query';
-import type { ModelType, IndexField, IndexConfig } from '@travetto/model';
+import { RuntimeError, CodecUtil, castTo, type Class, toConcrete, BinaryUtil } from '@travetto/runtime';
+import { type DistanceUnit, type PageableModelQuery, type WhereClause, isModelQueryIndex, ModelQueryUtil } from '@travetto/model-query';
+import { type ModelType, type IndexConfig, IndexNotSupported } from '@travetto/model';
 import { DataUtil, SchemaRegistryIndex, type Point } from '@travetto/schema';
+import { isModelIndexedIndex } from '@travetto/model-indexed';
 
 const PointConcrete = toConcrete<Point>();
-
-type IdxConfig = CreateIndexesOptions;
 
 /**
  * Converting units to various radians
@@ -25,7 +24,19 @@ const RADIANS_TO: Record<DistanceUnit, number> = {
 
 export type WithId<T, I = unknown> = T & { _id?: I };
 export type BasicIdx = Record<string, IndexDirection>;
-export type PlainIdx = Record<string, -1 | 0 | 1>;
+
+function flattenKeys(obj: Record<string, unknown>, prefix = ''): Record<string, 1 | -1> {
+  const out: Record<string, 1 | -1> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (typeof value === 'object' && value !== null) {
+      Object.assign(out, flattenKeys(castTo(value), path));
+    } else {
+      out[path] = typeof value === 'boolean' ? (value ? 1 : -1) : castTo<-1 | 1>(value);
+    }
+  }
+  return out;
+}
 
 /**
  * Basic mongo utils for conforming to the model module
@@ -34,19 +45,6 @@ export class MongoUtil {
 
   static namespaceIndex(cls: Class, name: string): string {
     return `${cls.Ⲑid}__${name}`.replace(/[^a-zA-Z0-9_]+/g, '_');
-  }
-
-  static toIndex<T extends ModelType>(field: IndexField<T>): PlainIdx {
-    const keys = [];
-    while (typeof field !== 'number' && typeof field !== 'boolean' && Object.keys(field)) {
-      const key = TypedObject.keys(field)[0];
-      field = castTo(field[key]);
-      keys.push(key);
-    }
-    const rf: number | boolean = castTo(field);
-    return {
-      [keys.join('.')]: typeof rf === 'boolean' ? (rf ? 1 : 0) : castTo<-1 | 1 | 0>(rf)
-    };
   }
 
   static uuid(value: string): Binary {
@@ -166,8 +164,8 @@ export class MongoUtil {
     return out;
   }
 
-  static getExtraIndices<T extends ModelType>(cls: Class<T>): [BasicIdx, IdxConfig][] {
-    const out: [BasicIdx, IdxConfig][] = [];
+  static getExtraIndices<T extends ModelType>(cls: Class<T>): [BasicIdx, CreateIndexesOptions][] {
+    const out: [BasicIdx, CreateIndexesOptions][] = [];
     const textFields: string[] = [];
     SchemaRegistryIndex.visitFields(cls, (field, path) => {
       if (field.type === PointConcrete) {
@@ -185,19 +183,26 @@ export class MongoUtil {
     return out;
   }
 
-  static getPlainIndex(idx: IndexConfig<ModelType>): PlainIdx {
-    let out: PlainIdx = {};
-    for (const config of idx.fields.map(value => this.toIndex(value))) {
-      out = Object.assign(out, config);
-    }
-    return out;
-  }
+  static getIndex(cls: Class, idx: IndexConfig): [BasicIdx, CreateIndexesOptions] {
+    const name = this.namespaceIndex(cls, idx.name);
+    if (isModelQueryIndex(idx)) {
+      const out = idx.fields.reduce(
+        (acc, field) => ({ ...acc, ...flattenKeys(castTo(field)) }),
+        castTo<Record<string, -1 | 0 | 1>>({}));
 
-  static getIndices<T extends ModelType>(cls: Class<T>, indices: IndexConfig<ModelType>[] = []): [BasicIdx, IdxConfig][] {
-    return [
-      ...indices.map(idx => [this.getPlainIndex(idx), { ...(idx.type === 'unique' ? { unique: true } : {}), name: this.namespaceIndex(cls, idx.name) }] as const),
-      ...this.getExtraIndices(cls)
-    ].map(idx => [...idx]);
+      return [out, { name, unique: idx.type === 'query:unique', }];
+    } else if (isModelIndexedIndex(idx)) {
+      const filter = Object.fromEntries([
+        ...idx.keyTemplate.map(({ path }) => [path.join('.'), 1]),
+        ...idx.sortTemplate.map(({ path, value }) => [path.join('.'), value === -1 ? -1 : 1])
+      ]);
+      switch (idx.type) {
+        case 'indexed:keyed': return [filter, { name, unique: idx.unique }];
+        case 'indexed:sorted': return [filter, { name }];
+      }
+    } else {
+      throw new IndexNotSupported(cls, idx);
+    }
   }
 
   static prepareCursor<T extends ModelType>(cls: Class<T>, cursor: FindCursor<T | MongoWithId<T>>, query: PageableModelQuery<T>): FindCursor<T> {

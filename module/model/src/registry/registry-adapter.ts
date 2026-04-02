@@ -7,7 +7,7 @@ import type { ModelConfig } from './types.ts';
 function combineClasses(target: ModelConfig, sources: Partial<ModelConfig>[]): ModelConfig {
   for (const source of sources) {
     Object.assign(target, source, {
-      indices: [...(target.indices || []), ...(source.indices || [])],
+      indices: { ...(target.indices || {}), ...(source.indices || {}) },
       postLoad: [...(target.postLoad || []), ...(source.postLoad || [])],
       prePersist: [...(target.prePersist || []), ...(source.prePersist || [])],
     });
@@ -29,7 +29,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
   register(...data: Partial<ModelConfig>[]): ModelConfig {
     const config = this.#config ??= {
       class: this.#cls,
-      indices: [],
+      indices: {},
       autoCreate: 'development',
       store: this.#cls.name,
       postLoad: [],
@@ -50,9 +50,6 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
 
       config.postLoad = [...parent.postLoad ?? [], ...config.postLoad ?? []];
       config.prePersist = [...parent.prePersist ?? [], ...config.prePersist ?? []];
-    }
-    for (const idx of config.indices ?? []) {
-      idx.simpleName ??= idx.name.replace(/[^A-Za-z0-9_]+/g, '_');
     }
   }
 

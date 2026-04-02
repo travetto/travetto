@@ -1,15 +1,19 @@
 import {
-  type Class, type TimeSpan, type DeepPartial, castTo, type BinaryMetadata,
-  type ByteRange, type BinaryType, BinaryUtil, type BinaryArray, JSONUtil, BinaryMetadataUtil
+  type Class, type TimeSpan, castTo, type BinaryMetadata,
+  type ByteRange, type BinaryType, BinaryUtil, type BinaryArray, JSONUtil, BinaryMetadataUtil,
 } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import { Config } from '@travetto/config';
 import {
-  type ModelType, type IndexConfig, type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, type ModelIndexedSupport,
-  ModelRegistryIndex, NotFoundError, ExistsError, type OptionalId, type ModelBlobSupport,
-  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
-  IndexNotSupported, type ModelIndexListPageResult, type ModelIndexedListPageOptions
+  type ModelType, type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, ModelRegistryIndex,
+  NotFoundError, ExistsError, type OptionalId, type ModelBlobSupport, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil,
+  IndexNotSupported,
 } from '@travetto/model';
+import {
+  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex,
+  type AllIndexes, isModelIndexedIndex, type FullKeyedIndexBody, type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex,
+} from '@travetto/model-indexed';
 
 const ModelBlobNamespace = '__blobs';
 const ModelBlobMetaNamespace = `${ModelBlobNamespace}_meta`;
@@ -23,8 +27,8 @@ export class MemoryModelConfig {
   cullRate?: number | TimeSpan;
 }
 
-function indexName<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, suffix?: string): string {
-  return [cls.Ⲑid, typeof idx === 'string' ? idx : idx.name, suffix].filter(part => !!part).join(':');
+function indexName<T extends ModelType>(cls: Class<T>, idx: AllIndexes<T>, suffix?: string): string {
+  return [cls.Ⲑid, idx.name, suffix].filter(part => !!part).join(':');
 }
 
 function getFirstId(data: Map<string, unknown> | Set<string>, value?: string | number): string | undefined {
@@ -48,9 +52,9 @@ export class MemoryModelService implements
 
   #store = new Map<string, StoreType>();
   #indices = {
-    sorted: new Map<string, Map<string, Map<string, number>>>(),
-    unsorted: new Map<string, Map<string, Set<string>>>()
-  };
+    'indexed:sorted': new Map<string, Map<string, Map<string, number>>>(),
+    'indexed:keyed': new Map<string, Map<string, Set<string>>>(),
+  } as const;
 
   idSource = ModelCrudUtil.uuidSource();
   config: MemoryModelConfig;
@@ -77,10 +81,16 @@ export class MemoryModelService implements
   async #removeIndices<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
     try {
       const item = await this.get(cls, id);
-      for (const idx of ModelRegistryIndex.getIndices(cls, ['sorted', 'unsorted'])) {
+      for (const idx of ModelRegistryIndex.getIndices(cls)) {
+        if (!isModelIndexedIndex(idx)) {
+          continue; // Only support ModelIndexed indices
+        }
         const idxName = indexName(cls, idx);
-        const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(item));
-        this.#indices[idx.type].get(idxName)?.get(key)?.delete(id);
+        const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
+        switch (idx.type) {
+          case 'indexed:sorted':
+          case 'indexed:keyed': this.#indices[idx.type].get(idxName)?.get(computed.getKey())?.delete(id); break;
+        }
       }
     } catch (error) {
       if (!(error instanceof NotFoundError)) {
@@ -90,14 +100,28 @@ export class MemoryModelService implements
   }
 
   async #writeIndices<T extends ModelType>(cls: Class<T>, item: T): Promise<void> {
-    for (const idx of ModelRegistryIndex.getIndices(cls, ['sorted', 'unsorted'])) {
+    for (const idx of ModelRegistryIndex.getIndices(cls)) {
+      if (!isModelIndexedIndex(idx)) {
+        continue; // Only support ModelIndexed indices
+      }
       const idxName = indexName(cls, idx);
-      const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(item));
-
-      if (idx.type === 'sorted') {
-        this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Map()).set(item.id, +sort!);
-      } else {
-        this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Set()).add(item.id);
+      const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
+      const key = computed.getKey();
+      switch (idx.type) {
+        case 'indexed:keyed': {
+          if (idx.unique) {
+            const existing = this.#indices[idx.type].get(idxName)?.get(key);
+            if (existing && existing.size > 0 && !existing.has(item.id)) {
+              throw new ExistsError(cls, key);
+            }
+          }
+          this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Set()).add(item.id);
+          break;
+        }
+        case 'indexed:sorted': {
+          this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Map()).set(item.id, computed.getSort());
+          break;
+        }
       }
     }
   }
@@ -116,37 +140,47 @@ export class MemoryModelService implements
     }
   }
 
-  async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<string> {
-    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, config, body);
-    const index = this.#indices[config.type].get(indexName(cls, idx))?.get(key);
+  async #getIdByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<string> {
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
+
+    const index = this.#indices[idx.type].get(indexName(cls, idx))?.get(computed.getKey());
     let id: string | undefined;
     if (index) {
       if (index instanceof Map) {
-        id = getFirstId(index, +sort!); // Grab first id
-      } else {
+        id = getFirstId(index, computed.getSort()); // Grab first id
+      } else if (index instanceof Set) {
         id = getFirstId(index); // Grab first id
       }
     }
     if (id) {
       return id;
     }
-    throw new NotFoundError(cls, key);
+    throw new NotFoundError(cls, computed.getKey({ sort: true }));
   }
 
-  #getIndexIds<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): string[] {
-    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body, { emptySortValue: null });
-    const index = this.#indices[config.type].get(indexName(cls, idx))?.get(key);
-    const isReversed = config.type === 'sorted' && config.fields.some(field => Object.values(field)[0] === -1);
-
-    if (!index) {
-      throw new IndexNotSupported(cls, config);
+  #getIndexIds<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: AllIndexes<T, K, S>, body: KeyedIndexBody<T, K>): string[] {
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate();
+    if (!isModelIndexedIndex(idx)) {
+      throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with MemoryModelService');
     }
 
-    return index instanceof Set ?
-      [...index] :
-      [...index.entries()].toSorted((a, b) => isReversed ? +b[1] - +a[1] : +a[1] - +b[1]).map(([a,]) => a);
+    const base = this.#indices[idx.type].get(indexName(cls, idx));
+    const index = base?.get(computed.getKey());
+    if (!index) {
+      return [];
+    } else if (index instanceof Map) {
+      return [...index.entries()].toSorted((a, b) => a[1] - b[1]).map(([id,]) => id);
+    } else {
+      return [...index];
+    }
   }
 
   @PostConstruct()
@@ -155,12 +189,9 @@ export class MemoryModelService implements
     ModelExpiryUtil.registerCull(this);
 
     for (const cls of ModelRegistryIndex.getClasses()) {
-      for (const idx of ModelRegistryIndex.getConfig(cls).indices ?? []) {
-        switch (idx.type) {
-          case 'unique': {
-            console.error('Unique indices are not supported for', { cls: cls.Ⲑid, idx: idx.name });
-            break;
-          }
+      for (const idx of Object.values(ModelRegistryIndex.getConfig(cls).indices ?? {})) {
+        if (!isModelIndexedIndex(idx)) {
+          console.error(`Indices of type ${idx.type} are not supported for`, { cls: cls.Ⲑid, name: idx.name, type: idx.type });
         }
       }
     }
@@ -304,13 +335,14 @@ export class MemoryModelService implements
 
   async deleteStorage(): Promise<void> {
     this.#store.clear();
-    this.#indices.sorted.clear();
-    this.#indices.unsorted.clear();
+    for (const value of Object.values(this.#indices)) {
+      value.clear();
+    }
   }
 
   async upsertModel<T extends ModelType>(cls: Class<T>): Promise<void> {
-    for (const idx of ModelRegistryIndex.getConfig(cls).indices ?? []) {
-      if (idx.type === 'sorted' || idx.type === 'unsorted') {
+    for (const idx of ModelRegistryIndex.getIndices(cls)) {
+      if (isModelIndexedIndex(idx)) {
         this.#indices[idx.type].set(indexName(cls, idx), new Map());
       }
     }
@@ -326,40 +358,61 @@ export class MemoryModelService implements
   }
 
   // Indexed
-  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
+  async getByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
     return this.get(cls, await this.#getIdByIndex(cls, idx, body));
+
   }
 
-  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void> {
+  async deleteByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<void> {
     await this.delete(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
-  upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T> {
+  upsertByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: OptionalId<T>): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
 
-  async updateByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: T): Promise<T> {
+  updateByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: T): Promise<T> {
     return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
   }
 
-  async updatePartialByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
+  async updatePartialByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexWithPartialBody<T, K, S>): Promise<T> {
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
     return this.update(cls, item);
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
+  async listByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    options?: ListPageOptions
+  ): Promise<ListPageResult<T>> {
     const ids = this.#getIndexIds(cls, idx, body);
-    for (const id of ids) {
-      yield this.get(cls, id);
-    }
-  }
-
-  async listPageByIndex<T extends ModelType>(
-    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>
-  ): Promise<ModelIndexListPageResult<T>> {
-    const ids = this.#getIndexIds(cls, idx, options.body);
-    const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-    const limit = options.limit;
+    const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
+    const limit = options?.limit ?? 100;
 
     const items: T[] = [];
     for (const id of ids.slice(offset, offset + limit)) {

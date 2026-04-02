@@ -1,12 +1,15 @@
 import { type DocumentData, FieldValue, Firestore, type Query } from '@google-cloud/firestore';
 
-import { castTo, JSONUtil, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
+import { castTo, JSONUtil, ShutdownManager, type Class } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
-  type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport,
-  type ModelIndexedSupport, type ModelType, NotFoundError, type OptionalId,
-  ModelCrudUtil, ModelIndexedUtil, type ModelIndexedListPageOptions, type ModelIndexListPageResult,
+  type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport, type ModelType, NotFoundError, type OptionalId, ModelCrudUtil,
 } from '@travetto/model';
+import {
+  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex, type FullKeyedIndexBody,
+  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex
+} from '@travetto/model-indexed';
 
 import type { FirestoreModelConfig } from './config.ts';
 
@@ -38,16 +41,19 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return this.client.collection(this.#resolveTable(cls));
   }
 
-  #buildIndexQuery<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): Query {
+  #buildIndexQuery<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>): Query {
     ModelCrudUtil.ensureNotSubType(cls);
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate();
 
-    const config = ModelRegistryIndex.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { fields, sorted } = ModelIndexedUtil.computeIndexParts(cls, config, body, { emptySortValue: null });
-    let query = fields.reduce<Query>((result, { path, value }) =>
-      result.where(path.join('.'), '==', value), this.#getCollection(cls));
+    let query = computed.keyedParts.reduce<Query>((result, { path, value, state }) =>
+      result.where(path.join('.'), '==', (state === 'empty' ? null : value)), this.#getCollection(cls));
 
-    if (sorted) {
-      query = query.orderBy(sorted.path.join('.'), sorted.dir === 1 ? 'asc' : 'desc');
+    for (const { path, value } of idx.sortTemplate) {
+      query = query.orderBy(path.join('.'), value === 1 ? 'asc' : 'desc');
     }
     return query;
   }
@@ -134,58 +140,81 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   // Indexed
-  async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<string> {
+  async #getIdByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
-
-    const { fields } = ModelIndexedUtil.computeIndexParts(cls, idx, body);
-    const query = fields.reduce<Query>(
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
+    const query = computed.allParts.reduce<Query>(
       (result, { path, value }) => result.where(path.join('.'), '==', value),
       this.#getCollection(cls)
     );
 
     const item = await query.get();
-
-    if (item && !item.empty) {
-      return item.docs[0].id;
+    if (!item || item.empty) {
+      throw new NotFoundError(`${cls.name} Index=${idx}`, computed.getKey());
     }
-    throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, { separator: '; ' })?.key);
+    return item.docs[0].id;
   }
 
-  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
+  // Indexed contract
+
+  async getByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
     return this.get(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
-  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void> {
+  async deleteByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<void> {
     return this.delete(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
-  upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T> {
+  upsertByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: OptionalId<T>): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
 
-  async updateByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: T): Promise<T> {
+  updateByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: T): Promise<T> {
     return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
   }
 
-  async updatePartialByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
+  async updatePartialByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexWithPartialBody<T, K, S>): Promise<T> {
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
     return this.update(cls, item);
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
-    const query = this.#buildIndexQuery(cls, idx, body);
-
-    for (const item of (await query.get()).docs) {
-      yield await ModelCrudUtil.load(cls, item.data()!);
-    }
-  }
-
-  async listPageByIndex<T extends ModelType>(
-    cls: Class<T>, idx: string, options: ModelIndexedListPageOptions<T>
-  ): Promise<ModelIndexListPageResult<T>> {
-    const offset = options.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-    const limit = options.limit;
-    const query = this.#buildIndexQuery(cls, idx, options.body)
+  async listByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    options?: ListPageOptions,
+  ): Promise<ListPageResult<T>> {
+    const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
+    const limit = options?.limit ?? 100;
+    const query = this.#buildIndexQuery(cls, idx, body)
       .limit(limit)
       .offset(offset);
 

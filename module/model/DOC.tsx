@@ -3,7 +3,7 @@ import { d, c } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
 import {
   type ModelBasicSupport, type ModelBlobSupport, type ModelBulkSupport, type ModelCrudSupport,
-  type ModelExpirySupport, type ModelIndexedSupport, ModelRegistryIndex, type ModelType
+  type ModelExpirySupport, ModelRegistryIndex, type ModelType
 } from '@travetto/model';
 
 import { Model } from './src/registry/decorator.ts';
@@ -47,7 +47,7 @@ export const text = <>
 
   <c.Section title='Contracts'>
 
-    The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are {Links.Basic}, {Links.Crud}, {Links.Indexed}, {Links.Expiry}, {Links.Blob} and {Links.Bulk}.
+    The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are {Links.Basic}, {Links.Crud}, {Links.Expiry}, {Links.Blob} and {Links.Bulk}.
 
     <c.SubSection title='Basic'>
       All {d.module('Model')} implementations, must honor the {Links.Basic} contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
@@ -59,12 +59,6 @@ export const text = <>
       The {Links.Crud} contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in {d.module('Auth')}, is an example of a module that only needs create, read and delete, and so any implementation of {d.module('Model')} that honors this contract, can be used with the {d.module('Auth')} model extension.
 
       <c.Code src={toConcrete<ModelCrudSupport>()} title='Crud Contract' />
-    </c.SubSection>
-
-    <c.SubSection title='Indexed' >
-      Additionally, an implementation may support the ability for basic {Links.Indexed} queries. This is not the full featured query support of {d.module('ModelQuery')}, but allowing for indexed lookups.  This allows for listing, through indexed data, as well as "pagination" through indexed data, via aa token that allows the next query to pick up where the last one left off. This allows for patterns like virtual scrolling, but does not allow for standard count/offset pagination.
-
-      <c.Code src={toConcrete<ModelIndexedSupport>()} title='Indexed Contract' />
     </c.SubSection>
 
     <c.SubSection title='Expiry'>

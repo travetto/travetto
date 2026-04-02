@@ -5,6 +5,7 @@ import type {
 
 import type { Class } from '@travetto/runtime';
 import { ModelCrudUtil, ModelExpiryUtil, ModelRegistryIndex, NotFoundError, type ModelType } from '@travetto/model';
+import { isModelIndexedIndex } from '@travetto/model-indexed';
 
 /**
  * Configuration for DynamoDB indices
@@ -18,6 +19,8 @@ type DynamoIndexConfig = {
  * Utility class for DynamoDB operations and transformations.
  */
 export class DynamoDBUtil {
+
+  static toSafeName = (name: string): string => name.toLowerCase().replace(/[^A-Za-z0-9]+/g, '_');
 
   /**
    * Converts a JavaScript value to a DynamoDB AttributeValue format
@@ -44,29 +47,36 @@ export class DynamoDBUtil {
    * Generates global secondary indices and attribute definitions based on the model's index configuration.
    */
   static computeIndexConfig<T extends ModelType>(cls: Class<T>): DynamoIndexConfig {
-    const config = ModelRegistryIndex.getConfig(cls);
+    const indexes = ModelRegistryIndex.getIndices(cls);
     const attributes: AttributeDefinition[] = [];
-    const indices: GlobalSecondaryIndex[] = [];
+    const toCreate: GlobalSecondaryIndex[] = [];
 
-    for (const idx of config.indices ?? []) {
-      const idxName = idx.simpleName!;
-      attributes.push({ AttributeName: `${idxName}__`, AttributeType: 'S' });
-
-      const keys: KeySchemaElement[] = [{
-        AttributeName: `${idxName}__`,
-        KeyType: 'HASH'
-      }];
-
-      if (idx.type === 'sorted') {
-        keys.push({
-          AttributeName: `${idxName}_sort__`,
-          KeyType: 'RANGE',
-        });
-        attributes.push({ AttributeName: `${idxName}_sort__`, AttributeType: 'N' });
+    for (const idx of indexes) {
+      if (!isModelIndexedIndex(idx) || ('unique' in idx && idx.unique)) {
+        console.warn('Non-indexed indices are not supported in DynamoDB for', { cls: cls.Ⲑid, idx: idx.name });
+        continue;
       }
 
-      indices.push({
-        IndexName: idxName,
+      const keys: KeySchemaElement[] = [];
+
+      const safeName = this.toSafeName(idx.name);
+
+      switch (idx.type) {
+        case 'indexed:sorted':
+          keys.push({ AttributeName: `${safeName}__`, KeyType: 'HASH' });
+          keys.push({ AttributeName: `${safeName}_sort__`, KeyType: 'RANGE', });
+          attributes.push({ AttributeName: `${safeName}__`, AttributeType: 'S' });
+          attributes.push({ AttributeName: `${safeName}_sort__`, AttributeType: 'N' });
+          break;
+        case 'indexed:keyed': {
+          keys.push({ AttributeName: `${safeName}__`, KeyType: 'HASH' });
+          attributes.push({ AttributeName: `${safeName}__`, AttributeType: 'S' });
+          break;
+        }
+      }
+
+      toCreate.push({
+        IndexName: safeName,
         // ProvisionedThroughput: '',
         Projection: {
           ProjectionType: 'INCLUDE',
@@ -76,7 +86,7 @@ export class DynamoDBUtil {
       });
     }
 
-    return { indices: indices.length ? indices : undefined, attributes };
+    return { indices: toCreate.length ? toCreate : undefined, attributes };
   }
 
   /**

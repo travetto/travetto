@@ -1,9 +1,10 @@
 import type * as estypes from '@elastic/elasticsearch/api/types';
 
-import { castTo, type Class, TypedObject } from '@travetto/runtime';
+import { type Any, castTo, type Class, TypedObject } from '@travetto/runtime';
 import { type WhereClause, type SelectClause, type SortClause, type Query, ModelQueryUtil } from '@travetto/model-query';
-import { type IndexConfig, type ModelType, ModelRegistryIndex } from '@travetto/model';
+import { type ModelType, ModelRegistryIndex } from '@travetto/model';
 import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
+import type { SortedIndex } from '@travetto/model-indexed';
 
 import { type EsSchemaConfig } from './types.ts';
 
@@ -13,7 +14,7 @@ import { type EsSchemaConfig } from './types.ts';
 export class ElasticsearchQueryUtil {
 
   /**
-   * Convert `a.b.c` to `a : { b : { c : ... }}`
+   * Convert `a : { b : { c : ... }}` to `a.b.c`
    */
   static extractSimple<T>(input: T, path: string = ''): Record<string, unknown> {
     const out: Record<string, unknown> = {};
@@ -51,13 +52,19 @@ export class ElasticsearchQueryUtil {
   /**
    * Build sort mechanism
    */
-  static getSort<T extends ModelType>(sort: SortClause<T>[] | IndexConfig<T>['fields']): estypes.Sort {
-    return sort.map<estypes.SortOptions>(option => {
-      const item = this.extractSimple(option);
-      const key = Object.keys(item)[0];
-      const value: boolean | -1 | 1 = castTo(item[key]);
-      return { [key]: { order: value === 1 || value === true ? 'asc' : 'desc' } };
-    });
+  static getSort<T extends ModelType>(sort: SortClause<T>[] | SortedIndex<T, Any, Any>): estypes.Sort {
+    if (Array.isArray(sort)) {
+      return sort.map<estypes.SortOptions>(option => {
+        const item = this.extractSimple(option);
+        const key = Object.keys(item)[0];
+        const value: boolean | -1 | 1 = castTo(item[key]);
+        return { [key]: { order: value === 1 || value === true ? 'asc' : 'desc' } };
+      });
+    } else {
+      return sort.sortTemplate.map<estypes.SortOptions>(field =>
+        ({ [field.path.join('.')]: { order: field.value === 1 ? 'asc' : 'desc' } })
+      );
+    }
   }
 
   /**
