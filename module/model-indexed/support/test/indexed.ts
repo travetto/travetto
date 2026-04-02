@@ -120,15 +120,20 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
 
     const { items: arr } = await service.listByIndex(User3, userAgeIndex, { name: 'bob' });
 
-    assert(arr[0].color === 'red' && arr[0].name === 'bob');
-    assert(arr[1].color === 'blue' && arr[1].name === 'bob');
-    assert(arr[2].color === 'green' && arr[2].name === 'bob');
+    console.error(arr);
+
+    assert(arr[0].color === 'red');
+    assert(arr[0].name === 'bob');
+    assert(arr[1].color === 'blue');
+    assert(arr[1].name === 'bob');
+    assert(arr[2].color === 'green');
+    assert(arr[2].name === 'bob');
 
     // @ts-expect-error
     await assert.rejects(() => service.listByIndex(User3, userAgeIndex, {}), IndexedFieldError);
   }
 
-  @Test({ skip: (self) => castTo<ModelIndexedSuite>(self).supportsDeepIndexes })
+  @Test({ skip: (self) => !castTo<ModelIndexedSuite>(self).supportsDeepIndexes })
   async queryDeepList() {
     const service = await this.service;
 
@@ -145,7 +150,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await assert.rejects(() => service.listByIndex(User4, childAgeIndex, {}), IndexedFieldError);
   }
 
-  @Test({ skip: (self) => castTo<ModelIndexedSuite>(self).supportsDeepIndexes })
+  @Test({ skip: (self) => !castTo<ModelIndexedSuite>(self).supportsDeepIndexes })
   async queryComplexDateList() {
     const service = await this.service;
 

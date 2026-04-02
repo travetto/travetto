@@ -404,9 +404,11 @@ export class SQLModelService implements
     const limit = options?.limit ?? 100;
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
 
-    const sort = computed.sortParts.map(({ template: { path, value } }) => ({ [path.join('.')]: value === 1 }));
-
-    const items = await this.query(cls, castTo({ where: computed.project(), sort, limit, offset }));
+    const items = await this.query(cls, castTo({
+      where: computed.project(),
+      sort: computed.sortParts.map(part => ({ [part.template.path.join('.')]: part.template.value })),
+      limit, offset
+    }));
     return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
   }
 }
