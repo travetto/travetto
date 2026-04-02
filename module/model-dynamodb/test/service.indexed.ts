@@ -11,7 +11,7 @@ class DynamoDBIndexedSuite extends ModelIndexedSuite {
 }
 
 @Suite()
-class DynamoDBIndexedPolymorphicdSuite extends ModelIndexedPolymorphismSuite {
+class DynamoDBIndexedPolymorphicSuite extends ModelIndexedPolymorphismSuite {
   serviceClass = DynamoDBModelService;
   configClass = DynamoDBModelConfig;
 }

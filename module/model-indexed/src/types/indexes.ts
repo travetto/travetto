@@ -10,8 +10,8 @@ type TypeProjection<T, V> = {
   );
 };
 
-export type KeyedIndexSelection<T> = TypeProjection<T, true>;
-export type SortedIndexSelection<T> = TypeProjection<T, 1 | -1>;
+export type KeyedIndexSelection<T> = TypeProjection<T, true> & { id?: never };
+export type SortedIndexSelection<T> = TypeProjection<T, 1 | -1> & { id?: never };
 
 export type KeyedIndexBody<T, K> = {
   [P in keyof K]: (P extends keyof T ?

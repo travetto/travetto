@@ -11,7 +11,7 @@ class FirestoreIndexedSuite extends ModelIndexedSuite {
 }
 
 @Suite()
-class FirestoreIndexedPolymorphicdSuite extends ModelIndexedPolymorphismSuite {
+class FirestoreIndexedPolymorphicSuite extends ModelIndexedPolymorphismSuite {
   serviceClass = FirestoreModelService;
   configClass = FirestoreModelConfig;
 }

@@ -11,7 +11,7 @@ class MemoryIndexedSuite extends ModelIndexedSuite {
 }
 
 @Suite()
-class MemoryIndexedPolymorphicdSuite extends ModelIndexedPolymorphismSuite {
+class MemoryIndexedPolymorphicSuite extends ModelIndexedPolymorphismSuite {
   serviceClass = MemoryModelService;
   configClass = MemoryModelConfig;
 }

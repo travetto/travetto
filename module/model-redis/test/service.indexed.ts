@@ -11,7 +11,7 @@ class RedisIndexedSuite extends ModelIndexedSuite {
 }
 
 @Suite()
-class RedisIndexedPolymorphicdSuite extends ModelIndexedPolymorphismSuite {
+class RedisIndexedPolymorphicSuite extends ModelIndexedPolymorphismSuite {
   serviceClass = RedisModelService;
   configClass = RedisModelConfig;
 }

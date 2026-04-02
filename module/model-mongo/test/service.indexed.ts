@@ -35,7 +35,7 @@ class MongoIndexedSuite extends ModelIndexedSuite {
 
 
 @Suite()
-class MongoIndexedPolymorphicdSuite extends ModelIndexedPolymorphismSuite {
+class MongoIndexedPolymorphicSuite extends ModelIndexedPolymorphismSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }
