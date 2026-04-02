@@ -68,7 +68,7 @@ export class MongoModelService implements
     body: KeyedIndexBody<T, K>
   ): Promise<FindCursor> {
     const store = await this.getStore(cls);
-    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ keyed: true });
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate();
 
     const where = this.getWhereFilter(cls, castTo(computed.project()));
 

@@ -65,7 +65,7 @@ export class ElasticsearchModelService implements
     nextOffset?: estypes.SortResults | undefined;
   }> {
     const limit = options?.limit ?? 100;
-    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ keyed: true });
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate();
 
     let search = await this.execSearch<T>(cls, {
       ...(options?.offset ?

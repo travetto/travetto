@@ -94,7 +94,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     options?: ListPageOptions
   ): AsyncIterable<ScanState> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ keyed: true });
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate();
     const fullKey = this.#resolveKey(cls, idx.name, computed.getKey());
     switch (idx.type) {
       // case 'indexed:keyed': return this.#streamValues('sScan', { key: fullKey }, options);

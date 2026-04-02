@@ -473,7 +473,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     let nextOffset;
     if (items.length) {
       const last: T = items.at(-1)!;
-      const computed = ModelIndexedComputedIndex.get(idx, last).validate({ keyed: true });
+      const computed = ModelIndexedComputedIndex.get(idx, last).validate();
       const safeName = DynamoDBUtil.toSafeName(idx.name);
       nextOffset = JSONUtil.toBase64({
         [`${safeName}__`]: DynamoDBUtil.toValue(computed.getKey()),

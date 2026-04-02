@@ -167,7 +167,7 @@ export class MemoryModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: AllIndexes<T, K, S>, body: KeyedIndexBody<T, K>): string[] {
-    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ keyed: true });
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate();
     if (!isModelIndexedIndex(idx)) {
       throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with MemoryModelService');
     }

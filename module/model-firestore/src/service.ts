@@ -47,7 +47,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>): Query {
     ModelCrudUtil.ensureNotSubType(cls);
-    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ keyed: true });
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate();
 
     let query = computed.keyedParts.reduce<Query>((result, { path, value, state }) =>
       result.where(path.join('.'), '==', (state === 'empty' ? null : value)), this.#getCollection(cls));
