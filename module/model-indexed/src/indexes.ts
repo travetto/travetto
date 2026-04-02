@@ -3,8 +3,7 @@ import { type Class, type Any, castTo } from '@travetto/runtime';
 
 import {
   type AllIndexes, type KeyedIndexSelection, type KeyedIndex,
-  type SortedIndexSelection, type SortedIndex, IndexedFieldError,
-  type TemplatePart, type TemplateValue
+  type SortedIndexSelection, type SortedIndex, type TemplatePart, type TemplateValue
 } from './types/indexes.ts';
 
 function buildTemplateParts<T extends TemplateValue = TemplateValue>(
@@ -41,9 +40,6 @@ export function keyedIndex<
     sort: {},
     unique: false
   };
-  if ('id' in selection) {
-    throw new IndexedFieldError(cls, idx, 'id', 'Invalid field for index creation');
-  }
   ModelRegistryIndex.getForRegister(cls).register({ indices: { [idx.name]: idx } });
   return idx;
 }
@@ -65,9 +61,6 @@ export function uniqueIndex<
     unique: true,
     sort: {},
   };
-  if ('id' in key) {
-    throw new IndexedFieldError(cls, idx, 'id', 'Invalid field for index creation');
-  }
   ModelRegistryIndex.getForRegister(cls).register({ indices: { [idx.name]: idx } });
   return idx;
 }
@@ -89,12 +82,9 @@ export function sortedIndex<
     sortTemplate: buildTemplateParts('sort', sort),
     class: cls,
   };
-  if ('id' in key) {
-    throw new IndexedFieldError(cls, idx, 'id', 'Invalid field for index creation');
-  }
   ModelRegistryIndex.getForRegister(cls).register({ indices: { [idx.name]: idx } });
   return idx;
 }
 
 export const isModelIndexedIndex = <T extends ModelType>(idx: Any): idx is AllIndexes<T> =>
-  typeof idx === 'object' && idx !== null && 'type' in idx && idx.type.startsWith('indexed:');
+  typeof idx === 'object' && idx !== null && 'type' in idx && typeof idx.type === 'string' && idx.type.startsWith('indexed:');
