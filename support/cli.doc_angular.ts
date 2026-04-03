@@ -1,9 +1,10 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { Env, ExecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { Env, ExecUtil, Runtime } from '@travetto/runtime';
 import { CliCommand, CliModuleUtil } from '@travetto/cli';
 import { RepoExecUtil } from '@travetto/repo';
+import type { IndexedModule } from '@travetto/manifest';
 
 const page = (file: string): string => path.resolve('related/travetto.github.io/src', file);
 
@@ -12,6 +13,35 @@ const page = (file: string): string => path.resolve('related/travetto.github.io/
  */
 @CliCommand()
 export class DocAngularCommand {
+
+  static async prepareAngularHtml(module: IndexedModule): Promise<void> {
+    const moduleName = module.name.endsWith('mono-repo') ? 'overview' : module.name.split('/')[1];
+    try {
+      let html = await fs.readFile(path.resolve(module.sourcePath, 'DOC.html'), 'utf8');
+
+      html = html
+        .replace(/href="[^"]+travetto\/tree\/[^/]+\/module\/([^/"]+)"/g, (_, ref) => `routerLink="/docs/${ref}"`)
+        .replace(/^src="images\//g, `src="/assets/images/${moduleName}/`)
+        .replace(/(href|src)="https?:\/\/travetto.dev\//g, (_, attr) => `${attr}="/`)
+        .replaceAll('@', '&#64;')
+        .replaceAll('process.env.NODE_ENV', text => text.replaceAll('.', '\u2024'));
+
+      if (moduleName === 'todo-app') {
+        html = html
+          .replace(
+            /(<h1>(?:[\n\r]|.)*)(<h2.*?\s*<ol>(?:[\r\n]|.)*?<\/ol>)((?:[\r\n]|.)*)/m,
+            (_, heading, toc, text) =>
+              `<div class="toc"><div class="inner">${toc.trim()}</div></div>\n<div class="documentation">\n${heading}\n${text}\n</div>\n`
+          );
+      }
+
+      await fs.writeFile(page(`app/documentation/gen/${moduleName}/${moduleName}.component.html`), html, 'utf8');
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(`${module.name}: ${error.message}`);
+      }
+    }
+  }
 
   preMain(): void {
     Env.DEBUG.set(false);
@@ -43,53 +73,27 @@ export class DocAngularCommand {
             }
           });
 
-          ExecUtil.getResult(subProcess).catch(() => console.error(`${module.name} - failed`));
+          ExecUtil.getResult(subProcess)
+            .then(() => DocAngularCommand.prepareAngularHtml(module))
+            .catch(() => console.error(`${module.name} - failed`));
 
           return subProcess;
         },
         {
           showStdout: false,
           progressMessage: module => `Running 'trv doc' [%idx/%total] ${module?.sourceFolder ?? ''}`,
-          filter: module => modules.has(module)
+          includeMonorepoRoot: true,
+          filter: module => modules.has(module),
+          showProgressList: true
         });
-      await ExecUtil.getResult(ExecUtil.spawnPackageCommand('trv', ['doc'],
-        { env: { ...process.env, ...Env.TRV_MANIFEST.export('') }, cwd: Runtime.mainSourcePath }));
-      modules.add(RuntimeIndex.mainModule);
     } else {
+      const module = [...modules][0];
       await ExecUtil.getResult(ExecUtil.spawnPackageCommand('trv', ['doc'], {
         env: { ...process.env, ...Env.TRV_MANIFEST.export(''), ...Env.TRV_BUILD.export('none') },
-        cwd: [...modules][0].sourcePath,
+        cwd: module.sourcePath,
         stdio: 'inherit'
       }));
-    }
-
-    for (const module of modules) {
-      const moduleName = module.name.endsWith('mono-repo') ? 'overview' : module.name.split('/')[1];
-      try {
-        let html = await fs.readFile(path.resolve(module.sourcePath, 'DOC.html'), 'utf8');
-
-        html = html
-          .replace(/href="[^"]+travetto\/tree\/[^/]+\/module\/([^/"]+)"/g, (_, ref) => `routerLink="/docs/${ref}"`)
-          .replace(/^src="images\//g, `src="/assets/images/${moduleName}/`)
-          .replace(/(href|src)="https?:\/\/travetto.dev\//g, (_, attr) => `${attr}="/`)
-          .replaceAll('@', '&#64;')
-          .replaceAll('process.env.NODE_ENV', text => text.replaceAll('.', '\u2024'));
-
-        if (moduleName === 'todo-app') {
-          html = html
-            .replace(
-              /(<h1>(?:[\n\r]|.)*)(<h2.*?\s*<ol>(?:[\r\n]|.)*?<\/ol>)((?:[\r\n]|.)*)/m,
-              (_, heading, toc, text) =>
-                `<div class="toc"><div class="inner">${toc.trim()}</div></div>\n<div class="documentation">\n${heading}\n${text}\n</div>\n`
-            );
-        }
-
-        await fs.writeFile(page(`app/documentation/gen/${moduleName}/${moduleName}.component.html`), html, 'utf8');
-      } catch (error) {
-        if (error instanceof Error) {
-          console.error(`${module.name}: ${error.message}`);
-        }
-      }
+      await DocAngularCommand.prepareAngularHtml(module);
     }
   }
 }

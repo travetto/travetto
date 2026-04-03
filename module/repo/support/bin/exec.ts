@@ -1,6 +1,6 @@
 import type { ChildProcess } from 'node:child_process';
 
-import { type ExecutionResult, Env, Util, ExecUtil, castTo, CodecUtil } from '@travetto/runtime';
+import { type ExecutionResult, Env, Util, ExecUtil, castTo, CodecUtil, Runtime, RuntimeIndex, AsyncQueue } from '@travetto/runtime';
 import { CliModuleUtil } from '@travetto/cli';
 import type { IndexedModule } from '@travetto/manifest';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
@@ -17,11 +17,14 @@ type ModuleRunConfig<T = ExecutionResult<string>> = {
   progressMessage?: (module: IndexedModule | undefined) => string;
   filter?: (module: IndexedModule) => boolean | Promise<boolean>;
   transformResult?: (module: IndexedModule, result: ExecutionResult<string>) => T;
+  progressListKey?: (module: IndexedModule) => string;
+  showProgressList?: boolean;
   workerCount?: number;
   prefixOutput?: boolean;
   showStdout?: boolean;
   showStderr?: boolean;
   stableOutput?: boolean;
+  includeMonorepoRoot?: boolean;
 };
 
 const colorize = (value: string, idx: number): string => COLORS[idx % COLORS.length](value);
@@ -65,10 +68,26 @@ export class RepoExecUtil {
     const stdoutTerm = new Terminal(process.stdout);
     const stderrTerm = new Terminal(process.stderr);
 
+    if (Runtime.workspace.mono && config.includeMonorepoRoot && !modules.some(module => module.name === Runtime.workspace.name)) {
+      modules.push(RuntimeIndex.getModule(Runtime.workspace.name)!);
+    }
+
+    const active = new Set<string>();
+    const activeItems = new AsyncQueue<{ idx: number, text: string }>();
+    const listHeader = ['', 'Modules in progress', '-------------------'];
+
+    if (stdoutTerm.interactive && config.showProgressList) {
+      stdoutTerm.writer.writeLines(listHeader).commit();
+    }
+
     const work = WorkPool.runStreamProgress(async (module) => {
       try {
         if (!(await config.filter?.(module) === false)) {
           const prefix = prefixes[module.sourceFolder] ?? '';
+          const listKey = config.progressListKey?.(module) ?? ` * ${module.name}`;
+          active.add(listKey);
+          [...active].sort().forEach((text, idx) => activeItems.add({ idx, text }));
+
           const subProcess = operation(module);
           processes.set(module, subProcess);
 
@@ -85,6 +104,13 @@ export class RepoExecUtil {
 
           const result = await ExecUtil.getResult(subProcess, { catch: true });
           const output = transform(module, result);
+
+          active.delete(listKey);
+          [...active].sort().forEach((text, idx) => activeItems.add({ idx, text }));
+          for (let j = active.size; j < workerCount; j++) {
+            activeItems.add({ idx: j, text: '' }); // Force update to remove item if needed
+          }
+
           results.set(module, output);
         }
         return config.progressMessage?.(module) ?? module.name;
@@ -94,7 +120,14 @@ export class RepoExecUtil {
     }, modules, modules.length, { max: workerCount, min: workerCount });
 
     if (config.progressMessage && stdoutTerm.interactive) {
+      if (config.showProgressList) {
+        stdoutTerm.streamList(activeItems);
+      }
       await stdoutTerm.streamToBottom(Util.mapAsyncIterable(work, TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true })));
+
+      if (stdoutTerm.interactive && config.showProgressList) {
+        stdoutTerm.writer.changePosition({ y: -listHeader.length, x: 0 }).storePosition().writeLines(Array(listHeader.length).fill('')).restoreOnCommit().commit();
+      }
     } else {
       for await (const _ of work) {
         // Ensure its all consumed

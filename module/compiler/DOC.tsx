@@ -52,7 +52,10 @@ export const text = async () => {
         formatCommand: (cmd, args) => `TRV_BUILD=debug ${cmd} ${args.join(' ')}`
       }} />
 
-      <c.Execution title='Sample trv output with default log level' cmd='trvc' args={['build']} />
+      <c.Execution title='Sample trv output with default log level' cmd='trvc' args={['build']} config={{
+        workingDirectory: './doc-exec',
+        rewrite: value => value.replace(/pid=\d+/g, 'pid=000000'),
+      }} />
     </c.Section>
 
     <c.Section title='Compilation Architecture'>
