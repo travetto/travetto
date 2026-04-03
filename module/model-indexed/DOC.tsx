@@ -112,7 +112,7 @@ export const text = <>
 
       For sorted indexes with key fields, you must provide all key values plus the sort value if using it to identify a specific item.
 
-      All single-item index operations also accept an optional {d.field('id')} in the request body. This is useful when the index is not unique and you need to ensure the resolved record also matches a specific id, such as enforcing a pattern like "userId matches".
+      All single-item index operations also accept an optional {d.field('id')} in the request body. This is useful when the index is not unique and you need to ensure the supplied index values resolve to the same record as the provided {d.field('id')}, such as enforcing a pattern like "userId matches".
 
       <c.Code
         title='Disambiguating with id'
@@ -130,7 +130,7 @@ export const text = <>
         startRe={/export async function deleteExample/}
       />
 
-      As with {d.method('getByIndex')}, you can pass an optional {d.field('id')} to ensure only the expected record is deleted when multiple items share the same computed index.
+      As with {d.method('getByIndex')}, you can pass an optional {d.field('id')} to ensure the computed index values resolve to the expected record before deleting it.
     </c.SubSection>
 
     <c.SubSection title='Upserting Items'>

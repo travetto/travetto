@@ -168,7 +168,6 @@ Model services that implement <a target="_blank" class="source-link" href="https
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelIndexedSupport</span> <span class="token keyword">extends</span> <span class="token class-name">ModelBasicSupport</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * Get entity by index as defined by fields of idx and the body fields
-    * An optional id can be provided to disambiguate among multiple matches.
    * &#64;param cls The type to search by
    * &#64;param idx The index to search against
    * &#64;param body The payload of fields needed to search
@@ -181,7 +180,6 @@ Model services that implement <a target="_blank" class="source-link" href="https
 
   <span class="token comment">/**
    * Delete entity by index as defined by fields of idx and the body fields
-    * An optional id can be provided to disambiguate among multiple matches.
    * &#64;param cls The type to search by
    * &#64;param idx The index to search against
    * &#64;param body The payload of fields needed to search
@@ -277,7 +275,7 @@ Use <code class="item method">getByIndex</code> to fetch a single item by provid
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-For sorted indexes with key fields, you must provide all key values plus the sort value if using it to identify a specific item. All single-item index operations also accept an optional <code class="item field">id</code> in the request body. This is useful when the index is not unique and you need to ensure the resolved record also matches a specific id, such as enforcing a pattern like "userId matches".
+For sorted indexes with key fields, you must provide all key values plus the sort value if using it to identify a specific item. All single-item index operations also accept an optional <code class="item field">id</code> in the request body. This is useful when the index is not unique and you need to ensure the supplied index values resolve to the same record as the provided <code class="item field">id</code>, such as enforcing a pattern like "userId matches".
 
   <figure class="code">
     <figcaption class="code">Disambiguating with id
@@ -309,7 +307,7 @@ Use <code class="item method">deleteByIndex</code> to remove an item by index.
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-As with <code class="item method">getByIndex</code>, you can pass an optional <code class="item field">id</code> to ensure only the expected record is deleted when multiple items share the same computed index.
+As with <code class="item method">getByIndex</code>, you can pass an optional <code class="item field">id</code> to ensure the computed index values resolve to the expected record before deleting it.
 
 <h3 id="upserting-items">Upserting Items</h3>
 
