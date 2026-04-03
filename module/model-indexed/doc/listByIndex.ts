@@ -1,5 +1,5 @@
 import { Model } from '@travetto/model';
-import { sortedIndex } from '@travetto/model-indexed';
+import { sortedIndex, type ModelIndexedSupport } from '@travetto/model-indexed';
 
 @Model()
 export class User {
@@ -15,7 +15,7 @@ const recentUsers = sortedIndex(User, {
   sort: { createdAt: -1 }
 });
 
-export async function listExample(modelService: any) {
+export async function listExample(modelService: ModelIndexedSupport) {
   const result = await modelService.listByIndex(User, recentUsers, {}, {
     limit: 20,
     offset: '0'

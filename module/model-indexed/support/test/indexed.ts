@@ -103,6 +103,33 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   }
 
   @Test()
+  async readByKeyedIndexUsingId() {
+    const service = await this.service;
+
+    const first = await service.create(User, User.from({ name: 'bob' }));
+    const second = await service.create(User, User.from({ name: 'bob' }));
+
+    const found = await service.getByIndex(User, userNameIndex, {
+      name: 'bob',
+      id: second.id
+    });
+
+    assert(found.id === second.id);
+
+    await assert.rejects(
+      () => service.getByIndex(User, userNameIndex, { name: 'bob', id: 'missing-user' }),
+      NotFoundError
+    );
+
+    await service.deleteByIndex(User, userNameIndex, { name: 'bob', id: first.id });
+
+    await assert.rejects(() => service.get(User, first.id), NotFoundError);
+
+    const remaining = await service.getByIndex(User, userNameIndex, { name: 'bob', id: second.id });
+    assert(remaining.id === second.id);
+  }
+
+  @Test()
   async readMissingValue() {
     const service = await this.service;
     await assert.rejects(() => service.getByIndex(User, userNameIndex, { name: 'jim' }), NotFoundError);
@@ -131,6 +158,30 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
 
     // @ts-expect-error
     await assert.rejects(() => service.getByIndex(User3, userAgeIndex, { name: 'bob' }), IndexedFieldError);
+  }
+
+  @Test()
+  async readBySortedIndexUsingId() {
+    const service = await this.service;
+
+    const first = await service.create(User3, User3.from({ name: 'bob', age: 40, color: 'blue' }));
+    const second = await service.create(User3, User3.from({ name: 'bob', age: 40, color: 'green' }));
+
+    const found = await service.getByIndex(User3, userAgeIndex, {
+      name: 'bob',
+      age: 40,
+      id: second.id
+    });
+
+    assert(found.id === second.id);
+    assert(found.color === 'green');
+
+    await service.deleteByIndex(User3, userAgeIndex, { name: 'bob', age: 40, id: first.id });
+
+    await assert.rejects(() => service.get(User3, first.id), NotFoundError);
+
+    const remaining = await service.getByIndex(User3, userAgeIndex, { name: 'bob', age: 40, id: second.id });
+    assert(remaining.id === second.id);
   }
 
   @Test()

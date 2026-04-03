@@ -1,5 +1,4 @@
-import { ModelRegistryIndex } from '@travetto/model';
-import { Model } from '@travetto/model';
+import { ModelRegistryIndex, Model } from '@travetto/model';
 
 @Model()
 export class User {
@@ -8,10 +7,10 @@ export class User {
 }
 
 export function registryAccessExample() {
-  const registry = ModelRegistryIndex.get(User);
+  const registry = ModelRegistryIndex.getConfig(User);
   const indexes = registry.indices; // Map of all indexes for the model
 
   // Access a specific index
-  const userByName = indexes['userByName'];
+  const userByName = indexes?.['userByName'];
   return userByName;
 }

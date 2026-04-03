@@ -1,5 +1,5 @@
 import { Model } from '@travetto/model';
-import { sortedIndex } from '@travetto/model-indexed';
+import { sortedIndex, type ModelIndexedSupport } from '@travetto/model-indexed';
 
 @Model()
 export class User {
@@ -14,7 +14,7 @@ const usersByNameAge = sortedIndex(User, {
   sort: { age: 1 }
 });
 
-export async function listWithFilterExample(modelService: any) {
+export async function listWithFilterExample(modelService: ModelIndexedSupport) {
   // Get all users named 'John' sorted by age
   const result = await modelService.listByIndex(User, usersByNameAge, {
     name: 'John'

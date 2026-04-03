@@ -145,6 +145,7 @@ Model services that implement [ModelIndexedSupport](https://github.com/travetto/
 export interface ModelIndexedSupport extends ModelBasicSupport {
   /**
    * Get entity by index as defined by fields of idx and the body fields
+    * An optional id can be provided to disambiguate among multiple matches.
    * @param cls The type to search by
    * @param idx The index to search against
    * @param body The payload of fields needed to search
@@ -157,6 +158,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
 
   /**
    * Delete entity by index as defined by fields of idx and the body fields
+    * An optional id can be provided to disambiguate among multiple matches.
    * @param cls The type to search by
    * @param idx The index to search against
    * @param body The payload of fields needed to search
@@ -237,9 +239,28 @@ export async function getExample(modelService: any) {
   });
   return user;
 }
+
+export async function getScopedExample(modelService: any) {
+  const user = await modelService.getByIndex(User, userByName, {
+    name: 'John Doe',
+    id: 'user-123'
+  });
+  return user;
+}
 ```
 
-For sorted indexes with key fields, you must provide all key values plus the sort value if using it to identify a specific item.
+For sorted indexes with key fields, you must provide all key values plus the sort value if using it to identify a specific item. All single-item index operations also accept an optional `id` in the request body. This is useful when the index is not unique and you need to ensure the resolved record also matches a specific id, such as enforcing a pattern like "userId matches".
+
+**Code: Disambiguating with id**
+```typescript
+export async function getScopedExample(modelService: any) {
+  const user = await modelService.getByIndex(User, userByName, {
+    name: 'John Doe',
+    id: 'user-123'
+  });
+  return user;
+}
+```
 
 ### Deleting Items
 Use `deleteByIndex` to remove an item by index.
@@ -252,6 +273,8 @@ export async function deleteExample(modelService: any) {
   });
 }
 ```
+
+As with `getByIndex`, you can pass an optional `id` to ensure only the expected record is deleted when multiple items share the same computed index.
 
 ### Upserting Items
 Use `upsertByIndex` to insert a new item or update an existing one. The index acts as a primary key.

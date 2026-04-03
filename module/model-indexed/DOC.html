@@ -168,6 +168,7 @@ Model services that implement <a target="_blank" class="source-link" href="https
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelIndexedSupport</span> <span class="token keyword">extends</span> <span class="token class-name">ModelBasicSupport</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * Get entity by index as defined by fields of idx and the body fields
+    * An optional id can be provided to disambiguate among multiple matches.
    * @param cls The type to search by
    * @param idx The index to search against
    * @param body The payload of fields needed to search
@@ -180,6 +181,7 @@ Model services that implement <a target="_blank" class="source-link" href="https
 
   <span class="token comment">/**
    * Delete entity by index as defined by fields of idx and the body fields
+    * An optional id can be provided to disambiguate among multiple matches.
    * @param cls The type to search by
    * @param idx The index to search against
    * @param body The payload of fields needed to search
@@ -264,10 +266,32 @@ Use <code class="item method">getByIndex</code> to fetch a single item by provid
     name<span class="token operator">:</span> <span class="token string">'John Doe'</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">return</span> user<span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span>
+
+<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">getScopedExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> <span class="token builtin">any</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">await</span> modelService<span class="token punctuation">.</span><span class="token function">getByIndex</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> userByName<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
+    name<span class="token operator">:</span> <span class="token string">'John Doe'</span><span class="token punctuation">,</span>
+    id<span class="token operator">:</span> <span class="token string">'user-123'</span>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">return</span> user<span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-For sorted indexes with key fields, you must provide all key values plus the sort value if using it to identify a specific item.
+For sorted indexes with key fields, you must provide all key values plus the sort value if using it to identify a specific item. All single-item index operations also accept an optional <code class="item field">id</code> in the request body. This is useful when the index is not unique and you need to ensure the resolved record also matches a specific id, such as enforcing a pattern like "userId matches".
+
+  <figure class="code">
+    <figcaption class="code">Disambiguating with id
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/doc/getByIndex.ts#L22">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">getScopedExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> <span class="token builtin">any</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">await</span> modelService<span class="token punctuation">.</span><span class="token function">getByIndex</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> userByName<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
+    name<span class="token operator">:</span> <span class="token string">'John Doe'</span><span class="token punctuation">,</span>
+    id<span class="token operator">:</span> <span class="token string">'user-123'</span>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">return</span> user<span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
 
 <h3 id="deleting-items">Deleting Items</h3>
 
@@ -284,6 +308,8 @@ Use <code class="item method">deleteByIndex</code> to remove an item by index.
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
+
+As with <code class="item method">getByIndex</code>, you can pass an optional <code class="item field">id</code> to ensure only the expected record is deleted when multiple items share the same computed index.
 
 <h3 id="upserting-items">Upserting Items</h3>
 
