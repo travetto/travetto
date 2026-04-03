@@ -4,7 +4,7 @@ import { toConcrete } from '@travetto/runtime';
 import { Model, ModelRegistryIndex } from '@travetto/model';
 
 import type { ModelIndexedSupport } from './src/types/service.ts';
-import { IndexedFieldError } from './src/types/indexes.ts';
+import { IndexedFieldError } from './src/types/error.ts';
 import { keyedIndex, sortedIndex, uniqueIndex } from './src/indexes.ts';
 
 const ModelIndexedSupportContract = toConcrete<ModelIndexedSupport>();

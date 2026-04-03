@@ -19,7 +19,7 @@ Supported features:
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11)
    *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64)
    *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10)
-   *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L23)
+   *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L15)
    *  [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/crud.ts#L11)
    *  [Facet](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/facet.ts#L14)
    *  [Query](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/query.ts#L10)

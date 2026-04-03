@@ -2,9 +2,10 @@ import type { ModelType } from '@travetto/model';
 import { castTo, type Any } from '@travetto/runtime';
 
 import {
-  type KeyedIndexSelection, type SortedIndexSelection, type AllIndexes, type KeyedIndexBody, IndexedFieldError,
+  type KeyedIndexSelection, type SortedIndexSelection, type AllIndexes, type KeyedIndexBody,
   type FullKeyedIndexBody, type TemplateValue, type TemplatePart
 } from './types/indexes.ts';
+import { IndexedFieldError } from './types/error.ts';
 
 const DEFAULT_SEP = '\u8203';
 
@@ -29,11 +30,11 @@ function buildIndexParts<T extends TemplateValue = TemplateValue>(
         if (value && pathItem in value) {
           value = castTo<Record<string, unknown>>(value)[pathItem];
         } else {
-          bodyPart = { value: undefined!, state: 'missing' };
+          bodyPart = { value: null, state: 'missing' };
           break;
         }
       } else {
-        bodyPart = { value: undefined!, state: 'mismatch' };
+        bodyPart = { value: castTo(value), state: 'mismatch' };
         break;
       }
     }

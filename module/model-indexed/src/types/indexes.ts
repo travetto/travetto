@@ -1,5 +1,5 @@
 import type { ModelType, IndexConfig } from '@travetto/model';
-import { type IntrinsicType, type Any, type DeepPartial, RuntimeError, type Class } from '@travetto/runtime';
+import { type IntrinsicType, type Any, type DeepPartial } from '@travetto/runtime';
 
 type TypeProjection<T, V> = {
   [P in keyof T]?:
@@ -85,10 +85,3 @@ export type AllIndexes<
   S extends SortedIndexSelection<T> = Any
 > = KeyedIndex<T, K, S> | SortedIndex<T, K, S>;
 
-export class IndexedFieldError<T extends ModelType> extends RuntimeError {
-  constructor(cls: Class<T>, idx: AllIndexes<T>, fieldPath: string, message: string) {
-    super(`${message}:  ${idx.name} on ${cls.name} at path ${fieldPath}`, {
-      details: { cls: cls.name, index: idx.name, fieldPath }
-    });
-  }
-}

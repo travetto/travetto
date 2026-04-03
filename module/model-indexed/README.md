@@ -136,7 +136,7 @@ export const specificOrders = keyedIndex(Order, {
 ```
 
 ## Using Indexes
-Model services that implement [ModelIndexedSupport](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L23) allow you to query using the indexes you've defined.
+Model services that implement [ModelIndexedSupport](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L15) allow you to query using the indexes you've defined.
 
 ### Service Interface
 
@@ -327,7 +327,7 @@ export async function listWithFilterExample(modelService: any) {
 ```
 
 ## Integration
-Index registration happens automatically when models are decorated with [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14). Model services like [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module."), [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module."), and [SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") implement the [ModelIndexedSupport](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L23) interface to provide indexed access.
+Index registration happens automatically when models are decorated with [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14). Model services like [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module."), [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module."), and [SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") implement the [ModelIndexedSupport](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L15) interface to provide indexed access.
 
 ### Reading Registry Information
 You can access registered indexes via [ModelRegistryIndex](https://github.com/travetto/travetto/tree/main/module/model/src/registry/registry-index.ts#L12) at runtime:
@@ -350,4 +350,4 @@ export function registryAccessExample() {
    *  **Use composite keys** — When filtering by multiple fields, include all of them in a single index
    *  **Leverage sorting** — Use sorted indexes for paginated lists and range queries
    *  **Enforce uniqueness** — Use [uniqueIndex](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L47) for fields that must be globally unique
-   *  **Handle errors gracefully** — Catch [IndexedFieldError](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/indexes.ts#L88) when working with user input
+   *  **Handle errors gracefully** — Catch [IndexedFieldError](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/error.ts#L7) when working with user input

@@ -1,19 +1,11 @@
 import type { ModelType, ModelBasicSupport, OptionalId } from '@travetto/model';
 import type { Class } from '@travetto/runtime';
+
 import type {
   KeyedIndexSelection, KeyedIndexBody, SortedIndexSelection, SortedIndex,
   SingleItemIndex, FullKeyedIndexBody, FullKeyedIndexWithPartialBody
 } from './indexes.ts';
-
-export type ListPageOptions<O = string> = {
-  limit?: number;
-  offset?: O;
-};
-
-export type ListPageResult<T extends ModelType> = {
-  items: T[];
-  nextOffset?: string;
-};
+import type { ListPageOptions, ListPageResult } from './list.ts';
 
 /**
  * Support for simple indexed activity

@@ -157,12 +157,12 @@ Indexes can use multiple fields or nested fields in their keys. This allows quer
 
 <h2 id="using-indexes">Using Indexes</h2>
 
-Model services that implement <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L23">ModelIndexedSupport</a> allow you to query using the indexes you've defined.
+Model services that implement <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L15">ModelIndexedSupport</a> allow you to query using the indexes you've defined.
 <h3 id="service-interface">Service Interface</h3>
 
   <figure class="code">
     <figcaption class="code">ModelIndexedSupport Interface
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L23">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L15">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelIndexedSupport</span> <span class="token keyword">extends</span> <span class="token class-name">ModelBasicSupport</span> <span class="token punctuation">{{'{'}}</span>
@@ -375,7 +375,7 @@ You can also provide key values to filter within a sorted index:
 
 <h2 id="integration">Integration</h2>
 
-Index registration happens automatically when models are decorated with <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">@Model</a>. Model services like <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-memory" title="Memory backing for the travetto model module.">Memory Model Support</a>, <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-mongo" title="Mongo backing for the travetto model module.">MongoDB Model Support</a>, and <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-sql" title="SQL backing for the travetto model module, with real-time modeling support for SQL schemas.">SQL Model Service</a> implement the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L23">ModelIndexedSupport</a> interface to provide indexed access.
+Index registration happens automatically when models are decorated with <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">@Model</a>. Model services like <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-memory" title="Memory backing for the travetto model module.">Memory Model Support</a>, <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-mongo" title="Mongo backing for the travetto model module.">MongoDB Model Support</a>, and <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-sql" title="SQL backing for the travetto model module, with real-time modeling support for SQL schemas.">SQL Model Service</a> implement the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L15">ModelIndexedSupport</a> interface to provide indexed access.
 <h3 id="reading-registry-information">Reading Registry Information</h3>
 
 You can access registered indexes via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/registry-index.ts#L12">ModelRegistryIndex</a> at runtime:
@@ -401,5 +401,5 @@ You can access registered indexes via <a target="_blank" class="source-link" hre
 <li><strong>Use composite keys</strong> — When filtering by multiple fields, include all of them in a single index</li>
 <li><strong>Leverage sorting</strong> — Use sorted indexes for paginated lists and range queries</li>
 <li><strong>Enforce uniqueness</strong> — Use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L47">uniqueIndex</a> for fields that must be globally unique</li>
-<li><strong>Handle errors gracefully</strong> — Catch <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/indexes.ts#L88">IndexedFieldError</a> when working with user input</li>
+<li><strong>Handle errors gracefully</strong> — Catch <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/error.ts#L7">IndexedFieldError</a> when working with user input</li>
 </ul>
