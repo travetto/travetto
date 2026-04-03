@@ -106,7 +106,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   async readByKeyedIndexUsingId() {
     const service = await this.service;
 
-    const first = await service.create(User, User.from({ name: 'bob' }));
+    const first = await service.create(User, User.from({ name: 'sam' }));
     const second = await service.create(User, User.from({ name: 'bob' }));
 
     const found = await service.getByIndex(User, userNameIndex, {
@@ -117,11 +117,11 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     assert(found.id === second.id);
 
     await assert.rejects(
-      () => service.getByIndex(User, userNameIndex, { name: 'bob', id: 'missing-user' }),
+      () => service.getByIndex(User, userNameIndex, { name: 'bob', id: first.id }),
       NotFoundError
     );
 
-    await service.deleteByIndex(User, userNameIndex, { name: 'bob', id: first.id });
+    await service.deleteByIndex(User, userNameIndex, { name: 'sam', id: first.id });
 
     await assert.rejects(() => service.get(User, first.id), NotFoundError);
 
