@@ -150,10 +150,18 @@ export class MemoryModelService implements
     const index = this.#indices[idx.type].get(indexName(cls, idx))?.get(computed.getKey());
     let id: string | undefined;
     if (index) {
-      if (index instanceof Map) {
-        id = getFirstId(index, computed.getSort()); // Grab first id
-      } else if (index instanceof Set) {
-        id = getFirstId(index); // Grab first id
+      if (computed.idPart) {
+        if (index.has(computed.idPart.value)) {
+          id = computed.idPart.value;
+        } else {
+          throw new NotFoundError(cls, computed.getKey({ sort: true }));
+        }
+      } else {
+        if (index instanceof Map) {
+          id = getFirstId(index, computed.getSort()); // Grab first id
+        } else if (index instanceof Set) {
+          id = getFirstId(index); // Grab first id
+        }
       }
     }
     if (id) {

@@ -419,6 +419,7 @@ export class ElasticsearchModelService implements
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.project({
           sort: true,
+          includeId: true,
           emptyValue: { $exists: true }
         }))
 
@@ -442,6 +443,7 @@ export class ElasticsearchModelService implements
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.project({
           sort: true,
+          includeId: true,
           emptyValue: { $exists: true }
         }))
       ),
