@@ -396,7 +396,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     return this.update(cls, item);
   }
 
-  async listByIndex<
+  async pageByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
@@ -415,5 +415,19 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       lastCursor = cursor;
     }
     return { items, nextOffset: lastCursor };
+  }
+
+  async * listByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>
+  ): AsyncIterable<T> {
+    for await (const { ids } of this.#scanIndex(cls, idx, body, { limit: Number.MAX_SAFE_INTEGER })) {
+      yield* await Array.fromAsync(this.#getBodies(cls, ids, id => this.#resolveKey(cls, id)));
+    }
   }
 }

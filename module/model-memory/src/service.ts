@@ -408,7 +408,7 @@ export class MemoryModelService implements
     return this.update(cls, item);
   }
 
-  async listByIndex<
+  async pageByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
@@ -427,5 +427,20 @@ export class MemoryModelService implements
       items.push(await this.get(cls, id));
     }
     return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
+  }
+
+  async  * listByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+  ): AsyncIterable<T> {
+    const ids = this.#getIndexIds(cls, idx, body);
+    for (const id of ids) {
+      yield await this.get(cls, id);
+    }
   }
 }

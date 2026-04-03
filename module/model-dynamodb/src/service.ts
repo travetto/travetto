@@ -451,7 +451,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     return this.update(cls, item);
   }
 
-  async listByIndex<
+  async pageByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
@@ -491,5 +491,27 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     }
 
     return { items, nextOffset };
+  }
+
+  async * listByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+  ): AsyncIterable<T> {
+    for await (const batch of this.#scanIndex(cls, idx, body, { limit: Number.MAX_SAFE_INTEGER })) {
+      for (const item of batch.Items ?? []) {
+        try {
+          yield await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);
+        } catch (error) {
+          if (!(error instanceof NotFoundError)) {
+            throw error;
+          }
+        }
+      }
+    }
   }
 }

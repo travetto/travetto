@@ -479,7 +479,7 @@ export class ElasticsearchModelService implements
     return this.update(cls, item);
   }
 
-  async listByIndex<
+  async pageByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
@@ -505,6 +505,28 @@ export class ElasticsearchModelService implements
       }
     }
     return { items, nextOffset: lastNextOffset ? JSONUtil.toBase64(lastNextOffset) : undefined };
+  }
+
+  async * listByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+  ): AsyncIterable<T> {
+    for await (const { hits } of this.#scrollIndex(cls, idx, body, { limit: Number.MAX_SAFE_INTEGER })) {
+      for (const hit of hits) {
+        try {
+          yield await this.postLoad(cls, hit);
+        } catch (error) {
+          if (!(error instanceof NotFoundError)) {
+            throw error;
+          }
+        }
+      }
+    }
   }
 
 

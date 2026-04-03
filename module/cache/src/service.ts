@@ -107,14 +107,9 @@ export class CacheService {
   async deleteAll(keySpace: string): Promise<void> {
     if (ModelIndexedUtil.isSupported(this.#modelService)) {
       const removes: Promise<void>[] = [];
-      let offset: string | undefined;
-      do {
-        const { items, nextOffset } = await this.#modelService.listByIndex(CacheRecord, keySpaceIndex, { keySpace }, { offset });
-        for (const item of items) {
-          removes.push(this.#modelService.delete(CacheRecord, item.id));
-        }
-        offset = nextOffset;
-      } while (offset);
+      for await (const item of this.#modelService.listByIndex(CacheRecord, keySpaceIndex, { keySpace })) {
+        removes.push(this.#modelService.delete(CacheRecord, item.id));
+      }
       await Promise.all(removes);
     } else {
       throw new RuntimeError('Unable to delete all on an un-indexed database');

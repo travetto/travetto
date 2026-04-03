@@ -393,7 +393,7 @@ export class SQLModelService implements
   }
 
   @Connected()
-  async listByIndex<
+  async pageByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
@@ -413,5 +413,32 @@ export class SQLModelService implements
       limit, offset
     }));
     return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
+  }
+
+  @ConnectedIterator()
+  async * listByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+  ): AsyncIterable<T> {
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate();
+    let offset = 0;
+    while (offset >= 0) {
+      const items = await this.query(cls, castTo({
+        where: computed.project(),
+        sort: idx.sortTemplate.map(part => ({ [part.path.join('.')]: part.value })),
+        limit: 100, offset
+      }));
+      if (items.length === 0) {
+        offset = -1;
+      } else {
+        offset += items.length;
+        yield* items;
+      }
+    }
   }
 }

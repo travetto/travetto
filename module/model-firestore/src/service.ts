@@ -202,7 +202,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return this.update(cls, item);
   }
 
-  async listByIndex<
+  async pageByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
@@ -224,5 +224,32 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     }
 
     return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
+  }
+
+  async * listByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+  ): AsyncIterable<T> {
+    let offset = 0;
+    while (offset >= 0) {
+      const query = this.#buildIndexQuery(cls, idx, body)
+        .limit(100)
+        .offset(offset);
+
+      const { docs: items } = await query.get();
+      if (items.length === 0) {
+        offset = -1;
+      } else {
+        for (const item of items) {
+          yield await ModelCrudUtil.load(cls, item.data()!);
+        }
+        offset += items.length;
+      }
+    }
   }
 }
