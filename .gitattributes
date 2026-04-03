@@ -2,7 +2,9 @@ related/travetto.github.io/src/app/documentation/gen/** linguist-generated
 related/travetto.github.io/src/app/documentation/**/*.html linguist-generated
 related/travetto.github.io/src/app/guide/**/*.html linguist-generated
 module/*/DOC.html linguist-generated
+module/*/README.md linguist-generated
 related/*/DOC.html linguist-generated
+related/*/README.md linguist-generated
 
 *.ts eol=lf
 *.tsx eol=lf
