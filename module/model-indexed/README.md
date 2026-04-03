@@ -233,14 +233,14 @@ Use `getByIndex` to fetch a single item by providing all required key fields.
 
 **Code: Getting by Keyed Index**
 ```typescript
-export async function getExample(modelService: any) {
+export async function getExample(modelService: ModelIndexedSupport) {
   const user = await modelService.getByIndex(User, userByName, {
     name: 'John Doe'
   });
   return user;
 }
 
-export async function getScopedExample(modelService: any) {
+export async function getScopedExample(modelService: ModelIndexedSupport) {
   const user = await modelService.getByIndex(User, userByName, {
     name: 'John Doe',
     id: 'user-123'
@@ -253,7 +253,7 @@ For sorted indexes with key fields, you must provide all key values plus the sor
 
 **Code: Disambiguating with id**
 ```typescript
-export async function getScopedExample(modelService: any) {
+export async function getScopedExample(modelService: ModelIndexedSupport) {
   const user = await modelService.getByIndex(User, userByName, {
     name: 'John Doe',
     id: 'user-123'
@@ -267,7 +267,7 @@ Use `deleteByIndex` to remove an item by index.
 
 **Code: Deleting by Index**
 ```typescript
-export async function deleteExample(modelService: any) {
+export async function deleteExample(modelService: ModelIndexedSupport) {
   await modelService.deleteByIndex(User, userByName, {
     name: 'John Doe'
   });
@@ -281,7 +281,7 @@ Use `upsertByIndex` to insert a new item or update an existing one. The index ac
 
 **Code: Upserting by Index**
 ```typescript
-export async function upsertExample(modelService: any) {
+export async function upsertExample(modelService: ModelIndexedSupport) {
   const user = await modelService.upsertByIndex(User, userByName, {
     id: 'user-1',
     name: 'John Doe',
@@ -296,7 +296,7 @@ Use `updateByIndex` to update an existing item, or `updatePartialByIndex` for pa
 
 **Code: Updating by Index**
 ```typescript
-export async function updateExample(modelService: any) {
+export async function updateExample(modelService: ModelIndexedSupport) {
   // Full update — all fields required
   const user = await modelService.updateByIndex(User, userByName, {
     id: 'user-1',
@@ -307,7 +307,7 @@ export async function updateExample(modelService: any) {
   return user;
 }
 
-export async function updatePartialExample(modelService: any) {
+export async function updatePartialExample(modelService: ModelIndexedSupport) {
   // Partial update — only updated fields required
   const user = await modelService.updatePartialByIndex(User, userByName, {
     name: 'John Doe',
@@ -322,7 +322,7 @@ Use `listByIndex` to fetch multiple items from a sorted index with pagination.
 
 **Code: Listing by Sorted Index**
 ```typescript
-export async function listExample(modelService: any) {
+export async function listExample(modelService: ModelIndexedSupport) {
   const result = await modelService.listByIndex(User, recentUsers, {}, {
     limit: 20,
     offset: '0'
@@ -338,7 +338,7 @@ You can also provide key values to filter within a sorted index:
 
 **Code: Listing with Key Filter**
 ```typescript
-export async function listWithFilterExample(modelService: any) {
+export async function listWithFilterExample(modelService: ModelIndexedSupport) {
   // Get all users named 'John' sorted by age
   const result = await modelService.listByIndex(User, usersByNameAge, {
     name: 'John'
@@ -358,11 +358,11 @@ You can access registered indexes via [ModelRegistryIndex](https://github.com/tr
 **Code: Accessing Model Indexes**
 ```typescript
 export function registryAccessExample() {
-  const registry = ModelRegistryIndex.get(User);
+  const registry = ModelRegistryIndex.getConfig(User);
   const indexes = registry.indices; // Map of all indexes for the model
 
   // Access a specific index
-  const userByName = indexes['userByName'];
+  const userByName = indexes?.['userByName'];
   return userByName;
 }
 ```

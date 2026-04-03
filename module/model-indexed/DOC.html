@@ -261,14 +261,14 @@ Use <code class="item method">getByIndex</code> to fetch a single item by provid
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/doc/getByIndex.ts#L15">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">getExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> <span class="token builtin">any</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">getExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> ModelIndexedSupport<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">await</span> modelService<span class="token punctuation">.</span><span class="token function">getByIndex</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> userByName<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
     name<span class="token operator">:</span> <span class="token string">'John Doe'</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">return</span> user<span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span>
 
-<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">getScopedExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> <span class="token builtin">any</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">getScopedExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> ModelIndexedSupport<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">await</span> modelService<span class="token punctuation">.</span><span class="token function">getByIndex</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> userByName<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
     name<span class="token operator">:</span> <span class="token string">'John Doe'</span><span class="token punctuation">,</span>
     id<span class="token operator">:</span> <span class="token string">'user-123'</span>
@@ -284,7 +284,7 @@ For sorted indexes with key fields, you must provide all key values plus the sor
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/doc/getByIndex.ts#L22">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">getScopedExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> <span class="token builtin">any</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">getScopedExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> ModelIndexedSupport<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">await</span> modelService<span class="token punctuation">.</span><span class="token function">getByIndex</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> userByName<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
     name<span class="token operator">:</span> <span class="token string">'John Doe'</span><span class="token punctuation">,</span>
     id<span class="token operator">:</span> <span class="token string">'user-123'</span>
@@ -302,7 +302,7 @@ Use <code class="item method">deleteByIndex</code> to remove an item by index.
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/doc/deleteByIndex.ts#L15">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">deleteExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> <span class="token builtin">any</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">deleteExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> ModelIndexedSupport<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">await</span> modelService<span class="token punctuation">.</span><span class="token function">deleteByIndex</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> userByName<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
     name<span class="token operator">:</span> <span class="token string">'John Doe'</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -320,7 +320,7 @@ Use <code class="item method">upsertByIndex</code> to insert a new item or updat
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/doc/upsertByIndex.ts#L16">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">upsertExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> <span class="token builtin">any</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">upsertExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> ModelIndexedSupport<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">await</span> modelService<span class="token punctuation">.</span><span class="token function">upsertByIndex</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> userByName<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
     id<span class="token operator">:</span> <span class="token string">'user-1'</span><span class="token punctuation">,</span>
     name<span class="token operator">:</span> <span class="token string">'John Doe'</span><span class="token punctuation">,</span>
@@ -339,7 +339,7 @@ Use <code class="item method">updateByIndex</code> to update an existing item, o
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/doc/updateByIndex.ts#L17">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">updateExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> <span class="token builtin">any</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">updateExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> ModelIndexedSupport<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">// Full update — all fields required</span>
   <span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">await</span> modelService<span class="token punctuation">.</span><span class="token function">updateByIndex</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> userByName<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
     id<span class="token operator">:</span> <span class="token string">'user-1'</span><span class="token punctuation">,</span>
@@ -350,7 +350,7 @@ Use <code class="item method">updateByIndex</code> to update an existing item, o
   <span class="token keyword">return</span> user<span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span>
 
-<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">updatePartialExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> <span class="token builtin">any</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">updatePartialExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> ModelIndexedSupport<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">// Partial update — only updated fields required</span>
   <span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">await</span> modelService<span class="token punctuation">.</span><span class="token function">updatePartialByIndex</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> userByName<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
     name<span class="token operator">:</span> <span class="token string">'John Doe'</span><span class="token punctuation">,</span>
@@ -369,7 +369,7 @@ Use <code class="item method">listByIndex</code> to fetch multiple items from a 
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/doc/listByIndex.ts#L18">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">listExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> <span class="token builtin">any</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">listExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> ModelIndexedSupport<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">const</span> result <span class="token operator">=</span> <span class="token keyword">await</span> modelService<span class="token punctuation">.</span><span class="token function">listByIndex</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> recentUsers<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
     limit<span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span>
     offset<span class="token operator">:</span> <span class="token string">'0'</span>
@@ -388,7 +388,7 @@ You can also provide key values to filter within a sorted index:
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/doc/listWithFilter.ts#L17">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">listWithFilterExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> <span class="token builtin">any</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">listWithFilterExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> ModelIndexedSupport<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">// Get all users named 'John' sorted by age</span>
   <span class="token keyword">const</span> result <span class="token operator">=</span> <span class="token keyword">await</span> modelService<span class="token punctuation">.</span><span class="token function">listByIndex</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> usersByNameAge<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
     name<span class="token operator">:</span> <span class="token string">'John'</span>
@@ -408,15 +408,15 @@ You can access registered indexes via <a target="_blank" class="source-link" hre
 
   <figure class="code">
     <figcaption class="code">Accessing Model Indexes
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/doc/registryAccess.ts#L10">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/doc/registryAccess.ts#L9">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">registryAccessExample</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token keyword">const</span> registry <span class="token operator">=</span> ModelRegistryIndex<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>User<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> registry <span class="token operator">=</span> ModelRegistryIndex<span class="token punctuation">.</span><span class="token function">getConfig</span><span class="token punctuation">(</span>User<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">const</span> indexes <span class="token operator">=</span> registry<span class="token punctuation">.</span>indices<span class="token punctuation">;</span> <span class="token comment">// Map of all indexes for the model</span>
 
   <span class="token comment">// Access a specific index</span>
-  <span class="token keyword">const</span> userByName <span class="token operator">=</span> indexes<span class="token punctuation">[</span><span class="token string">'userByName'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> userByName <span class="token operator">=</span> indexes<span class="token operator">?.</span><span class="token punctuation">[</span><span class="token string">'userByName'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
   <span class="token keyword">return</span> userByName<span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
