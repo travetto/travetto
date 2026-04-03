@@ -259,7 +259,8 @@ The service provides these operations:
 <li><code class="item method">upsertByIndex</code> — Insert or update by index</li>
 <li><code class="item method">updateByIndex</code> — Update an existing item by index</li>
 <li><code class="item method">updatePartialByIndex</code> — Partially update an item by index</li>
-<li><code class="item method">listByIndex</code> — List items with pagination and sorting</li>
+<li><code class="item method">listPageByIndex</code> — Fetch a page of items with pagination metadata</li>
+<li><code class="item method">listByIndex</code> — Stream all matching items from a sorted index</li>
 </ul>
 
 <h3 id="getting-items">Getting Items</h3>
@@ -372,11 +373,11 @@ Use <code class="item method">updateByIndex</code> to update an existing item, o
 
 <h3 id="listing-items">Listing Items</h3>
 
-Use <code class="item method">listByIndex</code> to fetch multiple items from a sorted index with pagination.
+Use <code class="item method">listPageByIndex</code> when you want paginated access to a sorted index.
 
   <figure class="code">
-    <figcaption class="code">Listing by Sorted Index
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/doc/listByIndex.ts#L18">Source</a></cite>
+    <figcaption class="code">Paging by Sorted Index
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/doc/listPageByIndex.ts#L18">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">listExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> ModelIndexedSupport<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -391,11 +392,29 @@ Use <code class="item method">listByIndex</code> to fetch multiple items from a 
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-You can also provide key values to filter within a sorted index:
+Use <code class="item method">listByIndex</code> when you want to iterate through every matching item as an async stream.
+
+  <figure class="code">
+    <figcaption class="code">Streaming by Sorted Index
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/doc/listByIndex.ts#L18">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">listStreamExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> ModelIndexedSupport<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">const</span> items<span class="token operator">:</span> User<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">for</span> <span class="token keyword">await</span> <span class="token punctuation">(</span><span class="token keyword">const</span> user <span class="token keyword">of</span> modelService<span class="token punctuation">.</span><span class="token function">listByIndex</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> recentUsers<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    items<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token keyword">return</span> items<span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+You can also provide key values to filter within a sorted index with <code class="item method">listPageByIndex</code>:
 
   <figure class="code">
     <figcaption class="code">Listing with Key Filter
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/doc/listWithFilter.ts#L17">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/doc/listPageByIndexWithFilter.ts#L17">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">listWithFilterExample</span><span class="token punctuation">(</span>modelService<span class="token operator">:</span> ModelIndexedSupport<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
