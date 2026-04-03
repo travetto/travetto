@@ -97,7 +97,8 @@ export const text = <>
         <li>{d.method('upsertByIndex')} — Insert or update by index</li>
         <li>{d.method('updateByIndex')} — Update an existing item by index</li>
         <li>{d.method('updatePartialByIndex')} — Partially update an item by index</li>
-        <li>{d.method('listByIndex')} — List items with pagination and sorting</li>
+        <li>{d.method('listPageByIndex')} — Fetch a page of items with pagination metadata</li>
+        <li>{d.method('listByIndex')} — Stream all matching items from a sorted index</li>
       </ul>
     </c.SubSection>
 
@@ -154,19 +155,27 @@ export const text = <>
     </c.SubSection>
 
     <c.SubSection title='Listing Items'>
-      Use {d.method('listByIndex')} to fetch multiple items from a sorted index with pagination.
+      Use {d.method('listPageByIndex')} when you want paginated access to a sorted index.
 
       <c.Code
-        title='Listing by Sorted Index'
-        src='doc/listByIndex.ts'
+        title='Paging by Sorted Index'
+        src='doc/listPageByIndex.ts'
         startRe={/export async function listExample/}
       />
 
-      You can also provide key values to filter within a sorted index:
+      Use {d.method('listByIndex')} when you want to iterate through every matching item as an async stream.
+
+      <c.Code
+        title='Streaming by Sorted Index'
+        src='doc/listByIndex.ts'
+        startRe={/export async function listStreamExample/}
+      />
+
+      You can also provide key values to filter within a sorted index with {d.method('listPageByIndex')}:
 
       <c.Code
         title='Listing with Key Filter'
-        src='doc/listWithFilter.ts'
+        src='doc/listPageByIndexWithFilter.ts'
         startRe={/export async function listWithFilterExample/}
       />
     </c.SubSection>

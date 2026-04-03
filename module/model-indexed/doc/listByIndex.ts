@@ -15,13 +15,12 @@ const recentUsers = sortedIndex(User, {
   sort: { createdAt: -1 }
 });
 
-export async function listExample(modelService: ModelIndexedSupport) {
-  const result = await modelService.pageByIndex(User, recentUsers, {}, {
-    limit: 20,
-    offset: '0'
-  });
+export async function listStreamExample(modelService: ModelIndexedSupport) {
+  const items: User[] = [];
 
-  console.log(result.items);      // Array of users
-  console.log(result.nextOffset); // Token for next page, if more results exist
-  return result;
+  for await (const user of modelService.listByIndex(User, recentUsers, {})) {
+    items.push(user);
+  }
+
+  return items;
 }

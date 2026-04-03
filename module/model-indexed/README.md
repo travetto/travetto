@@ -204,17 +204,29 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexWithPartialBody<T, K, S>): Promise<T>;
 
   /**
-   * List entity by ranged index as defined by fields of idx
+   * Page through entities by ranged index as defined by fields of idx
    * @param cls The type to search by
    * @param idx The index to search against
    * @param body The payload of fields needed to search
-   * @param options The configuration for listing
+   * @param options The configuration for pagination
+   */
+  listPageByIndex<
+    T extends ModelType,
+    S extends SortedIndexSelection<T>,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ListPageOptions): Promise<ListPageResult<T>>;
+
+  /**
+   * List all entities by ranged index as defined by fields of idx
+   * @param cls The type to search by
+   * @param idx The index to search against
+   * @param body The payload of fields needed to search
    */
   listByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ListPageOptions): Promise<ListPageResult<T>>;
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>,): AsyncIterable<T>;
 }
 ```
 
@@ -224,7 +236,8 @@ The service provides these operations:
    *  `upsertByIndex` — Insert or update by index
    *  `updateByIndex` — Update an existing item by index
    *  `updatePartialByIndex` — Partially update an item by index
-   *  `listByIndex` — List items with pagination and sorting
+   *  `listPageByIndex` — Fetch a page of items with pagination metadata
+   *  `listByIndex` — Stream all matching items from a sorted index
 
 ### Getting Items
 Use `getByIndex` to fetch a single item by providing all required key fields.
@@ -316,12 +329,12 @@ export async function updatePartialExample(modelService: ModelIndexedSupport) {
 ```
 
 ### Listing Items
-Use `listByIndex` to fetch multiple items from a sorted index with pagination.
+Use `listPageByIndex` when you want paginated access to a sorted index.
 
-**Code: Listing by Sorted Index**
+**Code: Paging by Sorted Index**
 ```typescript
 export async function listExample(modelService: ModelIndexedSupport) {
-  const result = await modelService.listByIndex(User, recentUsers, {}, {
+  const result = await modelService.listPageByIndex(User, recentUsers, {}, {
     limit: 20,
     offset: '0'
   });
@@ -332,13 +345,28 @@ export async function listExample(modelService: ModelIndexedSupport) {
 }
 ```
 
-You can also provide key values to filter within a sorted index:
+Use `listByIndex` when you want to iterate through every matching item as an async stream.
+
+**Code: Streaming by Sorted Index**
+```typescript
+export async function listStreamExample(modelService: ModelIndexedSupport) {
+  const items: User[] = [];
+
+  for await (const user of modelService.listByIndex(User, recentUsers, {})) {
+    items.push(user);
+  }
+
+  return items;
+}
+```
+
+You can also provide key values to filter within a sorted index with `listPageByIndex`:
 
 **Code: Listing with Key Filter**
 ```typescript
 export async function listWithFilterExample(modelService: ModelIndexedSupport) {
   // Get all users named 'John' sorted by age
-  const result = await modelService.listByIndex(User, usersByNameAge, {
+  const result = await modelService.listPageByIndex(User, usersByNameAge, {
     name: 'John'
   }, {
     limit: 10

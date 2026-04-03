@@ -393,7 +393,7 @@ export class SQLModelService implements
   }
 
   @Connected()
-  async pageByIndex<
+  async listPageByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
