@@ -150,10 +150,18 @@ export class MemoryModelService implements
     const index = this.#indices[idx.type].get(indexName(cls, idx))?.get(computed.getKey());
     let id: string | undefined;
     if (index) {
-      if (index instanceof Map) {
-        id = getFirstId(index, computed.getSort()); // Grab first id
-      } else if (index instanceof Set) {
-        id = getFirstId(index); // Grab first id
+      if (computed.idPart) {
+        if (index.has(computed.idPart.value)) {
+          id = computed.idPart.value;
+        } else {
+          throw new NotFoundError(cls, computed.getKey({ sort: true }));
+        }
+      } else {
+        if (index instanceof Map) {
+          id = getFirstId(index, computed.getSort()); // Grab first id
+        } else if (index instanceof Set) {
+          id = getFirstId(index); // Grab first id
+        }
       }
     }
     if (id) {
@@ -400,7 +408,7 @@ export class MemoryModelService implements
     return this.update(cls, item);
   }
 
-  async listByIndex<
+  async pageByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
@@ -419,5 +427,20 @@ export class MemoryModelService implements
       items.push(await this.get(cls, id));
     }
     return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
+  }
+
+  async  * listByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+  ): AsyncIterable<T> {
+    const ids = this.#getIndexIds(cls, idx, body);
+    for (const id of ids) {
+      yield await this.get(cls, id);
+    }
   }
 }

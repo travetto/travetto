@@ -1,5 +1,5 @@
 import { Model } from '@travetto/model';
-import { keyedIndex } from '@travetto/model-indexed';
+import { keyedIndex, type ModelIndexedSupport } from '@travetto/model-indexed';
 
 @Model()
 export class User {
@@ -12,7 +12,7 @@ const userByName = keyedIndex(User, {
   key: { name: true }
 });
 
-export async function deleteExample(modelService: any) {
+export async function deleteExample(modelService: ModelIndexedSupport) {
   await modelService.deleteByIndex(User, userByName, {
     name: 'John Doe'
   });

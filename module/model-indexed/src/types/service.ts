@@ -74,15 +74,27 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexWithPartialBody<T, K, S>): Promise<T>;
 
   /**
-   * List entity by ranged index as defined by fields of idx
+   * Page through entities by ranged index as defined by fields of idx
    * @param cls The type to search by
    * @param idx The index to search against
    * @param body The payload of fields needed to search
-   * @param options The configuration for listing
+   * @param options The configuration for pagination
+   */
+  pageByIndex<
+    T extends ModelType,
+    S extends SortedIndexSelection<T>,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ListPageOptions): Promise<ListPageResult<T>>;
+
+  /**
+   * List all entities by ranged index as defined by fields of idx
+   * @param cls The type to search by
+   * @param idx The index to search against
+   * @param body The payload of fields needed to search
    */
   listByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ListPageOptions): Promise<ListPageResult<T>>;
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>,): AsyncIterable<T>;
 }

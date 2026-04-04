@@ -213,11 +213,29 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     const resolvedKey = this.#resolveKey(cls, idx.name, computed.getKey());
     let id: string | undefined;
     switch (idx.type) {
-      case 'indexed:keyed': id = await this.client.sRandMember(resolvedKey) ?? undefined; break;
+      case 'indexed:keyed': {
+        if (computed.idPart) {
+          const all = await this.client.sMembers(resolvedKey);
+          if (!all.find(item => item === computed.idPart!.value)) {
+            throw new NotFoundError(`${cls.name} Index=${idx}`, computed.getKey());
+          }
+          id = computed.idPart!.value;
+        } else {
+          id = await this.client.sRandMember(resolvedKey) ?? undefined;
+        }
+        break;
+      }
       case 'indexed:sorted': {
         const sort = computed.getSort();
         const result = await this.client.zRangeByScore(resolvedKey, sort, sort);
-        id = result[0];
+        if (computed.idPart) {
+          if (!result.find(item => item === computed.idPart!.value)) {
+            throw new NotFoundError(`${cls.name} Index=${idx}`, computed.getKey());
+          }
+          id = computed.idPart!.value;
+        } else {
+          id = result[0];
+        }
         break;
       }
     }
@@ -378,7 +396,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     return this.update(cls, item);
   }
 
-  async listByIndex<
+  async pageByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
@@ -397,5 +415,19 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       lastCursor = cursor;
     }
     return { items, nextOffset: lastCursor };
+  }
+
+  async * listByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>
+  ): AsyncIterable<T> {
+    for await (const { ids } of this.#scanIndex(cls, idx, body, { limit: Number.MAX_SAFE_INTEGER })) {
+      yield* await Array.fromAsync(this.#getBodies(cls, ids, id => this.#resolveKey(cls, id)));
+    }
   }
 }

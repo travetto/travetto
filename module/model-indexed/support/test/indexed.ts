@@ -103,6 +103,33 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   }
 
   @Test()
+  async readByKeyedIndexUsingId() {
+    const service = await this.service;
+
+    const first = await service.create(User, User.from({ name: 'sam' }));
+    const second = await service.create(User, User.from({ name: 'bob' }));
+
+    const found = await service.getByIndex(User, userNameIndex, {
+      name: 'bob',
+      id: second.id
+    });
+
+    assert(found.id === second.id);
+
+    await assert.rejects(
+      () => service.getByIndex(User, userNameIndex, { name: 'bob', id: first.id }),
+      NotFoundError
+    );
+
+    await service.deleteByIndex(User, userNameIndex, { name: 'sam', id: first.id });
+
+    await assert.rejects(() => service.get(User, first.id), NotFoundError);
+
+    const remaining = await service.getByIndex(User, userNameIndex, { name: 'bob', id: second.id });
+    assert(remaining.id === second.id);
+  }
+
+  @Test()
   async readMissingValue() {
     const service = await this.service;
     await assert.rejects(() => service.getByIndex(User, userNameIndex, { name: 'jim' }), NotFoundError);
@@ -134,6 +161,30 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   }
 
   @Test()
+  async readBySortedIndexUsingId() {
+    const service = await this.service;
+
+    const first = await service.create(User3, User3.from({ name: 'bob', age: 40, color: 'blue' }));
+    const second = await service.create(User3, User3.from({ name: 'bob', age: 40, color: 'green' }));
+
+    const found = await service.getByIndex(User3, userAgeIndex, {
+      name: 'bob',
+      age: 40,
+      id: second.id
+    });
+
+    assert(found.id === second.id);
+    assert(found.color === 'green');
+
+    await service.deleteByIndex(User3, userAgeIndex, { name: 'bob', age: 40, id: first.id });
+
+    await assert.rejects(() => service.get(User3, first.id), NotFoundError);
+
+    const remaining = await service.getByIndex(User3, userAgeIndex, { name: 'bob', age: 40, id: second.id });
+    assert(remaining.id === second.id);
+  }
+
+  @Test()
   async queryList() {
     const service = await this.service;
 
@@ -141,7 +192,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await service.create(User3, User3.from({ name: 'bob', age: 30, color: 'red' }));
     await service.create(User3, User3.from({ name: 'bob', age: 50, color: 'green' }));
 
-    const { items: arr } = await service.listByIndex(User3, userAgeIndex, { name: 'bob' });
+    const { items: arr } = await service.pageByIndex(User3, userAgeIndex, { name: 'bob' });
 
     console.error(arr);
 
@@ -153,7 +204,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     assert(arr[2].name === 'bob');
 
     // @ts-expect-error
-    await assert.rejects(() => service.listByIndex(User3, userAgeIndex, {}), IndexedFieldError);
+    await assert.rejects(() => service.pageByIndex(User3, userAgeIndex, {}), IndexedFieldError);
   }
 
   @Test()
@@ -164,7 +215,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await service.create(User3, User3.from({ name: 'alice', age: 30, color: 'red' }));
     await service.create(User3, User3.from({ name: 'bob', age: 50, color: 'green' }));
 
-    const { items: arr } = await service.listByIndex(User3, userAgeNoKeyIndex, {});
+    const { items: arr } = await service.pageByIndex(User3, userAgeNoKeyIndex, {});
 
     assert(arr[0].name === 'alice' && arr[0].age === 30);
     assert(arr[1].name === 'charlie' && arr[1].age === 40);
@@ -185,13 +236,13 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await service.create(User4, User4.from({ child: { name: 'bob', age: 30 }, color: 'red' }));
     await service.create(User4, User4.from({ child: { name: 'bob', age: 50 }, color: 'green' }));
 
-    const { items: arr } = await service.listByIndex(User4, childAgeIndex, { child: { name: 'bob' } });
+    const { items: arr } = await service.pageByIndex(User4, childAgeIndex, { child: { name: 'bob' } });
     assert(arr[0].color === 'red' && arr[0].child.name === 'bob' && arr[0].child.age === 30);
     assert(arr[1].color === 'blue' && arr[1].child.name === 'bob' && arr[1].child.age === 40);
     assert(arr[2].color === 'green' && arr[2].child.name === 'bob' && arr[2].child.age === 50);
 
     // @ts-expect-error
-    await assert.rejects(() => service.listByIndex(User4, childAgeIndex, {}), IndexedFieldError);
+    await assert.rejects(() => service.pageByIndex(User4, childAgeIndex, {}), IndexedFieldError);
   }
 
   @Test({ skip: (self) => !castTo<ModelIndexedSuite>(self).supportsDeepIndexes })
@@ -202,14 +253,14 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await service.create(User4, User4.from({ child: { name: 'bob', age: 30 }, createdDate: TimeUtil.fromNow('2d'), color: 'red' }));
     await service.create(User4, User4.from({ child: { name: 'bob', age: 50 }, createdDate: TimeUtil.fromNow('-1d'), color: 'green' }));
 
-    const { items: arr } = await service.listByIndex(User4, nameCreatedIndex, { child: { name: 'bob' } });
+    const { items: arr } = await service.pageByIndex(User4, nameCreatedIndex, { child: { name: 'bob' } });
 
     assert(arr[0].color === 'green' && arr[0].child.name === 'bob' && arr[0].child.age === 50);
     assert(arr[1].color === 'red' && arr[1].child.name === 'bob' && arr[1].child.age === 30);
     assert(arr[2].color === 'blue' && arr[2].child.name === 'bob' && arr[2].child.age === 40);
 
     // @ts-expect-error
-    await assert.rejects(() => service.listByIndex(User4, nameCreatedIndex, {}), IndexedFieldError);
+    await assert.rejects(() => service.pageByIndex(User4, nameCreatedIndex, {}), IndexedFieldError);
   }
 
   @Test()
@@ -220,7 +271,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     const user2 = await service.upsertByIndex(User3, userAgeIndex, { name: 'bob', age: 40, color: 'green' });
     const user3 = await service.upsertByIndex(User3, userAgeIndex, { name: 'bob', age: 40, color: 'red' });
 
-    const { items: arr } = await service.listByIndex(User3, userAgeIndex, { name: 'bob' });
+    const { items: arr } = await service.pageByIndex(User3, userAgeIndex, { name: 'bob' });
     assert(arr.length === 1);
 
     assert(user1.id === user2.id);
@@ -229,12 +280,12 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     assert(user3.color === 'red');
 
     const user4 = await service.upsertByIndex(User3, userAgeIndex, { name: 'bob', age: 30, color: 'red' });
-    const { items: arr2 } = await service.listByIndex(User3, userAgeIndex, { name: 'bob' });
+    const { items: arr2 } = await service.pageByIndex(User3, userAgeIndex, { name: 'bob' });
     assert(arr2.length === 2);
 
     await service.deleteByIndex(User3, userAgeIndex, user1);
 
-    const { items: arr3 } = await service.listByIndex(User3, userAgeIndex, { name: 'bob' });
+    const { items: arr3 } = await service.pageByIndex(User3, userAgeIndex, { name: 'bob' });
     assert(arr3.length === 1);
     assert(arr3[0].id === user4.id);
   }
@@ -288,7 +339,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     let offset: string | undefined;
 
     do {
-      const page = await service.listByIndex(User3, userAgeIndex, { name: 'page' }, { limit, offset });
+      const page = await service.pageByIndex(User3, userAgeIndex, { name: 'page' }, { limit, offset });
       items.push(...page.items.map(u => u.color!));
       offset = page.nextOffset;
     } while (offset);
@@ -312,7 +363,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     let offset: string | undefined;
 
     do {
-      const page = await service.listByIndex(User3, userAgeReversedIndex, { name: 'page' }, { limit, offset });
+      const page = await service.pageByIndex(User3, userAgeReversedIndex, { name: 'page' }, { limit, offset });
       items.push(...page.items.map(u => u.color!));
       offset = page.nextOffset;
     } while (offset);

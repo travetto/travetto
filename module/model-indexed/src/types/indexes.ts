@@ -10,8 +10,8 @@ type TypeProjection<T, V> = {
   );
 };
 
-export type KeyedIndexSelection<T> = TypeProjection<T, true>;
-export type SortedIndexSelection<T> = TypeProjection<T, 1 | -1>;
+export type KeyedIndexSelection<T extends ModelType> = TypeProjection<T, true>;
+export type SortedIndexSelection<T extends ModelType> = TypeProjection<T, 1 | -1>;
 
 export type KeyedIndexBody<T, K> = {
   [P in keyof K]: (P extends keyof T ?
@@ -44,8 +44,8 @@ export type KeyedIndexWithPartialBody<T, K> = {
   DeepPartial<Omit<T, keyof K>>;
 
 
-export type FullKeyedIndexBody<T, K, S> = KeyedIndexBody<T, Merge<K, S>>;
-export type FullKeyedIndexWithPartialBody<T, K, S> = KeyedIndexWithPartialBody<T, Merge<K, S>>;
+export type FullKeyedIndexBody<T, K, S> = KeyedIndexBody<Omit<T, 'id'>, Merge<K, S>> & { id?: string };
+export type FullKeyedIndexWithPartialBody<T, K, S> = KeyedIndexWithPartialBody<Omit<T, 'id'>, Merge<K, S>> & { id?: string };
 
 export type TemplateValue = 1 | -1 | true;
 export type TemplatePart<T extends TemplateValue = TemplateValue> = { path: string[], value: T, part: 'key' | 'sort' };

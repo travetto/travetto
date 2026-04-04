@@ -9,9 +9,9 @@ import { IndexedFieldError } from './types/error.ts';
 
 const DEFAULT_SEP = '\u8203';
 
-type IndexPart<T extends TemplateValue = TemplateValue> = {
+type IndexPart<T extends TemplateValue = TemplateValue, V = unknown> = {
   state: 'missing' | 'empty' | 'mismatch' | 'found';
-  value: unknown;
+  value: V;
   path: string[];
   templateValue: T;
 };
@@ -76,6 +76,7 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
 
   keyedParts: IndexPart<true>[];
   sortParts: IndexPart<-1 | 1>[];
+  idPart: IndexPart<true, string> | undefined;
   idx: AllIndexes<T>;
 
   constructor(
@@ -85,6 +86,9 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
     this.idx = idx;
     this.keyedParts = buildIndexParts(idx.keyTemplate, castTo(body));
     this.sortParts = buildIndexParts(idx.sortTemplate, castTo(body), value => typeof value === 'number' || value instanceof Date);
+    if ('id' in body && typeof body.id === 'string') {
+      this.idPart = { path: ['id'], value: body.id, state: body.id === null || body.id === undefined ? 'empty' : 'found', templateValue: true };
+    }
   }
 
   get allParts(): IndexPart[] {
@@ -120,8 +124,8 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
     }
   }
 
-  project(config: IndexProcessConfig<{ emptyValue?: unknown }> = {}): Record<string, unknown> {
-    const { keyed = true, sort = false, emptyValue = null } = config;
+  project(config: IndexProcessConfig<{ emptyValue?: unknown, includeId?: boolean }> = {}): Record<string, unknown> {
+    const { keyed = true, sort = false, emptyValue = null, includeId } = config;
     const response: Record<string, unknown> = {};
     if (keyed) {
       for (const { path, value, state } of this.keyedParts) {
@@ -144,6 +148,9 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
         }
         sub[last] = state === 'empty' ? emptyValue : value;
       }
+    }
+    if (includeId && this.idPart) {
+      response.id = this.idPart.state === 'empty' ? emptyValue : this.idPart.value;
     }
     return response;
   }

@@ -340,7 +340,7 @@ export class SQLModelService implements
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
-    const results = await this.query(cls, castTo({ where: computed.project({ sort: true }) }));
+    const results = await this.query(cls, castTo({ where: computed.project({ sort: true, includeId: true }) }));
     if (results.length !== 1) {
       throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
@@ -354,8 +354,11 @@ export class SQLModelService implements
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<void> {
-    const { id } = await this.getByIndex(cls, idx, body);
-    await this.delete(cls, id);
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
+    const count = await this.deleteByQuery(cls, castTo({ where: computed.project({ sort: true, includeId: true }) }));
+    if (count === 0) {
+      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
+    }
   }
 
   @Connected()
@@ -390,7 +393,7 @@ export class SQLModelService implements
   }
 
   @Connected()
-  async listByIndex<
+  async pageByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
@@ -410,5 +413,32 @@ export class SQLModelService implements
       limit, offset
     }));
     return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
+  }
+
+  @ConnectedIterator()
+  async * listByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+  ): AsyncIterable<T> {
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate();
+    let offset = 0;
+    while (offset >= 0) {
+      const items = await this.query(cls, castTo({
+        where: computed.project(),
+        sort: idx.sortTemplate.map(part => ({ [part.path.join('.')]: part.value })),
+        limit: 100, offset
+      }));
+      if (items.length === 0) {
+        offset = -1;
+      } else {
+        offset += items.length;
+        yield* items;
+      }
+    }
   }
 }

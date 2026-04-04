@@ -1,4 +1,4 @@
-import { type AttributeValue, DynamoDB, type PutItemCommandInput, type PutItemCommandOutput, type QueryCommandOutput } from '@aws-sdk/client-dynamodb';
+import { type AttributeValue, DynamoDB, type PutItemCommandInput, type PutItemCommandOutput, type QueryCommandInput, type QueryCommandOutput } from '@aws-sdk/client-dynamodb';
 
 import { castTo, JSONUtil, ShutdownManager, TimeUtil, type Class } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
@@ -101,16 +101,22 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     const safeName = DynamoDBUtil.toSafeName(idx.name);
     const sorted = idx.type === 'indexed:sorted';
 
-    const query = {
+    const query: QueryCommandInput = {
       TableName: this.#resolveTable(cls),
       IndexName: safeName,
       ProjectionExpression: 'id',
-      KeyConditionExpression: [sorted ? `${safeName}_sort__ = :${safeName}_sort` : '', `${safeName}__ = :${safeName}`]
-        .filter(expr => !!expr)
+      KeyConditionExpression: [
+        ...(sorted ? [`${safeName}_sort__ = :${safeName}_sort`] : []),
+        `${safeName}__ = :${safeName}`
+      ]
         .join(' and '),
+      ...(computed.idPart ? {
+        FilterExpression: 'id = :id'
+      } : {}),
       ExpressionAttributeValues: {
         [`:${safeName}`]: getKey(computed),
-        ...(sorted ? { [`:${safeName}_sort`]: getSort(computed) } : {})
+        ...(sorted ? { [`:${safeName}_sort`]: getSort(computed) } : {}),
+        ...(computed.idPart ? { ':id': DynamoDBUtil.toValue(computed.idPart.value) } : {})
       }
     };
 
@@ -445,7 +451,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     return this.update(cls, item);
   }
 
-  async listByIndex<
+  async pageByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
@@ -485,5 +491,27 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     }
 
     return { items, nextOffset };
+  }
+
+  async * listByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+  ): AsyncIterable<T> {
+    for await (const batch of this.#scanIndex(cls, idx, body, { limit: Number.MAX_SAFE_INTEGER })) {
+      for (const item of batch.Items ?? []) {
+        try {
+          yield await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);
+        } catch (error) {
+          if (!(error instanceof NotFoundError)) {
+            throw error;
+          }
+        }
+      }
+    }
   }
 }

@@ -97,7 +97,8 @@ export const text = <>
         <li>{d.method('upsertByIndex')} — Insert or update by index</li>
         <li>{d.method('updateByIndex')} — Update an existing item by index</li>
         <li>{d.method('updatePartialByIndex')} — Partially update an item by index</li>
-        <li>{d.method('listByIndex')} — List items with pagination and sorting</li>
+        <li>{d.method('pageByIndex')} — Fetch a page of items with pagination metadata</li>
+        <li>{d.method('listByIndex')} — Stream all matching items from a sorted index</li>
       </ul>
     </c.SubSection>
 
@@ -111,6 +112,14 @@ export const text = <>
       />
 
       For sorted indexes with key fields, you must provide all key values plus the sort value if using it to identify a specific item.
+
+      All single-item index operations also accept an optional {d.field('id')} in the request body. This is useful when the index is not unique and you need to ensure the supplied index values resolve to the same record as the provided {d.field('id')}, such as enforcing a pattern like "userId matches".
+
+      <c.Code
+        title='Disambiguating with id'
+        src='doc/getByIndex.ts'
+        startRe={/export async function getScopedExample/}
+      />
     </c.SubSection>
 
     <c.SubSection title='Deleting Items'>
@@ -121,6 +130,8 @@ export const text = <>
         src='doc/deleteByIndex.ts'
         startRe={/export async function deleteExample/}
       />
+
+      As with {d.method('getByIndex')}, you can pass an optional {d.field('id')} to ensure the computed index values resolve to the expected record before deleting it.
     </c.SubSection>
 
     <c.SubSection title='Upserting Items'>
@@ -144,19 +155,27 @@ export const text = <>
     </c.SubSection>
 
     <c.SubSection title='Listing Items'>
-      Use {d.method('listByIndex')} to fetch multiple items from a sorted index with pagination.
+      Use {d.method('pageByIndex')} when you want paginated access to a sorted index.
 
       <c.Code
-        title='Listing by Sorted Index'
-        src='doc/listByIndex.ts'
+        title='Paging by Sorted Index'
+        src='doc/pageByIndex.ts'
         startRe={/export async function listExample/}
       />
 
-      You can also provide key values to filter within a sorted index:
+      Use {d.method('listByIndex')} when you want to iterate through every matching item as an async stream.
+
+      <c.Code
+        title='Streaming by Sorted Index'
+        src='doc/listByIndex.ts'
+        startRe={/export async function listStreamExample/}
+      />
+
+      You can also provide key values to filter within a sorted index with {d.method('pageByIndex')}:
 
       <c.Code
         title='Listing with Key Filter'
-        src='doc/listWithFilter.ts'
+        src='doc/pageByIndexWithFilter.ts'
         startRe={/export async function listWithFilterExample/}
       />
     </c.SubSection>

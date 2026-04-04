@@ -446,7 +446,7 @@ export class MongoModelService implements
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
 
     const result = await store.findOne(
-      this.getWhereFilter(cls, castTo(computed.project({ sort: true })))
+      this.getWhereFilter(cls, castTo(computed.project({ sort: true, includeId: true })))
     );
     if (!result) {
       throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
@@ -464,7 +464,7 @@ export class MongoModelService implements
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
 
     const result = await store.deleteOne(
-      this.getWhereFilter(cls, castTo(computed.project({ sort: true })))
+      this.getWhereFilter(cls, castTo(computed.project({ sort: true, includeId: true })))
     );
     if (!result.deletedCount) {
       throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
@@ -496,7 +496,7 @@ export class MongoModelService implements
     return this.update(cls, item);
   }
 
-  async listByIndex<
+  async pageByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
@@ -519,6 +519,33 @@ export class MongoModelService implements
       }
       return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
 
+    }
+  }
+
+  async *  listByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+  ): AsyncIterable<T> {
+    let offset = 0;
+    while (offset >= 0) {
+      const cursor = (await this.#buildIndexQuery(cls, idx, body))
+        .limit(100)
+        .skip(offset);
+
+      const items = await cursor.toArray();
+      if (items.length === 0) {
+        offset = -1;
+      } else {
+        offset += items.length;
+        for (const item of items) {
+          yield await this.postLoad(cls, item);
+        }
+      }
     }
   }
 
