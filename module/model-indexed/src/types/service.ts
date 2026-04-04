@@ -80,7 +80,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param body The payload of fields needed to search
    * @param options The configuration for pagination
    */
-  listPageByIndex<
+  pageByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>

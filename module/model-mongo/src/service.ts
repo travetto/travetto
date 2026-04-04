@@ -496,7 +496,7 @@ export class MongoModelService implements
     return this.update(cls, item);
   }
 
-  async listPageByIndex<
+  async pageByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>

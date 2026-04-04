@@ -16,7 +16,7 @@ const recentUsers = sortedIndex(User, {
 });
 
 export async function listExample(modelService: ModelIndexedSupport) {
-  const result = await modelService.listPageByIndex(User, recentUsers, {}, {
+  const result = await modelService.pageByIndex(User, recentUsers, {}, {
     limit: 20,
     offset: '0'
   });

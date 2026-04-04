@@ -202,7 +202,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return this.update(cls, item);
   }
 
-  async listPageByIndex<
+  async pageByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>

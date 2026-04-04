@@ -210,7 +210,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param body The payload of fields needed to search
    * @param options The configuration for pagination
    */
-  listPageByIndex<
+  pageByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>
@@ -236,7 +236,7 @@ The service provides these operations:
    *  `upsertByIndex` — Insert or update by index
    *  `updateByIndex` — Update an existing item by index
    *  `updatePartialByIndex` — Partially update an item by index
-   *  `listPageByIndex` — Fetch a page of items with pagination metadata
+   *  `pageByIndex` — Fetch a page of items with pagination metadata
    *  `listByIndex` — Stream all matching items from a sorted index
 
 ### Getting Items
@@ -329,12 +329,12 @@ export async function updatePartialExample(modelService: ModelIndexedSupport) {
 ```
 
 ### Listing Items
-Use `listPageByIndex` when you want paginated access to a sorted index.
+Use `pageByIndex` when you want paginated access to a sorted index.
 
 **Code: Paging by Sorted Index**
 ```typescript
 export async function listExample(modelService: ModelIndexedSupport) {
-  const result = await modelService.listPageByIndex(User, recentUsers, {}, {
+  const result = await modelService.pageByIndex(User, recentUsers, {}, {
     limit: 20,
     offset: '0'
   });
@@ -360,13 +360,13 @@ export async function listStreamExample(modelService: ModelIndexedSupport) {
 }
 ```
 
-You can also provide key values to filter within a sorted index with `listPageByIndex`:
+You can also provide key values to filter within a sorted index with `pageByIndex`:
 
 **Code: Listing with Key Filter**
 ```typescript
 export async function listWithFilterExample(modelService: ModelIndexedSupport) {
   // Get all users named 'John' sorted by age
-  const result = await modelService.listPageByIndex(User, usersByNameAge, {
+  const result = await modelService.pageByIndex(User, usersByNameAge, {
     name: 'John'
   }, {
     limit: 10
