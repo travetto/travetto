@@ -272,7 +272,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     const service = await this.service;
 
     await Promise.all(
-      [1, 2, 3].map(x => service.upsert(Person, Person.from({
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(x => service.upsert(Person, Person.from({
         id: service.idSource.create(),
         name: 'Bob',
         age: 20 + x,
@@ -290,6 +290,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     for await (const item of service.list(Person, { abort: controller.signal })) {
       found.push(item);
       controller.abort();
+      await timers.setTimeout(10);
     }
 
     assert(found.length === 1);

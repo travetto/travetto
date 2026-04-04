@@ -443,8 +443,9 @@ export class SQLModelService implements
       } else {
         offset += items.length;
         for (const item of items) {
+          console.error('Yielding item', item, { aborted: options?.abort?.aborted });
           if (options?.abort?.aborted) {
-            return;
+            break;
           }
           yield item;
         }

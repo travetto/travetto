@@ -1,4 +1,5 @@
 import assert from 'node:assert';
+import timers from 'node:timers/promises';
 
 import { Suite, Test } from '@travetto/test';
 import { Schema } from '@travetto/schema';
@@ -386,6 +387,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     for await (const item of service.listByIndex(User3, userAgeIndex, { name: 'page' }, { abort: controller.signal })) {
       found.push(item);
       controller.abort();
+      await timers.setTimeout(10);
     }
 
     assert(found.length === 1);
