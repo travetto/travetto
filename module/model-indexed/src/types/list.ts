@@ -1,7 +1,7 @@
 import type { ModelType } from '@travetto/model';
 
 export interface ModelPageOptions<O = string> {
-  limit?: number;
+  batchSizeHint?: number;
   offset?: O;
 }
 

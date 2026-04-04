@@ -297,9 +297,6 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
     for await (const batch of this.#iterateBucket(cls, options)) {
       for (const { id } of batch) {
-        if (options?.abort?.aborted) {
-          break;
-        }
         try {
           yield await this.get(cls, id);
         } catch (error) {

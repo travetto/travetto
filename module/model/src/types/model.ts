@@ -23,4 +23,5 @@ export type OptionalId<T extends ModelType> = Omit<T, 'id'> & { id?: string };
  */
 export interface ModelListOptions {
   abort?: AbortSignal;
+  batchSizeHint?: number;
 }

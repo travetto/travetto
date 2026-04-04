@@ -52,6 +52,51 @@ export class ElasticsearchModelService implements
 
   constructor(config: ElasticsearchModelConfig) { this.config = config; }
 
+  /**
+ * Convert _id to id
+ */
+  async #postLoad<T extends ModelType>(cls: Class<T>, input: estypes.SearchHit<T> | estypes.GetGetResult<T>): Promise<T> {
+    let item = {
+      ...(input._id ? { id: input._id } : {}),
+      ...input._source!,
+    };
+
+    item = await ModelCrudUtil.load(cls, item);
+
+    const { expiresAt } = ModelRegistryIndex.getConfig(cls);
+
+    if (expiresAt) {
+      const expiry = ModelExpiryUtil.getExpiryState(cls, item);
+      if (!expiry.expired) {
+        return item;
+      }
+      throw new NotFoundError(cls, item.id);
+    } else {
+      return item;
+    }
+  }
+
+  async * #scrollCollection<T extends ModelType>(cls: Class<T>,
+    options?: ModelPageOptions<estypes.SortResults> & ModelListOptions
+  ): AsyncIterable<estypes.SearchHit<T>[]> {
+    let search: estypes.SearchResponse<T> = await this.execSearch<T>(cls, {
+      scroll: '2m',
+      size: 100,
+      query: ElasticsearchQueryUtil.getSearchQuery(cls, {})
+    });
+
+    while (search.hits.hits.length > 0 && !(options?.abort?.aborted)) {
+      yield search.hits.hits;
+      search = await this.client.scroll({
+        scroll_id: search._scroll_id,
+        scroll: '2m'
+      });
+    }
+    if (search._scroll_id) {
+      await this.client.clearScroll({ scroll_id: search._scroll_id }).catch(() => { });
+    }
+  }
+
   async * #scrollIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
@@ -164,30 +209,6 @@ export class ElasticsearchModelService implements
     return item;
   }
 
-  /**
-   * Convert _id to id
-   */
-  async postLoad<T extends ModelType>(cls: Class<T>, input: estypes.SearchHit<T> | estypes.GetGetResult<T>): Promise<T> {
-    let item = {
-      ...(input._id ? { id: input._id } : {}),
-      ...input._source!,
-    };
-
-    item = await ModelCrudUtil.load(cls, item);
-
-    const { expiresAt } = ModelRegistryIndex.getConfig(cls);
-
-    if (expiresAt) {
-      const expiry = ModelExpiryUtil.getExpiryState(cls, item);
-      if (!expiry.expired) {
-        return item;
-      }
-      throw new NotFoundError(cls, item.id);
-    } else {
-      return item;
-    }
-  }
-
   createStorage(): Promise<void> { return this.manager.createStorage(); }
   deleteStorage(): Promise<void> { return this.manager.deleteStorage(); }
   upsertModel(cls: Class): Promise<void> { return this.manager.upsertModel(cls); }
@@ -198,7 +219,7 @@ export class ElasticsearchModelService implements
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     try {
       const result = await this.client.get<T>({ ...this.manager.getIdentity(cls), id });
-      return this.postLoad(cls, result);
+      return this.#postLoad(cls, result);
     } catch {
       throw new NotFoundError(cls, id);
     }
@@ -302,28 +323,15 @@ export class ElasticsearchModelService implements
   }
 
   async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
-    let search: estypes.SearchResponse<T> = await this.execSearch<T>(cls, {
-      scroll: '2m',
-      size: 100,
-      query: ElasticsearchQueryUtil.getSearchQuery(cls, {})
-    });
-
-    while (search.hits.hits.length > 0 && !(options?.abort?.aborted)) {
-      for (const hit of search.hits.hits) {
+    for await (const hits of this.#scrollCollection(cls, options)) {
+      for (const hit of hits) {
         try {
-          if (options?.abort?.aborted) {
-            break;
-          }
-          yield this.postLoad(cls, hit);
+          yield this.#postLoad(cls, hit);
         } catch (error) {
           if (!(error instanceof NotFoundError)) {
             throw error;
           }
         }
-        search = await this.client.scroll({
-          scroll_id: search._scroll_id,
-          scroll: '2m'
-        });
       }
     }
   }
@@ -432,7 +440,7 @@ export class ElasticsearchModelService implements
     if (!result.hits.hits.length) {
       throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
-    return this.postLoad(cls, result.hits.hits[0]);
+    return this.#postLoad(cls, result.hits.hits[0]);
 
   }
 
@@ -500,7 +508,7 @@ export class ElasticsearchModelService implements
       lastNextOffset = nextOffset;
       for (const hit of hits) {
         try {
-          items.push(await this.postLoad(cls, hit));
+          items.push(await this.#postLoad(cls, hit));
         } catch (error) {
           if (!(error instanceof NotFoundError)) {
             throw error;
@@ -523,11 +531,8 @@ export class ElasticsearchModelService implements
   ): AsyncIterable<T> {
     for await (const { hits } of this.#scrollIndex(cls, idx, body, { ...options, limit: Number.MAX_SAFE_INTEGER })) {
       for (const hit of hits) {
-        if (options?.abort?.aborted) {
-          break;
-        }
         try {
-          yield await this.postLoad(cls, hit);
+          yield await this.#postLoad(cls, hit);
         } catch (error) {
           if (!(error instanceof NotFoundError)) {
             throw error;
@@ -545,7 +550,7 @@ export class ElasticsearchModelService implements
     const search = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
     const results = await this.execSearch(cls, search);
     const shouldRemoveIds = query.select && 'id' in query.select && !query.select.id;
-    return Promise.all(results.hits.hits.map(hit => this.postLoad(cls, hit).then(item => {
+    return Promise.all(results.hits.hits.map(hit => this.#postLoad(cls, hit).then(item => {
       if (shouldRemoveIds) {
         delete castTo<OptionalId<T>>(item).id;
       }
@@ -647,7 +652,7 @@ export class ElasticsearchModelService implements
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
     const search = ElasticsearchQueryUtil.getSearchObject(cls, resolvedQuery);
     const result = await this.execSearch(cls, search);
-    const all = await Promise.all(result.hits.hits.map(hit => this.postLoad(cls, hit)));
+    const all = await Promise.all(result.hits.hits.map(hit => this.#postLoad(cls, hit)));
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, (_, value) => value, query && query.limit);
   }
 

@@ -241,23 +241,21 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     options?: ModelListOptions
   ): AsyncIterable<T> {
     let offset = 0;
-    while (offset >= 0 && !(options?.abort?.aborted)) {
+    let lastOffset = -1;
+    while (offset !== lastOffset && !(options?.abort?.aborted)) {
+      lastOffset = offset;
       const query = this.#buildIndexQuery(cls, idx, body)
         .limit(100)
         .offset(offset);
 
       const { docs: items } = await query.get();
-      if (items.length === 0) {
-        offset = -1;
-      } else {
-        for (const item of items) {
-          if (options?.abort?.aborted) {
-            break;
-          }
-          yield await ModelCrudUtil.load(cls, item.data()!);
+      for (const item of items) {
+        if (options?.abort?.aborted) {
+          break;
         }
-        offset += items.length;
+        yield await ModelCrudUtil.load(cls, item.data()!);
       }
+      offset += items.length;
     }
   }
 }

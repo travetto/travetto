@@ -195,7 +195,7 @@ export class SQLModelService implements
       if (options?.abort?.aborted) {
         break;
       }
-      yield await ModelCrudUtil.load(cls, item);
+      yield item;
     }
   }
 
@@ -432,24 +432,16 @@ export class SQLModelService implements
   ): AsyncIterable<T> {
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
     let offset = 0;
-    while (offset >= 0 && !(options?.abort?.aborted)) {
+    let lastOffset = -1;
+    while (offset !== lastOffset && !(options?.abort?.aborted)) {
+      lastOffset = offset;
       const items = await this.query(cls, castTo({
         where: computed.project(),
         sort: idx.sortTemplate.map(part => ({ [part.path.join('.')]: part.value })),
         limit: 100, offset
       }));
-      if (items.length === 0) {
-        offset = -1;
-      } else {
-        offset += items.length;
-        for (const item of items) {
-          console.error('Yielding item', item, { aborted: options?.abort?.aborted });
-          if (options?.abort?.aborted) {
-            break;
-          }
-          yield item;
-        }
-      }
+      offset += items.length;
+      yield* items;
     }
   }
 }

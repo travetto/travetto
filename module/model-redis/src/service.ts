@@ -322,12 +322,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
     for await (const { ids } of this.#streamValues('scan', { match: `${this.#resolveKey(cls)}:*` }, { limit: Number.MAX_SAFE_INTEGER, ...options })) {
-      for await (const item of this.#getBodies(cls, ids, id => id)) {
-        if (options?.abort?.aborted) {
-          break;
-        }
-        yield item;
-      }
+      yield* this.#getBodies(cls, ids, id => id);
     }
   }
 

@@ -309,6 +309,7 @@ export class MongoModelService implements
     const cursor = store.find(this.getWhereFilter(cls, {}), { timeout: true }).batchSize(100);
     for await (const item of cursor) {
       if (options?.abort?.aborted) {
+        cursor.close();
         break;
       }
       try {
@@ -456,7 +457,6 @@ export class MongoModelService implements
       throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
     return await this.postLoad(cls, result);
-
   }
 
   async deleteByIndex<
@@ -536,24 +536,13 @@ export class MongoModelService implements
     body: KeyedIndexBody<T, K>,
     options?: ModelListOptions
   ): AsyncIterable<T> {
-    let offset = 0;
-    while (offset >= 0 && !(options?.abort?.aborted)) {
-      const cursor = (await this.#buildIndexQuery(cls, idx, body))
-        .limit(100)
-        .skip(offset);
-
-      const items = await cursor.toArray();
-      if (items.length === 0) {
-        offset = -1;
-      } else {
-        offset += items.length;
-        for (const item of items) {
-          if (options?.abort?.aborted) {
-            break;
-          }
-          yield await this.postLoad(cls, item);
-        }
+    const cursor = await this.#buildIndexQuery(cls, idx, body);
+    for await (const item of cursor) {
+      if (options?.abort?.aborted) {
+        cursor.close();
+        break;
       }
+      yield await this.postLoad(cls, item);
     }
   }
 

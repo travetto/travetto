@@ -46,9 +46,15 @@ const exists = (file: string): Promise<boolean> => fs.stat(file).then(() => true
 export class FileModelService implements ModelCrudSupport, ModelBlobSupport, ModelExpirySupport, ModelStorageSupport {
 
   /** @private */
-  static async * scanFolder(folder: string, suffix: string): AsyncGenerator<[id: string, field: string]> {
+  static async * scanFolder(folder: string, suffix: string, options?: ModelListOptions): AsyncGenerator<[id: string, field: string]> {
     for (const sub of await fs.readdir(folder)) {
+      if (options?.abort?.aborted) {
+        break;
+      }
       for (const file of await fs.readdir(path.resolve(folder, sub))) {
+        if (options?.abort?.aborted) {
+          break;
+        }
         if (file.endsWith(suffix)) {
           yield [file.replace(suffix, ''), path.resolve(folder, sub, file)];
         }
@@ -162,10 +168,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   }
 
   async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
-    for await (const [id] of FileModelService.scanFolder(await this.#resolveName(cls, '.json'), '.json')) {
-      if (options?.abort?.aborted) {
-        break;
-      }
+    for await (const [id] of FileModelService.scanFolder(await this.#resolveName(cls, '.json'), '.json', options)) {
       try {
         yield await this.get(cls, id);
       } catch (error) {
