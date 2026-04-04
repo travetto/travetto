@@ -8,10 +8,11 @@ import {
   type ModelType, type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, ModelRegistryIndex,
   NotFoundError, ExistsError, type OptionalId, type ModelBlobSupport, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil,
   IndexNotSupported,
+  type ModelListOptions,
 } from '@travetto/model';
 import {
-  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex,
+  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex,
   type AllIndexes, isModelIndexedIndex, type FullKeyedIndexBody, type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex,
 } from '@travetto/model-indexed';
 
@@ -261,8 +262,11 @@ export class MemoryModelService implements
     await this.#persist(cls, where, 'remove');
   }
 
-  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
+  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
     for (const id of this.#getStore(cls).keys()) {
+      if (options?.abort?.aborted) {
+        break;
+      }
       try {
         yield await this.get(cls, id);
       } catch (error) {
@@ -416,8 +420,8 @@ export class MemoryModelService implements
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options?: ListPageOptions
-  ): Promise<ListPageResult<T>> {
+    options?: ModelPageOptions
+  ): Promise<ModelPageResult<T>> {
     const ids = this.#getIndexIds(cls, idx, body);
     const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     const limit = options?.limit ?? 100;
@@ -437,9 +441,13 @@ export class MemoryModelService implements
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
+    options?: ModelListOptions
   ): AsyncIterable<T> {
     const ids = this.#getIndexIds(cls, idx, body);
     for (const id of ids) {
+      if (options?.abort?.aborted) {
+        break;
+      }
       yield await this.get(cls, id);
     }
   }

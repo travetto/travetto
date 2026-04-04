@@ -6,10 +6,11 @@ import {
   type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelStorageSupport,
   type ModelType, NotFoundError, ExistsError, type OptionalId, ModelCrudUtil,
   ModelExpiryUtil, ModelStorageUtil,
+  type ModelListOptions,
 } from '@travetto/model';
 import {
   isModelIndexedIndex, ModelIndexedUtil, type KeyedIndexBody, type KeyedIndexSelection,
-  type ListPageOptions, type ListPageResult, type ModelIndexedSupport, type SingleItemIndex,
+  type ModelPageOptions, type ModelPageResult, type ModelIndexedSupport, type SingleItemIndex,
   type FullKeyedIndexBody, type FullKeyedIndexWithPartialBody, type SortedIndex, type SortedIndexSelection,
   ModelIndexedComputedIndex
 } from '@travetto/model-indexed';
@@ -50,7 +51,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     cls: Class,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options?: ListPageOptions<Record<string, AttributeValue>>
+    options?: ModelPageOptions<Record<string, AttributeValue>> & ModelListOptions
   ): AsyncIterable<QueryCommandOutput & { LastEvaluatedOffset?: string }> {
     ModelCrudUtil.ensureNotSubType(cls);
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
@@ -86,7 +87,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       } else {
         startKey = undefined;
       }
-    } while (startKey && produced < limit);
+    } while (startKey && produced < limit && !(options?.abort?.aborted));
   }
 
   async #getIdByIndex<
@@ -375,10 +376,10 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     }
   }
 
-  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
+  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
     let done = false;
     let token: Record<string, AttributeValue> | undefined;
-    while (!done) {
+    while (!done && !(options?.abort?.aborted)) {
       const batch = await this.client.scan({
         TableName: this.#resolveTable(cls),
         ExclusiveStartKey: token
@@ -459,8 +460,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options?: ListPageOptions,
-  ): Promise<ListPageResult<T>> {
+    options?: ModelPageOptions,
+  ): Promise<ModelPageResult<T>> {
     const items: T[] = [];
     const offset = options?.offset ? JSONUtil.fromBase64<Record<string, AttributeValue>>(options.offset) : undefined;
     for await (const batch of this.#scanIndex(cls, idx, body, { ...options, offset })) {
@@ -501,8 +502,9 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
+    options?: ModelListOptions
   ): AsyncIterable<T> {
-    for await (const batch of this.#scanIndex(cls, idx, body, { limit: Number.MAX_SAFE_INTEGER })) {
+    for await (const batch of this.#scanIndex(cls, idx, body, { ...options, limit: Number.MAX_SAFE_INTEGER })) {
       for (const item of batch.Items ?? []) {
         try {
           yield await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);

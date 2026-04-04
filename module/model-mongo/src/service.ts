@@ -10,6 +10,7 @@ import {
   ModelRegistryIndex, type ModelType, type OptionalId, type ModelCrudSupport, type ModelStorageSupport, type ModelExpirySupport,
   type ModelBulkSupport, type BulkOperation, type BulkResponse, NotFoundError, ExistsError, type ModelBlobSupport,
   ModelCrudUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
+  type ModelListOptions,
 } from '@travetto/model';
 import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
@@ -18,8 +19,8 @@ import {
   type ModelQueryFacet,
 } from '@travetto/model-query';
 import {
-  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex, type FullKeyedIndexBody,
+  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
   type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex,
 } from '@travetto/model-indexed';
 
@@ -303,10 +304,13 @@ export class MongoModelService implements
     }
   }
 
-  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
+  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
     const store = await this.getStore(cls);
     const cursor = store.find(this.getWhereFilter(cls, {}), { timeout: true }).batchSize(100);
     for await (const item of cursor) {
+      if (options?.abort?.aborted) {
+        break;
+      }
       try {
         yield await this.postLoad(cls, item);
       } catch (error) {
@@ -504,8 +508,8 @@ export class MongoModelService implements
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options?: ListPageOptions,
-  ): Promise<ListPageResult<T>> {
+    options?: ModelPageOptions,
+  ): Promise<ModelPageResult<T>> {
     {
       const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
       const limit = options?.limit ?? 100;
@@ -530,9 +534,10 @@ export class MongoModelService implements
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
+    options?: ModelListOptions
   ): AsyncIterable<T> {
     let offset = 0;
-    while (offset >= 0) {
+    while (offset >= 0 && !(options?.abort?.aborted)) {
       const cursor = (await this.#buildIndexQuery(cls, idx, body))
         .limit(100)
         .skip(offset);

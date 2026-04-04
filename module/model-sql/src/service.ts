@@ -2,10 +2,11 @@ import {
   type ModelType,
   type BulkOperation, type BulkResponse, type ModelCrudSupport, type ModelStorageSupport, type ModelBulkSupport, NotFoundError,
   ModelRegistryIndex, ExistsError, type OptionalId, type ModelIdSource, ModelExpiryUtil, ModelCrudUtil, ModelStorageUtil, ModelBulkUtil,
+  type ModelListOptions,
 } from '@travetto/model';
 import {
-  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex, type FullKeyedIndexBody,
+  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
   type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex
 } from '@travetto/model-indexed';
 import { castTo, type Class, JSONUtil } from '@travetto/runtime';
@@ -189,8 +190,11 @@ export class SQLModelService implements
   }
 
   @ConnectedIterator()
-  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
+  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
     for (const item of await this.query(cls, {})) {
+      if (options?.abort?.aborted) {
+        break;
+      }
       yield await ModelCrudUtil.load(cls, item);
     }
   }
@@ -401,8 +405,8 @@ export class SQLModelService implements
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options?: ListPageOptions
-  ): Promise<ListPageResult<T>> {
+    options?: ModelPageOptions
+  ): Promise<ModelPageResult<T>> {
     const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     const limit = options?.limit ?? 100;
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
@@ -424,10 +428,11 @@ export class SQLModelService implements
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
+    options?: ModelListOptions
   ): AsyncIterable<T> {
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
     let offset = 0;
-    while (offset >= 0) {
+    while (offset >= 0 && !(options?.abort?.aborted)) {
       const items = await this.query(cls, castTo({
         where: computed.project(),
         sort: idx.sortTemplate.map(part => ({ [part.path.join('.')]: part.value })),

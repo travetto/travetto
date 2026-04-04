@@ -4,10 +4,11 @@ import { castTo, JSONUtil, ShutdownManager, type Class } from '@travetto/runtime
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport, type ModelType, NotFoundError, type OptionalId, ModelCrudUtil,
+  type ModelListOptions,
 } from '@travetto/model';
 import {
-  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex, type FullKeyedIndexBody,
+  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
   type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex
 } from '@travetto/model-indexed';
 
@@ -126,9 +127,12 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     }
   }
 
-  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
+  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
     const batch = await this.#getCollection(cls).select().get();
     for (const item of batch.docs) {
+      if (options?.abort?.aborted) {
+        break;
+      }
       try {
         yield await this.get(cls, item.id);
       } catch (error) {
@@ -210,8 +214,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options?: ListPageOptions,
-  ): Promise<ListPageResult<T>> {
+    options?: ModelPageOptions,
+  ): Promise<ModelPageResult<T>> {
     const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
     const limit = options?.limit ?? 100;
     const query = this.#buildIndexQuery(cls, idx, body)
@@ -234,9 +238,10 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
+    options?: ModelListOptions
   ): AsyncIterable<T> {
     let offset = 0;
-    while (offset >= 0) {
+    while (offset >= 0 && !(options?.abort?.aborted)) {
       const query = this.#buildIndexQuery(cls, idx, body)
         .limit(100)
         .offset(offset);

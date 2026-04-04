@@ -1,6 +1,6 @@
 import type { Class } from '@travetto/runtime';
 
-import type { ModelType, OptionalId } from '../types/model.ts';
+import type { ModelListOptions, ModelType, OptionalId } from '../types/model.ts';
 
 import type { ModelBasicSupport } from './basic.ts';
 
@@ -40,5 +40,5 @@ export interface ModelCrudSupport extends ModelBasicSupport {
   /**
    * List all items
    */
-  list<T extends ModelType>(cls: Class<T>): AsyncIterable<T>;
+  list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T>;
 }

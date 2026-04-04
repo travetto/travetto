@@ -4,7 +4,8 @@ import type * as estypes from '@elastic/elasticsearch/api/types';
 import {
   type ModelCrudSupport, type BulkOperation, type BulkResponse, type ModelBulkSupport, type ModelExpirySupport,
   type ModelType, type ModelStorageSupport, NotFoundError, ModelRegistryIndex, type OptionalId,
-  ModelCrudUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil
+  ModelCrudUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
+  type ModelListOptions
 } from '@travetto/model';
 import { ShutdownManager, type Class, castTo, asFull, TypedObject, asConstructable, JSONUtil } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
@@ -15,8 +16,8 @@ import {
   ModelQueryCrudUtil, type ModelQueryFacet,
 } from '@travetto/model-query';
 import {
-  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex, type FullKeyedIndexBody,
+  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
   type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex
 } from '@travetto/model-indexed';
 
@@ -59,7 +60,7 @@ export class ElasticsearchModelService implements
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options?: ListPageOptions<estypes.SortResults>
+    options?: ModelPageOptions<estypes.SortResults> & ModelListOptions
   ): AsyncIterable<{
     hits: estypes.SearchResponse<T>['hits']['hits'];
     nextOffset?: estypes.SortResults | undefined;
@@ -85,7 +86,7 @@ export class ElasticsearchModelService implements
       yield { hits, nextOffset: hits.at(-1)?.sort };
     }
 
-    while (produced < limit && search._scroll_id && hits.length) {
+    while (produced < limit && search._scroll_id && hits.length && !(options?.abort?.aborted)) {
       search = await this.client.scroll({ scroll_id: search._scroll_id, scroll: '2m' });
       hits = search.hits.hits;
       produced += hits.length;
@@ -300,14 +301,14 @@ export class ElasticsearchModelService implements
     return this.get(cls, id);
   }
 
-  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
+  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
     let search: estypes.SearchResponse<T> = await this.execSearch<T>(cls, {
       scroll: '2m',
       size: 100,
       query: ElasticsearchQueryUtil.getSearchQuery(cls, {})
     });
 
-    while (search.hits.hits.length > 0) {
+    while (search.hits.hits.length > 0 && !(options?.abort?.aborted)) {
       for (const hit of search.hits.hits) {
         try {
           yield this.postLoad(cls, hit);
@@ -487,8 +488,8 @@ export class ElasticsearchModelService implements
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options?: ListPageOptions,
-  ): Promise<ListPageResult<T>> {
+    options?: ModelPageOptions,
+  ): Promise<ModelPageResult<T>> {
     const offset = options?.offset ? JSONUtil.fromBase64<estypes.SortResults>(options.offset) : undefined;
     const items: T[] = [];
     let lastNextOffset: estypes.SortResults | undefined;
@@ -515,8 +516,9 @@ export class ElasticsearchModelService implements
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
+    options?: ModelListOptions
   ): AsyncIterable<T> {
-    for await (const { hits } of this.#scrollIndex(cls, idx, body, { limit: Number.MAX_SAFE_INTEGER })) {
+    for await (const { hits } of this.#scrollIndex(cls, idx, body, { ...options, limit: Number.MAX_SAFE_INTEGER })) {
       for (const hit of hits) {
         try {
           yield await this.postLoad(cls, hit);
