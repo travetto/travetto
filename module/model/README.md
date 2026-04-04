@@ -112,7 +112,7 @@ export interface ModelCrudSupport extends ModelBasicSupport {
   /**
    * List all items
    */
-  list<T extends ModelType>(cls: Class<T>): AsyncIterable<T>;
+  list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T>;
 }
 ```
 

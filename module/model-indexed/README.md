@@ -214,7 +214,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
     T extends ModelType,
     S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ListPageOptions): Promise<ListPageResult<T>>;
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ModelPageOptions): Promise<ModelPageResult<T>>;
 
   /**
    * List all entities by ranged index as defined by fields of idx
@@ -226,7 +226,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
     T extends ModelType,
     S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>,): AsyncIterable<T>;
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ModelListOptions): AsyncIterable<T>;
 }
 ```
 
