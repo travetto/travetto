@@ -387,6 +387,9 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
       if (batch.Count && batch.Items) {
         for (const item of batch.Items) {
+          if (options?.abort?.aborted) {
+            break;
+          }
           try {
             yield await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);
           } catch (error) {
@@ -506,6 +509,9 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   ): AsyncIterable<T> {
     for await (const batch of this.#scanIndex(cls, idx, body, { ...options, limit: Number.MAX_SAFE_INTEGER })) {
       for (const item of batch.Items ?? []) {
+        if (options?.abort?.aborted) {
+          break;
+        }
         try {
           yield await DynamoDBUtil.loadAndCheckExpiry(cls, item.body.S!);
         } catch (error) {

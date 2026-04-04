@@ -311,6 +311,9 @@ export class ElasticsearchModelService implements
     while (search.hits.hits.length > 0 && !(options?.abort?.aborted)) {
       for (const hit of search.hits.hits) {
         try {
+          if (options?.abort?.aborted) {
+            break;
+          }
           yield this.postLoad(cls, hit);
         } catch (error) {
           if (!(error instanceof NotFoundError)) {
@@ -520,6 +523,9 @@ export class ElasticsearchModelService implements
   ): AsyncIterable<T> {
     for await (const { hits } of this.#scrollIndex(cls, idx, body, { ...options, limit: Number.MAX_SAFE_INTEGER })) {
       for (const hit of hits) {
+        if (options?.abort?.aborted) {
+          break;
+        }
         try {
           yield await this.postLoad(cls, hit);
         } catch (error) {

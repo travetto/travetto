@@ -322,7 +322,12 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
     for await (const { ids } of this.#streamValues('scan', { match: `${this.#resolveKey(cls)}:*` }, { limit: Number.MAX_SAFE_INTEGER, ...options })) {
-      yield* this.#getBodies(cls, ids, id => id);
+      for await (const item of this.#getBodies(cls, ids, id => id)) {
+        if (options?.abort?.aborted) {
+          break;
+        }
+        yield item;
+      }
     }
   }
 
@@ -432,7 +437,12 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     options?: ModelListOptions
   ): AsyncIterable<T> {
     for await (const { ids } of this.#scanIndex(cls, idx, body, { limit: Number.MAX_SAFE_INTEGER, ...options })) {
-      yield* await Array.fromAsync(this.#getBodies(cls, ids, id => this.#resolveKey(cls, id)));
+      for await (const item of this.#getBodies(cls, ids, id => this.#resolveKey(cls, id))) {
+        if (options?.abort?.aborted) {
+          break;
+        }
+        yield item;
+      }
     }
   }
 }

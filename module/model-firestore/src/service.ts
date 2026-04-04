@@ -251,6 +251,9 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
         offset = -1;
       } else {
         for (const item of items) {
+          if (options?.abort?.aborted) {
+            break;
+          }
           yield await ModelCrudUtil.load(cls, item.data()!);
         }
         offset += items.length;

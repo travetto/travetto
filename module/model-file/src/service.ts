@@ -12,7 +12,8 @@ import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
 import {
   type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, type ModelType, ModelRegistryIndex,
-  NotFoundError, type OptionalId, ExistsError, type ModelBlobSupport, ModelCrudUtil, ModelExpiryUtil
+  NotFoundError, type OptionalId, ExistsError, type ModelBlobSupport, ModelCrudUtil, ModelExpiryUtil,
+  type ModelListOptions
 } from '@travetto/model';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
@@ -160,8 +161,11 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     await fs.unlink(file);
   }
 
-  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
+  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
     for await (const [id] of FileModelService.scanFolder(await this.#resolveName(cls, '.json'), '.json')) {
+      if (options?.abort?.aborted) {
+        break;
+      }
       try {
         yield await this.get(cls, id);
       } catch (error) {

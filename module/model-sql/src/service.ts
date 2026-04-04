@@ -442,7 +442,12 @@ export class SQLModelService implements
         offset = -1;
       } else {
         offset += items.length;
-        yield* items;
+        for (const item of items) {
+          if (options?.abort?.aborted) {
+            return;
+          }
+          yield item;
+        }
       }
     }
   }

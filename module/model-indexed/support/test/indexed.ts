@@ -371,4 +371,23 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     assert(items.length === allColors.length);
     assert.deepEqual(items, allColors.toReversed());
   }
+
+  @Test()
+  async listByIndexAbortSignal() {
+    const service = await this.service;
+
+    await Promise.all(
+      [20, 30, 40].map(age => service.create(User3, User3.from({ name: 'page', age, color: `${age}` })))
+    );
+
+    const controller = new AbortController();
+    const found: User3[] = [];
+
+    for await (const item of service.listByIndex(User3, userAgeIndex, { name: 'page' }, { abort: controller.signal })) {
+      found.push(item);
+      controller.abort();
+    }
+
+    assert(found.length === 1);
+  }
 }

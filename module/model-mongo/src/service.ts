@@ -548,6 +548,9 @@ export class MongoModelService implements
       } else {
         offset += items.length;
         for (const item of items) {
+          if (options?.abort?.aborted) {
+            break;
+          }
           yield await this.postLoad(cls, item);
         }
       }

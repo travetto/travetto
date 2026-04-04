@@ -117,9 +117,6 @@ export class ModelCrudUtil {
         item = await handler(item) ?? item;
       }
     }
-    if (typeof item === 'object' && item && 'prePersist' in item && typeof item['prePersist'] === 'function') {
-      item = await item.prePersist() ?? item;
-    }
     return item;
   }
 
@@ -130,9 +127,6 @@ export class ModelCrudUtil {
     const config = ModelRegistryIndex.getConfig(cls);
     for (const handler of castTo<DataHandler<T>[]>(config.postLoad ?? [])) {
       item = await handler(item) ?? item;
-    }
-    if (typeof item === 'object' && item && 'postLoad' in item && typeof item['postLoad'] === 'function') {
-      item = await item.postLoad() ?? item;
     }
     return item;
   }

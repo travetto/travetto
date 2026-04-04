@@ -7,7 +7,8 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import {
   type ModelCrudSupport, type ModelStorageSupport, type ModelType, ModelRegistryIndex, ExistsError, NotFoundError, type OptionalId,
-  type ModelBlobSupport, type ModelExpirySupport, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil
+  type ModelBlobSupport, type ModelExpirySupport, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil,
+  type ModelListOptions
 } from '@travetto/model';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
@@ -93,9 +94,9 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     return {};
   }
 
-  async * #iterateBucket(cls?: string | Class): AsyncIterable<{ Key: string, id: string }[]> {
+  async * #iterateBucket(cls?: string | Class, options?: ModelListOptions): AsyncIterable<{ Key: string, id: string }[]> {
     let Marker: string | undefined;
-    for (; ;) {
+    for (; !(options?.abort?.aborted);) {
       const items = await this.client.listObjects({
         Bucket: this.config.bucket,
         Prefix: cls ? this.#resolveKey(cls) : this.config.namespace,
@@ -293,9 +294,12 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     await this.client.deleteObject(this.#query(cls, id));
   }
 
-  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
-    for await (const batch of this.#iterateBucket(cls)) {
+  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
+    for await (const batch of this.#iterateBucket(cls, options)) {
       for (const { id } of batch) {
+        if (options?.abort?.aborted) {
+          break;
+        }
         try {
           yield await this.get(cls, id);
         } catch (error) {
