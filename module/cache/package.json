@@ -1,6 +1,6 @@
 {
   "name": "@travetto/cache",
-  "version": "8.0.0-alpha.10",
+  "version": "8.0.0-alpha.11",
   "type": "module",
   "description": "Caching functionality with decorators for declarative use.",
   "keywords": [
