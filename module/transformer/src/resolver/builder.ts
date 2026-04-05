@@ -227,7 +227,9 @@ export const TypeBuilder: {
       const name = CoreUtil.getSymbol(type)?.getName();
       const importName = resolver.getTypeImportName(type)!;
       const tsTypeArguments = resolver.getAllTypeArguments(type);
-      return { key: 'managed', name, importName, tsTypeArguments };
+      const docs = DocUtil.readDocTag(type, 'see');
+      const innerType = docs.find(doc => doc.includes('#target'))?.split(' ')?.[0];
+      return { key: 'managed', name, importName, tsTypeArguments, innerType };
     }
   },
   composition: {

@@ -47,6 +47,10 @@ export interface ManagedType extends Type<'managed'> {
    * Type Info
    */
   tsTypeArguments?: ts.Type[];
+  /**
+   * Inner return property
+   */
+  innerType?: string;
 }
 
 /**

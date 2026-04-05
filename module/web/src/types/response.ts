@@ -8,6 +8,7 @@ export interface WebResponseContext {
 
 /**
  * Web Response as a simple object
+ * @see body Type of the response body #target
  */
 export class WebResponse<B = unknown> extends BaseWebMessage<B, WebResponseContext> {
 

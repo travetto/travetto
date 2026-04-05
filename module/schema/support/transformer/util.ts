@@ -350,10 +350,9 @@ class ${uniqueId} extends ${type.mappedClassName} {
       targetType = returnType.typeArguments[0];
     }
 
-    // TODO: Standardize this using jsdoc
     let innerReturnType: AnyType | undefined;
-    if (targetType.key === 'managed' && targetType.importName.startsWith('@travetto/')) {
-      innerReturnType = state.getApparentTypeOfField(targetType.original!, 'body');
+    if (targetType.key === 'managed' && targetType.innerType) {
+      innerReturnType = state.getApparentTypeOfField(targetType.original!, targetType.innerType);
     }
 
     const finalReturnType = SchemaTransformUtil.ensureType(state, innerReturnType ?? returnType, node);
