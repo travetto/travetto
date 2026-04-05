@@ -75,6 +75,9 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
 
   /**
    * Page through entities by ranged index as defined by fields of idx
+   *
+   * Note: Limit is generally honored, but can vary depending on the underlying storage implementation.
+   *
    * @param cls The type to search by
    * @param idx The index to search against
    * @param body The payload of fields needed to search
@@ -88,6 +91,10 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
 
   /**
    * List all entities by ranged index as defined by fields of idx
+   *
+   * Note: Limit is generally honored, but can vary depending on the underlying storage implementation.
+   * Batch size hint can be used to optimize batch size, but is not guaranteed.
+   *
    * @param cls The type to search by
    * @param idx The index to search against
    * @param body The payload of fields needed to search
