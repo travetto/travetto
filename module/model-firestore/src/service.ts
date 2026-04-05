@@ -123,11 +123,13 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   async deleteStorage(): Promise<void> { }
 
   async deleteModel<T extends ModelType>(cls: Class<T>): Promise<void> {
+    const toDelete: string[] = [];
     for await (const batch of this.list(cls)) {
       for (const item of batch) {
-        await this.delete(cls, item.id);
+        toDelete.push(item.id);
       }
     }
+    await Promise.all(toDelete.map(id => this.delete(cls, id)));
   }
 
   // Crud

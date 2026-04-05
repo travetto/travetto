@@ -353,7 +353,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   async paginateByIndexReverse() {
     const service = await this.service;
 
-    const allColors = 'ÇüéâäàåçêëèïîìÄÅÉ§ÆôöòûùÿÖÜ¢£¥₧ƒáíóúñÑªº¿⌐¬½¼¡«»░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴├├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀αßΓπΣσµτΦΘΩδ∞φε∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■'.repeat(2).split('');
+    const allColors = 'abcdefghijklmnopqrstuvwxyzABCDEFGHJIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+,<.>/?;:\'"[{]}|`~'.repeat(2).split('');
 
     for (const [i, color] of allColors.entries()) {
       await service.create(User3, User3.from({ name: 'page', age: (i + 1) * 10, color }));
