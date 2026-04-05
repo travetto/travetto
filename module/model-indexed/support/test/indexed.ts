@@ -395,5 +395,5 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     } else {
       assert(found.length === 1);
     }
-  
+  }
 }

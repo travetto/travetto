@@ -22,8 +22,8 @@ export abstract class BaseModelSuite<T> {
     const svc = (await this.service);
     if (ModelCrudUtil.isSupported(svc)) {
       let i = 0;
-      for await (const __el of svc.list(cls)) {
-        i += __el.length;
+      for await (const batch of svc.list(cls)) {
+        i += batch.length;
       }
       return i;
     } else {
