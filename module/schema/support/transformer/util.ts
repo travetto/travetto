@@ -351,8 +351,8 @@ class ${uniqueId} extends ${type.mappedClassName} {
     }
 
     let innerReturnType: AnyType | undefined;
-    if (targetType.key === 'managed' && targetType.innerType) {
-      innerReturnType = state.getApparentTypeOfField(targetType.original!, targetType.innerType);
+    if (targetType.key === 'managed' && targetType.innerTypeProperty) {
+      innerReturnType = state.getApparentTypeOfField(targetType.original!, targetType.innerTypeProperty);
     }
 
     const finalReturnType = SchemaTransformUtil.ensureType(state, innerReturnType ?? returnType, node);

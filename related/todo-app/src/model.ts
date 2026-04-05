@@ -1,4 +1,5 @@
 import { Model } from '@travetto/model';
+import { sortedIndex } from '@travetto/model-indexed';
 import { Schema } from '@travetto/schema';
 
 @Model()
@@ -11,6 +12,12 @@ export class Todo {
   who?: string;
   color?: string;
 }
+
+export const todoByCreated = sortedIndex(Todo, {
+  name: 'todoByCreated',
+  key: {},
+  sort: { created: -1 }
+});
 
 @Schema()
 export class TodoSearch {

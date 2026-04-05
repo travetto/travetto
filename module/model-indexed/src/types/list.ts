@@ -6,6 +6,9 @@ export interface ModelPageOptions<O = string> {
   offset?: O;
 }
 
+/**
+ * Result of a page request.
+ */
 export interface ModelPageResult<T extends ModelType> {
   items: T[];
   nextOffset?: string;

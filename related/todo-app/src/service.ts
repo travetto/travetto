@@ -1,7 +1,8 @@
 import type { MongoModelService } from '@travetto/model-mongo';
 import { Injectable, Inject } from '@travetto/di';
+import type { ModelPageResult } from '@travetto/model-indexed';
 
-import { Todo, type TodoSearch } from './model.ts';
+import { Todo, todoByCreated, type TodoSearch } from './model.ts';
 
 @Injectable()
 export class TodoService {
@@ -25,6 +26,10 @@ export class TodoService {
 
   async getAll(search: TodoSearch): Promise<Todo[]> {
     return this.modelService.query(Todo, { where: { text: { $regex: search.q ?? '.*' } }, ...search, sort: [{ created: -1 }] });
+  }
+
+  async getPage(offset?: string): Promise<ModelPageResult<Todo>> {
+    return this.modelService.pageByIndex(Todo, todoByCreated, {}, { offset });
   }
 
   async deleteAllCompleted(): Promise<number> {
