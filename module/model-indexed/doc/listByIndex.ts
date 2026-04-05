@@ -18,8 +18,8 @@ const recentUsers = sortedIndex(User, {
 export async function listStreamExample(modelService: ModelIndexedSupport) {
   const items: User[] = [];
 
-  for await (const user of modelService.listByIndex(User, recentUsers, {})) {
-    items.push(user);
+  for await (const batch of modelService.listByIndex(User, recentUsers, {}, { limit: 25 })) {
+    items.push(...batch);
   }
 
   return items;

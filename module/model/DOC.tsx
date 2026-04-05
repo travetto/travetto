@@ -59,6 +59,8 @@ export const text = <>
       The {Links.Crud} contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in {d.module('Auth')}, is an example of a module that only needs create, read and delete, and so any implementation of {d.module('Model')} that honors this contract, can be used with the {d.module('Auth')} model extension.
 
       <c.Code src={toConcrete<ModelCrudSupport>()} title='Crud Contract' />
+
+      The {d.method('list')} operation returns batches of model records as an async stream.  It also accepts listing options such as {d.field('limit')} to cap how many records are produced, alongside other runtime controls such as abort signals and batch size hints.
     </c.SubSection>
 
     <c.SubSection title='Expiry'>

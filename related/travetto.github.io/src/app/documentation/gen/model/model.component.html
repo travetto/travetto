@@ -131,6 +131,8 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
+The <code class="item method">list</code> operation returns batches of model records as an async stream.  It also accepts listing options such as <code class="item field">limit</code> to cap how many records are produced, alongside other runtime controls such as abort signals and batch size hints.
+
 <h3 id="expiry">Expiry</h3>
 
 Certain implementations will also provide support for automatic <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10">Expiry</a> of data at runtime.  This is extremely useful for temporary data as, and is used in the <a class="module-link" routerLink="/docs/cache" title="Caching functionality with decorators for declarative use.">Caching</a> module for expiring data accordingly.

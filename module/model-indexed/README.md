@@ -237,7 +237,7 @@ The service provides these operations:
    *  `updateByIndex` — Update an existing item by index
    *  `updatePartialByIndex` — Partially update an item by index
    *  `pageByIndex` — Fetch a page of items with pagination metadata
-   *  `listByIndex` — Stream all matching items from a sorted index
+   *  `listByIndex` — Stream matching items from a sorted index in batches, optionally capped by `limit`
 
 ### Getting Items
 Use `getByIndex` to fetch a single item by providing all required key fields.
@@ -345,15 +345,15 @@ export async function listExample(modelService: ModelIndexedSupport) {
 }
 ```
 
-Use `listByIndex` when you want to iterate through every matching item as an async stream.
+Use `listByIndex` when you want to iterate through matching items as an async stream of batches.  The same list options used by `list` are supported here, including `limit` when you want to stop after a fixed number of records.
 
 **Code: Streaming by Sorted Index**
 ```typescript
 export async function listStreamExample(modelService: ModelIndexedSupport) {
   const items: User[] = [];
 
-  for await (const user of modelService.listByIndex(User, recentUsers, {})) {
-    items.push(user);
+  for await (const batch of modelService.listByIndex(User, recentUsers, {}, { limit: 25 })) {
+    items.push(...batch);
   }
 
   return items;

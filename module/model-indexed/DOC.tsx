@@ -98,7 +98,7 @@ export const text = <>
         <li>{d.method('updateByIndex')} — Update an existing item by index</li>
         <li>{d.method('updatePartialByIndex')} — Partially update an item by index</li>
         <li>{d.method('pageByIndex')} — Fetch a page of items with pagination metadata</li>
-        <li>{d.method('listByIndex')} — Stream all matching items from a sorted index</li>
+        <li>{d.method('listByIndex')} — Stream matching items from a sorted index in batches, optionally capped by {d.field('limit')}</li>
       </ul>
     </c.SubSection>
 
@@ -163,7 +163,7 @@ export const text = <>
         startRe={/export async function listExample/}
       />
 
-      Use {d.method('listByIndex')} when you want to iterate through every matching item as an async stream.
+      Use {d.method('listByIndex')} when you want to iterate through matching items as an async stream of batches.  The same list options used by {d.method('list')} are supported here, including {d.field('limit')} when you want to stop after a fixed number of records.
 
       <c.Code
         title='Streaming by Sorted Index'

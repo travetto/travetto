@@ -118,6 +118,8 @@ export interface ModelCrudSupport extends ModelBasicSupport {
 }
 ```
 
+The `list` operation returns batches of model records as an async stream.  It also accepts listing options such as `limit` to cap how many records are produced, alongside other runtime controls such as abort signals and batch size hints.
+
 ### Expiry
 Certain implementations will also provide support for automatic [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10) of data at runtime.  This is extremely useful for temporary data as, and is used in the [Caching](https://github.com/travetto/travetto/tree/main/module/cache#readme "Caching functionality with decorators for declarative use.") module for expiring data accordingly.
 
