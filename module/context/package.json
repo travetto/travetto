@@ -1,6 +1,6 @@
 {
   "name": "@travetto/context",
-  "version": "8.0.0-alpha.10",
+  "version": "8.0.0-alpha.11",
   "type": "module",
   "description": "Async-aware state management, maintaining context across asynchronous calls.",
   "keywords": [
@@ -27,10 +27,10 @@
     "directory": "module/context"
   },
   "dependencies": {
-    "@travetto/di": "^8.0.0-alpha.10"
+    "@travetto/di": "^8.0.0-alpha.11"
   },
   "peerDependencies": {
-    "@travetto/test": "^8.0.0-alpha.10"
+    "@travetto/test": "^8.0.0-alpha.11"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
