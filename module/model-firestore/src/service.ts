@@ -84,13 +84,13 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     options?: ModelListOptions & ModelPageOptions<number>
   ): AsyncIterable<{ items: T[], nextOffset?: number }> {
     const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
+    const batchSize = Math.min(options?.batchSizeHint ?? 100, limit);
+
     let offset = options?.offset ?? 0;
     let produced = 0;
-    const batchSize = options?.batchSizeHint ?? 100;
+
     while (!(options?.abort?.aborted) && produced < limit) {
-      const query = queryBuilder()
-        .limit(batchSize)
-        .offset(offset);
+      const query = queryBuilder().limit(batchSize).offset(offset);
 
       let { docs } = await query.get();
       if (docs.length === 0) {
