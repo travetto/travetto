@@ -228,6 +228,9 @@ Model services that implement <a target="_blank" class="source-link" href="https
 
   <span class="token comment">/**
    * Page through entities by ranged index as defined by fields of idx
+   *
+   * Note: Limit is generally honored, but can vary depending on the underlying storage implementation.
+   *
    * &#64;param cls The type to search by
    * &#64;param idx The index to search against
    * &#64;param body The payload of fields needed to search
@@ -241,6 +244,10 @@ Model services that implement <a target="_blank" class="source-link" href="https
 
   <span class="token comment">/**
    * List all entities by ranged index as defined by fields of idx
+   *
+   * Note: Limit is generally honored, but can vary depending on the underlying storage implementation.
+   * Batch size hint can be used to optimize batch size, but is not guaranteed.
+   *
    * &#64;param cls The type to search by
    * &#64;param idx The index to search against
    * &#64;param body The payload of fields needed to search

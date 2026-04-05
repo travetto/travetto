@@ -110,7 +110,10 @@ export interface ModelCrudSupport extends ModelBasicSupport {
   updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T>;
 
   /**
-   * List all items
+   * List all items of a collection, results returned in batches of items.
+   *
+   * Note: Batch size hint can be used to optimize batch size, but is not guaranteed.
+   *
    * @param cls The class to list
    * @param options Options for listing
    */
