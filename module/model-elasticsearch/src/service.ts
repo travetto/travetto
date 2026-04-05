@@ -493,7 +493,7 @@ export class ElasticsearchModelService implements
     const offset = options?.offset ? JSONUtil.fromBase64<estypes.SortResults>(options.offset) : undefined;
     const items: T[] = [];
     let lastNextOffset: estypes.SortResults | undefined;
-    for await (const { items: fetched, nextOffset } of this.#scrollIndex(cls, idx, body, { batchSizeHint: 100, ...options, offset })) {
+    for await (const { items: fetched, nextOffset } of this.#scrollIndex(cls, idx, body, { limit: 100, ...options, offset })) {
       lastNextOffset = nextOffset;
       items.push(...fetched);
     }

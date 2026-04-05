@@ -444,12 +444,14 @@ export class MemoryModelService implements
     options?: ModelPageOptions
   ): Promise<ModelPageResult<T>> {
     const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
+    let produced = 0;
 
     const items: T[] = [];
-    for await (const batch of this.#getIndexIds(cls, idx, body, { ...options, offset })) {
+    for await (const batch of this.#getIndexIds(cls, idx, body, { limit: 100, ...options, offset })) {
+      produced += batch.length;
       items.push(...await ModelCrudUtil.filterOutNotFound(batch.map(id => this.get(cls, id))));
     }
-    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
+    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + produced) : undefined };
   }
 
   async  * listByIndex<

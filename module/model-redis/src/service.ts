@@ -72,18 +72,20 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   async * #streamValues(
     operation: ScanOp,
     search: RedisScan,
-    options?: ModelPageOptions & ModelListOptions,
-    count = 10
+    options?: ModelPageOptions & ModelListOptions
   ): AsyncIterable<ScanState> {
     const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
     let matched: ScanState = { cursor: options?.offset, ids: [] };
     let produced = 0;
+    const batchSize = options?.batchSizeHint ?? 100;
 
     do {
       const remaining = limit - produced;
-      matched = await this.#scan(operation, matched.cursor!, search, Math.min(remaining, count));
-      yield matched;
-      produced += matched.ids.length;
+      matched = await this.#scan(operation, matched.cursor!, search, Math.min(remaining, batchSize));
+      if (matched.ids.length) {
+        yield matched;
+        produced += matched.ids.length;
+      }
     } while (matched.cursor && produced < limit && !(options?.abort?.aborted));
   }
 

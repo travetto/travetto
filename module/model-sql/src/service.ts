@@ -124,7 +124,9 @@ export class SQLModelService implements
       });
       offset += items.length;
       produced += items.length;
-      yield { items, nextOffset: items.length < limit ? undefined : offset };
+      if (items.length) {
+        yield { items, nextOffset: items.length < limit ? undefined : offset };
+      }
     }
   }
 
@@ -438,7 +440,7 @@ export class SQLModelService implements
 
     const items: T[] = [];
     let nextOffset: number | undefined;
-    for await (const batch of this.#scanTable<T>(cls, () => baseQuery, { ...options, offset })) {
+    for await (const batch of this.#scanTable<T>(cls, () => baseQuery, { limit: 100, ...options, offset })) {
       items.push(...batch.items);
       nextOffset = batch.nextOffset;
     }

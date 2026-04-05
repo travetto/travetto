@@ -123,13 +123,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   async deleteStorage(): Promise<void> { }
 
   async deleteModel<T extends ModelType>(cls: Class<T>): Promise<void> {
-    const toDelete: string[] = [];
-    for await (const batch of this.list(cls)) {
-      for (const item of batch) {
-        toDelete.push(item.id);
-      }
-    }
-    await Promise.all(toDelete.map(id => this.delete(cls, id)));
+    const docs = await this.#getCollection(cls).listDocuments();
+    await Promise.all(docs.map(doc => doc.delete()));
   }
 
   // Crud
@@ -250,7 +245,6 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
       offset: options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0
     })) {
       items.push(...batch.items);
-      console.error(batch.items);
       nextOffset = batch.nextOffset;
     }
 
