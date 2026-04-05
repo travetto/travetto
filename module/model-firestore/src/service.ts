@@ -85,26 +85,29 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   ): AsyncIterable<{ items: T[], nextOffset?: number }> {
     const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
     let offset = options?.offset ?? 0;
-    let lastOffset = -1;
     let produced = 0;
     const batchSize = options?.batchSizeHint ?? 100;
-    while (offset !== lastOffset && !(options?.abort?.aborted) && produced < limit) {
-      lastOffset = offset;
+    while (!(options?.abort?.aborted) && produced < limit) {
       const query = queryBuilder()
         .limit(batchSize)
         .offset(offset);
 
       let { docs } = await query.get();
+      if (docs.length === 0) {
+        break;
+      }
+
       if (produced + docs.length > limit) {
         docs = docs.slice(0, limit - produced);
       }
 
+      offset += docs.length;
+
       const items = await ModelCrudUtil.filterOutNotFound(
         docs.map(item => ModelCrudUtil.load(cls, item.data()!)));
-      offset += items.length;
       produced += items.length;
 
-      yield { items, nextOffset: offset < limit ? offset : undefined };
+      yield { items, nextOffset: offset };
     }
   }
 
@@ -245,6 +248,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
       offset: options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0
     })) {
       items.push(...batch.items);
+      console.error(batch.items);
       nextOffset = batch.nextOffset;
     }
 
