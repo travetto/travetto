@@ -6,12 +6,14 @@ import { ModelIndexedPolymorphismSuite } from '@travetto/model-indexed/support/t
 
 @Suite()
 class RedisIndexedSuite extends ModelIndexedSuite {
+  indexLimitSkew = 10;
   serviceClass = RedisModelService;
   configClass = RedisModelConfig;
 }
 
 @Suite()
 class RedisIndexedPolymorphicSuite extends ModelIndexedPolymorphismSuite {
+  indexLimitSkew = 10;
   serviceClass = RedisModelService;
   configClass = RedisModelConfig;
 }

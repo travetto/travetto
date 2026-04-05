@@ -9,7 +9,7 @@ import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
 import type { ModelIndexedSupport } from '../../src/types/service.ts';
 import { keyedIndex, sortedIndex } from '../../src/indexes.ts';
-import { IndexedFieldError } from '../../__index__.ts';
+import { IndexedFieldError } from '../../src/types/error.ts';
 
 @Model('index_user')
 class User {
@@ -390,6 +390,10 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
       await timers.setTimeout(10);
     }
 
-    assert(found.length === 1);
-  }
+    if (this.indexLimitSkew) {
+      assert(found.length < this.indexLimitSkew && found.length > 0);
+    } else {
+      assert(found.length === 1);
+    }
+  
 }

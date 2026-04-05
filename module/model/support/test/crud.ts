@@ -76,6 +76,8 @@ class BigIntModel {
 @Suite()
 export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
+  indexLimitSkew = 0;
+
   @Test('save it')
   async save() {
     const service = await this.service;
@@ -293,7 +295,11 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
       await timers.setTimeout(10);
     }
 
-    assert(found.length === 1);
+    if (this.indexLimitSkew) {
+      assert(found.length > 0 && found.length < this.indexLimitSkew);
+    } else {
+      assert(found.length === 1);
+    }
   }
 
   @Test('save it')

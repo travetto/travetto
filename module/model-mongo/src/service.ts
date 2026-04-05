@@ -74,12 +74,12 @@ export class MongoModelService implements
       }
       batch.push(item);
       if (batch.length >= batchSize) {
-        yield await ModelCrudUtil.filterOutNotFound(batch.map(i => ModelCrudUtil.load(cls, i)));
+        yield await ModelCrudUtil.filterOutNotFound(batch.map(i => this.postLoad(cls, i)));
         batch = [];
       }
     }
     if (batch.length) {
-      yield await ModelCrudUtil.filterOutNotFound(batch.map(i => ModelCrudUtil.load(cls, i)));
+      yield await ModelCrudUtil.filterOutNotFound(batch.map(i => this.postLoad(cls, i)));
     }
   }
 
