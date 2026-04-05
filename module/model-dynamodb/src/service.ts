@@ -385,7 +385,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
-    for await (const { items } of this.#scanCollection(cls, (batchSize, lastKey) => this.client.query({
+    for await (const { items } of this.#scanCollection(cls, (batchSize, lastKey) => this.client.scan({
       TableName: this.#resolveTable(cls),
       ExclusiveStartKey: lastKey,
       Limit: batchSize

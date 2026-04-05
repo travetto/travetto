@@ -111,7 +111,7 @@ export class SQLModelService implements
   ): AsyncIterable<{ items: T[], nextOffset?: number }> {
     const batchSize = options?.batchSizeHint ?? 100;
     const maxCount = options?.limit ?? Number.MAX_SAFE_INTEGER;
-    let offset = 0;
+    const offset = options?.offset ?? 0;
     let lastOffset = -1;
     let produced = 0;
     while (offset !== lastOffset && produced < maxCount && !(options?.abort?.aborted)) {
@@ -119,11 +119,10 @@ export class SQLModelService implements
       const items = await this.query<T>(cls, {
         ...buildQuery(),
         limit: Math.min(batchSize, maxCount - produced),
-        offset
+        offset: offset + produced
       });
-      offset += items.length;
       produced += items.length;
-      yield { items, nextOffset: produced < maxCount ? offset : undefined };
+      yield { items, nextOffset: produced < maxCount ? offset + produced : undefined };
     }
   }
 

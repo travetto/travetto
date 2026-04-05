@@ -96,5 +96,5 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
     T extends ModelType,
     S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ModelListOptions): AsyncIterable<T>;
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ModelListOptions): AsyncIterable<T[]>;
 }

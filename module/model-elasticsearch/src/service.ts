@@ -91,14 +91,10 @@ export class ElasticsearchModelService implements
       ...buildSearch(),
     });
 
-    let hits = search.hits.hits.slice(0, limit);
-    let produced = hits.length;
+    let hits = search.hits.hits;
+    let produced = 0;
 
     while (produced < limit && search._scroll_id && hits.length && !(options?.abort?.aborted)) {
-      search = await this.client.scroll({
-        scroll_id: search._scroll_id,
-        scroll: '2m'
-      });
       hits = search.hits.hits;
       produced += hits.length;
       if (produced > limit) {
@@ -108,6 +104,10 @@ export class ElasticsearchModelService implements
         hits.map(hit => this.#postLoad(cls, hit))
       );
       yield { items, nextOffset: hits.at(-1)?.sort };
+      search = await this.client.scroll({
+        scroll_id: search._scroll_id,
+        scroll: '2m'
+      });
     }
     if (search._scroll_id) {
       await this.client.clearScroll({ scroll_id: search._scroll_id }).catch(() => { });
