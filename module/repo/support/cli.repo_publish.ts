@@ -17,6 +17,7 @@ export class RepoPublishCommand implements CliCommandShape {
       filter: module => !!module.workspace && !module.internal,
       progressMessage: (module) => `Checking published [%idx/%total] -- ${module?.name}`,
       showStderr: false,
+      showProgressList: true,
       transformResult: (module, result) => PackageManager.validatePublishedResult(result),
     });
 
@@ -29,6 +30,8 @@ export class RepoPublishCommand implements CliCommandShape {
       {
         progressMessage: (module) => `Published [%idx/%total] -- ${module?.name}`,
         showStdout: false,
+        showStderr: false,
+        showProgressList: true,
         filter: module => published.get(module) === false
       }
     );
