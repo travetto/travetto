@@ -4,10 +4,11 @@ import { castTo, JSONUtil, ShutdownManager, type Class } from '@travetto/runtime
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport, type ModelType, NotFoundError, type OptionalId, ModelCrudUtil,
+  type ModelListOptions,
 } from '@travetto/model';
 import {
-  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex, type FullKeyedIndexBody,
+  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
   type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex
 } from '@travetto/model-indexed';
 
@@ -41,6 +42,25 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return this.client.collection(this.#resolveTable(cls));
   }
 
+  async #getIdByIndex<
+    T extends ModelType,
+    K extends KeyedIndexSelection<T>,
+    S extends SortedIndexSelection<T>
+  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<string> {
+    ModelCrudUtil.ensureNotSubType(cls);
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
+    const query = [...computed.allParts, ...(computed.idPart ? [computed.idPart] : [])].reduce<Query>(
+      (result, { path, value }) => result.where(path.join('.'), '==', value),
+      this.#getCollection(cls)
+    );
+
+    const item = await query.get();
+    if (!item || item.empty) {
+      throw new NotFoundError(`${cls.name} Index=${idx}`, computed.getKey());
+    }
+    return item.docs[0].id;
+  }
+
   #buildIndexQuery<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
@@ -58,6 +78,39 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return query;
   }
 
+  async * #scanCollection<T extends ModelType>(
+    cls: Class<T>,
+    queryBuilder: () => Query,
+    options?: ModelListOptions & ModelPageOptions<number>
+  ): AsyncIterable<{ items: T[], nextOffset?: number }> {
+    const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
+    const batchSize = Math.min(options?.batchSizeHint ?? 100, limit);
+
+    let offset = options?.offset ?? 0;
+    let produced = 0;
+
+    while (!(options?.abort?.aborted) && produced < limit) {
+      const query = queryBuilder().limit(batchSize).offset(offset);
+
+      let { docs } = await query.get();
+      if (docs.length === 0) {
+        break;
+      }
+
+      if (produced + docs.length > limit) {
+        docs = docs.slice(0, limit - produced);
+      }
+
+      offset += docs.length;
+
+      const items = await ModelCrudUtil.filterOutNotFound(
+        docs.map(item => ModelCrudUtil.load(cls, item.data()!)));
+      produced += items.length;
+
+      yield { items, nextOffset: offset };
+    }
+  }
+
   @PostConstruct()
   async initializeClient(): Promise<void> {
     globalThis.devProcessWarningExclusions?.push((_, category) => category === 'MetadataLookupWarning');
@@ -69,10 +122,9 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   async createStorage(): Promise<void> { }
   async deleteStorage(): Promise<void> { }
 
-  async deleteModel(cls: Class): Promise<void> {
-    for await (const item of this.list(cls)) {
-      await this.delete(cls, item.id);
-    }
+  async deleteModel<T extends ModelType>(cls: Class<T>): Promise<void> {
+    const docs = await this.#getCollection(cls).listDocuments();
+    await Promise.all(docs.map(doc => doc.delete()));
   }
 
   // Crud
@@ -126,37 +178,10 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     }
   }
 
-  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
-    const batch = await this.#getCollection(cls).select().get();
-    for (const item of batch.docs) {
-      try {
-        yield await this.get(cls, item.id);
-      } catch (error) {
-        if (!(error instanceof NotFoundError)) {
-          throw error;
-        }
-      }
+  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+    for await (const { items } of this.#scanCollection(cls, () => this.#getCollection(cls), options)) {
+      yield items;
     }
-  }
-
-  // Indexed
-  async #getIdByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<string> {
-    ModelCrudUtil.ensureNotSubType(cls);
-    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
-    const query = [...computed.allParts, ...(computed.idPart ? [computed.idPart] : [])].reduce<Query>(
-      (result, { path, value }) => result.where(path.join('.'), '==', value),
-      this.#getCollection(cls)
-    );
-
-    const item = await query.get();
-    if (!item || item.empty) {
-      throw new NotFoundError(`${cls.name} Index=${idx}`, computed.getKey());
-    }
-    return item.docs[0].id;
   }
 
   // Indexed contract
@@ -210,20 +235,20 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options?: ListPageOptions,
-  ): Promise<ListPageResult<T>> {
-    const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-    const limit = options?.limit ?? 100;
-    const query = this.#buildIndexQuery(cls, idx, body)
-      .limit(limit)
-      .offset(offset);
-
+    options?: ModelPageOptions,
+  ): Promise<ModelPageResult<T>> {
     const items: T[] = [];
-    for (const item of (await query.get()).docs) {
-      items.push(await ModelCrudUtil.load(cls, item.data()!));
+    let nextOffset: number | undefined;
+    for await (const batch of this.#scanCollection(cls, () => this.#buildIndexQuery(cls, idx, body), {
+      limit: 100,
+      ...options,
+      offset: options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0
+    })) {
+      items.push(...batch.items);
+      nextOffset = batch.nextOffset;
     }
 
-    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
+    return { items, nextOffset: nextOffset ? JSONUtil.toBase64(nextOffset) : undefined };
   }
 
   async * listByIndex<
@@ -234,22 +259,10 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-  ): AsyncIterable<T> {
-    let offset = 0;
-    while (offset >= 0) {
-      const query = this.#buildIndexQuery(cls, idx, body)
-        .limit(100)
-        .offset(offset);
-
-      const { docs: items } = await query.get();
-      if (items.length === 0) {
-        offset = -1;
-      } else {
-        for (const item of items) {
-          yield await ModelCrudUtil.load(cls, item.data()!);
-        }
-        offset += items.length;
-      }
+    options?: ModelListOptions
+  ): AsyncIterable<T[]> {
+    for await (const { items } of this.#scanCollection(cls, () => this.#buildIndexQuery(cls, idx, body), options)) {
+      yield items;
     }
   }
 }

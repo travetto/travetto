@@ -57,6 +57,18 @@ declare module 'buffer' {
   interface File { }
 }
 
+declare module 'node:buffer' {
+  /**
+   * @concrete node:buffer#Blob
+   */
+  interface Blob { }
+
+  /**
+   * @concrete node:buffer#File
+   */
+  interface File { }
+}
+
 declare module 'stream' {
   /**
    * @concrete node:stream#Readable

@@ -107,8 +107,10 @@ export class CacheService {
   async deleteAll(keySpace: string): Promise<void> {
     if (ModelIndexedUtil.isSupported(this.#modelService)) {
       const removes: Promise<void>[] = [];
-      for await (const item of this.#modelService.listByIndex(CacheRecord, keySpaceIndex, { keySpace })) {
-        removes.push(this.#modelService.delete(CacheRecord, item.id));
+      for await (const batch of this.#modelService.listByIndex(CacheRecord, keySpaceIndex, { keySpace })) {
+        for (const item of batch) {
+          removes.push(this.#modelService.delete(CacheRecord, item.id));
+        }
       }
       await Promise.all(removes);
     } else {

@@ -17,3 +17,12 @@ export interface ModelType {
 }
 
 export type OptionalId<T extends ModelType> = Omit<T, 'id'> & { id?: string };
+
+/**
+ * Options for listing items
+ */
+export interface ModelListOptions {
+  abort?: AbortSignal;
+  limit?: number;
+  batchSizeHint?: number;
+}

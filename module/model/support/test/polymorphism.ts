@@ -71,7 +71,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     const fire2 = await service.get(Worker, fire.id);
     assert(fire2 instanceof Firefighter);
 
-    const all = await Array.fromAsync(service.list(Worker));
+    const all = await this.toArray(service.list(Worker));
     assert(all.length === 3);
 
     const doc3 = all.find(x => x instanceof Doctor);
@@ -89,7 +89,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     assert(eng3.major === 'oranges');
     assert(eng3.name === 'cob');
 
-    const engineers = await Array.fromAsync(service.list(Engineer));
+    const engineers = await this.toArray(service.list(Engineer));
     assert(engineers.length === 1);
 
     await service.create(Engineer, Engineer.from({
@@ -97,10 +97,10 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
       name: 'bob2'
     }));
 
-    const all2 = await Array.fromAsync(service.list(Worker));
+    const all2 = await this.toArray(service.list(Worker));
     assert(all2.length === 4);
 
-    const engineers2 = await Array.fromAsync(service.list(Engineer));
+    const engineers2 = await this.toArray(service.list(Engineer));
     assert(engineers2.length === 2);
   }
 

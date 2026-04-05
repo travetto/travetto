@@ -1,11 +1,12 @@
 import type { ModelType } from '@travetto/model';
 
-export type ListPageOptions<O = string> = {
+export interface ModelPageOptions<O = string> {
+  batchSizeHint?: number;
   limit?: number;
   offset?: O;
-};
+}
 
-export type ListPageResult<T extends ModelType> = {
+export interface ModelPageResult<T extends ModelType> {
   items: T[];
   nextOffset?: string;
-};
+}

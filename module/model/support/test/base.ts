@@ -22,8 +22,8 @@ export abstract class BaseModelSuite<T> {
     const svc = (await this.service);
     if (ModelCrudUtil.isSupported(svc)) {
       let i = 0;
-      for await (const __el of svc.list(cls)) {
-        i += 1;
+      for await (const batch of svc.list(cls)) {
+        i += batch.length;
       }
       return i;
     } else {
@@ -52,11 +52,11 @@ export abstract class BaseModelSuite<T> {
     return DependencyRegistryIndex.getInstance(this.serviceClass);
   }
 
-  async toArray<U>(src: AsyncIterable<U> | AsyncGenerator<U>): Promise<U[]> {
-    const out: U[] = [];
+  async toArray<U>(src: AsyncIterable<U | U[]> | AsyncGenerator<U | U[]>): Promise<U[]> {
+    const out: (U | U[])[] = [];
     for await (const el of src) {
       out.push(el);
     }
-    return out;
+    return castTo(out.flat());
   }
 }

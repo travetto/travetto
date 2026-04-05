@@ -10,6 +10,7 @@ import {
   ModelRegistryIndex, type ModelType, type OptionalId, type ModelCrudSupport, type ModelStorageSupport, type ModelExpirySupport,
   type ModelBulkSupport, type BulkOperation, type BulkResponse, NotFoundError, ExistsError, type ModelBlobSupport,
   ModelCrudUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
+  type ModelListOptions,
 } from '@travetto/model';
 import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
@@ -18,8 +19,8 @@ import {
   type ModelQueryFacet,
 } from '@travetto/model-query';
 import {
-  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex, type FullKeyedIndexBody,
+  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
   type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex,
 } from '@travetto/model-indexed';
 
@@ -57,6 +58,30 @@ export class MongoModelService implements
   config: MongoModelConfig;
 
   constructor(config: MongoModelConfig) { this.config = config; }
+
+  async * #iterateCursor<T extends ModelType>(cls: Class<T>, cursor: FindCursor, options?: ModelListOptions & ModelPageOptions<number>): AsyncGenerator<T[]> {
+    const batchSize = options?.batchSizeHint ?? 100;
+    let batch: T[] = [];
+    const maxCount = options?.limit ?? Number.MAX_SAFE_INTEGER;
+    for await (const item of cursor
+      .batchSize(batchSize)
+      .limit(maxCount)
+      .skip(options?.offset ?? 0)
+    ) {
+      if (options?.abort?.aborted) {
+        cursor.close();
+        break;
+      }
+      batch.push(item);
+      if (batch.length >= batchSize) {
+        yield await ModelCrudUtil.filterOutNotFound(batch.map(i => this.postLoad(cls, i)));
+        batch = [];
+      }
+    }
+    if (batch.length) {
+      yield await ModelCrudUtil.filterOutNotFound(batch.map(i => this.postLoad(cls, i)));
+    }
+  }
 
   async #buildIndexQuery<
     T extends ModelType,
@@ -303,18 +328,10 @@ export class MongoModelService implements
     }
   }
 
-  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
+  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
     const store = await this.getStore(cls);
-    const cursor = store.find(this.getWhereFilter(cls, {}), { timeout: true }).batchSize(100);
-    for await (const item of cursor) {
-      try {
-        yield await this.postLoad(cls, item);
-      } catch (error) {
-        if (!(error instanceof NotFoundError)) {
-          throw error;
-        }
-      }
-    }
+    const cursor = store.find(this.getWhereFilter(cls, {}), { timeout: true });
+    yield* this.#iterateCursor(cls, cursor, options);
   }
 
   // Blob
@@ -452,7 +469,6 @@ export class MongoModelService implements
       throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
     return await this.postLoad(cls, result);
-
   }
 
   async deleteByIndex<
@@ -504,21 +520,14 @@ export class MongoModelService implements
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options?: ListPageOptions,
-  ): Promise<ListPageResult<T>> {
+    options?: ModelPageOptions,
+  ): Promise<ModelPageResult<T>> {
     {
       const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-      const limit = options?.limit ?? 100;
-      const cursor = (await this.#buildIndexQuery(cls, idx, body))
-        .limit(limit)
-        .skip(offset);
-
-      const items: T[] = [];
-      for await (const item of cursor) {
-        items.push(await this.postLoad(cls, item));
-      }
+      const cursor = (await this.#buildIndexQuery(cls, idx, body));
+      const batches = await Array.fromAsync(this.#iterateCursor(cls, cursor, { limit: 100, ...options, offset }));
+      const items = batches.flat();
       return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
-
     }
   }
 
@@ -530,23 +539,10 @@ export class MongoModelService implements
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-  ): AsyncIterable<T> {
-    let offset = 0;
-    while (offset >= 0) {
-      const cursor = (await this.#buildIndexQuery(cls, idx, body))
-        .limit(100)
-        .skip(offset);
-
-      const items = await cursor.toArray();
-      if (items.length === 0) {
-        offset = -1;
-      } else {
-        offset += items.length;
-        for (const item of items) {
-          yield await this.postLoad(cls, item);
-        }
-      }
-    }
+    options?: ModelListOptions
+  ): AsyncIterable<T[]> {
+    const cursor = await this.#buildIndexQuery(cls, idx, body);
+    yield* this.#iterateCursor(cls, cursor, options);
   }
 
   // Query

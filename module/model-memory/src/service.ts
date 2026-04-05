@@ -8,10 +8,11 @@ import {
   type ModelType, type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, ModelRegistryIndex,
   NotFoundError, ExistsError, type OptionalId, type ModelBlobSupport, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil,
   IndexNotSupported,
+  type ModelListOptions,
 } from '@travetto/model';
 import {
-  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex,
+  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex,
   type AllIndexes, isModelIndexedIndex, type FullKeyedIndexBody, type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex,
 } from '@travetto/model-indexed';
 
@@ -170,11 +171,39 @@ export class MemoryModelService implements
     throw new NotFoundError(cls, computed.getKey({ sort: true }));
   }
 
-  #getIndexIds<
+  async * #iterateIds<T extends ModelType>(
+    ids: string[],
+    options?: ModelListOptions & ModelPageOptions<number>
+
+  ): AsyncIterable<string[]> {
+    let offset = options && 'offset' in options ? options.offset ?? 0 : 0;
+    const batchSize = options?.batchSizeHint ?? 100;
+    let produced = 0;
+    const maxCount = options?.limit ?? Number.MAX_SAFE_INTEGER;
+    while (offset < ids.length && produced < maxCount) {
+      if (options?.abort?.aborted) {
+        break;
+      }
+      const end = Math.min(offset + batchSize, ids.length, maxCount - produced + offset);
+      const batch = ids.slice(offset, end);
+      if (batch.length) {
+        yield batch;
+      }
+      offset += batchSize;
+      produced += batch.length;
+    }
+  }
+
+  async * #getIndexIds<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
     S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: AllIndexes<T, K, S>, body: KeyedIndexBody<T, K>): string[] {
+  >(
+    cls: Class<T>,
+    idx: AllIndexes<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    options?: ModelListOptions & ModelPageOptions<number>
+  ): AsyncIterable<string[]> {
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
     if (!isModelIndexedIndex(idx)) {
       throw new IndexNotSupported(cls, idx, 'Only ModelIndexed indices can be used with MemoryModelService');
@@ -182,13 +211,15 @@ export class MemoryModelService implements
 
     const base = this.#indices[idx.type].get(indexName(cls, idx));
     const index = base?.get(computed.getKey());
+    let ids: string[];
     if (!index) {
-      return [];
+      ids = [];
     } else if (index instanceof Map) {
-      return [...index.entries()].toSorted((a, b) => a[1] - b[1]).map(([id,]) => id);
+      ids = [...index.entries()].toSorted((a, b) => a[1] - b[1]).map(([id,]) => id);
     } else {
-      return [...index];
+      ids = [...index];
     }
+    yield* this.#iterateIds(ids, options);
   }
 
   @PostConstruct()
@@ -261,15 +292,9 @@ export class MemoryModelService implements
     await this.#persist(cls, where, 'remove');
   }
 
-  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
-    for (const id of this.#getStore(cls).keys()) {
-      try {
-        yield await this.get(cls, id);
-      } catch (error) {
-        if (!(error instanceof NotFoundError)) {
-          throw error;
-        }
-      }
+  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+    for await (const batch of this.#iterateIds([...this.#getStore(cls).keys()], options)) {
+      yield ModelCrudUtil.filterOutNotFound(batch.map(id => this.get(cls, id)));
     }
   }
 
@@ -416,17 +441,17 @@ export class MemoryModelService implements
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options?: ListPageOptions
-  ): Promise<ListPageResult<T>> {
-    const ids = this.#getIndexIds(cls, idx, body);
+    options?: ModelPageOptions
+  ): Promise<ModelPageResult<T>> {
     const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-    const limit = options?.limit ?? 100;
+    let produced = 0;
 
     const items: T[] = [];
-    for (const id of ids.slice(offset, offset + limit)) {
-      items.push(await this.get(cls, id));
+    for await (const batch of this.#getIndexIds(cls, idx, body, { limit: 100, ...options, offset })) {
+      produced += batch.length;
+      items.push(...await ModelCrudUtil.filterOutNotFound(batch.map(id => this.get(cls, id))));
     }
-    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
+    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + produced) : undefined };
   }
 
   async  * listByIndex<
@@ -437,10 +462,10 @@ export class MemoryModelService implements
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-  ): AsyncIterable<T> {
-    const ids = this.#getIndexIds(cls, idx, body);
-    for (const id of ids) {
-      yield await this.get(cls, id);
+    options?: ModelListOptions
+  ): AsyncIterable<T[]> {
+    for await (const batch of this.#getIndexIds(cls, idx, body, options)) {
+      yield ModelCrudUtil.filterOutNotFound(batch.map(id => this.get(cls, id)));
     }
   }
 }

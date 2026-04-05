@@ -14,6 +14,7 @@ class RedisBasicSuite extends ModelBasicSuite {
 
 @Suite()
 class RedisCrudSuite extends ModelCrudSuite {
+  indexLimitSkew = 10;
   serviceClass = RedisModelService;
   configClass = RedisModelConfig;
 }

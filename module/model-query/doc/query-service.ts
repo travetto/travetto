@@ -24,7 +24,7 @@ export class QueryModelService implements ModelQueryCrudSupport, ModelQueryFacet
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     return asFull({});
   }
-  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
+  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T[]> {
     yield* [];
   }
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {

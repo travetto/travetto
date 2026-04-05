@@ -110,11 +110,18 @@ export interface ModelCrudSupport extends ModelBasicSupport {
   updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T>;
 
   /**
-   * List all items
+   * List all items of a collection, results returned in batches of items.
+   *
+   * Note: Batch size hint can be used to optimize batch size, but is not guaranteed.
+   *
+   * @param cls The class to list
+   * @param options Options for listing
    */
-  list<T extends ModelType>(cls: Class<T>): AsyncIterable<T>;
+  list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]>;
 }
 ```
+
+The `list` operation returns batches of model records as an async stream.  It also accepts listing options such as `limit` to cap how many records are produced, alongside other runtime controls such as abort signals and batch size hints.
 
 ### Expiry
 Certain implementations will also provide support for automatic [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10) of data at runtime.  This is extremely useful for temporary data as, and is used in the [Caching](https://github.com/travetto/travetto/tree/main/module/cache#readme "Caching functionality with decorators for declarative use.") module for expiring data accordingly.
@@ -262,8 +269,8 @@ export abstract class BaseModelSuite<T> {
     const svc = (await this.service);
     if (ModelCrudUtil.isSupported(svc)) {
       let i = 0;
-      for await (const __el of svc.list(cls)) {
-        i += 1;
+      for await (const batch of svc.list(cls)) {
+        i += batch.length;
       }
       return i;
     } else {
@@ -292,12 +299,12 @@ export abstract class BaseModelSuite<T> {
     return DependencyRegistryIndex.getInstance(this.serviceClass);
   }
 
-  async toArray<U>(src: AsyncIterable<U> | AsyncGenerator<U>): Promise<U[]> {
-    const out: U[] = [];
+  async toArray<U>(src: AsyncIterable<U | U[]> | AsyncGenerator<U | U[]>): Promise<U[]> {
+    const out: (U | U[])[] = [];
     for await (const el of src) {
       out.push(el);
     }
-    return out;
+    return castTo(out.flat());
   }
 }
 ```

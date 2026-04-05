@@ -3,7 +3,7 @@ import timers from 'node:timers/promises';
 
 import { Suite, Test } from '@travetto/test';
 import { Schema, Text, Precision, Required, } from '@travetto/schema';
-import { type ModelCrudSupport, Model, NotFoundError, PersistValue } from '@travetto/model';
+import { type ModelCrudSupport, Model, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
 
 import { BaseModelSuite } from './base.ts';
 
@@ -42,14 +42,13 @@ class SimpleList {
 }
 
 @Model()
+@PrePersist((item) => {
+  item.name = `${item.name}-suffix`;
+})
 class User2 {
   id: string;
   address?: Address;
   name: string;
-
-  prePersist() {
-    this.name = `${this.name}-suffix`;
-  }
 }
 
 @Model()
@@ -76,6 +75,8 @@ class BigIntModel {
 
 @Suite()
 export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
+
+  indexLimitSkew = 0;
 
   @Test('save it')
   async save() {
@@ -266,6 +267,39 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(found[0].age === people[0].age);
     assert(found[1].age === people[1].age);
     assert(found[2].age === people[2].age);
+  }
+
+  @Test('verify list abort signal')
+  async listAbortSignal() {
+    const service = await this.service;
+
+    await Promise.all(
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(x => service.upsert(Person, Person.from({
+        id: service.idSource.create(),
+        name: 'Bob',
+        age: 20 + x,
+        gender: 'm',
+        address: {
+          street1: 'a',
+          ...(x === 1 ? { street2: 'b' } : {})
+        }
+      })))
+    );
+
+    const controller = new AbortController();
+    const found: Person[] = [];
+
+    for await (const items of service.list(Person, { abort: controller.signal, batchSizeHint: 1 })) {
+      found.push(...items);
+      controller.abort();
+      await timers.setTimeout(10);
+    }
+
+    if (this.indexLimitSkew) {
+      assert(found.length > 0 && found.length < this.indexLimitSkew);
+    } else {
+      assert(found.length === 1);
+    }
   }
 
   @Test('save it')

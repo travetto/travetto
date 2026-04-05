@@ -4,10 +4,11 @@ import { castTo, JSONUtil, ShutdownManager, type Class } from '@travetto/runtime
 import {
   type ModelCrudSupport, type ModelExpirySupport, ModelRegistryIndex, type ModelType, type ModelStorageSupport, NotFoundError,
   ExistsError, type OptionalId, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil,
+  type ModelListOptions,
 } from '@travetto/model';
 import {
-  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ListPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type SortedIndexSelection, type ListPageResult, type SortedIndex, isModelIndexedIndex,
+  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
+  type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, isModelIndexedIndex,
   type FullKeyedIndexWithPartialBody, type FullKeyedIndexBody, ModelIndexedComputedIndex,
 } from '@travetto/model-indexed';
 
@@ -69,18 +70,23 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async * #streamValues(
-    operation: ScanOp, search: RedisScan, options?: ListPageOptions, count = 10
+    operation: ScanOp,
+    search: RedisScan,
+    options?: ModelPageOptions & ModelListOptions
   ): AsyncIterable<ScanState> {
     const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
     let matched: ScanState = { cursor: options?.offset, ids: [] };
     let produced = 0;
+    const batchSize = options?.batchSizeHint ?? 100;
 
     do {
       const remaining = limit - produced;
-      matched = await this.#scan(operation, matched.cursor!, search, Math.min(remaining, count));
-      yield matched;
-      produced += matched.ids.length;
-    } while (matched.cursor && produced < limit);
+      matched = await this.#scan(operation, matched.cursor!, search, Math.min(remaining, batchSize));
+      if (matched.ids.length) {
+        yield matched;
+        produced += matched.ids.length;
+      }
+    } while (matched.cursor && produced < limit && !(options?.abort?.aborted));
   }
 
   #scanIndex<
@@ -91,7 +97,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options?: ListPageOptions
+    options?: ModelPageOptions
   ): AsyncIterable<ScanState> {
     ModelCrudUtil.ensureNotSubType(cls);
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
@@ -104,21 +110,13 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
   }
 
-  async * #getBodies<T extends ModelType>(cls: Class<T>, ids: string[], transform: (id: string) => string): AsyncIterable<T> {
+  async #getBodies<T extends ModelType>(cls: Class<T>, ids: string[], transform: (id: string) => string): Promise<T[]> {
     if (ids.length === 0) {
-      return;
+      return [];
     }
     const bodies = (await this.client.mGet(ids.map(transform)))
       .filter((result): result is string => !!result);
-    for (const body of bodies) {
-      try {
-        yield await ModelCrudUtil.load(cls, body);
-      } catch (error) {
-        if (!(error instanceof NotFoundError)) {
-          throw error;
-        }
-      }
-    }
+    return ModelCrudUtil.filterOutNotFound(bodies.map(body => ModelCrudUtil.load(cls, body)));
   }
 
   #removeIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
@@ -316,9 +314,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     await this.#store(cls, where, 'delete');
   }
 
-  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
-    for await (const { ids } of this.#streamValues('scan', { match: `${this.#resolveKey(cls)}:*` }, { limit: Number.MAX_SAFE_INTEGER })) {
-      yield* this.#getBodies(cls, ids, id => id);
+  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+    for await (const { ids } of this.#streamValues('scan', { match: `${this.#resolveKey(cls)}:*` }, options)) {
+      yield await this.#getBodies(cls, ids, id => id);
     }
   }
 
@@ -404,14 +402,12 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options?: ListPageOptions
-  ): Promise<ListPageResult<T>> {
+    options?: ModelPageOptions
+  ): Promise<ModelPageResult<T>> {
     const items: T[] = [];
     let lastCursor: string | undefined;
     for await (const { ids, cursor } of this.#scanIndex(cls, idx, body, { limit: 100, ...options })) {
-      items.push(
-        ...await Array.fromAsync(this.#getBodies(cls, ids, id => this.#resolveKey(cls, id)))
-      );
+      items.push(...await this.#getBodies(cls, ids, id => this.#resolveKey(cls, id)));
       lastCursor = cursor;
     }
     return { items, nextOffset: lastCursor };
@@ -424,10 +420,11 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   >(
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
-    body: KeyedIndexBody<T, K>
-  ): AsyncIterable<T> {
-    for await (const { ids } of this.#scanIndex(cls, idx, body, { limit: Number.MAX_SAFE_INTEGER })) {
-      yield* await Array.fromAsync(this.#getBodies(cls, ids, id => this.#resolveKey(cls, id)));
+    body: KeyedIndexBody<T, K>,
+    options?: ModelListOptions
+  ): AsyncIterable<T[]> {
+    for await (const { ids } of this.#scanIndex(cls, idx, body, options)) {
+      yield await this.#getBodies(cls, ids, id => this.#resolveKey(cls, id));
     }
   }
 }

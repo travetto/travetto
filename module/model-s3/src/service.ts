@@ -7,7 +7,8 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import {
   type ModelCrudSupport, type ModelStorageSupport, type ModelType, ModelRegistryIndex, ExistsError, NotFoundError, type OptionalId,
-  type ModelBlobSupport, type ModelExpirySupport, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil
+  type ModelBlobSupport, type ModelExpirySupport, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil,
+  type ModelListOptions
 } from '@travetto/model';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
@@ -93,16 +94,26 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     return {};
   }
 
-  async * #iterateBucket(cls?: string | Class): AsyncIterable<{ Key: string, id: string }[]> {
+  async * #iterateBucket(cls?: string | Class, options?: ModelListOptions): AsyncIterable<{ Key: string, id: string }[]> {
     let Marker: string | undefined;
-    for (; ;) {
+    const batchSize = options?.batchSizeHint ?? 100;
+    const maxCount = options?.limit ?? Number.MAX_SAFE_INTEGER;
+    let produced = 0;
+    for (; !(options?.abort?.aborted) && produced < maxCount;) {
       const items = await this.client.listObjects({
         Bucket: this.config.bucket,
         Prefix: cls ? this.#resolveKey(cls) : this.config.namespace,
-        Marker
+        Marker,
+        MaxKeys: batchSize
       });
-      if (items.Contents?.length) {
-        yield items.Contents.map(item => ({ Key: item.Key!, id: item.Key!.split(':').pop()! }));
+
+      let toSend = items.Contents?.map(item => ({ Key: item.Key!, id: item.Key!.split(':').pop()! }));
+      if (toSend) {
+        produced += toSend.length;
+        if (produced > maxCount) {
+          toSend = toSend.slice(0, maxCount - (produced - toSend.length));
+        }
+        yield toSend;
       }
       if (items.NextMarker) {
         Marker = items.NextMarker;
@@ -293,17 +304,9 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     await this.client.deleteObject(this.#query(cls, id));
   }
 
-  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
-    for await (const batch of this.#iterateBucket(cls)) {
-      for (const { id } of batch) {
-        try {
-          yield await this.get(cls, id);
-        } catch (error) {
-          if (!(error instanceof NotFoundError)) {
-            throw error;
-          }
-        }
-      }
+  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+    for await (const batch of this.#iterateBucket(cls, options)) {
+      yield ModelCrudUtil.filterOutNotFound(batch.map(item => this.get(cls, item.id)));
     }
   }
 

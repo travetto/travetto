@@ -34,6 +34,21 @@ export class ModelCrudUtil {
     return { create, valid };
   }
 
+  static async filterOutNotFound<T extends ModelType>(actions: Promise<T>[] | undefined): Promise<T[]> {
+    if (!actions) {
+      return [];
+    }
+    return (await Promise.allSettled(actions)).map(p => {
+      if (p.status === 'fulfilled') {
+        return p.value;
+      } else if (p.reason instanceof NotFoundError) {
+        return undefined!;
+      } else {
+        throw p.reason;
+      }
+    }).filter(item => !!item);
+  }
+
   /**
    * Load model
    * @param cls Class to load model for
@@ -117,9 +132,6 @@ export class ModelCrudUtil {
         item = await handler(item) ?? item;
       }
     }
-    if (typeof item === 'object' && item && 'prePersist' in item && typeof item['prePersist'] === 'function') {
-      item = await item.prePersist() ?? item;
-    }
     return item;
   }
 
@@ -130,9 +142,6 @@ export class ModelCrudUtil {
     const config = ModelRegistryIndex.getConfig(cls);
     for (const handler of castTo<DataHandler<T>[]>(config.postLoad ?? [])) {
       item = await handler(item) ?? item;
-    }
-    if (typeof item === 'object' && item && 'postLoad' in item && typeof item['postLoad'] === 'function') {
-      item = await item.postLoad() ?? item;
     }
     return item;
   }

@@ -1,4 +1,5 @@
 import assert from 'node:assert';
+import timers from 'node:timers/promises';
 
 import { Suite, Test } from '@travetto/test';
 import { Schema } from '@travetto/schema';
@@ -8,7 +9,7 @@ import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
 import type { ModelIndexedSupport } from '../../src/types/service.ts';
 import { keyedIndex, sortedIndex } from '../../src/indexes.ts';
-import { IndexedFieldError } from '../../__index__.ts';
+import { IndexedFieldError } from '../../src/types/error.ts';
 
 @Model('index_user')
 class User {
@@ -370,5 +371,29 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
 
     assert(items.length === allColors.length);
     assert.deepEqual(items, allColors.toReversed());
+  }
+
+  @Test()
+  async listByIndexAbortSignal() {
+    const service = await this.service;
+
+    await Promise.all(
+      [20, 30, 40].map(age => service.create(User3, User3.from({ name: 'page', age, color: `${age}` })))
+    );
+
+    const controller = new AbortController();
+    const found: User3[] = [];
+
+    for await (const items of service.listByIndex(User3, userAgeIndex, { name: 'page' }, { abort: controller.signal, batchSizeHint: 1 })) {
+      found.push(...items);
+      controller.abort();
+      await timers.setTimeout(10);
+    }
+
+    if (this.indexLimitSkew) {
+      assert(found.length < this.indexLimitSkew && found.length > 0);
+    } else {
+      assert(found.length === 1);
+    }
   }
 }
