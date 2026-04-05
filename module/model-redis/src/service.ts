@@ -108,21 +108,13 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
   }
 
-  async * #getBodies<T extends ModelType>(cls: Class<T>, ids: string[], transform: (id: string) => string): AsyncIterable<T> {
+  async #getBodies<T extends ModelType>(cls: Class<T>, ids: string[], transform: (id: string) => string): Promise<T[]> {
     if (ids.length === 0) {
-      return;
+      return [];
     }
     const bodies = (await this.client.mGet(ids.map(transform)))
       .filter((result): result is string => !!result);
-    for (const body of bodies) {
-      try {
-        yield await ModelCrudUtil.load(cls, body);
-      } catch (error) {
-        if (!(error instanceof NotFoundError)) {
-          throw error;
-        }
-      }
-    }
+    return ModelCrudUtil.filterOutNotFound(bodies.map(body => ModelCrudUtil.load(cls, body)));
   }
 
   #removeIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
@@ -320,9 +312,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     await this.#store(cls, where, 'delete');
   }
 
-  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
-    for await (const { ids } of this.#streamValues('scan', { match: `${this.#resolveKey(cls)}:*` }, { limit: Number.MAX_SAFE_INTEGER, ...options })) {
-      yield* this.#getBodies(cls, ids, id => id);
+  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+    for await (const { ids } of this.#streamValues('scan', { match: `${this.#resolveKey(cls)}:*` }, options)) {
+      yield await this.#getBodies(cls, ids, id => id);
     }
   }
 
@@ -413,9 +405,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     const items: T[] = [];
     let lastCursor: string | undefined;
     for await (const { ids, cursor } of this.#scanIndex(cls, idx, body, { limit: 100, ...options })) {
-      items.push(
-        ...await Array.fromAsync(this.#getBodies(cls, ids, id => this.#resolveKey(cls, id)))
-      );
+      items.push(...await this.#getBodies(cls, ids, id => this.#resolveKey(cls, id)));
       lastCursor = cursor;
     }
     return { items, nextOffset: lastCursor };
@@ -430,14 +420,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
     options?: ModelListOptions
-  ): AsyncIterable<T> {
-    for await (const { ids } of this.#scanIndex(cls, idx, body, { limit: Number.MAX_SAFE_INTEGER, ...options })) {
-      for await (const item of this.#getBodies(cls, ids, id => this.#resolveKey(cls, id))) {
-        if (options?.abort?.aborted) {
-          break;
-        }
-        yield item;
-      }
+  ): AsyncIterable<T[]> {
+    for await (const { ids } of this.#scanIndex(cls, idx, body, options)) {
+      yield await this.#getBodies(cls, ids, id => this.#resolveKey(cls, id));
     }
   }
 }

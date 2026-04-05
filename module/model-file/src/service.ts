@@ -46,7 +46,11 @@ const exists = (file: string): Promise<boolean> => fs.stat(file).then(() => true
 export class FileModelService implements ModelCrudSupport, ModelBlobSupport, ModelExpirySupport, ModelStorageSupport {
 
   /** @private */
-  static async * scanFolder(folder: string, suffix: string, options?: ModelListOptions): AsyncGenerator<[id: string, field: string]> {
+  static async * scanFolder(folder: string, suffix: string, options?: ModelListOptions): AsyncGenerator<[id: string, field: string][]> {
+    const found: [id: string, field: string][] = [];
+    const batchSize = options?.batchSizeHint ?? 100;
+    const maxCount = options?.limit ?? Number.MAX_SAFE_INTEGER;
+    let produced = 0;
     for (const sub of await fs.readdir(folder)) {
       if (options?.abort?.aborted) {
         break;
@@ -56,9 +60,19 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
           break;
         }
         if (file.endsWith(suffix)) {
-          yield [file.replace(suffix, ''), path.resolve(folder, sub, file)];
+          found.push([file.replace(suffix, ''), path.resolve(folder, sub, file)]);
+          produced += 1;
+          if (produced >= maxCount) {
+            break;
+          }
+          if (found.length >= batchSize) {
+            yield found.splice(0, found.length);
+          }
         }
       }
+    }
+    if (found.length) {
+      yield found;
     }
   }
 
@@ -167,15 +181,9 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     await fs.unlink(file);
   }
 
-  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
-    for await (const [id] of FileModelService.scanFolder(await this.#resolveName(cls, '.json'), '.json', options)) {
-      try {
-        yield await this.get(cls, id);
-      } catch (error) {
-        if (!(error instanceof NotFoundError)) {
-          throw error;
-        }
-      }
+  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+    for await (const batch of FileModelService.scanFolder(await this.#resolveName(cls, '.json'), '.json', options)) {
+      yield ModelCrudUtil.filterOutNotFound(batch.map(([id]) => this.get(cls, id)));
     }
   }
 
@@ -228,14 +236,16 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   // Expiry
   async deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number> {
     let deleted = 0;
-    for await (const [_id, file] of FileModelService.scanFolder(await this.#resolveName(cls, '.json'), '.json')) {
-      try {
-        const item = await ModelCrudUtil.load(cls, await fs.readFile(file));
-        if (ModelExpiryUtil.getExpiryState(cls, item).expired) {
-          await fs.rm(file, { force: true });
-          deleted += 1;
-        }
-      } catch { } // Don't let a single failure stop the process
+    for await (const batch of FileModelService.scanFolder(await this.#resolveName(cls, '.json'), '.json')) {
+      for (const [_id, file] of batch) {
+        try {
+          const item = await ModelCrudUtil.load(cls, await fs.readFile(file));
+          if (ModelExpiryUtil.getExpiryState(cls, item).expired) {
+            await fs.rm(file, { force: true });
+            deleted += 1;
+          }
+        } catch { } // Don't let a single failure stop the process
+      }
     }
     return deleted;
   }

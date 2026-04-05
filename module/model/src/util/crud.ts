@@ -34,6 +34,21 @@ export class ModelCrudUtil {
     return { create, valid };
   }
 
+  static async filterOutNotFound<T extends ModelType>(actions: Promise<T>[] | undefined): Promise<T[]> {
+    if (!actions) {
+      return [];
+    }
+    return (await Promise.allSettled(actions)).map(p => {
+      if (p.status === 'fulfilled') {
+        return p.value;
+      } else if (p.reason instanceof NotFoundError) {
+        return undefined!;
+      } else {
+        throw p.reason;
+      }
+    }).filter(item => !!item);
+  }
+
   /**
    * Load model
    * @param cls Class to load model for

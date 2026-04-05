@@ -59,6 +59,30 @@ export class MongoModelService implements
 
   constructor(config: MongoModelConfig) { this.config = config; }
 
+  async * #iterateCursor<T extends ModelType>(cls: Class<T>, cursor: FindCursor, options?: ModelListOptions & ModelPageOptions<number>): AsyncGenerator<T[]> {
+    const batchSize = options?.batchSizeHint ?? 100;
+    let batch: T[] = [];
+    const maxCount = options?.limit ?? Number.MAX_SAFE_INTEGER;
+    for await (const item of cursor
+      .batchSize(batchSize)
+      .limit(maxCount)
+      .skip(options?.offset ?? 0)
+    ) {
+      if (options?.abort?.aborted) {
+        cursor.close();
+        break;
+      }
+      batch.push(item);
+      if (batch.length >= batchSize) {
+        yield await ModelCrudUtil.filterOutNotFound(batch.map(i => ModelCrudUtil.load(cls, i)));
+        batch = [];
+      }
+    }
+    if (batch.length) {
+      yield await ModelCrudUtil.filterOutNotFound(batch.map(i => ModelCrudUtil.load(cls, i)));
+    }
+  }
+
   async #buildIndexQuery<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
@@ -304,22 +328,10 @@ export class MongoModelService implements
     }
   }
 
-  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
+  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
     const store = await this.getStore(cls);
-    const cursor = store.find(this.getWhereFilter(cls, {}), { timeout: true }).batchSize(100);
-    for await (const item of cursor) {
-      if (options?.abort?.aborted) {
-        cursor.close();
-        break;
-      }
-      try {
-        yield await this.postLoad(cls, item);
-      } catch (error) {
-        if (!(error instanceof NotFoundError)) {
-          throw error;
-        }
-      }
-    }
+    const cursor = store.find(this.getWhereFilter(cls, {}), { timeout: true });
+    yield* this.#iterateCursor(cls, cursor, options);
   }
 
   // Blob
@@ -512,17 +524,10 @@ export class MongoModelService implements
   ): Promise<ModelPageResult<T>> {
     {
       const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-      const limit = options?.limit ?? 100;
-      const cursor = (await this.#buildIndexQuery(cls, idx, body))
-        .limit(limit)
-        .skip(offset);
-
-      const items: T[] = [];
-      for await (const item of cursor) {
-        items.push(await this.postLoad(cls, item));
-      }
+      const cursor = (await this.#buildIndexQuery(cls, idx, body));
+      const batches = await Array.fromAsync(this.#iterateCursor(cls, cursor, { limit: 100, ...options, offset }));
+      const items = batches.flat();
       return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
-
     }
   }
 
@@ -535,15 +540,9 @@ export class MongoModelService implements
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
     options?: ModelListOptions
-  ): AsyncIterable<T> {
+  ): AsyncIterable<T[]> {
     const cursor = await this.#buildIndexQuery(cls, idx, body);
-    for await (const item of cursor) {
-      if (options?.abort?.aborted) {
-        cursor.close();
-        break;
-      }
-      yield await this.postLoad(cls, item);
-    }
+    yield* this.#iterateCursor(cls, cursor, options);
   }
 
   // Query

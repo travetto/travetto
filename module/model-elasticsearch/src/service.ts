@@ -76,21 +76,38 @@ export class ElasticsearchModelService implements
     }
   }
 
-  async * #scrollCollection<T extends ModelType>(cls: Class<T>,
+  async * #scrollCollection<T extends ModelType>(
+    cls: Class<T>,
+    buildSearch: () => estypes.SearchRequest,
     options?: ModelPageOptions<estypes.SortResults> & ModelListOptions
-  ): AsyncIterable<estypes.SearchHit<T>[]> {
+  ): AsyncIterable<{ items: T[], nextOffset?: estypes.SortResults | undefined }> {
+    const batchSize = options?.batchSizeHint ?? 100;
+    const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
+
     let search: estypes.SearchResponse<T> = await this.execSearch<T>(cls, {
-      scroll: '2m',
-      size: 100,
-      query: ElasticsearchQueryUtil.getSearchQuery(cls, {})
+      ...(options?.offset !== undefined ?
+        { size: limit, search_after: options.offset } :
+        { scroll: '2m', size: batchSize }),
+      ...buildSearch(),
     });
 
-    while (search.hits.hits.length > 0 && !(options?.abort?.aborted)) {
-      yield search.hits.hits;
+    let hits = search.hits.hits.slice(0, limit);
+    let produced = hits.length;
+
+    while (produced < limit && search._scroll_id && hits.length && !(options?.abort?.aborted)) {
       search = await this.client.scroll({
         scroll_id: search._scroll_id,
         scroll: '2m'
       });
+      hits = search.hits.hits;
+      produced += hits.length;
+      if (produced > limit) {
+        hits = hits.slice(0, limit - (produced - hits.length));
+      }
+      const items = await ModelCrudUtil.filterOutNotFound(
+        hits.map(hit => this.#postLoad(cls, hit))
+      );
+      yield { items, nextOffset: hits.at(-1)?.sort };
     }
     if (search._scroll_id) {
       await this.client.clearScroll({ scroll_id: search._scroll_id }).catch(() => { });
@@ -107,45 +124,16 @@ export class ElasticsearchModelService implements
     body: KeyedIndexBody<T, K>,
     options?: ModelPageOptions<estypes.SortResults> & ModelListOptions
   ): AsyncIterable<{
-    hits: estypes.SearchResponse<T>['hits']['hits'];
+    items: T[];
     nextOffset?: estypes.SortResults | undefined;
   }> {
-    const limit = options?.limit ?? 100;
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
-
-    let search = await this.execSearch<T>(cls, {
-      ...(options?.offset ?
-        { size: limit, search_after: options.offset } :
-        { scroll: '2m', size: 100 }
-      ),
+    yield* this.#scrollCollection(cls, () => ({
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.project())
       ),
       sort: ElasticsearchQueryUtil.getSort(idx)
-    });
-
-    let hits = search.hits.hits.slice(0, limit);
-    let produced = hits.length;
-
-    if (hits.length) {
-      yield { hits, nextOffset: hits.at(-1)?.sort };
-    }
-
-    while (produced < limit && search._scroll_id && hits.length && !(options?.abort?.aborted)) {
-      search = await this.client.scroll({ scroll_id: search._scroll_id, scroll: '2m' });
-      hits = search.hits.hits;
-      produced += hits.length;
-      if (produced > limit) {
-        hits = hits.slice(0, limit - (produced - hits.length));
-      }
-      if (hits.length) {
-        yield { hits, nextOffset: hits.at(-1)?.sort };
-      }
-    }
-
-    if (search._scroll_id) {
-      await this.client.clearScroll({ scroll_id: search._scroll_id }).catch(() => { });
-    }
+    }), options);
   }
 
   @PostConstruct()
@@ -322,17 +310,9 @@ export class ElasticsearchModelService implements
     return this.get(cls, id);
   }
 
-  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
-    for await (const hits of this.#scrollCollection(cls, options)) {
-      for (const hit of hits) {
-        try {
-          yield this.#postLoad(cls, hit);
-        } catch (error) {
-          if (!(error instanceof NotFoundError)) {
-            throw error;
-          }
-        }
-      }
+  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+    for await (const batch of this.#scrollCollection(cls, () => ({ query: ElasticsearchQueryUtil.getSearchQuery(cls, {}) }), options)) {
+      yield batch.items;
     }
   }
 
@@ -504,17 +484,9 @@ export class ElasticsearchModelService implements
     const offset = options?.offset ? JSONUtil.fromBase64<estypes.SortResults>(options.offset) : undefined;
     const items: T[] = [];
     let lastNextOffset: estypes.SortResults | undefined;
-    for await (const { hits, nextOffset } of this.#scrollIndex(cls, idx, body, { ...options, offset })) {
+    for await (const { items: fetched, nextOffset } of this.#scrollIndex(cls, idx, body, { limit: 100, ...options, offset })) {
       lastNextOffset = nextOffset;
-      for (const hit of hits) {
-        try {
-          items.push(await this.#postLoad(cls, hit));
-        } catch (error) {
-          if (!(error instanceof NotFoundError)) {
-            throw error;
-          }
-        }
-      }
+      items.push(...fetched);
     }
     return { items, nextOffset: lastNextOffset ? JSONUtil.toBase64(lastNextOffset) : undefined };
   }
@@ -528,20 +500,11 @@ export class ElasticsearchModelService implements
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
     options?: ModelListOptions
-  ): AsyncIterable<T> {
-    for await (const { hits } of this.#scrollIndex(cls, idx, body, { ...options, limit: Number.MAX_SAFE_INTEGER })) {
-      for (const hit of hits) {
-        try {
-          yield await this.#postLoad(cls, hit);
-        } catch (error) {
-          if (!(error instanceof NotFoundError)) {
-            throw error;
-          }
-        }
-      }
+  ): AsyncIterable<T[]> {
+    for await (const { items } of this.#scrollIndex(cls, idx, body, options)) {
+      yield items;
     }
   }
-
 
   // Query
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {

@@ -104,6 +104,29 @@ export class SQLModelService implements
     }
   }
 
+  async * #scanTable<T extends ModelType>(
+    cls: Class<T>,
+    buildQuery: () => PageableModelQuery<T>,
+    options?: ModelListOptions & ModelPageOptions<number>
+  ): AsyncIterable<{ items: T[], nextOffset?: number }> {
+    const batchSize = options?.batchSizeHint ?? 100;
+    const maxCount = options?.limit ?? Number.MAX_SAFE_INTEGER;
+    let offset = 0;
+    let lastOffset = -1;
+    let produced = 0;
+    while (offset !== lastOffset && produced < maxCount && !(options?.abort?.aborted)) {
+      lastOffset = offset;
+      const items = await this.query<T>(cls, {
+        ...buildQuery(),
+        limit: Math.min(batchSize, maxCount - produced),
+        offset
+      });
+      offset += items.length;
+      produced += items.length;
+      yield { items, nextOffset: produced < maxCount ? offset : undefined };
+    }
+  }
+
   @PostConstruct()
   async initializeClient(): Promise<void> {
     await this.#dialect.connection.init?.();
@@ -190,12 +213,9 @@ export class SQLModelService implements
   }
 
   @ConnectedIterator()
-  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
-    for (const item of await this.query(cls, {})) {
-      if (options?.abort?.aborted) {
-        break;
-      }
-      yield item;
+  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+    for await (const { items } of this.#scanTable(cls, () => ({}), options)) {
+      yield items;
     }
   }
 
@@ -407,16 +427,21 @@ export class SQLModelService implements
     body: KeyedIndexBody<T, K>,
     options?: ModelPageOptions
   ): Promise<ModelPageResult<T>> {
-    const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-    const limit = options?.limit ?? 100;
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
+    const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
 
-    const items = await this.query(cls, castTo({
+    const baseQuery = castTo<ModelQuery<T>>({
       where: computed.project(),
       sort: idx.sortTemplate.map(part => ({ [part.path.join('.')]: part.value })),
-      limit, offset
-    }));
-    return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
+    });
+
+    const items: T[] = [];
+    let nextOffset: number | undefined;
+    for await (const batch of this.#scanTable<T>(cls, () => baseQuery, { ...options, offset })) {
+      items.push(...batch.items);
+      nextOffset = batch.nextOffset;
+    }
+    return { items, nextOffset: nextOffset ? JSONUtil.toBase64(nextOffset) : undefined };
   }
 
   @ConnectedIterator()
@@ -429,19 +454,14 @@ export class SQLModelService implements
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
     options?: ModelListOptions
-  ): AsyncIterable<T> {
+  ): AsyncIterable<T[]> {
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
-    let offset = 0;
-    let lastOffset = -1;
-    while (offset !== lastOffset && !(options?.abort?.aborted)) {
-      lastOffset = offset;
-      const items = await this.query(cls, castTo({
-        where: computed.project(),
-        sort: idx.sortTemplate.map(part => ({ [part.path.join('.')]: part.value })),
-        limit: 100, offset
-      }));
-      offset += items.length;
-      yield* items;
+    const baseQuery = castTo<ModelQuery<T>>({
+      where: computed.project(),
+      sort: idx.sortTemplate.map(part => ({ [part.path.join('.')]: part.value })),
+    });
+    for await (const { items } of this.#scanTable<T>(cls, () => baseQuery, options)) {
+      yield items;
     }
   }
 }
