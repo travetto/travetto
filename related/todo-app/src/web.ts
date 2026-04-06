@@ -1,6 +1,5 @@
 import { Controller, Get, Post, Put, Delete } from '@travetto/web';
 import { Inject } from '@travetto/di';
-import type { ModelPageResult } from '@travetto/model-indexed';
 
 import type { TodoService } from './service.ts';
 import type { Todo, TodoSearch } from './model.ts';
@@ -26,14 +25,6 @@ export class TodoController {
   @Get('/')
   async getAll(search: TodoSearch): Promise<Todo[]> {
     return this._service.getAll(search);
-  }
-
-  /**
-   * Get all todos
-   */
-  @Get('/page')
-  async getPage(offset?: string): Promise<ModelPageResult<Todo>> {
-    return this._service.getPage(offset);
   }
 
   /**
