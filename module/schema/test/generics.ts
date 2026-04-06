@@ -13,6 +13,10 @@ interface GenericList<T> {
   items: T[];
 }
 
+class GenericArray<T> {
+  items: T[];
+}
+
 /**
  * Generic response wrapper
  * @see body Wrapped response body #target
@@ -32,7 +36,13 @@ class GenericMethodContainer {
   async getItems(): Promise<GenericResponse<GenericItem[]>> {
     return new GenericResponse<GenericItem[]>();
   }
+
+  @Method()
+  async getArray(): Promise<GenericArray<GenericItem>> {
+    return new GenericArray<GenericItem>();
+  }
 }
+
 
 @Suite()
 class GenericInstantiationSuite {
@@ -59,5 +69,14 @@ class GenericInstantiationSuite {
     assert(method.returnType);
     assert(method.returnType.array);
     assert(method.returnType.type === GenericItem);
+  }
+
+
+  @Test()
+  async testGenericClass() {
+    const method = SchemaRegistryIndex.get(GenericMethodContainer).getMethod('getArray');
+    assert(method.returnType);
+    assert(method.returnType.type !== GenericArray);
+    assert(Object.getPrototypeOf(method.returnType) === GenericArray)
   }
 }

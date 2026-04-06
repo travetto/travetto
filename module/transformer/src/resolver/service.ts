@@ -85,7 +85,7 @@ export class SimpleResolver implements TransformResolver {
   getAllTypeArguments(ref: ts.Type): [templateName: string, type: ts.Type][] {
     const types = this.#tsChecker.getTypeArguments(transformCast(ref));
     let names: string[] | undefined;
-    if (ref.symbol.declarations) {
+    if (ref.symbol.declarations?.[0]) {
       const first = ref.symbol.declarations[0];
       if (ts.isClassLike(first) || ts.isInterfaceDeclaration(first) || ts.isTypeAliasDeclaration(first)) {
         names = first.typeParameters?.map(tp => tp.name.getText()) ?? [];
