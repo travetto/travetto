@@ -151,10 +151,11 @@ export class SimpleResolver implements TransformResolver {
         } catch { }
 
         if ('tsTypeArguments' in result) {
+          const tsTypeArguments = result.tsTypeArguments!;
           if (typeArguments.length) {
-            result.typeArguments = typeArguments!.map((item) => resolve(item, { alias: type.aliasSymbol, depth: depth + 1 }));
+            result.typeArguments = typeArguments.map((item, i) => resolve(item, { alias: type.aliasSymbol, templateTypeName: tsTypeArguments[i][0], depth: depth + 1 }));
           } else {
-            result.typeArguments = result.tsTypeArguments!.map((item) => resolve(item[1], { alias: type.aliasSymbol, templateTypeName: item[0], depth: depth + 1 }));
+            result.typeArguments = tsTypeArguments.map((item) => resolve(item[1], { alias: type.aliasSymbol, templateTypeName: item[0], depth: depth + 1 }));
           }
           delete result.tsTypeArguments;
         }
