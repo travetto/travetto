@@ -43,7 +43,7 @@
     "@travetto/pack": "^8.0.0-alpha.1",
     "@travetto/test": "^8.0.0-alpha.1",
     "@types/node": "^25.5.2",
-    "@types/vscode": "^1.110.0"
+    "@types/vscode": "^1.115.0"
   },
   "dependencies": {
     "@travetto/registry": "^8.0.0-alpha.1",
@@ -119,6 +119,11 @@
       {
         "command": "travetto.compiler:clean",
         "title": "Clean Code Output",
+        "category": "Travetto"
+      },
+      {
+        "command": "travetto.compiler:view-output",
+        "title": "View Compiler Output",
         "category": "Travetto"
       },
       {
@@ -239,6 +244,9 @@
       "commandPalette": [
         {
           "command": "travetto.compiler:start"
+        },
+        {
+          "command": "travetto.compiler:view-output"
         },
         {
           "command": "travetto.compiler:restart"

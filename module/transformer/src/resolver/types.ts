@@ -83,6 +83,10 @@ export interface ShapeType extends Type<'shape'> {
    * Type Arguments
    */
   tsTypeArguments?: TemplateArgument[];
+  /**
+   * Can we template this type
+   */
+  canTemplate?: boolean;
 }
 
 /**
