@@ -9,10 +9,16 @@ class GenericItem {
   name: string;
 }
 
+/**
+ * @virtual true
+ */
 interface GenericList<T> {
   items: T[];
 }
 
+/**
+ * @virtual true
+ */
 class GenericArray<T> {
   items: T[];
 }
@@ -77,6 +83,6 @@ class GenericInstantiationSuite {
     const method = SchemaRegistryIndex.get(GenericMethodContainer).getMethod('getArray');
     assert(method.returnType);
     assert(method.returnType.type !== GenericArray);
-    assert(Object.getPrototypeOf(method.returnType) === GenericArray)
+    assert(Object.getPrototypeOf(method.returnType) === GenericArray);
   }
 }

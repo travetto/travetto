@@ -223,12 +223,32 @@ export const TypeBuilder: {
     }
   },
   managed: {
-    build: (resolver, type) => {
+    build: (resolver, type, context) => {
       const name = CoreUtil.getSymbol(type)?.getName();
       const importName = resolver.getTypeImportName(type)!;
       const tsTypeArguments = resolver.getAllTypeArguments(type);
       const docs = DocUtil.readDocTag(type, 'see');
       const innerTypeProperty = docs.find(doc => doc.includes('#target'))?.split(' ')?.[0];
+
+      // Detect managed, but shapeable
+      if (tsTypeArguments.length > 0) {
+        const hasEmptyConstructor = type.getConstructSignatures().some(signature => signature.parameters.length === 0)
+          || type.getConstructSignatures().length === 0; // If no constructor, we can assume it's shapeable
+        const hasMethods = type.getProperties().some(property => property.getFlags() & ts.SymbolFlags.Method);
+        const canTemplate = DocUtil.readDocTag(type, 'virtual')?.[0]?.trim() === 'true';
+        if (hasEmptyConstructor && !hasMethods && canTemplate) {
+          process.send?.({
+            type: 'log',
+            payload: {
+              level: 'info',
+              message: `Type ${importName} is a managed type, but has no constructor or methods. Treating as shape.`,
+              args: [importName]
+            }
+          });
+          return TypeBuilder.shape.build(resolver, type, { ...context, alias: type.aliasSymbol });
+        }
+      }
+
       return { key: 'managed', name, importName, tsTypeArguments, innerTypeProperty };
     },
   },
@@ -322,6 +342,7 @@ export const TypeBuilder: {
       const tsTypeArguments = resolver.getAllTypeArguments(type);
       const name = CoreUtil.getSymbol(context?.alias ?? type)?.getName();
       const tsFieldTypes: Record<string, ts.Type> = {};
+      const canTemplate = DocUtil.readDocTag(type, 'virtual')?.[0]?.trim() === 'true';
 
       for (const member of properties) {
         const declaration = DeclarationUtil.getPrimaryDeclarationNode(member);
@@ -338,10 +359,10 @@ export const TypeBuilder: {
           }
         }
       }
-      return { key: 'shape', name, importName, tsFieldTypes, tsTypeArguments, fieldTypes: {} };
+      return { key: 'shape', name, importName, tsFieldTypes, tsTypeArguments, fieldTypes: {}, canTemplate };
     },
     finalize: (type: ShapeType) => {
-      if ((type.typeArguments?.length ?? 0) > 0) {
+      if ((type.typeArguments?.length ?? 0) > 0 && type.canTemplate !== false) {
         let suffix = '';
         const typeTemplateMap = Object.fromEntries(type.typeArguments!.map(node => [node.templateTypeName, node]));
 

@@ -8,6 +8,7 @@ export interface ModelPageOptions<O = string> {
 
 /**
  * Result of a page request.
+ * @virtual true
  */
 export interface ModelPageResult<T extends ModelType> {
   items: T[];
