@@ -9,12 +9,13 @@ import { DeclarationUtil } from '../util/declaration.ts';
 import { LiteralUtil } from '../util/literal.ts';
 import { transformCast, type TemplateLiteralPart } from '../types/shared.ts';
 
-import type { Type, AnyType, CompositionType, TransformResolver, TemplateType, MappedType, ShapeType, ResolverContext } from './types.ts';
+import type { Type, AnyType, CompositionType, TransformResolver, TemplateType, MappedType, ShapeType, ResolverContext, ManagedType } from './types.ts';
 import { CoerceUtil } from './coerce.ts';
 
 const UNDEFINED = Symbol();
 
 const MAPPED_TYPE_SET = new Set(['Omit', 'Pick', 'Required', 'Partial']);
+const allowsVirtualTemplate = (type: ts.Type) => DocUtil.readDocTag(type, 'virtual')?.[0]?.trim() === 'true';
 const isMappedType = (type: string | undefined): type is MappedType['operation'] => MAPPED_TYPE_SET.has(type!);
 const getMappedFields = (type: ts.Type): string[] | undefined => {
   if (type.isStringLiteral()) {
@@ -230,26 +231,23 @@ export const TypeBuilder: {
       const docs = DocUtil.readDocTag(type, 'see');
       const innerTypeProperty = docs.find(doc => doc.includes('#target'))?.split(' ')?.[0];
 
+      const managedType: ManagedType = { key: 'managed', name, importName, tsTypeArguments, innerTypeProperty };
+
       // Detect managed, but shapeable
       if (tsTypeArguments.length > 0) {
         const hasEmptyConstructor = type.getConstructSignatures().some(signature => signature.parameters.length === 0)
           || type.getConstructSignatures().length === 0; // If no constructor, we can assume it's shapeable
         const hasMethods = type.getProperties().some(property => property.getFlags() & ts.SymbolFlags.Method);
-        const canTemplate = DocUtil.readDocTag(type, 'virtual')?.[0]?.trim() === 'true';
-        if (hasEmptyConstructor && !hasMethods && canTemplate) {
-          process.send?.({
-            type: 'log',
-            payload: {
-              level: 'info',
-              message: `Type ${importName} is a managed type, but has no constructor or methods. Treating as shape.`,
-              args: [importName]
-            }
+        if (hasEmptyConstructor && !hasMethods && allowsVirtualTemplate(type)) {
+          return TypeBuilder.shape.build(resolver, type, {
+            ...context,
+            extendsFrom: managedType,
+            alias: type.aliasSymbol
           });
-          return TypeBuilder.shape.build(resolver, type, { ...context, alias: type.aliasSymbol });
         }
       }
 
-      return { key: 'managed', name, importName, tsTypeArguments, innerTypeProperty };
+      return managedType;
     },
   },
   composition: {
@@ -342,7 +340,6 @@ export const TypeBuilder: {
       const tsTypeArguments = resolver.getAllTypeArguments(type);
       const name = CoreUtil.getSymbol(context?.alias ?? type)?.getName();
       const tsFieldTypes: Record<string, ts.Type> = {};
-      const canTemplate = DocUtil.readDocTag(type, 'virtual')?.[0]?.trim() === 'true';
 
       for (const member of properties) {
         const declaration = DeclarationUtil.getPrimaryDeclarationNode(member);
@@ -359,7 +356,10 @@ export const TypeBuilder: {
           }
         }
       }
-      return { key: 'shape', name, importName, tsFieldTypes, tsTypeArguments, fieldTypes: {}, canTemplate };
+      return {
+        key: 'shape', name, importName, tsFieldTypes, tsTypeArguments,
+        fieldTypes: {}, extendsFrom: context.extendsFrom, canTemplate: allowsVirtualTemplate(type)
+      };
     },
     finalize: (type: ShapeType) => {
       if ((type.typeArguments?.length ?? 0) > 0 && type.canTemplate !== false) {

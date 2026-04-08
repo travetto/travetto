@@ -74,7 +74,13 @@ class ${uniqueId} extends ${type.mappedClassName} {
                 description: type.comment
               })),
             ],
-            id, [], [],
+            id,
+            [],
+            type.extendsFrom ? [
+              state.factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
+                state.factory.createExpressionWithTypeArguments(state.getOrImport(type.extendsFrom), [])
+              ])
+            ] : [],
             Object.entries(type.fieldTypes)
               .map(([key, value]) =>
                 this.computeInput(state, state.factory.createPropertyDeclaration(

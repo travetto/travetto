@@ -87,6 +87,10 @@ export interface ShapeType extends Type<'shape'> {
    * Can we template this type
    */
   canTemplate?: boolean;
+  /**
+   * Extends from another type, used for shapes that are concrete types, but we want to preserve the shape information as well
+   */
+  extendsFrom?: ManagedType;
 }
 
 /**
@@ -239,4 +243,5 @@ export type ResolverContext = {
   importName: string;
   depth?: number;
   templateTypeName?: string;
+  extendsFrom?: ManagedType;
 };

@@ -83,6 +83,8 @@ class GenericInstantiationSuite {
     const method = SchemaRegistryIndex.get(GenericMethodContainer).getMethod('getArray');
     assert(method.returnType);
     assert(method.returnType.type !== GenericArray);
-    assert(Object.getPrototypeOf(method.returnType) === GenericArray);
+    assert(Object.getPrototypeOf(method.returnType.type) === GenericArray);
+    const children = SchemaRegistryIndex.get(method.returnType.type);
+    assert(children.getField('items').type === GenericItem);
   }
 }
