@@ -1,6 +1,6 @@
 {
   "name": "@travetto/eslint",
-  "version": "8.0.0-alpha.11",
+  "version": "8.0.0-alpha.12",
   "type": "module",
   "description": "ES Linting Rules",
   "keywords": [
@@ -35,7 +35,7 @@
     "eslint-plugin-unused-imports": "^4.4.1"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.16"
+    "@travetto/cli": "^8.0.0-alpha.17"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

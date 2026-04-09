@@ -1,6 +1,6 @@
 {
   "name": "@travetto/cache",
-  "version": "8.0.0-alpha.12",
+  "version": "8.0.0-alpha.13",
   "type": "module",
   "description": "Caching functionality with decorators for declarative use.",
   "keywords": [
@@ -27,11 +27,11 @@
   },
   "dependencies": {
     "@travetto/di": "^8.0.0-alpha.11",
-    "@travetto/model": "^8.0.0-alpha.11"
+    "@travetto/model": "^8.0.0-alpha.12"
   },
   "peerDependencies": {
     "@travetto/test": "^8.0.0-alpha.11",
-    "@travetto/transformer": "^8.0.0-alpha.6"
+    "@travetto/transformer": "^8.0.0-alpha.7"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {

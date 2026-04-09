@@ -22,23 +22,23 @@
     "start": "trv web:http"
   },
   "dependencies": {
-    "@travetto/auth-web": "^8.0.0-alpha.12",
-    "@travetto/auth-web-session": "^8.0.0-alpha.12",
-    "@travetto/log": "^8.0.0-alpha.11",
-    "@travetto/model-mongo": "^8.0.0-alpha.12",
-    "@travetto/openapi": "^8.0.0-alpha.12",
-    "@travetto/web-http": "^8.0.0-alpha.13",
-    "@travetto/web-rpc": "^8.0.0-alpha.13",
+    "@travetto/auth-web": "^8.0.0-alpha.13",
+    "@travetto/auth-web-session": "^8.0.0-alpha.13",
+    "@travetto/log": "^8.0.0-alpha.12",
+    "@travetto/model-mongo": "^8.0.0-alpha.13",
+    "@travetto/openapi": "^8.0.0-alpha.13",
+    "@travetto/web-http": "^8.0.0-alpha.14",
+    "@travetto/web-rpc": "^8.0.0-alpha.14",
     "vue": "^3.5.32"
   },
   "devDependencies": {
-    "@travetto/compiler": "^8.0.0-alpha.12",
-    "@travetto/email-compiler": "^8.0.0-alpha.12",
-    "@travetto/email-inky": "^8.0.0-alpha.12",
+    "@travetto/compiler": "^8.0.0-alpha.13",
+    "@travetto/email-compiler": "^8.0.0-alpha.13",
+    "@travetto/email-inky": "^8.0.0-alpha.13",
     "@travetto/pack": "^8.0.0-alpha.14"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.16"
+    "@travetto/cli": "^8.0.0-alpha.17"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
