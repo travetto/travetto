@@ -4,6 +4,8 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { Method, Schema, SchemaRegistryIndex } from '@travetto/schema';
 
+import { GenericArray } from './models/generic';
+
 @Schema()
 class GenericItem {
   name: string;
@@ -13,13 +15,6 @@ class GenericItem {
  * @virtual true
  */
 interface GenericList<T> {
-  items: T[];
-}
-
-/**
- * @virtual true
- */
-class GenericArray<T> {
   items: T[];
 }
 
@@ -49,7 +44,6 @@ class GenericMethodContainer {
   }
 }
 
-
 @Suite()
 class GenericInstantiationSuite {
 
@@ -76,7 +70,6 @@ class GenericInstantiationSuite {
     assert(method.returnType.array);
     assert(method.returnType.type === GenericItem);
   }
-
 
   @Test()
   async testGenericClass() {

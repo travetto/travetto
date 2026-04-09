@@ -15,7 +15,7 @@ import { CoerceUtil } from './coerce.ts';
 const UNDEFINED = Symbol();
 
 const MAPPED_TYPE_SET = new Set(['Omit', 'Pick', 'Required', 'Partial']);
-const allowsVirtualTemplate = (type: ts.Type) => DocUtil.readDocTag(type, 'virtual')?.[0]?.trim() === 'true';
+const allowsVirtualTemplate = (type: ts.Type): boolean => DocUtil.readDocTag(type, 'virtual')?.[0]?.trim() === 'true';
 const isMappedType = (type: string | undefined): type is MappedType['operation'] => MAPPED_TYPE_SET.has(type!);
 const getMappedFields = (type: ts.Type): string[] | undefined => {
   if (type.isStringLiteral()) {
@@ -53,9 +53,7 @@ const GLOBAL_SIMPLE: Record<string, Function> = {
   PromiseConstructor: Promise.constructor
 };
 
-type Category =
-  'tuple' | 'shape' | 'literal' | 'template' | 'managed' |
-  'composition' | 'foreign' | 'concrete' | 'unknown' | 'mapped';
+type Category = Exclude<AnyType['key'], 'pointer'> | 'concrete';
 
 /**
  * Type categorizer, input for builder

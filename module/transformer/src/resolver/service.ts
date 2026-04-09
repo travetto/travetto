@@ -9,6 +9,8 @@ import { DocUtil } from '../util/doc.ts';
 import { DeclarationUtil } from '../util/declaration.ts';
 import { transformCast } from '../types/shared.ts';
 
+const isFinalizeType = (key: string): key is keyof typeof TypeBuilder => key in TypeBuilder;
+
 /**
  * Implementation of TransformResolver
  */
@@ -131,12 +133,11 @@ export class SimpleResolver implements TransformResolver {
       }
 
       const { category, type } = TypeCategorize(this, resType);
-      const { build, finalize } = TypeBuilder[category];
       // TODO: Figure out how to get this legitimately
       const typeArguments: ts.Type[] =
         'resolvedTypeArguments' in resType && resType.resolvedTypeArguments ? transformCast(resType.resolvedTypeArguments) : [];
 
-      let result = build(this, type, { ...context, node: (node && 'kind' in node) ? node : undefined, importName });
+      let result = TypeBuilder[category].build(this, type, { ...context, node: (node && 'kind' in node) ? node : undefined, importName });
 
       // Convert via cache if needed
       result = visited.getOrSet(type, result);
@@ -171,8 +172,8 @@ export class SimpleResolver implements TransformResolver {
           result.subTypes = result.tsSubTypes!.map((item) => resolve(item, { alias: type.aliasSymbol, depth: depth + 1 }));
           delete result.tsSubTypes;
         }
-        if (finalize) {
-          result = finalize(transformCast(result));
+        if (isFinalizeType(result.key)) {
+          result = TypeBuilder[result.key].finalize?.(transformCast(result)) ?? result;
         }
       }
 
