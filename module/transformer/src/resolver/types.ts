@@ -1,6 +1,8 @@
 import type ts from 'typescript';
 import type { TemplateLiteral } from '../types/shared.ts';
 
+type TemplateArgument = [templateName: string, type: ts.Type];
+
 /**
  * Base type for a simplistic type structure
  */
@@ -29,6 +31,10 @@ export interface Type<K extends string> {
    * Original type
    */
   original?: ts.Type;
+  /**
+   * Template name if this type is derived from a template
+   */
+  templateTypeName?: string;
 }
 
 /**
@@ -46,7 +52,11 @@ export interface ManagedType extends Type<'managed'> {
   /**
    * Type Info
    */
-  tsTypeArguments?: ts.Type[];
+  tsTypeArguments?: TemplateArgument[];
+  /**
+   * Inner return property
+   */
+  innerTypeProperty?: string;
 }
 
 /**
@@ -72,7 +82,15 @@ export interface ShapeType extends Type<'shape'> {
   /**
    * Type Arguments
    */
-  tsTypeArguments?: ts.Type[];
+  tsTypeArguments?: TemplateArgument[];
+  /**
+   * Can we template this type
+   */
+  canTemplate?: boolean;
+  /**
+   * Extends from another type, used for shapes that are concrete types, but we want to preserve the shape information as well
+   */
+  extendsFrom?: ManagedType;
 }
 
 /**
@@ -116,7 +134,7 @@ export interface LiteralType extends Type<'literal'> {
   /**
    * Type Info
    */
-  tsTypeArguments?: ts.Type[];
+  tsTypeArguments?: TemplateArgument[];
 }
 
 /**
@@ -213,8 +231,17 @@ export interface TransformResolver {
   isKnownFile(file: string): boolean;
   getFileImportName(file: string, removeExt?: boolean): string;
   getTypeImportName(type: ts.Type, removeExt?: boolean): string | undefined;
-  getAllTypeArguments(type: ts.Type): ts.Type[];
+  getAllTypeArguments(type: ts.Type): TemplateArgument[];
   getPropertiesOfType(type: ts.Type): ts.Symbol[];
   getTypeAsString(type: ts.Type): string | undefined;
   getType(node: ts.Node): ts.Type;
 }
+
+export type ResolverContext = {
+  alias?: ts.Symbol;
+  node?: ts.Node;
+  importName: string;
+  depth?: number;
+  templateTypeName?: string;
+  extendsFrom?: ManagedType;
+};

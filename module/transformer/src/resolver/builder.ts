@@ -9,12 +9,13 @@ import { DeclarationUtil } from '../util/declaration.ts';
 import { LiteralUtil } from '../util/literal.ts';
 import { transformCast, type TemplateLiteralPart } from '../types/shared.ts';
 
-import type { Type, AnyType, CompositionType, TransformResolver, TemplateType, MappedType } from './types.ts';
+import type { Type, AnyType, CompositionType, TransformResolver, TemplateType, MappedType, ShapeType, ResolverContext, ManagedType } from './types.ts';
 import { CoerceUtil } from './coerce.ts';
 
 const UNDEFINED = Symbol();
 
 const MAPPED_TYPE_SET = new Set(['Omit', 'Pick', 'Required', 'Partial']);
+const allowsVirtualTemplate = (type: ts.Type): boolean => DocUtil.readDocTag(type, 'virtual')?.[0]?.trim() === 'true';
 const isMappedType = (type: string | undefined): type is MappedType['operation'] => MAPPED_TYPE_SET.has(type!);
 const getMappedFields = (type: ts.Type): string[] | undefined => {
   if (type.isStringLiteral()) {
@@ -52,9 +53,7 @@ const GLOBAL_SIMPLE: Record<string, Function> = {
   PromiseConstructor: Promise.constructor
 };
 
-type Category =
-  'tuple' | 'shape' | 'literal' | 'template' | 'managed' |
-  'composition' | 'foreign' | 'concrete' | 'unknown' | 'mapped';
+type Category = Exclude<AnyType['key'], 'pointer'> | 'concrete';
 
 /**
  * Type categorizer, input for builder
@@ -137,7 +136,7 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
  */
 export const TypeBuilder: {
   [K in Category]: {
-    build(resolver: TransformResolver, type: ts.Type, context: { alias?: ts.Symbol, node?: ts.Node }): AnyType | undefined;
+    build(resolver: TransformResolver, type: ts.Type, context: ResolverContext): AnyType | undefined;
     finalize?(type: Type<K>): AnyType;
   }
 } = {
@@ -223,12 +222,31 @@ export const TypeBuilder: {
     }
   },
   managed: {
-    build: (resolver, type) => {
+    build: (resolver, type, context) => {
       const name = CoreUtil.getSymbol(type)?.getName();
       const importName = resolver.getTypeImportName(type)!;
       const tsTypeArguments = resolver.getAllTypeArguments(type);
-      return { key: 'managed', name, importName, tsTypeArguments };
-    }
+      const docs = DocUtil.readDocTag(type, 'see');
+      const innerTypeProperty = docs.find(doc => doc.includes('#target'))?.split(' ')?.[0];
+
+      const managedType: ManagedType = { key: 'managed', name, importName, tsTypeArguments, innerTypeProperty };
+
+      // Detect managed, but shapeable
+      if (tsTypeArguments.length > 0) {
+        const hasEmptyConstructor = type.getConstructSignatures().some(signature => signature.parameters.length === 0)
+          || type.getConstructSignatures().length === 0; // If no constructor, we can assume it's shapeable
+        const hasMethods = type.getProperties().some(property => property.getFlags() & ts.SymbolFlags.Method);
+        if (hasEmptyConstructor && !hasMethods && allowsVirtualTemplate(type)) {
+          return TypeBuilder.shape.build(resolver, type, {
+            ...context,
+            extendsFrom: managedType,
+            alias: type.aliasSymbol
+          });
+        }
+      }
+
+      return managedType;
+    },
   },
   composition: {
     build: (resolver, uType: ts.UnionOrIntersectionType) => {
@@ -311,31 +329,54 @@ export const TypeBuilder: {
   },
   shape: {
     build: (resolver, type, context) => {
-      const tsFieldTypes: Record<string, ts.Type> = {};
-      const name = CoreUtil.getSymbol(context?.alias ?? type)?.getName();
       const importName = resolver.getTypeImportName(type) ?? '<unknown>';
-      const tsTypeArguments = resolver.getAllTypeArguments(type);
       const properties = resolver.getPropertiesOfType(type);
       if (properties.length === 0) {
         return { key: 'literal', name: 'Object', ctor: Object, importName };
       }
 
+      const tsTypeArguments = resolver.getAllTypeArguments(type);
+      const name = CoreUtil.getSymbol(context?.alias ?? type)?.getName();
+      const tsFieldTypes: Record<string, ts.Type> = {};
+
       for (const member of properties) {
-        const decorator = DeclarationUtil.getPrimaryDeclarationNode(member);
-        if (DeclarationUtil.isPublic(decorator)) { // If public
-          const memberType = resolver.getType(decorator);
+        const declaration = DeclarationUtil.getPrimaryDeclarationNode(member);
+        if (DeclarationUtil.isPublic(declaration)) { // IF public
+          const memberType = resolver.getType(declaration);
           if (
             !member.getName().includes('@') && // if not a symbol
             !memberType.getCallSignatures().length // if not a function
           ) {
-            if ((ts.isPropertySignature(decorator) || ts.isPropertyDeclaration(decorator)) && !!decorator.questionToken) {
+            if ((ts.isPropertySignature(declaration) || ts.isPropertyDeclaration(declaration)) && !!declaration.questionToken) {
               Object.defineProperty(memberType, UNDEFINED, { value: true });
             }
             tsFieldTypes[member.getName()] = memberType;
           }
         }
       }
-      return { key: 'shape', name, importName, tsFieldTypes, tsTypeArguments, fieldTypes: {} };
+      return {
+        key: 'shape', name, importName, tsFieldTypes, tsTypeArguments,
+        fieldTypes: {}, extendsFrom: context.extendsFrom, canTemplate: allowsVirtualTemplate(type)
+      };
+    },
+    finalize: (type: ShapeType) => {
+      if ((type.typeArguments?.length ?? 0) > 0 && type.canTemplate !== false) {
+        let suffix = '';
+        const typeTemplateMap = Object.fromEntries(type.typeArguments!.map(node => [node.templateTypeName, node]));
+
+        for (const field of Object.values(type.fieldTypes)) {
+          if (field.key === 'literal' || field.key === 'shape' || field.key === 'managed') {
+            if (field.typeArguments?.every(item => item.templateTypeName && item.templateTypeName in typeTemplateMap)) {
+              field.typeArguments = field.typeArguments.map(item => typeTemplateMap[item.templateTypeName!]);
+              suffix = `${suffix}${field.name}${field.typeArguments.map(arg => arg.name).join('$')}`;
+            }
+          }
+        }
+        if (suffix) {
+          type.name = `${type.name}$${suffix}`;
+        }
+      }
+      return type;
     }
   },
   concrete: {

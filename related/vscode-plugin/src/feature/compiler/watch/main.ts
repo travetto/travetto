@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import { ChildProcess } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 
 import { CodecUtil, Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
 
@@ -190,12 +192,36 @@ export class CompilerWatchFeature extends BaseFeature {
     this.#log.show();
   }
 
+  async #viewSource(): Promise<void> {
+    const currentDocument = vscode.window.activeTextEditor?.document;
+    if (!currentDocument) {
+      return;
+    }
+
+    const file = currentDocument.uri.fsPath;
+    const module = Workspace.workspaceIndex.findModuleForArbitraryFile(file);
+    if (module) {
+      const [, relativeFile] = file.split(module.sourceFolder);
+      const outputFile = path.join(Workspace.workspaceIndex.outputRoot, module.outputFolder, relativeFile.replace(/\.(ts|tsx)$/, '.js'));
+      if (existsSync(outputFile)) {
+        const doc = await vscode.workspace.openTextDocument(outputFile);
+        await vscode.window.showTextDocument(doc);
+        return;
+      } else {
+        this.#log.warn('Output file does not exist for', outputFile);
+      }
+    } else {
+      this.#log.warn('Output file does not exist for', file);
+    }
+  }
+
   /**
    * On initial activation
    */
   async activate(_: vscode.ExtensionContext): Promise<void> {
     this.#status.command = { command: this.commandName('status-item'), title: 'Show Logs' };
     this.register('status-item', () => this.#onStatusItemClick());
+    this.register('view-output', () => this.#viewSource())
     this.#onStateEvent('closed');
     this.#status.show();
 

@@ -74,7 +74,13 @@ class ${uniqueId} extends ${type.mappedClassName} {
                 description: type.comment
               })),
             ],
-            id, [], [],
+            id,
+            [],
+            type.extendsFrom ? [
+              state.factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
+                state.factory.createExpressionWithTypeArguments(state.getOrImport(type.extendsFrom), [])
+              ])
+            ] : [],
             Object.entries(type.fieldTypes)
               .map(([key, value]) =>
                 this.computeInput(state, state.factory.createPropertyDeclaration(
@@ -350,10 +356,9 @@ class ${uniqueId} extends ${type.mappedClassName} {
       targetType = returnType.typeArguments[0];
     }
 
-    // TODO: Standardize this using jsdoc
     let innerReturnType: AnyType | undefined;
-    if (targetType.key === 'managed' && targetType.importName.startsWith('@travetto/')) {
-      innerReturnType = state.getApparentTypeOfField(targetType.original!, 'body');
+    if (targetType.key === 'managed' && targetType.innerTypeProperty) {
+      innerReturnType = state.getApparentTypeOfField(targetType.original!, targetType.innerTypeProperty);
     }
 
     const finalReturnType = SchemaTransformUtil.ensureType(state, innerReturnType ?? returnType, node);
