@@ -34,12 +34,7 @@
     "@travetto/model-sql": "^8.0.0-alpha.14"
   },
   "travetto": {
-    "displayName": "SQLite Model Service",
-    "build": {
-      "binaryDependencies": [
-        "better-sqlite3"
-      ]
-    }
+    "displayName": "SQLite Model Service"
   },
   "publishConfig": {
     "access": "public"

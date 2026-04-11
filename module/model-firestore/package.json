@@ -40,7 +40,12 @@
     }
   },
   "travetto": {
-    "displayName": "Firestore Model Support"
+    "displayName": "Firestore Model Support",
+    "build": {
+      "externalDependencies": [
+        "google-gax"
+      ]
+    }
   },
   "private": false,
   "publishConfig": {

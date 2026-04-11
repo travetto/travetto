@@ -30,7 +30,7 @@
   "travetto": {
     "displayName": "Image",
     "build": {
-      "binaryDependencies": [
+      "externalDependencies": [
         "sharp"
       ]
     }

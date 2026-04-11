@@ -56,7 +56,7 @@ export type Package = {
       includes?: Record<string, 'main' | true>;
       watchIgnores?: string[];
       typesFolder?: string;
-      binaryDependencies?: string[];
+      externalDependencies?: string[];
     };
   };
   workspaces?: string[];

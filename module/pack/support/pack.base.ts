@@ -121,14 +121,14 @@ export abstract class BasePackCommand implements CliCommandShape {
   }
 
   /**
-   * Get all binary dependencies
+   * Get all external dependencies
    */
-  getBinaryDependencies(): string[] {
+  getModuleExternalDependencies(): string[] {
     return [...RuntimeIndex.getModuleList('all')]
       .map(name => RuntimeIndex.getModule(name))
       .filter((module): module is IndexedModule => !!module?.production)
       .map(module => PackageUtil.readPackage(module?.sourcePath))
-      .map(pkg => pkg?.travetto?.build?.binaryDependencies ?? [])
+      .map(pkg => pkg?.travetto?.build?.externalDependencies ?? [])
       .flat();
   }
 
@@ -146,8 +146,8 @@ export abstract class BasePackCommand implements CliCommandShape {
     this.mainName ??= path.basename(this.module);
     this.mainFile = `${this.mainName}.js`;
 
-    // Collect binary dependencies
-    const dependencies = this.getBinaryDependencies();
+    // Collect unmanaged dependencies
+    const dependencies = this.getModuleExternalDependencies();
     this.externalDependencies = [...this.externalDependencies, ...dependencies];
 
     const stream = this.runOperations();
