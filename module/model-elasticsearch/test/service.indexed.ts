@@ -8,6 +8,7 @@ import { ModelIndexedPolymorphismSuite } from '@travetto/model-indexed/support/t
 class ElasticsearchIndexedSuite extends ModelIndexedSuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
+  supportsUniqueIndexes = false;
 }
 
 @Suite()

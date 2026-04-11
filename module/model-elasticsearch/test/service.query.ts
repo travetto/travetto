@@ -16,6 +16,7 @@ class ElasticsearchQuerySuite extends ModelQuerySuite {
 class ElasticsearchQueryCrudSuite extends ModelQueryCrudSuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
+  supportsUniqueIndexes = false;
 }
 
 @Suite()

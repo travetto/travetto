@@ -190,7 +190,7 @@ export class MongoUtil {
         (acc, field) => ({ ...acc, ...flattenKeys(castTo(field)) }),
         castTo<Record<string, -1 | 0 | 1>>({}));
 
-      return [out, { name, unique: idx.type === 'query:unique', }];
+      return [out, { name, unique: !!idx.unique }];
     } else if (isModelIndexedIndex(idx)) {
       const filter = Object.fromEntries([
         ...idx.keyTemplate.map(({ path }) => [path.join('.'), 1]),

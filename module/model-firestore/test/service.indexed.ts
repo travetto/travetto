@@ -8,6 +8,7 @@ import { ModelIndexedPolymorphismSuite } from '@travetto/model-indexed/support/t
 class FirestoreIndexedSuite extends ModelIndexedSuite {
   serviceClass = FirestoreModelService;
   configClass = FirestoreModelConfig;
+  supportsUniqueIndexes = false;
 }
 
 @Suite()

@@ -52,7 +52,7 @@ export class DynamoDBUtil {
     const toCreate: GlobalSecondaryIndex[] = [];
 
     for (const idx of indexes) {
-      if (!isModelIndexedIndex(idx) || ('unique' in idx && idx.unique)) {
+      if (!isModelIndexedIndex(idx)) {
         console.warn('Non-indexed indices are not supported in DynamoDB for', { cls: cls.Ⲑid, idx: idx.name });
         continue;
       }

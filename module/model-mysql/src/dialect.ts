@@ -112,7 +112,7 @@ export class MySQLDialect extends SQLDialect {
       WHERE 
         stat.TABLE_NAME = '${table}' 
         AND stat.TABLE_SCHEMA = DATABASE()
-        AND tc.CONSTRAINT_TYPE IS NULL
+        AND (tc.CONSTRAINT_TYPE IS NULL OR tc.CONSTRAINT_TYPE = 'UNIQUE')
         AND stat.COLUMN_NAME NOT IN (${IGNORE_FIELDS.join(',')})
       GROUP BY stat.INDEX_NAME, stat.NON_UNIQUE
     `)

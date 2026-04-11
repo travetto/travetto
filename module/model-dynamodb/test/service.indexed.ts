@@ -8,6 +8,7 @@ import { ModelIndexedPolymorphismSuite } from '@travetto/model-indexed/support/t
 class DynamoDBIndexedSuite extends ModelIndexedSuite {
   serviceClass = DynamoDBModelService;
   configClass = DynamoDBModelConfig;
+  supportsUniqueIndexes = false;
 }
 
 @Suite()

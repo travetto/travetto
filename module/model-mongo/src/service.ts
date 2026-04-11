@@ -4,6 +4,7 @@ import {
   type ObjectId, type RootFilterOperators, type Filter,
   type WithId as MongoWithId,
   type FindCursor,
+  MongoServerError,
 } from 'mongodb';
 
 import {
@@ -37,6 +38,9 @@ import type { MongoModelConfig } from './config.ts';
 type BlobRaw = GridFSFile & { metadata?: BinaryMetadata };
 
 type MongoTextSearch = RootFilterOperators<unknown>['$text'];
+
+const isDuplicateKeyError = (error: unknown): boolean =>
+  error instanceof MongoServerError && error.message.includes('duplicate key error');
 
 export const ModelBlobNamespace = '__blobs';
 
@@ -249,11 +253,15 @@ export class MongoModelService implements
     const id = this.preUpdate(cleaned);
 
     const store = await this.getStore(cls);
-    const result = await store.insertOne(castTo(cleaned));
-    if (!result.insertedId) {
-      throw new ExistsError(cls, id);
+    try {
+      const result = await store.insertOne(castTo(cleaned));
+      if (!result.insertedId) {
+        throw new ExistsError(cls, id);
+      }
+      return this.postUpdate(cleaned, id);
+    } catch (error) {
+      throw isDuplicateKeyError(error) ? new ExistsError(cls, id) : error;
     }
-    return this.postUpdate(cleaned, id);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
@@ -279,11 +287,7 @@ export class MongoModelService implements
         { upsert: true }
       );
     } catch (error) {
-      if (error instanceof Error && error.message.includes('duplicate key error')) {
-        throw new ExistsError(cls, id);
-      } else {
-        throw error;
-      }
+      throw isDuplicateKeyError(error) ? new ExistsError(cls, id) : error;
     }
     return this.postUpdate(cleaned, id);
   }
