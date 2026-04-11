@@ -10,6 +10,7 @@ import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, isModelIndexedIndex,
   type FullKeyedIndexWithPartialBody, type FullKeyedIndexBody, ModelIndexedComputedIndex,
+  warnIfIndexedUniqueIndex, warnIfNonIndexedIndex,
 } from '@travetto/model-indexed';
 
 import { Injectable, PostConstruct } from '@travetto/di';
@@ -250,11 +251,8 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     await ModelStorageUtil.storageInitialization(this);
     ShutdownManager.signal.addEventListener('abort', () => this.client.close());
     for (const cls of ModelRegistryIndex.getClasses()) {
-      for (const idx of ModelRegistryIndex.getIndices(cls)) {
-        if (!isModelIndexedIndex(idx) || ('unique' in idx && idx.unique)) {
-          console.warn('Non-indexed indices are not supported in redis for', { cls: cls.Ⲑid, idx: idx.name });
-        }
-      }
+      warnIfIndexedUniqueIndex(this, cls, ModelRegistryIndex.getIndices(cls));
+      warnIfNonIndexedIndex(this, cls, ModelRegistryIndex.getIndices(cls));
     }
   }
 
@@ -328,7 +326,10 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   // Storage
   async createStorage(): Promise<void> {
-    // Do nothing
+    for (const cls of ModelRegistryIndex.getClasses()) {
+      warnIfIndexedUniqueIndex(this, cls, ModelRegistryIndex.getIndices(cls));
+      warnIfNonIndexedIndex(this, cls, ModelRegistryIndex.getIndices(cls));
+    }
   }
 
   async deleteStorage(): Promise<void> {

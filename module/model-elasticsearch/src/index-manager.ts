@@ -3,6 +3,7 @@ import type * as estypes from '@elastic/elasticsearch/api/types';
 
 import { JSONUtil, type Class } from '@travetto/runtime';
 import { ModelRegistryIndex, type ModelType, type ModelStorageSupport } from '@travetto/model';
+import { warnIfIndexedUniqueIndex } from '@travetto/model-indexed';
 
 import type { ElasticsearchModelConfig } from './config.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
@@ -102,6 +103,8 @@ export class IndexManager implements ModelStorageSupport {
   async upsertModel(cls: Class<ModelType>): Promise<void> {
     const { index } = this.getIdentity(cls);
     const resolvedAlias = await this.#client.indices.getMapping({ index }).catch(() => undefined);
+
+    warnIfIndexedUniqueIndex(this, cls, ModelRegistryIndex.getIndices(cls));
 
     if (resolvedAlias) {
       const [currentIndex] = Object.keys(resolvedAlias ?? {});

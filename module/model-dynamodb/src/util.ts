@@ -5,7 +5,7 @@ import type {
 
 import type { Class } from '@travetto/runtime';
 import { ModelCrudUtil, ModelExpiryUtil, ModelRegistryIndex, NotFoundError, type ModelType } from '@travetto/model';
-import { isModelIndexedIndex } from '@travetto/model-indexed';
+import { warnIfIndexedUniqueIndex, warnIfNonIndexedIndex } from '@travetto/model-indexed';
 
 /**
  * Configuration for DynamoDB indices
@@ -51,15 +51,11 @@ export class DynamoDBUtil {
     const attributes: AttributeDefinition[] = [];
     const toCreate: GlobalSecondaryIndex[] = [];
 
-    for (const idx of indexes) {
-      if (!isModelIndexedIndex(idx)) {
-        console.warn('Non-indexed indices are not supported in DynamoDB for', { cls: cls.Ⲑid, idx: idx.name });
-        continue;
-      } else if ('unique' in idx && idx.unique) {
-        console.warn('Unique indices are not supported in DynamoDB for', { cls: cls.Ⲑid, idx: idx.name });
-        continue;
-      }
+    const filtered = indexes
+      .filter(idx => !warnIfIndexedUniqueIndex(this, cls, [idx]))
+      .filter(idx => !warnIfNonIndexedIndex(this, cls, [idx]));
 
+    for (const idx of filtered) {
       const keys: KeySchemaElement[] = [];
 
       const safeName = this.toSafeName(idx.name);
