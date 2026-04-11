@@ -9,7 +9,7 @@ import {
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex
+  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex, warnIfIndexedUniqueIndex, warnIfNonIndexedIndex
 } from '@travetto/model-indexed';
 
 import type { FirestoreModelConfig } from './config.ts';
@@ -119,7 +119,12 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   // Storage
-  async createStorage(): Promise<void> { }
+  async createStorage(): Promise<void> {
+    for (const cls of ModelRegistryIndex.getClasses()) {
+      warnIfIndexedUniqueIndex(this, cls, ModelRegistryIndex.getIndices(cls));
+      warnIfNonIndexedIndex(this, cls, ModelRegistryIndex.getIndices(cls));
+    }
+  }
   async deleteStorage(): Promise<void> { }
 
   async deleteModel<T extends ModelType>(cls: Class<T>): Promise<void> {

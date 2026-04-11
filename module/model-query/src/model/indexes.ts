@@ -11,32 +11,27 @@ type IndexClauseRaw<T> = {
 export type IndexField<T extends ModelType> = IndexClauseRaw<RetainPrimitiveFields<T>>;
 
 /**
- * Supported index types
- */
-export type QueryIndexType = 'query:unique' | 'query:unsorted' | 'query:sorted';
-
-/**
  * Index options
  */
-export interface QueryIndexConfig<T extends ModelType> extends IndexConfig<QueryIndexType> {
+export interface QueryIndexConfig<T extends ModelType> extends IndexConfig<'query'> {
   /**
    * Fields and sort order
    */
   fields: IndexClauseRaw<RetainPrimitiveFields<T>>[];
-};
+  /**
+   * Is this a unique index
+   */
+  unique?: boolean;
+}
 
-/**
- * Defines an index on a model
- * @kind decorator
- */
-export function QueryIndex<T extends ModelType>(index: Omit<QueryIndexConfig<T>, 'class'>) {
+export function QueryIndex<T extends ModelType>(index: Omit<QueryIndexConfig<T>, 'class' | 'type'>) {
   if (index.fields.some(field => field === 'id')) {
     throw new RuntimeError('Cannot create an index with the id field');
   }
   return function (cls: Class<T>): void {
-    ModelRegistryIndex.getForRegister(cls).register({ indices: { [index.name]: { ...index, class: cls } } });
+    ModelRegistryIndex.getForRegister(cls).register({ indices: { [index.name]: { ...index, type: 'query', class: cls } } });
   };
 }
 
 export const isModelQueryIndex = (idx: unknown): idx is QueryIndexConfig<ModelType> =>
-  typeof idx === 'object' && idx !== null && 'type' in idx && typeof idx.type === 'string' && idx.type.startsWith('query:');
+  typeof idx === 'object' && idx !== null && 'type' in idx && typeof idx.type === 'string' && idx.type === 'query';

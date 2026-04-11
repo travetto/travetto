@@ -1,15 +1,39 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { type ModelCrudSupport, NotFoundError } from '@travetto/model';
+import { ExistsError, Model, type ModelCrudSupport, NotFoundError } from '@travetto/model';
+import { castTo } from '@travetto/runtime';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
 import { Address, Person, Todo, BigIntModel } from './model.ts';
 import type { ModelQueryCrudSupport } from '../../src/types/crud.ts';
+import { QueryIndex } from '../../__index__.ts';
+
+
+@Model()
+@QueryIndex({
+  name: 'uniqueUser2',
+  fields: [{ name: true }],
+  unique: true
+})
+class UniqueUser2 {
+  id: string;
+  name: string;
+}
 
 @Suite()
 export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudSupport & ModelCrudSupport> {
+
+  supportsUniqueIndexes = true;
+
+  @Test({ skip: (self) => !castTo<ModelQueryCrudSuite>(self).supportsUniqueIndexes })
+  async testUnique() {
+    const svc = await this.service;
+    await svc.create(UniqueUser2, UniqueUser2.from({ name: 'bob' }));
+    await assert.rejects(() => svc.create(UniqueUser2, UniqueUser2.from({ name: 'bob' })), ExistsError);
+  }
+
   @Test()
   async testUpdateOneWithQuery() {
     const svc = await this.service;

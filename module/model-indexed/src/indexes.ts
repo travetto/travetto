@@ -1,5 +1,5 @@
-import { type ModelType, ModelRegistryIndex } from '@travetto/model';
-import { type Class, type Any, castTo } from '@travetto/runtime';
+import { type IndexConfig, type ModelType, ModelRegistryIndex } from '@travetto/model';
+import { type Class, type Any, castTo, type ClassInstance } from '@travetto/runtime';
 
 import {
   type AllIndexes, type KeyedIndexSelection, type KeyedIndex,
@@ -81,3 +81,26 @@ export function sortedIndex<
 
 export const isModelIndexedIndex = <T extends ModelType>(idx: Any): idx is AllIndexes<T> =>
   typeof idx === 'object' && idx !== null && 'type' in idx && typeof idx.type === 'string' && idx.type.startsWith('indexed:');
+
+
+export const warnIfIndexedUniqueIndex = (service: ClassInstance, cls: Class<ModelType>, indexes: IndexConfig[]): boolean => {
+  let warned = false;
+  for (const idx of indexes) {
+    if (isModelIndexedIndex(idx) && 'unique' in idx && idx.unique) {
+      console.debug('Unique indices are not supported', { cls: cls.Ⲑid, idx: idx.name, service: service.constructor.Ⲑid });
+      warned = true;
+    }
+  }
+  return warned;
+};
+
+export const warnIfNonIndexedIndex = (service: ClassInstance, cls: Class<ModelType>, indexes: IndexConfig[]): boolean => {
+  let warned = false;
+  for (const idx of indexes) {
+    if (!isModelIndexedIndex(idx)) {
+      console.debug('Non-indexed indices are not supported', { cls: cls.Ⲑid, idx: idx.name, service: service.constructor.Ⲑid });
+      warned = true;
+    }
+  }
+  return warned;
+};

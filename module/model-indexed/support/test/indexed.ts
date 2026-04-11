@@ -4,11 +4,11 @@ import timers from 'node:timers/promises';
 import { Suite, Test } from '@travetto/test';
 import { Schema } from '@travetto/schema';
 import { castTo, TimeUtil } from '@travetto/runtime';
-import { Model, NotFoundError } from '@travetto/model';
+import { ExistsError, Model, NotFoundError } from '@travetto/model';
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
 import type { ModelIndexedSupport } from '../../src/types/service.ts';
-import { keyedIndex, sortedIndex } from '../../src/indexes.ts';
+import { keyedIndex, sortedIndex, uniqueIndex } from '../../src/indexes.ts';
 import { IndexedFieldError } from '../../src/types/error.ts';
 
 @Model('index_user')
@@ -19,6 +19,17 @@ class User {
 
 const userNameIndex = keyedIndex(User, {
   name: 'userName',
+  key: { name: true }
+});
+
+@Model('index_unique_user')
+class UniqueUser {
+  id: string;
+  name: string;
+}
+
+const userUniqueNameIndex = uniqueIndex(UniqueUser, {
+  name: 'userUniqueName',
   key: { name: true }
 });
 
@@ -82,6 +93,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
 
   indexLimitSkew = 0;
   supportsDeepIndexes = true;
+  supportsUniqueIndexes = true;
 
   @Test()
   async writeAndRead() {
@@ -101,6 +113,22 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     });
 
     assert(found2.name === 'bob2');
+  }
+
+  @Test({ skip: (self) => !castTo<ModelIndexedSuite>(self).supportsUniqueIndexes })
+  async writeRejectsDuplicateUniqueIndex() {
+    const service = await this.service;
+
+    const created = await service.create(UniqueUser, UniqueUser.from({ name: 'sam' }));
+
+    await assert.rejects(
+      () => service.create(UniqueUser, UniqueUser.from({ name: 'sam' })),
+      err => err instanceof ExistsError
+    );
+
+    const found = await service.getByIndex(UniqueUser, userUniqueNameIndex, { name: 'sam' });
+    assert(found.id === created.id);
+    assert(found.name === 'sam');
   }
 
   @Test()

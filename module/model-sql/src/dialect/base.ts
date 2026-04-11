@@ -746,15 +746,16 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
         }
         return [castTo(key), typeof value === 'number' ? value === 1 : (!!value)];
       });
-      return `CREATE ${idx.type === 'query:unique' ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields
+      return `CREATE ${idx.unique ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields
         .map(([name, sel]) => `${this.identifier(name)} ${sel ? 'ASC' : 'DESC'}`)
         .join(', ')});`;
     } else if (isModelIndexedIndex(idx)) {
-      if ([...idx.sortTemplate, ...idx.keyTemplate].find(field => field.path.length > 1)) {
+      const all = [...idx.keyTemplate, ...idx.sortTemplate];
+      if (all.find(field => field.path.length > 1)) {
         console.debug('Nested fields are not supported in ModelIndexed indices SQL', { index: idx.name });
         return;
       }
-      const fields = [...idx.sortTemplate, ...idx.keyTemplate]
+      const fields = all
         .map(({ path, value }) => `${this.identifier(path.join('_'))} ${value === -1 ? 'DESC' : 'ASC'}`)
         .join(', ');
       switch (idx.type) {
@@ -1094,10 +1095,9 @@ ${this.getWhereSQL(cls, where!)}`;
    */
   isIndexChanged(requested: IndexConfig, existing: SQLTableDescription['indices'][number]): boolean {
     if (isModelQueryIndex(requested)) {
-      let result =
-        (existing.is_unique && requested.type !== 'query:unique')
-        || requested.fields.length !== existing.columns.length;
-
+      const uniqueChanged = (existing.is_unique && !requested.unique);
+      const columnSizeChanged = requested.fields.length !== existing.columns.length;
+      let result = uniqueChanged || columnSizeChanged;
       for (let i = 0; i < requested.fields.length && !result; i++) {
         const [[key, value]] = Object.entries(requested.fields[i]);
         const desc = value === -1;
@@ -1106,8 +1106,21 @@ ${this.getWhereSQL(cls, where!)}`;
 
       return result;
     } else if (isModelIndexedIndex(requested)) {
-      // TODO: Fill this out
-      return false;
+      const keys = Object.entries(requested.key);
+      const sort = Object.entries(requested.sort);
+      const all = [...keys, ...sort];
+
+      const uniqueChanged = (requested.type === 'indexed:keyed' && existing.is_unique && !requested.unique);
+      const columnSizeChanged = all.length !== existing.columns.length;
+      let result = uniqueChanged || columnSizeChanged;
+
+      for (let i = 0; i < all.length && !result; i++) {
+        const [key, value] = all[i];
+        const desc = value === -1;
+        result ||= key !== existing.columns[i].name && desc !== existing.columns[i].desc;
+      }
+
+      return result;
     } else {
       throw new IndexNotSupported(requested.class, requested, 'Only indexed and query indices are supported in SQL');
     }
