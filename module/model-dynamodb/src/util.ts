@@ -55,6 +55,9 @@ export class DynamoDBUtil {
       if (!isModelIndexedIndex(idx)) {
         console.warn('Non-indexed indices are not supported in DynamoDB for', { cls: cls.Ⲑid, idx: idx.name });
         continue;
+      } else if ('unique' in idx && idx.unique) {
+        console.warn('Unique indices are not supported in DynamoDB for', { cls: cls.Ⲑid, idx: idx.name });
+        continue;
       }
 
       const keys: KeySchemaElement[] = [];
