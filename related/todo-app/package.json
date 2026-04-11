@@ -25,7 +25,7 @@
     "@travetto/auth-web": "^8.0.0-alpha.13",
     "@travetto/auth-web-session": "^8.0.0-alpha.13",
     "@travetto/log": "^8.0.0-alpha.12",
-    "@travetto/model-mongo": "^8.0.0-alpha.13",
+    "@travetto/model-mongo": "^8.0.0-alpha.14",
     "@travetto/openapi": "^8.0.0-alpha.13",
     "@travetto/web-http": "^8.0.0-alpha.14",
     "@travetto/web-rpc": "^8.0.0-alpha.14",
