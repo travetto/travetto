@@ -38,7 +38,7 @@
     "@angular/build": "^21.2.7",
     "@angular/cli": "^21.2.7",
     "@angular/compiler-cli": "^21.2.8",
-    "@types/node": "^25.5.2",
+    "@types/node": "^25.6.0",
     "source-map-explorer": "^2.5.3",
     "ts-node": "~10.9.2",
     "typescript": "~5.9.3"
