@@ -3,16 +3,16 @@
   "version": "0.0.0",
   "type": "module",
   "dependencies": {
-    "@travetto/cache": "^8.0.0-alpha.14",
-    "@travetto/model-dynamodb": "^8.0.0-alpha.15",
-    "@travetto/model-elasticsearch": "^8.0.0-alpha.15",
-    "@travetto/model-firestore": "^8.0.0-alpha.15",
-    "@travetto/model-mongo": "^8.0.0-alpha.15",
-    "@travetto/model-mysql": "^8.0.0-alpha.15",
-    "@travetto/model-postgres": "^8.0.0-alpha.15",
-    "@travetto/model-redis": "^8.0.0-alpha.15",
-    "@travetto/model-s3": "^8.0.0-alpha.13",
-    "@travetto/model-sqlite": "^8.0.0-alpha.15"
+    "@travetto/cache": "^8.0.0-alpha.15",
+    "@travetto/model-dynamodb": "^8.0.0-alpha.16",
+    "@travetto/model-elasticsearch": "^8.0.0-alpha.16",
+    "@travetto/model-firestore": "^8.0.0-alpha.16",
+    "@travetto/model-mongo": "^8.0.0-alpha.16",
+    "@travetto/model-mysql": "^8.0.0-alpha.16",
+    "@travetto/model-postgres": "^8.0.0-alpha.16",
+    "@travetto/model-redis": "^8.0.0-alpha.16",
+    "@travetto/model-s3": "^8.0.0-alpha.14",
+    "@travetto/model-sqlite": "^8.0.0-alpha.16"
   },
   "travetto": {},
   "private": true
