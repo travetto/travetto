@@ -4,7 +4,7 @@ import { IsPrivate } from '@travetto/schema';
 import {
   HeaderParam, Controller, ExcludeInterceptors, ControllerRegistryIndex,
   type WebAsyncContext, Body, EndpointUtil, BodyInterceptor, Post, WebCommonUtil,
-  RespondInterceptor, DecompressInterceptor, Get
+  RespondInterceptor, DecompressInterceptor, Get, QueryParam, Delete, Put, Patch
 } from '@travetto/web';
 
 @Controller('/rpc')
@@ -21,11 +21,26 @@ export class WebRpcController {
   ctx: WebAsyncContext;
 
   /**
-   * Allow for get-based requests
+   * Allow for extra method-based requests
    */
   @Get('/:target')
-  async onGetRequest(target: string, @HeaderParam('X-TRV-RPC-INPUTS') paramInput?: string): Promise<unknown> {
+  onGetRequest(target: string, @QueryParam('TRV_RPC_INPUTS') paramInput?: string): Promise<unknown> {
     return this.onRequest(target, paramInput);
+  }
+
+  @Delete('/:target')
+  onDeleteRequest(target: string, @QueryParam('TRV_RPC_INPUTS') paramInput?: string): Promise<unknown> {
+    return this.onRequest(target, paramInput);
+  }
+
+  @Put('/:target')
+  onPutRequest(target: string, @HeaderParam('X-TRV-RPC-INPUTS') paramInput?: string, @Body() body?: Any): Promise<unknown> {
+    return this.onRequest(target, paramInput, body);
+  }
+
+  @Patch('/:target')
+  onPatchRequest(target: string, @HeaderParam('X-TRV-RPC-INPUTS') paramInput?: string, @Body() body?: Any): Promise<unknown> {
+    return this.onRequest(target, paramInput, body);
   }
 
   /**

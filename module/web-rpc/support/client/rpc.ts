@@ -3,13 +3,21 @@ type MethodKeys<C extends {}> = {
 }[keyof C];
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PromiseFn = (...args: any) => Promise<unknown>;
-type PromiseRes<V extends PromiseFn> = Awaited<ReturnType<V>>;
+type PromiseResult<V extends PromiseFn> = Awaited<ReturnType<V>>;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isBlobMap = (value: any): value is Record<string, Blob> => value && typeof value === 'object' && value[Object.keys(value)[0]] instanceof Blob;
+const isBlobMap = (value: unknown): value is Record<string, Blob> => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  for (const [key, item] of Object.entries(value)) {
+    if (!(item instanceof Blob) || typeof key !== 'string') {
+      return false;
+    }
+  }
+  return true;
+};
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isBlobLike = (value: any): value is Record<string, Blob> | Blob => value instanceof Blob || isBlobMap(value);
+const isBlobLike = (value: unknown): value is Record<string, Blob> | Blob => value instanceof Blob || isBlobMap(value);
 
 const extendHeaders = (base: RequestInit['headers'], toAdd: Record<string, string>): Headers => {
   const headers = new Headers(base);
@@ -18,10 +26,10 @@ const extendHeaders = (base: RequestInit['headers'], toAdd: Record<string, strin
 };
 
 const jsonToString = (input: unknown): string =>
-  JSON.stringify(input, (key, value): unknown => typeof value === 'bigint' ? `${value.toString()}n` : value);
+  JSON.stringify(input, (_, value): unknown => typeof value === 'bigint' ? `${value.toString()}n` : value);
 
 const stringToJson = <T = unknown>(input: string): T =>
-  JSON.parse(input, (key, value): unknown => {
+  JSON.parse(input, (_, value): unknown => {
     if (typeof value === 'string') {
       if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[.]\d{3}Z$/.test(value)) {
         return new Date(value);
@@ -33,16 +41,17 @@ const stringToJson = <T = unknown>(input: string): T =>
   });
 
 
-export type PreRequestHandler = (item: RequestInit) => Promise<RequestInit | undefined | void>;
+export type PreRequestHandler = (item: RequestInit) => Promise<RpcRequest['core'] | undefined | void>;
 export type PostResponseHandler = (item: Response) => Promise<Response | undefined | void>;
 
 export type RpcRequest = {
-  core?: Partial<RequestInit> & {
+  core: Omit<Partial<RequestInit>, 'method'> & {
     timeout?: number;
     retriesOnConnectFailure?: number;
-    path?: string;
-    controller?: string;
-    endpoint?: string;
+    path: string;
+    controller: string;
+    endpoint: string;
+    method: string;
   };
   url: URL | string;
   consumeJSON?: <T>(text?: unknown) => (T | Promise<T>);
@@ -57,7 +66,7 @@ export type RpcClient<T extends Record<string, {}>, E extends Record<string, Fun
 
 export type RpcClientFactory<T extends Record<string, {}>> =
   <R extends Record<string, Function>>(
-    baseOpts: RpcRequest,
+    baseOpts: Omit<Partial<RpcRequest>, 'url'> & { url: RpcRequest['url'] },
     decorate?: (request: RpcRequest) => R
   ) => RpcClient<T, R>;
 
@@ -87,28 +96,49 @@ function registerTimeout<T>(
 }
 
 function buildRequest<T extends RequestInit>(base: T, controller: string, endpoint: string): T {
+  let verb: string;
+  switch (endpoint.split(/[A-Z]/)[0]) {
+    case 'get': verb = 'GET'; break;
+    case 'update': verb = 'PUT'; break;
+    case 'delete': verb = 'DELETE'; break;
+    case 'create': default: verb = 'POST'; break;
+  }
   return {
     ...base,
-    method: 'POST',
+    method: verb,
     path: `${controller}:${endpoint}`,
     controller,
     endpoint
   };
 }
 
-export function getBody(inputs: unknown[], isBodyRequest: boolean): { body: FormData | string | undefined, headers: Record<string, string> } {
-  if (!isBodyRequest) {
-    return {
-      body: undefined,
-      headers: {
-        'X-TRV-RPC-INPUTS': btoa(encodeURIComponent(jsonToString(inputs)))
-      }
-    };
+export function getBody(inputs: unknown[], method: string): {
+  body: FormData | string | undefined;
+  query: Record<string, string> | undefined;
+  method: string;
+  headers: Record<string, string>;
+} {
+  let outMethod = method;
+  if (method.toLowerCase() === 'get' || method.toLowerCase() === 'delete') {
+    const inputComputed = btoa(encodeURIComponent(jsonToString(inputs)));
+    if (inputComputed.length < 1000) {
+      return {
+        body: undefined,
+        method: outMethod,
+        query: { TRV_RPC_INPUTS: inputComputed },
+        headers: {}
+      };
+    } else {
+      outMethod = 'POST';
+    }
   }
+
   // If we do not have a blob, simple output
   if (!inputs.some(isBlobLike)) {
     return {
       body: jsonToString(inputs),
+      query: undefined,
+      method: outMethod,
       headers: {
         'Content-Type': 'application/json'
       }
@@ -130,6 +160,8 @@ export function getBody(inputs: unknown[], isBodyRequest: boolean): { body: Form
 
   return {
     body: form,
+    query: undefined,
+    method: outMethod,
     headers: {
       'X-TRV-RPC-INPUTS': btoa(encodeURIComponent(jsonToString(plainInputs)))
     }
@@ -169,20 +201,16 @@ export async function consumeError(error: unknown): Promise<Error> {
 }
 
 export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]): Promise<T> {
-  let core = request.core!;
+  let core = { ...request.core };
 
   try {
-    const { body, headers } = getBody(params, /^(post|put|patch)$/i.test(request.core?.method ?? 'POST'));
-    if (body) {
-      core.body = body;
-    }
+    const { method, body, headers, query } = getBody(params, request.core.method);
+    if (body) { core.body = body; }
+    core.method = method;
     core.headers = extendHeaders(core.headers, headers);
 
     for (const fn of request.preRequestHandlers ?? []) {
-      const computed = await fn(core);
-      if (computed) {
-        core = computed;
-      }
+      core = (await fn(core)) ?? core;
     }
 
     const signals = [];
@@ -202,8 +230,9 @@ export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]):
     }
 
     const url = typeof request.url === 'string' ? new URL(request.url) : request.url;
-    if (request.core?.path) {
-      url.pathname = `${url.pathname}/${request.core.path}`.replaceAll('//', '/');
+    url.pathname = `${url.pathname}/${request.core.path || '/'}`.replaceAll('//', '/');
+    for (const [key, value] of Object.entries(query ?? {})) {
+      url.searchParams.append(key, value);
     }
 
     let resolved: Response | undefined;
@@ -265,7 +294,12 @@ export function clientFactory<T extends Record<string, {}>>(): RpcClientFactory<
       consumeJSON,
       consumeError,
       ...request,
-      core: { timeout: 0, credentials: 'include', mode: 'cors', ...request.core },
+      core: {
+        method: 'POST',
+        path: undefined!, controller: undefined!, endpoint: undefined!,
+        timeout: 0, credentials: 'include', mode: 'cors',
+        ...request.core
+      },
     };
     const cache: Record<string, unknown> = {};
     // @ts-ignore
@@ -292,7 +326,7 @@ export function clientFactory<T extends Record<string, {}>>(): RpcClientFactory<
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function withConfigFactoryDecorator(request: RpcRequest) {
   return {
-    withConfig<V extends PromiseFn>(this: V, extra: Partial<RpcRequest['core']>, ...params: Parameters<V>): Promise<PromiseRes<V>> {
+    withConfig<V extends PromiseFn>(this: V, extra: Partial<RpcRequest['core']>, ...params: Parameters<V>): Promise<PromiseResult<V>> {
       return invokeFetch({ ...request, core: { ...request.core, ...extra } }, ...params);
     }
   };
