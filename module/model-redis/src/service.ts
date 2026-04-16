@@ -11,13 +11,14 @@ import {
   type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, isModelIndexedIndex,
   type FullKeyedIndexWithPartialBody, type FullKeyedIndexBody, ModelIndexedComputedIndex,
   warnIfIndexedUniqueIndex, warnIfNonIndexedIndex,
+  type ModelIndexedSearchOptions,
 } from '@travetto/model-indexed';
 
 import { Injectable, PostConstruct } from '@travetto/di';
 
 import type { RedisModelConfig } from './config.ts';
 
-type RedisScan = ({ key: string } | { match: string }) & { reverse?: boolean };
+type RedisScan = ({ key: string } | { match: string } | { prefix: string }) & { reverse?: boolean };
 type RedisClient = ReturnType<typeof createClient>;
 type RedisMulti = ReturnType<RedisClient['multi']>;
 type ScanState = { cursor?: string, ids: string[] };
@@ -59,10 +60,20 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       case 'sScan': output = await this.client.sScan(key!, cursor ?? '0', flags).then(result => ({ cursor: result.cursor, ids: result.members })); break;
       case 'zRange': {
         const offset = cursor ? +cursor : 0;
-        const bounds: [number, number] = search.reverse ?
-          [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY] :
-          [Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY];
-        const result = await this.client.zRange(key!, ...bounds, { BY: 'SCORE', REV: search.reverse, LIMIT: { offset, count } });
+        const prefix = 'prefix' in search ? search.prefix : undefined;
+
+        let bounds: [number | string, number | string];
+
+        if (prefix) {
+          bounds = [`[${prefix}`, `[${prefix}\xff`];
+        } else {
+          bounds = [Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY];
+        }
+        if (search.reverse) {
+          bounds = [bounds[1], bounds[0]];
+        }
+
+        const result = await this.client.zRange(key!, ...bounds, { BY: prefix ? 'LEX' : 'SCORE', REV: search.reverse, LIMIT: { offset, count } });
         output = { cursor: result.length ? (offset + result.length).toString() : undefined, ids: result };
         break;
       }
@@ -98,7 +109,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options?: ModelPageOptions
+    options?: ModelPageOptions & { prefix?: string }
   ): AsyncIterable<ScanState> {
     ModelCrudUtil.ensureNotSubType(cls);
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
@@ -427,5 +438,18 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     for await (const { ids } of this.#scanIndex(cls, idx, body, options)) {
       yield await this.#getBodies(cls, ids, id => this.#resolveKey(cls, id));
     }
+  }
+
+  async suggestByIndex<T extends ModelType,
+    S extends SortedIndexSelection<T>,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
+
+    const items: T[] = [];
+    for await (const { ids } of this.#scanIndex(cls, idx, body, { limit: 10, ...options, prefix })) {
+      items.push(...await this.#getBodies(cls, ids, id => this.#resolveKey(cls, id)));
+    }
+
+    return items;
   }
 }

@@ -1,12 +1,12 @@
 import type { ModelType, IndexConfig } from '@travetto/model';
 import { type IntrinsicType, type Any, type DeepPartial } from '@travetto/runtime';
 
-type TypeProjection<T, V> = {
+type TypeProjection<T, V, B = IntrinsicType> = {
   [P in keyof T]?:
-  (T[P] extends (IntrinsicType | undefined) ? (V | undefined) :
+  (T[P] extends (B | undefined) ? (V | undefined) :
     (T[P] extends Any[] ?
-      (TypeProjection<T[P][number], V> | null | undefined)[] :
-      TypeProjection<T[P], V>)
+      (TypeProjection<T[P][number], V, B> | null | undefined)[] :
+      TypeProjection<T[P], V, B>)
   );
 };
 

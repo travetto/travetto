@@ -1,6 +1,6 @@
 import { type DocumentData, FieldValue, Firestore, type Query } from '@google-cloud/firestore';
 
-import { castTo, JSONUtil, ShutdownManager, type Class, type ValidTypedFields } from '@travetto/runtime';
+import { castTo, JSONUtil, ShutdownManager, type Class } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport, type ModelType, NotFoundError, type OptionalId, ModelCrudUtil,
@@ -9,7 +9,8 @@ import {
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex, warnIfIndexedUniqueIndex, warnIfNonIndexedIndex
+  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex, warnIfIndexedUniqueIndex, warnIfNonIndexedIndex,
+  type ModelIndexedSearchOptions
 } from '@travetto/model-indexed';
 
 import type { FirestoreModelConfig } from './config.ts';
@@ -270,19 +271,20 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     }
   }
 
-  async suggestSearch<T extends ModelType>(
-    cls: Class<T>,
-    field: ValidTypedFields<T, string>,
-    prefix: string,
-    options?: ModelPageOptions<number>
-  ): Promise<T[]> {
+  async suggestByIndex<T extends ModelType,
+    S extends SortedIndexSelection<T>,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
     const results: T[] = [];
 
-    const search = this.#getCollection(cls)
-      .where(field, '>=', prefix)
-      .where(field, '<', `${prefix}\uf8ff`);
+    const field = idx.sortTemplate[0].path.join('.');
 
-    for await (const { items } of this.#scanCollection(cls, () => search, { limit: 10, ...options })) {
+    for await (const { items } of this.#scanCollection(cls,
+      () => this.#buildIndexQuery(cls, idx, body)
+        .where(field, '>=', prefix)
+        .where(field, '<', `${prefix}\uf8ff`),
+      { limit: 10, ...options })
+    ) {
       results.push(...items);
     }
 

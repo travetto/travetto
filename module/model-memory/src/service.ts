@@ -1,6 +1,7 @@
 import {
   type Class, type TimeSpan, castTo, type BinaryMetadata,
   type ByteRange, type BinaryType, BinaryUtil, type BinaryArray, JSONUtil, BinaryMetadataUtil,
+  castKey,
 } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -14,6 +15,7 @@ import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex,
   type AllIndexes, isModelIndexedIndex, type FullKeyedIndexBody, type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex,
+  type ModelIndexedSearchOptions,
 } from '@travetto/model-indexed';
 
 const ModelBlobNamespace = '__blobs';
@@ -467,5 +469,29 @@ export class MemoryModelService implements
     for await (const batch of this.#getIndexIds(cls, idx, body, options)) {
       yield ModelCrudUtil.filterOutNotFound(batch.map(id => this.get(cls, id)));
     }
+  }
+
+  async suggestByIndex<T extends ModelType,
+    S extends SortedIndexSelection<T>,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
+    const items: T[] = [];
+    const limit = (options?.limit ?? 10);
+    for await (const batch of this.#getIndexIds(cls, idx, body, { ...options })) {
+      const resolved = await ModelCrudUtil.filterOutNotFound(batch.map(id => this.get(cls, id)));
+      for (const item of resolved) {
+        let value: unknown = item;
+        for (const key of idx.sortTemplate[0].path) {
+          value = (typeof value === 'object' && value !== null && key in value) ? value[castKey(key)] : null;
+        }
+        if (typeof value === 'string' && value.startsWith(prefix)) {
+          items.push(item);
+        }
+        if (items.length === limit) {
+          break;
+        }
+      }
+    }
+    return items;
   }
 }

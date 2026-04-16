@@ -5,7 +5,7 @@ import type {
   KeyedIndexSelection, KeyedIndexBody, SortedIndexSelection, SortedIndex,
   SingleItemIndex, FullKeyedIndexBody, FullKeyedIndexWithPartialBody
 } from './indexes.ts';
-import type { ModelPageOptions, ModelPageResult } from './list.ts';
+import type { ModelIndexedSearchOptions, ModelPageOptions, ModelPageResult } from './list.ts';
 
 /**
  * Support for simple indexed activity
@@ -104,4 +104,21 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
     S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>
   >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ModelListOptions): AsyncIterable<T[]>;
+
+  /**
+   * Suggest entities by ranged index as defined by fields of idx and a prefix
+   *
+   * Note: Limit is generally honored, but can vary depending on the underlying storage implementation.
+   *
+   * @param cls The type to search by
+   * @param idx The index to search against
+   * @param body The payload of fields needed to search
+   * @param prefix The prefix to use for suggesting entities
+   * @param options The configuration for pagination
+   */
+  suggestByIndex<
+    T extends ModelType,
+    S extends SortedIndexSelection<T>,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]>;
 }

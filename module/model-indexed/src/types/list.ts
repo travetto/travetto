@@ -1,8 +1,11 @@
 import type { ModelType } from '@travetto/model';
 
-export interface ModelPageOptions<O = string> {
+export interface ModelIndexedSearchOptions {
   batchSizeHint?: number;
   limit?: number;
+}
+
+export interface ModelPageOptions<O = string> extends ModelIndexedSearchOptions {
   offset?: O;
 }
 

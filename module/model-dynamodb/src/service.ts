@@ -12,7 +12,8 @@ import {
   isModelIndexedIndex, ModelIndexedUtil, type KeyedIndexBody, type KeyedIndexSelection,
   type ModelPageOptions, type ModelPageResult, type ModelIndexedSupport, type SingleItemIndex,
   type FullKeyedIndexBody, type FullKeyedIndexWithPartialBody, type SortedIndex, type SortedIndexSelection,
-  ModelIndexedComputedIndex
+  ModelIndexedComputedIndex,
+  type ModelIndexedSearchOptions
 } from '@travetto/model-indexed';
 
 import type { DynamoDBModelConfig } from './config.ts';
@@ -80,14 +81,17 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options?: ModelPageOptions<Record<string, AttributeValue>> & ModelListOptions
+    options?: ModelPageOptions<Record<string, AttributeValue>> & ModelListOptions,
+    transform?: (query: QueryCommandInput) => QueryCommandInput
   ): AsyncIterable<{ items: T[], lastKey?: Record<string, AttributeValue> }> {
     ModelCrudUtil.ensureNotSubType(cls);
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
     const safeName = DynamoDBUtil.toSafeName(idx.name);
     const expression = { [`:${safeName}`]: getKey(computed) };
 
-    yield* this.#scanCollection(cls, (batchSize, lastKey) => this.client.query({
+    const finalTransform = transform ?? ((query) => query);
+
+    yield* this.#scanCollection(cls, (batchSize, lastKey) => this.client.query(finalTransform({
       TableName: this.#resolveTable(cls),
       IndexName: safeName,
       ProjectionExpression: 'body',
@@ -95,7 +99,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       ExpressionAttributeValues: expression,
       Limit: batchSize,
       ExclusiveStartKey: lastKey,
-    }), options);
+    })), options);
   }
 
   async #getIdByIndex<
@@ -485,5 +489,29 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     for await (const { items } of this.#scanIndex(cls, idx, body, options)) {
       yield items;
     }
+  }
+
+  async suggestByIndex<T extends ModelType,
+    S extends SortedIndexSelection<T>,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
+    const results: T[] = [];
+
+    const safeName = DynamoDBUtil.toSafeName(idx.name);
+
+    for await (const { items } of this.#scanIndex(cls, idx, body, { limit: 10, ...options },
+      (query) => ({
+        ...query,
+        FilterExpression: `begins_with(${safeName}_sort__, :prefix)`,
+        ExpressionAttributeValues: {
+          ...query.ExpressionAttributeValues,
+          ':prefix': { S: prefix }
+        }
+      })
+    )) {
+      results.push(...items);
+    }
+
+    return results;
   }
 }
