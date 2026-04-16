@@ -14,11 +14,13 @@ import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport, type PageableModelQuery,
   type Query, type ValidStringFields, QueryVerifier, type ModelQuerySuggestSupport, ModelQueryUtil, ModelQuerySuggestUtil,
   ModelQueryCrudUtil, type ModelQueryFacet,
+  type WhereClause,
 } from '@travetto/model-query';
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex
+  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex,
+  type ModelIndexedSearchOptions
 } from '@travetto/model-indexed';
 
 import type { ElasticsearchModelConfig } from './config.ts';
@@ -127,15 +129,21 @@ export class ElasticsearchModelService implements
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options?: ModelPageOptions<estypes.SortResults> & ModelListOptions
+    options?: ModelPageOptions<estypes.SortResults> & ModelListOptions,
+    transformWhere?: (where: WhereClause<T>) => WhereClause<T>
   ): AsyncIterable<{
     items: T[];
     nextOffset?: estypes.SortResults | undefined;
   }> {
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
+    let whereClause: WhereClause<T> = castTo(computed.project());
+    if (transformWhere) {
+      whereClause = transformWhere(whereClause);
+    }
+
     yield* this.#scrollCollection(cls, (offset) => ({
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
-        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.project())
+        ElasticsearchQueryUtil.extractWhereTermQuery(cls, whereClause)
       ),
       search_after: offset,
       sort: ElasticsearchQueryUtil.getSort(idx)
@@ -513,6 +521,28 @@ export class ElasticsearchModelService implements
     for await (const { items } of this.#scrollIndex(cls, idx, body, options)) {
       yield items;
     }
+  }
+
+  async suggestByIndex<T extends ModelType,
+    S extends SortedIndexSelection<T>,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
+    const search: Record<string, unknown> = {};
+    let current = search;
+    for (const key of idx.sortTemplate[0].path.slice(0, -1)) {
+      current = (current[key] = {});
+    }
+    current[idx.sortTemplate[0].path.at(-1)!] = { $like: `${prefix}%` };
+
+    const items: T[] = [];
+    for await (const { items: fetched } of this.#scrollIndex(cls, idx, body, { limit: 10, ...options },
+      where => castTo({
+        $and: [where, search]
+      })
+    )) {
+      items.push(...fetched);
+    }
+    return items;
   }
 
   // Query

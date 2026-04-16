@@ -554,6 +554,25 @@ export class MongoModelService implements
     yield* this.#iterateCursor(cls, cursor, options);
   }
 
+  async suggestByIndex<T extends ModelType,
+    S extends SortedIndexSelection<T>,
+    K extends KeyedIndexSelection<T>
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
+    const search: Record<string, unknown> = {};
+    let current = search;
+    for (const key of idx.sortTemplate[0].path.slice(0, -1)) {
+      current = (current[key] = {});
+    }
+    current[idx.sortTemplate[0].path.at(-1)!] = { $like: `${prefix}%` };
+
+    const cursor = (await this.#buildIndexQuery(cls, idx, body, (where) => castTo({
+      $and: [where, search]
+    })));
+    const batches = await Array.fromAsync(this.#iterateCursor(cls, cursor, { limit: 10, ...options }));
+
+    return batches.flat();
+  }
+
   // Query
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
@@ -695,24 +714,5 @@ export class MongoModelService implements
     const cursor = col.find(castTo({ $and: [{ $text: search }, filter] }), {});
     const items = await MongoUtil.prepareCursor(cls, cursor, query).toArray();
     return await Promise.all(items.map(item => this.postLoad(cls, item)));
-  }
-
-  async suggestByIndex<T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
-    const search: Record<string, unknown> = {};
-    let current = search;
-    for (const key of idx.sortTemplate[0].path.slice(0, -1)) {
-      current = (current[key] = {});
-    }
-    current[idx.sortTemplate[0].path.at(-1)!] = { $like: `${prefix}%` };
-
-    const cursor = (await this.#buildIndexQuery(cls, idx, body, (where) => castTo({
-      $and: [where, search]
-    })));
-    const batches = await Array.fromAsync(this.#iterateCursor(cls, cursor, { limit: 10, ...options }));
-
-    return batches.flat();
   }
 }
