@@ -184,7 +184,9 @@ export class ElasticsearchQueryUtil {
         items.push(subPathQuery(top));
       }
     }
-    if (items.length === 1) {
+    if (items.length === 0) {
+      return { bool: { must: [] } };
+    } else if (items.length === 1) {
       return items[0];
     } else {
       return { bool: { must: items } };
@@ -198,7 +200,7 @@ export class ElasticsearchQueryUtil {
     if (ModelQueryUtil.has$And(clause)) {
       return { bool: { must: clause.$and.map(item => this.extractWhereQuery<T>(cls, item, config)) } };
     } else if (ModelQueryUtil.has$Or(clause)) {
-      return { bool: { should: clause.$or.map(item => this.extractWhereQuery<T>(cls, item, config)), ['minimum_should_match']: 1 } };
+      return { bool: { should: clause.$or.map(item => this.extractWhereQuery<T>(cls, item, config)), minimum_should_match: 1 } };
     } else if (ModelQueryUtil.has$Not(clause)) {
       return { bool: { ['must_not']: this.extractWhereQuery<T>(cls, clause.$not, config) } };
     } else {

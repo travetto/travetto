@@ -143,7 +143,7 @@ export class ElasticsearchModelService implements
 
     yield* this.#scrollCollection(cls, (offset) => ({
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
-        ElasticsearchQueryUtil.extractWhereTermQuery(cls, whereClause)
+        ElasticsearchQueryUtil.extractWhereQuery(cls, whereClause)
       ),
       search_after: offset,
       sort: ElasticsearchQueryUtil.getSort(idx)
@@ -532,7 +532,7 @@ export class ElasticsearchModelService implements
     for (const key of idx.sortTemplate[0].path.slice(0, -1)) {
       current = (current[key] = {});
     }
-    current[idx.sortTemplate[0].path.at(-1)!] = { $like: `${prefix}%` };
+    current[idx.sortTemplate[0].path.at(-1)!] = { $regex: ModelQuerySuggestUtil.getSuggestRegex(prefix) };
 
     const items: T[] = [];
     for await (const { items: fetched } of this.#scrollIndex(cls, idx, body, { limit: 10, ...options },
