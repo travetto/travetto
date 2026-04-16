@@ -539,7 +539,9 @@ export abstract class SQLDialect implements DialectState {
         items.push(`${sPath} ${SQL_OPS.$eq} ${this.resolveValue(field, top)}`);
       }
     }
-    if (items.length === 1) {
+    if (items.length === 0) {
+      return 'TRUE';
+    } else if (items.length === 1) {
       return items[0];
     } else {
       return `(${items.join(` ${SQL_OPS.$and} `)})`;

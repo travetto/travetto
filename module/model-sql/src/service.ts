@@ -476,13 +476,18 @@ export class SQLModelService implements
   >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
     const items: T[] = [];
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
+    const nested: Record<string, unknown> = {};
+    let current = nested;
+    for (const key of idx.sortTemplate[0].path.slice(0, -1)) {
+      current = (current[key] = {});
+    }
+    current[idx.sortTemplate[0].path.at(-1)!] = { $regex: ModelQuerySuggestUtil.getSuggestRegex(prefix) };
+
     const baseQuery = castTo<ModelQuery<T>>({
       where: {
         $and: [
           computed.project(),
-          {
-            [idx.sortTemplate[0].path.join('.')]: { $like: `${prefix}%` }
-          }
+          nested
         ]
       },
     });
