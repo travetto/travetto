@@ -1,6 +1,6 @@
 import { type DocumentData, FieldValue, Firestore, type Query } from '@google-cloud/firestore';
 
-import { castTo, JSONUtil, ShutdownManager, type Class } from '@travetto/runtime';
+import { castTo, JSONUtil, ShutdownManager, type Class, type ValidTypedFields } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport, type ModelType, NotFoundError, type OptionalId, ModelCrudUtil,
@@ -268,5 +268,24 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     for await (const { items } of this.#scanCollection(cls, () => this.#buildIndexQuery(cls, idx, body), options)) {
       yield items;
     }
+  }
+
+  async suggestSearch<T extends ModelType>(
+    cls: Class<T>,
+    field: ValidTypedFields<T, string>,
+    prefix: string,
+    options?: ModelPageOptions<number>
+  ): Promise<T[]> {
+    const results: T[] = [];
+
+    const search = this.#getCollection(cls)
+      .where(field, '>=', prefix)
+      .where(field, '<', `${prefix}\uf8ff`);
+
+    for await (const { items } of this.#scanCollection(cls, () => search, { limit: 10, ...options })) {
+      results.push(...items);
+    }
+
+    return results;
   }
 }

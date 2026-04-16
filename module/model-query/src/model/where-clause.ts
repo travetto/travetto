@@ -1,10 +1,11 @@
-import type { Primitive, ValidFields, TimeSpan } from '@travetto/runtime';
+import type { Primitive, ValidFields, TimeSpan, ValidTypedFields } from '@travetto/runtime';
 import type { Point } from '@travetto/schema';
 
 export type QueryPrimitive = Primitive | Date | Point;
 export type QueryPrimitiveArray = QueryPrimitive[];
 export type DistanceUnit = 'mi' | 'm' | 'km' | 'ft' | 'rad';
 export type RetainQueryPrimitiveFields<T> = Pick<T, ValidFields<T, QueryPrimitive>>;
+export type ValidStringFields<T> = ValidTypedFields<T, String | string | string[] | String[] | undefined>;
 
 type General<T> = {
   $eq?: T;
@@ -67,11 +68,3 @@ export type WhereClauseRaw<T> =
  * Full where clause, typed against the input type T
  */
 export type WhereClause<T> = WhereClauseRaw<RetainQueryPrimitiveFields<T>>;
-
-/**
- * Provides all the valid string type fields from a given type T
- */
-export type ValidStringFields<T> = {
-  [K in Extract<keyof T, string>]:
-  (T[K] extends (String | string | string[] | String[] | undefined) ? K : never)
-}[Extract<keyof T, string>];
