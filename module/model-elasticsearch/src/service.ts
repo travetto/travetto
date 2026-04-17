@@ -145,7 +145,6 @@ export class ElasticsearchModelService implements
         ...(offset ? { search_after: offset } : {}),
         sort: ElasticsearchQueryUtil.getSort(idx)
       };
-      console.error(result);
       return result;
     }, options);
   }
@@ -423,19 +422,19 @@ export class ElasticsearchModelService implements
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
+    const projected = computed.project({
+      sort: true,
+      includeId: true,
+      emptyValue: { $exists: true }
+    });
 
     const result = await this.execSearch<T>(cls, {
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
-        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.project({
-          sort: true,
-          includeId: true,
-          emptyValue: { $exists: true }
-        }))
-
+        ElasticsearchQueryUtil.extractWhereTermQuery(cls, projected)
       )
     });
     if (!result.hits.hits.length) {
-      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
+      throw new NotFoundError(`${cls.name}: ${idx.name}`, computed.getKey({ sort: true }));
     }
     return this.#postLoad(cls, result.hits.hits[0]);
 

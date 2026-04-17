@@ -44,7 +44,7 @@ export abstract class ModelIndexedPolymorphismSuite extends BaseModelSuite<Model
 
   @Test('Polymorphic index', { skip: BaseModelSuite.ifNot(ModelIndexedUtil.isSupported) })
   async polymorphicIndexGet() {
-    const service: ModelIndexedSupport = await this.service;
+    const service = await this.service;
     const now = 30;
     const [doc, fire, eng] = [
       IndexedDoctor.from({ name: 'bob', specialty: 'feet', age: now }),
@@ -52,7 +52,7 @@ export abstract class ModelIndexedPolymorphismSuite extends BaseModelSuite<Model
       IndexedEngineer.from({ name: 'cob', major: 'oranges', age: now })
     ];
 
-    await this.saveAll(IndexedWorker, [doc, fire, eng]);
+    const updated = await this.saveAll(IndexedWorker, [doc, fire, eng]);
 
     const result = await service.getByIndex(IndexedWorker, workerNameIndex, {
       age: now,
@@ -74,7 +74,7 @@ export abstract class ModelIndexedPolymorphismSuite extends BaseModelSuite<Model
 
   @Test('Polymorphic index', { skip: BaseModelSuite.ifNot(ModelIndexedUtil.isSupported) })
   async polymorphicIndexDelete() {
-    const service: ModelIndexedSupport = await this.service;
+    const service = await this.service;
     const now = 30;
     const [doc, fire, eng] = [
       IndexedDoctor.from({ name: 'bob', specialty: 'feet', age: now }),
