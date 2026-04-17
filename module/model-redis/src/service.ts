@@ -148,7 +148,15 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
         switch (idx.type) {
           case 'indexed:keyed': multi.sAdd(resolvedKey, item.id); break;
-          case 'indexed:sorted': multi.zAdd(resolvedKey, { score: computed.getSort(), value: item.id }); break;
+          case 'indexed:sorted': {
+            const value = computed.getSort();
+            if (typeof value === 'string') {
+              multi.zAdd(resolvedKey, { score: 0, value: `${value}\xff${item.id}` });
+            } else {
+              multi.zAdd(resolvedKey, { score: computed.getSort(), value: item.id });
+            }
+            break;
+          }
         }
       }
     }
@@ -436,14 +444,17 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
   }
 
-  async suggestByIndex<T extends ModelType,
-    S extends SortedIndexSelection<T, string>,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, K, S, string>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
+  async suggestByIndex<
+    T extends ModelType,
+    S extends SortedIndexSelection<T, B>,
+    K extends KeyedIndexSelection<T>,
+    B extends string
+  >(cls: Class<T>, idx: SortedIndex<T, K, S, B>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
 
     const items: T[] = [];
     for await (const { ids } of this.#scanIndex(cls, idx, body, { limit: 10, ...options, prefix })) {
-      items.push(...await this.#getBodies(cls, ids, id => this.#resolveKey(cls, id)));
+      const cleaned = ids.map(id => id.split('\xff').at(-1)!);
+      items.push(...await this.#getBodies(cls, cleaned, id => this.#resolveKey(cls, id)));
     }
 
     return items;

@@ -55,7 +55,7 @@ export class MemoryModelService implements
 
   #store = new Map<string, StoreType>();
   #indices = {
-    'indexed:sorted': new Map<string, Map<string, Map<string, number>>>(),
+    'indexed:sorted': new Map<string, Map<string, Map<string, number | string>>>(),
     'indexed:keyed': new Map<string, Map<string, Set<string>>>(),
   } as const;
 
@@ -215,7 +215,10 @@ export class MemoryModelService implements
     if (!index) {
       ids = [];
     } else if (index instanceof Map) {
-      ids = [...index.entries()].toSorted((a, b) => a[1] - b[1]).map(([id,]) => id);
+      ids = [...index.entries()]
+        .toSorted((a, b) => (typeof a[1] === 'number' && typeof b[1] === 'number') ? a[1] - b[1] :
+          (typeof a[1] === 'string' && typeof b[1] === 'string') ? a[1].localeCompare(b[1]) : 0)
+        .map(([id,]) => id);
     } else {
       ids = [...index];
     }
@@ -469,10 +472,12 @@ export class MemoryModelService implements
     }
   }
 
-  async suggestByIndex<T extends ModelType,
-    S extends SortedIndexSelection<T, string>,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, K, S, string>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
+  async suggestByIndex<
+    T extends ModelType,
+    S extends SortedIndexSelection<T, B>,
+    K extends KeyedIndexSelection<T>,
+    B extends string
+  >(cls: Class<T>, idx: SortedIndex<T, K, S, B>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
     const items: T[] = [];
     const limit = (options?.limit ?? 10);
     for await (const batch of this.#getIndexIds(cls, idx, body, { ...options })) {

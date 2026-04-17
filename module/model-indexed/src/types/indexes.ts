@@ -55,7 +55,8 @@ export type TemplatePart<T extends TemplateValue = TemplateValue> = { path: stri
 export interface KeyedIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T> = Any,
-  S extends SortedIndexSelection<T> = Any,
+  S extends SortedIndexSelection<T, B> = Any,
+  B extends SortScalar = SortScalar
 > extends IndexConfig<'indexed:keyed'> {
   key: K;
   sort: S;

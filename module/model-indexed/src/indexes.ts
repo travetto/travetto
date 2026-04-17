@@ -65,7 +65,7 @@ export function uniqueIndex<
 export function sortedIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T>,
-  S extends SortedIndexSelection<T>
+  S extends SortedIndexSelection<T>,
 >(cls: Class<T>, config: { name: string, key: K, sort: S }): SortedIndex<T, K, S> {
   const { name, key, sort } = config;
   const keyTemplate = buildTemplateParts<true>('key', key);

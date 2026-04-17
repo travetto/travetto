@@ -3,7 +3,7 @@ import timers from 'node:timers/promises';
 
 import { Suite, Test } from '@travetto/test';
 import { castTo, TimeUtil } from '@travetto/runtime';
-import { ExistsError, NotFoundError } from '@travetto/model';
+import { ExistsError, ModelBulkUtil, NotFoundError } from '@travetto/model';
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
 import type { ModelIndexedSupport } from '../../src/types/service.ts';
@@ -24,7 +24,13 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
 
   async #seed(names: string[]): Promise<void> {
     const service = await this.service;
-    await Promise.all(names.map(name => service.create(SuggestItem, SuggestItem.from({ name }))));
+    if (ModelBulkUtil.isSupported(service)) {
+      await service.processBulk(SuggestItem, names.map(name => ({ insert: { name } })));
+    } else {
+      for (const item of names) {
+        await service.create(SuggestItem, SuggestItem.from({ name: item }));
+      }
+    }
   }
 
   @Test()
