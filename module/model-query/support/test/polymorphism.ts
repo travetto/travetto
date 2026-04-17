@@ -83,15 +83,15 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
     await this.saveAll(Worker, [doc, doc2, fire, eng]);
     assert(await this.getSize(Worker) === 4);
 
-    assert((await svc.suggest(Worker, 'name', '')).length === 4);
-    assert((await svc.suggestValues(Worker, 'name', '')).length === 4);
-    assert((await svc.suggest(Worker, 'name', 'r')).length === 1);
-    assert((await svc.suggest(Worker, 'name', 'r'))[0] instanceof Firefighter);
-    assert((await svc.suggest(Doctor, 'name', 'r')).length === 0);
-    assert((await svc.suggest(Firefighter, 'name', 'r')).length === 1);
+    assert((await svc.suggestByQuery(Worker, 'name', '')).length === 4);
+    assert((await svc.suggestValuesByQuery(Worker, 'name', '')).length === 4);
+    assert((await svc.suggestByQuery(Worker, 'name', 'r')).length === 1);
+    assert((await svc.suggestByQuery(Worker, 'name', 'r'))[0] instanceof Firefighter);
+    assert((await svc.suggestByQuery(Doctor, 'name', 'r')).length === 0);
+    assert((await svc.suggestByQuery(Firefighter, 'name', 'r')).length === 1);
 
-    assert((await svc.suggestValues(Firefighter, 'name', 'r')).length === 1);
-    assert((await svc.suggestValues(Firefighter, 'name', 'r'))[0] === 'rob');
+    assert((await svc.suggestValuesByQuery(Firefighter, 'name', 'r')).length === 1);
+    assert((await svc.suggestValuesByQuery(Firefighter, 'name', 'r'))[0] === 'rob');
   }
 
   @Test({ skip: ModelQueryPolymorphismSuite.ifNot(ModelQueryFacetUtil.isSupported) })
@@ -107,8 +107,8 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
     await this.saveAll(Worker, [doc, doc2, fire, eng]);
     assert(await this.getSize(Worker) === 4);
 
-    assert((await svc.facet(Worker, 'name')).length === 4);
-    const docFacet = await svc.facet(Doctor, 'specialty');
+    assert((await svc.facetByQuery(Worker, 'name')).length === 4);
+    const docFacet = await svc.facetByQuery(Doctor, 'specialty');
     assert.deepStrictEqual(docFacet, [{ count: 2, key: 'eyes' }]);
   }
 }

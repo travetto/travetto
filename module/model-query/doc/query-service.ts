@@ -48,13 +48,13 @@ export class QueryModelService implements ModelQueryCrudSupport, ModelQueryFacet
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     return 0;
   }
-  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T> | undefined): Promise<{ key: string, count: number }[]> {
+  async facetByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T> | undefined): Promise<{ key: string, count: number }[]> {
     return [];
   }
-  async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string | undefined, query?: PageableModelQuery<T> | undefined): Promise<T[]> {
+  async suggestByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string | undefined, query?: PageableModelQuery<T> | undefined): Promise<T[]> {
     return [];
   }
-  async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string | undefined, query?: PageableModelQuery<T> | undefined): Promise<string[]> {
+  async suggestValuesByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string | undefined, query?: PageableModelQuery<T> | undefined): Promise<string[]> {
     return [];
   }
 }

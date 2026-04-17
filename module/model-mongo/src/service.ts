@@ -1,34 +1,28 @@
 import {
-  type Binary,
-  type Db, GridFSBucket, MongoClient, type GridFSFile, type Collection,
-  type ObjectId, type RootFilterOperators, type Filter,
-  type WithId as MongoWithId,
-  type FindCursor,
+  type Binary, type Db, GridFSBucket, MongoClient, type GridFSFile, type Collection,
+  type ObjectId, type RootFilterOperators, type Filter, type WithId as MongoWithId, type FindCursor,
   MongoServerError,
 } from 'mongodb';
 
 import {
   ModelRegistryIndex, type ModelType, type OptionalId, type ModelCrudSupport, type ModelStorageSupport, type ModelExpirySupport,
   type ModelBulkSupport, type BulkOperation, type BulkResponse, NotFoundError, ExistsError, type ModelBlobSupport,
-  ModelCrudUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
-  type ModelListOptions,
+  ModelCrudUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, type ModelListOptions,
 } from '@travetto/model';
 import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
   type PageableModelQuery, type ValidStringFields, type WhereClause, type ModelQuerySuggestSupport,
-  QueryVerifier, ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
-  type ModelQueryFacet,
+  QueryVerifier, ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil, type ModelQueryFacet,
 } from '@travetto/model-query';
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex,
+  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex, type ModelIndexedSearchOptions, type SortedIndexSelectionType,
 } from '@travetto/model-indexed';
 
 import {
-  ShutdownManager, type Class, TypedObject,
-  castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType, BinaryUtil, BinaryMetadataUtil,
-  JSONUtil,
+  ShutdownManager, type Class, TypedObject, castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType,
+  BinaryUtil, BinaryMetadataUtil, JSONUtil,
 } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 
@@ -87,20 +81,20 @@ export class MongoModelService implements
     }
   }
 
-  async #buildIndexQuery<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(
+  async #buildIndexQuery<T extends ModelType>(
     cls: Class<T>,
-    idx: SortedIndex<T, K, S>,
-    body: KeyedIndexBody<T, K>
+    idx: SortedIndex<T>,
+    body: KeyedIndexBody<T>,
+    transformWhere?: (where: WhereClause<T>) => WhereClause<T>
   ): Promise<FindCursor> {
     const store = await this.getStore(cls);
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
+    let whereClause: WhereClause<T> = castTo(computed.project());
+    if (transformWhere) {
+      whereClause = transformWhere(whereClause);
+    }
 
-    const where = this.getWhereFilter(cls, castTo(computed.project()));
-
+    const where = this.getWhereFilter(cls, whereClause);
     let q = store.find(where, { timeout: true })
       .batchSize(100);
 
@@ -549,6 +543,28 @@ export class MongoModelService implements
     yield* this.#iterateCursor(cls, cursor, options);
   }
 
+  async suggestByIndex<
+    T extends ModelType,
+    S extends SortedIndexSelection<T>,
+    K extends KeyedIndexSelection<T>,
+    B extends SortedIndexSelectionType<T, S> & string
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    prefix: B,
+    options?: ModelIndexedSearchOptions
+  ): Promise<T[]> {
+    const cursor = (await this.#buildIndexQuery(cls, idx, body, (where) => castTo({
+      $and: [where, {
+        [idx.sortTemplate[0].path.join('.')]: ModelIndexedUtil.getSuggestRegex(prefix)
+      }]
+    })));
+    const batches = await Array.fromAsync(this.#iterateCursor(cls, cursor, { limit: 10, ...options }));
+
+    return batches.flat();
+  }
+
   // Query
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
@@ -622,7 +638,7 @@ export class MongoModelService implements
   }
 
   // Facet
-  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
+  async facetByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(cls, query);
 
     const col = await this.getStore(cls);
@@ -659,14 +675,14 @@ export class MongoModelService implements
   }
 
   // Suggest
-  async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+  async suggestValuesByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     await QueryVerifier.verify(cls, query);
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestFieldQuery<T>(cls, field, prefix, query);
     const results = await this.query<T>(cls, resolvedQuery);
     return ModelQuerySuggestUtil.combineSuggestResults<T, string>(cls, field, prefix, results, (a) => a, query && query.limit);
   }
 
-  async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+  async suggestByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
     const results = await this.query<T>(cls, resolvedQuery);

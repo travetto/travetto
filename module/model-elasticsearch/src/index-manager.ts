@@ -144,8 +144,8 @@ export class IndexManager implements ModelStorageSupport {
 
   async deleteStorage(): Promise<void> {
     console.debug('Deleting storage', { idx: this.getNamespacedIndex('*') });
-    await this.#client.indices.delete({
-      index: this.getNamespacedIndex('*')
-    });
+    // await this.#client.indices.delete({
+    //   index: this.getNamespacedIndex('*')
+    // });
   }
 }

@@ -9,7 +9,8 @@ import {
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex, warnIfIndexedUniqueIndex, warnIfNonIndexedIndex
+  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex, warnIfIndexedUniqueIndex, warnIfNonIndexedIndex,
+  type ModelIndexedSearchOptions, type SortedIndexSelectionType
 } from '@travetto/model-indexed';
 
 import type { FirestoreModelConfig } from './config.ts';
@@ -61,11 +62,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return item.docs[0].id;
   }
 
-  #buildIndexQuery<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>): Query {
+  #buildIndexQuery<T extends ModelType>(cls: Class<T>, idx: SortedIndex<T>, body: KeyedIndexBody<T>): Query {
     ModelCrudUtil.ensureNotSubType(cls);
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
 
@@ -268,5 +265,27 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     for await (const { items } of this.#scanCollection(cls, () => this.#buildIndexQuery(cls, idx, body), options)) {
       yield items;
     }
+  }
+
+  async suggestByIndex<
+    T extends ModelType,
+    S extends SortedIndexSelection<T>,
+    K extends KeyedIndexSelection<T>,
+    B extends SortedIndexSelectionType<T, S> & string
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]> {
+    const results: T[] = [];
+
+    const field = idx.sortTemplate[0].path.join('.');
+
+    for await (const { items } of this.#scanCollection(cls,
+      () => this.#buildIndexQuery(cls, idx, body)
+        .where(field, '>=', prefix)
+        .where(field, '<', `${prefix}\uf8ff`),
+      { limit: 10, ...options })
+    ) {
+      results.push(...items);
+    }
+
+    return results;
   }
 }

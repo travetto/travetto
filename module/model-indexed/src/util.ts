@@ -59,4 +59,11 @@ export class ModelIndexedUtil {
     body.id = id;
     return await service.update(cls, castTo(body));
   }
+
+  /**
+   * Build regex for suggesting
+   */
+  static getSuggestRegex(prefix?: string): RegExp {
+    return prefix ? new RegExp(`^${prefix}`, 'i') : /./;
+  }
 }

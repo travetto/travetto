@@ -16,7 +16,7 @@ import { QueryIndex } from '@travetto/model-query';
 @QueryIndex({
   name: 'uniqueUser',
   fields: [{ name: true }],
-  type: 'query:unique'
+  unique: true,
 })
 class UniqueUser {
   id: string;

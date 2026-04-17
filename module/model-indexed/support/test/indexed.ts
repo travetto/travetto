@@ -2,91 +2,18 @@ import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
 import { Suite, Test } from '@travetto/test';
-import { Schema } from '@travetto/schema';
 import { castTo, TimeUtil } from '@travetto/runtime';
-import { ExistsError, Model, NotFoundError } from '@travetto/model';
+import { ExistsError, ModelBulkUtil, NotFoundError } from '@travetto/model';
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
 import type { ModelIndexedSupport } from '../../src/types/service.ts';
-import { keyedIndex, sortedIndex, uniqueIndex } from '../../src/indexes.ts';
 import { IndexedFieldError } from '../../src/types/error.ts';
 
-@Model('index_user')
-class User {
-  id: string;
-  name: string;
-}
-
-const userNameIndex = keyedIndex(User, {
-  name: 'userName',
-  key: { name: true }
-});
-
-@Model('index_unique_user')
-class UniqueUser {
-  id: string;
-  name: string;
-}
-
-const userUniqueNameIndex = uniqueIndex(UniqueUser, {
-  name: 'userUniqueName',
-  key: { name: true }
-});
-
-@Model('index_user_2')
-class User2 {
-  id: string;
-  name: string;
-}
-
-@Model()
-class User3 {
-  id: string;
-  name: string;
-  age: number;
-  color?: string;
-}
-
-const userAgeIndex = sortedIndex(User3, {
-  name: 'userAge',
-  key: { name: true },
-  sort: { age: 1 }
-});
-const userAgeReversedIndex = sortedIndex(User3, {
-  name: 'userAgeReverse',
-  key: { name: true },
-  sort: { age: -1 }
-});
-const userAgeNoKeyIndex = sortedIndex(User3, {
-  name: 'userAgeNoKey',
-  key: {},
-  sort: { age: 1 }
-});
-
-@Schema()
-class Child {
-  name: string;
-  age: number;
-}
-
-@Model()
-class User4 {
-  id: string;
-  createdDate?: Date = new Date();
-  color: string;
-  child: Child;
-}
-
-const childAgeIndex = sortedIndex(User4, {
-  name: 'childAge',
-  key: { child: { name: true } },
-  sort: { child: { age: 1 } }
-});
-const nameCreatedIndex = sortedIndex(User4, {
-  name: 'nameCreated',
-  key: { child: { name: true } },
-  sort: { createdDate: 1 }
-});
+import { SUGGEST_DATA, SuggestItem, suggestSort } from './models/suggest.ts';
+import {
+  childAgeIndex, nameCreatedIndex, UniqueUser, User, User2, User3, User4, userAgeIndex,
+  userAgeNoKeyIndex, userAgeReversedIndex, userNameIndex, userUniqueNameIndex
+} from './models/indexed.ts';
 
 @Suite()
 export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSupport> {
@@ -94,6 +21,17 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   indexLimitSkew = 0;
   supportsDeepIndexes = true;
   supportsUniqueIndexes = true;
+
+  async #seed(names: string[]): Promise<void> {
+    const service = await this.service;
+    if (ModelBulkUtil.isSupported(service)) {
+      await service.processBulk(SuggestItem, names.map(name => ({ insert: { name } })));
+    } else {
+      for (const item of names) {
+        await service.create(SuggestItem, SuggestItem.from({ name: item }));
+      }
+    }
+  }
 
   @Test()
   async writeAndRead() {
@@ -423,5 +361,41 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     } else {
       assert(found.length === 1);
     }
+  }
+
+  @Test('suggestByIndex returns items matching prefix')
+  async testSuggestSearchBasic() {
+    const service = await this.service;
+
+    await this.#seed(SUGGEST_DATA);
+
+    const results = await service.suggestByIndex(SuggestItem, suggestSort, {}, 'ap', { limit: 10 });
+
+    assert(results.length === 10);
+    assert(results.every(r => r.name.startsWith('ap')));
+  }
+
+  @Test('suggestByIndex returns empty array when no items match prefix')
+  async testSuggestSearchNoMatch() {
+    const service = await this.service;
+
+    await this.#seed(SUGGEST_DATA);
+
+    const results = await service.suggestByIndex(SuggestItem, suggestSort, {}, 'zzz');
+
+    assert(results.length === 0);
+  }
+
+  @Test('suggestByIndex respects limit option')
+  async testSuggestSearchLimit() {
+    const service = await this.service;
+
+    await this.#seed(SUGGEST_DATA);
+
+    const results = await service.suggestByIndex(SuggestItem, suggestSort, {}, 'ba', { limit: 5 });
+
+    assert(results.length === 5);
+    assert(/^ba/.test(results[0].name));
+    assert(results.every(r => r.name.startsWith('ba')));
   }
 }

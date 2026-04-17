@@ -3,9 +3,10 @@ import type {
   GlobalSecondaryIndexUpdate, KeySchemaElement
 } from '@aws-sdk/client-dynamodb';
 
-import type { Class } from '@travetto/runtime';
+import { type Class, castTo } from '@travetto/runtime';
 import { ModelCrudUtil, ModelExpiryUtil, ModelRegistryIndex, NotFoundError, type ModelType } from '@travetto/model';
-import { warnIfIndexedUniqueIndex, warnIfNonIndexedIndex } from '@travetto/model-indexed';
+import { isModelIndexedIndex, warnIfIndexedUniqueIndex, warnIfNonIndexedIndex } from '@travetto/model-indexed';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 /**
  * Configuration for DynamoDB indices
@@ -20,7 +21,15 @@ type DynamoIndexConfig = {
  */
 export class DynamoDBUtil {
 
-  static toSafeName = (name: string): string => name.toLowerCase().replace(/[^A-Za-z0-9]+/g, '_');
+  static indexNames = (name: string): { keyIndexName: string, sortIndexName: string, keyIndexAttribute: string, sortIndexAttribute: string } => {
+    const base = name.toLowerCase().replace(/[^A-Za-z0-9]+/g, '_');
+    return {
+      keyIndexName: base,
+      sortIndexName: `${base}_sort`,
+      keyIndexAttribute: `${base}__`,
+      sortIndexAttribute: `${base}_sort__`
+    };
+  };
 
   /**
    * Converts a JavaScript value to a DynamoDB AttributeValue format
@@ -53,29 +62,44 @@ export class DynamoDBUtil {
 
     const filtered = indexes
       .filter(idx => !warnIfIndexedUniqueIndex(this, cls, [idx]))
-      .filter(idx => !warnIfNonIndexedIndex(this, cls, [idx]));
+      .filter(idx => !warnIfNonIndexedIndex(this, cls, [idx]))
+      .filter(isModelIndexedIndex);
 
     for (const idx of filtered) {
       const keys: KeySchemaElement[] = [];
 
-      const safeName = this.toSafeName(idx.name);
+      const { keyIndexName, keyIndexAttribute, sortIndexAttribute } = this.indexNames(idx.name);
 
       switch (idx.type) {
-        case 'indexed:sorted':
-          keys.push({ AttributeName: `${safeName}__`, KeyType: 'HASH' });
-          keys.push({ AttributeName: `${safeName}_sort__`, KeyType: 'RANGE', });
-          attributes.push({ AttributeName: `${safeName}__`, AttributeType: 'S' });
-          attributes.push({ AttributeName: `${safeName}_sort__`, AttributeType: 'N' });
+        case 'indexed:sorted': {
+          const path = idx.sortTemplate[0].path;
+          let fieldType = cls;
+          for (const field of path) {
+            if (SchemaRegistryIndex.has(fieldType)) {
+              const schema = SchemaRegistryIndex.getConfig(fieldType);
+              if (field in schema.fields) {
+                fieldType = schema.fields[field].type;
+              }
+            } else {
+              break;
+            }
+          }
+
+          keys.push({ AttributeName: keyIndexAttribute, KeyType: 'HASH' });
+          keys.push({ AttributeName: sortIndexAttribute, KeyType: 'RANGE', });
+          attributes.push({ AttributeName: keyIndexAttribute, AttributeType: 'S' });
+          attributes.push({ AttributeName: sortIndexAttribute, AttributeType: castTo(fieldType) === String ? 'S' : 'N' });
           break;
+        }
         case 'indexed:keyed': {
-          keys.push({ AttributeName: `${safeName}__`, KeyType: 'HASH' });
-          attributes.push({ AttributeName: `${safeName}__`, AttributeType: 'S' });
+          keys.push({ AttributeName: keyIndexAttribute, KeyType: 'HASH' });
+          attributes.push({ AttributeName: keyIndexAttribute, AttributeType: 'S' });
           break;
         }
       }
 
       toCreate.push({
-        IndexName: safeName,
+        IndexName: keyIndexName,
         // ProvisionedThroughput: '',
         Projection: {
           ProjectionType: 'INCLUDE',

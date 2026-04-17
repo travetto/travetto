@@ -13,14 +13,14 @@ npm install @travetto/model-mysql
 yarn add @travetto/model-mysql
 ```
 
-This module provides a [MySQL](https://www.mysql.com/)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module.  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [SQL](https://en.wikipedia.org/wiki/SQL) databases. In development mode, the [SQLModelService](https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L37) will also modify the database schema in real time to minimize impact to development. 
+This module provides a [MySQL](https://www.mysql.com/)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module.  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [SQL](https://en.wikipedia.org/wiki/SQL) databases. In development mode, the [SQLModelService](https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L36) will also modify the database schema in real time to minimize impact to development. 
 
 The schema generated will not generally map to existing tables as it is attempting to produce a document store like experience on top of a [SQL](https://en.wikipedia.org/wiki/SQL) database.  Every table generated will have a `path_id` which determines it's location in the document hierarchy as well as sub tables will have a `parent_path_id` to associate records with the parent values. 
 
 Supported features:
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11)
    *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64)
-   *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L15)
+   *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L16)
    *  [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/crud.ts#L11)
    *  [Facet](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/facet.ts#L14)
    *  [Query](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/query.ts#L10)

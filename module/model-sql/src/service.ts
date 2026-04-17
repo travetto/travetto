@@ -7,7 +7,7 @@ import {
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex
+  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex, type ModelIndexedSearchOptions, type SortedIndexSelectionType
 } from '@travetto/model-indexed';
 import { castTo, type Class, JSONUtil } from '@travetto/runtime';
 import { DataUtil } from '@travetto/schema';
@@ -16,8 +16,7 @@ import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
   type PageableModelQuery, type ValidStringFields, type WhereClauseRaw, QueryVerifier, type ModelQuerySuggestSupport,
-  ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
-  type ModelQueryFacet,
+  ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil, type ModelQueryFacet,
 } from '@travetto/model-query';
 
 import type { SQLModelConfig } from './config.ts';
@@ -317,7 +316,7 @@ export class SQLModelService implements
   }
 
   @Connected()
-  async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+  async suggestByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
     const results = await this.query<T>(cls, resolvedQuery);
@@ -325,7 +324,7 @@ export class SQLModelService implements
   }
 
   @Connected()
-  async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+  async suggestValuesByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     await QueryVerifier.verify(cls, query);
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestFieldQuery(cls, field, prefix, query);
     const results = await this.query(cls, resolvedQuery);
@@ -335,7 +334,7 @@ export class SQLModelService implements
   }
 
   @Connected()
-  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
+  async facetByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(cls, query);
     const col = this.#dialect.identifier(field);
     const ttl = this.#dialect.identifier('count');
@@ -466,5 +465,37 @@ export class SQLModelService implements
     for await (const { items } of this.#scanTable<T>(cls, () => baseQuery, options)) {
       yield items;
     }
+  }
+
+  @Connected()
+  async suggestByIndex<
+    T extends ModelType,
+    S extends SortedIndexSelection<T>,
+    K extends KeyedIndexSelection<T>,
+    B extends SortedIndexSelectionType<T, S> & string
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]> {
+    const items: T[] = [];
+    const computed = ModelIndexedComputedIndex.get(idx, body).validate();
+    const nested: Record<string, unknown> = {};
+    let current = nested;
+    for (const key of idx.sortTemplate[0].path.slice(0, -1)) {
+      current = (current[key] = {});
+    }
+    current[idx.sortTemplate[0].path.at(-1)!] = { $regex: ModelIndexedUtil.getSuggestRegex(prefix) };
+
+    const baseQuery = castTo<ModelQuery<T>>({
+      where: {
+        $and: [
+          computed.project(),
+          nested
+        ]
+      },
+    });
+
+    for await (const batch of this.#scanTable<T>(cls, () => baseQuery, { limit: 10, ...options })) {
+      items.push(...batch.items);
+    }
+
+    return items;
   }
 }

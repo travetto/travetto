@@ -14,11 +14,12 @@ import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport, type PageableModelQuery,
   type Query, type ValidStringFields, QueryVerifier, type ModelQuerySuggestSupport, ModelQueryUtil, ModelQuerySuggestUtil,
   ModelQueryCrudUtil, type ModelQueryFacet,
+  type WhereClause,
 } from '@travetto/model-query';
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex
+  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex, type ModelIndexedSearchOptions, type SortedIndexSelectionType
 } from '@travetto/model-indexed';
 
 import type { ElasticsearchModelConfig } from './config.ts';
@@ -119,27 +120,32 @@ export class ElasticsearchModelService implements
     }
   }
 
-  async * #scrollIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(
+  async * #scrollIndex<T extends ModelType>(
     cls: Class<T>,
-    idx: SortedIndex<T, K, S>,
-    body: KeyedIndexBody<T, K>,
-    options?: ModelPageOptions<estypes.SortResults> & ModelListOptions
+    idx: SortedIndex<T>,
+    body: KeyedIndexBody<T>,
+    options?: ModelPageOptions<estypes.SortResults> & ModelListOptions,
+    transformWhere?: (where: WhereClause<T>) => WhereClause<T>
   ): AsyncIterable<{
     items: T[];
     nextOffset?: estypes.SortResults | undefined;
   }> {
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
-    yield* this.#scrollCollection(cls, (offset) => ({
-      query: ElasticsearchQueryUtil.getSearchQuery(cls,
-        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.project())
-      ),
-      search_after: offset,
-      sort: ElasticsearchQueryUtil.getSort(idx)
-    }), options);
+    let whereClause: WhereClause<T> = castTo(computed.project());
+    if (transformWhere) {
+      whereClause = transformWhere(whereClause);
+    }
+
+    yield* this.#scrollCollection(cls, (offset) => {
+      const result = {
+        query: ElasticsearchQueryUtil.getSearchQuery(cls,
+          ElasticsearchQueryUtil.extractWhereQuery(cls, whereClause)
+        ),
+        ...(offset ? { search_after: offset } : {}),
+        sort: ElasticsearchQueryUtil.getSort(idx)
+      };
+      return result;
+    }, options);
   }
 
   @PostConstruct()
@@ -415,19 +421,19 @@ export class ElasticsearchModelService implements
     S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
+    const projected = computed.project({
+      sort: true,
+      includeId: true,
+      emptyValue: { $exists: true }
+    });
 
     const result = await this.execSearch<T>(cls, {
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
-        ElasticsearchQueryUtil.extractWhereTermQuery(cls, computed.project({
-          sort: true,
-          includeId: true,
-          emptyValue: { $exists: true }
-        }))
-
+        ElasticsearchQueryUtil.extractWhereTermQuery(cls, projected)
       )
     });
     if (!result.hits.hits.length) {
-      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
+      throw new NotFoundError(`${cls.name}: ${idx.name}`, computed.getKey({ sort: true }));
     }
     return this.#postLoad(cls, result.hits.hits[0]);
 
@@ -513,6 +519,25 @@ export class ElasticsearchModelService implements
     for await (const { items } of this.#scrollIndex(cls, idx, body, options)) {
       yield items;
     }
+  }
+
+  async suggestByIndex<
+    T extends ModelType,
+    S extends SortedIndexSelection<T>,
+    K extends KeyedIndexSelection<T>,
+    B extends SortedIndexSelectionType<T, S> & string
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]> {
+    const items: T[] = [];
+    for await (const { items: fetched } of this.#scrollIndex(cls, idx, body, { limit: 10, ...options },
+      where => castTo({
+        $and: [where, {
+          [idx.sortTemplate[0].path.join('.')]: { $regex: ModelIndexedUtil.getSuggestRegex(prefix) }
+        }]
+      })
+    )) {
+      items.push(...fetched);
+    }
+    return items;
   }
 
   // Query
@@ -618,7 +643,7 @@ export class ElasticsearchModelService implements
   }
 
   // Query Facet
-  async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+  async suggestByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
 
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
@@ -628,7 +653,7 @@ export class ElasticsearchModelService implements
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, (_, value) => value, query && query.limit);
   }
 
-  async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+  async suggestValuesByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     await QueryVerifier.verify(cls, query);
 
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, {
@@ -642,7 +667,7 @@ export class ElasticsearchModelService implements
   }
 
   // Facet
-  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
+  async facetByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(cls, query);
 
     const resolvedSearch = ElasticsearchQueryUtil.getSearchObject(cls, query ?? {}, this.config.schemaConfig);

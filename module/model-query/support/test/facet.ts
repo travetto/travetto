@@ -36,7 +36,7 @@ export abstract class ModelQueryFacetSuite extends BaseModelSuite<ModelQueryFace
 
     assert(saved === 50);
 
-    const results = await svc.facet(Person, 'gender');
+    const results = await svc.facetByQuery(Person, 'gender');
 
     assert(results.length === 2);
     assert(results[0].count >= results[1].count);
@@ -51,7 +51,7 @@ export abstract class ModelQueryFacetSuite extends BaseModelSuite<ModelQueryFace
       names[el.name!] = (names[el.name!] || 0) + 1;
     }
 
-    const nameFacet = await svc.facet(Person, 'name');
+    const nameFacet = await svc.facetByQuery(Person, 'name');
     assert(Object.keys(names).length === nameFacet.length);
   }
 }

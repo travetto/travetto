@@ -34,6 +34,11 @@ export type ValidFields<T, I> = {
 
 export type RetainIntrinsicFields<T> = Pick<T, ValidFields<T, IntrinsicType>>;
 
+export type ValidTypedFields<T, F> = {
+  [K in Extract<keyof T, string>]:
+  (T[K] extends F ? K : never)
+}[Extract<keyof T, string>];
+
 export const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T & string>(value: T): K[];
   fromEntries<K extends string | symbol, V>(items: ([K, V] | readonly [K, V])[]): Record<K, V>;

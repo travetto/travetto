@@ -136,7 +136,7 @@ export const specificOrders = keyedIndex(Order, {
 ```
 
 ## Using Indexes
-Model services that implement [ModelIndexedSupport](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L15) allow you to query using the indexes you've defined.
+Model services that implement [ModelIndexedSupport](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L16) allow you to query using the indexes you've defined.
 
 ### Service Interface
 
@@ -216,7 +216,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   pageByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>
+    K extends KeyedIndexSelection<T>,
   >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ModelPageOptions): Promise<ModelPageResult<T>>;
 
   /**
@@ -232,8 +232,26 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   listByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>
+    K extends KeyedIndexSelection<T>,
   >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ModelListOptions): AsyncIterable<T[]>;
+
+  /**
+   * Suggest entities by ranged index as defined by fields of idx and a prefix
+   *
+   * Note: Limit is generally honored, but can vary depending on the underlying storage implementation.
+   *
+   * @param cls The type to search by
+   * @param idx The index to search against
+   * @param body The payload of fields needed to search
+   * @param prefix The prefix to use for suggesting entities
+   * @param options The configuration for pagination
+   */
+  suggestByIndex<
+    T extends ModelType,
+    S extends SortedIndexSelection<T>,
+    K extends KeyedIndexSelection<T>,
+    B extends SortedIndexSelectionType<T, S> & string
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]>;
 }
 ```
 
@@ -383,7 +401,7 @@ export async function listWithFilterExample(modelService: ModelIndexedSupport) {
 ```
 
 ## Integration
-Index registration happens automatically when models are decorated with [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14). Model services like [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module."), [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module."), and [SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") implement the [ModelIndexedSupport](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L15) interface to provide indexed access.
+Index registration happens automatically when models are decorated with [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14). Model services like [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module."), [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module."), and [SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") implement the [ModelIndexedSupport](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L16) interface to provide indexed access.
 
 ### Reading Registry Information
 You can access registered indexes via [ModelRegistryIndex](https://github.com/travetto/travetto/tree/main/module/model/src/registry/registry-index.ts#L12) at runtime:
