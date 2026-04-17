@@ -7,8 +7,7 @@ import {
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex,
-  type ModelIndexedSearchOptions
+  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex, type ModelIndexedSearchOptions
 } from '@travetto/model-indexed';
 import { castTo, type Class, JSONUtil } from '@travetto/runtime';
 import { DataUtil } from '@travetto/schema';
@@ -17,8 +16,7 @@ import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
   type PageableModelQuery, type ValidStringFields, type WhereClauseRaw, QueryVerifier, type ModelQuerySuggestSupport,
-  ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
-  type ModelQueryFacet,
+  ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil, type ModelQueryFacet,
 } from '@travetto/model-query';
 
 import type { SQLModelConfig } from './config.ts';

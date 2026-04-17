@@ -1,35 +1,28 @@
 import {
-  type Binary,
-  type Db, GridFSBucket, MongoClient, type GridFSFile, type Collection,
-  type ObjectId, type RootFilterOperators, type Filter,
-  type WithId as MongoWithId,
-  type FindCursor,
+  type Binary, type Db, GridFSBucket, MongoClient, type GridFSFile, type Collection,
+  type ObjectId, type RootFilterOperators, type Filter, type WithId as MongoWithId, type FindCursor,
   MongoServerError,
 } from 'mongodb';
 
 import {
   ModelRegistryIndex, type ModelType, type OptionalId, type ModelCrudSupport, type ModelStorageSupport, type ModelExpirySupport,
   type ModelBulkSupport, type BulkOperation, type BulkResponse, NotFoundError, ExistsError, type ModelBlobSupport,
-  ModelCrudUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil,
-  type ModelListOptions,
+  ModelCrudUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, type ModelListOptions,
 } from '@travetto/model';
 import {
   type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
   type PageableModelQuery, type ValidStringFields, type WhereClause, type ModelQuerySuggestSupport,
-  QueryVerifier, ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
-  type ModelQueryFacet,
+  QueryVerifier, ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil, type ModelQueryFacet,
 } from '@travetto/model-query';
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex,
-  type ModelIndexedSearchOptions,
+  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex, type ModelIndexedSearchOptions,
 } from '@travetto/model-indexed';
 
 import {
-  ShutdownManager, type Class, TypedObject,
-  castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType, BinaryUtil, BinaryMetadataUtil,
-  JSONUtil,
+  ShutdownManager, type Class, TypedObject, castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType,
+  BinaryUtil, BinaryMetadataUtil, JSONUtil,
 } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 
