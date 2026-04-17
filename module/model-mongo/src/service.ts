@@ -17,7 +17,7 @@ import {
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex, type ModelIndexedSearchOptions,
+  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex, type ModelIndexedSearchOptions, type SortedIndexSelectionType,
 } from '@travetto/model-indexed';
 
 import {
@@ -545,14 +545,14 @@ export class MongoModelService implements
 
   async suggestByIndex<
     T extends ModelType,
-    S extends SortedIndexSelection<T, B>,
+    S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>,
-    B extends string
+    B extends SortedIndexSelectionType<T, S> & string
   >(
     cls: Class<T>,
-    idx: SortedIndex<T, K, S, B>,
+    idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    prefix: string,
+    prefix: B,
     options?: ModelIndexedSearchOptions
   ): Promise<T[]> {
     const cursor = (await this.#buildIndexQuery(cls, idx, body, (where) => castTo({

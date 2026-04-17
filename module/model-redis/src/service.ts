@@ -10,8 +10,7 @@ import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, isModelIndexedIndex,
   type FullKeyedIndexWithPartialBody, type FullKeyedIndexBody, ModelIndexedComputedIndex,
-  warnIfIndexedUniqueIndex, warnIfNonIndexedIndex,
-  type ModelIndexedSearchOptions,
+  warnIfIndexedUniqueIndex, warnIfNonIndexedIndex, type ModelIndexedSearchOptions, type SortedIndexSelectionType,
 } from '@travetto/model-indexed';
 
 import { Injectable, PostConstruct } from '@travetto/di';
@@ -448,10 +447,10 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   async suggestByIndex<
     T extends ModelType,
-    S extends SortedIndexSelection<T, B>,
+    S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>,
-    B extends string
-  >(cls: Class<T>, idx: SortedIndex<T, K, S, B>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
+    B extends SortedIndexSelectionType<T, S> & string
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]> {
 
     const items: T[] = [];
     for await (const { ids } of this.#scanIndex(cls, idx, body, { limit: 10, ...options, prefix })) {

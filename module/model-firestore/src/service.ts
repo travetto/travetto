@@ -10,7 +10,7 @@ import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
   type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex, warnIfIndexedUniqueIndex, warnIfNonIndexedIndex,
-  type ModelIndexedSearchOptions
+  type ModelIndexedSearchOptions, type SortedIndexSelectionType
 } from '@travetto/model-indexed';
 
 import type { FirestoreModelConfig } from './config.ts';
@@ -269,10 +269,10 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   async suggestByIndex<
     T extends ModelType,
-    S extends SortedIndexSelection<T, B>,
+    S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>,
-    B extends string
-  >(cls: Class<T>, idx: SortedIndex<T, K, S, B>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
+    B extends SortedIndexSelectionType<T, S> & string
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]> {
     const results: T[] = [];
 
     const field = idx.sortTemplate[0].path.join('.');

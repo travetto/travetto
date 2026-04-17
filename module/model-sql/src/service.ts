@@ -7,7 +7,7 @@ import {
 import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex, type ModelIndexedSearchOptions
+  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex, type ModelIndexedSearchOptions, type SortedIndexSelectionType
 } from '@travetto/model-indexed';
 import { castTo, type Class, JSONUtil } from '@travetto/runtime';
 import { DataUtil } from '@travetto/schema';
@@ -470,10 +470,10 @@ export class SQLModelService implements
   @Connected()
   async suggestByIndex<
     T extends ModelType,
-    S extends SortedIndexSelection<T, B>,
+    S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>,
-    B extends string
-  >(cls: Class<T>, idx: SortedIndex<T, K, S, B>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
+    B extends SortedIndexSelectionType<T, S> & string
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]> {
     const items: T[] = [];
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
     const nested: Record<string, unknown> = {};

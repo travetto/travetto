@@ -12,8 +12,7 @@ import {
   isModelIndexedIndex, ModelIndexedUtil, type KeyedIndexBody, type KeyedIndexSelection,
   type ModelPageOptions, type ModelPageResult, type ModelIndexedSupport, type SingleItemIndex,
   type FullKeyedIndexBody, type FullKeyedIndexWithPartialBody, type SortedIndex, type SortedIndexSelection,
-  ModelIndexedComputedIndex,
-  type ModelIndexedSearchOptions
+  ModelIndexedComputedIndex, type ModelIndexedSearchOptions, type SortedIndexSelectionType
 } from '@travetto/model-indexed';
 
 import type { DynamoDBModelConfig } from './config.ts';
@@ -492,10 +491,10 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async suggestByIndex<
     T extends ModelType,
-    S extends SortedIndexSelection<T, B>,
+    S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>,
-    B extends string
-  >(cls: Class<T>, idx: SortedIndex<T, K, S, B>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
+    B extends SortedIndexSelectionType<T, S> & string
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]> {
     const results: T[] = [];
 
     const { sortIndexAttribute } = DynamoDBUtil.indexNames(idx.name);

@@ -14,7 +14,7 @@ import {
   type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
   type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex,
   type AllIndexes, isModelIndexedIndex, type FullKeyedIndexBody, type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex,
-  type ModelIndexedSearchOptions,
+  type ModelIndexedSearchOptions, type SortedIndexSelectionType,
 } from '@travetto/model-indexed';
 
 const ModelBlobNamespace = '__blobs';
@@ -478,10 +478,10 @@ export class MemoryModelService implements
 
   async suggestByIndex<
     T extends ModelType,
-    S extends SortedIndexSelection<T, B>,
+    S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>,
-    B extends string
-  >(cls: Class<T>, idx: SortedIndex<T, K, S, B>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
+    B extends SortedIndexSelectionType<T, S> & string
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]> {
     const items: T[] = [];
     for await (const batch of this.#getIndexIds(
       cls, idx, body, options,
