@@ -14,7 +14,7 @@ export class ModelQuerySuggestUtil {
   /**
    * Type guard for determining if service supports query suggest operations
    */
-  static isSupported = hasFunction<ModelQuerySuggestSupport>('suggest');
+  static isSupported = hasFunction<ModelQuerySuggestSupport>('suggestByQuery');
 
   /**
    * Build regex for suggesting
