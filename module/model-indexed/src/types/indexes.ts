@@ -12,8 +12,17 @@ type TypeProjection<T, V, B = IntrinsicType> = {
   );
 };
 
+export type SortedIndexSelectionType<T, S> =
+  (T extends SortScalar ? T :
+    (T extends Any[] ? SortedIndexSelectionType<T[number], S> :
+      (S extends object ? (
+        (T extends object ?
+          { [K in keyof S]: K extends keyof T ? SortedIndexSelectionType<T[K], S[K]> : never }[keyof S] :
+          never
+        )) : never)));
+
 export type KeyedIndexSelection<T extends ModelType> = TypeProjection<T, true>;
-export type SortedIndexSelection<T extends ModelType, B extends SortScalar = SortScalar> = TypeProjection<T, 1 | -1, B>;
+export type SortedIndexSelection<T extends ModelType> = TypeProjection<T, 1 | -1>;
 
 export type KeyedIndexBody<T, K = Any> = {
   [P in keyof K]: (P extends keyof T ?
@@ -55,8 +64,7 @@ export type TemplatePart<T extends TemplateValue = TemplateValue> = { path: stri
 export interface KeyedIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T> = Any,
-  S extends SortedIndexSelection<T, B> = Any,
-  B extends SortScalar = SortScalar
+  S extends SortedIndexSelection<T> = Any,
 > extends IndexConfig<'indexed:keyed'> {
   key: K;
   sort: S;
@@ -68,8 +76,7 @@ export interface KeyedIndex<
 export interface SortedIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T> = Any,
-  S extends SortedIndexSelection<T, B> = Any,
-  B extends SortScalar = SortScalar
+  S extends SortedIndexSelection<T> = Any
 > extends IndexConfig<'indexed:sorted'> {
   key: K;
   sort: S;
@@ -88,4 +95,5 @@ export type AllIndexes<
   K extends KeyedIndexSelection<T> = Any,
   S extends SortedIndexSelection<T> = Any,
 > = KeyedIndex<T, K, S> | SortedIndex<T, K, S>;
+
 

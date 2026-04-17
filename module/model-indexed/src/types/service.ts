@@ -3,7 +3,8 @@ import type { Class } from '@travetto/runtime';
 
 import type {
   KeyedIndexSelection, KeyedIndexBody, SortedIndexSelection, SortedIndex,
-  SingleItemIndex, FullKeyedIndexBody, FullKeyedIndexWithPartialBody
+  SingleItemIndex, FullKeyedIndexBody, FullKeyedIndexWithPartialBody,
+  SortedIndexSelectionType
 } from './indexes.ts';
 import type { ModelIndexedSearchOptions, ModelPageOptions, ModelPageResult } from './list.ts';
 
@@ -22,7 +23,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   getByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T, string | Date | number>
+    S extends SortedIndexSelection<T>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T>;
 
   /**
@@ -118,8 +119,8 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    */
   suggestByIndex<
     T extends ModelType,
-    S extends SortedIndexSelection<T, B>,
+    S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>,
-    B extends string = string
-  >(cls: Class<T>, idx: SortedIndex<T, K, S, B>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]>;
+    B extends SortedIndexSelectionType<T, S> & string,
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]>;
 }

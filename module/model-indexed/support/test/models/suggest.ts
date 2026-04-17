@@ -40,6 +40,7 @@ export const SUGGEST_DATA = [
 export class SuggestItem {
   id: string;
   name: string;
+  age?: number;
 }
 
 export const suggestSort = sortedIndex(SuggestItem, {
