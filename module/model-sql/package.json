@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-sql",
-  "version": "8.0.0-alpha.16",
+  "version": "8.0.0-alpha.17",
   "type": "module",
   "description": "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.",
   "keywords": [
@@ -28,15 +28,15 @@
     "directory": "module/model-sql"
   },
   "dependencies": {
-    "@travetto/config": "^8.0.0-alpha.14",
-    "@travetto/context": "^8.0.0-alpha.13",
-    "@travetto/model": "^8.0.0-alpha.14",
-    "@travetto/model-indexed": "^8.0.0-alpha.16",
-    "@travetto/model-query": "^8.0.0-alpha.15"
+    "@travetto/config": "^8.0.0-alpha.15",
+    "@travetto/context": "^8.0.0-alpha.14",
+    "@travetto/model": "^8.0.0-alpha.15",
+    "@travetto/model-indexed": "^8.0.0-alpha.17",
+    "@travetto/model-query": "^8.0.0-alpha.16"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.19",
-    "@travetto/test": "^8.0.0-alpha.13"
+    "@travetto/cli": "^8.0.0-alpha.20",
+    "@travetto/test": "^8.0.0-alpha.14"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

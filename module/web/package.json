@@ -1,6 +1,6 @@
 {
   "name": "@travetto/web",
-  "version": "8.0.0-alpha.15",
+  "version": "8.0.0-alpha.16",
   "type": "module",
   "description": "Declarative support for creating Web Applications",
   "keywords": [
@@ -26,18 +26,18 @@
     "directory": "module/web"
   },
   "dependencies": {
-    "@travetto/config": "^8.0.0-alpha.14",
-    "@travetto/context": "^8.0.0-alpha.13",
-    "@travetto/di": "^8.0.0-alpha.13",
-    "@travetto/registry": "^8.0.0-alpha.13",
-    "@travetto/runtime": "^8.0.0-alpha.13",
-    "@travetto/schema": "^8.0.0-alpha.14",
+    "@travetto/config": "^8.0.0-alpha.15",
+    "@travetto/context": "^8.0.0-alpha.14",
+    "@travetto/di": "^8.0.0-alpha.14",
+    "@travetto/registry": "^8.0.0-alpha.14",
+    "@travetto/runtime": "^8.0.0-alpha.14",
+    "@travetto/schema": "^8.0.0-alpha.15",
     "find-my-way": "^9.5.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.19",
-    "@travetto/test": "^8.0.0-alpha.13",
-    "@travetto/transformer": "^8.0.0-alpha.9"
+    "@travetto/cli": "^8.0.0-alpha.20",
+    "@travetto/test": "^8.0.0-alpha.14",
+    "@travetto/transformer": "^8.0.0-alpha.10"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {
