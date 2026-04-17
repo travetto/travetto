@@ -3,8 +3,7 @@ import type { Class } from '@travetto/runtime';
 
 import type {
   KeyedIndexSelection, KeyedIndexBody, SortedIndexSelection, SortedIndex,
-  SingleItemIndex, FullKeyedIndexBody, FullKeyedIndexWithPartialBody,
-  SortedStringIndex
+  SingleItemIndex, FullKeyedIndexBody, FullKeyedIndexWithPartialBody
 } from './indexes.ts';
 import type { ModelIndexedSearchOptions, ModelPageOptions, ModelPageResult } from './list.ts';
 
@@ -121,5 +120,5 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
     T extends ModelType,
     S extends SortedIndexSelection<T, string>,
     K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: SortedStringIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]>;
+  >(cls: Class<T>, idx: SortedIndex<T, K, S, string>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]>;
 }

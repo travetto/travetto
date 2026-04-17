@@ -112,13 +112,15 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
     return parts.map(({ value }) => value).map(value => `${value}`).join(sep);
   }
 
-  getSort(): number {
+  getSort(): number | string {
     const { value } = this.sortParts[0] ?? {};
     const direction = (this.sortParts[0]?.templateValue ?? 1);
     if (value instanceof Date) {
       return value.getTime() * direction;
     } else if (typeof value === 'number') {
       return value * direction;
+    } else if (typeof value === 'string') {
+      return value;
     } else {
       return 0;
     }

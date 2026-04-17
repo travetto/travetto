@@ -82,7 +82,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   ): AsyncIterable<{ items: T[], lastKey?: Record<string, AttributeValue> }> {
     ModelCrudUtil.ensureNotSubType(cls);
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
-    const { keyIndexName, keyIndexAttribute } = DynamoDBUtil.toSafeName(idx.name);
+    const { keyIndexName, keyIndexAttribute } = DynamoDBUtil.indexNames(idx.name);
     const expression = { [`:${keyIndexName}`]: getKey(computed) };
 
     const finalTransform = transform ?? ((query): QueryCommandInput => query);
@@ -110,7 +110,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
 
-    const { keyIndexName, keyIndexAttribute, sortIndexAttribute, sortIndexName } = DynamoDBUtil.toSafeName(idx.name);
+    const { keyIndexName, keyIndexAttribute, sortIndexAttribute, sortIndexName } = DynamoDBUtil.indexNames(idx.name);
     const sorted = idx.type === 'indexed:sorted';
 
     const query: QueryCommandInput = {
@@ -163,7 +163,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         const indices: Record<string, unknown> = {};
         for (const idx of ModelRegistryIndex.getIndices(cls)) {
           if (isModelIndexedIndex(idx)) {
-            const { keyIndexAttribute, sortIndexAttribute } = DynamoDBUtil.toSafeName(idx.name);
+            const { keyIndexAttribute, sortIndexAttribute } = DynamoDBUtil.indexNames(idx.name);
             const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
             switch (idx.type) {
               case 'indexed:keyed': indices[keyIndexAttribute] = getKey(computed); break;
@@ -195,7 +195,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
         for (const idx of ModelRegistryIndex.getIndices(cls)) {
           if (isModelIndexedIndex(idx)) {
-            const { keyIndexAttribute, sortIndexAttribute, keyIndexName, sortIndexName } = DynamoDBUtil.toSafeName(idx.name);
+            const { keyIndexAttribute, sortIndexAttribute, keyIndexName, sortIndexName } = DynamoDBUtil.indexNames(idx.name);
             const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
             switch (idx.type) {
               case 'indexed:keyed': {
@@ -464,7 +464,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     if (output.length) {
       const last: T = output.at(-1)!;
       const computed = ModelIndexedComputedIndex.get(idx, last).validate();
-      const { keyIndexAttribute, sortIndexAttribute } = DynamoDBUtil.toSafeName(idx.name);
+      const { keyIndexAttribute, sortIndexAttribute } = DynamoDBUtil.indexNames(idx.name);
       nextOffset = JSONUtil.toBase64({
         [keyIndexAttribute]: getKey(computed),
         [sortIndexAttribute]: getSort(computed),
@@ -496,7 +496,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   >(cls: Class<T>, idx: SortedIndex<T, K, S, string>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
     const results: T[] = [];
 
-    const { sortIndexAttribute } = DynamoDBUtil.toSafeName(idx.name);
+    const { sortIndexAttribute } = DynamoDBUtil.indexNames(idx.name);
 
     for await (const { items } of this.#scanIndex(cls, idx, body, { limit: 10, ...options },
       (query) => ({
