@@ -483,7 +483,7 @@ export class SQLModelService implements
     for (const key of idx.sortTemplate[0].path.slice(0, -1)) {
       current = (current[key] = {});
     }
-    current[idx.sortTemplate[0].path.at(-1)!] = { $regex: ModelQuerySuggestUtil.getSuggestRegex(prefix) };
+    current[idx.sortTemplate[0].path.at(-1)!] = { $regex: ModelIndexedUtil.getSuggestRegex(prefix) };
 
     const baseQuery = castTo<ModelQuery<T>>({
       where: {

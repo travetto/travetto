@@ -1,7 +1,6 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { castTo } from '@travetto/runtime';
 import { Discriminated } from '@travetto/schema';
 import { Model, NotFoundError, SubTypeNotSupportedError } from '@travetto/model';
 
@@ -45,7 +44,7 @@ export abstract class ModelIndexedPolymorphismSuite extends BaseModelSuite<Model
 
   @Test('Polymorphic index', { skip: BaseModelSuite.ifNot(ModelIndexedUtil.isSupported) })
   async polymorphicIndexGet() {
-    const service: ModelIndexedSupport = castTo(await this.service);
+    const service: ModelIndexedSupport = await this.service;
     const now = 30;
     const [doc, fire, eng] = [
       IndexedDoctor.from({ name: 'bob', specialty: 'feet', age: now }),
@@ -75,7 +74,7 @@ export abstract class ModelIndexedPolymorphismSuite extends BaseModelSuite<Model
 
   @Test('Polymorphic index', { skip: BaseModelSuite.ifNot(ModelIndexedUtil.isSupported) })
   async polymorphicIndexDelete() {
-    const service: ModelIndexedSupport = castTo(await this.service);
+    const service: ModelIndexedSupport = await this.service;
     const now = 30;
     const [doc, fire, eng] = [
       IndexedDoctor.from({ name: 'bob', specialty: 'feet', age: now }),

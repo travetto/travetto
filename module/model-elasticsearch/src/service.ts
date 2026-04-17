@@ -137,13 +137,17 @@ export class ElasticsearchModelService implements
       whereClause = transformWhere(whereClause);
     }
 
-    yield* this.#scrollCollection(cls, (offset) => ({
-      query: ElasticsearchQueryUtil.getSearchQuery(cls,
-        ElasticsearchQueryUtil.extractWhereQuery(cls, whereClause)
-      ),
-      search_after: offset,
-      sort: ElasticsearchQueryUtil.getSort(idx)
-    }), options);
+    yield* this.#scrollCollection(cls, (offset) => {
+      const result = {
+        query: ElasticsearchQueryUtil.getSearchQuery(cls,
+          ElasticsearchQueryUtil.extractWhereQuery(cls, whereClause)
+        ),
+        search_after: offset,
+        sort: ElasticsearchQueryUtil.getSort(idx)
+      };
+      console.error(result);
+      return result;
+    }, options);
   }
 
   @PostConstruct()
@@ -530,7 +534,7 @@ export class ElasticsearchModelService implements
     for (const key of idx.sortTemplate[0].path.slice(0, -1)) {
       current = (current[key] = {});
     }
-    current[idx.sortTemplate[0].path.at(-1)!] = { $regex: ModelQuerySuggestUtil.getSuggestRegex(prefix) };
+    current[idx.sortTemplate[0].path.at(-1)!] = { $regex: ModelIndexedUtil.getSuggestRegex(prefix) };
 
     const items: T[] = [];
     for await (const { items: fetched } of this.#scrollIndex(cls, idx, body, { limit: 10, ...options },

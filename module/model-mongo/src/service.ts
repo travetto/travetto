@@ -564,7 +564,7 @@ export class MongoModelService implements
   ): Promise<T[]> {
     const cursor = (await this.#buildIndexQuery(cls, idx, body, (where) => castTo({
       $and: [where, {
-        [idx.sortTemplate[0].path.join('.')]: ModelQuerySuggestUtil.getSuggestRegex(prefix)
+        [idx.sortTemplate[0].path.join('.')]: ModelIndexedUtil.getSuggestRegex(prefix)
       }]
     })));
     const batches = await Array.fromAsync(this.#iterateCursor(cls, cursor, { limit: 10, ...options }));
