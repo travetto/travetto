@@ -1,7 +1,6 @@
 import {
   type Class, type TimeSpan, castTo, type BinaryMetadata,
   type ByteRange, type BinaryType, BinaryUtil, type BinaryArray, JSONUtil, BinaryMetadataUtil,
-  castKey,
 } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -22,6 +21,10 @@ const ModelBlobNamespace = '__blobs';
 const ModelBlobMetaNamespace = `${ModelBlobNamespace}_meta`;
 
 type StoreType = Map<string, BinaryArray>;
+
+const sortValue = (a: string | number, b: string | number): number =>
+  (typeof a === 'number' && typeof b === 'number') ?
+    a - b : (typeof a === 'string' && typeof b === 'string') ? a.localeCompare(b) : 0;
 
 @Config('model.memory')
 export class MemoryModelConfig {
@@ -173,10 +176,9 @@ export class MemoryModelService implements
     throw new NotFoundError(cls, computed.getKey({ sort: true }));
   }
 
-  async * #iterateIds<T extends ModelType>(
+  async * #iterateIds(
     ids: string[],
-    options?: ModelListOptions & ModelPageOptions<number>
-
+    options?: ModelListOptions & ModelPageOptions<number>,
   ): AsyncIterable<string[]> {
     let offset = options && 'offset' in options ? options.offset ?? 0 : 0;
     const batchSize = options?.batchSizeHint ?? 100;
@@ -202,7 +204,8 @@ export class MemoryModelService implements
     cls: Class<T>,
     idx: AllIndexes<T>,
     body: KeyedIndexBody<T>,
-    options?: ModelListOptions & ModelPageOptions<number>
+    options?: ModelListOptions & ModelPageOptions<number>,
+    filterIndex?: (indexValue: string | number) => boolean
   ): AsyncIterable<string[]> {
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
     if (!isModelIndexedIndex(idx)) {
@@ -216,12 +219,13 @@ export class MemoryModelService implements
       ids = [];
     } else if (index instanceof Map) {
       ids = [...index.entries()]
-        .toSorted((a, b) => (typeof a[1] === 'number' && typeof b[1] === 'number') ? a[1] - b[1] :
-          (typeof a[1] === 'string' && typeof b[1] === 'string') ? a[1].localeCompare(b[1]) : 0)
+        .filter(([, sort]) => filterIndex ? filterIndex(sort) : true)
+        .sort((a, b) => sortValue(a[1], b[1]))
         .map(([id,]) => id);
     } else {
       ids = [...index];
     }
+
     yield* this.#iterateIds(ids, options);
   }
 
@@ -479,21 +483,11 @@ export class MemoryModelService implements
     B extends string
   >(cls: Class<T>, idx: SortedIndex<T, K, S, B>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
     const items: T[] = [];
-    const limit = (options?.limit ?? 10);
-    for await (const batch of this.#getIndexIds(cls, idx, body, { ...options })) {
-      const resolved = await ModelCrudUtil.filterOutNotFound(batch.map(id => this.get(cls, id)));
-      for (const item of resolved) {
-        let value: unknown = item;
-        for (const key of idx.sortTemplate[0].path) {
-          value = (typeof value === 'object' && value !== null && key in value) ? value[castKey(key)] : null;
-        }
-        if (typeof value === 'string' && value.startsWith(prefix)) {
-          items.push(item);
-        }
-        if (items.length === limit) {
-          break;
-        }
-      }
+    for await (const batch of this.#getIndexIds(
+      cls, idx, body, options,
+      id => (typeof id === 'string' && id.startsWith(prefix))
+    )) {
+      items.push(...await ModelCrudUtil.filterOutNotFound(batch.map(id => this.get(cls, id))));
     }
     return items;
   }
