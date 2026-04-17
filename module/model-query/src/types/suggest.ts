@@ -18,7 +18,7 @@ export interface ModelQuerySuggestSupport extends ModelQuerySupport {
    * @param prefix The search prefix for the given field
    * @param query A query to filter the search on, in addition to the prefix
    */
-  suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]>;
+  suggestByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]>;
   /**
    * Suggest distinct values for a given cls and a given field
    *
@@ -27,5 +27,5 @@ export interface ModelQuerySuggestSupport extends ModelQuerySupport {
    * @param prefix The search prefix for the given field
    * @param query A query to filter the search on, in addition to the prefix
    */
-  suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]>;
+  suggestValuesByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]>;
 }

@@ -318,7 +318,7 @@ export class SQLModelService implements
   }
 
   @Connected()
-  async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+  async suggestByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
     const results = await this.query<T>(cls, resolvedQuery);
@@ -326,7 +326,7 @@ export class SQLModelService implements
   }
 
   @Connected()
-  async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+  async suggestValuesByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     await QueryVerifier.verify(cls, query);
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestFieldQuery(cls, field, prefix, query);
     const results = await this.query(cls, resolvedQuery);
@@ -336,7 +336,7 @@ export class SQLModelService implements
   }
 
   @Connected()
-  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
+  async facetByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(cls, query);
     const col = this.#dialect.identifier(field);
     const ttl = this.#dialect.identifier('count');

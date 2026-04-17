@@ -33,13 +33,13 @@ export abstract class ModelQuerySuggestSuite extends BaseModelSuite<ModelQuerySu
 
     await this.#loadPeople();
 
-    let suggested = await service.suggestValues(Person, 'name', 'bo');
+    let suggested = await service.suggestValuesByQuery(Person, 'name', 'bo');
     assert(suggested.length === 2);
 
-    suggested = await service.suggestValues(Person, 'name', 'b');
+    suggested = await service.suggestValuesByQuery(Person, 'name', 'b');
     assert(suggested.length === 3);
 
-    suggested = await service.suggestValues(Person, 'name', 'b', {
+    suggested = await service.suggestValuesByQuery(Person, 'name', 'b', {
       where: {
         address: {
           street2: {
@@ -57,7 +57,7 @@ export abstract class ModelQuerySuggestSuite extends BaseModelSuite<ModelQuerySu
 
     await this.#loadPeople();
 
-    const suggestedEntities = await service.suggest(Person, 'name', 'bo');
+    const suggestedEntities = await service.suggestByQuery(Person, 'name', 'bo');
 
     assert(suggestedEntities.length === 2);
     assert(suggestedEntities[0].name === 'Bo');

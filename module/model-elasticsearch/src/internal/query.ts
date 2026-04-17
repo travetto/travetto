@@ -141,7 +141,7 @@ export class ElasticsearchQueryUtil {
             }
             case '$regex': {
               const pattern = DataUtil.toRegex(castTo(value));
-              if (pattern.source.startsWith('\\b') && pattern.source.endsWith('.*')) {
+              if (pattern.source.startsWith('\\b') && pattern.source.endsWith('.*') && declaredSchema.specifiers?.includes('text')) {
                 const textField = !pattern.flags.includes('i') && config && config.caseSensitive ?
                   `${subPath}.text_cs` :
                   `${subPath}.text`;
@@ -152,7 +152,7 @@ export class ElasticsearchQueryUtil {
                   }
                 });
               } else {
-                items.push({ regexp: { [subPath]: pattern.source } });
+                items.push({ regexp: { [`${subPath}.keyword`]: pattern.source } });
               }
               break;
             }
@@ -184,9 +184,7 @@ export class ElasticsearchQueryUtil {
         items.push(subPathQuery(top));
       }
     }
-    if (items.length === 0) {
-      return { bool: { must: [] } };
-    } else if (items.length === 1) {
+    if (items.length === 1) {
       return items[0];
     } else {
       return { bool: { must: items } };

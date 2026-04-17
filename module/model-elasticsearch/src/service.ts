@@ -142,7 +142,7 @@ export class ElasticsearchModelService implements
         query: ElasticsearchQueryUtil.getSearchQuery(cls,
           ElasticsearchQueryUtil.extractWhereQuery(cls, whereClause)
         ),
-        search_after: offset,
+        ...(offset ? { search_after: offset } : {}),
         sort: ElasticsearchQueryUtil.getSort(idx)
       };
       console.error(result);
@@ -529,17 +529,12 @@ export class ElasticsearchModelService implements
     K extends KeyedIndexSelection<T>,
     B extends string
   >(cls: Class<T>, idx: SortedIndex<T, K, S, B>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
-    const search: Record<string, unknown> = {};
-    let current = search;
-    for (const key of idx.sortTemplate[0].path.slice(0, -1)) {
-      current = (current[key] = {});
-    }
-    current[idx.sortTemplate[0].path.at(-1)!] = { $regex: ModelIndexedUtil.getSuggestRegex(prefix) };
-
     const items: T[] = [];
     for await (const { items: fetched } of this.#scrollIndex(cls, idx, body, { limit: 10, ...options },
       where => castTo({
-        $and: [where, search]
+        $and: [where, {
+          [idx.sortTemplate[0].path.join('.')]: { $regex: ModelIndexedUtil.getSuggestRegex(prefix) }
+        }]
       })
     )) {
       items.push(...fetched);
@@ -650,7 +645,7 @@ export class ElasticsearchModelService implements
   }
 
   // Query Facet
-  async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+  async suggestByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
 
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
@@ -660,7 +655,7 @@ export class ElasticsearchModelService implements
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, (_, value) => value, query && query.limit);
   }
 
-  async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+  async suggestValuesByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     await QueryVerifier.verify(cls, query);
 
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, {
@@ -674,7 +669,7 @@ export class ElasticsearchModelService implements
   }
 
   // Facet
-  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
+  async facetByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(cls, query);
 
     const resolvedSearch = ElasticsearchQueryUtil.getSearchObject(cls, query ?? {}, this.config.schemaConfig);
