@@ -3,7 +3,7 @@ import { type Class, type Any, castTo, type ClassInstance } from '@travetto/runt
 
 import {
   type AllIndexes, type KeyedIndexSelection, type KeyedIndex,
-  type SortedIndexSelection, type SortedIndex, type TemplatePart, type TemplateValue,
+  type SortedIndexSelection, type SortedIndex, type TemplatePart, type TemplateValue
 } from './types/indexes.ts';
 
 function buildTemplateParts<T extends TemplateValue = TemplateValue>(
