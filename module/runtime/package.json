@@ -29,7 +29,7 @@
     "@travetto/manifest": "^8.0.0-alpha.7",
     "@types/debug": "^4.1.13",
     "debug": "^4.4.3",
-    "temporal-polyfill-lite": "^0.3.3"
+    "temporal-polyfill-lite": "^0.3.4"
   },
   "peerDependencies": {
     "@travetto/transformer": "^8.0.0-alpha.9"
