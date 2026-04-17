@@ -121,14 +121,10 @@ export class ElasticsearchModelService implements
     }
   }
 
-  async * #scrollIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(
+  async * #scrollIndex<T extends ModelType>(
     cls: Class<T>,
-    idx: SortedIndex<T, K, S>,
-    body: KeyedIndexBody<T, K>,
+    idx: SortedIndex<T>,
+    body: KeyedIndexBody<T>,
     options?: ModelPageOptions<estypes.SortResults> & ModelListOptions,
     transformWhere?: (where: WhereClause<T>) => WhereClause<T>
   ): AsyncIterable<{
@@ -524,9 +520,9 @@ export class ElasticsearchModelService implements
   }
 
   async suggestByIndex<T extends ModelType,
-    S extends SortedIndexSelection<T>,
+    S extends SortedIndexSelection<T, string>,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
+  >(cls: Class<T>, idx: SortedIndex<T, K, S, string>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
     const search: Record<string, unknown> = {};
     let current = search;
     for (const key of idx.sortTemplate[0].path.slice(0, -1)) {

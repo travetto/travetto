@@ -2,8 +2,7 @@ import type { ModelType } from '@travetto/model';
 import { castTo, type Any } from '@travetto/runtime';
 
 import {
-  type KeyedIndexSelection, type SortedIndexSelection, type AllIndexes, type KeyedIndexBody,
-  type FullKeyedIndexBody, type TemplateValue, type TemplatePart
+  type AllIndexes, type KeyedIndexBody, type FullKeyedIndexBody, type TemplateValue, type TemplatePart
 } from './types/indexes.ts';
 import { IndexedFieldError } from './types/error.ts';
 
@@ -67,8 +66,8 @@ type Body<T extends ModelType> = KeyedIndexBody<T, Any> | FullKeyedIndexBody<T, 
 type IndexProcessConfig<T = {}> = T & { keyed?: boolean, sort?: boolean };
 
 export class ModelIndexedComputedIndex<T extends ModelType> {
-  static get<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
-    idx: AllIndexes<T, K, S>,
+  static get<T extends ModelType>(
+    idx: AllIndexes<T>,
     body: Body<T>,
   ): ModelIndexedComputedIndex<T> {
     return new ModelIndexedComputedIndex(idx, body);
@@ -85,7 +84,8 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
   ) {
     this.idx = idx;
     this.keyedParts = buildIndexParts(idx.keyTemplate, castTo(body));
-    this.sortParts = buildIndexParts(idx.sortTemplate, castTo(body), value => typeof value === 'number' || value instanceof Date);
+    this.sortParts = buildIndexParts(idx.sortTemplate, castTo(body),
+      value => typeof value === 'number' || value instanceof Date || typeof value === 'string');
     if ('id' in body && typeof body.id === 'string') {
       this.idPart = { path: ['id'], value: body.id, state: body.id === null || body.id === undefined ? 'empty' : 'found', templateValue: true };
     }

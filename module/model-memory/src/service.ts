@@ -198,12 +198,10 @@ export class MemoryModelService implements
 
   async * #getIndexIds<
     T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
   >(
     cls: Class<T>,
-    idx: AllIndexes<T, K, S>,
-    body: KeyedIndexBody<T, K>,
+    idx: AllIndexes<T>,
+    body: KeyedIndexBody<T>,
     options?: ModelListOptions & ModelPageOptions<number>
   ): AsyncIterable<string[]> {
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
@@ -472,9 +470,9 @@ export class MemoryModelService implements
   }
 
   async suggestByIndex<T extends ModelType,
-    S extends SortedIndexSelection<T>,
+    S extends SortedIndexSelection<T, string>,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
+  >(cls: Class<T>, idx: SortedIndex<T, K, S, string>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
     const items: T[] = [];
     const limit = (options?.limit ?? 10);
     for await (const batch of this.#getIndexIds(cls, idx, body, { ...options })) {

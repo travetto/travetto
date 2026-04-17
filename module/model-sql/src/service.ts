@@ -471,9 +471,9 @@ export class SQLModelService implements
 
   @Connected()
   async suggestByIndex<T extends ModelType,
-    S extends SortedIndexSelection<T>,
+    S extends SortedIndexSelection<T, string>,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
+  >(cls: Class<T>, idx: SortedIndex<T, K, S, string>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
     const items: T[] = [];
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
     const nested: Record<string, unknown> = {};

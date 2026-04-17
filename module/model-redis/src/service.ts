@@ -101,14 +101,10 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     } while (matched.cursor && produced < limit && !(options?.abort?.aborted));
   }
 
-  #scanIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(
+  #scanIndex<T extends ModelType>(
     cls: Class<T>,
-    idx: SortedIndex<T, K, S>,
-    body: KeyedIndexBody<T, K>,
+    idx: SortedIndex<T>,
+    body: KeyedIndexBody<T>,
     options?: ModelPageOptions & { prefix?: string }
   ): AsyncIterable<ScanState> {
     ModelCrudUtil.ensureNotSubType(cls);
@@ -441,9 +437,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async suggestByIndex<T extends ModelType,
-    S extends SortedIndexSelection<T>,
+    S extends SortedIndexSelection<T, string>,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
+  >(cls: Class<T>, idx: SortedIndex<T, K, S, string>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
 
     const items: T[] = [];
     for await (const { ids } of this.#scanIndex(cls, idx, body, { limit: 10, ...options, prefix })) {

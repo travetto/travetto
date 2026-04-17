@@ -88,14 +88,10 @@ export class MongoModelService implements
     }
   }
 
-  async #buildIndexQuery<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(
+  async #buildIndexQuery<T extends ModelType>(
     cls: Class<T>,
-    idx: SortedIndex<T, K, S>,
-    body: KeyedIndexBody<T, K>,
+    idx: SortedIndex<T>,
+    body: KeyedIndexBody<T>,
     transformWhere?: (where: WhereClause<T>) => WhereClause<T>
   ): Promise<FindCursor> {
     const store = await this.getStore(cls);
@@ -554,10 +550,17 @@ export class MongoModelService implements
     yield* this.#iterateCursor(cls, cursor, options);
   }
 
-  async suggestByIndex<T extends ModelType,
-    S extends SortedIndexSelection<T>,
+  async suggestByIndex<
+    T extends ModelType,
+    S extends SortedIndexSelection<T, string>,
     K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]> {
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S, string>,
+    body: KeyedIndexBody<T, K>,
+    prefix: string,
+    options?: ModelIndexedSearchOptions
+  ): Promise<T[]> {
     const cursor = (await this.#buildIndexQuery(cls, idx, body, (where) => castTo({
       $and: [where, {
         [idx.sortTemplate[0].path.join('.')]: ModelQuerySuggestUtil.getSuggestRegex(prefix)

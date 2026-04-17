@@ -3,7 +3,8 @@ import type { Class } from '@travetto/runtime';
 
 import type {
   KeyedIndexSelection, KeyedIndexBody, SortedIndexSelection, SortedIndex,
-  SingleItemIndex, FullKeyedIndexBody, FullKeyedIndexWithPartialBody
+  SingleItemIndex, FullKeyedIndexBody, FullKeyedIndexWithPartialBody,
+  SortedStringIndex
 } from './indexes.ts';
 import type { ModelIndexedSearchOptions, ModelPageOptions, ModelPageResult } from './list.ts';
 
@@ -22,7 +23,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   getByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
+    S extends SortedIndexSelection<T, string | Date | number>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T>;
 
   /**
@@ -86,7 +87,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   pageByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>
+    K extends KeyedIndexSelection<T>,
   >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ModelPageOptions): Promise<ModelPageResult<T>>;
 
   /**
@@ -102,7 +103,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   listByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>
+    K extends KeyedIndexSelection<T>,
   >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ModelListOptions): AsyncIterable<T[]>;
 
   /**
@@ -118,7 +119,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    */
   suggestByIndex<
     T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]>;
+    S extends SortedIndexSelection<T, string>,
+    K extends KeyedIndexSelection<T>,
+  >(cls: Class<T>, idx: SortedStringIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]>;
 }

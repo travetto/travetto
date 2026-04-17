@@ -1,6 +1,8 @@
 import type { ModelType, IndexConfig } from '@travetto/model';
 import { type IntrinsicType, type Any, type DeepPartial } from '@travetto/runtime';
 
+type SortScalar = string | number | Date;
+
 type TypeProjection<T, V, B = IntrinsicType> = {
   [P in keyof T]?:
   (T[P] extends (B | undefined) ? (V | undefined) :
@@ -11,9 +13,9 @@ type TypeProjection<T, V, B = IntrinsicType> = {
 };
 
 export type KeyedIndexSelection<T extends ModelType> = TypeProjection<T, true>;
-export type SortedIndexSelection<T extends ModelType> = TypeProjection<T, 1 | -1>;
+export type SortedIndexSelection<T extends ModelType, B extends SortScalar = SortScalar> = TypeProjection<T, 1 | -1, B>;
 
-export type KeyedIndexBody<T, K> = {
+export type KeyedIndexBody<T, K = Any> = {
   [P in keyof K]: (P extends keyof T ?
     (K[P] extends true | 1 | -1 ? T[P] :
       (T[P] extends Any[] | null | undefined ? T[P] :
@@ -52,8 +54,8 @@ export type TemplatePart<T extends TemplateValue = TemplateValue> = { path: stri
 
 export interface KeyedIndex<
   T extends ModelType,
-  K extends KeyedIndexSelection<T>,
-  S extends SortedIndexSelection<T>
+  K extends KeyedIndexSelection<T> = Any,
+  S extends SortedIndexSelection<T> = Any,
 > extends IndexConfig<'indexed:keyed'> {
   key: K;
   sort: S;
@@ -64,8 +66,9 @@ export interface KeyedIndex<
 
 export interface SortedIndex<
   T extends ModelType,
-  K extends KeyedIndexSelection<T>,
-  S extends SortedIndexSelection<T>
+  K extends KeyedIndexSelection<T> = Any,
+  S extends SortedIndexSelection<T, B> = Any,
+  B extends SortScalar = SortScalar
 > extends IndexConfig<'indexed:sorted'> {
   key: K;
   sort: S;
@@ -76,12 +79,12 @@ export interface SortedIndex<
 export type SingleItemIndex<
   T extends ModelType,
   K extends KeyedIndexSelection<T> = Any,
-  S extends SortedIndexSelection<T> = Any
+  S extends SortedIndexSelection<T> = Any,
 > = KeyedIndex<T, K, S> | SortedIndex<T, K, S>;
 
 export type AllIndexes<
   T extends ModelType,
   K extends KeyedIndexSelection<T> = Any,
-  S extends SortedIndexSelection<T> = Any
+  S extends SortedIndexSelection<T> = Any,
 > = KeyedIndex<T, K, S> | SortedIndex<T, K, S>;
 
