@@ -18,6 +18,8 @@ import { Injectable, PostConstruct } from '@travetto/di';
 
 import type { RedisModelConfig } from './config.ts';
 
+const TERMINATOR = '\xff';
+
 type RedisScan = ({ key: string } | { match: string } | { prefix: string }) & { reverse?: boolean };
 type RedisClient = ReturnType<typeof createClient>;
 type RedisMulti = ReturnType<RedisClient['multi']>;
@@ -64,8 +66,8 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
         let bounds: [number | string, number | string];
 
-        if (prefix) {
-          bounds = [`[${prefix}`, `[${prefix}\xff`];
+        if (prefix !== undefined) {
+          bounds = [prefix ? `[${prefix}` : '-', `(${prefix}${TERMINATOR}`];
         } else {
           bounds = [Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY];
         }
@@ -113,7 +115,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     switch (idx.type) {
       // case 'indexed:keyed': return this.#streamValues('sScan', { key: fullKey }, options);
       case 'indexed:sorted': {
-        return this.#streamValues('zRange', { key: fullKey }, options);
+        return this.#streamValues('zRange', { key: fullKey, prefix: options?.prefix }, options);
       }
     }
   }
@@ -151,7 +153,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
           case 'indexed:sorted': {
             const value = computed.getSort();
             if (typeof value === 'string') {
-              multi.zAdd(resolvedKey, { score: 0, value: `${value}\xff${item.id}` });
+              multi.zAdd(resolvedKey, { score: 0, value: `${value}${TERMINATOR}${item.id}` });
             } else {
               multi.zAdd(resolvedKey, { score: computed.getSort(), value: item.id });
             }
@@ -453,7 +455,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
     const items: T[] = [];
     for await (const { ids } of this.#scanIndex(cls, idx, body, { limit: 10, ...options, prefix })) {
-      const cleaned = ids.map(id => id.split('\xff').at(-1)!);
+      const cleaned = ids.map(id => id.split(TERMINATOR).at(-1)!);
       items.push(...await this.#getBodies(cls, cleaned, id => this.#resolveKey(cls, id)));
     }
 

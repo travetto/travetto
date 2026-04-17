@@ -395,6 +395,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     const results = await service.suggestByIndex(SuggestItem, suggestSort, {}, 'ba', { limit: 5 });
 
     assert(results.length === 5);
+    assert(/^ba/.test(results[0].name));
     assert(results.every(r => r.name.startsWith('ba')));
   }
 }
