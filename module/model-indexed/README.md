@@ -152,7 +152,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   getByIndex<
     T extends ModelType,
     K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
+    S extends SortedIndexSelection<T, string | Date | number>
   >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T>;
 
   /**
@@ -216,7 +216,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   pageByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>
+    K extends KeyedIndexSelection<T>,
   >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ModelPageOptions): Promise<ModelPageResult<T>>;
 
   /**
@@ -232,8 +232,26 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   listByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>
+    K extends KeyedIndexSelection<T>,
   >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ModelListOptions): AsyncIterable<T[]>;
+
+  /**
+   * Suggest entities by ranged index as defined by fields of idx and a prefix
+   *
+   * Note: Limit is generally honored, but can vary depending on the underlying storage implementation.
+   *
+   * @param cls The type to search by
+   * @param idx The index to search against
+   * @param body The payload of fields needed to search
+   * @param prefix The prefix to use for suggesting entities
+   * @param options The configuration for pagination
+   */
+  suggestByIndex<
+    T extends ModelType,
+    S extends SortedIndexSelection<T, B>,
+    K extends KeyedIndexSelection<T>,
+    B extends string = string
+  >(cls: Class<T>, idx: SortedIndex<T, K, S, B>, body: KeyedIndexBody<T, K>, prefix: string, options?: ModelIndexedSearchOptions): Promise<T[]>;
 }
 ```
 
