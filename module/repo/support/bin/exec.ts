@@ -80,44 +80,47 @@ export class RepoExecUtil {
       stdoutTerm.writer.writeLines(listHeader).commit();
     }
 
+    const modulesToRun = (config.filter ? await Promise.all(
+      modules.map(async module => (await config.filter!(module)) ? module : undefined)
+    ) : modules)
+      .filter((module): module is IndexedModule => !!module);
+
     const work = WorkPool.runStreamProgress(async (module) => {
       try {
-        if (!(await config.filter?.(module) === false)) {
-          const prefix = prefixes[module.sourceFolder] ?? '';
-          const listKey = config.progressListKey?.(module) ?? ` * ${module.name}`;
-          active.add(listKey);
-          [...active].sort().forEach((text, idx) => activeItems.add({ idx, text }));
+        const prefix = prefixes[module.sourceFolder] ?? '';
+        const listKey = config.progressListKey?.(module) ?? ` * ${module.name}`;
+        active.add(listKey);
+        [...active].sort().forEach((text, idx) => activeItems.add({ idx, text }));
 
-          const subProcess = operation(module);
-          processes.set(module, subProcess);
+        const subProcess = operation(module);
+        processes.set(module, subProcess);
 
-          if (config.showStdout && subProcess.stdout) {
-            CodecUtil.readLines(subProcess.stdout, line =>
-              stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit()
-            );
-          }
-          if (config.showStderr && subProcess.stderr) {
-            CodecUtil.readLines(subProcess.stderr, line =>
-              stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit()
-            );
-          }
-
-          const result = await ExecUtil.getResult(subProcess, { catch: true });
-          const output = transform(module, result);
-
-          active.delete(listKey);
-          [...active].sort().forEach((text, idx) => activeItems.add({ idx, text }));
-          for (let j = active.size; j < workerCount; j++) {
-            activeItems.add({ idx: j, text: '' }); // Force update to remove item if needed
-          }
-
-          results.set(module, output);
+        if (config.showStdout && subProcess.stdout) {
+          CodecUtil.readLines(subProcess.stdout, line =>
+            stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit()
+          );
         }
+        if (config.showStderr && subProcess.stderr) {
+          CodecUtil.readLines(subProcess.stderr, line =>
+            stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit()
+          );
+        }
+
+        const result = await ExecUtil.getResult(subProcess, { catch: true });
+        const output = transform(module, result);
+
+        active.delete(listKey);
+        [...active].sort().forEach((text, idx) => activeItems.add({ idx, text }));
+        for (let j = active.size; j < workerCount; j++) {
+          activeItems.add({ idx: j, text: '' }); // Force update to remove item if needed
+        }
+
+        results.set(module, output);
         return config.progressMessage?.(module) ?? module.name;
       } finally {
         processes.get(module!)?.kill();
       }
-    }, modules, modules.length, { max: workerCount, min: workerCount });
+    }, modulesToRun, modules.length, { max: workerCount, min: workerCount });
 
     if (config.progressMessage && stdoutTerm.interactive) {
       if (config.showProgressList) {
