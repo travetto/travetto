@@ -7,7 +7,7 @@ type PromiseResult<V extends PromiseFn> = Awaited<ReturnType<V>>;
 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const triggerRedirect = (world: any, url: URL): boolean => {
+const triggerBrowserRedirect = (world: any, url: URL): boolean => {
   const location = world?.window?.location;
   if (location) {
     location.href = url.toString();
@@ -63,7 +63,7 @@ export type RpcRequest = {
     controller: string;
     endpoint: string;
     method: string;
-    redirect?: boolean;
+    browserRedirect?: boolean;
   };
   url: URL | string;
   consumeJSON?: <T>(text?: unknown) => (T | Promise<T>);
@@ -109,11 +109,11 @@ function registerTimeout<T>(
 
 function buildRequest<T extends RequestInit>(base: T, controller: string, endpoint: string): T {
   let verb: string;
-  let redirect = false;
+  let browserRedirect = false;
   switch (endpoint.split(/[A-Z]/)[0]) {
     case 'redirect': {
       verb = 'GET';
-      redirect = true;
+      browserRedirect = true;
       break;
     }
     case 'get': verb = 'GET'; break;
@@ -123,7 +123,7 @@ function buildRequest<T extends RequestInit>(base: T, controller: string, endpoi
   }
   return {
     ...base,
-    redirect,
+    browserRedirect,
     method: verb,
     path: `${controller}:${endpoint}`,
     controller,
@@ -254,7 +254,7 @@ export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]):
       url.searchParams.append(key, value);
     }
 
-    if (core.redirect && triggerRedirect(globalThis, url)) {
+    if (core.browserRedirect && triggerBrowserRedirect(globalThis, url)) {
       return Promise.resolve(undefined!);
     }
 
