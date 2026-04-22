@@ -1,6 +1,6 @@
 {
   "name": "@travetto/repo",
-  "version": "8.0.0-alpha.17",
+  "version": "8.0.0-alpha.18",
   "type": "module",
   "description": "Monorepo utilities",
   "keywords": [
