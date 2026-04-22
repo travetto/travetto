@@ -109,13 +109,7 @@ function registerTimeout<T>(
 
 function buildRequest<T extends RequestInit>(base: T, controller: string, endpoint: string): T {
   let verb: string;
-  let browserRedirect = false;
   switch (endpoint.split(/[A-Z]/)[0]) {
-    case 'redirect': {
-      verb = 'GET';
-      browserRedirect = true;
-      break;
-    }
     case 'get': verb = 'GET'; break;
     case 'update': verb = 'PUT'; break;
     case 'delete': verb = 'DELETE'; break;
@@ -123,7 +117,6 @@ function buildRequest<T extends RequestInit>(base: T, controller: string, endpoi
   }
   return {
     ...base,
-    browserRedirect,
     method: verb,
     path: `${controller}:${endpoint}`,
     controller,
