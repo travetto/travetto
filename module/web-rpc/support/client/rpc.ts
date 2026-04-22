@@ -5,6 +5,17 @@ type MethodKeys<C extends {}> = {
 type PromiseFn = (...args: any) => Promise<unknown>;
 type PromiseResult<V extends PromiseFn> = Awaited<ReturnType<V>>;
 
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const triggerRedirect = (world: any, url: URL): boolean => {
+  const location = world?.window?.location;
+  if (location) {
+    location.href = url.toString();
+    return true;
+  }
+  return false;
+};
+
 const isBlobMap = (value: unknown): value is Record<string, Blob> => {
   if (typeof value !== 'object' || value === null) {
     return false;
@@ -52,6 +63,7 @@ export type RpcRequest = {
     controller: string;
     endpoint: string;
     method: string;
+    redirect?: boolean;
   };
   url: URL | string;
   consumeJSON?: <T>(text?: unknown) => (T | Promise<T>);
@@ -97,7 +109,13 @@ function registerTimeout<T>(
 
 function buildRequest<T extends RequestInit>(base: T, controller: string, endpoint: string): T {
   let verb: string;
+  let redirect = false;
   switch (endpoint.split(/[A-Z]/)[0]) {
+    case 'redirect': {
+      verb = 'GET';
+      redirect = true;
+      break;
+    }
     case 'get': verb = 'GET'; break;
     case 'update': verb = 'PUT'; break;
     case 'delete': verb = 'DELETE'; break;
@@ -105,6 +123,7 @@ function buildRequest<T extends RequestInit>(base: T, controller: string, endpoi
   }
   return {
     ...base,
+    redirect,
     method: verb,
     path: `${controller}:${endpoint}`,
     controller,
@@ -233,6 +252,10 @@ export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]):
     url.pathname = `${url.pathname}/${request.core.path || '/'}`.replaceAll('//', '/');
     for (const [key, value] of Object.entries(query ?? {})) {
       url.searchParams.append(key, value);
+    }
+
+    if (core.redirect && triggerRedirect(globalThis, url)) {
+      return Promise.resolve(undefined!);
     }
 
     let resolved: Response | undefined;
