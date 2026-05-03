@@ -92,19 +92,17 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     while (!(options?.abort?.aborted) && produced < limit) {
       const query = queryBuilder().limit(batchSize).offset(offset);
 
-      let { docs } = await query.get();
-      if (docs.length === 0) {
+      const { docs, size } = await query.get();
+      if (size === 0) {
         break;
       }
 
-      if (produced + docs.length > limit) {
-        docs = docs.slice(0, limit - produced);
-      }
+      const remaining = (produced + size > limit) ? docs.slice(0, limit - produced) : docs;
 
-      offset += docs.length;
+      offset += size;
 
       const items = await ModelCrudUtil.filterOutNotFound(
-        docs.map(item => ModelCrudUtil.load(cls, item.data()!)));
+        remaining.map(item => ModelCrudUtil.load(cls, item.data()!)));
       produced += items.length;
 
       yield { items, nextOffset: offset };
