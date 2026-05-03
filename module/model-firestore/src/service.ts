@@ -1,6 +1,6 @@
 import { type DocumentData, FieldValue, Firestore, type Query } from '@google-cloud/firestore';
 
-import { castTo, JSONUtil, ShutdownManager, type Class } from '@travetto/runtime';
+import { castTo, JSONUtil, ShutdownManager, type Class, RuntimeError } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport, type ModelType, NotFoundError, type OptionalId, ModelCrudUtil,
@@ -59,7 +59,10 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     if (!item || item.empty) {
       throw new NotFoundError(`${cls.name} Index=${idx}`, computed.getKey());
     }
-    return item.docs[0].id;
+    if (item.size > 1) {
+      throw new RuntimeError(`Multiple items found for ${cls.name} Index=${idx}`);
+    }
+    return item.docs[0].data().id;
   }
 
   #buildIndexQuery<T extends ModelType>(cls: Class<T>, idx: SortedIndex<T>, body: KeyedIndexBody<T>): Query {

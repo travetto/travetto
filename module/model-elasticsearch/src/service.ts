@@ -662,7 +662,7 @@ export class ElasticsearchModelService implements
     });
     const search = ElasticsearchQueryUtil.getSearchObject(cls, resolvedQuery);
     const result = await this.execSearch(cls, search);
-    const all = result.hits.hits.map(hit => castTo<T>(({ [field]: field === 'id' ? hit._id : hit._source![field] })));
+    const all = result.hits.hits.map(hit => castTo<T>((field === 'id' ? { id: hit._id } : hit._source)));
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, item => item, query && query.limit);
   }
 

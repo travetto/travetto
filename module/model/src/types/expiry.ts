@@ -1,6 +1,6 @@
 import type { Class } from '@travetto/runtime';
 
-import type { ModelType } from '../types/model.ts';
+import type { ModelType } from './model.ts';
 import type { ModelCrudSupport } from './crud.ts';
 
 /**

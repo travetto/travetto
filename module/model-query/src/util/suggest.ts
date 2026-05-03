@@ -1,5 +1,5 @@
 import { ModelRegistryIndex, type ModelType } from '@travetto/model';
-import { castTo, type Class, hasFunction } from '@travetto/runtime';
+import { castKey, castTo, type Class, hasFunction } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { PageableModelQuery, Query } from '../model/query.ts';
@@ -28,7 +28,15 @@ export class ModelQuerySuggestUtil {
    */
   static getSuggestQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: Query<T>): Query<T> {
     const limit = query?.limit ?? 10;
-    const clauses: WhereClauseRaw<ModelType>[] = prefix ? [{ [field]: { $regex: this.getSuggestRegex(prefix) } }] : [];
+    const clauses: WhereClauseRaw<ModelType>[] = [];
+    if (prefix) {
+      const parts = `${field}`.split('.');
+      let o: WhereClauseRaw<ModelType> = { [parts.at(-1)!]: { $regex: this.getSuggestRegex(prefix) } };
+      for (let i = parts.length - 2; i >= 0; i -= 1) {
+        o = { [parts[i]]: o };
+      }
+      clauses.push(o);
+    }
     const select: Query<T>['select'] = {
       ...query?.select
     };
@@ -75,8 +83,13 @@ export class ModelQuerySuggestUtil {
     const pattern = this.getSuggestRegex(prefix);
 
     const out: ([string, U] | readonly [string, U])[] = [];
+    const parts = `${field}`.split('.');
+
     for (const result of results) {
-      const resultValue = result[field];
+      let resultValue = result[castKey<T>(parts[0])];
+      for (let i = 1; i < parts.length; i++) {
+        resultValue = resultValue[castKey(parts[i])];
+      }
       if (Array.isArray(resultValue)) {
         out.push(...resultValue.filter(item => pattern.test(item)).map((item: string) => [item, transform(item, result)] as const));
       } else if (typeof resultValue === 'string') {

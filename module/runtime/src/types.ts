@@ -39,6 +39,18 @@ export type ValidTypedFields<T, F> = {
   (T[K] extends F ? K : never)
 }[Extract<keyof T, string>];
 
+export type KeyPaths<T, PrimitiveType = IntrinsicType | IntrinsicType[], PREFIX extends string = '', SEP extends string = '.'> =
+  { [K in keyof T]:
+    (K extends string ? (
+      T[K] extends (IntrinsicType[] | IntrinsicType | undefined) ?
+      (T[K] extends PrimitiveType ? `${PREFIX}${K}` : never) :
+      (T[K] extends Any[] ?
+        KeyPaths<T[K][number], PrimitiveType, `${K}${SEP}`, SEP> :
+        (T[K] extends object ? KeyPaths<T[K], PrimitiveType, `${K}${SEP}`, SEP> : never)
+      )
+    ) : never)
+  }[keyof T];
+
 export const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T & string>(value: T): K[];
   fromEntries<K extends string | symbol, V>(items: ([K, V] | readonly [K, V])[]): Record<K, V>;
