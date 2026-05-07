@@ -12,7 +12,6 @@ export type TypedFunction<R = Any, V = unknown> = (this: V, ...args: Any[]) => R
 export type MethodDescriptor<V = Any, R = Any> = TypedPropertyDescriptor<TypedFunction<R, V>>;
 export type AsyncMethodDescriptor<V = Any, R = Any> = TypedPropertyDescriptor<TypedFunction<Promise<R>, V>>;
 export type AsyncIterableMethodDescriptor<V = Any, R = Any> = TypedPropertyDescriptor<TypedFunction<AsyncIterable<R>, V>>;
-export type ClassTDecorator<T extends Class = Class> = (target: T) => T | void;
 
 export type NumericPrimitive = number | bigint;
 export type Primitive = NumericPrimitive | boolean | string;
@@ -34,10 +33,17 @@ export type ValidFields<T, I> = {
 
 export type RetainIntrinsicFields<T> = Pick<T, ValidFields<T, IntrinsicType>>;
 
-export type ValidTypedFields<T, F> = {
-  [K in Extract<keyof T, string>]:
-  (T[K] extends F ? K : never)
-}[Extract<keyof T, string>];
+export type KeyPaths<T, PrimitiveType = IntrinsicType | IntrinsicType[], PREFIX extends string = '', SEP extends string = '.'> =
+  { [K in keyof T]:
+    (K extends string ? (
+      (T[K] extends (IntrinsicType[] | IntrinsicType | undefined) ?
+        (T[K] extends PrimitiveType ? `${PREFIX}${K}` : never) : (
+          (T[K] extends Any[] ?
+            KeyPaths<T[K][number], PrimitiveType, `${K}${SEP}`, SEP> :
+            (T[K] extends object ? KeyPaths<T[K], PrimitiveType, `${K}${SEP}`, SEP> : never))
+        )
+      )) : never)
+  }[keyof T];
 
 export const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T & string>(value: T): K[];

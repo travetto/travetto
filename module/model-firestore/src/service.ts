@@ -1,6 +1,6 @@
 import { type DocumentData, FieldValue, Firestore, type Query } from '@google-cloud/firestore';
 
-import { castTo, JSONUtil, ShutdownManager, type Class } from '@travetto/runtime';
+import { castTo, JSONUtil, ShutdownManager, type Class, RuntimeError } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport, type ModelType, NotFoundError, type OptionalId, ModelCrudUtil,
@@ -59,7 +59,10 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     if (!item || item.empty) {
       throw new NotFoundError(`${cls.name} Index=${idx}`, computed.getKey());
     }
-    return item.docs[0].id;
+    if (item.size > 1) {
+      throw new RuntimeError(`Multiple items found for ${cls.name} Index=${idx}`);
+    }
+    return item.docs[0].data().id;
   }
 
   #buildIndexQuery<T extends ModelType>(cls: Class<T>, idx: SortedIndex<T>, body: KeyedIndexBody<T>): Query {
@@ -89,19 +92,17 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     while (!(options?.abort?.aborted) && produced < limit) {
       const query = queryBuilder().limit(batchSize).offset(offset);
 
-      let { docs } = await query.get();
-      if (docs.length === 0) {
+      const { docs, size } = await query.get();
+      if (size === 0) {
         break;
       }
 
-      if (produced + docs.length > limit) {
-        docs = docs.slice(0, limit - produced);
-      }
+      const remaining = (produced + size > limit) ? docs.slice(0, limit - produced) : docs;
 
-      offset += docs.length;
+      offset += size;
 
       const items = await ModelCrudUtil.filterOutNotFound(
-        docs.map(item => ModelCrudUtil.load(cls, item.data()!)));
+        remaining.map(item => ModelCrudUtil.load(cls, item.data()!)));
       produced += items.length;
 
       yield { items, nextOffset: offset };
