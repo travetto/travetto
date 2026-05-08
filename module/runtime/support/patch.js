@@ -7,7 +7,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // polyfills
-const [majorVersion, minorVersion] = process.version.replace(/^v/, '').split('.').map(text => parseInt(text, 10));
+const [majorVersion, minorVersion] = process.version.match(/\d+/g).map(text => parseInt(text, 10));
 if (majorVersion < 26) {
   void import('temporal-polyfill-lite/global');
 

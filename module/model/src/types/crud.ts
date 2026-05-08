@@ -1,6 +1,7 @@
 import type { Class } from '@travetto/runtime';
 
 import type { ModelListOptions, ModelType, OptionalId } from './model.ts';
+
 import type { ModelBasicSupport } from './basic.ts';
 
 /**

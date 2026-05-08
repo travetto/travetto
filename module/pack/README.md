@@ -141,7 +141,7 @@ Options:
   -np, --npm-package <string>            External NPM Packages (default: [])
   -m, --module <module>                  Module to run for
   -df, --docker-factory <string>         Docker Factory source (default: "@travetto/pack/support/pack.dockerfile.ts")
-  -di, --docker-image <string>           Docker Image to extend (default: "node:25-alpine")
+  -di, --docker-image <string>           Docker Image to extend (default: "node:26-alpine")
   -dn, --docker-name <string>            Docker Image Name (default: "<module>")
   -ru, --runtime-user <string>           Docker Runtime user
   -rp, --runtime-package <string>        Docker Runtime Packages (default: [])
@@ -244,21 +244,21 @@ cd $TRV_OUT
 node $REPO_ROOT/node_modules/.bin/rollup -c $TRV_OUT/node_modules/@travetto/pack/support/rollup/build.js
 cd $ROOT
 
-# Pulling Docker Base Image node:25-alpine 
+# Pulling Docker Base Image node:26-alpine 
 
-echo "Pulling Docker Base Image node:25-alpine"
+echo "Pulling Docker Base Image node:26-alpine"
 
-docker pull node:25-alpine
+docker pull node:26-alpine
 
-# Detected Image OS node:25-alpine as alpine 
+# Detected Image OS node:26-alpine as alpine 
 
-echo "Detected Image OS node:25-alpine as alpine"
+echo "Detected Image OS node:26-alpine as alpine"
 
 # Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile.ts 
 
 echo "Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile.ts"
 
-echo "FROM node:25-alpine" > $DIST/Dockerfile
+echo "FROM node:26-alpine" > $DIST/Dockerfile
 echo "RUN addgroup -g 2000 app && adduser -D -G app -u 2000 app" >> $DIST/Dockerfile
 echo "RUN mkdir /app && chown app:app /app" >> $DIST/Dockerfile
 echo "COPY --chown=\"app:app\" . /app" >> $DIST/Dockerfile
