@@ -42,8 +42,8 @@
     "@travetto/log": "^8.0.0-alpha.1",
     "@travetto/pack": "^8.0.0-alpha.1",
     "@travetto/test": "^8.0.0-alpha.1",
-    "@types/node": "^25.6.0",
-    "@types/vscode": "^1.116.0"
+    "@types/node": "^25.6.2",
+    "@types/vscode": "^1.118.0"
   },
   "dependencies": {
     "@travetto/registry": "^8.0.0-alpha.1",
