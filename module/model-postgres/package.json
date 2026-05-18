@@ -34,7 +34,7 @@
     "@travetto/model-query": "^8.0.0-alpha.16",
     "@travetto/model-sql": "^8.0.0-alpha.17",
     "@types/pg": "^8.20.0",
-    "pg": "^8.20.0"
+    "pg": "^8.21.0"
   },
   "peerDependencies": {
     "@travetto/cli": "^8.0.0-alpha.20"
