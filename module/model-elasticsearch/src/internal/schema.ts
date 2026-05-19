@@ -163,14 +163,18 @@ export class ElasticsearchSchemaUtil {
       const currentProperty = currentProperties[key];
       const neededProperty = neededProperties[key];
 
-      if (!currentProperty || !neededProperty || currentProperty.type !== neededProperty.type) {
+      if (isMappingType(currentProperty) || isMappingType(neededProperty)) {
+        if (!isMappingType(neededProperty) || !isMappingType(currentProperty)) {
+          changed.push(path);
+        } else {
+          changed.push(...this.getChangedFields(
+            'properties' in currentProperty ? currentProperty : { properties: {} },
+            'properties' in neededProperty ? neededProperty : { properties: {} },
+            path
+          ));
+        }
+      } else if (!currentProperty || !neededProperty || currentProperty.type !== neededProperty.type) {
         changed.push(path);
-      } else if (isMappingType(currentProperty) || isMappingType(neededProperty)) {
-        changed.push(...this.getChangedFields(
-          'properties' in currentProperty ? currentProperty : { properties: {} },
-          'properties' in neededProperty ? neededProperty : { properties: {} },
-          path
-        ));
       }
     }
     return changed;
