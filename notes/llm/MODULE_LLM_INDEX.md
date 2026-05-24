@@ -566,25 +566,25 @@ After wave coverage is complete for a module, run a targeted quality pass for bo
 - auth-model: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
 - auth-session: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
 - auth-web: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
-- auth-web-passport: initial coverage added; hardening pending
-- auth-web-session: initial coverage added; hardening pending
-- email: initial coverage added; hardening pending
-- image: initial coverage added; hardening pending
-- eslint: initial coverage added; hardening pending
-- email-compiler: initial coverage added; hardening pending
-- email-inky: initial coverage added; hardening pending
-- email-nodemailer: initial coverage added; hardening pending
-- web-http: initial coverage added; hardening pending
-- web-connect: initial coverage added; hardening pending
-- web-rpc: initial coverage added; hardening pending
-- web-upload: initial coverage added; hardening pending
-- web-aws-lambda: initial coverage added; hardening pending
-- worker: initial coverage added; hardening pending
-- doc: initial coverage added; hardening pending
-- pack: initial coverage added; hardening pending
-- scaffold: initial coverage added; hardening pending
-- schema-faker: initial coverage added; hardening pending
-- transformer: initial coverage added; hardening pending
+- auth-web-passport: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- auth-web-session: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- email: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- image: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- eslint: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- email-compiler: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- email-inky: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- email-nodemailer: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- web-http: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- web-connect: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- web-rpc: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- web-upload: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- web-aws-lambda: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- worker: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- doc: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- pack: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- scaffold: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- schema-faker: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- transformer: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
 - model-indexed: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
 - model-memory: hardening pass completed (consumer safe-default depth, maintainer compatibility/triage updates)
 - model-query: hardening pass completed (consumer decision/pitfall guidance, maintainer verifier contract depth)

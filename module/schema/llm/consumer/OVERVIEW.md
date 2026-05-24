@@ -75,7 +75,7 @@ This module is the framework's type metadata, binding, and validation backbone f
 Decision guideline:
 Use schema decorators and binding/validation utilities as the single source of truth for external input contracts, instead of duplicating checks across handlers and services.
 
-## Runtime Metadata Guidance
+Runtime metadata guidance:
 - Use SchemaRegistryIndex when you need runtime schema introspection for framework-level tooling.
 - Prefer decorator-driven schema definitions for application logic instead of manual metadata mutation.
 - Keep dynamic metadata reads side-effect free so validation and binding behavior remains deterministic.

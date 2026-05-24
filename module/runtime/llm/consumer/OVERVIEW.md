@@ -39,7 +39,7 @@ This module provides shared runtime primitives used across the framework: proces
 - TimeUtil: time parsing and duration conversion helpers.
 - WatchUtil: file watch helpers for incremental workflows.
 
-## Additional High-Value Runtime APIs
+Additional high-value runtime APIs:
 
 - Runtime: workspace/module path resolution, import resolution, resource path lookup.
 - ShutdownManager: abort signal and graceful process shutdown lifecycle.

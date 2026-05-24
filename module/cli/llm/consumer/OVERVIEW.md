@@ -36,7 +36,7 @@ This module is the framework command system for declaring, validating, and execu
 ## Utility Classes (Non-Internal)
 - CliUtil: helpers for command option parsing, restart-on-change execution, IPC debug output, and stream-safe writes.
 
-## Agent Tooling Surface
+Agent tooling surface:
 - Use npx trv cli:schema to enumerate commands, modules, flags, and input schemas.
 
 ## Core APIs and Extension Points

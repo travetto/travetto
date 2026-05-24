@@ -55,7 +55,7 @@ Common pitfalls:
 - Bypassing compiler lifecycle in workflows that depend on manifest/transformer outputs.
 - Adding async transitions without explicit state/event ordering checks.
 
-## Agent Tooling Surface
+Agent tooling surface:
 
 - Use npx trv cli:schema to discover available compiler-adjacent commands and their input schema.
 

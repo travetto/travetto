@@ -58,7 +58,7 @@ Common pitfalls:
 - Ignoring path normalization expectations and breaking cross-platform behavior.
 - Treating delta logic as optional in incremental workflows and causing unnecessary rebuilds.
 
-## Agent Tooling Surface
+Agent tooling surface:
 
 - Use npx trv cli:schema to discover command surfaces that depend on manifest/module indexing.
 

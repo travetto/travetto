@@ -259,6 +259,43 @@ When module behavior or README changes:
   - consumer OVERVIEW heading-contract checks
   - package publish-safety checks (llm excluded from files arrays)
 
+- Auth extension/email hardening batch completed:
+  - auth-web-passport
+  - auth-web-session
+  - email
+- Validation gates passed for auth extension/email hardening batch:
+  - six-file structure checks
+  - consumer OVERVIEW heading-contract checks
+  - package publish-safety checks (llm excluded from files arrays)
+
+- Tooling/media hardening batch completed:
+  - image
+  - eslint
+  - email-compiler
+- Validation gates passed for tooling/media hardening batch:
+  - six-file structure checks
+  - consumer OVERVIEW heading-contract checks
+  - package publish-safety checks (llm excluded from files arrays)
+
+- Final hardening wave completed:
+  - email-inky
+  - email-nodemailer
+  - web-http
+  - web-connect
+  - web-rpc
+  - web-upload
+  - web-aws-lambda
+  - worker
+  - doc
+  - pack
+  - scaffold
+  - schema-faker
+  - transformer
+- Validation gates passed for final hardening wave:
+  - six-file structure checks
+  - consumer OVERVIEW heading-contract checks
+  - package publish-safety checks (llm excluded from files arrays)
+
 ### In Progress
 
 - Full README-grounded enrichment pass for all completed modules, continuing beyond priority sparse set.
