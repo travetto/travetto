@@ -287,6 +287,60 @@ Each covered module should provide:
 - module/email-nodemailer/llm/maintainer/INSTRUCTIONS.md
 - module/email-nodemailer/llm/maintainer/TIPS.md
 
+### web-http
+
+- module/web-http/llm/consumer/OVERVIEW.md
+- module/web-http/llm/consumer/INSTRUCTIONS.md
+- module/web-http/llm/consumer/TIPS.md
+- module/web-http/llm/maintainer/OVERVIEW.md
+- module/web-http/llm/maintainer/INSTRUCTIONS.md
+- module/web-http/llm/maintainer/TIPS.md
+
+### web-connect
+
+- module/web-connect/llm/consumer/OVERVIEW.md
+- module/web-connect/llm/consumer/INSTRUCTIONS.md
+- module/web-connect/llm/consumer/TIPS.md
+- module/web-connect/llm/maintainer/OVERVIEW.md
+- module/web-connect/llm/maintainer/INSTRUCTIONS.md
+- module/web-connect/llm/maintainer/TIPS.md
+
+### web-rpc
+
+- module/web-rpc/llm/consumer/OVERVIEW.md
+- module/web-rpc/llm/consumer/INSTRUCTIONS.md
+- module/web-rpc/llm/consumer/TIPS.md
+- module/web-rpc/llm/maintainer/OVERVIEW.md
+- module/web-rpc/llm/maintainer/INSTRUCTIONS.md
+- module/web-rpc/llm/maintainer/TIPS.md
+
+### web-upload
+
+- module/web-upload/llm/consumer/OVERVIEW.md
+- module/web-upload/llm/consumer/INSTRUCTIONS.md
+- module/web-upload/llm/consumer/TIPS.md
+- module/web-upload/llm/maintainer/OVERVIEW.md
+- module/web-upload/llm/maintainer/INSTRUCTIONS.md
+- module/web-upload/llm/maintainer/TIPS.md
+
+### web-aws-lambda
+
+- module/web-aws-lambda/llm/consumer/OVERVIEW.md
+- module/web-aws-lambda/llm/consumer/INSTRUCTIONS.md
+- module/web-aws-lambda/llm/consumer/TIPS.md
+- module/web-aws-lambda/llm/maintainer/OVERVIEW.md
+- module/web-aws-lambda/llm/maintainer/INSTRUCTIONS.md
+- module/web-aws-lambda/llm/maintainer/TIPS.md
+
+### worker
+
+- module/worker/llm/consumer/OVERVIEW.md
+- module/worker/llm/consumer/INSTRUCTIONS.md
+- module/worker/llm/consumer/TIPS.md
+- module/worker/llm/maintainer/OVERVIEW.md
+- module/worker/llm/maintainer/INSTRUCTIONS.md
+- module/worker/llm/maintainer/TIPS.md
+
 ## Wave 4: Model Extension Modules
 
 ### model-indexed
@@ -475,6 +529,12 @@ After wave coverage is complete for a module, run a targeted quality pass for bo
 - email-compiler: initial coverage added; hardening pending
 - email-inky: initial coverage added; hardening pending
 - email-nodemailer: initial coverage added; hardening pending
+- web-http: initial coverage added; hardening pending
+- web-connect: initial coverage added; hardening pending
+- web-rpc: initial coverage added; hardening pending
+- web-upload: initial coverage added; hardening pending
+- web-aws-lambda: initial coverage added; hardening pending
+- worker: initial coverage added; hardening pending
 - model-indexed: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
 - model-memory: hardening pass completed (consumer safe-default depth, maintainer compatibility/triage updates)
 - model-query: hardening pass completed (consumer decision/pitfall guidance, maintainer verifier contract depth)

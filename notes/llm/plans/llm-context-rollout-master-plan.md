@@ -218,6 +218,22 @@ When module behavior or README changes:
   - six-file structure checks
   - consumer OVERVIEW heading-contract checks
   - package publish-safety checks (llm excluded from files arrays)
+- Web transport coverage batch completed:
+  - web-http
+  - web-connect
+  - web-rpc
+- Validation gates passed for web transport coverage batch:
+  - six-file structure checks
+  - consumer OVERVIEW heading-contract checks
+  - package publish-safety checks (llm excluded from files arrays)
+- Upload/serverless/worker coverage batch completed:
+  - web-upload
+  - web-aws-lambda
+  - worker
+- Validation gates passed for upload/serverless/worker coverage batch:
+  - six-file structure checks
+  - consumer OVERVIEW heading-contract checks
+  - package publish-safety checks (llm excluded from files arrays)
 
 ### In Progress
 
