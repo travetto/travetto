@@ -114,10 +114,21 @@ Quality threshold:
 
 After all module docs are compliant:
 
-1. Create module/llm-support.
-2. Synthesize role-based module knowledge into task-oriented workflows.
-3. Integrate cli:schema outputs for command-discovery and argument-shape guidance.
-4. Add cross-module troubleshooting and decision trees.
+1. Create module/llm-support using standard module package conventions.
+2. Synthesize consumer module knowledge into task-oriented workflows.
+3. Package all consumer LLM docs at pack time via the llm:support:package:consumer:docs CLI command into a bundled consumer-docs source artifact.
+4. Encode package install guidance in two views:
+  - task bundles by user intent
+  - dependency graph prerequisites with optional adapters
+5. Integrate cli:schema outputs for command-discovery and argument-shape guidance.
+6. Add cross-module troubleshooting and decision trees.
+7. Verify synthesis gates:
+  - six-file structure check
+  - consumer heading contract
+  - stale symbol scan
+  - publish safety
+  - schema alignment
+  - install-guidance completeness
 
 ## Maintenance Policy
 
@@ -299,14 +310,26 @@ When module behavior or README changes:
   - normalized heading-count compliance in cli/compiler/manifest/runtime/schema consumer OVERVIEW files
   - verified all non-archived module/* packages pass 3 rollout gates
   - reconciled hardening status list coverage for model and test modules
+- Final synthesis implementation kickoff completed:
+  - created module/llm-support package scaffold
+  - created llm-support consumer role docs
+  - added task-bundle and dependency-graph guidance sources
+  - added pack-time bundling of consumer docs into src/consumer-docs.ts via a CLI command
+  - validated npx trv cli:schema execution for command-schema source-of-truth alignment
 
 ### In Progress
 
 - Module-level coverage and hardening work is complete.
+- Final synthesis implementation started:
+  - scaffolded module/llm-support package
+  - created six role docs under module/llm-support/llm
+  - added task bundle and dependency graph install guidance source files
 
 ### Pending
 
-- Build module/llm-support synthesis after full compliance.
+- Validate cli:schema alignment for llm-support command guidance language.
+- Run synthesis verification gates and record pass/fail outcomes.
+- Add module/llm-support to module index and completion summaries.
 
 ## Modified Files in Most Recent Retrofit Batch
 
@@ -412,6 +435,18 @@ When module behavior or README changes:
 - module/model-dynamodb/llm/maintainer/OVERVIEW.md
 - module/model-dynamodb/llm/maintainer/INSTRUCTIONS.md
 - module/model-dynamodb/llm/maintainer/TIPS.md
+- module/llm-support/package.json
+- module/llm-support/__index__.ts
+- module/llm-support/DOC.tsx
+- module/llm-support/src/types.ts
+- module/llm-support/src/install-guidance.ts
+- module/llm-support/src/workflow-guidance.ts
+- module/llm-support/llm/consumer/OVERVIEW.md
+- module/llm-support/llm/consumer/INSTRUCTIONS.md
+- module/llm-support/llm/consumer/TIPS.md
+- module/llm-support/llm/maintainer/OVERVIEW.md
+- module/llm-support/llm/maintainer/INSTRUCTIONS.md
+- module/llm-support/llm/maintainer/TIPS.md
 
 ## Source References
 

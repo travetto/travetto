@@ -44,6 +44,7 @@
     "typescript": "^6.0.0"
   },
   "devDependencies": {
+    "@travetto/llm-support": "^8.0.0-alpha.20",
     "@travetto/repo": "^8.0.0-alpha.6",
     "@types/node-forge": "^1.3.14",
     "node-forge": "^1.4.0",

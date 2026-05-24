@@ -523,11 +523,21 @@ Each covered module should provide:
 - module/model-dynamodb/llm/maintainer/INSTRUCTIONS.md
 - module/model-dynamodb/llm/maintainer/TIPS.md
 
+## Final Synthesis Module
+
+### llm-support
+
+- module/llm-support/llm/consumer/OVERVIEW.md
+- module/llm-support/llm/consumer/INSTRUCTIONS.md
+- module/llm-support/llm/consumer/TIPS.md
+- module/llm-support/src/consumer-docs.ts
+
 ## Next
 
-- Add Wave 4 modules with both role folders and six total files per module.
-- Integrate `npx trv cli:schema` into synthesis inputs for command/schema-aware agent support.
-- After all modules are complete, create module/llm-support to synthesize cross-module instructions and workflows.
+- Validate npx trv cli:schema alignment for llm-support command/schema-aware guidance text.
+- Add synthesis verification output for llm-support gates.
+- Continue hardening synthesized install bundles and dependency graph guidance as module dependencies evolve.
+- Keep llm-support consumer-only; do not reintroduce maintainer-role docs.
 
 ## Quality Hardening Plan
 
