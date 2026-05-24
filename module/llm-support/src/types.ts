@@ -21,3 +21,5 @@ export interface WorkflowGuidance {
   commandDiscoveryRule: string;
   verification: string[];
 }
+
+export type AdapterNeed = 'blob' | 'query' | 'indexed' | 'expiry';

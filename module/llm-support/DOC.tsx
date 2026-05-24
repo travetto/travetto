@@ -24,4 +24,8 @@ export const text = <>
   <c.Section title='CLI Schema Rule'>
     When command signatures are uncertain, use CLI schema output as source of truth before recommending command arguments.
   </c.Section>
+
+  <c.Section title='CLI Recommendation Entry Point'>
+    Use trv llm:support:recommend to emit workflow-aware required and optional module recommendations as JSON or text.
+  </c.Section>
 </>;

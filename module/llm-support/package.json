@@ -32,16 +32,23 @@
     "@travetto/runtime": "^8.0.0-alpha.14"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.20"
+    "@travetto/cli": "^8.0.0-alpha.20",
+    "@travetto/test": "^8.0.0-alpha.14"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
+      "optional": true
+    },
+    "@travetto/test": {
       "optional": true
     }
   },
   "travetto": {
     "workspaceInclude": true,
-    "displayName": "LLM Support"
+    "displayName": "LLM Support",
+    "roles": [
+      "std"
+    ]
   },
   "publishConfig": {
     "access": "public"

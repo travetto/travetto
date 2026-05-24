@@ -31,17 +31,57 @@
 ### Build a web API
 1. Start with web-api-baseline.
 2. Add auth-enabled-web only if identity or permission requirements exist.
-3. Add model-sql-stack only if persistence is requested.
+3. Add model-persistence-stack only if persistence is requested.
 
 ### Add persistence
-1. Start with model-sql-stack for SQL targets or switch adapter families for non-SQL stores.
-2. Select exactly one adapter package for the active datastore.
-3. Confirm index/query needs match selected adapter capabilities.
+1. Start with model-persistence-stack.
+2. Pick one adapter family (SQL or non-SQL) based on datastore and operational requirements.
+3. Select exactly one primary adapter package for the active datastore.
+4. Confirm index/query/blob/expiry needs match selected adapter capabilities.
 
 ### Add worker processing
 1. Start with worker-baseline.
 2. Add model modules only when jobs persist data.
 3. Verify shutdown behavior assumptions against runtime guidance.
 
+### Enable Google OAuth (Passport)
+1. Start with auth-google-passport-web and enable-google-oauth-passport.
+2. Configure google.auth values (clientID, clientSecret, callbackUrl) and bind via @Config.
+3. Register PassportAuthenticator with Google OAuth strategy and explicit profile-to-principal mapping.
+4. If persisting identities, add one model adapter and external-id indexed lookup.
+
+### Scaffold web + OpenAPI service
+1. Start with scaffold-web-openapi-service.
+2. Confirm generated app includes web-http and OpenAPI endpoint support.
+3. Add logging if runtime diagnostics are needed.
+
+### Scaffold basic auth + session
+1. Start with scaffold-auth-basic-session and scaffold-auth-basic-session workflow.
+2. Confirm authenticator/authorizer/session store factories are present.
+3. Verify /auth/login, /auth/self, and /auth/logout behavior in generated routes.
+
+### Scaffold web + model CRUD
+1. Start with scaffold-web-model-crud.
+2. Confirm generated CRUD controller uses model-query compatible source.
+3. Add auth/auth-web if principal-scoped record access is required.
+
+### Scaffold model backend selection
+1. Start with scaffold-model-backend-selection.
+2. Choose one datastore adapter from scaffold-supported options.
+3. Ensure SQL-family choices include shared SQL runtime requirements.
+
+### Scaffold quality setup
+1. Start with scaffold-quality-setup.
+2. Confirm generated package scripts include test and lint commands.
+3. Run test and lint immediately after generation.
+
 ## Verification Command
 - Use trv llm:support:verify to run llm-support structure and contract checks.
+
+## Recommendation Command
+- Use trv llm:support:recommend to emit workflow and install guidance as text output by default.
+- Filter with --workflow, --bundle, or --intent, and switch to --format json when structured output is required.
+- Use --needs blob,query,indexed,expiry to narrow non-SQL adapter choices by required capabilities.
+- Use --workflow enable-google-oauth-passport for provider-specific Google OAuth setup guidance.
+- Use --workflow scaffold-web-openapi-service, scaffold-auth-basic-session, scaffold-web-model-crud, scaffold-model-backend-selection, or scaffold-quality-setup for scaffold-aligned guidance.
+- Use trv llm:support:recommend:json for strict machine output with schemaVersion.

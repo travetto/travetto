@@ -22,8 +22,12 @@ The @travetto/llm-support module is a synthesis layer for LLM-facing framework g
 - Task-bundle package guidance for common intents.
 - Dependency-graph package guidance that distinguishes required versus optional adapters.
 - Cross-module workflow synthesis for common framework outcomes.
+- Needs-based non-SQL adapter selection for blob/query/indexed/expiry requirements.
+- Provider-specific auth workflow guidance for Google OAuth via auth-web-passport.
+- Scaffold-aligned workflow guidance for web+openapi, basic auth+session, web+model CRUD, backend selection, and quality setup.
 - Command-discovery guardrails grounded in npx trv cli:schema.
 - Packaged consumer-docs bundle generated at pack time for downstream tooling.
+- CLI recommendation surface via trv llm:support:recommend for direct agent/tool integration.
 
 ## Decorators
 
@@ -40,6 +44,7 @@ The @travetto/llm-support module is a synthesis layer for LLM-facing framework g
 - src/workflow-guidance.ts: workflow definitions and schema-check guidance.
 - src/consumer-docs.ts: generated bundle of all consumer LLM docs.
 - src/types.ts: guidance contracts for ingestion and downstream processing.
+- support/cli.llm_support_recommend.ts: CLI command that resolves workflows and bundles into required/optional package recommendations.
 
 Decision guideline:
 Start with task bundles when users state an outcome (for example, "build an auth API"), then refine with dependency graph constraints to avoid over-installation.
@@ -53,4 +58,4 @@ Start with task bundles when users state an outcome (for example, "build an auth
 6. Link the user to module-level docs for deep API specifics.
 
 ## Practical Scenario
-For a request like "build a web API with auth and SQL persistence," select the web baseline and auth-enabled bundles, then add the model SQL bundle. Use dependency graph checks to ensure @travetto/model prerequisites are satisfied before choosing one SQL adapter package. If the user asks for install or setup command invocations, verify command signatures via npx trv cli:schema before returning command examples.
+For a request like "build a web API with auth and persistence," select the web baseline and auth-enabled bundles, then add the model persistence bundle. Use dependency graph checks to ensure @travetto/model prerequisites are satisfied, choose one adapter family (SQL or non-SQL), and then select one primary adapter package. If the user asks for install or setup command invocations, verify command signatures via npx trv cli:schema before returning command examples.
