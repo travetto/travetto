@@ -34,6 +34,9 @@ This module wraps Node async context primitives and gives framework-friendly API
 - AsyncContext: get/set/run operations for shared async state.
 - AsyncContextValue<T>: typed accessor abstraction for specific context keys.
 
+Decision guideline:
+Use async context for operation-scoped metadata that must cross async boundaries, and keep ordinary business parameters explicit when values are local to one call path.
+
 ## Typical Integration Flow
 1. Inject AsyncContext into services that manage request-scoped operations.
 2. Annotate entry methods with @WithAsyncContext.
@@ -42,3 +45,8 @@ This module wraps Node async context primitives and gives framework-friendly API
 
 ## Practical Scenario
 When handling a request that triggers multiple async service calls, store a correlation ID once and access it everywhere downstream for consistent tracing and diagnostics.
+
+Common pitfalls:
+- Treating async context as global mutable state for unrelated workflows.
+- Relying on context initialization side effects instead of explicit @WithAsyncContext boundaries.
+- Storing overly broad payloads that create accidental coupling.

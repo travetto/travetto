@@ -33,6 +33,9 @@ This module provides the base registry lifecycle used by other framework modules
 - RegistryIndexStore as reusable storage/indexing helper.
 - RegistryAdapter and RegistryIndex interfaces for custom implementations.
 
+Decision guideline:
+Use registry abstractions only when implementing framework-level discovery/indexing behavior, and keep application-level logic on higher-level modules that already consume registry state.
+
 ## Typical Integration Flow
 1. Define a RegistryAdapter for class-level metadata.
 2. Define a RegistryIndex that owns store lifecycle and access patterns.
@@ -41,3 +44,8 @@ This module provides the base registry lifecycle used by other framework modules
 
 ## Practical Scenario
 If you are authoring a framework plugin that discovers decorated classes and builds a runtime map, Registry provides the initialization/finalization contract to make that behavior deterministic.
+
+Common pitfalls:
+- Mixing registration side effects into application runtime paths.
+- Treating registry initialization ordering as incidental instead of explicit lifecycle behavior.
+- Building duplicate indexing systems when RegistryIndexStore can provide canonical storage.

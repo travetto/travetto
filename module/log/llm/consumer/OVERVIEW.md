@@ -36,6 +36,9 @@ This module is the logging runtime for Travetto applications. It converts consol
 - LogAppender implementations: ConsoleLogAppender, FileLogAppender.
 - LogEvent and Logger contracts for custom integrations.
 
+Decision guideline:
+Use module-configured formatter/appender composition as the canonical logging surface, and keep application code on consistent console/logger usage patterns.
+
 ## Typical Integration Flow
 1. Install @travetto/log and keep default line+console settings for local development.
 2. Switch to JSON output in environments that aggregate logs.
@@ -44,3 +47,8 @@ This module is the logging runtime for Travetto applications. It converts consol
 
 ## Practical Scenario
 If you run services across multiple environments, start with line logs locally for readability and use JSON logs in production so log platforms can query by fields like module, scope, and level.
+
+Common pitfalls:
+- Emitting non-serializable payloads while expecting stable JSON logs.
+- Bypassing configured logger pathways with ad hoc wrappers.
+- Changing formatter output shape without validating downstream ingestion contracts.

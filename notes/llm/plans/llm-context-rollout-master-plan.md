@@ -187,7 +187,34 @@ When module behavior or README changes:
   - compiler, manifest, cli
   - web, auth, cache
   - openapi, terminal, repo
+  - registry, context, log
 - Validation gates passed for each completed non-model hardening trio:
+  - six-file structure checks
+  - consumer OVERVIEW heading-contract checks
+  - package publish-safety checks (llm excluded from files arrays)
+- Auth extension coverage batch completed:
+  - auth-model
+  - auth-session
+  - auth-web
+  - auth-web-passport
+  - auth-web-session
+- Validation gates passed for auth extension coverage batch:
+  - six-file structure checks
+  - consumer OVERVIEW heading-contract checks
+  - package publish-safety checks (llm excluded from files arrays)
+- Tooling/service coverage batch completed:
+  - email
+  - image
+  - eslint
+- Validation gates passed for tooling/service coverage batch:
+  - six-file structure checks
+  - consumer OVERVIEW heading-contract checks
+  - package publish-safety checks (llm excluded from files arrays)
+- Email extension coverage batch completed:
+  - email-compiler
+  - email-inky
+  - email-nodemailer
+- Validation gates passed for email extension coverage batch:
   - six-file structure checks
   - consumer OVERVIEW heading-contract checks
   - package publish-safety checks (llm excluded from files arrays)
@@ -195,7 +222,7 @@ When module behavior or README changes:
 ### In Progress
 
 - Full README-grounded enrichment pass for all completed modules, continuing beyond priority sparse set.
-- Planning next Wave 4+ coverage beyond model extension modules.
+- Planning next Wave 4+ coverage beyond model/auth-extension modules.
 
 ### Pending
 

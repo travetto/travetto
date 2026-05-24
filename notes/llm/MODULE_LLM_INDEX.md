@@ -186,6 +186,107 @@ Each covered module should provide:
 - module/log/llm/maintainer/INSTRUCTIONS.md
 - module/log/llm/maintainer/TIPS.md
 
+## Wave 4.5: Auth Extension Modules
+
+### auth-model
+
+- module/auth-model/llm/consumer/OVERVIEW.md
+- module/auth-model/llm/consumer/INSTRUCTIONS.md
+- module/auth-model/llm/consumer/TIPS.md
+- module/auth-model/llm/maintainer/OVERVIEW.md
+- module/auth-model/llm/maintainer/INSTRUCTIONS.md
+- module/auth-model/llm/maintainer/TIPS.md
+
+### auth-session
+
+- module/auth-session/llm/consumer/OVERVIEW.md
+- module/auth-session/llm/consumer/INSTRUCTIONS.md
+- module/auth-session/llm/consumer/TIPS.md
+- module/auth-session/llm/maintainer/OVERVIEW.md
+- module/auth-session/llm/maintainer/INSTRUCTIONS.md
+- module/auth-session/llm/maintainer/TIPS.md
+
+### auth-web
+
+- module/auth-web/llm/consumer/OVERVIEW.md
+- module/auth-web/llm/consumer/INSTRUCTIONS.md
+- module/auth-web/llm/consumer/TIPS.md
+- module/auth-web/llm/maintainer/OVERVIEW.md
+- module/auth-web/llm/maintainer/INSTRUCTIONS.md
+- module/auth-web/llm/maintainer/TIPS.md
+
+### auth-web-passport
+
+- module/auth-web-passport/llm/consumer/OVERVIEW.md
+- module/auth-web-passport/llm/consumer/INSTRUCTIONS.md
+- module/auth-web-passport/llm/consumer/TIPS.md
+- module/auth-web-passport/llm/maintainer/OVERVIEW.md
+- module/auth-web-passport/llm/maintainer/INSTRUCTIONS.md
+- module/auth-web-passport/llm/maintainer/TIPS.md
+
+### auth-web-session
+
+- module/auth-web-session/llm/consumer/OVERVIEW.md
+- module/auth-web-session/llm/consumer/INSTRUCTIONS.md
+- module/auth-web-session/llm/consumer/TIPS.md
+- module/auth-web-session/llm/maintainer/OVERVIEW.md
+- module/auth-web-session/llm/maintainer/INSTRUCTIONS.md
+- module/auth-web-session/llm/maintainer/TIPS.md
+
+### email
+
+- module/email/llm/consumer/OVERVIEW.md
+- module/email/llm/consumer/INSTRUCTIONS.md
+- module/email/llm/consumer/TIPS.md
+- module/email/llm/maintainer/OVERVIEW.md
+- module/email/llm/maintainer/INSTRUCTIONS.md
+- module/email/llm/maintainer/TIPS.md
+
+### image
+
+- module/image/llm/consumer/OVERVIEW.md
+- module/image/llm/consumer/INSTRUCTIONS.md
+- module/image/llm/consumer/TIPS.md
+- module/image/llm/maintainer/OVERVIEW.md
+- module/image/llm/maintainer/INSTRUCTIONS.md
+- module/image/llm/maintainer/TIPS.md
+
+### eslint
+
+- module/eslint/llm/consumer/OVERVIEW.md
+- module/eslint/llm/consumer/INSTRUCTIONS.md
+- module/eslint/llm/consumer/TIPS.md
+- module/eslint/llm/maintainer/OVERVIEW.md
+- module/eslint/llm/maintainer/INSTRUCTIONS.md
+- module/eslint/llm/maintainer/TIPS.md
+
+### email-compiler
+
+- module/email-compiler/llm/consumer/OVERVIEW.md
+- module/email-compiler/llm/consumer/INSTRUCTIONS.md
+- module/email-compiler/llm/consumer/TIPS.md
+- module/email-compiler/llm/maintainer/OVERVIEW.md
+- module/email-compiler/llm/maintainer/INSTRUCTIONS.md
+- module/email-compiler/llm/maintainer/TIPS.md
+
+### email-inky
+
+- module/email-inky/llm/consumer/OVERVIEW.md
+- module/email-inky/llm/consumer/INSTRUCTIONS.md
+- module/email-inky/llm/consumer/TIPS.md
+- module/email-inky/llm/maintainer/OVERVIEW.md
+- module/email-inky/llm/maintainer/INSTRUCTIONS.md
+- module/email-inky/llm/maintainer/TIPS.md
+
+### email-nodemailer
+
+- module/email-nodemailer/llm/consumer/OVERVIEW.md
+- module/email-nodemailer/llm/consumer/INSTRUCTIONS.md
+- module/email-nodemailer/llm/consumer/TIPS.md
+- module/email-nodemailer/llm/maintainer/OVERVIEW.md
+- module/email-nodemailer/llm/maintainer/INSTRUCTIONS.md
+- module/email-nodemailer/llm/maintainer/TIPS.md
+
 ## Wave 4: Model Extension Modules
 
 ### model-indexed
@@ -360,6 +461,20 @@ After wave coverage is complete for a module, run a targeted quality pass for bo
 - openapi: hardening pass completed (consumer contract-artifact guardrails, maintainer traversal/output triage)
 - terminal: hardening pass completed (consumer capability-aware output guardrails, maintainer writer/detection triage)
 - repo: hardening pass completed (consumer release-workflow guardrails, maintainer scope/exec triage)
+- registry: hardening pass completed (consumer lifecycle guardrails, maintainer adapter/index triage)
+- context: hardening pass completed (consumer propagation guardrails, maintainer async-boundary triage)
+- log: hardening pass completed (consumer formatter/appender guardrails, maintainer event-pipeline triage)
+- auth-model: initial coverage added; hardening pending
+- auth-session: initial coverage added; hardening pending
+- auth-web: initial coverage added; hardening pending
+- auth-web-passport: initial coverage added; hardening pending
+- auth-web-session: initial coverage added; hardening pending
+- email: initial coverage added; hardening pending
+- image: initial coverage added; hardening pending
+- eslint: initial coverage added; hardening pending
+- email-compiler: initial coverage added; hardening pending
+- email-inky: initial coverage added; hardening pending
+- email-nodemailer: initial coverage added; hardening pending
 - model-indexed: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
 - model-memory: hardening pass completed (consumer safe-default depth, maintainer compatibility/triage updates)
 - model-query: hardening pass completed (consumer decision/pitfall guidance, maintainer verifier contract depth)
