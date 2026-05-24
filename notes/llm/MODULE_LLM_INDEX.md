@@ -341,6 +341,51 @@ Each covered module should provide:
 - module/worker/llm/maintainer/INSTRUCTIONS.md
 - module/worker/llm/maintainer/TIPS.md
 
+### doc
+
+- module/doc/llm/consumer/OVERVIEW.md
+- module/doc/llm/consumer/INSTRUCTIONS.md
+- module/doc/llm/consumer/TIPS.md
+- module/doc/llm/maintainer/OVERVIEW.md
+- module/doc/llm/maintainer/INSTRUCTIONS.md
+- module/doc/llm/maintainer/TIPS.md
+
+### pack
+
+- module/pack/llm/consumer/OVERVIEW.md
+- module/pack/llm/consumer/INSTRUCTIONS.md
+- module/pack/llm/consumer/TIPS.md
+- module/pack/llm/maintainer/OVERVIEW.md
+- module/pack/llm/maintainer/INSTRUCTIONS.md
+- module/pack/llm/maintainer/TIPS.md
+
+### scaffold
+
+- module/scaffold/llm/consumer/OVERVIEW.md
+- module/scaffold/llm/consumer/INSTRUCTIONS.md
+- module/scaffold/llm/consumer/TIPS.md
+- module/scaffold/llm/maintainer/OVERVIEW.md
+- module/scaffold/llm/maintainer/INSTRUCTIONS.md
+- module/scaffold/llm/maintainer/TIPS.md
+
+### schema-faker
+
+- module/schema-faker/llm/consumer/OVERVIEW.md
+- module/schema-faker/llm/consumer/INSTRUCTIONS.md
+- module/schema-faker/llm/consumer/TIPS.md
+- module/schema-faker/llm/maintainer/OVERVIEW.md
+- module/schema-faker/llm/maintainer/INSTRUCTIONS.md
+- module/schema-faker/llm/maintainer/TIPS.md
+
+### transformer
+
+- module/transformer/llm/consumer/OVERVIEW.md
+- module/transformer/llm/consumer/INSTRUCTIONS.md
+- module/transformer/llm/consumer/TIPS.md
+- module/transformer/llm/maintainer/OVERVIEW.md
+- module/transformer/llm/maintainer/INSTRUCTIONS.md
+- module/transformer/llm/maintainer/TIPS.md
+
 ## Wave 4: Model Extension Modules
 
 ### model-indexed
@@ -518,9 +563,9 @@ After wave coverage is complete for a module, run a targeted quality pass for bo
 - registry: hardening pass completed (consumer lifecycle guardrails, maintainer adapter/index triage)
 - context: hardening pass completed (consumer propagation guardrails, maintainer async-boundary triage)
 - log: hardening pass completed (consumer formatter/appender guardrails, maintainer event-pipeline triage)
-- auth-model: initial coverage added; hardening pending
-- auth-session: initial coverage added; hardening pending
-- auth-web: initial coverage added; hardening pending
+- auth-model: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- auth-session: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- auth-web: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
 - auth-web-passport: initial coverage added; hardening pending
 - auth-web-session: initial coverage added; hardening pending
 - email: initial coverage added; hardening pending
@@ -535,6 +580,11 @@ After wave coverage is complete for a module, run a targeted quality pass for bo
 - web-upload: initial coverage added; hardening pending
 - web-aws-lambda: initial coverage added; hardening pending
 - worker: initial coverage added; hardening pending
+- doc: initial coverage added; hardening pending
+- pack: initial coverage added; hardening pending
+- scaffold: initial coverage added; hardening pending
+- schema-faker: initial coverage added; hardening pending
+- transformer: initial coverage added; hardening pending
 - model-indexed: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
 - model-memory: hardening pass completed (consumer safe-default depth, maintainer compatibility/triage updates)
 - model-query: hardening pass completed (consumer decision/pitfall guidance, maintainer verifier contract depth)

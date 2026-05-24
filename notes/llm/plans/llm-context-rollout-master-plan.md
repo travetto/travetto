@@ -234,6 +234,30 @@ When module behavior or README changes:
   - six-file structure checks
   - consumer OVERVIEW heading-contract checks
   - package publish-safety checks (llm excluded from files arrays)
+- Tooling/generator coverage batch completed:
+  - doc
+  - pack
+  - scaffold
+- Validation gates passed for tooling/generator coverage batch:
+  - six-file structure checks
+  - consumer OVERVIEW heading-contract checks
+  - package publish-safety checks (llm excluded from files arrays)
+- Data/compile utility coverage batch completed:
+  - schema-faker
+  - transformer
+- Validation gates passed for data/compile utility coverage batch:
+  - six-file structure checks
+  - consumer OVERVIEW heading-contract checks
+  - package publish-safety checks (llm excluded from files arrays)
+
+- Auth core hardening batch completed:
+  - auth-model
+  - auth-session
+  - auth-web
+- Validation gates passed for auth core hardening batch:
+  - six-file structure checks
+  - consumer OVERVIEW heading-contract checks
+  - package publish-safety checks (llm excluded from files arrays)
 
 ### In Progress
 
