@@ -41,6 +41,9 @@ This module exposes no decorators.
 - `ModelQueryFacetSupport` adds `facetByQuery`.
 - `ModelQuerySuggestSupport` adds `suggestByQuery` and `suggestValuesByQuery`.
 
+Decision guideline:
+If users can shape filters at runtime, use `model-query`. If the access path is fixed and deterministic, prefer `model-indexed` for simpler contracts and lower ambiguity.
+
 ## Typical Integration Flow
 1. Define persisted models with @travetto/model.
 2. Choose a backend that implements the query contracts you need.
@@ -49,3 +52,8 @@ This module exposes no decorators.
 
 ## Practical Scenario
 For an admin search screen, issue a query that filters active users by organization, sorts by creation date, and pages results. Add `facetByQuery` on role to drive filter counts, and use `suggestByQuery` on the email field to power type-ahead search. The UI logic stays on the shared DSL even if the underlying provider changes.
+
+Common pitfalls:
+- Passing arbitrary user clauses directly to providers without verification or field restrictions.
+- Treating provider-specific behavior as guaranteed by the shared query contracts.
+- Mixing singular (`queryOne`) and list-query semantics in endpoints without explicit expectations.

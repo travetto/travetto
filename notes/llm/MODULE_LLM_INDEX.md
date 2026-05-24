@@ -242,6 +242,87 @@ Each covered module should provide:
 - module/model-mongo/llm/maintainer/INSTRUCTIONS.md
 - module/model-mongo/llm/maintainer/TIPS.md
 
+### model-elasticsearch
+
+- module/model-elasticsearch/llm/consumer/OVERVIEW.md
+- module/model-elasticsearch/llm/consumer/INSTRUCTIONS.md
+- module/model-elasticsearch/llm/consumer/TIPS.md
+- module/model-elasticsearch/llm/maintainer/OVERVIEW.md
+- module/model-elasticsearch/llm/maintainer/INSTRUCTIONS.md
+- module/model-elasticsearch/llm/maintainer/TIPS.md
+
+### model-postgres
+
+- module/model-postgres/llm/consumer/OVERVIEW.md
+- module/model-postgres/llm/consumer/INSTRUCTIONS.md
+- module/model-postgres/llm/consumer/TIPS.md
+- module/model-postgres/llm/maintainer/OVERVIEW.md
+- module/model-postgres/llm/maintainer/INSTRUCTIONS.md
+- module/model-postgres/llm/maintainer/TIPS.md
+
+### model-mysql
+
+- module/model-mysql/llm/consumer/OVERVIEW.md
+- module/model-mysql/llm/consumer/INSTRUCTIONS.md
+- module/model-mysql/llm/consumer/TIPS.md
+- module/model-mysql/llm/maintainer/OVERVIEW.md
+- module/model-mysql/llm/maintainer/INSTRUCTIONS.md
+- module/model-mysql/llm/maintainer/TIPS.md
+
+### model-sqlite
+
+- module/model-sqlite/llm/consumer/OVERVIEW.md
+- module/model-sqlite/llm/consumer/INSTRUCTIONS.md
+- module/model-sqlite/llm/consumer/TIPS.md
+- module/model-sqlite/llm/maintainer/OVERVIEW.md
+- module/model-sqlite/llm/maintainer/INSTRUCTIONS.md
+- module/model-sqlite/llm/maintainer/TIPS.md
+
+### model-file
+
+- module/model-file/llm/consumer/OVERVIEW.md
+- module/model-file/llm/consumer/INSTRUCTIONS.md
+- module/model-file/llm/consumer/TIPS.md
+- module/model-file/llm/maintainer/OVERVIEW.md
+- module/model-file/llm/maintainer/INSTRUCTIONS.md
+- module/model-file/llm/maintainer/TIPS.md
+
+### model-firestore
+
+- module/model-firestore/llm/consumer/OVERVIEW.md
+- module/model-firestore/llm/consumer/INSTRUCTIONS.md
+- module/model-firestore/llm/consumer/TIPS.md
+- module/model-firestore/llm/maintainer/OVERVIEW.md
+- module/model-firestore/llm/maintainer/INSTRUCTIONS.md
+- module/model-firestore/llm/maintainer/TIPS.md
+
+### model-redis
+
+- module/model-redis/llm/consumer/OVERVIEW.md
+- module/model-redis/llm/consumer/INSTRUCTIONS.md
+- module/model-redis/llm/consumer/TIPS.md
+- module/model-redis/llm/maintainer/OVERVIEW.md
+- module/model-redis/llm/maintainer/INSTRUCTIONS.md
+- module/model-redis/llm/maintainer/TIPS.md
+
+### model-s3
+
+- module/model-s3/llm/consumer/OVERVIEW.md
+- module/model-s3/llm/consumer/INSTRUCTIONS.md
+- module/model-s3/llm/consumer/TIPS.md
+- module/model-s3/llm/maintainer/OVERVIEW.md
+- module/model-s3/llm/maintainer/INSTRUCTIONS.md
+- module/model-s3/llm/maintainer/TIPS.md
+
+### model-dynamodb
+
+- module/model-dynamodb/llm/consumer/OVERVIEW.md
+- module/model-dynamodb/llm/consumer/INSTRUCTIONS.md
+- module/model-dynamodb/llm/consumer/TIPS.md
+- module/model-dynamodb/llm/maintainer/OVERVIEW.md
+- module/model-dynamodb/llm/maintainer/INSTRUCTIONS.md
+- module/model-dynamodb/llm/maintainer/TIPS.md
+
 ## Next
 
 - Add Wave 4 modules with both role folders and six total files per module.
@@ -267,9 +348,18 @@ After wave coverage is complete for a module, run a targeted quality pass for bo
 ### Current Hardening Status
 
 - schema: in progress (consumer and maintainer instruction depth expanded; validate with follow-up consistency pass)
-- model-indexed: initial coverage added; hardening pending
-- model-memory: initial coverage added; hardening pending
-- model-query: initial coverage added; hardening pending
+- model-indexed: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- model-memory: hardening pass completed (consumer safe-default depth, maintainer compatibility/triage updates)
+- model-query: hardening pass completed (consumer decision/pitfall guidance, maintainer verifier contract depth)
 - model-query-language: initial coverage added; hardening pending
 - model-sql: initial coverage added; hardening pending
 - model-mongo: initial coverage added; hardening pending
+- model-elasticsearch: initial coverage added; hardening pending
+- model-postgres: initial coverage added; hardening pending
+- model-mysql: initial coverage added; hardening pending
+- model-sqlite: initial coverage added; hardening pending
+- model-file: initial coverage added; hardening pending
+- model-firestore: initial coverage added; hardening pending
+- model-redis: initial coverage added; hardening pending
+- model-s3: initial coverage added; hardening pending
+- model-dynamodb: initial coverage added; hardening pending

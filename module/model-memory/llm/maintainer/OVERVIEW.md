@@ -16,6 +16,10 @@ Maintainer guidance for the in-memory reference implementation of Travetto model
 - Depends on @travetto/model-indexed for computed index contracts and helpers.
 - Often acts as the easiest concrete backend for global-test and support-suite coverage.
 
+Compatibility boundaries:
+- Error behavior (`NotFoundError`, `ExistsError`, indexed failures) is used as reference semantics by downstream suites.
+- Capability coverage breadth is intentional; removing or weakening support surface can break provider parity expectations.
+
 ## Invariants
 - Persist paths must keep stored records and index state synchronized.
 - Blob content and blob metadata must remain isolated from normal model records.
@@ -29,6 +33,11 @@ Maintainer guidance for the in-memory reference implementation of Travetto model
 ## Testing Expectations
 - Run direct module tests plus at least one downstream suite that uses model-memory as the active provider.
 - Revalidate CRUD lifecycle, blob range behavior, expiry culling, and indexed operations after changes.
+
+Change-triage guidance:
+- Write-path changes: verify index add/remove symmetry plus expiry persistence behavior.
+- Blob-path changes: verify metadata and payload mutation/read flows, including ranged reads.
+- Initialization/config changes: validate namespace isolation and cull registration behavior across test suites.
 
 ## Risk Areas
 - Index maintenance is tightly coupled to create, update, and delete flows.

@@ -13,3 +13,8 @@
 ## Validation
 - Run the module test suite and targeted global or support tests that use model-memory.
 - Recheck unique-index conflicts, expired reads, and blob metadata flows after edits.
+
+Regression checklist:
+- Create/update/delete keep index structures synchronized.
+- Expired items are not returned from `get` and list-like flows.
+- Blob metadata and payload files remain coherent after update/delete operations.

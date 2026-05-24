@@ -19,6 +19,10 @@ Maintainer guidance for @travetto/model-indexed contracts, computation rules, an
 - Consumed by provider modules such as model-memory and any backend implementing `ModelIndexedSupport`.
 - Must remain consistent with provider-specific test suites and index error behavior.
 
+Compatibility boundaries:
+- Index body typing (`FullKeyedIndexBody`, `FullKeyedIndexWithPartialBody`) is part of consumer-facing API shape.
+- `ModelIndexedSupport` method names and argument contracts are shared by multiple providers and should be treated as semver-sensitive.
+
 ## Invariants
 - Index registration must preserve exact key and sort templates derived from user input.
 - Missing required fields during computation must remain a validation failure unless an explicit empty-value strategy is supplied.
@@ -33,6 +37,11 @@ Maintainer guidance for @travetto/model-indexed contracts, computation rules, an
 - Validate index registration and retrieval behavior through support tests.
 - Cover missing-key failures, unique-key collisions, sorted paging, and suggestion behavior.
 - Run at least one concrete provider integration suite after changing computation or contract types.
+
+Change-triage guidance:
+- If a change touches template parsing or computed key/sort extraction, run indexed suites plus at least one memory and one non-memory provider integration.
+- If a change touches service type signatures only, run compile-time checks across provider modules and support tests.
+- If a change touches warnings for unsupported index types, validate startup logs in at least one provider with mixed index declarations.
 
 ## Risk Areas
 - Changes to template parsing or computed key construction can silently break persisted or in-memory index layouts.

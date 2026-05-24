@@ -156,6 +156,18 @@ When module behavior or README changes:
   - model-query-language
   - model-sql
   - model-mongo
+- Wave 4 batch 3 docs created for:
+  - model-elasticsearch
+  - model-postgres
+  - model-mysql
+- Wave 4 batch 4 docs created for:
+  - model-sqlite
+  - model-file
+  - model-firestore
+- Wave 4 batch 5 docs created for:
+  - model-redis
+  - model-s3
+  - model-dynamodb
 
 ### In Progress
 
@@ -219,6 +231,60 @@ When module behavior or README changes:
 - module/model-mongo/llm/maintainer/OVERVIEW.md
 - module/model-mongo/llm/maintainer/INSTRUCTIONS.md
 - module/model-mongo/llm/maintainer/TIPS.md
+- module/model-elasticsearch/llm/consumer/OVERVIEW.md
+- module/model-elasticsearch/llm/consumer/INSTRUCTIONS.md
+- module/model-elasticsearch/llm/consumer/TIPS.md
+- module/model-elasticsearch/llm/maintainer/OVERVIEW.md
+- module/model-elasticsearch/llm/maintainer/INSTRUCTIONS.md
+- module/model-elasticsearch/llm/maintainer/TIPS.md
+- module/model-postgres/llm/consumer/OVERVIEW.md
+- module/model-postgres/llm/consumer/INSTRUCTIONS.md
+- module/model-postgres/llm/consumer/TIPS.md
+- module/model-postgres/llm/maintainer/OVERVIEW.md
+- module/model-postgres/llm/maintainer/INSTRUCTIONS.md
+- module/model-postgres/llm/maintainer/TIPS.md
+- module/model-mysql/llm/consumer/OVERVIEW.md
+- module/model-mysql/llm/consumer/INSTRUCTIONS.md
+- module/model-mysql/llm/consumer/TIPS.md
+- module/model-mysql/llm/maintainer/OVERVIEW.md
+- module/model-mysql/llm/maintainer/INSTRUCTIONS.md
+- module/model-mysql/llm/maintainer/TIPS.md
+- module/model-sqlite/llm/consumer/OVERVIEW.md
+- module/model-sqlite/llm/consumer/INSTRUCTIONS.md
+- module/model-sqlite/llm/consumer/TIPS.md
+- module/model-sqlite/llm/maintainer/OVERVIEW.md
+- module/model-sqlite/llm/maintainer/INSTRUCTIONS.md
+- module/model-sqlite/llm/maintainer/TIPS.md
+- module/model-file/llm/consumer/OVERVIEW.md
+- module/model-file/llm/consumer/INSTRUCTIONS.md
+- module/model-file/llm/consumer/TIPS.md
+- module/model-file/llm/maintainer/OVERVIEW.md
+- module/model-file/llm/maintainer/INSTRUCTIONS.md
+- module/model-file/llm/maintainer/TIPS.md
+- module/model-firestore/llm/consumer/OVERVIEW.md
+- module/model-firestore/llm/consumer/INSTRUCTIONS.md
+- module/model-firestore/llm/consumer/TIPS.md
+- module/model-firestore/llm/maintainer/OVERVIEW.md
+- module/model-firestore/llm/maintainer/INSTRUCTIONS.md
+- module/model-firestore/llm/maintainer/TIPS.md
+- module/model-redis/llm/consumer/OVERVIEW.md
+- module/model-redis/llm/consumer/INSTRUCTIONS.md
+- module/model-redis/llm/consumer/TIPS.md
+- module/model-redis/llm/maintainer/OVERVIEW.md
+- module/model-redis/llm/maintainer/INSTRUCTIONS.md
+- module/model-redis/llm/maintainer/TIPS.md
+- module/model-s3/llm/consumer/OVERVIEW.md
+- module/model-s3/llm/consumer/INSTRUCTIONS.md
+- module/model-s3/llm/consumer/TIPS.md
+- module/model-s3/llm/maintainer/OVERVIEW.md
+- module/model-s3/llm/maintainer/INSTRUCTIONS.md
+- module/model-s3/llm/maintainer/TIPS.md
+- module/model-dynamodb/llm/consumer/OVERVIEW.md
+- module/model-dynamodb/llm/consumer/INSTRUCTIONS.md
+- module/model-dynamodb/llm/consumer/TIPS.md
+- module/model-dynamodb/llm/maintainer/OVERVIEW.md
+- module/model-dynamodb/llm/maintainer/INSTRUCTIONS.md
+- module/model-dynamodb/llm/maintainer/TIPS.md
 
 ## Source References
 

@@ -13,7 +13,13 @@ How to use computed indexes safely and predictably.
 - Pass every required key field, and for single-item sorted lookups also pass the sort field when the index shape requires it.
 - Use `ModelIndexedUtil.naiveUpsert` or `naiveUpdate` only as a compatibility fallback when the provider lacks a native optimized path.
 
+Minimal pattern:
+1. Export index definitions from one module next to the model type.
+2. Reuse those exported constants at every call site.
+3. Keep indexed read/write operations in a thin repository layer so key-shape changes are localized.
+
 ## Safe Defaults
 - Keep index keys stable and based on persisted fields.
 - Prefer a small number of intentional indexes over broad speculative coverage.
 - Treat index definitions as part of your model contract and keep names stable.
+- Use sorted indexes only when callers actually depend on deterministic order.

@@ -37,6 +37,9 @@ This module exposes no decorators. Indexes are defined with factory functions th
 - `ModelIndexedSupport` defines `getByIndex`, `deleteByIndex`, `upsertByIndex`, `updateByIndex`, `updatePartialByIndex`, `pageByIndex`, `listByIndex`, and `suggestByIndex`.
 - `warnIfIndexedUniqueIndex` and `warnIfNonIndexedIndex` help providers surface unsupported index shapes.
 
+Decision guideline:
+Choose `model-indexed` when the access path is fixed and repeatable (for example account-by-email or events-by-tenant-and-time). Choose `model-query` when the filter shape is user-driven or cannot be predicted up front.
+
 ## Typical Integration Flow
 1. Define a model with `@Model` from @travetto/model.
 2. Register one or more computed indexes next to the model definition.
@@ -45,3 +48,8 @@ This module exposes no decorators. Indexes are defined with factory functions th
 
 ## Practical Scenario
 For a user account system, define a unique index on `email` and a sorted index on `{ organizationId } + { createdAt: -1 }`. Use the unique index for sign-in or duplicate protection, and the sorted index to page through the newest users in a tenant. If you later swap providers, application code can keep calling the same indexed contract instead of rewriting lookup logic.
+
+Common pitfalls:
+- Do not put mutable business fields in index keys unless reindex cost and semantics are intentional.
+- Do not treat missing key fields as wildcard criteria; indexed operations require the declared key shape.
+- Do not over-index every possible access path; each index adds write-time and maintenance overhead.

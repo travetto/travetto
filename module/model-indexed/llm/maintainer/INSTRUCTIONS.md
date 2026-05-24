@@ -13,3 +13,8 @@
 ## Validation
 - Run the module support tests and at least one provider suite that consumes indexed support.
 - Re-check unique, sorted, nested-field, and polymorphism scenarios after behavior changes.
+
+Regression checklist:
+- Missing key field behavior still throws the expected indexed error path.
+- Sorted index output ordering stays stable for numeric and date sort values.
+- `naiveUpdate` and `naiveUpsert` fallback behavior remains unchanged.

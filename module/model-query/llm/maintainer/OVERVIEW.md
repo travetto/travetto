@@ -22,6 +22,10 @@ Maintainer guidance for the typed query DSL, validator, and query-support contra
 - Depends on @travetto/schema for structural validation through `QueryVerifier`.
 - Implemented by provider modules such as model-mongo, model-sql, and model-elasticsearch.
 
+Compatibility boundaries:
+- Query type shapes and operator names are shared API and must be treated as semver-sensitive.
+- `QueryVerifier` accepted/rejected behavior is externally visible and should be treated as a user-facing contract.
+
 ## Invariants
 - The query DSL must stay typed against model fields and field shapes.
 - Clause validation must reject unknown members and invalid operator/type combinations.
@@ -37,6 +41,11 @@ Maintainer guidance for the typed query DSL, validator, and query-support contra
 - Run support tests for query, crud, facet, suggest, and polymorphism paths as applicable.
 - Revalidate verifier behavior whenever operator rules, field traversal, or nested clause handling changes.
 - Check at least one concrete provider after shared utility or type changes.
+
+Change-triage guidance:
+- Verifier/operator changes: run support suites plus at least one SQL-like and one document-like provider integration.
+- Type-level changes: run compile checks across provider modules and query-language integration.
+- Helper changes (`ModelQueryUtil`, suggest/facet/crud utils): verify expiry and polymorphism helper behavior explicitly.
 
 ## Risk Areas
 - Operator-rule changes can break multiple backends at once.

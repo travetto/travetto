@@ -36,6 +36,9 @@ This module exposes no standalone utility classes; the primary public surface is
 - `MemoryModelConfig` provides `modifyStorage`, `namespace`, and `cullRate` configuration under `model.memory`.
 - The `client` getter exposes the underlying map store for inspection-oriented workflows.
 
+Decision guideline:
+Use this provider as the behavioral baseline for local development and tests. Move to a production datastore provider once durability, throughput, or backend-specific query features become requirements.
+
 ## Typical Integration Flow
 1. Add @travetto/model-memory to a project that already defines models with @travetto/model.
 2. Configure `model.memory` if you need namespacing or custom expiry culling cadence.
@@ -44,3 +47,8 @@ This module exposes no standalone utility classes; the primary public surface is
 
 ## Practical Scenario
 For integration tests around file uploads and account expiry, use `MemoryModelService` to store user records, blob payloads, and expiry timestamps without provisioning an external database. The same suite can validate index-based lookups and blob retrieval while still staying fast and isolated per test run.
+
+Common pitfalls:
+- Shared singleton service instances can leak state across unrelated tests.
+- Expiry assertions can become flaky if culling cadence is implicit.
+- Behavior that passes in memory might still fail in backend providers with different consistency or indexing constraints.

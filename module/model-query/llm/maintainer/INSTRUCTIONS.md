@@ -13,3 +13,8 @@
 ## Validation
 - Run the relevant support suites plus one concrete provider integration suite.
 - Recheck nested-field validation, operator typing, and singular-result handling after edits.
+
+Regression checklist:
+- Unknown member and bad-operator clauses are still rejected predictably.
+- `$and`, `$or`, and `$not` nesting semantics remain stable.
+- `queryOne` singular-result behavior and error paths remain unchanged.
