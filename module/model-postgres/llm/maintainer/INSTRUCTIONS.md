@@ -13,3 +13,8 @@
 ## Validation
 - Run module tests and composed model-sql integration tests on PostgreSQL.
 - Re-test transaction boundaries, schema introspection, and index lifecycle behaviors.
+
+Regression checklist:
+- Transaction modes maintain expected nested and isolated behavior.
+- Error-code translation maps to stable framework errors.
+- Introspection output still reconciles table/index metadata correctly.

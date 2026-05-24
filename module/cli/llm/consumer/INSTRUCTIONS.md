@@ -12,7 +12,13 @@ Practical workflow for building and consuming Travetto CLI commands.
 - Use @CliProfilesFlag for profile-specific execution.
 - Use npx trv cli:schema to verify command contracts and input shape.
 
+Minimal pattern:
+1. Define command contract with @CliCommand and typed flags.
+2. Keep command behavior side-effect free until input validation passes.
+3. Verify schema output whenever command/flag signatures change.
+
 ## Safe Defaults
 - Keep command flags small and typed.
 - Prefer explicit defaults in command code.
 - Avoid hidden side effects in command constructors.
+- Keep flag naming and help text stable for automation consumers.

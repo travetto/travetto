@@ -12,7 +12,13 @@ How to use the Redis-backed model provider effectively.
 - Use sorted indexes for ordered scans and suggestions.
 - Keep API-level paging limits explicit for scan-heavy endpoints.
 
+Minimal pattern:
+1. Centralize Redis config/service wiring in one startup boundary.
+2. Keep indexed-descriptor definitions near model design and review.
+3. Validate one integration flow that exercises create/update/delete plus indexed retrieval.
+
 ## Safe Defaults
 - Keep namespace values explicit per environment.
 - Treat indexed support as contract-driven and validate index definitions at startup.
 - Avoid endpoint patterns that rely on unbounded scans.
+- Keep scan-heavy operations behind explicit limits and operational monitoring.

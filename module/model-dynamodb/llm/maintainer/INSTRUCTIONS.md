@@ -13,3 +13,8 @@
 ## Validation
 - Run module tests plus integration flows covering table lifecycle and indexed retrieval.
 - Verify local endpoint and namespaced table behavior after config changes.
+
+Regression checklist:
+- Table/GSI reconciliation remains idempotent and safe across repeated runs.
+- Indexed attribute mutation remains synchronized with descriptor definitions.
+- Expiry and not-found behavior remains stable across read/update/delete paths.

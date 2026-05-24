@@ -34,6 +34,9 @@ This module is an operational command surface for workspace maintenance. It buil
 - Primary surface is CLI commands.
 - RepoExecUtil exists in support tooling for multi-module command orchestration.
 
+Decision guideline:
+Use repo module commands as the standardized operational surface for monorepo release and bulk-exec workflows, instead of composing one-off shell orchestration scripts.
+
 ## Typical Integration Flow
 1. Use repo:list to inspect module scope or changed modules.
 2. Run repo:version for release-level updates.
@@ -42,3 +45,8 @@ This module is an operational command surface for workspace maintenance. It buil
 
 ## Practical Scenario
 When preparing a release in a large monorepo, use changed-mode versioning plus dry-run publish to reduce release risk while keeping dependent module versions coherent.
+
+Common pitfalls:
+- Skipping dry-run and changed-scope validation before publish actions.
+- Mixing manual version bumps with repo-managed workflows and causing inconsistent state.
+- Running high-concurrency repo:exec commands without safe idempotent task design.

@@ -36,6 +36,9 @@ This module exports no standalone utility classes. The primary public API is `Mo
 - `MongoModelService` is the extension seam for custom provider wiring via DI factory registration.
 - `ModelBlobNamespace` identifies the blob bucket namespace.
 
+Decision guideline:
+Use model-mongo when you want broad model capability coverage on a document database with flexible schema evolution. If relational integrity and cross-table joins are first-class requirements, prefer a SQL provider path.
+
 ## Typical Integration Flow
 1. Configure `model.mongo` settings (or a connection string) for your environment.
 2. Register/resolve `MongoModelService` as the active model provider.
@@ -44,3 +47,8 @@ This module exports no standalone utility classes. The primary public API is `Mo
 
 ## Practical Scenario
 A multi-tenant API uses MongoDB for user/account documents and file metadata. The service uses query contracts for filtered search, indexed contracts for deterministic lookups, and GridFS blob support for uploaded artifacts. Tenant isolation is controlled with namespaced configuration while keeping model APIs consistent.
+
+Common pitfalls:
+- Treating dynamic schema flexibility as a reason to skip model validation and migration discipline.
+- Relying on provider-specific query behavior in shared domain services.
+- Allowing namespace and credential config drift across environments.

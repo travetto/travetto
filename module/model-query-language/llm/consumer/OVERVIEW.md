@@ -38,6 +38,9 @@ This module exposes no decorators for consumers. The exported `QueryLanguageMode
 - `QueryLanguageParser.parseToQuery(text)` produces a where-clause object.
 - `QueryLanguageModelQuery.finalize(self)` converts serialized fields (`where`, `sort`, `limit`, `offset`) into `PageableModelQuery<T>`.
 
+Decision guideline:
+Use query-language parsing when filters come from user-entered expressions. Use direct typed query objects when query shape is authored in trusted application code.
+
 ## Typical Integration Flow
 1. Accept query input text from request parameters.
 2. Parse text with `QueryLanguageParser.parseToQuery`.
@@ -46,3 +49,8 @@ This module exposes no decorators for consumers. The exported `QueryLanguageMode
 
 ## Practical Scenario
 An admin UI sends `user.role in ['admin','root'] and not (status == 'disabled')` as a text filter. The API parses it into a model-query where-clause, adds pagination, and runs it through the active query-capable provider. The UI keeps one readable filter format while backend providers remain swappable.
+
+Common pitfalls:
+- Treating parse success as permission to run any clause without endpoint-level field/operator controls.
+- Assuming all providers will execute regex and complex boolean clauses with similar performance.
+- Mixing expression parsing and raw JSON where-clause parsing in one endpoint without explicit precedence rules.

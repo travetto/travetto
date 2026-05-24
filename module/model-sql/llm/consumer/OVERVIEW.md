@@ -39,6 +39,9 @@ This module defines SQL model configuration, connection and transaction decorato
 - `SQLDialect` is the provider extension surface for SQL generation and datastore-specific behavior.
 - `SQLModelService` is the shared service layer used by concrete SQL providers.
 
+Decision guideline:
+Use model-sql when you want one contract surface across SQL providers and are comfortable with framework-managed schema conventions. If legacy relational schema compatibility is a primary constraint, validate fit before committing.
+
 ## Typical Integration Flow
 1. Configure SQL settings via `model.sql` config.
 2. Use a concrete SQL provider module that supplies a dialect and connection implementation.
@@ -47,3 +50,8 @@ This module defines SQL model configuration, connection and transaction decorato
 
 ## Practical Scenario
 A service migrates from in-memory data to PostgreSQL while keeping model contracts unchanged. The application swaps in a SQL provider built on model-sql, keeps the same query/indexed service calls, and gains transaction support and SQL-backed durability with minimal application-layer changes.
+
+Common pitfalls:
+- Assuming generated SQL schemas are intended to match pre-existing relational designs.
+- Mixing provider-specific SQL assumptions into application-layer code.
+- Using broad query paths where deterministic indexed lookup would be safer and clearer.

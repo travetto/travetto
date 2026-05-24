@@ -18,6 +18,10 @@ Maintainer guidance for DynamoDB provider behavior and index lifecycle managemen
 - Uses DynamoDB table/query/GSI behaviors through AWS SDK.
 - Integrates with runtime/di lifecycle and model metadata registry.
 
+Compatibility boundaries:
+- Table naming, namespace behavior, and index-name derivation are compatibility boundaries and semver-sensitive.
+- Indexed query translation and write-path attribute mutation behavior is contract-visible.
+
 ## Invariants
 - Indexed attribute updates on writes must stay synchronized with index definitions.
 - Table and GSI reconciliation logic must remain safe and idempotent.
@@ -33,6 +37,11 @@ Maintainer guidance for DynamoDB provider behavior and index lifecycle managemen
 - Run module tests for CRUD/indexed/storage/expiry behavior.
 - Validate index creation/update/delete diff logic against realistic table states.
 - Recheck paging and suggest behavior when query construction changes.
+
+Change-triage guidance:
+- Utility/index-name changes: run upsertModel and index-diff reconciliation tests together.
+- Write-path changes: validate indexed attribute mutation and retrieval compatibility.
+- Config changes: test local endpoint, namespace overrides, and explicit credential behavior.
 
 ## Risk Areas
 - GSI evolution and table update flows can break production reads if changed carelessly.

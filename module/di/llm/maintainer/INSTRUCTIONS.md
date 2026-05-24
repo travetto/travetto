@@ -25,3 +25,9 @@ Internal LLM support document. Committed in-repo and intended to remain outside 
 - Add tests for default target selection and qualifier overrides.
 - Add failure-path tests for missing dependencies and ambiguous matches.
 - Add lifecycle tests when touching construction order or caching.
+
+## Regression Checklist
+
+- Qualifier and target resolution remains deterministic for existing registrations.
+- Optional and required injection failure behavior remains stable.
+- PostConstruct and factory lifecycle behavior remains predictable.

@@ -13,3 +13,8 @@
 ## Validation
 - Run module tests and targeted integration scenarios with keyed and sorted indexes.
 - Verify startup/shutdown and namespaced storage cleanup behavior.
+
+Regression checklist:
+- Key and index naming remains stable across reads/writes/deletes.
+- Indexed retrieval methods remain synchronized with write-path mutations.
+- Expiry-aware reads continue to exclude expired records.

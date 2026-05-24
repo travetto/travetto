@@ -41,6 +41,9 @@ This module is the framework metadata index for modules, files, and resources ac
 - ManifestIndex for in-memory lookups and filtering.
 - Manifest utilities for persistence, scans, and delta updates.
 
+Decision guideline:
+Use manifest indexing and delta APIs as the canonical source for module/file discovery in tooling and incremental workflows, instead of re-scanning filesystem trees.
+
 ## Typical Integration Flow
 1. Load or build manifest state.
 2. Query modules/files/resources through ManifestIndex.
@@ -49,6 +52,11 @@ This module is the framework metadata index for modules, files, and resources ac
 
 ## Practical Scenario
 When implementing a module-aware code generation command, use manifest lookups to target only relevant source files and dependencies instead of scanning the entire repository.
+
+Common pitfalls:
+- Replacing manifest classification with ad hoc globbing and producing inconsistent module targeting.
+- Ignoring path normalization expectations and breaking cross-platform behavior.
+- Treating delta logic as optional in incremental workflows and causing unnecessary rebuilds.
 
 ## Agent Tooling Surface
 

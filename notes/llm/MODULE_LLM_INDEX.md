@@ -347,19 +347,31 @@ After wave coverage is complete for a module, run a targeted quality pass for bo
 
 ### Current Hardening Status
 
-- schema: in progress (consumer and maintainer instruction depth expanded; validate with follow-up consistency pass)
+- schema: hardening pass completed (consumer contract guardrails, maintainer compatibility/triage/checklist updates)
+- runtime: hardening pass completed (consumer lifecycle defaults, maintainer env/shutdown triage)
+- config: hardening pass completed (consumer precedence guardrails, maintainer source/override triage)
+- di: hardening pass completed (consumer lifecycle/qualifier guardrails, maintainer resolution triage)
+- compiler: hardening pass completed (consumer incremental guardrails, maintainer invalidation/event triage)
+- manifest: hardening pass completed (consumer discovery/delta guardrails, maintainer classification/path triage)
+- cli: hardening pass completed (consumer command-contract guardrails, maintainer registry/schema triage)
+- web: hardening pass completed (consumer endpoint/interceptor guardrails, maintainer extraction/ordering triage)
+- auth: hardening pass completed (consumer identity-permission guardrails, maintainer contract/context triage)
+- cache: hardening pass completed (consumer key/eviction guardrails, maintainer decorator/serialization triage)
+- openapi: hardening pass completed (consumer contract-artifact guardrails, maintainer traversal/output triage)
+- terminal: hardening pass completed (consumer capability-aware output guardrails, maintainer writer/detection triage)
+- repo: hardening pass completed (consumer release-workflow guardrails, maintainer scope/exec triage)
 - model-indexed: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
 - model-memory: hardening pass completed (consumer safe-default depth, maintainer compatibility/triage updates)
 - model-query: hardening pass completed (consumer decision/pitfall guidance, maintainer verifier contract depth)
-- model-query-language: initial coverage added; hardening pending
-- model-sql: initial coverage added; hardening pending
-- model-mongo: initial coverage added; hardening pending
-- model-elasticsearch: initial coverage added; hardening pending
-- model-postgres: initial coverage added; hardening pending
-- model-mysql: initial coverage added; hardening pending
-- model-sqlite: initial coverage added; hardening pending
-- model-file: initial coverage added; hardening pending
-- model-firestore: initial coverage added; hardening pending
-- model-redis: initial coverage added; hardening pending
-- model-s3: initial coverage added; hardening pending
-- model-dynamodb: initial coverage added; hardening pending
+- model-query-language: hardening pass completed (consumer parsing guardrails, maintainer parser contract triage/checklists)
+- model-sql: hardening pass completed (consumer decision guidance, maintainer compatibility/transaction triage depth)
+- model-mongo: hardening pass completed (consumer operational defaults, maintainer id/config triage/checklists)
+- model-elasticsearch: hardening pass completed (consumer query guardrails, maintainer id/translation triage/checklists)
+- model-postgres: hardening pass completed (consumer composition defaults, maintainer transaction/introspection triage)
+- model-mysql: hardening pass completed (consumer version-aware defaults, maintainer error/introspection triage)
+- model-sqlite: hardening pass completed (consumer lock/concurrency defaults, maintainer retry/introspection triage)
+- model-file: hardening pass completed (consumer filesystem guardrails, maintainer compatibility/scan triage)
+- model-firestore: hardening pass completed (consumer indexed/config defaults, maintainer query/config triage)
+- model-redis: hardening pass completed (consumer indexed guardrails, maintainer key/index triage)
+- model-s3: hardening pass completed (consumer object-store defaults, maintainer multipart/key-schema triage)
+- model-dynamodb: hardening pass completed (consumer index lifecycle guardrails, maintainer GSI/utility triage)

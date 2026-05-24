@@ -36,6 +36,9 @@ This module is the core identity and permission contract layer for authenticatio
 - Authenticator / Authorizer interfaces: extension points for identity and permission checks.
 - Principal and token types: shared auth model contracts.
 
+Decision guideline:
+Use explicit authenticator and authorizer boundaries to keep identity verification and permission decisions independently testable and composable.
+
 ## Typical Integration Flow
 1. Define a principal contract suitable for your domain.
 2. Implement one or more authenticators for credential verification.
@@ -44,4 +47,9 @@ This module is the core identity and permission contract layer for authenticatio
 
 ## Practical Scenario
 For SSO plus internal role checks, authenticate with external identity and run authorizers to attach product-specific permissions before endpoint access.
+
+Common pitfalls:
+- Mixing permission enrichment into authenticator logic and obscuring auth flow boundaries.
+- Expanding principal payload shape without compatibility planning for downstream consumers.
+- Treating AuthContext as global state instead of request-scoped state.
 

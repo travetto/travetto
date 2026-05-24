@@ -36,6 +36,9 @@ This module exposes no standalone utility classes; primary API is `RedisModelSer
 - `RedisModelService` is the runtime provider surface for CRUD and indexed contracts.
 - Service wiring can be customized via DI factory registration.
 
+Decision guideline:
+Use model-redis when low-latency key access and deterministic indexed patterns are primary requirements, and full query-contract semantics are not required.
+
 ## Typical Integration Flow
 1. Configure `model.redis` client options and optional namespace.
 2. Resolve `RedisModelService` through DI as the active provider.
@@ -44,3 +47,8 @@ This module exposes no standalone utility classes; primary API is `RedisModelSer
 
 ## Practical Scenario
 An event-processing service stores short-lived entities in Redis and retrieves them through computed indexes by tenant and timestamp. Application code remains provider-agnostic by using model/indexed contracts while Redis handles fast key and sorted-set operations under the hood.
+
+Common pitfalls:
+- Assuming index mutation consistency without validating write/delete and index-update paths together.
+- Relying on unbounded scans for API endpoints with unpredictable cardinality.
+- Treating Redis index uniqueness behavior as equivalent to relational constraints.

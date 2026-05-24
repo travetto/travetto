@@ -40,6 +40,9 @@ This module is the framework dependency injection container and registration sys
 - DI registry index APIs for programmatic resolution and registry behavior.
 - Injectable factories and qualifiers for controlled implementation selection.
 
+Decision guideline:
+Use DI registration, qualifiers, and factories for substitution and lifecycle control, instead of manual object wiring in business services.
+
 ## Typical Integration Flow
 1. Mark implementations with @Injectable.
 2. Inject dependencies with @Inject or constructor parameters in services consumed by web, model, and CLI layers.
@@ -48,4 +51,9 @@ This module is the framework dependency injection container and registration sys
 
 ## Practical Scenario
 When supporting multiple payment providers, register each implementation as injectable and select the appropriate one by qualifier without changing consumer service logic.
+
+Common pitfalls:
+- Mixing manual singleton creation with container-managed lifecycle and causing duplicate instances.
+- Using ambiguous qualifier/target combinations without explicit tests.
+- Placing side-effectful startup logic in constructors instead of controlled lifecycle hooks.
 

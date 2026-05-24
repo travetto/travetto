@@ -12,7 +12,13 @@ How to use MySQL with Travetto model-sql contracts.
 - Use query contracts for broad filters and indexed contracts for deterministic keys.
 - Let model-sql lifecycle behavior manage schema updates in development workflows.
 
+Minimal pattern:
+1. Wire dialect/service composition in one DI startup location.
+2. Keep transaction boundaries at service-method level.
+3. Run one CI integration flow on the target MySQL major/minor version you deploy.
+
 ## Safe Defaults
 - Use environment-specific credentials and connection options.
 - Keep API paging limits bounded.
 - Validate MySQL version behavior when relying on regex/operator semantics.
+- Keep index and schema lifecycle operations explicit in deploy/testing workflows.

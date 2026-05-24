@@ -50,6 +50,9 @@ This module provides shared runtime primitives used across the framework: proces
 - Env and EnvProp for typed environment variable access.
 - ShutdownManager for graceful application stop/restart flows.
 
+Decision guideline:
+Use runtime abstractions for environment, path resolution, and shutdown behavior whenever logic is shared across modules or runtimes, rather than composing raw process/path primitives per call site.
+
 ## Typical Integration Flow
 1. Use Runtime and Env for environment- and workspace-aware logic shared by config, web, and CLI modules.
 2. Register cleanup behavior through ShutdownManager for services launched by web workers or CLI commands.
@@ -57,4 +60,9 @@ This module provides shared runtime primitives used across the framework: proces
 
 ## Practical Scenario
 When implementing a long-running worker, use Env to read deployment flags, Runtime to resolve resources, and ShutdownManager to ensure jobs are safely drained on termination.
+
+Common pitfalls:
+- Mixing raw `process.env` access with Env/EnvProp conventions and introducing inconsistent defaults.
+- Calling `process.exit` in routine control paths and bypassing graceful shutdown cleanup.
+- Re-implementing path/resource resolution instead of relying on Runtime semantics.
 

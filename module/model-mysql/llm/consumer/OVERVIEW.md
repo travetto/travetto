@@ -36,6 +36,9 @@ This module exposes no standalone utility classes.
 - `MySQLConnection`: pooled connection and query execution behavior.
 - Composition point: `SQLModelService(context, config, new MySQLDialect(context, config))`.
 
+Decision guideline:
+Use model-mysql when MySQL is the selected backend and you want to keep application logic on shared model-sql contracts while isolating MySQL behavior in provider composition.
+
 ## Typical Integration Flow
 1. Configure `model.sql` for host/database/user/password and options.
 2. Compose `SQLModelService` with `MySQLDialect` via DI.
@@ -44,3 +47,8 @@ This module exposes no standalone utility classes.
 
 ## Practical Scenario
 An internal application standardizes on MySQL but wants the same model/query abstraction used by other providers. It wires `SQLModelService` with `MySQLDialect`, keeps service code contract-driven, and relies on MySQL-specific execution details only inside the module.
+
+Common pitfalls:
+- Ignoring version-specific SQL/operator differences when planning upgrades.
+- Coupling domain services to MySQL-specific assumptions instead of contract behavior.
+- Skipping duplicate-key and rollback path verification after driver/dialect updates.

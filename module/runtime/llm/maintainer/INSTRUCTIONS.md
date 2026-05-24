@@ -30,3 +30,9 @@ Internal LLM support document. Committed in-repo and intended to remain outside 
 
 - Run module tests that touch runtime behavior and any directly affected dependents.
 - For broad utility changes, spot-check one downstream consumer module.
+
+## Regression Checklist
+
+- Env defaults and malformed-input handling remain deterministic.
+- Runtime path/resource resolution remains stable across workspace layouts.
+- Shutdown callbacks remain resilient and do not regress process-exit behavior.

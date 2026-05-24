@@ -29,8 +29,19 @@ The manifest module indexes project/module files and metadata, providing a norma
 - Runtime consumers use manifest data for discovery/loading.
 - Path normalization must remain consistent across operating systems.
 
+## Compatibility Boundaries
+
+- Manifest shape and field semantics are consumed by compiler/runtime and semver-sensitive.
+- Delta and path-normalization behavior is externally visible via rebuild/discovery outcomes.
+
 ## Typical Use Cases
 
 - Adjusting file type classification or manifest shape.
 - Debugging unexpected rebuilds due to delta mismatches.
 - Extending module metadata consumed by other framework modules.
+
+## Change-Triage Guidance
+
+- Classification changes: validate module/file role mapping across representative workspaces.
+- Delta changes: run add/change/delete incremental checks and compare expected outputs.
+- Path changes: verify normalized behavior across platform-sensitive paths.

@@ -46,6 +46,9 @@ This module is the framework web API layer for defining controllers, endpoints, 
 - WebInterceptor contracts and registration controls.
 - Request/response metadata decorators for protocol behavior.
 
+Decision guideline:
+Use declarative endpoint, parameter, and interceptor contracts as the canonical API surface, rather than embedding transport-specific parsing and policy logic inside handlers.
+
 ## Typical Integration Flow
 1. Define a controller with @Controller.
 2. Add endpoint methods with HTTP decorators.
@@ -54,4 +57,9 @@ This module is the framework web API layer for defining controllers, endpoints, 
 
 ## Practical Scenario
 For a versioned REST API, define route groups by controller, enforce auth/logging via interceptors, and keep endpoint methods focused on typed domain operations.
+
+Common pitfalls:
+- Mixing manual request parsing with parameter decorators and producing inconsistent validation behavior.
+- Embedding cross-cutting concerns in endpoints instead of interceptor chains.
+- Changing route/parameter behavior without updating content negotiation and metadata decorators.
 

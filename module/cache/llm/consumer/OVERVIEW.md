@@ -36,6 +36,9 @@ This module wraps method execution with configurable cache read/write and evicti
 - CacheService for direct cache operations.
 - CacheModelSymbol binding for custom model-backed cache providers.
 
+Decision guideline:
+Use decorator-driven caching for deterministic method results with explicit key-space and eviction behavior, rather than ad hoc cache checks inside method bodies.
+
 ## Typical Integration Flow
 1. Register/cache-inject a CacheService.
 2. Add @Cache to expensive read methods.
@@ -44,4 +47,9 @@ This module wraps method execution with configurable cache read/write and evicti
 
 ## Practical Scenario
 For user profile reads, cache getUser(id) and evict on update/delete so high-traffic reads stay fast while writes preserve correctness.
+
+Common pitfalls:
+- Caching non-deterministic or side-effectful methods and creating correctness bugs.
+- Using unstable key generation inputs that change across process/version boundaries.
+- Forgetting eviction on mutation paths and serving stale data.
 

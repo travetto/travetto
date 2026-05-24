@@ -25,3 +25,9 @@ Internal LLM support document. Committed in-repo and intended to remain outside 
 - Validate full build and watch mode for changed code paths.
 - Verify no regression in single-run `build` workflows.
 - Confirm event/state output remains coherent for CLI consumers.
+
+## Regression Checklist
+
+- Incremental invalidation remains scoped and deterministic.
+- Watch/server lifecycle remains idempotent under restart scenarios.
+- Event and state output remains stable for downstream tools.

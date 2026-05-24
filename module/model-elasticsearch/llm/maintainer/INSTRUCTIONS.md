@@ -13,3 +13,8 @@
 ## Validation
 - Run module tests and targeted integration flows for search, facets, and indexed retrieval.
 - Validate startup against configured hosts and shutdown cleanup behavior.
+
+Regression checklist:
+- `_id` and model `id` mapping remains stable across create/read/update/delete paths.
+- Query translation preserves expected behavior for existing filter/sort combinations.
+- Index lifecycle operations remain idempotent across repeated startup and schema reconciliation.

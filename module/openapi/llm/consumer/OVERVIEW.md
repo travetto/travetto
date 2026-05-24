@@ -35,6 +35,9 @@ This module bridges internal endpoint/schema metadata into external OpenAPI docu
 - OpenapiVisitor for metadata-to-spec traversal.
 - ApiInfoConfig, ApiHostConfig, ApiSpecConfig for runtime configuration.
 
+Decision guideline:
+Use generated OpenAPI output as the canonical external contract artifact and keep source-of-truth behavior in web/schema code, not in post-processed spec edits.
+
 ## Typical Integration Flow
 1. Build APIs with @travetto/web and schema models.
 2. Configure api.info/api.host/api.spec values.
@@ -43,3 +46,8 @@ This module bridges internal endpoint/schema metadata into external OpenAPI docu
 
 ## Practical Scenario
 When frontend and backend evolve in parallel, use generated OpenAPI output as the contract artifact so client codegen and endpoint implementation remain aligned.
+
+Common pitfalls:
+- Hand-editing generated specs and drifting from controller/schema behavior.
+- Treating OpenAPI generation as a replacement for runtime validation.
+- Changing metadata traversal behavior without compatibility checks for schema consumers.

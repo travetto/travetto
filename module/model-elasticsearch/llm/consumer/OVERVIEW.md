@@ -36,6 +36,9 @@ This module exports no standalone utility classes; the primary public API is `El
 - `ElasticsearchModelService` is the main runtime provider surface for model operations.
 - Service replacement/override can be done through DI factory registration.
 
+Decision guideline:
+Use model-elasticsearch when search-oriented workflows (facet/suggest/filter composition) are first-class requirements. Prefer SQL or indexed-only paths for strongly transactional or strictly relational use cases.
+
 ## Typical Integration Flow
 1. Configure `model.elasticsearch` hosts, namespace, and connection options.
 2. Resolve `ElasticsearchModelService` through DI as the active provider.
@@ -44,3 +47,8 @@ This module exports no standalone utility classes; the primary public API is `El
 
 ## Practical Scenario
 A catalog service uses Elasticsearch for product data with both deterministic lookups and broad text filtering. The application uses indexed methods for exact SKU retrieval, query methods for faceted search, and suggest methods for type-ahead. The same business-layer contracts stay stable while relying on Elasticsearch-specific execution underneath.
+
+Common pitfalls:
+- Relying on unconstrained user-defined queries without endpoint-level field/operator allowlists.
+- Assuming index mappings auto-evolve safely for every model-shape change.
+- Treating scroll/paging defaults as performance-safe for high-cardinality datasets.

@@ -19,6 +19,10 @@ Maintainer guidance for Elasticsearch provider behavior, index management, and q
 - Uses the Elasticsearch JS client and index mappings as runtime substrate.
 - Integrates with DI/config/runtime modules for lifecycle and shutdown behavior.
 
+Compatibility boundaries:
+- `_id`/`id` translation and `storeId` semantics are externally visible and semver-sensitive.
+- Query/facet/suggest translation behavior is contract-visible and must remain stable for existing expressions.
+
 ## Invariants
 - ID handling (`_id` versus model `id`) must remain consistent with `storeId` behavior.
 - Query/indexed contract behavior must remain compatible with shared module expectations.
@@ -34,6 +38,11 @@ Maintainer guidance for Elasticsearch provider behavior, index management, and q
 - Run module-level tests for CRUD/query/indexed/bulk/facet/suggest/expiry behavior.
 - Re-verify index lifecycle operations after schema or mapping changes.
 - Validate startup/shutdown behavior around client initialization and shutdown hooks.
+
+Change-triage guidance:
+- ID/serialization changes: run CRUD/indexed tests plus compatibility checks on existing records.
+- Query translation changes: run query, facet, suggest, and paging/scroll tests together.
+- Mapping/index-manager changes: validate index create/update/drop and expiry-aware read behavior.
 
 ## Risk Areas
 - Mapping/field translation drift can break queries silently.

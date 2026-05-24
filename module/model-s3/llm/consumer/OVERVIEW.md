@@ -36,6 +36,9 @@ This module exposes no standalone utility classes; primary API is `S3ModelServic
 - `S3ModelService` is the runtime provider surface for CRUD/blob/expiry/storage contracts.
 - Service wiring can be customized via DI factory registration.
 
+Decision guideline:
+Use model-s3 when object-storage semantics and blob-heavy workflows are central, and advanced indexed/query model contracts are not required.
+
 ## Typical Integration Flow
 1. Configure `model.s3` bucket, region, credentials, and optional local endpoint.
 2. Resolve `S3ModelService` through DI as active provider.
@@ -44,3 +47,8 @@ This module exposes no standalone utility classes; primary API is `S3ModelServic
 
 ## Practical Scenario
 A media workflow persists metadata documents and large assets in S3. The service stores model records through CRUD contract methods, uploads media through multipart blob APIs, and serves temporary download links through signed URL support while keeping domain code contract-oriented.
+
+Common pitfalls:
+- Treating object-store list/read latency characteristics like low-latency database reads.
+- Skipping multipart abort/cleanup checks after upload-path refactors.
+- Allowing key-schema or namespace changes without migration planning.

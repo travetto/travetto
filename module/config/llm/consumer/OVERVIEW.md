@@ -68,6 +68,9 @@ export class DatabaseConfig {
 - ConfigurationService for loading and resolving active configuration values.
 - ConfigSource extension points for custom external configuration providers.
 
+Decision guideline:
+Use typed @Config classes and source precedence controls for all application/module settings instead of mixing ad hoc env parsing and direct file reads.
+
 ## Typical Integration Flow
 1. Define typed classes with @Config namespaces.
 2. Load defaults from resources/application.* files.
@@ -76,4 +79,9 @@ export class DatabaseConfig {
 
 ## Practical Scenario
 For multi-environment deployments, keep baseline values in application.yml, environment specifics in profile files, and sensitive overrides through @EnvVar-bound variables.
+
+Common pitfalls:
+- Scattering `process.env` access outside config classes and breaking precedence expectations.
+- Introducing ambiguous source priorities for custom ConfigSource implementations.
+- Treating config binding/coercion as optional and allowing invalid startup state.
 

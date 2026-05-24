@@ -17,6 +17,10 @@ Maintainer guidance for Firestore provider behavior and indexed contract integra
 - Uses Firestore client APIs for persistence and indexed query construction.
 - Integrates with runtime/config/di lifecycle behavior.
 
+Compatibility boundaries:
+- Namespace/collection naming and id semantics are data-compatibility boundaries.
+- Indexed key/sort query construction behavior is contract-visible and semver-sensitive.
+
 ## Invariants
 - Collection naming with namespace must remain stable and deterministic.
 - Indexed key/sort translation to Firestore query constraints must stay consistent.
@@ -32,6 +36,11 @@ Maintainer guidance for Firestore provider behavior and indexed contract integra
 - Run module tests for CRUD and indexed behaviors.
 - Validate emulator and credential file initialization paths.
 - Re-test paging/suggest/indexed lookup behavior when query construction changes.
+
+Change-triage guidance:
+- Config finalization changes: validate emulator, credentials, and explicit override precedence.
+- Indexed query changes: test `getByIndex`, `pageByIndex`, and `suggestByIndex` together.
+- ID/null handling changes: verify create/read/update flows and indexed projections.
 
 ## Risk Areas
 - Firestore query constraints and index requirements can surface runtime failures if query construction drifts.

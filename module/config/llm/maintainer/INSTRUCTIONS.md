@@ -25,3 +25,9 @@ Internal LLM support document. Committed in-repo and intended to remain outside 
 - Cover default behavior, overrides, and precedence collisions.
 - Test missing/invalid config behavior and error output.
 - For parser changes, include representative yaml/json/properties cases.
+
+## Regression Checklist
+
+- Source ordering remains deterministic for equivalent inputs.
+- @EnvVar alias fallback behavior remains compatible.
+- Invalid/missing config failures remain explicit and actionable.

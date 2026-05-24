@@ -31,7 +31,13 @@ export class ServiceConfig {
 - Override values via environment variables: PREFIX_FIELD_NAME=value.
 - Prefer @EnvVar when env names need to differ from default naming conventions.
 
+Minimal pattern:
+1. Model each namespace in a dedicated @Config class.
+2. Provide explicit defaults and optional @EnvVar aliases.
+3. Fail startup on invalid bound config rather than deferring errors.
+
 ## Safe Defaults
 - Provide default values in your config classes.
 - Use TRV_ENV to switch between development and production profiles.
 - Use explicit @EnvVar mappings for secrets and externally managed keys.
+- Keep source precedence documented whenever custom ConfigSource providers are added.

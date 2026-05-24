@@ -36,6 +36,9 @@ This module exposes no standalone utility classes.
 - `SqliteConnection`: connection creation, query execution, and retry behavior.
 - Composition point: `SQLModelService(context, config, new SqliteDialect(context, config))`.
 
+Decision guideline:
+Use model-sqlite for local/dev, tests, and lightweight deployments where operational simplicity matters more than high-concurrency write throughput.
+
 ## Typical Integration Flow
 1. Configure `model.sql` settings, including SQLite file options.
 2. Compose `SQLModelService` with `SqliteDialect` in DI.
@@ -44,3 +47,8 @@ This module exposes no standalone utility classes.
 
 ## Practical Scenario
 A local dev environment needs full model/query behavior without external dependencies. The project wires `SQLModelService` with `SqliteDialect`, stores data in a local file-backed SQLite database, and keeps the same contract-driven application code used in larger environments.
+
+Common pitfalls:
+- Assuming SQLite lock behavior will mirror networked SQL provider concurrency behavior.
+- Letting local file-path defaults drift between environments and test runs.
+- Skipping transaction and retry validation after connection-layer changes.

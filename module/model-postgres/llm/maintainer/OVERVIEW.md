@@ -17,6 +17,10 @@ Maintainer guidance for PostgreSQL dialect and connection implementation in the 
 - Used by composed `SQLModelService` from model-sql.
 - Depends on PostgreSQL driver behavior and extension availability.
 
+Compatibility boundaries:
+- Error translation semantics and SQL operator mappings are externally visible through contract behavior.
+- Connection/transaction lifecycle behavior must remain compatible with model-sql guarantees.
+
 ## Invariants
 - PostgreSQL error-code mapping must continue producing consistent framework errors.
 - SQL operator/type mappings must remain compatible with model-query semantics.
@@ -32,6 +36,11 @@ Maintainer guidance for PostgreSQL dialect and connection implementation in the 
 - Run module tests and at least one integrated model-sql suite using PostgreSQL.
 - Validate transaction behavior, index updates, and query translation.
 - Re-check schema introspection and create/update/drop lifecycle flows.
+
+Change-triage guidance:
+- Error mapping updates: validate duplicate/exists/not-found paths and transaction rollback behavior.
+- Dialect mapping updates: verify query/indexed compatibility and operator semantics.
+- Introspection changes: test schema reconciliation across create, update, truncate, and drop flows.
 
 ## Risk Areas
 - SQL/operator mapping mismatches can surface as subtle query regressions.

@@ -12,3 +12,8 @@
 ## Validation
 - Validate parameter extraction across body/path/query/header variants.
 - Verify interceptor inclusion/exclusion and conditional registration behavior.
+
+## Regression Checklist
+- Route and parameter metadata remains backward compatible.
+- Interceptor ordering and filtering remains deterministic.
+- Body/header utility behavior remains stable for existing transports.

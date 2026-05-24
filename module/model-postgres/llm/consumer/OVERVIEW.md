@@ -36,6 +36,9 @@ This module exposes no standalone utility classes.
 - `PostgreSQLConnection`: connection pooling and query execution behavior.
 - Composition point: `SQLModelService(context, config, new PostgreSQLDialect(context, config))`.
 
+Decision guideline:
+Use model-postgres when PostgreSQL is your SQL target and you want shared model-sql behavior with provider-specific SQL encapsulated in one module.
+
 ## Typical Integration Flow
 1. Configure `model.sql` settings.
 2. Compose `SQLModelService` with `PostgreSQLDialect`.
@@ -44,3 +47,8 @@ This module exposes no standalone utility classes.
 
 ## Practical Scenario
 An application running on PostgreSQL needs queryable document-like model behavior without writing provider-specific business code. The service composes `SQLModelService` with `PostgreSQLDialect`, then keeps all domain logic on shared model/query interfaces while PostgreSQL-specific SQL generation stays isolated in the module.
+
+Common pitfalls:
+- Assuming dialect-level defaults cover all extension/privilege requirements in every environment.
+- Embedding PostgreSQL-specific SQL assumptions in application services instead of provider boundaries.
+- Skipping transaction-path validation after connection or error-mapping changes.

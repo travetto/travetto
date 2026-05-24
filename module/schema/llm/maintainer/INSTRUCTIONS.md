@@ -44,6 +44,12 @@ Prefer additive evolution with deprecation periods over abrupt semantic shifts.
 - Include positive and negative validation cases.
 - Add regression coverage for any fixed edge case.
 
+## Regression Checklist
+
+- Existing decorator semantics stay stable for common schema patterns.
+- Bind/coerce behavior remains deterministic for aliased, optional, and polymorphic inputs.
+- Validation output preserves stable, path-aware errors for nested structures.
+
 ## Testing Matrix Expectations
 
 When touching registration, binding, or validation behavior, validate beyond local unit tests:

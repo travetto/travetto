@@ -168,17 +168,40 @@ When module behavior or README changes:
   - model-redis
   - model-s3
   - model-dynamodb
+- Wave 4 hardening completed for all model extension modules:
+  - model-indexed, model-memory, model-query
+  - model-query-language, model-sql, model-mongo
+  - model-elasticsearch, model-postgres, model-mysql
+  - model-sqlite, model-file, model-firestore
+  - model-redis, model-s3, model-dynamodb
+- Validation gates passed for all Wave 4 model extension hardening batches:
+  - six-file structure checks
+  - consumer OVERVIEW heading-contract checks
+  - package publish-safety checks (llm excluded from files arrays)
+- Schema hardening follow-up completed:
+  - consumer contract guardrails finalized
+  - maintainer compatibility/triage/checklist depth finalized
+  - schema validation gates passed (structure, heading contract, publish safety)
+- Non-model hardening trios completed:
+  - runtime, config, di
+  - compiler, manifest, cli
+  - web, auth, cache
+  - openapi, terminal, repo
+- Validation gates passed for each completed non-model hardening trio:
+  - six-file structure checks
+  - consumer OVERVIEW heading-contract checks
+  - package publish-safety checks (llm excluded from files arrays)
 
 ### In Progress
 
 - Full README-grounded enrichment pass for all completed modules, continuing beyond priority sparse set.
-- Wave 4 expansion through model-adjacent extension modules.
+- Planning next Wave 4+ coverage beyond model extension modules.
 
 ### Pending
 
 - Continue/complete retrofit for remaining completed modules that still need narrative-depth improvements.
-- Execute quality hardening passes for both roles across all covered modules.
-- Continue Wave 4 module coverage beyond the first model-adjacent batch.
+- Execute quality hardening passes for both roles across remaining non-model modules.
+- Continue Wave 4+ module coverage beyond model extension modules.
 - Build module/llm-support synthesis after full compliance.
 
 ## Modified Files in Most Recent Retrofit Batch

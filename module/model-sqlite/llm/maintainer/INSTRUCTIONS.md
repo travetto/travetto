@@ -13,3 +13,8 @@
 ## Validation
 - Run module tests plus model-sql integration tests on SQLite.
 - Re-check transaction, query, indexed, and schema lifecycle flows after edits.
+
+Regression checklist:
+- Busy/locked retry handling remains deterministic and bounded.
+- Transaction behavior remains stable under nested and failure scenarios.
+- Introspection output still maps correctly to schema lifecycle operations.

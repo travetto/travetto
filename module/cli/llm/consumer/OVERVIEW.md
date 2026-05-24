@@ -43,6 +43,9 @@ This module is the framework command system for declaring, validating, and execu
 - Command decorators and class contracts.
 - CliUtil for command option handling and restart-on-change behavior.
 
+Decision guideline:
+Use typed command classes and CLI decorators for operational workflows that need discoverability, validation, and tooling introspection, instead of ad hoc scripts.
+
 ## Typical Integration Flow
 1. Create a command class under support/cli.*.ts.
 2. Decorate with @CliCommand and define typed flags/arguments.
@@ -51,4 +54,9 @@ This module is the framework command system for declaring, validating, and execu
 
 ## Practical Scenario
 When a release pipeline needs one consistent entrypoint, wrap versioning, validation, and packaging in a typed command so humans and automation invoke identical logic.
+
+Common pitfalls:
+- Adding ambiguous flags without explicit defaults and schema validation intent.
+- Duplicating command parsing logic outside decorator-driven contracts.
+- Changing flag names or behavior without updating cli:schema consumers.
 

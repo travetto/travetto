@@ -72,6 +72,9 @@ This module is the framework's type metadata, binding, and validation backbone f
 - SchemaRegistryIndex for metadata lookup and registry operations.
 - BindUtil/DataUtil/SchemaTypeUtil for coercion and type transformation flows.
 
+Decision guideline:
+Use schema decorators and binding/validation utilities as the single source of truth for external input contracts, instead of duplicating checks across handlers and services.
+
 ## Runtime Metadata Guidance
 - Use SchemaRegistryIndex when you need runtime schema introspection for framework-level tooling.
 - Prefer decorator-driven schema definitions for application logic instead of manual metadata mutation.
@@ -86,4 +89,9 @@ This module is the framework's type metadata, binding, and validation backbone f
 
 ## Practical Scenario
 When a request payload and a persisted model share structure, define a schema once and enforce correctness in both web request handling and storage lifecycle paths.
+
+Common pitfalls:
+- Relying on broad implicit coercion for business-critical fields without explicit constraints.
+- Changing discriminator or alias behavior without regression checks across integration surfaces.
+- Mixing custom parsing logic into validators and losing path-aware error consistency.
 

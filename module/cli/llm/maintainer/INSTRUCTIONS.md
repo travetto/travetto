@@ -12,3 +12,8 @@
 ## Validation
 - Validate command discovery and schema generation.
 - Verify restart-on-change and debug IPC paths when touched.
+
+## Regression Checklist
+- Existing command and flag contracts remain discoverable and stable.
+- Parsing and validation errors remain deterministic and actionable.
+- cli:schema output remains compatible for automation/tool consumers.

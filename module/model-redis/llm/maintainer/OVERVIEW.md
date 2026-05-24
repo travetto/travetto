@@ -17,6 +17,10 @@ Maintainer guidance for Redis model persistence and indexed maintenance behavior
 - Uses Redis primitives for key-value, set, and sorted-set behaviors.
 - Integrates with runtime/di lifecycle for startup and shutdown.
 
+Compatibility boundaries:
+- Key naming and namespace composition are data-compatibility boundaries and semver-sensitive.
+- Index maintenance semantics for sorted/keyed paths are externally visible through indexed contract behavior.
+
 ## Invariants
 - Index mutation on write/delete must remain synchronized with base record state.
 - Key resolution and namespace composition must remain deterministic.
@@ -32,6 +36,11 @@ Maintainer guidance for Redis model persistence and indexed maintenance behavior
 - Run module tests for CRUD, indexed, and expiry paths.
 - Validate scan behavior with paging, offsets, and abort signals.
 - Recheck index cleanup/update behavior whenever write-path code changes.
+
+Change-triage guidance:
+- Write-path changes: run index add/remove/update checks with CRUD compatibility tests.
+- Scan/paging changes: validate offsets, limits, and suggest behavior on realistic data volumes.
+- Namespace/key-shape changes: verify backward compatibility with existing persisted data.
 
 ## Risk Areas
 - Index drift from record state can produce hard-to-debug retrieval bugs.

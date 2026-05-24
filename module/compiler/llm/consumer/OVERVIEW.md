@@ -38,6 +38,9 @@ This module is the build and watch orchestration layer for framework-aware TypeS
 - Compiler server/client state APIs.
 - Event/state streams for tooling and diagnostic integration.
 
+Decision guideline:
+Use compiler-managed build/watch flows whenever you rely on Travetto metadata or transformer behavior, rather than substituting raw TypeScript pipelines.
+
 ## Typical Integration Flow
 1. Run compiler in build or watch mode through framework commands.
 2. Consume manifest data and transformer output during compile phases.
@@ -46,6 +49,11 @@ This module is the build and watch orchestration layer for framework-aware TypeS
 
 ## Practical Scenario
 When local build times regress, inspect compiler state/event output to determine whether invalidation scope is too broad or a specific phase is dominating runtime.
+
+Common pitfalls:
+- Treating broad invalidation as acceptable and losing incremental build performance.
+- Bypassing compiler lifecycle in workflows that depend on manifest/transformer outputs.
+- Adding async transitions without explicit state/event ordering checks.
 
 ## Agent Tooling Surface
 

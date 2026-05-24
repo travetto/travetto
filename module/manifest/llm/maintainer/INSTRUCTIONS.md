@@ -25,3 +25,9 @@ Internal LLM support document. Committed in-repo and intended to remain outside 
 - Verify manifest generation output for representative modules.
 - Verify delta behavior for add/change/delete scenarios.
 - Validate path behavior on normalized POSIX-style expectations.
+
+## Regression Checklist
+
+- Manifest serialization remains deterministic for equivalent inputs.
+- Classification and dependency interpretation remains stable.
+- Delta computation avoids false positives and false negatives.

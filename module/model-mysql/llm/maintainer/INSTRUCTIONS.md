@@ -13,3 +13,8 @@
 ## Validation
 - Run module tests and model-sql integration tests with MySQL.
 - Re-test transaction behavior, schema introspection, and indexed/query paths.
+
+Regression checklist:
+- Duplicate-key and not-found conditions map to expected framework errors.
+- Transaction behavior remains stable under nested and failure scenarios.
+- Introspection and schema lifecycle outputs remain consistent across supported versions.

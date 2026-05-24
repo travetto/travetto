@@ -18,6 +18,10 @@ Maintainer guidance for MongoDB-backed model service behavior and configuration 
 - Uses MongoDB driver behavior for query execution, indexes, and GridFS.
 - Integrates with DI/config/runtime modules for startup and environment resolution.
 
+Compatibility boundaries:
+- `_id`/`id` translation behavior is externally visible and must remain stable.
+- Config finalization (`connectionString`, TLS, emulator-like local settings) is operationally sensitive and semver-significant for deploy flows.
+
 ## Invariants
 - ID translation between `_id` and model `id` must stay consistent.
 - Query, indexed, and expiry behavior must continue to honor contract-level semantics.
@@ -33,6 +37,11 @@ Maintainer guidance for MongoDB-backed model service behavior and configuration 
 - Run module tests for CRUD/query/indexed/blob/expiry paths.
 - Validate duplicate-key handling, index synchronization, and suggestion/facet behavior.
 - Recheck TLS/cert-path handling and connection-string parsing when config logic changes.
+
+Change-triage guidance:
+- ID or write-path changes: test CRUD, indexed retrieval, and duplicate-key handling together.
+- Config changes: test both connection-string and explicit-field configuration paths.
+- Blob changes: verify GridFS metadata, ranged reads, and delete/update metadata flows.
 
 ## Risk Areas
 - Duplicate-key and id-mapping regressions can break multiple write/read paths.

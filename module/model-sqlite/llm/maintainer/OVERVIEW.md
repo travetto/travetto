@@ -16,6 +16,10 @@ Maintainer guidance for SQLite dialect and connection behavior in the model-sql 
 - Consumed by composed `SQLModelService` from model-sql.
 - Depends on node:sqlite behavior and file-backed runtime semantics.
 
+Compatibility boundaries:
+- Lock/retry behavior and SQL override semantics are externally visible through provider contract behavior.
+- Introspection outputs are semver-sensitive for schema lifecycle reconciliation.
+
 ## Invariants
 - Lock/retry handling must remain safe and deterministic for recoverable busy/locked states.
 - Dialect SQL overrides must keep query/update/delete semantics aligned with model-sql expectations.
@@ -31,6 +35,11 @@ Maintainer guidance for SQLite dialect and connection behavior in the model-sql 
 - Run module tests and model-sql integration tests with SQLite.
 - Validate locking retries, transaction behavior, and metadata introspection.
 - Re-check indexed/query compatibility after SQL override changes.
+
+Change-triage guidance:
+- Retry/connection changes: run lock/busy scenarios plus transaction rollback coverage.
+- SQL override changes: run query and indexed compatibility checks against existing fixtures.
+- Introspection changes: validate create/update/drop/truncate reconciliation flows.
 
 ## Risk Areas
 - SQLite lock behavior can cause intermittent failures if retry logic regresses.

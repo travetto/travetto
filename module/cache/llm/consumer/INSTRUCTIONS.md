@@ -11,7 +11,13 @@ How to add reliable method-level caching.
 - Use explicit key-space partitioning for multi-tenant or multi-domain scenarios.
 - Prefer short TTLs initially, then tune based on hit/miss behavior.
 
+Minimal pattern:
+1. Add @Cache to deterministic read methods.
+2. Configure explicit key-space and TTL policy.
+3. Pair writes with @EvictCache for affected read keys.
+
 ## Safe Defaults
 - Cache only side-effect-free methods.
 - Avoid caching responses containing request-specific secrets.
 - Keep serialization strategy consistent across producers/consumers.
+- Start with conservative TTLs and increase only with observed stability.

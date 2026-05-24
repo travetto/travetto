@@ -36,6 +36,9 @@ This module exposes no standalone utility classes; the primary API is `FileModel
 - `FileModelService` provides CRUD/blob/expiry/storage contract methods.
 - Service wiring can be customized via DI factories when needed.
 
+Decision guideline:
+Use model-file when you need minimal operational overhead and contract portability, and can accept filesystem-level concurrency and performance characteristics.
+
 ## Typical Integration Flow
 1. Configure `model.file` folder/namespace settings.
 2. Resolve `FileModelService` via DI as the active provider.
@@ -44,3 +47,8 @@ This module exposes no standalone utility classes; the primary API is `FileModel
 
 ## Practical Scenario
 A CLI tool needs persistent state and binary artifact storage without external infrastructure. It uses `FileModelService` for model documents and blobs under a namespaced folder, keeping the same contract-oriented code that can later move to another provider if requirements grow.
+
+Common pitfalls:
+- Treating filesystem persistence as if it had datastore-level transactional guarantees.
+- Running unbounded list/scan operations on large directories in latency-sensitive paths.
+- Allowing namespace and folder-path drift across environments.

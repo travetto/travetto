@@ -20,6 +20,10 @@ Maintainer guidance for SQL model abstraction layers, transaction decorators, an
 - Serves as the core for SQL provider modules (mysql, postgres, sqlite).
 - Relies on @travetto/context for active connection and transaction scope.
 
+Compatibility boundaries:
+- `Connection`, `SQLDialect`, and `SQLModelService` public method behavior is consumed by provider modules and should be treated as semver-sensitive.
+- Transaction semantics (`required`, `isolated`, `force`) are externally visible behavior for write flows.
+
 ## Invariants
 - Connection activation and transaction nesting semantics must remain deterministic.
 - Dialect APIs must stay stable enough for downstream provider implementations.
@@ -35,6 +39,11 @@ Maintainer guidance for SQL model abstraction layers, transaction decorators, an
 - Run model-sql support tests and at least one concrete SQL provider integration suite.
 - Validate transaction behavior (nested/isolated), bulk flows, indexed lookups, and query translation.
 - Verify schema upsert/drop/truncate flows after traversal or table-manager changes.
+
+Change-triage guidance:
+- Connection/transaction changes: run model-sql tests plus at least two SQL provider integrations.
+- SQL generation changes: verify query/indexed parity and schema lifecycle behavior.
+- Utility/traversal changes: validate nested object/table mapping and hydration paths.
 
 ## Risk Areas
 - Transaction wrapper changes can affect every write path across SQL providers.

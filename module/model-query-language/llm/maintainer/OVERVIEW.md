@@ -17,6 +17,10 @@ Maintainer guidance for query-language tokenization, parsing, and query conversi
 - Consumed by services and endpoints that target @travetto/model-query contracts.
 - Must stay aligned with operator semantics accepted by `QueryVerifier` in @travetto/model-query.
 
+Compatibility boundaries:
+- Token and AST conversion behavior is externally observable through endpoint query semantics.
+- Operator translation table entries are semver-sensitive whenever they alter emitted where-clause meaning.
+
 ## Invariants
 - Tokenization rules must stay deterministic for quoting, escaping, regex literals, and numeric/time-like literals.
 - Operator translation must remain consistent with model-query operator names.
@@ -30,6 +34,11 @@ Maintainer guidance for query-language tokenization, parsing, and query conversi
 - Cover malformed literals, invalid operators, nested groupings, and list/operator mismatches.
 - Validate conversion output against expected where-clause shapes.
 - Run query-language support tests when changing parser or tokenizer code paths.
+
+Change-triage guidance:
+- Tokenizer changes: run literal/regex/escape-focused tests plus parser integration tests.
+- Operator translation changes: run query-language tests and model-query verifier checks together.
+- `finalize` changes: validate both JSON-like where input and expression-based where input paths.
 
 ## Risk Areas
 - Regex parsing and escaped literal handling are regression-prone.

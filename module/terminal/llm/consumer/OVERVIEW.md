@@ -34,6 +34,9 @@ This module is the framework terminal abstraction layer for colorized output, TT
 - Terminal: environment-aware terminal metadata and capability access.
 - TerminalWriter: dynamic line/progress streaming for command UX.
 
+Decision guideline:
+Use terminal capability and style abstractions for all CLI UX output so behavior stays readable and consistent across local TTYs, CI logs, and redirected streams.
+
 ## Typical Integration Flow
 1. Detect terminal capabilities using Terminal/TerminalUtil.
 2. Build a style template with StyleUtil.
@@ -43,5 +46,7 @@ This module is the framework terminal abstraction layer for colorized output, TT
 ## Practical Scenario
 For a long-running CLI task, show spinner/progress in TTY mode and emit concise line-by-line status in CI mode while preserving readable color semantics where supported.
 
-## When to use it
-Use this module when command-line UX must be robust across local terminals, CI logs, and different color-capability environments.
+Common pitfalls:
+- Hardcoding ANSI codes and breaking output in limited-color or non-TTY contexts.
+- Assuming interactive writers are safe in CI/redirection environments.
+- Mixing style/template conventions and producing inconsistent command UX.

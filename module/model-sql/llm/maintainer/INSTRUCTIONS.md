@@ -13,3 +13,8 @@
 ## Validation
 - Run model-sql tests plus one concrete SQL backend suite.
 - Recheck create/update/upsert/delete, query/list, and bulk/indexed operations after code changes.
+
+Regression checklist:
+- Connection acquisition/release remains balanced under success and failure.
+- Nested transaction behavior remains stable for `required`, `isolated`, and `force` modes.
+- Query verification and SQL generation still agree on accepted and rejected query shapes.

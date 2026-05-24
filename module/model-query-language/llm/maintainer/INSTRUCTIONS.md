@@ -13,3 +13,8 @@
 ## Validation
 - Re-run query-language tests for grammar and edge-case coverage.
 - Spot-check compatibility by running parsed output through query verifier or a concrete query provider.
+
+Regression checklist:
+- Unary/group precedence (`not`, nested `and`/`or`) remains stable.
+- Regex and escaped string literal behavior remains unchanged.
+- Operator-to-where mapping produces the same structural output for existing expressions.

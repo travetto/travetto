@@ -13,3 +13,8 @@
 ## Validation
 - Run module tests and representative file-based integration scenarios.
 - Recheck CRUD, blob, expiry, and truncate/delete storage behavior after changes.
+
+Regression checklist:
+- Namespace and path derivation remains deterministic across environments.
+- Blob metadata and payload files remain synchronized under failures.
+- Expiry/list batching behavior remains correct for large directory sets.

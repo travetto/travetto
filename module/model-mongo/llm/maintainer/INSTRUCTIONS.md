@@ -13,3 +13,8 @@
 ## Validation
 - Run module tests and at least one integration scenario covering CRUD, query, indexed, and blob operations.
 - Recheck startup behavior with and without connection strings, including TLS settings.
+
+Regression checklist:
+- `_id` and `id` mapping remains stable across create/get/update paths.
+- Index lifecycle behavior (create/update/drop) remains consistent with model metadata.
+- Config finalization preserves explicit overrides while applying defaults.

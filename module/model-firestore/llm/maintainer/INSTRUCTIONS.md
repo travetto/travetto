@@ -13,3 +13,8 @@
 ## Validation
 - Run module tests plus representative emulator-backed integration flows.
 - Verify CRUD/indexed behavior and config init paths after edits.
+
+Regression checklist:
+- Namespace and collection naming remains stable and deterministic.
+- Indexed query translation remains compatible with existing descriptors.
+- Config finalization preserves explicit values while applying safe defaults.

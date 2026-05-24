@@ -29,8 +29,19 @@ The compiler module orchestrates Travetto compilation and watch behavior, integr
 - Sensitive to file classification and delta calculations.
 - Changes should prioritize deterministic, resumable, incremental execution.
 
+## Compatibility Boundaries
+
+- Compiler state/event transitions are externally consumed by tooling and are semver-sensitive.
+- Invalidation and delta semantics are contract-visible through build/watch behavior.
+
 ## Typical Use Cases
 
 - Fixing incremental rebuild invalidation edge cases.
 - Improving watch/restart behavior in monorepos.
 - Extending compiler event visibility for tooling.
+
+## Change-Triage Guidance
+
+- Invalidation/delta changes: run full build plus watch-mode regression checks.
+- Event/state changes: verify ordering and coherence for CLI/tool consumers.
+- Server lifecycle changes: validate start/stop/restart idempotency and lock behavior.

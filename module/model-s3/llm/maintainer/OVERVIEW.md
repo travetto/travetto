@@ -17,6 +17,10 @@ Maintainer guidance for S3 object-store model and blob behavior.
 - Uses AWS SDK S3 client and presigner behavior.
 - Integrates with DI/config/runtime lifecycle for startup and environment handling.
 
+Compatibility boundaries:
+- Key-resolution and metadata mapping behavior are data-compatibility boundaries.
+- Signed URL and ranged-read semantics are externally visible and semver-sensitive.
+
 ## Invariants
 - Key-resolution and namespacing behavior must remain stable.
 - Blob metadata and content handling must stay consistent across upload/read/update paths.
@@ -32,6 +36,11 @@ Maintainer guidance for S3 object-store model and blob behavior.
 - Run module tests for CRUD/blob/storage/expiry behavior.
 - Validate multipart uploads, signed URLs, and range reads.
 - Recheck local endpoint compatibility after config or client changes.
+
+Change-triage guidance:
+- Upload-path changes: run multipart create/abort/complete and integrity checks together.
+- Config changes: validate endpoint, credential, and namespace override precedence.
+- Key-schema changes: verify backward compatibility and lifecycle cleanup behavior.
 
 ## Risk Areas
 - Credentials/config changes can break runtime connectivity.

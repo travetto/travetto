@@ -11,6 +11,11 @@ How to implement and use schemas.
 - Use SchemaValidator.validate(MySchema, instance) to validate bound instances.
 - Use Alias/Required/Enum/Match decorators to keep input contracts explicit.
 
+Minimal pattern:
+1. Define one schema class per external input contract.
+2. Bind raw input once at the boundary.
+3. Validate the bound instance before domain logic executes.
+
 ## Common Patterns
 
 ### Bind request or config input
@@ -43,3 +48,4 @@ How to implement and use schemas.
 - Keep class-level rules in @Validator and field-level rules on decorators.
 - Favor explicit @Alias mappings when input names may vary across clients.
 - Treat coercion as a convenience, not a substitute for clear validation constraints.
+- Keep discriminator names stable and versioned when evolution is required.

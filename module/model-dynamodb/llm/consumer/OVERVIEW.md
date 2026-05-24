@@ -36,6 +36,9 @@ This module exposes no decorators.
 - `DynamoDBModelService` is the runtime provider surface for CRUD/indexed/storage contracts.
 - `DynamoDBUtil` provides reusable transformation and index-computation helpers.
 
+Decision guideline:
+Use model-dynamodb when deterministic indexed access patterns and managed table/GSI lifecycle fit your workload better than full query-contract providers.
+
 ## Typical Integration Flow
 1. Configure `model.dynamodb` endpoint/client options and namespace.
 2. Resolve `DynamoDBModelService` via DI as active provider.
@@ -44,3 +47,8 @@ This module exposes no decorators.
 
 ## Practical Scenario
 An application uses DynamoDB with computed secondary indexes for tenant-specific lookups and sorted timelines. The provider computes and updates GSI-related attributes during writes, and application services use indexed contract methods for predictable read patterns without direct DynamoDB query construction.
+
+Common pitfalls:
+- Assuming newly added indexes are retroactively populated without explicit migration/backfill plans.
+- Treating index/table lifecycle changes as low risk in production environments.
+- Using indexed endpoints without strict paging and constraint boundaries.

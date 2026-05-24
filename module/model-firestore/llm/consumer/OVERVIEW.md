@@ -36,6 +36,9 @@ This module exports no standalone utility classes; primary API is `FirestoreMode
 - `FirestoreModelService` is the runtime provider surface for CRUD and indexed contracts.
 - Service wiring can be customized through DI factory registration.
 
+Decision guideline:
+Use model-firestore when Firestore is your operational target and deterministic indexed access patterns (without full model-query support) meet your endpoint needs.
+
 ## Typical Integration Flow
 1. Configure `model.firestore` credentials/emulator/project settings.
 2. Resolve `FirestoreModelService` as the active model provider.
@@ -44,3 +47,8 @@ This module exports no standalone utility classes; primary API is `FirestoreMode
 
 ## Practical Scenario
 An application uses Firestore in production and emulator in local development. It configures `model.firestore`, keeps model CRUD and indexed access on shared contracts, and uses the same domain service code in both environments while only the provider configuration changes.
+
+Common pitfalls:
+- Assuming index definitions and query constraints can be changed freely without runtime index requirements.
+- Letting emulator and production credential flows diverge without validation.
+- Using indexed endpoints without explicit paging and suggestion constraints.

@@ -12,3 +12,8 @@
 ## Validation
 - Validate authenticator/authorizer integration paths.
 - Verify token parsing/verification edge cases.
+
+## Regression Checklist
+- Principal and token contracts remain backward compatible.
+- AuthContext state remains request-scoped and isolated.
+- Auth failure states remain typed and consistent.

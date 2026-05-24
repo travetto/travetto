@@ -27,8 +27,19 @@ The config module loads and merges configuration from files and sources, binds v
 - Frequently consumed by modules that need typed startup configuration.
 - Should remain focused on source resolution, binding, and validation lifecycle.
 
+## Compatibility Boundaries
+
+- Source precedence and merge-order semantics are externally visible startup contracts.
+- @Config/@EnvVar metadata behavior and error output shape are semver-sensitive.
+
 ## Typical Use Cases
 
 - Defining @Config classes for module options.
 - Introducing a custom ConfigSource with explicit priority.
 - Adding env-var overrides for specific fields.
+
+## Change-Triage Guidance
+
+- Source/parser changes: validate precedence collisions and representative yaml/json/properties inputs.
+- Decorator/binding changes: test @Config/@EnvVar compatibility and schema validation output paths.
+- Override logic changes: verify profile layering and environment-specific startup behavior.

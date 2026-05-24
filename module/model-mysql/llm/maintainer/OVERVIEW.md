@@ -17,6 +17,10 @@ Maintainer guidance for MySQL dialect and connection behavior in the model-sql e
 - Consumed through composed `SQLModelService` from model-sql.
 - Relies on mysql2 driver behavior and version-specific SQL characteristics.
 
+Compatibility boundaries:
+- Error-code translation and version-sensitive operator behavior are semver-sensitive contract surfaces.
+- Connection and prepared-statement lifecycle behavior is operationally visible and must remain stable.
+
 ## Invariants
 - Error-code mapping must continue to raise consistent framework-level errors.
 - Version-aware operator/type behavior must remain deterministic.
@@ -32,6 +36,11 @@ Maintainer guidance for MySQL dialect and connection behavior in the model-sql e
 - Run module tests and integrated model-sql suites against MySQL.
 - Validate duplicate-key handling, transaction behavior, and query translation.
 - Re-check schema update and truncate flows after dialect changes.
+
+Change-triage guidance:
+- Driver/connection changes: validate pool lifecycle, retries/failures, and transaction rollback.
+- Dialect/operator changes: verify query compatibility across supported MySQL versions.
+- Introspection changes: confirm schema reconciliation behavior on representative real schemas.
 
 ## Risk Areas
 - Version-dependent SQL behavior can introduce hidden regressions.

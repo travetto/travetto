@@ -28,6 +28,11 @@ The schema module provides runtime type metadata, binding, and validation. It is
 - Keep module neutral and avoid endpoint/storage-specific behavior.
 - Preserve compatibility with existing decorators and metadata conventions.
 
+## Compatibility Boundaries
+
+- Decorator semantics and registry metadata shape are externally consumed by downstream modules/tooling.
+- Binding/coercion behavior and validation error-path shape are semver-sensitive contract surfaces.
+
 ## Dependency Sensitivity
 
 - Schema is a foundational contract layer for config, web, cli, model, and related tooling.
@@ -46,3 +51,9 @@ The schema module provides runtime type metadata, binding, and validation. It is
 - Add or refine field decorators.
 - Improve validation or binding behavior for edge cases.
 - Extend type metadata representation for downstream tooling.
+
+## Change-Triage Guidance
+
+- Decorator/metadata changes: run schema tests and at least one downstream integration (config, web, cli, or model).
+- Binding/coercion changes: verify backward compatibility for aliases, optionals, and discriminator-driven payloads.
+- Validation traversal changes: recheck nested array/object path formatting and message stability.
