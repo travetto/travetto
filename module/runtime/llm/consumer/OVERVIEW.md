@@ -1,7 +1,24 @@
 # Runtime Overview
 The @travetto/runtime module is the core utility foundation for Travetto applications.
 
-## Primary Capabilities
+## What This Module Is
+This module provides shared runtime primitives used across the framework: process context, environment access, lifecycle control, and utility helpers.
+
+## Why To Use It
+- It gives stable, framework-aware abstractions for environment and path behavior.
+- It centralizes shutdown behavior and process utility logic.
+- It reduces duplicated low-level helpers in application and module code.
+
+## When To Use It
+- Use for environment-aware behavior and workspace/module path resolution.
+- Use for graceful shutdown and lifecycle-aware process cleanup.
+- Use when you need shared serialization, binary, execution, and timing helpers.
+
+## When Not To Use It
+- Do not reimplement equivalent low-level helpers unless you need special semantics.
+- Do not bypass shutdown abstractions for routine service termination.
+
+## Core Capabilities
 - Runtime and workspace context via Runtime.
 - Graceful shutdown orchestration via ShutdownManager.
 - Typed environment access via Env.
@@ -11,7 +28,7 @@ The @travetto/runtime module is the core utility foundation for Travetto applica
 
 - This module does not expose consumer decorators.
 
-## Utility Classes (Consumer API)
+## Utility Classes (Non-Internal)
 
 - Util: generic helpers such as uuid generation, timeout helpers, async iterable mapping, and stack-trace parsing.
 - BinaryUtil: byte and buffer helpers for binary data handling.
@@ -28,5 +45,16 @@ The @travetto/runtime module is the core utility foundation for Travetto applica
 - ShutdownManager: abort signal and graceful process shutdown lifecycle.
 - FileLoader: file and module loading helper for controlled dynamic loading.
 
-## When to use it
-Use runtime APIs whenever you need environment-aware behavior, robust process lifecycle handling, or shared utility primitives instead of ad hoc helpers.
+## Core APIs and Extension Points
+- Runtime for module/workspace/resource resolution.
+- Env and EnvProp for typed environment variable access.
+- ShutdownManager for graceful application stop/restart flows.
+
+## Typical Integration Flow
+1. Use Runtime and Env for environment- and workspace-aware logic shared by config, web, and CLI modules.
+2. Register cleanup behavior through ShutdownManager for services launched by web workers or CLI commands.
+3. Reuse runtime utility classes instead of ad hoc helper code.
+
+## Practical Scenario
+When implementing a long-running worker, use Env to read deployment flags, Runtime to resolve resources, and ShutdownManager to ensure jobs are safely drained on termination.
+

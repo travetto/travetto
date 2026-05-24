@@ -14,6 +14,26 @@ Internal LLM support document. Committed in-repo and intended to remain outside 
 - Changing default required/optional behavior unintentionally.
 - Breaking schema metadata assumptions used by config/web/model.
 
+## Triage Workflow
+
+1. Classify the issue first:
+	- Registration/metadata (decorators, schema indexing)
+	- Binding/coercion (raw input conversion)
+	- Validation (constraints and error reporting)
+2. Decide compatibility risk:
+	- Additive metadata changes are usually lower risk.
+	- Behavioral changes in bind/coerce/validate are usually high risk.
+3. Scope regression depth:
+	- Unit-only for isolated metadata additions.
+	- Unit + integration coverage for behavior changes.
+
+## Release and Stability Checks
+
+- Preserve stable discriminator and subtype resolution behavior.
+- Keep validation error paths precise and predictable for nested payloads.
+- Prefer deprecation windows when semantics need to evolve.
+- Record migration notes when consumer-facing behavior changes.
+
 ## Debugging Checks
 
 - Inspect registered schema metadata before debugging validator code.

@@ -1,7 +1,24 @@
 # Schema Overview
 The @travetto/schema module provides powerful data validation and transformation for TypeScript classes.
 
-## Primary Capabilities
+## What This Module Is
+This module is the framework's type metadata, binding, and validation backbone for structured input/output contracts.
+
+## Why To Use It
+- It keeps data contracts explicit and enforceable at runtime.
+- It centralizes validation and coercion rules near model definitions.
+- It powers consistent behavior across config, web, model, and cli modules.
+
+## When To Use It
+- Use for API payload validation and parameter binding.
+- Use for config and model classes requiring strict data shape guarantees.
+- Use when decorators should drive validation and schema metadata generation.
+
+## When Not To Use It
+- Do not rely only on ad hoc runtime checks scattered through service code.
+- Do not duplicate schema rules in multiple modules when one schema class can define them.
+
+## Core Capabilities
 - Runtime validation of complex data structures.
 - Automatic type coercion (e.g. string to number).
 - Metadata-driven validation using decorators (e.g. @Min, @Match).
@@ -50,5 +67,23 @@ The @travetto/schema module provides powerful data validation and transformation
 - DataUtil: low-level coercion, merge, regex, and plain-object helpers used by binding workflows.
 - SchemaTypeUtil: type-level schema resolution helpers.
 
-## When to use it
-Use it for API request validation, data persistence models, and any scenario requiring strict data integrity.
+## Core APIs and Extension Points
+- SchemaValidator for runtime validation entry points.
+- SchemaRegistryIndex for metadata lookup and registry operations.
+- BindUtil/DataUtil/SchemaTypeUtil for coercion and type transformation flows.
+
+## Runtime Metadata Guidance
+- Use SchemaRegistryIndex when you need runtime schema introspection for framework-level tooling.
+- Prefer decorator-driven schema definitions for application logic instead of manual metadata mutation.
+- Keep dynamic metadata reads side-effect free so validation and binding behavior remains deterministic.
+
+## Typical Integration Flow
+1. Define schema classes and field decorators.
+2. Bind raw input with BindUtil or framework integrations.
+3. Validate with SchemaValidator.
+4. Reuse the same schemas across web/config/model surfaces.
+5. Add regression tests when introducing new decorators or coercion behavior.
+
+## Practical Scenario
+When a request payload and a persisted model share structure, define a schema once and enforce correctness in both web request handling and storage lifecycle paths.
+

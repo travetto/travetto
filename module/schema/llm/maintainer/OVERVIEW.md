@@ -28,6 +28,19 @@ The schema module provides runtime type metadata, binding, and validation. It is
 - Keep module neutral and avoid endpoint/storage-specific behavior.
 - Preserve compatibility with existing decorators and metadata conventions.
 
+## Dependency Sensitivity
+
+- Schema is a foundational contract layer for config, web, cli, model, and related tooling.
+- Changes to binding, coercion, or validation semantics can cascade across modules.
+- Treat registry metadata shape and error-path behavior as long-lived contracts.
+
+## Stability Priorities
+
+1. Preserve deterministic registration and lookup behavior.
+2. Preserve discriminator/subtype compatibility unless a migration path is provided.
+3. Keep validation failures precise, stable, and developer-actionable.
+4. Keep module-level behavior transport/storage neutral.
+
 ## Typical Use Cases
 
 - Add or refine field decorators.

@@ -1,7 +1,24 @@
 # CLI Overview
 The @travetto/cli module is the command-line execution surface for Travetto applications and tooling.
 
-## Primary Capabilities
+## What This Module Is
+This module is the framework command system for declaring, validating, and executing typed CLI commands.
+
+## Why To Use It
+- It turns operational workflows into first-class, discoverable commands.
+- It keeps command flags/arguments typed and schema-validated.
+- It integrates with tooling through command schema introspection.
+
+## When To Use It
+- Use when exposing build/test/scaffold/maintenance operations via CLI.
+- Use when command input validation and structured help output are required.
+- Use when editor or automation tooling must introspect command schemas.
+
+## When Not To Use It
+- Do not build ad hoc scripts for workflows that should be stable public commands.
+- Do not duplicate input parsing logic outside the command class contract.
+
+## Core Capabilities
 - Declarative command definitions with decorators.
 - Strongly typed flag/input handling integrated with schema validation.
 - Module-aware command execution in monorepos.
@@ -22,5 +39,16 @@ The @travetto/cli module is the command-line execution surface for Travetto appl
 ## Agent Tooling Surface
 - Use npx trv cli:schema to enumerate commands, modules, flags, and input schemas.
 
-## When to use it
-Use this module whenever you are exposing operational workflows (build, test, migrate, scaffold, maintenance) through first-class CLI commands.
+## Core APIs and Extension Points
+- Command decorators and class contracts.
+- CliUtil for command option handling and restart-on-change behavior.
+
+## Typical Integration Flow
+1. Create a command class under support/cli.*.ts.
+2. Decorate with @CliCommand and define typed flags/arguments.
+3. Run via trv command name and validate behavior with --help.
+4. Expose command metadata via npx trv cli:schema for tool consumers.
+
+## Practical Scenario
+When a release pipeline needs one consistent entrypoint, wrap versioning, validation, and packaging in a typed command so humans and automation invoke identical logic.
+

@@ -130,8 +130,146 @@ Each covered module should provide:
 - module/test/llm/maintainer/INSTRUCTIONS.md
 - module/test/llm/maintainer/TIPS.md
 
+## Wave 3: Platform and Tooling Support
+
+### openapi
+
+- module/openapi/llm/consumer/OVERVIEW.md
+- module/openapi/llm/consumer/INSTRUCTIONS.md
+- module/openapi/llm/consumer/TIPS.md
+- module/openapi/llm/maintainer/OVERVIEW.md
+- module/openapi/llm/maintainer/INSTRUCTIONS.md
+- module/openapi/llm/maintainer/TIPS.md
+
+### terminal
+
+- module/terminal/llm/consumer/OVERVIEW.md
+- module/terminal/llm/consumer/INSTRUCTIONS.md
+- module/terminal/llm/consumer/TIPS.md
+- module/terminal/llm/maintainer/OVERVIEW.md
+- module/terminal/llm/maintainer/INSTRUCTIONS.md
+- module/terminal/llm/maintainer/TIPS.md
+
+### repo
+
+- module/repo/llm/consumer/OVERVIEW.md
+- module/repo/llm/consumer/INSTRUCTIONS.md
+- module/repo/llm/consumer/TIPS.md
+- module/repo/llm/maintainer/OVERVIEW.md
+- module/repo/llm/maintainer/INSTRUCTIONS.md
+- module/repo/llm/maintainer/TIPS.md
+
+### registry
+
+- module/registry/llm/consumer/OVERVIEW.md
+- module/registry/llm/consumer/INSTRUCTIONS.md
+- module/registry/llm/consumer/TIPS.md
+- module/registry/llm/maintainer/OVERVIEW.md
+- module/registry/llm/maintainer/INSTRUCTIONS.md
+- module/registry/llm/maintainer/TIPS.md
+
+### context
+
+- module/context/llm/consumer/OVERVIEW.md
+- module/context/llm/consumer/INSTRUCTIONS.md
+- module/context/llm/consumer/TIPS.md
+- module/context/llm/maintainer/OVERVIEW.md
+- module/context/llm/maintainer/INSTRUCTIONS.md
+- module/context/llm/maintainer/TIPS.md
+
+### log
+
+- module/log/llm/consumer/OVERVIEW.md
+- module/log/llm/consumer/INSTRUCTIONS.md
+- module/log/llm/consumer/TIPS.md
+- module/log/llm/maintainer/OVERVIEW.md
+- module/log/llm/maintainer/INSTRUCTIONS.md
+- module/log/llm/maintainer/TIPS.md
+
+## Wave 4: Model Extension Modules
+
+### model-indexed
+
+- module/model-indexed/llm/consumer/OVERVIEW.md
+- module/model-indexed/llm/consumer/INSTRUCTIONS.md
+- module/model-indexed/llm/consumer/TIPS.md
+- module/model-indexed/llm/maintainer/OVERVIEW.md
+- module/model-indexed/llm/maintainer/INSTRUCTIONS.md
+- module/model-indexed/llm/maintainer/TIPS.md
+
+### model-memory
+
+- module/model-memory/llm/consumer/OVERVIEW.md
+- module/model-memory/llm/consumer/INSTRUCTIONS.md
+- module/model-memory/llm/consumer/TIPS.md
+- module/model-memory/llm/maintainer/OVERVIEW.md
+- module/model-memory/llm/maintainer/INSTRUCTIONS.md
+- module/model-memory/llm/maintainer/TIPS.md
+
+### model-query
+
+- module/model-query/llm/consumer/OVERVIEW.md
+- module/model-query/llm/consumer/INSTRUCTIONS.md
+- module/model-query/llm/consumer/TIPS.md
+- module/model-query/llm/maintainer/OVERVIEW.md
+- module/model-query/llm/maintainer/INSTRUCTIONS.md
+- module/model-query/llm/maintainer/TIPS.md
+
+### model-query-language
+
+- module/model-query-language/llm/consumer/OVERVIEW.md
+- module/model-query-language/llm/consumer/INSTRUCTIONS.md
+- module/model-query-language/llm/consumer/TIPS.md
+- module/model-query-language/llm/maintainer/OVERVIEW.md
+- module/model-query-language/llm/maintainer/INSTRUCTIONS.md
+- module/model-query-language/llm/maintainer/TIPS.md
+
+### model-sql
+
+- module/model-sql/llm/consumer/OVERVIEW.md
+- module/model-sql/llm/consumer/INSTRUCTIONS.md
+- module/model-sql/llm/consumer/TIPS.md
+- module/model-sql/llm/maintainer/OVERVIEW.md
+- module/model-sql/llm/maintainer/INSTRUCTIONS.md
+- module/model-sql/llm/maintainer/TIPS.md
+
+### model-mongo
+
+- module/model-mongo/llm/consumer/OVERVIEW.md
+- module/model-mongo/llm/consumer/INSTRUCTIONS.md
+- module/model-mongo/llm/consumer/TIPS.md
+- module/model-mongo/llm/maintainer/OVERVIEW.md
+- module/model-mongo/llm/maintainer/INSTRUCTIONS.md
+- module/model-mongo/llm/maintainer/TIPS.md
+
 ## Next
 
-- Add Wave 3 modules with both role folders and six total files per module.
+- Add Wave 4 modules with both role folders and six total files per module.
 - Integrate `npx trv cli:schema` into synthesis inputs for command/schema-aware agent support.
 - After all modules are complete, create module/llm-support to synthesize cross-module instructions and workflows.
+
+## Quality Hardening Plan
+
+After wave coverage is complete for a module, run a targeted quality pass for both roles:
+
+1. Consumer hardening
+	- Ensure every public decorator is documented with purpose and practical usage guidance.
+	- Ensure non-internal utility classes/APIs are described with actionable workflows.
+	- Add "safe defaults" and common pitfalls that reduce LLM hallucination risk.
+2. Maintainer hardening
+	- Add compatibility and breaking-change guidance for behavior-sensitive APIs.
+	- Add testing matrix expectations covering at least one downstream integration surface.
+	- Add triage guidance for registration vs bind/coerce vs validate changes.
+3. Cross-role consistency check
+	- Ensure consumer and maintainer docs do not conflict on expected behavior.
+	- Keep tone and structure consistent with module-level LLM docs.
+
+### Current Hardening Status
+
+- schema: in progress (consumer and maintainer instruction depth expanded; validate with follow-up consistency pass)
+- model-indexed: initial coverage added; hardening pending
+- model-memory: initial coverage added; hardening pending
+- model-query: initial coverage added; hardening pending
+- model-query-language: initial coverage added; hardening pending
+- model-sql: initial coverage added; hardening pending
+- model-mongo: initial coverage added; hardening pending
