@@ -295,17 +295,17 @@ When module behavior or README changes:
   - six-file structure checks
   - consumer OVERVIEW heading-contract checks
   - package publish-safety checks (llm excluded from files arrays)
+- Final gate reconciliation completed:
+  - normalized heading-count compliance in cli/compiler/manifest/runtime/schema consumer OVERVIEW files
+  - verified all non-archived module/* packages pass 3 rollout gates
+  - reconciled hardening status list coverage for model and test modules
 
 ### In Progress
 
-- Full README-grounded enrichment pass for all completed modules, continuing beyond priority sparse set.
-- Planning next Wave 4+ coverage beyond model/auth-extension modules.
+- Module-level coverage and hardening work is complete.
 
 ### Pending
 
-- Continue/complete retrofit for remaining completed modules that still need narrative-depth improvements.
-- Execute quality hardening passes for both roles across remaining non-model modules.
-- Continue Wave 4+ module coverage beyond model extension modules.
 - Build module/llm-support synthesis after full compliance.
 
 ## Modified Files in Most Recent Retrofit Batch

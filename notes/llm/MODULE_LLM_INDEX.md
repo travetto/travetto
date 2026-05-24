@@ -563,6 +563,8 @@ After wave coverage is complete for a module, run a targeted quality pass for bo
 - registry: hardening pass completed (consumer lifecycle guardrails, maintainer adapter/index triage)
 - context: hardening pass completed (consumer propagation guardrails, maintainer async-boundary triage)
 - log: hardening pass completed (consumer formatter/appender guardrails, maintainer event-pipeline triage)
+- model: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
+- test: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
 - auth-model: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
 - auth-session: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
 - auth-web: hardening pass completed (consumer decision/pitfall guidance, maintainer triage/checklist updates)
