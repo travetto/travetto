@@ -1,29 +1,50 @@
-import fs from 'node:fs';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { JSONUtil } from '@travetto/runtime';
+import { SchemaValidator } from '@travetto/schema';
 
 import type { RecommendationQuery, SnippetSource } from './types.ts';
+import { SnippetSourceSchema } from './snippet-shapes.ts';
 
 const SNIPPET_DIR = fileURLToPath(new URL('../resources/snippets/', import.meta.url));
+const WORKSPACE_SNIPPET_DIR = path.resolve(process.cwd(), 'module/llm-support/resources/snippets');
 
-function loadSnippet(file: string): SnippetSource {
-  const fullPath = path.join(SNIPPET_DIR, file);
-  const content = fs.readFileSync(fullPath, 'utf8');
+function isErrnoException(err: unknown): err is NodeJS.ErrnoException {
+  return typeof err === 'object' && err !== null && 'code' in err;
+}
+
+async function loadSnippet(fullPath: string): Promise<SnippetSource> {
+  const content = await fs.readFile(fullPath, 'utf8');
   const match = content.match(/<!--\s*json\s*([\s\S]*?)\s*-->/i);
   if (!match) {
     throw new Error(`Invalid snippet markdown: ${fullPath}`);
   }
-  return JSONUtil.fromUTF8(match[1].trim());
+  const bound = SnippetSourceSchema.from(JSON.parse(match[1].trim()));
+  await SchemaValidator.validate(SnippetSourceSchema, bound);
+  return bound;
 }
 
-const SNIPPETS: SnippetSource[] = fs.existsSync(SNIPPET_DIR) ?
-  fs.readdirSync(SNIPPET_DIR)
-    .filter(file => file.endsWith('.md'))
-    .sort()
-    .map(loadSnippet) :
-  [];
+async function loadSnippets(): Promise<SnippetSource[]> {
+  for (const dir of [SNIPPET_DIR, WORKSPACE_SNIPPET_DIR]) {
+    try {
+      const files = await fs.readdir(dir);
+      const filtered = files
+        .filter(file => file.endsWith('.md'))
+        .sort();
+      return Promise.all(filtered.map(file => loadSnippet(path.join(dir, file))));
+    } catch (err) {
+      if (isErrnoException(err) && err.code === 'ENOENT') {
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  return [];
+}
+
+const SNIPPETS: SnippetSource[] = await loadSnippets();
 
 function matchesAny(value: string[], desired?: string[]): boolean {
   if (!desired || desired.length === 0) {

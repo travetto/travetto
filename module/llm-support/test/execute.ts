@@ -8,6 +8,7 @@ import { Suite, Test } from '@travetto/test';
 import { JSONUtil } from '@travetto/runtime';
 
 import { executeOperations, getUnimplementedOperations } from '../src/execute.ts';
+import { recommendOperations } from '../src/recommendation.ts';
 import { PackageJsonSchema } from '../src/template-shapes.ts';
 
 @Suite()
@@ -178,6 +179,14 @@ class LlmSupportExecuteTest {
     assert(!missing.includes('enable-auth-session'));
     assert(!missing.includes('enable-linting'));
     assert(missing.includes('excluded-log-config'));
+  }
+
+  @Test()
+  async allNonExcludedOperationsImplemented() {
+    const ids = recommendOperations({ includeExcluded: false }).map(item => item.id);
+    const missing = getUnimplementedOperations(ids);
+
+    assert(missing.length === 0);
   }
 
   @Test()
