@@ -32,8 +32,8 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/eslint/eslint.component').then(item => item.EslintComponent)
       },
       {
-        path: 'scaffold', title: 'App Scaffold',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/scaffold/scaffold.component').then(item => item.ScaffoldComponent)
+        path: 'llm-support', title: 'LLM Support',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/llm-support/llm-support.component').then(item => item.LlmSupportComponent)
       },
       {
         path: 'vscode-plugin', title: 'VS Code Plugin',

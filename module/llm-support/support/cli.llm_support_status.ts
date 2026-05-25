@@ -1,4 +1,4 @@
-import { CliCommand, CliFlag, type CliCommandShape } from '@travetto/cli';
+import { CliCommand, CliFlag, CliModuleFlag, type CliCommandShape } from '@travetto/cli';
 
 import { getUnimplementedOperations } from '../src/execute.ts';
 import { recommendOperations } from '../src/recommendation.ts';
@@ -23,6 +23,9 @@ const CATEGORIES: LlmOperationCategory[] = [
  */
 @CliCommand()
 export class LlmSupportStatusCommand implements CliCommandShape {
+
+  @CliModuleFlag(({ scope: 'command' }))
+  module: string;
 
   @CliFlag({ short: 'o', full: 'operations' })
   operations?: string[];

@@ -8,8 +8,8 @@ import { buildPlans } from '../src/plan.ts';
 class LlmSupportPlanTest {
 
   @Test()
-  buildsEmailPlans() {
-    const output = buildPlans({ categories: ['email'] });
+  async buildsEmailPlans() {
+    const output = await buildPlans({ categories: ['email'] });
 
     assert(output.plans.length > 0);
     assert(output.plans.every(item => item.operationId.startsWith('email-')));
@@ -17,8 +17,8 @@ class LlmSupportPlanTest {
   }
 
   @Test()
-  filtersPlanByOperationId() {
-    const output = buildPlans({ operations: ['create-web-route'] });
+  async filtersPlanByOperationId() {
+    const output = await buildPlans({ operations: ['create-web-route'] });
 
     assert(output.plans.length === 1);
     assert(output.plans[0].operationId === 'create-web-route');
@@ -26,15 +26,15 @@ class LlmSupportPlanTest {
   }
 
   @Test()
-  excludesScopedOperationsByDefault() {
-    const output = buildPlans();
+  async excludesScopedOperationsByDefault() {
+    const output = await buildPlans();
 
     assert(!output.plans.some(item => item.operationId === 'excluded-eslint-profile'));
   }
 
   @Test()
-  includesScopedOperationsWhenRequested() {
-    const output = buildPlans({ includeExcluded: true, operations: ['excluded-eslint-profile'] });
+  async includesScopedOperationsWhenRequested() {
+    const output = await buildPlans({ includeExcluded: true, operations: ['excluded-eslint-profile'] });
 
     assert(output.plans.length === 1);
     assert(output.plans[0].operationId === 'excluded-eslint-profile');

@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { CliCommand, CliFlag, type CliCommandShape } from '@travetto/cli';
+import { CliCommand, CliFlag, CliModuleFlag, type CliCommandShape } from '@travetto/cli';
 
 import { executeOperations } from '../src/execute.ts';
 
@@ -9,6 +9,9 @@ import { executeOperations } from '../src/execute.ts';
  */
 @CliCommand()
 export class LlmSupportExecuteCommand implements CliCommandShape {
+
+  @CliModuleFlag(({ scope: 'command' }))
+  module: string;
 
   @CliFlag({ short: 'o', full: 'operations' })
   operations?: string[];

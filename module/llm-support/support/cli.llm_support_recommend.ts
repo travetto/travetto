@@ -1,4 +1,4 @@
-import { CliCommand, CliFlag, type CliCommandShape } from '@travetto/cli';
+import { CliCommand, CliFlag, CliModuleFlag, type CliCommandShape } from '@travetto/cli';
 
 import { recommend } from '../src/recommendation.ts';
 import type { LlmOperationCategory } from '../src/types.ts';
@@ -23,6 +23,9 @@ const CATEGORIES: LlmOperationCategory[] = [
 @CliCommand()
 export class LlmSupportRecommendCommand implements CliCommandShape {
 
+  @CliModuleFlag(({ scope: 'command' }))
+  module: string;
+
   @CliFlag({ short: 'b', full: 'bundles' })
   bundles?: string[];
 
@@ -40,7 +43,7 @@ export class LlmSupportRecommendCommand implements CliCommandShape {
 
   async main(): Promise<void> {
     const categories = (this.categories ?? []).filter(item => CATEGORIES.includes(item));
-    const payload = recommend({
+    const payload = await recommend({
       bundles: this.bundles,
       workflows: this.workflows,
       categories,

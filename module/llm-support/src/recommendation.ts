@@ -240,13 +240,13 @@ export function recommendOperations(query: RecommendationQuery = {}): LlmOperati
   return selected.filter(item => includeExcluded || !item.excluded);
 }
 
-export function recommend(query: RecommendationQuery = {}): RecommendationResponse {
+export async function recommend(query: RecommendationQuery = {}): Promise<RecommendationResponse> {
   const operations = recommendOperations(query);
   return {
     bundles: recommendBundles(query.bundles),
     workflows: recommendWorkflows(query.workflows),
     operations,
-    snippets: recommendSnippets({
+    snippets: await recommendSnippets({
       ...query,
       operations: operations.map(item => item.id)
     })
