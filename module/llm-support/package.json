@@ -1,0 +1,59 @@
+{
+  "name": "@travetto/llm-support",
+  "version": "8.0.0-alpha.20",
+  "type": "module",
+  "description": "Task-oriented synthesized LLM guidance for Travetto modules.",
+  "keywords": [
+    "travetto",
+    "llm",
+    "docs",
+    "guidance"
+  ],
+  "main": "__index__.ts",
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "__index__.ts",
+    "src",
+    "support",
+    "resources",
+    "llm",
+    "test"
+  ],
+  "scripts": {
+    "prepack": "trv llm:support:package:consumer:docs"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/llm-support"
+  },
+  "dependencies": {
+    "@travetto/runtime": "^8.0.0-alpha.14"
+  },
+  "peerDependencies": {
+    "@travetto/cli": "^8.0.0-alpha.20",
+    "@travetto/test": "^8.0.0-alpha.14"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/cli": {
+      "optional": true
+    },
+    "@travetto/test": {
+      "optional": true
+    }
+  },
+  "travetto": {
+    "workspaceInclude": true,
+    "displayName": "LLM Support",
+    "roles": [
+      "std"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

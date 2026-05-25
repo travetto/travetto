@@ -35,3 +35,5 @@ email-local-context.json
 # Specific
 module/scaffold/**/eslintrc.json
 **/doc-exec/tsconfig.json
+
+.tmp*/

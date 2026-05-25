@@ -1,0 +1,111 @@
+import assert from 'node:assert';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+
+import { Suite, Test } from '@travetto/test';
+
+import { executeOperations } from '../src/execute.ts';
+
+@Suite()
+class LlmSupportExecuteTest {
+
+  @Test()
+  async dryRunDoesNotCreateFiles() {
+    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-dry-run-'));
+
+    const output = await executeOperations({
+      operations: ['project-bootstrap'],
+      targetDir: target,
+      dryRun: true
+    });
+
+    assert(output.artifacts.some(item => item.status === 'planned'));
+
+    await assert.rejects(
+      () => fs.access(path.join(target, 'resources/application.yml')),
+      /ENOENT/
+    );
+  }
+
+  @Test()
+  async applyCreatesFiles() {
+    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-apply-'));
+
+    const output = await executeOperations({
+      operations: ['create-web-route'],
+      targetDir: target,
+      dryRun: false,
+      routePath: 'orders',
+      serviceName: 'OrderService',
+      controllerName: 'OrderController'
+    });
+
+    assert(output.artifacts.some(item => item.status === 'created'));
+    await fs.access(path.join(target, 'src/service/order.ts'));
+    await fs.access(path.join(target, 'src/web/order.ts'));
+  }
+
+  @Test()
+  async warnsOnUnknownOperation() {
+    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-unknown-'));
+
+    const output = await executeOperations({
+      operations: ['unknown-op'],
+      targetDir: target,
+      dryRun: true
+    });
+
+    assert(output.warnings.length === 1);
+    assert(output.warnings[0].includes('unknown-op'));
+  }
+
+  @Test()
+  async applyCreatesEmailArtifacts() {
+    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-email-'));
+
+    const output = await executeOperations({
+      operations: [
+        'email-create-template',
+        'email-context-schema',
+        'email-render-pipeline',
+        'email-transport-provider',
+        'email-preview-snapshot',
+        'email-send-flow',
+        'email-test-fixtures'
+      ],
+      targetDir: target,
+      dryRun: false,
+      emailName: 'welcome',
+      sendRoutePath: 'mail/send'
+    });
+
+    assert(output.artifacts.some(item => item.status === 'created'));
+    await fs.access(path.join(target, 'src/email/templates/welcome.mustache'));
+    await fs.access(path.join(target, 'src/email/schema.ts'));
+    await fs.access(path.join(target, 'src/email/render.ts'));
+    await fs.access(path.join(target, 'src/email/provider.ts'));
+    await fs.access(path.join(target, 'src/config/email.ts'));
+    await fs.access(path.join(target, 'src/web/email.ts'));
+    await fs.access(path.join(target, 'test/email/preview.ts'));
+    await fs.access(path.join(target, 'test/email/fixtures/transactional.json'));
+  }
+
+  @Test()
+  async applyCreatesModelArtifacts() {
+    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-model-'));
+
+    const output = await executeOperations({
+      operations: ['model-indexed-assistant', 'model-query-assistant'],
+      targetDir: target,
+      dryRun: false,
+      modelName: 'OrderItem'
+    });
+
+    assert(output.artifacts.some(item => item.status === 'created'));
+    await fs.access(path.join(target, 'src/model/order-item.ts'));
+    await fs.access(path.join(target, 'src/model/order-item.indexes.ts'));
+    await fs.access(path.join(target, 'src/service/order-item-indexed.ts'));
+    await fs.access(path.join(target, 'src/service/order-item-query.ts'));
+  }
+}
