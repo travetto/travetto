@@ -4,9 +4,25 @@ import path from 'node:path';
 import type { ExecutionArtifact, ExecutionRequest, ExecutionResponse } from './types.ts';
 
 const SNIPPET_DIR = new URL('../resources/snippets/code/', import.meta.url);
+const WORKSPACE_SNIPPET_DIR = path.resolve(process.cwd(), 'module/llm-support/resources/snippets/code');
+
+function isErrnoException(err: unknown): err is NodeJS.ErrnoException {
+  return typeof err === 'object' && err !== null && 'code' in err;
+}
+
+async function readSnippet(name: string): Promise<string> {
+  try {
+    return await fs.readFile(new URL(name, SNIPPET_DIR), 'utf8');
+  } catch (err) {
+    if (!isErrnoException(err) || err.code !== 'ENOENT') {
+      throw err;
+    }
+    return fs.readFile(path.join(WORKSPACE_SNIPPET_DIR, name), 'utf8');
+  }
+}
 
 async function renderSnippet(name: string, params: Record<string, string> = {}): Promise<string> {
-  const source = await fs.readFile(new URL(name, SNIPPET_DIR), 'utf8');
+  const source = await readSnippet(name);
   return source.replace(/\{\{([a-zA-Z0-9_]+)\}\}/g, (_all, key: string) => params[key] ?? '');
 }
 
@@ -390,6 +406,128 @@ async function execGenerateTestSuite(
   );
 }
 
+async function execWorkflowGcpDeploy(
+  baseDir: string,
+  request: ExecutionRequest,
+  artifacts: ExecutionArtifact[]
+): Promise<void> {
+  await writeFile(
+    'workflow-gcp-deploy',
+    path.join(baseDir, '.github/workflows/deploy-api.yml'),
+    await renderSnippet('workflow-gcp-deploy.yml.tpl'),
+    request,
+    artifacts
+  );
+}
+
+async function execWorkflowCloudfrontDeploy(
+  baseDir: string,
+  request: ExecutionRequest,
+  artifacts: ExecutionArtifact[]
+): Promise<void> {
+  await writeFile(
+    'workflow-cloudfront-deploy',
+    path.join(baseDir, '.github/workflows/deploy-ui.yml'),
+    await renderSnippet('workflow-cloudfront-deploy.yml.tpl'),
+    request,
+    artifacts
+  );
+}
+
+async function execCreateWebInterceptor(
+  baseDir: string,
+  request: ExecutionRequest,
+  artifacts: ExecutionArtifact[]
+): Promise<void> {
+  await writeFile(
+    'create-web-interceptor',
+    path.join(baseDir, 'src/interceptor/request-logging.ts'),
+    await renderSnippet('create-web-interceptor.ts.tpl'),
+    request,
+    artifacts
+  );
+}
+
+async function execCacheEnhancements(
+  baseDir: string,
+  request: ExecutionRequest,
+  artifacts: ExecutionArtifact[]
+): Promise<void> {
+  await writeFile(
+    'cache-enhancements',
+    path.join(baseDir, 'src/service/cacheable.ts'),
+    await renderSnippet('cache-enhancements.service.ts.tpl'),
+    request,
+    artifacts
+  );
+
+  await writeFile(
+    'cache-enhancements',
+    path.join(baseDir, 'src/config/cache.ts'),
+    await renderSnippet('cache-enhancements.config.ts.tpl'),
+    request,
+    artifacts
+  );
+}
+
+async function execEnableFileUpload(
+  baseDir: string,
+  request: ExecutionRequest,
+  artifacts: ExecutionArtifact[]
+): Promise<void> {
+  await writeFile(
+    'enable-file-upload',
+    path.join(baseDir, 'src/web/upload.ts'),
+    await renderSnippet('enable-file-upload.controller.ts.tpl'),
+    request,
+    artifacts
+  );
+
+  await writeFile(
+    'enable-file-upload',
+    path.join(baseDir, 'src/config/upload.ts'),
+    await renderSnippet('enable-file-upload.config.ts.tpl'),
+    request,
+    artifacts
+  );
+}
+
+async function execEnableAuthSession(
+  baseDir: string,
+  request: ExecutionRequest,
+  artifacts: ExecutionArtifact[]
+): Promise<void> {
+  await writeFile(
+    'enable-auth-session',
+    path.join(baseDir, 'src/web/auth.ts'),
+    await renderSnippet('enable-auth-session.controller.ts.tpl'),
+    request,
+    artifacts
+  );
+
+  await writeFile(
+    'enable-auth-session',
+    path.join(baseDir, 'src/web/auth.config.ts'),
+    await renderSnippet('enable-auth-session.config.ts.tpl'),
+    request,
+    artifacts
+  );
+}
+
+async function execEnableLinting(
+  baseDir: string,
+  request: ExecutionRequest,
+  artifacts: ExecutionArtifact[]
+): Promise<void> {
+  await writeFile(
+    'enable-linting',
+    path.join(baseDir, 'package.json'),
+    await renderSnippet('enable-linting.package.json.tpl'),
+    request,
+    artifacts
+  );
+}
+
 type OperationHandler = (
   baseDir: string,
   request: ExecutionRequest,
@@ -410,8 +548,19 @@ const OPERATION_HANDLERS: Partial<Record<ExecutionRequest['operations'][number],
   'model-query-assistant': execModelQueryAssistant,
   'rest-rpc-client': execRestRpcClient,
   'generate-config': execGenerateConfig,
-  'generate-test-suite': execGenerateTestSuite
+  'generate-test-suite': execGenerateTestSuite,
+  'workflow-gcp-deploy': execWorkflowGcpDeploy,
+  'workflow-cloudfront-deploy': execWorkflowCloudfrontDeploy,
+  'create-web-interceptor': execCreateWebInterceptor,
+  'cache-enhancements': execCacheEnhancements,
+  'enable-file-upload': execEnableFileUpload,
+  'enable-auth-session': execEnableAuthSession,
+  'enable-linting': execEnableLinting
 };
+
+export function getUnimplementedOperations(operationIds: string[]): string[] {
+  return operationIds.filter(id => !OPERATION_HANDLERS[id]);
+}
 
 export async function executeOperations(input: ExecutionRequest): Promise<ExecutionResponse> {
   const request: ExecutionRequest = {

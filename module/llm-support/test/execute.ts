@@ -5,7 +5,7 @@ import path from 'node:path';
 
 import { Suite, Test } from '@travetto/test';
 
-import { executeOperations } from '../src/execute.ts';
+import { executeOperations, getUnimplementedOperations } from '../src/execute.ts';
 
 @Suite()
 class LlmSupportExecuteTest {
@@ -129,5 +129,72 @@ class LlmSupportExecuteTest {
     await fs.access(path.join(target, 'resources/local.yml'));
     await fs.access(path.join(target, 'test/unit/example.ts'));
     await fs.access(path.join(target, 'test/fixtures/example.json'));
+  }
+
+  @Test()
+  async applyCreatesWorkflowAndPlatformArtifacts() {
+    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-platform-'));
+
+    const output = await executeOperations({
+      operations: [
+        'workflow-gcp-deploy',
+        'workflow-cloudfront-deploy',
+        'create-web-interceptor',
+        'cache-enhancements'
+      ],
+      targetDir: target,
+      dryRun: false
+    });
+
+    assert(output.artifacts.some(item => item.status === 'created'));
+    await fs.access(path.join(target, '.github/workflows/deploy-api.yml'));
+    await fs.access(path.join(target, '.github/workflows/deploy-ui.yml'));
+    await fs.access(path.join(target, 'src/interceptor/request-logging.ts'));
+    await fs.access(path.join(target, 'src/service/cacheable.ts'));
+    await fs.access(path.join(target, 'src/config/cache.ts'));
+  }
+
+  @Test()
+  async statusShowsRemainingUnimplemented() {
+    const missing = getUnimplementedOperations([
+      'workflow-gcp-deploy',
+      'workflow-cloudfront-deploy',
+      'create-web-interceptor',
+      'cache-enhancements',
+      'enable-file-upload',
+      'enable-auth-session',
+      'enable-linting',
+      'excluded-log-config'
+    ]);
+
+    assert(!missing.includes('workflow-gcp-deploy'));
+    assert(!missing.includes('workflow-cloudfront-deploy'));
+    assert(!missing.includes('create-web-interceptor'));
+    assert(!missing.includes('cache-enhancements'));
+    assert(!missing.includes('enable-file-upload'));
+    assert(!missing.includes('enable-auth-session'));
+    assert(!missing.includes('enable-linting'));
+    assert(missing.includes('excluded-log-config'));
+  }
+
+  @Test()
+  async applyCreatesAuthUploadLintArtifacts() {
+    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-auth-upload-lint-'));
+
+    const output = await executeOperations({
+      operations: ['enable-file-upload', 'enable-auth-session', 'enable-linting'],
+      targetDir: target,
+      dryRun: false
+    });
+
+    assert(output.artifacts.some(item => item.status === 'created'));
+    await fs.access(path.join(target, 'src/web/upload.ts'));
+    await fs.access(path.join(target, 'src/config/upload.ts'));
+    await fs.access(path.join(target, 'src/web/auth.ts'));
+    await fs.access(path.join(target, 'src/web/auth.config.ts'));
+    await fs.access(path.join(target, 'package.json'));
+
+    const pkg = await fs.readFile(path.join(target, 'package.json'), 'utf8');
+    assert(pkg.includes('trv eslint:register'));
   }
 }

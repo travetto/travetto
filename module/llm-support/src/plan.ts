@@ -28,7 +28,7 @@ function filesFor(op: LlmOperation): string[] {
     case 'workflow-cloudfront-deploy':
       return ['.github/workflows/deploy-ui.yml'];
     case 'enable-linting':
-      return ['eslint.config.js', 'package.json'];
+      return ['package.json'];
     case 'generate-config':
       return ['src/config/', 'resources/'];
     case 'generate-test-suite':
