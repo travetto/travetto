@@ -1,7 +1,7 @@
 export const MODULES = {
   Auth: {
     name: '@travetto/auth', folder: '@travetto/auth', displayName: 'Authentication',
-    description: 'Authentication scaffolding for the Travetto framework'
+    description: 'Authentication support for the Travetto framework'
   },
   AuthModel: {
     name: '@travetto/auth-model', folder: '@travetto/auth-model', displayName: 'Authentication Model',
@@ -166,10 +166,6 @@ export const MODULES = {
   Runtime: {
     name: '@travetto/runtime', folder: '@travetto/runtime', displayName: 'Runtime',
     description: 'Runtime for travetto applications.'
-  },
-  Scaffold: {
-    name: '@travetto/scaffold', folder: '@travetto/scaffold', displayName: 'App Scaffold',
-    description: 'App Scaffold for the Travetto framework'
   },
   Schema: {
     name: '@travetto/schema', folder: '@travetto/schema', displayName: 'Schema',

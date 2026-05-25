@@ -5,11 +5,20 @@ import path from 'node:path';
 
 import { SchemaValidator } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
-import { JSONUtil } from '@travetto/runtime';
+import { JSONUtil, RuntimeResources } from '@travetto/runtime';
 
 import { executeOperations, getUnimplementedOperations } from '../src/execute.ts';
 import { recommendOperations } from '../src/recommendation.ts';
 import { PackageJsonSchema } from '../src/template-shapes.ts';
+
+async function readSnippet(name: string): Promise<string> {
+  return RuntimeResources.readUTF8(`snippets/code/${name}`);
+}
+
+async function renderSnippet(name: string, params: Record<string, string> = {}): Promise<string> {
+  const source = await readSnippet(name);
+  return source.replace(/\{\{([a-zA-Z0-9_]+)\}\}/g, (_all, key: string) => params[key] ?? '');
+}
 
 @Suite()
 class LlmSupportExecuteTest {
@@ -46,8 +55,24 @@ class LlmSupportExecuteTest {
     });
 
     assert(output.artifacts.some(item => item.status === 'created'));
-    await fs.access(path.join(target, 'src/service/order.ts'));
-    await fs.access(path.join(target, 'src/web/order.ts'));
+    const serviceFile = path.join(target, 'src/service/order.ts');
+    const controllerFile = path.join(target, 'src/web/order.ts');
+
+    await fs.access(serviceFile);
+    await fs.access(controllerFile);
+
+    const expectedService = await renderSnippet('create-web-route.service.ts.tpl', {
+      serviceName: 'OrderService'
+    });
+    const expectedController = await renderSnippet('create-web-route.controller.ts.tpl', {
+      serviceName: 'OrderService',
+      serviceFile: 'order',
+      routePath: 'orders',
+      controllerName: 'OrderController'
+    });
+
+    assert((await fs.readFile(serviceFile, 'utf8')) === expectedService);
+    assert((await fs.readFile(controllerFile, 'utf8')) === expectedController);
   }
 
   @Test()
@@ -92,7 +117,10 @@ class LlmSupportExecuteTest {
     await fs.access(path.join(target, 'src/config/email.ts'));
     await fs.access(path.join(target, 'src/web/email.ts'));
     await fs.access(path.join(target, 'test/email/preview.ts'));
-    await fs.access(path.join(target, 'test/email/fixtures/transactional.json'));
+
+    const fixtureFile = path.join(target, 'test/email/fixtures/transactional.json');
+    await fs.access(fixtureFile);
+    assert((await fs.readFile(fixtureFile, 'utf8')) === await renderSnippet('email-fixture.json.tpl'));
   }
 
   @Test()

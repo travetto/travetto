@@ -1,14 +1,13 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 import { SchemaValidator } from '@travetto/schema';
+import { RuntimeResources } from '@travetto/runtime';
 
 import type { RecommendationQuery, SnippetSource } from './types.ts';
 import { SnippetSourceSchema } from './snippet-shapes.ts';
 
-const SNIPPET_DIR = fileURLToPath(new URL('../resources/snippets/', import.meta.url));
-const WORKSPACE_SNIPPET_DIR = path.resolve(process.cwd(), 'module/llm-support/resources/snippets');
+const SNIPPET_RELATIVE_DIR = 'snippets';
 
 function isErrnoException(err: unknown): err is NodeJS.ErrnoException {
   return typeof err === 'object' && err !== null && 'code' in err;
@@ -26,22 +25,19 @@ async function loadSnippet(fullPath: string): Promise<SnippetSource> {
 }
 
 async function loadSnippets(): Promise<SnippetSource[]> {
-  for (const dir of [SNIPPET_DIR, WORKSPACE_SNIPPET_DIR]) {
-    try {
-      const files = await fs.readdir(dir);
-      const filtered = files
-        .filter(file => file.endsWith('.md'))
-        .sort();
-      return Promise.all(filtered.map(file => loadSnippet(path.join(dir, file))));
-    } catch (err) {
-      if (isErrnoException(err) && err.code === 'ENOENT') {
-        continue;
-      }
-      throw err;
+  try {
+    const dir = await RuntimeResources.resolve(SNIPPET_RELATIVE_DIR);
+    const files = await fs.readdir(dir);
+    const filtered = files
+      .filter(file => file.endsWith('.md'))
+      .sort();
+    return Promise.all(filtered.map(file => loadSnippet(path.join(dir, file))));
+  } catch (err) {
+    if (isErrnoException(err) && (err.code === 'ENOENT' || err.code === 'ERR_MODULE_NOT_FOUND')) {
+      return [];
     }
+    throw err;
   }
-
-  return [];
 }
 
 const SNIPPETS: SnippetSource[] = await loadSnippets();

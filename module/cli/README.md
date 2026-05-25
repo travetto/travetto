@@ -44,7 +44,6 @@ Commands:
   repo:version      Version all changed dependencies
   repo:version-sync Enforces all packages to write out their versions and dependencies
   run:double        Doubles a number
-  scaffold          Command to run scaffolding
   service           Allows for running services
   test              Launch test framework and execute tests
   test:watch        Invoke the test watcher

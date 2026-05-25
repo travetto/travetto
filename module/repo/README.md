@@ -152,7 +152,6 @@ module/pack
 module/registry
 module/repo
 module/runtime
-module/scaffold
 module/schema
 module/schema-faker
 module/terminal
@@ -239,7 +238,6 @@ global-test/model_auth-session <workspace-root>/global-test/model_auth-session
                module/registry <workspace-root>/module/registry
                    module/repo .
                 module/runtime <workspace-root>/module/runtime
-               module/scaffold <workspace-root>/module/scaffold
                  module/schema <workspace-root>/module/schema
            module/schema-faker <workspace-root>/module/schema-faker
                module/terminal <workspace-root>/module/terminal

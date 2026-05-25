@@ -110,7 +110,7 @@ export const INSTALL_BUNDLES: InstallGuidance[] = [
     required: ['@travetto/web', '@travetto/model', '@travetto/model-query', '@travetto/schema', '@travetto/di'],
     optional: ['@travetto/auth', '@travetto/auth-web', '@travetto/model-indexed'],
     notes: [
-      'Use this bundle when creating route/controller/service scaffolds backed by model-query.',
+      'Use this bundle when creating route/controller/service flows backed by model-query.',
       'Add auth/auth-web when CRUD endpoints should be principal-scoped.'
     ]
   },
