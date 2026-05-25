@@ -97,6 +97,7 @@ export interface ExecutionRequest {
   targetDir: string;
   dryRun?: boolean;
   overwrite?: boolean;
+  monorepo?: boolean;
   routePath?: string;
   controllerName?: string;
   serviceName?: string;
