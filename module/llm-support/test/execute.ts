@@ -34,11 +34,105 @@ class LlmSupportExecuteTest {
     });
 
     assert(output.artifacts.some(item => item.status === 'planned'));
+    assert(output.artifacts.some(item => item.file.endsWith('package.json')));
 
     await assert.rejects(
       () => fs.access(path.join(target, 'resources/application.yml')),
       /ENOENT/
     );
+
+    await assert.rejects(
+      () => fs.access(path.join(target, 'package.json')),
+      /ENOENT/
+    );
+  }
+
+  @Test()
+  async projectBootstrapCreatesPackageAndCoreFiles() {
+    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-bootstrap-'));
+
+    const output = await executeOperations({
+      operations: ['project-bootstrap'],
+      targetDir: target,
+      dryRun: false,
+      projectName: 'sample-bootstrap-app'
+    });
+
+    assert(output.artifacts.some(item => item.status === 'created'));
+
+    const pkgFile = path.join(target, 'package.json');
+    const appConfigFile = path.join(target, 'resources/application.yml');
+    const serviceFile = path.join(target, 'src/service/home.ts');
+    const controllerFile = path.join(target, 'src/web/home.ts');
+
+    await fs.access(pkgFile);
+    await fs.access(appConfigFile);
+    await fs.access(serviceFile);
+    await fs.access(controllerFile);
+
+    const pkgRaw = JSON.parse(await fs.readFile(pkgFile, 'utf8')) as {
+      name?: string;
+      scripts?: Record<string, string>;
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+    };
+
+    assert(pkgRaw.name === 'sample-bootstrap-app');
+    assert(pkgRaw.scripts?.start === 'trv web:http');
+    assert(pkgRaw.scripts?.test === 'trv test');
+    assert(pkgRaw.dependencies?.['@travetto/web']);
+    assert(pkgRaw.dependencies?.['@travetto/web-http']);
+    assert(pkgRaw.dependencies?.['@travetto/di']);
+    assert(pkgRaw.devDependencies?.['@travetto/cli']);
+    assert(pkgRaw.devDependencies?.['@travetto/compiler']);
+  }
+
+  @Test()
+  async projectBootstrapCreatesMonorepoLayout() {
+    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-bootstrap-mono-'));
+
+    const output = await executeOperations({
+      operations: ['project-bootstrap'],
+      targetDir: target,
+      dryRun: false,
+      projectName: 'sample-mono-app',
+      monorepo: true
+    });
+
+    assert(output.artifacts.some(item => item.status === 'created'));
+
+    const rootPkgFile = path.join(target, 'package.json');
+    const appPkgFile = path.join(target, 'packages/app/package.json');
+    const appConfigFile = path.join(target, 'packages/app/resources/application.yml');
+    const serviceFile = path.join(target, 'packages/app/src/service/home.ts');
+    const controllerFile = path.join(target, 'packages/app/src/web/home.ts');
+
+    await fs.access(rootPkgFile);
+    await fs.access(appPkgFile);
+    await fs.access(appConfigFile);
+    await fs.access(serviceFile);
+    await fs.access(controllerFile);
+
+    const rootPkgRaw = JSON.parse(await fs.readFile(rootPkgFile, 'utf8')) as {
+      name?: string;
+      workspaces?: string[];
+      scripts?: Record<string, string>;
+    };
+    const appPkgRaw = JSON.parse(await fs.readFile(appPkgFile, 'utf8')) as {
+      name?: string;
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+    };
+
+    assert(rootPkgRaw.name === 'sample-mono-app');
+    assert(rootPkgRaw.workspaces?.includes('packages/*'));
+    assert(rootPkgRaw.scripts?.start === 'npm run -w sample-mono-app-app start');
+    assert(rootPkgRaw.scripts?.test === 'npm run -w sample-mono-app-app test');
+
+    assert(appPkgRaw.name === 'sample-mono-app-app');
+    assert(appPkgRaw.dependencies?.['@travetto/web']);
+    assert(appPkgRaw.dependencies?.['@travetto/web-http']);
+    assert(appPkgRaw.devDependencies?.['@travetto/cli']);
   }
 
   @Test()

@@ -62,6 +62,17 @@ function toFileName(input: string, fallback: string): string {
     .toLowerCase();
 }
 
+function toPackageName(input: string, fallback: string): string {
+  const cleaned = input.trim() || fallback;
+  const normalized = cleaned
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  const safe = normalized.replace(/^[._-]+/, '');
+  return safe || fallback;
+}
+
 async function exists(file: string): Promise<boolean> {
   try {
     await fs.access(file);
@@ -158,10 +169,42 @@ async function execProjectBootstrap(
   artifacts: ExecutionArtifact[]
 ): Promise<void> {
   const projectName = request.projectName ?? path.basename(baseDir);
+  const packageName = toPackageName(projectName, 'travetto-app');
+  const monorepo = request.monorepo === true;
+  const appDir = monorepo ? path.join(baseDir, 'packages/app') : baseDir;
+
+  if (monorepo) {
+    await writeFile(
+      'project-bootstrap',
+      path.join(baseDir, 'package.json'),
+      await renderSnippet('project-bootstrap.monorepo.package.json.tpl', {
+        projectName: packageName,
+        workspaceName: `${packageName}-app`
+      }),
+      request,
+      artifacts
+    );
+
+    await writeFile(
+      'project-bootstrap',
+      path.join(appDir, 'package.json'),
+      await renderSnippet('project-bootstrap.package.json.tpl', { projectName: `${packageName}-app` }),
+      request,
+      artifacts
+    );
+  } else {
+    await writeFile(
+      'project-bootstrap',
+      path.join(baseDir, 'package.json'),
+      await renderSnippet('project-bootstrap.package.json.tpl', { projectName: packageName }),
+      request,
+      artifacts
+    );
+  }
 
   await writeFile(
     'project-bootstrap',
-    path.join(baseDir, 'resources/application.yml'),
+    path.join(appDir, 'resources/application.yml'),
     await renderSnippet('project-bootstrap.application.yml.tpl', { projectName }),
     request,
     artifacts
@@ -169,7 +212,7 @@ async function execProjectBootstrap(
 
   await writeFile(
     'project-bootstrap',
-    path.join(baseDir, 'src/service/home.ts'),
+    path.join(appDir, 'src/service/home.ts'),
     await renderSnippet('project-bootstrap.home-service.ts.tpl'),
     request,
     artifacts
@@ -177,7 +220,7 @@ async function execProjectBootstrap(
 
   await writeFile(
     'project-bootstrap',
-    path.join(baseDir, 'src/web/home.ts'),
+    path.join(appDir, 'src/web/home.ts'),
     await renderSnippet('project-bootstrap.home-controller.ts.tpl'),
     request,
     artifacts

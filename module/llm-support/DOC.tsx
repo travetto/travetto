@@ -25,7 +25,7 @@ export const text = <>
 
     <c.Code language='bash' title='Recommended flow' src='trv llm:support:recommend\ntrv llm:support:plan\ntrv llm:support:execute' />
 
-    The recommendation command supports filtering by {d.input('bundles')}, {d.input('workflows')}, {d.input('categories')}, and {d.input('snippet-tags')}.  The plan command focuses on selected {d.input('operations')} and produces file-level change steps.  Execution supports dry-run, overwrite, target directory selection, and several operation-specific hints such as route, controller, service, model, and email naming.
+    The recommendation command supports filtering by {d.input('bundles')}, {d.input('workflows')}, {d.input('categories')}, and {d.input('snippet-tags')}.  The plan command focuses on selected {d.input('operations')} and produces file-level change steps.  Execution supports dry-run, overwrite, target directory selection, monorepo bootstrap selection ({d.input('--monorepo')}), and several operation-specific hints such as route, controller, service, model, and email naming.
   </c.Section>
 
   <c.Section title='What It Supports'>
@@ -77,6 +77,7 @@ export const text = <>
       <li>{d.input('--categories')} - filter by capability category.</li>
       <li>{d.input('--snippet-tags')} - narrow the snippet catalog.</li>
       <li>{d.input('--include-excluded')} - include excluded operations when you need the full catalog.</li>
+      <li>{d.input('--monorepo')} - when used with {d.input('project-bootstrap')}, generate a workspace root and {d.input('packages/app')} project layout.</li>
     </ul>
 
     That combination lets you start broad, then narrow to exactly the path you want before making changes.

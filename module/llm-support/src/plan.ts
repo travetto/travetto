@@ -10,7 +10,7 @@ import type {
 function filesFor(op: LlmOperation): string[] {
   switch (op.id) {
     case 'project-bootstrap':
-      return ['package.json', 'resources/application.yml', 'src/'];
+      return ['package.json', 'resources/application.yml', 'src/', 'packages/app/'];
     case 'create-web-route':
       return ['src/web/', 'src/service/'];
     case 'enable-file-upload':

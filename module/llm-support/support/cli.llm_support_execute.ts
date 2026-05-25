@@ -25,6 +25,9 @@ export class LlmSupportExecuteCommand extends LlmSupportCommandBase {
   @CliFlag({ full: 'overwrite' })
   overwrite = false;
 
+  @CliFlag({ full: 'monorepo' })
+  monorepo = false;
+
   @CliFlag({ full: 'route-path' })
   routePath?: string;
 
@@ -54,6 +57,7 @@ export class LlmSupportExecuteCommand extends LlmSupportCommandBase {
       targetDir: path.resolve(this.targetDir),
       dryRun: !this.apply,
       overwrite: this.overwrite,
+      monorepo: this.monorepo,
       routePath: this.routePath,
       controllerName: this.controllerName,
       serviceName: this.serviceName,
