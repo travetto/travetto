@@ -6,7 +6,7 @@ This module owns LLM-oriented generation guidance for Travetto.
 ## Implementation Rules
 - Keep operation metadata explicit and testable.
 - Track excluded operations in `src/recommendation.ts`.
-- Keep install/workflow guidance scaffold-independent.
+- Keep install/workflow guidance focused on direct generation workflows.
 - Avoid provider-specific integrations in this phase.
 
 ## Catalog Evolution

@@ -2,16 +2,10 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { SchemaValidator } from '@travetto/schema';
+import { RuntimeResources } from '@travetto/runtime';
 
 import type { ExecutionArtifact, ExecutionRequest, ExecutionResponse } from './types.ts';
 import { PackageJsonSchema, type PackageJsonShape } from './template-shapes.ts';
-
-const SNIPPET_DIR = new URL('../resources/snippets/code/', import.meta.url);
-const WORKSPACE_SNIPPET_DIR = path.resolve(process.cwd(), 'module/llm-support/resources/snippets/code');
-
-function isErrnoException(err: unknown): err is NodeJS.ErrnoException {
-  return typeof err === 'object' && err !== null && 'code' in err;
-}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -41,14 +35,7 @@ async function validatePackageJsonShape(payload: unknown, source: string): Promi
 }
 
 async function readSnippet(name: string): Promise<string> {
-  try {
-    return await fs.readFile(new URL(name, SNIPPET_DIR), 'utf8');
-  } catch (err) {
-    if (!isErrnoException(err) || err.code !== 'ENOENT') {
-      throw err;
-    }
-    return fs.readFile(path.join(WORKSPACE_SNIPPET_DIR, name), 'utf8');
-  }
+  return RuntimeResources.readUTF8(`snippets/code/${name}`);
 }
 
 async function renderSnippet(name: string, params: Record<string, string> = {}): Promise<string> {
