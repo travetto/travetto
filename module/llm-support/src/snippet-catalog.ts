@@ -72,4 +72,9 @@ export async function recommendSnippets(query: RecommendationQuery = {}): Promis
   return byTag;
 }
 
+export async function getValidSnippetTags(): Promise<string[]> {
+  const snippets = await getSnippets();
+  return [...new Set(snippets.flatMap(item => item.capabilityTags))].sort();
+}
+
 export const LLM_SNIPPET_SOURCES = getSnippets();

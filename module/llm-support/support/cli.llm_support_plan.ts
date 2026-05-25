@@ -1,52 +1,30 @@
-import { CliCommand, CliFlag, CliModuleFlag, type CliCommandShape } from '@travetto/cli';
+import { CliCommand, CliFlag } from '@travetto/cli';
+import { MinLength, Required } from '@travetto/schema';
 
 import { buildPlans } from '../src/plan.ts';
-import type { LlmOperationCategory } from '../src/types.ts';
-
-const CATEGORIES: LlmOperationCategory[] = [
-  'project',
-  'web',
-  'auth',
-  'model',
-  'upload',
-  'workflow',
-  'quality',
-  'email',
-  'test',
-  'config',
-  'cache'
-];
+import { LlmSupportScopedSnippetCommandBase } from './base-command.ts';
 
 /**
  * Build plan-first execution details for llm-support operations.
  */
 @CliCommand()
-export class LlmSupportPlanCommand implements CliCommandShape {
-
-  @CliModuleFlag(({ scope: 'command' }))
-  module: string;
+export class LlmSupportPlanCommand extends LlmSupportScopedSnippetCommandBase {
 
   @CliFlag({ short: 'o', full: 'operations' })
+  @Required(false)
+  @MinLength(1)
   operations?: string[];
 
-  @CliFlag({ short: 'c', full: 'categories' })
-  categories?: LlmOperationCategory[];
-
-  @CliFlag({ short: 't', full: 'snippet-tags' })
-  snippetTags?: string[];
-
-  @CliFlag({ full: 'include-excluded' })
-  includeExcluded = false;
-
   async main(): Promise<void> {
-    const categories = (this.categories ?? []).filter(item => CATEGORIES.includes(item));
+    const categories = this.getScopedCategories();
+
     const payload = await buildPlans({
-      operations: this.operations,
+      operations: this.operations?.filter(Boolean) ?? [],
       categories,
-      snippetTags: this.snippetTags,
+      snippetTags: this.snippetTags?.filter(Boolean) ?? [],
       includeExcluded: this.includeExcluded
     });
 
-    process.stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
+    await this.writeOutput(payload, this.includeExcluded);
   }
 }
