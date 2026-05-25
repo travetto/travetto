@@ -1,19 +1,19 @@
 import path from 'node:path';
 
-import { CliCommand, CliFlag, CliModuleFlag, type CliCommandShape } from '@travetto/cli';
+import { CliCommand, CliFlag } from '@travetto/cli';
+import { MinLength } from '@travetto/schema';
 
 import { executeOperations } from '../src/execute.ts';
+import { LlmSupportCommandBase } from './base-command.ts';
 
 /**
  * Execute llm-support operations with dry-run by default.
  */
 @CliCommand()
-export class LlmSupportExecuteCommand implements CliCommandShape {
-
-  @CliModuleFlag(({ scope: 'command' }))
-  module: string;
+export class LlmSupportExecuteCommand extends LlmSupportCommandBase {
 
   @CliFlag({ short: 'o', full: 'operations' })
+  @MinLength(1)
   operations?: string[];
 
   @CliFlag({ short: 'd', full: 'dir' })
@@ -47,10 +47,7 @@ export class LlmSupportExecuteCommand implements CliCommandShape {
   sendRoutePath?: string;
 
   async main(): Promise<void> {
-    const operations = (this.operations ?? []).filter(Boolean);
-    if (!operations.length) {
-      throw new Error('At least one operation is required via --operations');
-    }
+    const operations = this.operations ?? [];
 
     const payload = await executeOperations({
       operations,
@@ -66,6 +63,6 @@ export class LlmSupportExecuteCommand implements CliCommandShape {
       sendRoutePath: this.sendRoutePath
     });
 
-    process.stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
+    await this.writeOutput(payload, true);
   }
 }

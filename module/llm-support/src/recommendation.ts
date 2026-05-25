@@ -240,6 +240,12 @@ export function recommendOperations(query: RecommendationQuery = {}): LlmOperati
   return selected.filter(item => includeExcluded || !item.excluded);
 }
 
+export const LLM_OPERATION_CATEGORIES = [...new Set(OPERATIONS.map(item => item.category))].sort();
+
+export function getValidOperationIds(includeExcluded = false): string[] {
+  return recommendOperations({ includeExcluded }).map(item => item.id);
+}
+
 export async function recommend(query: RecommendationQuery = {}): Promise<RecommendationResponse> {
   const operations = recommendOperations(query);
   return {

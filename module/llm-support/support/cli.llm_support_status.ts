@@ -1,51 +1,30 @@
-import { CliCommand, CliFlag, CliModuleFlag, type CliCommandShape } from '@travetto/cli';
+import { CliCommand, CliFlag } from '@travetto/cli';
 
 import { getUnimplementedOperations } from '../src/execute.ts';
 import { recommendOperations } from '../src/recommendation.ts';
-import type { LlmOperationCategory } from '../src/types.ts';
-
-const CATEGORIES: LlmOperationCategory[] = [
-  'project',
-  'web',
-  'auth',
-  'model',
-  'upload',
-  'workflow',
-  'quality',
-  'email',
-  'test',
-  'config',
-  'cache'
-];
+import { LlmSupportScopedCommandBase } from './base-command.ts';
 
 /**
  * Show llm-support execution coverage status.
  */
 @CliCommand()
-export class LlmSupportStatusCommand implements CliCommandShape {
-
-  @CliModuleFlag(({ scope: 'command' }))
-  module: string;
+export class LlmSupportStatusCommand extends LlmSupportScopedCommandBase {
 
   @CliFlag({ short: 'o', full: 'operations' })
   operations?: string[];
 
-  @CliFlag({ short: 'c', full: 'categories' })
-  categories?: LlmOperationCategory[];
-
-  @CliFlag({ full: 'include-excluded' })
-  includeExcluded = false;
-
   async main(): Promise<void> {
-    const categories = (this.categories ?? []).filter(item => CATEGORIES.includes(item));
-    const selected = this.operations && this.operations.length > 0 ?
-      this.operations :
+    const categories = this.getScopedCategories();
+
+    const operations = this.operations ?? [];
+    const selected = operations.length > 0 ?
+      operations :
       recommendOperations({ categories, includeExcluded: this.includeExcluded }).map(item => item.id);
 
     const unimplemented = getUnimplementedOperations(selected);
     const unimplementedSet = new Set(unimplemented);
     const implemented = selected.filter(item => !unimplementedSet.has(item));
 
-    process.stdout.write(`${JSON.stringify({ implemented, unimplemented }, null, 2)}\n`);
+    await this.writeOutput({ implemented, unimplemented }, this.includeExcluded);
   }
 }
