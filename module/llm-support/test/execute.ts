@@ -108,4 +108,26 @@ class LlmSupportExecuteTest {
     await fs.access(path.join(target, 'src/service/order-item-indexed.ts'));
     await fs.access(path.join(target, 'src/service/order-item-query.ts'));
   }
+
+  @Test()
+  async applyCreatesAdditionalCoreArtifacts() {
+    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-core-'));
+
+    const output = await executeOperations({
+      operations: ['rest-rpc-client', 'generate-config', 'generate-test-suite'],
+      targetDir: target,
+      dryRun: false,
+      routePath: 'orders',
+      projectName: 'support-app'
+    });
+
+    assert(output.artifacts.some(item => item.status === 'created'));
+    await fs.access(path.join(target, 'src/client/orders.ts'));
+    await fs.access(path.join(target, 'src/client/index.ts'));
+    await fs.access(path.join(target, 'src/config/app.ts'));
+    await fs.access(path.join(target, 'resources/application.yml'));
+    await fs.access(path.join(target, 'resources/local.yml'));
+    await fs.access(path.join(target, 'test/unit/example.ts'));
+    await fs.access(path.join(target, 'test/fixtures/example.json'));
+  }
 }
