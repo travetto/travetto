@@ -75,6 +75,10 @@ export const MODULES = {
     name: '@travetto/image', folder: '@travetto/image', displayName: 'Image',
     description: 'Image support, resizing, and optimization'
   },
+  LlmSupport: {
+    name: '@travetto/llm-support', folder: '@travetto/llm-support', displayName: 'LLM Support',
+    description: 'Task-oriented synthesized LLM guidance for Travetto modules.'
+  },
   Log: {
     name: '@travetto/log', folder: '@travetto/log', displayName: 'Logging',
     description: 'Logging framework that integrates at the console.log level.'

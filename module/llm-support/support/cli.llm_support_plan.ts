@@ -1,4 +1,4 @@
-import { CliCommand, CliFlag, type CliCommandShape } from '@travetto/cli';
+import { CliCommand, CliFlag, CliModuleFlag, type CliCommandShape } from '@travetto/cli';
 
 import { buildPlans } from '../src/plan.ts';
 import type { LlmOperationCategory } from '../src/types.ts';
@@ -23,6 +23,9 @@ const CATEGORIES: LlmOperationCategory[] = [
 @CliCommand()
 export class LlmSupportPlanCommand implements CliCommandShape {
 
+  @CliModuleFlag(({ scope: 'command' }))
+  module: string;
+
   @CliFlag({ short: 'o', full: 'operations' })
   operations?: string[];
 
@@ -37,7 +40,7 @@ export class LlmSupportPlanCommand implements CliCommandShape {
 
   async main(): Promise<void> {
     const categories = (this.categories ?? []).filter(item => CATEGORIES.includes(item));
-    const payload = buildPlans({
+    const payload = await buildPlans({
       operations: this.operations,
       categories,
       snippetTags: this.snippetTags,

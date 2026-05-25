@@ -86,7 +86,7 @@ function toPlan(op: LlmOperation): OperationPlan {
   };
 }
 
-export function buildPlans(query: RecommendationQuery = {}): PlanResponse {
+export async function buildPlans(query: RecommendationQuery = {}): Promise<PlanResponse> {
   const operations = query.operations && query.operations.length > 0 ?
     recommendOperations({
       categories: query.categories,
@@ -98,10 +98,10 @@ export function buildPlans(query: RecommendationQuery = {}): PlanResponse {
     });
 
   const plans = operations.map(toPlan);
-  const snippets = recommend({
+  const snippets = (await recommend({
     ...query,
     operations: plans.map(item => item.operationId)
-  }).snippets;
+  })).snippets;
 
   return { plans, snippets };
 }

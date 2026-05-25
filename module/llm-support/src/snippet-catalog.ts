@@ -2,12 +2,16 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { SchemaValidator } from '@travetto/schema';
-import { RuntimeResources } from '@travetto/runtime';
+import { RuntimeIndex } from '@travetto/runtime';
 
 import type { RecommendationQuery, SnippetSource } from './types.ts';
 import { SnippetSourceSchema } from './snippet-shapes.ts';
 
 const SNIPPET_RELATIVE_DIR = 'snippets';
+
+function snippetDirectory(): string {
+  return path.resolve(RuntimeIndex.getModule('@travetto/llm-support')!.sourcePath, 'resources', SNIPPET_RELATIVE_DIR);
+}
 
 function isErrnoException(err: unknown): err is NodeJS.ErrnoException {
   return typeof err === 'object' && err !== null && 'code' in err;
@@ -26,7 +30,7 @@ async function loadSnippet(fullPath: string): Promise<SnippetSource> {
 
 async function loadSnippets(): Promise<SnippetSource[]> {
   try {
-    const dir = await RuntimeResources.resolve(SNIPPET_RELATIVE_DIR);
+    const dir = snippetDirectory();
     const files = await fs.readdir(dir);
     const filtered = files
       .filter(file => file.endsWith('.md'))
@@ -40,7 +44,12 @@ async function loadSnippets(): Promise<SnippetSource[]> {
   }
 }
 
-const SNIPPETS: SnippetSource[] = await loadSnippets();
+let snippetsPromise: Promise<SnippetSource[]> | undefined;
+
+async function getSnippets(): Promise<SnippetSource[]> {
+  snippetsPromise ??= loadSnippets();
+  return snippetsPromise;
+}
 
 function matchesAny(value: string[], desired?: string[]): boolean {
   if (!desired || desired.length === 0) {
@@ -50,10 +59,11 @@ function matchesAny(value: string[], desired?: string[]): boolean {
   return value.some(item => wanted.has(item));
 }
 
-export function recommendSnippets(query: RecommendationQuery = {}): SnippetSource[] {
+export async function recommendSnippets(query: RecommendationQuery = {}): Promise<SnippetSource[]> {
+  const snippets = await getSnippets();
   const byOperation = query.operations && query.operations.length > 0 ?
-    SNIPPETS.filter(item => matchesAny(item.operationIds ?? [], query.operations)) :
-    SNIPPETS;
+    snippets.filter(item => matchesAny(item.operationIds ?? [], query.operations)) :
+    snippets;
 
   const byTag = query.snippetTags && query.snippetTags.length > 0 ?
     byOperation.filter(item => matchesAny(item.capabilityTags, query.snippetTags)) :
@@ -62,4 +72,4 @@ export function recommendSnippets(query: RecommendationQuery = {}): SnippetSourc
   return byTag;
 }
 
-export const LLM_SNIPPET_SOURCES = SNIPPETS;
+export const LLM_SNIPPET_SOURCES = getSnippets();
