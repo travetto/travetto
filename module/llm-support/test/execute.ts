@@ -3,9 +3,12 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
+import { SchemaValidator } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
+import { JSONUtil } from '@travetto/runtime';
 
 import { executeOperations, getUnimplementedOperations } from '../src/execute.ts';
+import { PackageJsonSchema } from '../src/template-shapes.ts';
 
 @Suite()
 class LlmSupportExecuteTest {
@@ -196,5 +199,38 @@ class LlmSupportExecuteTest {
 
     const pkg = await fs.readFile(path.join(target, 'package.json'), 'utf8');
     assert(pkg.includes('trv eslint:register'));
+  }
+
+  @Test()
+  async enableLintingMergesPackageJson() {
+    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-lint-merge-'));
+    const pkgFile = path.join(target, 'package.json');
+
+    await fs.writeFile(pkgFile, JSON.stringify({
+      name: 'existing-app',
+      scripts: {
+        test: 'node --test',
+        lint: 'eslint .'
+      },
+      devDependencies: {
+        typescript: '^5.0.0'
+      }
+    }, null, 2));
+
+    await executeOperations({
+      operations: ['enable-linting'],
+      targetDir: target,
+      dryRun: false
+    });
+
+    const raw: PackageJsonSchema = JSONUtil.fromUTF8(await fs.readFile(pkgFile, 'utf8'));
+    const merged = PackageJsonSchema.from(raw);
+    await SchemaValidator.validate(PackageJsonSchema, merged);
+
+    assert(merged.scripts?.test === 'node --test');
+    assert(merged.scripts?.lint === 'eslint .');
+    assert(merged.scripts?.['lint:register'] === 'trv eslint:register');
+    assert(merged.devDependencies?.typescript === '^5.0.0');
+    assert(Boolean(merged.devDependencies?.['@travetto/eslint']));
   }
 }

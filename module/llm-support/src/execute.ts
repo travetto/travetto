@@ -1,13 +1,43 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+import { SchemaValidator } from '@travetto/schema';
+
 import type { ExecutionArtifact, ExecutionRequest, ExecutionResponse } from './types.ts';
+import { PackageJsonSchema, type PackageJsonShape } from './template-shapes.ts';
 
 const SNIPPET_DIR = new URL('../resources/snippets/code/', import.meta.url);
 const WORKSPACE_SNIPPET_DIR = path.resolve(process.cwd(), 'module/llm-support/resources/snippets/code');
 
 function isErrnoException(err: unknown): err is NodeJS.ErrnoException {
   return typeof err === 'object' && err !== null && 'code' in err;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function toStringMap(value: unknown): Record<string, string> {
+  if (!isRecord(value)) {
+    return {};
+  }
+  return Object.fromEntries(
+    Object.entries(value).filter((entry): entry is [string, string] => typeof entry[1] === 'string')
+  );
+}
+
+function toOptionalString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
+async function validatePackageJsonShape(payload: unknown, source: string): Promise<PackageJsonShape> {
+  if (!isRecord(payload)) {
+    throw new Error(`Invalid package json shape for ${source}`);
+  }
+
+  const bound = PackageJsonSchema.from(payload);
+  await SchemaValidator.validate(PackageJsonSchema, bound);
+  return bound;
 }
 
 async function readSnippet(name: string): Promise<string> {
@@ -79,6 +109,59 @@ async function writeFile(
 
   await fs.mkdir(path.dirname(fullPath), { recursive: true });
   await fs.writeFile(fullPath, content, 'utf8');
+  artifacts.push({ operationId, file: fullPath, status: 'created' });
+}
+
+async function mergeLintPackageJson(
+  operationId: string,
+  fullPath: string,
+  lintTemplate: string,
+  request: ExecutionRequest,
+  artifacts: ExecutionArtifact[]
+): Promise<void> {
+  const present = await exists(fullPath);
+
+  if (request.dryRun !== false) {
+    artifacts.push({ operationId, file: fullPath, status: 'planned' });
+    return;
+  }
+
+  await fs.mkdir(path.dirname(fullPath), { recursive: true });
+
+  if (!present) {
+    await fs.writeFile(fullPath, lintTemplate, 'utf8');
+    artifacts.push({ operationId, file: fullPath, status: 'created' });
+    return;
+  }
+
+  const current = await validatePackageJsonShape(JSON.parse(await fs.readFile(fullPath, 'utf8')), fullPath);
+  const incoming = await validatePackageJsonShape(JSON.parse(lintTemplate), 'enable-linting.package.json.tpl');
+
+  const base = { ...current };
+
+  const currentScripts = toStringMap(current.scripts);
+  const incomingScripts = toStringMap(incoming.scripts);
+
+  const scripts = { ...currentScripts };
+  scripts['lint:register'] = incomingScripts['lint:register'] ?? 'trv eslint:register';
+  scripts.lint = scripts.lint ?? incomingScripts.lint ?? 'npm run lint:register && trv eslint';
+  scripts['lint:fix'] = scripts['lint:fix'] ?? incomingScripts['lint:fix'] ?? 'npm run lint:register && trv eslint --fix';
+
+  const devDependencies = { ...toStringMap(current.devDependencies) };
+  for (const [name, version] of Object.entries(toStringMap(incoming.devDependencies))) {
+    if (!devDependencies[name]) {
+      devDependencies[name] = version;
+    }
+  }
+
+  const merged = {
+    ...base,
+    type: toOptionalString(current.type) ?? toOptionalString(incoming.type),
+    scripts,
+    devDependencies
+  };
+
+  await fs.writeFile(fullPath, `${JSON.stringify(merged, null, 2)}\n`, 'utf8');
   artifacts.push({ operationId, file: fullPath, status: 'created' });
 }
 
@@ -519,7 +602,7 @@ async function execEnableLinting(
   request: ExecutionRequest,
   artifacts: ExecutionArtifact[]
 ): Promise<void> {
-  await writeFile(
+  await mergeLintPackageJson(
     'enable-linting',
     path.join(baseDir, 'package.json'),
     await renderSnippet('enable-linting.package.json.tpl'),
