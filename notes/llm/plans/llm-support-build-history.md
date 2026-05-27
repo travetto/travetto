@@ -41,6 +41,11 @@ Purpose: Capture what was implemented, key architectural decisions, and verifica
 - Migrated MCP tests away from custom shape guards to schema validation.
 - Updated helper style to `schema.from(payload as Any)` where applied.
 - Removed unnecessary `@Required(false)` decorators on optional schema fields.
+- Added execution coverage for overwrite conflict behavior.
+- Added execution coverage for monorepo workspace path/name bootstrap permutations.
+- Added negative-path execute validation test in tooling boundary tests.
+- Added MCP tool failure-shaping test for JSON-RPC error mapping (`-32000`).
+- Standardized runtime/tooling bind+validate helpers on non-assertion-safe binding (`schema.from({})` + guarded assign) to satisfy no-type-assertion rules while preserving behavior.
 
 ### Notable Design Decisions
 1. Schema classes are the source of truth for boundary contracts.

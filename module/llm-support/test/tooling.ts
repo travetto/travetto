@@ -91,4 +91,64 @@ class LlmSupportToolingTest {
 
     await fs.access(path.join(target, 'package.json'));
   }
+
+  @Test()
+  async skipsExistingFilesWhenOverwriteIsFalse() {
+    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-tooling-overwrite-'));
+
+    await runLlmSupportTool('llm_support_execute', {
+      operations: ['project-bootstrap'],
+      targetDir: target,
+      apply: true,
+      projectName: 'overwrite-app'
+    });
+
+    const output = await runLlmSupportTool('llm_support_execute', {
+      operations: ['project-bootstrap'],
+      targetDir: target,
+      apply: true,
+      projectName: 'overwrite-app'
+    });
+
+    const bound = await bindAndValidate(ExecutionResponseSchema, output);
+    assert(bound.dryRun === false);
+    assert(bound.artifacts.some(item => item.status === 'skipped'));
+    assert(bound.artifacts.some(item => item.reason === 'File already exists. Use --overwrite to replace.'));
+  }
+
+  @Test()
+  async supportsMonorepoWorkspaceBootstrap() {
+    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-tooling-monorepo-'));
+
+    const output = await runLlmSupportTool('llm_support_execute', {
+      operations: ['project-bootstrap'],
+      targetDir: target,
+      apply: true,
+      monorepo: true,
+      workspacePath: '/packages/api service/',
+      workspaceName: 'Demo API',
+      projectName: 'Demo Root'
+    });
+
+    const bound = await bindAndValidate(ExecutionResponseSchema, output);
+    assert(bound.dryRun === false);
+    assert(bound.artifacts.some(item => item.status === 'created'));
+
+    await fs.access(path.join(target, 'package.json'));
+    await fs.access(path.join(target, 'packages/api-service/package.json'));
+    await fs.access(path.join(target, 'packages/api-service/resources/application.yml'));
+    await fs.access(path.join(target, 'packages/api-service/src/service/home.ts'));
+    await fs.access(path.join(target, 'packages/api-service/src/web/home.ts'));
+  }
+
+  @Test()
+  async rejectsExecuteWhenOperationsTypeIsInvalid() {
+    await assert.rejects(
+      () => runLlmSupportTool('llm_support_execute', {
+        operations: 5,
+        targetDir: '.'
+      }),
+      /validation errors/i
+    );
+  }
 }
