@@ -6,4 +6,6 @@ export * from './src/snippet-shapes.ts';
 export * from './src/recommendation.ts';
 export * from './src/plan.ts';
 export * from './src/execute.ts';
+export * from './src/tooling.ts';
+export * from './src/mcp.ts';
 export * from './src/consumer-docs.ts';

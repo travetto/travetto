@@ -73,3 +73,19 @@ The CLI surface is designed for narrow, predictable selection:
    *  `--workspace-name` - customize the generated workspace package name used by root scripts.
 
 That combination lets you start broad, then narrow to exactly the path you want before making changes.
+
+## MCP Server
+The module also exposes a minimal stdio MCP entrypoint for external LLM tool-calling integration.
+
+Run:
+
+```bash
+trv llm:support:mcp
+```
+
+Supported methods:
+   *  `initialize`
+   *  `tools/list`
+   *  `tools/call`
+
+The command accepts newline-delimited JSON-RPC 2.0 requests on stdin and writes newline-delimited JSON-RPC responses to stdout.
