@@ -1,26 +1,4 @@
-export interface InstallGuidance {
-  id: string;
-  title: string;
-  required: string[];
-  optional: string[];
-  notes: string[];
-}
-
-export interface DependencyGraphNode {
-  package: string;
-  requires: string[];
-  optionalAdapters: string[];
-}
-
-export interface WorkflowGuidance {
-  id: string;
-  title: string;
-  intent: string;
-  recommendedModules: string[];
-  optionalModules: string[];
-  commandDiscoveryRule: string;
-  verification: string[];
-}
+import { MinLength, Required, Schema } from '@travetto/schema';
 
 export type AdapterNeed = 'blob' | 'query' | 'indexed' | 'expiry';
 
@@ -37,88 +15,196 @@ export type LlmOperationCategory =
   | 'config'
   | 'cache';
 
-export interface LlmOperation {
-  id: string;
-  category: LlmOperationCategory;
-  title: string;
-  summary: string;
-  requiredModules: string[];
-  optionalModules: string[];
-  excluded?: boolean;
+export type ExecutionArtifactStatus = 'planned' | 'created' | 'skipped';
+
+@Schema()
+export class DependencyGraphNodeSchema {
+  package = '';
+  requires: string[] = [];
+  optionalAdapters: string[] = [];
 }
 
-export interface SnippetSource {
-  sourceId: string;
-  repositoryId: string;
-  filePath: string;
-  capabilityTags: string[];
-  operationIds?: string[];
-  applicability?: string[];
-  notes: string[];
-}
-
-export interface RecommendationQuery {
+@Schema()
+export class RecommendationQuerySchema {
+  @Required(false)
   bundles?: string[];
+
+  @Required(false)
   workflows?: string[];
+
+  @Required(false)
   operations?: string[];
+
+  @Required(false)
   categories?: LlmOperationCategory[];
+
+  @Required(false)
   snippetTags?: string[];
+
+  @Required(false)
   includeExcluded?: boolean;
 }
 
-export interface RecommendationResponse {
-  bundles: InstallGuidance[];
-  workflows: WorkflowGuidance[];
-  operations: LlmOperation[];
-  snippets: SnippetSource[];
-}
+@Schema()
+export class LlmSupportRecommendToolInput extends RecommendationQuerySchema { }
 
-export interface PlannedChange {
-  step: string;
-  files: string[];
-  rationale: string;
-}
+@Schema()
+export class LlmSupportPlanToolInput extends RecommendationQuerySchema { }
 
-export interface OperationPlan {
-  operationId: string;
-  title: string;
-  requiredModules: string[];
-  optionalModules: string[];
-  changes: PlannedChange[];
-}
+@Schema()
+export class LlmSupportExecuteToolInput {
+  @MinLength(1)
+  operations: string[] = [];
 
-export interface PlanResponse {
-  plans: OperationPlan[];
-  snippets: SnippetSource[];
-}
+  @MinLength(1)
+  targetDir = '.';
 
-export interface ExecutionRequest {
-  operations: string[];
-  targetDir: string;
-  dryRun?: boolean;
+  @Required(false)
+  apply?: boolean;
+
+  @Required(false)
   overwrite?: boolean;
+
+  @Required(false)
   monorepo?: boolean;
+
+  @Required(false)
   workspacePath?: string;
+
+  @Required(false)
   workspaceName?: string;
+
+  @Required(false)
   routePath?: string;
+
+  @Required(false)
   controllerName?: string;
+
+  @Required(false)
   serviceName?: string;
+
+  @Required(false)
   modelName?: string;
+
+  @Required(false)
   projectName?: string;
+
+  @Required(false)
   emailName?: string;
+
+  @Required(false)
   sendRoutePath?: string;
 }
 
-export interface ExecutionArtifact {
-  operationId: string;
-  file: string;
-  status: 'planned' | 'created' | 'skipped';
+@Schema()
+export class InstallGuidanceSchema {
+  id = '';
+  title = '';
+  required: string[] = [];
+  optional: string[] = [];
+  notes: string[] = [];
+}
+
+@Schema()
+export class WorkflowGuidanceSchema {
+  id = '';
+  title = '';
+  intent = '';
+  recommendedModules: string[] = [];
+  optionalModules: string[] = [];
+  commandDiscoveryRule = '';
+  verification: string[] = [];
+}
+
+@Schema()
+export class LlmOperationSchema {
+  id = '';
+  category: LlmOperationCategory = 'project';
+  title = '';
+  summary = '';
+  requiredModules: string[] = [];
+  optionalModules: string[] = [];
+
+  @Required(false)
+  excluded?: boolean;
+}
+
+@Schema()
+export class SnippetSourceSchema {
+  sourceId = '';
+  repositoryId = '';
+  filePath = '';
+  capabilityTags: string[] = [];
+
+  @Required(false)
+  operationIds?: string[];
+
+  @Required(false)
+  applicability?: string[];
+
+  notes: string[] = [];
+}
+
+@Schema()
+export class PlannedChangeSchema {
+  step = '';
+  files: string[] = [];
+  rationale = '';
+}
+
+@Schema()
+export class OperationPlanSchema {
+  operationId = '';
+  title = '';
+  requiredModules: string[] = [];
+  optionalModules: string[] = [];
+  changes: PlannedChangeSchema[] = [];
+}
+
+@Schema()
+export class ExecutionArtifactSchema {
+  operationId = '';
+  file = '';
+  status: ExecutionArtifactStatus = 'planned';
+
+  @Required(false)
   reason?: string;
 }
 
-export interface ExecutionResponse {
-  dryRun: boolean;
-  targetDir: string;
-  artifacts: ExecutionArtifact[];
-  warnings: string[];
+@Schema()
+export class RecommendationResponseSchema {
+  bundles: InstallGuidanceSchema[] = [];
+  workflows: WorkflowGuidanceSchema[] = [];
+  operations: LlmOperationSchema[] = [];
+  snippets: SnippetSourceSchema[] = [];
 }
+
+@Schema()
+export class PlanResponseSchema {
+  plans: OperationPlanSchema[] = [];
+  snippets: SnippetSourceSchema[] = [];
+}
+
+@Schema()
+export class ExecutionResponseSchema {
+  dryRun = true;
+  targetDir = '';
+  artifacts: ExecutionArtifactSchema[] = [];
+  warnings: string[] = [];
+}
+
+export type DependencyGraphNode = InstanceType<typeof DependencyGraphNodeSchema>;
+export type RecommendationQuery = InstanceType<typeof RecommendationQuerySchema>;
+export type InstallGuidance = InstanceType<typeof InstallGuidanceSchema>;
+export type WorkflowGuidance = InstanceType<typeof WorkflowGuidanceSchema>;
+export type LlmOperation = InstanceType<typeof LlmOperationSchema>;
+export type SnippetSource = InstanceType<typeof SnippetSourceSchema>;
+export type PlannedChange = InstanceType<typeof PlannedChangeSchema>;
+export type OperationPlan = InstanceType<typeof OperationPlanSchema>;
+export type RecommendationResponse = InstanceType<typeof RecommendationResponseSchema>;
+export type PlanResponse = InstanceType<typeof PlanResponseSchema>;
+export type ExecutionArtifact = InstanceType<typeof ExecutionArtifactSchema>;
+export type ExecutionResponse = InstanceType<typeof ExecutionResponseSchema>;
+export type ExecutionRequest = Omit<InstanceType<typeof LlmSupportExecuteToolInput>, 'apply'> & {
+  dryRun?: boolean;
+};
