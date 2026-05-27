@@ -21,8 +21,7 @@
     "src",
     "support",
     "resources",
-    "llm",
-    "test"
+    "llm"
   ],
   "scripts": {
     "prepack": "trv llm:support:package:consumer:docs"
@@ -51,7 +50,7 @@
     "workspaceInclude": true,
     "displayName": "LLM Support",
     "roles": [
-      "std"
+      "build"
     ]
   },
   "publishConfig": {
