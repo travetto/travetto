@@ -123,4 +123,26 @@ class LlmSupportMcpTest {
     assert(response.error);
     assert(response.error?.code === -32601);
   }
+
+  @Test()
+  async mapsToolExecutionFailuresToServerError() {
+    const output = await handleMcpRequest({
+      jsonrpc: '2.0',
+      id: 5,
+      method: 'tools/call',
+      params: {
+        name: 'llm_support_execute',
+        arguments: {
+          operations: 5,
+          targetDir: '.'
+        }
+      }
+    });
+
+    assert(output);
+    const response = await bindAndValidate(JsonRpcResponseSchema, output);
+    assert(response.error);
+    assert(response.error?.code === -32000);
+    assert((response.error?.message ?? '').length > 0);
+  }
 }

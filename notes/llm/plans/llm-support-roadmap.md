@@ -6,8 +6,8 @@ Purpose: Capture remaining work and sequencing for llm-support.
 
 ### Near-Term Priorities
 1. Contract Consolidation
-- Standardize bind+validate helper usage across runtime and tests.
-- Decide and document whether `schema.from(payload as Any)` is mandatory in-module.
+- Completed: standardized bind+validate helper usage across runtime and tests.
+- Completed: decided `schema.from(payload as Any)` is not mandatory in-module because no-type-assertion rules apply in runtime/tooling files.
 - Minimize test-local duplicate schemas where runtime schemas are reusable.
 
 2. MCP Contract Reuse
@@ -20,9 +20,9 @@ Purpose: Capture remaining work and sequencing for llm-support.
 - Re-audit snippet metadata (`operationIds`, tags, applicability) for drift.
 
 4. Execution Coverage Expansion
-- Add overwrite conflict path tests.
-- Add monorepo path/name combination tests.
-- Add negative-path tests for invalid payloads and tool failure behavior.
+- Completed: overwrite conflict path tests.
+- Completed: monorepo path/name combination tests.
+- Completed: negative-path tests for invalid payloads and tool failure behavior.
 
 5. Documentation Alignment
 - Add/refresh examples for tooling and MCP invocation payloads.
