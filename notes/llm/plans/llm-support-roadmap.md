@@ -15,9 +15,9 @@ Purpose: Capture remaining work and sequencing for llm-support.
 - Keep JSON-RPC envelopes explicit and stable for external consumers.
 
 3. Guidance Data Freshness
-- Re-audit operation metadata against current module capability.
-- Re-audit workflow guidance command references against `cli:schema` output.
-- Re-audit snippet metadata (`operationIds`, tags, applicability) for drift.
+- Completed: operation metadata audit against current module capability, including executor linkage checks.
+- Completed: added workflow guidance consistency guardrails (unique IDs, `cli:schema` command rule, non-empty recommended modules).
+- Completed: added snippet metadata drift guardrails verifying all snippet `operationIds` map to valid operations.
 
 4. Execution Coverage Expansion
 - Completed: overwrite conflict path tests.
