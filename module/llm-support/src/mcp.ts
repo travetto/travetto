@@ -31,6 +31,48 @@ export class JsonRpcResponseSchema {
   error?: JsonRpcErrorSchema;
 }
 
+@Schema()
+export class McpInitializeCapabilitiesSchema {
+  tools?: object;
+}
+
+@Schema()
+export class McpInitializeServerInfoSchema {
+  name?: string;
+  version?: string;
+}
+
+@Schema()
+export class McpInitializeResultSchema {
+  protocolVersion?: string;
+  capabilities?: McpInitializeCapabilitiesSchema;
+  serverInfo?: McpInitializeServerInfoSchema;
+}
+
+@Schema()
+export class McpToolDefinitionSchema {
+  name = '';
+  description = '';
+  inputSchema?: object;
+}
+
+@Schema()
+export class McpToolsListResultSchema {
+  tools: McpToolDefinitionSchema[] = [];
+}
+
+@Schema()
+export class McpToolCallContentSchema {
+  type = '';
+  text = '';
+}
+
+@Schema()
+export class McpToolCallResultSchema {
+  content: McpToolCallContentSchema[] = [];
+  structuredContent?: unknown;
+}
+
 export type JsonRpcRequest = InstanceType<typeof JsonRpcRequestSchema>;
 export type JsonRpcResponse = InstanceType<typeof JsonRpcResponseSchema>;
 

@@ -8,7 +8,7 @@ Purpose: Capture remaining work and sequencing for llm-support.
 1. Contract Consolidation
 - Completed: standardized bind+validate helper usage across runtime and tests.
 - Completed: decided `schema.from(payload as Any)` is not mandatory in-module because no-type-assertion rules apply in runtime/tooling files.
-- Minimize test-local duplicate schemas where runtime schemas are reusable.
+- Completed: minimized test-local duplicate schemas by promoting reusable MCP result schemas to runtime exports and reusing them in tests.
 
 2. MCP Contract Reuse
 - Evaluate exporting additional typed schemas for common MCP `result` payloads.
