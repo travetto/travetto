@@ -98,6 +98,8 @@ export interface ExecutionRequest {
   dryRun?: boolean;
   overwrite?: boolean;
   monorepo?: boolean;
+  workspacePath?: string;
+  workspaceName?: string;
   routePath?: string;
   controllerName?: string;
   serviceName?: string;

@@ -73,6 +73,21 @@ function toPackageName(input: string, fallback: string): string {
   return safe || fallback;
 }
 
+function toWorkspacePath(input: string | undefined, fallback = 'packages/app'): string {
+  const cleaned = (input ?? '').trim();
+  if (!cleaned) {
+    return fallback;
+  }
+
+  const segments = cleaned
+    .replace(/^\/+|\/+$/g, '')
+    .split('/')
+    .filter(Boolean)
+    .map((part, idx) => toPackageName(part, idx === 0 ? 'packages' : 'app'));
+
+  return segments.length ? segments.join('/') : fallback;
+}
+
 async function exists(file: string): Promise<boolean> {
   try {
     await fs.access(file);
@@ -171,7 +186,9 @@ async function execProjectBootstrap(
   const projectName = request.projectName ?? path.basename(baseDir);
   const packageName = toPackageName(projectName, 'travetto-app');
   const monorepo = request.monorepo === true;
-  const appDir = monorepo ? path.join(baseDir, 'packages/app') : baseDir;
+  const workspacePath = monorepo ? toWorkspacePath(request.workspacePath) : '';
+  const workspaceName = monorepo ? toPackageName(request.workspaceName ?? `${packageName}-app`, `${packageName}-app`) : packageName;
+  const appDir = monorepo ? path.join(baseDir, workspacePath) : baseDir;
 
   if (monorepo) {
     await writeFile(
@@ -179,7 +196,7 @@ async function execProjectBootstrap(
       path.join(baseDir, 'package.json'),
       await renderSnippet('project-bootstrap.monorepo.package.json.tpl', {
         projectName: packageName,
-        workspaceName: `${packageName}-app`
+        workspaceName
       }),
       request,
       artifacts
@@ -188,7 +205,7 @@ async function execProjectBootstrap(
     await writeFile(
       'project-bootstrap',
       path.join(appDir, 'package.json'),
-      await renderSnippet('project-bootstrap.package.json.tpl', { projectName: `${packageName}-app` }),
+      await renderSnippet('project-bootstrap.package.json.tpl', { projectName: workspaceName }),
       request,
       artifacts
     );

@@ -28,6 +28,12 @@ export class LlmSupportExecuteCommand extends LlmSupportCommandBase {
   @CliFlag({ full: 'monorepo' })
   monorepo = false;
 
+  @CliFlag({ full: 'workspace-path' })
+  workspacePath?: string;
+
+  @CliFlag({ full: 'workspace-name' })
+  workspaceName?: string;
+
   @CliFlag({ full: 'route-path' })
   routePath?: string;
 
@@ -58,6 +64,8 @@ export class LlmSupportExecuteCommand extends LlmSupportCommandBase {
       dryRun: !this.apply,
       overwrite: this.overwrite,
       monorepo: this.monorepo,
+      workspacePath: this.workspacePath,
+      workspaceName: this.workspaceName,
       routePath: this.routePath,
       controllerName: this.controllerName,
       serviceName: this.serviceName,
