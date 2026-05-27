@@ -1,57 +1,22 @@
 import assert from 'node:assert';
 
 import type { Any, Class } from '@travetto/runtime';
-import { Schema, SchemaValidator } from '@travetto/schema';
+import { SchemaValidator } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
-import { handleMcpRequest, JsonRpcResponseSchema } from '../src/mcp.ts';
+import { RecommendationResponseSchema } from '../src/types.ts';
+import {
+  handleMcpRequest,
+  JsonRpcResponseSchema,
+  McpInitializeResultSchema,
+  McpToolCallResultSchema,
+  McpToolsListResultSchema
+} from '../src/mcp.ts';
 
 async function bindAndValidate<T extends object>(schema: Class<T>, payload: unknown): Promise<T> {
   const bound = schema.from(payload as Any);
   await SchemaValidator.validate(schema, bound);
   return bound;
-}
-
-@Schema()
-class InitializeCapabilitiesSchema {
-  tools?: object;
-}
-
-@Schema()
-class InitializeServerInfoSchema {
-  name?: string;
-}
-
-@Schema()
-class InitializeResultSchema {
-  capabilities?: InitializeCapabilitiesSchema;
-
-  serverInfo?: InitializeServerInfoSchema;
-}
-
-@Schema()
-class ToolSummarySchema {
-  name = '';
-}
-
-@Schema()
-class ToolsListResultSchema {
-  tools: ToolSummarySchema[] = [];
-}
-
-@Schema()
-class LlmOperationResultSchema {
-  category = '';
-}
-
-@Schema()
-class RecommendStructuredResultSchema {
-  operations: LlmOperationResultSchema[] = [];
-}
-
-@Schema()
-class RecommendCallResultSchema {
-  structuredContent?: RecommendStructuredResultSchema;
 }
 
 @Suite()
@@ -67,7 +32,7 @@ class LlmSupportMcpTest {
 
     assert(output);
     const response = await bindAndValidate(JsonRpcResponseSchema, output);
-    const result = await bindAndValidate(InitializeResultSchema, response.result);
+    const result = await bindAndValidate(McpInitializeResultSchema, response.result);
     assert(result.capabilities?.tools);
     assert(result.serverInfo?.name === '@travetto/llm-support');
   }
@@ -82,7 +47,7 @@ class LlmSupportMcpTest {
 
     assert(output);
     const response = await bindAndValidate(JsonRpcResponseSchema, output);
-    const result = await bindAndValidate(ToolsListResultSchema, response.result);
+    const result = await bindAndValidate(McpToolsListResultSchema, response.result);
     const tools = result.tools;
     const names = tools.map(item => item.name);
     assert(names.includes('llm_support_recommend'));
@@ -104,8 +69,8 @@ class LlmSupportMcpTest {
 
     assert(output);
     const response = await bindAndValidate(JsonRpcResponseSchema, output);
-    const result = await bindAndValidate(RecommendCallResultSchema, response.result);
-    const structured = result.structuredContent;
+    const result = await bindAndValidate(McpToolCallResultSchema, response.result);
+    const structured = await bindAndValidate(RecommendationResponseSchema, result.structuredContent);
     assert(structured?.operations?.length);
     assert(structured?.operations?.every(item => item.category === 'web'));
   }

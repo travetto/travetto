@@ -46,6 +46,7 @@ Purpose: Capture what was implemented, key architectural decisions, and verifica
 - Added negative-path execute validation test in tooling boundary tests.
 - Added MCP tool failure-shaping test for JSON-RPC error mapping (`-32000`).
 - Standardized runtime/tooling bind+validate helpers on non-assertion-safe binding (`schema.from({})` + guarded assign) to satisfy no-type-assertion rules while preserving behavior.
+- Promoted reusable MCP result schemas into runtime exports and removed duplicate MCP result schema definitions from tests.
 
 ### Notable Design Decisions
 1. Schema classes are the source of truth for boundary contracts.
