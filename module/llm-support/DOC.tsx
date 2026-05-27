@@ -78,6 +78,8 @@ export const text = <>
       <li>{d.input('--snippet-tags')} - narrow the snippet catalog.</li>
       <li>{d.input('--include-excluded')} - include excluded operations when you need the full catalog.</li>
       <li>{d.input('--monorepo')} - when used with {d.input('project-bootstrap')}, generate a workspace root and {d.input('packages/app')} project layout.</li>
+      <li>{d.input('--workspace-path')} - customize the monorepo app location (for example {d.input('packages/api')}).</li>
+      <li>{d.input('--workspace-name')} - customize the generated workspace package name used by root scripts.</li>
     </ul>
 
     That combination lets you start broad, then narrow to exactly the path you want before making changes.

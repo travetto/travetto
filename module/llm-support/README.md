@@ -69,5 +69,7 @@ The CLI surface is designed for narrow, predictable selection:
    *  `--snippet-tags` - narrow the snippet catalog.
    *  `--include-excluded` - include excluded operations when you need the full catalog.
    *  `--monorepo` - when used with `project-bootstrap`, generate a workspace root and `packages/app` project layout.
+   *  `--workspace-path` - customize the monorepo app location (for example `packages/api`).
+   *  `--workspace-name` - customize the generated workspace package name used by root scripts.
 
 That combination lets you start broad, then narrow to exactly the path you want before making changes.

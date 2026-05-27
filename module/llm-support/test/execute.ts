@@ -136,6 +136,42 @@ class LlmSupportExecuteTest {
   }
 
   @Test()
+  async projectBootstrapSupportsCustomMonorepoWorkspace() {
+    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-bootstrap-mono-custom-'));
+
+    const output = await executeOperations({
+      operations: ['project-bootstrap'],
+      targetDir: target,
+      dryRun: false,
+      projectName: 'sample-mono-custom',
+      monorepo: true,
+      workspacePath: 'packages/api',
+      workspaceName: 'sample-mono-workspace'
+    });
+
+    assert(output.artifacts.some(item => item.status === 'created'));
+
+    const rootPkgFile = path.join(target, 'package.json');
+    const appPkgFile = path.join(target, 'packages/api/package.json');
+    const appConfigFile = path.join(target, 'packages/api/resources/application.yml');
+
+    await fs.access(rootPkgFile);
+    await fs.access(appPkgFile);
+    await fs.access(appConfigFile);
+
+    const rootPkgRaw = JSON.parse(await fs.readFile(rootPkgFile, 'utf8')) as {
+      scripts?: Record<string, string>;
+    };
+    const appPkgRaw = JSON.parse(await fs.readFile(appPkgFile, 'utf8')) as {
+      name?: string;
+    };
+
+    assert(rootPkgRaw.scripts?.start === 'npm run -w sample-mono-workspace start');
+    assert(rootPkgRaw.scripts?.test === 'npm run -w sample-mono-workspace test');
+    assert(appPkgRaw.name === 'sample-mono-workspace');
+  }
+
+  @Test()
   async applyCreatesFiles() {
     const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-apply-'));
 
