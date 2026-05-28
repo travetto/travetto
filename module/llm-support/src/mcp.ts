@@ -1,4 +1,5 @@
 import { Schema } from '@travetto/schema';
+import { JSONUtil } from '@travetto/runtime';
 
 import { getLlmSupportToolDefinitions, runLlmSupportTool, type LlmSupportToolName } from './tooling.ts';
 
@@ -152,7 +153,7 @@ export async function handleMcpRequest(input: JsonRpcRequest): Promise<JsonRpcRe
           content: [
             {
               type: 'text',
-              text: JSON.stringify(output, null, 2)
+              text: JSONUtil.toUTF8(output, { indent: 2 })
             }
           ],
           structuredContent: output

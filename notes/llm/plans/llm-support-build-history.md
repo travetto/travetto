@@ -47,10 +47,13 @@ Purpose: Capture what was implemented, key architectural decisions, and verifica
 - Added MCP tool failure-shaping test for JSON-RPC error mapping (`-32000`).
 - Standardized runtime/tooling bind+validate helpers on non-assertion-safe binding (`schema.from({})` + guarded assign) to satisfy no-type-assertion rules while preserving behavior.
 - Promoted reusable MCP result schemas into runtime exports and removed duplicate MCP result schema definitions from tests.
+- Finalized MCP contract reuse by keeping exported common result schemas and explicit JSON-RPC envelope schemas as the stable boundary.
 - Added guidance freshness guardrails validating snippet `operationIds` against known operations.
 - Added workflow guidance integrity checks (unique IDs, `cli:schema` rule presence, non-empty recommended modules).
 - Added operation metadata integrity checks (kebab-case IDs, uniqueness, non-empty title/summary, module list hygiene).
 - Added executor linkage guardrail ensuring all non-excluded operations remain executable.
+- Added MCP/tooling invocation examples to module docs and regenerated `README.md` and `DOC.html` from `DOC.tsx`.
+- Added contributor contract-model documentation covering schema-first boundaries and class-derived type aliases.
 
 ### Notable Design Decisions
 1. Schema classes are the source of truth for boundary contracts.

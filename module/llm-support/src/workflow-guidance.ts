@@ -156,5 +156,65 @@ export const WORKFLOWS: WorkflowGuidance[] = [
       'Ensure renderer and transport wiring are both validated by tests or snapshots.',
       'Ensure send integration supports direct and worker-based execution paths.'
     ]
+  },
+  {
+    id: 'openapi-spec-pipeline',
+    title: 'Add OpenAPI spec pipeline',
+    intent: 'Generate and persist OpenAPI specs as build artifacts and optionally commit outputs.',
+    recommendedModules: ['@travetto/openapi', '@travetto/web', '@travetto/schema'],
+    optionalModules: ['@travetto/cli'],
+    commandDiscoveryRule: 'Validate OpenAPI command signatures with npx trv cli:schema before recommending command invocations.',
+    verification: [
+      'Ensure openapi:spec output path and format match repository conventions.',
+      'Ensure generated spec is available as CI artifact for downstream use.'
+    ]
+  },
+  {
+    id: 'openapi-client-generation',
+    title: 'Add OpenAPI client generation workflow',
+    intent: 'Generate API clients from OpenAPI artifacts and keep them synchronized with endpoint changes.',
+    recommendedModules: ['@travetto/openapi'],
+    optionalModules: ['@travetto/web-rpc', '@travetto/web'],
+    commandDiscoveryRule: 'Validate openapi:client command signatures with npx trv cli:schema before recommending formats or arguments.',
+    verification: [
+      'Ensure generated client output location is stable and committed when required.',
+      'Ensure workflow runs after spec generation and fails fast on generator errors.'
+    ]
+  },
+  {
+    id: 'aws-lambda-package-and-deploy',
+    title: 'Add AWS Lambda package and deploy workflow',
+    intent: 'Package web entrypoint for AWS Lambda and deploy artifacts through CI.',
+    recommendedModules: ['@travetto/web-aws-lambda', '@travetto/pack'],
+    optionalModules: ['@travetto/web', '@travetto/config'],
+    commandDiscoveryRule: 'Validate pack:lambda command signatures with npx trv cli:schema before recommending packaging flags.',
+    verification: [
+      'Ensure lambda package artifact is produced and published by CI.',
+      'Ensure workflow includes environment-specific deploy step stubs.'
+    ]
+  },
+  {
+    id: 'pack-docker-release',
+    title: 'Add Docker pack release workflow',
+    intent: 'Build and publish container images from Travetto pack:docker in CI.',
+    recommendedModules: ['@travetto/pack'],
+    optionalModules: ['@travetto/runtime', '@travetto/config'],
+    commandDiscoveryRule: 'Validate pack:docker command signatures with npx trv cli:schema before recommending image/tag flags.',
+    verification: [
+      'Ensure image tags, registry targets, and build platform inputs are explicit.',
+      'Ensure workflow supports dry runs or stage-only builds for PR validation.'
+    ]
+  },
+  {
+    id: 'repo-version-release',
+    title: 'Add repo version release flow',
+    intent: 'Automate monorepo versioning with change-aware release mode and optional tagging.',
+    recommendedModules: ['@travetto/repo'],
+    optionalModules: ['@travetto/registry', '@travetto/pack'],
+    commandDiscoveryRule: 'Validate repo:version and repo:publish command signatures with npx trv cli:schema before suggesting release automation.',
+    verification: [
+      'Ensure release mode and semver level are explicit and reviewed in CI inputs.',
+      'Ensure release commits and tags align with repository policy.'
+    ]
   }
 ];

@@ -5,7 +5,7 @@ import path from 'node:path';
 
 import { SchemaValidator } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
-import { JSONUtil, RuntimeResources } from '@travetto/runtime';
+import { FileLoader, JSONUtil, RuntimeResources } from '@travetto/runtime';
 
 import { executeOperations, getUnimplementedOperations } from '../src/execute.ts';
 import { recommendOperations } from '../src/recommendation.ts';
@@ -20,12 +20,28 @@ async function renderSnippet(name: string, params: Record<string, string> = {}):
   return source.replace(/\{\{([a-zA-Z0-9_]+)\}\}/g, (_all, key: string) => params[key] ?? '');
 }
 
+type TargetContext = {
+  target: string;
+  loader: FileLoader;
+};
+
+async function createTarget(prefix: string): Promise<TargetContext> {
+  const target = await fs.mkdtemp(path.join(os.tmpdir(), prefix));
+  return { target, loader: new FileLoader([target]) };
+}
+
+async function assertFilesExist(loader: FileLoader, files: string[]): Promise<void> {
+  for (const file of files) {
+    await loader.resolve(file);
+  }
+}
+
 @Suite()
 class LlmSupportExecuteTest {
 
   @Test()
   async dryRunDoesNotCreateFiles() {
-    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-dry-run-'));
+    const { target, loader } = await createTarget('llm-support-dry-run-');
 
     const output = await executeOperations({
       operations: ['project-bootstrap'],
@@ -37,19 +53,19 @@ class LlmSupportExecuteTest {
     assert(output.artifacts.some(item => item.file.endsWith('package.json')));
 
     await assert.rejects(
-      () => fs.access(path.join(target, 'resources/application.yml')),
-      /ENOENT/
+      () => loader.resolve('resources/application.yml'),
+      /Unable to find/
     );
 
     await assert.rejects(
-      () => fs.access(path.join(target, 'package.json')),
-      /ENOENT/
+      () => loader.resolve('package.json'),
+      /Unable to find/
     );
   }
 
   @Test()
   async projectBootstrapCreatesPackageAndCoreFiles() {
-    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-bootstrap-'));
+    const { target, loader } = await createTarget('llm-support-bootstrap-');
 
     const output = await executeOperations({
       operations: ['project-bootstrap'],
@@ -60,22 +76,19 @@ class LlmSupportExecuteTest {
 
     assert(output.artifacts.some(item => item.status === 'created'));
 
-    const pkgFile = path.join(target, 'package.json');
-    const appConfigFile = path.join(target, 'resources/application.yml');
-    const serviceFile = path.join(target, 'src/service/home.ts');
-    const controllerFile = path.join(target, 'src/web/home.ts');
+    await assertFilesExist(loader, [
+      'package.json',
+      'resources/application.yml',
+      'src/service/home.ts',
+      'src/web/home.ts'
+    ]);
 
-    await fs.access(pkgFile);
-    await fs.access(appConfigFile);
-    await fs.access(serviceFile);
-    await fs.access(controllerFile);
-
-    const pkgRaw = JSON.parse(await fs.readFile(pkgFile, 'utf8')) as {
+    const pkgRaw: {
       name?: string;
       scripts?: Record<string, string>;
       dependencies?: Record<string, string>;
       devDependencies?: Record<string, string>;
-    };
+    } = JSONUtil.fromUTF8(await loader.readUTF8('package.json'));
 
     assert(pkgRaw.name === 'sample-bootstrap-app');
     assert(pkgRaw.scripts?.start === 'trv web:http');
@@ -89,7 +102,7 @@ class LlmSupportExecuteTest {
 
   @Test()
   async projectBootstrapCreatesMonorepoLayout() {
-    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-bootstrap-mono-'));
+    const { target, loader } = await createTarget('llm-support-bootstrap-mono-');
 
     const output = await executeOperations({
       operations: ['project-bootstrap'],
@@ -101,28 +114,24 @@ class LlmSupportExecuteTest {
 
     assert(output.artifacts.some(item => item.status === 'created'));
 
-    const rootPkgFile = path.join(target, 'package.json');
-    const appPkgFile = path.join(target, 'packages/app/package.json');
-    const appConfigFile = path.join(target, 'packages/app/resources/application.yml');
-    const serviceFile = path.join(target, 'packages/app/src/service/home.ts');
-    const controllerFile = path.join(target, 'packages/app/src/web/home.ts');
+    await assertFilesExist(loader, [
+      'package.json',
+      'packages/app/package.json',
+      'packages/app/resources/application.yml',
+      'packages/app/src/service/home.ts',
+      'packages/app/src/web/home.ts'
+    ]);
 
-    await fs.access(rootPkgFile);
-    await fs.access(appPkgFile);
-    await fs.access(appConfigFile);
-    await fs.access(serviceFile);
-    await fs.access(controllerFile);
-
-    const rootPkgRaw = JSON.parse(await fs.readFile(rootPkgFile, 'utf8')) as {
+    const rootPkgRaw: {
       name?: string;
       workspaces?: string[];
       scripts?: Record<string, string>;
-    };
-    const appPkgRaw = JSON.parse(await fs.readFile(appPkgFile, 'utf8')) as {
+    } = JSONUtil.fromUTF8(await loader.readUTF8('package.json'));
+    const appPkgRaw: {
       name?: string;
       dependencies?: Record<string, string>;
       devDependencies?: Record<string, string>;
-    };
+    } = JSONUtil.fromUTF8(await loader.readUTF8('packages/app/package.json'));
 
     assert(rootPkgRaw.name === 'sample-mono-app');
     assert(rootPkgRaw.workspaces?.includes('packages/*'));
@@ -137,7 +146,7 @@ class LlmSupportExecuteTest {
 
   @Test()
   async projectBootstrapSupportsCustomMonorepoWorkspace() {
-    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-bootstrap-mono-custom-'));
+    const { target, loader } = await createTarget('llm-support-bootstrap-mono-custom-');
 
     const output = await executeOperations({
       operations: ['project-bootstrap'],
@@ -151,20 +160,18 @@ class LlmSupportExecuteTest {
 
     assert(output.artifacts.some(item => item.status === 'created'));
 
-    const rootPkgFile = path.join(target, 'package.json');
-    const appPkgFile = path.join(target, 'packages/api/package.json');
-    const appConfigFile = path.join(target, 'packages/api/resources/application.yml');
+    await assertFilesExist(loader, [
+      'package.json',
+      'packages/api/package.json',
+      'packages/api/resources/application.yml'
+    ]);
 
-    await fs.access(rootPkgFile);
-    await fs.access(appPkgFile);
-    await fs.access(appConfigFile);
-
-    const rootPkgRaw = JSON.parse(await fs.readFile(rootPkgFile, 'utf8')) as {
+    const rootPkgRaw: {
       scripts?: Record<string, string>;
-    };
-    const appPkgRaw = JSON.parse(await fs.readFile(appPkgFile, 'utf8')) as {
+    } = JSONUtil.fromUTF8(await loader.readUTF8('package.json'));
+    const appPkgRaw: {
       name?: string;
-    };
+    } = JSONUtil.fromUTF8(await loader.readUTF8('packages/api/package.json'));
 
     assert(rootPkgRaw.scripts?.start === 'npm run -w sample-mono-workspace start');
     assert(rootPkgRaw.scripts?.test === 'npm run -w sample-mono-workspace test');
@@ -173,7 +180,7 @@ class LlmSupportExecuteTest {
 
   @Test()
   async applyCreatesFiles() {
-    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-apply-'));
+    const { target, loader } = await createTarget('llm-support-apply-');
 
     const output = await executeOperations({
       operations: ['create-web-route'],
@@ -185,11 +192,7 @@ class LlmSupportExecuteTest {
     });
 
     assert(output.artifacts.some(item => item.status === 'created'));
-    const serviceFile = path.join(target, 'src/service/order.ts');
-    const controllerFile = path.join(target, 'src/web/order.ts');
-
-    await fs.access(serviceFile);
-    await fs.access(controllerFile);
+    await assertFilesExist(loader, ['src/service/order.ts', 'src/web/order.ts']);
 
     const expectedService = await renderSnippet('create-web-route.service.ts.tpl', {
       serviceName: 'OrderService'
@@ -201,8 +204,8 @@ class LlmSupportExecuteTest {
       controllerName: 'OrderController'
     });
 
-    assert((await fs.readFile(serviceFile, 'utf8')) === expectedService);
-    assert((await fs.readFile(controllerFile, 'utf8')) === expectedController);
+    assert((await loader.readUTF8('src/service/order.ts')) === expectedService);
+    assert((await loader.readUTF8('src/web/order.ts')) === expectedController);
   }
 
   @Test()
@@ -221,7 +224,7 @@ class LlmSupportExecuteTest {
 
   @Test()
   async applyCreatesEmailArtifacts() {
-    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-email-'));
+    const { target, loader } = await createTarget('llm-support-email-');
 
     const output = await executeOperations({
       operations: [
@@ -240,22 +243,22 @@ class LlmSupportExecuteTest {
     });
 
     assert(output.artifacts.some(item => item.status === 'created'));
-    await fs.access(path.join(target, 'src/email/templates/welcome.mustache'));
-    await fs.access(path.join(target, 'src/email/schema.ts'));
-    await fs.access(path.join(target, 'src/email/render.ts'));
-    await fs.access(path.join(target, 'src/email/provider.ts'));
-    await fs.access(path.join(target, 'src/config/email.ts'));
-    await fs.access(path.join(target, 'src/web/email.ts'));
-    await fs.access(path.join(target, 'test/email/preview.ts'));
-
-    const fixtureFile = path.join(target, 'test/email/fixtures/transactional.json');
-    await fs.access(fixtureFile);
-    assert((await fs.readFile(fixtureFile, 'utf8')) === await renderSnippet('email-fixture.json.tpl'));
+    await assertFilesExist(loader, [
+      'src/email/templates/welcome.mustache',
+      'src/email/schema.ts',
+      'src/email/render.ts',
+      'src/email/provider.ts',
+      'src/config/email.ts',
+      'src/web/email.ts',
+      'test/email/preview.ts',
+      'test/email/fixtures/transactional.json'
+    ]);
+    assert((await loader.readUTF8('test/email/fixtures/transactional.json')) === await renderSnippet('email-fixture.json.tpl'));
   }
 
   @Test()
   async applyCreatesModelArtifacts() {
-    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-model-'));
+    const { target, loader } = await createTarget('llm-support-model-');
 
     const output = await executeOperations({
       operations: ['model-indexed-assistant', 'model-query-assistant'],
@@ -265,15 +268,17 @@ class LlmSupportExecuteTest {
     });
 
     assert(output.artifacts.some(item => item.status === 'created'));
-    await fs.access(path.join(target, 'src/model/order-item.ts'));
-    await fs.access(path.join(target, 'src/model/order-item.indexes.ts'));
-    await fs.access(path.join(target, 'src/service/order-item-indexed.ts'));
-    await fs.access(path.join(target, 'src/service/order-item-query.ts'));
+    await assertFilesExist(loader, [
+      'src/model/order-item.ts',
+      'src/model/order-item.indexes.ts',
+      'src/service/order-item-indexed.ts',
+      'src/service/order-item-query.ts'
+    ]);
   }
 
   @Test()
   async applyCreatesAdditionalCoreArtifacts() {
-    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-core-'));
+    const { target, loader } = await createTarget('llm-support-core-');
 
     const output = await executeOperations({
       operations: ['rest-rpc-client', 'generate-config', 'generate-test-suite'],
@@ -284,18 +289,20 @@ class LlmSupportExecuteTest {
     });
 
     assert(output.artifacts.some(item => item.status === 'created'));
-    await fs.access(path.join(target, 'src/client/orders.ts'));
-    await fs.access(path.join(target, 'src/client/index.ts'));
-    await fs.access(path.join(target, 'src/config/app.ts'));
-    await fs.access(path.join(target, 'resources/application.yml'));
-    await fs.access(path.join(target, 'resources/local.yml'));
-    await fs.access(path.join(target, 'test/unit/example.ts'));
-    await fs.access(path.join(target, 'test/fixtures/example.json'));
+    await assertFilesExist(loader, [
+      'src/client/orders.ts',
+      'src/client/index.ts',
+      'src/config/app.ts',
+      'resources/application.yml',
+      'resources/local.yml',
+      'test/unit/example.ts',
+      'test/fixtures/example.json'
+    ]);
   }
 
   @Test()
   async applyCreatesWorkflowAndPlatformArtifacts() {
-    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-platform-'));
+    const { target, loader } = await createTarget('llm-support-platform-');
 
     const output = await executeOperations({
       operations: [
@@ -309,11 +316,40 @@ class LlmSupportExecuteTest {
     });
 
     assert(output.artifacts.some(item => item.status === 'created'));
-    await fs.access(path.join(target, '.github/workflows/deploy-api.yml'));
-    await fs.access(path.join(target, '.github/workflows/deploy-ui.yml'));
-    await fs.access(path.join(target, 'src/interceptor/request-logging.ts'));
-    await fs.access(path.join(target, 'src/service/cacheable.ts'));
-    await fs.access(path.join(target, 'src/config/cache.ts'));
+    await assertFilesExist(loader, [
+      '.github/workflows/deploy-api.yml',
+      '.github/workflows/deploy-ui.yml',
+      'src/interceptor/request-logging.ts',
+      'src/service/cacheable.ts',
+      'src/config/cache.ts'
+    ]);
+  }
+
+  @Test()
+  async applyCreatesReleasePipelineArtifacts() {
+    const { target, loader } = await createTarget('llm-support-release-');
+
+    const output = await executeOperations({
+      operations: [
+        'openapi-spec-pipeline',
+        'openapi-client-generation',
+        'aws-lambda-package-and-deploy',
+        'pack-docker-release',
+        'repo-version-release'
+      ],
+      targetDir: target,
+      dryRun: false
+    });
+
+    assert(output.artifacts.some(item => item.status === 'created'));
+    await assertFilesExist(loader, [
+      '.github/workflows/openapi-spec.yml',
+      '.github/workflows/openapi-client.yml',
+      '.github/workflows/deploy-lambda.yml',
+      '.github/workflows/docker-release.yml',
+      '.github/workflows/repo-version-release.yml',
+      'src/client/README.md'
+    ]);
   }
 
   @Test()
@@ -349,7 +385,7 @@ class LlmSupportExecuteTest {
 
   @Test()
   async applyCreatesAuthUploadLintArtifacts() {
-    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-auth-upload-lint-'));
+    const { target, loader } = await createTarget('llm-support-auth-upload-lint-');
 
     const output = await executeOperations({
       operations: ['enable-file-upload', 'enable-auth-session', 'enable-linting'],
@@ -358,22 +394,24 @@ class LlmSupportExecuteTest {
     });
 
     assert(output.artifacts.some(item => item.status === 'created'));
-    await fs.access(path.join(target, 'src/web/upload.ts'));
-    await fs.access(path.join(target, 'src/config/upload.ts'));
-    await fs.access(path.join(target, 'src/web/auth.ts'));
-    await fs.access(path.join(target, 'src/web/auth.config.ts'));
-    await fs.access(path.join(target, 'package.json'));
+    await assertFilesExist(loader, [
+      'src/web/upload.ts',
+      'src/config/upload.ts',
+      'src/web/auth.ts',
+      'src/web/auth.config.ts',
+      'package.json'
+    ]);
 
-    const pkg = await fs.readFile(path.join(target, 'package.json'), 'utf8');
+    const pkg = await loader.readUTF8('package.json');
     assert(pkg.includes('trv eslint:register'));
   }
 
   @Test()
   async enableLintingMergesPackageJson() {
-    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-lint-merge-'));
+    const { target, loader } = await createTarget('llm-support-lint-merge-');
     const pkgFile = path.join(target, 'package.json');
 
-    await fs.writeFile(pkgFile, JSON.stringify({
+    await fs.writeFile(pkgFile, JSONUtil.toUTF8({
       name: 'existing-app',
       scripts: {
         test: 'node --test',
@@ -382,7 +420,7 @@ class LlmSupportExecuteTest {
       devDependencies: {
         typescript: '^5.0.0'
       }
-    }, null, 2));
+    }, { indent: 2 }));
 
     await executeOperations({
       operations: ['enable-linting'],
@@ -390,7 +428,7 @@ class LlmSupportExecuteTest {
       dryRun: false
     });
 
-    const raw: PackageJsonSchema = JSONUtil.fromUTF8(await fs.readFile(pkgFile, 'utf8'));
+    const raw: PackageJsonSchema = JSONUtil.fromUTF8(await loader.readUTF8('package.json'));
     const merged = PackageJsonSchema.from(raw);
     await SchemaValidator.validate(PackageJsonSchema, merged);
 

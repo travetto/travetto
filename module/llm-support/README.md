@@ -74,18 +74,28 @@ The CLI surface is designed for narrow, predictable selection:
 
 That combination lets you start broad, then narrow to exactly the path you want before making changes.
 
-## MCP Server
-The module also exposes a minimal stdio MCP entrypoint for external LLM tool-calling integration.
+## MCP Integration
+The module exposes a minimal stdio MCP entrypoint for tool-calling integrations:
 
-Run:
-
+**Code: Start MCP server**
 ```bash
 trv llm:support:mcp
 ```
 
-Supported methods:
-   *  `initialize`
-   *  `tools/list`
-   *  `tools/call`
+Supported methods are `initialize`, `tools/list`, and `tools/call`. Requests and responses are newline-delimited JSON-RPC 2.0 payloads.
 
-The command accepts newline-delimited JSON-RPC 2.0 requests on stdin and writes newline-delimited JSON-RPC responses to stdout.
+**Code: MCP request examples**
+```json
+{"jsonrpc":"2.0","id":1,"method":"initialize"}
+{"jsonrpc":"2.0","id":2,"method":"tools/list"}
+{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"llm_support_plan","arguments":{"operations":["create-web-route"]}}}
+```
+
+## Contract Model
+Contributor contract model for this module:
+   *  Boundary contracts are schema classes first (inputs and outputs).
+   *  Public type names are derived from classes instead of parallel interface trees.
+   *  Runtime boundaries validate both inbound payloads and outbound responses.
+   *  Tests should prefer schema bind+validate over custom shape guards when practical.
+
+For execution and tooling helpers in this module, prefer non-assertion-safe binding where required by project rules.

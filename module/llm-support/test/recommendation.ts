@@ -116,4 +116,15 @@ class LlmSupportRecommendationTest {
 
     assert(missing.length === 0, `Missing executors for operations: ${missing.join(', ')}`);
   }
+
+  @Test()
+  async includesReleaseAndPipelineOperations() {
+    const ids = new Set(recommendOperations({ includeExcluded: false }).map(item => item.id));
+
+    assert(ids.has('openapi-spec-pipeline'));
+    assert(ids.has('openapi-client-generation'));
+    assert(ids.has('aws-lambda-package-and-deploy'));
+    assert(ids.has('pack-docker-release'));
+    assert(ids.has('repo-version-release'));
+  }
 }
