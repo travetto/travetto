@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { SchemaValidator } from '@travetto/schema';
-import { RuntimeResources } from '@travetto/runtime';
+import { FileLoader, JSONUtil, RuntimeResources } from '@travetto/runtime';
 
 import type { ExecutionArtifact, ExecutionRequest, ExecutionResponse } from './types.ts';
 import { PackageJsonSchema, type PackageJsonShape } from './template-shapes.ts';
@@ -125,8 +125,91 @@ async function writeFile(
   artifacts.push({ operationId, file: fullPath, status: 'created' });
 }
 
+type OperationFileSpec = {
+  file: string;
+  snippet: string;
+  params?: Record<string, string> | ((baseDir: string, request: ExecutionRequest) => Record<string, string>);
+};
+
+type OperationId = ExecutionRequest['operations'][number];
+
+const STATIC_OPERATION_SPECS: Partial<Record<OperationId, OperationFileSpec[]>> = {
+  'email-transport-provider': [
+    { file: 'src/email/provider.ts', snippet: 'email-transport-provider.ts.tpl' },
+    { file: 'src/config/email.ts', snippet: 'email-config.ts.tpl' }
+  ],
+  'email-preview-snapshot': [
+    { file: 'test/email/preview.ts', snippet: 'email-preview-test.ts.tpl' }
+  ],
+  'email-test-fixtures': [
+    { file: 'test/email/fixtures/transactional.json', snippet: 'email-fixture.json.tpl' }
+  ],
+  'generate-test-suite': [
+    { file: 'test/unit/example.ts', snippet: 'generate-test-suite.unit.ts.tpl' },
+    { file: 'test/fixtures/example.json', snippet: 'generate-test-suite.fixture.json.tpl' }
+  ],
+  'workflow-gcp-deploy': [
+    { file: '.github/workflows/deploy-api.yml', snippet: 'workflow-gcp-deploy.yml.tpl' }
+  ],
+  'workflow-cloudfront-deploy': [
+    { file: '.github/workflows/deploy-ui.yml', snippet: 'workflow-cloudfront-deploy.yml.tpl' }
+  ],
+  'create-web-interceptor': [
+    { file: 'src/interceptor/request-logging.ts', snippet: 'create-web-interceptor.ts.tpl' }
+  ],
+  'cache-enhancements': [
+    { file: 'src/service/cacheable.ts', snippet: 'cache-enhancements.service.ts.tpl' },
+    { file: 'src/config/cache.ts', snippet: 'cache-enhancements.config.ts.tpl' }
+  ],
+  'enable-file-upload': [
+    { file: 'src/web/upload.ts', snippet: 'enable-file-upload.controller.ts.tpl' },
+    { file: 'src/config/upload.ts', snippet: 'enable-file-upload.config.ts.tpl' }
+  ],
+  'enable-auth-session': [
+    { file: 'src/web/auth.ts', snippet: 'enable-auth-session.controller.ts.tpl' },
+    { file: 'src/web/auth.config.ts', snippet: 'enable-auth-session.config.ts.tpl' }
+  ],
+  'openapi-spec-pipeline': [
+    { file: '.github/workflows/openapi-spec.yml', snippet: 'openapi-spec-pipeline.yml.tpl' }
+  ],
+  'openapi-client-generation': [
+    { file: '.github/workflows/openapi-client.yml', snippet: 'openapi-client-generation.yml.tpl' },
+    { file: 'src/client/README.md', snippet: 'openapi-client-generation.readme.tpl' }
+  ],
+  'aws-lambda-package-and-deploy': [
+    { file: '.github/workflows/deploy-lambda.yml', snippet: 'aws-lambda-package-and-deploy.yml.tpl' }
+  ],
+  'pack-docker-release': [
+    { file: '.github/workflows/docker-release.yml', snippet: 'pack-docker-release.yml.tpl' }
+  ],
+  'repo-version-release': [
+    { file: '.github/workflows/repo-version-release.yml', snippet: 'repo-version-release.yml.tpl' }
+  ]
+};
+
+async function execFromSpecs(
+  operationId: string,
+  specs: OperationFileSpec[],
+  baseDir: string,
+  request: ExecutionRequest,
+  artifacts: ExecutionArtifact[]
+): Promise<void> {
+  for (const spec of specs) {
+    const params = typeof spec.params === 'function' ? spec.params(baseDir, request) : (spec.params ?? {});
+    await writeFile(
+      operationId,
+      path.join(baseDir, spec.file),
+      await renderSnippet(spec.snippet, params),
+      request,
+      artifacts
+    );
+  }
+}
+
 async function mergeLintPackageJson(
   operationId: string,
+  baseDir: string,
+  relativePath: string,
   fullPath: string,
   lintTemplate: string,
   request: ExecutionRequest,
@@ -147,8 +230,9 @@ async function mergeLintPackageJson(
     return;
   }
 
-  const current = await validatePackageJsonShape(JSON.parse(await fs.readFile(fullPath, 'utf8')), fullPath);
-  const incoming = await validatePackageJsonShape(JSON.parse(lintTemplate), 'enable-linting.package.json.tpl');
+  const loader = new FileLoader([baseDir]);
+  const current = await validatePackageJsonShape(JSONUtil.fromUTF8(await loader.readUTF8(relativePath)), fullPath);
+  const incoming = await validatePackageJsonShape(JSONUtil.fromUTF8(lintTemplate), 'enable-linting.package.json.tpl');
 
   const base = { ...current };
 
@@ -174,7 +258,7 @@ async function mergeLintPackageJson(
     devDependencies
   };
 
-  await fs.writeFile(fullPath, `${JSON.stringify(merged, null, 2)}\n`, 'utf8');
+  await fs.writeFile(fullPath, `${JSONUtil.toUTF8(merged, { indent: 2 })}\n`, 'utf8');
   artifacts.push({ operationId, file: fullPath, status: 'created' });
 }
 
@@ -326,42 +410,6 @@ async function execEmailRenderPipeline(
   );
 }
 
-async function execEmailTransportProvider(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
-  await writeFile(
-    'email-transport-provider',
-    path.join(baseDir, 'src/email/provider.ts'),
-    await renderSnippet('email-transport-provider.ts.tpl'),
-    request,
-    artifacts
-  );
-
-  await writeFile(
-    'email-transport-provider',
-    path.join(baseDir, 'src/config/email.ts'),
-    await renderSnippet('email-config.ts.tpl'),
-    request,
-    artifacts
-  );
-}
-
-async function execEmailPreviewSnapshot(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
-  await writeFile(
-    'email-preview-snapshot',
-    path.join(baseDir, 'test/email/preview.ts'),
-    await renderSnippet('email-preview-test.ts.tpl'),
-    request,
-    artifacts
-  );
-}
-
 async function execEmailSendFlow(
   baseDir: string,
   request: ExecutionRequest,
@@ -372,20 +420,6 @@ async function execEmailSendFlow(
     'email-send-flow',
     path.join(baseDir, 'src/web/email.ts'),
     await renderSnippet('email-send-controller.ts.tpl', { routePath }),
-    request,
-    artifacts
-  );
-}
-
-async function execEmailTestFixtures(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
-  await writeFile(
-    'email-test-fixtures',
-    path.join(baseDir, 'test/email/fixtures/transactional.json'),
-    await renderSnippet('email-fixture.json.tpl'),
     request,
     artifacts
   );
@@ -487,161 +521,15 @@ async function execGenerateConfig(
   request: ExecutionRequest,
   artifacts: ExecutionArtifact[]
 ): Promise<void> {
-  const projectName = request.projectName ?? path.basename(baseDir);
-
-  await writeFile(
-    'generate-config',
-    path.join(baseDir, 'src/config/app.ts'),
-    await renderSnippet('generate-config.app-config.ts.tpl'),
-    request,
-    artifacts
-  );
-
-  await writeFile(
-    'generate-config',
-    path.join(baseDir, 'resources/application.yml'),
-    await renderSnippet('generate-config.application.yml.tpl', { projectName }),
-    request,
-    artifacts
-  );
-
-  await writeFile(
-    'generate-config',
-    path.join(baseDir, 'resources/local.yml'),
-    await renderSnippet('generate-config.local.yml.tpl'),
-    request,
-    artifacts
-  );
-}
-
-async function execGenerateTestSuite(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
-  await writeFile(
-    'generate-test-suite',
-    path.join(baseDir, 'test/unit/example.ts'),
-    await renderSnippet('generate-test-suite.unit.ts.tpl'),
-    request,
-    artifacts
-  );
-
-  await writeFile(
-    'generate-test-suite',
-    path.join(baseDir, 'test/fixtures/example.json'),
-    await renderSnippet('generate-test-suite.fixture.json.tpl'),
-    request,
-    artifacts
-  );
-}
-
-async function execWorkflowGcpDeploy(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
-  await writeFile(
-    'workflow-gcp-deploy',
-    path.join(baseDir, '.github/workflows/deploy-api.yml'),
-    await renderSnippet('workflow-gcp-deploy.yml.tpl'),
-    request,
-    artifacts
-  );
-}
-
-async function execWorkflowCloudfrontDeploy(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
-  await writeFile(
-    'workflow-cloudfront-deploy',
-    path.join(baseDir, '.github/workflows/deploy-ui.yml'),
-    await renderSnippet('workflow-cloudfront-deploy.yml.tpl'),
-    request,
-    artifacts
-  );
-}
-
-async function execCreateWebInterceptor(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
-  await writeFile(
-    'create-web-interceptor',
-    path.join(baseDir, 'src/interceptor/request-logging.ts'),
-    await renderSnippet('create-web-interceptor.ts.tpl'),
-    request,
-    artifacts
-  );
-}
-
-async function execCacheEnhancements(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
-  await writeFile(
-    'cache-enhancements',
-    path.join(baseDir, 'src/service/cacheable.ts'),
-    await renderSnippet('cache-enhancements.service.ts.tpl'),
-    request,
-    artifacts
-  );
-
-  await writeFile(
-    'cache-enhancements',
-    path.join(baseDir, 'src/config/cache.ts'),
-    await renderSnippet('cache-enhancements.config.ts.tpl'),
-    request,
-    artifacts
-  );
-}
-
-async function execEnableFileUpload(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
-  await writeFile(
-    'enable-file-upload',
-    path.join(baseDir, 'src/web/upload.ts'),
-    await renderSnippet('enable-file-upload.controller.ts.tpl'),
-    request,
-    artifacts
-  );
-
-  await writeFile(
-    'enable-file-upload',
-    path.join(baseDir, 'src/config/upload.ts'),
-    await renderSnippet('enable-file-upload.config.ts.tpl'),
-    request,
-    artifacts
-  );
-}
-
-async function execEnableAuthSession(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
-  await writeFile(
-    'enable-auth-session',
-    path.join(baseDir, 'src/web/auth.ts'),
-    await renderSnippet('enable-auth-session.controller.ts.tpl'),
-    request,
-    artifacts
-  );
-
-  await writeFile(
-    'enable-auth-session',
-    path.join(baseDir, 'src/web/auth.config.ts'),
-    await renderSnippet('enable-auth-session.config.ts.tpl'),
-    request,
-    artifacts
-  );
+  await execFromSpecs('generate-config', [
+    { file: 'src/config/app.ts', snippet: 'generate-config.app-config.ts.tpl' },
+    {
+      file: 'resources/application.yml',
+      snippet: 'generate-config.application.yml.tpl',
+      params: (dir, input): Record<string, string> => ({ projectName: input.projectName ?? path.basename(dir) })
+    },
+    { file: 'resources/local.yml', snippet: 'generate-config.local.yml.tpl' }
+  ], baseDir, request, artifacts);
 }
 
 async function execEnableLinting(
@@ -651,6 +539,8 @@ async function execEnableLinting(
 ): Promise<void> {
   await mergeLintPackageJson(
     'enable-linting',
+    baseDir,
+    'package.json',
     path.join(baseDir, 'package.json'),
     await renderSnippet('enable-linting.package.json.tpl'),
     request,
@@ -664,28 +554,39 @@ type OperationHandler = (
   artifacts: ExecutionArtifact[]
 ) => Promise<void>;
 
+function createStaticHandler(operationId: OperationId): OperationHandler {
+  return async (baseDir: string, request: ExecutionRequest, artifacts: ExecutionArtifact[]): Promise<void> => {
+    await execFromSpecs(operationId, STATIC_OPERATION_SPECS[operationId] ?? [], baseDir, request, artifacts);
+  };
+}
+
 const OPERATION_HANDLERS: Partial<Record<ExecutionRequest['operations'][number], OperationHandler>> = {
   'project-bootstrap': execProjectBootstrap,
   'create-web-route': execCreateWebRoute,
   'email-create-template': execEmailCreateTemplate,
   'email-context-schema': execEmailContextSchema,
   'email-render-pipeline': execEmailRenderPipeline,
-  'email-transport-provider': execEmailTransportProvider,
-  'email-preview-snapshot': execEmailPreviewSnapshot,
+  'email-transport-provider': createStaticHandler('email-transport-provider'),
+  'email-preview-snapshot': createStaticHandler('email-preview-snapshot'),
   'email-send-flow': execEmailSendFlow,
-  'email-test-fixtures': execEmailTestFixtures,
+  'email-test-fixtures': createStaticHandler('email-test-fixtures'),
   'model-indexed-assistant': execModelIndexedAssistant,
   'model-query-assistant': execModelQueryAssistant,
   'rest-rpc-client': execRestRpcClient,
   'generate-config': execGenerateConfig,
-  'generate-test-suite': execGenerateTestSuite,
-  'workflow-gcp-deploy': execWorkflowGcpDeploy,
-  'workflow-cloudfront-deploy': execWorkflowCloudfrontDeploy,
-  'create-web-interceptor': execCreateWebInterceptor,
-  'cache-enhancements': execCacheEnhancements,
-  'enable-file-upload': execEnableFileUpload,
-  'enable-auth-session': execEnableAuthSession,
-  'enable-linting': execEnableLinting
+  'generate-test-suite': createStaticHandler('generate-test-suite'),
+  'workflow-gcp-deploy': createStaticHandler('workflow-gcp-deploy'),
+  'workflow-cloudfront-deploy': createStaticHandler('workflow-cloudfront-deploy'),
+  'create-web-interceptor': createStaticHandler('create-web-interceptor'),
+  'cache-enhancements': createStaticHandler('cache-enhancements'),
+  'enable-file-upload': createStaticHandler('enable-file-upload'),
+  'enable-auth-session': createStaticHandler('enable-auth-session'),
+  'enable-linting': execEnableLinting,
+  'openapi-spec-pipeline': createStaticHandler('openapi-spec-pipeline'),
+  'openapi-client-generation': createStaticHandler('openapi-client-generation'),
+  'aws-lambda-package-and-deploy': createStaticHandler('aws-lambda-package-and-deploy'),
+  'pack-docker-release': createStaticHandler('pack-docker-release'),
+  'repo-version-release': createStaticHandler('repo-version-release')
 };
 
 export function getUnimplementedOperations(operationIds: string[]): string[] {

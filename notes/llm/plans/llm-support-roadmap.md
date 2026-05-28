@@ -11,8 +11,8 @@ Purpose: Capture remaining work and sequencing for llm-support.
 - Completed: minimized test-local duplicate schemas by promoting reusable MCP result schemas to runtime exports and reusing them in tests.
 
 2. MCP Contract Reuse
-- Evaluate exporting additional typed schemas for common MCP `result` payloads.
-- Keep JSON-RPC envelopes explicit and stable for external consumers.
+- Completed: exported typed schemas for common MCP `result` payloads used by tests and consumers.
+- Completed: JSON-RPC envelope and result schema surface is explicit and stable for current methods.
 
 3. Guidance Data Freshness
 - Completed: operation metadata audit against current module capability, including executor linkage checks.
@@ -25,9 +25,9 @@ Purpose: Capture remaining work and sequencing for llm-support.
 - Completed: negative-path tests for invalid payloads and tool failure behavior.
 
 5. Documentation Alignment
-- Add/refresh examples for tooling and MCP invocation payloads.
-- Add contributor section describing class-first contract approach.
-- Ensure docs reflect current command names and arguments.
+- Completed: added/updated tooling and MCP invocation examples.
+- Completed: added contributor section describing class-first contract approach.
+- Completed: aligned docs with current command names and arguments.
 
 ### Medium-Term Enhancements
 1. CI Validation

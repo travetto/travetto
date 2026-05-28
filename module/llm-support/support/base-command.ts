@@ -1,5 +1,6 @@
 import { CliFlag, CliModuleFlag, type CliCommandShape } from '@travetto/cli';
 import { Required } from '@travetto/schema';
+import { JSONUtil } from '@travetto/runtime';
 
 import { getValidOperationIds, LLM_OPERATION_CATEGORIES } from '../src/recommendation.ts';
 import { getValidSnippetTags } from '../src/snippet-catalog.ts';
@@ -26,7 +27,7 @@ export abstract class LlmSupportCommandBase implements CliCommandShape {
 
   async writeOutput(payload: object, includeExcluded: boolean): Promise<void> {
     const valid = await this.getValidValues(includeExcluded);
-    process.stdout.write(`${JSON.stringify({ ...payload, valid }, null, 2)}\n`);
+    process.stdout.write(`${JSONUtil.toUTF8({ ...payload, valid }, { indent: 2 })}\n`);
   }
 
   abstract main(): Promise<void>;

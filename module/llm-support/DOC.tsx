@@ -84,4 +84,31 @@ export const text = <>
 
     That combination lets you start broad, then narrow to exactly the path you want before making changes.
   </c.Section>
+
+  <c.Section title='MCP Integration'>
+    The module exposes a minimal stdio MCP entrypoint for tool-calling integrations:
+
+    <c.Code language='bash' title='Start MCP server' src='trv llm:support:mcp' />
+
+    Supported methods are {d.input('initialize')}, {d.input('tools/list')}, and {d.input('tools/call')}. Requests and responses are newline-delimited JSON-RPC 2.0 payloads.
+
+    <c.Code title='MCP request examples' language='json' src={[
+      '{"jsonrpc":"2.0","id":1,"method":"initialize"}',
+      '{"jsonrpc":"2.0","id":2,"method":"tools/list"}',
+      '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"llm_support_plan","arguments":{"operations":["create-web-route"]}}}'
+    ].join('\n')} />
+  </c.Section>
+
+  <c.Section title='Contract Model'>
+    Contributor contract model for this module:
+
+    <ul>
+      <li>Boundary contracts are schema classes first (inputs and outputs).</li>
+      <li>Public type names are derived from classes instead of parallel interface trees.</li>
+      <li>Runtime boundaries validate both inbound payloads and outbound responses.</li>
+      <li>Tests should prefer schema bind+validate over custom shape guards when practical.</li>
+    </ul>
+
+    For execution and tooling helpers in this module, prefer non-assertion-safe binding where required by project rules.
+  </c.Section>
 </>;

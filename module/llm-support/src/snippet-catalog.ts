@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { SchemaValidator } from '@travetto/schema';
-import { RuntimeIndex } from '@travetto/runtime';
+import { JSONUtil, RuntimeIndex } from '@travetto/runtime';
 
 import type { RecommendationQuery, SnippetSource } from './types.ts';
 import { SnippetSourceSchema } from './snippet-shapes.ts';
@@ -23,7 +23,7 @@ async function loadSnippet(fullPath: string): Promise<SnippetSource> {
   if (!match) {
     throw new Error(`Invalid snippet markdown: ${fullPath}`);
   }
-  const bound = SnippetSourceSchema.from(JSON.parse(match[1].trim()));
+  const bound = SnippetSourceSchema.from(JSONUtil.fromUTF8(match[1].trim()));
   await SchemaValidator.validate(SnippetSourceSchema, bound);
   return bound;
 }

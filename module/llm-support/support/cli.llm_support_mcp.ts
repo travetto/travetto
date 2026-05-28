@@ -1,6 +1,7 @@
 import { createInterface } from 'node:readline';
 
 import { CliCommand, type CliCommandShape } from '@travetto/cli';
+import { JSONUtil } from '@travetto/runtime';
 
 import { handleMcpRequest, type JsonRpcRequest } from '../src/mcp.ts';
 
@@ -25,7 +26,7 @@ export class LlmSupportMcpCommand implements CliCommandShape {
 
       let request: JsonRpcRequest;
       try {
-        request = JSON.parse(trimmed) as JsonRpcRequest;
+        request = JSONUtil.fromUTF8(trimmed);
       } catch {
         const parseError = {
           jsonrpc: '2.0',
@@ -35,13 +36,13 @@ export class LlmSupportMcpCommand implements CliCommandShape {
             message: 'Parse error'
           }
         };
-        process.stdout.write(`${JSON.stringify(parseError)}\n`);
+        process.stdout.write(`${JSONUtil.toUTF8(parseError)}\n`);
         return;
       }
 
       const response = await handleMcpRequest(request);
       if (response) {
-        process.stdout.write(`${JSON.stringify(response)}\n`);
+        process.stdout.write(`${JSONUtil.toUTF8(response)}\n`);
       }
     };
 

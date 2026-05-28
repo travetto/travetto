@@ -179,6 +179,46 @@ const OPERATIONS: LlmOperation[] = [
     optionalModules: ['@travetto/model']
   },
   {
+    id: 'openapi-spec-pipeline',
+    category: 'web',
+    title: 'Add OpenAPI spec pipeline',
+    summary: 'Generate OpenAPI specification workflow and persistence settings.',
+    requiredModules: ['@travetto/openapi'],
+    optionalModules: ['@travetto/web', '@travetto/schema']
+  },
+  {
+    id: 'openapi-client-generation',
+    category: 'web',
+    title: 'Add OpenAPI client generation',
+    summary: 'Generate client workflow from OpenAPI spec artifacts.',
+    requiredModules: ['@travetto/openapi'],
+    optionalModules: ['@travetto/web-rpc', '@travetto/web']
+  },
+  {
+    id: 'aws-lambda-package-and-deploy',
+    category: 'workflow',
+    title: 'Add AWS Lambda package/deploy',
+    summary: 'Generate packaging and deployment workflow for web AWS Lambda targets.',
+    requiredModules: ['@travetto/web-aws-lambda', '@travetto/pack'],
+    optionalModules: ['@travetto/web', '@travetto/config']
+  },
+  {
+    id: 'pack-docker-release',
+    category: 'workflow',
+    title: 'Add Docker pack release',
+    summary: 'Generate workflow for container image build and publish via pack:docker.',
+    requiredModules: ['@travetto/pack'],
+    optionalModules: ['@travetto/config', '@travetto/runtime']
+  },
+  {
+    id: 'repo-version-release',
+    category: 'workflow',
+    title: 'Add repo version release flow',
+    summary: 'Generate monorepo versioning workflow using repo:version.',
+    requiredModules: ['@travetto/repo'],
+    optionalModules: ['@travetto/pack', '@travetto/registry']
+  },
+  {
     id: 'excluded-log-config',
     category: 'quality',
     title: 'Log configuration (excluded)',
