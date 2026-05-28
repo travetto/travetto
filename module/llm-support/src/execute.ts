@@ -57,8 +57,8 @@ function toFileName(input: string, fallback: string): string {
   const cleaned = input.trim() || fallback;
   return cleaned
     .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-    .replace(/[^a-zA-Z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+    .replace(/[^a-zA-Z0-9]{1,30}/g, '-')
+    .replace(/^-{1,10}|-{1,10}$/g, '')
     .toLowerCase();
 }
 
@@ -66,10 +66,10 @@ function toPackageName(input: string, fallback: string): string {
   const cleaned = input.trim() || fallback;
   const normalized = cleaned
     .toLowerCase()
-    .replace(/[^a-z0-9-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replace(/[^a-z0-9-]{1,30}/g, '-')
+    .replace(/^-{1,10}|-{1,10}$/g, '');
 
-  const safe = normalized.replace(/^[._-]+/, '');
+  const safe = normalized.replace(/^[._-]{1,30}/, '');
   return safe || fallback;
 }
 
@@ -80,7 +80,7 @@ function toWorkspacePath(input: string | undefined, fallback = 'packages/app'): 
   }
 
   const segments = cleaned
-    .replace(/^\/+|\/+$/g, '')
+    .replace(/^\/{1,10}|\/{1,10}$/g, '')
     .split('/')
     .filter(Boolean)
     .map((part, idx) => toPackageName(part, idx === 0 ? 'packages' : 'app'));
