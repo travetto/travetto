@@ -4,7 +4,7 @@ import path from 'node:path';
 import { SchemaValidator } from '@travetto/schema';
 import { FileLoader, JSONUtil, RuntimeResources } from '@travetto/runtime';
 
-import type { ExecutionArtifact, ExecutionRequest, ExecutionResponse } from './types.ts';
+import type { ExecutionArtifact, ExecutionRequest, ExecutionResponse, PlanStepId } from './types.ts';
 import { PackageJsonSchema, type PackageJsonShape } from './template-shapes.ts';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -102,7 +102,8 @@ async function writeFile(
   fullPath: string,
   content: string,
   request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
+  artifacts: ExecutionArtifact[],
+  stepId: PlanStepId = 'generate-artifacts'
 ): Promise<void> {
   const present = await exists(fullPath);
   if (present && !request.overwrite) {
@@ -110,19 +111,20 @@ async function writeFile(
       operationId,
       file: fullPath,
       status: 'skipped',
+      stepId,
       reason: 'File already exists. Use --overwrite to replace.'
     });
     return;
   }
 
   if (request.dryRun !== false) {
-    artifacts.push({ operationId, file: fullPath, status: 'planned' });
+    artifacts.push({ operationId, file: fullPath, status: 'planned', stepId });
     return;
   }
 
   await fs.mkdir(path.dirname(fullPath), { recursive: true });
   await fs.writeFile(fullPath, content, 'utf8');
-  artifacts.push({ operationId, file: fullPath, status: 'created' });
+  artifacts.push({ operationId, file: fullPath, status: 'created', stepId });
 }
 
 type OperationFileSpec = {
@@ -213,12 +215,13 @@ async function mergeLintPackageJson(
   fullPath: string,
   lintTemplate: string,
   request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
+  artifacts: ExecutionArtifact[],
+  stepId: PlanStepId = 'generate-artifacts'
 ): Promise<void> {
   const present = await exists(fullPath);
 
   if (request.dryRun !== false) {
-    artifacts.push({ operationId, file: fullPath, status: 'planned' });
+    artifacts.push({ operationId, file: fullPath, status: 'planned', stepId });
     return;
   }
 
@@ -226,7 +229,7 @@ async function mergeLintPackageJson(
 
   if (!present) {
     await fs.writeFile(fullPath, lintTemplate, 'utf8');
-    artifacts.push({ operationId, file: fullPath, status: 'created' });
+    artifacts.push({ operationId, file: fullPath, status: 'created', stepId });
     return;
   }
 
@@ -259,7 +262,7 @@ async function mergeLintPackageJson(
   };
 
   await fs.writeFile(fullPath, `${JSONUtil.toUTF8(merged, { indent: 2 })}\n`, 'utf8');
-  artifacts.push({ operationId, file: fullPath, status: 'created' });
+  artifacts.push({ operationId, file: fullPath, status: 'created', stepId });
 }
 
 async function execProjectBootstrap(

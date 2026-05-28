@@ -12,7 +12,7 @@ import {
   PlanResponseSchema,
   RecommendationResponseSchema
 } from '../src/types.ts';
-import { getLlmSupportToolDefinitions, runLlmSupportTool } from '../src/tooling.ts';
+import { getLlmSupportToolDefinitions, runLlmSupportFlow, runLlmSupportTool } from '../src/tooling.ts';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -150,5 +150,23 @@ class LlmSupportToolingTest {
       }),
       /validation errors/i
     );
+  }
+
+  @Test()
+  async supportsRecommendPlanExecuteFlowHelper() {
+    const target = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-support-tooling-flow-'));
+
+    const output = await runLlmSupportFlow({
+      query: { operations: ['create-web-route'] },
+      execute: {
+        targetDir: target,
+        dryRun: true
+      }
+    });
+
+    assert(output.recommendation.operations.some(item => item.id === 'create-web-route'));
+    assert(output.plan.plans.some(item => item.operationId === 'create-web-route'));
+    assert(output.execution.dryRun === true);
+    assert(output.execution.artifacts.some(item => item.stepId === 'generate-artifacts'));
   }
 }

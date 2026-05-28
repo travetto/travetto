@@ -26,6 +26,17 @@ export interface LlmSupportToolDefinition {
   inputSchema: object;
 }
 
+export interface LlmSupportFlowInput {
+  query?: RecommendationQuery;
+  execute?: Omit<ExecutionRequest, 'operations'> & { operations?: string[] };
+}
+
+export interface LlmSupportFlowResult {
+  recommendation: RecommendationResponse;
+  plan: PlanResponse;
+  execution: ExecutionResponse;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -161,4 +172,26 @@ export async function runLlmSupportTool(
       return validateOutput(ExecutionResponseSchema, output);
     }
   }
+}
+
+export async function runLlmSupportFlow(input: LlmSupportFlowInput = {}): Promise<LlmSupportFlowResult> {
+  const query = normalizeQuery(input.query ?? {});
+  const recommendation = await validateOutput(RecommendationResponseSchema, await recommend(query));
+  const plan = await validateOutput(PlanResponseSchema, await buildPlans(query));
+
+  const execute = input.execute ?? { targetDir: '.', dryRun: true };
+  const operations = toList(execute.operations) ?? plan.plans.map(item => item.operationId);
+
+  const executionRequest: ExecutionRequest = {
+    ...execute,
+    operations,
+    targetDir: execute.targetDir
+  };
+  const execution = await validateOutput(ExecutionResponseSchema, await executeOperations(executionRequest));
+
+  return {
+    recommendation,
+    plan,
+    execution
+  };
 }

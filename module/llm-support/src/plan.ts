@@ -59,16 +59,19 @@ function filesFor(op: LlmOperation): string[] {
 function changesFor(op: LlmOperation): PlannedChange[] {
   return [
     {
+      stepId: 'validate-assumptions',
       step: 'Validate command and module assumptions',
       files: [],
       rationale: 'Use cli schema and module metadata to avoid stale command signatures.'
     },
     {
+      stepId: 'generate-artifacts',
       step: 'Generate core implementation artifacts',
       files: filesFor(op),
       rationale: op.summary
     },
     {
+      stepId: 'verify-output',
       step: 'Run verification checks',
       files: [],
       rationale: 'Compile, lint, and test generated code paths before apply confirmation.'

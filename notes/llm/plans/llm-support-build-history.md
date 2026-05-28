@@ -54,6 +54,9 @@ Purpose: Capture what was implemented, key architectural decisions, and verifica
 - Added executor linkage guardrail ensuring all non-excluded operations remain executable.
 - Added MCP/tooling invocation examples to module docs and regenerated `README.md` and `DOC.html` from `DOC.tsx`.
 - Added contributor contract-model documentation covering schema-first boundaries and class-derived type aliases.
+- Added consumer helper API `runLlmSupportFlow` to orchestrate recommend-plan-execute for common integration flows.
+- Added versioned MCP compatibility notes and helper flow metadata in `consumer-docs.ts`.
+- Added explicit step-level traceability by introducing `stepId` on plan changes and execution artifacts.
 
 ### Notable Design Decisions
 1. Schema classes are the source of truth for boundary contracts.
