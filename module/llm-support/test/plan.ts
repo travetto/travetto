@@ -23,6 +23,9 @@ class LlmSupportPlanTest {
     assert(output.plans.length === 1);
     assert(output.plans[0].operationId === 'create-web-route');
     assert(output.plans[0].changes.length >= 3);
+    assert(output.plans[0].changes.some(item => item.stepId === 'validate-assumptions'));
+    assert(output.plans[0].changes.some(item => item.stepId === 'generate-artifacts'));
+    assert(output.plans[0].changes.some(item => item.stepId === 'verify-output'));
   }
 
   @Test()

@@ -35,11 +35,11 @@ Purpose: Capture remaining work and sequencing for llm-support.
 - Add lightweight integrity checks if adopted.
 
 2. Consumer Experience
-- Evaluate whether to expose helper APIs for common LLM integration flows.
-- Consider versioned compatibility notes for MCP consumers.
+- Completed: exposed helper API `runLlmSupportFlow` for recommend-plan-execute consumer flow orchestration.
+- Completed: added versioned compatibility notes and helper flow docs in `consumer-docs.ts`.
 
 3. Planning/Execution Fidelity
-- Improve plan-to-artifact traceability so each generated artifact maps clearly to an operation and step.
+- Completed: added step-level traceability (`stepId`) to plan changes and execution artifacts.
 
 ### Risks and Mitigations
 1. Risk: Guidance drift from real CLI behavior.

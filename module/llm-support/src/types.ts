@@ -16,6 +16,7 @@ export type LlmOperationCategory =
   | 'cache';
 
 export type ExecutionArtifactStatus = 'planned' | 'created' | 'skipped';
+export type PlanStepId = 'validate-assumptions' | 'generate-artifacts' | 'verify-output';
 
 @Schema()
 export class DependencyGraphNodeSchema {
@@ -147,6 +148,7 @@ export class SnippetSourceSchema {
 
 @Schema()
 export class PlannedChangeSchema {
+  stepId: PlanStepId = 'generate-artifacts';
   step = '';
   files: string[] = [];
   rationale = '';
@@ -166,6 +168,9 @@ export class ExecutionArtifactSchema {
   operationId = '';
   file = '';
   status: ExecutionArtifactStatus = 'planned';
+
+  @Required(false)
+  stepId?: PlanStepId;
 
   @Required(false)
   reason?: string;

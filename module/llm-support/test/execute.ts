@@ -192,6 +192,7 @@ class LlmSupportExecuteTest {
     });
 
     assert(output.artifacts.some(item => item.status === 'created'));
+    assert(output.artifacts.some(item => item.stepId === 'generate-artifacts'));
     await assertFilesExist(loader, ['src/service/order.ts', 'src/web/order.ts']);
 
     const expectedService = await renderSnippet('create-web-route.service.ts.tpl', {
