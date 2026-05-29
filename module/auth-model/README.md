@@ -13,7 +13,7 @@ npm install @travetto/auth-model
 yarn add @travetto/auth-model
 ```
 
-This module supports the integration between the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") module and the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations."). 
+This module supports the integration between the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication support for the Travetto framework") module and the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations."). 
 
 The asset module requires a [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11)-model to provide functionality for reading and storing user information. You can use any existing providers to serve as your [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11), or you can roll your own.
 

@@ -22,34 +22,37 @@ $ trv --help
 Usage:  [options] [command]
 
 Commands:
-  doc               Command line support for generating module docs.
-  doc:angular       Generate documentation into the angular webapp under related/travetto.github.io
-  doc:mapping       Generate module mapping for
-  email:compile     CLI Entry point for running the email server
-  email:editor      The email editor compilation service and output serving
-  email:test        CLI Entry point for running the email server
-  eslint            Command line support for eslint
-  eslint:register   Writes the eslint configuration file
-  model:export      Exports model schemas
-  model:install     Installing models
-  openapi:client    CLI for generating the cli client
-  openapi:spec      CLI for outputting the open api spec to a local file
-  pack              Standard pack support
-  pack:docker       Standard docker support for pack
-  pack:lambda       Standard lambda support for pack
-  pack:zip          Standard zip support for pack
-  repo:exec         Repo execution
-  repo:list         Allows for listing of modules
-  repo:publish      Publish all pending modules
-  repo:version      Version all changed dependencies
-  repo:version-sync Enforces all packages to write out their versions and dependencies
-  run:double        Doubles a number
-  scaffold          Command to run scaffolding
-  service           Allows for running services
-  test              Launch test framework and execute tests
-  test:watch        Invoke the test watcher
-  web:http          Run a web server
-  web:rpc-client    Generate the web-rpc client
+  doc                   Command line support for generating module docs.
+  doc:angular           Generate documentation into the angular webapp under related/travetto.github.io
+  doc:mapping           Generate module mapping for
+  email:compile         CLI Entry point for running the email server
+  email:editor          The email editor compilation service and output serving
+  email:test            CLI Entry point for running the email server
+  eslint                Command line support for eslint
+  eslint:register       Writes the eslint configuration file
+  llm:support:execute   Execute llm-support operations with dry-run by default.
+  llm:support:plan      Build plan-first execution details for llm-support operations.
+  llm:support:recommend Recommend llm-support bundles, workflows, and operations.
+  llm:support:status    Show llm-support execution coverage status.
+  model:export          Exports model schemas
+  model:install         Installing models
+  openapi:client        CLI for generating the cli client
+  openapi:spec          CLI for outputting the open api spec to a local file
+  pack                  Standard pack support
+  pack:docker           Standard docker support for pack
+  pack:lambda           Standard lambda support for pack
+  pack:zip              Standard zip support for pack
+  repo:exec             Repo execution
+  repo:list             Allows for listing of modules
+  repo:publish          Publish all pending modules
+  repo:version          Version all changed dependencies
+  repo:version-sync     Enforces all packages to write out their versions and dependencies
+  run:double            Doubles a number
+  service               Allows for running services
+  test                  Launch test framework and execute tests
+  test:watch            Invoke the test watcher
+  web:http              Run a web server
+  web:rpc-client        Generate the web-rpc client
 ```
 
 This listing is from the [Travetto](https://travetto.dev) monorepo, and represents the majority of tools that can be invoked from the command line. 
@@ -566,7 +569,7 @@ Available Services
  * dynamodb@3.3.0
  * elasticsearch@9.2.8
  * firestore@latest
- * mongodb@8.2
+ * mongodb@8.3
  * mysql@9.6
  * postgresql@18.3
  * redis@8.4
@@ -584,7 +587,7 @@ Service          Version    Status
 dynamodb           3.3.0    Running 93af422e793a
 elasticsearch      9.2.8    Running ed76ee063d13
 firestore         latest    Running feec2e5e95b4
-mongodb              8.2    Running 5513eba6734e
+mongodb              8.3    Running 5513eba6734e
 mysql                9.6    Running 307bc66d442a
 postgresql          18.3    Running e78291e71040
 redis                8.4    Running 77ba279b4e30
@@ -598,12 +601,16 @@ The services are defined as plain typescript files within the framework and can 
 ```typescript
 import type { ServiceDescriptor } from '@travetto/cli';
 
-const version = process.env.MONGO_VERSION || '8.2';
+const version = process.env.MONGO_VERSION || '8.3';
 
 export const service: ServiceDescriptor = {
   name: 'mongodb',
   version,
   port: 27017,
-  image: `mongo:${version}`
+  image: `mongo:${version}`,
+  env: {
+    // Temp until mongo image fixes orbstack issue
+    GLIBC_TUNABLES: 'glibc.pthread.rseq=1'
+  }
 };
 ```

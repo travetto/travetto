@@ -129,6 +129,7 @@ module/email-inky
 module/email-nodemailer
 module/eslint
 module/image
+module/llm-support
 module/log
 module/manifest
 module/model
@@ -152,7 +153,6 @@ module/pack
 module/registry
 module/repo
 module/runtime
-module/scaffold
 module/schema
 module/schema-faker
 module/terminal
@@ -216,6 +216,7 @@ global-test/model_auth-session <workspace-root>/global-test/model_auth-session
        module/email-nodemailer <workspace-root>/module/email-nodemailer
                  module/eslint <workspace-root>/module/eslint
                   module/image <workspace-root>/module/image
+            module/llm-support <workspace-root>/module/llm-support
                     module/log <workspace-root>/module/log
                module/manifest <workspace-root>/module/manifest
                   module/model <workspace-root>/module/model
@@ -239,7 +240,6 @@ global-test/model_auth-session <workspace-root>/global-test/model_auth-session
                module/registry <workspace-root>/module/registry
                    module/repo .
                 module/runtime <workspace-root>/module/runtime
-               module/scaffold <workspace-root>/module/scaffold
                  module/schema <workspace-root>/module/schema
            module/schema-faker <workspace-root>/module/schema-faker
                module/terminal <workspace-root>/module/terminal

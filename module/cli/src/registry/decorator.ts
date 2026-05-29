@@ -84,7 +84,7 @@ export function CliModuleFlag(config: CliFlagOptions & { scope?: 'current' | 'co
       ...CliParseUtil.buildAliases(config, Env.TRV_MODULE.key),
       description: 'Module to run for',
       specifiers: ['module'],
-      required: { active: Runtime.monoRoot },
+      required: { active: Runtime.monoRoot && config.scope !== 'command' },
     });
 
     SchemaRegistryIndex.getForRegister(cls).register({

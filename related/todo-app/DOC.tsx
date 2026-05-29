@@ -55,7 +55,7 @@ export const text = async () => {
   return root = <>
     <c.Header title='Getting Started: A Todo App' />
 
-    The following tutorial wil walk you through setting up a {d.library('Travetto')} application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at {TodoRoot}.  Additionally, you can use the {d.module('Scaffold')}.
+    The following tutorial wil walk you through setting up a {d.library('Travetto')} application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at {TodoRoot}.  If you want the LLM-assisted path instead of manual setup, start with {d.input('trv llm-support:recommend')} to pick a bundle, {d.input('trv llm-support:plan')} to preview the changes, and {d.input('trv llm-support:execute')} to apply them.
 
     <c.Section title='Overview'>
       <TableOfContents root={() => root} />
