@@ -16,7 +16,7 @@ import { CliRunUtil } from './util.ts';
 type Recent = { mode: 'recent', count: number };
 type All = { mode: 'all' };
 
-@Activatible('@travetto/cli', 'run')
+@Activatible({ module: '@travetto/cli', command: 'run' })
 export class CliRunFeature extends BaseFeature {
 
   #storage: ActionStorage<RunChoice>;

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 import { Log } from '../core/log.ts';
-import { ActivationTarget } from '../core/types.ts';
+import { ActivationTarget, type ActivationTargetConfig } from '../core/types.ts';
 
 /**
  * Base feature structure
@@ -11,13 +11,13 @@ export abstract class BaseFeature implements ActivationTarget {
   readonly module: string;
   readonly command: string;
   readonly log: Log;
+  readonly isInstalled?: boolean;
+  readonly isPackaged?: boolean;
+  readonly priority?: number;
+  readonly alwaysActivate?: boolean;
 
-  constructor(
-    module?: string,
-    command?: string
-  ) {
-    this.module = module!;
-    this.command = command!;
+  constructor(config: ActivationTargetConfig) {
+    Object.assign(this, config);
     this.log = new Log([this.moduleBase, this.command].filter(part => !!part).join('.'));
   }
 
@@ -26,8 +26,7 @@ export abstract class BaseFeature implements ActivationTarget {
   }
 
   commandName(task: string): string {
-    const prefix = [this.moduleBase, this.command].filter(part => !!part).join('.');
-    return `${prefix}:${task}`;
+    return `${this.moduleBase}.${this.command}:${task}`;
   }
 
   register(task: string, handler: () => unknown): void {

@@ -17,7 +17,7 @@ const isTemplate = (file?: string): boolean => /[.]email[.]tsx$/.test(file ?? ''
 /**
  * Email Template Feature
  */
-@Activatible('@travetto/email-compiler', 'editor')
+@Activatible({ module: '@travetto/email-compiler', command: 'editor' })
 export class EmailCompilerFeature extends BaseFeature {
 
   #server: ChildProcess | undefined;

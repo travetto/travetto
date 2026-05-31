@@ -6,11 +6,21 @@ export type TargetEvent<T = unknown> = {
 };
 
 /**
+ * Shape of an activation target configuration
+ */
+export interface ActivationTargetConfig {
+  module: string;
+  command: string;
+  priority?: number;
+  isInstalled?: boolean;
+  isPackaged?: boolean;
+  alwaysActivate?: boolean;
+}
+
+/**
  * Shape of an activation target
  */
-export interface ActivationTarget {
-  module: string;
-  command?: string;
+export interface ActivationTarget extends ActivationTargetConfig {
   moduleBase: string;
   activate?(ctx: vscode.ExtensionContext): void | Promise<void>;
   deactivate?(): void | Promise<void>;

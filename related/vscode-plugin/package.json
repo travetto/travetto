@@ -46,6 +46,8 @@
     "@types/vscode": "^1.118.0"
   },
   "dependencies": {
+    "@travetto/cli": "^8.0.0-alpha.20",
+    "@travetto/llm-support": "^8.0.0-alpha.20",
     "@travetto/registry": "^8.0.0-alpha.1",
     "@travetto/runtime": "^8.0.0-alpha.1"
   },
@@ -116,27 +118,27 @@
     ],
     "commands": [
       {
-        "command": "travetto.compiler:stop",
+        "command": "travetto.compiler.trvc:stop",
         "title": "Stop Compiler",
         "category": "Travetto"
       },
       {
-        "command": "travetto.compiler:restart",
+        "command": "travetto.compiler.trvc:restart",
         "title": "Restart Compiler",
         "category": "Travetto"
       },
       {
-        "command": "travetto.compiler:start",
+        "command": "travetto.compiler.trvc:start",
         "title": "Start Compiler",
         "category": "Travetto"
       },
       {
-        "command": "travetto.compiler:clean",
+        "command": "travetto.compiler.trvc:clean",
         "title": "Clean Code Output",
         "category": "Travetto"
       },
       {
-        "command": "travetto.compiler:view-output",
+        "command": "travetto.compiler.trvc:view-output",
         "title": "View Compiler Output",
         "category": "Travetto"
       },
@@ -257,19 +259,19 @@
       ],
       "commandPalette": [
         {
-          "command": "travetto.compiler:start"
+          "command": "travetto.compiler.trvc:start"
         },
         {
-          "command": "travetto.compiler:view-output"
+          "command": "travetto.compiler.trvc:view-output"
         },
         {
-          "command": "travetto.compiler:restart"
+          "command": "travetto.compiler.trvc:restart"
         },
         {
-          "command": "travetto.compiler:stop"
+          "command": "travetto.compiler.trvc:stop"
         },
         {
-          "command": "travetto.compiler:clean"
+          "command": "travetto.compiler.trvc:clean"
         },
         {
           "command": "travetto.test.test:start"

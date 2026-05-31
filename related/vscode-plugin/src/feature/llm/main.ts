@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 
+import { RuntimeIndex } from '@travetto/runtime';
+
 import { Activatible } from '../../core/activation.ts';
 import { Workspace } from '../../core/workspace.ts';
 
@@ -8,12 +10,26 @@ import { BaseFeature } from '../base.ts';
 const MCP_PROVIDER_ID = 'travetto-plugin.llm-support';
 const MCP_SERVER_LABEL = 'Travetto LLM Support';
 
-@Activatible('@travetto/llm-support', true, 50)
+@Activatible({ module: '@travetto/llm-support', command: 'llm', alwaysActivate: true })
 export class LlmSupportMcpFeature extends BaseFeature {
 
   activate(context: vscode.ExtensionContext): void {
     if (!vscode.lm?.registerMcpServerDefinitionProvider || typeof vscode.McpStdioServerDefinition !== 'function') {
-      this.log.warn('MCP server definition providers are not supported in this VS Code build.');
+      return;
+    }
+
+    let trvEntry: string | undefined;
+    let cwd: string;
+
+    if (this.isInstalled) {
+      trvEntry = RuntimeIndex.getFromImport('@travetto/runtime/bin/trv.js')?.outputFile;
+    } else {
+      trvEntry = Workspace.workspaceIndex.resolvePackageCommand('trv');
+      cwd = RuntimeIndex.manifest.workspace.path;
+    }
+
+    if (!trvEntry) {
+      this.log.error('LLM Support MCP feature is inactive due to missing trv command.');
       return;
     }
 
@@ -23,21 +39,17 @@ export class LlmSupportMcpFeature extends BaseFeature {
 
     const provider = vscode.lm.registerMcpServerDefinitionProvider(MCP_PROVIDER_ID, {
       provideMcpServerDefinitions: () => {
-        try {
-          const trvEntry = Workspace.workspaceIndex.resolvePackageCommand('trv');
-          return [
-            new vscode.McpStdioServerDefinition(
-              MCP_SERVER_LABEL,
-              process.execPath,
-              [trvEntry, 'llm:support:mcp'],
-              undefined,
-              extensionVersion
-            )
-          ];
-        } catch (err) {
-          this.log.warn('Unable to resolve workspace trv command for MCP provider', err);
-          return [];
-        }
+        return [
+          new vscode.McpStdioServerDefinition(
+            MCP_SERVER_LABEL,
+            process.execPath,
+            [trvEntry, 'llm:support:mcp'],
+            {
+              CWD: cwd
+            },
+            extensionVersion
+          )
+        ];
       },
       resolveMcpServerDefinition: server => server
     });
