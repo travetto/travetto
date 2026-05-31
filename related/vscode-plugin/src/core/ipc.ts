@@ -42,7 +42,7 @@ export class IpcSupport {
     });
     await new Promise<void>(resolve => {
       server.listen(undefined, '0.0.0.0', () => {
-        this.#controller.signal.addEventListener('onabort', () => {
+        this.#controller.signal.addEventListener('abort', () => {
           server.closeAllConnections();
           server.close();
         });

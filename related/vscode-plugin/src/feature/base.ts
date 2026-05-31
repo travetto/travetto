@@ -25,6 +25,12 @@ export abstract class BaseFeature implements ActivationTarget {
     return this.module.replace('@', '').replace(/[/]/g, '.');
   }
 
+  get active(): boolean {
+    return (this.alwaysActivate ?? false)
+      || (this.isInstalled ?? false)
+      || (this.isPackaged ?? false);
+  }
+
   commandName(task: string): string {
     return `${this.moduleBase}.${this.command}:${task}`;
   }

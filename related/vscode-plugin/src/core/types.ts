@@ -22,6 +22,7 @@ export interface ActivationTargetConfig {
  */
 export interface ActivationTarget extends ActivationTargetConfig {
   moduleBase: string;
+  active: boolean;
   activate?(ctx: vscode.ExtensionContext): void | Promise<void>;
   deactivate?(): void | Promise<void>;
   onEvent?(event: TargetEvent): void | Promise<void>;

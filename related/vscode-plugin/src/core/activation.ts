@@ -52,14 +52,17 @@ class $ActivationManager {
   async activate(ctx: vscode.ExtensionContext): Promise<void> {
     const byPriority = [...this.#registry.values()]
       .toSorted((a, b) => (a.priority ?? 100) - (b.priority ?? 100));
+    let hasIpcActivated = false;
     for (const instance of byPriority) {
-      const activate = (instance.alwaysActivate ?? false) || (instance.isInstalled ?? false) || (instance.isPackaged ?? false);
-      this.#log.info('Activating', instance.module, instance.command);
-      if (activate) {
+      if (instance.active) {
+        this.#log.info('Activating', instance.module, instance.command);
         await instance.activate?.(ctx);
+        hasIpcActivated ||= instance.onEvent !== undefined;
       }
     }
-    await this.#ipcSupport.activate(ctx);
+    if (hasIpcActivated) {
+      await this.#ipcSupport.activate(ctx);
+    }
   }
 
   async deactivate(): Promise<void> {
