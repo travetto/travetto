@@ -31,12 +31,12 @@
     "directory": "module/llm-support"
   },
   "dependencies": {
-    "@travetto/runtime": "^8.0.0-alpha.14",
-    "@travetto/schema": "^8.0.0-alpha.20"
+    "@travetto/runtime": "^8.0.0-alpha.0",
+    "@travetto/schema": "^8.0.0-alpha.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.20",
-    "@travetto/test": "^8.0.0-alpha.14"
+    "@travetto/cli": "^8.0.0-alpha.0",
+    "@travetto/test": "^8.0.0-alpha.0"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

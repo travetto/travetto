@@ -18,19 +18,13 @@ export class LlmSupportMcpFeature extends BaseFeature {
       return;
     }
 
-    let trvEntry: string | undefined;
-    let cwd: string;
-
-    if (this.isInstalled) {
-      trvEntry = RuntimeIndex.getFromImport('@travetto/runtime/bin/trv.js')?.outputFile;
-    } else {
-      trvEntry = Workspace.workspaceIndex.resolvePackageCommand('trv');
-      cwd = RuntimeIndex.manifest.workspace.path;
-    }
+    let trvEntry = RuntimeIndex.getFromImport('@travetto/runtime/bin/trv.js')?.outputFile;
+    let cwd = Workspace.path;
 
     if (!trvEntry) {
-      this.log.error('LLM Support MCP feature is inactive due to missing trv command.');
-      return;
+      this.log.warn('Unable to resolve trv entry from runtime index, falling back to workspace resolution');
+      trvEntry = Workspace.workspaceIndex.resolvePackageCommand('trv');
+      cwd = RuntimeIndex.manifest.workspace.path;
     }
 
     const extensionVersion = typeof context.extension.packageJSON?.version === 'string' ?
