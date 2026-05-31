@@ -98,6 +98,20 @@
       {
         "language": "typescript",
         "path": "snippets/ts.json"
+      },
+      {
+        "language": "json",
+        "path": "snippets/mcp-server-snippets.json"
+      },
+      {
+        "language": "jsonc",
+        "path": "snippets/mcp-server-snippets.json"
+      }
+    ],
+    "mcpServerDefinitionProviders": [
+      {
+        "id": "travetto-plugin.llm-support",
+        "label": "Travetto LLM Support"
       }
     ],
     "commands": [
