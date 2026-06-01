@@ -4,8 +4,7 @@ import path from 'node:path';
 import { SchemaValidator } from '@travetto/schema';
 import { JSONUtil, RuntimeIndex } from '@travetto/runtime';
 
-import type { RecommendationQuery, SnippetSource } from './types.ts';
-import { SnippetSourceSchema } from './snippet-shapes.ts';
+import { type RecommendationQuery, type SnippetSource, SnippetSourceSchema } from './types.ts';
 
 const SNIPPET_RELATIVE_DIR = 'snippets';
 

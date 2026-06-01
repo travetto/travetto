@@ -23,9 +23,6 @@
     "resources",
     "llm"
   ],
-  "scripts": {
-    "prepack": "trv llm:support:package:consumer:docs"
-  },
   "repository": {
     "url": "git+https://github.com/travetto/travetto.git",
     "directory": "module/llm-support"

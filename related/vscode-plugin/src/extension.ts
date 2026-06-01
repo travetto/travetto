@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 
+import '@travetto/runtime/support/patch.js';
+
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { getManifestContext } from '@travetto/manifest';
 
