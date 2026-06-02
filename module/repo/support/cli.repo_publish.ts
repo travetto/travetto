@@ -4,7 +4,10 @@ import { PackageManager } from './bin/package-manager.ts';
 import { RepoExecUtil } from './bin/exec.ts';
 
 /**
- * Publish all pending modules
+ * Publish unpublished workspace modules to the package registry.
+ *
+ * The command performs a publishability scan first, then publishes candidates.
+ * Dry-run mode is enabled by default.
  */
 @CliCommand()
 export class RepoPublishCommand implements CliCommandShape {

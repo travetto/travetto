@@ -13,7 +13,10 @@ const asNumber = (input?: string): number | undefined => (!input || isNaN(+input
 const asString = (input?: string): string | undefined => (input && asNumber(input)) ? input : undefined;
 
 /**
- * Standard docker support for pack
+ * Build container-ready artifacts and optionally publish Docker images.
+ *
+ * Extends the core pack pipeline with Dockerfile generation and image build/
+ * push operations, including runtime user and registry customization.
  */
 @CliCommand()
 export class PackDockerCommand extends BasePackCommand {

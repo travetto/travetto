@@ -16,7 +16,10 @@ async function validateService(_: ServiceAction, services: string[]): Promise<Va
 }
 
 /**
- * Allows for running services
+ * Manage development services (start/stop/restart/status) across the workspace.
+ *
+ * Services are discovered from registered descriptors and executed with streamed
+ * terminal feedback, including optional quiet mode.
  */
 @CliCommand()
 export class CliServiceCommand implements CliCommandShape {

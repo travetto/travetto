@@ -6,7 +6,10 @@ import { ModelInstallUtil } from './bin/install.ts';
 import { ModelCandidateUtil } from './bin/candidate.ts';
 
 /**
- * Installing models
+ * Install or update model definitions for a selected provider.
+ *
+ * The command resolves candidate models and applies provider install/upsert
+ * operations so backing stores are prepared for runtime usage.
  */
 @CliCommand()
 export class ModelInstallCommand extends BaseModelCommand {

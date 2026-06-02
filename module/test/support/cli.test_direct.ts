@@ -4,7 +4,12 @@ import { IsPrivate } from '@travetto/schema';
 
 import { runTests, type TestConsumerType } from './bin/run.ts';
 
-/**  Direct test invocation */
+/**
+ * Run tests directly from an import or source file with optional class/method filtering.
+ *
+ * This internal command bypasses discovery by targeting a specific test import
+ * and optional class or method names.
+ */
 @CliCommand()
 @IsPrivate()
 export class TestDirectCommand {

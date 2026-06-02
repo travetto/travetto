@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 
 import { CliModuleUtil, type CliCommandShape, CliCommand, CliScmUtil } from '@travetto/cli';
-import { ExecUtil, Runtime } from '@travetto/runtime';
+import { ExecUtil, Runtime, RuntimeError } from '@travetto/runtime';
 import { Validator } from '@travetto/schema';
 
 import { PackageManager, type SemverLevel } from './bin/package-manager.ts';
@@ -9,7 +9,10 @@ import { PackageManager, type SemverLevel } from './bin/package-manager.ts';
 const CHANGE_LEVELS = new Set<SemverLevel>(['prerelease', 'patch', 'prepatch']);
 
 /**
- * Version all changed dependencies
+ * Bump workspace module versions and optionally commit/tag release metadata.
+ *
+ * Supports changed/all/direct module targeting and synchronizes dependency
+ * versions after the version bump operation completes.
  */
 @CliCommand()
 @Validator(async (cmd) => {
@@ -43,7 +46,7 @@ export class RepoVersionCommand implements CliCommandShape {
 
     // Do we have valid changes?
     if (!modules.length) {
-      throw new Error('No modules available for versioning');
+      throw new RuntimeError('No modules available for versioning');
     }
 
     await ExecUtil.getResult(PackageManager.version(modules, level, prefix));

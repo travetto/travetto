@@ -6,12 +6,16 @@ import { EmailCompiler } from '../src/compiler.ts';
 import { EmailCompileUtil } from '../src/util.ts';
 
 /**
- * CLI Entry point for running the email server
+ * Compile all email templates into generated runtime artifacts.
+ *
+ * The command discovers templated inputs (for example, `.email.html`) and emits
+ * compiled outputs used at runtime (html/text/subject variants). With watch
+ * enabled, recompilation runs automatically on matching template changes.
  */
 @CliCommand()
 export class EmailCompileCommand implements CliCommandShape {
 
-  /** Compile in watch mode */
+  /** Recompile templates whenever source templates change. */
   watch?: boolean;
 
   finalize(): void {

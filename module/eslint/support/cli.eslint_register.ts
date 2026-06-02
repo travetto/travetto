@@ -4,7 +4,9 @@ import { type CliCommandShape, CliCommand } from '@travetto/cli';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
 /**
- * Writes the eslint configuration file
+ * Generate the workspace ESLint configuration entry file.
+ *
+ * This bootstraps `eslint.config.js` to load framework-provided rule wiring.
  */
 @CliCommand({})
 export class ESLintConfigureCommand implements CliCommandShape {

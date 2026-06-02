@@ -6,12 +6,16 @@ const { prompt } = enquirer.default;
 
 import { type CliCommandShape, CliCommand, cliTpl, CliFlag } from '@travetto/cli';
 import { Terminal } from '@travetto/terminal';
+import { RuntimeError } from '@travetto/runtime';
 
 import { Context } from './bin/context.ts';
 import { type Feature, FEATURES } from './bin/features.ts';
 
 /**
- * Command to run scaffolding
+ * Scaffold a new Travetto application from interactive templates.
+ *
+ * Guides users through template and feature selection, then materializes a
+ * project in the target directory.
  */
 @CliCommand()
 export class ScaffoldCommand implements CliCommandShape {
@@ -75,7 +79,7 @@ export class ScaffoldCommand implements CliCommandShape {
         if (choice) {
           yield* this.#resolveFeatures([choice], true, depth);
         } else {
-          throw new Error(`Invalid choice: ${feat}`);
+          throw new RuntimeError(`Invalid choice: ${feat}`);
         }
       }
 
@@ -93,7 +97,7 @@ export class ScaffoldCommand implements CliCommandShape {
     } else if (name && !this.targetDirectory) {
       this.targetDirectory = path.resolve(this.workingDirectory, name);
     } else if (!name && !this.targetDirectory) {
-      throw new Error('Either a name or a target directory are required');
+      throw new RuntimeError('Either a name or a target directory are required');
     }
 
     const ctx = new Context(name, this.template, path.resolve(this.workingDirectory, this.targetDirectory!));

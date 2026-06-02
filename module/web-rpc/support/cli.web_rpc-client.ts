@@ -10,7 +10,10 @@ import type { WebRpcClient } from '../src/config.ts';
 import { WebRpcClientGeneratorService } from '../src/service.ts';
 
 /**
- * Generate the web-rpc client
+ * Generate web-rpc client artifacts or provider config output.
+ *
+ * Resolves generator services from DI and writes typed client code for the
+ * selected provider target.
  */
 @CliCommand()
 export class CliWebRpcCommand implements CliCommandShape {

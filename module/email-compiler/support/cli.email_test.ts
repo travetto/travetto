@@ -8,7 +8,10 @@ import { Env } from '@travetto/runtime';
 import { EditorService } from './bin/editor.ts';
 
 /**
- * CLI Entry point for running the email server
+ * Render and send a template file to a target recipient for quick validation.
+ *
+ * This command is useful during template development to verify real delivery and
+ * formatting without running the full editor workflow.
  */
 @CliCommand()
 export class EmailTestCommand implements CliCommandShape {
