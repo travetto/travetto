@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import MarkdownIt from 'markdown-it';
 
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { PackageUtil } from '@travetto/manifest';
@@ -15,6 +16,7 @@ import { PackageDocUtil } from '../util/package.ts';
 
 const ESCAPE_ENTITIES: Record<string, string> = { '<': '&lt;', '>': '&gt;', '&': '&amp;', '{': "{{'{'}}", '}': "{{'}'}}" };
 const ENTITY_REGEX = new RegExp(`[${Object.keys(ESCAPE_ENTITIES).join('')}]`, 'gm');
+const md = new MarkdownIt({ html: false });
 
 const stdInline = async ({ recurse, node }: RenderState<JSXElement, RenderContext>): Promise<string> =>
   `<${node.type}>${await recurse()}</${node.type}>`;
@@ -50,6 +52,19 @@ export const Html: RenderProvider<RenderContext> = {
       src: [`$ ${displayCmd}`, '', context.cleanText(output)].join('\n')
     });
     return Html.Terminal(sub);
+  },
+  CliHelp: async ({ context, props, createState }) => {
+    const config = context.resolveCliCommandFromClass(props.commandClass);
+    const { name: command, description: markdownDescription = '' } = config;
+    const title = `CLI - ${command}`;
+    const description = md.render(markdownDescription);
+    const execution = await Html.Execution(createState('Execution', {
+      title: `Running ${command}`,
+      cmd: 'trv',
+      args: [command, '--help'],
+      config: { workingDirectory: './doc-exec' }
+    }));
+    return `\n<h2 id="${context.getAnchorId(title)}">${title}</h2>\n\n${description}\n${execution}`;
   },
   Install: async ({ context, node }) => {
     const highlighted = highlight(`

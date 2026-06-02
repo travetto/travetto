@@ -53,6 +53,17 @@ export const Markdown: RenderProvider<RenderContext> = {
     });
     return Markdown.Terminal(state);
   },
+  CliHelp: async ({ context, props, createState }) => {
+    const { name: command, description = '' } = context.resolveCliCommandFromClass(props.commandClass);
+    const title = `CLI - ${command}`;
+    const execution = await Markdown.Execution(createState('Execution', {
+      title: `Running ${command}`,
+      cmd: 'trv',
+      args: [command, '--help'],
+      config: { workingDirectory: './doc-exec' }
+    }));
+    return `\n## ${title}\n\n${description}\n\n${execution}`;
+  },
   Install: async ({ context, node }) =>
     `\n\n**Install: ${node.props.title}**
 \`\`\`bash

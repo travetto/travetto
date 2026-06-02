@@ -1,4 +1,4 @@
-import { castTo, TypedObject } from '@travetto/runtime';
+import { castTo, type Class, TypedObject } from '@travetto/runtime';
 
 import type { LIBRARIES } from './mapping/library.ts';
 import type { MODULES } from './mapping/module.ts';
@@ -9,6 +9,9 @@ import { PackageDocUtil } from './util/package.ts';
 
 type InstallProps = { title: string, pkg: string };
 type ExecProps = { title: string, cmd: string, args?: string[], config?: RunConfig & { formatCommand?(cmd: string, args: string[]): string } };
+type CliHelpProps = {
+  commandClass: Class
+};
 type StdHeaderProps = { module?: string, install?: boolean };
 type HeaderProps = { title: string, description?: string };
 type ModuleProps = { name: keyof typeof MODULES };
@@ -46,6 +49,7 @@ const Config: CompFn<CodeProps> = () => EMPTY; // Configuration block
 const StdHeader: CompFn<StdHeaderProps> = () => EMPTY; // Standard module header
 const Header: CompFn<HeaderProps> = () => EMPTY; // Basic module header
 const Execution: CompFn<ExecProps> = () => EMPTY; // Run a command, and include the output as part of the document
+const CliHelp: CompFn<CliHelpProps> = () => EMPTY; // Standardized CLI command help section
 
 const Module: CompFn<ModuleProps> = () => EMPTY; // Node Module Reference
 const Library: CompFn<LibraryProps> = () => EMPTY; // Library reference
@@ -55,7 +59,7 @@ export const c = {
   Anchor, Library, Ref, File, Image, CodeLink,
   Module, Note, Header, StdHeader,
   Section, SubSection, SubSubSection,
-  Code, Execution, Terminal, Install, Config
+  Code, Execution, CliHelp, Terminal, Install, Config
 } as const;
 
 type C = typeof c;
