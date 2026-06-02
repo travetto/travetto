@@ -17,9 +17,9 @@ export const text = <>
 
   <c.Section title='Running a Server'>
 
-    By default, the framework provides a default {CliCommand} for {WebServerContract} that will follow default behaviors, and spin up the server.
-
-    <c.CliHelp commandClass={WebHttpCommand} />
+    <c.CliHelp commandClass={WebHttpCommand}>
+      By default, the framework provides a default {CliCommand} for {WebServerContract} that will follow default behaviors, and spin up the server.
+    </c.CliHelp>
 
     <c.SubSection title="Configuration">
       <c.Code title="Standard Web Http Config" src={WebHttpConfig} />
