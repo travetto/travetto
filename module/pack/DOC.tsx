@@ -4,6 +4,10 @@ import path from 'node:path';
 import { d, c } from '@travetto/doc';
 import { Runtime } from '@travetto/runtime';
 
+import { PackCommand } from './support/cli.pack.ts';
+import { PackZipCommand } from './support/cli.pack_zip.ts';
+import { PackDockerCommand } from './support/cli.pack_docker.ts';
+
 export const text = <>
   <c.StdHeader />
   This module provides the necessary tools to produce deliverable output for {d.library('Travetto')} based projects.  The main interaction with this module is through the command line interface, and the operations it provides.  Under the covers, the code bundling is performed by {d.library('Rollup')}, with specific configuration to support the frameworks runtime expectations. <br />
@@ -16,8 +20,7 @@ export const text = <>
   </ul>
 
   <c.Section title='CLI - pack'>
-
-    <c.Execution title='Pack usage' cmd='trv' args={['pack', '--help']} />
+    <c.CliHelp commandClass={PackCommand} />
 
     This command line operation will compile your project, and produce a ready to use workspace as a deliverable. Additionally, you can pass in a file to the {d.input('eject-file')} flag that will allow for a script to be produced (base on the host operating system). <br />
 
@@ -61,14 +64,14 @@ node cli run myapp
   <c.Section title='CLI - pack:zip' >
     This command is nearly identical to the standard {d.input('pack')} operation, except for the {d.input('output')} flag.  In this scenario, the {d.input('output')} flag determines the location and name of the final zip file.
 
-    <c.Execution title='Pack:zip usage' cmd='trv' args={['pack:zip', '--help']} />
+    <c.CliHelp commandClass={PackZipCommand} />
   </c.Section>
 
   <c.Section title='CLI - pack:docker'>
 
     This command starts off identical to the standard {d.input('pack')} operation, but it contains a few additional flags, and ultimately a few additional operations to support creating of the final {d.library('Docker')} image.
 
-    <c.Execution title='Pack:docker usage' cmd='trv' args={['pack:docker', '--help']} />
+    <c.CliHelp commandClass={PackDockerCommand} />
 
     The additional flags provided are allow for specifying the base image, the final docker image name (and tags), and which registry to push to (if  any).  Additionally, there are flags for exposing which ports the image should expect to open as well.   When using the {d.input('--eject-file')}  flag, the output script will produce the entire Dockerfile output inline, so that it can be easily modified as needed. <br />
 

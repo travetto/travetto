@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import MarkdownIt from 'markdown-it';
 
-import { Runtime, RuntimeIndex } from '@travetto/runtime';
+import { Runtime, RuntimeError, RuntimeIndex } from '@travetto/runtime';
 import { PackageUtil } from '@travetto/manifest';
 
 import { highlight } from './code-highlight.ts';
@@ -53,7 +53,7 @@ export const Html: RenderProvider<RenderContext> = {
     });
     return Html.Terminal(sub);
   },
-  CliHelp: async ({ context, props, createState }) => {
+  CliHelp: async ({ context, props, createState, recurse }) => {
     const config = context.resolveCliCommandFromClass(props.commandClass);
     const { name: command, description: markdownDescription = '' } = config;
     const title = `CLI - ${command}`;
@@ -64,7 +64,8 @@ export const Html: RenderProvider<RenderContext> = {
       args: [command, '--help'],
       config: { workingDirectory: './doc-exec' }
     }));
-    return `\n<h2 id="${context.getAnchorId(title)}">${title}</h2>\n\n${description}\n${execution}`;
+    const nested = (await recurse())?.trim();
+    return `\n<h2 id="${context.getAnchorId(title)}">${title}</h2>\n\n${description}\n${execution}${nested ? `\n${nested}\n` : ''}`;
   },
   Install: async ({ context, node }) => {
     const highlighted = highlight(`
@@ -140,7 +141,7 @@ ${PackageDocUtil.getInstallInstructions(node.props.pkg, true)}
     `<a target="_blank" class="source-link" href="${context.link(props.href, props)}">${props.title}</a>`,
   Image: async ({ context, props }) => {
     if (!/^https?:/.test(props.href) && !(await fs.stat(props.href, { throwIfNoEntry: false }))) {
-      throw new Error(`${props.href} is not a valid location`);
+      throw new RuntimeError(`${props.href} is not a valid location`);
     }
     return `<img src="${context.link(props.href, props)}" alt="${props.title}">`;
   },

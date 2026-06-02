@@ -7,7 +7,12 @@ import { IsPrivate } from '@travetto/schema';
 import { runTests, type TestConsumerType } from './bin/run.ts';
 import type { TestDiffSource } from '../src/model/test.ts';
 
-/**  Direct test invocation */
+/**
+ * Run tests scoped by a precomputed diff source file.
+ *
+ * The first argument resolves the test import root, and the second argument is
+ * a JSON diff payload consumed by test-selection logic.
+ */
 @CliCommand()
 @IsPrivate()
 export class TestDiffCommand {

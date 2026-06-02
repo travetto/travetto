@@ -7,6 +7,7 @@ import { WebRequest, WebResponse } from '@travetto/web';
 import type { WebHttpServer } from './src/types.ts';
 import { WebHttpConfig } from './src/config.ts';
 import { NodeWebHttpServer } from './src/node.ts';
+import { WebHttpCommand } from './support/cli.web_http.ts';
 
 const WebServerContract = toConcrete<WebHttpServer>();
 
@@ -18,7 +19,7 @@ export const text = <>
 
     By default, the framework provides a default {CliCommand} for {WebServerContract} that will follow default behaviors, and spin up the server.
 
-    <c.Execution title='Standard application' cmd='trv' args={['web:http']} config={{ workingDirectory: './doc-exec', env: { TRV_ROLE: 'doc' } }} />
+    <c.CliHelp commandClass={WebHttpCommand} />
 
     <c.SubSection title="Configuration">
       <c.Code title="Standard Web Http Config" src={WebHttpConfig} />

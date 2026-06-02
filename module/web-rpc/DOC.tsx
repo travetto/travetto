@@ -2,6 +2,8 @@
 import { d, c, DocRunUtil } from '@travetto/doc';
 import { ExecUtil, Runtime } from '@travetto/runtime';
 
+import { CliWebRpcCommand } from './support/cli.web_rpc-client.ts';
+
 export const text = async () => {
   await DocRunUtil.run('trv', ['web:rpc-client', 'config'], { workingDirectory: './doc-exec', spawn: ExecUtil.spawnPackageCommand });
 
@@ -9,11 +11,9 @@ export const text = async () => {
     <c.StdHeader />
     This module allows for a highly focused scenario, of supporting RPC operations within a {d.module('Web')} application.  The module takes care of producing the appropriate handler for the RPC commands along with the ability to generate the appropriate client to be used to interact with the RPC functionality.  The generated client uses Proxy-based objects, along with {d.library('Typescript')} magic to create a dynamic client that does not rely on generating a lot of code.
 
-    <c.Section title='CLI - web:rpc-client'>
-      The library will create the RPC client in one of three flavors: fetch, fetch + node, angular.
+    The library will create the RPC client in one of three flavors: fetch, fetch + node, angular.
 
-      <c.Execution title='Command Service' cmd='trv' args={['web:rpc-client', '--help']} config={{ workingDirectory: Runtime.workspace.path }} />
-    </c.Section>
+    <c.CliHelp commandClass={CliWebRpcCommand} />
 
     <c.Section title='Example'>
       <c.Code title="Example Controller" src="./doc-exec/src/controller.ts" />

@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import { type ManifestContext, PackageUtil } from '@travetto/manifest';
-import { castTo, type Class, Runtime } from '@travetto/runtime';
+import { castTo, type Class, Runtime, RuntimeError } from '@travetto/runtime';
 
 import { EMPTY_ELEMENT, getComponentName, type JSXElementByFn, type c } from '../jsx.ts';
 import type { DocumentShape, RenderProvider, RenderState } from '../types.ts';
@@ -106,7 +106,7 @@ export class DocRenderer {
         return renderer[name](state);
       } else {
         console.log(final);
-        throw new Error(`Unknown element: ${final.type}`);
+        throw new RuntimeError(`Unknown element: ${final.type}`);
       }
     } else {
       switch (typeof input) {
@@ -124,7 +124,7 @@ export class DocRenderer {
           return await this.#buildLink(renderer, castTo(input));
         }
       }
-      throw new Error(`Unknown object type: ${typeof input}`);
+      throw new RuntimeError(`Unknown object type: ${typeof input}`);
     }
   }
 
@@ -144,7 +144,7 @@ export class DocRenderer {
    */
   async render(format: keyof typeof providers): Promise<string> {
     if (!providers[format]) {
-      throw new Error(`Unknown renderer with format: ${format}`);
+      throw new RuntimeError(`Unknown renderer with format: ${format}`);
     }
     if (!this.#rootNode) {
       this.#rootNode = (Array.isArray(this.#root.text) || isJSXElement(this.#root.text)) ?

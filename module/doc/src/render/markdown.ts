@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { Runtime, RuntimeIndex } from '@travetto/runtime';
+import { Runtime, RuntimeError, RuntimeIndex } from '@travetto/runtime';
 import { PackageUtil } from '@travetto/manifest';
 
 import type { RenderProvider } from '../types.ts';
@@ -53,7 +53,7 @@ export const Markdown: RenderProvider<RenderContext> = {
     });
     return Markdown.Terminal(state);
   },
-  CliHelp: async ({ context, props, createState }) => {
+  CliHelp: async ({ context, props, createState, recurse }) => {
     const { name: command, description = '' } = context.resolveCliCommandFromClass(props.commandClass);
     const title = `CLI - ${command}`;
     const execution = await Markdown.Execution(createState('Execution', {
@@ -62,7 +62,8 @@ export const Markdown: RenderProvider<RenderContext> = {
       args: [command, '--help'],
       config: { workingDirectory: './doc-exec' }
     }));
-    return `\n## ${title}\n\n${description}\n\n${execution}`;
+    const nested = (await recurse())?.trim();
+    return `\n## ${title}\n\n${description}\n\n${execution}${nested ? `\n${nested}\n` : ''}`;
   },
   Install: async ({ context, node }) =>
     `\n\n**Install: ${node.props.title}**
@@ -113,7 +114,7 @@ ${context.cleanText(content.text)}
 
   Image: async ({ props, context }) => {
     if (!/^https?:/.test(props.href) && !(await fs.stat(props.href, { throwIfNoEntry: false }))) {
-      throw new Error(`${props.href} is not a valid location`);
+      throw new RuntimeError(`${props.href} is not a valid location`);
     }
     return `![${props.title}](${context.link(props.href)})`;
   },

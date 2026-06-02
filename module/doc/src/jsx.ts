@@ -9,9 +9,7 @@ import { PackageDocUtil } from './util/package.ts';
 
 type InstallProps = { title: string, pkg: string };
 type ExecProps = { title: string, cmd: string, args?: string[], config?: RunConfig & { formatCommand?(cmd: string, args: string[]): string } };
-type CliHelpProps = {
-  commandClass: Class
-};
+type CliHelpProps = { commandClass: Class, children?: unknown };
 type StdHeaderProps = { module?: string, install?: boolean };
 type HeaderProps = { title: string, description?: string };
 type ModuleProps = { name: keyof typeof MODULES };

@@ -8,8 +8,15 @@ import { RunUtil } from '../src/execute/run.ts';
 
 @CliCommand()
 @IsPrivate()
+/**
+ * Produce a deterministic digest of discovered test identifiers.
+ *
+ * This is an internal command used by tooling to enumerate tests in a stable
+ * order for planning, sharding, or change detection workflows.
+ */
 export class TestDigestCommand {
 
+  /** Output mode for digest emission. */
   output: 'json' | 'text' = 'text';
 
   preMain(): void {

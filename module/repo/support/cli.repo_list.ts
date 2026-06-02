@@ -4,7 +4,10 @@ import { JSONUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 const write = (line: string): Promise<void> => new Promise(resolve => process.stdout.write(`${line}\n`, () => resolve()));
 
 /**
- * Allows for listing of modules
+ * List workspace modules and their relationships.
+ *
+ * Output can be emitted as plain list, graphviz digraph, or JSON dependency
+ * graph suitable for automation.
  */
 @CliCommand()
 export class ListModuleCommand implements CliCommandShape {

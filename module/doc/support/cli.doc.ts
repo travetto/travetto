@@ -7,7 +7,10 @@ import { MinLength, Validator } from '@travetto/schema';
 import { PackageUtil } from '@travetto/manifest';
 
 /**
- * Command line support for generating module docs.
+ * Generate documentation outputs from a module `DOC.tsx` entry file.
+ *
+ * Supports multiple output formats/targets and optional watch mode for
+ * iterative documentation authoring.
  */
 @CliCommand()
 @Validator(async (cmd) => {

@@ -1,6 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
-import { HELP_FLAG } from '@travetto/cli';
 import { c, d } from '@travetto/doc';
+
+import { PackLambdaCommand } from './support/cli.pack_lambda.ts';
 
 export const text = <>
   <c.StdHeader />
@@ -8,7 +9,5 @@ export const text = <>
 
   <strong>NOTE:</strong> The only caveat to consider, is that while the framework supports streams for responses, {d.library('AwsLambda')} does not. Any streaming result will be read and converted into a {d.library('NodeBuffer')} before being sent back.
 
-  <c.Section title='CLI - Packaging Lambdas'>
-    <c.Execution title='Invoking a Package Build' cmd='trv' args={['pack:lambda', HELP_FLAG]} />
-  </c.Section>
+  <c.CliHelp commandClass={PackLambdaCommand} />
 </>;

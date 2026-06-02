@@ -4,7 +4,10 @@ import { Env, ExecUtil, Runtime } from '@travetto/runtime';
 import { type CliCommandShape, CliCommand, CliModuleUtil } from '@travetto/cli';
 
 /**
- * Command line support for eslint
+ * Run ESLint for the workspace or changed files.
+ *
+ * Supports incremental mode (`changed`/`since`) and forwards formatting/fix
+ * options to the underlying eslint invocation.
  */
 @CliCommand()
 export class ESLintCommand implements CliCommandShape {

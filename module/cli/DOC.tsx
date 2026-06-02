@@ -5,6 +5,7 @@ import { Max, Min, Schema, Match, Enum, Integer, Float, Precision, MinLength, Ma
 
 import { CliCommand } from './src/registry/decorator.ts';
 import { HELP_FLAG } from './__index__.ts';
+import { CliServiceCommand } from './support/cli.service.ts';
 
 const ValidationErrorContract = toConcrete<ValidationError>();
 
@@ -163,7 +164,7 @@ export const text = <>
   <c.Section title='CLI - service'>
     The module provides the ability to start/stop/restart services as {d.library('Docker')} containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targeted individually or handled as a group.
 
-    <c.Execution title='Command Service' cmd='trv' args={['service', HELP_FLAG]} config={{ workingDirectory: Runtime.workspace.path }} />
+    <c.CliHelp commandClass={CliServiceCommand} />
 
     A sample of all services available to the entire framework:
 

@@ -4,7 +4,12 @@ import { Env } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 import { IsPrivate } from '@travetto/schema';
 
-/** Test child worker target */
+/**
+ * Internal command target for test child workers.
+ *
+ * Used by the test runner to bootstrap isolated worker processes with test-
+ * oriented runtime configuration.
+ */
 @CliCommand()
 @IsPrivate()
 export class TestChildWorkerCommand {

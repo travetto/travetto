@@ -7,21 +7,24 @@ import { ExecUtil } from '@travetto/runtime';
 import { OpenApiClientHelp } from './bin/help.ts';
 
 /**
- * CLI for generating the cli client
+ * Generate API clients from an OpenAPI specification using the generator image.
+ *
+ * This command wraps OpenAPI Generator in Docker and writes generated client code
+ * into the configured output folder.
  */
 @CliCommand()
 export class OpenApiClientCommand implements CliCommandShape {
-  /** Show Extended Help */
+  /** Show expanded generator help for all available formats/options. */
   @CliFlag({ short: '-x' })
   extendedHelp: boolean = false;
-  /** Additional Properties */
+  /** Additional generator properties passed as comma-separated key/value pairs. */
   @CliFlag({ short: '-a', full: '--additional-properties' })
   properties: string[] = [];
-  /** Input file */
+  /** Input OpenAPI document path. */
   input = './openapi.yml';
-  /** Output folder */
+  /** Output directory for generated client sources. */
   output = './api-client';
-  /** Docker Image to user */
+  /** Docker image used to run OpenAPI Generator. */
   dockerImage = 'openapitools/openapi-generator-cli:latest';
 
   async help(): Promise<string[]> {

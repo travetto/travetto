@@ -11,7 +11,10 @@ async function validateMain(fileOrImport: string): Promise<ValidationError | und
 };
 
 /**
- * Allows for running of main entry points
+ * Execute a module `main()` entrypoint directly.
+ *
+ * This internal command resolves an import/source target, invokes its exported
+ * `main` function, and forwards unknown CLI args to that function.
  */
 @CliCommand()
 @IsPrivate()
