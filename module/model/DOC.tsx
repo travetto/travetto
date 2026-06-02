@@ -8,6 +8,8 @@ import {
 
 import { Model } from './src/registry/decorator.ts';
 import { Links } from './support/doc.support.ts';
+import { ModelExportCommand } from './support/cli.model_export.ts';
+import { ModelInstallCommand } from './support/cli.model_install.ts';
 
 const ModelTypeContract = toConcrete<ModelType>();
 
@@ -103,15 +105,6 @@ export const text = <>
     <c.Code title='Memory Service Test Configuration' src='./support/test/base.ts' />
   </c.Section>
 
-  <c.Section title='CLI - model:export'>
-    The module provides the ability to generate an export of the model structure from all the various {Model}s within the application.  This is useful for being able to generate the appropriate files to manually create the data schemas in production.
-
-    <c.Execution title='Running model export' cmd='trv' args={['model:export', '--help']} config={{ workingDirectory: './doc-exec' }} />
-  </c.Section>
-  <c.Section title='CLI - model:install'>
-
-    The module provides the ability to install all the various {Model}s within the application given the current configuration being targeted.  This is useful for being able to prepare the datastore manually.
-
-    <c.Execution title='Running model install' cmd='trv' args={['model:install', '--help']} config={{ workingDirectory: './doc-exec' }} />
-  </c.Section>
+  <c.CliHelp commandClass={ModelExportCommand} />
+  <c.CliHelp commandClass={ModelInstallCommand} />
 </>;

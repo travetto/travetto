@@ -25,7 +25,10 @@ async function nameValidator(names?: string[]): Promise<ValidationError | undefi
 }
 
 /**
- * Generates the schema for all CLI operations
+ * Exports machine-readable command metadata for automation and tooling.
+ *
+ * Used by editor integrations to discover runnable commands and inputs.
+ * Used by guidance workflows to validate command signatures.
  */
 @CliCommand()
 @IsPrivate()
