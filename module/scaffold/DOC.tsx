@@ -2,6 +2,7 @@
 import { d, c, PackageDocUtil } from '@travetto/doc';
 
 import { Todo } from './doc/model.ts';
+import { ScaffoldCommand } from './support/cli.scaffold.ts';
 
 export const text = <>
   <c.StdHeader install={false} />
@@ -19,6 +20,10 @@ $ git config --global.username <Username> #Set your git username
       .map(v => `$ ${PackageDocUtil.getPackageCommand(`@travetto/scaffold${v}`)}`)
       .join('\n\n# or\n\n')
   } />
+
+  <c.CliHelp commandClass={ScaffoldCommand}>
+    Once installed in your workspace, this command is the standard way to create a new Travetto project scaffold.
+  </c.CliHelp>
 
   The generator will ask about enabling the following features:
 
