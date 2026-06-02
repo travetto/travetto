@@ -19,9 +19,7 @@ export const text = <>
     <li>pack:docker</li>
   </ul>
 
-  <c.Section title='CLI - pack'>
-    <c.CliHelp commandClass={PackCommand} />
-
+  <c.CliHelp commandClass={PackCommand}>
     This command line operation will compile your project, and produce a ready to use workspace as a deliverable. Additionally, you can pass in a file to the {d.input('eject-file')} flag that will allow for a script to be produced (base on the host operating system). <br />
 
     Specific to this CLI command, the {d.input('output')} field determines where the final folder is written that contains all the compiled source.
@@ -59,19 +57,15 @@ node cli run myapp
         <li>{d.method('bundle')} - Invokes {d.library('Rollup')} with the appropriate file set to produce a single output .js file.  Depending on the module type ({d.library('CommonJS')} or {d.library('EcmascriptModule')}) the build process differs to handle the dynamic loading that application does at runtime.</li>
       </ul>
     </c.SubSection>
-  </c.Section>
+  </c.CliHelp>
 
-  <c.Section title='CLI - pack:zip' >
+  <c.CliHelp commandClass={PackZipCommand}>
     This command is nearly identical to the standard {d.input('pack')} operation, except for the {d.input('output')} flag.  In this scenario, the {d.input('output')} flag determines the location and name of the final zip file.
 
-    <c.CliHelp commandClass={PackZipCommand} />
-  </c.Section>
+  </c.CliHelp>
 
-  <c.Section title='CLI - pack:docker'>
-
+  <c.CliHelp commandClass={PackDockerCommand}>
     This command starts off identical to the standard {d.input('pack')} operation, but it contains a few additional flags, and ultimately a few additional operations to support creating of the final {d.library('Docker')} image.
-
-    <c.CliHelp commandClass={PackDockerCommand} />
 
     The additional flags provided are allow for specifying the base image, the final docker image name (and tags), and which registry to push to (if  any).  Additionally, there are flags for exposing which ports the image should expect to open as well.   When using the {d.input('--eject-file')}  flag, the output script will produce the entire Dockerfile output inline, so that it can be easily modified as needed. <br />
 
@@ -82,7 +76,7 @@ node cli run myapp
       <li>{d.method('buildDockerContainer')} - Build final container</li>
       <li>{d.method('pushDockerContainer')} - Push container with appropriate tags.  Only applies if {d.input('--docker-push')} is specified</li>
     </ul>
-  </c.Section>
+  </c.CliHelp>
 
   <c.Section title='Ejected File'>
 

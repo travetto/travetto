@@ -161,10 +161,8 @@ export const text = <>
     </c.SubSection>
   </c.Section>
 
-  <c.Section title='CLI - service'>
+  <c.CliHelp commandClass={CliServiceCommand}>
     The module provides the ability to start/stop/restart services as {d.library('Docker')} containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targeted individually or handled as a group.
-
-    <c.CliHelp commandClass={CliServiceCommand} />
 
     A sample of all services available to the entire framework:
 
@@ -175,5 +173,5 @@ export const text = <>
 
       <c.Code title='Sample Service Definition' src='../model-mongo/support/service.mongo.ts' />
     </c.SubSection>
-  </c.Section>
+  </c.CliHelp>
 </>;

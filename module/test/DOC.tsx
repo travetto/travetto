@@ -87,13 +87,13 @@ AssertionError(
 
     To run the tests you can either call the {d.module('Cli')} by invoking
 
-    <c.CliHelp commandClass={TestCommand} />
+    <c.CliHelp commandClass={TestCommand}>
+      The regexes are the patterns of tests you want to run, and all tests must be found under the {d.path('test/')} folder.
 
-    The regexes are the patterns of tests you want to run, and all tests must be found under the {d.path('test/')} folder.
-
-    <c.SubSection title='Travetto Plugin'>
-      The {d.library('TravettoPlugin')} also supports test running,  which will provide even more functionality for real-time testing and debugging.
-    </c.SubSection>
+      <c.SubSection title='Travetto Plugin'>
+        The {d.library('TravettoPlugin')} also supports test running,  which will provide even more functionality for real-time testing and debugging.
+      </c.SubSection>
+    </c.CliHelp>
   </c.Section>
 
   <c.Section title='Additional Considerations'>
