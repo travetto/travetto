@@ -11,6 +11,8 @@ import type { WebHttpServer } from '../src/types.ts';
  *
  * Initializes registry and server bindings, supports restart-aware development
  * flags, and can attempt to clear conflicting port owners in local workflows.
+ *
+ * @example trv web:http -m <MODULE2> --port 8080
  */
 @CliCommand()
 export class WebHttpCommand implements CliCommandShape {

@@ -5,7 +5,7 @@ import { Env } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 import { Registry } from '@travetto/registry';
 
-import { CliCommand, CliModuleFlag, CliParseUtil } from '@travetto/cli';
+import { CliCommand, CliModuleFlag, CliParseUtil, HELP_FLAG } from '@travetto/cli';
 
 /**
  * My command
@@ -34,12 +34,12 @@ class ParseSuite {
 
   @Test()
   async testArgs() {
-    const expected = { cmd: 'bob', args: ['--help'], help: true };
-    const expectedWithoutCmd = { cmd: undefined, args: ['--help', 'bob'], help: true };
-    assert.deepStrictEqual(CliParseUtil.getArgs(['--help', 'bob']), expectedWithoutCmd);
-    assert.deepStrictEqual(CliParseUtil.getArgs(['bob', '--help']), expected);
-    assert.deepStrictEqual(CliParseUtil.getArgs([...process.argv.slice(0, 2), 'bob', '--help']), expected);
-    assert.deepStrictEqual(CliParseUtil.getArgs([...process.argv.slice(0, 2), '--help', 'bob']), expectedWithoutCmd);
+    const expected = { cmd: 'bob', args: [HELP_FLAG], help: true };
+    const expectedWithoutCmd = { cmd: undefined, args: [HELP_FLAG, 'bob'], help: true };
+    assert.deepStrictEqual(CliParseUtil.getArgs([HELP_FLAG, 'bob']), expectedWithoutCmd);
+    assert.deepStrictEqual(CliParseUtil.getArgs(['bob', HELP_FLAG]), expected);
+    assert.deepStrictEqual(CliParseUtil.getArgs([...process.argv.slice(0, 2), 'bob', HELP_FLAG]), expected);
+    assert.deepStrictEqual(CliParseUtil.getArgs([...process.argv.slice(0, 2), HELP_FLAG, 'bob']), expectedWithoutCmd);
     assert.match((CliParseUtil.getArgs(process.argv)).cmd!, /test(:.*)?$/);
   }
 

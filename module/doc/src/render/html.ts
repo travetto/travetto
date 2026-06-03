@@ -1,8 +1,9 @@
 import fs from 'node:fs/promises';
-import MarkdownIt from 'markdown-it';
+import markdown from 'markdown-it';
 
 import { Runtime, RuntimeError, RuntimeIndex } from '@travetto/runtime';
 import { PackageUtil } from '@travetto/manifest';
+import { HELP_FLAG } from '@travetto/cli';
 
 import { highlight } from './code-highlight.ts';
 import type { RenderProvider, RenderState } from '../types.ts';
@@ -16,7 +17,7 @@ import { PackageDocUtil } from '../util/package.ts';
 
 const ESCAPE_ENTITIES: Record<string, string> = { '<': '&lt;', '>': '&gt;', '&': '&amp;', '{': "{{'{'}}", '}': "{{'}'}}" };
 const ENTITY_REGEX = new RegExp(`[${Object.keys(ESCAPE_ENTITIES).join('')}]`, 'gm');
-const md = new MarkdownIt({ html: false });
+const md = new markdown({ html: false });
 
 const stdInline = async ({ recurse, node }: RenderState<JSXElement, RenderContext>): Promise<string> =>
   `<${node.type}>${await recurse()}</${node.type}>`;
@@ -61,7 +62,7 @@ export const Html: RenderProvider<RenderContext> = {
     const execution = await Html.Execution(createState('Execution', {
       title: `Running ${command}`,
       cmd: 'trv',
-      args: [command, '--help'],
+      args: [command, HELP_FLAG],
       config: { workingDirectory: './doc-exec' }
     }));
     const nested = (await recurse())?.trim();

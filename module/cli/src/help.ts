@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { castKey, getClass, JSONUtil, Runtime } from '@travetto/runtime';
+import { castKey, CodecUtil, getClass, JSONUtil, Runtime } from '@travetto/runtime';
 import { SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
 
 import { cliTpl } from './color.ts';
@@ -55,9 +55,23 @@ ${{ identifier: Runtime.getInstallCommand(module) }}
     const { name: commandName } = CliCommandRegistryIndex.get(getClass(command));
     const args = schema.methods.main?.parameters ?? [];
 
-    const usage = [cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`,];
+    const usage: string[] = [];
     const params: string[] = [];
     const descriptions: string[] = [];
+
+    if (schema.description) {
+      usage.push(schema.description);
+    }
+
+    const prefix = usage.length ? '\n' : '';
+    usage.push(prefix, cliTpl`${prefix}${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`);
+
+    if (schema.examples) {
+      usage.push(cliTpl`${{ title: 'Example Usage:' }}`);
+      for (const example of schema.examples) {
+        usage.push(cliTpl`\t${example}`);
+      }
+    }
 
     // Ensure finalized
     for (const field of args) {
@@ -136,11 +150,13 @@ ${{ identifier: Runtime.getInstallCommand(module) }}
     for (const { command: cmd, schema } of resolved) {
       try {
         if (schema && !schema.private) {
-          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.description || '' }}`);
+          const description = CodecUtil.readFirstLine(schema.description, '');
+          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: description }}`);
         }
       } catch (error) {
         if (error instanceof Error) {
-          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ failure: error.message.split(/\n/)[0] }}`);
+          const failure = CodecUtil.readFirstLine(error.message);
+          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ failure }}`);
         } else {
           throw error;
         }

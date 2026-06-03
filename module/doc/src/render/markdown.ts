@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 
 import { Runtime, RuntimeError, RuntimeIndex } from '@travetto/runtime';
 import { PackageUtil } from '@travetto/manifest';
+import { HELP_FLAG } from '@travetto/cli';
 
 import type { RenderProvider } from '../types.ts';
 import { c, getComponentName } from '../jsx.ts';
@@ -59,7 +60,7 @@ export const Markdown: RenderProvider<RenderContext> = {
     const execution = await Markdown.Execution(createState('Execution', {
       title: `Running ${command}`,
       cmd: 'trv',
-      args: [command, '--help'],
+      args: [command, HELP_FLAG],
       config: { workingDirectory: './doc-exec' }
     }));
     const nested = (await recurse())?.trim();

@@ -32,6 +32,7 @@ export class DocUtil {
     const out: DeclDocumentation = {
       description: undefined,
       return: undefined,
+      examples: undefined,
       params: []
     };
 
@@ -47,6 +48,7 @@ export class DocUtil {
         const top = docs.at(-1)!;
         if (ts.isJSDoc(top)) {
           out.description = this.getDocComment(top, out.description);
+          out.examples = tags.filter(tag => tag.tagName.getText() === 'example').map(tag => this.getDocComment(tag, '')!).filter(Boolean);
         }
       }
 

@@ -85,7 +85,10 @@ export class CodecUtil {
   /** Consume lines  */
   static async readLines(stream: BinaryType, handler: (input: string) => unknown | Promise<unknown>): Promise<void> {
     for await (const item of createInterface(BinaryUtil.toReadable(stream))) {
-      await handler(item);
+      const result = await handler(item);
+      if (result === false) {
+        break;
+      }
     }
   }
 
@@ -101,5 +104,15 @@ export class CodecUtil {
     }
     return BinaryUtil.isBinaryArray(chunk) ? chunk :
       Buffer.from(typeof chunk === 'string' ? chunk : `${chunk}`, castTo(encoding ?? 'utf8'));
+  }
+
+  static readFirstLine(data: string): string;
+  static readFirstLine(data: string | undefined, defaultValue: string): string;
+  static readFirstLine(data: string | undefined, defaultValue: string = ''): string {
+    if (typeof data === 'undefined') {
+      return defaultValue;
+    } else {
+      return data.substring(0, data.indexOf('\n')).trim();
+    }
   }
 }
