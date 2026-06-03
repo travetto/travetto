@@ -148,9 +148,7 @@ export class SimpleResolver implements TransformResolver {
         result.templateTypeName = context?.templateTypeName;
 
         try {
-          const docs = DocUtil.describeDocs(type);
-          result.description = docs.description;
-          result.examples = docs.examples;
+          result.description = DocUtil.describeDocs(type).description;
         } catch { }
 
         if ('tsTypeArguments' in result) {

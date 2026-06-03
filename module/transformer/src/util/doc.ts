@@ -37,10 +37,11 @@ export class DocUtil {
     };
 
     if (toDescribe) {
-      const tags = ts.getJSDocTags(toDescribe);
       while (!this.hasJSDoc(toDescribe) && CoreUtil.hasOriginal(toDescribe)) {
         toDescribe = transformCast<ts.Declaration>(toDescribe.original);
       }
+
+      const tags = ts.getJSDocTags(toDescribe);
 
       const docs = this.hasJSDoc(toDescribe) ? toDescribe.jsDoc : undefined;
 
@@ -48,7 +49,6 @@ export class DocUtil {
         const top = docs.at(-1)!;
         if (ts.isJSDoc(top)) {
           out.description = this.getDocComment(top, out.description);
-          out.examples = tags.filter(tag => tag.tagName.getText() === 'example').map(tag => this.getDocComment(tag, '')!).filter(Boolean);
         }
       }
 
@@ -61,6 +61,8 @@ export class DocUtil {
               name: tag.name && tag.name.getText(),
               description: this.getDocComment(tag, '')!
             });
+          } else if (tag.tagName.getText() === 'example') {
+            (out.examples ??= []).push(this.getDocComment(tag, '')!);
           }
         }
       }

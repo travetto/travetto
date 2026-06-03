@@ -90,10 +90,11 @@ export class SchemaTransformer {
     const existing = state.findDecorator(this, node, 'Schema', SchemaTransformUtil.SCHEMA_IMPORT);
     const cons = node.members.find(member => ts.isConstructorDeclaration(member));
 
-    const attrs: Record<string, string | boolean | ts.Expression | number | object | unknown[]> = {};
+    const attrs: Record<string, string | boolean | ts.Expression | number | object | unknown[] | undefined> = {};
 
     if (comments.description) {
       attrs.description = comments.description;
+      attrs.examples = comments.examples;
     }
 
     // Extract all interfaces
