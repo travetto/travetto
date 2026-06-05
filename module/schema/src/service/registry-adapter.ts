@@ -23,12 +23,6 @@ function assignMetadata<T>(key: symbol, base: SchemaCoreConfig, data: Partial<T>
   return castTo(out);
 }
 
-function ensureBinary<T extends SchemaBasicType>(config?: T): void {
-  if (config?.type) {
-    config.binary = BinaryUtil.isBinaryTypeReference(config.type);
-  }
-}
-
 function combineCore<T extends SchemaCoreConfig>(base: T, config: Partial<T>): T {
   return {
     ...config.metadata ? { metadata: { ...base.metadata, ...config.metadata } } : {},
@@ -36,6 +30,12 @@ function combineCore<T extends SchemaCoreConfig>(base: T, config: Partial<T>): T
     ...config.description ? { description: config.description || base.description } : {},
     ...config.examples ? { examples: [...(base.examples ?? []), ...(config.examples ?? [])] } : {},
   };
+}
+
+function ensureBinary<T extends SchemaBasicType>(config?: T): void {
+  if (config?.type) {
+    config.binary = BinaryUtil.isBinaryTypeReference(config.type);
+  }
 }
 
 function combineInputs<T extends SchemaInputConfig>(base: T, configs: Partial<T>[]): T {
