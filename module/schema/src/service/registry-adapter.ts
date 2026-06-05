@@ -4,7 +4,7 @@ import { RuntimeError, BinaryUtil, castKey, castTo, type Class, describeFunction
 import {
   type SchemaClassConfig, type SchemaMethodConfig, type SchemaFieldConfig,
   type SchemaParameterConfig, type SchemaInputConfig, type SchemaFieldMap, type SchemaCoreConfig,
-  type SchemaBasicType, CONSTRUCTOR_PROPERTY
+  CONSTRUCTOR_PROPERTY
 } from './types.ts';
 
 export type SchemaDiscriminatedInfo = Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>>;
@@ -23,25 +23,11 @@ function assignMetadata<T>(key: symbol, base: SchemaCoreConfig, data: Partial<T>
   return castTo(out);
 }
 
-function combineCore<T extends SchemaCoreConfig>(base: T, config: Partial<T>): T {
-  return safeAssign(base, {
-    ...config.metadata ? { metadata: { ...base.metadata, ...config.metadata } } : {},
-    ...config.private ? { private: config.private ?? base.private } : {},
-    ...config.description ? { description: config.description || base.description } : {},
-    ...config.examples ? { examples: [...(base.examples ?? []), ...(config.examples ?? [])] } : {},
-  });
-}
-
-function ensureBinary<T extends SchemaBasicType>(config?: T): void {
-  if (config?.type) {
-    config.binary = BinaryUtil.isBinaryTypeReference(config.type);
-  }
-}
-
 function combineInputs<T extends SchemaInputConfig>(base: T, configs: Partial<T>[]): T {
   for (const config of configs) {
     if (config) {
       safeAssign(base, {
+        ...config,
         ...config.aliases ? { aliases: [...base.aliases ?? [], ...config.aliases ?? []] } : {},
         ...config.specifiers ? { specifiers: [...base.specifiers ?? [], ...config.specifiers ?? []] } : {},
         ...config.enum ? {
@@ -50,10 +36,13 @@ function combineInputs<T extends SchemaInputConfig>(base: T, configs: Partial<T>
             values: (config.enum?.values ?? base.enum?.values ?? []).toSorted()
           }
         } : {},
+        ...config.metadata ? { metadata: { ...base.metadata, ...config.metadata } } : {},
+        ...config.private ? { private: config.private ?? base.private } : {},
+        ...config.description ? { description: config.description || base.description } : {},
+        ...config.examples ? { examples: [...(base.examples ?? []), ...(config.examples ?? [])] } : {},
+        ...config.type ? { binary: BinaryUtil.isBinaryTypeReference(config.type) } : {}
       });
     }
-    combineCore(base, config);
-    ensureBinary(base);
   }
   return base;
 }
@@ -62,16 +51,19 @@ function combineMethods<T extends SchemaMethodConfig>(base: T, configs: Partial<
   for (const config of configs) {
     safeAssign(base, {
       ...config,
+      ...config.metadata ? { metadata: { ...base.metadata, ...config.metadata } } : {},
+      ...config.private ? { private: config.private ?? base.private } : {},
+      ...config.description ? { description: config.description || base.description } : {},
+      ...config.examples ? { examples: [...(base.examples ?? []), ...(config.examples ?? [])] } : {},
+      ...config.returnType?.type ? { binary: BinaryUtil.isBinaryTypeReference(config.returnType?.type) } : {},
       parameters: config.parameters ?? base.parameters,
       validators: [...base.validators, ...(config.validators ?? [])],
     });
-    combineCore(base, config);
     if (config.parameters) {
       for (const param of config.parameters) {
         safeAssign(base.parameters[param.index], param);
       }
     }
-    ensureBinary(config.returnType);
   }
   return base;
 }
@@ -136,11 +128,14 @@ function combineClasses<T extends SchemaClassConfig>(base: T, configs: Partial<T
       ...config,
       ...config.views ? { views: { ...base.views, ...config.views } } : {},
       ...config.validators ? { validators: [...base.validators, ...config.validators] } : {},
+      ...config.metadata ? { metadata: { ...base.metadata, ...config.metadata } } : {},
+      ...config.private ? { private: config.private ?? base.private } : {},
+      ...config.description ? { description: config.description || base.description } : {},
+      ...config.examples ? { examples: [...(base.examples ?? []), ...(config.examples ?? [])] } : {},
       interfaces: [...base.interfaces, ...(config.interfaces ?? [])],
       methods: { ...base.methods, ...config.methods },
       fields: { ...base.fields, ...config.fields },
     });
-    combineCore(base, config);
   }
   return base;
 }
