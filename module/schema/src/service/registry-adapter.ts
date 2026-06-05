@@ -276,7 +276,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
     for (const method of Object.values(config.methods)) {
       method.parameters = method.parameters.toSorted((a, b) => (a.index! - b.index!));
-      if (method.returnType && method.returnType.type) {
+      if (method.returnType?.type) {
         method.returnType.binary = BinaryUtil.isBinaryTypeReference(method.returnType.type);
       }
       for (const input of method.parameters) {
