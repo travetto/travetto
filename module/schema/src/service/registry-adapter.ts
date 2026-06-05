@@ -42,7 +42,6 @@ function combineInputs<T extends SchemaInputConfig>(base: T, configs: Partial<T>
   for (const config of configs) {
     if (config) {
       safeAssign(base, {
-        ...config,
         ...config.aliases ? { aliases: [...base.aliases ?? [], ...config.aliases ?? []] } : {},
         ...config.specifiers ? { specifiers: [...base.specifiers ?? [], ...config.specifiers ?? []] } : {},
         ...config.enum ? {
