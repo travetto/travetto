@@ -4,7 +4,7 @@ import { RuntimeError, BinaryUtil, castKey, castTo, type Class, describeFunction
 import {
   type SchemaClassConfig, type SchemaMethodConfig, type SchemaFieldConfig,
   type SchemaParameterConfig, type SchemaInputConfig, type SchemaFieldMap, type SchemaCoreConfig,
-  CONSTRUCTOR_PROPERTY
+  CONSTRUCTOR_PROPERTY, type SchemaBasicType
 } from './types.ts';
 
 export type SchemaDiscriminatedInfo = Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>>;
@@ -21,6 +21,12 @@ function assignMetadata<T>(key: symbol, base: SchemaCoreConfig, data: Partial<T>
     safeAssign(out, d);
   }
   return castTo(out);
+}
+
+function ensureBinary<T extends SchemaBasicType>(config?: T): void {
+  if (config?.type) {
+    config.binary = BinaryUtil.isBinaryTypeReference(config.type);
+  }
 }
 
 function combineInputs<T extends SchemaInputConfig>(base: T, configs: Partial<T>[]): T {
@@ -40,8 +46,8 @@ function combineInputs<T extends SchemaInputConfig>(base: T, configs: Partial<T>
         ...config.private ? { private: config.private ?? base.private } : {},
         ...config.description ? { description: config.description || base.description } : {},
         ...config.examples ? { examples: [...(base.examples ?? []), ...(config.examples ?? [])] } : {},
-        ...config.type ? { binary: BinaryUtil.isBinaryTypeReference(config.type) } : {}
       });
+      ensureBinary(base);
     }
   }
   return base;
@@ -55,10 +61,10 @@ function combineMethods<T extends SchemaMethodConfig>(base: T, configs: Partial<
       ...config.private ? { private: config.private ?? base.private } : {},
       ...config.description ? { description: config.description || base.description } : {},
       ...config.examples ? { examples: [...(base.examples ?? []), ...(config.examples ?? [])] } : {},
-      ...config.returnType?.type ? { binary: BinaryUtil.isBinaryTypeReference(config.returnType?.type) } : {},
       parameters: config.parameters ?? base.parameters,
       validators: [...base.validators, ...(config.validators ?? [])],
     });
+    ensureBinary(base.returnType);
     if (config.parameters) {
       for (const param of config.parameters) {
         safeAssign(base.parameters[param.index], param);
