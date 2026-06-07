@@ -7,8 +7,8 @@ import type { EsSchemaConfig } from './types.ts';
 
 const PointConcrete = toConcrete<Point>();
 
-const isMappingType = (input: estypes.MappingProperty): input is estypes.MappingTypeMapping =>
-  (input.type === 'object' || input.type === 'nested') && 'properties' in input && !!input.properties;
+const isMappingType = (input: estypes.MappingProperty): input is estypes.MappingTypeMapping & estypes.MappingProperty =>
+  !!input && !!input.type && (input.type === 'object' || input.type === 'nested');
 
 /**
  * Utils for ES Schema management
@@ -158,13 +158,15 @@ export class ElasticsearchSchemaUtil {
     const allKeys = new Set([...Object.keys(currentProperties), ...Object.keys(neededProperties)]);
     const changed: string[] = [];
 
+    console.error({ current, needed });
+
     for (const key of allKeys) {
       const path = prefix ? `${prefix}.${key}` : key;
       const currentProperty = currentProperties[key];
       const neededProperty = neededProperties[key];
 
-      if (isMappingType(currentProperty) || isMappingType(neededProperty)) {
-        if (!isMappingType(neededProperty) || !isMappingType(currentProperty)) {
+      if (isMappingType(currentProperty) && isMappingType(neededProperty)) {
+        if (currentProperty.type !== neededProperty.type) {
           changed.push(path);
         } else {
           changed.push(...this.getChangedFields(
@@ -173,6 +175,8 @@ export class ElasticsearchSchemaUtil {
             path
           ));
         }
+      } else if (isMappingType(currentProperty) || isMappingType(neededProperty)) {
+        changed.push(path);
       } else if (!currentProperty || !neededProperty || currentProperty.type !== neededProperty.type) {
         changed.push(path);
       }

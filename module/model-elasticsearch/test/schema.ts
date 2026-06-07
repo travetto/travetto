@@ -221,9 +221,7 @@ class SchemaSuite {
         id: { type: 'keyword' },
         address: {
           type: 'object',
-          properties: {
-            street: { type: 'keyword' }
-          }
+          properties: { street: { type: 'keyword' } }
         }
       },
       dynamic: false
