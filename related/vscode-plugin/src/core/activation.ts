@@ -2,9 +2,7 @@ import * as vscode from 'vscode';
 
 import { IpcSupport } from './ipc.ts';
 import { ActivationTarget, TargetEvent, type ActivationTargetConfig } from './types.ts';
-import { Workspace } from './workspace.ts';
 import { Log } from './log.ts';
-import { RuntimeIndex } from '@travetto/runtime';
 
 interface ActivationFactory<T extends ActivationTarget = ActivationTarget> {
   new(cfg: ActivationTargetConfig): T;
@@ -15,37 +13,24 @@ interface ActivationFactory<T extends ActivationTarget = ActivationTarget> {
  */
 class $ActivationManager {
 
-  static #isInstalled(module: string): boolean {
-    try { Workspace.resolveImport(module); return true; } catch { return false; }
-  }
-
-  static #isPackaged(module: string): boolean {
-    return RuntimeIndex.hasModule(module) ?? false;
-  }
-
   #registry = new Set<ActivationTarget>();
   #commandRegistry = new Map<string, ActivationTarget>();
   #ipcSupport = new IpcSupport(event => this.onTargetEvent(event));
   #log = new Log('travetto.vscode.activation');
 
   add(cls: ActivationFactory, config: ActivationTargetConfig): void {
-    const instance = new cls({
-      isInstalled: $ActivationManager.#isInstalled(config.module),
-      isPackaged: $ActivationManager.#isPackaged(config.module),
+    const resolved = {
       ...config,
       priority: config.priority ?? 100,
-    });
+    } as const;
+
+    this.#log.info('Registering activation target', `${resolved.module}.${resolved.command}`, resolved);
+
+    const instance = new cls(resolved);
 
     this.#registry.add(instance);
     if (config.command && typeof config.command === 'string') {
-      this.#commandRegistry.set(`${config.module}:${config.command}`, instance);
-    }
-  }
-
-  async init(): Promise<void> {
-    for (const instance of this.#registry.values()) {
-      await vscode.commands.executeCommand('setContext', instance.moduleBase, true);
-      await vscode.commands.executeCommand('setContext', `${instance.moduleBase}.${instance.command}`, true);
+      this.#commandRegistry.set(instance.moduleCommand, instance);
     }
   }
 
@@ -54,8 +39,10 @@ class $ActivationManager {
       .toSorted((a, b) => (a.priority ?? 100) - (b.priority ?? 100));
     let hasIpcActivated = false;
     for (const instance of byPriority) {
-      if (instance.active) {
+      if (instance.available) {
         this.#log.info('Activating', instance.module, instance.command);
+        await vscode.commands.executeCommand('setContext', instance.moduleBase, true);
+        await vscode.commands.executeCommand('setContext', instance.moduleCommand, true);
         await instance.activate?.(ctx);
         hasIpcActivated ||= instance.onEvent !== undefined;
       }

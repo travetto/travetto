@@ -23,7 +23,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     await Runtime.importFrom(ext.import);
   }
 
-  await ActivationManager.init();
   await ActivationManager.activate(context);
 }
 

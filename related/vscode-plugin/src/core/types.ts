@@ -12,8 +12,6 @@ export interface ActivationTargetConfig {
   module: string;
   command: string;
   priority?: number;
-  isInstalled?: boolean;
-  isPackaged?: boolean;
   alwaysActivate?: boolean;
 }
 
@@ -22,7 +20,8 @@ export interface ActivationTargetConfig {
  */
 export interface ActivationTarget extends ActivationTargetConfig {
   moduleBase: string;
-  active: boolean;
+  moduleCommand: string;
+  available: boolean;
   activate?(ctx: vscode.ExtensionContext): void | Promise<void>;
   deactivate?(): void | Promise<void>;
   onEvent?(event: TargetEvent): void | Promise<void>;

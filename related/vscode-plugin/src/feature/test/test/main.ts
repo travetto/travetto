@@ -159,7 +159,7 @@ class TestRunnerFeature extends BaseFeature {
         range: document.lineAt(test.lineStart - 1).range,
         isResolved: true,
         command: {
-          command: this.commandName('line'),
+          command: `${this.moduleCommand}:line`,
           title: 'Debug Test',
           arguments: [test.lineBodyStart]
         }
