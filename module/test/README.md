@@ -220,11 +220,18 @@ class SimpleTest {
 ## Running Tests
 To run the tests you can either call the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework") by invoking
 
-**Terminal: Test Help Output**
+## CLI - test
+
+**Terminal: Help for test**
 ```bash
 $ trv test --help
 
 Usage: test [options] [first:string] [globs...:string]
+
+Execute the test framework for targeted files, suites, or methods.
+
+Supports glob-based discovery, import-based targeting, tag filtering, and
+configurable output consumers for local and CI workflows.
 
 Options:
   -f, --format <string>          Output format for test results (default: "tap")

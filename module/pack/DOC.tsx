@@ -20,11 +20,11 @@ export const text = <>
   </ul>
 
   <c.CliHelpSection commandClass={PackCommand}>
+    <c.CliHelpExecution commandClass={PackCommand} />
+
     This command line operation will compile your project, and produce a ready to use workspace as a deliverable. Additionally, you can pass in a file to the {d.input('eject-file')} flag that will allow for a script to be produced (base on the host operating system). <br />
 
     Specific to this CLI command, the {d.input('output')} field determines where the final folder is written that contains all the compiled source.
-
-    <c.CliHelpExecution commandClass={PackCommand} />
 
     <c.SubSection title='Entry Point Configuration'>
       Every application requires an entry point to determine execution flow (and in {d.library('Rollup')}'s case, tree-shaking as well.).  By default the {d.module('Cli')} acts as the entry point.  This bypasses the {d.module('Compiler')} intentionally, as the compiler is not available at runtime. <br />

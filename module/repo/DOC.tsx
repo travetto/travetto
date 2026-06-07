@@ -68,9 +68,9 @@ Date:   Thu Feb 23 17:51:37 2023 -0500
   </c.CliHelpSection>
 
   <c.CliHelpSection commandClass={RepoExecCommand}>
-    The standard format includes prefixed output to help identify which module produced which output.
-
     <c.CliHelpExecution commandClass={RepoExecCommand} />
+
+    The standard format includes prefixed output to help identify which module produced which output.
 
     <c.Execution title='List execution of Monorepo' cmd='trv' args={['repo:exec', '-w', '1', 'pwd']} config={{ workingDirectory: Runtime.workspace.path }} />
   </c.CliHelpSection>

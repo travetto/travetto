@@ -25,12 +25,18 @@ There are three primary cli commands for packing your code:
 <h2 id="cli-pack">CLI - pack</h2>
 
   <figure class="terminal">
-    <figcaption class="terminal">Pack usage
+    <figcaption class="terminal">Showing help for pack
 
 </figcaption>
     <pre><code class="language-bash">$ trv pack <span class="token parameter variable">--help</span>
 
 Usage: pack <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.:string<span class="token punctuation">]</span>
+
+Build a standard module package artifact.
+
+This base <span class="token builtin class-name">command</span> produces the default packaged output and serves as the
+common entry point <span class="token keyword">for</span> module packaging workflows.
+Example Usage:
 
 Options:
   -b, <span class="token parameter variable">--buildDir</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>              Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
@@ -97,12 +103,18 @@ Every <a class="module-link" href="https://github.com/travetto/travetto/tree/mai
 This command is nearly identical to the standard <code class="item input">pack</code> operation, except for the <code class="item input">output</code> flag.  In this scenario, the <code class="item input">output</code> flag determines the location and name of the final zip file.
 
   <figure class="terminal">
-    <figcaption class="terminal">Pack:zip usage
+    <figcaption class="terminal">Showing help for pack:zip
 
 </figcaption>
     <pre><code class="language-bash">$ trv pack:zip <span class="token parameter variable">--help</span>
 
 Usage: pack:zip <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.:string<span class="token punctuation">]</span>
+
+Build a deployable <span class="token function">zip</span> artifact using the standard pack pipeline.
+
+This <span class="token builtin class-name">command</span> runs base packing operations and <span class="token keyword">then</span> compresses the generated
+output into a single archive file.
+Example Usage:
 
 Options:
   -b, <span class="token parameter variable">--buildDir</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>              Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
@@ -129,12 +141,18 @@ Options:
 This command starts off identical to the standard <code class="item input">pack</code> operation, but it contains a few additional flags, and ultimately a few additional operations to support creating of the final <a target="_blank" class="external-link" href="https://www.docker.com/community-edition">docker</a> image.
 
   <figure class="terminal">
-    <figcaption class="terminal">Pack:docker usage
+    <figcaption class="terminal">Showing help for pack:docker
 
 </figcaption>
     <pre><code class="language-bash">$ trv pack:docker <span class="token parameter variable">--help</span>
 
 Usage: pack:docker <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.:string<span class="token punctuation">]</span>
+
+Build container-ready artifacts and optionally publish Docker images.
+
+Extends the core pack pipeline with Dockerfile generation and image build/
+push operations, including runtime user and registry customization.
+Example Usage:
 
 Options:
   -b, <span class="token parameter variable">--buildDir</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>

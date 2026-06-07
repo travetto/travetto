@@ -26,6 +26,31 @@ Once the necessary configuration is setup, you can invoke the scaffolding by run
 $ npx @travetto/scaffold@<span class="token operator">&lt;</span>version-or-tag<span class="token operator">></span></code></pre>
   </figure>
 
+<h2 id="cli-scaffold">CLI - scaffold</h2>
+
+Once installed in your workspace, this command is the standard way to create a new Travetto project scaffold.
+
+  <figure class="terminal">
+    <figcaption class="terminal">Showing help for scaffold
+
+</figcaption>
+    <pre><code class="language-bash">$ trv scaffold <span class="token parameter variable">--help</span>
+
+Usage: scaffold <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>name:string<span class="token punctuation">]</span>
+
+Scaffold a new Travetto application from interactive templates.
+
+Guides <span class="token function">users</span> through template and feature selection, <span class="token keyword">then</span> materializes a
+project <span class="token keyword">in</span> the target directory.
+
+Options:
+  -t, <span class="token parameter variable">--template</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Template <span class="token punctuation">(</span>default: <span class="token string">"todo"</span><span class="token punctuation">)</span>
+  -c, <span class="token parameter variable">--cwd</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>       Current Working Directory override <span class="token punctuation">(</span>default: <span class="token string">"."</span><span class="token punctuation">)</span>
+  -d, <span class="token parameter variable">--dir</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>       Target Directory
+  -f, <span class="token parameter variable">--force</span>              Force writing into an existing directory <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
+  <span class="token parameter variable">--help</span>                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  </figure>
+
 The generator will ask about enabling the following features:
 <h2 id="web-application">Web Application</h2>
 

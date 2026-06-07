@@ -17,15 +17,23 @@
 
 This module provides an adapter between <a class="module-link" routerLink="/docs/web" title="Declarative support for creating Web Applications">Web API</a> and <a target="_blank" class="external-link" href="https://aws.amazon.com/lambda/">AWS Lambda</a>.  The event-driven invocation model for <a class="module-link" routerLink="/docs/web" title="Declarative support for creating Web Applications">Web API</a> aligns cleanly with <a target="_blank" class="external-link" href="https://aws.amazon.com/lambda/">AWS Lambda</a>'s model for event-driven operation.  <br><br>
 <strong>NOTE:</strong> The only caveat to consider, is that while the framework supports streams for responses, <a target="_blank" class="external-link" href="https://aws.amazon.com/lambda/">AWS Lambda</a> does not. Any streaming result will be read and converted into a <a target="_blank" class="external-link" href="https://nodejs.org/api/buffer.html">Buffer</a> before being sent back.
-<h2 id="cli-packaging-lambdas">CLI - Packaging Lambdas</h2>
+<h2 id="cli-pack-lambda">CLI - pack:lambda</h2>
+
+Use this command to produce the Lambda-ready archive for deployment.
 
   <figure class="terminal">
-    <figcaption class="terminal">Invoking a Package Build
+    <figcaption class="terminal">Showing help for pack:lambda
 
 </figcaption>
     <pre><code class="language-bash">$ trv pack:lambda <span class="token parameter variable">--help</span>
 
 Usage: pack:lambda <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.:string<span class="token punctuation">]</span>
+
+Build an AWS Lambda-ready <span class="token function">zip</span> package using the pack pipeline.
+
+Configures the Lambda entrypoint and emits a compressed deployment artifact
+suitable <span class="token keyword">for</span> direct Lambda upload workflows.
+Example Usage:
 
 Options:
   -b, <span class="token parameter variable">--buildDir</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>              Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
