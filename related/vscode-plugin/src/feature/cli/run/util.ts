@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { ExecUtil, Env, JSONUtil } from '@travetto/runtime';
+import { ExecUtil, Env, JSONUtil, CodecUtil } from '@travetto/runtime';
 
 import { RunChoice, ResolvedRunChoice } from './types.ts';
 import { Workspace } from '../../../core/workspace.ts';
@@ -22,8 +22,8 @@ export class CliRunUtil {
    * @param choice
    */
   static #buildChoiceDetail(choice: RunChoice): string {
-    const detail = [choice.description];
-    const out = detail.filter(part => !!part).join(' ').trim();
+    const detail = [CodecUtil.readFirstLine(choice.description ?? '')];
+    const out = detail.filter(Boolean).join(' ').trim();
     return out ? `${'\u00A0'.repeat(4)}${out}` : out;
   }
 
