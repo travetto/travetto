@@ -6,7 +6,7 @@ import { Activatible } from '../../../core/activation.ts';
 import { BaseFeature } from '../../base.ts';
 import { RunUtil } from '../../../core/run.ts';
 
-@Activatible('@travetto/terminal', true)
+@Activatible({ module: '@travetto/terminal', command: 'terminal', alwaysActivate: true })
 export class TerminalThemeFeature extends BaseFeature {
 
   darkBackground(): boolean {

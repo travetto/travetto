@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 
+import '@travetto/runtime/support/patch.js';
+
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { getManifestContext } from '@travetto/manifest';
 
@@ -21,7 +23,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     await Runtime.importFrom(ext.import);
   }
 
-  await ActivationManager.init();
   await ActivationManager.activate(context);
 }
 

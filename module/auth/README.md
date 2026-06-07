@@ -2,7 +2,7 @@
 <!-- Please modify https://github.com/travetto/travetto/tree/main/module/auth/DOC.tsx and execute "npx trv doc" to rebuild -->
 # Authentication
 
-## Authentication scaffolding for the Travetto framework
+## Authentication support for the Travetto framework
 
 **Install: @travetto/auth**
 ```bash

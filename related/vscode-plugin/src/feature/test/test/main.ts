@@ -18,7 +18,7 @@ import { WorkspaceResultsManager } from './workspace.ts';
 /**
  * Test Runner Feature
  */
-@Activatible('@travetto/test', 'test')
+@Activatible({ module: '@travetto/test', command: 'test' })
 class TestRunnerFeature extends BaseFeature {
 
   #server: ChildProcess | undefined;
@@ -121,11 +121,6 @@ class TestRunnerFeature extends BaseFeature {
     }
   }
 
-  constructor(module?: string, command?: string) {
-    super(module, command);
-    this.#consumer = new WorkspaceResultsManager(this.log, vscode.window);
-  }
-
   /**
    * Launch a test from the current location
    */
@@ -164,7 +159,7 @@ class TestRunnerFeature extends BaseFeature {
         range: document.lineAt(test.lineStart - 1).range,
         isResolved: true,
         command: {
-          command: this.commandName('line'),
+          command: `${this.moduleCommand}:line`,
           title: 'Debug Test',
           arguments: [test.lineBodyStart]
         }
@@ -216,6 +211,8 @@ class TestRunnerFeature extends BaseFeature {
    * On feature activate
    */
   async activate(context: vscode.ExtensionContext): Promise<void> {
+    this.#consumer = new WorkspaceResultsManager(this.log, vscode.window);
+
     this.register('line', (line?: number) => this.#launchTestDebugger(line));
     this.register('stop', () => this.#stopServer(true));
     this.register('start', () => this.#startServer());

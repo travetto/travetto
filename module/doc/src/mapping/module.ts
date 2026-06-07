@@ -1,7 +1,7 @@
 export const MODULES = {
   Auth: {
     name: '@travetto/auth', folder: '@travetto/auth', displayName: 'Authentication',
-    description: 'Authentication scaffolding for the Travetto framework'
+    description: 'Authentication support for the Travetto framework'
   },
   AuthModel: {
     name: '@travetto/auth-model', folder: '@travetto/auth-model', displayName: 'Authentication Model',
@@ -74,6 +74,10 @@ export const MODULES = {
   Image: {
     name: '@travetto/image', folder: '@travetto/image', displayName: 'Image',
     description: 'Image support, resizing, and optimization'
+  },
+  LlmSupport: {
+    name: '@travetto/llm-support', folder: '@travetto/llm-support', displayName: 'LLM Support',
+    description: 'Task-oriented synthesized LLM guidance for Travetto modules.'
   },
   Log: {
     name: '@travetto/log', folder: '@travetto/log', displayName: 'Logging',
@@ -166,10 +170,6 @@ export const MODULES = {
   Runtime: {
     name: '@travetto/runtime', folder: '@travetto/runtime', displayName: 'Runtime',
     description: 'Runtime for travetto applications.'
-  },
-  Scaffold: {
-    name: '@travetto/scaffold', folder: '@travetto/scaffold', displayName: 'App Scaffold',
-    description: 'App Scaffold for the Travetto framework'
   },
   Schema: {
     name: '@travetto/schema', folder: '@travetto/schema', displayName: 'Schema',

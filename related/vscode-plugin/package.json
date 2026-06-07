@@ -35,15 +35,14 @@
     "postinstall": "rm -rf node_modules/@travetto && ln -sf ../../../../node_modules/.bin/trv node_modules/.bin/trv && ln -sf ../../../../node_modules/.bin/trvc node_modules/.bin/trvc"
   },
   "devDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.1",
     "@travetto/compiler": "^8.0.0-alpha.1",
     "@travetto/doc": "^8.0.0-alpha.1",
     "@travetto/email-compiler": "^8.0.0-alpha.1",
     "@travetto/log": "^8.0.0-alpha.1",
     "@travetto/pack": "^8.0.0-alpha.1",
     "@travetto/test": "^8.0.0-alpha.1",
-    "@types/node": "^25.6.2",
-    "@types/vscode": "^1.118.0"
+    "@types/node": "^25.9.1",
+    "@types/vscode": "^1.120.0"
   },
   "dependencies": {
     "@travetto/registry": "^8.0.0-alpha.1",
@@ -65,7 +64,7 @@
     }
   },
   "engines": {
-    "vscode": "^1.110.0"
+    "vscode": "^1.120.0"
   },
   "publishConfig": {
     "access": "restricted"
@@ -98,31 +97,45 @@
       {
         "language": "typescript",
         "path": "snippets/ts.json"
+      },
+      {
+        "language": "json",
+        "path": "snippets/mcp-server-snippets.json"
+      },
+      {
+        "language": "jsonc",
+        "path": "snippets/mcp-server-snippets.json"
+      }
+    ],
+    "mcpServerDefinitionProviders": [
+      {
+        "id": "travetto-plugin.llm-support",
+        "label": "Travetto LLM Support"
       }
     ],
     "commands": [
       {
-        "command": "travetto.compiler:stop",
+        "command": "travetto.compiler.trvc:stop",
         "title": "Stop Compiler",
         "category": "Travetto"
       },
       {
-        "command": "travetto.compiler:restart",
+        "command": "travetto.compiler.trvc:restart",
         "title": "Restart Compiler",
         "category": "Travetto"
       },
       {
-        "command": "travetto.compiler:start",
+        "command": "travetto.compiler.trvc:start",
         "title": "Start Compiler",
         "category": "Travetto"
       },
       {
-        "command": "travetto.compiler:clean",
+        "command": "travetto.compiler.trvc:clean",
         "title": "Clean Code Output",
         "category": "Travetto"
       },
       {
-        "command": "travetto.compiler:view-output",
+        "command": "travetto.compiler.trvc:view-output",
         "title": "View Compiler Output",
         "category": "Travetto"
       },
@@ -243,19 +256,19 @@
       ],
       "commandPalette": [
         {
-          "command": "travetto.compiler:start"
+          "command": "travetto.compiler.trvc:start"
         },
         {
-          "command": "travetto.compiler:view-output"
+          "command": "travetto.compiler.trvc:view-output"
         },
         {
-          "command": "travetto.compiler:restart"
+          "command": "travetto.compiler.trvc:restart"
         },
         {
-          "command": "travetto.compiler:stop"
+          "command": "travetto.compiler.trvc:stop"
         },
         {
-          "command": "travetto.compiler:clean"
+          "command": "travetto.compiler.trvc:clean"
         },
         {
           "command": "travetto.test.test:start"

@@ -1,0 +1,23 @@
+{
+  "Travetto LLM Support MCP (npx)": {
+    "prefix": "travettoMcp",
+    "description": "Configure llm-support MCP server via npx without direct installation",
+    "body": [
+      "\"mcpServers\": {",
+      "  \"travetto-llm-support\": {",
+      "    \"type\": \"stdio\",",
+      "    \"command\": \"npx\",",
+      "    \"args\": [",
+      "      \"--yes\",",
+      "      \"-p\",",
+      "      \"@travetto/cli@8.0.0-alpha.20\",",
+      "      \"-p\",",
+      "      \"@travetto/llm-support@8.0.0-alpha.20\",",
+      "      \"trv\",",
+      "      \"llm:support:mcp\"",
+      "    ]",
+      "  }",
+      "}"
+    ]
+  }
+}

@@ -1,69 +1,67 @@
 import * as vscode from 'vscode';
 
 import { IpcSupport } from './ipc.ts';
-import { ActivationTarget, TargetEvent } from './types.ts';
-import { Workspace } from './workspace.ts';
+import { ActivationTarget, TargetEvent, type ActivationTargetConfig } from './types.ts';
 import { Log } from './log.ts';
 
 interface ActivationFactory<T extends ActivationTarget = ActivationTarget> {
-  new(module: string, command?: string): T;
+  new(cfg: ActivationTargetConfig): T;
 }
-
-type ActivationConfig = { module: string, command?: string | true, cls: ActivationFactory, instance?: ActivationTarget, priority: number };
 
 /**
  * Activation manager
  */
 class $ActivationManager {
 
-  static #isInstalled(module: string): boolean | undefined {
-    try { Workspace.resolveImport(module); return true; } catch { }
-  }
-
-  #registry = new Set<ActivationConfig>();
-  #commandRegistry = new Map<string, ActivationConfig>();
+  #registry = new Set<ActivationTarget>();
+  #commandRegistry = new Map<string, ActivationTarget>();
   #ipcSupport = new IpcSupport(event => this.onTargetEvent(event));
   #log = new Log('travetto.vscode.activation');
 
-  add(config: ActivationConfig): void {
-    this.#registry.add(config);
-    if (config.command && typeof config.command === 'string') {
-      this.#commandRegistry.set(`${config.module}:${config.command}`, config);
-    }
-  }
+  add(cls: ActivationFactory, config: ActivationTargetConfig): void {
+    const resolved = {
+      ...config,
+      priority: config.priority ?? 100,
+    } as const;
 
-  async init(): Promise<void> {
-    for (const entry of this.#registry.values()) {
-      const { module, command, cls } = entry;
-      if (command === true || $ActivationManager.#isInstalled(module)) {
-        const inst = entry.instance = new cls(module, command === true ? undefined : command);
-        await vscode.commands.executeCommand('setContext', inst.moduleBase, true);
-        if (typeof command === 'string') {
-          this.#commandRegistry.get(`${module}:${command}`)!.instance = entry.instance;
-          await vscode.commands.executeCommand('setContext', `${inst.moduleBase}.${command}`, true);
-        }
-      }
+    this.#log.info('Registering activation target', `${resolved.module}.${resolved.command}`, resolved);
+
+    const instance = new cls(resolved);
+
+    this.#registry.add(instance);
+    if (config.command && typeof config.command === 'string') {
+      this.#commandRegistry.set(instance.moduleCommand, instance);
     }
   }
 
   async activate(ctx: vscode.ExtensionContext): Promise<void> {
-    for (const { instance } of [...this.#registry.values()].toSorted((a, b) => a.priority - b.priority)) {
-      this.#log.info('Activating', instance?.module, instance?.command);
-      await instance?.activate?.(ctx);
+    const byPriority = [...this.#registry.values()]
+      .toSorted((a, b) => (a.priority ?? 100) - (b.priority ?? 100));
+    let hasIpcActivated = false;
+    for (const instance of byPriority) {
+      if (instance.available) {
+        this.#log.info('Activating', instance.module, instance.command);
+        await vscode.commands.executeCommand('setContext', instance.moduleBase, true);
+        await vscode.commands.executeCommand('setContext', instance.moduleCommand, true);
+        await instance.activate?.(ctx);
+        hasIpcActivated ||= instance.onEvent !== undefined;
+      }
     }
-    await this.#ipcSupport.activate(ctx);
+    if (hasIpcActivated) {
+      await this.#ipcSupport.activate(ctx);
+    }
   }
 
   async deactivate(): Promise<void> {
     this.#ipcSupport.deactivate();
-    for (const { instance } of this.#registry.values()) {
-      instance?.deactivate?.();
+    for (const instance of this.#registry.values()) {
+      instance.deactivate?.();
     }
   }
 
   async onTargetEvent(event: TargetEvent): Promise<void> {
     try {
-      const handler = await this.#commandRegistry.get(event.type)?.instance;
+      const handler = await this.#commandRegistry.get(event.type);
       if (handler?.onEvent) {
         await handler.onEvent(event);
         await vscode.window.activeTerminal?.show();
@@ -78,6 +76,8 @@ class $ActivationManager {
 
 export const ActivationManager = new $ActivationManager();
 
-export function Activatible(module: string, command?: string | true, priority = 100) {
-  return (cls: ActivationFactory): void => { ActivationManager.add({ module, command, cls, priority }); };
+export function Activatible(config: ActivationTargetConfig) {
+  return (cls: ActivationFactory): void => {
+    ActivationManager.add(cls, config);
+  };
 }

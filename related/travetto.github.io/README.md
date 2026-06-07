@@ -6,9 +6,11 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
-## Code scaffolding
+## LLM support
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+Use `trv llm:support:recommend` to choose a bundle, `trv llm:support:plan` to preview the resulting changes, and `trv llm:support:execute` to apply them.
+
+This workflow replaces the old scaffold-first setup flow with guided bundle selection, snippets, and plan-first execution.
 
 ## Build
 
