@@ -26,7 +26,7 @@
     "directory": "module/model-redis"
   },
   "dependencies": {
-    "@redis/client": "^5.12.1",
+    "@redis/client": "^6.0.0",
     "@travetto/config": "^8.0.0-alpha.15",
     "@travetto/model": "^8.0.0-alpha.15",
     "@travetto/model-indexed": "^8.0.0-alpha.17"

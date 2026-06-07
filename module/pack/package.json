@@ -26,13 +26,13 @@
     "directory": "module/pack"
   },
   "dependencies": {
-    "@rollup/plugin-commonjs": "^29.0.2",
+    "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^1.0.0",
     "@travetto/runtime": "^8.0.0-alpha.14",
     "@travetto/terminal": "^8.0.0-alpha.14",
-    "rollup": "^4.60.4"
+    "rollup": "^4.61.1"
   },
   "peerDependencies": {
     "@travetto/cli": "^8.0.0-alpha.20"
