@@ -44,11 +44,11 @@ Commands:
   repo:version      Bump workspace module versions and optionally commit/tag release metadata.
   repo:version-sync Synchronize package versions and dependency ranges across the monorepo.
   run:double        Doubles a number
-  service           Allows for running services
-  test              Launch test framework and execute tests
-  test:watch        Invoke the test watcher
-  web:http          Run a web server
-  web:rpc-client    Generate the web-rpc client
+  service           Manage development services (start/stop/restart/status) across the workspace.
+  test              Execute the test framework for targeted files, suites, or methods.
+  test:watch        Start the test watcher for continuous test execution.
+  web:http          Start the configured web HTTP server for a module.
+  web:rpc-client    Generate web-rpc client artifacts from a specified provider or leveraging local config.
 ```
 
 This listing is from the [Travetto](https://travetto.dev) monorepo, and represents the majority of tools that can be invoked from the command line. 
