@@ -29,19 +29,11 @@
   },
   "dependencies": {
     "@travetto/runtime": "^8.0.0-alpha.0",
-    "@travetto/schema": "^8.0.0-alpha.0"
+    "@travetto/schema": "^8.0.0-alpha.0",
+    "@travetto/cli": "^8.0.0-alpha.0"
   },
-  "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.0",
+  "devDependencies": {
     "@travetto/test": "^8.0.0-alpha.0"
-  },
-  "peerDependenciesMeta": {
-    "@travetto/cli": {
-      "optional": true
-    },
-    "@travetto/test": {
-      "optional": true
-    }
   },
   "travetto": {
     "workspaceInclude": true,

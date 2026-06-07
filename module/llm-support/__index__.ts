@@ -2,7 +2,6 @@ export * from './src/types.ts';
 export * from './src/install-guidance.ts';
 export * from './src/workflow-guidance.ts';
 export * from './src/snippet-catalog.ts';
-export * from './src/snippet-shapes.ts';
 export * from './src/recommendation.ts';
 export * from './src/plan.ts';
 export * from './src/execute.ts';
