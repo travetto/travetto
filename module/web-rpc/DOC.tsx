@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c, DocRunUtil } from '@travetto/doc';
-import { ExecUtil, Runtime } from '@travetto/runtime';
+import { ExecUtil } from '@travetto/runtime';
 
 import { CliWebRpcCommand } from './support/cli.web_rpc-client.ts';
 
@@ -10,8 +10,6 @@ export const text = async () => {
   return <>
     <c.StdHeader />
     This module allows for a highly focused scenario, of supporting RPC operations within a {d.module('Web')} application.  The module takes care of producing the appropriate handler for the RPC commands along with the ability to generate the appropriate client to be used to interact with the RPC functionality.  The generated client uses Proxy-based objects, along with {d.library('Typescript')} magic to create a dynamic client that does not rely on generating a lot of code.
-
-    The library will create the RPC client in one of three flavors: fetch, fetch + node, angular.
 
     <c.CliHelp commandClass={CliWebRpcCommand}>
       <c.Section title='Example'>

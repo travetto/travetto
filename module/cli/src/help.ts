@@ -63,8 +63,12 @@ ${{ identifier: Runtime.getInstallCommand(module) }}
       usage.push(schema.description);
     }
 
-    const prefix = usage.length ? '\n' : '';
-    usage.push(prefix, cliTpl`${prefix}${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`);
+    const headline = cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`;
+    if (usage.length) {
+      usage.push('\n', `\n${headline}`);
+    } else {
+      usage.push(headline);
+    }
 
     if (schema.examples) {
       usage.push(cliTpl`${{ title: 'Example Usage:' }}`);

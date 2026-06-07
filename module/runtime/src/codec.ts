@@ -112,7 +112,12 @@ export class CodecUtil {
     if (typeof data === 'undefined') {
       return defaultValue;
     } else {
-      return data.substring(0, data.indexOf('\n')).trim();
+      const end = data.indexOf('\n');
+      if (end === -1) {
+        return data.trim();
+      } else {
+        return data.substring(0, end).trim();
+      }
     }
   }
 }
