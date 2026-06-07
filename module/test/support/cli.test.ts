@@ -8,7 +8,10 @@ import { Max, Min } from '@travetto/schema';
 import type { TestConsumerType } from './bin/run.ts';
 
 /**
- * Launch test framework and execute tests
+ * Execute the test framework for targeted files, suites, or methods.
+ *
+ * Supports glob-based discovery, import-based targeting, tag filtering, and
+ * configurable output consumers for local and CI workflows.
  */
 @CliCommand()
 export class TestCommand implements CliCommandShape {

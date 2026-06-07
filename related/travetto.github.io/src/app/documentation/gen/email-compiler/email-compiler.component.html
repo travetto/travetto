@@ -65,17 +65,24 @@ The module provides <a class="module-link" routerLink="/docs/cli" title="CLI inf
 <h2 id="cli-compilation">CLI Compilation</h2>
 
 The module provides <a class="module-link" routerLink="/docs/cli" title="CLI infrastructure for Travetto framework">Command Line Interface</a> support for email template compilation also. Running
+<h2 id="cli-email-compile">CLI - email:compile</h2>
 
   <figure class="terminal">
-    <figcaption class="terminal">Running template compilation
+    <figcaption class="terminal">Showing help for email:compile
 
 </figcaption>
     <pre><code class="language-bash">$ trv email:compile <span class="token parameter variable">--help</span>
 
 Usage: email:compile <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
+Compile all email templates into generated runtime artifacts.
+
+The <span class="token builtin class-name">command</span> discovers templated inputs <span class="token punctuation">(</span>for example, <span class="token variable"><span class="token variable">`</span>.email.html<span class="token variable">`</span></span><span class="token punctuation">)</span> and emits
+compiled outputs used at runtime <span class="token punctuation">(</span>html/text/subject variants<span class="token punctuation">)</span>. With <span class="token function">watch</span>
+enabled, recompilation runs automatically on matching template changes.
+
 Options:
-  -w, <span class="token parameter variable">--watch</span>  Compile <span class="token keyword">in</span> <span class="token function">watch</span> mode
+  -w, <span class="token parameter variable">--watch</span>  Recompile templates whenever <span class="token builtin class-name">source</span> templates change.
   <span class="token parameter variable">--help</span>       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 

@@ -1,7 +1,8 @@
 import fs from 'node:fs/promises';
 
-import { Runtime, RuntimeIndex } from '@travetto/runtime';
+import { CodecUtil, Runtime, RuntimeError, RuntimeIndex } from '@travetto/runtime';
 import { PackageUtil } from '@travetto/manifest';
+import { HELP_FLAG } from '@travetto/cli';
 
 import type { RenderProvider } from '../types.ts';
 import { c, getComponentName } from '../jsx.ts';
@@ -53,6 +54,29 @@ export const Markdown: RenderProvider<RenderContext> = {
     });
     return Markdown.Terminal(state);
   },
+  CliHelpExecution: async ({ context, props, createState }) => {
+    const { name: command } = context.resolveCliCommandFromClass(props.commandClass);
+    return await Markdown.Execution(createState('Execution', {
+      title: `Help for ${command}`,
+      cmd: 'trv',
+      args: [command, HELP_FLAG],
+      config: { ...props.config }
+    }));
+  },
+  CliHelpDescription: async ({ context, props }) => {
+    const { description = '' } = context.resolveCliCommandFromClass(props.commandClass);
+    let text = description;
+    if (props.short) {
+      text = CodecUtil.readFirstLine(text);
+    }
+    return text;
+  },
+  CliHelpSection: async ({ context, props, recurse }) => {
+    const { name: command } = context.resolveCliCommandFromClass(props.commandClass);
+    const title = `CLI - ${command}`;
+    const body = await recurse();
+    return `\n## ${title}\n${body}`;
+  },
   Install: async ({ context, node }) =>
     `\n\n**Install: ${node.props.title}**
 \`\`\`bash
@@ -102,7 +126,7 @@ ${context.cleanText(content.text)}
 
   Image: async ({ props, context }) => {
     if (!/^https?:/.test(props.href) && !(await fs.stat(props.href, { throwIfNoEntry: false }))) {
-      throw new Error(`${props.href} is not a valid location`);
+      throw new RuntimeError(`${props.href} is not a valid location`);
     }
     return `![${props.title}](${context.link(props.href)})`;
   },

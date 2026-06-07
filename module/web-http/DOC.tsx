@@ -7,6 +7,7 @@ import { WebRequest, WebResponse } from '@travetto/web';
 import type { WebHttpServer } from './src/types.ts';
 import { WebHttpConfig } from './src/config.ts';
 import { NodeWebHttpServer } from './src/node.ts';
+import { WebHttpCommand } from './support/cli.web_http.ts';
 
 const WebServerContract = toConcrete<WebHttpServer>();
 
@@ -14,9 +15,12 @@ export const text = <>
   <c.StdHeader />
   This module provides basic for running {d.library('NodeHttp')}. {d.library('NodeHttps')}  and {d.library('NodeHttp2')} servers, along with support for tls key generation during development.
 
-  <c.Section title='Running a Server'>
-
+  <c.CliHelpSection commandClass={WebHttpCommand}>
     By default, the framework provides a default {CliCommand} for {WebServerContract} that will follow default behaviors, and spin up the server.
+    <c.CliHelpExecution commandClass={WebHttpCommand} />
+  </c.CliHelpSection>
+
+  <c.Section title='Running a Server'>
 
     <c.Execution title='Standard application' cmd='trv' args={['web:http']} config={{ workingDirectory: './doc-exec', env: { TRV_ROLE: 'doc' } }} />
 

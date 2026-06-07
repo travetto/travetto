@@ -2,7 +2,10 @@ import { type CliCommandShape, CliCommand } from '@travetto/cli';
 import { PackageManager } from './bin/package-manager.ts';
 
 /**
- * Enforces all packages to write out their versions and dependencies
+ * Synchronize package versions and dependency ranges across the monorepo.
+ *
+ * Ensures package metadata reflects workspace version policy before publishing
+ * or release operations.
  */
 @CliCommand()
 export class VersionSyncCommand implements CliCommandShape {

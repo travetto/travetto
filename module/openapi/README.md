@@ -117,13 +117,18 @@ export class ApiSpecConfig {
 The framework, when in watch mode, will generate the [OpenAPI](https://github.com/OAI/OpenAPI-Specification) specification in either [JSON](https://www.json.org) or [YAML](https://en.wikipedia.org/wiki/YAML). This module integrates with the file watching paradigm and can regenerate the openapi spec as changes to endpoints and models are made during development.  The output format is defined by the suffix of the output file, `.yaml` or `.json`.
 
 ## CLI - openapi:spec
-The module provides a command for the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework") to allow scripting file generation.
+The command will load your application, in non-listening mode, to collect all the endpoints and model information, to produce the `openapi.yml`.  Once produced, the code will store the output in the specified location.
 
-**Terminal: OpenAPI usage**
+**Terminal: Help for openapi:spec**
 ```bash
 $ trv openapi:spec --help
 
 Usage: openapi:spec [options]
+
+Generate the OpenAPI specification for the selected module.
+
+The resulting JSON can be written to stdout or to a file path for use in
+downstream tooling, CI publishing, and client generation pipelines.
 
 Options:
   -o, --output <string>  Output files
@@ -131,25 +136,28 @@ Options:
   --help                 display help for command
 ```
 
-The command will run your application, in non-server mode, to collect all the endpoints and model information, to produce the `openapi.yml`.  Once produced, the code will store the output in the specified location.
-
 **Note**: The module supports generating the OpenAPI spec in real-time while listening for changes to endpoints and models.
 
 ## CLI - openapi:client
-The module provides a command for the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework") to allow client generation from the API structure.
+Generate API clients from an OpenAPI specification using the generator image.
 
-**Terminal: OpenAPI usage**
+**Terminal: Help for openapi:client**
 ```bash
 $ trv openapi:client --help
 
 Usage: openapi:client [options] <format:string>
 
+Generate API clients from an OpenAPI specification using the generator image.
+
+This command wraps OpenAPI Generator in Docker and writes generated client code
+into the configured output folder.
+
 Options:
-  -x, --extended-help                   Show Extended Help (default: false)
-  -a, --additional-properties <string>  Additional Properties (default: [])
-  -i, --input <string>                  Input file (default: "./openapi.yml")
-  -o, --output <string>                 Output folder (default: "./api-client")
-  -d, --docker-image <string>           Docker Image to user (default: "openapitools/openapi-generator-cli:latest")
+  -x, --extended-help                   Show expanded generator help for all available formats/options. (default: false)
+  -a, --additional-properties <string>  Additional generator properties passed as comma-separated key/value pairs. (default: [])
+  -i, --input <string>                  Input OpenAPI document path. (default: "./openapi.yml")
+  -o, --output <string>                 Output directory for generated client sources. (default: "./api-client")
+  -d, --docker-image <string>           Docker image used to run OpenAPI Generator. (default: "openapitools/openapi-generator-cli:latest")
   --help                                display help for command
 ```
 

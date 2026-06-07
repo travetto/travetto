@@ -18,7 +18,11 @@ export interface Type<K extends string> {
   /**
    * JS Doc comment
    */
-  comment?: string;
+  description?: string;
+  /**
+   * JS Doc examples
+   */
+  examples?: string[];
   /**
    * Can be undefined
    */

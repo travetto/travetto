@@ -122,15 +122,20 @@ The framework, when in watch mode, will generate the <a target="_blank" class="e
 
 <h2 id="cli-openapi-spec">CLI - openapi:spec</h2>
 
-The module provides a command for the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/cli" title="CLI infrastructure for Travetto framework">Command Line Interface</a> to allow scripting file generation.
+The command will load your application, in non-listening mode, to collect all the endpoints and model information, to produce the <code class="item path">openapi.yml</code>.  Once produced, the code will store the output in the specified location.
 
   <figure class="terminal">
-    <figcaption class="terminal">OpenAPI usage
+    <figcaption class="terminal">Showing help for openapi:spec
 
 </figcaption>
     <pre><code class="language-bash">$ trv openapi:spec <span class="token parameter variable">--help</span>
 
 Usage: openapi:spec <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Generate the OpenAPI specification <span class="token keyword">for</span> the selected module.
+
+The resulting JSON can be written to stdout or to a <span class="token function">file</span> path <span class="token keyword">for</span> <span class="token for-or-select variable">use</span> <span class="token keyword">in</span>
+downstream tooling, CI publishing, and client generation pipelines.
 
 Options:
   -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Output files
@@ -138,28 +143,31 @@ Options:
   <span class="token parameter variable">--help</span>                 display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
-The command will run your application, in non-server mode, to collect all the endpoints and model information, to produce the <code class="item path">openapi.yml</code>.  Once produced, the code will store the output in the specified location.
-
 <p class="note"><strong>Note</strong> The module supports generating the OpenAPI spec in real-time while listening for changes to endpoints and models.</p>
 
 <h2 id="cli-openapi-client">CLI - openapi:client</h2>
 
-The module provides a command for the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/cli" title="CLI infrastructure for Travetto framework">Command Line Interface</a> to allow client generation from the API structure.
+<p>Generate API clients from an OpenAPI specification using the generator image.</p>
 
   <figure class="terminal">
-    <figcaption class="terminal">OpenAPI usage
+    <figcaption class="terminal">Showing help for openapi:client
 
 </figcaption>
     <pre><code class="language-bash">$ trv openapi:client <span class="token parameter variable">--help</span>
 
 Usage: openapi:client <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>format:string<span class="token operator">></span>
 
+Generate API clients from an OpenAPI specification using the generator image.
+
+This <span class="token builtin class-name">command</span> wraps OpenAPI Generator <span class="token keyword">in</span> Docker and writes generated client code
+into the configured output folder.
+
 Options:
-  -x, --extended-help                   Show Extended Help <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
-  -a, --additional-properties <span class="token operator">&lt;</span>string<span class="token operator">></span>  Additional Properties <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-  -i, <span class="token parameter variable">--input</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                  Input <span class="token function">file</span> <span class="token punctuation">(</span>default: <span class="token string">"./openapi.yml"</span><span class="token punctuation">)</span>
-  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                 Output folder <span class="token punctuation">(</span>default: <span class="token string">"./api-client"</span><span class="token punctuation">)</span>
-  -d, --docker-image <span class="token operator">&lt;</span>string<span class="token operator">></span>           Docker Image to user <span class="token punctuation">(</span>default: <span class="token string">"openapitools/openapi-generator-cli:latest"</span><span class="token punctuation">)</span>
+  -x, --extended-help                   Show expanded generator <span class="token builtin class-name">help</span> <span class="token keyword">for</span> all available formats/options. <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
+  -a, --additional-properties <span class="token operator">&lt;</span>string<span class="token operator">></span>  Additional generator properties passed as comma-separated key/value pairs. <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -i, <span class="token parameter variable">--input</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                  Input OpenAPI document path. <span class="token punctuation">(</span>default: <span class="token string">"./openapi.yml"</span><span class="token punctuation">)</span>
+  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                 Output directory <span class="token keyword">for</span> generated client sources. <span class="token punctuation">(</span>default: <span class="token string">"./api-client"</span><span class="token punctuation">)</span>
+  -d, --docker-image <span class="token operator">&lt;</span>string<span class="token operator">></span>           Docker image used to run OpenAPI Generator. <span class="token punctuation">(</span>default: <span class="token string">"openapitools/openapi-generator-cli:latest"</span><span class="token punctuation">)</span>
   <span class="token parameter variable">--help</span>                                display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 

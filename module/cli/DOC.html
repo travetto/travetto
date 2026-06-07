@@ -26,34 +26,34 @@ The cli module represents the primary entry point for execution within the frame
 Usage:  <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>
 
 Commands:
-  doc               Command line support <span class="token keyword">for</span> generating module docs.
+  doc               Generate documentation outputs from a module <span class="token variable"><span class="token variable">`</span>DOC.tsx<span class="token variable">`</span></span> entry file.
   doc:angular       Generate documentation into the angular webapp under related/travetto.github.io
   doc:mapping       Generate module mapping <span class="token keyword">for</span>
-  email:compile     CLI Entry point <span class="token keyword">for</span> running the email server
-  email:editor      The email editor compilation <span class="token function">service</span> and output serving
-  email:test        CLI Entry point <span class="token keyword">for</span> running the email server
-  eslint            Command line support <span class="token keyword">for</span> eslint
-  eslint:register   Writes the eslint configuration <span class="token function">file</span>
-  model:export      Exports model schemas
-  model:install     Installing models
-  openapi:client    CLI <span class="token keyword">for</span> generating the cli client
-  openapi:spec      CLI <span class="token keyword">for</span> outputting the <span class="token function">open</span> api spec to a <span class="token builtin class-name">local</span> <span class="token function">file</span>
-  pack              Standard pack support
-  pack:docker       Standard <span class="token function">docker</span> support <span class="token keyword">for</span> pack
-  pack:lambda       Standard lambda support <span class="token keyword">for</span> pack
-  pack:zip          Standard <span class="token function">zip</span> support <span class="token keyword">for</span> pack
-  repo:exec         Repo execution
-  repo:list         Allows <span class="token keyword">for</span> listing of modules
-  repo:publish      Publish all pending modules
-  repo:version      Version all changed dependencies
-  repo:version-sync Enforces all packages to <span class="token function">write</span> out their versions and dependencies
+  email:compile     Compile all email templates into generated runtime artifacts.
+  email:editor      Start the email template editor <span class="token function">service</span> <span class="token keyword">for</span> interactive preview and testing.
+  email:test        Render and send a template <span class="token function">file</span> to a target recipient <span class="token keyword">for</span> quick validation.
+  eslint            Run ESLint <span class="token keyword">for</span> the workspace or changed files.
+  eslint:register   Generate the workspace ESLint configuration entry file.
+  model:export      Export model definitions <span class="token keyword">for</span> a selected provider and model set.
+  model:install     Install or update model definitions <span class="token keyword">for</span> a selected provider.
+  openapi:client    Generate API clients from an OpenAPI specification using the generator image.
+  openapi:spec      Generate the OpenAPI specification <span class="token keyword">for</span> the selected module.
+  pack              Build a standard module package artifact.
+  pack:docker       Build container-ready artifacts and optionally publish Docker images.
+  pack:lambda       Build an AWS Lambda-ready <span class="token function">zip</span> package using the pack pipeline.
+  pack:zip          Build a deployable <span class="token function">zip</span> artifact using the standard pack pipeline.
+  repo:exec         Execute a shell <span class="token builtin class-name">command</span> across workspace modules.
+  repo:list         List workspace modules and their relationships.
+  repo:publish      Publish unpublished workspace modules to the package registry.
+  repo:version      Bump workspace module versions and optionally commit/tag release metadata.
+  repo:version-sync Synchronize package versions and dependency ranges across the monorepo.
   run:double        Doubles a number
-  scaffold          Command to run scaffolding
-  <span class="token function">service</span>           Allows <span class="token keyword">for</span> running services
-  <span class="token builtin class-name">test</span>              Launch <span class="token builtin class-name">test</span> framework and execute tests
-  test:watch        Invoke the <span class="token builtin class-name">test</span> watcher
-  web:http          Run a web server
-  web:rpc-client    Generate the web-rpc client</code></pre>
+  scaffold          Scaffold a new Travetto application from interactive templates.
+  <span class="token function">service</span>           Manage development services <span class="token punctuation">(</span>start/stop/restart/status<span class="token punctuation">)</span> across the workspace.
+  <span class="token builtin class-name">test</span>              Execute the <span class="token builtin class-name">test</span> framework <span class="token keyword">for</span> targeted files, suites, or methods.
+  test:watch        Start the <span class="token builtin class-name">test</span> watcher <span class="token keyword">for</span> continuous <span class="token builtin class-name">test</span> execution.
+  web:http          Start the configured web HTTP server <span class="token keyword">for</span> a module.
+  web:rpc-client    Generate web-rpc client artifacts from a specified provider or leveraging <span class="token builtin class-name">local</span> config.</code></pre>
   </figure>
 
 This listing is from the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> monorepo, and represents the majority of tools that can be invoked from the command line. <br><br>
@@ -303,7 +303,7 @@ By default, all fields are treated as flags and all parameters of <code class="i
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Max<span class="token punctuation">,</span> Min <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
- * Custom Argument Command
+ * Example command with a custom argument
  */</span>
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">CliCommand</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CustomCommand</span> <span class="token punctuation">{{'{'}}</span>
@@ -328,6 +328,8 @@ By default, all fields are treated as flags and all parameters of <code class="i
     <pre><code class="language-bash">$ trv custom:arg <span class="token parameter variable">--help</span>
 
 Usage: custom:arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
+
+Example <span class="token builtin class-name">command</span> with a custom argument
 
 Options:
   -m, <span class="token parameter variable">--message</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  The message to send back to the user <span class="token punctuation">(</span>default: <span class="token string">"hello"</span><span class="token punctuation">)</span>
@@ -365,7 +367,7 @@ In addition to standard flag overriding (e.g. <code class="item input">/** @alia
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Max<span class="token punctuation">,</span> Min <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
- * Custom Argument Command
+ * Example of a command with a custom environment variable argument
  */</span>
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">CliCommand</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CustomCommand</span> <span class="token punctuation">{{'{'}}</span>
@@ -389,6 +391,8 @@ In addition to standard flag overriding (e.g. <code class="item input">/** @alia
     <pre><code class="language-bash">$ trv custom:env-arg <span class="token parameter variable">--help</span>
 
 Usage: custom:env-arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
+
+Example of a <span class="token builtin class-name">command</span> with a custom environment variable argument
 
 Options:
   -t, <span class="token parameter variable">--text</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  The message to send back to the user <span class="token punctuation">(</span>default: <span class="token string">"hello"</span><span class="token punctuation">)</span>
@@ -523,7 +527,12 @@ If the goal is to run a more complex application, which may include depending on
 <span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> WebHttpServer <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/types.ts'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
- * Run a web server
+ * Start the configured web HTTP server for a module.
+ *
+ * Initializes registry and server bindings, supports restart-aware development
+ * flags, and can attempt to clear conflicting port owners in local workflows.
+ *
+ * @example trv web:http -m &lt;MODULE> -p 3000
  */</span>
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">CliCommand</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">WebHttpCommand</span> <span class="token keyword">implements</span> <span class="token class-name">CliCommandShape</span> <span class="token punctuation">{{'{'}}</span>
@@ -624,7 +633,7 @@ A simple example of the validation can be found in the <code class="item input">
 
   <figure class="code">
     <figcaption class="code">Simple Validation Example
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/doc/support/cli.doc.ts#L13">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/doc/support/cli.doc.ts#L16">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token decorator"><span class="token at operator">@</span><span class="token function">Validator</span></span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span>cmd<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
@@ -640,12 +649,17 @@ A simple example of the validation can be found in the <code class="item input">
 The module provides the ability to start/stop/restart services as <a target="_blank" class="external-link" href="https://www.docker.com/community-edition">docker</a> containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targeted individually or handled as a group.
 
   <figure class="terminal">
-    <figcaption class="terminal">Command Service
+    <figcaption class="terminal">Showing help for service
 
 </figcaption>
     <pre><code class="language-bash">$ trv <span class="token function">service</span> <span class="token parameter variable">--help</span>
 
 Usage: <span class="token function">service</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>action:restart<span class="token operator">|</span>start<span class="token operator">|</span>status<span class="token operator">|</span>stop<span class="token operator">></span> <span class="token punctuation">[</span>services<span class="token punctuation">..</span>.:string<span class="token punctuation">]</span>
+
+Manage development services <span class="token punctuation">(</span>start/stop/restart/status<span class="token punctuation">)</span> across the workspace.
+
+Services are discovered from registered descriptors and executed with streamed
+terminal feedback, including optional quiet mode.
 
 Options:
   -q, <span class="token parameter variable">--quiet</span>   <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
@@ -656,7 +670,7 @@ Available Services
  * dynamodb@3.3.0
  * elasticsearch@9.2.8
  * firestore@latest
- * mongodb@8.2
+ * mongodb@8.3
  * mysql@9.6
  * postgresql@18.3
  * redis@8.4
@@ -676,7 +690,7 @@ Service          Version    Status
 dynamodb           <span class="token number">3.3</span>.0    Running 93af422e793a
 elasticsearch      <span class="token number">9.2</span>.8    Running ed76ee063d13
 firestore         latest    Running feec2e5e95b4
-mongodb              <span class="token number">8.2</span>    Running 5513eba6734e
+mongodb              <span class="token number">8.3</span>    Running 5513eba6734e
 mysql                <span class="token number">9.6</span>    Running 307bc66d442a
 postgresql          <span class="token number">18.3</span>    Running e78291e71040
 redis                <span class="token number">8.4</span>    Running 77ba279b4e30
@@ -694,12 +708,16 @@ The services are defined as plain typescript files within the framework and can 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> ServiceDescriptor <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">const</span> version <span class="token operator">=</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">MONGO_VERSION</span> <span class="token operator">||</span> <span class="token string">'8.2'</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> version <span class="token operator">=</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">MONGO_VERSION</span> <span class="token operator">||</span> <span class="token string">'8.3'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">const</span> service<span class="token operator">:</span> ServiceDescriptor <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
   name<span class="token operator">:</span> <span class="token string">'mongodb'</span><span class="token punctuation">,</span>
   version<span class="token punctuation">,</span>
   port<span class="token operator">:</span> <span class="token number">27017</span><span class="token punctuation">,</span>
-  image<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">mongo:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>version<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span>
+  image<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">mongo:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>version<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+  env<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token comment">// Temp until mongo image fixes orbstack issue</span>
+    <span class="token constant">GLIBC_TUNABLES</span><span class="token operator">:</span> <span class="token string">'glibc.pthread.rseq=1'</span>
+  <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span></code></pre>
   </figure>

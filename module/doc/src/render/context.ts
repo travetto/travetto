@@ -1,7 +1,9 @@
 import path from 'node:path';
 
 import { PackageUtil } from '@travetto/manifest';
-import { castTo, RuntimeIndex } from '@travetto/runtime';
+import { castTo, RuntimeIndex, type Class } from '@travetto/runtime';
+import { CliCommandRegistryIndex } from '@travetto/cli';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { type JSXElementByFn, c, d } from '../jsx.ts';
 import { DocResolveUtil, type ResolvedCode, type ResolvedRef, type ResolvedSnippetLink } from '../util/resolve.ts';
@@ -94,6 +96,15 @@ export class RenderContext {
     const { cmd, args = [], config = {} } = node.props;
     const result = await DocRunUtil.run(cmd, args, config);
     return this.#executeCache[key] = result;
+  }
+
+  /**
+   * Resolve CLI command metadata for a class from cli:schema output.
+   */
+  resolveCliCommandFromClass(commandClass: Class): { name: string, description?: string } {
+    const { name } = CliCommandRegistryIndex.get(commandClass);
+    const { description } = SchemaRegistryIndex.getConfig(commandClass);
+    return { name, description };
   }
 
   /**

@@ -7,7 +7,10 @@ import { Registry } from '@travetto/registry';
 import { DependencyRegistryIndex } from '@travetto/di';
 
 /**
- * CLI for outputting the open api spec to a local file
+ * Generate the OpenAPI specification for the selected module.
+ *
+ * The resulting JSON can be written to stdout or to a file path for use in
+ * downstream tooling, CI publishing, and client generation pipelines.
  */
 @CliCommand()
 export class OpenApiSpecCommand implements CliCommandShape {

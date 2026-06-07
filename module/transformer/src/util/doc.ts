@@ -32,14 +32,16 @@ export class DocUtil {
     const out: DeclDocumentation = {
       description: undefined,
       return: undefined,
+      examples: undefined,
       params: []
     };
 
     if (toDescribe) {
-      const tags = ts.getJSDocTags(toDescribe);
       while (!this.hasJSDoc(toDescribe) && CoreUtil.hasOriginal(toDescribe)) {
         toDescribe = transformCast<ts.Declaration>(toDescribe.original);
       }
+
+      const tags = ts.getJSDocTags(toDescribe);
 
       const docs = this.hasJSDoc(toDescribe) ? toDescribe.jsDoc : undefined;
 
@@ -59,6 +61,8 @@ export class DocUtil {
               name: tag.name && tag.name.getText(),
               description: this.getDocComment(tag, '')!
             });
+          } else if (tag.tagName.getText() === 'example') {
+            (out.examples ??= []).push(this.getDocComment(tag, '')!);
           }
         }
       }

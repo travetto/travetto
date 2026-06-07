@@ -14,6 +14,7 @@ export interface ParamDocumentation {
 export interface DeclDocumentation {
   return?: string;
   description?: string;
+  examples?: string[];
   params?: ParamDocumentation[];
 }
 

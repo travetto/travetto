@@ -8,7 +8,10 @@ import { Max, Min } from '@travetto/schema';
 import { RepoExecUtil } from './bin/exec.ts';
 
 /**
- * Repo execution
+ * Execute a shell command across workspace modules.
+ *
+ * Supports running for all modules or only changed modules, with optional
+ * concurrency and output prefixing controls.
  */
 @CliCommand()
 export class RepoExecCommand implements CliCommandShape {

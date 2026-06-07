@@ -4,7 +4,10 @@ import { PackOperation } from './bin/operation.ts';
 import { BasePackCommand, type PackOperationShape } from './pack.base.ts';
 
 /**
- * Standard zip support for pack
+ * Build a deployable zip artifact using the standard pack pipeline.
+ *
+ * This command runs base packing operations and then compresses the generated
+ * output into a single archive file.
  */
 @CliCommand()
 export class PackZipCommand extends BasePackCommand {

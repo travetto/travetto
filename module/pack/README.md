@@ -22,11 +22,17 @@ There are three primary cli commands for packing your code:
 
 ## CLI - pack
 
-**Terminal: Pack usage**
+**Terminal: Help for pack**
 ```bash
 $ trv pack --help
 
 Usage: pack [options] [args...:string]
+
+Build a standard module package artifact.
+
+This base command produces the default packaged output and serves as the
+common entry point for module packaging workflows.
+Example Usage:
 
 Options:
   -b, --buildDir <string>              Workspace for building (default: "/tmp/<temp-folder>")
@@ -88,11 +94,17 @@ Every [Pack](https://github.com/travetto/travetto/tree/main/module/pack#readme "
 ## CLI - pack:zip
 This command is nearly identical to the standard `pack` operation, except for the `output` flag.  In this scenario, the `output` flag determines the location and name of the final zip file.
 
-**Terminal: Pack:zip usage**
+**Terminal: Help for pack:zip**
 ```bash
 $ trv pack:zip --help
 
 Usage: pack:zip [options] [args...:string]
+
+Build a deployable zip artifact using the standard pack pipeline.
+
+This command runs base packing operations and then compresses the generated
+output into a single archive file.
+Example Usage:
 
 Options:
   -b, --buildDir <string>              Workspace for building (default: "/tmp/<temp-folder>")
@@ -117,11 +129,17 @@ Options:
 ## CLI - pack:docker
 This command starts off identical to the standard `pack` operation, but it contains a few additional flags, and ultimately a few additional operations to support creating of the final [docker](https://www.docker.com/community-edition) image.
 
-**Terminal: Pack:docker usage**
+**Terminal: Help for pack:docker**
 ```bash
 $ trv pack:docker --help
 
 Usage: pack:docker [options] [args...:string]
+
+Build container-ready artifacts and optionally publish Docker images.
+
+Extends the core pack pipeline with Dockerfile generation and image build/
+push operations, including runtime user and registry customization.
+Example Usage:
 
 Options:
   -b, --buildDir <string>                Workspace for building (default: "/tmp/<temp-folder>")

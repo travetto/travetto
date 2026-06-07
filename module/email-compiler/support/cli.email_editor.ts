@@ -5,7 +5,12 @@ import { DependencyRegistryIndex } from '@travetto/di';
 
 import { EditorService } from './bin/editor.ts';
 
-/** The email editor compilation service and output serving */
+/**
+ * Start the email template editor service for interactive preview and testing.
+ *
+ * The editor compiles templates on demand and hosts the preview/test workflow
+ * used during local template authoring.
+ */
 @CliCommand()
 export class EmailEditorCommand {
 

@@ -53,14 +53,22 @@ The module provides [Command Line Interface](https://github.com/travetto/travett
 ## CLI Compilation
 The module provides [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework") support for email template compilation also. Running
 
-**Terminal: Running template compilation**
+## CLI - email:compile
+
+**Terminal: Help for email:compile**
 ```bash
 $ trv email:compile --help
 
 Usage: email:compile [options]
 
+Compile all email templates into generated runtime artifacts.
+
+The command discovers templated inputs (for example, `.email.html`) and emits
+compiled outputs used at runtime (html/text/subject variants). With watch
+enabled, recompilation runs automatically on matching template changes.
+
 Options:
-  -w, --watch  Compile in watch mode
+  -w, --watch  Recompile templates whenever source templates change.
   --help       display help for command
 ```
 

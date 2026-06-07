@@ -22,17 +22,22 @@ The repo module aims to provide concise monorepo based tools.  The monorepo supp
 <li>Running commands on all workspace modules</li>
 </ul>
 
-<h2 id="cli-version">CLI - Version</h2>
+<h2 id="cli-repo-version">CLI - repo:version</h2>
 
 The versioning operation will find all the changed modules (and the modules that depend on the changed), and will update the versions in accordance with the user preferences.  The versioning logic is backed by <a target="_blank" class="external-link" href="https://docs.npmjs.com/downloading-and-installing-node-js-and-npm">Npm</a>/<a target="_blank" class="external-link" href="https://yarnpkg.com">Yarn</a>'s versioning functionality and so it is identical to using the tool manually. The determination of what has or hasn't changed is relative to the last versioning commit.
 
   <figure class="terminal">
-    <figcaption class="terminal">Version execution
+    <figcaption class="terminal">Showing help for repo:version
 
 </figcaption>
     <pre><code class="language-bash">$ trv repo:version <span class="token parameter variable">--help</span>
 
 Usage: repo:version <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>level:major<span class="token operator">|</span>minor<span class="token operator">|</span>patch<span class="token operator">|</span>premajor<span class="token operator">|</span>preminor<span class="token operator">|</span>prepatch<span class="token operator">|</span>prerelease<span class="token operator">></span> <span class="token punctuation">[</span>prefix:string<span class="token punctuation">]</span>
+
+Bump workspace module versions and optionally commit/tag release metadata.
+
+Supports changed/all/direct module targeting and synchronizes dependency
+versions after the version bump operation completes.
 
 Options:
   <span class="token parameter variable">--mode</span> <span class="token operator">&lt;</span>all<span class="token operator">|</span>changed<span class="token operator">|</span>direct<span class="token operator">></span>  The mode <span class="token keyword">for</span> versioning
@@ -66,17 +71,22 @@ Date:   Thu Feb <span class="token number">23</span> <span class="token number">
     Publish &#64;travetto/asset,&#64;travetto/asset-web,&#64;travetto/auth,&#64;travetto/auth-model,&#64;travetto/auth-web,&#64;travetto/auth-web-jwt,&#64;travetto/auth-web-passport,&#64;travetto/auth-web-session,<span class="token punctuation">..</span>.</code></pre>
   </figure>
 
-<h2 id="cli-publish">CLI - Publish</h2>
+<h2 id="cli-repo-publish">CLI - repo:publish</h2>
 
 The publish functionality is relatively naive, but consistent.  The code will look at all modules in the mono-repo and check the listed version against what is available in the npm registry.  If the local version is newer, it is a candidate for publishing.
 
   <figure class="terminal">
-    <figcaption class="terminal">Publish execution
+    <figcaption class="terminal">Showing help for repo:publish
 
 </figcaption>
     <pre><code class="language-bash">$ trv repo:publish <span class="token parameter variable">--help</span>
 
 Usage: repo:publish <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Publish unpublished workspace modules to the package registry.
+
+The <span class="token builtin class-name">command</span> performs a publishability scan first, <span class="token keyword">then</span> publishes candidates.
+Dry-run mode is enabled by default.
 
 Options:
   --dry-run, --no-dry-run  Dry Run? <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
@@ -93,18 +103,26 @@ By default the tool will execute a dry run only, and requires passing a flag to 
   </figure>
 
 If no modules are currently changed, then the command will indicate there is no work to do, and exit gracefully.
-
-<h2 id="cli-list">CLI - List</h2>
+<h2 id="cli-repo-list">CLI - repo:list</h2>
 
 The listing functionality provides the ability to get the workspace modules in the following formats:
+<ul> <li><code class="item input">list</code> - Standard text list, each module on its own line</li>
+<li><code class="item input">graph</code> - Modules as a digraph, mapping interdependencies</li>
+<li><code class="item input">json</code> - Graph of modules in JSON form, with additional data (useful for quickly building a dependency graph)</li>
+</ul>
 
   <figure class="terminal">
-    <figcaption class="terminal">List execution
+    <figcaption class="terminal">Showing help for repo:list
 
 </figcaption>
     <pre><code class="language-bash">$ trv repo:list <span class="token parameter variable">--help</span>
 
 Usage: repo:list <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+List workspace modules and their relationships.
+
+Output can be emitted as plain list, graphviz digraph, or JSON dependency
+graph suitable <span class="token keyword">for</span> automation.
 
 Options:
   -c, <span class="token parameter variable">--changed</span>                   Only show changed modules <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
@@ -113,11 +131,6 @@ Options:
   -th, --to-hash <span class="token operator">&lt;</span>string<span class="token operator">></span>         End revision to check against
   <span class="token parameter variable">--help</span>                          display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
-
-<ul> <li><code class="item input">list</code> - Standard text list, each module on its own line</li>
-<li><code class="item input">graph</code> - Modules as a digraph, mapping interdependencies</li>
-<li><code class="item input">json</code> - Graph of modules in JSON form, with additional data (useful for quickly building a dependency graph)</li>
-</ul>
 
   <figure class="terminal">
     <figcaption class="terminal">List execution of Monorepo
@@ -189,17 +202,20 @@ module/worker
 related/todo-app</code></pre>
   </figure>
 
-<h2 id="cli-exec">CLI - Exec</h2>
-
-The exec command allows for running commands on all modules, or just changed modules.
+<h2 id="cli-repo-exec">CLI - repo:exec</h2>
 
   <figure class="terminal">
-    <figcaption class="terminal">Exec execution
+    <figcaption class="terminal">Showing help for repo:exec
 
 </figcaption>
     <pre><code class="language-bash">$ trv repo:exec <span class="token parameter variable">--help</span>
 
 Usage: repo:exec <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>cmd:string<span class="token operator">></span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.:string<span class="token punctuation">]</span>
+
+Execute a shell <span class="token builtin class-name">command</span> across workspace modules.
+
+Supports running <span class="token keyword">for</span> all modules or only changed modules, with optional
+concurrency and output prefixing controls.
 
 Options:
   -c, <span class="token parameter variable">--changed</span>                        Only changed modules <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>

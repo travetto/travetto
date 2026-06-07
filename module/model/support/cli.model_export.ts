@@ -6,7 +6,10 @@ import { ModelExportUtil } from './bin/export.ts';
 import { ModelCandidateUtil } from './bin/candidate.ts';
 
 /**
- * Exports model schemas
+ * Export model definitions for a selected provider and model set.
+ *
+ * The command resolves candidate models and delegates to provider-specific
+ * export logic to produce schema/install artifacts.
  */
 @CliCommand()
 export class ModelExportCommand extends BaseModelCommand {

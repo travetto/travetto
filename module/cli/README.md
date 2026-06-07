@@ -22,34 +22,34 @@ $ trv --help
 Usage:  [options] [command]
 
 Commands:
-  doc               Command line support for generating module docs.
+  doc               Generate documentation outputs from a module `DOC.tsx` entry file.
   doc:angular       Generate documentation into the angular webapp under related/travetto.github.io
   doc:mapping       Generate module mapping for
-  email:compile     CLI Entry point for running the email server
-  email:editor      The email editor compilation service and output serving
-  email:test        CLI Entry point for running the email server
-  eslint            Command line support for eslint
-  eslint:register   Writes the eslint configuration file
-  model:export      Exports model schemas
-  model:install     Installing models
-  openapi:client    CLI for generating the cli client
-  openapi:spec      CLI for outputting the open api spec to a local file
-  pack              Standard pack support
-  pack:docker       Standard docker support for pack
-  pack:lambda       Standard lambda support for pack
-  pack:zip          Standard zip support for pack
-  repo:exec         Repo execution
-  repo:list         Allows for listing of modules
-  repo:publish      Publish all pending modules
-  repo:version      Version all changed dependencies
-  repo:version-sync Enforces all packages to write out their versions and dependencies
+  email:compile     Compile all email templates into generated runtime artifacts.
+  email:editor      Start the email template editor service for interactive preview and testing.
+  email:test        Render and send a template file to a target recipient for quick validation.
+  eslint            Run ESLint for the workspace or changed files.
+  eslint:register   Generate the workspace ESLint configuration entry file.
+  model:export      Export model definitions for a selected provider and model set.
+  model:install     Install or update model definitions for a selected provider.
+  openapi:client    Generate API clients from an OpenAPI specification using the generator image.
+  openapi:spec      Generate the OpenAPI specification for the selected module.
+  pack              Build a standard module package artifact.
+  pack:docker       Build container-ready artifacts and optionally publish Docker images.
+  pack:lambda       Build an AWS Lambda-ready zip package using the pack pipeline.
+  pack:zip          Build a deployable zip artifact using the standard pack pipeline.
+  repo:exec         Execute a shell command across workspace modules.
+  repo:list         List workspace modules and their relationships.
+  repo:publish      Publish unpublished workspace modules to the package registry.
+  repo:version      Bump workspace module versions and optionally commit/tag release metadata.
+  repo:version-sync Synchronize package versions and dependency ranges across the monorepo.
   run:double        Doubles a number
-  scaffold          Command to run scaffolding
-  service           Allows for running services
-  test              Launch test framework and execute tests
-  test:watch        Invoke the test watcher
-  web:http          Run a web server
-  web:rpc-client    Generate the web-rpc client
+  scaffold          Scaffold a new Travetto application from interactive templates.
+  service           Manage development services (start/stop/restart/status) across the workspace.
+  test              Execute the test framework for targeted files, suites, or methods.
+  test:watch        Start the test watcher for continuous test execution.
+  web:http          Start the configured web HTTP server for a module.
+  web:rpc-client    Generate web-rpc client artifacts from a specified provider or leveraging local config.
 ```
 
 This listing is from the [Travetto](https://travetto.dev) monorepo, and represents the majority of tools that can be invoked from the command line. 
@@ -259,7 +259,7 @@ import { CliCommand } from '@travetto/cli';
 import { Max, Min } from '@travetto/schema';
 
 /**
- * Custom Argument Command
+ * Example command with a custom argument
  */
 @CliCommand()
 export class CustomCommand {
@@ -282,6 +282,8 @@ export class CustomCommand {
 $ trv custom:arg --help
 
 Usage: custom:arg [options] [volume:number]
+
+Example command with a custom argument
 
 Options:
   -m, --message <string>  The message to send back to the user (default: "hello")
@@ -311,7 +313,7 @@ import { CliCommand } from '@travetto/cli';
 import { Max, Min } from '@travetto/schema';
 
 /**
- * Custom Argument Command
+ * Example of a command with a custom environment variable argument
  */
 @CliCommand()
 export class CustomCommand {
@@ -333,6 +335,8 @@ export class CustomCommand {
 $ trv custom:env-arg --help
 
 Usage: custom:env-arg [options] [volume:number]
+
+Example of a command with a custom environment variable argument
 
 Options:
   -t, --text <string>  The message to send back to the user (default: "hello")
@@ -442,7 +446,12 @@ import { Registry } from '@travetto/registry';
 import type { WebHttpServer } from '../src/types.ts';
 
 /**
- * Run a web server
+ * Start the configured web HTTP server for a module.
+ *
+ * Initializes registry and server bindings, supports restart-aware development
+ * flags, and can attempt to clear conflicting port owners in local workflows.
+ *
+ * @example trv web:http -m <MODULE> -p 3000
  */
 @CliCommand()
 export class WebHttpCommand implements CliCommandShape {
@@ -551,11 +560,16 @@ A simple example of the validation can be found in the `doc` command:
 ## CLI - service
 The module provides the ability to start/stop/restart services as [docker](https://www.docker.com/community-edition) containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targeted individually or handled as a group.
 
-**Terminal: Command Service**
+**Terminal: Help for service**
 ```bash
 $ trv service --help
 
 Usage: service [options] <action:restart|start|status|stop> [services...:string]
+
+Manage development services (start/stop/restart/status) across the workspace.
+
+Services are discovered from registered descriptors and executed with streamed
+terminal feedback, including optional quiet mode.
 
 Options:
   -q, --quiet   (default: false)
@@ -566,7 +580,7 @@ Available Services
  * dynamodb@3.3.0
  * elasticsearch@9.2.8
  * firestore@latest
- * mongodb@8.2
+ * mongodb@8.3
  * mysql@9.6
  * postgresql@18.3
  * redis@8.4
@@ -584,7 +598,7 @@ Service          Version    Status
 dynamodb           3.3.0    Running 93af422e793a
 elasticsearch      9.2.8    Running ed76ee063d13
 firestore         latest    Running feec2e5e95b4
-mongodb              8.2    Running 5513eba6734e
+mongodb              8.3    Running 5513eba6734e
 mysql                9.6    Running 307bc66d442a
 postgresql          18.3    Running e78291e71040
 redis                8.4    Running 77ba279b4e30
@@ -598,12 +612,16 @@ The services are defined as plain typescript files within the framework and can 
 ```typescript
 import type { ServiceDescriptor } from '@travetto/cli';
 
-const version = process.env.MONGO_VERSION || '8.2';
+const version = process.env.MONGO_VERSION || '8.3';
 
 export const service: ServiceDescriptor = {
   name: 'mongodb',
   version,
   port: 27017,
-  image: `mongo:${version}`
+  image: `mongo:${version}`,
+  env: {
+    // Temp until mongo image fixes orbstack issue
+    GLIBC_TUNABLES: 'glibc.pthread.rseq=1'
+  }
 };
 ```

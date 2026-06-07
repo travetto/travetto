@@ -1,6 +1,9 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c } from '@travetto/doc';
 
+import { OpenApiSpecCommand } from './support/cli.openapi_spec.ts';
+import { OpenApiClientCommand } from './support/cli.openapi_client.ts';
+
 export const text = <>
   <c.StdHeader />
   In the {d.module('Web')} module, the controllers and endpoints can be described via decorators, comments, or typings. This only provides the general metadata internally. This is not sufficient to generate a usable API doc, and so this module exists to bridge that gap. <br />
@@ -17,22 +20,15 @@ export const text = <>
   <c.Section title='Spec Generation'>
     The framework, when in watch mode, will generate the {d.library('OpenAPI')} specification in either {d.library('JSON')} or {d.library('YAML')}. This module integrates with the file watching paradigm and can regenerate the openapi spec as changes to endpoints and models are made during development.  The output format is defined by the suffix of the output file, {d.input('.yaml')} or {d.input('.json')}.
   </c.Section>
-  <c.Section title='CLI - openapi:spec'>
-
-    The module provides a command for the {d.module('Cli')} to allow scripting file generation.
-
-    <c.Execution title='OpenAPI usage' cmd='trv' args={['openapi:spec', '--help']} />
-
-    The command will run your application, in non-server mode, to collect all the endpoints and model information, to produce the {d.path('openapi.yml')}.  Once produced, the code will store the output in the specified location.
-
+  <c.CliHelpSection commandClass={OpenApiSpecCommand}>
+    The command will load your application, in non-listening mode, to collect all the endpoints and model information, to produce the {d.path('openapi.yml')}.  Once produced, the code will store the output in the specified location.
+    <c.CliHelpExecution commandClass={OpenApiSpecCommand} />
     <c.Note>The module supports generating the OpenAPI spec in real-time while listening for changes to endpoints and models.</c.Note>
-  </c.Section>
-  <c.Section title='CLI - openapi:client'>
+  </c.CliHelpSection>
 
-    The module provides a command for the {d.module('Cli')} to allow client generation from the API structure.
-
-    <c.Execution title='OpenAPI usage' cmd='trv' args={['openapi:client', '--help']} />
-
+  <c.CliHelpSection commandClass={OpenApiClientCommand}>
+    <c.CliHelpDescription commandClass={OpenApiClientCommand} short />
+    <c.CliHelpExecution commandClass={OpenApiClientCommand} />
     This tool relies upon a custom build of {d.library('OpenAPIGenerator')}, which supports watching.  This allows for fast responsive client generation as the shape of the API changes.
-  </c.Section>
+  </c.CliHelpSection>
 </>;

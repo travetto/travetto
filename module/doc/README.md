@@ -57,6 +57,9 @@ As you can see, you need to export a field named `text` as the body of the help 
 
    *  `Anchor` - In page anchor reference
    *  `Class` - Class reference
+   *  `CliHelpDescription` - Standardized CLI command help description
+   *  `CliHelpExecution` - Standardized CLI command help execution
+   *  `CliHelpSection` - Standardized CLI command help section
    *  `Code` - Code sample
    *  `CodeLink` - Code link with regexp for detecting line
    *  `Command` - Command invocation
@@ -87,17 +90,22 @@ Some of the more common libraries are provided as the `d.library` method.  The p
 You can also link to other [Travetto](https://travetto.dev) based modules as needed.  The `d.module` object relies on what is already imported into your project, and reference the package.json of the related module. If the module is not installed, doc generation will fail.
 
 ## CLI - doc
-The run command allows for generating documentation output.
+Generate documentation outputs from a module `DOC.tsx` entry file.
 
-**Terminal: CLI Doc Help**
+**Terminal: Help for doc**
 ```bash
 $ trv doc --help
 
 Usage: doc [options]
 
+Generate documentation outputs from a module `DOC.tsx` entry file.
+
+Supports multiple output formats/targets and optional watch mode for
+iterative documentation authoring.
+
 Options:
   -i, --input <string>    Input File (default: "DOC.tsx")
-  -o, --outputs <string>  Outputs (default: ["README.md"])
+  -o, --outputs <string>  Outputs (default: ["README.md","DOC.html"])
   -w, --watch             Watch? (default: false)
   --help                  display help for command
 ```
@@ -152,7 +160,7 @@ Sample documentation for fictional module.  This module fictitiously relies upon
 Usage:  <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>
 
 Commands:
-  doc        Command line support <span class="token keyword">for</span> generating module docs.
-  <span class="token function">service</span>    Allows <span class="token keyword">for</span> running services</code></pre>
+  doc        Generate documentation outputs from a module <span class="token variable"><span class="token variable">`</span>DOC.tsx<span class="token variable">`</span></span> entry file.
+  <span class="token function">service</span>    Manage development services <span class="token punctuation">(</span>start/stop/restart/status<span class="token punctuation">)</span> across the workspace.</code></pre>
   </figure>
 ```

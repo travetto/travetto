@@ -3,7 +3,10 @@ import { PackOperation } from '@travetto/pack/support/bin/operation.ts';
 import { BasePackCommand, type PackOperationShape } from '@travetto/pack/support/pack.base.ts';
 
 /**
- * Standard lambda support for pack
+ * Build an AWS Lambda-ready zip package using the pack pipeline.
+ *
+ * Configures the Lambda entrypoint and emits a compressed deployment artifact
+ * suitable for direct Lambda upload workflows.
  */
 @CliCommand()
 export class PackLambdaCommand extends BasePackCommand {

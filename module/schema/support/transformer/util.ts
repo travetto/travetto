@@ -40,7 +40,8 @@ export class SchemaTransformUtil {
           const cls = state.factory.createClassDeclaration(
             [
               state.createDecorator(this.SCHEMA_IMPORT, 'Schema', state.fromLiteral({
-                description: type.comment,
+
+                description: type.description,
                 mappedOperation: type.operation,
                 mappedFields: type.fields,
               })),
@@ -71,7 +72,7 @@ class ${uniqueId} extends ${type.mappedClassName} {
           const cls = state.factory.createClassDeclaration(
             [
               state.createDecorator(this.SCHEMA_IMPORT, 'Schema', state.fromLiteral({
-                description: type.comment
+                description: type.description
               })),
             ],
             id,

@@ -1,7 +1,9 @@
 import fs from 'node:fs/promises';
+import markdown from 'markdown-it';
 
-import { Runtime, RuntimeIndex } from '@travetto/runtime';
+import { CodecUtil, Runtime, RuntimeError, RuntimeIndex } from '@travetto/runtime';
 import { PackageUtil } from '@travetto/manifest';
+import { HELP_FLAG } from '@travetto/cli';
 
 import { highlight } from './code-highlight.ts';
 import type { RenderProvider, RenderState } from '../types.ts';
@@ -15,6 +17,7 @@ import { PackageDocUtil } from '../util/package.ts';
 
 const ESCAPE_ENTITIES: Record<string, string> = { '<': '&lt;', '>': '&gt;', '&': '&amp;', '{': "{{'{'}}", '}': "{{'}'}}" };
 const ENTITY_REGEX = new RegExp(`[${Object.keys(ESCAPE_ENTITIES).join('')}]`, 'gm');
+const md = new markdown({ html: false });
 
 const stdInline = async ({ recurse, node }: RenderState<JSXElement, RenderContext>): Promise<string> =>
   `<${node.type}>${await recurse()}</${node.type}>`;
@@ -50,6 +53,30 @@ export const Html: RenderProvider<RenderContext> = {
       src: [`$ ${displayCmd}`, '', context.cleanText(output)].join('\n')
     });
     return Html.Terminal(sub);
+  },
+  CliHelpExecution: async ({ context, props, createState }) => {
+    const config = context.resolveCliCommandFromClass(props.commandClass);
+    const { name: command } = config;
+    return Html.Execution(createState('Execution', {
+      title: `Showing help for ${command}`,
+      cmd: 'trv',
+      args: [command, HELP_FLAG],
+      config: { ...props.config }
+    }));
+  },
+  CliHelpDescription: async ({ context, props }) => {
+    const config = context.resolveCliCommandFromClass(props.commandClass);
+    let text = config.description ?? '';
+    if (props.short) {
+      text = CodecUtil.readFirstLine(text);
+    }
+    return md.render(text);
+  },
+  CliHelpSection: async ({ context, props, recurse }) => {
+    const config = context.resolveCliCommandFromClass(props.commandClass);
+    const { name: command } = config;
+    const title = `CLI - ${command}`;
+    return `\n<h2 id="${context.getAnchorId(title)}">${title}</h2>\n\n${await recurse()}`;
   },
   Install: async ({ context, node }) => {
     const highlighted = highlight(`
@@ -125,7 +152,7 @@ ${PackageDocUtil.getInstallInstructions(node.props.pkg, true)}
     `<a target="_blank" class="source-link" href="${context.link(props.href, props)}">${props.title}</a>`,
   Image: async ({ context, props }) => {
     if (!/^https?:/.test(props.href) && !(await fs.stat(props.href, { throwIfNoEntry: false }))) {
-      throw new Error(`${props.href} is not a valid location`);
+      throw new RuntimeError(`${props.href} is not a valid location`);
     }
     return `<img src="${context.link(props.href, props)}" alt="${props.title}">`;
   },

@@ -22,6 +22,28 @@ $ npx @travetto/scaffold
 $ npx @travetto/scaffold@<version-or-tag>
 ```
 
+## CLI - scaffold
+Once installed in your workspace, this command is the standard way to create a new Travetto project scaffold.
+
+**Terminal: Help for scaffold**
+```bash
+$ trv scaffold --help
+
+Usage: scaffold [options] [name:string]
+
+Scaffold a new Travetto application from interactive templates.
+
+Guides users through template and feature selection, then materializes a
+project in the target directory.
+
+Options:
+  -t, --template <string>  Template (default: "todo")
+  -c, --cwd <string>       Current Working Directory override (default: ".")
+  -d, --dir <string>       Target Directory
+  -f, --force              Force writing into an existing directory (default: false)
+  --help                   display help for command
+```
+
 The generator will ask about enabling the following features:
 
 ## Web Application

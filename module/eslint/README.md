@@ -16,18 +16,25 @@ yarn add @travetto/eslint
 [ESLint](https://eslint.org/) is the standard for linting [Typescript](https://typescriptlang.org) and [Javascript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) code.  This module provides some standard linting patterns and the ability to create custom rules. Due to the fact that the framework supports both [CommonJS](https://nodejs.org/api/modules.html) and [Ecmascript Module](https://nodejs.org/api/esm.html) formats, a novel solution was required to allow [ESLint](https://eslint.org/) to load [Ecmascript Module](https://nodejs.org/api/esm.html) files.
 
 **Note**: The [ESLint](https://eslint.org/) has introduced [a new configuration format](https://eslint.org/blog/2022/08/new-config-system-part-3/) which allows for [Ecmascript Module](https://nodejs.org/api/esm.html) files.
-
-## CLI - Register
 In a new project, the first thing that will need to be done, post installation, is to create the eslint configuration file.
 
-**Terminal: Registering the Configuration**
-```bash
-$ trv eslint:register
+## CLI - eslint:register
 
-Wrote eslint config to <workspace-root>/eslint.config.js
+**Terminal: Help for eslint:register**
+```bash
+$ trv eslint:register --help
+
+Usage: eslint:register [options]
+
+Generate the workspace ESLint configuration entry file.
+
+This bootstraps `eslint.config.js` to load framework-provided rule wiring.
+
+Options:
+  --help  display help for command
 ```
 
-This is the file the linter will use, and any other tooling (e.g. IDEs).
+When registration completes, this is the file the linter will use, and any other tooling (e.g. IDEs).
 
 **Code: Sample configuration**
 ```javascript
@@ -36,10 +43,8 @@ const { rules } = await import('./.trv/output/node_modules/@travetto/eslint/supp
 export { rules as default };
 ```
 
-The output is tied to whether or not you are using the [CommonJS](https://nodejs.org/api/modules.html) or [Ecmascript Module](https://nodejs.org/api/esm.html) format.
-
-## CLI - Lint
-Once installed, using the linter is as simple as invoking it via the cli:
+## CLI - eslint
+Once registered, using the linter is as simple as invoking it via the cli:
 
 **Terminal: Running the Linter**
 ```bash
@@ -47,6 +52,25 @@ npx trv eslint
 ```
 
 Or pointing your IDE to reference the registered configuration file.
+
+**Terminal: Help for eslint**
+```bash
+$ trv eslint --help
+
+Usage: eslint [options]
+
+Run ESLint for the workspace or changed files.
+
+Supports incremental mode (`changed`/`since`) and forwards formatting/fix
+options to the underlying eslint invocation.
+
+Options:
+  -c, --changed          Only check changed modules (default: false)
+  -f, --format <string>  Output format
+  -s, --since <string>   Since a specific git commit
+  --fix                  Should we attempt to fix?
+  --help                 display help for command
+```
 
 ## Custom Rules
 It can be seen in the sample configuration, that the configuration is looking for files with the pattern of `support/eslint/.*` 

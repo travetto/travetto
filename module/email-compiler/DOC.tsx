@@ -1,6 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
-import { HELP_FLAG } from '@travetto/cli';
 import { d, c } from '@travetto/doc';
+
+import { EmailCompileCommand } from './support/cli.email_compile.ts';
 
 export const text = <>
   <c.StdHeader />
@@ -64,9 +65,10 @@ export const text = <>
 
     The module provides {d.module('Cli')} support for email template compilation also. Running
 
-    <c.Execution title='Running template compilation' cmd='trv' args={['email:compile', HELP_FLAG]} />
-
-    Will convert all {d.path('.email.html')} files into the appropriate {d.path('.compiled.html')}, {d.path('.compiled.text')} and {d.path('.compiled.subject')} files.  These will be used during the running of the application.  By default these files are added to the {d.path('.gitignore')} as they are generally not intended to be saved but to be generated during the build process.
+    <c.CliHelpSection commandClass={EmailCompileCommand}>
+      <c.CliHelpExecution commandClass={EmailCompileCommand} config={{ workingDirectory: '.' }} />
+      Will convert all {d.path('.email.html')} files into the appropriate {d.path('.compiled.html')}, {d.path('.compiled.text')} and {d.path('.compiled.subject')} files.  These will be used during the running of the application.  By default these files are added to the {d.path('.gitignore')} as they are generally not intended to be saved but to be generated during the build process.
+    </c.CliHelpSection>
   </c.Section>
 
   <c.Section title='VSCode Plugin'>

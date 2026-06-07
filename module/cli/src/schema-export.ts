@@ -1,7 +1,7 @@
 import { castTo, type Class, describeFunction } from '@travetto/runtime';
 import { type SchemaInputConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import { CliCommandRegistryIndex } from '../src/registry/registry-index.ts';
+import { CliCommandRegistryIndex } from './registry/registry-index.ts';
 
 /**
  * CLI Command argument/flag shape

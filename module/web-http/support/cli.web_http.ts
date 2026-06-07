@@ -7,7 +7,12 @@ import { Registry } from '@travetto/registry';
 import type { WebHttpServer } from '../src/types.ts';
 
 /**
- * Run a web server
+ * Start the configured web HTTP server for a module.
+ *
+ * Initializes registry and server bindings, supports restart-aware development
+ * flags, and can attempt to clear conflicting port owners in local workflows.
+ *
+ * @example trv web:http -m <MODULE> -p 3000
  */
 @CliCommand()
 export class WebHttpCommand implements CliCommandShape {

@@ -2,7 +2,7 @@ import { CliCommand } from '@travetto/cli';
 import { Max, Min } from '@travetto/schema';
 
 /**
- * Custom Argument Command
+ * Example of a command with a custom environment variable argument
  */
 @CliCommand()
 export class CustomCommand {

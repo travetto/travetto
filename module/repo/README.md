@@ -19,14 +19,19 @@ The repo module aims to provide concise monorepo based tools.  The monorepo supp
    *  Listing local modules
    *  Running commands on all workspace modules
 
-## CLI - Version
+## CLI - repo:version
 The versioning operation will find all the changed modules (and the modules that depend on the changed), and will update the versions in accordance with the user preferences.  The versioning logic is backed by [Npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)/[Yarn](https://yarnpkg.com)'s versioning functionality and so it is identical to using the tool manually. The determination of what has or hasn't changed is relative to the last versioning commit.
 
-**Terminal: Version execution**
+**Terminal: Help for repo:version**
 ```bash
 $ trv repo:version --help
 
 Usage: repo:version [options] <level:major|minor|patch|premajor|preminor|prepatch|prerelease> [prefix:string]
+
+Bump workspace module versions and optionally commit/tag release metadata.
+
+Supports changed/all/direct module targeting and synchronizes dependency
+versions after the version bump operation completes.
 
 Options:
   --mode <all|changed|direct>  The mode for versioning
@@ -56,14 +61,19 @@ Date:   Thu Feb 23 17:51:37 2023 -0500
     Publish @travetto/asset,@travetto/asset-web,@travetto/auth,@travetto/auth-model,@travetto/auth-web,@travetto/auth-web-jwt,@travetto/auth-web-passport,@travetto/auth-web-session,...
 ```
 
-## CLI - Publish
+## CLI - repo:publish
 The publish functionality is relatively naive, but consistent.  The code will look at all modules in the mono-repo and check the listed version against what is available in the npm registry.  If the local version is newer, it is a candidate for publishing.
 
-**Terminal: Publish execution**
+**Terminal: Help for repo:publish**
 ```bash
 $ trv repo:publish --help
 
 Usage: repo:publish [options]
+
+Publish unpublished workspace modules to the package registry.
+
+The command performs a publishability scan first, then publishes candidates.
+Dry-run mode is enabled by default.
 
 Options:
   --dry-run, --no-dry-run  Dry Run? (default: true)
@@ -79,14 +89,22 @@ npx trv repo:publish --no-dry-run
 
 If no modules are currently changed, then the command will indicate there is no work to do, and exit gracefully.
 
-## CLI - List
+## CLI - repo:list
 The listing functionality provides the ability to get the workspace modules in the following formats:
+   *  `list` - Standard text list, each module on its own line
+   *  `graph` - Modules as a digraph, mapping interdependencies
+   *  `json` - Graph of modules in JSON form, with additional data (useful for quickly building a dependency graph)
 
-**Terminal: List execution**
+**Terminal: Help for repo:list**
 ```bash
 $ trv repo:list --help
 
 Usage: repo:list [options]
+
+List workspace modules and their relationships.
+
+Output can be emitted as plain list, graphviz digraph, or JSON dependency
+graph suitable for automation.
 
 Options:
   -c, --changed                   Only show changed modules (default: false)
@@ -95,10 +113,6 @@ Options:
   -th, --to-hash <string>         End revision to check against
   --help                          display help for command
 ```
-
-   *  `list` - Standard text list, each module on its own line
-   *  `graph` - Modules as a digraph, mapping interdependencies
-   *  `json` - Graph of modules in JSON form, with additional data (useful for quickly building a dependency graph)
 
 **Terminal: List execution of Monorepo**
 ```bash
@@ -168,14 +182,18 @@ module/worker
 related/todo-app
 ```
 
-## CLI - Exec
-The exec command allows for running commands on all modules, or just changed modules.
+## CLI - repo:exec
 
-**Terminal: Exec execution**
+**Terminal: Help for repo:exec**
 ```bash
 $ trv repo:exec --help
 
 Usage: repo:exec [options] <cmd:string> [args...:string]
+
+Execute a shell command across workspace modules.
+
+Supports running for all modules or only changed modules, with optional
+concurrency and output prefixing controls.
 
 Options:
   -c, --changed                        Only changed modules (default: false)

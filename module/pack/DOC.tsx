@@ -4,6 +4,10 @@ import path from 'node:path';
 import { d, c } from '@travetto/doc';
 import { Runtime } from '@travetto/runtime';
 
+import { PackCommand } from './support/cli.pack.ts';
+import { PackZipCommand } from './support/cli.pack_zip.ts';
+import { PackDockerCommand } from './support/cli.pack_docker.ts';
+
 export const text = <>
   <c.StdHeader />
   This module provides the necessary tools to produce deliverable output for {d.library('Travetto')} based projects.  The main interaction with this module is through the command line interface, and the operations it provides.  Under the covers, the code bundling is performed by {d.library('Rollup')}, with specific configuration to support the frameworks runtime expectations. <br />
@@ -15,9 +19,8 @@ export const text = <>
     <li>pack:docker</li>
   </ul>
 
-  <c.Section title='CLI - pack'>
-
-    <c.Execution title='Pack usage' cmd='trv' args={['pack', '--help']} />
+  <c.CliHelpSection commandClass={PackCommand}>
+    <c.CliHelpExecution commandClass={PackCommand} />
 
     This command line operation will compile your project, and produce a ready to use workspace as a deliverable. Additionally, you can pass in a file to the {d.input('eject-file')} flag that will allow for a script to be produced (base on the host operating system). <br />
 
@@ -56,19 +59,19 @@ node cli run myapp
         <li>{d.method('bundle')} - Invokes {d.library('Rollup')} with the appropriate file set to produce a single output .js file.  Depending on the module type ({d.library('CommonJS')} or {d.library('EcmascriptModule')}) the build process differs to handle the dynamic loading that application does at runtime.</li>
       </ul>
     </c.SubSection>
-  </c.Section>
+  </c.CliHelpSection>
 
-  <c.Section title='CLI - pack:zip' >
+  <c.CliHelpSection commandClass={PackZipCommand}>
     This command is nearly identical to the standard {d.input('pack')} operation, except for the {d.input('output')} flag.  In this scenario, the {d.input('output')} flag determines the location and name of the final zip file.
 
-    <c.Execution title='Pack:zip usage' cmd='trv' args={['pack:zip', '--help']} />
-  </c.Section>
+    <c.CliHelpExecution commandClass={PackZipCommand} />
 
-  <c.Section title='CLI - pack:docker'>
+  </c.CliHelpSection>
 
+  <c.CliHelpSection commandClass={PackDockerCommand}>
     This command starts off identical to the standard {d.input('pack')} operation, but it contains a few additional flags, and ultimately a few additional operations to support creating of the final {d.library('Docker')} image.
 
-    <c.Execution title='Pack:docker usage' cmd='trv' args={['pack:docker', '--help']} />
+    <c.CliHelpExecution commandClass={PackDockerCommand} />
 
     The additional flags provided are allow for specifying the base image, the final docker image name (and tags), and which registry to push to (if  any).  Additionally, there are flags for exposing which ports the image should expect to open as well.   When using the {d.input('--eject-file')}  flag, the output script will produce the entire Dockerfile output inline, so that it can be easily modified as needed. <br />
 
@@ -79,7 +82,7 @@ node cli run myapp
       <li>{d.method('buildDockerContainer')} - Build final container</li>
       <li>{d.method('pushDockerContainer')} - Push container with appropriate tags.  Only applies if {d.input('--docker-push')} is specified</li>
     </ul>
-  </c.Section>
+  </c.CliHelpSection>
 
   <c.Section title='Ejected File'>
 

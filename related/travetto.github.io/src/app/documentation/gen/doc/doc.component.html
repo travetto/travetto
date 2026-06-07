@@ -65,6 +65,9 @@ As you can see, you need to export a field named <code class="item field">text</
 
 <ul> <li><code class="item method">Anchor</code> - In page anchor reference</li>
 <li><code class="item method">Class</code> - Class reference</li>
+<li><code class="item method">CliHelpDescription</code> - Standardized CLI command help description</li>
+<li><code class="item method">CliHelpExecution</code> - Standardized CLI command help execution</li>
+<li><code class="item method">CliHelpSection</code> - Standardized CLI command help section</li>
 <li><code class="item method">Code</code> - Code sample</li>
 <li><code class="item method">CodeLink</code> - Code link with regexp for detecting line</li>
 <li><code class="item method">Command</code> - Command invocation</li>
@@ -99,19 +102,24 @@ You can also link to other <a target="_blank" class="external-link" href="https:
 
 <h2 id="cli-doc">CLI - doc</h2>
 
-The run command allows for generating documentation output.
+<p>Generate documentation outputs from a module <code>DOC.tsx</code> entry file.</p>
 
   <figure class="terminal">
-    <figcaption class="terminal">CLI Doc Help
+    <figcaption class="terminal">Showing help for doc
 
 </figcaption>
     <pre><code class="language-bash">$ trv doc <span class="token parameter variable">--help</span>
 
 Usage: doc <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
+Generate documentation outputs from a module <span class="token variable"><span class="token variable">`</span>DOC.tsx<span class="token variable">`</span></span> entry file.
+
+Supports multiple output formats/targets and optional <span class="token function">watch</span> mode <span class="token keyword">for</span>
+iterative documentation authoring.
+
 Options:
   -i, <span class="token parameter variable">--input</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>    Input File <span class="token punctuation">(</span>default: <span class="token string">"DOC.tsx"</span><span class="token punctuation">)</span>
-  -o, <span class="token parameter variable">--outputs</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Outputs <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token string">"README.md"</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -o, <span class="token parameter variable">--outputs</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Outputs <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token string">"README.md"</span>,<span class="token string">"DOC.html"</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
   -w, <span class="token parameter variable">--watch</span>             Watch? <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   <span class="token parameter variable">--help</span>                  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
@@ -168,7 +176,7 @@ Sample documentation <span class="token keyword">for</span> fictional module.  T
 Usage:  <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token punctuation"</span><span class="token operator">></span><span class="token punctuation">[</span><span class="token operator">&lt;</span>/span<span class="token operator">></span>options<span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token punctuation"</span><span class="token operator">></span><span class="token punctuation">]</span><span class="token operator">&lt;</span>/span<span class="token operator">></span> <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token punctuation"</span><span class="token operator">></span><span class="token punctuation">[</span><span class="token operator">&lt;</span>/span<span class="token operator">></span>command<span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token punctuation"</span><span class="token operator">></span><span class="token punctuation">]</span><span class="token operator">&lt;</span>/span<span class="token operator">></span>
 
 Commands:
-  doc        Command line support <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token keyword"</span><span class="token operator">></span>for<span class="token operator">&lt;</span>/span<span class="token operator">></span> generating module docs.
-  <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token function"</span><span class="token operator">></span>service<span class="token operator">&lt;</span>/span<span class="token operator">></span>    Allows <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token keyword"</span><span class="token operator">></span>for<span class="token operator">&lt;</span>/span<span class="token operator">></span> running services<span class="token operator">&lt;</span>/code<span class="token operator">></span><span class="token operator">&lt;</span>/pre<span class="token operator">></span>
+  doc        Generate documentation outputs from a module <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token variable"</span><span class="token operator">></span><span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token variable"</span><span class="token operator">></span><span class="token variable"><span class="token variable">`</span><span class="token operator">&lt;</span>/span<span class="token operator">></span>DOC.tsx<span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token variable"</span><span class="token operator">></span><span class="token variable">`</span></span><span class="token operator">&lt;</span>/span<span class="token operator">></span><span class="token operator">&lt;</span>/span<span class="token operator">></span> entry file.
+  <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token function"</span><span class="token operator">></span>service<span class="token operator">&lt;</span>/span<span class="token operator">></span>    Manage development services <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token punctuation"</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token operator">&lt;</span>/span<span class="token operator">></span>start/stop/restart/status<span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token punctuation"</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">&lt;</span>/span<span class="token operator">></span> across the workspace.<span class="token operator">&lt;</span>/code<span class="token operator">></span><span class="token operator">&lt;</span>/pre<span class="token operator">></span>
   <span class="token operator">&lt;</span>/figure<span class="token operator">></span></code></pre>
   </figure>

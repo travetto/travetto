@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { castKey, getClass, JSONUtil, Runtime } from '@travetto/runtime';
+import { castKey, CodecUtil, getClass, JSONUtil, Runtime } from '@travetto/runtime';
 import { SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
 
 import { cliTpl } from './color.ts';
@@ -55,15 +55,37 @@ ${{ identifier: Runtime.getInstallCommand(module) }}
     const { name: commandName } = CliCommandRegistryIndex.get(getClass(command));
     const args = schema.methods.main?.parameters ?? [];
 
-    const usage = [cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`,];
+    const usage: string[] = [];
     const params: string[] = [];
     const descriptions: string[] = [];
+
+    usage.push(
+      cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`
+    );
 
     // Ensure finalized
     for (const field of args) {
       const type = field.type === String && field.enum && field.enum?.values.length <= 7 ? field.enum?.values?.join('|') : field.type.name.toLowerCase();
       const arg = `${field.name}${field.array ? '...' : ''}:${type}`;
       usage.push(cliTpl`${{ input: field.required?.active !== false ? `<${arg}>` : `[${arg}]` }}`);
+    }
+
+
+    const description: string[] = [];
+
+    if (schema.description) {
+      description.push(schema.description);
+    }
+
+    if (schema.examples) {
+      description.push(cliTpl`${{ title: 'Example Usage:' }}`);
+      for (const example of schema.examples) {
+        description.push(cliTpl`\t${example}`);
+      }
+    }
+
+    if (description.length) {
+      description.push('');
     }
 
     for (const field of Object.values(schema.fields)) {
@@ -114,6 +136,7 @@ ${{ identifier: Runtime.getInstallCommand(module) }}
     return [
       usage.join(' '),
       '',
+      ...description,
       cliTpl`${{ title: 'Options:' }}`,
       ...params.map((_, i) =>
         `  ${params[i]}${' '.repeat((paramWidth - paramWidths[i]))}  ${descriptions[i].padEnd(descWidth)}${' '.repeat((descWidth - descWidths[i]))}`
@@ -136,11 +159,13 @@ ${{ identifier: Runtime.getInstallCommand(module) }}
     for (const { command: cmd, schema } of resolved) {
       try {
         if (schema && !schema.private) {
-          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.description || '' }}`);
+          const description = CodecUtil.readFirstLine(schema.description, '');
+          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: description }}`);
         }
       } catch (error) {
         if (error instanceof Error) {
-          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ failure: error.message.split(/\n/)[0] }}`);
+          const failure = CodecUtil.readFirstLine(error.message);
+          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ failure }}`);
         } else {
           throw error;
         }

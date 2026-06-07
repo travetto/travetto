@@ -4,7 +4,10 @@ import { CliCommand } from '@travetto/cli';
 import type { TestConsumerType } from './bin/run.ts';
 
 /**
- * Invoke the test watcher
+ * Start the test watcher for continuous test execution.
+ *
+ * Watches project changes and reruns either all tests or changed subsets,
+ * using the configured output format.
  */
 @CliCommand()
 export class TestWatcherCommand {

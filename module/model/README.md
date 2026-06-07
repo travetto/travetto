@@ -312,11 +312,17 @@ export abstract class BaseModelSuite<T> {
 ## CLI - model:export
 The module provides the ability to generate an export of the model structure from all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14)s within the application.  This is useful for being able to generate the appropriate files to manually create the data schemas in production.
 
-**Terminal: Running model export**
+**Terminal: Help for model:export**
 ```bash
 $ trv model:export --help
 
 Usage: model:export [options] <provider:string> <models...:string>
+
+Export model definitions for a selected provider and model set.
+
+The command resolves candidate models and delegates to provider-specific
+export logic to produce schema/install artifacts.
+Example Usage:
 
 Options:
   -p, --profile <string>  Application profiles
@@ -335,11 +341,17 @@ Models
 ## CLI - model:install
 The module provides the ability to install all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14)s within the application given the current configuration being targeted.  This is useful for being able to prepare the datastore manually.
 
-**Terminal: Running model install**
+**Terminal: Help for model:install**
 ```bash
 $ trv model:install --help
 
 Usage: model:install [options] <provider:string> <models...:string>
+
+Install or update model definitions for a selected provider.
+
+The command resolves candidate models and applies provider install/upsert
+operations so backing stores are prepared for runtime usage.
+Example Usage:
 
 Options:
   -p, --profile <string>  Application profiles

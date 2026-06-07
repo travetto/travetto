@@ -6,6 +6,7 @@ import { RuntimeIndex, toConcrete } from '@travetto/runtime';
 import { c, d, type DocJSXElement } from '@travetto/doc';
 
 import type { DocumentShape } from './src/types.ts';
+import { DocCommand } from './support/cli.doc.ts';
 
 function NodeList({ src }: { src: string }): DocJSXElement {
   const lines = src.split(/\n/g);
@@ -52,14 +53,12 @@ export const text = async () => {
       You can also link to other {d.library('Travetto')} based modules as needed.  The {d.method('d.module')} object relies on what is already imported into your project, and reference the package.json of the related module. If the module is not installed, doc generation will fail.
     </c.Section>
 
-    <c.Section title='CLI - doc'>
-      The run command allows for generating documentation output.
-      <c.Execution title='CLI Doc Help' cmd='trv' args={['doc', '--help']}
-        config={{ workingDirectory: './doc-exec' }} />
-
+    <c.CliHelpSection commandClass={DocCommand}>
+      <c.CliHelpDescription commandClass={DocCommand} short />
+      <c.CliHelpExecution commandClass={DocCommand} />
       By default, running the command will output the {d.library('Markdown')} content directly to the terminal.
       <c.Execution title='Sample CLI Output' cmd='trv' args={['doc', '-o', 'html']}
         config={{ workingDirectory: './doc-exec' }} />
-    </c.Section>
+    </c.CliHelpSection>
   </>;
 };

@@ -18,21 +18,26 @@
 <a target="_blank" class="external-link" href="https://eslint.org/">ESLint</a> is the standard for linting <a target="_blank" class="external-link" href="https://typescriptlang.org">Typescript</a> and <a target="_blank" class="external-link" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">Javascript</a> code.  This module provides some standard linting patterns and the ability to create custom rules. Due to the fact that the framework supports both <a target="_blank" class="external-link" href="https://nodejs.org/api/modules.html">CommonJS</a> and <a target="_blank" class="external-link" href="https://nodejs.org/api/esm.html">Ecmascript Module</a> formats, a novel solution was required to allow <a target="_blank" class="external-link" href="https://eslint.org/">ESLint</a> to load <a target="_blank" class="external-link" href="https://nodejs.org/api/esm.html">Ecmascript Module</a> files.
 
 <p class="note"><strong>Note</strong> The <a target="_blank" class="external-link" href="https://eslint.org/">ESLint</a> has introduced <a target="_blank" class="source-link" href="https://eslint.org/blog/2022/08/new-config-system-part-3/">a new configuration format</a> which allows for <a target="_blank" class="external-link" href="https://nodejs.org/api/esm.html">Ecmascript Module</a> files.</p>
-
-<h2 id="cli-register">CLI - Register</h2>
-
 In a new project, the first thing that will need to be done, post installation, is to create the eslint configuration file.
+<h2 id="cli-eslint-register">CLI - eslint:register</h2>
 
   <figure class="terminal">
-    <figcaption class="terminal">Registering the Configuration
+    <figcaption class="terminal">Showing help for eslint:register
 
 </figcaption>
-    <pre><code class="language-bash">$ trv eslint:register
+    <pre><code class="language-bash">$ trv eslint:register <span class="token parameter variable">--help</span>
 
-Wrote eslint config to <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/eslint.config.js</code></pre>
+Usage: eslint:register <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Generate the workspace ESLint configuration entry file.
+
+This bootstraps <span class="token variable"><span class="token variable">`</span>eslint.config.js<span class="token variable">`</span></span> to load framework-provided rule wiring.
+
+Options:
+  <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
-This is the file the linter will use, and any other tooling (e.g. IDEs).
+When registration completes, this is the file the linter will use, and any other tooling (e.g. IDEs).
 
   <figure class="code">
     <figcaption class="code">Sample configuration
@@ -44,11 +49,9 @@ This is the file the linter will use, and any other tooling (e.g. IDEs).
 <span class="token keyword">export</span> <span class="token punctuation">{{'{'}}</span> rules <span class="token keyword">as</span> <span class="token keyword">default</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span></code></pre>
   </figure>
 
-The output is tied to whether or not you are using the <a target="_blank" class="external-link" href="https://nodejs.org/api/modules.html">CommonJS</a> or <a target="_blank" class="external-link" href="https://nodejs.org/api/esm.html">Ecmascript Module</a> format.
+<h2 id="cli-eslint">CLI - eslint</h2>
 
-<h2 id="cli-lint">CLI - Lint</h2>
-
-Once installed, using the linter is as simple as invoking it via the cli:
+Once registered, using the linter is as simple as invoking it via the cli:
 
   <figure class="terminal">
     <figcaption class="terminal">Running the Linter
@@ -58,6 +61,27 @@ Once installed, using the linter is as simple as invoking it via the cli:
   </figure>
 
 Or pointing your IDE to reference the registered configuration file.
+
+  <figure class="terminal">
+    <figcaption class="terminal">Showing help for eslint
+
+</figcaption>
+    <pre><code class="language-bash">$ trv eslint <span class="token parameter variable">--help</span>
+
+Usage: eslint <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Run ESLint <span class="token keyword">for</span> the workspace or changed files.
+
+Supports incremental mode <span class="token punctuation">(</span><span class="token variable"><span class="token variable">`</span>changed<span class="token variable">`</span></span>/<span class="token variable"><span class="token variable">`</span>since<span class="token variable">`</span></span><span class="token punctuation">)</span> and forwards formatting/fix
+options to the underlying eslint invocation.
+
+Options:
+  -c, <span class="token parameter variable">--changed</span>          Only check changed modules <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
+  -f, <span class="token parameter variable">--format</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Output <span class="token function">format</span>
+  -s, <span class="token parameter variable">--since</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>   Since a specific <span class="token function">git</span> commit
+  <span class="token parameter variable">--fix</span>                  Should we attempt to fix?
+  <span class="token parameter variable">--help</span>                 display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  </figure>
 
 <h2 id="custom-rules">Custom Rules</h2>
 

@@ -16,13 +16,18 @@ yarn add @travetto/web-rpc
 This module allows for a highly focused scenario, of supporting RPC operations within a [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") application.  The module takes care of producing the appropriate handler for the RPC commands along with the ability to generate the appropriate client to be used to interact with the RPC functionality.  The generated client uses Proxy-based objects, along with [Typescript](https://typescriptlang.org) magic to create a dynamic client that does not rely on generating a lot of code.
 
 ## CLI - web:rpc-client
-The library will create the RPC client in one of three flavors: fetch, fetch + node, angular.
+Generate web-rpc client artifacts from a specified provider or leveraging local config.
 
-**Terminal: Command Service**
+**Terminal: Help for web:rpc-client**
 ```bash
 $ trv web:rpc-client --help
 
 Usage: web:rpc-client [options] <type:config|node|web> [output:string]
+
+Generate web-rpc client artifacts from a specified provider or leveraging local config.
+
+Resolves generator services from DI and writes typed client code for the
+selected provider target.
 
 Options:
   -p, --profile <string>  Application profiles
@@ -30,7 +35,7 @@ Options:
   --help                  display help for command
 ```
 
-## Example
+### Example
 
 **Code: Example Controller**
 ```typescript

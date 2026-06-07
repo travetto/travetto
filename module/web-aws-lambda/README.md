@@ -17,13 +17,20 @@ This module provides an adapter between [Web API](https://github.com/travetto/tr
 
 **NOTE:** The only caveat to consider, is that while the framework supports streams for responses, [AWS Lambda](https://aws.amazon.com/lambda/) does not. Any streaming result will be read and converted into a [Buffer](https://nodejs.org/api/buffer.html) before being sent back.
 
-## CLI - Packaging Lambdas
+## CLI - pack:lambda
+Use this command to produce the Lambda-ready archive for deployment.
 
-**Terminal: Invoking a Package Build**
+**Terminal: Help for pack:lambda**
 ```bash
 $ trv pack:lambda --help
 
 Usage: pack:lambda [options] [args...:string]
+
+Build an AWS Lambda-ready zip package using the pack pipeline.
+
+Configures the Lambda entrypoint and emits a compressed deployment artifact
+suitable for direct Lambda upload workflows.
+Example Usage:
 
 Options:
   -b, --buildDir <string>              Workspace for building (default: "/tmp/<temp-folder>")
