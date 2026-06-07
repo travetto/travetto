@@ -158,8 +158,6 @@ export class ElasticsearchSchemaUtil {
     const allKeys = new Set([...Object.keys(currentProperties), ...Object.keys(neededProperties)]);
     const changed: string[] = [];
 
-    console.error({ current, needed });
-
     for (const key of allKeys) {
       const path = prefix ? `${prefix}.${key}` : key;
       const currentProperty = currentProperties[key];
