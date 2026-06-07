@@ -21,9 +21,10 @@ $ git config --global.username <Username> #Set your git username
       .join('\n\n# or\n\n')
   } />
 
-  <c.CliHelp commandClass={ScaffoldCommand}>
+  <c.CliHelpSection commandClass={ScaffoldCommand}>
     Once installed in your workspace, this command is the standard way to create a new Travetto project scaffold.
-  </c.CliHelp>
+    <c.CliHelpExecution commandClass={ScaffoldCommand} />
+  </c.CliHelpSection>
 
   The generator will ask about enabling the following features:
 

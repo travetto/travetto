@@ -54,17 +54,24 @@ export const Markdown: RenderProvider<RenderContext> = {
     });
     return Markdown.Terminal(state);
   },
-  CliHelp: async ({ context, props, createState, recurse }) => {
-    const { name: command, description = '' } = context.resolveCliCommandFromClass(props.commandClass);
-    const title = `CLI - ${command}`;
-    const execution = await Markdown.Execution(createState('Execution', {
-      title: `Running ${command}`,
+  CliHelpExecution: async ({ context, props, createState }) => {
+    const { name: command } = context.resolveCliCommandFromClass(props.commandClass);
+    return await Markdown.Execution(createState('Execution', {
+      title: `Help for ${command}`,
       cmd: 'trv',
       args: [command, HELP_FLAG],
-      config: { workingDirectory: './doc-exec' }
+      config: { workingDirectory: './doc-exec', ...props.config }
     }));
-    const nested = (await recurse())?.trim();
-    return `\n## ${title}\n\n${description}\n\n${execution}${nested ? `\n${nested}\n` : ''}`;
+  },
+  CliHelpDescription: async ({ context, props }) => {
+    const { description = '' } = context.resolveCliCommandFromClass(props.commandClass);
+    return description;
+  },
+  CliHelpSection: async ({ context, props, recurse }) => {
+    const { name: command } = context.resolveCliCommandFromClass(props.commandClass);
+    const title = `CLI - ${command}`;
+    const body = await recurse();
+    return `\n## ${title}\n${body}`;
   },
   Install: async ({ context, node }) =>
     `\n\n**Install: ${node.props.title}**

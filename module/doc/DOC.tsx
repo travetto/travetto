@@ -53,10 +53,11 @@ export const text = async () => {
       You can also link to other {d.library('Travetto')} based modules as needed.  The {d.method('d.module')} object relies on what is already imported into your project, and reference the package.json of the related module. If the module is not installed, doc generation will fail.
     </c.Section>
 
-    <c.CliHelp commandClass={DocCommand}>
+    <c.CliHelpSection commandClass={DocCommand}>
       By default, running the command will output the {d.library('Markdown')} content directly to the terminal.
+      <c.CliHelpExecution commandClass={DocCommand} />
       <c.Execution title='Sample CLI Output' cmd='trv' args={['doc', '-o', 'html']}
         config={{ workingDirectory: './doc-exec' }} />
-    </c.CliHelp>
+    </c.CliHelpSection>
   </>;
 };

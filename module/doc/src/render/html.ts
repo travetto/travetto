@@ -54,19 +54,25 @@ export const Html: RenderProvider<RenderContext> = {
     });
     return Html.Terminal(sub);
   },
-  CliHelp: async ({ context, props, createState, recurse }) => {
+  CliHelpExecution: async ({ context, props, createState }) => {
     const config = context.resolveCliCommandFromClass(props.commandClass);
-    const { name: command, description: markdownDescription = '' } = config;
-    const title = `CLI - ${command}`;
-    const description = md.render(markdownDescription);
-    const execution = await Html.Execution(createState('Execution', {
-      title: `Running ${command}`,
+    const { name: command } = config;
+    return Html.Execution(createState('Execution', {
+      title: `Showing help for ${command}`,
       cmd: 'trv',
       args: [command, HELP_FLAG],
-      config: { workingDirectory: './doc-exec' }
+      config: { workingDirectory: './doc-exec', ...props.config }
     }));
-    const nested = (await recurse())?.trim();
-    return `\n<h2 id="${context.getAnchorId(title)}">${title}</h2>\n\n${description}\n${execution}${nested ? `\n${nested}\n` : ''}`;
+  },
+  CliHelpDescription: async ({ context, props }) => {
+    const config = context.resolveCliCommandFromClass(props.commandClass);
+    return md.render(config.description ?? '');
+  },
+  CliHelpSection: async ({ context, props, recurse }) => {
+    const config = context.resolveCliCommandFromClass(props.commandClass);
+    const { name: command } = config;
+    const title = `CLI - ${command}`;
+    return `\n<h2 id="${context.getAnchorId(title)}">${title}</h2>\n\n${await recurse()}`;
   },
   Install: async ({ context, node }) => {
     const highlighted = highlight(`

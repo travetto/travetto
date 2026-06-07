@@ -59,29 +59,33 @@ ${{ identifier: Runtime.getInstallCommand(module) }}
     const params: string[] = [];
     const descriptions: string[] = [];
 
-    if (schema.description) {
-      usage.push(schema.description);
-    }
-
-    const headline = cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`;
-    if (usage.length) {
-      usage.push('\n', `\n${headline}`);
-    } else {
-      usage.push(headline);
-    }
-
-    if (schema.examples) {
-      usage.push(cliTpl`${{ title: 'Example Usage:' }}`);
-      for (const example of schema.examples) {
-        usage.push(cliTpl`\t${example}`);
-      }
-    }
+    usage.push(
+      cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`
+    );
 
     // Ensure finalized
     for (const field of args) {
       const type = field.type === String && field.enum && field.enum?.values.length <= 7 ? field.enum?.values?.join('|') : field.type.name.toLowerCase();
       const arg = `${field.name}${field.array ? '...' : ''}:${type}`;
       usage.push(cliTpl`${{ input: field.required?.active !== false ? `<${arg}>` : `[${arg}]` }}`);
+    }
+
+
+    const description: string[] = [];
+
+    if (schema.description) {
+      description.push(schema.description);
+    }
+
+    if (schema.examples) {
+      description.push(cliTpl`${{ title: 'Example Usage:' }}`);
+      for (const example of schema.examples) {
+        description.push(cliTpl`\t${example}`);
+      }
+    }
+
+    if (description.length) {
+      description.push('');
     }
 
     for (const field of Object.values(schema.fields)) {
@@ -132,6 +136,7 @@ ${{ identifier: Runtime.getInstallCommand(module) }}
     return [
       usage.join(' '),
       '',
+      ...description,
       cliTpl`${{ title: 'Options:' }}`,
       ...params.map((_, i) =>
         `  ${params[i]}${' '.repeat((paramWidth - paramWidths[i]))}  ${descriptions[i].padEnd(descWidth)}${' '.repeat((descWidth - descWidths[i]))}`

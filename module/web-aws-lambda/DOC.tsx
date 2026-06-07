@@ -9,7 +9,8 @@ export const text = <>
 
   <strong>NOTE:</strong> The only caveat to consider, is that while the framework supports streams for responses, {d.library('AwsLambda')} does not. Any streaming result will be read and converted into a {d.library('NodeBuffer')} before being sent back.
 
-  <c.CliHelp commandClass={PackLambdaCommand}>
+  <c.CliHelpSection commandClass={PackLambdaCommand}>
     Use this command to produce the Lambda-ready archive for deployment.
-  </c.CliHelp>
+    <c.CliHelpExecution commandClass={PackLambdaCommand} />
+  </c.CliHelpSection>
 </>;

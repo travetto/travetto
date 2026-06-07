@@ -20,13 +20,14 @@ export const text = <>
   <c.Section title='Spec Generation'>
     The framework, when in watch mode, will generate the {d.library('OpenAPI')} specification in either {d.library('JSON')} or {d.library('YAML')}. This module integrates with the file watching paradigm and can regenerate the openapi spec as changes to endpoints and models are made during development.  The output format is defined by the suffix of the output file, {d.input('.yaml')} or {d.input('.json')}.
   </c.Section>
-  <c.CliHelp commandClass={OpenApiSpecCommand}>
+  <c.CliHelpSection commandClass={OpenApiSpecCommand}>
     The command will run your application, in non-server mode, to collect all the endpoints and model information, to produce the {d.path('openapi.yml')}.  Once produced, the code will store the output in the specified location.
-
+    <c.CliHelpExecution commandClass={OpenApiSpecCommand} />
     <c.Note>The module supports generating the OpenAPI spec in real-time while listening for changes to endpoints and models.</c.Note>
-  </c.CliHelp>
+  </c.CliHelpSection>
 
-  <c.CliHelp commandClass={OpenApiClientCommand}>
+  <c.CliHelpSection commandClass={OpenApiClientCommand}>
     This tool relies upon a custom build of {d.library('OpenAPIGenerator')}, which supports watching.  This allows for fast responsive client generation as the shape of the API changes.
-  </c.CliHelp>
+    <c.CliHelpExecution commandClass={OpenApiClientCommand} />
+  </c.CliHelpSection>
 </>;

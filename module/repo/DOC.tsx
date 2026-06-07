@@ -20,8 +20,10 @@ export const text = <>
     <li>Running commands on all workspace modules</li>
   </ul>
 
-  <c.CliHelp commandClass={RepoVersionCommand}>
+  <c.CliHelpSection commandClass={RepoVersionCommand}>
     The versioning operation will find all the changed modules (and the modules that depend on the changed), and will update the versions in accordance with the user preferences.  The versioning logic is backed by {PACKAGE_MANAGER_LIST}'s versioning functionality and so it is identical to using the tool manually. The determination of what has or hasn't changed is relative to the last versioning commit.
+
+    <c.CliHelpExecution commandClass={RepoVersionCommand} />
 
     Level is a standard semver level of: major, minor, patch or prerelease.  The prefix argument only applies to the prerelease and allows for determining the prerelease level.  For example:
 
@@ -37,20 +39,22 @@ Date:   Thu Feb 23 17:51:37 2023 -0500
 
     Publish @travetto/asset,@travetto/asset-web,@travetto/auth,@travetto/auth-model,@travetto/auth-web,@travetto/auth-web-jwt,@travetto/auth-web-passport,@travetto/auth-web-session,...
 `} language='bash' />
-  </c.CliHelp>
+  </c.CliHelpSection>
 
 
-  <c.CliHelp commandClass={RepoPublishCommand}>
+  <c.CliHelpSection commandClass={RepoPublishCommand}>
     The publish functionality is relatively naive, but consistent.  The code will look at all modules in the mono-repo and check the listed version against what is available in the npm registry.  If the local version is newer, it is a candidate for publishing.
+
+    <c.CliHelpExecution commandClass={RepoPublishCommand} />
 
     By default the tool will execute a dry run only, and requires passing a flag to disable the dry run.
 
     <c.Terminal title='Publishing changes' src={`${d.trv} repo:publish --no-dry-run`} />
 
     If no modules are currently changed, then the command will indicate there is no work to do, and exit gracefully.
-  </c.CliHelp>
+  </c.CliHelpSection>
 
-  <c.CliHelp commandClass={ListModuleCommand}>
+  <c.CliHelpSection commandClass={ListModuleCommand}>
     The listing functionality provides the ability to get the workspace modules in the following formats:
     <ul>
       <li>{d.input('list')} - Standard text list, each module on its own line</li>
@@ -58,11 +62,16 @@ Date:   Thu Feb 23 17:51:37 2023 -0500
       <li>{d.input('json')} - Graph of modules in JSON form, with additional data (useful for quickly building a dependency graph)</li>
     </ul>
 
-    <c.Execution title='List execution of Monorepo' cmd='trv' args={['repo:list']} config={{ workingDirectory: Runtime.workspace.path }} />
-  </c.CliHelp>
+    <c.CliHelpExecution commandClass={ListModuleCommand} />
 
-  <c.CliHelp commandClass={RepoExecCommand}>
+    <c.Execution title='List execution of Monorepo' cmd='trv' args={['repo:list']} config={{ workingDirectory: Runtime.workspace.path }} />
+  </c.CliHelpSection>
+
+  <c.CliHelpSection commandClass={RepoExecCommand}>
     The standard format includes prefixed output to help identify which module produced which output.
+
+    <c.CliHelpExecution commandClass={RepoExecCommand} />
+
     <c.Execution title='List execution of Monorepo' cmd='trv' args={['repo:exec', '-w', '1', 'pwd']} config={{ workingDirectory: Runtime.workspace.path }} />
-  </c.CliHelp>
+  </c.CliHelpSection>
 </>;

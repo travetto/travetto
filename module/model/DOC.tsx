@@ -105,10 +105,12 @@ export const text = <>
     <c.Code title='Memory Service Test Configuration' src='./support/test/base.ts' />
   </c.Section>
 
-  <c.CliHelp commandClass={ModelExportCommand}>
+  <c.CliHelpSection commandClass={ModelExportCommand}>
     Use export to generate provider-specific schema artifacts from selected models.
-  </c.CliHelp>
-  <c.CliHelp commandClass={ModelInstallCommand}>
+    <c.CliHelpExecution commandClass={ModelExportCommand} />
+  </c.CliHelpSection>
+  <c.CliHelpSection commandClass={ModelInstallCommand}>
     Use install to apply model definitions to the selected provider runtime.
-  </c.CliHelp>
+    <c.CliHelpExecution commandClass={ModelInstallCommand} />
+  </c.CliHelpSection>
 </>;
