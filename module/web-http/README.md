@@ -15,8 +15,33 @@ yarn add @travetto/web-http
 
 This module provides basic for running [http](https://nodejs.org/api/http.html). [https](https://nodejs.org/api/https.html)  and [http2](https://nodejs.org/api/http2.html) servers, along with support for tls key generation during development.
 
-## Running a Server
+## CLI - web:http
 By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L20) for [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http/src/types.ts#L19) that will follow default behaviors, and spin up the server.
+
+**Terminal: Help for web:http**
+```bash
+$ trv web:http --help
+
+Usage: web:http [options]
+
+Start the configured web HTTP server for a module.
+
+Initializes registry and server bindings, supports restart-aware development
+flags, and can attempt to clear conflicting port owners in local workflows.
+Example Usage:
+	trv web:http -m <MODULE> -p 3000
+
+Options:
+  -p, --port <number>                          Port to run on
+  --kill-conflict, --no-kill-conflict          Kill conflicting port owner (default: true)
+  -m, --module <module>                        Module to run for
+  --profile <string>                           Application profiles
+  --restart-on-change, --no-restart-on-change  Should the invocation automatically restart on source changes (default: true)
+  -d, --debug-ipc                              Should the invocation automatically restart on source changes
+  --help                                       display help for command
+```
+
+## Running a Server
 
 **Terminal: Standard application**
 ```bash

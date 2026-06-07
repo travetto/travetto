@@ -12,9 +12,9 @@ export const text = async () => {
     This module allows for a highly focused scenario, of supporting RPC operations within a {d.module('Web')} application.  The module takes care of producing the appropriate handler for the RPC commands along with the ability to generate the appropriate client to be used to interact with the RPC functionality.  The generated client uses Proxy-based objects, along with {d.library('Typescript')} magic to create a dynamic client that does not rely on generating a lot of code.
 
     <c.CliHelpSection commandClass={CliWebRpcCommand}>
-      <c.CliHelpDescription commandClass={CliWebRpcCommand} />
+      <c.CliHelpDescription commandClass={CliWebRpcCommand} short />
       <c.CliHelpExecution commandClass={CliWebRpcCommand} />
-      <c.Section title='Example'>
+      <c.SubSection title='Example'>
         <c.Code title="Example Controller" src="./doc-exec/src/controller.ts" />
 
         This controller is a basic example of an invokable endpoint.
@@ -37,7 +37,7 @@ export const text = async () => {
 
         The usage here is extremely simple, but outlines the simplicity of what is needed to make RPC requests.
 
-      </c.Section>
+      </c.SubSection>
     </c.CliHelpSection>
   </>;
 };

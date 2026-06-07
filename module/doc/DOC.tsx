@@ -54,8 +54,9 @@ export const text = async () => {
     </c.Section>
 
     <c.CliHelpSection commandClass={DocCommand}>
-      By default, running the command will output the {d.library('Markdown')} content directly to the terminal.
+      <c.CliHelpDescription commandClass={DocCommand} short />
       <c.CliHelpExecution commandClass={DocCommand} />
+      By default, running the command will output the {d.library('Markdown')} content directly to the terminal.
       <c.Execution title='Sample CLI Output' cmd='trv' args={['doc', '-o', 'html']}
         config={{ workingDirectory: './doc-exec' }} />
     </c.CliHelpSection>

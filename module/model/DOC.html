@@ -419,12 +419,18 @@ To enforce that these contracts are honored, the module provides shared test sui
 The module provides the ability to generate an export of the model structure from all the various <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">@Model</a> s within the application.  This is useful for being able to generate the appropriate files to manually create the data schemas in production.
 
   <figure class="terminal">
-    <figcaption class="terminal">Running model export
+    <figcaption class="terminal">Showing help for model:export
 
 </figcaption>
     <pre><code class="language-bash">$ trv model:export <span class="token parameter variable">--help</span>
 
 Usage: model:export <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>provider:string<span class="token operator">></span> <span class="token operator">&lt;</span>models<span class="token punctuation">..</span>.:string<span class="token operator">></span>
+
+Export model definitions <span class="token keyword">for</span> a selected provider and model set.
+
+The <span class="token builtin class-name">command</span> resolves candidate models and delegates to provider-specific
+<span class="token builtin class-name">export</span> logic to produce schema/install artifacts.
+Example Usage:
 
 Options:
   -p, <span class="token parameter variable">--profile</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Application profiles
@@ -445,12 +451,18 @@ Models
 The module provides the ability to install all the various <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">@Model</a> s within the application given the current configuration being targeted.  This is useful for being able to prepare the datastore manually.
 
   <figure class="terminal">
-    <figcaption class="terminal">Running model install
+    <figcaption class="terminal">Showing help for model:install
 
 </figcaption>
     <pre><code class="language-bash">$ trv model:install <span class="token parameter variable">--help</span>
 
 Usage: model:install <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>provider:string<span class="token operator">></span> <span class="token operator">&lt;</span>models<span class="token punctuation">..</span>.:string<span class="token operator">></span>
+
+Install or update model definitions <span class="token keyword">for</span> a selected provider.
+
+The <span class="token builtin class-name">command</span> resolves candidate models and applies provider install/upsert
+operations so backing stores are prepared <span class="token keyword">for</span> runtime usage.
+Example Usage:
 
 Options:
   -p, <span class="token parameter variable">--profile</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Application profiles

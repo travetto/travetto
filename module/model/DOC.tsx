@@ -106,11 +106,13 @@ export const text = <>
   </c.Section>
 
   <c.CliHelpSection commandClass={ModelExportCommand}>
-    Use export to generate provider-specific schema artifacts from selected models.
-    <c.CliHelpExecution commandClass={ModelExportCommand} />
+    The module provides the ability to generate an export of the model structure from all the various {Model}s within the application.  This is useful for being able to generate the appropriate files to manually create the data schemas in production.
+
+    <c.CliHelpExecution commandClass={ModelExportCommand} config={{ workingDirectory: './doc-exec/' }} />
   </c.CliHelpSection>
   <c.CliHelpSection commandClass={ModelInstallCommand}>
-    Use install to apply model definitions to the selected provider runtime.
-    <c.CliHelpExecution commandClass={ModelInstallCommand} />
+    The module provides the ability to install all the various {Model}s within the application given the current configuration being targeted.  This is useful for being able to prepare the datastore manually.
+
+    <c.CliHelpExecution commandClass={ModelInstallCommand} config={{ workingDirectory: './doc-exec/' }} />
   </c.CliHelpSection>
 </>;

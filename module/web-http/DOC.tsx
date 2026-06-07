@@ -15,12 +15,14 @@ export const text = <>
   <c.StdHeader />
   This module provides basic for running {d.library('NodeHttp')}. {d.library('NodeHttps')}  and {d.library('NodeHttp2')} servers, along with support for tls key generation during development.
 
+  <c.CliHelpSection commandClass={WebHttpCommand}>
+    By default, the framework provides a default {CliCommand} for {WebServerContract} that will follow default behaviors, and spin up the server.
+    <c.CliHelpExecution commandClass={WebHttpCommand} />
+  </c.CliHelpSection>
+
   <c.Section title='Running a Server'>
 
-    <c.CliHelpSection commandClass={WebHttpCommand}>
-      By default, the framework provides a default {CliCommand} for {WebServerContract} that will follow default behaviors, and spin up the server.
-      <c.CliHelpExecution commandClass={WebHttpCommand} />
-    </c.CliHelpSection>
+    <c.Execution title='Standard application' cmd='trv' args={['web:http']} config={{ workingDirectory: './doc-exec', env: { TRV_ROLE: 'doc' } }} />
 
     <c.SubSection title="Configuration">
       <c.Code title="Standard Web Http Config" src={WebHttpConfig} />

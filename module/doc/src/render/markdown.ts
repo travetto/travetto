@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { Runtime, RuntimeError, RuntimeIndex } from '@travetto/runtime';
+import { CodecUtil, Runtime, RuntimeError, RuntimeIndex } from '@travetto/runtime';
 import { PackageUtil } from '@travetto/manifest';
 import { HELP_FLAG } from '@travetto/cli';
 
@@ -60,12 +60,16 @@ export const Markdown: RenderProvider<RenderContext> = {
       title: `Help for ${command}`,
       cmd: 'trv',
       args: [command, HELP_FLAG],
-      config: { workingDirectory: './doc-exec', ...props.config }
+      config: { ...props.config }
     }));
   },
   CliHelpDescription: async ({ context, props }) => {
     const { description = '' } = context.resolveCliCommandFromClass(props.commandClass);
-    return description;
+    let text = description;
+    if (props.short) {
+      text = CodecUtil.readFirstLine(text);
+    }
+    return text;
   },
   CliHelpSection: async ({ context, props, recurse }) => {
     const { name: command } = context.resolveCliCommandFromClass(props.commandClass);

@@ -49,7 +49,7 @@ const StdHeader: CompFn<StdHeaderProps> = () => EMPTY; // Standard module header
 const Header: CompFn<HeaderProps> = () => EMPTY; // Basic module header
 const Execution: CompFn<ExecProps> = () => EMPTY; // Run a command, and include the output as part of the document
 const CliHelpSection: CompFn<CliHelpProps> = () => EMPTY; // Standardized CLI command help section
-const CliHelpDescription: CompFn<CliHelpProps> = () => EMPTY; // Standardized CLI command help description
+const CliHelpDescription: CompFn<CliHelpProps & { short?: boolean }> = () => EMPTY; // Standardized CLI command help description
 const CliHelpExecution: CompFn<CliHelpExecutionProps> = () => EMPTY; // Standardized CLI command help execution
 
 const Module: CompFn<ModuleProps> = () => EMPTY; // Node Module Reference

@@ -15,23 +15,20 @@ export const text = <>
   In a new project, the first thing that will need to be done, post installation, is to create the eslint configuration file.
 
   <c.CliHelpSection commandClass={ESLintConfigureCommand}>
-    This is the file the linter will use, and any other tooling (e.g. IDEs).
+    <c.CliHelpExecution commandClass={ESLintConfigureCommand} config={{ workingDirectory: '.' }} />
 
-    <c.CliHelpExecution commandClass={ESLintConfigureCommand} />
-
+    When registration completes, this is the file the linter will use, and any other tooling (e.g. IDEs).
     <c.Code title='Sample configuration' src='../../eslint.config.js' />
-
-    The output is tied to whether or not you are using the {d.library('CommonJS')} or {d.library('EcmascriptModule')} format.
   </c.CliHelpSection>
 
   <c.CliHelpSection commandClass={ESLintCommand}>
-    Once installed, using the linter is as simple as invoking it via the cli:
-
-    <c.CliHelpExecution commandClass={ESLintCommand} />
+    Once registered, using the linter is as simple as invoking it via the cli:
 
     <c.Terminal title='Running the Linter' src={`${d.trv} eslint`} />
 
     Or pointing your IDE to reference the registered configuration file.
+
+    <c.CliHelpExecution commandClass={ESLintCommand} config={{ workingDirectory: '.' }} />
   </c.CliHelpSection>
 
   <c.Section title='Custom Rules'>

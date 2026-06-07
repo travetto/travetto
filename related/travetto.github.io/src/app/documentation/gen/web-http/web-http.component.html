@@ -16,9 +16,36 @@
   </figure>
 
 This module provides basic for running <a target="_blank" class="external-link" href="https://nodejs.org/api/http.html">http</a>. <a target="_blank" class="external-link" href="https://nodejs.org/api/https.html">https</a>  and <a target="_blank" class="external-link" href="https://nodejs.org/api/http2.html">http2</a> servers, along with support for tls key generation during development.
-<h2 id="running-a-server">Running a Server</h2>
+<h2 id="cli-web-http">CLI - web:http</h2>
 
 By default, the framework provides a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L20">&#64;CliCommand</a> for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-http/src/types.ts#L19">WebHttpServer</a> that will follow default behaviors, and spin up the server.
+
+  <figure class="terminal">
+    <figcaption class="terminal">Showing help for web:http
+
+</figcaption>
+    <pre><code class="language-bash">$ trv web:http <span class="token parameter variable">--help</span>
+
+Usage: web:http <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Start the configured web HTTP server <span class="token keyword">for</span> a module.
+
+Initializes registry and server bindings, supports restart-aware development
+flags, and can attempt to <span class="token function">clear</span> conflicting port owners <span class="token keyword">in</span> <span class="token builtin class-name">local</span> workflows.
+Example Usage:
+	trv web:http <span class="token parameter variable">-m</span> <span class="token operator">&lt;</span>MODULE<span class="token operator">></span> <span class="token parameter variable">-p</span> <span class="token number">3000</span>
+
+Options:
+  -p, <span class="token parameter variable">--port</span> <span class="token operator">&lt;</span>number<span class="token operator">></span>                          Port to run on
+  --kill-conflict, --no-kill-conflict          Kill conflicting port owner <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
+  -m, <span class="token parameter variable">--module</span> <span class="token operator">&lt;</span>module<span class="token operator">></span>                        Module to run <span class="token keyword">for</span>
+  <span class="token parameter variable">--profile</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                           Application profiles
+  --restart-on-change, --no-restart-on-change  Should the invocation automatically restart on <span class="token builtin class-name">source</span> changes <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
+  -d, --debug-ipc                              Should the invocation automatically restart on <span class="token builtin class-name">source</span> changes
+  <span class="token parameter variable">--help</span>                                       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  </figure>
+
+<h2 id="running-a-server">Running a Server</h2>
 
   <figure class="terminal">
     <figcaption class="terminal">Standard application
