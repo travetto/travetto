@@ -12,3 +12,4 @@ images/*.gif
 .eslintignore
 DOC.ts*
 DOC.html
+temp/

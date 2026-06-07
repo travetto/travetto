@@ -35,7 +35,6 @@
     "postinstall": "rm -rf node_modules/@travetto && ln -sf ../../../../node_modules/.bin/trv node_modules/.bin/trv && ln -sf ../../../../node_modules/.bin/trvc node_modules/.bin/trvc"
   },
   "devDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.1",
     "@travetto/compiler": "^8.0.0-alpha.1",
     "@travetto/doc": "^8.0.0-alpha.1",
     "@travetto/email-compiler": "^8.0.0-alpha.1",
@@ -46,8 +45,6 @@
     "@types/vscode": "^1.120.0"
   },
   "dependencies": {
-    "@travetto/cli": "^8.0.0-alpha.1",
-    "@travetto/llm-support": "^8.0.0-alpha.20",
     "@travetto/registry": "^8.0.0-alpha.1",
     "@travetto/runtime": "^8.0.0-alpha.1"
   },
@@ -79,7 +76,6 @@
   ],
   "activationEvents": [
     "workspaceContains:node_modules/@travetto",
-    "*",
     "onView:travetto.email-compiler.context"
   ],
   "icon": "images/logo.png",
