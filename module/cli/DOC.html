@@ -26,33 +26,38 @@ The cli module represents the primary entry point for execution within the frame
 Usage:  <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>
 
 Commands:
-  doc               Generate documentation outputs from a module <span class="token variable"><span class="token variable">`</span>DOC.tsx<span class="token variable">`</span></span> entry file.
-  doc:angular       Generate documentation into the angular webapp under related/travetto.github.io
-  doc:mapping       Generate module mapping <span class="token keyword">for</span>
-  email:compile     Compile all email templates into generated runtime artifacts.
-  email:editor      Start the email template editor <span class="token function">service</span> <span class="token keyword">for</span> interactive preview and testing.
-  email:test        Render and send a template <span class="token function">file</span> to a target recipient <span class="token keyword">for</span> quick validation.
-  eslint            Run ESLint <span class="token keyword">for</span> the workspace or changed files.
-  eslint:register   Generate the workspace ESLint configuration entry file.
-  model:export      Export model definitions <span class="token keyword">for</span> a selected provider and model set.
-  model:install     Install or update model definitions <span class="token keyword">for</span> a selected provider.
-  openapi:client    Generate API clients from an OpenAPI specification using the generator image.
-  openapi:spec      Generate the OpenAPI specification <span class="token keyword">for</span> the selected module.
-  pack              Build a standard module package artifact.
-  pack:docker       Build container-ready artifacts and optionally publish Docker images.
-  pack:lambda       Build an AWS Lambda-ready <span class="token function">zip</span> package using the pack pipeline.
-  pack:zip          Build a deployable <span class="token function">zip</span> artifact using the standard pack pipeline.
-  repo:exec         Execute a shell <span class="token builtin class-name">command</span> across workspace modules.
-  repo:list         List workspace modules and their relationships.
-  repo:publish      Publish unpublished workspace modules to the package registry.
-  repo:version      Bump workspace module versions and optionally commit/tag release metadata.
-  repo:version-sync Synchronize package versions and dependency ranges across the monorepo.
-  run:double        Doubles a number
-  <span class="token function">service</span>           Manage development services <span class="token punctuation">(</span>start/stop/restart/status<span class="token punctuation">)</span> across the workspace.
-  <span class="token builtin class-name">test</span>              Execute the <span class="token builtin class-name">test</span> framework <span class="token keyword">for</span> targeted files, suites, or methods.
-  test:watch        Start the <span class="token builtin class-name">test</span> watcher <span class="token keyword">for</span> continuous <span class="token builtin class-name">test</span> execution.
-  web:http          Start the configured web HTTP server <span class="token keyword">for</span> a module.
-  web:rpc-client    Generate web-rpc client artifacts from a specified provider or leveraging <span class="token builtin class-name">local</span> config.</code></pre>
+  doc                   Generate documentation outputs from a module <span class="token variable"><span class="token variable">`</span>DOC.tsx<span class="token variable">`</span></span> entry file.
+  doc:angular           Generate documentation into the angular webapp under related/travetto.github.io
+  doc:mapping           Generate module mapping <span class="token keyword">for</span>
+  email:compile         Compile all email templates into generated runtime artifacts.
+  email:editor          Start the email template editor <span class="token function">service</span> <span class="token keyword">for</span> interactive preview and testing.
+  email:test            Render and send a template <span class="token function">file</span> to a target recipient <span class="token keyword">for</span> quick validation.
+  eslint                Run ESLint <span class="token keyword">for</span> the workspace or changed files.
+  eslint:register       Generate the workspace ESLint configuration entry file.
+  llm:support:execute   Execute llm-support operations with dry-run by default.
+  llm:support:mcp       Minimal MCP stdio server <span class="token keyword">for</span> llm-support tools.
+  llm:support:plan      Build plan-first execution details <span class="token keyword">for</span> llm-support operations.
+  llm:support:recommend Recommend llm-support bundles, workflows, and operations.
+  llm:support:status    Show llm-support execution coverage status.
+  model:export          Export model definitions <span class="token keyword">for</span> a selected provider and model set.
+  model:install         Install or update model definitions <span class="token keyword">for</span> a selected provider.
+  openapi:client        Generate API clients from an OpenAPI specification using the generator image.
+  openapi:spec          Generate the OpenAPI specification <span class="token keyword">for</span> the selected module.
+  pack                  Build a standard module package artifact.
+  pack:docker           Build container-ready artifacts and optionally publish Docker images.
+  pack:lambda           Build an AWS Lambda-ready <span class="token function">zip</span> package using the pack pipeline.
+  pack:zip              Build a deployable <span class="token function">zip</span> artifact using the standard pack pipeline.
+  repo:exec             Execute a shell <span class="token builtin class-name">command</span> across workspace modules.
+  repo:list             List workspace modules and their relationships.
+  repo:publish          Publish unpublished workspace modules to the package registry.
+  repo:version          Bump workspace module versions and optionally commit/tag release metadata.
+  repo:version-sync     Synchronize package versions and dependency ranges across the monorepo.
+  run:double            Doubles a number
+  <span class="token function">service</span>               Manage development services <span class="token punctuation">(</span>start/stop/restart/status<span class="token punctuation">)</span> across the workspace.
+  <span class="token builtin class-name">test</span>                  Execute the <span class="token builtin class-name">test</span> framework <span class="token keyword">for</span> targeted files, suites, or methods.
+  test:watch            Start the <span class="token builtin class-name">test</span> watcher <span class="token keyword">for</span> continuous <span class="token builtin class-name">test</span> execution.
+  web:http              Start the configured web HTTP server <span class="token keyword">for</span> a module.
+  web:rpc-client        Generate web-rpc client artifacts from a specified provider or leveraging <span class="token builtin class-name">local</span> config.</code></pre>
   </figure>
 
 This listing is from the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> monorepo, and represents the majority of tools that can be invoked from the command line. <br><br>
