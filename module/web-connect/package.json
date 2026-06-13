@@ -1,6 +1,6 @@
 {
   "name": "@travetto/web-connect",
-  "version": "8.0.0-alpha.17",
+  "version": "8.0.0-alpha.18",
   "type": "module",
   "description": "Web integration for Connect-Like Resources",
   "keywords": [
@@ -25,11 +25,11 @@
     "directory": "module/web-connect"
   },
   "dependencies": {
-    "@travetto/web": "^8.0.0-alpha.17"
+    "@travetto/web": "^8.0.0-alpha.18"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.21",
-    "@travetto/test": "^8.0.0-alpha.15"
+    "@travetto/cli": "^8.0.0-alpha.22",
+    "@travetto/test": "^8.0.0-alpha.16"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
