@@ -1,6 +1,6 @@
 {
   "name": "@travetto/repo",
-  "version": "8.0.0-alpha.20",
+  "version": "8.0.0-alpha.21",
   "type": "module",
   "description": "Monorepo utilities",
   "keywords": [
@@ -23,10 +23,10 @@
     "directory": "module/repo"
   },
   "dependencies": {
-    "@travetto/worker": "^8.0.0-alpha.16"
+    "@travetto/worker": "^8.0.0-alpha.17"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.22"
+    "@travetto/cli": "^8.0.0-alpha.23"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

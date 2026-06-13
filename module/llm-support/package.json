@@ -1,6 +1,6 @@
 {
   "name": "@travetto/llm-support",
-  "version": "8.0.0-alpha.22",
+  "version": "8.0.0-alpha.23",
   "type": "module",
   "description": "Task-oriented synthesized LLM guidance for Travetto modules.",
   "keywords": [
@@ -28,12 +28,12 @@
     "directory": "module/llm-support"
   },
   "dependencies": {
-    "@travetto/runtime": "^8.0.0-alpha.16",
-    "@travetto/schema": "^8.0.0-alpha.17",
-    "@travetto/cli": "^8.0.0-alpha.22"
+    "@travetto/runtime": "^8.0.0-alpha.17",
+    "@travetto/schema": "^8.0.0-alpha.18",
+    "@travetto/cli": "^8.0.0-alpha.23"
   },
   "devDependencies": {
-    "@travetto/test": "^8.0.0-alpha.16"
+    "@travetto/test": "^8.0.0-alpha.17"
   },
   "travetto": {
     "workspaceInclude": true,
