@@ -12,19 +12,19 @@ class PackAppSuite {
     const tag = `tag-${Math.random()}`.replace(/[0][.]/, '');
     const imageName = 'travetto-test_pack_app';
     assert(Runtime.mainSourcePath.endsWith('pack_app'));
-    const proc = ExecUtil.spawnPackageCommand('trv', ['pack:docker', '-dt', tag, 'run:double'], { cwd: Runtime.mainSourcePath });
+    const process = ExecUtil.spawnPackageCommand('trv', ['pack:docker', '-dt', tag, 'run:double'], { cwd: Runtime.mainSourcePath });
 
-    const state = await ExecUtil.getResult(proc, { catch: true });
+    const state = await ExecUtil.getResult(process, { catch: true });
     console.log(state.stderr);
     assert(state.valid);
 
-    const proc2 = spawn('docker', ['run', '--rm', `${imageName}:${tag}`, '30']);
-    const state2 = await ExecUtil.getResult(proc2);
+    const process2 = spawn('docker', ['run', '--rm', `${imageName}:${tag}`, '30']);
+    const state2 = await ExecUtil.getResult(process2);
     assert(state2.stderr === '');
     assert(state2.code === 0);
 
-    const proc3 = spawn('docker', ['image', 'rm', '--force', `${imageName}:${tag}`]);
-    await ExecUtil.getResult(proc3);
+    const process3 = spawn('docker', ['image', 'rm', '--force', `${imageName}:${tag}`]);
+    await ExecUtil.getResult(process3);
 
     assert(state2.stdout.includes('Result: 60'));
     assert(/Result: 60/.test(state2.stdout));

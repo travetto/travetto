@@ -1,4 +1,6 @@
 import { type CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
+import { RuntimeError } from '@travetto/runtime';
+import { TerminalUtil } from '@travetto/terminal';
 
 import { PackageManager } from './bin/package-manager.ts';
 import { RepoExecUtil } from './bin/exec.ts';
@@ -27,7 +29,7 @@ export class RepoPublishCommand implements CliCommandShape {
     });
 
     const unpublished = [...published.entries()]
-      .filter(entry => !PackageManager.validatePublishedResult(entry[1]))
+      .filter(([, result]) => !PackageManager.validatePublishedResult(result))
       .map(([module]) => module);
 
     if (this.dryRun) {
@@ -36,8 +38,15 @@ export class RepoPublishCommand implements CliCommandShape {
 
     let otp = this.otp;
     if (unpublished.length > 0 && !this.dryRun) {
+      if (await PackageManager.needsLogin()) {
+        throw new RuntimeError('NPM login is required to publish. Please run "npm login" to authenticate.');
+      }
       if (!otp && await PackageManager.needsOtp()) {
-        otp = await PackageManager.requestOtp();
+        if (TerminalUtil.isInteractive()) {
+          otp = await PackageManager.requestOtp();
+        } else {
+          throw new RuntimeError('OTP token is required for publishing, but was not provided.');
+        }
       }
     }
 

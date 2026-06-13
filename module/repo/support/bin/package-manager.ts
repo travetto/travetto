@@ -15,6 +15,19 @@ export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease' | 'premajor
 export class PackageManager {
 
   /**
+   * Check if npm login is needed
+   */
+  static async needsLogin(): Promise<boolean> {
+    try {
+      const result = await ExecUtil.getResult(spawn('npm', ['whoami']), { catch: true });
+      return !result.valid;
+    } catch {
+      // Ignore errors checking for login profile
+    }
+    return false;
+  }
+
+  /**
    * Check if OTP is needed for publishing
    */
   static async needsOtp(): Promise<boolean> {
