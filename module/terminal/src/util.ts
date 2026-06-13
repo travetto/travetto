@@ -1,10 +1,36 @@
+import rl from 'node:readline/promises';
+
+import { Env } from '@travetto/runtime';
+
 import { StyleUtil, type TermStyleFn, type TermStyleInput } from './style.ts';
 import { type Terminal, WAIT_TOKEN } from './terminal.ts';
 
-type ProgressEvent<T> = { total?: number, idx: number, value: T };
+export type ProgressEvent<T> = { total?: number, idx: number, value: T };
 type ProgressStyle = { complete: TermStyleFn, incomplete?: TermStyleFn };
 
 export class TerminalUtil {
+
+  /**
+   * Determine if the terminal session is interactive
+   */
+  static isInteractive(): boolean {
+    return process.stdout.isTTY && process.stdin.isTTY && !Env.TRV_QUIET.isTrue;
+  }
+
+  /**
+   * Prompt the user for input
+   */
+  static async prompt(message: string): Promise<string> {
+    if (!this.isInteractive()) {
+      return '';
+    }
+    const reader = rl.createInterface({ input: process.stdin, output: process.stdout });
+    try {
+      return (await reader.question(message)).trim();
+    } finally {
+      reader.close();
+    }
+  }
 
   /**
    * Create a progress bar updater, suitable for streaming to the bottom of the screen
