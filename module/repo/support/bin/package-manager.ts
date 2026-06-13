@@ -2,9 +2,10 @@ import path from 'node:path';
 import { spawn, type ChildProcess } from 'node:child_process';
 import fs from 'node:fs/promises';
 
-import { JSONUtil, type ExecutionResult, Runtime } from '@travetto/runtime';
+import { JSONUtil, type ExecutionResult, Runtime, ExecUtil } from '@travetto/runtime';
 import { type IndexedModule, type Package, PackageUtil } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
+import { TerminalUtil } from '@travetto/terminal';
 
 export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease' | 'premajor' | 'preminor' | 'prepatch';
 
@@ -12,6 +13,65 @@ export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease' | 'premajor
  * Utilities for working with package managers
  */
 export class PackageManager {
+
+  /**
+   * Check if npm login is needed
+   */
+  static async needsLogin(): Promise<boolean> {
+    const result = await ExecUtil.getResult(spawn('npm', ['whoami']), { catch: true });
+    return !result.valid;
+  }
+
+  /**
+   * Check if OTP is needed for publishing
+   */
+  static async needsOtp(): Promise<boolean> {
+    try {
+      const result = await ExecUtil.getResult(spawn('npm', ['profile', 'get', '--json']), { catch: true });
+      if (result.valid) {
+        const info = JSONUtil.fromUTF8<{ tfa?: { mode?: string } }>(result.stdout);
+        return !!info?.tfa?.mode;
+      }
+    } catch {
+      // Ignore errors checking for OTP profile
+    }
+    return false;
+  }
+
+  /**
+   * Request an OTP token if required
+   */
+  static async requestOtp(): Promise<string | undefined> {
+    if (TerminalUtil.isInteractive()) {
+      console.log([
+        'OTP token is required for publishing. Please provide an OTP token to proceed with publishing.',
+        'This value will not be stored, and is only used for the current publish operation.'
+      ].join(' '));
+      return await TerminalUtil.prompt('Enter OTP token: ');
+    }
+  }
+
+  /**
+   * Classify publish error from execution result
+   */
+  static classifyPublishError(result: ExecutionResult): string {
+    const errorText = ExecUtil.toString(result, 'any');
+
+    if (/EOTP|one-time password|two-factor|OTP/i.test(errorText)) {
+      return 'Two-factor authentication (OTP) failed or was missing.';
+    }
+    if (/EPUBLISHCONFLICT|E403(.){,100}previously published|cannot publish over/i.test(errorText)) {
+      return 'Version conflict: This version has already been published to the registry.';
+    }
+    if (/ENEEDAUTH|E401|login|unauthorized/i.test(errorText)) {
+      return 'Authentication failed: Please log in or check your registry credentials.';
+    }
+    if (/E403|permission|not allowed/i.test(errorText)) {
+      return 'Permission denied: You do not have access to publish this package.';
+    }
+
+    return errorText || 'Unknown publishing error.';
+  }
 
   /**
    * Is a module already published
@@ -29,13 +89,15 @@ export class PackageManager {
   /**
    * Validate published result
    */
-  static validatePublishedResult(result: ExecutionResult<string>): boolean {
-    if (!result.valid && !result.stderr.includes('E404')) {
-      throw new Error(result.stderr);
+  static validatePublishedResult(result: ExecutionResult): boolean {
+    const stderr = ExecUtil.toString(result, 'stderr');
+    if (!result.valid && !stderr.includes('E404')) {
+      throw new Error(stderr);
     }
 
+    const stdout = ExecUtil.toString(result, 'stdout');
     type PackageInfo = { dist?: { integrity?: string } };
-    let parsed = JSONUtil.fromUTF8<PackageInfo | { data: PackageInfo }>(result.stdout || '{}');
+    let parsed = JSONUtil.fromUTF8<PackageInfo | { data: PackageInfo }>(stdout || '{}');
     if ('data' in parsed) { // Yarn support
       parsed = parsed.data;
     }
@@ -72,7 +134,7 @@ export class PackageManager {
   /**
    * Publish a module
    */
-  static publish(module: IndexedModule, dryRun: boolean | undefined): ChildProcess {
+  static publish(module: IndexedModule, dryRun: boolean | undefined, otp?: string): ChildProcess {
     if (dryRun) {
       return this.dryRunPackaging(module);
     }
@@ -82,7 +144,7 @@ export class PackageManager {
     switch (Runtime.workspace.manager) {
       case 'npm':
       case 'yarn':
-      case 'pnpm': args = ['publish', '--tag', versionTag, '--access', 'public']; break;
+      case 'pnpm': args = ['publish', '--tag', versionTag, '--access', 'public', ...(otp ? ['--otp', otp] : [])]; break;
     }
     return spawn(Runtime.workspace.manager, args, { cwd: module.sourcePath });
   }

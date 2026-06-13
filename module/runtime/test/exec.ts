@@ -17,10 +17,10 @@ export class ExecUtilTest {
 
   @Test()
   async spawn() {
-    const proc = spawn('ls', ['-ls'], {
+    const process = spawn('ls', ['-ls'], {
       cwd: Runtime.workspace.path
     });
-    const result = await ExecUtil.getResult(proc);
+    const result = await ExecUtil.getResult(process);
     assert(result.stdout.includes('package.json'));
     assert(result.code === 0);
     assert(result.valid);
@@ -28,10 +28,10 @@ export class ExecUtilTest {
 
   @Test()
   async spawnBad() {
-    const proc = spawn('ls', ['xxxx'], {
+    const process = spawn('ls', ['xxxx'], {
       cwd: Runtime.workspace.path
     });
-    const result = await ExecUtil.getResult(proc, { catch: true });
+    const result = await ExecUtil.getResult(process, { catch: true });
     assert(result.stderr.includes('xxxx'));
     assert(result.code > 0);
     assert(!result.valid);
@@ -39,10 +39,10 @@ export class ExecUtilTest {
 
   @Test()
   async fork() {
-    const proc = fork(await this.fixture.resolve('echo.js'), { stdio: 'pipe' });
-    proc.stdin?.write('Hello World');
-    proc.stdin?.end();
-    const result = await ExecUtil.getResult(proc);
+    const process = fork(await this.fixture.resolve('echo.js'), { stdio: 'pipe' });
+    process.stdin?.write('Hello World');
+    process.stdin?.end();
+    const result = await ExecUtil.getResult(process);
     assert(result.stdout === 'Hello World');
   }
 
@@ -50,7 +50,7 @@ export class ExecUtilTest {
   async pipe() {
     const src = await this.fixture.readBinaryStream('/logo.png');
 
-    const proc = spawn('gm', [
+    const process = spawn('gm', [
       'convert', '-resize', '100x',
       '-auto-orient', '-strip', '-quality', '86',
       '-', '-'
@@ -59,8 +59,8 @@ export class ExecUtilTest {
     const tempFile = path.resolve(os.tmpdir(), `${Math.random()}.png`);
 
     await Promise.all([
-      pipeline(src, proc.stdin!),
-      pipeline(proc.stdout!, createWriteStream(tempFile))
+      pipeline(src, process.stdin!),
+      pipeline(process.stdout!, createWriteStream(tempFile))
     ]);
 
     const test = await fs.stat(tempFile);
@@ -70,9 +70,9 @@ export class ExecUtilTest {
 
   @Test()
   async testImmediateFail() {
-    const proc = spawn('npm', ['run', 'Cork'], { cwd: Runtime.workspace.path });
+    const process = spawn('npm', ['run', 'Cork'], { cwd: Runtime.workspace.path });
     await timers.setTimeout(600);
-    const failure = await ExecUtil.getResult(proc, { catch: true });
+    const failure = await ExecUtil.getResult(process, { catch: true });
     assert(!failure.valid);
   }
 }

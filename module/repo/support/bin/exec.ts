@@ -1,9 +1,9 @@
 import type { ChildProcess } from 'node:child_process';
 
-import { type ExecutionResult, Env, Util, ExecUtil, castTo, CodecUtil, Runtime, RuntimeIndex, AsyncQueue } from '@travetto/runtime';
+import { type ExecutionResult, Env, Util, ExecUtil, CodecUtil, Runtime, RuntimeIndex, AsyncQueue } from '@travetto/runtime';
 import { CliModuleUtil } from '@travetto/cli';
 import type { IndexedModule } from '@travetto/manifest';
-import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
+import { StyleUtil, Terminal, TerminalUtil, type ProgressEvent } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 
 const COLORS = ([...[
@@ -13,11 +13,11 @@ const COLORS = ([...[
   '#c6c6c6', '#d0d0d0', '#dadada', '#e4e4e4', '#eeeeee'
 ] as const]).toSorted(() => Math.random() < .5 ? -1 : 1).map(color => StyleUtil.getStyle(color));
 
-type ModuleRunConfig<T = ExecutionResult<string>> = {
+type ModuleRunConfig = {
   progressMessage?: (module: IndexedModule | undefined) => string;
   filter?: (module: IndexedModule) => boolean | Promise<boolean>;
-  transformResult?: (module: IndexedModule, result: ExecutionResult<string>) => T;
   progressListKey?: (module: IndexedModule) => string;
+  isSuccess?: (result: ExecutionResult) => boolean;
   showProgressList?: boolean;
   workerCount?: number;
   prefixOutput?: boolean;
@@ -48,20 +48,19 @@ export class RepoExecUtil {
   /**
    * Run on all modules
    */
-  static async execOnModules<T = ExecutionResult>(
+  static async execOnModules(
     mode: 'all' | 'workspace' | 'changed',
     operation: (module: IndexedModule) => ChildProcess,
-    config: ModuleRunConfig<T> = {}
-  ): Promise<Map<IndexedModule, T>> {
+    config: ModuleRunConfig = {}
+  ): Promise<Map<IndexedModule, ExecutionResult>> {
 
     config.showStdout = config.showStdout ?? (Env.DEBUG.isSet && !Env.DEBUG.isFalse);
     config.showStderr = config.showStderr ?? true;
-    const transform = config.transformResult ?? ((module, result): T => castTo(result));
 
     const workerCount = config.workerCount ?? WorkPool.DEFAULT_SIZE;
 
     const modules = await CliModuleUtil.findModules(mode);
-    const results = new Map<IndexedModule, T>();
+    const results = new Map<IndexedModule, ExecutionResult>();
     const processes = new Map<IndexedModule, ChildProcess>();
 
     const prefixes = config.prefixOutput !== false ? this.#buildPrefixes(modules) : {};
@@ -85,7 +84,7 @@ export class RepoExecUtil {
     ) : modules)
       .filter((module): module is IndexedModule => !!module);
 
-    const work = WorkPool.runStreamProgress(async (module) => {
+    const work = WorkPool.runStream<IndexedModule, ExecutionResult>(async (module) => {
       try {
         const prefix = prefixes[module.sourceFolder] ?? '';
         const listKey = config.progressListKey?.(module) ?? ` * ${module.name}`;
@@ -107,7 +106,6 @@ export class RepoExecUtil {
         }
 
         const result = await ExecUtil.getResult(subProcess, { catch: true });
-        const output = transform(module, result);
 
         active.delete(listKey);
         [...active].sort().forEach((text, idx) => activeItems.add({ idx, text }));
@@ -115,18 +113,30 @@ export class RepoExecUtil {
           activeItems.add({ idx: j, text: '' }); // Force update to remove item if needed
         }
 
-        results.set(module, output);
-        return config.progressMessage?.(module) ?? module.name;
+        results.set(module, result);
+        return result;
       } finally {
         processes.get(module!)?.kill();
       }
-    }, modulesToRun, modules.length, { max: workerCount, min: workerCount });
+    }, modulesToRun, {
+      max: workerCount,
+      min: workerCount,
+      total: modules.length,
+      isSuccess: config.isSuccess ?? ((result: ExecutionResult): boolean => result.valid),
+    });
 
     if (config.progressMessage && stdoutTerm.interactive) {
       if (config.showProgressList) {
         stdoutTerm.streamList(activeItems);
       }
-      await stdoutTerm.streamToBottom(Util.mapAsyncIterable(work, TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true })));
+      await stdoutTerm.streamToBottom(
+        Util.mapAsyncIterable(
+          Util.mapAsyncIterable(work, (event): ProgressEvent<string> => {
+            const message = config.progressMessage?.(modulesToRun[event.progress.completed]) ?? 'Completed %completed/%total (%failed failed)';
+            return { ...event.progress, value: message };
+          }),
+          TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true }))
+      );
 
       if (stdoutTerm.interactive && config.showProgressList) {
         stdoutTerm.writer.changePosition({ y: -listHeader.length, x: 0 }).storePosition().writeLines(Array(listHeader.length).fill('')).restoreOnCommit().commit();

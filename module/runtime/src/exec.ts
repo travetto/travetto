@@ -40,6 +40,18 @@ type ExecutionBaseResult = Omit<ExecutionResult, 'stdout' | 'stderr'>;
  */
 export class ExecUtil {
 
+  /** Read stream as string from a result */
+  static toString(result: ExecutionResult<BinaryArray | string>, stream: 'stdout' | 'stderr' | 'any'): string {
+    if (stream === 'any') {
+      return this.toString(result, 'stderr') || this.toString(result, 'stdout');
+    }
+    const value = result[stream];
+    if (typeof value === 'string') {
+      return value.trim();
+    }
+    return CodecUtil.toUTF8String(value).trim();
+  }
+
   /**
    * Take a child process, and some additional options, and produce a promise that
    * represents the entire execution.  On successful completion the promise will resolve, and
