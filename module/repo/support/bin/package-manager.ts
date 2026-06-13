@@ -2,7 +2,7 @@ import path from 'node:path';
 import { spawn, type ChildProcess } from 'node:child_process';
 import fs from 'node:fs/promises';
 
-import { JSONUtil, type ExecutionResult, Runtime, ExecUtil, RuntimeError, CodecUtil } from '@travetto/runtime';
+import { JSONUtil, type ExecutionResult, Runtime, ExecUtil } from '@travetto/runtime';
 import { type IndexedModule, type Package, PackageUtil } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
 import { TerminalUtil } from '@travetto/terminal';
@@ -18,13 +18,8 @@ export class PackageManager {
    * Check if npm login is needed
    */
   static async needsLogin(): Promise<boolean> {
-    try {
-      const result = await ExecUtil.getResult(spawn('npm', ['whoami']), { catch: true });
-      return !result.valid;
-    } catch {
-      // Ignore errors checking for login profile
-    }
-    return false;
+    const result = await ExecUtil.getResult(spawn('npm', ['whoami']), { catch: true });
+    return !result.valid;
   }
 
   /**
@@ -47,30 +42,25 @@ export class PackageManager {
    * Request an OTP token if required
    */
   static async requestOtp(): Promise<string | undefined> {
-    let otp: string | undefined;
     if (TerminalUtil.isInteractive()) {
       console.log([
         'OTP token is required for publishing. Please provide an OTP token to proceed with publishing.',
         'This value will not be stored, and is only used for the current publish operation.'
       ].join(' '));
-      otp = await TerminalUtil.prompt('Enter OTP token: ');
+      return await TerminalUtil.prompt('Enter OTP token: ');
     }
-    if (!otp) {
-      throw new RuntimeError('OTP token is required for publishing, but was not provided.');
-    }
-    return otp;
   }
 
   /**
    * Classify publish error from execution result
    */
   static classifyPublishError(result: ExecutionResult): string {
-    const errorText = CodecUtil.toUTF8String(result.stderr || result.stdout || '').trim();
+    const errorText = ExecUtil.toString(result, 'any');
 
     if (/EOTP|one-time password|two-factor|OTP/i.test(errorText)) {
       return 'Two-factor authentication (OTP) failed or was missing.';
     }
-    if (/EPUBLISHCONFLICT|E403.*previously published|cannot publish over/i.test(errorText)) {
+    if (/EPUBLISHCONFLICT|E403(.){,100}previously published|cannot publish over/i.test(errorText)) {
       return 'Version conflict: This version has already been published to the registry.';
     }
     if (/ENEEDAUTH|E401|login|unauthorized/i.test(errorText)) {
@@ -100,12 +90,12 @@ export class PackageManager {
    * Validate published result
    */
   static validatePublishedResult(result: ExecutionResult): boolean {
-    const stderr = CodecUtil.toUTF8String(result.stderr || '').trim();
+    const stderr = ExecUtil.toString(result, 'stderr');
     if (!result.valid && !stderr.includes('E404')) {
       throw new Error(stderr);
     }
 
-    const stdout = CodecUtil.toUTF8String(result.stdout || '').trim();
+    const stdout = ExecUtil.toString(result, 'stdout');
     type PackageInfo = { dist?: { integrity?: string } };
     let parsed = JSONUtil.fromUTF8<PackageInfo | { data: PackageInfo }>(stdout || '{}');
     if ('data' in parsed) { // Yarn support

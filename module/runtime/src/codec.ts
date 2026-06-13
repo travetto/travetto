@@ -54,10 +54,7 @@ export class CodecUtil {
   }
 
   /** Return utf8 string from bytes  */
-  static toUTF8String(value: BinaryArray | string): string {
-    if (typeof value === 'string') {
-      return value;
-    }
+  static toUTF8String(value: BinaryArray): string {
     return UTF8_DECODER.decode(BinaryUtil.binaryArrayToUint8Array(value));
   }
 
