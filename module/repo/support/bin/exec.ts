@@ -17,6 +17,7 @@ type ModuleRunConfig = {
   progressMessage?: (module: IndexedModule | undefined) => string;
   filter?: (module: IndexedModule) => boolean | Promise<boolean>;
   progressListKey?: (module: IndexedModule) => string;
+  isSuccess?: (result: ExecutionResult) => boolean;
   showProgressList?: boolean;
   workerCount?: number;
   prefixOutput?: boolean;
@@ -121,7 +122,7 @@ export class RepoExecUtil {
       max: workerCount,
       min: workerCount,
       total: modules.length,
-      isSuccess: result => result.valid,
+      isSuccess: config.isSuccess ?? ((result: ExecutionResult): boolean => result.valid),
     });
 
     if (config.progressMessage && stdoutTerm.interactive) {
@@ -131,9 +132,8 @@ export class RepoExecUtil {
       await stdoutTerm.streamToBottom(
         Util.mapAsyncIterable(
           Util.mapAsyncIterable(work, (event): ProgressEvent<string> => {
-            const { progress, failures, total } = event.progress;
-            const message = config.progressMessage?.(modulesToRun[progress]) ?? ` (${failures} failed)`;
-            return { idx: progress, value: message, total };
+            const message = config.progressMessage?.(modulesToRun[event.progress.completed]) ?? 'Completed %completed/%total (%failed failed)';
+            return { ...event.progress, value: message };
           }),
           TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true }))
       );

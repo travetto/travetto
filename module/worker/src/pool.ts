@@ -5,7 +5,7 @@ import { Env, Util, AsyncQueue } from '@travetto/runtime';
 
 import {
   isWorkerFactory, WorkPoolResultError, type IterableSource, type Worker, type WorkerInput,
-  type WorkPoolCompleteEvent, type WorkPoolConfig
+  type WorkPoolCompleteEvent, type WorkPoolConfig, type WorkPoolProgress
 } from './types.ts';
 
 /**
@@ -81,10 +81,10 @@ export class WorkPool {
 
     const pool = this.#buildPool(workerFactory, options);
 
-    const progress = {
-      progress: 0,
+    const progress: WorkPoolProgress = {
+      completed: 0,
       total: options.total ?? 0,
-      failures: 0,
+      failed: 0,
     };
 
     for await (const nextInput of source) {
@@ -100,14 +100,14 @@ export class WorkPool {
       const completion = worker.execute(nextInput, inputIdx += 1)
         .then(output => {
           const success = options.isSuccess?.(output) ?? true;
-          progress.failures += +!success;
-          progress.progress += 1;
+          progress.failed += +!success;
+          progress.completed += 1;
           return options.onComplete?.({ output, input: nextInput, success, progress });
         })
         .catch(error => {
           errors.push(error);
-          progress.failures += 1;
-          progress.progress += 1;
+          progress.failed += 1;
+          progress.completed += 1;
           options?.onError?.({ error, input: nextInput, progress });
         }) // Catch error
         .finally(async () => {

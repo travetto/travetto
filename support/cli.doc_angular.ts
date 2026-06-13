@@ -81,7 +81,7 @@ export class DocAngularCommand {
         },
         {
           showStdout: false,
-          progressMessage: module => `Running 'trv doc' [%idx/%total] ${module?.sourceFolder ?? ''}`,
+          progressMessage: module => `Running 'trv doc' [%completed/%total] ${module?.sourceFolder ?? ''}`,
           includeMonorepoRoot: true,
           filter: module => modules.has(module),
           showProgressList: true

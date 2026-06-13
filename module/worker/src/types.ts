@@ -28,10 +28,10 @@ export interface Worker<I, O = unknown> {
   release?(): unknown;
 }
 
-type WorkPoolProgress = {
+export type WorkPoolProgress = {
   total: number;
-  progress: number;
-  failures: number;
+  completed: number;
+  failed: number;
 };
 
 export type WorkPoolCompleteEvent<I, O> = {

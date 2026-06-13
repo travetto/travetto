@@ -48,7 +48,7 @@ export class RepoExecCommand implements CliCommandShape {
         }
       }),
       {
-        progressMessage: module => `Running '${cmd} ${finalArgs.join(' ')}' [%idx/%total] ${module?.sourceFolder ?? ''}`,
+        progressMessage: module => `Running '${cmd} ${finalArgs.join(' ')}' [%completed/%total] ${module?.sourceFolder ?? ''}`,
         showStdout: this.showStdout,
         prefixOutput: this.prefixOutput,
         workerCount: this.workers,

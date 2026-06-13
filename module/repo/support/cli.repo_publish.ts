@@ -23,9 +23,10 @@ export class RepoPublishCommand implements CliCommandShape {
   async main(): Promise<void> {
     const published = await RepoExecUtil.execOnModules('workspace', module => PackageManager.isPublished(module), {
       filter: module => !!module.workspace && !module.internal,
-      progressMessage: (module) => `Checking published [%idx/%total] -- ${module?.name}`,
+      progressMessage: (module) => `Checking published [%completed/%total] -- ${module?.name}`,
       showStderr: false,
       showProgressList: true,
+      isSuccess: () => true
     });
 
     const unpublished = [...published.entries()]
@@ -56,7 +57,7 @@ export class RepoPublishCommand implements CliCommandShape {
       'workspace',
       module => PackageManager.publish(module, this.dryRun, otp),
       {
-        progressMessage: () => 'Publishing (%idx/%total) -- (%failed)',
+        progressMessage: () => 'Publishing (%completed/%total) -- (Failed %failed)',
         showStdout: false,
         showStderr: false,
         showProgressList: true,
