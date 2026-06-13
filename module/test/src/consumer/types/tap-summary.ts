@@ -1,5 +1,5 @@
 import { Util, AsyncQueue } from '@travetto/runtime';
-import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
+import { Terminal, TerminalUtil } from '@travetto/terminal';
 
 import type { TestEvent } from '../../model/event.ts';
 import type { TestResult } from '../../model/test.ts';
@@ -98,8 +98,6 @@ export class TapSummaryEmitter implements TestConsumerShape {
     this.onTestRunState(state);
 
     const total = TestModelUtil.buildSummary();
-    const success = StyleUtil.getStyle({ text: '#e5e5e5', background: '#026020' }); // White on dark green
-    const fail = StyleUtil.getStyle({ text: '#e5e5e5', background: '#8b0000' }); // White on dark red
     this.#progress = this.#terminal.streamToBottom(
       Util.mapAsyncIterable(
         this.#results,
@@ -114,7 +112,10 @@ export class TapSummaryEmitter implements TestConsumerShape {
           };
         },
         TerminalUtil.progressBarUpdater(this.#terminal, {
-          style: () => ({ complete: success, failed: fail })
+          style: {
+            complete: { text: '#e5e5e5', background: '#026020' },
+            failed: { text: '#e5e5e5', background: '#8b0000' }
+          }
         })
       ),
       { minDelay: 100 }
