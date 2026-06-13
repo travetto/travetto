@@ -33,60 +33,43 @@ const COMMAND_TO_MODULE = Object.fromEntries(Object.entries(MODULE_TO_COMMAND).f
  */
 export class HelpUtil {
 
-  /** Render the unknown command message */
-  static renderUnknownCommandMessage(command: string): string {
-    const module = COMMAND_TO_MODULE[command];
-    if (module) {
-      return cliTpl`
-${{ title: 'Missing Package' }}\n${'-'.repeat(20)}\nTo use ${{ input: command }} please run:\n
-${{ identifier: Runtime.getInstallCommand(module) }}
-`;
-    } else {
-      return cliTpl`${{ subtitle: 'Unknown command' }}: ${{ input: command }}`;
-    }
-  }
-
-  /**
-   * Render command-specific help
-   * @param command
-   */
-  static async renderCommandHelp(command: CliCommandShape): Promise<string> {
+  /** Get usage help for a command */
+  static getUsageMessage(command: CliCommandShape): string[] {
     const schema = SchemaRegistryIndex.getConfig(getClass(command));
     const { name: commandName } = CliCommandRegistryIndex.get(getClass(command));
-    const args = schema.methods.main?.parameters ?? [];
 
     const usage: string[] = [];
-    const params: string[] = [];
-    const descriptions: string[] = [];
 
     usage.push(
       cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`
     );
 
     // Ensure finalized
-    for (const field of args) {
+    for (const field of schema.methods.main?.parameters ?? []) {
       const type = field.type === String && field.enum && field.enum?.values.length <= 7 ? field.enum?.values?.join('|') : field.type.name.toLowerCase();
       const arg = `${field.name}${field.array ? '...' : ''}:${type}`;
       usage.push(cliTpl`${{ input: field.required?.active !== false ? `<${arg}>` : `[${arg}]` }}`);
     }
+    usage.push('');
+    return usage;
+  }
 
-
+  /** Get description help for a command */
+  static getDescriptionMessage(command: CliCommandShape): string[] {
+    const schema = SchemaRegistryIndex.getConfig(getClass(command));
     const description: string[] = [];
 
     if (schema.description) {
-      description.push(schema.description);
+      description.push(cliTpl`${{ title: 'Description:' }}`, ...schema.description.split('\n').map(line => `  ${line}`), '');
     }
+    return description;
+  }
 
-    if (schema.examples) {
-      description.push(cliTpl`${{ title: 'Example Usage:' }}`);
-      for (const example of schema.examples) {
-        description.push(cliTpl`\t${example}`);
-      }
-    }
-
-    if (description.length) {
-      description.push('');
-    }
+  /** Get options help for a command */
+  static getOptionsMessage(command: CliCommandShape): string[] {
+    const schema = SchemaRegistryIndex.getConfig(getClass(command));
+    const params: string[] = [];
+    const descriptions: string[] = [];
 
     for (const field of Object.values(schema.fields)) {
       const key = castKey<CliCommandShape>(field.name);
@@ -128,21 +111,68 @@ ${{ identifier: Runtime.getInstallCommand(module) }}
     const paramWidth = Math.max(...paramWidths);
     const descWidth = Math.max(...descWidths);
 
-    const extendedHelpText = await (command.help?.() ?? []);
-    if (extendedHelpText.length && extendedHelpText.at(-1) !== '') {
-      extendedHelpText.push('');
-    }
-
-    return [
-      usage.join(' '),
-      '',
-      ...description,
+    const options: string[] = [
       cliTpl`${{ title: 'Options:' }}`,
       ...params.map((_, i) =>
         `  ${params[i]}${' '.repeat((paramWidth - paramWidths[i]))}  ${descriptions[i].padEnd(descWidth)}${' '.repeat((descWidth - descWidths[i]))}`
       ),
-      '',
-      ...extendedHelpText
+      ''
+    ];
+    return options;
+  }
+
+  /** Get extended help for a command */
+  static async getExtendedHelpMessage(command: CliCommandShape): Promise<string[]> {
+    const extendedHelpText = await (command.help?.() ?? []);
+    if (extendedHelpText.length && extendedHelpText.at(-1) !== '') {
+      extendedHelpText.push('');
+    }
+    return extendedHelpText;
+  }
+
+  /** Get examples for a command */
+  static getExamplesMessage(command: CliCommandShape): string[] {
+    const schema = SchemaRegistryIndex.getConfig(getClass(command));
+    const examples: string[] = [];
+    if (schema.examples) {
+      examples.push(cliTpl`${{ title: 'Examples:' }}`);
+      for (const example of schema.examples) {
+        for (const line of example.split('\n')) {
+          examples.push(
+            line.trim().startsWith('>') ?
+              cliTpl`    ${{ input: line.substring(line.indexOf('> ') + 2).trim() }}` :
+              cliTpl`  ${{ subtitle: line.trim() }}`);
+        }
+      }
+      examples.push('');
+    }
+    return examples;
+  }
+
+  /** Render the unknown command message */
+  static renderUnknownCommandMessage(command: string): string {
+    const module = COMMAND_TO_MODULE[command];
+    if (module) {
+      return cliTpl`
+${{ title: 'Missing Package' }}\n${'-'.repeat(20)}\nTo use ${{ input: command }} please run:\n
+${{ identifier: Runtime.getInstallCommand(module) }}
+`;
+    } else {
+      return cliTpl`${{ subtitle: 'Unknown command' }}: ${{ input: command }}`;
+    }
+  }
+
+  /**
+   * Render command-specific help
+   * @param command
+   */
+  static async renderCommandHelp(command: CliCommandShape): Promise<string> {
+    return [
+      ...this.getUsageMessage(command),
+      ...this.getDescriptionMessage(command),
+      ...this.getOptionsMessage(command),
+      ...await this.getExtendedHelpMessage(command),
+      ...this.getExamplesMessage(command)
     ].map(line => line.trimEnd()).join('\n');
   }
 
