@@ -61,7 +61,7 @@ export class TerminalUtil {
         total: `${event.total}`,
         completed: `${event.completed}`.padStart(width ?? 0),
         progress: `${Math.trunc(progress * 100)}`,
-        failed: event.failed ? `${event.failed}` : ''
+        failed: `${event.failed ?? 0}`
       };
       const line = ` ${text.replace(/[%](completed|total|progress|failed)/g, (_, key) => state[key])} `;
       const full = term.writer.padToWidth(line, config?.withWaiting ? 2 : 0);
