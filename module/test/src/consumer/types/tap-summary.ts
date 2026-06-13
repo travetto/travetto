@@ -106,9 +106,16 @@ export class TapSummaryEmitter implements TestConsumerShape {
         (value) => {
           TestModelUtil.countTestResult(total, [value]);
           const statusLine = `${total.failed} failed, ${total.errored} errored, ${total.skipped} skipped`;
-          return { value: `Tests %completed/%total [${statusLine}] -- ${value.classId}`, total: this.#state.testCount, completed: total.passed };
+          return {
+            value: `Tests %completed/%total [${statusLine}] -- ${value.classId}`,
+            total: this.#state.testCount,
+            completed: total.passed,
+            failed: total.failed + total.errored
+          };
         },
-        TerminalUtil.progressBarUpdater(this.#terminal, { style: () => ({ complete: (total.failed || total.errored) ? fail : success }) })
+        TerminalUtil.progressBarUpdater(this.#terminal, {
+          style: () => ({ complete: success, failed: fail })
+        })
       ),
       { minDelay: 100 }
     );

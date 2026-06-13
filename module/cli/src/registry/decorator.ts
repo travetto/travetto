@@ -147,7 +147,7 @@ export function CliDebugIpcFlag(config: CliFlagOptions = {}) {
     const cls = getClass(instance);
     SchemaRegistryIndex.getForRegister(cls).registerField(property, {
       ...CliParseUtil.buildAliases(config, Env.TRV_DEBUG_IPC.key),
-      description: 'Should the invocation automatically restart on source changes'
+      description: 'Should the invocation support debugging via IPC (e.g. from VSCode)'
     });
 
     CliCommandRegistryIndex.getForRegister(cls).register({ runTarget: true });
