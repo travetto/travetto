@@ -6,13 +6,12 @@ import { PostConstruct } from '@travetto/di';
 @Schema()
 class FirestoreModelConfigCredentials {
   client_email: string;
-  project_id: string;
   private_key: string;
 }
 
 @Config('model.firestore')
 export class FirestoreModelConfig {
-  databaseURL?: string;
+  databaseId?: string;
   credentialsFile?: string;
   emulator?: string;
   projectId?: string;
@@ -22,8 +21,8 @@ export class FirestoreModelConfig {
 
   @PostConstruct()
   async finalizeConfig(): Promise<void> {
-    if (!this.databaseURL && !Runtime.production) {
-      this.projectId ??= 'trv-local-dev';
+    if (!this.projectId && !Runtime.production) {
+      this.projectId = 'trv-local-dev';
       this.emulator ??= 'localhost:7000'; // From docker
     }
     if (this.emulator) {
