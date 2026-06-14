@@ -412,12 +412,11 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   async getBlobReadUrl(location: string, expiresIn: TimeSpan | false = '1h'): Promise<string> {
     if (expiresIn === false) {
       const key = this.#basicKey(location);
-      const host = this.config.hostName;
-      const protocol = this.config.endpoint?.startsWith('http://') ? 'http' : 'https';
+      const baseUrl = this.config.publicBaseUrl;
       if (this.config.config.forcePathStyle) {
-        return `${protocol}://${host}/${this.config.bucket}/${key}`;
+        return `${baseUrl}/${this.config.bucket}/${key}`;
       } else {
-        return `${protocol}://${host}/${key}`;
+        return `${baseUrl}/${key}`;
       }
     }
     return await getSignedUrl(
