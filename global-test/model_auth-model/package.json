@@ -6,7 +6,7 @@
     "@travetto/auth-model": "^8.0.0-alpha.20",
     "@travetto/model-dynamodb": "^8.0.0-alpha.22",
     "@travetto/model-elasticsearch": "^8.0.0-alpha.22",
-    "@travetto/model-firestore": "^8.0.0-alpha.23",
+    "@travetto/model-firestore": "^8.0.0-alpha.24",
     "@travetto/model-mongo": "^8.0.0-alpha.22",
     "@travetto/model-mysql": "^8.0.0-alpha.22",
     "@travetto/model-postgres": "^8.0.0-alpha.22",

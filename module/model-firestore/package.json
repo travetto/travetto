@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-firestore",
-  "version": "8.0.0-alpha.23",
+  "version": "8.0.0-alpha.24",
   "description": "Firestore backing for the travetto model module.",
   "keywords": [
     "typescript",
