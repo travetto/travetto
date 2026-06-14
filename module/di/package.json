@@ -1,6 +1,6 @@
 {
   "name": "@travetto/di",
-  "version": "8.0.0-alpha.17",
+  "version": "8.0.0-alpha.18",
   "type": "module",
   "description": "Dependency registration/management and injection support.",
   "keywords": [
@@ -28,10 +28,10 @@
     "directory": "module/di"
   },
   "dependencies": {
-    "@travetto/registry": "^8.0.0-alpha.17"
+    "@travetto/registry": "^8.0.0-alpha.18"
   },
   "peerDependencies": {
-    "@travetto/transformer": "^8.0.0-alpha.11"
+    "@travetto/transformer": "^8.0.0-alpha.12"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {

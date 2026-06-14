@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-indexed",
-  "version": "8.0.0-alpha.21",
+  "version": "8.0.0-alpha.22",
   "type": "module",
   "description": "Basic indexing support for model sources that support it.",
   "keywords": [
@@ -26,13 +26,13 @@
     "directory": "module/model-indexed"
   },
   "dependencies": {
-    "@travetto/model": "^8.0.0-alpha.19",
-    "@travetto/registry": "^8.0.0-alpha.17",
-    "@travetto/schema": "^8.0.0-alpha.18"
+    "@travetto/model": "^8.0.0-alpha.20",
+    "@travetto/registry": "^8.0.0-alpha.18",
+    "@travetto/schema": "^8.0.0-alpha.19"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.24",
-    "@travetto/test": "^8.0.0-alpha.17"
+    "@travetto/cli": "^8.0.0-alpha.25",
+    "@travetto/test": "^8.0.0-alpha.18"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
