@@ -2,7 +2,7 @@
 {
   "sourceId": "core-email-compiler-pattern",
   "repositoryId": "travetto",
-  "filePath": "module/email-compiler/src/service.ts",
+  "filePath": "module/email-compiler/src/compiler.ts",
   "capabilityTags": ["email", "compiler", "rendering"],
   "operationIds": ["email-render-pipeline"],
   "applicability": ["framework-native"],
@@ -14,7 +14,7 @@
 
 # core-email-compiler-pattern
 
-- Source: `module/email-compiler/src/service.ts`
+- Source: `module/email-compiler/src/compiler.ts`
 - Capability tags: email, compiler, rendering
 - Applicability: framework-native
 - Notes:
