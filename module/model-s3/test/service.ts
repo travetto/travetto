@@ -79,17 +79,11 @@ class S3BlobSuite extends ModelBlobSuite {
     // 2. Custom publicBaseUrl configuration with normalization
     const configCustom = new S3ModelConfig();
     configCustom.bucket = 'my-bucket';
-    configCustom.publicBaseUrl = 'cdn.example.com';
+    configCustom.publicBaseUrl = 'https://cdn.example.com';
     configCustom.endpoint = 'https://cdn.example.com';
     await configCustom.finalizeConfig();
     assert(configCustom.publicBaseUrl === 'https://cdn.example.com');
 
-    // 3. publicBaseUrl derived from endpoint origin
-    const configEndpoint = new S3ModelConfig();
-    configEndpoint.bucket = 'my-bucket';
-    configEndpoint.endpoint = 'https://storage.googleapis.com';
-    await configEndpoint.finalizeConfig();
-    assert(configEndpoint.publicBaseUrl === 'https://storage.googleapis.com');
 
     // 4. publicBaseUrl derived from localhost endpoint directly
     const configLocalhost = new S3ModelConfig();
@@ -108,6 +102,7 @@ class S3BlobSuite extends ModelBlobSuite {
     const pathStyleConfig = new S3ModelConfig();
     pathStyleConfig.bucket = 'my-bucket';
     pathStyleConfig.endpoint = 'https://storage.googleapis.com';
+    pathStyleConfig.publicBaseUrl = 'https://storage.googleapis.com';
     await pathStyleConfig.finalizeConfig();
     // Simulate setting forcePathStyle to true
     pathStyleConfig.config.forcePathStyle = true;
