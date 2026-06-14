@@ -180,12 +180,13 @@ export interface ModelBlobSupport {
   updateBlobMetadata(location: string, metadata: BinaryMetadata): Promise<void>;
 
   /**
-   * Produces an externally usable URL for sharing limited read access to a specific resource
+   * Produces an externally usable URL for sharing limited read access to a specific resource.
+   * If expiresIn is explicitly set to false, returns a direct/public URL.
    *
    * @param location The asset location to read from
-   * @param expiresIn Expiry
+   * @param expiresIn Expiry or false for public/direct URL
    */
-  getBlobReadUrl?(location: string, expiresIn?: TimeSpan): Promise<string>;
+  getBlobReadUrl?(location: string, expiresIn?: TimeSpan | false): Promise<string>;
 
   /**
    * Produces an externally usable URL for sharing allowing direct write access
@@ -318,11 +319,11 @@ $ trv model:export --help
 
 Usage: model:export [options] <provider:string> <models...:string>
 
-Export model definitions for a selected provider and model set.
+Description:
+  Export model definitions for a selected provider and model set.
 
-The command resolves candidate models and delegates to provider-specific
-export logic to produce schema/install artifacts.
-Example Usage:
+  The command resolves candidate models and delegates to provider-specific
+  export logic to produce schema/install artifacts.
 
 Options:
   -p, --profile <string>  Application profiles
@@ -336,6 +337,8 @@ Providers
 Models
 --------------------
   * samplemodel
+
+Examples:
 ```
 
 ## CLI - model:install
@@ -347,11 +350,11 @@ $ trv model:install --help
 
 Usage: model:install [options] <provider:string> <models...:string>
 
-Install or update model definitions for a selected provider.
+Description:
+  Install or update model definitions for a selected provider.
 
-The command resolves candidate models and applies provider install/upsert
-operations so backing stores are prepared for runtime usage.
-Example Usage:
+  The command resolves candidate models and applies provider install/upsert
+  operations so backing stores are prepared for runtime usage.
 
 Options:
   -p, --profile <string>  Application profiles
@@ -365,4 +368,6 @@ Providers
 Models
 --------------------
   * samplemodel
+
+Examples:
 ```

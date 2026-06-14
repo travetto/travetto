@@ -67,9 +67,8 @@ export class S3ModelConfig {
   /**
    * Provide host to bucket
    */
-  get hostName(): string {
-    return `${this.bucket}.s3.amazonaws.com`;
-  }
+  @Required(false)
+  hostName: string;
 
   /**
    * Produces the s3 config from the provide details, post construction
@@ -79,6 +78,14 @@ export class S3ModelConfig {
     if (!Runtime.production) {
       this.endpoint ??= 'http://localhost:4566'; // From docker
       this.bucket ??= 'app';
+    }
+
+    if (!this.hostName) {
+      if (this.endpoint && !this.endpoint.includes('localhost')) {
+        this.hostName = new URL(this.endpoint).host;
+      } else {
+        this.hostName = `${this.bucket}.s3.amazonaws.com`;
+      }
     }
 
     if (!this.accessKeyId && !this.secretAccessKey) {

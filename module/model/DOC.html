@@ -201,12 +201,13 @@ Some implementations also allow for the ability to read/write binary data as <a 
   <span class="token function">updateBlobMetadata</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> metadata<span class="token operator">:</span> BinaryMetadata<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
-   * Produces an externally usable URL for sharing limited read access to a specific resource
+   * Produces an externally usable URL for sharing limited read access to a specific resource.
+   * If expiresIn is explicitly set to false, returns a direct/public URL.
    *
    * @param location The asset location to read from
-   * @param expiresIn Expiry
+   * @param expiresIn Expiry or false for public/direct URL
    */</span>
-  getBlobReadUrl<span class="token operator">?</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> expiresIn<span class="token operator">?</span><span class="token operator">:</span> TimeSpan<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
+  getBlobReadUrl<span class="token operator">?</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> expiresIn<span class="token operator">?</span><span class="token operator">:</span> TimeSpan <span class="token operator">|</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
    * Produces an externally usable URL for sharing allowing direct write access
@@ -426,11 +427,11 @@ The module provides the ability to generate an export of the model structure fro
 
 Usage: model:export <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>provider:string<span class="token operator">></span> <span class="token operator">&lt;</span>models<span class="token punctuation">..</span>.:string<span class="token operator">></span>
 
-Export model definitions <span class="token keyword">for</span> a selected provider and model set.
+Description:
+  Export model definitions <span class="token keyword">for</span> a selected provider and model set.
 
-The <span class="token builtin class-name">command</span> resolves candidate models and delegates to provider-specific
-<span class="token builtin class-name">export</span> logic to produce schema/install artifacts.
-Example Usage:
+  The <span class="token builtin class-name">command</span> resolves candidate models and delegates to provider-specific
+  <span class="token builtin class-name">export</span> logic to produce schema/install artifacts.
 
 Options:
   -p, <span class="token parameter variable">--profile</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Application profiles
@@ -443,7 +444,9 @@ Providers
 
 Models
 --------------------
-  * samplemodel</code></pre>
+  * samplemodel
+
+Examples:</code></pre>
   </figure>
 
 <h2 id="cli-model-install">CLI - model:install</h2>
@@ -458,11 +461,11 @@ The module provides the ability to install all the various <a target="_blank" cl
 
 Usage: model:install <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>provider:string<span class="token operator">></span> <span class="token operator">&lt;</span>models<span class="token punctuation">..</span>.:string<span class="token operator">></span>
 
-Install or update model definitions <span class="token keyword">for</span> a selected provider.
+Description:
+  Install or update model definitions <span class="token keyword">for</span> a selected provider.
 
-The <span class="token builtin class-name">command</span> resolves candidate models and applies provider install/upsert
-operations so backing stores are prepared <span class="token keyword">for</span> runtime usage.
-Example Usage:
+  The <span class="token builtin class-name">command</span> resolves candidate models and applies provider install/upsert
+  operations so backing stores are prepared <span class="token keyword">for</span> runtime usage.
 
 Options:
   -p, <span class="token parameter variable">--profile</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Application profiles
@@ -475,5 +478,7 @@ Providers
 
 Models
 --------------------
-  * samplemodel</code></pre>
+  * samplemodel
+
+Examples:</code></pre>
   </figure>
