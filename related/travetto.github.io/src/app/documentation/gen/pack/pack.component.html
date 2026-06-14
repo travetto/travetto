@@ -32,11 +32,11 @@ There are three primary cli commands for packing your code:
 
 Usage: pack <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.:string<span class="token punctuation">]</span>
 
-Build a standard module package artifact.
+Description:
+  Build a standard module package artifact.
 
-This base <span class="token builtin class-name">command</span> produces the default packaged output and serves as the
-common entry point <span class="token keyword">for</span> module packaging workflows.
-Example Usage:
+  This base <span class="token builtin class-name">command</span> produces the default packaged output and serves as the
+  common entry point <span class="token keyword">for</span> module packaging workflows.
 
 Options:
   -b, <span class="token parameter variable">--buildDir</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>              Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
@@ -55,7 +55,9 @@ Options:
   -wr, --include-workspace-resources   Include workspace resources <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   -np, --npm-package <span class="token operator">&lt;</span>string<span class="token operator">></span>          External NPM Packages <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
   -m, <span class="token parameter variable">--module</span> <span class="token operator">&lt;</span>module<span class="token operator">></span>                Module to run <span class="token keyword">for</span>
-  <span class="token parameter variable">--help</span>                               display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  <span class="token parameter variable">--help</span>                               display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+
+Examples:</code></pre>
   </figure>
 
 This command line operation will compile your project, and produce a ready to use workspace as a deliverable. Additionally, you can pass in a file to the <code class="item input">eject-file</code> flag that will allow for a script to be produced (base on the host operating system). <br><br>
@@ -110,11 +112,11 @@ This command is nearly identical to the standard <code class="item input">pack</
 
 Usage: pack:zip <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.:string<span class="token punctuation">]</span>
 
-Build a deployable <span class="token function">zip</span> artifact using the standard pack pipeline.
+Description:
+  Build a deployable <span class="token function">zip</span> artifact using the standard pack pipeline.
 
-This <span class="token builtin class-name">command</span> runs base packing operations and <span class="token keyword">then</span> compresses the generated
-output into a single archive file.
-Example Usage:
+  This <span class="token builtin class-name">command</span> runs base packing operations and <span class="token keyword">then</span> compresses the generated
+  output into a single archive file.
 
 Options:
   -b, <span class="token parameter variable">--buildDir</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>              Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
@@ -133,7 +135,9 @@ Options:
   -wr, --include-workspace-resources   Include workspace resources <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   -np, --npm-package <span class="token operator">&lt;</span>string<span class="token operator">></span>          External NPM Packages <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
   -m, <span class="token parameter variable">--module</span> <span class="token operator">&lt;</span>module<span class="token operator">></span>                Module to run <span class="token keyword">for</span>
-  <span class="token parameter variable">--help</span>                               display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  <span class="token parameter variable">--help</span>                               display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+
+Examples:</code></pre>
   </figure>
 
 <h2 id="cli-pack-docker">CLI - pack:docker</h2>
@@ -148,11 +152,11 @@ This command starts off identical to the standard <code class="item input">pack<
 
 Usage: pack:docker <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.:string<span class="token punctuation">]</span>
 
-Build container-ready artifacts and optionally publish Docker images.
+Description:
+  Build container-ready artifacts and optionally publish Docker images.
 
-Extends the core pack pipeline with Dockerfile generation and image build/
-push operations, including runtime user and registry customization.
-Example Usage:
+  Extends the core pack pipeline with Dockerfile generation and image build/
+  push operations, including runtime user and registry customization.
 
 Options:
   -b, <span class="token parameter variable">--buildDir</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
@@ -182,7 +186,9 @@ Options:
   -dx, --docker-push                     Docker Push Tags <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   -db, --docker-build-platform <span class="token operator">&lt;</span>string<span class="token operator">></span>  Docker Build Platform
   -dr, --docker-registry <span class="token operator">&lt;</span>string<span class="token operator">></span>        Docker Registry
-  <span class="token parameter variable">--help</span>                                 display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  <span class="token parameter variable">--help</span>                                 display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+
+Examples:</code></pre>
   </figure>
 
 The additional flags provided are allow for specifying the base image, the final docker image name (and tags), and which registry to push to (if  any).  Additionally, there are flags for exposing which ports the image should expect to open as well.   When using the <code class="item input">--eject-file</code>  flag, the output script will produce the entire Dockerfile output inline, so that it can be easily modified as needed. <br><br>

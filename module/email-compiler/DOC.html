@@ -75,11 +75,12 @@ The module provides <a class="module-link" href="https://github.com/travetto/tra
 
 Usage: email:compile <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
-Compile all email templates into generated runtime artifacts.
+Description:
+  Compile all email templates into generated runtime artifacts.
 
-The <span class="token builtin class-name">command</span> discovers templated inputs <span class="token punctuation">(</span>for example, <span class="token variable"><span class="token variable">`</span>.email.html<span class="token variable">`</span></span><span class="token punctuation">)</span> and emits
-compiled outputs used at runtime <span class="token punctuation">(</span>html/text/subject variants<span class="token punctuation">)</span>. With <span class="token function">watch</span>
-enabled, recompilation runs automatically on matching template changes.
+  The <span class="token builtin class-name">command</span> discovers templated inputs <span class="token punctuation">(</span>for example, <span class="token variable"><span class="token variable">`</span>.email.html<span class="token variable">`</span></span><span class="token punctuation">)</span> and emits
+  compiled outputs used at runtime <span class="token punctuation">(</span>html/text/subject variants<span class="token punctuation">)</span>. With <span class="token function">watch</span>
+  enabled, recompilation runs automatically on matching template changes.
 
 Options:
   -w, <span class="token parameter variable">--watch</span>  Recompile templates whenever <span class="token builtin class-name">source</span> templates change.

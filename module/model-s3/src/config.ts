@@ -2,7 +2,7 @@ import { fromIni } from '@aws-sdk/credential-provider-ini';
 import type s3 from '@aws-sdk/client-s3';
 
 import { Config, EnvVar } from '@travetto/config';
-import { Required } from '@travetto/schema';
+import { Required, Url } from '@travetto/schema';
 import { Runtime } from '@travetto/runtime';
 import { PostConstruct } from '@travetto/di';
 
@@ -35,6 +35,7 @@ export class S3ModelConfig {
   /**
    * Provide base URL for public access
    */
+  @Url()
   @Required(false)
   publicBaseUrl: string;
 
@@ -49,23 +50,11 @@ export class S3ModelConfig {
     }
 
     if (!this.publicBaseUrl) {
-      if (this.endpoint) {
-        if (this.endpoint.includes('localhost')) {
-          this.publicBaseUrl = this.endpoint;
-        } else {
-          try {
-            this.publicBaseUrl = new URL(this.endpoint).origin;
-          } catch {
-            this.publicBaseUrl = this.endpoint;
-          }
-        }
+      if (this.endpoint?.includes('localhost')) {
+        this.publicBaseUrl = this.endpoint;
       } else {
         this.publicBaseUrl = `https://${this.bucket}.s3.amazonaws.com`;
       }
-    }
-
-    if (this.publicBaseUrl && !this.publicBaseUrl.includes('://')) {
-      this.publicBaseUrl = `https://${this.publicBaseUrl}`;
     }
 
     if (!this.accessKeyId && !this.secretAccessKey) {

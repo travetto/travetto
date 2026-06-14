@@ -132,10 +132,11 @@ The command will load your application, in non-listening mode, to collect all th
 
 Usage: openapi:spec <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
-Generate the OpenAPI specification <span class="token keyword">for</span> the selected module.
+Description:
+  Generate the OpenAPI specification <span class="token keyword">for</span> the selected module.
 
-The resulting JSON can be written to stdout or to a <span class="token function">file</span> path <span class="token keyword">for</span> <span class="token for-or-select variable">use</span> <span class="token keyword">in</span>
-downstream tooling, CI publishing, and client generation pipelines.
+  The resulting JSON can be written to stdout or to a <span class="token function">file</span> path <span class="token keyword">for</span> <span class="token for-or-select variable">use</span> <span class="token keyword">in</span>
+  downstream tooling, CI publishing, and client generation pipelines.
 
 Options:
   -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Output files
@@ -157,10 +158,11 @@ Options:
 
 Usage: openapi:client <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>format:string<span class="token operator">></span>
 
-Generate API clients from an OpenAPI specification using the generator image.
+Description:
+  Generate API clients from an OpenAPI specification using the generator image.
 
-This <span class="token builtin class-name">command</span> wraps OpenAPI Generator <span class="token keyword">in</span> Docker and writes generated client code
-into the configured output folder.
+  This <span class="token builtin class-name">command</span> wraps OpenAPI Generator <span class="token keyword">in</span> Docker and writes generated client code
+  into the configured output folder.
 
 Options:
   -x, --extended-help                   Show expanded generator <span class="token builtin class-name">help</span> <span class="token keyword">for</span> all available formats/options. <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>

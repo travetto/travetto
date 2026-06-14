@@ -26,11 +26,11 @@ $ trv pack:lambda --help
 
 Usage: pack:lambda [options] [args...:string]
 
-Build an AWS Lambda-ready zip package using the pack pipeline.
+Description:
+  Build an AWS Lambda-ready zip package using the pack pipeline.
 
-Configures the Lambda entrypoint and emits a compressed deployment artifact
-suitable for direct Lambda upload workflows.
-Example Usage:
+  Configures the Lambda entrypoint and emits a compressed deployment artifact
+  suitable for direct Lambda upload workflows.
 
 Options:
   -b, --buildDir <string>              Workspace for building (default: "/tmp/<temp-folder>")
@@ -50,4 +50,6 @@ Options:
   -np, --npm-package <string>          External NPM Packages (default: [])
   -m, --module <module>                Module to run for
   --help                               display help for command
+
+Examples:
 ```

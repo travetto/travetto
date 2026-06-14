@@ -24,12 +24,11 @@ $ trv web:http --help
 
 Usage: web:http [options]
 
-Start the configured web HTTP server for a module.
+Description:
+  Start the configured web HTTP server for a module.
 
-Initializes registry and server bindings, supports restart-aware development
-flags, and can attempt to clear conflicting port owners in local workflows.
-Example Usage:
-	trv web:http -m <MODULE> -p 3000
+  Initializes registry and server bindings, supports restart-aware development
+  flags, and can attempt to clear conflicting port owners in local workflows.
 
 Options:
   -p, --port <number>                          Port to run on
@@ -37,8 +36,12 @@ Options:
   -m, --module <module>                        Module to run for
   --profile <string>                           Application profiles
   --restart-on-change, --no-restart-on-change  Should the invocation automatically restart on source changes (default: true)
-  -d, --debug-ipc                              Should the invocation automatically restart on source changes
+  -d, --debug-ipc                              Should the invocation support debugging via IPC (e.g. from VSCode)
   --help                                       display help for command
+
+Examples:
+  Starting a web server on port 8000
+    trv web:http -m <MODULE> -p 8000
 ```
 
 ## Running a Server

@@ -228,10 +228,11 @@ $ trv test --help
 
 Usage: test [options] [first:string] [globs...:string]
 
-Execute the test framework for targeted files, suites, or methods.
+Description:
+  Execute the test framework for targeted files, suites, or methods.
 
-Supports glob-based discovery, import-based targeting, tag filtering, and
-configurable output consumers for local and CI workflows.
+  Supports glob-based discovery, import-based targeting, tag filtering, and
+  configurable output consumers for local and CI workflows.
 
 Options:
   -f, --format <string>          Output format for test results (default: "tap")

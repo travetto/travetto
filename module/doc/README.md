@@ -98,10 +98,11 @@ $ trv doc --help
 
 Usage: doc [options]
 
-Generate documentation outputs from a module `DOC.tsx` entry file.
+Description:
+  Generate documentation outputs from a module `DOC.tsx` entry file.
 
-Supports multiple output formats/targets and optional watch mode for
-iterative documentation authoring.
+  Supports multiple output formats/targets and optional watch mode for
+  iterative documentation authoring.
 
 Options:
   -i, --input <string>    Input File (default: "DOC.tsx")

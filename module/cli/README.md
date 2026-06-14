@@ -287,7 +287,8 @@ $ trv custom:arg --help
 
 Usage: custom:arg [options] [volume:number]
 
-Example command with a custom argument
+Description:
+  Example command with a custom argument
 
 Options:
   -m, --message <string>  The message to send back to the user (default: "hello")
@@ -340,7 +341,8 @@ $ trv custom:env-arg --help
 
 Usage: custom:env-arg [options] [volume:number]
 
-Example of a command with a custom environment variable argument
+Description:
+  Example of a command with a custom environment variable argument
 
 Options:
   -t, --text <string>  The message to send back to the user (default: "hello")
@@ -455,7 +457,9 @@ import type { WebHttpServer } from '../src/types.ts';
  * Initializes registry and server bindings, supports restart-aware development
  * flags, and can attempt to clear conflicting port owners in local workflows.
  *
- * @example trv web:http -m <MODULE> -p 3000
+ * @example
+ * Starting a web server on port 8000
+ * > trv web:http -m <MODULE> -p 8000
  */
 @CliCommand()
 export class WebHttpCommand implements CliCommandShape {
@@ -570,10 +574,11 @@ $ trv service --help
 
 Usage: service [options] <action:restart|start|status|stop> [services...:string]
 
-Manage development services (start/stop/restart/status) across the workspace.
+Description:
+  Manage development services (start/stop/restart/status) across the workspace.
 
-Services are discovered from registered descriptors and executed with streamed
-terminal feedback, including optional quiet mode.
+  Services are discovered from registered descriptors and executed with streamed
+  terminal feedback, including optional quiet mode.
 
 Options:
   -q, --quiet   (default: false)
