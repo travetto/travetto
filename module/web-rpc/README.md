@@ -24,10 +24,11 @@ $ trv web:rpc-client --help
 
 Usage: web:rpc-client [options] <type:config|node|web> [output:string]
 
-Generate web-rpc client artifacts from a specified provider or leveraging local config.
+Description:
+  Generate web-rpc client artifacts from a specified provider or leveraging local config.
 
-Resolves generator services from DI and writes typed client code for the
-selected provider target.
+  Resolves generator services from DI and writes typed client code for the
+  selected provider target.
 
 Options:
   -p, --profile <string>  Application profiles

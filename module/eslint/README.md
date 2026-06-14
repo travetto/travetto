@@ -26,9 +26,10 @@ $ trv eslint:register --help
 
 Usage: eslint:register [options]
 
-Generate the workspace ESLint configuration entry file.
+Description:
+  Generate the workspace ESLint configuration entry file.
 
-This bootstraps `eslint.config.js` to load framework-provided rule wiring.
+  This bootstraps `eslint.config.js` to load framework-provided rule wiring.
 
 Options:
   --help  display help for command
@@ -59,10 +60,11 @@ $ trv eslint --help
 
 Usage: eslint [options]
 
-Run ESLint for the workspace or changed files.
+Description:
+  Run ESLint for the workspace or changed files.
 
-Supports incremental mode (`changed`/`since`) and forwards formatting/fix
-options to the underlying eslint invocation.
+  Supports incremental mode (`changed`/`since`) and forwards formatting/fix
+  options to the underlying eslint invocation.
 
 Options:
   -c, --changed          Only check changed modules (default: false)

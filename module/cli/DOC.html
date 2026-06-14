@@ -333,7 +333,8 @@ By default, all fields are treated as flags and all parameters of <code class="i
 
 Usage: custom:arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
 
-Example <span class="token builtin class-name">command</span> with a custom argument
+Description:
+  Example <span class="token builtin class-name">command</span> with a custom argument
 
 Options:
   -m, <span class="token parameter variable">--message</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  The message to send back to the user <span class="token punctuation">(</span>default: <span class="token string">"hello"</span><span class="token punctuation">)</span>
@@ -396,7 +397,8 @@ In addition to standard flag overriding (e.g. <code class="item input">/** @alia
 
 Usage: custom:env-arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
 
-Example of a <span class="token builtin class-name">command</span> with a custom environment variable argument
+Description:
+  Example of a <span class="token builtin class-name">command</span> with a custom environment variable argument
 
 Options:
   -t, <span class="token parameter variable">--text</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  The message to send back to the user <span class="token punctuation">(</span>default: <span class="token string">"hello"</span><span class="token punctuation">)</span>
@@ -536,7 +538,9 @@ If the goal is to run a more complex application, which may include depending on
  * Initializes registry and server bindings, supports restart-aware development
  * flags, and can attempt to clear conflicting port owners in local workflows.
  *
- * @example trv web:http -m &lt;MODULE> -p 3000
+ * @example
+ * Starting a web server on port 8000
+ * > trv web:http -m &lt;MODULE> -p 8000
  */</span>
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">CliCommand</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">WebHttpCommand</span> <span class="token keyword">implements</span> <span class="token class-name">CliCommandShape</span> <span class="token punctuation">{{'{'}}</span>
@@ -660,10 +664,11 @@ The module provides the ability to start/stop/restart services as <a target="_bl
 
 Usage: <span class="token function">service</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>action:restart<span class="token operator">|</span>start<span class="token operator">|</span>status<span class="token operator">|</span>stop<span class="token operator">></span> <span class="token punctuation">[</span>services<span class="token punctuation">..</span>.:string<span class="token punctuation">]</span>
 
-Manage development services <span class="token punctuation">(</span>start/stop/restart/status<span class="token punctuation">)</span> across the workspace.
+Description:
+  Manage development services <span class="token punctuation">(</span>start/stop/restart/status<span class="token punctuation">)</span> across the workspace.
 
-Services are discovered from registered descriptors and executed with streamed
-terminal feedback, including optional quiet mode.
+  Services are discovered from registered descriptors and executed with streamed
+  terminal feedback, including optional quiet mode.
 
 Options:
   -q, <span class="token parameter variable">--quiet</span>   <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>

@@ -2,7 +2,7 @@ import { fromIni } from '@aws-sdk/credential-provider-ini';
 import type s3 from '@aws-sdk/client-s3';
 
 import { Config, EnvVar } from '@travetto/config';
-import { Required } from '@travetto/schema';
+import { Required, Url } from '@travetto/schema';
 import { Runtime } from '@travetto/runtime';
 import { PostConstruct } from '@travetto/di';
 
@@ -33,10 +33,11 @@ export class S3ModelConfig {
   modifyStorage?: boolean;
 
   /**
-   * Provide host to bucket
+   * Provide base URL for public access
    */
+  @Url()
   @Required(false)
-  hostName: string;
+  publicBaseUrl: string;
 
   /**
    * Produces the s3 config from the provide details, post construction
@@ -48,11 +49,11 @@ export class S3ModelConfig {
       this.bucket ??= 'app';
     }
 
-    if (!this.hostName) {
-      if (this.endpoint && !this.endpoint.includes('localhost')) {
-        this.hostName = new URL(this.endpoint).host;
+    if (!this.publicBaseUrl) {
+      if (this.endpoint?.includes('localhost')) {
+        this.publicBaseUrl = this.endpoint;
       } else {
-        this.hostName = `${this.bucket}.s3.amazonaws.com`;
+        this.publicBaseUrl = `https://${this.bucket}.s3.amazonaws.com`;
       }
     }
 

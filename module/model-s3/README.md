@@ -65,10 +65,10 @@ export class S3ModelConfig {
   modifyStorage?: boolean;
 
   /**
-   * Provide host to bucket
+   * Provide base URL for public access
    */
   @Required(false)
-  hostName: string;
+  publicBaseUrl: string;
 
   /**
    * Produces the s3 config from the provide details, post construction
@@ -80,12 +80,24 @@ export class S3ModelConfig {
       this.bucket ??= 'app';
     }
 
-    if (!this.hostName) {
-      if (this.endpoint && !this.endpoint.includes('localhost')) {
-        this.hostName = new URL(this.endpoint).host;
+    if (!this.publicBaseUrl) {
+      if (this.endpoint) {
+        if (this.endpoint.includes('localhost')) {
+          this.publicBaseUrl = this.endpoint;
+        } else {
+          try {
+            this.publicBaseUrl = new URL(this.endpoint).origin;
+          } catch {
+            this.publicBaseUrl = this.endpoint;
+          }
+        }
       } else {
-        this.hostName = `${this.bucket}.s3.amazonaws.com`;
+        this.publicBaseUrl = `https://${this.bucket}.s3.amazonaws.com`;
       }
+    }
+
+    if (this.publicBaseUrl && !this.publicBaseUrl.includes('://')) {
+      this.publicBaseUrl = `https://${this.publicBaseUrl}`;
     }
 
     if (!this.accessKeyId && !this.secretAccessKey) {

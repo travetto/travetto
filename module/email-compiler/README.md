@@ -61,11 +61,12 @@ $ trv email:compile --help
 
 Usage: email:compile [options]
 
-Compile all email templates into generated runtime artifacts.
+Description:
+  Compile all email templates into generated runtime artifacts.
 
-The command discovers templated inputs (for example, `.email.html`) and emits
-compiled outputs used at runtime (html/text/subject variants). With watch
-enabled, recompilation runs automatically on matching template changes.
+  The command discovers templated inputs (for example, `.email.html`) and emits
+  compiled outputs used at runtime (html/text/subject variants). With watch
+  enabled, recompilation runs automatically on matching template changes.
 
 Options:
   -w, --watch  Recompile templates whenever source templates change.

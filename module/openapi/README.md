@@ -125,10 +125,11 @@ $ trv openapi:spec --help
 
 Usage: openapi:spec [options]
 
-Generate the OpenAPI specification for the selected module.
+Description:
+  Generate the OpenAPI specification for the selected module.
 
-The resulting JSON can be written to stdout or to a file path for use in
-downstream tooling, CI publishing, and client generation pipelines.
+  The resulting JSON can be written to stdout or to a file path for use in
+  downstream tooling, CI publishing, and client generation pipelines.
 
 Options:
   -o, --output <string>  Output files
@@ -147,10 +148,11 @@ $ trv openapi:client --help
 
 Usage: openapi:client [options] <format:string>
 
-Generate API clients from an OpenAPI specification using the generator image.
+Description:
+  Generate API clients from an OpenAPI specification using the generator image.
 
-This command wraps OpenAPI Generator in Docker and writes generated client code
-into the configured output folder.
+  This command wraps OpenAPI Generator in Docker and writes generated client code
+  into the configured output folder.
 
 Options:
   -x, --extended-help                   Show expanded generator help for all available formats/options. (default: false)

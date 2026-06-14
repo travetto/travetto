@@ -28,11 +28,11 @@ $ trv pack --help
 
 Usage: pack [options] [args...:string]
 
-Build a standard module package artifact.
+Description:
+  Build a standard module package artifact.
 
-This base command produces the default packaged output and serves as the
-common entry point for module packaging workflows.
-Example Usage:
+  This base command produces the default packaged output and serves as the
+  common entry point for module packaging workflows.
 
 Options:
   -b, --buildDir <string>              Workspace for building (default: "/tmp/<temp-folder>")
@@ -52,6 +52,8 @@ Options:
   -np, --npm-package <string>          External NPM Packages (default: [])
   -m, --module <module>                Module to run for
   --help                               display help for command
+
+Examples:
 ```
 
 This command line operation will compile your project, and produce a ready to use workspace as a deliverable. Additionally, you can pass in a file to the `eject-file` flag that will allow for a script to be produced (base on the host operating system). 
@@ -100,11 +102,11 @@ $ trv pack:zip --help
 
 Usage: pack:zip [options] [args...:string]
 
-Build a deployable zip artifact using the standard pack pipeline.
+Description:
+  Build a deployable zip artifact using the standard pack pipeline.
 
-This command runs base packing operations and then compresses the generated
-output into a single archive file.
-Example Usage:
+  This command runs base packing operations and then compresses the generated
+  output into a single archive file.
 
 Options:
   -b, --buildDir <string>              Workspace for building (default: "/tmp/<temp-folder>")
@@ -124,6 +126,8 @@ Options:
   -np, --npm-package <string>          External NPM Packages (default: [])
   -m, --module <module>                Module to run for
   --help                               display help for command
+
+Examples:
 ```
 
 ## CLI - pack:docker
@@ -135,11 +139,11 @@ $ trv pack:docker --help
 
 Usage: pack:docker [options] [args...:string]
 
-Build container-ready artifacts and optionally publish Docker images.
+Description:
+  Build container-ready artifacts and optionally publish Docker images.
 
-Extends the core pack pipeline with Dockerfile generation and image build/
-push operations, including runtime user and registry customization.
-Example Usage:
+  Extends the core pack pipeline with Dockerfile generation and image build/
+  push operations, including runtime user and registry customization.
 
 Options:
   -b, --buildDir <string>                Workspace for building (default: "/tmp/<temp-folder>")
@@ -170,6 +174,8 @@ Options:
   -db, --docker-build-platform <string>  Docker Build Platform
   -dr, --docker-registry <string>        Docker Registry
   --help                                 display help for command
+
+Examples:
 ```
 
 The additional flags provided are allow for specifying the base image, the final docker image name (and tags), and which registry to push to (if  any).  Additionally, there are flags for exposing which ports the image should expect to open as well.   When using the `--eject-file`  flag, the output script will produce the entire Dockerfile output inline, so that it can be easily modified as needed. 

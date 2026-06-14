@@ -29,11 +29,11 @@ Use this command to produce the Lambda-ready archive for deployment.
 
 Usage: pack:lambda <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.:string<span class="token punctuation">]</span>
 
-Build an AWS Lambda-ready <span class="token function">zip</span> package using the pack pipeline.
+Description:
+  Build an AWS Lambda-ready <span class="token function">zip</span> package using the pack pipeline.
 
-Configures the Lambda entrypoint and emits a compressed deployment artifact
-suitable <span class="token keyword">for</span> direct Lambda upload workflows.
-Example Usage:
+  Configures the Lambda entrypoint and emits a compressed deployment artifact
+  suitable <span class="token keyword">for</span> direct Lambda upload workflows.
 
 Options:
   -b, <span class="token parameter variable">--buildDir</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>              Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
@@ -52,5 +52,7 @@ Options:
   -wr, --include-workspace-resources   Include workspace resources <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   -np, --npm-package <span class="token operator">&lt;</span>string<span class="token operator">></span>          External NPM Packages <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
   -m, <span class="token parameter variable">--module</span> <span class="token operator">&lt;</span>module<span class="token operator">></span>                Module to run <span class="token keyword">for</span>
-  <span class="token parameter variable">--help</span>                               display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  <span class="token parameter variable">--help</span>                               display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+
+Examples:</code></pre>
   </figure>

@@ -28,10 +28,11 @@ $ trv repo:version --help
 
 Usage: repo:version [options] <level:major|minor|patch|premajor|preminor|prepatch|prerelease> [prefix:string]
 
-Bump workspace module versions and optionally commit/tag release metadata.
+Description:
+  Bump workspace module versions and optionally commit/tag release metadata.
 
-Supports changed/all/direct module targeting and synchronizes dependency
-versions after the version bump operation completes.
+  Supports changed/all/direct module targeting and synchronizes dependency
+  versions after the version bump operation completes.
 
 Options:
   --mode <all|changed|direct>  The mode for versioning
@@ -70,13 +71,15 @@ $ trv repo:publish --help
 
 Usage: repo:publish [options]
 
-Publish unpublished workspace modules to the package registry.
+Description:
+  Publish unpublished workspace modules to the package registry.
 
-The command performs a publishability scan first, then publishes candidates.
-Dry-run mode is enabled by default.
+  The command performs a publishability scan first, then publishes candidates.
+  Dry-run mode is enabled by default.
 
 Options:
   --dry-run, --no-dry-run  Dry Run? (default: true)
+  -o, --otp <string>       OTP Token
   --help                   display help for command
 ```
 
@@ -101,10 +104,11 @@ $ trv repo:list --help
 
 Usage: repo:list [options]
 
-List workspace modules and their relationships.
+Description:
+  List workspace modules and their relationships.
 
-Output can be emitted as plain list, graphviz digraph, or JSON dependency
-graph suitable for automation.
+  Output can be emitted as plain list, graphviz digraph, or JSON dependency
+  graph suitable for automation.
 
 Options:
   -c, --changed                   Only show changed modules (default: false)
@@ -190,10 +194,11 @@ $ trv repo:exec --help
 
 Usage: repo:exec [options] <cmd:string> [args...:string]
 
-Execute a shell command across workspace modules.
+Description:
+  Execute a shell command across workspace modules.
 
-Supports running for all modules or only changed modules, with optional
-concurrency and output prefixing controls.
+  Supports running for all modules or only changed modules, with optional
+  concurrency and output prefixing controls.
 
 Options:
   -c, --changed                        Only changed modules (default: false)

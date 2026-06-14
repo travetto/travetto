@@ -69,37 +69,40 @@ class S3BlobSuite extends ModelBlobSuite {
 
   @Test()
   async verifyBlobUrls() {
-    // 1. Default hostname
+    // 1. Default publicBaseUrl
     const config = new S3ModelConfig();
     config.bucket = 'my-bucket';
+    config.endpoint = ''; // Prevent default localhost endpoint during test
     await config.finalizeConfig();
-    assert(config.hostName === 'my-bucket.s3.amazonaws.com');
+    assert(config.publicBaseUrl === 'https://my-bucket.s3.amazonaws.com');
 
-    // 2. Custom hostName configuration
+    // 2. Custom publicBaseUrl configuration with normalization
     const configCustom = new S3ModelConfig();
     configCustom.bucket = 'my-bucket';
-    configCustom.hostName = 'cdn.example.com';
+    configCustom.publicBaseUrl = 'https://cdn.example.com';
     configCustom.endpoint = 'https://cdn.example.com';
     await configCustom.finalizeConfig();
-    assert(configCustom.hostName === 'cdn.example.com');
+    assert(configCustom.publicBaseUrl === 'https://cdn.example.com');
 
-    // 3. HostName derived from endpoint
-    const configEndpoint = new S3ModelConfig();
-    configEndpoint.bucket = 'my-bucket';
-    configEndpoint.endpoint = 'https://storage.googleapis.com';
-    await configEndpoint.finalizeConfig();
-    assert(configEndpoint.hostName === 'storage.googleapis.com');
 
-    // 4. getBlobReadUrl with false (returns public URL)
+    // 4. publicBaseUrl derived from localhost endpoint directly
+    const configLocalhost = new S3ModelConfig();
+    configLocalhost.bucket = 'my-bucket';
+    configLocalhost.endpoint = 'http://localhost:4566/some-path?param=1';
+    await configLocalhost.finalizeConfig();
+    assert(configLocalhost.publicBaseUrl === 'http://localhost:4566/some-path?param=1');
+
+    // 5. getBlobReadUrl with false (returns public URL)
     const customService = new S3ModelService(configCustom);
     customService.client = new S3(configCustom.config);
     const customUrl = await customService.getBlobReadUrl('test-path/file.txt', false);
     assert(customUrl === 'https://cdn.example.com/test-path/file.txt');
 
-    // 5. getBlobReadUrl with forcePathStyle and false
+    // 6. getBlobReadUrl with forcePathStyle and false
     const pathStyleConfig = new S3ModelConfig();
     pathStyleConfig.bucket = 'my-bucket';
     pathStyleConfig.endpoint = 'https://storage.googleapis.com';
+    pathStyleConfig.publicBaseUrl = 'https://storage.googleapis.com';
     await pathStyleConfig.finalizeConfig();
     // Simulate setting forcePathStyle to true
     pathStyleConfig.config.forcePathStyle = true;
@@ -108,7 +111,7 @@ class S3BlobSuite extends ModelBlobSuite {
     const pathStyleUrl = await pathStyleService.getBlobReadUrl('test-path/file.txt', false);
     assert(pathStyleUrl === 'https://storage.googleapis.com/my-bucket/test-path/file.txt');
 
-    // 6. getBlobReadUrl with omitted/default (returns 1h signed URL)
+    // 7. getBlobReadUrl with omitted/default (returns 1h signed URL)
     const readSignedUrl = await customService.getBlobReadUrl('test-path/file.txt');
     assert(readSignedUrl.includes('test-path/file.txt?'));
     assert(readSignedUrl.includes('X-Amz-Expires=3600'));
