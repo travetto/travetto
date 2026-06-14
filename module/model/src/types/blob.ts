@@ -42,12 +42,13 @@ export interface ModelBlobSupport {
   updateBlobMetadata(location: string, metadata: BinaryMetadata): Promise<void>;
 
   /**
-   * Produces an externally usable URL for sharing limited read access to a specific resource
+   * Produces an externally usable URL for sharing limited read access to a specific resource.
+   * If expiresIn is explicitly set to false, returns a direct/public URL.
    *
    * @param location The asset location to read from
-   * @param expiresIn Expiry
+   * @param expiresIn Expiry or false for public/direct URL
    */
-  getBlobReadUrl?(location: string, expiresIn?: TimeSpan): Promise<string>;
+  getBlobReadUrl?(location: string, expiresIn?: TimeSpan | false): Promise<string>;
 
   /**
    * Produces an externally usable URL for sharing allowing direct write access

@@ -50,8 +50,8 @@ export class HelpUtil {
       const arg = `${field.name}${field.array ? '...' : ''}:${type}`;
       usage.push(cliTpl`${{ input: field.required?.active !== false ? `<${arg}>` : `[${arg}]` }}`);
     }
-    usage.push('');
-    return usage;
+
+    return [usage.join(' '), ''];
   }
 
   /** Get description help for a command */

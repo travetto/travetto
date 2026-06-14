@@ -409,7 +409,17 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   // Signed urls
-  async getBlobReadUrl(location: string, expiresIn: TimeSpan = '1h'): Promise<string> {
+  async getBlobReadUrl(location: string, expiresIn: TimeSpan | false = '1h'): Promise<string> {
+    if (expiresIn === false) {
+      const key = this.#basicKey(location);
+      const host = this.config.hostName;
+      const protocol = this.config.endpoint?.startsWith('http://') ? 'http' : 'https';
+      if (this.config.config.forcePathStyle) {
+        return `${protocol}://${host}/${this.config.bucket}/${key}`;
+      } else {
+        return `${protocol}://${host}/${key}`;
+      }
+    }
     return await getSignedUrl(
       this.client,
       new GetObjectCommand(this.#queryBlob(location)),

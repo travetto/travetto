@@ -74,9 +74,8 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
   <span class="token comment">/**
    * Provide host to bucket
    */</span>
-  <span class="token keyword">get</span> <span class="token function">hostName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>bucket<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">.s3.amazonaws.com</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Required</span></span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span>
+  hostName<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
    * Produces the s3 config from the provide details, post construction
@@ -86,6 +85,14 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>Runtime<span class="token punctuation">.</span>production<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">this</span><span class="token punctuation">.</span>endpoint <span class="token operator">??=</span> <span class="token string">'http://localhost:4566'</span><span class="token punctuation">;</span> <span class="token comment">// From docker</span>
       <span class="token keyword">this</span><span class="token punctuation">.</span>bucket <span class="token operator">??=</span> <span class="token string">'app'</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>hostName<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>endpoint <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>endpoint<span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token string">'localhost'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>hostName <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name"><span class="token constant">URL</span></span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>endpoint<span class="token punctuation">)</span><span class="token punctuation">.</span>host<span class="token punctuation">;</span>
+      <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token punctuation">{{'{'}}</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>hostName <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>bucket<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">.s3.amazonaws.com</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+      <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
 
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>accessKeyId <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>secretAccessKey<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
