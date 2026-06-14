@@ -35,7 +35,7 @@
     "rollup": "^4.61.1"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.23"
+    "@travetto/cli": "^8.0.0-alpha.24"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

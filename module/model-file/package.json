@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-file",
-  "version": "8.0.0-alpha.18",
+  "version": "8.0.0-alpha.19",
   "type": "module",
   "description": "File system backing for the travetto model module.",
   "keywords": [
@@ -28,11 +28,11 @@
   "dependencies": {
     "@travetto/config": "^8.0.0-alpha.18",
     "@travetto/di": "^8.0.0-alpha.17",
-    "@travetto/model": "^8.0.0-alpha.18",
+    "@travetto/model": "^8.0.0-alpha.19",
     "@travetto/schema": "^8.0.0-alpha.18"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.23",
+    "@travetto/cli": "^8.0.0-alpha.24",
     "@travetto/test": "^8.0.0-alpha.17"
   },
   "peerDependenciesMeta": {

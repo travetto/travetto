@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-query",
-  "version": "8.0.0-alpha.19",
+  "version": "8.0.0-alpha.20",
   "type": "module",
   "description": "Datastore abstraction for advanced query support.",
   "keywords": [
@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@travetto/di": "^8.0.0-alpha.17",
-    "@travetto/model": "^8.0.0-alpha.18",
+    "@travetto/model": "^8.0.0-alpha.19",
     "@travetto/schema": "^8.0.0-alpha.18"
   },
   "peerDependencies": {
