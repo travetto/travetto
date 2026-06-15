@@ -25,6 +25,14 @@ const setMissingValues = <T>(input: T, missingValue: unknown): T =>
 @Injectable()
 export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupport, ModelIndexedSupport {
 
+  static resolveTable(cls: Class, namespace?: string): string {
+    let table = ModelRegistryIndex.getStoreName(cls);
+    if (namespace) {
+      table = `${namespace}_${table}`;
+    }
+    return table;
+  }
+
   idSource = ModelCrudUtil.uuidSource();
   client: Firestore;
   config: FirestoreModelConfig;
@@ -32,11 +40,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   constructor(config: FirestoreModelConfig) { this.config = config; }
 
   #resolveTable(cls: Class): string {
-    let table = ModelRegistryIndex.getStoreName(cls);
-    if (this.config.namespace) {
-      table = `${this.config.namespace}_${table}`;
-    }
-    return table;
+    return FirestoreModelService.resolveTable(cls, this.config.namespace);
   }
 
   #getCollection(cls: Class): FirebaseFirestore.CollectionReference<DocumentData> {

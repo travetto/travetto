@@ -501,6 +501,10 @@ These files must be valid, compilable TypeScript and serve as both documentation
 8. **`internal/` for non-public code** — implementation details that shouldn't be imported by consumers go in `src/internal/`.
 9. **Consistent `from()` pattern** — Schema-decorated classes get a static `from()` method for constructing instances from plain objects.
 10. **JSDoc on public APIs** — decorators and services should have JSDoc comments for documentation generation.
+11. **Avoid Node built-ins for I/O when framework utilities exist** — prefer `@travetto/manifest`'s `ManifestFileUtil.bufferedFileWrite` over `node:fs` for creating files (bufferedFileWrite includes mkdir).
+12. **DRY name resolution and configuration parsing** — if logic needs to be shared or replicated between a CLI command and a service, extract it into a static/public helper method on the service class (e.g., `resolveTable`) rather than duplicating it.
+13. **Strong/Explicit typing for configurations and JSON structures** — define explicit TypeScript types or interfaces for schemas (e.g., Firestore index definitions) instead of using `unknown[]` or inline untyped objects.
+14. **Declarative arrays over imperative loops** — prefer functional array operations (using `.filter()`, `.map()`, and array spreading) over deeply nested imperative `for` loops and conditional `if` blocks.
 
 ## Development Workflow
 
