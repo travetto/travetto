@@ -144,9 +144,18 @@ const STATIC_OPERATION_SPECS: Partial<Record<OperationId, OperationFileSpec[]>> 
     { file: 'test/unit/example.ts', snippet: 'generate-test-suite.unit.ts.tpl' },
     { file: 'test/fixtures/example.json', snippet: 'generate-test-suite.fixture.json.tpl' }
   ],
-  'workflow-gcp-deploy': [{ file: '.github/workflows/deploy-api.yml', snippet: 'workflow-gcp-deploy.yml.tpl' }],
-  'workflow-cloudfront-deploy': [{ file: '.github/workflows/deploy-ui.yml', snippet: 'workflow-cloudfront-deploy.yml.tpl' }],
-  'create-web-interceptor': [{ file: 'src/interceptor/request-logging.ts', snippet: 'create-web-interceptor.ts.tpl' }],
+  'workflow-gcp-deploy': [
+    { file: '.github/workflows/deploy-api.yml', snippet: 'workflow-gcp-deploy.yml.tpl' }
+  ],
+  'workflow-cloudfront-deploy': [
+    { file: '.github/workflows/deploy-ui.yml', snippet: 'workflow-cloudfront-deploy.yml.tpl' }
+  ],
+  'workflow-firebase-deploy': [
+    { file: '.github/workflows/firebase-hosting-merge.yml', snippet: 'workflow-firebase-deploy.yml.tpl' }
+  ],
+  'create-web-interceptor': [
+    { file: 'src/interceptor/request-logging.ts', snippet: 'create-web-interceptor.ts.tpl' }
+  ],
   'cache-enhancements': [
     { file: 'src/service/cacheable.ts', snippet: 'cache-enhancements.service.ts.tpl' },
     { file: 'src/config/cache.ts', snippet: 'cache-enhancements.config.ts.tpl' }
@@ -512,6 +521,7 @@ const OPERATION_HANDLERS: Partial<Record<ExecutionRequest['operations'][number],
   'generate-test-suite': createStaticHandler('generate-test-suite'),
   'workflow-gcp-deploy': createStaticHandler('workflow-gcp-deploy'),
   'workflow-cloudfront-deploy': createStaticHandler('workflow-cloudfront-deploy'),
+  'workflow-firebase-deploy': createStaticHandler('workflow-firebase-deploy'),
   'create-web-interceptor': createStaticHandler('create-web-interceptor'),
   'cache-enhancements': createStaticHandler('cache-enhancements'),
   'enable-file-upload': createStaticHandler('enable-file-upload'),
