@@ -80,7 +80,9 @@ class LlmSupportExecuteTest {
       'package.json',
       'resources/application.yml',
       'src/service/home.ts',
-      'src/web/home.ts'
+      'src/web/home.ts',
+      '.agents/AGENTS.md',
+      '.cursorrules'
     ]);
 
     const pkgRaw: {
@@ -119,7 +121,9 @@ class LlmSupportExecuteTest {
       'packages/app/package.json',
       'packages/app/resources/application.yml',
       'packages/app/src/service/home.ts',
-      'packages/app/src/web/home.ts'
+      'packages/app/src/web/home.ts',
+      '.agents/AGENTS.md',
+      '.cursorrules'
     ]);
 
     const rootPkgRaw: {
@@ -163,7 +167,9 @@ class LlmSupportExecuteTest {
     await assertFilesExist(loader, [
       'package.json',
       'packages/api/package.json',
-      'packages/api/resources/application.yml'
+      'packages/api/resources/application.yml',
+      '.agents/AGENTS.md',
+      '.cursorrules'
     ]);
 
     const rootPkgRaw: {
