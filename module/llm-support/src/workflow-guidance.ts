@@ -34,10 +34,11 @@ export const WORKFLOWS: WorkflowGuidance[] = [
       '@travetto/model-s3',
       '@travetto/model-elasticsearch'
     ],
-    commandDiscoveryRule: 'Use npx trv cli:schema before proposing model:install or model:export argument forms.',
+    commandDiscoveryRule: 'Use npx trv cli:schema before proposing model:install, model:export, or firestore:indexes argument forms.',
     verification: [
       'Ensure selected adapter family and module match datastore target and install bundle guidance.',
-      'Ensure required capability needs (blob/query/indexed/expiry) align with selected adapter support.'
+      'Ensure required capability needs (blob/query/indexed/expiry) align with selected adapter support.',
+      'If using Firestore, confirm index exporting via trv firestore:indexes is documented or planned.'
     ]
   },
   {
@@ -215,6 +216,18 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     verification: [
       'Ensure release mode and semver level are explicit and reviewed in CI inputs.',
       'Ensure release commits and tags align with repository policy.'
+    ]
+  },
+  {
+    id: 'firebase-hosting-deploy',
+    title: 'Add Firebase Hosting deploy workflow',
+    intent: 'Deploy the static UI to Firebase Hosting on merge to main branch.',
+    recommendedModules: ['@travetto/compiler'],
+    optionalModules: ['@travetto/cli'],
+    commandDiscoveryRule: 'Validate firebase target or build commands. If CLI command shape is uncertain, validate with npx trv cli:schema.',
+    verification: [
+      'Ensure the action-hosting-deploy maps repoToken, firebaseServiceAccount, and projectId correctly.',
+      'Ensure UI build output directory in firebase.json matches deployment paths.'
     ]
   }
 ];

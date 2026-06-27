@@ -83,6 +83,14 @@ const OPERATIONS: LlmOperation[] = [
     optionalModules: []
   },
   {
+    id: 'workflow-firebase-deploy',
+    category: 'workflow',
+    title: 'Generate Firebase Hosting deploy workflow',
+    summary: 'Create GitHub workflows for Firebase Hosting UI deploy pipelines.',
+    requiredModules: [],
+    optionalModules: []
+  },
+  {
     id: 'enable-linting',
     category: 'quality',
     title: 'Enable linting and fix',
