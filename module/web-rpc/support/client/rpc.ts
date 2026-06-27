@@ -281,6 +281,9 @@ export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]):
 
     if (resolved.ok) {
       const text = await resolved.text();
+      if (resolved.status === 204 || !contentType || !text) {
+        return undefined!;
+      }
       if (contentType === 'application/json') {
         return await request.consumeJSON!<T>(text);
       } else if (contentType === 'text/plain') {
