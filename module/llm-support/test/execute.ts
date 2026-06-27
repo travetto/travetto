@@ -69,7 +69,14 @@ class LlmSupportExecuteTest {
 
     assert(output.artifacts.some(item => item.status === 'created'));
 
-    await assertFilesExist(loader, ['package.json', 'resources/application.yml', 'src/service/home.ts', 'src/web/home.ts']);
+    await assertFilesExist(loader, [
+      'package.json',
+      'resources/application.yml',
+      'src/service/home.ts',
+      'src/web/home.ts',
+      '.agents/AGENTS.md',
+      '.cursorrules'
+    ]);
 
     const pkgRaw: {
       name?: string;
@@ -107,7 +114,9 @@ class LlmSupportExecuteTest {
       'packages/app/package.json',
       'packages/app/resources/application.yml',
       'packages/app/src/service/home.ts',
-      'packages/app/src/web/home.ts'
+      'packages/app/src/web/home.ts',
+      '.agents/AGENTS.md',
+      '.cursorrules'
     ]);
 
     const rootPkgRaw: {
@@ -148,7 +157,13 @@ class LlmSupportExecuteTest {
 
     assert(output.artifacts.some(item => item.status === 'created'));
 
-    await assertFilesExist(loader, ['package.json', 'packages/api/package.json', 'packages/api/resources/application.yml']);
+    await assertFilesExist(loader, [
+      'package.json',
+      'packages/api/package.json',
+      'packages/api/resources/application.yml',
+      '.agents/AGENTS.md',
+      '.cursorrules'
+    ]);
 
     const rootPkgRaw: {
       scripts?: Record<string, string>;

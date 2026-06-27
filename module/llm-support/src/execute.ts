@@ -308,6 +308,24 @@ async function execProjectBootstrap(baseDir: string, request: ExecutionRequest, 
     request,
     artifacts
   );
+
+  const agentsContent = await renderSnippet('project-bootstrap.agents.md.tpl');
+
+  await writeFile(
+    'project-bootstrap',
+    path.join(baseDir, '.agents/AGENTS.md'),
+    agentsContent,
+    request,
+    artifacts
+  );
+
+  await writeFile(
+    'project-bootstrap',
+    path.join(baseDir, '.cursorrules'),
+    agentsContent,
+    request,
+    artifacts
+  );
 }
 
 async function execCreateWebRoute(baseDir: string, request: ExecutionRequest, artifacts: ExecutionArtifact[]): Promise<void> {
