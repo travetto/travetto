@@ -22,7 +22,7 @@ function isMetadataBearer(value: unknown): value is MetadataBearer {
   return !!value && typeof value === 'object' && '$metadata' in value;
 }
 
-function hasContentType<T>(value: T): value is T & { contenttype?: string } {
+function hasLowerContentType<T>(value: T): value is T & { contenttype?: string } {
   return value !== undefined && value !== null && Object.hasOwn(value, 'contenttype');
 }
 
@@ -361,7 +361,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     return BinaryMetadataUtil.makeBlob(() => this.#getObject(location, final), { ...metadata, range: final });
   }
 
-  async headBlob(location: string): Promise<{ Metadata?: BinaryMetadata, ContentLength?: number }> {
+  async headBlob(location: string): Promise<{ Metadata?: BinaryMetadata, ContentLength?: number, ContentType?: string }> {
     const query = this.#queryBlob(location);
     try {
       return (await this.client.headObject(query));
@@ -380,11 +380,11 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
     if (blob) {
       const metadata: BinaryMetadata = {
-        contentType: '',
+        contentType: blob.ContentType ?? '',
         ...blob.Metadata,
         size: blob.ContentLength!,
       };
-      if (hasContentType(metadata)) {
+      if (hasLowerContentType(metadata)) {
         metadata['contentType'] = metadata['contenttype']!;
         delete metadata['contenttype'];
       }
