@@ -1,5 +1,2 @@
 model.s3:
   bucket: travetto-test
-
-model.firestore:
-  projectId: trv-local-dev
