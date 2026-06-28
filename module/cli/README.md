@@ -30,6 +30,7 @@ Commands:
   email:test            Render and send a template file to a target recipient for quick validation.
   eslint                Run ESLint for the workspace or changed files.
   eslint:register       Generate the workspace ESLint configuration entry file.
+  firestore:indexes     Generate the Firestore composite indexes JSON for all registered models.
   llm:support:execute   Execute llm-support operations with dry-run by default.
   llm:support:mcp       Minimal MCP stdio server for llm-support tools.
   llm:support:plan      Build plan-first execution details for llm-support operations.
