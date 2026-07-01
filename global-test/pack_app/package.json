@@ -6,7 +6,7 @@
     "@travetto/cli": "^8.0.0-alpha.25"
   },
   "devDependencies": {
-    "@travetto/compiler": "^8.0.0-alpha.18",
+    "@travetto/compiler": "^8.0.0-alpha.19",
     "@travetto/pack": "^8.0.0-alpha.21"
   },
   "travetto": {},
