@@ -1,3 +1,4 @@
+import fsSync from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
@@ -6,10 +7,13 @@ import { JSONUtil, RuntimeIndex } from '@travetto/runtime';
 
 import { type RecommendationQuery, type SnippetSource, SnippetSourceSchema } from './types.ts';
 
-const SNIPPET_RELATIVE_DIR = 'snippets';
-
 function snippetDirectory(): string {
-  return path.resolve(RuntimeIndex.getModule('@travetto/llm-support')!.sourcePath, 'resources', SNIPPET_RELATIVE_DIR);
+  const mod = RuntimeIndex.getModule('@travetto/llm-support')!;
+  const generated = path.resolve(mod.sourcePath, 'generated', 'snippets');
+  if (fsSync.existsSync(generated)) {
+    return generated;
+  }
+  return path.resolve(mod.sourcePath, 'resources', 'snippets');
 }
 
 function isErrnoException(err: unknown): err is NodeJS.ErrnoException {

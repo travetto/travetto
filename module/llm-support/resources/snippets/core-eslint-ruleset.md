@@ -2,7 +2,7 @@
 {
   "sourceId": "core-eslint-ruleset",
   "repositoryId": "travetto",
-  "filePath": "module/eslint/support/eslint.config.ts",
+  "filePath": "module/eslint/support/bin/eslint-config.ts",
   "capabilityTags": ["quality", "lint", "eslint", "fix"],
   "operationIds": ["enable-linting"],
   "applicability": ["framework-native"],
@@ -14,7 +14,7 @@
 
 # core-eslint-ruleset
 
-- Source: `module/eslint/support/eslint.config.ts`
+- Source: `module/eslint/support/bin/eslint-config.ts`
 - Capability tags: quality, lint, eslint, fix
 - Applicability: framework-native
 - Notes:

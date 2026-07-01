@@ -27,6 +27,8 @@ function filesFor(op: LlmOperation): string[] {
       return ['.github/workflows/deploy-api.yml'];
     case 'workflow-cloudfront-deploy':
       return ['.github/workflows/deploy-ui.yml'];
+    case 'workflow-firebase-deploy':
+      return ['.github/workflows/firebase-hosting-merge.yml'];
     case 'enable-linting':
       return ['package.json'];
     case 'generate-config':

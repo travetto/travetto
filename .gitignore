@@ -35,5 +35,6 @@ email-local-context.json
 # Specific
 module/scaffold/**/eslintrc.json
 **/doc-exec/tsconfig.json
+module/llm-support/generated/
 
 .tmp*/

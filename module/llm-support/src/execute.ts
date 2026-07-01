@@ -156,6 +156,9 @@ const STATIC_OPERATION_SPECS: Partial<Record<OperationId, OperationFileSpec[]>> 
   'workflow-cloudfront-deploy': [
     { file: '.github/workflows/deploy-ui.yml', snippet: 'workflow-cloudfront-deploy.yml.tpl' }
   ],
+  'workflow-firebase-deploy': [
+    { file: '.github/workflows/firebase-hosting-merge.yml', snippet: 'workflow-firebase-deploy.yml.tpl' }
+  ],
   'create-web-interceptor': [
     { file: 'src/interceptor/request-logging.ts', snippet: 'create-web-interceptor.ts.tpl' }
   ],
@@ -326,6 +329,24 @@ async function execProjectBootstrap(
     'project-bootstrap',
     path.join(appDir, 'src/web/home.ts'),
     await renderSnippet('project-bootstrap.home-controller.ts.tpl'),
+    request,
+    artifacts
+  );
+
+  const agentsContent = await renderSnippet('project-bootstrap.agents.md.tpl');
+
+  await writeFile(
+    'project-bootstrap',
+    path.join(baseDir, '.agents/AGENTS.md'),
+    agentsContent,
+    request,
+    artifacts
+  );
+
+  await writeFile(
+    'project-bootstrap',
+    path.join(baseDir, '.cursorrules'),
+    agentsContent,
     request,
     artifacts
   );
@@ -580,6 +601,7 @@ const OPERATION_HANDLERS: Partial<Record<ExecutionRequest['operations'][number],
   'generate-test-suite': createStaticHandler('generate-test-suite'),
   'workflow-gcp-deploy': createStaticHandler('workflow-gcp-deploy'),
   'workflow-cloudfront-deploy': createStaticHandler('workflow-cloudfront-deploy'),
+  'workflow-firebase-deploy': createStaticHandler('workflow-firebase-deploy'),
   'create-web-interceptor': createStaticHandler('create-web-interceptor'),
   'cache-enhancements': createStaticHandler('cache-enhancements'),
   'enable-file-upload': createStaticHandler('enable-file-upload'),
