@@ -7,7 +7,7 @@ export const LIBRARIES = {
   Npm: { title: 'Npm', href: 'https://docs.npmjs.com/downloading-and-installing-node-js-and-npm' },
   Yarn: { title: 'Yarn', href: 'https://yarnpkg.com' },
   Pnpm: { title: 'Pnpm', href: 'https://pnpm.io/' },
-  Eslint: { title: 'ESLint', href: 'https://eslint.org/' },
+  Biome: { title: 'Biome', href: 'https://biomejs.dev/' },
   Rollup: { title: 'Rollup', href: 'https://rollupjs.org/' },
   TSConfig: { title: 'TS Config', href: 'https://www.typescriptlang.org/docs/handbook/tsconfig-json.html' },
 
@@ -35,7 +35,10 @@ export const LIBRARIES = {
   DependencyInjection: { title: 'Dependency injection', href: 'https://en.wikipedia.org/wiki/Dependency_injection' },
   OpenAPI: { title: 'OpenAPI', href: 'https://github.com/OAI/OpenAPI-Specification' },
   JSDoc: { title: 'JSDoc', href: 'http://usejsdoc.org/about-getting-started.html' },
-  CodeLens: { title: 'CodeLens', href: 'https://code.visualstudio.com/api/language-extensions/programmatic-language-features#codelens-show-actionable-context-information-within-source-code' },
+  CodeLens: {
+    title: 'CodeLens',
+    href: 'https://code.visualstudio.com/api/language-extensions/programmatic-language-features#codelens-show-actionable-context-information-within-source-code',
+  },
   ORM: { title: 'Object Relationship Mapping', href: 'https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping' },
   UUID: { title: 'UUID', href: 'https://en.wikipedia.org/wiki/Universally_unique_identifier' },
 

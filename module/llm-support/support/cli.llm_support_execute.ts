@@ -11,7 +11,6 @@ import { LlmSupportCommandBase } from './base-command.ts';
  */
 @CliCommand()
 export class LlmSupportExecuteCommand extends LlmSupportCommandBase {
-
   @CliFlag({ short: 'o', full: 'operations' })
   @MinLength(1)
   operations?: string[];
@@ -72,7 +71,7 @@ export class LlmSupportExecuteCommand extends LlmSupportCommandBase {
       modelName: this.modelName,
       projectName: this.projectName,
       emailName: this.emailName,
-      sendRoutePath: this.sendRoutePath
+      sendRoutePath: this.sendRoutePath,
     });
 
     await this.writeOutput(payload, true);

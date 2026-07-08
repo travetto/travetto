@@ -1,0 +1,45 @@
+{
+  "name": "@travetto/lint",
+  "version": "8.0.0-alpha.19",
+  "type": "module",
+  "description": "Linting and Formatting integration for Travetto",
+  "keywords": [
+    "lint",
+    "travetto",
+    "typescript",
+    "biome"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "main": "__index__.ts",
+  "files": [
+    "support",
+    "__index__.ts",
+    "biome.json"
+  ],
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/lint"
+  },
+  "dependencies": {
+    "@travetto/runtime": "^8.0.0-alpha.18"
+  },
+  "peerDependencies": {
+    "@travetto/cli": "^8.0.0-alpha.25"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/cli": {
+      "optional": true
+    }
+  },
+  "travetto": {
+    "displayName": "Lint Support"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -2,18 +2,7 @@ import { MinLength, Required, Schema } from '@travetto/schema';
 
 export type AdapterNeed = 'blob' | 'query' | 'indexed' | 'expiry';
 
-export type LlmOperationCategory =
-  | 'project'
-  | 'web'
-  | 'auth'
-  | 'model'
-  | 'upload'
-  | 'workflow'
-  | 'quality'
-  | 'email'
-  | 'test'
-  | 'config'
-  | 'cache';
+export type LlmOperationCategory = 'project' | 'web' | 'auth' | 'model' | 'upload' | 'workflow' | 'quality' | 'email' | 'test' | 'config' | 'cache';
 
 export type ExecutionArtifactStatus = 'planned' | 'created' | 'skipped';
 export type PlanStepId = 'validate-assumptions' | 'generate-artifacts' | 'verify-output';
@@ -47,10 +36,10 @@ export class RecommendationQuerySchema {
 }
 
 @Schema()
-export class LlmSupportRecommendToolInput extends RecommendationQuerySchema { }
+export class LlmSupportRecommendToolInput extends RecommendationQuerySchema {}
 
 @Schema()
-export class LlmSupportPlanToolInput extends RecommendationQuerySchema { }
+export class LlmSupportPlanToolInput extends RecommendationQuerySchema {}
 
 @Schema()
 export class LlmSupportExecuteToolInput {

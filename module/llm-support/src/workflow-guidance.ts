@@ -1,4 +1,4 @@
-import { type WorkflowGuidance } from './types.ts';
+import type { WorkflowGuidance } from './types.ts';
 
 export const WORKFLOWS: WorkflowGuidance[] = [
   {
@@ -10,8 +10,8 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     commandDiscoveryRule: 'If CLI command shape is uncertain, validate with npx trv cli:schema before recommending command arguments.',
     verification: [
       'Confirm endpoint decorators and schema decorators are documented in module LLM consumer docs.',
-      'Confirm generated guidance is consistent with current CLI schema output.'
-    ]
+      'Confirm generated guidance is consistent with current CLI schema output.',
+    ],
   },
   {
     id: 'enable-persistence',
@@ -32,13 +32,13 @@ export const WORKFLOWS: WorkflowGuidance[] = [
       '@travetto/model-firestore',
       '@travetto/model-redis',
       '@travetto/model-s3',
-      '@travetto/model-elasticsearch'
+      '@travetto/model-elasticsearch',
     ],
     commandDiscoveryRule: 'Use npx trv cli:schema before proposing model:install or model:export argument forms.',
     verification: [
       'Ensure selected adapter family and module match datastore target and install bundle guidance.',
-      'Ensure required capability needs (blob/query/indexed/expiry) align with selected adapter support.'
-    ]
+      'Ensure required capability needs (blob/query/indexed/expiry) align with selected adapter support.',
+    ],
   },
   {
     id: 'run-background-jobs',
@@ -47,10 +47,7 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     recommendedModules: ['@travetto/worker', '@travetto/runtime', '@travetto/config'],
     optionalModules: ['@travetto/model', '@travetto/context', '@travetto/log'],
     commandDiscoveryRule: 'Validate worker command patterns with npx trv cli:schema whenever command signatures are referenced.',
-    verification: [
-      'Ensure shutdown behavior and lifecycle guidance references runtime abstractions.',
-      'Confirm job storage guidance aligns with selected model adapter.'
-    ]
+    verification: ['Ensure shutdown behavior and lifecycle guidance references runtime abstractions.', 'Confirm job storage guidance aligns with selected model adapter.'],
   },
   {
     id: 'enable-google-oauth-passport',
@@ -62,20 +59,20 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     verification: [
       'Ensure google.auth config includes clientID, clientSecret, and callbackUrl.',
       'Ensure a PassportAuthenticator is registered with Google OAuth strategy and stable principal mapping.',
-      'If user persistence is required, ensure external-id lookup/index and one model adapter are configured.'
-    ]
+      'If user persistence is required, ensure external-id lookup/index and one model adapter are configured.',
+    ],
   },
   {
     id: 'project-bootstrap',
     title: 'Bootstrap a new project',
     intent: 'Create a project baseline using guided prompts for model backend, quality, and initial web stack.',
     recommendedModules: ['@travetto/web', '@travetto/web-http', '@travetto/openapi', '@travetto/runtime', '@travetto/config'],
-    optionalModules: ['@travetto/schema', '@travetto/di', '@travetto/model', '@travetto/test', '@travetto/eslint'],
+    optionalModules: ['@travetto/schema', '@travetto/di', '@travetto/model', '@travetto/test', '@travetto/lint'],
     commandDiscoveryRule: 'Validate command signatures with npx trv cli:schema before suggesting starter commands.',
     verification: [
       'Ensure generated project includes selected web and model modules from prompt answers.',
-      'Ensure generated package scripts include startup, test, and lint commands when selected.'
-    ]
+      'Ensure generated package scripts include startup, test, and lint commands when selected.',
+    ],
   },
   {
     id: 'create-web-route',
@@ -84,10 +81,7 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     recommendedModules: ['@travetto/web', '@travetto/schema', '@travetto/di'],
     optionalModules: ['@travetto/auth', '@travetto/auth-web', '@travetto/model-query'],
     commandDiscoveryRule: 'Validate web and schema command references with npx trv cli:schema before publishing examples.',
-    verification: [
-      'Ensure route methods use controller decorators and typed parameter bindings.',
-      'Ensure service wiring uses @Injectable and @Inject patterns.'
-    ]
+    verification: ['Ensure route methods use controller decorators and typed parameter bindings.', 'Ensure service wiring uses @Injectable and @Inject patterns.'],
   },
   {
     id: 'enable-auth-session',
@@ -98,8 +92,8 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     commandDiscoveryRule: 'Validate auth-web decorators and auth command references with npx trv cli:schema before publishing examples.',
     verification: [
       'Ensure auth config exposes authenticator, authorizer, and session store factories.',
-      'Ensure /auth/login, /auth/self, and /auth/logout routes are registered and session-aware.'
-    ]
+      'Ensure /auth/login, /auth/self, and /auth/logout routes are registered and session-aware.',
+    ],
   },
   {
     id: 'generate-web-model-crud',
@@ -108,10 +102,7 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     recommendedModules: ['@travetto/web', '@travetto/model', '@travetto/model-query', '@travetto/schema', '@travetto/di'],
     optionalModules: ['@travetto/auth', '@travetto/auth-web', '@travetto/model-indexed'],
     commandDiscoveryRule: 'Validate web/controller command references and generated route assumptions with npx trv cli:schema.',
-    verification: [
-      'Ensure controller CRUD methods bind to a model-query capable source.',
-      'Ensure principal-scoped filtering is applied when auth-web integration is enabled.'
-    ]
+    verification: ['Ensure controller CRUD methods bind to a model-query capable source.', 'Ensure principal-scoped filtering is applied when auth-web integration is enabled.'],
   },
   {
     id: 'model-backend-selection',
@@ -124,25 +115,25 @@ export const WORKFLOWS: WorkflowGuidance[] = [
       '@travetto/model-sql',
       '@travetto/model-mysql',
       '@travetto/model-postgres',
-      '@travetto/model-sqlite'
+      '@travetto/model-sqlite',
     ],
     commandDiscoveryRule: 'Validate model command signatures and adapter setup commands with npx trv cli:schema before recommendation output.',
     verification: [
       'Ensure selected adapter is supported and matches deployment datastore target.',
-      'Ensure SQL-family selections include shared SQL runtime package requirements.'
-    ]
+      'Ensure SQL-family selections include shared SQL runtime package requirements.',
+    ],
   },
   {
     id: 'quality-lint-and-test',
     title: 'Enable lint and test quality checks',
     intent: 'Enable quality features so generated projects have immediate test and lint feedback loops.',
-    recommendedModules: ['@travetto/test', '@travetto/eslint'],
+    recommendedModules: ['@travetto/test', '@travetto/lint'],
     optionalModules: [],
     commandDiscoveryRule: 'Validate test and lint command examples with npx trv cli:schema or generated package scripts before suggesting execution.',
     verification: [
       'Ensure generated package scripts include test and lint commands when selected.',
-      'Run test and lint once after generation to catch template/config drift early.'
-    ]
+      'Run test and lint once after generation to catch template/config drift early.',
+    ],
   },
   {
     id: 'add-email-generation',
@@ -154,8 +145,8 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     verification: [
       'Ensure generated template context has a typed schema contract.',
       'Ensure renderer and transport wiring are both validated by tests or snapshots.',
-      'Ensure send integration supports direct and worker-based execution paths.'
-    ]
+      'Ensure send integration supports direct and worker-based execution paths.',
+    ],
   },
   {
     id: 'openapi-spec-pipeline',
@@ -164,10 +155,7 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     recommendedModules: ['@travetto/openapi', '@travetto/web', '@travetto/schema'],
     optionalModules: ['@travetto/cli'],
     commandDiscoveryRule: 'Validate OpenAPI command signatures with npx trv cli:schema before recommending command invocations.',
-    verification: [
-      'Ensure openapi:spec output path and format match repository conventions.',
-      'Ensure generated spec is available as CI artifact for downstream use.'
-    ]
+    verification: ['Ensure openapi:spec output path and format match repository conventions.', 'Ensure generated spec is available as CI artifact for downstream use.'],
   },
   {
     id: 'openapi-client-generation',
@@ -178,8 +166,8 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     commandDiscoveryRule: 'Validate openapi:client command signatures with npx trv cli:schema before recommending formats or arguments.',
     verification: [
       'Ensure generated client output location is stable and committed when required.',
-      'Ensure workflow runs after spec generation and fails fast on generator errors.'
-    ]
+      'Ensure workflow runs after spec generation and fails fast on generator errors.',
+    ],
   },
   {
     id: 'aws-lambda-package-and-deploy',
@@ -188,10 +176,7 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     recommendedModules: ['@travetto/web-aws-lambda', '@travetto/pack'],
     optionalModules: ['@travetto/web', '@travetto/config'],
     commandDiscoveryRule: 'Validate pack:lambda command signatures with npx trv cli:schema before recommending packaging flags.',
-    verification: [
-      'Ensure lambda package artifact is produced and published by CI.',
-      'Ensure workflow includes environment-specific deploy step stubs.'
-    ]
+    verification: ['Ensure lambda package artifact is produced and published by CI.', 'Ensure workflow includes environment-specific deploy step stubs.'],
   },
   {
     id: 'pack-docker-release',
@@ -200,10 +185,7 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     recommendedModules: ['@travetto/pack'],
     optionalModules: ['@travetto/runtime', '@travetto/config'],
     commandDiscoveryRule: 'Validate pack:docker command signatures with npx trv cli:schema before recommending image/tag flags.',
-    verification: [
-      'Ensure image tags, registry targets, and build platform inputs are explicit.',
-      'Ensure workflow supports dry runs or stage-only builds for PR validation.'
-    ]
+    verification: ['Ensure image tags, registry targets, and build platform inputs are explicit.', 'Ensure workflow supports dry runs or stage-only builds for PR validation.'],
   },
   {
     id: 'repo-version-release',
@@ -212,9 +194,6 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     recommendedModules: ['@travetto/repo'],
     optionalModules: ['@travetto/registry', '@travetto/pack'],
     commandDiscoveryRule: 'Validate repo:version and repo:publish command signatures with npx trv cli:schema before suggesting release automation.',
-    verification: [
-      'Ensure release mode and semver level are explicit and reviewed in CI inputs.',
-      'Ensure release commits and tags align with repository policy.'
-    ]
-  }
+    verification: ['Ensure release mode and semver level are explicit and reviewed in CI inputs.', 'Ensure release commits and tags align with repository policy.'],
+  },
 ];

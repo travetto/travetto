@@ -6,7 +6,6 @@ import { buildPlans } from '../src/plan.ts';
 
 @Suite()
 class LlmSupportPlanTest {
-
   @Test()
   async buildsEmailPlans() {
     const output = await buildPlans({ categories: ['email'] });

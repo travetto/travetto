@@ -1,7 +1,7 @@
-import { Schema } from '@travetto/schema';
 import { JSONUtil } from '@travetto/runtime';
+import { Schema } from '@travetto/schema';
 
-import { getLlmSupportToolDefinitions, runLlmSupportTool, type LlmSupportToolName } from './tooling.ts';
+import { getLlmSupportToolDefinitions, type LlmSupportToolName, runLlmSupportTool } from './tooling.ts';
 
 @Schema()
 export class JsonRpcRequestSchema {
@@ -86,8 +86,8 @@ function toError(id: string | number | null, code: number, message: string, data
     error: {
       code,
       message,
-      data
-    }
+      data,
+    },
   };
 }
 
@@ -95,7 +95,7 @@ function toResult(id: string | number | null, result: unknown): JsonRpcResponse 
   return {
     jsonrpc: '2.0',
     id,
-    result
+    result,
   };
 }
 
@@ -124,12 +124,12 @@ export async function handleMcpRequest(input: JsonRpcRequest): Promise<JsonRpcRe
       return toResult(id, {
         protocolVersion: PROTOCOL_VERSION,
         capabilities: {
-          tools: {}
+          tools: {},
         },
         serverInfo: {
           name: '@travetto/llm-support',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       });
 
     case 'notifications/initialized':
@@ -137,7 +137,7 @@ export async function handleMcpRequest(input: JsonRpcRequest): Promise<JsonRpcRe
 
     case 'tools/list':
       return toResult(id, {
-        tools: getLlmSupportToolDefinitions()
+        tools: getLlmSupportToolDefinitions(),
       });
 
     case 'tools/call': {
@@ -153,10 +153,10 @@ export async function handleMcpRequest(input: JsonRpcRequest): Promise<JsonRpcRe
           content: [
             {
               type: 'text',
-              text: JSONUtil.toUTF8(output, { indent: 2 })
-            }
+              text: JSONUtil.toUTF8(output, { indent: 2 }),
+            },
           ],
-          structuredContent: output
+          structuredContent: output,
         });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Tool execution failed';

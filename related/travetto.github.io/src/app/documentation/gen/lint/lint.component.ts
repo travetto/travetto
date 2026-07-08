@@ -3,8 +3,8 @@ import { RouterModule } from '@angular/router';
 
 @Component({
   imports: [RouterModule],
-  selector: 'app-eslint',
-  templateUrl: './eslint.component.html',
+  selector: 'app-lint',
+  templateUrl: './lint.component.html',
   styleUrls: []
 })
-export class EslintComponent { }
+export class LintComponent { }

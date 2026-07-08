@@ -3,15 +3,8 @@ import assert from 'node:assert';
 import type { Any, Class } from '@travetto/runtime';
 import { SchemaValidator } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
-
+import { handleMcpRequest, JsonRpcResponseSchema, McpInitializeResultSchema, McpToolCallResultSchema, McpToolsListResultSchema } from '../src/mcp.ts';
 import { RecommendationResponseSchema } from '../src/types.ts';
-import {
-  handleMcpRequest,
-  JsonRpcResponseSchema,
-  McpInitializeResultSchema,
-  McpToolCallResultSchema,
-  McpToolsListResultSchema
-} from '../src/mcp.ts';
 
 async function bindAndValidate<T extends object>(schema: Class<T>, payload: unknown): Promise<T> {
   const bound = schema.from(payload as Any);
@@ -21,13 +14,12 @@ async function bindAndValidate<T extends object>(schema: Class<T>, payload: unkn
 
 @Suite()
 class LlmSupportMcpTest {
-
   @Test()
   async initializeRespondsWithToolCapability() {
     const output = await handleMcpRequest({
       jsonrpc: '2.0',
       id: 1,
-      method: 'initialize'
+      method: 'initialize',
     });
 
     assert(output);
@@ -42,7 +34,7 @@ class LlmSupportMcpTest {
     const output = await handleMcpRequest({
       jsonrpc: '2.0',
       id: 2,
-      method: 'tools/list'
+      method: 'tools/list',
     });
 
     assert(output);
@@ -63,8 +55,8 @@ class LlmSupportMcpTest {
       method: 'tools/call',
       params: {
         name: 'llm_support_recommend',
-        arguments: { categories: ['web'] }
-      }
+        arguments: { categories: ['web'] },
+      },
     });
 
     assert(output);
@@ -80,7 +72,7 @@ class LlmSupportMcpTest {
     const output = await handleMcpRequest({
       jsonrpc: '2.0',
       id: 4,
-      method: 'unknown/method'
+      method: 'unknown/method',
     });
 
     assert(output);
@@ -99,9 +91,9 @@ class LlmSupportMcpTest {
         name: 'llm_support_execute',
         arguments: {
           operations: 5,
-          targetDir: '.'
-        }
-      }
+          targetDir: '.',
+        },
+      },
     });
 
     assert(output);

@@ -1,6 +1,6 @@
-import { CliFlag, CliModuleFlag, type CliCommandShape } from '@travetto/cli';
-import { Required } from '@travetto/schema';
+import { type CliCommandShape, CliFlag, CliModuleFlag } from '@travetto/cli';
 import { JSONUtil } from '@travetto/runtime';
+import { Required } from '@travetto/schema';
 
 import { getValidOperationIds, LLM_OPERATION_CATEGORIES } from '../src/recommendation.ts';
 import { getValidSnippetTags } from '../src/snippet-catalog.ts';
@@ -13,15 +13,14 @@ interface LlmSupportValidValues {
 }
 
 export abstract class LlmSupportCommandBase implements CliCommandShape {
-
-  @CliModuleFlag(({ scope: 'command' }))
+  @CliModuleFlag({ scope: 'command' })
   module: string = '';
 
   async getValidValues(includeExcluded: boolean): Promise<LlmSupportValidValues> {
     return {
       categories: LLM_OPERATION_CATEGORIES,
       operations: getValidOperationIds(includeExcluded),
-      snippetTags: await getValidSnippetTags()
+      snippetTags: await getValidSnippetTags(),
     };
   }
 
@@ -34,7 +33,6 @@ export abstract class LlmSupportCommandBase implements CliCommandShape {
 }
 
 export abstract class LlmSupportScopedCommandBase extends LlmSupportCommandBase {
-
   @CliFlag({ short: 'c', full: 'categories' })
   @Required(false)
   categories?: LlmOperationCategory[];
@@ -43,14 +41,11 @@ export abstract class LlmSupportScopedCommandBase extends LlmSupportCommandBase 
   includeExcluded = false;
 
   getScopedCategories(): LlmOperationCategory[] {
-    return this.categories?.filter(item =>
-      LLM_OPERATION_CATEGORIES.some(allowed => allowed === item)
-    ) ?? [];
+    return this.categories?.filter(item => LLM_OPERATION_CATEGORIES.some(allowed => allowed === item)) ?? [];
   }
 }
 
 export abstract class LlmSupportScopedSnippetCommandBase extends LlmSupportScopedCommandBase {
-
   @CliFlag({ short: 't', full: 'snippet-tags' })
   @Required(false)
   snippetTags?: string[];

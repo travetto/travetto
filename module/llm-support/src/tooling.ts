@@ -15,7 +15,7 @@ import {
   PlanResponseSchema,
   type RecommendationQuery,
   type RecommendationResponse,
-  RecommendationResponseSchema
+  RecommendationResponseSchema,
 } from './types.ts';
 
 export type LlmSupportToolName = 'llm_support_recommend' | 'llm_support_plan' | 'llm_support_execute';
@@ -57,7 +57,7 @@ function normalizeQuery(input: RecommendationQuery): RecommendationQuery {
     bundles: toList(input.bundles) ?? input.bundles,
     workflows: toList(input.workflows) ?? input.workflows,
     operations: toList(input.operations) ?? input.operations,
-    snippetTags: toList(input.snippetTags) ?? input.snippetTags
+    snippetTags: toList(input.snippetTags) ?? input.snippetTags,
   };
 }
 
@@ -88,10 +88,10 @@ export function getLlmSupportToolDefinitions(): LlmSupportToolDefinition[] {
           operations: { type: 'array', items: { type: 'string' } },
           categories: { type: 'array', items: { type: 'string' } },
           snippetTags: { type: 'array', items: { type: 'string' } },
-          includeExcluded: { type: 'boolean' }
+          includeExcluded: { type: 'boolean' },
         },
-        additionalProperties: false
-      }
+        additionalProperties: false,
+      },
     },
     {
       name: 'llm_support_plan',
@@ -102,10 +102,10 @@ export function getLlmSupportToolDefinitions(): LlmSupportToolDefinition[] {
           operations: { type: 'array', items: { type: 'string' } },
           categories: { type: 'array', items: { type: 'string' } },
           snippetTags: { type: 'array', items: { type: 'string' } },
-          includeExcluded: { type: 'boolean' }
+          includeExcluded: { type: 'boolean' },
         },
-        additionalProperties: false
-      }
+        additionalProperties: false,
+      },
     },
     {
       name: 'llm_support_execute',
@@ -127,18 +127,15 @@ export function getLlmSupportToolDefinitions(): LlmSupportToolDefinition[] {
           modelName: { type: 'string' },
           projectName: { type: 'string' },
           emailName: { type: 'string' },
-          sendRoutePath: { type: 'string' }
+          sendRoutePath: { type: 'string' },
         },
-        additionalProperties: false
-      }
-    }
+        additionalProperties: false,
+      },
+    },
   ];
 }
 
-export async function runLlmSupportTool(
-  name: LlmSupportToolName,
-  payload: unknown
-): Promise<RecommendationResponse | PlanResponse | ExecutionResponse> {
+export async function runLlmSupportTool(name: LlmSupportToolName, payload: unknown): Promise<RecommendationResponse | PlanResponse | ExecutionResponse> {
   switch (name) {
     case 'llm_support_recommend': {
       const input = await validateInput(LlmSupportRecommendToolInput, payload);
@@ -166,7 +163,7 @@ export async function runLlmSupportTool(
         modelName: input.modelName,
         projectName: input.projectName,
         emailName: input.emailName,
-        sendRoutePath: input.sendRoutePath
+        sendRoutePath: input.sendRoutePath,
       };
       const output = await executeOperations(request);
       return validateOutput(ExecutionResponseSchema, output);
@@ -185,13 +182,13 @@ export async function runLlmSupportFlow(input: LlmSupportFlowInput = {}): Promis
   const executionRequest: ExecutionRequest = {
     ...execute,
     operations,
-    targetDir: execute.targetDir
+    targetDir: execute.targetDir,
   };
   const execution = await validateOutput(ExecutionResponseSchema, await executeOperations(executionRequest));
 
   return {
     recommendation,
     plan,
-    execution
+    execution,
   };
 }
