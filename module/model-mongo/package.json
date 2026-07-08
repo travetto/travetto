@@ -30,7 +30,7 @@
     "@travetto/model": "^8.0.0-alpha.20",
     "@travetto/model-indexed": "^8.0.0-alpha.22",
     "@travetto/model-query": "^8.0.0-alpha.21",
-    "mongodb": "^7.2.0"
+    "mongodb": "^7.5.0"
   },
   "peerDependencies": {
     "@travetto/cli": "^8.0.0-alpha.25"
