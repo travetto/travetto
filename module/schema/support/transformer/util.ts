@@ -14,6 +14,7 @@ export class SchemaTransformUtil {
   static INPUT_IMPORT = '@travetto/schema/src/decorator/input.ts';
   static COMMON_IMPORT = '@travetto/schema/src/decorator/common.ts';
   static TYPES_IMPORT = '@travetto/schema/src/types.ts';
+  static BIND_UTIL_IMPORT = '@travetto/schema/src/bind-util.ts';
 
   /**
    * Produce concrete type given transformer type
@@ -370,7 +371,7 @@ class ${uniqueId} extends ${type.mappedClassName} {
    * Helper to create inline defineProperty statement for accessors
    */
   static createAccessorDefineProperty(state: TransformerState, accessorName: string): ts.Statement {
-    const bindUtilImport = state.importFile('@travetto/schema/src/bind-util.ts');
+    const bindUtilImport = state.importFile(this.BIND_UTIL_IMPORT);
     return state.factory.createExpressionStatement(
       state.factory.createCallExpression(
         state.createAccess(bindUtilImport.identifier, 'BindUtil', 'registerAccessor'),
