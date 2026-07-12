@@ -36,7 +36,7 @@ export class AssertCheck {
     };
 
     // Invert check for negative
-    const assertFn = positive ? assert : (value: unknown, msg?: string): unknown => assert(!value, msg);
+    const assertFn = positive ? assert : (value: unknown, msg?: string): unknown => assert(!value, msg!);
 
     // Check fn to call
     if (fn === 'fail') {
@@ -91,7 +91,7 @@ export class AssertCheck {
         case 'lessThanEqual': assertFn(castTo<number>(actual) <= castTo<number>(expected), message); break;
         case 'greaterThan': assertFn(castTo<number>(actual) > castTo<number>(expected), message); break;
         case 'greaterThanEqual': assertFn(castTo<number>(actual) >= castTo<number>(expected), message); break;
-        case 'ok': assertFn(...castTo<Parameters<typeof assertFn>>(args)); break;
+        case 'ok': assertFn.apply(null, castTo(args)); break;
         default:
           if (fn && assert[castKey<typeof assert>(fn)]) { // Assert call
             if (/not/i.test(fn)) {
