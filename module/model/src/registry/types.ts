@@ -60,5 +60,8 @@ export class ModelConfig<T extends ModelType = ModelType> {
    * Post-load handlers
    */
   postLoad?: DataHandler<unknown>[];
+  /**
+   * Fields to ignore during persistence
+   */
   transientFields?: string[];
 }
