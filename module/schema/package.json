@@ -1,6 +1,6 @@
 {
   "name": "@travetto/schema",
-  "version": "8.0.0-alpha.20",
+  "version": "8.0.0-alpha.21",
   "type": "module",
   "description": "Data type registry for runtime validation, reflection and binding.",
   "keywords": [

@@ -1,6 +1,6 @@
 {
   "name": "@travetto/test",
-  "version": "8.0.0-alpha.19",
+  "version": "8.0.0-alpha.20",
   "type": "module",
   "description": "Declarative test framework",
   "keywords": [
@@ -35,7 +35,7 @@
     "yaml": "^2.9.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.26",
+    "@travetto/cli": "^8.0.0-alpha.27",
     "@travetto/transformer": "^8.0.0-alpha.13"
   },
   "peerDependenciesMeta": {

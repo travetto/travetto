@@ -26,7 +26,7 @@
     "@travetto/worker": "^8.0.0-alpha.19"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.26"
+    "@travetto/cli": "^8.0.0-alpha.27"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
