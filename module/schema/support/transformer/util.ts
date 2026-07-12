@@ -373,13 +373,7 @@ class ${uniqueId} extends ${type.mappedClassName} {
     const bindUtilImport = state.importFile('@travetto/schema/src/bind-util.ts');
     return state.factory.createExpressionStatement(
       state.factory.createCallExpression(
-        state.factory.createPropertyAccessExpression(
-          state.factory.createPropertyAccessExpression(
-            bindUtilImport.identifier,
-            state.factory.createIdentifier('BindUtil')
-          ),
-          state.factory.createIdentifier('registerAccessor')
-        ),
+        state.createAccess(bindUtilImport.identifier, 'BindUtil', 'registerAccessor'),
         undefined,
         [
           state.factory.createThis(),
