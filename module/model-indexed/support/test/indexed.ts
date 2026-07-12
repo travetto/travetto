@@ -12,7 +12,8 @@ import { IndexedFieldError } from '../../src/types/error.ts';
 import { SUGGEST_DATA, SuggestItem, suggestSort } from './models/suggest.ts';
 import {
   childAgeIndex, nameCreatedIndex, UniqueUser, User, User2, User3, User4, userAgeIndex,
-  userAgeNoKeyIndex, userAgeReversedIndex, userNameIndex, userUniqueNameIndex
+  userAgeNoKeyIndex, userAgeReversedIndex, userNameIndex, userUniqueNameIndex,
+  ComputedIndexedUser, computedNameIndex, TransientIndexedUser, transientNameIndex
 } from './models/indexed.ts';
 
 @Suite()
@@ -397,5 +398,39 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     assert(results.length === 5);
     assert(/^ba/.test(results[0].name));
     assert(results.every(r => r.name.startsWith('ba')));
+  }
+
+  @Test('Verify computed fields (aka getters) are searchable via indexes')
+  async queryComputedField() {
+    const service = await this.service;
+
+    await service.create(ComputedIndexedUser, ComputedIndexedUser.from({ name: 'bob' }));
+    await service.create(ComputedIndexedUser, ComputedIndexedUser.from({ name: 'alice' }));
+
+    const foundUser = await service.getByIndex(ComputedIndexedUser, computedNameIndex, {
+      nameUppercase: 'BOB'
+    });
+
+    assert(foundUser.name === 'bob');
+    assert(foundUser.nameUppercase === 'BOB');
+
+    const anotherUser = await service.getByIndex(ComputedIndexedUser, computedNameIndex, {
+      nameUppercase: 'ALICE'
+    });
+
+    assert(anotherUser.name === 'alice');
+    assert(anotherUser.nameUppercase === 'ALICE');
+  }
+
+  @Test('Verify transient fields are not searchable via indexes')
+  async queryTransientFieldFails() {
+    const service = await this.service;
+
+    await service.create(TransientIndexedUser, TransientIndexedUser.from({ name: 'bob' }));
+
+    await assert.rejects(
+      () => service.getByIndex(TransientIndexedUser, transientNameIndex, { name: 'bob' }),
+      NotFoundError
+    );
   }
 }
