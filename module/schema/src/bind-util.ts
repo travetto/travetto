@@ -153,6 +153,10 @@ export class BindUtil {
       const instance = classConstruct<T & { type?: string }>(resolvedCls);
 
       for (const key of TypedObject.keys(instance)) { // Do not retain undefined fields
+        const desc = Object.getOwnPropertyDescriptor(instance, key);
+        if (desc?.get) {
+          continue;
+        }
         if (instance[key] === undefined) {
           delete instance[key];
         }
@@ -244,13 +248,6 @@ export class BindUtil {
           }
 
           input[castKey<T>(schemaFieldName)] = castTo(value);
-
-          if (field.accessor) {
-            Object.defineProperty(input, schemaFieldName, {
-              ...adapter.getAccessorDescriptor(schemaFieldName),
-              enumerable: true
-            });
-          }
         }
       }
     }

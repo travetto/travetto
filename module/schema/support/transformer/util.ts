@@ -365,4 +365,49 @@ class ${uniqueId} extends ${type.mappedClassName} {
     const finalReturnType = SchemaTransformUtil.ensureType(state, innerReturnType ?? returnType, node);
     return finalReturnType ? [state.fromLiteral({ returnType: finalReturnType })] : [];
   }
+
+  /**
+   * Helper to create inline defineProperty statement for accessors
+   */
+  static createAccessorDefineProperty(state: TransformerState, accessorName: string): ts.Statement {
+    return state.factory.createExpressionStatement(
+      state.factory.createCallExpression(
+        state.factory.createPropertyAccessExpression(
+          state.factory.createIdentifier('Object'),
+          state.factory.createIdentifier('defineProperty')
+        ),
+        undefined,
+        [
+          state.factory.createThis(),
+          state.factory.createStringLiteral(accessorName),
+          state.factory.createObjectLiteralExpression([
+            state.factory.createSpreadAssignment(
+              state.factory.createCallExpression(
+                state.factory.createPropertyAccessExpression(
+                  state.factory.createIdentifier('Object'),
+                  state.factory.createIdentifier('getOwnPropertyDescriptor')
+                ),
+                undefined,
+                [
+                  state.factory.createCallExpression(
+                    state.factory.createPropertyAccessExpression(
+                      state.factory.createIdentifier('Object'),
+                      state.factory.createIdentifier('getPrototypeOf')
+                    ),
+                    undefined,
+                    [state.factory.createThis()]
+                  ),
+                  state.factory.createStringLiteral(accessorName)
+                ]
+              )
+            ),
+            state.factory.createPropertyAssignment(
+              state.factory.createIdentifier('enumerable'),
+              state.factory.createTrue()
+            )
+          ], true)
+        ]
+      )
+    );
+  }
 }

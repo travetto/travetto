@@ -1,9 +1,18 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { type ModelCrudSupport, Model, NotFoundError } from '@travetto/model';
+import { type ModelCrudSupport, Model, NotFoundError, ModelCrudUtil } from '@travetto/model';
 
 import { BaseModelSuite } from './base.ts';
+
+@Model('computed_person')
+class ComputedPerson {
+  id: string;
+  name: string;
+  get nameUpper(): string {
+    return this.name.toUpperCase();
+  }
+}
 
 @Model('basic_person')
 class Person {
@@ -58,5 +67,29 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
     const single = await service.get(Person, id);
     assert(single !== undefined);
     assert(single.age === 25);
+  }
+
+  @Test('Should not persist computed properties')
+  async testComputed() {
+    const service = await this.service;
+    const id = service.idSource.create();
+    await service.create(ComputedPerson, ComputedPerson.from({
+      id,
+      name: 'Bob'
+    }));
+
+    const retrieved = await service.get(ComputedPerson, id);
+    assert(retrieved.nameUpper === 'BOB');
+
+    // Verify it wasn't saved in the database holistically:
+    // When we fetch the document, the database driver retrieves a raw object and maps it.
+    // If the database stored 'nameUpper', trying to map it would set it on the retrieved instance.
+    // Since nameUpper is a getter-only property on the instance, we can verify that the persistence
+    // preparation (prePersist) recursively stripped the getter property from the stored object.
+    const instance = ComputedPerson.from({ id, name: 'Bob' });
+    assert(Object.hasOwn(instance, 'nameUpper'));
+
+    const prepared = await ModelCrudUtil.prePersist(ComputedPerson, instance, 'all');
+    assert(prepared.nameUpper === undefined);
   }
 }

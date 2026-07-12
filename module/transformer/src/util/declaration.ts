@@ -102,4 +102,66 @@ export class DeclarationUtil {
     }
     return false;
   }
+
+  /**
+   * Ensures a constructor exists in the class declaration, synthesizing one if necessary
+   */
+  static ensureConstructor(factory: ts.NodeFactory, node: ts.ClassDeclaration): ts.ClassDeclaration {
+    const hasCons = node.members.some(member => ts.isConstructorDeclaration(member));
+    if (hasCons) {
+      return node;
+    }
+
+    const hasParent = node.heritageClauses?.some(clause => clause.token === ts.SyntaxKind.ExtendsKeyword);
+    const newConsStatements: ts.Statement[] = [];
+    let parameters: ts.ParameterDeclaration[] = [];
+    if (hasParent) {
+      parameters = [
+        factory.createParameterDeclaration(
+          undefined,
+          factory.createToken(ts.SyntaxKind.DotDotDotToken),
+          factory.createIdentifier('args'),
+          undefined,
+          factory.createArrayTypeNode(factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)),
+          undefined
+        )
+      ];
+      newConsStatements.push(
+        factory.createExpressionStatement(
+          factory.createCallExpression(
+            factory.createSuper(),
+            undefined,
+            [factory.createSpreadElement(factory.createIdentifier('args'))]
+          )
+        )
+      );
+    }
+    const newCons = factory.createConstructorDeclaration(
+      undefined,
+      parameters,
+      factory.createBlock(newConsStatements, true)
+    );
+    return factory.updateClassDeclaration(
+      node,
+      node.modifiers,
+      node.name,
+      node.typeParameters,
+      node.heritageClauses,
+      [...node.members, newCons]
+    );
+  }
+
+  /**
+   * Calculates the insertion index for constructor statements (after super call, if exists)
+   */
+  static getConstructorInsertIndex(node: ts.ConstructorDeclaration): number {
+    if (node.body) {
+      const first = node.body.statements[0];
+      if (first && ts.isExpressionStatement(first) && ts.isCallExpression(first.expression) &&
+          first.expression.expression.kind === ts.SyntaxKind.SuperKeyword) {
+        return 1;
+      }
+    }
+    return 0;
+  }
 }

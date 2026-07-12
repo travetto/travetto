@@ -309,7 +309,7 @@ class DataBinding {
     });
 
     const cloned = structuredClone(acc);
-    assert(cloned.age === undefined);
+    assert(cloned.age === 5);
     assert(cloned.area === 'green');
   }
 }

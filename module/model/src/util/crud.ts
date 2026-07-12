@@ -1,4 +1,4 @@
-import { castTo, type Class, Util, RuntimeError, hasFunction, BinaryUtil, type BinaryArray, JSONUtil } from '@travetto/runtime';
+import { castTo, castKey, type Class, Util, RuntimeError, hasFunction, BinaryUtil, type BinaryArray, JSONUtil } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
@@ -112,6 +112,64 @@ export class ModelCrudUtil {
   }
 
   /**
+   * Recursively deletes or masks accessor own properties from an object based on its Schema.
+   * If accessors are present, returns a copy with the accessors set to undefined.
+   */
+  static cleanAccessors<T>(cls: Class<T>, item: T): T {
+    if (!item || typeof item !== 'object') {
+      return item;
+    }
+    if (SchemaRegistryIndex.has(cls)) {
+      const schema = SchemaRegistryIndex.get(cls).get();
+      const hasGetters = Object.values(schema.fields).some(field => field.accessor && field.access === 'readonly');
+      
+      let res = item;
+      if (hasGetters) {
+        res = { ...item };
+        for (const [key, field] of Object.entries(schema.fields)) {
+          if (field.accessor && field.access === 'readonly') {
+            res[castKey<T>(key)] = undefined!;
+          }
+        }
+      }
+
+      for (const [key, field] of Object.entries(schema.fields)) {
+        const fieldKey = castKey<typeof res>(key);
+        if (!(field.accessor && field.access === 'readonly') && res[fieldKey] !== undefined && res[fieldKey] !== null) {
+          if (field.array && Array.isArray(res[fieldKey])) {
+            const arr = res[fieldKey] as any[];
+            let changed = false;
+            const newArr = arr.map(subItem => {
+              const cleaned = this.cleanAccessors(field.type, subItem);
+              if (cleaned !== subItem) {
+                changed = true;
+              }
+              return cleaned;
+            });
+            if (changed) {
+              if (res === item) {
+                res = { ...item };
+              }
+              res[fieldKey] = newArr as any;
+            }
+          } else {
+            const val = res[fieldKey];
+            const cleaned = this.cleanAccessors(field.type, val);
+            if (cleaned !== val) {
+              if (res === item) {
+                res = { ...item };
+              }
+              res[fieldKey] = cleaned;
+            }
+          }
+        }
+      }
+      return res;
+    }
+    return item;
+  }
+
+  /**
    * Ensure subtype is not supported
    */
   static ensureNotSubType(cls: Class): void {
@@ -132,7 +190,7 @@ export class ModelCrudUtil {
         item = await handler(item) ?? item;
       }
     }
-    return item;
+    return this.cleanAccessors(cls, item);
   }
 
   /**
