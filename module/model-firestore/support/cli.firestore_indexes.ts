@@ -1,10 +1,13 @@
+import cp from 'node:child_process';
+import fs from 'node:fs/promises';
+
 import { type CliCommandShape, CliCommand, CliModuleFlag } from '@travetto/cli';
-import { JSONUtil, Env } from '@travetto/runtime';
+import { JSONUtil, Env, ExecUtil, Runtime } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { ModelRegistryIndex } from '@travetto/model';
 import { isModelIndexedIndex } from '@travetto/model-indexed';
-import { ManifestFileUtil, ManifestUtil } from '@travetto/manifest';
+import { ManifestFileUtil } from '@travetto/manifest';
 
 import { FirestoreModelConfig } from '../src/config.ts';
 import { FirestoreModelService } from '../src/service.ts';
@@ -34,11 +37,14 @@ type FirestoreIndexSet = {
 @CliCommand()
 export class FirestoreIndexesCommand implements CliCommandShape {
 
-  /** Output file */
-  output?: string;
+  indexFile = 'firestore.indexes.json';
+  firebaseFile = 'firebase.json';
 
   @CliModuleFlag({ short: 'm' })
   module: string;
+
+  /** Should we deploy after writing the json file? */
+  deploy?: boolean;
 
   finalize(): void {
     Env.DEBUG.set(false);
@@ -74,10 +80,37 @@ export class FirestoreIndexesCommand implements CliCommandShape {
 
     const text = JSONUtil.toUTF8Pretty(outputData);
 
-    if (this.output === '-' || !this.output) {
-      console.log!(text);
+    await ManifestFileUtil.bufferedFileWrite(this.indexFile, text);
+
+    const firebaseLocation = Runtime.workspaceRelative(this.firebaseFile);
+    if (!await fs.stat(firebaseLocation, { throwIfNoEntry: false })) {
+      await ManifestFileUtil.bufferedFileWrite(firebaseLocation, '{}');
+    }
+
+    const firebaseContext = JSONUtil.fromBinaryArray<{ firestore?: { database?: string, indexes?: string }[] }>(await fs.readFile(firebaseLocation));
+    const existing = (firebaseContext.firestore ??= []);
+    const found = existing.find(x => x.database === config.databaseId);
+
+    let changed = true;
+    if (!found) {
+      existing.push(({ indexes: this.indexFile, database: config.databaseId }));
+    } else if (found.indexes !== this.indexFile) {
+      found.indexes = this.indexFile;
     } else {
-      await ManifestFileUtil.bufferedFileWrite(this.output, text);
+      changed = false;
+    }
+
+    if (changed) {
+      await ManifestFileUtil.bufferedFileWrite(firebaseLocation, JSONUtil.toUTF8Pretty(firebaseContext));
+    }
+
+    if (this.deploy) {
+      const child = cp.spawn(
+        'firebase', ['deploy', '--only', 'firestore:indexes'],
+        // Complete take over
+        { stdio: 'inherit' },
+      );
+      await ExecUtil.getResult(child)
     }
   }
 }
