@@ -124,7 +124,7 @@ export class ModelCrudUtil {
       const transientFields = ModelRegistryIndex.has(cls) ? ModelRegistryIndex.getConfig(cls).transientFields : undefined;
 
       const isCleanTarget = (key: string, field: any): boolean => {
-        return (field.accessor && field.access === 'readonly') || (transientFields?.has(key) ?? false);
+        return (field.accessor && field.access === 'readonly') || (transientFields?.includes(key) ?? false);
       };
 
       const hasTargets = Object.entries(schema.fields).some(([key, field]) => isCleanTarget(key, field));

@@ -10,7 +10,7 @@ function combineClasses(target: ModelConfig, sources: Partial<ModelConfig>[]): M
       indices: { ...(target.indices || {}), ...(source.indices || {}) },
       postLoad: [...(target.postLoad || []), ...(source.postLoad || [])],
       prePersist: [...(target.prePersist || []), ...(source.prePersist || [])],
-      transientFields: new Set([...(target.transientFields || []), ...(source.transientFields || [])]),
+      transientFields: [...(target.transientFields || []), ...(source.transientFields || [])],
     });
   }
   if (target.store) {
@@ -35,7 +35,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
       store: this.#cls.name,
       postLoad: [],
       prePersist: [],
-      transientFields: new Set()
+      transientFields: []
     };
     combineClasses(config, data);
     return config;
@@ -52,7 +52,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
 
       config.postLoad = [...parent.postLoad ?? [], ...config.postLoad ?? []];
       config.prePersist = [...parent.prePersist ?? [], ...config.prePersist ?? []];
-      config.transientFields = new Set([...parent.transientFields ?? [], ...config.transientFields ?? []]);
+      config.transientFields = [...parent.transientFields ?? [], ...config.transientFields ?? []];
     }
   }
 

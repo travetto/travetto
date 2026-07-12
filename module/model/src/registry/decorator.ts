@@ -97,7 +97,7 @@ export function Transient<T>() {
 export function TransientField() {
   return function <K extends string, C extends Partial<Record<K, unknown>>>(instance: C, property: K): void {
     ModelRegistryIndex.getForRegister(getClass(instance)).register({
-      transientFields: new Set([property])
+      transientFields: [property]
     });
   };
 }
