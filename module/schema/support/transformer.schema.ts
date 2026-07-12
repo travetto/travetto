@@ -6,6 +6,7 @@ const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';
 const InSchema = Symbol();
 const IsOptIn = Symbol();
 const AccessorsSymbol = Symbol();
+const GettersSymbol = Symbol();
 const AutoEnrollMethods = Symbol();
 
 interface AutoState {
@@ -13,6 +14,7 @@ interface AutoState {
   [IsOptIn]?: boolean;
   [AutoEnrollMethods]?: Set<string>;
   [AccessorsSymbol]?: Set<string>;
+  [GettersSymbol]?: Set<string>;
 }
 
 /**
@@ -64,6 +66,7 @@ export class SchemaTransformer {
    */
   static startSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
     state[AccessorsSymbol] = new Set();
+    state[GettersSymbol] = new Set();
     state[AutoEnrollMethods] = new Set();
     state[InSchema] = true;
 
@@ -130,9 +133,40 @@ export class SchemaTransformer {
       params = [...params, state.fromLiteral(attrs)];
     }
 
+    let newMembers = node.members;
+    const accessors = state[GettersSymbol] ? [...state[GettersSymbol]] : [];
+    if (accessors.length > 0) {
+      node = DeclarationUtil.ensureConstructor(state.factory, node);
+
+      const accessorStatements = accessors.map(accessorName =>
+        SchemaTransformUtil.createAccessorDefineProperty(state, accessorName)
+      );
+
+      const consIndex = node.members.findIndex(member => ts.isConstructorDeclaration(member));
+      const consNode = node.members[consIndex] as ts.ConstructorDeclaration;
+      const insertIndex = DeclarationUtil.getConstructorInsertIndex(consNode);
+      const newStatements = [
+        ...consNode.body?.statements.slice(0, insertIndex) ?? [],
+        ...accessorStatements,
+        ...consNode.body?.statements.slice(insertIndex) ?? []
+      ];
+      const updatedCons = state.factory.updateConstructorDeclaration(
+        consNode,
+        consNode.modifiers,
+        consNode.parameters,
+        state.factory.createBlock(newStatements, true)
+      );
+      newMembers = ts.factory.createNodeArray([
+        ...node.members.slice(0, consIndex),
+        updatedCons,
+        ...node.members.slice(consIndex + 1)
+      ]);
+    }
+
     delete state[InSchema];
     delete state[IsOptIn];
     delete state[AccessorsSymbol];
+    delete state[GettersSymbol];
     delete state[AutoEnrollMethods];
 
     return state.factory.updateClassDeclaration(
@@ -143,7 +177,7 @@ export class SchemaTransformer {
       node.name,
       node.typeParameters,
       node.heritageClauses,
-      node.members
+      newMembers
     );
   }
 
@@ -201,6 +235,7 @@ export class SchemaTransformer {
     if (this.isInvisible(state, node) || DeclarationUtil.isStatic(node)) {
       return node;
     }
+    state[GettersSymbol]?.add(node.name.getText());
     if (state[AccessorsSymbol]?.has(node.name.getText())) {
       return node;
     } else {

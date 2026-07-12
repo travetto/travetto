@@ -232,7 +232,7 @@ export interface SchemaFieldConfig extends SchemaInputConfig {
   /**
    * Is this field a getter or setter
    */
-  accessor?: string;
+  accessor?: boolean;
 }
 
 export type ViewFieldsConfig<T> = { with: Extract<(keyof T), string>[] } | { without: Extract<(keyof T), string>[] };

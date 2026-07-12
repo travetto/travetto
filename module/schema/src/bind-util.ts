@@ -21,6 +21,16 @@ function isInstance<T>(value: unknown): value is T {
 export class BindUtil {
 
   /**
+   * Utility to make a property accessor enumerable at runtime
+   */
+  static registerAccessor(instance: any, property: string): void {
+    Object.defineProperty(instance, property, {
+      ...Object.getOwnPropertyDescriptor(Object.getPrototypeOf(instance), property),
+      enumerable: true
+    });
+  }
+
+  /**
    * Coerce a value to match the field config type
    * @param config The field config to coerce to
    * @param value The provided value
@@ -153,6 +163,10 @@ export class BindUtil {
       const instance = classConstruct<T & { type?: string }>(resolvedCls);
 
       for (const key of TypedObject.keys(instance)) { // Do not retain undefined fields
+        const descriptor = Object.getOwnPropertyDescriptor(instance, key);
+        if (descriptor?.get) {
+          continue;
+        }
         if (instance[key] === undefined) {
           delete instance[key];
         }
@@ -244,13 +258,6 @@ export class BindUtil {
           }
 
           input[castKey<T>(schemaFieldName)] = castTo(value);
-
-          if (field.accessor) {
-            Object.defineProperty(input, schemaFieldName, {
-              ...adapter.getAccessorDescriptor(schemaFieldName),
-              enumerable: true
-            });
-          }
         }
       }
     }

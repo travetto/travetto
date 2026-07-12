@@ -1,4 +1,4 @@
-import { castTo, type Class, Util, RuntimeError, hasFunction, BinaryUtil, type BinaryArray, JSONUtil } from '@travetto/runtime';
+import { castTo, castKey, type Class, Util, RuntimeError, hasFunction, BinaryUtil, type BinaryArray, JSONUtil } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
@@ -112,6 +112,70 @@ export class ModelCrudUtil {
   }
 
   /**
+   * Recursively deletes or masks transient fields from an object based on its Model config.
+   * If transient fields are present, returns a copy with those fields set to undefined.
+   */
+  static cleanTransientFields<T>(cls: Class<T>, item: T): T {
+    if (!item || typeof item !== 'object') {
+      return item;
+    }
+    if (SchemaRegistryIndex.has(cls)) {
+      const schema = SchemaRegistryIndex.get(cls).get();
+      const transientFields = ModelRegistryIndex.has(cls) ? ModelRegistryIndex.getConfig(cls).transientFields : undefined;
+
+      const isCleanTarget = (key: string): boolean => {
+        return transientFields?.includes(key) ?? false;
+      };
+
+      const hasTargets = Object.keys(schema.fields).some(key => isCleanTarget(key));
+      
+      let res = item;
+      if (hasTargets) {
+        res = { ...item };
+        for (const key of Object.keys(schema.fields)) {
+          if (isCleanTarget(key)) {
+            res[castKey<T>(key)] = undefined!;
+          }
+        }
+      }
+
+      for (const [key, field] of Object.entries(schema.fields)) {
+        const fieldKey = castKey<typeof res>(key);
+        if (!isCleanTarget(key) && res[fieldKey] !== undefined && res[fieldKey] !== null) {
+          if (field.array && Array.isArray(res[fieldKey])) {
+            const arr = res[fieldKey] as any[];
+            let changed = false;
+            const newArr = arr.map(subItem => {
+              const cleaned = this.cleanTransientFields(field.type, subItem);
+              if (cleaned !== subItem) {
+                changed = true;
+              }
+              return cleaned;
+            });
+            if (changed) {
+              if (res === item) {
+                res = { ...item };
+              }
+              res[fieldKey] = newArr as any;
+            }
+          } else {
+            const val = res[fieldKey];
+            const cleaned = this.cleanTransientFields(field.type, val);
+            if (cleaned !== val) {
+              if (res === item) {
+                res = { ...item };
+              }
+              res[fieldKey] = cleaned;
+            }
+          }
+        }
+      }
+      return res;
+    }
+    return item;
+  }
+
+  /**
    * Ensure subtype is not supported
    */
   static ensureNotSubType(cls: Class): void {
@@ -132,7 +196,7 @@ export class ModelCrudUtil {
         item = await handler(item) ?? item;
       }
     }
-    return item;
+    return this.cleanTransientFields(cls, item);
   }
 
   /**
