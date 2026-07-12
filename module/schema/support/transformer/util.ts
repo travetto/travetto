@@ -370,11 +370,14 @@ class ${uniqueId} extends ${type.mappedClassName} {
    * Helper to create inline defineProperty statement for accessors
    */
   static createAccessorDefineProperty(state: TransformerState, accessorName: string): ts.Statement {
-    const accessorHelper = state.importFile('@travetto/schema/src/internal/accessor.ts');
+    const bindUtilImport = state.importFile('@travetto/schema/src/bind-util.ts');
     return state.factory.createExpressionStatement(
       state.factory.createCallExpression(
         state.factory.createPropertyAccessExpression(
-          accessorHelper.identifier,
+          state.factory.createPropertyAccessExpression(
+            bindUtilImport.identifier,
+            state.factory.createIdentifier('BindUtil')
+          ),
           state.factory.createIdentifier('registerAccessor')
         ),
         undefined,

@@ -21,6 +21,16 @@ function isInstance<T>(value: unknown): value is T {
 export class BindUtil {
 
   /**
+   * Utility to make a property accessor enumerable at runtime
+   */
+  static registerAccessor(instance: any, property: string): void {
+    Object.defineProperty(instance, property, {
+      ...Object.getOwnPropertyDescriptor(Object.getPrototypeOf(instance), property),
+      enumerable: true
+    });
+  }
+
+  /**
    * Coerce a value to match the field config type
    * @param config The field config to coerce to
    * @param value The provided value
