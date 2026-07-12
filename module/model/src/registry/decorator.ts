@@ -90,6 +90,19 @@ export function Transient<T>() {
 }
 
 /**
+ * Prevent a field from being persisted
+ * @augments `@travetto/schema:Field`
+ * @kind decorator
+ */
+export function TransientField() {
+  return function <K extends string, C extends Partial<Record<K, unknown>>>(instance: C, property: K): void {
+    ModelRegistryIndex.getForRegister(getClass(instance)).register({
+      transientFields: new Set([property])
+    });
+  };
+}
+
+/**
  * Model class decorator for post-load behavior
  * @augments `@travetto/schema:Schema`
  * @kind decorator

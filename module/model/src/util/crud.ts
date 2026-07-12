@@ -121,13 +121,19 @@ export class ModelCrudUtil {
     }
     if (SchemaRegistryIndex.has(cls)) {
       const schema = SchemaRegistryIndex.get(cls).get();
-      const hasGetters = Object.values(schema.fields).some(field => field.accessor && field.access === 'readonly');
+      const transientFields = ModelRegistryIndex.has(cls) ? ModelRegistryIndex.getConfig(cls).transientFields : undefined;
+
+      const isCleanTarget = (key: string, field: any): boolean => {
+        return (field.accessor && field.access === 'readonly') || (transientFields?.has(key) ?? false);
+      };
+
+      const hasTargets = Object.entries(schema.fields).some(([key, field]) => isCleanTarget(key, field));
       
       let res = item;
-      if (hasGetters) {
+      if (hasTargets) {
         res = { ...item };
         for (const [key, field] of Object.entries(schema.fields)) {
-          if (field.accessor && field.access === 'readonly') {
+          if (isCleanTarget(key, field)) {
             res[castKey<T>(key)] = undefined!;
           }
         }
@@ -135,7 +141,7 @@ export class ModelCrudUtil {
 
       for (const [key, field] of Object.entries(schema.fields)) {
         const fieldKey = castKey<typeof res>(key);
-        if (!(field.accessor && field.access === 'readonly') && res[fieldKey] !== undefined && res[fieldKey] !== null) {
+        if (!isCleanTarget(key, field) && res[fieldKey] !== undefined && res[fieldKey] !== null) {
           if (field.array && Array.isArray(res[fieldKey])) {
             const arr = res[fieldKey] as any[];
             let changed = false;

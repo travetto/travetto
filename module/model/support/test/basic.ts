@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { type ModelCrudSupport, Model, NotFoundError, ModelCrudUtil } from '@travetto/model';
+import { type ModelCrudSupport, Model, NotFoundError, ModelCrudUtil, TransientField } from '@travetto/model';
 
 import { BaseModelSuite } from './base.ts';
 
@@ -12,6 +12,8 @@ class ComputedPerson {
   get nameUpper(): string {
     return this.name.toUpperCase();
   }
+  @TransientField()
+  ignoredField?: string;
 }
 
 @Model('basic_person')
@@ -75,7 +77,8 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
     const id = service.idSource.create();
     await service.create(ComputedPerson, ComputedPerson.from({
       id,
-      name: 'Bob'
+      name: 'Bob',
+      ignoredField: 'secret'
     }));
 
     const retrieved = await service.get(ComputedPerson, id);
@@ -86,10 +89,12 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
     // If the database stored 'nameUpper', trying to map it would set it on the retrieved instance.
     // Since nameUpper is a getter-only property on the instance, we can verify that the persistence
     // preparation (prePersist) recursively stripped the getter property from the stored object.
-    const instance = ComputedPerson.from({ id, name: 'Bob' });
+    const instance = ComputedPerson.from({ id, name: 'Bob', ignoredField: 'secret' });
     assert(Object.hasOwn(instance, 'nameUpper'));
+    assert(instance.ignoredField === 'secret');
 
     const prepared = await ModelCrudUtil.prePersist(ComputedPerson, instance, 'all');
     assert(prepared.nameUpper === undefined);
+    assert(prepared.ignoredField === undefined);
   }
 }
