@@ -153,8 +153,8 @@ export class BindUtil {
       const instance = classConstruct<T & { type?: string }>(resolvedCls);
 
       for (const key of TypedObject.keys(instance)) { // Do not retain undefined fields
-        const desc = Object.getOwnPropertyDescriptor(instance, key);
-        if (desc?.get) {
+        const descriptor = Object.getOwnPropertyDescriptor(instance, key);
+        if (descriptor?.get) {
           continue;
         }
         if (instance[key] === undefined) {
