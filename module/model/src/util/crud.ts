@@ -112,10 +112,10 @@ export class ModelCrudUtil {
   }
 
   /**
-   * Recursively deletes or masks accessor own properties from an object based on its Schema.
-   * If accessors are present, returns a copy with the accessors set to undefined.
+   * Recursively deletes or masks transient fields from an object based on its Model config.
+   * If transient fields are present, returns a copy with those fields set to undefined.
    */
-  static cleanAccessors<T>(cls: Class<T>, item: T): T {
+  static cleanTransientFields<T>(cls: Class<T>, item: T): T {
     if (!item || typeof item !== 'object') {
       return item;
     }
@@ -123,17 +123,17 @@ export class ModelCrudUtil {
       const schema = SchemaRegistryIndex.get(cls).get();
       const transientFields = ModelRegistryIndex.has(cls) ? ModelRegistryIndex.getConfig(cls).transientFields : undefined;
 
-      const isCleanTarget = (key: string, field: any): boolean => {
-        return (field.accessor && field.access === 'readonly') || (transientFields?.includes(key) ?? false);
+      const isCleanTarget = (key: string): boolean => {
+        return transientFields?.includes(key) ?? false;
       };
 
-      const hasTargets = Object.entries(schema.fields).some(([key, field]) => isCleanTarget(key, field));
+      const hasTargets = Object.keys(schema.fields).some(key => isCleanTarget(key));
       
       let res = item;
       if (hasTargets) {
         res = { ...item };
-        for (const [key, field] of Object.entries(schema.fields)) {
-          if (isCleanTarget(key, field)) {
+        for (const key of Object.keys(schema.fields)) {
+          if (isCleanTarget(key)) {
             res[castKey<T>(key)] = undefined!;
           }
         }
@@ -141,12 +141,12 @@ export class ModelCrudUtil {
 
       for (const [key, field] of Object.entries(schema.fields)) {
         const fieldKey = castKey<typeof res>(key);
-        if (!isCleanTarget(key, field) && res[fieldKey] !== undefined && res[fieldKey] !== null) {
+        if (!isCleanTarget(key) && res[fieldKey] !== undefined && res[fieldKey] !== null) {
           if (field.array && Array.isArray(res[fieldKey])) {
             const arr = res[fieldKey] as any[];
             let changed = false;
             const newArr = arr.map(subItem => {
-              const cleaned = this.cleanAccessors(field.type, subItem);
+              const cleaned = this.cleanTransientFields(field.type, subItem);
               if (cleaned !== subItem) {
                 changed = true;
               }
@@ -160,7 +160,7 @@ export class ModelCrudUtil {
             }
           } else {
             const val = res[fieldKey];
-            const cleaned = this.cleanAccessors(field.type, val);
+            const cleaned = this.cleanTransientFields(field.type, val);
             if (cleaned !== val) {
               if (res === item) {
                 res = { ...item };
@@ -196,7 +196,7 @@ export class ModelCrudUtil {
         item = await handler(item) ?? item;
       }
     }
-    return this.cleanAccessors(cls, item);
+    return this.cleanTransientFields(cls, item);
   }
 
   /**

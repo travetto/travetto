@@ -9,6 +9,7 @@ import { BaseModelSuite } from './base.ts';
 class ComputedPerson {
   id: string;
   name: string;
+  @TransientField()
   get nameUpper(): string {
     return this.name.toUpperCase();
   }
