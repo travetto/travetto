@@ -370,42 +370,17 @@ class ${uniqueId} extends ${type.mappedClassName} {
    * Helper to create inline defineProperty statement for accessors
    */
   static createAccessorDefineProperty(state: TransformerState, accessorName: string): ts.Statement {
+    const accessorHelper = state.importFile('@travetto/schema/src/internal/accessor.ts');
     return state.factory.createExpressionStatement(
       state.factory.createCallExpression(
         state.factory.createPropertyAccessExpression(
-          state.factory.createIdentifier('Object'),
-          state.factory.createIdentifier('defineProperty')
+          accessorHelper.identifier,
+          state.factory.createIdentifier('registerAccessor')
         ),
         undefined,
         [
           state.factory.createThis(),
-          state.factory.createStringLiteral(accessorName),
-          state.factory.createObjectLiteralExpression([
-            state.factory.createSpreadAssignment(
-              state.factory.createCallExpression(
-                state.factory.createPropertyAccessExpression(
-                  state.factory.createIdentifier('Object'),
-                  state.factory.createIdentifier('getOwnPropertyDescriptor')
-                ),
-                undefined,
-                [
-                  state.factory.createCallExpression(
-                    state.factory.createPropertyAccessExpression(
-                      state.factory.createIdentifier('Object'),
-                      state.factory.createIdentifier('getPrototypeOf')
-                    ),
-                    undefined,
-                    [state.factory.createThis()]
-                  ),
-                  state.factory.createStringLiteral(accessorName)
-                ]
-              )
-            ),
-            state.factory.createPropertyAssignment(
-              state.factory.createIdentifier('enumerable'),
-              state.factory.createTrue()
-            )
-          ], true)
+          state.factory.createStringLiteral(accessorName)
         ]
       )
     );
