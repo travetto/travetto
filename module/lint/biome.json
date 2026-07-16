@@ -8,7 +8,18 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!**/node_modules", "!**/dist", "!**/out", "!**/*.d.ts", "!**/.trv", "!**/fixtures", "!**/resources", "!**/ui", "!**/api-client"]
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/out",
+      "!**/*.d.ts",
+      "!**/.trv",
+      "!**/fixtures",
+      "!**/resources",
+      "!**/ui",
+      "!**/api-client"
+    ]
   },
   "formatter": {
     "enabled": true,
@@ -17,14 +28,26 @@
     "indentWidth": 2,
     "lineWidth": 180
   },
-  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
   "linter": {
     "enabled": true,
     "rules": {
       "preset": "recommended",
       "style": {
         "useImportType": "error",
-        "useNamingConvention": "off",
+        "useNamingConvention": {
+          "level": "on",
+          "options": {
+            "strictCase": false
+          }
+        },
+        "noNonNullAssertion": "off",
         "useConst": "error"
       },
       "correctness": {
@@ -44,7 +67,39 @@
     "formatter": {
       "quoteStyle": "single",
       "semicolons": "always",
-      "arrowParentheses": "asNeeded"
+      "arrowParentheses": "asNeeded",
+      "trailingCommas": "none"
+    },
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
     }
-  }
+  },
+  "json": {
+    "formatter": {
+      "lineWidth": 80
+    }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "**/test/**/*.ts*",
+        "**/support/test/**/*.ts*",
+        "global-test/**"
+      ],
+      "assist": {
+        "actions": {
+          "source": {
+            "organizeImports": "off"
+          }
+        }
+      },
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off"
+          }
+        }
+      }
+    }
+  ]
 }
