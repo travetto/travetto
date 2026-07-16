@@ -3,12 +3,18 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 
 import { getUnimplementedOperations } from '../src/execute.ts';
-import { EXCLUDED_OPERATION_IDS, getValidOperationIds, recommend, recommendOperations } from '../src/recommendation.ts';
 import { LLM_SNIPPET_SOURCES } from '../src/snippet-catalog.ts';
 import { WORKFLOWS } from '../src/workflow-guidance.ts';
+import {
+  EXCLUDED_OPERATION_IDS,
+  getValidOperationIds,
+  recommend,
+  recommendOperations
+} from '../src/recommendation.ts';
 
 @Suite()
 class LlmSupportRecommendationTest {
+
   @Test()
   async excludesScopedOperationsByDefault() {
     const output = recommendOperations();
@@ -98,14 +104,8 @@ class LlmSupportRecommendationTest {
       const moduleNames = [...op.requiredModules, ...op.optionalModules];
       const duplicateModules = moduleNames.filter((item, idx, arr) => arr.indexOf(item) !== idx);
       assert(duplicateModules.length === 0, `Operation '${op.id}' has duplicate modules`);
-      assert(
-        op.requiredModules.every(item => item.startsWith('@travetto/')),
-        `Operation '${op.id}' has non-travetto required module`,
-      );
-      assert(
-        op.optionalModules.every(item => item.startsWith('@travetto/')),
-        `Operation '${op.id}' has non-travetto optional module`,
-      );
+      assert(op.requiredModules.every(item => item.startsWith('@travetto/')), `Operation '${op.id}' has non-travetto required module`);
+      assert(op.optionalModules.every(item => item.startsWith('@travetto/')), `Operation '${op.id}' has non-travetto optional module`);
     }
   }
 

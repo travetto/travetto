@@ -6,8 +6,13 @@ import path from 'node:path';
 import type { Class } from '@travetto/runtime';
 import { SchemaValidator } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
+
+import {
+  ExecutionResponseSchema,
+  PlanResponseSchema,
+  RecommendationResponseSchema
+} from '../src/types.ts';
 import { getLlmSupportToolDefinitions, runLlmSupportFlow, runLlmSupportTool } from '../src/tooling.ts';
-import { ExecutionResponseSchema, PlanResponseSchema, RecommendationResponseSchema } from '../src/types.ts';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -22,6 +27,7 @@ async function bindAndValidate<T extends object>(schema: Class<T>, value: unknow
 
 @Suite()
 class LlmSupportToolingTest {
+
   @Test()
   async exposesExpectedToolDefinitions() {
     const defs = getLlmSupportToolDefinitions();
@@ -55,14 +61,17 @@ class LlmSupportToolingTest {
 
     const output = await runLlmSupportTool('llm_support_execute', {
       operations: ['project-bootstrap'],
-      targetDir: target,
+      targetDir: target
     });
 
     const bound = await bindAndValidate(ExecutionResponseSchema, output);
     assert(bound.dryRun === true);
     assert(bound.artifacts.some(item => item.status === 'planned'));
 
-    await assert.rejects(() => fs.access(path.join(target, 'package.json')), /ENOENT/);
+    await assert.rejects(
+      () => fs.access(path.join(target, 'package.json')),
+      /ENOENT/
+    );
   }
 
   @Test()
@@ -73,7 +82,7 @@ class LlmSupportToolingTest {
       operations: ['project-bootstrap'],
       targetDir: target,
       apply: true,
-      projectName: 'tooling-app',
+      projectName: 'tooling-app'
     });
 
     const bound = await bindAndValidate(ExecutionResponseSchema, output);
@@ -91,14 +100,14 @@ class LlmSupportToolingTest {
       operations: ['project-bootstrap'],
       targetDir: target,
       apply: true,
-      projectName: 'overwrite-app',
+      projectName: 'overwrite-app'
     });
 
     const output = await runLlmSupportTool('llm_support_execute', {
       operations: ['project-bootstrap'],
       targetDir: target,
       apply: true,
-      projectName: 'overwrite-app',
+      projectName: 'overwrite-app'
     });
 
     const bound = await bindAndValidate(ExecutionResponseSchema, output);
@@ -118,7 +127,7 @@ class LlmSupportToolingTest {
       monorepo: true,
       workspacePath: '/packages/api service/',
       workspaceName: 'Demo API',
-      projectName: 'Demo Root',
+      projectName: 'Demo Root'
     });
 
     const bound = await bindAndValidate(ExecutionResponseSchema, output);
@@ -135,12 +144,11 @@ class LlmSupportToolingTest {
   @Test()
   async rejectsExecuteWhenOperationsTypeIsInvalid() {
     await assert.rejects(
-      () =>
-        runLlmSupportTool('llm_support_execute', {
-          operations: 5,
-          targetDir: '.',
-        }),
-      /validation errors/i,
+      () => runLlmSupportTool('llm_support_execute', {
+        operations: 5,
+        targetDir: '.'
+      }),
+      /validation errors/i
     );
   }
 
@@ -152,8 +160,8 @@ class LlmSupportToolingTest {
       query: { operations: ['create-web-route'] },
       execute: {
         targetDir: target,
-        dryRun: true,
-      },
+        dryRun: true
+      }
     });
 
     assert(output.recommendation.operations.some(item => item.id === 'create-web-route'));

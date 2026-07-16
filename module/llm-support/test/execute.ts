@@ -2,9 +2,10 @@ import assert from 'node:assert';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { FileLoader, JSONUtil, RuntimeResources } from '@travetto/runtime';
+
 import { SchemaValidator } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
+import { FileLoader, JSONUtil, RuntimeResources } from '@travetto/runtime';
 
 import { executeOperations, getUnimplementedOperations } from '../src/execute.ts';
 import { recommendOperations } from '../src/recommendation.ts';
@@ -37,6 +38,7 @@ async function assertFilesExist(loader: FileLoader, files: string[]): Promise<vo
 
 @Suite()
 class LlmSupportExecuteTest {
+
   @Test()
   async dryRunDoesNotCreateFiles() {
     const { target, loader } = await createTarget('llm-support-dry-run-');
@@ -44,15 +46,21 @@ class LlmSupportExecuteTest {
     const output = await executeOperations({
       operations: ['project-bootstrap'],
       targetDir: target,
-      dryRun: true,
+      dryRun: true
     });
 
     assert(output.artifacts.some(item => item.status === 'planned'));
     assert(output.artifacts.some(item => item.file.endsWith('package.json')));
 
-    await assert.rejects(() => loader.resolve('resources/application.yml'), /Unable to find/);
+    await assert.rejects(
+      () => loader.resolve('resources/application.yml'),
+      /Unable to find/
+    );
 
-    await assert.rejects(() => loader.resolve('package.json'), /Unable to find/);
+    await assert.rejects(
+      () => loader.resolve('package.json'),
+      /Unable to find/
+    );
   }
 
   @Test()
@@ -63,12 +71,17 @@ class LlmSupportExecuteTest {
       operations: ['project-bootstrap'],
       targetDir: target,
       dryRun: false,
-      projectName: 'sample-bootstrap-app',
+      projectName: 'sample-bootstrap-app'
     });
 
     assert(output.artifacts.some(item => item.status === 'created'));
 
-    await assertFilesExist(loader, ['package.json', 'resources/application.yml', 'src/service/home.ts', 'src/web/home.ts']);
+    await assertFilesExist(loader, [
+      'package.json',
+      'resources/application.yml',
+      'src/service/home.ts',
+      'src/web/home.ts'
+    ]);
 
     const pkgRaw: {
       name?: string;
@@ -96,7 +109,7 @@ class LlmSupportExecuteTest {
       targetDir: target,
       dryRun: false,
       projectName: 'sample-mono-app',
-      monorepo: true,
+      monorepo: true
     });
 
     assert(output.artifacts.some(item => item.status === 'created'));
@@ -106,7 +119,7 @@ class LlmSupportExecuteTest {
       'packages/app/package.json',
       'packages/app/resources/application.yml',
       'packages/app/src/service/home.ts',
-      'packages/app/src/web/home.ts',
+      'packages/app/src/web/home.ts'
     ]);
 
     const rootPkgRaw: {
@@ -142,12 +155,16 @@ class LlmSupportExecuteTest {
       projectName: 'sample-mono-custom',
       monorepo: true,
       workspacePath: 'packages/api',
-      workspaceName: 'sample-mono-workspace',
+      workspaceName: 'sample-mono-workspace'
     });
 
     assert(output.artifacts.some(item => item.status === 'created'));
 
-    await assertFilesExist(loader, ['package.json', 'packages/api/package.json', 'packages/api/resources/application.yml']);
+    await assertFilesExist(loader, [
+      'package.json',
+      'packages/api/package.json',
+      'packages/api/resources/application.yml'
+    ]);
 
     const rootPkgRaw: {
       scripts?: Record<string, string>;
@@ -171,7 +188,7 @@ class LlmSupportExecuteTest {
       dryRun: false,
       routePath: 'orders',
       serviceName: 'OrderService',
-      controllerName: 'OrderController',
+      controllerName: 'OrderController'
     });
 
     assert(output.artifacts.some(item => item.status === 'created'));
@@ -179,13 +196,13 @@ class LlmSupportExecuteTest {
     await assertFilesExist(loader, ['src/service/order.ts', 'src/web/order.ts']);
 
     const expectedService = await renderSnippet('create-web-route.service.ts.tpl', {
-      serviceName: 'OrderService',
+      serviceName: 'OrderService'
     });
     const expectedController = await renderSnippet('create-web-route.controller.ts.tpl', {
       serviceName: 'OrderService',
       serviceFile: 'order',
       routePath: 'orders',
-      controllerName: 'OrderController',
+      controllerName: 'OrderController'
     });
 
     assert((await loader.readUTF8('src/service/order.ts')) === expectedService);
@@ -199,7 +216,7 @@ class LlmSupportExecuteTest {
     const output = await executeOperations({
       operations: ['unknown-op'],
       targetDir: target,
-      dryRun: true,
+      dryRun: true
     });
 
     assert(output.warnings.length === 1);
@@ -218,12 +235,12 @@ class LlmSupportExecuteTest {
         'email-transport-provider',
         'email-preview-snapshot',
         'email-send-flow',
-        'email-test-fixtures',
+        'email-test-fixtures'
       ],
       targetDir: target,
       dryRun: false,
       emailName: 'welcome',
-      sendRoutePath: 'mail/send',
+      sendRoutePath: 'mail/send'
     });
 
     assert(output.artifacts.some(item => item.status === 'created'));
@@ -235,9 +252,9 @@ class LlmSupportExecuteTest {
       'src/config/email.ts',
       'src/web/email.ts',
       'test/email/preview.ts',
-      'test/email/fixtures/transactional.json',
+      'test/email/fixtures/transactional.json'
     ]);
-    assert((await loader.readUTF8('test/email/fixtures/transactional.json')) === (await renderSnippet('email-fixture.json.tpl')));
+    assert((await loader.readUTF8('test/email/fixtures/transactional.json')) === await renderSnippet('email-fixture.json.tpl'));
   }
 
   @Test()
@@ -248,11 +265,16 @@ class LlmSupportExecuteTest {
       operations: ['model-indexed-assistant', 'model-query-assistant'],
       targetDir: target,
       dryRun: false,
-      modelName: 'OrderItem',
+      modelName: 'OrderItem'
     });
 
     assert(output.artifacts.some(item => item.status === 'created'));
-    await assertFilesExist(loader, ['src/model/order-item.ts', 'src/model/order-item.indexes.ts', 'src/service/order-item-indexed.ts', 'src/service/order-item-query.ts']);
+    await assertFilesExist(loader, [
+      'src/model/order-item.ts',
+      'src/model/order-item.indexes.ts',
+      'src/service/order-item-indexed.ts',
+      'src/service/order-item-query.ts'
+    ]);
   }
 
   @Test()
@@ -264,7 +286,7 @@ class LlmSupportExecuteTest {
       targetDir: target,
       dryRun: false,
       routePath: 'orders',
-      projectName: 'support-app',
+      projectName: 'support-app'
     });
 
     assert(output.artifacts.some(item => item.status === 'created'));
@@ -275,7 +297,7 @@ class LlmSupportExecuteTest {
       'resources/application.yml',
       'resources/local.yml',
       'test/unit/example.ts',
-      'test/fixtures/example.json',
+      'test/fixtures/example.json'
     ]);
   }
 
@@ -284,9 +306,14 @@ class LlmSupportExecuteTest {
     const { target, loader } = await createTarget('llm-support-platform-');
 
     const output = await executeOperations({
-      operations: ['workflow-gcp-deploy', 'workflow-cloudfront-deploy', 'create-web-interceptor', 'cache-enhancements'],
+      operations: [
+        'workflow-gcp-deploy',
+        'workflow-cloudfront-deploy',
+        'create-web-interceptor',
+        'cache-enhancements'
+      ],
       targetDir: target,
-      dryRun: false,
+      dryRun: false
     });
 
     assert(output.artifacts.some(item => item.status === 'created'));
@@ -295,7 +322,7 @@ class LlmSupportExecuteTest {
       '.github/workflows/deploy-ui.yml',
       'src/interceptor/request-logging.ts',
       'src/service/cacheable.ts',
-      'src/config/cache.ts',
+      'src/config/cache.ts'
     ]);
   }
 
@@ -304,9 +331,15 @@ class LlmSupportExecuteTest {
     const { target, loader } = await createTarget('llm-support-release-');
 
     const output = await executeOperations({
-      operations: ['openapi-spec-pipeline', 'openapi-client-generation', 'aws-lambda-package-and-deploy', 'pack-docker-release', 'repo-version-release'],
+      operations: [
+        'openapi-spec-pipeline',
+        'openapi-client-generation',
+        'aws-lambda-package-and-deploy',
+        'pack-docker-release',
+        'repo-version-release'
+      ],
       targetDir: target,
-      dryRun: false,
+      dryRun: false
     });
 
     assert(output.artifacts.some(item => item.status === 'created'));
@@ -316,7 +349,7 @@ class LlmSupportExecuteTest {
       '.github/workflows/deploy-lambda.yml',
       '.github/workflows/docker-release.yml',
       '.github/workflows/repo-version-release.yml',
-      'src/client/README.md',
+      'src/client/README.md'
     ]);
   }
 
@@ -330,7 +363,7 @@ class LlmSupportExecuteTest {
       'enable-file-upload',
       'enable-auth-session',
       'enable-linting',
-      'excluded-log-config',
+      'excluded-log-config'
     ]);
 
     assert(!missing.includes('workflow-gcp-deploy'));
@@ -358,14 +391,20 @@ class LlmSupportExecuteTest {
     const output = await executeOperations({
       operations: ['enable-file-upload', 'enable-auth-session', 'enable-linting'],
       targetDir: target,
-      dryRun: false,
+      dryRun: false
     });
 
     assert(output.artifacts.some(item => item.status === 'created'));
-    await assertFilesExist(loader, ['src/web/upload.ts', 'src/config/upload.ts', 'src/web/auth.ts', 'src/web/auth.config.ts', 'package.json']);
+    await assertFilesExist(loader, [
+      'src/web/upload.ts',
+      'src/config/upload.ts',
+      'src/web/auth.ts',
+      'src/web/auth.config.ts',
+      'package.json'
+    ]);
 
     const pkg = await loader.readUTF8('package.json');
-    assert(pkg.includes('trv lint'));
+    assert(pkg.includes('trv eslint:register'));
   }
 
   @Test()
@@ -373,27 +412,21 @@ class LlmSupportExecuteTest {
     const { target, loader } = await createTarget('llm-support-lint-merge-');
     const pkgFile = path.join(target, 'package.json');
 
-    await fs.writeFile(
-      pkgFile,
-      JSONUtil.toUTF8(
-        {
-          name: 'existing-app',
-          scripts: {
-            test: 'node --test',
-            lint: 'eslint .',
-          },
-          devDependencies: {
-            typescript: '^5.0.0',
-          },
-        },
-        { indent: 2 },
-      ),
-    );
+    await fs.writeFile(pkgFile, JSONUtil.toUTF8({
+      name: 'existing-app',
+      scripts: {
+        test: 'node --test',
+        lint: 'eslint .'
+      },
+      devDependencies: {
+        typescript: '^5.0.0'
+      }
+    }, { indent: 2 }));
 
     await executeOperations({
       operations: ['enable-linting'],
       targetDir: target,
-      dryRun: false,
+      dryRun: false
     });
 
     const raw: PackageJsonSchema = JSONUtil.fromUTF8(await loader.readUTF8('package.json'));
@@ -402,8 +435,8 @@ class LlmSupportExecuteTest {
 
     assert(merged.scripts?.test === 'node --test');
     assert(merged.scripts?.lint === 'eslint .');
-    assert(!merged.scripts?.['lint:register']);
+    assert(merged.scripts?.['lint:register'] === 'trv eslint:register');
     assert(merged.devDependencies?.typescript === '^5.0.0');
-    assert(Boolean(merged.devDependencies?.['@travetto/lint']));
+    assert(Boolean(merged.devDependencies?.['@travetto/eslint']));
   }
 }

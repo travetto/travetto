@@ -9,6 +9,7 @@ import { LlmSupportScopedCommandBase } from './base-command.ts';
  */
 @CliCommand()
 export class LlmSupportStatusCommand extends LlmSupportScopedCommandBase {
+
   @CliFlag({ short: 'o', full: 'operations' })
   operations?: string[];
 
@@ -16,7 +17,9 @@ export class LlmSupportStatusCommand extends LlmSupportScopedCommandBase {
     const categories = this.getScopedCategories();
 
     const operations = this.operations ?? [];
-    const selected = operations.length > 0 ? operations : recommendOperations({ categories, includeExcluded: this.includeExcluded }).map(item => item.id);
+    const selected = operations.length > 0 ?
+      operations :
+      recommendOperations({ categories, includeExcluded: this.includeExcluded }).map(item => item.id);
 
     const unimplemented = getUnimplementedOperations(selected);
     const unimplementedSet = new Set(unimplemented);

@@ -9,6 +9,7 @@ import { LlmSupportScopedSnippetCommandBase } from './base-command.ts';
  */
 @CliCommand()
 export class LlmSupportPlanCommand extends LlmSupportScopedSnippetCommandBase {
+
   @CliFlag({ short: 'o', full: 'operations' })
   @Required(false)
   @MinLength(1)
@@ -21,7 +22,7 @@ export class LlmSupportPlanCommand extends LlmSupportScopedSnippetCommandBase {
       operations: this.operations?.filter(Boolean) ?? [],
       categories,
       snippetTags: this.snippetTags?.filter(Boolean) ?? [],
-      includeExcluded: this.includeExcluded,
+      includeExcluded: this.includeExcluded
     });
 
     await this.writeOutput(payload, this.includeExcluded);

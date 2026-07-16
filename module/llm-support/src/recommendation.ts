@@ -1,6 +1,12 @@
+import {
+  type InstallGuidance,
+  type LlmOperation,
+  type RecommendationQuery,
+  type RecommendationResponse,
+  type WorkflowGuidance
+} from './types.ts';
 import { INSTALL_BUNDLES } from './install-guidance.ts';
 import { recommendSnippets } from './snippet-catalog.ts';
-import type { InstallGuidance, LlmOperation, RecommendationQuery, RecommendationResponse, WorkflowGuidance } from './types.ts';
 import { WORKFLOWS } from './workflow-guidance.ts';
 
 const OPERATIONS: LlmOperation[] = [
@@ -10,7 +16,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Project bootstrap',
     summary: 'Create a project with guided module and backend selection.',
     requiredModules: ['@travetto/runtime', '@travetto/config'],
-    optionalModules: ['@travetto/web', '@travetto/model', '@travetto/test', '@travetto/lint'],
+    optionalModules: ['@travetto/web', '@travetto/model', '@travetto/test', '@travetto/eslint']
   },
   {
     id: 'create-web-route',
@@ -18,7 +24,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Create route/controller/service',
     summary: 'Generate a web route with controller and service separation.',
     requiredModules: ['@travetto/web', '@travetto/schema', '@travetto/di'],
-    optionalModules: ['@travetto/auth-web', '@travetto/model-query'],
+    optionalModules: ['@travetto/auth-web', '@travetto/model-query']
   },
   {
     id: 'enable-file-upload',
@@ -26,7 +32,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Enable file upload',
     summary: 'Support direct upload and presigned URL upload flows.',
     requiredModules: ['@travetto/web-upload'],
-    optionalModules: ['@travetto/model-s3', '@travetto/model-firestore'],
+    optionalModules: ['@travetto/model-s3', '@travetto/model-firestore']
   },
   {
     id: 'enable-auth-session',
@@ -34,7 +40,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Enable auth/session',
     summary: 'Add login, self, and logout flows with session support.',
     requiredModules: ['@travetto/auth', '@travetto/auth-web'],
-    optionalModules: ['@travetto/auth-session', '@travetto/auth-web-session', '@travetto/model-memory'],
+    optionalModules: ['@travetto/auth-session', '@travetto/auth-web-session', '@travetto/model-memory']
   },
   {
     id: 'rest-rpc-client',
@@ -42,7 +48,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Create rest-rpc client',
     summary: 'Generate UI-focused rest-rpc client integration.',
     requiredModules: ['@travetto/web-rpc'],
-    optionalModules: ['@travetto/openapi'],
+    optionalModules: ['@travetto/openapi']
   },
   {
     id: 'model-indexed-assistant',
@@ -50,7 +56,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Model indexed support',
     summary: 'Add indexes and index-aware query helpers.',
     requiredModules: ['@travetto/model-indexed'],
-    optionalModules: ['@travetto/model-query'],
+    optionalModules: ['@travetto/model-query']
   },
   {
     id: 'model-query-assistant',
@@ -58,7 +64,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Model query support',
     summary: 'Craft query expressions from natural language intent.',
     requiredModules: ['@travetto/model-query'],
-    optionalModules: ['@travetto/model-query-language'],
+    optionalModules: ['@travetto/model-query-language']
   },
   {
     id: 'workflow-gcp-deploy',
@@ -66,7 +72,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Generate GCP deploy workflow',
     summary: 'Create GitHub workflows for GCP deploy pipelines.',
     requiredModules: [],
-    optionalModules: [],
+    optionalModules: []
   },
   {
     id: 'workflow-cloudfront-deploy',
@@ -74,15 +80,15 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Generate CloudFront deploy workflow',
     summary: 'Create GitHub workflows for S3 + CloudFront UI deploy pipelines.',
     requiredModules: [],
-    optionalModules: [],
+    optionalModules: []
   },
   {
     id: 'enable-linting',
     category: 'quality',
     title: 'Enable linting and fix',
     summary: 'Configure linting support and fix workflows for generated code.',
-    requiredModules: ['@travetto/lint'],
-    optionalModules: ['@travetto/test'],
+    requiredModules: ['@travetto/eslint'],
+    optionalModules: ['@travetto/test']
   },
   {
     id: 'generate-config',
@@ -90,7 +96,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Create configuration classes/files',
     summary: 'Generate config schema classes and profile-aware config files.',
     requiredModules: ['@travetto/config'],
-    optionalModules: [],
+    optionalModules: []
   },
   {
     id: 'generate-test-suite',
@@ -98,7 +104,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Create test suite',
     summary: 'Generate unit/integration tests and fixture setup.',
     requiredModules: ['@travetto/test'],
-    optionalModules: [],
+    optionalModules: []
   },
   {
     id: 'create-web-interceptor',
@@ -106,7 +112,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Create web interceptor',
     summary: 'Generate web interceptor for cross-cutting concerns.',
     requiredModules: ['@travetto/web'],
-    optionalModules: ['@travetto/auth-web', '@travetto/cache'],
+    optionalModules: ['@travetto/auth-web', '@travetto/cache']
   },
   {
     id: 'email-create-template',
@@ -114,7 +120,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Create email template',
     summary: 'Generate template files for transactional email.',
     requiredModules: ['@travetto/email'],
-    optionalModules: ['@travetto/email-compiler', '@travetto/email-inky'],
+    optionalModules: ['@travetto/email-compiler', '@travetto/email-inky']
   },
   {
     id: 'email-context-schema',
@@ -122,7 +128,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Generate email context schema',
     summary: 'Create typed context contracts for template rendering.',
     requiredModules: ['@travetto/email', '@travetto/schema'],
-    optionalModules: [],
+    optionalModules: []
   },
   {
     id: 'email-render-pipeline',
@@ -130,7 +136,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Add email render pipeline',
     summary: 'Wire template compiler and renderer integration.',
     requiredModules: ['@travetto/email'],
-    optionalModules: ['@travetto/email-compiler', '@travetto/email-inky'],
+    optionalModules: ['@travetto/email-compiler', '@travetto/email-inky']
   },
   {
     id: 'email-transport-provider',
@@ -138,7 +144,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Add email transport/provider',
     summary: 'Configure provider wiring for runtime delivery.',
     requiredModules: ['@travetto/email'],
-    optionalModules: ['@travetto/email-nodemailer'],
+    optionalModules: ['@travetto/email-nodemailer']
   },
   {
     id: 'email-preview-snapshot',
@@ -146,7 +152,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Add email preview/snapshot',
     summary: 'Generate preview and snapshot validation support.',
     requiredModules: ['@travetto/email', '@travetto/test'],
-    optionalModules: [],
+    optionalModules: []
   },
   {
     id: 'email-send-flow',
@@ -154,7 +160,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Add email send integration',
     summary: 'Integrate send operations with endpoint or worker execution.',
     requiredModules: ['@travetto/email'],
-    optionalModules: ['@travetto/worker', '@travetto/web'],
+    optionalModules: ['@travetto/worker', '@travetto/web']
   },
   {
     id: 'email-test-fixtures',
@@ -162,7 +168,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Add email test fixtures',
     summary: 'Generate fixture data and tests for email generation flows.',
     requiredModules: ['@travetto/email', '@travetto/test'],
-    optionalModules: [],
+    optionalModules: []
   },
   {
     id: 'cache-enhancements',
@@ -170,7 +176,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Add cache enhancements',
     summary: 'Generate cache decorators and eviction workflows.',
     requiredModules: ['@travetto/cache'],
-    optionalModules: ['@travetto/model'],
+    optionalModules: ['@travetto/model']
   },
   {
     id: 'openapi-spec-pipeline',
@@ -178,7 +184,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Add OpenAPI spec pipeline',
     summary: 'Generate OpenAPI specification workflow and persistence settings.',
     requiredModules: ['@travetto/openapi'],
-    optionalModules: ['@travetto/web', '@travetto/schema'],
+    optionalModules: ['@travetto/web', '@travetto/schema']
   },
   {
     id: 'openapi-client-generation',
@@ -186,7 +192,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Add OpenAPI client generation',
     summary: 'Generate client workflow from OpenAPI spec artifacts.',
     requiredModules: ['@travetto/openapi'],
-    optionalModules: ['@travetto/web-rpc', '@travetto/web'],
+    optionalModules: ['@travetto/web-rpc', '@travetto/web']
   },
   {
     id: 'aws-lambda-package-and-deploy',
@@ -194,7 +200,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Add AWS Lambda package/deploy',
     summary: 'Generate packaging and deployment workflow for web AWS Lambda targets.',
     requiredModules: ['@travetto/web-aws-lambda', '@travetto/pack'],
-    optionalModules: ['@travetto/web', '@travetto/config'],
+    optionalModules: ['@travetto/web', '@travetto/config']
   },
   {
     id: 'pack-docker-release',
@@ -202,7 +208,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Add Docker pack release',
     summary: 'Generate workflow for container image build and publish via pack:docker.',
     requiredModules: ['@travetto/pack'],
-    optionalModules: ['@travetto/config', '@travetto/runtime'],
+    optionalModules: ['@travetto/config', '@travetto/runtime']
   },
   {
     id: 'repo-version-release',
@@ -210,7 +216,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Add repo version release flow',
     summary: 'Generate monorepo versioning workflow using repo:version.',
     requiredModules: ['@travetto/repo'],
-    optionalModules: ['@travetto/pack', '@travetto/registry'],
+    optionalModules: ['@travetto/pack', '@travetto/registry']
   },
   {
     id: 'excluded-log-config',
@@ -219,7 +225,7 @@ const OPERATIONS: LlmOperation[] = [
     summary: 'Excluded by scope decision.',
     requiredModules: ['@travetto/log'],
     optionalModules: [],
-    excluded: true,
+    excluded: true
   },
   {
     id: 'excluded-log-instrumentation',
@@ -228,16 +234,16 @@ const OPERATIONS: LlmOperation[] = [
     summary: 'Excluded by scope decision.',
     requiredModules: ['@travetto/log'],
     optionalModules: [],
-    excluded: true,
+    excluded: true
   },
   {
-    id: 'excluded-lint-profile',
+    id: 'excluded-eslint-profile',
     category: 'quality',
-    title: 'Lint profile generation (excluded)',
+    title: 'ESLint profile generation (excluded)',
     summary: 'Excluded by scope decision.',
-    requiredModules: ['@travetto/lint'],
+    requiredModules: ['@travetto/eslint'],
     optionalModules: [],
-    excluded: true,
+    excluded: true
   },
   {
     id: 'excluded-test-mock-service',
@@ -246,8 +252,8 @@ const OPERATIONS: LlmOperation[] = [
     summary: 'Excluded by scope decision.',
     requiredModules: ['@travetto/test'],
     optionalModules: [],
-    excluded: true,
-  },
+    excluded: true
+  }
 ];
 
 function matchesIds<T extends { id: string }>(items: T[], ids?: string[]): T[] {
@@ -268,7 +274,9 @@ export function recommendWorkflows(ids?: string[]): WorkflowGuidance[] {
 
 export function recommendOperations(query: RecommendationQuery = {}): LlmOperation[] {
   const { categories, includeExcluded = false } = query;
-  const selected = categories && categories.length ? OPERATIONS.filter(item => categories.includes(item.category)) : OPERATIONS;
+  const selected = categories && categories.length ?
+    OPERATIONS.filter(item => categories.includes(item.category)) :
+    OPERATIONS;
   return selected.filter(item => includeExcluded || !item.excluded);
 }
 
@@ -286,11 +294,13 @@ export async function recommend(query: RecommendationQuery = {}): Promise<Recomm
     operations,
     snippets: await recommendSnippets({
       ...query,
-      operations: operations.map(item => item.id),
-    }),
+      operations: operations.map(item => item.id)
+    })
   };
 }
 
-export const EXCLUDED_OPERATION_IDS = OPERATIONS.filter(item => item.excluded).map(item => item.id);
+export const EXCLUDED_OPERATION_IDS = OPERATIONS
+  .filter(item => item.excluded)
+  .map(item => item.id);
 
 export const LLM_OPERATIONS = OPERATIONS;

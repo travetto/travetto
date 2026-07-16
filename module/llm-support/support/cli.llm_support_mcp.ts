@@ -13,7 +13,7 @@ export class LlmSupportMcpCommand implements CliCommandShape {
   async main(): Promise<void> {
     const rl = createInterface({
       input: process.stdin,
-      crlfDelay: Infinity,
+      crlfDelay: Infinity
     });
 
     const active: Promise<void>[] = [];
@@ -33,8 +33,8 @@ export class LlmSupportMcpCommand implements CliCommandShape {
           id: null,
           error: {
             code: -32700,
-            message: 'Parse error',
-          },
+            message: 'Parse error'
+          }
         };
         process.stdout.write(`${JSONUtil.toUTF8(parseError)}\n`);
         return;
