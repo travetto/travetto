@@ -1,16 +1,17 @@
 import util from 'node:util';
 
-import { CodecUtil, castKey, getClass, JSONUtil, Runtime } from '@travetto/runtime';
+import { castKey, CodecUtil, getClass, JSONUtil, Runtime } from '@travetto/runtime';
 import { SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
 
 import { cliTpl } from './color.ts';
+import { HELP_FLAG, type CliCommandShape } from './types.ts';
 import { CliCommandRegistryIndex, UNKNOWN_COMMAND } from './registry/registry-index.ts';
 import { CliSchemaExportUtil } from './schema-export.ts';
-import { type CliCommandShape, HELP_FLAG } from './types.ts';
 
 const validationSourceMap: Record<string, string> = { arg: 'Argument', flag: 'Flag' };
 
-const ifDefined = <T>(value: T | null | '' | undefined): T | undefined => (value === null || value === '' || value === undefined ? undefined : value);
+const ifDefined = <T>(value: T | null | '' | undefined): T | undefined =>
+  (value === null || value === '' || value === undefined) ? undefined : value;
 
 const MODULE_TO_COMMAND = {
   '@travetto/doc': ['doc'],
@@ -31,6 +32,7 @@ const COMMAND_TO_MODULE = Object.fromEntries(Object.entries(MODULE_TO_COMMAND).f
  * Utilities for showing help
  */
 export class HelpUtil {
+
   /** Get usage help for a command */
   static getUsageMessage(command: CliCommandShape): string[] {
     const schema = SchemaRegistryIndex.getConfig(getClass(command));
@@ -38,7 +40,9 @@ export class HelpUtil {
 
     const usage: string[] = [];
 
-    usage.push(cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`);
+    usage.push(
+      cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`
+    );
 
     // Ensure finalized
     for (const field of schema.methods.main?.parameters ?? []) {
@@ -72,7 +76,9 @@ export class HelpUtil {
       const defaultValue = ifDefined(command[key]) ?? ifDefined(field.default);
       const aliases = (field.aliases ?? [])
         .filter(flag => flag.startsWith('-'))
-        .filter(flag => field.type !== Boolean || (defaultValue !== true ? !flag.startsWith('--no-') : flag.startsWith('--')));
+        .filter(flag =>
+          (field.type !== Boolean) || (defaultValue !== true ? !flag.startsWith('--no-') : flag.startsWith('--'))
+        );
       let type: string | undefined;
 
       if (field.type === String && field.enum && field.enum.values.length <= 3) {
@@ -81,7 +87,10 @@ export class HelpUtil {
         ({ type } = CliSchemaExportUtil.baseInputType(field));
       }
 
-      const parameter = [cliTpl`${{ param: aliases.join(', ') }}`, ...(type ? [cliTpl`${{ type: `<${type}>` }}`] : [])];
+      const parameter = [
+        cliTpl`${{ param: aliases.join(', ') }}`,
+        ...(type ? [cliTpl`${{ type: `<${type}>` }}`] : []),
+      ];
 
       params.push(parameter.join(' '));
       const parts = [cliTpl`${{ title: field.description }}`];
@@ -95,6 +104,7 @@ export class HelpUtil {
     params.push(cliTpl`${{ param: HELP_FLAG }}`);
     descriptions.push('display help for command');
 
+
     const paramWidths = params.map(item => util.stripVTControlCharacters(item).length);
     const descWidths = descriptions.map(item => util.stripVTControlCharacters(item).length);
 
@@ -103,8 +113,10 @@ export class HelpUtil {
 
     const options: string[] = [
       cliTpl`${{ title: 'Options:' }}`,
-      ...params.map((_, i) => `  ${params[i]}${' '.repeat(paramWidth - paramWidths[i])}  ${descriptions[i].padEnd(descWidth)}${' '.repeat(descWidth - descWidths[i])}`),
-      '',
+      ...params.map((_, i) =>
+        `  ${params[i]}${' '.repeat((paramWidth - paramWidths[i]))}  ${descriptions[i].padEnd(descWidth)}${' '.repeat((descWidth - descWidths[i]))}`
+      ),
+      ''
     ];
     return options;
   }
@@ -126,7 +138,10 @@ export class HelpUtil {
       examples.push(cliTpl`${{ title: 'Examples:' }}`);
       for (const example of schema.examples) {
         for (const line of example.split('\n')) {
-          examples.push(line.trim().startsWith('>') ? cliTpl`    ${{ input: line.substring(line.indexOf('> ') + 2).trim() }}` : cliTpl`  ${{ subtitle: line.trim() }}`);
+          examples.push(
+            line.trim().startsWith('>') ?
+              cliTpl`    ${{ input: line.substring(line.indexOf('> ') + 2).trim() }}` :
+              cliTpl`  ${{ subtitle: line.trim() }}`);
         }
       }
       examples.push('');
@@ -153,14 +168,12 @@ ${{ identifier: Runtime.getInstallCommand(module) }}
    */
   static async renderCommandHelp(command: CliCommandShape): Promise<string> {
     return [
-      ...HelpUtil.getUsageMessage(command),
-      ...HelpUtil.getDescriptionMessage(command),
-      ...HelpUtil.getOptionsMessage(command),
-      ...(await HelpUtil.getExtendedHelpMessage(command)),
-      ...HelpUtil.getExamplesMessage(command),
-    ]
-      .map(line => line.trimEnd())
-      .join('\n');
+      ...this.getUsageMessage(command),
+      ...this.getDescriptionMessage(command),
+      ...this.getOptionsMessage(command),
+      ...await this.getExtendedHelpMessage(command),
+      ...this.getExamplesMessage(command)
+    ].map(line => line.trimEnd()).join('\n');
   }
 
   /**
@@ -216,14 +229,14 @@ ${{ identifier: Runtime.getInstallCommand(module) }}
   static async renderError(error: unknown, cmd: string, command?: CliCommandShape): Promise<void> {
     process.exitCode ??= 1;
     if (error instanceof ValidationResultError) {
-      console.error!(HelpUtil.renderValidationError(error));
+      console.error!(this.renderValidationError(error));
     } else if (error instanceof Error) {
       console.error!(cliTpl`${{ failure: error.stack }}\n`);
     }
     if (command) {
-      console.error!(await HelpUtil.renderCommandHelp(command));
+      console.error!(await this.renderCommandHelp(command));
     } else if (error === UNKNOWN_COMMAND) {
-      console.error!(HelpUtil.renderUnknownCommandMessage(cmd));
+      console.error!(this.renderUnknownCommandMessage(cmd));
     }
     console.error!();
   }
