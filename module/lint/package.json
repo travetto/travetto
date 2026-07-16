@@ -26,7 +26,8 @@
     "directory": "module/lint"
   },
   "dependencies": {
-    "@travetto/runtime": "^8.0.0-alpha.18"
+    "@travetto/runtime": "^8.0.0-alpha.18",
+    "@biomejs/biome": "^2.5.3"
   },
   "peerDependencies": {
     "@travetto/cli": "^8.0.0-alpha.25"
