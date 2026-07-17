@@ -1,5 +1,5 @@
 {
-  "$schema": "../node_modules/oxlint/configuration_schema.json",
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/refs/tags/oxlint_v1.59.0/npm/oxlint/configuration_schema.json",
   "ignorePatterns": [
     "dist/**",
     "out/**",
@@ -18,7 +18,12 @@
         "ignoreCase": false,
         "ignoreDeclarationSort": false,
         "ignoreMemberSort": false,
-        "memberSyntaxSortOrder": ["none", "all", "multiple", "single"],
+        "memberSyntaxSortOrder": [
+          "none",
+          "all",
+          "multiple",
+          "single"
+        ],
         "allowSeparatedGroups": true
       }
     ]
