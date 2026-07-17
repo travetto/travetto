@@ -10,8 +10,8 @@ class ComputedPerson {
   id: string;
   name: string;
   @TransientField()
-  get nameUpper(): string {
-    return this.name.toUpperCase();
+  get nameUpper(): string | undefined {
+    return this.name?.toUpperCase();
   }
   @TransientField()
   ignoredField?: string;
