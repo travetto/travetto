@@ -28,8 +28,8 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/pack/pack.component').then(item => item.PackComponent)
       },
       {
-        path: 'eslint', title: 'ESLint Support',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/eslint/eslint.component').then(item => item.EslintComponent)
+        path: 'lint', title: 'Lint Support',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/lint/lint.component').then(item => item.LintComponent)
       },
       {
         path: 'llm-support', title: 'LLM Support',
