@@ -28,9 +28,10 @@ Commands:
   email:compile         Compile all email templates into generated runtime artifacts.
   email:editor          Start the email template editor service for interactive preview and testing.
   email:test            Render and send a template file to a target recipient for quick validation.
-  eslint                Run ESLint for the workspace or changed files.
-  eslint:register       Generate the workspace ESLint configuration entry file.
   firestore:indexes     Generate the Firestore composite indexes JSON for all registered models.
+  lint:check            Run Oxlint safety checking for the workspace or changed files.
+  lint:format           Run Oxfmt code style formatting for the workspace or changed files.
+  lint:register         Generate the workspace Oxlint configuration file.
   llm:support:execute   Execute llm-support operations with dry-run by default.
   llm:support:mcp       Minimal MCP stdio server for llm-support tools.
   llm:support:plan      Build plan-first execution details for llm-support operations.

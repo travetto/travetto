@@ -145,8 +145,8 @@ module/email
 module/email-compiler
 module/email-inky
 module/email-nodemailer
-module/eslint
 module/image
+module/lint
 module/llm-support
 module/log
 module/manifest
@@ -237,8 +237,8 @@ global-test/model_auth-session <workspace-root>/global-test/model_auth-session
          module/email-compiler <workspace-root>/module/email-compiler
              module/email-inky <workspace-root>/module/email-inky
        module/email-nodemailer <workspace-root>/module/email-nodemailer
-                 module/eslint <workspace-root>/module/eslint
                   module/image <workspace-root>/module/image
+                   module/lint <workspace-root>/module/lint
             module/llm-support <workspace-root>/module/llm-support
                     module/log <workspace-root>/module/log
                module/manifest <workspace-root>/module/manifest
