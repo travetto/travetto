@@ -27,7 +27,8 @@
   },
   "dependencies": {
     "@travetto/runtime": "^8.0.0-alpha.19",
-    "oxlint": "^1.74.0"
+    "oxlint": "^1.74.0",
+    "oxfmt": "^0.59.0"
   },
   "peerDependencies": {
     "@travetto/cli": "^8.0.0-alpha.27"

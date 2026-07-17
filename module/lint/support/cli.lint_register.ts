@@ -21,5 +21,17 @@ export class LintConfigureCommand implements CliCommandShape {
     const outputLinterFilePath = Runtime.workspaceRelative('.oxlintrc.json');
     await fs.writeFile(outputLinterFilePath, JSON.stringify(linterConfiguration, null, 2) + '\n');
     console.log(`Wrote oxlint config to ${outputLinterFilePath}`);
+
+    const formatterConfiguration = {
+      $schema: './node_modules/oxfmt/configuration_schema.json',
+      singleQuote: true,
+      semi: true,
+      tabWidth: 2,
+      printWidth: 120,
+      trailingComma: 'all'
+    };
+    const outputFormatterFilePath = Runtime.workspaceRelative('.oxfmtrc.json');
+    await fs.writeFile(outputFormatterFilePath, JSON.stringify(formatterConfiguration, null, 2) + '\n');
+    console.log(`Wrote oxfmt config to ${outputFormatterFilePath}`);
   }
 }

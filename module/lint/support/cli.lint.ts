@@ -36,18 +36,29 @@ export class LintCommand implements CliCommandShape {
       return;
     }
 
-    const commandArguments: string[] = [
+    const lintCommandArguments: string[] = [
       Runtime.workspaceRelative('node_modules', '.bin', 'oxlint'),
       ...(this.format ? ['--format', this.format] : []),
       ...(this.fix ? ['--fix'] : []),
       ...paths
     ];
 
-    const result = await ExecUtil.getResult(spawn(process.argv0, commandArguments, {
+    const linterResult = await ExecUtil.getResult(spawn(process.argv0, lintCommandArguments, {
       cwd: Runtime.workspace.path,
       stdio: 'inherit',
     }), { catch: true });
 
-    process.exitCode = result.code;
+    const formatCommandArguments: string[] = [
+      Runtime.workspaceRelative('node_modules', '.bin', 'oxfmt'),
+      ...(this.fix ? [] : ['--check']),
+      ...paths
+    ];
+
+    const formatterResult = await ExecUtil.getResult(spawn(process.argv0, formatCommandArguments, {
+      cwd: Runtime.workspace.path,
+      stdio: 'inherit',
+    }), { catch: true });
+
+    process.exitCode = linterResult.code || formatterResult.code;
   }
 }
