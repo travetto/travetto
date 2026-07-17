@@ -68,8 +68,8 @@ export const MODULES = {
     description: 'Email transmission module.'
   },
   Lint: {
-    name: '@travetto/lint', folder: '@travetto/lint', displayName: 'Linting Rules',
-    description: 'Linting Rules based on Oxlint'
+    name: '@travetto/lint', folder: '@travetto/lint', displayName: 'Linting and Formatting',
+    description: 'Linting and Formatting based on Oxlint and Oxfmt'
   },
   Image: {
     name: '@travetto/image', folder: '@travetto/image', displayName: 'Image',

@@ -2,7 +2,7 @@
   "name": "@travetto/lint",
   "version": "8.0.0-alpha.20",
   "type": "module",
-  "description": "Linting Rules based on Oxlint",
+  "description": "Linting and Formatting based on Oxlint and Oxfmt",
   "keywords": [
     "lint",
     "oxlint",
@@ -39,7 +39,7 @@
     }
   },
   "travetto": {
-    "displayName": "Linting Rules"
+    "displayName": "Linting and Formatting"
   },
   "publishConfig": {
     "access": "public"
