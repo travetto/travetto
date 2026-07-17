@@ -16,7 +16,7 @@ const ifDefined = <T>(value: T | null | '' | undefined): T | undefined =>
 const MODULE_TO_COMMAND = {
   '@travetto/doc': ['doc'],
   '@travetto/email-compiler': ['email:compile', 'email:test', 'email:editor'],
-  '@travetto/lint': ['lint', 'lint:register'],
+  '@travetto/lint': ['lint:check', 'lint:format', 'lint:register'],
   '@travetto/model': ['model:install', 'model:export'],
   '@travetto/openapi': ['openapi:spec', 'openapi:client'],
   '@travetto/pack': ['pack', 'pack:zip', 'pack:docker'],

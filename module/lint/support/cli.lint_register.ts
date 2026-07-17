@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 
 import { CliCommand, type CliCommandShape } from '@travetto/cli';
-import { Runtime } from '@travetto/runtime';
+import { JSONUtil, Runtime } from '@travetto/runtime';
 
 /**
  * Generate the workspace Oxlint configuration file.
@@ -19,19 +19,17 @@ export class LintConfigureCommand implements CliCommandShape {
       ]
     };
     const outputLinterFilePath = Runtime.workspaceRelative('.oxlintrc.json');
-    await fs.writeFile(outputLinterFilePath, JSON.stringify(linterConfiguration, null, 2) + '\n');
-    console.log(`Wrote oxlint config to ${outputLinterFilePath}`);
+    await fs.writeFile(outputLinterFilePath, JSONUtil.toUTF8Pretty(linterConfiguration) + '\n');
+    console.log(`Wrote lint config to ${outputLinterFilePath}`);
 
     const formatterConfiguration = {
       $schema: './node_modules/oxfmt/configuration_schema.json',
-      singleQuote: true,
-      semi: true,
-      tabWidth: 2,
-      printWidth: 120,
-      trailingComma: 'all'
+      extends: [
+        './node_modules/@travetto/lint/resources/oxfmtrc.json'
+      ]
     };
     const outputFormatterFilePath = Runtime.workspaceRelative('.oxfmtrc.json');
-    await fs.writeFile(outputFormatterFilePath, JSON.stringify(formatterConfiguration, null, 2) + '\n');
-    console.log(`Wrote oxfmt config to ${outputFormatterFilePath}`);
+    await fs.writeFile(outputFormatterFilePath, JSONUtil.toUTF8Pretty(formatterConfiguration) + '\n');
+    console.log(`Wrote format config to ${outputFormatterFilePath}`);
   }
 }

@@ -1,8 +1,6 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
-  "singleQuote": true,
-  "semi": true,
-  "tabWidth": 2,
-  "printWidth": 120,
-  "trailingComma": "all"
+  "extends": [
+    "./node_modules/@travetto/lint/resources/oxfmtrc.json"
+  ]
 }
