@@ -244,8 +244,8 @@ async function mergeLintPackageJson(
 
   const scripts = { ...currentScripts };
   scripts['lint:register'] = incomingScripts['lint:register'] ?? 'trv lint:register';
-  scripts.lint = scripts.lint ?? incomingScripts.lint ?? 'npm run lint:register && trv lint';
-  scripts['lint:fix'] = scripts['lint:fix'] ?? incomingScripts['lint:fix'] ?? 'npm run lint:register && trv lint --fix';
+  scripts.lint = scripts.lint ?? incomingScripts.lint ?? 'npm run lint:register && trv lint:check && trv lint:format --check';
+  scripts['lint:fix'] = scripts['lint:fix'] ?? incomingScripts['lint:fix'] ?? 'npm run lint:register && trv lint:check --fix && trv lint:format';
 
   const devDependencies = { ...toStringMap(current.devDependencies) };
   for (const [name, version] of Object.entries(toStringMap(incoming.devDependencies))) {

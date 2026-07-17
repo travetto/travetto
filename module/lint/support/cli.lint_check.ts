@@ -4,13 +4,13 @@ import { Env, ExecUtil, Runtime } from '@travetto/runtime';
 import { CliCommand, type CliCommandShape, CliModuleUtil } from '@travetto/cli';
 
 /**
- * Run Oxlint for the workspace or changed files.
+ * Run Oxlint safety checking for the workspace or changed files.
  *
- * Supports incremental mode (changed/since) and forwards formatting/fix
- * options to the underlying oxlint invocation.
+ * Supports incremental mode (changed/since) and forwards options to the
+ * underlying oxlint invocation.
  */
 @CliCommand()
-export class LintCommand implements CliCommandShape {
+export class LintCheckCommand implements CliCommandShape {
 
   /** Only check changed modules */
   changed = false;
@@ -36,29 +36,18 @@ export class LintCommand implements CliCommandShape {
       return;
     }
 
-    const lintCommandArguments: string[] = [
+    const commandArguments: string[] = [
       Runtime.workspaceRelative('node_modules', '.bin', 'oxlint'),
       ...(this.format ? ['--format', this.format] : []),
       ...(this.fix ? ['--fix'] : []),
       ...paths
     ];
 
-    const linterResult = await ExecUtil.getResult(spawn(process.argv0, lintCommandArguments, {
+    const linterResult = await ExecUtil.getResult(spawn(process.argv0, commandArguments, {
       cwd: Runtime.workspace.path,
       stdio: 'inherit',
     }), { catch: true });
 
-    const formatCommandArguments: string[] = [
-      Runtime.workspaceRelative('node_modules', '.bin', 'oxfmt'),
-      ...(this.fix ? [] : ['--check']),
-      ...paths
-    ];
-
-    const formatterResult = await ExecUtil.getResult(spawn(process.argv0, formatCommandArguments, {
-      cwd: Runtime.workspace.path,
-      stdio: 'inherit',
-    }), { catch: true });
-
-    process.exitCode = linterResult.code || formatterResult.code;
+    process.exitCode = linterResult.code;
   }
 }
