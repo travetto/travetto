@@ -16,7 +16,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Project bootstrap',
     summary: 'Create a project with guided module and backend selection.',
     requiredModules: ['@travetto/runtime', '@travetto/config'],
-    optionalModules: ['@travetto/web', '@travetto/model', '@travetto/test', '@travetto/eslint']
+    optionalModules: ['@travetto/web', '@travetto/model', '@travetto/test', '@travetto/lint']
   },
   {
     id: 'create-web-route',
@@ -87,7 +87,7 @@ const OPERATIONS: LlmOperation[] = [
     category: 'quality',
     title: 'Enable linting and fix',
     summary: 'Configure linting support and fix workflows for generated code.',
-    requiredModules: ['@travetto/eslint'],
+    requiredModules: ['@travetto/lint'],
     optionalModules: ['@travetto/test']
   },
   {
@@ -237,11 +237,11 @@ const OPERATIONS: LlmOperation[] = [
     excluded: true
   },
   {
-    id: 'excluded-eslint-profile',
+    id: 'excluded-lint-profile',
     category: 'quality',
-    title: 'ESLint profile generation (excluded)',
+    title: 'Lint profile generation (excluded)',
     summary: 'Excluded by scope decision.',
-    requiredModules: ['@travetto/eslint'],
+    requiredModules: ['@travetto/lint'],
     optionalModules: [],
     excluded: true
   },

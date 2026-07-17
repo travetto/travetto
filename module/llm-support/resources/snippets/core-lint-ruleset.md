@@ -1,9 +1,9 @@
 <!-- json
 {
-  "sourceId": "core-eslint-ruleset",
+  "sourceId": "core-lint-ruleset",
   "repositoryId": "travetto",
-  "filePath": "module/eslint/support/eslint.config.ts",
-  "capabilityTags": ["quality", "lint", "eslint", "fix"],
+  "filePath": "module/lint/support/cli.lint_register.ts",
+  "capabilityTags": ["quality", "lint", "oxlint", "fix"],
   "operationIds": ["enable-linting"],
   "applicability": ["framework-native"],
   "notes": [
@@ -12,10 +12,10 @@
 }
 -->
 
-# core-eslint-ruleset
+# core-lint-ruleset
 
-- Source: `module/eslint/support/eslint.config.ts`
-- Capability tags: quality, lint, eslint, fix
+- Source: `module/lint/support/cli.lint_register.ts`
+- Capability tags: quality, lint, oxlint, fix
 - Applicability: framework-native
 - Notes:
   - Reference lint baseline setup and autofix-friendly rule composition.

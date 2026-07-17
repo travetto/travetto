@@ -1,0 +1,46 @@
+{
+  "name": "@travetto/lint",
+  "version": "8.0.0-alpha.20",
+  "type": "module",
+  "description": "Linting Rules based on Oxlint",
+  "keywords": [
+    "lint",
+    "oxlint",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "main": "__index__.ts",
+  "files": [
+    "support",
+    "__index__.ts",
+    "resources"
+  ],
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/lint"
+  },
+  "dependencies": {
+    "@travetto/runtime": "^8.0.0-alpha.19",
+    "oxlint": "^1.74.0"
+  },
+  "peerDependencies": {
+    "@travetto/cli": "^8.0.0-alpha.27"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/cli": {
+      "optional": true
+    }
+  },
+  "travetto": {
+    "displayName": "Linting Rules"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

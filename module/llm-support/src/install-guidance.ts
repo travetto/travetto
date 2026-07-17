@@ -80,7 +80,7 @@ export const INSTALL_BUNDLES: InstallGuidance[] = [
   {
     id: 'quality-lint-and-test',
     title: 'Quality Setup (Lint + Test)',
-    required: ['@travetto/test', '@travetto/eslint'],
+    required: ['@travetto/test', '@travetto/lint'],
     optional: ['@travetto/log'],
     notes: [
       'Use this bundle for project quality guardrails and lint-fix workflows.',
