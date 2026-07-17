@@ -26,7 +26,7 @@
     "formatWithErrors": false,
     "indentStyle": "space",
     "indentWidth": 2,
-    "lineWidth": 180
+    "lineWidth": 140
   },
   "assist": {
     "actions": {
@@ -41,25 +41,24 @@
       "preset": "recommended",
       "style": {
         "useImportType": "error",
-        "useNamingConvention": {
-          "level": "on",
-          "options": {
-            "strictCase": false
-          }
-        },
         "noNonNullAssertion": "off",
         "useConst": "error"
       },
       "correctness": {
-        "noUnusedVariables": "warn",
-        "noUnusedImports": "error"
+        "noUnusedFunctionParameters": "off"
       },
       "complexity": {
-        "useSimpleNumberKeys": "off",
-        "noStaticOnlyClass": "off"
+        "noStaticOnlyClass": "off",
+        "noThisInStatic": "off",
+        "noBannedTypes": "off",
+        "noUselessSwitchCase": "warn",
+        "noUselessLabel": "warn"
       },
       "suspicious": {
-        "noVar": "error"
+        "noVar": "error",
+        "noTsIgnore": "warn",
+        "noAssignInExpressions": "warn",
+        "noNonNullAssertedOptionalChain": "warn"
       }
     }
   },
@@ -96,7 +95,47 @@
       "linter": {
         "rules": {
           "correctness": {
-            "noUnusedVariables": "off"
+            "noUnusedVariables": "off",
+            "noUnusedFunctionParameters": "off"
+          },
+          "complexity": {
+            "useLiteralKeys": "off"
+          },
+          "suspicious": {
+            "noTsIgnore": "warn",
+            "noAssignInExpressions": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "**/*.tsx",
+        "**/*.html"
+      ],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useValidAnchor": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "**/doc/**/*.ts*"
+      ],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedFunctionParameters": "off"
+          },
+          "complexity": {
+            "useLiteralKeys": "off"
+          },
+          "suspicious": {
+            "noTsIgnore": "warn"
           }
         }
       }

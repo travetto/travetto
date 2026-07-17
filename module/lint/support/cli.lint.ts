@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { CliCommand, type CliCommandShape, CliModuleUtil } from '@travetto/cli';
+import { CliCommand, type CliCommandShape, CliModuleUtil, CliParseUtil } from '@travetto/cli';
 import { Env, ExecUtil, Runtime } from '@travetto/runtime';
 
 /**
@@ -31,9 +31,9 @@ export class LintCommand implements CliCommandShape {
       return;
     }
 
+    const state = CliParseUtil.getState(this);
     const result = await ExecUtil.getResult(
-      spawn(process.argv0, [Runtime.workspaceRelative('node_modules', '.bin', 'biome'), 'check', ...(this.fix ? ['--write'] : []), ...paths], {
-        cwd: Runtime.workspace.path,
+      spawn(process.argv0, [Runtime.workspaceRelative('node_modules', '.bin', 'biome'), 'check', ...(this.fix ? ['--write'] : []), ...paths, ...state?.unknown ?? []], {
         stdio: 'inherit',
       }),
       { catch: true },
