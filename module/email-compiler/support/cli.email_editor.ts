@@ -1,7 +1,7 @@
-import { Env } from '@travetto/runtime';
 import { CliCommand, CliProfilesFlag } from '@travetto/cli';
-import { Registry } from '@travetto/registry';
 import { DependencyRegistryIndex } from '@travetto/di';
+import { Registry } from '@travetto/registry';
+import { Env } from '@travetto/runtime';
 
 import { EditorService } from './bin/editor.ts';
 

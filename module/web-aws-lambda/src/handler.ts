@@ -1,9 +1,9 @@
 import type lambda from 'aws-lambda';
 
-import { Runtime, ConsoleManager } from '@travetto/runtime';
+import { ConfigurationService } from '@travetto/config';
 import { DependencyRegistryIndex, Inject, Injectable } from '@travetto/di';
 import { Registry } from '@travetto/registry';
-import { ConfigurationService } from '@travetto/config';
+import { ConsoleManager, Runtime } from '@travetto/runtime';
 import type { StandardWebRouter } from '@travetto/web';
 
 import { AwsLambdaWebUtil } from './util.ts';

@@ -1,14 +1,14 @@
-import { Registry } from '@travetto/registry';
-import { castTo, type Class } from '@travetto/runtime';
-import { AfterAll, BeforeAll } from '@travetto/test';
+import type { ConfigPayload, ConfigSource } from '@travetto/config';
 import { DependencyRegistryIndex, Injectable } from '@travetto/di';
-import type { ConfigSource, ConfigPayload } from '@travetto/config';
+import { Registry } from '@travetto/registry';
+import { type Class, castTo } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
+import { AfterAll, BeforeAll } from '@travetto/test';
 
 import type { WebDispatcher } from '../../../src/types/dispatch.ts';
+import type { WebMessageInit } from '../../../src/types/message.ts';
 import { WebRequest, type WebRequestContext } from '../../../src/types/request.ts';
 import type { WebResponse } from '../../../src/types/response.ts';
-import type { WebMessageInit } from '../../../src/types/message.ts';
 
 @Injectable()
 export class WebTestConfig implements ConfigSource {

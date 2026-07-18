@@ -1,7 +1,7 @@
 import { DependencyRegistryIndex } from '@travetto/di';
-import { castKey, castTo, type Class } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
-import { SuiteRegistryIndex, type SuitePhaseHandler } from '@travetto/test';
+import { type Class, castKey, castTo } from '@travetto/runtime';
+import { type SuitePhaseHandler, SuiteRegistryIndex } from '@travetto/test';
 
 import { AsyncContext } from '../../src/service.ts';
 

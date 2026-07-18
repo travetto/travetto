@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
-import { Alias, Field, LongText, Required, Schema, SchemaRegistryIndex, Specifier, Text } from '@travetto/schema';
 import { Registry } from '@travetto/registry';
+import { Alias, Field, LongText, Required, Schema, SchemaRegistryIndex, Specifier, Text } from '@travetto/schema';
+import { Suite, Test } from '@travetto/test';
 
 @Schema()
 class MyClass {

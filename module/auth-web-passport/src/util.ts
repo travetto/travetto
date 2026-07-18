@@ -1,5 +1,5 @@
-import type { WebFilterContext, WebRequest } from '@travetto/web';
 import { castTo, JSONUtil } from '@travetto/runtime';
+import type { WebFilterContext, WebRequest } from '@travetto/web';
 
 /**
  * Passport utilities

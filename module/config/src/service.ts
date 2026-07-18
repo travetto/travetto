@@ -1,14 +1,14 @@
 import util from 'node:util';
 
-import { RuntimeError, toConcrete, castTo, type Class, Env, Runtime, RuntimeResources, getClass } from '@travetto/runtime';
 import { DependencyRegistryIndex, getDefaultQualifier, Injectable, PostConstruct } from '@travetto/di';
+import { type Class, castTo, Env, getClass, Runtime, RuntimeError, RuntimeResources, toConcrete } from '@travetto/runtime';
 import { BindUtil, DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ParserManager } from './parser/parser.ts';
 import type { ConfigData } from './parser/types.ts';
-import type { ConfigSource, ConfigPayload } from './source/types.ts';
 import { FileConfigSource } from './source/file.ts';
 import { OverrideConfigSource } from './source/override.ts';
+import type { ConfigPayload, ConfigSource } from './source/types.ts';
 
 type ConfigSpecSimple = Omit<ConfigPayload, 'data'>;
 

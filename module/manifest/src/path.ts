@@ -1,6 +1,6 @@
+import native from 'node:path';
 import posix from 'node:path/posix';
 import win32 from 'node:path/win32';
-import native from 'node:path';
 
 const toPosix = (file: string): string => file.replaceAll('\\', '/');
 const toNative = (file: string): string => file.replace(/[/\\]/g, native.sep);

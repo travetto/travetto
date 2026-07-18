@@ -2,10 +2,10 @@ import { Env } from '@travetto/runtime';
 import { IsPrivate, MethodValidator, type ValidationError } from '@travetto/schema';
 
 import { CliCommand } from '../src/registry/decorator.ts';
-import type { CliCommandShape } from '../src/types.ts';
 import { CliCommandRegistryIndex } from '../src/registry/registry-index.ts';
-import { CliUtil } from '../src/util.ts';
 import { CliSchemaExportUtil } from '../src/schema-export.ts';
+import type { CliCommandShape } from '../src/types.ts';
+import { CliUtil } from '../src/util.ts';
 
 async function nameValidator(names?: string[]): Promise<ValidationError | undefined> {
   if (!names || names.length === 0) {

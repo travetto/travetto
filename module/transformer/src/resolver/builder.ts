@@ -1,25 +1,24 @@
 import ts from 'typescript';
 
-import { path, ManifestModuleUtil } from '@travetto/manifest';
+import { ManifestModuleUtil, path } from '@travetto/manifest';
 
-import { DocUtil } from '../util/doc.ts';
+import { type TemplateLiteralPart, transformCast } from '../types/shared.ts';
 import { CoreUtil } from '../util/core.ts';
 import { DeclarationUtil } from '../util/declaration.ts';
+import { DocUtil } from '../util/doc.ts';
 import { LiteralUtil } from '../util/literal.ts';
-import { transformCast, type TemplateLiteralPart } from '../types/shared.ts';
-
+import { CoerceUtil } from './coerce.ts';
 import type {
-  Type,
   AnyType,
   CompositionType,
-  TransformResolver,
-  TemplateType,
+  ManagedType,
   MappedType,
-  ShapeType,
   ResolverContext,
-  ManagedType
+  ShapeType,
+  TemplateType,
+  TransformResolver,
+  Type
 } from './types.ts';
-import { CoerceUtil } from './coerce.ts';
 
 const UNDEFINED = Symbol();
 

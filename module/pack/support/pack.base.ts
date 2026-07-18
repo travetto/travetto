@@ -2,10 +2,10 @@ import os from 'node:os';
 import path from 'node:path';
 
 import { type CliCommandShape, CliFlag, CliModuleFlag, CliParseUtil, cliTpl } from '@travetto/cli';
-import { TimeUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
-import { Terminal } from '@travetto/terminal';
+import { type IndexedModule, PackageUtil } from '@travetto/manifest';
+import { Runtime, RuntimeIndex, TimeUtil } from '@travetto/runtime';
 import { Ignore, Method, Required, Schema } from '@travetto/schema';
-import { PackageUtil, type IndexedModule } from '@travetto/manifest';
+import { Terminal } from '@travetto/terminal';
 
 import { PackOperation } from './bin/operation.ts';
 import { PackUtil } from './bin/util.ts';

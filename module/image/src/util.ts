@@ -1,6 +1,6 @@
 import type { Metadata, Sharp } from 'sharp';
 
-import { BinaryUtil, castTo, type BinaryStream, type BinaryType } from '@travetto/runtime';
+import { type BinaryStream, type BinaryType, BinaryUtil, castTo } from '@travetto/runtime';
 
 const VALID_EXTENSIONS = ['jpeg', 'jpg', 'png', 'avif', 'webp', 'gif', 'jxl'] as const;
 

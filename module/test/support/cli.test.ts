@@ -1,9 +1,9 @@
 import { EventEmitter } from 'node:events';
 
+import { CliCommand, type CliCommandShape, CliUtil } from '@travetto/cli';
 import { Env, RuntimeIndex } from '@travetto/runtime';
-import { type CliCommandShape, CliCommand, CliUtil } from '@travetto/cli';
-import { WorkPool } from '@travetto/worker';
 import { Max, Min } from '@travetto/schema';
+import { WorkPool } from '@travetto/worker';
 
 import type { TestConsumerType } from './bin/run.ts';
 

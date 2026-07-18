@@ -1,4 +1,4 @@
-import { Get, Controller } from '@travetto/web';
+import { Controller, Get } from '@travetto/web';
 
 class Data {}
 

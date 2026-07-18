@@ -1,42 +1,42 @@
 import { Agent } from 'node:https';
 
-import { S3, type CompletedPart, type CreateMultipartUploadRequest, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { type CompletedPart, type CreateMultipartUploadRequest, GetObjectCommand, PutObjectCommand, S3 } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { MetadataBearer } from '@aws-sdk/types';
 import { NodeHttpHandler } from '@smithy/node-http-handler';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-import {
-  type ModelCrudSupport,
-  type ModelStorageSupport,
-  type ModelType,
-  ModelRegistryIndex,
-  ExistsError,
-  NotFoundError,
-  type OptionalId,
-  type ModelBlobSupport,
-  type ModelExpirySupport,
-  ModelCrudUtil,
-  ModelExpiryUtil,
-  ModelStorageUtil,
-  type ModelListOptions
-} from '@travetto/model';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
-  type Class,
-  RuntimeError,
-  castTo,
+  ExistsError,
+  type ModelBlobSupport,
+  type ModelCrudSupport,
+  ModelCrudUtil,
+  type ModelExpirySupport,
+  ModelExpiryUtil,
+  type ModelListOptions,
+  ModelRegistryIndex,
+  type ModelStorageSupport,
+  ModelStorageUtil,
+  type ModelType,
+  NotFoundError,
+  type OptionalId
+} from '@travetto/model';
+import {
   asFull,
+  type BinaryArray,
   type BinaryMetadata,
-  type ByteRange,
+  BinaryMetadataUtil,
   type BinaryType,
   BinaryUtil,
+  type ByteRange,
+  type Class,
+  CodecUtil,
+  castTo,
+  JSONUtil,
+  RuntimeError,
   type TimeSpan,
   TimeUtil,
-  type BinaryArray,
-  CodecUtil,
-  BinaryMetadataUtil,
-  TypedObject,
-  JSONUtil
+  TypedObject
 } from '@travetto/runtime';
 
 import type { S3ModelConfig } from './config.ts';

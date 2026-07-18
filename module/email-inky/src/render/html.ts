@@ -1,7 +1,7 @@
 import type { JSXElement } from '../../support/jsx-runtime.ts';
 import type { RenderProvider, RenderState } from '../types.ts';
-import type { RenderContext } from './context.ts';
 import { classString, combinePropsToString, getChildren, isOfType, visit } from './common.ts';
+import type { RenderContext } from './context.ts';
 
 export const SUMMARY_STYLE = Object.entries({
   display: 'none',

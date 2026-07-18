@@ -1,19 +1,20 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c } from '@travetto/doc';
-import { InjectableFactory, Injectable } from '@travetto/di';
-import { ContextParam, WebRequest, WebResponse } from '@travetto/web';
-import {
-  Login,
-  Unauthenticated,
-  Authenticated,
-  Logout,
-  WebAuthConfig,
-  JWTPrincipalCodec,
-  AuthContextInterceptor,
-  type PrincipalCodec
-} from '@travetto/auth-web';
-import { toConcrete } from '@travetto/runtime';
+
 import { AuthContext, type Authenticator, type AuthenticatorState, type Principal } from '@travetto/auth';
+import {
+  AuthContextInterceptor,
+  Authenticated,
+  JWTPrincipalCodec,
+  Login,
+  Logout,
+  type PrincipalCodec,
+  Unauthenticated,
+  WebAuthConfig
+} from '@travetto/auth-web';
+import { Injectable, InjectableFactory } from '@travetto/di';
+import { c, d } from '@travetto/doc';
+import { toConcrete } from '@travetto/runtime';
+import { ContextParam, WebRequest, WebResponse } from '@travetto/web';
 
 const PrincipalContract = toConcrete<Principal>();
 const PrincipalCodecContract = toConcrete<PrincipalCodec>();

@@ -1,13 +1,13 @@
-import os from 'node:os';
 import assert from 'node:assert';
-import fs from 'node:fs/promises';
-import { pipeline } from 'node:stream/promises';
 import { createReadStream, createWriteStream } from 'node:fs';
+import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
+import { pipeline } from 'node:stream/promises';
 
-import { Test, Suite, TestFixtures } from '@travetto/test';
 import { ImageUtil } from '@travetto/image';
 import { BinaryUtil } from '@travetto/runtime';
+import { Suite, Test, TestFixtures } from '@travetto/test';
 
 @Suite()
 class ImageUtilSuite {

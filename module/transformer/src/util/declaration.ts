@@ -1,4 +1,5 @@
 import ts from 'typescript';
+
 import { CoreUtil } from './core.ts';
 
 const isNamed = (value: ts.Declaration): value is ts.Declaration & { name: ts.Node } => 'name' in value && !!value.name;

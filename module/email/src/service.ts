@@ -1,9 +1,9 @@
-import { RuntimeResources } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
+import { RuntimeResources } from '@travetto/runtime';
 
-import type { EmailCompiled, EmailOptions, SentEmail } from './types.ts';
-import type { MailTransport } from './transport.ts';
 import type { MailInterpolator } from './template.ts';
+import type { MailTransport } from './transport.ts';
+import type { EmailCompiled, EmailOptions, SentEmail } from './types.ts';
 import { MailUtil } from './util.ts';
 
 type MessageWithoutBody = Omit<EmailOptions, keyof EmailCompiled>;

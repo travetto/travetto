@@ -1,11 +1,11 @@
 import { stripVTControlCharacters } from 'node:util';
 
-import { type CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
-import { Terminal } from '@travetto/terminal';
+import { CliCommand, type CliCommandShape, cliTpl } from '@travetto/cli';
 import { AsyncQueue, Util } from '@travetto/runtime';
 import { MethodValidator, type ValidationError } from '@travetto/schema';
+import { Terminal } from '@travetto/terminal';
 
-import { ServiceRunner, type ServiceAction } from '../src/service.ts';
+import { type ServiceAction, ServiceRunner } from '../src/service.ts';
 
 async function validateService(_: ServiceAction, services: string[]): Promise<ValidationError | undefined> {
   const all = await ServiceRunner.findServices(services);

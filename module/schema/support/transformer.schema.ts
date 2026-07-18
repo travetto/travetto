@@ -1,5 +1,7 @@
 import ts from 'typescript';
-import { type TransformerState, DocUtil, DeclarationUtil, DecoratorUtil, TransformerHandler } from '@travetto/transformer';
+
+import { DeclarationUtil, DecoratorUtil, DocUtil, TransformerHandler, type TransformerState } from '@travetto/transformer';
+
 import { SchemaTransformUtil } from './transformer/util.ts';
 
 const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';

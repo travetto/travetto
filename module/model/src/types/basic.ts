@@ -1,4 +1,5 @@
 import type { Class } from '@travetto/runtime';
+
 import type { ModelIdSource, ModelType, OptionalId } from './model.ts';
 
 /**

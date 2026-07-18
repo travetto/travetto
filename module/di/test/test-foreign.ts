@@ -1,13 +1,14 @@
 import assert from 'node:assert';
 import { EventEmitter } from 'node:events';
 import type { Writable } from 'node:stream';
-import type { HttpError } from 'http-errors';
-import type debug from 'debug';
 
-import { Suite, Test } from '@travetto/test';
-import { castTo } from '@travetto/runtime';
+import type debug from 'debug';
+import type { HttpError } from 'http-errors';
+
 import { DependencyRegistryIndex, Inject, Injectable, InjectableFactory } from '@travetto/di';
 import { Registry } from '@travetto/registry';
+import { castTo } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
 
 class Item {
   follow: number;

@@ -1,16 +1,15 @@
-import zlib from 'node:zlib';
 import util from 'node:util';
+import zlib from 'node:zlib';
 
-import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { Inject, Injectable } from '@travetto/di';
 import { BinaryUtil } from '@travetto/runtime';
 
-import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import type { WebInterceptorCategory } from '../types/core.ts';
-import type { WebChainedContext } from '../types/filter.ts';
-import { WebResponse } from '../types/response.ts';
 import { WebError } from '../types/error.ts';
-
+import type { WebChainedContext } from '../types/filter.ts';
+import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
+import { WebResponse } from '../types/response.ts';
 import { WebBodyUtil } from '../util/body.ts';
 import { WebHeaderUtil } from '../util/header.ts';
 

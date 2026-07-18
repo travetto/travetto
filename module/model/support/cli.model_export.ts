@@ -2,8 +2,8 @@ import { CliCommand } from '@travetto/cli';
 import { MethodValidator } from '@travetto/schema';
 
 import { BaseModelCommand } from './base-command.ts';
-import { ModelExportUtil } from './bin/export.ts';
 import { ModelCandidateUtil } from './bin/candidate.ts';
+import { ModelExportUtil } from './bin/export.ts';
 
 /**
  * Export model definitions for a selected provider and model set.

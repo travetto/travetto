@@ -1,5 +1,5 @@
-import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import type { IndexedModule } from '@travetto/manifest';
+import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { CliScmUtil } from './scm.ts';
 

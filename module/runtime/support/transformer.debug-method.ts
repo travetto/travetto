@@ -1,6 +1,6 @@
 import type ts from 'typescript';
 
-import { type TransformerState, CoreUtil, TransformerHandler } from '@travetto/transformer';
+import { CoreUtil, TransformerHandler, type TransformerState } from '@travetto/transformer';
 
 const DebugSymbol = Symbol();
 

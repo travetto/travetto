@@ -1,10 +1,10 @@
 import { createPool } from 'mysql2';
-import type { PoolConnection, Pool, OkPacket, ResultSetHeader, TypeCastField, PreparedStatementInfo } from 'mysql2/promise';
+import type { OkPacket, Pool, PoolConnection, PreparedStatementInfo, ResultSetHeader, TypeCastField } from 'mysql2/promise';
 
-import { castTo, JSONUtil, ShutdownManager } from '@travetto/runtime';
 import type { AsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { Connection, type SQLModelConfig } from '@travetto/model-sql';
+import { castTo, JSONUtil, ShutdownManager } from '@travetto/runtime';
 
 function isSimplePacket(value: unknown): value is OkPacket | ResultSetHeader {
   return (

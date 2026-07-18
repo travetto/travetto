@@ -1,8 +1,9 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c } from '@travetto/doc';
-import { ModelQueryTypes } from '@travetto/model-query/support/doc.support.ts';
-import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
+import { c, d } from '@travetto/doc';
+
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
+import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
+import { ModelQueryTypes } from '@travetto/model-query/support/doc.support.ts';
 
 import { ElasticsearchModelConfig } from './src/config.ts';
 import { ElasticsearchModelService } from './src/service.ts';

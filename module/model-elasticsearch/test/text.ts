@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
 import { Registry } from '@travetto/registry';
-import { Suite, Test, BeforeAll } from '@travetto/test';
-import { LongText, Text, Schema } from '@travetto/schema';
+import { LongText, Schema, Text } from '@travetto/schema';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { ElasticsearchSchemaUtil } from '@travetto/model-elasticsearch/src/internal/schema.ts';
 

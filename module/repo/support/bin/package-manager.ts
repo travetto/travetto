@@ -1,10 +1,10 @@
-import path from 'node:path';
-import { spawn, type ChildProcess } from 'node:child_process';
+import { type ChildProcess, spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
+import path from 'node:path';
 
-import { JSONUtil, type ExecutionResult, Runtime, ExecUtil } from '@travetto/runtime';
-import { type IndexedModule, type Package, PackageUtil } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
+import { type IndexedModule, type Package, PackageUtil } from '@travetto/manifest';
+import { ExecUtil, type ExecutionResult, JSONUtil, Runtime } from '@travetto/runtime';
 import { TerminalUtil } from '@travetto/terminal';
 
 export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease' | 'premajor' | 'preminor' | 'prepatch';

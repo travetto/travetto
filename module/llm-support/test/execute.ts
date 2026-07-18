@@ -3,9 +3,9 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
+import { FileLoader, JSONUtil, RuntimeResources } from '@travetto/runtime';
 import { SchemaValidator } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
-import { FileLoader, JSONUtil, RuntimeResources } from '@travetto/runtime';
 
 import { executeOperations, getUnimplementedOperations } from '../src/execute.ts';
 import { recommendOperations } from '../src/recommendation.ts';

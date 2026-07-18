@@ -2,11 +2,11 @@ import { spawn } from 'node:child_process';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import type { CompilerEvent, CompilerLogLevel } from '../types.ts';
-import { AsyncQueue } from '../queue.ts';
-import { Log } from '../log.ts';
 import { CommonUtil } from '../common.ts';
 import { EventUtil } from '../event.ts';
+import { Log } from '../log.ts';
+import { AsyncQueue } from '../queue.ts';
+import type { CompilerEvent, CompilerLogLevel } from '../types.ts';
 import type { CompilerClient } from './client.ts';
 import { CompilerServer } from './server.ts';
 

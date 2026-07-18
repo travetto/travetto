@@ -1,9 +1,9 @@
-import { castTo, type Class, getClass } from '@travetto/runtime';
+import { type Class, castTo, getClass } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelType } from '../types/model.ts';
-import type { DataHandler, ModelConfig, PrePersistScope } from './types.ts';
 import { ModelRegistryIndex } from './registry-index.ts';
+import type { DataHandler, ModelConfig, PrePersistScope } from './types.ts';
 
 /**
  * Model decorator, extends `@Schema`

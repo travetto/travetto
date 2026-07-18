@@ -1,12 +1,12 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c } from '@travetto/doc';
-import { Runtime } from '@travetto/runtime';
+import { c, d } from '@travetto/doc';
 import { PACKAGE_MANAGERS } from '@travetto/manifest';
+import { Runtime } from '@travetto/runtime';
 
-import { RepoVersionCommand } from './support/cli.repo_version.ts';
-import { RepoPublishCommand } from './support/cli.repo_publish.ts';
-import { ListModuleCommand } from './support/cli.repo_list.ts';
 import { RepoExecCommand } from './support/cli.repo_exec.ts';
+import { ListModuleCommand } from './support/cli.repo_list.ts';
+import { RepoPublishCommand } from './support/cli.repo_publish.ts';
+import { RepoVersionCommand } from './support/cli.repo_version.ts';
 
 const PACKAGE_MANAGER_LIST = PACKAGE_MANAGERS.map((manager, i) => (i === 0 ? [d.library(manager.title)] : ['/', d.library(manager.title)]));
 

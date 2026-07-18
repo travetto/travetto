@@ -1,64 +1,64 @@
 import { Client, errors, Serializer } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/api/types';
 
+import { Injectable, PostConstruct } from '@travetto/di';
 import {
-  type ModelCrudSupport,
   type BulkOperation,
   type BulkResponse,
   type ModelBulkSupport,
-  type ModelExpirySupport,
-  type ModelType,
-  type ModelStorageSupport,
-  NotFoundError,
-  ModelRegistryIndex,
-  type OptionalId,
-  ModelCrudUtil,
-  ModelStorageUtil,
-  ModelExpiryUtil,
   ModelBulkUtil,
-  type ModelListOptions
+  type ModelCrudSupport,
+  ModelCrudUtil,
+  type ModelExpirySupport,
+  ModelExpiryUtil,
+  type ModelListOptions,
+  ModelRegistryIndex,
+  type ModelStorageSupport,
+  ModelStorageUtil,
+  type ModelType,
+  NotFoundError,
+  type OptionalId
 } from '@travetto/model';
-import { ShutdownManager, type Class, castTo, asFull, TypedObject, asConstructable, JSONUtil } from '@travetto/runtime';
-import { BindUtil } from '@travetto/schema';
-import { Injectable, PostConstruct } from '@travetto/di';
+import {
+  type FullKeyedIndexBody,
+  type FullKeyedIndexWithPartialBody,
+  type KeyedIndexBody,
+  type KeyedIndexSelection,
+  ModelIndexedComputedIndex,
+  type ModelIndexedSearchOptions,
+  type ModelIndexedSupport,
+  ModelIndexedUtil,
+  type ModelPageOptions,
+  type ModelPageResult,
+  type SingleItemIndex,
+  type SortedIndex,
+  type SortedIndexSelection,
+  type SortedIndexSelectionType
+} from '@travetto/model-indexed';
 import {
   type ModelQuery,
   type ModelQueryCrudSupport,
-  type ModelQueryFacetSupport,
-  type ModelQuerySupport,
-  type PageableModelQuery,
-  type Query,
-  type ValidStringFields,
-  QueryVerifier,
-  type ModelQuerySuggestSupport,
-  ModelQueryUtil,
-  ModelQuerySuggestUtil,
   ModelQueryCrudUtil,
   type ModelQueryFacet,
+  type ModelQueryFacetSupport,
+  type ModelQuerySuggestSupport,
+  ModelQuerySuggestUtil,
+  type ModelQuerySupport,
+  ModelQueryUtil,
+  type PageableModelQuery,
+  type Query,
+  QueryVerifier,
+  type ValidStringFields,
   type WhereClause
 } from '@travetto/model-query';
-import {
-  type ModelIndexedSupport,
-  type KeyedIndexSelection,
-  type KeyedIndexBody,
-  type ModelPageOptions,
-  ModelIndexedUtil,
-  type SingleItemIndex,
-  type SortedIndexSelection,
-  type ModelPageResult,
-  type SortedIndex,
-  type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody,
-  ModelIndexedComputedIndex,
-  type ModelIndexedSearchOptions,
-  type SortedIndexSelectionType
-} from '@travetto/model-indexed';
+import { asConstructable, asFull, type Class, castTo, JSONUtil, ShutdownManager, TypedObject } from '@travetto/runtime';
+import { BindUtil } from '@travetto/schema';
 
 import type { ElasticsearchModelConfig } from './config.ts';
-import type { EsBulkError } from './internal/types.ts';
+import { IndexManager } from './index-manager.ts';
 import { ElasticsearchQueryUtil } from './internal/query.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
-import { IndexManager } from './index-manager.ts';
+import type { EsBulkError } from './internal/types.ts';
 
 const ELASTICSEARCH_REPLACER = {
   replacer(this: unknown, key: string, value: unknown): unknown {

@@ -3,8 +3,8 @@ import path from 'node:path';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import { Log, type Logger } from '../log.ts';
 import { CommonUtil } from '../common.ts';
+import { Log, type Logger } from '../log.ts';
 
 export class ProcessHandle {
   #file: string;

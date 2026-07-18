@@ -1,5 +1,5 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { RuntimeError, asFull, type Class, describeFunction, Runtime, safeAssign } from '@travetto/runtime';
+import { asFull, type Class, describeFunction, Runtime, RuntimeError, safeAssign } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { SuiteConfig } from '../model/suite.ts';

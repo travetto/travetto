@@ -1,5 +1,5 @@
-import type { WebResponse } from './response.ts';
 import type { WebRequest } from './request.ts';
+import type { WebResponse } from './response.ts';
 
 export type WebFilterContext<C = {}> = { request: WebRequest } & C;
 export type WebFilter<C extends WebFilterContext = WebFilterContext> = (context: C) => Promise<WebResponse>;

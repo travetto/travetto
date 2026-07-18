@@ -2,9 +2,8 @@ import { existsSync } from 'node:fs';
 
 import { ManifestModuleUtil } from './module.ts';
 import path from './path.ts';
+import type { FindConfig, IndexedFile, IndexedModule, ManifestModule, ManifestModuleFile, ManifestRoot } from './types/manifest.ts';
 import { ManifestUtil } from './util.ts';
-
-import type { ManifestModule, ManifestRoot, ManifestModuleFile, IndexedModule, IndexedFile, FindConfig } from './types/manifest.ts';
 
 const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T>(item: T): K[];

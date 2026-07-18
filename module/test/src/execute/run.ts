@@ -1,21 +1,21 @@
 import { createReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
-import readline from 'node:readline/promises';
 import path from 'node:path';
+import readline from 'node:readline/promises';
 
-import { Env, ExecUtil, Util, RuntimeIndex, Runtime, TimeUtil, JSONUtil, describeFunction } from '@travetto/runtime';
-import { WorkPool } from '@travetto/worker';
 import { Registry } from '@travetto/registry';
+import { describeFunction, Env, ExecUtil, JSONUtil, Runtime, RuntimeIndex, TimeUtil, Util } from '@travetto/runtime';
+import { WorkPool } from '@travetto/worker';
 
-import type { TestConfig, TestRunInput, TestRun, TestGlobInput, TestDiffInput } from '../model/test.ts';
-import type { TestRemoveEvent } from '../model/event.ts';
-import type { TestConsumerShape } from '../consumer/types.ts';
-import { RunnableTestConsumer } from '../consumer/types/runnable.ts';
-import type { TestConsumerConfig } from './types.ts';
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
-import { TestExecutor } from './executor.ts';
-import { buildStandardTestManager } from '../worker/standard.ts';
+import { RunnableTestConsumer } from '../consumer/types/runnable.ts';
+import type { TestConsumerShape } from '../consumer/types.ts';
+import type { TestRemoveEvent } from '../model/event.ts';
+import type { TestConfig, TestDiffInput, TestGlobInput, TestRun, TestRunInput } from '../model/test.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
+import { buildStandardTestManager } from '../worker/standard.ts';
+import { TestExecutor } from './executor.ts';
+import type { TestConsumerConfig } from './types.ts';
 
 type RunState = {
   runs: TestRun[];

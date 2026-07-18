@@ -2,10 +2,10 @@ import type ts from 'typescript';
 
 import type { ManifestIndex } from '@travetto/manifest';
 
+import { getAllTransformers } from './register.ts';
+import { TransformerState } from './state.ts';
 import type { NodeTransformer } from './types/visitor.ts';
 import { VisitorFactory } from './visitor.ts';
-import { TransformerState } from './state.ts';
-import { getAllTransformers } from './register.ts';
 
 /**
  * Manages the typescript transformers

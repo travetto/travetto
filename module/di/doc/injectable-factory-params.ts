@@ -1,6 +1,6 @@
 import { InjectableFactory } from '@travetto/di';
 
-import { type DependentService, CustomService } from './dependency.ts';
+import { CustomService, type DependentService } from './dependency.ts';
 
 class Config {
   @InjectableFactory()

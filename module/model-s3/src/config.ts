@@ -1,10 +1,10 @@
-import { fromIni } from '@aws-sdk/credential-provider-ini';
 import type s3 from '@aws-sdk/client-s3';
+import { fromIni } from '@aws-sdk/credential-provider-ini';
 
 import { Config, EnvVar } from '@travetto/config';
-import { Required, Url } from '@travetto/schema';
-import { Runtime } from '@travetto/runtime';
 import { PostConstruct } from '@travetto/di';
+import { Runtime } from '@travetto/runtime';
+import { Required, Url } from '@travetto/schema';
 
 /**
  * S3 Support as an Asset Source

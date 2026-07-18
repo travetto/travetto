@@ -1,15 +1,15 @@
-import http from 'node:http';
-import fs from 'node:fs/promises';
 import { setMaxListeners } from 'node:events';
+import fs from 'node:fs/promises';
+import http from 'node:http';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import type { CompilerProgressEvent, CompilerEvent, CompilerEventType, CompilerServerInfo } from '../types.ts';
-import { Log } from '../log.ts';
 import { CommonUtil } from '../common.ts';
+import { EventUtil } from '../event.ts';
+import { Log } from '../log.ts';
+import type { CompilerEvent, CompilerEventType, CompilerProgressEvent, CompilerServerInfo } from '../types.ts';
 import { CompilerClient } from './client.ts';
 import { ProcessHandle } from './process-handle.ts';
-import { EventUtil } from '../event.ts';
 
 const log = Log.scoped('server');
 

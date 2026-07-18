@@ -1,6 +1,6 @@
 import { Registry } from '@travetto/registry';
-import { SchemaValidator } from '@travetto/schema';
 import { JSONUtil } from '@travetto/runtime';
+import { SchemaValidator } from '@travetto/schema';
 
 import { LocationAware } from './custom-type-usage.ts';
 

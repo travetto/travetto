@@ -1,20 +1,21 @@
 import fs from 'node:fs';
-import type { CompilerHost, SourceFile, CompilerOptions, Program, ScriptTarget } from 'typescript';
+
+import type { CompilerHost, CompilerOptions, Program, ScriptTarget, SourceFile } from 'typescript';
 
 import {
-  path,
-  ManifestModuleUtil,
-  type ManifestModule,
-  type ManifestRoot,
   type ManifestIndex,
-  type ManifestModuleFolderType
+  type ManifestModule,
+  type ManifestModuleFolderType,
+  ManifestModuleUtil,
+  type ManifestRoot,
+  path
 } from '@travetto/manifest';
 import type { TransformerManager } from '@travetto/transformer';
 
-import { CompilerUtil } from './util.ts';
-import type { CompileStateEntry } from './types.ts';
 import { CommonUtil } from './common.ts';
 import { tsProxy as ts, tsProxyInit } from './ts-proxy.ts';
+import type { CompileStateEntry } from './types.ts';
+import { CompilerUtil } from './util.ts';
 
 const TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'support', 'src', '$package']);
 

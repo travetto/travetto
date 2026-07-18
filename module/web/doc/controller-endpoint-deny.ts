@@ -1,4 +1,4 @@
-import { Controller, Get, QueryParam, ConfigureInterceptor, CorsInterceptor, ExcludeInterceptors } from '@travetto/web';
+import { ConfigureInterceptor, Controller, CorsInterceptor, ExcludeInterceptors, Get, QueryParam } from '@travetto/web';
 
 @Controller('/allowDeny')
 @ConfigureInterceptor(CorsInterceptor, { applies: true })

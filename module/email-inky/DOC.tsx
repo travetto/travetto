@@ -1,5 +1,5 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c } from '@travetto/doc';
+import { c, d } from '@travetto/doc';
 
 const IfLink = <c.CodeLink src="./src/components.ts" startRe={/const If/} title="If Component" />;
 const UnlessLink = <c.CodeLink src="./src/components.ts" startRe={/const Unless/} title="Unless Component" />;

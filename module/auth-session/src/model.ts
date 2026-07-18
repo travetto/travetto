@@ -1,4 +1,4 @@
-import { Model, ExpiresAt } from '@travetto/model';
+import { ExpiresAt, Model } from '@travetto/model';
 import { Text } from '@travetto/schema';
 
 /**

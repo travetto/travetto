@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
+
 import { WebTlsUtil } from '../src/tls.ts';
 
 @Suite()

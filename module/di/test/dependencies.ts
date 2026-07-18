@@ -1,7 +1,7 @@
 import { Inject, Injectable, InjectableFactory, PostConstruct } from '@travetto/di';
 import { Required } from '@travetto/schema';
 
-import { DbConfig, type AltConfig, Empty } from './config.ts';
+import { type AltConfig, DbConfig, Empty } from './config.ts';
 
 export abstract class BasePattern {}
 

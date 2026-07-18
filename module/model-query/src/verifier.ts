@@ -1,10 +1,10 @@
 /* eslint @typescript-eslint/no-unused-vars: ["error", { "args": "none"} ] */
-import { DataUtil, ValidationResultError, type ValidationError, SchemaRegistryIndex } from '@travetto/schema';
-import { JSONUtil, type Class } from '@travetto/runtime';
 
-import type { ModelQuery, Query, PageableModelQuery } from './model/query.ts';
+import { type Class, JSONUtil } from '@travetto/runtime';
+import { DataUtil, SchemaRegistryIndex, type ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { TypeUtil } from './internal/types.ts';
+import type { ModelQuery, PageableModelQuery, Query } from './model/query.ts';
 
 type SimpleType = keyof typeof TypeUtil.OPERATORS;
 

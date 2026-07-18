@@ -1,4 +1,4 @@
-import { Controller, Post, Get } from '@travetto/web';
+import { Controller, Get, Post } from '@travetto/web';
 import { type FileMap, Upload } from '@travetto/web-upload';
 
 @Controller('/simple')

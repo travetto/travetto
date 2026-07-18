@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Test, Suite } from '@travetto/test';
+import { Suite, Test } from '@travetto/test';
 
 import { BaseWebSuite } from './base.ts';
 import './controller.ts'; // Ensure imported

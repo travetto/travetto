@@ -1,7 +1,7 @@
 import { type Class, type ClassInstance, getClass } from '@travetto/runtime';
 
-import type { SchemaCoreConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
+import type { SchemaCoreConfig } from '../service/types.ts';
 
 /**
  * Describe a model or a field

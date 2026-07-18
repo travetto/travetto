@@ -2,8 +2,8 @@
 
 import assert from 'node:assert';
 
-import { Test, Suite } from '@travetto/test';
-import { HLine, Summary, SUMMARY_STYLE, Title, Wrapper } from '@travetto/email-inky';
+import { HLine, SUMMARY_STYLE, Summary, Title, Wrapper } from '@travetto/email-inky';
+import { Suite, Test } from '@travetto/test';
 
 import { renderJSX } from './util.ts';
 

@@ -1,14 +1,14 @@
 import assert from 'node:assert';
 
+import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 import { TimeUtil } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
-import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 
+import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
+import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 import { ExpiryUser, ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
-import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
-import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
 
 const KB = 2 ** 20;
 

@@ -1,5 +1,5 @@
-import { type Class, RuntimeError, TimeUtil, castTo, hasFunction } from '@travetto/runtime';
-import { type ModelType, NotFoundError, ModelRegistryIndex } from '@travetto/model';
+import { ModelRegistryIndex, type ModelType, NotFoundError } from '@travetto/model';
+import { type Class, castTo, hasFunction, RuntimeError, TimeUtil } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { WhereClause, WhereClauseRaw } from '../model/where-clause.ts';

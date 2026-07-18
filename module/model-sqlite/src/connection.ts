@@ -2,12 +2,12 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { DatabaseSync, type DatabaseSyncOptions, type SQLInputValue } from 'node:sqlite';
 
-import { type Pool, createPool } from 'generic-pool';
+import { createPool, type Pool } from 'generic-pool';
 
-import { ShutdownManager, Util, Runtime, RuntimeError, castTo } from '@travetto/runtime';
 import { type AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
-import { type SQLModelConfig, Connection } from '@travetto/model-sql';
+import { Connection, type SQLModelConfig } from '@travetto/model-sql';
+import { castTo, Runtime, RuntimeError, ShutdownManager, Util } from '@travetto/runtime';
 
 const RECOVERABLE_MESSAGE = /database( table| schema)? is (locked|busy)/;
 

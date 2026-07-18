@@ -1,5 +1,5 @@
-import { type WebInterceptor, type WebInterceptorCategory, type WebChainedContext, WebError } from '@travetto/web';
 import { Injectable } from '@travetto/di';
+import { type WebChainedContext, WebError, type WebInterceptor, type WebInterceptorCategory } from '@travetto/web';
 
 @Injectable()
 export class SimpleAuthInterceptor implements WebInterceptor {

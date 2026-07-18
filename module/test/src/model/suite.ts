@@ -1,7 +1,7 @@
 import type { Any, Class } from '@travetto/runtime';
 
-import type { TestConfig, TestResult, TestStatus } from './test.ts';
 import type { Skip, SuiteCore } from './common.ts';
+import type { TestConfig, TestResult, TestStatus } from './test.ts';
 
 export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
 

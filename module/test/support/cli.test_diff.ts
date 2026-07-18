@@ -1,11 +1,11 @@
 import fs from 'node:fs/promises';
 
-import { Env, JSONUtil, RuntimeIndex } from '@travetto/runtime';
 import { CliCommand, CliUtil } from '@travetto/cli';
+import { Env, JSONUtil, RuntimeIndex } from '@travetto/runtime';
 import { IsPrivate } from '@travetto/schema';
 
-import { runTests, type TestConsumerType } from './bin/run.ts';
 import type { TestDiffSource } from '../src/model/test.ts';
+import { runTests, type TestConsumerType } from './bin/run.ts';
 
 /**
  * Run tests scoped by a precomputed diff source file.

@@ -1,9 +1,9 @@
-import fs from 'node:fs/promises';
 import { spawn } from 'node:child_process';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { JSONUtil, ExecUtil, Runtime } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
+import { ExecUtil, JSONUtil, Runtime } from '@travetto/runtime';
 
 /**
  * Help utility for openapi client command

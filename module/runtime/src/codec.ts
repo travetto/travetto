@@ -1,8 +1,8 @@
 import { createInterface } from 'node:readline/promises';
 
-import { BinaryUtil, type BinaryArray, type BinaryType } from './binary.ts';
+import { type BinaryArray, type BinaryType, BinaryUtil } from './binary.ts';
 import { RuntimeError } from './error.ts';
-import { castTo, type Any } from './types.ts';
+import { type Any, castTo } from './types.ts';
 
 type TextInput = string | BinaryArray;
 

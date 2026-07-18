@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
+import { Registry } from '@travetto/registry';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { CorsConfig, CorsInterceptor, HTTP_METHODS, WebRequest, WebResponse } from '@travetto/web';
-import { Registry } from '@travetto/registry';
 
 @Suite()
 class CorsInterceptorSuite {

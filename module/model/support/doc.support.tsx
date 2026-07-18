@@ -1,6 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c, type DocJSXElementByFn, type DocJSXElement, DocFileUtil } from '@travetto/doc';
+
 import { Config } from '@travetto/config';
+import { c, DocFileUtil, type DocJSXElement, type DocJSXElementByFn, d } from '@travetto/doc';
 import { castKey, Runtime, toConcrete } from '@travetto/runtime';
 
 import type { ModelBasicSupport } from '../src/types/basic.ts';

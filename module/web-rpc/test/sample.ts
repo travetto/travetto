@@ -1,12 +1,12 @@
 import assert from 'node:assert';
 
-import { Body, Controller, Delete, Get, Post, Put } from '@travetto/web';
+import { type BinaryArray, BinaryUtil, CodecUtil, JSONUtil, RuntimeError, Util } from '@travetto/runtime';
 import { Specifier } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
-import { RuntimeError, BinaryUtil, CodecUtil, JSONUtil, Util, type BinaryArray } from '@travetto/runtime';
+import { Body, Controller, Delete, Get, Post, Put } from '@travetto/web';
 
-import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 import { LocalRequestDispatcher } from '@travetto/web/support/test/dispatcher.ts';
+import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
 // QUESTION: Should we load all source for the module?
 import '../src/controller.ts'; // Ensure we load the controller

@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { Discriminated, Schema } from '@travetto/schema';
+import { Suite, Test } from '@travetto/test';
 
 @Schema()
 @Discriminated('flavor')

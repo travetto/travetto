@@ -1,10 +1,10 @@
 import assert from 'node:assert';
 
-import { BeforeAll, Suite, Test } from '@travetto/test';
-import { CookieJar, CookieInterceptor, WebAsyncContext, WebRequest, WebResponse, KeyGrip, type Cookie } from '@travetto/web';
+import { AsyncContext } from '@travetto/context';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
-import { AsyncContext } from '@travetto/context';
+import { BeforeAll, Suite, Test } from '@travetto/test';
+import { type Cookie, CookieInterceptor, CookieJar, KeyGrip, WebAsyncContext, WebRequest, WebResponse } from '@travetto/web';
 
 @Suite()
 class CookiesInterceptorSuite {

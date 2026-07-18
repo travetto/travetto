@@ -2,8 +2,8 @@
 
 import fs from 'node:fs/promises';
 
+import { c, type DocJSXElement, d } from '@travetto/doc';
 import { RuntimeIndex, toConcrete } from '@travetto/runtime';
-import { c, d, type DocJSXElement } from '@travetto/doc';
 
 import type { DocumentShape } from './src/types.ts';
 import { DocCommand } from './support/cli.doc.ts';

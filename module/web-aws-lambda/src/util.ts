@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { BinaryUtil, castTo, CodecUtil, type BinaryArray } from '@travetto/runtime';
+import { type BinaryArray, BinaryUtil, CodecUtil, castTo } from '@travetto/runtime';
 import { WebBodyUtil, WebCommonUtil, WebRequest, WebResponse } from '@travetto/web';
 
 export class AwsLambdaWebUtil {

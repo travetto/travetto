@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
-import { Suite, Test, ShouldThrow } from '@travetto/test';
-import { Registry } from '@travetto/registry';
 import { DependencyRegistryIndex } from '@travetto/di';
+import { Registry } from '@travetto/registry';
+import { ShouldThrow, Suite, Test } from '@travetto/test';
 
 @Suite('cycle')
 class CycleTest {

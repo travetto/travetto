@@ -1,13 +1,13 @@
-import rl from 'node:readline/promises';
-import timers from 'node:timers/promises';
 import fs from 'node:fs/promises';
 import http, { Agent } from 'node:http';
+import rl from 'node:readline/promises';
+import timers from 'node:timers/promises';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import type { CompilerEventPayload, CompilerEventType, CompilerServerInfo, CompilerStateType } from '../types.ts';
-import type { LogShape } from '../log.ts';
 import { CommonUtil } from '../common.ts';
+import type { LogShape } from '../log.ts';
+import type { CompilerEventPayload, CompilerEventType, CompilerServerInfo, CompilerStateType } from '../types.ts';
 import { ProcessHandle } from './process-handle.ts';
 
 type FetchEventsConfig<T> = {

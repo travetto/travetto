@@ -1,11 +1,11 @@
-import type net from 'node:net';
 import http from 'node:http';
 import http2 from 'node:http2';
 import https from 'node:https';
+import type net from 'node:net';
 import { TLSSocket } from 'node:tls';
 
-import { WebBodyUtil, WebCommonUtil, type WebDispatcher, WebRequest, WebResponse } from '@travetto/web';
 import { type BinaryType, BinaryUtil, castTo, ShutdownManager } from '@travetto/runtime';
+import { WebBodyUtil, WebCommonUtil, type WebDispatcher, WebRequest, WebResponse } from '@travetto/web';
 
 import type { WebSecureKeyPair, WebServerHandle } from './types.ts';
 

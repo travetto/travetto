@@ -1,11 +1,11 @@
 import assert from 'node:assert';
-import { createBrotliCompress, brotliCompressSync, deflateSync, createDeflate, createGzip, gzipSync } from 'node:zlib';
+import { brotliCompressSync, createBrotliCompress, createDeflate, createGzip, deflateSync, gzipSync } from 'node:zlib';
 
-import { BeforeAll, Suite, Test } from '@travetto/test';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
-import { WebResponse, WebRequest, DecompressInterceptor, WebBodyUtil } from '@travetto/web';
-import { RuntimeError, BinaryUtil, castTo, type BinaryType } from '@travetto/runtime';
+import { type BinaryType, BinaryUtil, castTo, RuntimeError } from '@travetto/runtime';
+import { BeforeAll, Suite, Test } from '@travetto/test';
+import { DecompressInterceptor, WebBodyUtil, WebRequest, WebResponse } from '@travetto/web';
 
 @Suite()
 class DecompressInterceptorSuite {

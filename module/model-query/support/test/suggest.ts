@@ -5,8 +5,8 @@ import { Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
-import { Person } from './model.ts';
 import type { ModelQuerySuggestSupport } from '../../src/types/suggest.ts';
+import { Person } from './model.ts';
 
 @Suite()
 export abstract class ModelQuerySuggestSuite extends BaseModelSuite<ModelQuerySuggestSupport & ModelCrudSupport> {

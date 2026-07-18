@@ -1,64 +1,64 @@
-import {
-  type ModelType,
-  type BulkOperation,
-  type BulkResponse,
-  type ModelCrudSupport,
-  type ModelStorageSupport,
-  type ModelBulkSupport,
-  NotFoundError,
-  ModelRegistryIndex,
-  ExistsError,
-  type OptionalId,
-  type ModelIdSource,
-  ModelExpiryUtil,
-  ModelCrudUtil,
-  ModelStorageUtil,
-  ModelBulkUtil,
-  type ModelListOptions
-} from '@travetto/model';
-import {
-  type ModelIndexedSupport,
-  type KeyedIndexSelection,
-  type KeyedIndexBody,
-  type ModelPageOptions,
-  ModelIndexedUtil,
-  type SingleItemIndex,
-  type SortedIndexSelection,
-  type ModelPageResult,
-  type SortedIndex,
-  type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody,
-  ModelIndexedComputedIndex,
-  type ModelIndexedSearchOptions,
-  type SortedIndexSelectionType
-} from '@travetto/model-indexed';
-import { castTo, type Class, JSONUtil } from '@travetto/runtime';
-import { DataUtil } from '@travetto/schema';
 import type { AsyncContext } from '@travetto/context';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
+  type BulkOperation,
+  type BulkResponse,
+  ExistsError,
+  type ModelBulkSupport,
+  ModelBulkUtil,
+  type ModelCrudSupport,
+  ModelCrudUtil,
+  ModelExpiryUtil,
+  type ModelIdSource,
+  type ModelListOptions,
+  ModelRegistryIndex,
+  type ModelStorageSupport,
+  ModelStorageUtil,
+  type ModelType,
+  NotFoundError,
+  type OptionalId
+} from '@travetto/model';
+import {
+  type FullKeyedIndexBody,
+  type FullKeyedIndexWithPartialBody,
+  type KeyedIndexBody,
+  type KeyedIndexSelection,
+  ModelIndexedComputedIndex,
+  type ModelIndexedSearchOptions,
+  type ModelIndexedSupport,
+  ModelIndexedUtil,
+  type ModelPageOptions,
+  type ModelPageResult,
+  type SingleItemIndex,
+  type SortedIndex,
+  type SortedIndexSelection,
+  type SortedIndexSelectionType
+} from '@travetto/model-indexed';
+import {
   type ModelQuery,
   type ModelQueryCrudSupport,
-  type ModelQueryFacetSupport,
-  type ModelQuerySupport,
-  type PageableModelQuery,
-  type ValidStringFields,
-  type WhereClauseRaw,
-  QueryVerifier,
-  type ModelQuerySuggestSupport,
-  ModelQueryUtil,
-  ModelQuerySuggestUtil,
   ModelQueryCrudUtil,
-  type ModelQueryFacet
+  type ModelQueryFacet,
+  type ModelQueryFacetSupport,
+  type ModelQuerySuggestSupport,
+  ModelQuerySuggestUtil,
+  type ModelQuerySupport,
+  ModelQueryUtil,
+  type PageableModelQuery,
+  QueryVerifier,
+  type ValidStringFields,
+  type WhereClauseRaw
 } from '@travetto/model-query';
+import { type Class, castTo, JSONUtil } from '@travetto/runtime';
+import { DataUtil } from '@travetto/schema';
 
 import type { SQLModelConfig } from './config.ts';
-import { Connected, ConnectedIterator, Transactional } from './connection/decorator.ts';
-import { SQLModelUtil } from './util.ts';
-import type { SQLDialect } from './dialect/base.ts';
-import { TableManager } from './table-manager.ts';
 import type { Connection } from './connection/base.ts';
+import { Connected, ConnectedIterator, Transactional } from './connection/decorator.ts';
+import type { SQLDialect } from './dialect/base.ts';
 import type { InsertWrapper } from './internal/types.ts';
+import { TableManager } from './table-manager.ts';
+import { SQLModelUtil } from './util.ts';
 
 /**
  * Core for SQL Model Source.  Should not have any direct queries,

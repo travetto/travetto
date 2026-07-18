@@ -1,9 +1,9 @@
 import { existsSync, readFileSync } from 'node:fs';
-import path from 'node:path';
 import { createRequire } from 'node:module';
+import path from 'node:path';
 
-import { type Package, PACKAGE_MANAGERS } from './types/package.ts';
 import type { ManifestContext } from './types/context.ts';
+import { PACKAGE_MANAGERS, type Package } from './types/package.ts';
 
 type Pkg = Package & { path: string };
 
@@ -62,7 +62,7 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
   const wsPrefix = `${workspace.path}/`;
   const moduleName = process.env.TRV_MODULE === workspace.name ? workspace.path : process.env.TRV_MODULE;
   const modulePkg =
-    !!workspace.workspaces && moduleName
+    workspace.workspaces && moduleName
       ? readPackage(resolve(`${moduleName}/package.json`))
       : (findPackage(root, pkg => !!pkg) ?? workspace);
 

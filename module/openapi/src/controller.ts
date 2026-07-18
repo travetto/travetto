@@ -1,8 +1,8 @@
 import { stringify } from 'yaml';
 
-import { ConfigureInterceptor, Controller, CorsInterceptor, Get, SetHeaders } from '@travetto/web';
 import { Inject } from '@travetto/di';
 import { IsPrivate } from '@travetto/schema';
+import { ConfigureInterceptor, Controller, CorsInterceptor, Get, SetHeaders } from '@travetto/web';
 
 import type { OpenApiService } from './service.ts';
 

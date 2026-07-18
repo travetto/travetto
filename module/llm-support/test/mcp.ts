@@ -4,7 +4,6 @@ import type { Any, Class } from '@travetto/runtime';
 import { SchemaValidator } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
-import { RecommendationResponseSchema } from '../src/types.ts';
 import {
   handleMcpRequest,
   JsonRpcResponseSchema,
@@ -12,6 +11,7 @@ import {
   McpToolCallResultSchema,
   McpToolsListResultSchema
 } from '../src/mcp.ts';
+import { RecommendationResponseSchema } from '../src/types.ts';
 
 async function bindAndValidate<T extends object>(schema: Class<T>, payload: unknown): Promise<T> {
   const bound = schema.from(payload as Any);

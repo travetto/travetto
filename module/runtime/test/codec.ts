@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 import { isUint8Array } from 'node:util/types';
 
-import { Test, Suite, TestFixtures } from '@travetto/test';
-import { castTo, CodecUtil, RuntimeError, type BinaryStream } from '@travetto/runtime';
+import { type BinaryStream, CodecUtil, castTo, RuntimeError } from '@travetto/runtime';
+import { Suite, Test, TestFixtures } from '@travetto/test';
 
 @Suite()
 export class CodecUtilTest {

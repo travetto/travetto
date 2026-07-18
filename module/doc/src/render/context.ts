@@ -1,14 +1,14 @@
 import path from 'node:path';
 
-import { PackageUtil } from '@travetto/manifest';
-import { castTo, RuntimeIndex, type Class } from '@travetto/runtime';
 import { CliCommandRegistryIndex } from '@travetto/cli';
+import { PackageUtil } from '@travetto/manifest';
+import { type Class, castTo, RuntimeIndex } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import { type JSXElementByFn, c, d } from '../jsx.ts';
+import { createElement, JSXRuntimeTag } from '../../support/jsx-runtime.ts';
+import { c, d, type JSXElementByFn } from '../jsx.ts';
 import { DocResolveUtil, type ResolvedCode, type ResolvedRef, type ResolvedSnippetLink } from '../util/resolve.ts';
 import { DocRunUtil } from '../util/run.ts';
-import { createElement, JSXRuntimeTag } from '../../support/jsx-runtime.ts';
 
 /**
  * Render Context

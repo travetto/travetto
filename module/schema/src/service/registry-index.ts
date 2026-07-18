@@ -1,8 +1,8 @@
-import { type RegistrationMethods, type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { RuntimeError, castKey, castTo, type Class, classConstruct, getParentClass } from '@travetto/runtime';
+import { type RegistrationMethods, Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
+import { type Class, castKey, castTo, classConstruct, getParentClass, RuntimeError } from '@travetto/runtime';
 
-import type { SchemaFieldConfig, SchemaClassConfig } from './types.ts';
 import { type SchemaDiscriminatedInfo, SchemaRegistryAdapter } from './registry-adapter.ts';
+import type { SchemaClassConfig, SchemaFieldConfig } from './types.ts';
 
 /**
  * Schema registry index for managing schema configurations across classes

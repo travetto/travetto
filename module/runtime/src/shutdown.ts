@@ -1,8 +1,8 @@
 import type { ChildProcess } from 'node:child_process';
 
 import { Env } from './env.ts';
-import { Util } from './util.ts';
 import { TimeUtil } from './time.ts';
+import { Util } from './util.ts';
 
 const MAPPING = [
   ['restart', 200],

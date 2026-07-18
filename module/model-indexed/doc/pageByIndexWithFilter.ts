@@ -1,5 +1,5 @@
 import { Model } from '@travetto/model';
-import { sortedIndex, type ModelIndexedSupport } from '@travetto/model-indexed';
+import { type ModelIndexedSupport, sortedIndex } from '@travetto/model-indexed';
 
 @Model()
 export class User {

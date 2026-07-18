@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc/support */
 import { HELP_FLAG } from '@travetto/cli';
-import { d, c } from '@travetto/doc';
+import { c, d } from '@travetto/doc';
 
 export const text = (
   <>
@@ -30,10 +30,7 @@ export const text = (
       <c.Code title="CLI Color Palette" src="@travetto/cli/src/color.ts" />
       When the color palette is combined with {d.module('Runtime')}'s Util.makeTemplate, you produce a string template function that will
       automatically colorize:
-      <c.Code
-        title="Sample Template Usage"
-        src='cliTpl`Build finished: status=${{success: "complete"}}, output=${{path: "/build.zip"}}`'
-      />
+      <c.Code title="Sample Template Usage" src='cliTpl`Build finished: status=${{success: "complete"}}, output=${{path: "/build.zip"}}`' />
       This would then produce colorized output based on the palette, and the terminal capabilities. <br />
       This module follows the pattern {d.library('Node')} follows with respect to the environment variables: {d.field('NO_COLOR')},{' '}
       {d.field('FORCE_COLOR')} and {d.field('NODE_DISABLE_COLORS')}

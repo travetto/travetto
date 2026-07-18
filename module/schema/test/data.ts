@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
-import { Test, Suite } from '@travetto/test';
 import { DataUtil } from '@travetto/schema';
+import { Suite, Test } from '@travetto/test';
 
 @Suite()
 class DataUtilTests {

@@ -1,8 +1,8 @@
-import { castTo, type Class, hasFunction } from '@travetto/runtime';
-import { type ModelType, type ModelCrudSupport, type OptionalId, NotFoundError } from '@travetto/model';
+import { type ModelCrudSupport, type ModelType, NotFoundError, type OptionalId } from '@travetto/model';
+import { type Class, castTo, hasFunction } from '@travetto/runtime';
 
-import type { ModelIndexedSupport } from './types/service.ts';
 import type { KeyedIndexSelection, SingleItemIndex, SortedIndexSelection } from './types/indexes.ts';
+import type { ModelIndexedSupport } from './types/service.ts';
 
 /**
  * Utils for working with indexed model services

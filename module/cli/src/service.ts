@@ -1,14 +1,12 @@
 import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
-import rl from 'node:readline/promises';
 import net from 'node:net';
+import rl from 'node:readline/promises';
 
 import { ExecUtil, Runtime, RuntimeIndex, TimeUtil, Util } from '@travetto/runtime';
 
 const ports = (value: number | `${number}:${number}`): [number, number] =>
-  typeof value === 'number'
-    ? [value, value]
-    : (value.split(':').map(number => parseInt(number, 10)) as [number, number]);
+  typeof value === 'number' ? [value, value] : (value.split(':').map(number => parseInt(number, 10)) as [number, number]);
 
 type BodyCheck = (body: string) => boolean;
 

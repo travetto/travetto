@@ -1,6 +1,6 @@
-import { CliFlag, CliModuleFlag, type CliCommandShape } from '@travetto/cli';
-import { Required } from '@travetto/schema';
+import { type CliCommandShape, CliFlag, CliModuleFlag } from '@travetto/cli';
 import { JSONUtil } from '@travetto/runtime';
+import { Required } from '@travetto/schema';
 
 import { getValidOperationIds, LLM_OPERATION_CATEGORIES } from '../src/recommendation.ts';
 import { getValidSnippetTags } from '../src/snippet-catalog.ts';

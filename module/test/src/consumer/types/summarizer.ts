@@ -1,7 +1,7 @@
-import type { SuiteResult } from '../../model/suite.ts';
 import type { TestEvent } from '../../model/event.ts';
-import type { SuitesSummary, TestConsumerShape } from '../types.ts';
+import type { SuiteResult } from '../../model/suite.ts';
 import { TestModelUtil } from '../../model/util.ts';
+import type { SuitesSummary, TestConsumerShape } from '../types.ts';
 
 /**
  * Test Result Collector, combines all results into a single Suite Result

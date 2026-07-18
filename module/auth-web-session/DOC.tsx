@@ -1,7 +1,8 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c } from '@travetto/doc';
+
 import { Session, SessionContext, SessionService } from '@travetto/auth-session';
 import { AuthSessionInterceptor } from '@travetto/auth-web-session';
+import { c, d } from '@travetto/doc';
 import { ContextParam } from '@travetto/web';
 
 export const text = (

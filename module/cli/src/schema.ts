@@ -1,7 +1,7 @@
 import { castKey, castTo, getClass } from '@travetto/runtime';
-import { BindUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError, type ValidationError } from '@travetto/schema';
+import { BindUtil, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 
-import type { ParsedState, CliCommandShape } from './types.ts';
+import type { CliCommandShape, ParsedState } from './types.ts';
 
 const getSource = (source: string | undefined, defaultSource: ValidationError['source']): ValidationError['source'] => {
   switch (source) {

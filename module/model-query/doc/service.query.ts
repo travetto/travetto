@@ -1,12 +1,12 @@
-import { Suite } from '@travetto/test';
 import { Config } from '@travetto/config';
 import { Injectable } from '@travetto/di';
-import type { ModelQueryFacetSupport, ModelQuerySuggestSupport, ModelQueryCrudSupport } from '@travetto/model-query';
+import type { ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport } from '@travetto/model-query';
+import { Suite } from '@travetto/test';
 
-import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
 import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
 import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.ts';
 import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism.ts';
+import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
 import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest.ts';
 
 import { QueryModelService } from './query-service.ts';

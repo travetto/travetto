@@ -3,17 +3,17 @@ import {
   type CreateIndexesOptions,
   type Filter,
   type FindCursor,
+  type IndexDescriptionInfo,
   type IndexDirection,
-  ObjectId,
   type WithId as MongoWithId,
-  type IndexDescriptionInfo
+  ObjectId
 } from 'mongodb';
 
-import { RuntimeError, CodecUtil, castTo, type Class, toConcrete, BinaryUtil } from '@travetto/runtime';
-import { type DistanceUnit, type PageableModelQuery, type WhereClause, isModelQueryIndex, ModelQueryUtil } from '@travetto/model-query';
-import { type ModelType, type IndexConfig, IndexNotSupported } from '@travetto/model';
-import { DataUtil, SchemaRegistryIndex, type Point } from '@travetto/schema';
+import { type IndexConfig, IndexNotSupported, type ModelType } from '@travetto/model';
 import { isModelIndexedIndex } from '@travetto/model-indexed';
+import { type DistanceUnit, isModelQueryIndex, ModelQueryUtil, type PageableModelQuery, type WhereClause } from '@travetto/model-query';
+import { BinaryUtil, type Class, CodecUtil, castTo, RuntimeError, toConcrete } from '@travetto/runtime';
+import { DataUtil, type Point, SchemaRegistryIndex } from '@travetto/schema';
 
 const PointConcrete = toConcrete<Point>();
 

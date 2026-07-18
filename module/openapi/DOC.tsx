@@ -1,8 +1,8 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c } from '@travetto/doc';
+import { c, d } from '@travetto/doc';
 
-import { OpenApiSpecCommand } from './support/cli.openapi_spec.ts';
 import { OpenApiClientCommand } from './support/cli.openapi_client.ts';
+import { OpenApiSpecCommand } from './support/cli.openapi_spec.ts';
 
 export const text = (
   <>

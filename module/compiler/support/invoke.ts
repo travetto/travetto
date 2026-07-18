@@ -1,11 +1,11 @@
 // @trv-no-transform
 import { getManifestContext, ManifestUtil } from '@travetto/manifest';
 
-import { Log } from '../src/log.ts';
-import { CompilerManager } from '../src/server/manager.ts';
-import { CompilerClient } from '../src/server/client.ts';
 import { CommonUtil } from '../src/common.ts';
 import { EventUtil } from '../src/event.ts';
+import { Log } from '../src/log.ts';
+import { CompilerClient } from '../src/server/client.ts';
+import { CompilerManager } from '../src/server/manager.ts';
 
 const hasColor = (process.stdout.isTTY && /^(0)*$/.test(process.env.NO_COLOR ?? '')) || /1\d*/.test(process.env.FORCE_COLOR ?? '');
 const color =

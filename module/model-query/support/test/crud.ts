@@ -1,14 +1,14 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
 import { ExistsError, Model, type ModelCrudSupport, NotFoundError } from '@travetto/model';
 import { castTo } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
-import { Address, Person, Todo, BigIntModel } from './model.ts';
-import type { ModelQueryCrudSupport } from '../../src/types/crud.ts';
 import { QueryIndex } from '../../__index__.ts';
+import type { ModelQueryCrudSupport } from '../../src/types/crud.ts';
+import { Address, BigIntModel, Person, Todo } from './model.ts';
 
 @Model()
 @QueryIndex({

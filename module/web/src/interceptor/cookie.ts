@@ -1,18 +1,17 @@
-import { Injectable, Inject, PostConstruct } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { Secret } from '@travetto/schema';
 import { type AsyncContext, AsyncContextValue } from '@travetto/context';
-
-import type { WebChainedContext } from '../types/filter.ts';
-import type { WebResponse } from '../types/response.ts';
-import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
-import type { WebInterceptorCategory } from '../types/core.ts';
+import { Inject, Injectable, PostConstruct } from '@travetto/di';
+import { Secret } from '@travetto/schema';
 
 import type { WebConfig } from '../config.ts';
-import type { Cookie, CookieSetOptions } from '../types/cookie.ts';
-import { KeyGrip } from '../util/keygrip.ts';
-import { CookieJar } from '../util/cookie.ts';
 import type { WebAsyncContext } from '../context.ts';
+import type { Cookie, CookieSetOptions } from '../types/cookie.ts';
+import type { WebInterceptorCategory } from '../types/core.ts';
+import type { WebChainedContext } from '../types/filter.ts';
+import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
+import type { WebResponse } from '../types/response.ts';
+import { CookieJar } from '../util/cookie.ts';
+import { KeyGrip } from '../util/keygrip.ts';
 
 /**
  * Web cookie configuration

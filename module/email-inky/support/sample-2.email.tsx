@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/email-inky/support */
 
-import { Container, InkyTemplate, Title, Column, Row, Spacer, Value } from '@travetto/email-inky';
+import { Column, Container, InkyTemplate, Row, Spacer, Title, Value } from '@travetto/email-inky';
 
 export default (
   <InkyTemplate>

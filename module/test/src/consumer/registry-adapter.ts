@@ -1,9 +1,9 @@
 import path from 'node:path';
 
-import { classConstruct, describeFunction, type Class } from '@travetto/runtime';
 import type { RegistryAdapter } from '@travetto/registry';
+import { type Class, classConstruct, describeFunction } from '@travetto/runtime';
 
-import type { TestConsumerShape, TestConsumerConfig } from './types.ts';
+import type { TestConsumerConfig, TestConsumerShape } from './types.ts';
 
 /**
  * Test Results Handler Registry

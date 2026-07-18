@@ -1,10 +1,10 @@
-import type { SchemaFieldConfig } from '@travetto/schema';
-import { Injectable } from '@travetto/di';
 import type { AsyncContext } from '@travetto/context';
+import { Injectable } from '@travetto/di';
+import type { IndexConfig, ModelType } from '@travetto/model';
 import type { WhereClause } from '@travetto/model-query';
-import { castTo, type Class } from '@travetto/runtime';
-import type { ModelType, IndexConfig } from '@travetto/model';
-import { type SQLModelConfig, SQLDialect, type VisitStack, type SQLTableDescription, SQLModelUtil } from '@travetto/model-sql';
+import { SQLDialect, type SQLModelConfig, SQLModelUtil, type SQLTableDescription, type VisitStack } from '@travetto/model-sql';
+import { type Class, castTo } from '@travetto/runtime';
+import type { SchemaFieldConfig } from '@travetto/schema';
 
 import { MySQLConnection } from './connection.ts';
 

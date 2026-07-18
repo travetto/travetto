@@ -1,13 +1,13 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Suite, Test } from '@travetto/test';
 import { type TimeSpan, TimeUtil } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
 
+import { NotFoundError } from '../../src/error/not-found.ts';
 import { ExpiresAt, Model } from '../../src/registry/decorator.ts';
 import type { ModelExpirySupport } from '../../src/types/expiry.ts';
 import { ModelExpiryUtil } from '../../src/util/expiry.ts';
-import { NotFoundError } from '../../src/error/not-found.ts';
 import { BaseModelSuite } from './base.ts';
 
 @Model('expiry-user')

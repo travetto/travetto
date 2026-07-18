@@ -1,6 +1,6 @@
 import { Config } from '@travetto/config';
 import { PostConstruct } from '@travetto/di';
-import { Runtime, RuntimeError, BinaryMetadataUtil } from '@travetto/runtime';
+import { BinaryMetadataUtil, Runtime, RuntimeError } from '@travetto/runtime';
 import { Ignore, Secret } from '@travetto/schema';
 
 type KeyEntry = { key: string; id: string };

@@ -1,11 +1,11 @@
 import assert from 'node:assert';
 
-import { Registry } from '@travetto/registry';
-import { IsPrivate } from '@travetto/schema';
-import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Post, Put, QueryParam } from '@travetto/web';
-import { BeforeAll, Suite, Test } from '@travetto/test';
 import { OpenapiVisitor } from '@travetto/openapi';
+import { Registry } from '@travetto/registry';
 import { BinaryUtil } from '@travetto/runtime';
+import { IsPrivate } from '@travetto/schema';
+import { BeforeAll, Suite, Test } from '@travetto/test';
+import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Post, Put, QueryParam } from '@travetto/web';
 
 import { TestUser } from './model.ts';
 

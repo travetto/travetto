@@ -1,13 +1,13 @@
 import ts from 'typescript';
 
-import { path, type ManifestIndex, ManifestModuleUtil, type IndexedFile } from '@travetto/manifest';
+import { type IndexedFile, type ManifestIndex, ManifestModuleUtil, path } from '@travetto/manifest';
 
-import type { AnyType, ResolverContext, TransformResolver } from './types.ts';
-import { TypeCategorize, TypeBuilder } from './builder.ts';
-import { VisitCache } from './cache.ts';
-import { DocUtil } from '../util/doc.ts';
-import { DeclarationUtil } from '../util/declaration.ts';
 import { transformCast } from '../types/shared.ts';
+import { DeclarationUtil } from '../util/declaration.ts';
+import { DocUtil } from '../util/doc.ts';
+import { TypeBuilder, TypeCategorize } from './builder.ts';
+import { VisitCache } from './cache.ts';
+import type { AnyType, ResolverContext, TransformResolver } from './types.ts';
 
 const isFinalizeType = (key: string): key is keyof typeof TypeBuilder => key in TypeBuilder;
 

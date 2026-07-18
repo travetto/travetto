@@ -1,6 +1,6 @@
+import type { ConfigurationService } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
 import type { StandardWebRouter } from '@travetto/web';
-import type { ConfigurationService } from '@travetto/config';
 
 import type { WebHttpConfig } from './config.ts';
 import { WebHttpUtil } from './http.ts';

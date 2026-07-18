@@ -1,12 +1,13 @@
 import assert from 'node:assert';
 
+import { castTo } from '@travetto/runtime';
 import { Schema, type SchemaFieldConfig } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
-import { castTo } from '@travetto/runtime';
+
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
-import type { VisitStack } from '../../src/types.ts';
 import type { SQLModelService } from '../../src/service.ts';
+import type { VisitStack } from '../../src/types.ts';
 
 @Schema()
 class User {

@@ -1,15 +1,14 @@
-import fs from 'node:fs/promises';
 import { setMaxListeners } from 'node:events';
+import fs from 'node:fs/promises';
 
-import { getManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil, type DeltaEvent } from '@travetto/manifest';
+import { type DeltaEvent, getManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil } from '@travetto/manifest';
 
-import { CompilerState } from './state.ts';
-import { CompilerWatcher } from './watch.ts';
-import { type CompileEmitEvent, CompilerReset } from './types.ts';
-import { EventUtil } from './event.ts';
-
-import { IpcLogger } from './log.ts';
 import { CommonUtil } from './common.ts';
+import { EventUtil } from './event.ts';
+import { IpcLogger } from './log.ts';
+import { CompilerState } from './state.ts';
+import { type CompileEmitEvent, CompilerReset } from './types.ts';
+import { CompilerWatcher } from './watch.ts';
 
 const log = new IpcLogger({ level: 'debug' });
 

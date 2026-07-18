@@ -2,8 +2,8 @@
 
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
 import { Container } from '@travetto/email-inky';
+import { Suite, Test } from '@travetto/test';
 
 import { renderJSX } from './util.ts';
 

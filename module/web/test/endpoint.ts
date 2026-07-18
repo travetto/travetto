@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Registry } from '@travetto/registry';
-import { Suite, Test, BeforeAll } from '@travetto/test';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Controller, ControllerRegistryIndex, EndpointUtil, Get, Post } from '@travetto/web';
 
 @Controller('/')

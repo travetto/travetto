@@ -1,10 +1,10 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c } from '@travetto/doc';
+import { c, d } from '@travetto/doc';
 import { Runtime, toConcrete } from '@travetto/runtime';
-import { Max, Min, Schema, Match, Enum, Integer, Float, Precision, MinLength, MaxLength, type ValidationError } from '@travetto/schema';
+import { Enum, Float, Integer, Match, Max, MaxLength, Min, MinLength, Precision, Schema, type ValidationError } from '@travetto/schema';
 
-import { CliCommand } from './src/registry/decorator.ts';
 import { HELP_FLAG } from './__index__.ts';
+import { CliCommand } from './src/registry/decorator.ts';
 import { CliServiceCommand } from './support/cli.service.ts';
 
 const ValidationErrorContract = toConcrete<ValidationError>();

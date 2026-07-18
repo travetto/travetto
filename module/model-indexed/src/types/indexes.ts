@@ -1,5 +1,5 @@
-import type { ModelType, IndexConfig } from '@travetto/model';
-import type { IntrinsicType, Any, DeepPartial } from '@travetto/runtime';
+import type { IndexConfig, ModelType } from '@travetto/model';
+import type { Any, DeepPartial, IntrinsicType } from '@travetto/runtime';
 
 type SortScalar = string | number | Date;
 

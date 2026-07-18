@@ -1,4 +1,4 @@
-import { Injectable, DependencyRegistryIndex } from '@travetto/di';
+import { DependencyRegistryIndex, Injectable } from '@travetto/di';
 
 @Injectable()
 class Complex {}

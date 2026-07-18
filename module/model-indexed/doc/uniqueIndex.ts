@@ -1,5 +1,5 @@
-import { uniqueIndex } from '@travetto/model-indexed';
 import { Model } from '@travetto/model';
+import { uniqueIndex } from '@travetto/model-indexed';
 
 @Model()
 export class User {

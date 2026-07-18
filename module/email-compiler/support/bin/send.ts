@@ -1,7 +1,7 @@
-import { MailService, type EmailOptions, type MailTransport } from '@travetto/email';
 import { DependencyRegistryIndex, Injectable } from '@travetto/di';
-import { toConcrete } from '@travetto/runtime';
+import { type EmailOptions, MailService, type MailTransport } from '@travetto/email';
 import { Registry } from '@travetto/registry';
+import { toConcrete } from '@travetto/runtime';
 
 import { EditorConfig } from './config.ts';
 

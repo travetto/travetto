@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@travetto/di';
 import {
   BodyInterceptor,
+  DecompressInterceptor,
+  type WebChainedContext,
   type WebInterceptor,
   type WebInterceptorCategory,
-  type WebChainedContext,
-  type WebResponse,
-  DecompressInterceptor,
-  type WebInterceptorContext
+  type WebInterceptorContext,
+  type WebResponse
 } from '@travetto/web';
 
 import type { WebUploadConfig } from './config.ts';

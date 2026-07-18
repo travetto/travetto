@@ -2,9 +2,9 @@
 
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
+import { Container, If, InkyTemplate, prepare, Summary, Title, Unless, Value } from '@travetto/email-inky';
 import { Runtime } from '@travetto/runtime';
-import { Container, If, InkyTemplate, Summary, Title, Unless, Value, prepare } from '@travetto/email-inky';
+import { Suite, Test } from '@travetto/test';
 
 @Suite('InkyTemplate')
 class ContainerTest {

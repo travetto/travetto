@@ -1,8 +1,8 @@
-import type { Class } from '@travetto/runtime';
 import type { ModelCrudSupport, ModelType } from '@travetto/model';
+import type { Class } from '@travetto/runtime';
 
-import type { ModelQuerySupport } from './query.ts';
 import type { ModelQuery } from '../model/query.ts';
+import type { ModelQuerySupport } from './query.ts';
 
 /**
  * The contract for a model service with query support

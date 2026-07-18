@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { CliModuleUtil, type CliCommandShape, CliCommand, CliScmUtil } from '@travetto/cli';
+import { CliCommand, type CliCommandShape, CliModuleUtil, CliScmUtil } from '@travetto/cli';
 import { ExecUtil, Runtime, RuntimeError } from '@travetto/runtime';
 import { Validator } from '@travetto/schema';
 

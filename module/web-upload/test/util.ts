@@ -1,12 +1,12 @@
 import assert from 'node:assert';
+import { createReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import { PassThrough } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
-import { createReadStream } from 'node:fs';
 
-import { Test, Suite, TestFixtures } from '@travetto/test';
-import { WebUploadUtil } from '@travetto/web-upload';
 import { BinaryUtil } from '@travetto/runtime';
+import { Suite, Test, TestFixtures } from '@travetto/test';
+import { WebUploadUtil } from '@travetto/web-upload';
 
 const makeData = () => [BinaryUtil.makeBinaryArray(100)];
 

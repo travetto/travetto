@@ -1,4 +1,5 @@
 import { Injectable } from '@travetto/di';
+
 import type { DependentService } from './dependency.ts';
 
 @Injectable()

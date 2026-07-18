@@ -1,5 +1,5 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c } from '@travetto/doc';
+import { c, d } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
 
 import { Registry } from './src/registry.ts';

@@ -1,13 +1,13 @@
 import assert from 'node:assert';
 import { isPromise } from 'node:util/types';
 
-import { RuntimeError, type Class, castTo, castKey, asConstructable } from '@travetto/runtime';
+import { asConstructable, type Class, castKey, castTo, RuntimeError } from '@travetto/runtime';
 
-import type { ThrowableError, TestConfig, Assertion, TestStatus } from '../model/test.ts';
-import { AssertCapture, type CapturedAssertion } from './capture.ts';
-import { AssertUtil } from './util.ts';
-import { ASSERT_FN_OPERATOR, OP_MAPPING } from './types.ts';
 import { TestExecutionError } from '../model/error.ts';
+import type { Assertion, TestConfig, TestStatus, ThrowableError } from '../model/test.ts';
+import { AssertCapture, type CapturedAssertion } from './capture.ts';
+import { ASSERT_FN_OPERATOR, OP_MAPPING } from './types.ts';
+import { AssertUtil } from './util.ts';
 
 type StringFields<T> = {
   [K in Extract<keyof T, string>]: T[K] extends string ? K : never;

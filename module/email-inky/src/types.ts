@@ -1,5 +1,5 @@
 import type { JSXElement, ValidHtmlTags } from '../support/jsx-runtime.ts';
-import type { JSXElementByFn, c } from './components.ts';
+import type { c, JSXElementByFn } from './components.ts';
 
 export type Wrapper = Record<string, (count: string) => string>;
 

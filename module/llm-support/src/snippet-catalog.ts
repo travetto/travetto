@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { SchemaValidator } from '@travetto/schema';
 import { JSONUtil, RuntimeIndex } from '@travetto/runtime';
+import { SchemaValidator } from '@travetto/schema';
 
 import { type RecommendationQuery, type SnippetSource, SnippetSourceSchema } from './types.ts';
 

@@ -1,4 +1,5 @@
 import util from 'node:util';
+
 import debug from 'debug';
 
 import { RuntimeIndex } from './manifest-index.ts';

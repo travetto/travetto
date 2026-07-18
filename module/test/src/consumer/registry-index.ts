@@ -1,9 +1,9 @@
-import { RuntimeIndex, type Class } from '@travetto/runtime';
 import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
+import { type Class, RuntimeIndex } from '@travetto/runtime';
 
-import type { TestConsumerShape } from './types.ts';
 import type { TestConsumerConfig } from '../execute/types.ts';
 import { TestConsumerRegistryAdapter } from './registry-adapter.ts';
+import type { TestConsumerShape } from './types.ts';
 
 /**
  * Test Results Handler Registry

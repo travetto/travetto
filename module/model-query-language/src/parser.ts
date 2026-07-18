@@ -1,8 +1,8 @@
-import { castTo } from '@travetto/runtime';
 import type { WhereClauseRaw } from '@travetto/model-query';
+import { castTo } from '@travetto/runtime';
 
 import { QueryLanguageTokenizer } from './tokenizer.ts';
-import { type Token, type Literal, type GroupNode, OPERATOR_TRANSLATION, type ArrayNode, type AllNode } from './types.ts';
+import { type AllNode, type ArrayNode, type GroupNode, type Literal, OPERATOR_TRANSLATION, type Token } from './types.ts';
 
 /**
  * Determine if a token is boolean

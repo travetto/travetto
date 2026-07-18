@@ -8,9 +8,9 @@ import {
   type Primitive
 } from '@travetto/runtime';
 
-import { CommonRegex } from '../validate/regex.ts';
-import { CONSTRUCTOR_PROPERTY, type SchemaInputConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
+import { CONSTRUCTOR_PROPERTY, type SchemaInputConfig } from '../service/types.ts';
+import { CommonRegex } from '../validate/regex.ts';
 
 type StringType = string | string[];
 type LengthType = string | unknown[] | Uint8Array | Uint16Array | Uint32Array;

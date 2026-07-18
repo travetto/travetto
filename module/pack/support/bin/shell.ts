@@ -1,5 +1,5 @@
-import util from 'node:util';
 import path from 'node:path';
+import util from 'node:util';
 
 import type { ShellCommandProvider } from '../../src/types.ts';
 

@@ -1,9 +1,9 @@
+import { type SessionContext, type SessionData, SessionModelSymbol } from '@travetto/auth-session';
+import { Authenticated } from '@travetto/auth-web';
 import { Inject, InjectableFactory } from '@travetto/di';
 import type { ModelExpirySupport } from '@travetto/model';
-import { Controller, Put, Get, ContextParam } from '@travetto/web';
-import { type SessionContext, type SessionData, SessionModelSymbol } from '@travetto/auth-session';
 import type { MemoryModelService } from '@travetto/model-memory';
-import { Authenticated } from '@travetto/auth-web';
+import { ContextParam, Controller, Get, Put } from '@travetto/web';
 
 // Applies to entire execution, not just this file
 class SessionConfig {

@@ -1,8 +1,8 @@
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 
-import { InjectableFactory } from '@travetto/di';
 import type { Authenticator, Authorizer, Principal } from '@travetto/auth';
 import { PassportAuthenticator } from '@travetto/auth-web-passport';
+import { InjectableFactory } from '@travetto/di';
 
 export class FbUser {
   username: string;

@@ -1,4 +1,4 @@
-import { PACKAGE_MANAGERS, type NodePackageManager } from '@travetto/manifest';
+import { type NodePackageManager, PACKAGE_MANAGERS } from '@travetto/manifest';
 import { Runtime } from '@travetto/runtime';
 
 export class PackageDocUtil {

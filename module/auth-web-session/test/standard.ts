@@ -1,10 +1,10 @@
-import { Suite } from '@travetto/test';
-import { InjectableFactory } from '@travetto/di';
 import { SessionModelSymbol } from '@travetto/auth-session';
+import { InjectableFactory } from '@travetto/di';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
+import { Suite } from '@travetto/test';
 
-import { LocalRequestDispatcher } from '@travetto/web/support/test/dispatcher.ts';
 import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server.ts';
+import { LocalRequestDispatcher } from '@travetto/web/support/test/dispatcher.ts';
 
 class Config {
   @InjectableFactory({ primary: true, qualifier: SessionModelSymbol })

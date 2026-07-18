@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete } from '@travetto/web';
+import { Controller, Delete, Get, Post, Put } from '@travetto/web';
 
 import { User, type UserSearch } from './model.ts';
 

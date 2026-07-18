@@ -1,8 +1,8 @@
+import { type SpawnOptions, spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
-import { spawn, type SpawnOptions } from 'node:child_process';
 import path from 'node:path';
 
-import { RuntimeError, ExecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { ExecUtil, Runtime, RuntimeError, RuntimeIndex } from '@travetto/runtime';
 
 import { ActiveShellCommand } from './shell.ts';
 

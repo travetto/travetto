@@ -2,24 +2,24 @@ import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
 import type { AuthConfig, AuthContext } from '@travetto/auth';
+import type { SessionData, SessionService } from '@travetto/auth-session';
 import { AuthContextInterceptor, type WebAuthConfig } from '@travetto/auth-web';
-import type { SessionService, SessionData } from '@travetto/auth-session';
 import { Inject, Injectable } from '@travetto/di';
-import {
-  Controller,
-  Get,
-  Body,
-  Post,
-  Put,
-  type WebRequest,
-  type WebInterceptor,
-  ContextParam,
-  type WebInterceptorCategory,
-  type WebChainedContext,
-  type WebInterceptorContext
-} from '@travetto/web';
 import { castTo, Util } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
+import {
+  Body,
+  ContextParam,
+  Controller,
+  Get,
+  Post,
+  Put,
+  type WebChainedContext,
+  type WebInterceptor,
+  type WebInterceptorCategory,
+  type WebInterceptorContext,
+  type WebRequest
+} from '@travetto/web';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';

@@ -1,18 +1,18 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, d } from '@travetto/doc';
 import {
-  ExecUtil,
-  RuntimeError,
-  Util,
-  FileLoader,
-  TimeUtil,
-  EnvProp,
-  RuntimeIndex,
-  Runtime,
-  ConsoleManager,
-  CodecUtil,
   BinaryUtil,
-  JSONUtil
+  CodecUtil,
+  ConsoleManager,
+  EnvProp,
+  ExecUtil,
+  FileLoader,
+  JSONUtil,
+  Runtime,
+  RuntimeError,
+  RuntimeIndex,
+  TimeUtil,
+  Util
 } from '@travetto/runtime';
 
 const EnvLink = d.codeLink('Env', 'src/env.ts', /export const Env/);

@@ -1,12 +1,12 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Suite, Test } from '@travetto/test';
+import { Inject, Injectable } from '@travetto/di';
 import type { ModelExpirySupport } from '@travetto/model';
 import { ModelIndexedUtil } from '@travetto/model-indexed';
-import { Inject, Injectable } from '@travetto/di';
-import { castTo, type Class } from '@travetto/runtime';
+import { type Class, castTo } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
+import { Suite, Test } from '@travetto/test';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 import { ModelSuite } from '@travetto/model/support/test/suite.ts';

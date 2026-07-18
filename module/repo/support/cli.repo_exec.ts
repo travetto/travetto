@@ -1,9 +1,9 @@
 import { spawn } from 'node:child_process';
 
-import { CliCommand, CliParseUtil, type CliCommandShape } from '@travetto/cli';
-import { WorkPool } from '@travetto/worker';
+import { CliCommand, type CliCommandShape, CliParseUtil } from '@travetto/cli';
 import { Env } from '@travetto/runtime';
 import { Max, Min } from '@travetto/schema';
+import { WorkPool } from '@travetto/worker';
 
 import { RepoExecUtil } from './bin/exec.ts';
 

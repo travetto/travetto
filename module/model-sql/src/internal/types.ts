@@ -1,4 +1,4 @@
-import type { SchemaFieldConfig, SchemaClassConfig } from '@travetto/schema';
+import type { SchemaClassConfig, SchemaFieldConfig } from '@travetto/schema';
 
 import type { VisitStack } from '../types.ts';
 

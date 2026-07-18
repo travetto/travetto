@@ -1,35 +1,35 @@
 import { type DocumentData, FieldValue, Firestore, type Query } from '@google-cloud/firestore';
 
-import { castTo, JSONUtil, ShutdownManager, type Class, RuntimeError } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type ModelCrudSupport,
+  ModelCrudUtil,
+  type ModelListOptions,
   ModelRegistryIndex,
   type ModelStorageSupport,
   type ModelType,
   NotFoundError,
-  type OptionalId,
-  ModelCrudUtil,
-  type ModelListOptions
+  type OptionalId
 } from '@travetto/model';
 import {
-  type ModelIndexedSupport,
-  type KeyedIndexSelection,
-  type KeyedIndexBody,
-  type ModelPageOptions,
-  ModelIndexedUtil,
-  type SingleItemIndex,
-  type SortedIndexSelection,
-  type ModelPageResult,
-  type SortedIndex,
   type FullKeyedIndexBody,
   type FullKeyedIndexWithPartialBody,
+  type KeyedIndexBody,
+  type KeyedIndexSelection,
   ModelIndexedComputedIndex,
-  warnIfIndexedUniqueIndex,
-  warnIfNonIndexedIndex,
   type ModelIndexedSearchOptions,
-  type SortedIndexSelectionType
+  type ModelIndexedSupport,
+  ModelIndexedUtil,
+  type ModelPageOptions,
+  type ModelPageResult,
+  type SingleItemIndex,
+  type SortedIndex,
+  type SortedIndexSelection,
+  type SortedIndexSelectionType,
+  warnIfIndexedUniqueIndex,
+  warnIfNonIndexedIndex
 } from '@travetto/model-indexed';
+import { type Class, castTo, JSONUtil, RuntimeError, ShutdownManager } from '@travetto/runtime';
 
 import type { FirestoreModelConfig } from './config.ts';
 

@@ -4,9 +4,9 @@ import { c, d } from '@travetto/doc';
 import { RuntimeResources, toConcrete } from '@travetto/runtime';
 import { WebRequest, WebResponse } from '@travetto/web';
 
-import type { WebHttpServer } from './src/types.ts';
 import { WebHttpConfig } from './src/config.ts';
 import { NodeWebHttpServer } from './src/node.ts';
+import type { WebHttpServer } from './src/types.ts';
 import { WebHttpCommand } from './support/cli.web_http.ts';
 
 const WebServerContract = toConcrete<WebHttpServer>();

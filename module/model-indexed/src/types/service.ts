@@ -1,14 +1,14 @@
-import type { ModelType, ModelBasicSupport, OptionalId, ModelListOptions } from '@travetto/model';
+import type { ModelBasicSupport, ModelListOptions, ModelType, OptionalId } from '@travetto/model';
 import type { Class } from '@travetto/runtime';
 
 import type {
-  KeyedIndexSelection,
-  KeyedIndexBody,
-  SortedIndexSelection,
-  SortedIndex,
-  SingleItemIndex,
   FullKeyedIndexBody,
   FullKeyedIndexWithPartialBody,
+  KeyedIndexBody,
+  KeyedIndexSelection,
+  SingleItemIndex,
+  SortedIndex,
+  SortedIndexSelection,
   SortedIndexSelectionType
 } from './indexes.ts';
 import type { ModelIndexedSearchOptions, ModelPageOptions, ModelPageResult } from './list.ts';

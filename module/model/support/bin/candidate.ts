@@ -1,10 +1,10 @@
-import { toConcrete, type Class } from '@travetto/runtime';
-import { type InjectableCandidate, DependencyRegistryIndex } from '@travetto/di';
+import { DependencyRegistryIndex, type InjectableCandidate } from '@travetto/di';
+import { type Class, toConcrete } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import type { ModelStorageSupport } from '../../src/types/storage.ts';
-import type { ModelType } from '../../src/types/model.ts';
 import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
+import type { ModelType } from '../../src/types/model.ts';
+import type { ModelStorageSupport } from '../../src/types/storage.ts';
 
 /**
  * Utilities for finding candidates for model operations

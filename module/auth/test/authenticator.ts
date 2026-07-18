@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
 import { AuthenticationError, type Authenticator } from '@travetto/auth';
+import { Suite, Test } from '@travetto/test';
 
 type User = { username: string; password: string };
 

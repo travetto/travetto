@@ -1,13 +1,12 @@
-import { type Class, toConcrete } from '@travetto/runtime';
 import { DependencyRegistryIndex, Injectable, PostConstruct } from '@travetto/di';
+import { type Class, toConcrete } from '@travetto/runtime';
 import { ControllerRegistryIndex } from '@travetto/web';
 
 import type { ControllerConfig, EndpointConfig } from '../registry/types.ts';
 import type { WebRouter } from '../types/dispatch.ts';
+import type { WebFilterContext } from '../types/filter.ts';
 import type { WebInterceptor } from '../types/interceptor.ts';
 import type { WebResponse } from '../types/response.ts';
-import type { WebFilterContext } from '../types/filter.ts';
-
 import { EndpointUtil } from '../util/endpoint.ts';
 
 /**

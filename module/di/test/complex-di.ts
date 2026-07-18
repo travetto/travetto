@@ -1,10 +1,9 @@
 import assert from 'node:assert';
 
-import { Suite, Test, BeforeEach } from '@travetto/test';
+import { DependencyRegistryIndex, Injectable, InjectableFactory } from '@travetto/di';
 import { Registry } from '@travetto/registry';
 import { asFull, toConcrete } from '@travetto/runtime';
-
-import { Injectable, InjectableFactory, DependencyRegistryIndex } from '@travetto/di';
+import { BeforeEach, Suite, Test } from '@travetto/test';
 
 abstract class Common {}
 @Injectable()

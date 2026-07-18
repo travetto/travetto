@@ -1,4 +1,5 @@
 import type ts from 'typescript';
+
 import type { TemplateLiteral } from '../types/shared.ts';
 
 type TemplateArgument = [templateName: string, type: ts.Type];

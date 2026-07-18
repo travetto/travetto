@@ -1,7 +1,7 @@
-import { JSONUtil } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
+import { JSONUtil } from '@travetto/runtime';
 
-import type { LogFormatter, LogEvent } from '../types.ts';
+import type { LogEvent, LogFormatter } from '../types.ts';
 import { LogFormatUtil } from './util.ts';
 
 /**

@@ -1,6 +1,6 @@
-import type { TimeSpan } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 import { PostConstruct } from '@travetto/di';
+import type { TimeSpan } from '@travetto/runtime';
 
 import type { EsSchemaConfig } from './internal/types.ts';
 

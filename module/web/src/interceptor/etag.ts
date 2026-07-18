@@ -1,16 +1,16 @@
-import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { Inject, Injectable } from '@travetto/di';
+import { type BinaryArray, BinaryMetadataUtil, BinaryUtil } from '@travetto/runtime';
 import { Ignore } from '@travetto/schema';
-import { BinaryMetadataUtil, BinaryUtil, type BinaryArray } from '@travetto/runtime';
 
-import type { WebChainedContext } from '../types/filter.ts';
-import { WebResponse } from '../types/response.ts';
-import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import type { WebInterceptorCategory } from '../types/core.ts';
-import { CompressInterceptor } from './compress.ts';
+import type { WebChainedContext } from '../types/filter.ts';
+import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
+import { WebResponse } from '../types/response.ts';
 import { WebBodyUtil } from '../util/body.ts';
 import { type ByteSizeInput, WebCommonUtil } from '../util/common.ts';
 import { WebHeaderUtil } from '../util/header.ts';
+import { CompressInterceptor } from './compress.ts';
 
 @Config('web.etag')
 export class EtagConfig {

@@ -1,4 +1,4 @@
-import { Runtime, CodecUtil, BinaryMetadataUtil } from '@travetto/runtime';
+import { BinaryMetadataUtil, CodecUtil, Runtime } from '@travetto/runtime';
 
 import type { EmailAttachment, EmailIdentity, EmailIdentityList, EmailOptions } from './types.ts';
 

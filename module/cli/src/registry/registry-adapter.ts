@@ -1,9 +1,9 @@
-import { type Class, classConstruct, describeFunction } from '@travetto/runtime';
 import type { RegistryAdapter } from '@travetto/registry';
+import { type Class, classConstruct, describeFunction } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import type { CliCommandConfig, CliCommandShape } from '../types.ts';
 import { CliParseUtil, ENV_PREFIX } from '../parse.ts';
+import type { CliCommandConfig, CliCommandShape } from '../types.ts';
 
 const CLI_FILE_REGEX = /\/cli[.](?<name>.{0,100}?)([.]tsx?)?$/;
 

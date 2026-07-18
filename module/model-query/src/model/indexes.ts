@@ -1,5 +1,5 @@
-import { ModelRegistryIndex, type IndexConfig, type ModelType } from '@travetto/model';
-import { RuntimeError, type Class, type Primitive, type ValidFields } from '@travetto/runtime';
+import { type IndexConfig, ModelRegistryIndex, type ModelType } from '@travetto/model';
+import { type Class, type Primitive, RuntimeError, type ValidFields } from '@travetto/runtime';
 
 type RetainPrimitiveFields<T> = Pick<T, ValidFields<T, Primitive | Date>>;
 

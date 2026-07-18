@@ -1,8 +1,8 @@
 import type { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
+import { asFull, type BinaryArray, BinaryUtil, CodecUtil, castTo, RuntimeError } from '@travetto/runtime';
 import { type WebDispatcher, type WebFilterContext, type WebRequest, WebResponse } from '@travetto/web';
-import { RuntimeError, asFull, BinaryUtil, castTo, CodecUtil, type BinaryArray } from '@travetto/runtime';
 
 import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
 

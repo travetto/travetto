@@ -1,17 +1,15 @@
 import path from 'node:path';
 
 import { type ManifestContext, PackageUtil } from '@travetto/manifest';
-import { castTo, type Class, Runtime, RuntimeError } from '@travetto/runtime';
+import { type Class, castTo, Runtime, RuntimeError } from '@travetto/runtime';
 
-import { EMPTY_ELEMENT, getComponentName, type JSXElementByFn, type c } from '../jsx.ts';
+import { isJSXElement, type JSXElement, JSXFragmentType } from '../../support/jsx-runtime.ts';
+import { type c, EMPTY_ELEMENT, getComponentName, type JSXElementByFn } from '../jsx.ts';
 import type { DocumentShape, RenderProvider, RenderState } from '../types.ts';
 import { DocFileUtil } from '../util/file.ts';
-
 import { RenderContext } from './context.ts';
 import { Html } from './html.ts';
 import { Markdown } from './markdown.ts';
-
-import { isJSXElement, type JSXElement, JSXFragmentType } from '../../support/jsx-runtime.ts';
 
 const providers = { [Html.ext]: Html, [Markdown.ext]: Markdown };
 

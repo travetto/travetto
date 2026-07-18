@@ -1,12 +1,12 @@
 import assert from 'node:assert';
 
-import { Test, Suite, BeforeAll } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { castTo, RuntimeError } from '@travetto/runtime';
 import { BindUtil, SchemaValidator } from '@travetto/schema';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { Address } from './models/address.ts';
-import { Person, Count, Response, SuperAddress, BasePoly, Poly1, Poly2, RegexSimple, Accessors } from './models/binding.ts';
+import { Accessors, BasePoly, Count, Person, Poly1, Poly2, RegexSimple, Response, SuperAddress } from './models/binding.ts';
 
 @Suite('Data Binding')
 class DataBinding {

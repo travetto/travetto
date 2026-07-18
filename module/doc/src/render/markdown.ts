@@ -1,16 +1,16 @@
 import fs from 'node:fs/promises';
 
-import { CodecUtil, Runtime, RuntimeError, RuntimeIndex } from '@travetto/runtime';
-import { PackageUtil } from '@travetto/manifest';
 import { HELP_FLAG } from '@travetto/cli';
+import { PackageUtil } from '@travetto/manifest';
+import { CodecUtil, Runtime, RuntimeError, RuntimeIndex } from '@travetto/runtime';
 
-import type { RenderProvider } from '../types.ts';
 import { c, getComponentName } from '../jsx.ts';
-import { MODULES } from '../mapping/module.ts';
 import { LIBRARIES } from '../mapping/library.ts';
-import type { RenderContext } from './context.ts';
-import { DocResolveUtil } from '../util/resolve.ts';
+import { MODULES } from '../mapping/module.ts';
+import type { RenderProvider } from '../types.ts';
 import { PackageDocUtil } from '../util/package.ts';
+import { DocResolveUtil } from '../util/resolve.ts';
+import type { RenderContext } from './context.ts';
 
 export const Markdown: RenderProvider<RenderContext> = {
   ext: 'md',

@@ -1,5 +1,5 @@
-import util from 'node:util';
 import { AssertionError } from 'node:assert';
+import util from 'node:util';
 
 import { TypedObject } from '@travetto/runtime';
 

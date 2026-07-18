@@ -1,12 +1,12 @@
 /** @jsxImportSource @travetto/doc/support */
 import path from 'node:path';
 
-import { d, c } from '@travetto/doc';
+import { c, d } from '@travetto/doc';
 import { Runtime } from '@travetto/runtime';
 
 import { PackCommand } from './support/cli.pack.ts';
-import { PackZipCommand } from './support/cli.pack_zip.ts';
 import { PackDockerCommand } from './support/cli.pack_docker.ts';
+import { PackZipCommand } from './support/cli.pack_zip.ts';
 
 export const text = (
   <>

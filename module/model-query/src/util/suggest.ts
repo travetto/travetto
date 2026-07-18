@@ -1,5 +1,5 @@
 import { ModelRegistryIndex, type ModelType } from '@travetto/model';
-import { castKey, castTo, type Class, hasFunction } from '@travetto/runtime';
+import { type Class, castKey, castTo, hasFunction } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { PageableModelQuery, Query } from '../model/query.ts';

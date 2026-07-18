@@ -1,10 +1,11 @@
 import { createReadStream, existsSync } from 'node:fs';
+
 import type { OpenAPIObject } from 'openapi3-ts/oas31';
 import { stringify } from 'yaml';
 
+import { Inject, Injectable, PostConstruct } from '@travetto/di';
 import { ManifestFileUtil } from '@travetto/manifest';
 import { BinaryMetadataUtil, JSONUtil } from '@travetto/runtime';
-import { Injectable, Inject, PostConstruct } from '@travetto/di';
 import { ControllerVisitUtil, type WebConfig } from '@travetto/web';
 
 import type { ApiHostConfig, ApiInfoConfig, ApiSpecConfig } from './config.ts';

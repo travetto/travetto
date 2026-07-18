@@ -1,9 +1,9 @@
-import { BinaryUtil, castTo, type BinaryType, type BinaryArray, CodecUtil, JSONUtil } from '@travetto/runtime';
+import { type BinaryArray, type BinaryType, BinaryUtil, CodecUtil, castTo, JSONUtil } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
-import type { WebResponse } from '../../src/types/response.ts';
-import type { WebRequest } from '../../src/types/request.ts';
 import { DecompressInterceptor } from '../../src/interceptor/decompress.ts';
+import type { WebRequest } from '../../src/types/request.ts';
+import type { WebResponse } from '../../src/types/response.ts';
 import { WebBodyUtil } from '../../src/util/body.ts';
 import { WebCommonUtil } from '../../src/util/common.ts';
 

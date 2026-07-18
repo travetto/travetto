@@ -1,8 +1,8 @@
 import { RuntimeError } from '@travetto/runtime';
 
 import type { Cookie, CookieGetOptions, CookieSetOptions } from '../types/cookie.ts';
-import { KeyGrip } from './keygrip.ts';
 import { WebHeaderUtil } from './header.ts';
+import { KeyGrip } from './keygrip.ts';
 
 const pairText = (cookie: Cookie): string => `${cookie.name}=${cookie.value}`;
 const pair = (key: string, value: unknown): string => `${key}=${value}`;

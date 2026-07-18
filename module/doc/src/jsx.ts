@@ -1,11 +1,10 @@
-import { castTo, type Class as ClassType, TypedObject } from '@travetto/runtime';
+import { type Class as ClassType, castTo, TypedObject } from '@travetto/runtime';
 
+import { type JSXComponentFunction as CompFn, createElement, type JSXElement } from '../support/jsx-runtime.ts';
 import type { LIBRARIES } from './mapping/library.ts';
 import type { MODULES } from './mapping/module.ts';
-import type { CodeProps, CodeSourceInput, RunConfig } from './util/types.ts';
-
-import { createElement, type JSXElement, type JSXComponentFunction as CompFn } from '../support/jsx-runtime.ts';
 import { PackageDocUtil } from './util/package.ts';
+import type { CodeProps, CodeSourceInput, RunConfig } from './util/types.ts';
 
 type InstallProps = { title: string; pkg: string };
 type ExecProps = {

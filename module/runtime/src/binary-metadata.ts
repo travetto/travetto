@@ -1,11 +1,11 @@
 import crypto from 'node:crypto';
+import { createReadStream, ReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { createReadStream, ReadStream } from 'node:fs';
 
-import { BinaryUtil, type BinaryArray, type BinaryContainer, type BinaryStream, type BinaryType } from './binary.ts';
-import { RuntimeError } from './error.ts';
+import { type BinaryArray, type BinaryContainer, type BinaryStream, type BinaryType, BinaryUtil } from './binary.ts';
 import { CodecUtil } from './codec.ts';
+import { RuntimeError } from './error.ts';
 
 type BlobInput = BinaryType | (() => BinaryType | Promise<BinaryType>);
 

@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { type TransformerState, CoreUtil, TransformerHandler } from '@travetto/transformer';
+import { CoreUtil, TransformerHandler, type TransformerState } from '@travetto/transformer';
 
 import type { FunctionMetadataTag } from '../src/function.ts';
 import { MetadataRegistrationUtil } from './transformer/metadata.ts';

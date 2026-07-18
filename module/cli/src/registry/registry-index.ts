@@ -1,5 +1,5 @@
+import { Registry, type RegistryAdapter, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
 import { type Any, type Class, getClass, getParentClass, isClass, Runtime, RuntimeIndex } from '@travetto/runtime';
-import { type RegistryAdapter, type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 import { type SchemaClassConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { CliCommandConfig, CliCommandShape, PreMainHandler } from '../types.ts';

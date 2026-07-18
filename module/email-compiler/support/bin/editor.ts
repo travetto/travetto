@@ -1,13 +1,12 @@
 import { Inject, Injectable } from '@travetto/di';
-import { MailUtil, type EmailCompiled, type MailInterpolator } from '@travetto/email';
+import { type EmailCompiled, type MailInterpolator, MailUtil } from '@travetto/email';
 import { RuntimeError, TypedObject, WatchUtil } from '@travetto/runtime';
-
-import type { EditorSendService } from './send.ts';
-import { EditorConfig } from './config.ts';
-import type { EditorRequest, EditorResponse } from './types.ts';
 
 import { EmailCompiler } from '../../src/compiler.ts';
 import { EmailCompileUtil } from '../../src/util.ts';
+import { EditorConfig } from './config.ts';
+import type { EditorSendService } from './send.ts';
+import type { EditorRequest, EditorResponse } from './types.ts';
 
 /**
  * Utils for interacting with editors

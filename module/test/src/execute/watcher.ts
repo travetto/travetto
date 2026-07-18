@@ -1,14 +1,14 @@
 import { ManifestModuleUtil } from '@travetto/manifest';
 import { Registry } from '@travetto/registry';
-import { WorkPool } from '@travetto/worker';
 import { AsyncQueue, TimeUtil, WatchUtil } from '@travetto/runtime';
+import { WorkPool } from '@travetto/worker';
 
-import { buildStandardTestManager } from '../worker/standard.ts';
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
 import type { TestDiffInput, TestRun } from '../model/test.ts';
-import { RunUtil } from './run.ts';
+import { buildStandardTestManager } from '../worker/standard.ts';
 import { isTestRunEvent, type TestReadyEvent } from '../worker/types.ts';
+import { RunUtil } from './run.ts';
 
 /**
  * Test Watcher.

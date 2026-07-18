@@ -1,5 +1,5 @@
-import { Suite } from '@travetto/test';
 import { ElasticsearchModelConfig, ElasticsearchModelService } from '@travetto/model-elasticsearch';
+import { Suite } from '@travetto/test';
 
 import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 

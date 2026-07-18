@@ -1,6 +1,6 @@
-import type { OutgoingHttpHeaders, IncomingMessage, ServerResponse } from 'node:http';
+import type { IncomingMessage, OutgoingHttpHeaders, ServerResponse } from 'node:http';
 
-import { BinaryUtil, castTo, CodecUtil, type BinaryArray } from '@travetto/runtime';
+import { type BinaryArray, BinaryUtil, CodecUtil, castTo } from '@travetto/runtime';
 import { type WebRequest, WebResponse } from '@travetto/web';
 
 export class ConnectRequest implements Pick<IncomingMessage, 'url' | 'headers'> {

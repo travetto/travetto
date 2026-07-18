@@ -1,4 +1,5 @@
 import { hasFunction } from '@travetto/runtime';
+
 import type { ModelBlobSupport } from '../types/blob.ts';
 
 /**

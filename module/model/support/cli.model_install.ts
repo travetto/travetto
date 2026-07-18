@@ -2,8 +2,8 @@ import { CliCommand, cliTpl } from '@travetto/cli';
 import { MethodValidator } from '@travetto/schema';
 
 import { BaseModelCommand } from './base-command.ts';
-import { ModelInstallUtil } from './bin/install.ts';
 import { ModelCandidateUtil } from './bin/candidate.ts';
+import { ModelInstallUtil } from './bin/install.ts';
 
 /**
  * Install or update model definitions for a selected provider.

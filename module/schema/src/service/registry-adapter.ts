@@ -1,15 +1,15 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { RuntimeError, BinaryUtil, castKey, castTo, type Class, describeFunction, safeAssign } from '@travetto/runtime';
+import { BinaryUtil, type Class, castKey, castTo, describeFunction, RuntimeError, safeAssign } from '@travetto/runtime';
 
 import {
+  CONSTRUCTOR_PROPERTY,
   type SchemaClassConfig,
-  type SchemaMethodConfig,
-  type SchemaFieldConfig,
-  type SchemaParameterConfig,
-  type SchemaInputConfig,
-  type SchemaFieldMap,
   type SchemaCoreConfig,
-  CONSTRUCTOR_PROPERTY
+  type SchemaFieldConfig,
+  type SchemaFieldMap,
+  type SchemaInputConfig,
+  type SchemaMethodConfig,
+  type SchemaParameterConfig
 } from './types.ts';
 
 export type SchemaDiscriminatedInfo = Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>>;

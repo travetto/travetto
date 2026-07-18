@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 
+import type { WhereClause } from '@travetto/model-query';
 import { Registry } from '@travetto/registry';
 import { DataUtil, Schema } from '@travetto/schema';
-import { Suite, Test, BeforeAll } from '@travetto/test';
-import type { WhereClause } from '@travetto/model-query';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { ElasticsearchQueryUtil } from '@travetto/model-elasticsearch/src/internal/query.ts';
 

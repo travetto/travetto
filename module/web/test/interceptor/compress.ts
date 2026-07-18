@@ -1,11 +1,11 @@
-import { gunzipSync, brotliDecompressSync, inflateSync, createGunzip } from 'node:zlib';
 import assert from 'node:assert';
+import { brotliDecompressSync, createGunzip, gunzipSync, inflateSync } from 'node:zlib';
 
-import { BeforeAll, Suite, Test } from '@travetto/test';
-import { Registry } from '@travetto/registry';
-import { CompressInterceptor, WebRequest, WebResponse } from '@travetto/web';
 import { DependencyRegistryIndex } from '@travetto/di';
-import { BinaryUtil, type BinaryType, CodecUtil } from '@travetto/runtime';
+import { Registry } from '@travetto/registry';
+import { type BinaryType, BinaryUtil, CodecUtil } from '@travetto/runtime';
+import { BeforeAll, Suite, Test } from '@travetto/test';
+import { CompressInterceptor, WebRequest, WebResponse } from '@travetto/web';
 
 @Suite()
 class CompressInterceptorSuite {

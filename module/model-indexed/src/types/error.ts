@@ -1,5 +1,5 @@
 import type { ModelType } from '@travetto/model';
-import { RuntimeError, type Class } from '@travetto/runtime';
+import { type Class, RuntimeError } from '@travetto/runtime';
 
 import type { AllIndexes } from './indexes.ts';
 

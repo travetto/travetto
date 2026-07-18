@@ -1,9 +1,9 @@
 import type { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/api/types';
 
-import { JSONUtil, type Class } from '@travetto/runtime';
-import { ModelRegistryIndex, type ModelType, type ModelStorageSupport } from '@travetto/model';
+import { ModelRegistryIndex, type ModelStorageSupport, type ModelType } from '@travetto/model';
 import { warnIfIndexedUniqueIndex } from '@travetto/model-indexed';
+import { type Class, JSONUtil } from '@travetto/runtime';
 
 import type { ElasticsearchModelConfig } from './config.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';

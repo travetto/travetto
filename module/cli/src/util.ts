@@ -1,6 +1,6 @@
-import { spawn, type ChildProcess } from 'node:child_process';
+import { type ChildProcess, spawn } from 'node:child_process';
 
-import { RuntimeError, JSONUtil, Env, ExecUtil, Runtime, ShutdownManager, Util, WatchUtil } from '@travetto/runtime';
+import { Env, ExecUtil, JSONUtil, Runtime, RuntimeError, ShutdownManager, Util, WatchUtil } from '@travetto/runtime';
 
 const IPC_VALID_ENV = new Set(['NODE_OPTIONS', 'PATH', Env.DEBUG.key, Env.NODE_ENV.key]);
 const IPC_INVALID_ENV = new Set(

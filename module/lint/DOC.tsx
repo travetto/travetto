@@ -1,8 +1,8 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c } from '@travetto/doc';
+import { c, d } from '@travetto/doc';
 
-import { LintRegisterCommand } from './support/cli.lint_register.ts';
 import { LintCommand } from './support/cli.lint.ts';
+import { LintRegisterCommand } from './support/cli.lint_register.ts';
 
 export const text = (
   <>

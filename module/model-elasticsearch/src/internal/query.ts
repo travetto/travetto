@@ -1,10 +1,10 @@
 import type * as estypes from '@elastic/elasticsearch/api/types';
 
-import { type Any, castTo, type Class, TypedObject } from '@travetto/runtime';
-import { type WhereClause, type SelectClause, type SortClause, type Query, ModelQueryUtil } from '@travetto/model-query';
-import { type ModelType, ModelRegistryIndex } from '@travetto/model';
-import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
+import { ModelRegistryIndex, type ModelType } from '@travetto/model';
 import type { SortedIndex } from '@travetto/model-indexed';
+import { ModelQueryUtil, type Query, type SelectClause, type SortClause, type WhereClause } from '@travetto/model-query';
+import { type Any, type Class, castTo, TypedObject } from '@travetto/runtime';
+import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { EsSchemaConfig } from './types.ts';
 

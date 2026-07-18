@@ -1,5 +1,5 @@
 import { recommend, recommendOperations } from './recommendation.ts';
-import type { LlmOperation, OperationPlan, PlanResponse, PlannedChange, RecommendationQuery } from './types.ts';
+import type { LlmOperation, OperationPlan, PlannedChange, PlanResponse, RecommendationQuery } from './types.ts';
 
 function filesFor(op: LlmOperation): string[] {
   switch (op.id) {

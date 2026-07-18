@@ -1,10 +1,10 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, type DocJSXElementByFn, type DocJSXElement, DocFileUtil } from '@travetto/doc';
+import { DocFileUtil, type DocJSXElement, type DocJSXElementByFn, d } from '@travetto/doc';
 import { castKey, Runtime, toConcrete } from '@travetto/runtime';
 
 import type { ModelQueryCrudSupport } from '../src/types/crud.ts';
-import type { ModelQuerySupport } from '../src/types/query.ts';
 import type { ModelQueryFacetSupport } from '../src/types/facet.ts';
+import type { ModelQuerySupport } from '../src/types/query.ts';
 import type { ModelQuerySuggestSupport } from '../src/types/suggest.ts';
 
 const toLink = (title: string, target: Function): DocJSXElementByFn<'CodeLink'> =>

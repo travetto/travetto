@@ -1,8 +1,8 @@
 import type { Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import type { ControllerVisitor, ControllerVisitorOptions } from './types.ts';
 import { ControllerRegistryIndex } from './registry-index.ts';
+import type { ControllerVisitor, ControllerVisitorOptions } from './types.ts';
 
 /**
  * Supports visiting the controller structure

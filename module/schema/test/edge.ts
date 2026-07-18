@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
-import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { Schema, SchemaRegistryIndex, SchemaValidator } from '@travetto/schema';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 @Schema()
 export class OptionalAsUnion {

@@ -1,4 +1,4 @@
-import { type NodeTransformer, type TransformPhase, type TransformerType, type Transformer, ModuleNameSymbol } from './types/visitor.ts';
+import { ModuleNameSymbol, type NodeTransformer, type Transformer, type TransformerType, type TransformPhase } from './types/visitor.ts';
 
 const HandlersSymbol = Symbol();
 

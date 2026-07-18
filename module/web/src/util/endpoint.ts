@@ -1,14 +1,14 @@
-import { asConstructable, castKey, castTo, type Class, TypedObject } from '@travetto/runtime';
-import { BindUtil, type SchemaParameterConfig, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { DependencyRegistryIndex } from '@travetto/di';
+import { asConstructable, type Class, castKey, castTo, TypedObject } from '@travetto/runtime';
+import { BindUtil, type SchemaParameterConfig, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import type { WebChainedFilter, WebChainedContext, WebFilter } from '../types/filter.ts';
-import { WebResponse } from '../types/response.ts';
+import { ControllerRegistryIndex } from '../registry/registry-index.ts';
+import type { ControllerConfig, EndpointConfig, EndpointFunction, EndpointParameterConfig } from '../registry/types.ts';
+import { WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
+import type { WebChainedContext, WebChainedFilter, WebFilter } from '../types/filter.ts';
 import type { WebInterceptor } from '../types/interceptor.ts';
 import type { WebRequest } from '../types/request.ts';
-import { WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
-import type { EndpointConfig, ControllerConfig, EndpointParameterConfig, EndpointFunction } from '../registry/types.ts';
-import { ControllerRegistryIndex } from '../registry/registry-index.ts';
+import { WebResponse } from '../types/response.ts';
 import { WebCommonUtil } from './common.ts';
 
 const WebQueryExpandedSymbol = Symbol();

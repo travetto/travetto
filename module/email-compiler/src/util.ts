@@ -1,9 +1,10 @@
 import path from 'node:path';
+
 import type { CompileResult, Options } from 'sass';
 
 import type { EmailCompiled, EmailTemplateModule, EmailTemplateResource } from '@travetto/email';
 import { ImageUtil } from '@travetto/image';
-import { BinaryUtil, CodecUtil, RuntimeIndex, type BinaryArray } from '@travetto/runtime';
+import { type BinaryArray, BinaryUtil, CodecUtil, RuntimeIndex } from '@travetto/runtime';
 
 type Tokenized = {
   text: string;

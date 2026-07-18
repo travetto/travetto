@@ -1,9 +1,9 @@
 import { DependencyRegistryIndex } from '@travetto/di';
-import { RuntimeError, castTo, type Class, classConstruct } from '@travetto/runtime';
+import { type Class, castTo, classConstruct, RuntimeError } from '@travetto/runtime';
 
+import type { ModelType } from '../../src/types/model.ts';
 import { ModelBulkUtil } from '../../src/util/bulk.ts';
 import { ModelCrudUtil } from '../../src/util/crud.ts';
-import type { ModelType } from '../../src/types/model.ts';
 import { ModelSuite } from './suite.ts';
 
 type ServiceClass = { serviceClass: { new (): unknown } };

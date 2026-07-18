@@ -1,9 +1,13 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c } from '@travetto/doc';
+import { c, d } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
 
+import { DataUtil } from './src/data.ts';
+import { Describe, Ignore } from './src/decorator/common.ts';
+import { Field, Readonly, Secret, Writeonly } from './src/decorator/field.ts';
 import {
   Currency,
+  DiscriminatorField,
   Email,
   Enum,
   Float,
@@ -15,16 +19,12 @@ import {
   Min,
   MinLength,
   Required,
-  Telephone,
-  Url,
-  Text,
   Specifier,
-  DiscriminatorField
+  Telephone,
+  Text,
+  Url
 } from './src/decorator/input.ts';
-import { Readonly, Writeonly, Secret, Field } from './src/decorator/field.ts';
 import { Schema } from './src/decorator/schema.ts';
-import { Ignore, Describe } from './src/decorator/common.ts';
-import { DataUtil } from './src/data.ts';
 import type { ValidationError } from './src/validate/types.ts';
 
 export const text = (

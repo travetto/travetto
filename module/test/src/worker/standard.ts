@@ -1,12 +1,12 @@
 import { fork } from 'node:child_process';
 
-import { JSONUtil, Env, RuntimeIndex } from '@travetto/runtime';
+import { Env, JSONUtil, RuntimeIndex } from '@travetto/runtime';
 import { IpcChannel } from '@travetto/worker';
 
-import { TestWorkerEvents, type TestLogEvent } from './types.ts';
 import type { TestConsumerShape } from '../consumer/types.ts';
 import type { TestEvent, TestRemoveEvent } from '../model/event.ts';
 import type { TestDiffInput, TestRun } from '../model/test.ts';
+import { type TestLogEvent, TestWorkerEvents } from './types.ts';
 
 const log = (message: string | TestLogEvent): void => {
   const event: TestLogEvent = typeof message === 'string' ? { type: 'log', message } : message;

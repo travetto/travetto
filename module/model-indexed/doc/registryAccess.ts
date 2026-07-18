@@ -1,4 +1,4 @@
-import { ModelRegistryIndex, Model } from '@travetto/model';
+import { Model, ModelRegistryIndex } from '@travetto/model';
 
 @Model()
 export class User {

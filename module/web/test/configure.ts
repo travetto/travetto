@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 
-import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Registry } from '@travetto/registry';
-import { Controller, ControllerRegistryIndex, Get, PathParam } from '@travetto/web';
 import { SchemaRegistryIndex } from '@travetto/schema';
+import { BeforeAll, Suite, Test } from '@travetto/test';
+import { Controller, ControllerRegistryIndex, Get, PathParam } from '@travetto/web';
 
 /**
  * Test Controller For Fun

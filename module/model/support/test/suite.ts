@@ -1,12 +1,12 @@
-import type { Class } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
-import { SuiteRegistryIndex, TestFixtures, type SuitePhaseHandler } from '@travetto/test';
+import type { Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
+import { type SuitePhaseHandler, SuiteRegistryIndex, TestFixtures } from '@travetto/test';
 
+import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
 import { ModelBlobUtil } from '../../src/util/blob.ts';
 import { ModelStorageUtil } from '../../src/util/storage.ts';
-import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
 
 type ConfigType = { autoCreate?: boolean; namespace?: string };
 

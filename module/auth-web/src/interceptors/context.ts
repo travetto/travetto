@@ -1,11 +1,11 @@
-import { toConcrete } from '@travetto/runtime';
-import type { WebInterceptor, WebAsyncContext, WebInterceptorCategory, WebChainedContext, WebResponse } from '@travetto/web';
-import { Injectable, Inject, DependencyRegistryIndex, PostConstruct } from '@travetto/di';
 import type { AuthContext, AuthService, AuthToken, Principal } from '@travetto/auth';
+import { DependencyRegistryIndex, Inject, Injectable, PostConstruct } from '@travetto/di';
+import { toConcrete } from '@travetto/runtime';
 import { Required } from '@travetto/schema';
+import type { WebAsyncContext, WebChainedContext, WebInterceptor, WebInterceptorCategory, WebResponse } from '@travetto/web';
 
-import { CommonPrincipalCodecSymbol, type PrincipalCodec } from '../types.ts';
 import type { WebAuthConfig } from '../config.ts';
+import { CommonPrincipalCodecSymbol, type PrincipalCodec } from '../types.ts';
 
 const toDate = (value: string | Date | undefined): Date | undefined => (typeof value === 'string' ? new Date(value) : value);
 

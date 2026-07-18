@@ -1,4 +1,4 @@
-import { RuntimeError, castTo, type Class, getParentClass } from '@travetto/runtime';
+import { type Class, castTo, getParentClass, RuntimeError } from '@travetto/runtime';
 
 import type { RegistrationMethods, RegistryAdapter, RegistrySimpleStore } from './types.ts';
 

@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Suite, BeforeAll, AfterEach, AfterAll, BeforeEach, Test, TestExecutionError } from '@travetto/test';
+import { AfterAll, AfterEach, BeforeAll, BeforeEach, Suite, Test, TestExecutionError } from '@travetto/test';
 
 let a: unknown = 0;
 a = 1;

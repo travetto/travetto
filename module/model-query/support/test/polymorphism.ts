@@ -1,20 +1,19 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
-import { NotFoundError, type ModelCrudSupport } from '@travetto/model';
+import { type ModelCrudSupport, NotFoundError } from '@travetto/model';
 import { castTo } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
-import { Doctor, Engineer, Worker, Firefighter } from '@travetto/model/support/test/polymorphism.ts';
+import { Doctor, Engineer, Firefighter, Worker } from '@travetto/model/support/test/polymorphism.ts';
 
 import type { ModelQueryCrudSupport } from '../../src/types/crud.ts';
-import type { ModelQuerySupport } from '../../src/types/query.ts';
 import type { ModelQueryFacetSupport } from '../../src/types/facet.ts';
+import type { ModelQuerySupport } from '../../src/types/query.ts';
 import type { ModelQuerySuggestSupport } from '../../src/types/suggest.ts';
-
+import { ModelQueryCrudUtil } from '../../src/util/crud.ts';
 import { ModelQueryFacetUtil } from '../../src/util/facet.ts';
 import { ModelQuerySuggestUtil } from '../../src/util/suggest.ts';
-import { ModelQueryCrudUtil } from '../../src/util/crud.ts';
 
 @Suite()
 export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQuerySupport & ModelCrudSupport> {

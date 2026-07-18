@@ -1,8 +1,8 @@
+import { type Class, castTo } from '@travetto/runtime';
 import { SchemaRegistryIndex, UnknownType } from '@travetto/schema';
-import { castTo, type Class } from '@travetto/runtime';
 
-import { getDefaultQualifier, type InjectableCandidate, PrimaryCandidateSymbol, type ResolutionType } from '../types.ts';
 import { InjectionError } from '../error.ts';
+import { getDefaultQualifier, type InjectableCandidate, PrimaryCandidateSymbol, type ResolutionType } from '../types.ts';
 
 type Resolved<T> = { candidate: InjectableCandidate<T>; qualifier: symbol; target: Class };
 

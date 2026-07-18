@@ -1,9 +1,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { TypedObject, RuntimeIndex, Runtime, ExecUtil } from '@travetto/runtime';
-import { type EmailCompiled, MailUtil, type EmailTemplateImport, type EmailTemplateModule } from '@travetto/email';
+import { type EmailCompiled, type EmailTemplateImport, type EmailTemplateModule, MailUtil } from '@travetto/email';
 import { ManifestFileUtil } from '@travetto/manifest';
+import { ExecUtil, Runtime, RuntimeIndex, TypedObject } from '@travetto/runtime';
 
 import { EmailCompileUtil } from './util.ts';
 

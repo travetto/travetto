@@ -2,11 +2,11 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { cliTpl } from '@travetto/cli';
-import { JSONUtil, Env, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { Env, JSONUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import type { CommonPackConfig } from '../../src/types.ts';
-import { PackUtil } from './util.ts';
 import { ActiveShellCommand, ShellCommands } from './shell.ts';
+import { PackUtil } from './util.ts';
 
 /**
  * General pack operations

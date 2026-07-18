@@ -1,11 +1,11 @@
 import { Config, EnvVar } from '@travetto/config';
-import { Ignore, Secret } from '@travetto/schema';
-import { RuntimeError, Runtime, RuntimeResources } from '@travetto/runtime';
-import { NetUtil } from '@travetto/web';
 import { PostConstruct } from '@travetto/di';
+import { Runtime, RuntimeError, RuntimeResources } from '@travetto/runtime';
+import { Ignore, Secret } from '@travetto/schema';
+import { NetUtil } from '@travetto/web';
 
-import type { WebSecureKeyPair } from './types.ts';
 import { WebTlsUtil } from './tls.ts';
+import type { WebSecureKeyPair } from './types.ts';
 
 /**
  * Web HTTP configuration

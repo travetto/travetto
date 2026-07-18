@@ -1,5 +1,5 @@
-import type { OutputOptions } from 'rollup';
 import type terser from '@rollup/plugin-terser';
+import type { OutputOptions } from 'rollup';
 
 export type CommonPackConfig = {
   buildDirectory: string;

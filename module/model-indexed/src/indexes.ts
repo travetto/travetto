@@ -1,12 +1,12 @@
-import { type IndexConfig, type ModelType, ModelRegistryIndex } from '@travetto/model';
-import { type Class, type Any, castTo, type ClassInstance } from '@travetto/runtime';
+import { type IndexConfig, ModelRegistryIndex, type ModelType } from '@travetto/model';
+import { type Any, type Class, type ClassInstance, castTo } from '@travetto/runtime';
 
 import type {
   AllIndexes,
-  KeyedIndexSelection,
   KeyedIndex,
-  SortedIndexSelection,
+  KeyedIndexSelection,
   SortedIndex,
+  SortedIndexSelection,
   TemplatePart,
   TemplateValue
 } from './types/indexes.ts';

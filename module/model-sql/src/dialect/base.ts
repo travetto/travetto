@@ -1,21 +1,21 @@
-import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex, type Point } from '@travetto/schema';
-import { type Class, RuntimeError, TypedObject, TimeUtil, castTo, castKey, toConcrete, JSONUtil } from '@travetto/runtime';
-import {
-  type SelectClause,
-  type Query,
-  type SortClause,
-  type WhereClause,
-  type RetainQueryPrimitiveFields,
-  ModelQueryUtil,
-  isModelQueryIndex
-} from '@travetto/model-query';
-import { IndexNotSupported, type BulkResponse, type IndexConfig, type ModelType } from '@travetto/model';
+import { type BulkResponse, type IndexConfig, IndexNotSupported, type ModelType } from '@travetto/model';
 import { isModelIndexedIndex } from '@travetto/model-indexed';
+import {
+  isModelQueryIndex,
+  ModelQueryUtil,
+  type Query,
+  type RetainQueryPrimitiveFields,
+  type SelectClause,
+  type SortClause,
+  type WhereClause
+} from '@travetto/model-query';
+import { type Class, castKey, castTo, JSONUtil, RuntimeError, TimeUtil, TypedObject, toConcrete } from '@travetto/runtime';
+import { DataUtil, type Point, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import { SQLModelUtil } from '../util.ts';
-import type { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types.ts';
 import type { Connection } from '../connection/base.ts';
+import type { DeleteWrapper, DialectState, InsertWrapper } from '../internal/types.ts';
 import type { VisitStack } from '../types.ts';
+import { SQLModelUtil } from '../util.ts';
 
 const PointConcrete = toConcrete<Point>();
 

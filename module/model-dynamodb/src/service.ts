@@ -7,39 +7,39 @@ import {
   type QueryCommandOutput
 } from '@aws-sdk/client-dynamodb';
 
-import { castTo, JSONUtil, ShutdownManager, TimeUtil, type Class } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
+  ExistsError,
   type ModelCrudSupport,
+  ModelCrudUtil,
   type ModelExpirySupport,
+  ModelExpiryUtil,
+  type ModelListOptions,
   ModelRegistryIndex,
   type ModelStorageSupport,
+  ModelStorageUtil,
   type ModelType,
   NotFoundError,
-  ExistsError,
-  type OptionalId,
-  ModelCrudUtil,
-  ModelExpiryUtil,
-  ModelStorageUtil,
-  type ModelListOptions
+  type OptionalId
 } from '@travetto/model';
 import {
-  isModelIndexedIndex,
-  ModelIndexedUtil,
-  type KeyedIndexBody,
-  type KeyedIndexSelection,
-  type ModelPageOptions,
-  type ModelPageResult,
-  type ModelIndexedSupport,
-  type SingleItemIndex,
   type FullKeyedIndexBody,
   type FullKeyedIndexWithPartialBody,
-  type SortedIndex,
-  type SortedIndexSelection,
+  isModelIndexedIndex,
+  type KeyedIndexBody,
+  type KeyedIndexSelection,
   ModelIndexedComputedIndex,
   type ModelIndexedSearchOptions,
+  type ModelIndexedSupport,
+  ModelIndexedUtil,
+  type ModelPageOptions,
+  type ModelPageResult,
+  type SingleItemIndex,
+  type SortedIndex,
+  type SortedIndexSelection,
   type SortedIndexSelectionType
 } from '@travetto/model-indexed';
+import { type Class, castTo, JSONUtil, ShutdownManager, TimeUtil } from '@travetto/runtime';
 
 import type { DynamoDBModelConfig } from './config.ts';
 import { DynamoDBUtil } from './util.ts';

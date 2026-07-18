@@ -1,12 +1,12 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { JSONUtil, Runtime } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
+import { JSONUtil, Runtime } from '@travetto/runtime';
 
-import { ActiveShellCommand } from './shell.ts';
 import type { DockerPackConfig, DockerPackFactoryModule } from '../../src/types.ts';
 import { PackOperation } from './operation.ts';
+import { ActiveShellCommand } from './shell.ts';
 import { PackUtil } from './util.ts';
 
 export class DockerPackOperation {

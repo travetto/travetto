@@ -1,10 +1,10 @@
-import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { RuntimeError, castTo, type Class } from '@travetto/runtime';
+import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
+import { type Class, castTo, RuntimeError } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import type { IndexConfig, ModelConfig } from './types.ts';
 import type { ModelType } from '../types/model.ts';
 import { ModelRegistryAdapter } from './registry-adapter.ts';
+import type { IndexConfig, ModelConfig } from './types.ts';
 
 /**
  * Model registry index for managing model configurations across classes

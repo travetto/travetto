@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 
-import { AssertCheck, BeforeAll, Suite, Test } from '@travetto/test';
 import { CliCommand, CliCommandSchemaUtil, CliFlag, CliParseUtil, type ParsedState } from '@travetto/cli';
-import { SchemaRegistryIndex } from '@travetto/schema';
 import { Registry } from '@travetto/registry';
+import { SchemaRegistryIndex } from '@travetto/schema';
+import { AssertCheck, BeforeAll, Suite, Test } from '@travetto/test';
 
 /**
  * My command

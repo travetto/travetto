@@ -1,9 +1,9 @@
-import { castTo, type Class, type DeepPartial } from '@travetto/runtime';
+import { type Class, castTo, type DeepPartial } from '@travetto/runtime';
 
 import { BindUtil } from '../bind-util.ts';
+import { SchemaRegistryIndex } from '../service/registry-index.ts';
 import type { SchemaClassConfig, ViewFieldsConfig } from '../service/types.ts';
 import type { ValidatorFn } from '../validate/types.ts';
-import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
 /**
  * Provides all the valid string type fields from a given type T

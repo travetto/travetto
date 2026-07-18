@@ -1,10 +1,10 @@
-import crypto from 'node:crypto';
 import assert from 'node:assert';
-import { buffer } from 'node:stream/consumers';
+import crypto from 'node:crypto';
 import { Readable } from 'node:stream';
+import { buffer } from 'node:stream/consumers';
 
-import { Test, Suite, TestFixtures } from '@travetto/test';
 import { BinaryMetadataUtil, BinaryUtil } from '@travetto/runtime';
+import { Suite, Test, TestFixtures } from '@travetto/test';
 
 @Suite()
 export class BinaryMetadataUtilSuite {

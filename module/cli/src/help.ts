@@ -1,12 +1,12 @@
 import util from 'node:util';
 
-import { castKey, CodecUtil, getClass, JSONUtil, Runtime } from '@travetto/runtime';
+import { CodecUtil, castKey, getClass, JSONUtil, Runtime } from '@travetto/runtime';
 import { SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
 
 import { cliTpl } from './color.ts';
-import { HELP_FLAG, type CliCommandShape } from './types.ts';
 import { CliCommandRegistryIndex, UNKNOWN_COMMAND } from './registry/registry-index.ts';
 import { CliSchemaExportUtil } from './schema-export.ts';
+import { type CliCommandShape, HELP_FLAG } from './types.ts';
 
 const validationSourceMap: Record<string, string> = { arg: 'Argument', flag: 'Flag' };
 

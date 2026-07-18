@@ -1,18 +1,18 @@
-import timers from 'node:timers/promises';
 import assert from 'node:assert';
+import timers from 'node:timers/promises';
 
-import { Controller, Get, type WebHeaders, WebResponse, Post, type Cookie, CookieJar } from '@travetto/web';
-import { Suite, Test } from '@travetto/test';
+import { type AuthConfig, type AuthContext, AuthenticationError, type Authenticator } from '@travetto/auth';
 import { DependencyRegistryIndex, Inject, InjectableFactory } from '@travetto/di';
-import { AuthenticationError, type Authenticator, type AuthContext, type AuthConfig } from '@travetto/auth';
+import { Suite, Test } from '@travetto/test';
+import { Controller, type Cookie, CookieJar, Get, Post, type WebHeaders, WebResponse } from '@travetto/web';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
-import { Login, Authenticated, Logout } from '../../src/decorator.ts';
-import type { WebAuthConfig } from '../../src/config.ts';
-import { CommonPrincipalCodecSymbol } from '../../src/types.ts';
 import { JWTPrincipalCodec } from '../../src/codec.ts';
+import type { WebAuthConfig } from '../../src/config.ts';
+import { Authenticated, Login, Logout } from '../../src/decorator.ts';
+import { CommonPrincipalCodecSymbol } from '../../src/types.ts';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 

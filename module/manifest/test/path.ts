@@ -1,9 +1,9 @@
 import assert from 'node:assert';
-import winPath from 'node:path/win32';
 import path from 'node:path';
+import winPath from 'node:path/win32';
 
-import { Suite, Test } from '@travetto/test';
 import { path as path2 } from '@travetto/manifest';
+import { Suite, Test } from '@travetto/test';
 
 @Suite()
 class PathTests {

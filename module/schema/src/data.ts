@@ -1,6 +1,7 @@
-import { isNumberObject, isBooleanObject, isStringObject } from 'node:util/types';
+import { isBooleanObject, isNumberObject, isStringObject } from 'node:util/types';
 
-import { asConstructable, castTo, type Class, asFull, TypedObject } from '@travetto/runtime';
+import { asConstructable, asFull, type Class, castTo, TypedObject } from '@travetto/runtime';
+
 import { UnknownType } from './types.ts';
 
 const REGEX_PATTERN = /[/](.*)[/](i|g|m|s)?/;

@@ -3,9 +3,9 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 
 import { getUnimplementedOperations } from '../src/execute.ts';
+import { EXCLUDED_OPERATION_IDS, getValidOperationIds, recommend, recommendOperations } from '../src/recommendation.ts';
 import { LLM_SNIPPET_SOURCES } from '../src/snippet-catalog.ts';
 import { WORKFLOWS } from '../src/workflow-guidance.ts';
-import { EXCLUDED_OPERATION_IDS, getValidOperationIds, recommend, recommendOperations } from '../src/recommendation.ts';
 
 @Suite()
 class LlmSupportRecommendationTest {

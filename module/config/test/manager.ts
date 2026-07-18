@@ -1,11 +1,11 @@
 import assert from 'node:assert';
 
-import { Test, Suite, BeforeEach } from '@travetto/test';
-import { ValidationResultError } from '@travetto/schema';
+import { Config, type ConfigSource, ConfigurationService, MemoryConfigSource } from '@travetto/config';
 import { DependencyRegistryIndex, InjectableFactory } from '@travetto/di';
 import { Registry } from '@travetto/registry';
 import { Env } from '@travetto/runtime';
-import { Config, type ConfigSource, ConfigurationService, MemoryConfigSource } from '@travetto/config';
+import { ValidationResultError } from '@travetto/schema';
+import { BeforeEach, Suite, Test } from '@travetto/test';
 
 @Config('ignore')
 class TestConfig {

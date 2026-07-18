@@ -1,10 +1,11 @@
 import ts from 'typescript';
+
 import {
   type AnyType,
   DeclarationUtil,
-  LiteralUtil,
   DecoratorUtil,
   DocUtil,
+  LiteralUtil,
   type ParamDocumentation,
   type TransformerState,
   transformCast

@@ -1,4 +1,5 @@
 import type { AnyMap } from '@travetto/runtime';
+
 import type { Principal } from './principal.ts';
 
 /**

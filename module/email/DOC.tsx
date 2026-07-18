@@ -1,9 +1,9 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c } from '@travetto/doc';
+import { c, d } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
 
-import { NullTransport } from './src/transport.ts';
 import { MailConfig } from './src/config.ts';
+import { NullTransport } from './src/transport.ts';
 import type { EmailOptions } from './src/types.ts';
 
 export const text = (

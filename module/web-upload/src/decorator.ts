@@ -1,9 +1,9 @@
-import { RuntimeError, toConcrete, type ClassInstance, getClass } from '@travetto/runtime';
-import { ControllerRegistryIndex, type EndpointParameterConfig, Param } from '@travetto/web';
+import { type ClassInstance, getClass, RuntimeError, toConcrete } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
+import { ControllerRegistryIndex, type EndpointParameterConfig, Param } from '@travetto/web';
 
-import { WebUploadInterceptor } from './interceptor.ts';
 import type { WebUploadConfig } from './config.ts';
+import { WebUploadInterceptor } from './interceptor.ts';
 import type { FileMap } from './types.ts';
 import { WebUploadUtil } from './util.ts';
 

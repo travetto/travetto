@@ -1,5 +1,5 @@
-import { MemoryModelService } from '@travetto/model-memory';
 import { Cache, CacheService } from '@travetto/cache';
+import { MemoryModelService } from '@travetto/model-memory';
 
 async function request(url: string): Promise<string> {
   let value: string;

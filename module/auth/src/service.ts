@@ -1,12 +1,12 @@
 import { DependencyRegistryIndex, getDefaultQualifier, Inject, Injectable, PostConstruct } from '@travetto/di';
-import { toConcrete, TimeUtil } from '@travetto/runtime';
+import { TimeUtil, toConcrete } from '@travetto/runtime';
 
-import type { Principal } from './types/principal.ts';
+import type { AuthConfig } from './config.ts';
+import type { AuthContext } from './context.ts';
 import type { Authenticator } from './types/authenticator.ts';
 import type { Authorizer } from './types/authorizer.ts';
 import { AuthenticationError } from './types/error.ts';
-import type { AuthContext } from './context.ts';
-import type { AuthConfig } from './config.ts';
+import type { Principal } from './types/principal.ts';
 
 @Injectable()
 export class AuthService {

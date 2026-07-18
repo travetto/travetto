@@ -1,12 +1,12 @@
-import { Buffer, Blob, File } from 'node:buffer';
 import assert from 'node:assert';
+import { Blob, Buffer, File } from 'node:buffer';
 import { Readable } from 'node:stream';
 import { ReadableStream } from 'node:stream/web';
 
-import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Registry } from '@travetto/registry';
-import { Schema, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 import { type BinaryArray, type BinaryStream, type BinaryType, castTo } from '@travetto/runtime';
+import { Schema, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 @Schema()
 class BinaryTestContainer {

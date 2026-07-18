@@ -1,8 +1,8 @@
 import { PassThrough, Readable, type Writable } from 'node:stream';
+import consumers from 'node:stream/consumers';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
-import consumers from 'node:stream/consumers';
-import { isArrayBuffer, isPromise, isTypedArray, isUint16Array, isUint32Array, isUint8Array, isUint8ClampedArray } from 'node:util/types';
+import { isArrayBuffer, isPromise, isTypedArray, isUint8Array, isUint8ClampedArray, isUint16Array, isUint32Array } from 'node:util/types';
 
 import { castTo, hasFunction, toConcrete } from './types.ts';
 

@@ -1,5 +1,5 @@
-import { Env } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
+import { Env } from '@travetto/runtime';
 
 import type { TestConsumerType } from './bin/run.ts';
 

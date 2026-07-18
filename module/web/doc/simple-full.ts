@@ -1,5 +1,5 @@
-import { Get, Controller, Post, QueryParam, type WebRequest, ContextParam } from '@travetto/web';
 import { Integer, Min } from '@travetto/schema';
+import { ContextParam, Controller, Get, Post, QueryParam, type WebRequest } from '@travetto/web';
 
 import type { MockService } from './mock.ts';
 

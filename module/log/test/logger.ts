@@ -1,10 +1,10 @@
 import assert from 'node:assert';
 
-import { Suite, Test, BeforeAll, BeforeEach } from '@travetto/test';
-import { castTo, type ConsoleListener, ConsoleManager } from '@travetto/runtime';
 import { DependencyRegistryIndex, Injectable } from '@travetto/di';
-import { Registry } from '@travetto/registry';
 import { JsonLogFormatter, type LogDecorator, type LogEvent, LogFormatUtil, type Logger, LogService } from '@travetto/log';
+import { Registry } from '@travetto/registry';
+import { type ConsoleListener, ConsoleManager, castTo } from '@travetto/runtime';
+import { BeforeAll, BeforeEach, Suite, Test } from '@travetto/test';
 
 @Injectable()
 class CustomLogger implements Logger {

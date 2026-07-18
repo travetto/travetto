@@ -1,4 +1,4 @@
-import { Runtime, type Any } from '@travetto/runtime';
+import { type Any, Runtime } from '@travetto/runtime';
 
 import type { WebSecureKeyPair } from './types.ts';
 

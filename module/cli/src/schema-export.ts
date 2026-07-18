@@ -1,4 +1,4 @@
-import { castTo, type Class, describeFunction } from '@travetto/runtime';
+import { type Class, castTo, describeFunction } from '@travetto/runtime';
 import { type SchemaInputConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { CliCommandRegistryIndex } from './registry/registry-index.ts';

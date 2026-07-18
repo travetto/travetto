@@ -1,5 +1,5 @@
-import { isPromise } from 'node:util/types';
 import { createHook, executionAsyncId } from 'node:async_hooks';
+import { isPromise } from 'node:util/types';
 
 import { type TimeSpan, TimeUtil, Util } from '@travetto/runtime';
 

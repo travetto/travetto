@@ -3,8 +3,8 @@ import type { Writable } from 'node:stream';
 import { JSONUtil } from '@travetto/runtime';
 
 import type { TestEvent, TestRemoveEvent } from '../../model/event.ts';
-import type { TestConsumerShape } from '../types.ts';
 import { TestConsumer } from '../decorator.ts';
+import type { TestConsumerShape } from '../types.ts';
 
 /**
  * Streams all test events a JSON payload, in an nd-json format

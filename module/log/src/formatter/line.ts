@@ -1,8 +1,8 @@
 import util from 'node:util';
 
-import { Env, RuntimeIndex } from '@travetto/runtime';
-import { Injectable, PostConstruct } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
+import { Injectable, PostConstruct } from '@travetto/di';
+import { Env, RuntimeIndex } from '@travetto/runtime';
 import { Ignore } from '@travetto/schema';
 import { StyleUtil, type TermStyleFn } from '@travetto/terminal';
 

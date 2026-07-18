@@ -1,5 +1,6 @@
-import { Runtime } from '@travetto/runtime';
 import { Html, InkyRenderer } from '@travetto/email-inky';
+import { Runtime } from '@travetto/runtime';
+
 import type { JSXElement } from '@travetto/email-inky/support/jsx-runtime.ts';
 
 export function cleanseOutput(output: string) {

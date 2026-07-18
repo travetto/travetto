@@ -1,13 +1,13 @@
-import { Suite } from '@travetto/test';
-import { InjectableFactory } from '@travetto/di';
 import type { AsyncContext } from '@travetto/context';
-import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
+import { InjectableFactory } from '@travetto/di';
 import { PostgreSQLDialect } from '@travetto/model-postgres';
+import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
+import { Suite } from '@travetto/test';
 
-import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
-import { ModelBulkSuite } from '@travetto/model/support/test/bulk.ts';
-import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
+import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
+import { ModelBulkSuite } from '@travetto/model/support/test/bulk.ts';
+import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
 

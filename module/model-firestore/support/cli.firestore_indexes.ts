@@ -1,13 +1,13 @@
 import cp from 'node:child_process';
 import fs from 'node:fs/promises';
 
-import { type CliCommandShape, CliCommand, CliModuleFlag } from '@travetto/cli';
-import { JSONUtil, Env, ExecUtil, Runtime } from '@travetto/runtime';
-import { Registry } from '@travetto/registry';
+import { CliCommand, type CliCommandShape, CliModuleFlag } from '@travetto/cli';
 import { DependencyRegistryIndex } from '@travetto/di';
+import { ManifestFileUtil } from '@travetto/manifest';
 import { ModelRegistryIndex } from '@travetto/model';
 import { isModelIndexedIndex } from '@travetto/model-indexed';
-import { ManifestFileUtil } from '@travetto/manifest';
+import { Registry } from '@travetto/registry';
+import { Env, ExecUtil, JSONUtil, Runtime } from '@travetto/runtime';
 
 import { FirestoreModelConfig } from '../src/config.ts';
 import { FirestoreModelService } from '../src/service.ts';

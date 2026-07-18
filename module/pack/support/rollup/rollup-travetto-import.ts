@@ -1,10 +1,10 @@
-import type { AstNode, Plugin } from 'rollup';
 // @ts-expect-error - This module lacks types
 import { walk } from 'estree-walker';
 import magicString from 'magic-string';
+import type { AstNode, Plugin } from 'rollup';
 
-import { GLOBAL_IMPORT } from './rollup-travetto-entry.ts';
 import type { CoreRollupConfig } from '../../src/types.ts';
+import { GLOBAL_IMPORT } from './rollup-travetto-entry.ts';
 
 type TNode = AstNode & { source?: { type: string }; callee?: TNode & { name?: string }; args?: TNode[] };
 

@@ -3,7 +3,7 @@ import { AssertionError } from 'node:assert';
 import type { BinaryArray } from './binary.ts';
 import { CodecUtil } from './codec.ts';
 import { RuntimeError, type RuntimeErrorOptions } from './error.ts';
-import { castTo, type Any } from './types.ts';
+import { type Any, castTo } from './types.ts';
 
 const VALID_JSON_ERROR_TYPES = ['runtime', 'plain', 'assert'] as const;
 const VALID_JSON_ERROR_TYPE_SET = new Set<unknown>(VALID_JSON_ERROR_TYPES);

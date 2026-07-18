@@ -1,9 +1,9 @@
 import type { ChildProcess } from 'node:child_process';
 
-import { type ExecutionResult, Env, Util, ExecUtil, CodecUtil, Runtime, RuntimeIndex, AsyncQueue } from '@travetto/runtime';
 import { CliModuleUtil } from '@travetto/cli';
 import type { IndexedModule } from '@travetto/manifest';
-import { StyleUtil, Terminal, TerminalUtil, type ProgressEvent } from '@travetto/terminal';
+import { AsyncQueue, CodecUtil, Env, ExecUtil, type ExecutionResult, Runtime, RuntimeIndex, Util } from '@travetto/runtime';
+import { type ProgressEvent, StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 
 const COLORS = [

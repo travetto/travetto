@@ -1,5 +1,5 @@
-import { Schema } from '@travetto/schema';
 import type { Package } from '@travetto/manifest';
+import { Schema } from '@travetto/schema';
 
 export type PackageJsonShape = Partial<Pick<Package, 'name' | 'private' | 'type' | 'scripts' | 'devDependencies'>>;
 

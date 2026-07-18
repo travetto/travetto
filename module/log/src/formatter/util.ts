@@ -1,7 +1,7 @@
-import { inspect, type InspectOptions } from 'node:util';
+import { type InspectOptions, inspect } from 'node:util';
 
-import { DataUtil } from '@travetto/schema';
 import { safeAssign } from '@travetto/runtime';
+import { DataUtil } from '@travetto/schema';
 
 import type { LogEvent } from '../types.ts';
 

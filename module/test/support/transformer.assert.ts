@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { type TransformerState, DeclarationUtil, CoreUtil, TransformerHandler } from '@travetto/transformer';
+import { CoreUtil, DeclarationUtil, TransformerHandler, type TransformerState } from '@travetto/transformer';
 
 /**
  * Which types are candidates for deep literal checking

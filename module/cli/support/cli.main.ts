@@ -1,5 +1,5 @@
+import { CliCommand, type CliCommandShape, CliParseUtil } from '@travetto/cli';
 import { JSONUtil, Runtime } from '@travetto/runtime';
-import { type CliCommandShape, CliCommand, CliParseUtil } from '@travetto/cli';
 import { IsPrivate, MethodValidator, type ValidationError } from '@travetto/schema';
 
 async function validateMain(fileOrImport: string): Promise<ValidationError | undefined> {

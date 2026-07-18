@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import fs from 'node:fs/promises';
 
-import { d, c } from '@travetto/doc';
+import { c, d } from '@travetto/doc';
 import { RuntimeIndex } from '@travetto/runtime';
 
 export const text = async () => {

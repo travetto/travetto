@@ -1,6 +1,6 @@
-import type { Class } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
-import { SuiteRegistryIndex, type SuitePhaseHandler } from '@travetto/test';
+import type { Class } from '@travetto/runtime';
+import { type SuitePhaseHandler, SuiteRegistryIndex } from '@travetto/test';
 
 import { DependencyRegistryIndex } from '../../src/registry/registry-index.ts';
 

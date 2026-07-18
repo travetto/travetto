@@ -1,4 +1,4 @@
-import { RuntimeError, castTo, type Class, Env, flushPendingFunctions, isClass, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { type Class, castTo, Env, flushPendingFunctions, isClass, Runtime, RuntimeError, RuntimeIndex } from '@travetto/runtime';
 
 import type { RegistryIndex, RegistryIndexClass } from './types.ts';
 

@@ -1,5 +1,5 @@
 import type { TimeUnit } from '@travetto/runtime';
-import { Schema, Float, MinLength, Match, Max, Min, CommonRegex, View, Url, Required, Validator, Discriminated } from '@travetto/schema';
+import { CommonRegex, Discriminated, Float, Match, Max, Min, MinLength, Required, Schema, Url, Validator, View } from '@travetto/schema';
 
 @Schema()
 @Validator((o: CustomValidated) => {

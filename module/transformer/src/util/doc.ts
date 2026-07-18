@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { transformCast, type DeclDocumentation } from '../types/shared.ts';
+import { type DeclDocumentation, transformCast } from '../types/shared.ts';
 import { CoreUtil } from './core.ts';
 import { DeclarationUtil } from './declaration.ts';
 

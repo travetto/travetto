@@ -1,11 +1,11 @@
 import path from 'node:path';
 
-import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/oas31';
+import type { ContactObject, LicenseObject, ServerObject } from 'openapi3-ts/oas31';
 
 import { Config } from '@travetto/config';
+import { PostConstruct } from '@travetto/di';
 import { Runtime } from '@travetto/runtime';
 import { Required } from '@travetto/schema';
-import { PostConstruct } from '@travetto/di';
 
 /**
  * API Information, infers as much as possible from the package.json

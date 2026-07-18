@@ -1,86 +1,85 @@
 import {
   type Binary,
-  type Db,
-  GridFSBucket,
-  MongoClient,
-  type GridFSFile,
   type Collection,
-  type ObjectId,
-  type RootFilterOperators,
+  type Db,
   type Filter,
-  type WithId as MongoWithId,
   type FindCursor,
-  MongoServerError
+  GridFSBucket,
+  type GridFSFile,
+  MongoClient,
+  MongoServerError,
+  type WithId as MongoWithId,
+  type ObjectId,
+  type RootFilterOperators
 } from 'mongodb';
 
+import { Injectable, PostConstruct } from '@travetto/di';
 import {
-  ModelRegistryIndex,
-  type ModelType,
-  type OptionalId,
-  type ModelCrudSupport,
-  type ModelStorageSupport,
-  type ModelExpirySupport,
-  type ModelBulkSupport,
   type BulkOperation,
   type BulkResponse,
-  NotFoundError,
   ExistsError,
   type ModelBlobSupport,
-  ModelCrudUtil,
-  ModelStorageUtil,
-  ModelExpiryUtil,
+  type ModelBulkSupport,
   ModelBulkUtil,
-  type ModelListOptions
+  type ModelCrudSupport,
+  ModelCrudUtil,
+  type ModelExpirySupport,
+  ModelExpiryUtil,
+  type ModelListOptions,
+  ModelRegistryIndex,
+  type ModelStorageSupport,
+  ModelStorageUtil,
+  type ModelType,
+  NotFoundError,
+  type OptionalId
 } from '@travetto/model';
+import {
+  type FullKeyedIndexBody,
+  type FullKeyedIndexWithPartialBody,
+  type KeyedIndexBody,
+  type KeyedIndexSelection,
+  ModelIndexedComputedIndex,
+  type ModelIndexedSearchOptions,
+  type ModelIndexedSupport,
+  ModelIndexedUtil,
+  type ModelPageOptions,
+  type ModelPageResult,
+  type SingleItemIndex,
+  type SortedIndex,
+  type SortedIndexSelection,
+  type SortedIndexSelectionType
+} from '@travetto/model-indexed';
 import {
   type ModelQuery,
   type ModelQueryCrudSupport,
-  type ModelQueryFacetSupport,
-  type ModelQuerySupport,
-  type PageableModelQuery,
-  type ValidStringFields,
-  type WhereClause,
-  type ModelQuerySuggestSupport,
-  QueryVerifier,
-  ModelQueryUtil,
-  ModelQuerySuggestUtil,
   ModelQueryCrudUtil,
-  type ModelQueryFacet
+  type ModelQueryFacet,
+  type ModelQueryFacetSupport,
+  type ModelQuerySuggestSupport,
+  ModelQuerySuggestUtil,
+  type ModelQuerySupport,
+  ModelQueryUtil,
+  type PageableModelQuery,
+  QueryVerifier,
+  type ValidStringFields,
+  type WhereClause
 } from '@travetto/model-query';
 import {
-  type ModelIndexedSupport,
-  type KeyedIndexSelection,
-  type KeyedIndexBody,
-  type ModelPageOptions,
-  ModelIndexedUtil,
-  type SingleItemIndex,
-  type SortedIndexSelection,
-  type ModelPageResult,
-  type SortedIndex,
-  type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody,
-  ModelIndexedComputedIndex,
-  type ModelIndexedSearchOptions,
-  type SortedIndexSelectionType
-} from '@travetto/model-indexed';
-
-import {
-  ShutdownManager,
-  type Class,
-  TypedObject,
-  castTo,
   asFull,
   type BinaryMetadata,
-  type ByteRange,
+  BinaryMetadataUtil,
   type BinaryType,
   BinaryUtil,
-  BinaryMetadataUtil,
-  JSONUtil
+  type ByteRange,
+  type Class,
+  castTo,
+  JSONUtil,
+  ShutdownManager,
+  TypedObject
 } from '@travetto/runtime';
-import { Injectable, PostConstruct } from '@travetto/di';
 
-import { MongoUtil, type WithId } from './internal/util.ts';
 import type { MongoModelConfig } from './config.ts';
+import { MongoUtil, type WithId } from './internal/util.ts';
 
 type BlobRaw = GridFSFile & { metadata?: BinaryMetadata };
 

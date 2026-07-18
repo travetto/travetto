@@ -1,11 +1,11 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c } from '@travetto/doc';
-import { toConcrete } from '@travetto/runtime';
+import { c, d } from '@travetto/doc';
 import { Model, ModelRegistryIndex } from '@travetto/model';
+import { toConcrete } from '@travetto/runtime';
 
-import type { ModelIndexedSupport } from './src/types/service.ts';
-import { IndexedFieldError } from './src/types/error.ts';
 import { keyedIndex, sortedIndex, uniqueIndex } from './src/indexes.ts';
+import { IndexedFieldError } from './src/types/error.ts';
+import type { ModelIndexedSupport } from './src/types/service.ts';
 
 const ModelIndexedSupportContract = toConcrete<ModelIndexedSupport>();
 

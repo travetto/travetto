@@ -1,5 +1,5 @@
+import { CliCommand, type CliCommandShape, cliTpl } from '@travetto/cli';
 import { Registry } from '@travetto/registry';
-import { type CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
 import { Env, Runtime, WatchUtil } from '@travetto/runtime';
 
 import { EmailCompiler } from '../src/compiler.ts';

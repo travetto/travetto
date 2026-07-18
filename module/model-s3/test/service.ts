@@ -1,15 +1,16 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
-import { BinaryMetadataUtil, BinaryUtil, castTo } from '@travetto/runtime';
-import { S3ModelConfig, S3ModelService } from '@travetto/model-s3';
 import { S3 } from '@aws-sdk/client-s3';
 
+import { S3ModelConfig, S3ModelService } from '@travetto/model-s3';
+import { BinaryMetadataUtil, BinaryUtil, castTo } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
+
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
+import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
-import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
 
 @Suite()
 class S3BasicSuite extends ModelBasicSuite {

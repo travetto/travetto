@@ -1,9 +1,10 @@
 /** @jsxImportSource @travetto/doc/support */
-import path from 'node:path';
-import fs from 'node:fs/promises';
 
-import { d, c, COMMON_DATE } from '@travetto/doc';
-import { ManifestDeltaUtil, PACKAGE_MANAGERS, type ManifestRoot } from '@travetto/manifest';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+import { COMMON_DATE, c, d } from '@travetto/doc';
+import { ManifestDeltaUtil, type ManifestRoot, PACKAGE_MANAGERS } from '@travetto/manifest';
 import { JSONUtil, RuntimeIndex } from '@travetto/runtime';
 
 const PACKAGE_MANAGER_LIST = PACKAGE_MANAGERS.map((manager, i) => (i === 0 ? [d.library(manager.title)] : ['/', d.library(manager.title)]));

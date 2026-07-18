@@ -1,8 +1,8 @@
-import { type CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
+import { CliCommand, type CliCommandShape, cliTpl } from '@travetto/cli';
 import { RuntimeError } from '@travetto/runtime';
 
-import { PackageManager } from './bin/package-manager.ts';
 import { RepoExecUtil } from './bin/exec.ts';
+import { PackageManager } from './bin/package-manager.ts';
 
 /**
  * Publish unpublished workspace modules to the package registry.

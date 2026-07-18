@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
+import { MongoModelConfig } from '@travetto/model-mongo';
 import { Registry } from '@travetto/registry';
 import { Suite, Test } from '@travetto/test';
-import { MongoModelConfig } from '@travetto/model-mongo';
 
 @Suite()
 class MongoConfigSuite {

@@ -7,9 +7,9 @@ import type {
   KeySchemaElement
 } from '@aws-sdk/client-dynamodb';
 
-import { type Class, castTo } from '@travetto/runtime';
-import { ModelCrudUtil, ModelExpiryUtil, ModelRegistryIndex, NotFoundError, type ModelType } from '@travetto/model';
+import { ModelCrudUtil, ModelExpiryUtil, ModelRegistryIndex, type ModelType, NotFoundError } from '@travetto/model';
 import { isModelIndexedIndex, warnIfIndexedUniqueIndex, warnIfNonIndexedIndex } from '@travetto/model-indexed';
+import { type Class, castTo } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 /**

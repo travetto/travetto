@@ -1,9 +1,9 @@
-import { Login } from '@travetto/auth-web';
-import { InjectableFactory } from '@travetto/di';
-import { Controller, Post } from '@travetto/web';
 import type { Authenticator } from '@travetto/auth';
-import { castTo } from '@travetto/runtime';
+import { Login } from '@travetto/auth-web';
 import { PassportAuthenticator } from '@travetto/auth-web-passport';
+import { InjectableFactory } from '@travetto/di';
+import { castTo } from '@travetto/runtime';
+import { Controller, Post } from '@travetto/web';
 
 const LOGIN = Symbol();
 

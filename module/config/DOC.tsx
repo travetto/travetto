@@ -1,9 +1,10 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c } from '@travetto/doc';
-import { Field, Schema } from '@travetto/schema';
+
+import { Config as ConfigDec, type ConfigSource, ConfigurationService, EnvVar, OverrideConfigSource } from '@travetto/config';
 import { Injectable } from '@travetto/di';
-import { Config as ConfigDec, EnvVar, ConfigurationService, OverrideConfigSource, type ConfigSource } from '@travetto/config';
+import { c, d } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
+import { Field, Schema } from '@travetto/schema';
 
 export const text = (
   <>

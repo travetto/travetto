@@ -1,13 +1,14 @@
 import path from 'node:path';
+
 import { stringify } from 'yaml';
 
-import { Terminal, StyleUtil } from '@travetto/terminal';
-import { TimeUtil, RuntimeIndex } from '@travetto/runtime';
+import { RuntimeIndex, TimeUtil } from '@travetto/runtime';
+import { StyleUtil, Terminal } from '@travetto/terminal';
 
 import type { TestEvent } from '../../model/event.ts';
-import type { SuitesSummary, TestConsumerShape } from '../types.ts';
 import { TestConsumer } from '../decorator.ts';
-import { type TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer.ts';
+import { CONSOLE_ENHANCER, type TestResultsEnhancer } from '../enhancer.ts';
+import type { SuitesSummary, TestConsumerShape } from '../types.ts';
 import { TestConsumerUtil } from './util.ts';
 
 const SPACE = ' ';

@@ -1,19 +1,20 @@
 import fs from 'node:fs/promises';
+
 import markdown from 'markdown-it';
 
-import { CodecUtil, Runtime, RuntimeError, RuntimeIndex } from '@travetto/runtime';
-import { PackageUtil } from '@travetto/manifest';
 import { HELP_FLAG } from '@travetto/cli';
+import { PackageUtil } from '@travetto/manifest';
+import { CodecUtil, Runtime, RuntimeError, RuntimeIndex } from '@travetto/runtime';
 
-import { highlight } from './code-highlight.ts';
-import type { RenderProvider, RenderState } from '../types.ts';
-import { c, getComponentName } from '../jsx.ts';
-import { MODULES } from '../mapping/module.ts';
-import { LIBRARIES } from '../mapping/library.ts';
-import type { RenderContext } from './context.ts';
-import { DocResolveUtil } from '../util/resolve.ts';
 import type { JSXElement } from '../../support/jsx-runtime.ts';
+import { c, getComponentName } from '../jsx.ts';
+import { LIBRARIES } from '../mapping/library.ts';
+import { MODULES } from '../mapping/module.ts';
+import type { RenderProvider, RenderState } from '../types.ts';
 import { PackageDocUtil } from '../util/package.ts';
+import { DocResolveUtil } from '../util/resolve.ts';
+import { highlight } from './code-highlight.ts';
+import type { RenderContext } from './context.ts';
 
 const ESCAPE_ENTITIES: Record<string, string> = { '<': '&lt;', '>': '&gt;', '&': '&amp;', '{': "{{'{'}}", '}': "{{'}'}}" };
 const ENTITY_REGEX = new RegExp(`[${Object.keys(ESCAPE_ENTITIES).join('')}]`, 'gm');

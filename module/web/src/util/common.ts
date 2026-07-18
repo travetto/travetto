@@ -1,8 +1,8 @@
-import { RuntimeError, type ErrorCategory, Util } from '@travetto/runtime';
+import { type ErrorCategory, RuntimeError, Util } from '@travetto/runtime';
 
-import { WebResponse } from '../types/response.ts';
-import type { WebRequest } from '../types/request.ts';
 import type { WebError } from '../types/error.ts';
+import type { WebRequest } from '../types/request.ts';
+import { WebResponse } from '../types/response.ts';
 
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>; before?: List<T>; key: T };
@@ -115,7 +115,7 @@ export class WebCommonUtil {
     const body =
       error instanceof Error
         ? error
-        : !!error && typeof error === 'object' && 'message' in error && typeof error.message === 'string'
+        : error && typeof error === 'object' && 'message' in error && typeof error.message === 'string'
           ? new RuntimeError(error.message, { details: error })
           : new RuntimeError(`${error}`);
 

@@ -1,5 +1,5 @@
-import { RuntimeError, type Class, Runtime, describeFunction } from '@travetto/runtime';
-import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
+import { type Class, describeFunction, Runtime, RuntimeError } from '@travetto/runtime';
 
 import type { SuiteConfig } from '../model/suite.ts';
 import type { TestConfig, TestRun } from '../model/test.ts';

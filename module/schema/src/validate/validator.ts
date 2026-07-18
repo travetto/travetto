@@ -1,14 +1,14 @@
-import { castKey, castTo, type Class, type ClassInstance, TypedObject } from '@travetto/runtime';
+import { type Class, type ClassInstance, castKey, castTo, TypedObject } from '@travetto/runtime';
 
-import type { SchemaInputConfig, SchemaFieldMap } from '../service/types.ts';
-import type { ValidationError, ValidationKindCore, ValidationResult } from './types.ts';
-import { Messages } from './messages.ts';
-import { isValidationError, TypeMismatchError, ValidationResultError } from './error.ts';
 import { DataUtil } from '../data.ts';
-import { CommonRegexToName } from './regex.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
+import type { SchemaFieldMap, SchemaInputConfig } from '../service/types.ts';
 import { SchemaTypeUtil } from '../type-config.ts';
 import { UnknownType } from '../types.ts';
+import { isValidationError, TypeMismatchError, ValidationResultError } from './error.ts';
+import { Messages } from './messages.ts';
+import { CommonRegexToName } from './regex.ts';
+import type { ValidationError, ValidationKindCore, ValidationResult } from './types.ts';
 
 const PrimitiveTypes = new Set<Function>([String, Number, BigInt, Boolean]);
 type NumericComparable = number | bigint | Date;

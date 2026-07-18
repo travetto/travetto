@@ -1,9 +1,9 @@
-import { type ChildProcess, spawn, type SpawnOptions } from 'node:child_process';
+import { type ChildProcess, type SpawnOptions, spawn } from 'node:child_process';
 
-import { castTo } from './types.ts';
-import { RuntimeIndex } from './manifest-index.ts';
-import { BinaryUtil, type BinaryArray } from './binary.ts';
+import { type BinaryArray, BinaryUtil } from './binary.ts';
 import { CodecUtil } from './codec.ts';
+import { RuntimeIndex } from './manifest-index.ts';
+import { castTo } from './types.ts';
 
 const ResultSymbol = Symbol();
 

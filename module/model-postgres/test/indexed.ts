@@ -3,8 +3,8 @@ import { InjectableFactory } from '@travetto/di';
 import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 import { Suite } from '@travetto/test';
 
-import { ModelIndexedSuite } from '@travetto/model-indexed/support/test/indexed.ts';
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
+import { ModelIndexedSuite } from '@travetto/model-indexed/support/test/indexed.ts';
 import { ModelIndexedPolymorphismSuite } from '@travetto/model-indexed/support/test/polymorphism.ts';
 
 import { PostgreSQLDialect } from '../src/dialect.ts';

@@ -1,8 +1,8 @@
-import { Env, toConcrete } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
-import { type WebHttpServer, WebHttpConfig } from '@travetto/web-http';
+import { Env, toConcrete } from '@travetto/runtime';
+import { WebHttpConfig, type WebHttpServer } from '@travetto/web-http';
 
 import './config-override.ts';
 

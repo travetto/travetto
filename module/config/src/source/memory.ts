@@ -1,5 +1,5 @@
 import type { ConfigData } from '../parser/types.ts';
-import type { ConfigSource, ConfigPayload } from './types.ts';
+import type { ConfigPayload, ConfigSource } from './types.ts';
 
 /**
  * Meant to be instantiated and provided as a unique config source

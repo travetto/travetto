@@ -1,9 +1,10 @@
 import assert from 'node:assert';
+
 import type { IndexDescriptionInfo } from 'mongodb';
 
 import { Suite, Test } from '@travetto/test';
 
-import { MongoUtil, type BasicIdx } from '../src/internal/util.ts';
+import { type BasicIdx, MongoUtil } from '../src/internal/util.ts';
 
 @Suite()
 export class MongoUtilTests {

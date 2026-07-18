@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
 import { AuthVerifyInterceptor } from '@travetto/auth-web';
+import { Suite, Test } from '@travetto/test';
 
 const base = {
   applies: true,

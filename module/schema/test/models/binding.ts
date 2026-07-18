@@ -1,4 +1,4 @@
-import { Schema, View, Field, Float, Integer, Alias, Url, Required, Discriminated } from '@travetto/schema';
+import { Alias, Discriminated, Field, Float, Integer, Required, Schema, Url, View } from '@travetto/schema';
 
 import { Address } from './address.ts';
 

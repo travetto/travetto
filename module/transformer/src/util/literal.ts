@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { transformCast, type TemplateLiteral } from '../types/shared.ts';
+import { type TemplateLiteral, transformCast } from '../types/shared.ts';
 
 const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T>(value: T): K[];

@@ -1,5 +1,5 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c, DocRunUtil } from '@travetto/doc';
+import { c, DocRunUtil, d } from '@travetto/doc';
 import { ExecUtil } from '@travetto/runtime';
 
 const TrvcEntry = d.codeLink('trvc', 'bin/trvc.js', /#/);

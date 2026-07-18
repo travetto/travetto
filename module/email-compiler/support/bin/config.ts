@@ -1,8 +1,9 @@
 import fs from 'node:fs/promises';
+
 import { parse, stringify } from 'yaml';
 
-import { Runtime } from '@travetto/runtime';
 import { ManifestFileUtil } from '@travetto/manifest';
+import { Runtime } from '@travetto/runtime';
 
 import type { EditorConfigType } from './types.ts';
 

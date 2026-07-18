@@ -1,12 +1,12 @@
 import path from 'node:path';
 
-import { RuntimeIndex } from '@travetto/runtime';
 import { CliCommand, CliFlag, CliUtil } from '@travetto/cli';
+import { RuntimeIndex } from '@travetto/runtime';
 import { Ignore, Max, Min, Required } from '@travetto/schema';
 
+import type { DockerPackConfig } from '../src/types.ts';
 import { DockerPackOperation } from './bin/docker-operation.ts';
 import { BasePackCommand, type PackOperationShape } from './pack.base.ts';
-import type { DockerPackConfig } from '../src/types.ts';
 
 const NODE_MAJOR = process.version.match(/\d+/)?.[0] ?? '22';
 const asNumber = (input?: string): number | undefined => (!input || Number.isNaN(+input) ? undefined : +input);

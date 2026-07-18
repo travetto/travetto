@@ -1,6 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c } from '@travetto/doc';
-import { DependencyRegistryIndex, Injectable, InjectableFactory, Inject } from '@travetto/di';
+
+import { DependencyRegistryIndex, Inject, Injectable, InjectableFactory } from '@travetto/di';
+import { c, d } from '@travetto/doc';
 
 export const text = (
   <>

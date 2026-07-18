@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c } from '@travetto/doc';
 import { AsyncQueue } from '@travetto/runtime';
-import { WorkPool, IpcChannel } from '@travetto/worker';
+import { IpcChannel, WorkPool } from '@travetto/worker';
 
 export const text = (
   <>

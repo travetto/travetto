@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
 import { Registry } from '@travetto/registry';
-import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Alias, Min, Required, SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 import {
   ContextParam,
   Controller,

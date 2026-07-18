@@ -1,6 +1,6 @@
 import { TypedObject } from '@travetto/runtime';
 
-import type { JSXElement, JSXComponentFunction as CompFn } from '../support/jsx-runtime.ts';
+import type { JSXComponentFunction as CompFn, JSXElement } from '../support/jsx-runtime.ts';
 
 const EMPTY: JSXElement = { type: '', key: '', props: {} };
 

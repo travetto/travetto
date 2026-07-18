@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { Schema, SchemaValidator, ValidationResultError, Validator } from '@travetto/schema';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 @Schema()
 @Validator((user: User) => {

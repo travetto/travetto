@@ -1,14 +1,14 @@
 import assert from 'node:assert';
-import os from 'node:os';
-import fs from 'node:fs/promises';
 import { fork, spawn } from 'node:child_process';
 import { createWriteStream } from 'node:fs';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import timers from 'node:timers/promises';
-import path from 'node:path';
 
-import { Test, Suite, TestFixtures } from '@travetto/test';
 import { ExecUtil, Runtime } from '@travetto/runtime';
+import { Suite, Test, TestFixtures } from '@travetto/test';
 
 @Suite()
 export class ExecUtilTest {

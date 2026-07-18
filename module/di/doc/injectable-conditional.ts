@@ -1,5 +1,5 @@
-import { Runtime } from '@travetto/runtime';
 import { Inject, Injectable } from '@travetto/di';
+import { Runtime } from '@travetto/runtime';
 
 @Injectable({ enabled: Runtime.production })
 class ProductionLogger {

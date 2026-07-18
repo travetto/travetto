@@ -1,8 +1,8 @@
 import { ControllerRegistryIndex, type EndpointDecorator } from '@travetto/web';
 
-import { AuthVerifyInterceptor } from './interceptors/verify.ts';
 import { AuthLoginInterceptor } from './interceptors/login.ts';
 import { AuthLogoutInterceptor } from './interceptors/logout.ts';
+import { AuthVerifyInterceptor } from './interceptors/verify.ts';
 
 /**
  * Authenticate an endpoint with a list of available identity sources

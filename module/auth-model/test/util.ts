@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
 import { AuthModelUtil } from '@travetto/auth-model';
+import { Suite, Test } from '@travetto/test';
 
 @Suite()
 export class UtilTest {

@@ -1,5 +1,5 @@
 import { Schema } from '@travetto/schema';
-import { Controller, Post, Body } from '@travetto/web';
+import { Body, Controller, Post } from '@travetto/web';
 
 @Schema()
 class User {

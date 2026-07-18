@@ -1,10 +1,10 @@
 import type { CompilerEventPayload, CompilerEventType } from '@travetto/compiler';
 
 import { RuntimeError } from './error.ts';
-import { Util } from './util.ts';
 import { RuntimeIndex } from './manifest-index.ts';
 import { ShutdownManager, type ShutdownReason } from './shutdown.ts';
 import { castTo } from './types.ts';
+import { Util } from './util.ts';
 
 type RetryRunState = {
   iteration: number;

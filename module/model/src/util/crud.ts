@@ -1,13 +1,13 @@
-import { castTo, castKey, type Class, Util, RuntimeError, hasFunction, BinaryUtil, type BinaryArray, JSONUtil } from '@travetto/runtime';
+import { type BinaryArray, BinaryUtil, type Class, castKey, castTo, hasFunction, JSONUtil, RuntimeError, Util } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 
-import { ModelRegistryIndex } from '../registry/registry-index.ts';
-import type { ModelIdSource, ModelType, OptionalId } from '../types/model.ts';
-import { NotFoundError } from '../error/not-found.ts';
 import { ExistsError } from '../error/exists.ts';
 import { SubTypeNotSupportedError } from '../error/invalid-sub-type.ts';
+import { NotFoundError } from '../error/not-found.ts';
+import { ModelRegistryIndex } from '../registry/registry-index.ts';
 import type { DataHandler, PrePersistScope } from '../registry/types.ts';
 import type { ModelCrudSupport } from '../types/crud.ts';
+import type { ModelIdSource, ModelType, OptionalId } from '../types/model.ts';
 
 type ModelLoadInput = string | BinaryArray | object;
 

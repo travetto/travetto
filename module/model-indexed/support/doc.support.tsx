@@ -1,5 +1,5 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, type DocJSXElementByFn, type DocJSXElement, DocFileUtil } from '@travetto/doc';
+import { DocFileUtil, type DocJSXElement, type DocJSXElementByFn, d } from '@travetto/doc';
 import { castKey, Runtime, toConcrete } from '@travetto/runtime';
 
 import type { ModelIndexedSupport } from '../src/types/service.ts';

@@ -1,4 +1,4 @@
-import type { Primitive, ValidFields, TimeSpan, KeyPaths } from '@travetto/runtime';
+import type { KeyPaths, Primitive, TimeSpan, ValidFields } from '@travetto/runtime';
 import type { Point } from '@travetto/schema';
 
 export type QueryPrimitive = Primitive | Date | Point;

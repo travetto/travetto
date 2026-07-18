@@ -1,8 +1,8 @@
-import { type Any, castTo, type ClassInstance, getClass, type Class } from '@travetto/runtime';
+import { type Any, type Class, type ClassInstance, castTo, getClass } from '@travetto/runtime';
 import { CONSTRUCTOR_PROPERTY } from '@travetto/schema';
 
-import type { InjectableCandidate, ResolutionType } from './types.ts';
 import { DependencyRegistryIndex } from './registry/registry-index.ts';
+import type { InjectableCandidate, ResolutionType } from './types.ts';
 
 const fromInput = <T extends { qualifier?: symbol }>(input?: T | symbol): T =>
   typeof input === 'symbol' ? castTo({ qualifier: input }) : (input ?? castTo<T>({}));

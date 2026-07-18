@@ -1,11 +1,11 @@
 import assert from 'node:assert';
 
+import { Max, Min, Schema } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
-import { Schema, Min, Max } from '@travetto/schema';
-import { Controller, Post, Get, QueryParam } from '@travetto/web';
+import { Controller, Get, Post, QueryParam } from '@travetto/web';
 
-import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 import { LocalRequestDispatcher } from '@travetto/web/support/test/dispatcher.ts';
+import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
 @Schema()
 class BigIntModel {

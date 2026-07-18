@@ -1,8 +1,8 @@
 import type { ModelType } from '@travetto/model';
-import { castTo, type Any } from '@travetto/runtime';
+import { type Any, castTo } from '@travetto/runtime';
 
-import type { AllIndexes, KeyedIndexBody, FullKeyedIndexBody, TemplateValue, TemplatePart } from './types/indexes.ts';
 import { IndexedFieldError } from './types/error.ts';
+import type { AllIndexes, FullKeyedIndexBody, KeyedIndexBody, TemplatePart, TemplateValue } from './types/indexes.ts';
 
 const DEFAULT_SEP = '\u8203';
 

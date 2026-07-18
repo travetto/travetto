@@ -1,6 +1,6 @@
-import { Schema } from '@travetto/schema';
 import type { PageableModelQuery } from '@travetto/model-query';
 import { JSONUtil } from '@travetto/runtime';
+import { Schema } from '@travetto/schema';
 
 import { QueryLanguageParser } from './parser.ts';
 

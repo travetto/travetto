@@ -1,14 +1,13 @@
-import fs from 'node:fs/promises';
 import { watch } from 'node:fs';
+import fs from 'node:fs/promises';
 
 import { ManifestFileUtil, ManifestModuleUtil, ManifestUtil, PACKAGE_MANAGERS, PackageUtil, path } from '@travetto/manifest';
 
-import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from './types.ts';
-import type { CompilerState } from './state.ts';
-
-import { AsyncQueue } from './queue.ts';
-import { IpcLogger } from './log.ts';
 import { EventUtil } from './event.ts';
+import { IpcLogger } from './log.ts';
+import { AsyncQueue } from './queue.ts';
+import type { CompilerState } from './state.ts';
+import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from './types.ts';
 
 const log = new IpcLogger({ level: 'debug' });
 

@@ -1,10 +1,10 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
-import { Inject } from '@travetto/di';
-import { WebResponse } from '@travetto/web';
 import { type AuthContextInterceptor, CommonPrincipalCodecSymbol, type JWTPrincipalCodec, type WebAuthConfig } from '@travetto/auth-web';
+import { Inject } from '@travetto/di';
 import { JSONUtil } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
+import { WebResponse } from '@travetto/web';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 

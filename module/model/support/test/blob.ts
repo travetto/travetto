@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
-import { Suite, Test, TestFixtures } from '@travetto/test';
 import { BinaryMetadataUtil, BinaryUtil, Util } from '@travetto/runtime';
+import { Suite, Test, TestFixtures } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 

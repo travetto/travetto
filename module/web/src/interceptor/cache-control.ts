@@ -1,11 +1,10 @@
-import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { Inject, Injectable } from '@travetto/di';
 
+import type { WebInterceptorCategory } from '../types/core.ts';
 import type { WebChainedContext } from '../types/filter.ts';
 import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
-import type { WebInterceptorCategory } from '../types/core.ts';
 import type { WebResponse } from '../types/response.ts';
-
 import { EtagInterceptor } from './etag.ts';
 
 @Config('web.cache')

@@ -1,9 +1,9 @@
-import { IpcChannel } from '@travetto/worker';
 import { JSONUtil } from '@travetto/runtime';
+import { IpcChannel } from '@travetto/worker';
 
 import type { TestEvent, TestRemoveEvent } from '../../model/event.ts';
-import type { TestConsumerShape } from '../types.ts';
 import { TestConsumer } from '../decorator.ts';
+import type { TestConsumerShape } from '../types.ts';
 
 /**
  * Triggers each event as an IPC command to a parent process

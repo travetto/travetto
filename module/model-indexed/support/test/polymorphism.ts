@@ -1,14 +1,14 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
-import { Discriminated } from '@travetto/schema';
 import { Model, NotFoundError, SubTypeNotSupportedError } from '@travetto/model';
+import { Discriminated } from '@travetto/schema';
+import { Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
+import { keyedIndex } from '../../src/indexes.ts';
 import type { ModelIndexedSupport } from '../../src/types/service.ts';
 import { ModelIndexedUtil } from '../../src/util.ts';
-import { keyedIndex } from '../../src/indexes.ts';
 
 @Model()
 @Discriminated('type')

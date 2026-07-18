@@ -1,17 +1,18 @@
 import os from 'node:os';
-import { type Pool, createPool } from 'generic-pool';
 
-import { Env, Util, AsyncQueue } from '@travetto/runtime';
+import { createPool, type Pool } from 'generic-pool';
+
+import { AsyncQueue, Env, Util } from '@travetto/runtime';
 
 import {
-  isWorkerFactory,
-  WorkPoolResultError,
   type IterableSource,
+  isWorkerFactory,
   type Worker,
   type WorkerInput,
   type WorkPoolCompleteEvent,
   type WorkPoolConfig,
-  type WorkPoolProgress
+  type WorkPoolProgress,
+  WorkPoolResultError
 } from './types.ts';
 
 /**

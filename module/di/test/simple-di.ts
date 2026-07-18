@@ -1,31 +1,30 @@
 import assert from 'node:assert';
 
-import { Suite, Test, BeforeAll } from '@travetto/test';
+import { DependencyRegistryIndex, InjectionError } from '@travetto/di';
 import { Registry } from '@travetto/registry';
 import { toConcrete } from '@travetto/runtime';
-import { DependencyRegistryIndex, InjectionError } from '@travetto/di';
-
-import {
-  ServiceInherit,
-  ServiceInheritSymbol2,
-  CustomServiceInheritSymbol,
-  CustomDatabaseSymbol,
-  Database,
-  CustomEmptySymbol,
-  BasePattern,
-  SpecificPattern,
-  InterfaceType,
-  type BaseType,
-  CustomInterfaceSymbol,
-  UsableMainClass,
-  UsableSubClass,
-  UsableSubSubClass,
-  LooseResolutionClass,
-  LooseSymbol,
-  SetterInject
-} from './dependencies.ts';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { DbConfig } from './config.ts';
+import {
+  BasePattern,
+  type BaseType,
+  CustomDatabaseSymbol,
+  CustomEmptySymbol,
+  CustomInterfaceSymbol,
+  CustomServiceInheritSymbol,
+  Database,
+  InterfaceType,
+  LooseResolutionClass,
+  LooseSymbol,
+  ServiceInherit,
+  ServiceInheritSymbol2,
+  SetterInject,
+  SpecificPattern,
+  UsableMainClass,
+  UsableSubClass,
+  UsableSubSubClass
+} from './dependencies.ts';
 
 const FOUR = 4;
 

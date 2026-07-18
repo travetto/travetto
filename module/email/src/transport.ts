@@ -1,4 +1,5 @@
 import { castTo } from '@travetto/runtime';
+
 import type { EmailOptions, SentEmail } from './types.ts';
 
 /**

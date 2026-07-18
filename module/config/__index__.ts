@@ -1,12 +1,13 @@
 import type {} from './src/trv.d.ts';
+
 export * from './src/decorator.ts';
+export * from './src/parser/json.ts';
+export * from './src/parser/properties.ts';
+export * from './src/parser/types.ts';
+export * from './src/parser/yaml.ts';
 export * from './src/service.ts';
 export * from './src/source/env.ts';
 export * from './src/source/file.ts';
-export * from './src/parser/json.ts';
-export * from './src/parser/types.ts';
-export * from './src/parser/properties.ts';
-export * from './src/source/override.ts';
 export * from './src/source/memory.ts';
+export * from './src/source/override.ts';
 export * from './src/source/types.ts';
-export * from './src/parser/yaml.ts';

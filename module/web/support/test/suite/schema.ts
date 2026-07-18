@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
 import { Schema, SchemaRegistryIndex, type ValidationResultError, Validator } from '@travetto/schema';
-import { Controller, Post, Get, ControllerRegistryIndex, WebResponse, PathParam, QueryParam, type HttpMethod } from '@travetto/web';
+import { Suite, Test } from '@travetto/test';
+import { Controller, ControllerRegistryIndex, Get, type HttpMethod, PathParam, Post, QueryParam, WebResponse } from '@travetto/web';
 
 import { BaseWebSuite } from './base.ts';
 

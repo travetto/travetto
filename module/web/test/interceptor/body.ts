@@ -1,10 +1,10 @@
 import assert from 'node:assert';
 
-import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
-import { Registry } from '@travetto/registry';
-import { BodyInterceptor, WebBodyUtil, WebError, WebRequest, WebResponse } from '@travetto/web';
 import { DependencyRegistryIndex } from '@travetto/di';
+import { Registry } from '@travetto/registry';
 import { BinaryUtil, CodecUtil } from '@travetto/runtime';
+import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
+import { BodyInterceptor, WebBodyUtil, WebError, WebRequest, WebResponse } from '@travetto/web';
 
 @Suite()
 class BodyInterceptorSuite {

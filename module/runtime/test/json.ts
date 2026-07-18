@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
 import { CodecUtil, JSONUtil } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
 
 @Suite()
 class JSONUtilSuite {

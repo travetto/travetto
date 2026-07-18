@@ -1,9 +1,9 @@
 import type mongo from 'mongodb';
 
-import { type TimeSpan, Runtime, RuntimeResources, BinaryUtil, CodecUtil, type BinaryType, type BinaryArray } from '@travetto/runtime';
 import { Config } from '@travetto/config';
-import { Field } from '@travetto/schema';
 import { PostConstruct } from '@travetto/di';
+import { type BinaryArray, type BinaryType, BinaryUtil, CodecUtil, Runtime, RuntimeResources, type TimeSpan } from '@travetto/runtime';
+import { Field } from '@travetto/schema';
 
 const readCert = async (input: BinaryType | string): Promise<BinaryArray> => {
   if (BinaryUtil.isBinaryType(input)) {

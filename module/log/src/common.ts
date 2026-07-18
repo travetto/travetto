@@ -1,13 +1,13 @@
-import { type Class, Env } from '@travetto/runtime';
 import { Config, EnvVar } from '@travetto/config';
 import { DependencyRegistryIndex, Inject, Injectable, PostConstruct } from '@travetto/di';
+import { type Class, Env } from '@travetto/runtime';
 import { Required } from '@travetto/schema';
 
 import { ConsoleLogAppender } from './appender/console.ts';
 import { FileLogAppender } from './appender/file.ts';
 import { JsonLogFormatter } from './formatter/json.ts';
 import { LineLogFormatter } from './formatter/line.ts';
-import { type LogAppender, type LogFormatter, type LogEvent, LogCommonSymbol, type Logger } from './types.ts';
+import { type LogAppender, LogCommonSymbol, type LogEvent, type LogFormatter, type Logger } from './types.ts';
 
 @Config('log')
 export class CommonLoggerConfig {

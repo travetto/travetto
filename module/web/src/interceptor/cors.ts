@@ -1,12 +1,12 @@
 import { Config } from '@travetto/config';
-import { Injectable, Inject } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
 import { Ignore } from '@travetto/schema';
 
-import type { WebChainedContext } from '../types/filter.ts';
 import { HTTP_METHODS, type HttpMethod, type WebInterceptorCategory } from '../types/core.ts';
-import type { WebResponse } from '../types/response.ts';
-import type { WebRequest } from '../types/request.ts';
+import type { WebChainedContext } from '../types/filter.ts';
 import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
+import type { WebRequest } from '../types/request.ts';
+import type { WebResponse } from '../types/response.ts';
 import { WebCommonUtil } from '../util/common.ts';
 
 /**

@@ -1,4 +1,4 @@
-import { RuntimeError, Env, FileLoader, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { Env, FileLoader, Runtime, RuntimeError, RuntimeIndex } from '@travetto/runtime';
 
 /** Build a resource loader that looks into a module and it's dependencies */
 export class EmailResourceLoader extends FileLoader {

@@ -1,4 +1,4 @@
-import { RuntimeError, type Class } from '@travetto/runtime';
+import { type Class, RuntimeError } from '@travetto/runtime';
 
 function getName(symbol: symbol): string {
   return symbol.toString().split(/[()]/g)[1];

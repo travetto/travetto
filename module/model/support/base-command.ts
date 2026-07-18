@@ -1,10 +1,9 @@
-import { Env } from '@travetto/runtime';
-import { type CliCommandShape, cliTpl, CliModuleFlag, CliProfilesFlag } from '@travetto/cli';
+import { type CliCommandShape, CliModuleFlag, CliProfilesFlag, cliTpl } from '@travetto/cli';
 import { Registry } from '@travetto/registry';
+import { Env } from '@travetto/runtime';
 import { Schema, type ValidationError } from '@travetto/schema';
 
 import type { ModelStorageSupport } from '../src/types/storage.ts';
-
 import { ModelCandidateUtil } from './bin/candidate.ts';
 
 /**

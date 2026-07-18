@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
 import { DependencyRegistryIndex, InjectableFactory } from '@travetto/di';
 import { Registry } from '@travetto/registry';
+import { Suite, Test } from '@travetto/test';
 
 import { CustomEmptySymbol, DbConfig, Empty } from './di-config.ts';
 

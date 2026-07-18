@@ -1,11 +1,11 @@
-import path from 'node:path';
 import fs from 'node:fs/promises';
+import path from 'node:path';
 
 import { Inject, Injectable, PostConstruct } from '@travetto/di';
-import { ControllerRegistryIndex } from '@travetto/web';
-import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { ManifestModuleUtil } from '@travetto/manifest';
+import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
+import { ControllerRegistryIndex } from '@travetto/web';
 
 import { clientFactory } from '../support/client/rpc.ts';
 import type { WebRpcClient, WebRpcConfig } from './config.ts';

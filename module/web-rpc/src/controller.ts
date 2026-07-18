@@ -1,24 +1,24 @@
 import { Inject } from '@travetto/di';
-import { type Any, RuntimeError, JSONUtil } from '@travetto/runtime';
+import { type Any, JSONUtil, RuntimeError } from '@travetto/runtime';
 import { IsPrivate } from '@travetto/schema';
 import {
-  HeaderParam,
-  Controller,
-  ExcludeInterceptors,
-  ControllerRegistryIndex,
-  type WebAsyncContext,
   Body,
-  EndpointUtil,
   BodyInterceptor,
-  Post,
-  WebCommonUtil,
-  RespondInterceptor,
+  Controller,
+  ControllerRegistryIndex,
   DecompressInterceptor,
-  Get,
-  QueryParam,
   Delete,
+  EndpointUtil,
+  ExcludeInterceptors,
+  Get,
+  HeaderParam,
+  Patch,
+  Post,
   Put,
-  Patch
+  QueryParam,
+  RespondInterceptor,
+  type WebAsyncContext,
+  WebCommonUtil
 } from '@travetto/web';
 
 @Controller('/rpc')

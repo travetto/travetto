@@ -2,8 +2,8 @@
 
 import assert from 'node:assert';
 
+import { Center, Item, Menu } from '@travetto/email-inky';
 import { Suite, Test } from '@travetto/test';
-import { Center, Menu, Item } from '@travetto/email-inky';
 
 import { renderJSX } from './util.ts';
 

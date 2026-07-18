@@ -1,4 +1,5 @@
 import ts from 'typescript';
+
 import { CoreUtil } from './core.ts';
 
 /**

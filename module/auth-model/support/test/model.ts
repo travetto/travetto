@@ -1,9 +1,10 @@
 import assert from 'node:assert';
 
-import { RuntimeError, castTo, type Class } from '@travetto/runtime';
-import { Suite, Test } from '@travetto/test';
 import { Inject, InjectableFactory } from '@travetto/di';
-import { type ModelCrudSupport, Model, Transient } from '@travetto/model';
+import { Model, type ModelCrudSupport, Transient } from '@travetto/model';
+import { type Class, castTo, RuntimeError } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
+
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 import { ModelSuite } from '@travetto/model/support/test/suite.ts';
 

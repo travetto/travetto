@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 
-import { BinaryMetadataUtil, castTo } from '@travetto/runtime';
-import { Controller, Post } from '@travetto/web';
-import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { Registry } from '@travetto/registry';
+import { BinaryMetadataUtil, castTo } from '@travetto/runtime';
+import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
+import { Controller, Post } from '@travetto/web';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 

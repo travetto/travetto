@@ -1,6 +1,5 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c } from '@travetto/doc';
-import { toConcrete } from '@travetto/runtime';
+import { c, d } from '@travetto/doc';
 import {
   type ModelBasicSupport,
   type ModelBlobSupport,
@@ -10,11 +9,12 @@ import {
   ModelRegistryIndex,
   type ModelType
 } from '@travetto/model';
+import { toConcrete } from '@travetto/runtime';
 
 import { Model } from './src/registry/decorator.ts';
-import { Links } from './support/doc.support.ts';
 import { ModelExportCommand } from './support/cli.model_export.ts';
 import { ModelInstallCommand } from './support/cli.model_install.ts';
+import { Links } from './support/doc.support.ts';
 
 const ModelTypeContract = toConcrete<ModelType>();
 

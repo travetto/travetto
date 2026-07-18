@@ -1,13 +1,13 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { type ManifestIndex, type ManifestContext, ManifestModuleUtil } from '@travetto/manifest';
+import { type ManifestContext, type ManifestIndex, ManifestModuleUtil } from '@travetto/manifest';
 
 import { Env } from './env.ts';
-import { RuntimeIndex } from './manifest-index.ts';
 import { describeFunction } from './function.ts';
-import type { Role } from './trv.ts';
 import { JSONUtil } from './json.ts';
+import { RuntimeIndex } from './manifest-index.ts';
+import type { Role } from './trv.ts';
 
 /** Constrained version of {@type ManifestContext} */
 class $Runtime {

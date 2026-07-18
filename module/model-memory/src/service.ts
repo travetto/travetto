@@ -1,51 +1,51 @@
-import {
-  type Class,
-  type TimeSpan,
-  castTo,
-  type BinaryMetadata,
-  type ByteRange,
-  type BinaryType,
-  BinaryUtil,
-  type BinaryArray,
-  JSONUtil,
-  BinaryMetadataUtil
-} from '@travetto/runtime';
-import { Injectable, PostConstruct } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { Injectable, PostConstruct } from '@travetto/di';
 import {
-  type ModelType,
-  type ModelCrudSupport,
-  type ModelExpirySupport,
-  type ModelStorageSupport,
-  ModelRegistryIndex,
-  NotFoundError,
   ExistsError,
-  type OptionalId,
-  type ModelBlobSupport,
-  ModelCrudUtil,
-  ModelExpiryUtil,
-  ModelStorageUtil,
   IndexNotSupported,
-  type ModelListOptions
+  type ModelBlobSupport,
+  type ModelCrudSupport,
+  ModelCrudUtil,
+  type ModelExpirySupport,
+  ModelExpiryUtil,
+  type ModelListOptions,
+  ModelRegistryIndex,
+  type ModelStorageSupport,
+  ModelStorageUtil,
+  type ModelType,
+  NotFoundError,
+  type OptionalId
 } from '@travetto/model';
 import {
-  type ModelIndexedSupport,
-  type KeyedIndexSelection,
-  type KeyedIndexBody,
-  type ModelPageOptions,
-  ModelIndexedUtil,
-  type SingleItemIndex,
-  type SortedIndexSelection,
-  type ModelPageResult,
-  type SortedIndex,
   type AllIndexes,
-  isModelIndexedIndex,
   type FullKeyedIndexBody,
   type FullKeyedIndexWithPartialBody,
+  isModelIndexedIndex,
+  type KeyedIndexBody,
+  type KeyedIndexSelection,
   ModelIndexedComputedIndex,
   type ModelIndexedSearchOptions,
+  type ModelIndexedSupport,
+  ModelIndexedUtil,
+  type ModelPageOptions,
+  type ModelPageResult,
+  type SingleItemIndex,
+  type SortedIndex,
+  type SortedIndexSelection,
   type SortedIndexSelectionType
 } from '@travetto/model-indexed';
+import {
+  type BinaryArray,
+  type BinaryMetadata,
+  BinaryMetadataUtil,
+  type BinaryType,
+  BinaryUtil,
+  type ByteRange,
+  type Class,
+  castTo,
+  JSONUtil,
+  type TimeSpan
+} from '@travetto/runtime';
 
 const ModelBlobNamespace = '__blobs';
 const ModelBlobMetaNamespace = `${ModelBlobNamespace}_meta`;

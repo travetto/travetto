@@ -1,11 +1,10 @@
 import assert from 'node:assert';
 
-import { BeforeAll, Suite, Test } from '@travetto/test';
+import { CliCommand, CliModuleFlag, CliParseUtil, HELP_FLAG } from '@travetto/cli';
+import { Registry } from '@travetto/registry';
 import { Env } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
-import { Registry } from '@travetto/registry';
-
-import { CliCommand, CliModuleFlag, CliParseUtil, HELP_FLAG } from '@travetto/cli';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 /**
  * My command

@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
+import { Model, type ModelCrudSupport, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
+import { Precision, Required, Schema, Text } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
-import { Schema, Text, Precision, Required } from '@travetto/schema';
-import { type ModelCrudSupport, Model, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
 
 import { BaseModelSuite } from './base.ts';
 

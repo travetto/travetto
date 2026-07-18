@@ -1,6 +1,6 @@
-import { Controller, Get, Post, type WebRequest, ContextParam, WebResponse } from '@travetto/web';
-import { Login, Authenticated, Logout } from '@travetto/auth-web';
 import type { Principal } from '@travetto/auth';
+import { Authenticated, Login, Logout } from '@travetto/auth-web';
+import { ContextParam, Controller, Get, Post, type WebRequest, WebResponse } from '@travetto/web';
 
 import { FbAuthSymbol } from './config.ts';
 

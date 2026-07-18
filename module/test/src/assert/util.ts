@@ -1,9 +1,9 @@
 import util from 'node:util';
 
-import { JSONUtil, hasFunction, RuntimeIndex, Util } from '@travetto/runtime';
+import { hasFunction, JSONUtil, RuntimeIndex, Util } from '@travetto/runtime';
 
-import type { Assertion, TestConfig } from '../model/test.ts';
 import type { SuiteConfig } from '../model/suite.ts';
+import type { Assertion, TestConfig } from '../model/test.ts';
 
 const isCleanable = hasFunction<{ toClean(): unknown }>('toClean');
 

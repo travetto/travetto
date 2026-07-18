@@ -1,8 +1,8 @@
-import { castTo, type Class, classConstruct, asFull, TypedObject, castKey } from '@travetto/runtime';
+import { asFull, type Class, castKey, castTo, classConstruct, TypedObject } from '@travetto/runtime';
 
 import { DataUtil } from './data.ts';
-import type { SchemaInputConfig, SchemaParameterConfig, SchemaFieldMap } from './service/types.ts';
 import { SchemaRegistryIndex } from './service/registry-index.ts';
+import type { SchemaFieldMap, SchemaInputConfig, SchemaParameterConfig } from './service/types.ts';
 import { SchemaTypeUtil } from './type-config.ts';
 
 type BindConfig = {

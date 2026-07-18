@@ -1,15 +1,14 @@
-import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { Inject, Injectable } from '@travetto/di';
 import { Ignore } from '@travetto/schema';
 
-import { WebCommonUtil } from '../util/common.ts';
-
+import type { WebInterceptorCategory } from '../types/core.ts';
+import { WebError } from '../types/error.ts';
 import type { WebChainedContext } from '../types/filter.ts';
 import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
-import type { WebInterceptorCategory } from '../types/core.ts';
-import type { WebResponse } from '../types/response.ts';
 import type { WebRequest } from '../types/request.ts';
-import { WebError } from '../types/error.ts';
+import type { WebResponse } from '../types/response.ts';
+import { WebCommonUtil } from '../util/common.ts';
 
 @Config('web.accept')
 export class AcceptConfig {

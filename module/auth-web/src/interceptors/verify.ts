@@ -1,9 +1,9 @@
-import { RuntimeError, Util } from '@travetto/runtime';
-import type { WebInterceptor, WebInterceptorCategory, WebChainedContext, WebResponse, WebInterceptorContext } from '@travetto/web';
-import { Injectable, Inject } from '@travetto/di';
+import { type AuthContext, AuthenticationError } from '@travetto/auth';
 import { Config } from '@travetto/config';
+import { Inject, Injectable } from '@travetto/di';
+import { RuntimeError, Util } from '@travetto/runtime';
 import { Ignore } from '@travetto/schema';
-import { AuthenticationError, type AuthContext } from '@travetto/auth';
+import type { WebChainedContext, WebInterceptor, WebInterceptorCategory, WebInterceptorContext, WebResponse } from '@travetto/web';
 
 import { AuthContextInterceptor } from './context.ts';
 

@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
 import { QueryLanguageParser, QueryLanguageTokenizer } from '@travetto/model-query-language';
+import { Suite, Test } from '@travetto/test';
 
 type UserType<R = string> = { user: { address: { state: String; city: string }; role: R } };
 

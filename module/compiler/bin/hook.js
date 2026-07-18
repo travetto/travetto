@@ -1,6 +1,7 @@
 // @ts-check
-import module from 'node:module';
+
 import { readFileSync } from 'node:fs';
+import module from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const ogEmitWarning = process.emitWarning.bind(process);

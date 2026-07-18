@@ -1,6 +1,6 @@
-import os from 'node:os';
-import net from 'node:net';
 import { spawn } from 'node:child_process';
+import net from 'node:net';
+import os from 'node:os';
 
 import { ExecUtil } from '@travetto/runtime';
 

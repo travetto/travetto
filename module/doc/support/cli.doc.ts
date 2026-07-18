@@ -1,10 +1,10 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { ExecUtil, Env, Runtime, WatchUtil } from '@travetto/runtime';
-import { type CliCommandShape, CliCommand } from '@travetto/cli';
-import { MinLength, Validator } from '@travetto/schema';
+import { CliCommand, type CliCommandShape } from '@travetto/cli';
 import { PackageUtil } from '@travetto/manifest';
+import { Env, ExecUtil, Runtime, WatchUtil } from '@travetto/runtime';
+import { MinLength, Validator } from '@travetto/schema';
 
 /**
  * Generate documentation outputs from a module `DOC.tsx` entry file.

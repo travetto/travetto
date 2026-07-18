@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { type TransformerState, LiteralUtil, TransformerHandler } from '@travetto/transformer';
+import { LiteralUtil, TransformerHandler, type TransformerState } from '@travetto/transformer';
 
 const CONSOLE_IMPORT = '@travetto/runtime/src/console.ts';
 

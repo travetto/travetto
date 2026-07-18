@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
+import { Registry } from '@travetto/registry';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { AcceptConfig, AcceptInterceptor, WebRequest, WebResponse } from '@travetto/web';
-import { Registry } from '@travetto/registry';
 
 function unwrapError(err: unknown): unknown {
   if (err instanceof WebResponse && err.body instanceof Error) {

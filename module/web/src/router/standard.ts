@@ -1,15 +1,13 @@
 import router from 'find-my-way';
 
-import { RuntimeError } from '@travetto/runtime';
 import { Inject, Injectable } from '@travetto/di';
+import { RuntimeError } from '@travetto/runtime';
 
+import type { WebConfig } from '../config.ts';
 import type { EndpointConfig } from '../registry/types.ts';
-
-import { WebResponse } from '../types/response.ts';
 import { HTTP_METHODS } from '../types/core.ts';
 import type { WebFilterContext } from '../types/filter.ts';
-import type { WebConfig } from '../config.ts';
-
+import { WebResponse } from '../types/response.ts';
 import { BaseWebRouter } from './base.ts';
 
 const DEFAULT_HTTP_METHOD = 'POST';

@@ -1,11 +1,11 @@
-import { Injectable, Inject } from '@travetto/di';
-import { JSONUtil } from '@travetto/runtime';
-import { type ModelExpirySupport, NotFoundError } from '@travetto/model';
 import type { AuthContext, AuthService } from '@travetto/auth';
+import { Inject, Injectable } from '@travetto/di';
+import { type ModelExpirySupport, NotFoundError } from '@travetto/model';
+import { JSONUtil } from '@travetto/runtime';
 
-import { Session } from './session.ts';
-import { SessionEntry, SessionModelSymbol } from './model.ts';
 import type { SessionContext } from './context.ts';
+import { SessionEntry, SessionModelSymbol } from './model.ts';
+import { Session } from './session.ts';
 
 /**
  * Service for supporting the session and managing the session state

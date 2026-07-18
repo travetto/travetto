@@ -1,6 +1,6 @@
-import type { InstallGuidance, LlmOperation, RecommendationQuery, RecommendationResponse, WorkflowGuidance } from './types.ts';
 import { INSTALL_BUNDLES } from './install-guidance.ts';
 import { recommendSnippets } from './snippet-catalog.ts';
+import type { InstallGuidance, LlmOperation, RecommendationQuery, RecommendationResponse, WorkflowGuidance } from './types.ts';
 import { WORKFLOWS } from './workflow-guidance.ts';
 
 const OPERATIONS: LlmOperation[] = [

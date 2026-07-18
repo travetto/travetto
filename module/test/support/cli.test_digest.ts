@@ -1,10 +1,10 @@
 import { CliCommand } from '@travetto/cli';
-import { JSONUtil, Env, Runtime, describeFunction } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
+import { describeFunction, Env, JSONUtil, Runtime } from '@travetto/runtime';
 import { IsPrivate } from '@travetto/schema';
 
-import { SuiteRegistryIndex } from '../src/registry/registry-index.ts';
 import { RunUtil } from '../src/execute/run.ts';
+import { SuiteRegistryIndex } from '../src/registry/registry-index.ts';
 
 @CliCommand()
 @IsPrivate()

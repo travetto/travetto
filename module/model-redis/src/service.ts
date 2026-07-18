@@ -1,41 +1,40 @@
 import { createClient } from '@redis/client';
 
-import { castTo, JSONUtil, ShutdownManager, type Class } from '@travetto/runtime';
+import { Injectable, PostConstruct } from '@travetto/di';
 import {
-  type ModelCrudSupport,
-  type ModelExpirySupport,
-  ModelRegistryIndex,
-  type ModelType,
-  type ModelStorageSupport,
-  NotFoundError,
   ExistsError,
-  type OptionalId,
+  type ModelCrudSupport,
   ModelCrudUtil,
+  type ModelExpirySupport,
   ModelExpiryUtil,
+  type ModelListOptions,
+  ModelRegistryIndex,
+  type ModelStorageSupport,
   ModelStorageUtil,
-  type ModelListOptions
+  type ModelType,
+  NotFoundError,
+  type OptionalId
 } from '@travetto/model';
 import {
-  type ModelIndexedSupport,
-  type KeyedIndexSelection,
-  type KeyedIndexBody,
-  type ModelPageOptions,
-  ModelIndexedUtil,
-  type SingleItemIndex,
-  type SortedIndexSelection,
-  type ModelPageResult,
-  type SortedIndex,
-  isModelIndexedIndex,
-  type FullKeyedIndexWithPartialBody,
   type FullKeyedIndexBody,
+  type FullKeyedIndexWithPartialBody,
+  isModelIndexedIndex,
+  type KeyedIndexBody,
+  type KeyedIndexSelection,
   ModelIndexedComputedIndex,
-  warnIfIndexedUniqueIndex,
-  warnIfNonIndexedIndex,
   type ModelIndexedSearchOptions,
-  type SortedIndexSelectionType
+  type ModelIndexedSupport,
+  ModelIndexedUtil,
+  type ModelPageOptions,
+  type ModelPageResult,
+  type SingleItemIndex,
+  type SortedIndex,
+  type SortedIndexSelection,
+  type SortedIndexSelectionType,
+  warnIfIndexedUniqueIndex,
+  warnIfNonIndexedIndex
 } from '@travetto/model-indexed';
-
-import { Injectable, PostConstruct } from '@travetto/di';
+import { type Class, castTo, JSONUtil, ShutdownManager } from '@travetto/runtime';
 
 import type { RedisModelConfig } from './config.ts';
 

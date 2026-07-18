@@ -1,17 +1,17 @@
-import { Env, TimeUtil, Runtime, castTo, classConstruct } from '@travetto/runtime';
 import { Registry } from '@travetto/registry';
+import { castTo, classConstruct, Env, Runtime, TimeUtil } from '@travetto/runtime';
 
-import type { TestConfig, TestResult, TestRun } from '../model/test.ts';
-import type { SuiteConfig, SuiteResult } from '../model/suite.ts';
-import type { TestConsumerShape } from '../consumer/types.ts';
-import { AssertCheck } from '../assert/check.ts';
 import { AssertCapture } from '../assert/capture.ts';
+import { AssertCheck } from '../assert/check.ts';
+import { AssertUtil } from '../assert/util.ts';
+import type { TestConsumerShape } from '../consumer/types.ts';
+import type { SuiteConfig, SuiteResult } from '../model/suite.ts';
+import type { TestConfig, TestResult, TestRun } from '../model/test.ts';
+import { TestModelUtil } from '../model/util.ts';
+import { SuiteRegistryIndex } from '../registry/registry-index.ts';
+import { Barrier } from './barrier.ts';
 import { ConsoleCapture } from './console.ts';
 import { TestPhaseManager } from './phase.ts';
-import { AssertUtil } from '../assert/util.ts';
-import { Barrier } from './barrier.ts';
-import { SuiteRegistryIndex } from '../registry/registry-index.ts';
-import { TestModelUtil } from '../model/util.ts';
 
 const TEST_TIMEOUT = TimeUtil.duration(Env.TRV_TEST_TIMEOUT.value || 5000, 'ms');
 

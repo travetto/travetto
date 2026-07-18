@@ -1,5 +1,5 @@
-import type { Class } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
+import type { Class } from '@travetto/runtime';
 
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 

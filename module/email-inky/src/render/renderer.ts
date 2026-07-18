@@ -1,9 +1,9 @@
 import { castTo } from '@travetto/runtime';
 
-import { EMPTY_ELEMENT, getComponentName, type JSXElementByFn, type c } from '../components.ts';
+import { createFragment, isJSXElement, type JSXChild, type JSXElement, JSXFragmentType } from '../../support/jsx-runtime.ts';
+import { type c, EMPTY_ELEMENT, getComponentName, type JSXElementByFn } from '../components.ts';
 import type { RenderProvider, RenderState } from '../types.ts';
 import { RenderContext, type RenderContextInit } from './context.ts';
-import { isJSXElement, type JSXElement, createFragment, JSXFragmentType, type JSXChild } from '../../support/jsx-runtime.ts';
 
 /**
  * Inky Renderer

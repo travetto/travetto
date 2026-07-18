@@ -1,6 +1,6 @@
 import type { AsyncLocalStorage } from 'node:async_hooks';
 
-import { RuntimeError, castTo } from '@travetto/runtime';
+import { castTo, RuntimeError } from '@travetto/runtime';
 
 type Payload<T> = Record<string | symbol, T | undefined>;
 type Storage<T = unknown> = AsyncLocalStorage<Payload<T>>;

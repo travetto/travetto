@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+
 import type { Plugin } from 'rollup';
 
 import { RuntimeIndex } from '@travetto/runtime';

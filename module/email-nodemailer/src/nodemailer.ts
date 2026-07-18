@@ -2,12 +2,12 @@ import type { Readable } from 'node:stream';
 
 import { createTransport, type Transporter, type Transport as TransportType } from 'nodemailer';
 import type json from 'nodemailer/lib/json-transport';
-import type smtp from 'nodemailer/lib/smtp-transport';
-import type ses from 'nodemailer/lib/ses-transport';
 import type sendmail from 'nodemailer/lib/sendmail-transport';
+import type ses from 'nodemailer/lib/ses-transport';
+import type smtp from 'nodemailer/lib/smtp-transport';
 
-import type { MailTransport, EmailOptions, SentEmail } from '@travetto/email';
-import { BinaryUtil, castTo, CodecUtil } from '@travetto/runtime';
+import type { EmailOptions, MailTransport, SentEmail } from '@travetto/email';
+import { BinaryUtil, CodecUtil, castTo } from '@travetto/runtime';
 
 type Transport = TransportType | json.Options | smtp.Options | ses.Options | sendmail.Options;
 

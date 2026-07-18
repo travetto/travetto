@@ -1,13 +1,12 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Suite, Test } from '@travetto/test';
+import { Model, type ModelCrudSupport, NotFoundError, PersistValue, SubTypeNotSupportedError } from '@travetto/model';
 import { castTo } from '@travetto/runtime';
-import { Schema, DiscriminatorField, Text, TypeMismatchError } from '@travetto/schema';
-import { type ModelCrudSupport, Model, NotFoundError, SubTypeNotSupportedError, PersistValue } from '@travetto/model';
+import { DiscriminatorField, Schema, Text, TypeMismatchError } from '@travetto/schema';
+import { Suite, Test } from '@travetto/test';
 
 import { ExistsError } from '../../src/error/exists.ts';
-
 import { BaseModelSuite } from './base.ts';
 
 @Schema()

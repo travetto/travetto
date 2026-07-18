@@ -1,5 +1,5 @@
-import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { Injectable } from '@travetto/di';
 
 import type { LogAppender, LogEvent } from '../types.ts';
 

@@ -1,10 +1,10 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c } from '@travetto/doc';
+import { c, d } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
 import { Endpoint } from '@travetto/web';
 
-import type { FileMap } from './src/types.ts';
 import { Upload } from './src/decorator.ts';
+import type { FileMap } from './src/types.ts';
 
 const FileMapContract = toConcrete<FileMap>();
 

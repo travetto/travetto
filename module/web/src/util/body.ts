@@ -1,20 +1,20 @@
 import { TextDecoder } from 'node:util';
 
 import {
+  type BinaryArray,
+  BinaryMetadataUtil,
   type BinaryType,
   BinaryUtil,
-  type BinaryArray,
-  castTo,
-  Util,
   CodecUtil,
+  castTo,
   hasToJSON,
-  BinaryMetadataUtil,
-  JSONUtil
+  JSONUtil,
+  Util
 } from '@travetto/runtime';
 
-import type { WebMessage } from '../types/message.ts';
-import { WebHeaders } from '../types/headers.ts';
 import { WebError } from '../types/error.ts';
+import { WebHeaders } from '../types/headers.ts';
+import type { WebMessage } from '../types/message.ts';
 
 const WebRawBinarySymbol = Symbol();
 

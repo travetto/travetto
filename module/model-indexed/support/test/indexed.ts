@@ -1,18 +1,21 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Suite, Test } from '@travetto/test';
-import { castTo, TimeUtil } from '@travetto/runtime';
 import { ExistsError, ModelBulkUtil, NotFoundError } from '@travetto/model';
+import { castTo, TimeUtil } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
+
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
-import type { ModelIndexedSupport } from '../../src/types/service.ts';
 import { IndexedFieldError } from '../../src/types/error.ts';
-
-import { SUGGEST_DATA, SuggestItem, suggestSort } from './models/suggest.ts';
+import type { ModelIndexedSupport } from '../../src/types/service.ts';
 import {
+  ComputedIndexedUser,
   childAgeIndex,
+  computedNameIndex,
   nameCreatedIndex,
+  TransientIndexedUser,
+  transientNameIndex,
   UniqueUser,
   User,
   User2,
@@ -22,12 +25,9 @@ import {
   userAgeNoKeyIndex,
   userAgeReversedIndex,
   userNameIndex,
-  userUniqueNameIndex,
-  ComputedIndexedUser,
-  computedNameIndex,
-  TransientIndexedUser,
-  transientNameIndex
+  userUniqueNameIndex
 } from './models/indexed.ts';
+import { SUGGEST_DATA, SuggestItem, suggestSort } from './models/suggest.ts';
 
 @Suite()
 export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSupport> {

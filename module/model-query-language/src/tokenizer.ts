@@ -1,4 +1,5 @@
 import { TimeUtil } from '@travetto/runtime';
+
 import type { Token, TokenizeState, TokenType } from './types.ts';
 
 const OPEN_PARENS = 0x28,

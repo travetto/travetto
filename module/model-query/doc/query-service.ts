@@ -1,13 +1,13 @@
-import { asFull, type Class } from '@travetto/runtime';
-import { type ModelType, type OptionalId, ModelCrudUtil } from '@travetto/model';
+import { ModelCrudUtil, type ModelType, type OptionalId } from '@travetto/model';
 import type {
-  ModelQueryCrudSupport,
-  ModelQuerySuggestSupport,
-  ModelQueryFacetSupport,
-  ValidStringFields,
   ModelQuery,
-  PageableModelQuery
+  ModelQueryCrudSupport,
+  ModelQueryFacetSupport,
+  ModelQuerySuggestSupport,
+  PageableModelQuery,
+  ValidStringFields
 } from '@travetto/model-query';
+import { asFull, type Class } from '@travetto/runtime';
 
 export class QueryModelService implements ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport {
   idSource = ModelCrudUtil.uuidSource();

@@ -1,5 +1,5 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c, module } from '@travetto/doc';
+import { c, d, module } from '@travetto/doc';
 
 import { Links } from '@travetto/model/support/doc.support.ts';
 

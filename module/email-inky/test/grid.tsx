@@ -2,8 +2,8 @@
 
 import assert from 'node:assert';
 
+import { BlockGrid, Column, Row } from '@travetto/email-inky';
 import { Suite, Test } from '@travetto/test';
-import { Row, Column, BlockGrid } from '@travetto/email-inky';
 
 import { renderJSX } from './util.ts';
 

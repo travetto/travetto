@@ -2,8 +2,8 @@ import type { Writable } from 'node:stream';
 
 import { JSONUtil } from '@travetto/runtime';
 
-import type { SuitesSummary } from '../types.ts';
 import { TestConsumer } from '../decorator.ts';
+import type { SuitesSummary } from '../types.ts';
 
 /**
  * Returns the entire result set as a single JSON document

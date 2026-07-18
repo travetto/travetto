@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 
-import { BeforeAll, Suite, Test } from '@travetto/test';
-import { Registry } from '@travetto/registry';
-import { AsyncContextInterceptor, WebRequest, WebResponse, WebAsyncContext } from '@travetto/web';
 import { DependencyRegistryIndex } from '@travetto/di';
+import { Registry } from '@travetto/registry';
+import { BeforeAll, Suite, Test } from '@travetto/test';
+import { AsyncContextInterceptor, WebAsyncContext, WebRequest, WebResponse } from '@travetto/web';
 
 @Suite()
 class AsyncContextInterceptorSuite {

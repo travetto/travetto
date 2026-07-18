@@ -1,4 +1,4 @@
-import type { WhereClauseRaw, RetainQueryPrimitiveFields } from './where-clause.ts';
+import type { RetainQueryPrimitiveFields, WhereClauseRaw } from './where-clause.ts';
 
 type SelectClauseRaw<T> = {
   [P in keyof T]?: T[P] extends object ? SelectClauseRaw<RetainQueryPrimitiveFields<T[P]>> : 1 | 0 | boolean;

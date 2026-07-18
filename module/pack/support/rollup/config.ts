@@ -1,7 +1,7 @@
 import path from 'node:path';
 
-import type { OutputOptions } from 'rollup';
 import type terser from '@rollup/plugin-terser';
+import type { OutputOptions } from 'rollup';
 
 import { type ManifestModule, ManifestModuleUtil } from '@travetto/manifest';
 import { EnvProp, Runtime, RuntimeIndex } from '@travetto/runtime';

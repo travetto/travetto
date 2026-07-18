@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
 import { AsyncQueue } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
 
 @Suite()
 export class WorkSetTest {
