@@ -13,9 +13,7 @@ export interface ConnectionAware<C = unknown> {
  * @kind decorator
  */
 export function Connected() {
-  return function <T extends { connection?: Connection }>(
-    target: T, property: string, descriptor: AsyncMethodDescriptor<T>
-  ): void {
+  return function <T extends { connection?: Connection }>(target: T, property: string, descriptor: AsyncMethodDescriptor<T>): void {
     const handle = descriptor.value!;
     descriptor.value = function (...args: unknown[]): ReturnType<typeof handle> {
       return this.connection!.runWithActive(() => handle.call(this, ...args));
@@ -28,9 +26,7 @@ export function Connected() {
  * @kind decorator
  */
 export function ConnectedIterator() {
-  return function <T extends { connection?: Connection }>(
-    target: T, property: string, descriptor: AsyncIterableMethodDescriptor<T>
-  ): void {
+  return function <T extends { connection?: Connection }>(target: T, property: string, descriptor: AsyncIterableMethodDescriptor<T>): void {
     const handle = descriptor.value!;
     descriptor.value = async function* (...args: unknown[]): ReturnType<typeof handle> {
       yield* this.connection!.iterateWithActive(() => handle.call(this, ...args));
@@ -43,9 +39,7 @@ export function ConnectedIterator() {
  * @kind decorator
  */
 export function Transactional(mode: TransactionType = 'required') {
-  return function <T extends { connection?: Connection }>(
-    target: unknown, property: string, descriptor: AsyncMethodDescriptor<T>
-  ): void {
+  return function <T extends { connection?: Connection }>(target: unknown, property: string, descriptor: AsyncMethodDescriptor<T>): void {
     const handle = descriptor.value!;
     descriptor.value = function (...args: unknown[]): ReturnType<typeof handle> {
       return this.connection!.runWithTransaction(mode, () => handle.call(this, ...args));

@@ -4,8 +4,7 @@ import { RuntimeError, type Class, type Primitive, type ValidFields } from '@tra
 type RetainPrimitiveFields<T> = Pick<T, ValidFields<T, Primitive | Date>>;
 
 type IndexClauseRaw<T> = {
-  [P in keyof T]?:
-  T[P] extends object ? IndexClauseRaw<RetainPrimitiveFields<T[P]>> : 1 | -1 | true;
+  [P in keyof T]?: T[P] extends object ? IndexClauseRaw<RetainPrimitiveFields<T[P]>> : 1 | -1 | true;
 };
 
 export type IndexField<T extends ModelType> = IndexClauseRaw<RetainPrimitiveFields<T>>;

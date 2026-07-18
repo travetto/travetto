@@ -8,7 +8,7 @@ const toLink = (title: string, target: Function): DocJSXElementByFn<'CodeLink'> 
   d.codeLink(title, Runtime.getSourceFile(target), new RegExp(`\\binterface\\s+${target.name}`));
 
 export const Links = {
-  Indexed: toLink('Indexed', toConcrete<ModelIndexedSupport>()),
+  Indexed: toLink('Indexed', toConcrete<ModelIndexedSupport>())
 };
 
 export const ModelIndexedTypes = (fn: Function): DocJSXElement[] => {

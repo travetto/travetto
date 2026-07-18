@@ -10,7 +10,6 @@ import type { ModelQuerySuggestSupport } from '../../src/types/suggest.ts';
 
 @Suite()
 export abstract class ModelQuerySuggestSuite extends BaseModelSuite<ModelQuerySuggestSupport & ModelCrudSupport> {
-
   async #loadPeople() {
     const names = ['Bob', 'Bo', 'Barry', 'Rob', 'Robert', 'Robbie'];
     const people = [0, 1, 2, 3, 4, 5].map(x =>
@@ -22,7 +21,8 @@ export abstract class ModelQuerySuggestSuite extends BaseModelSuite<ModelQuerySu
           street1: 'a',
           ...(x === 1 ? { street2: 'b' } : {})
         }
-      }));
+      })
+    );
 
     await this.saveAll(Person, people);
   }

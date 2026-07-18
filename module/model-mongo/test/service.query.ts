@@ -58,7 +58,7 @@ class MongoQuerySuite extends ModelQuerySuite {
     await this.saveAll(TextModel, [
       TextModel.from({ document: 'I was running from bear that was running as well' }),
       TextModel.from({ document: 'I ran at a bear, ferociously' }),
-      TextModel.from({ document: 'We run from Bears fans on the weekend' }),
+      TextModel.from({ document: 'We run from Bears fans on the weekend' })
     ]);
     const svc: MongoModelService = castTo(await this.service);
 
@@ -77,7 +77,6 @@ class MongoQuerySuite extends ModelQuerySuite {
 
     const all8 = await svc.queryText(TextModel, 'run from bear -ferocious');
     assert(all8.length === 2);
-
   }
 }
 

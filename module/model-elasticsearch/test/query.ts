@@ -54,7 +54,7 @@ type MustType = {
   ids: { values: string[] };
 };
 
-function isBool(o: unknown): o is { bool: { must: [MustType], must_not: unknown, should_not: unknown } } {
+function isBool(o: unknown): o is { bool: { must: [MustType]; must_not: unknown; should_not: unknown } } {
   return DataUtil.isPlainObject(o) && 'bool' in o;
 }
 
@@ -64,7 +64,6 @@ function isRegexp(o: unknown): o is { regexp: { name: string } } {
 
 @Suite()
 export class QueryTest {
-
   @BeforeAll()
   async beforeAll() {
     await Registry.init();
@@ -113,9 +112,7 @@ export class QueryTest {
   @Test()
   async translateIds() {
     const out = ElasticsearchQueryUtil.extractWhereQuery(User, {
-      $and: [
-        { id: { $in: ['a'.repeat(24), 'b'.repeat(24), 'c'.repeat(24)] } }
-      ]
+      $and: [{ id: { $in: ['a'.repeat(24), 'b'.repeat(24), 'c'.repeat(24)] } }]
     });
 
     assert(isBool(out));
@@ -127,7 +124,6 @@ export class QueryTest {
 
   @Test()
   async testRegEx() {
-
     const out = ElasticsearchQueryUtil.extractWhereQuery(User, {
       name: {
         $regex: '/google.$/'

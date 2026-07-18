@@ -14,7 +14,6 @@ const isMappingType = (input: estypes.MappingProperty): input is estypes.Mapping
  * Utils for ES Schema management
  */
 export class ElasticsearchSchemaUtil {
-
   /**
    * Build the update script for a given object
    */
@@ -35,7 +34,7 @@ export class ElasticsearchSchemaUtil {
   }
  }
 `,
-      params: { body: item },
+      params: { body: item }
     };
     return out;
   }
@@ -57,9 +56,9 @@ export class ElasticsearchSchemaUtil {
    * Build one or more mappings depending on the polymorphic state
    */
   static generateSchemaMapping(cls: Class, config?: EsSchemaConfig): estypes.MappingTypeMapping {
-    return SchemaRegistryIndex.getConfig(cls).discriminatedBase ?
-      this.generateAllMapping(cls, config) :
-      this.generateSingleMapping(cls, config);
+    return SchemaRegistryIndex.getConfig(cls).discriminatedBase
+      ? this.generateAllMapping(cls, config)
+      : this.generateSingleMapping(cls, config);
   }
 
   /**
@@ -67,10 +66,13 @@ export class ElasticsearchSchemaUtil {
    */
   static generateAllMapping(cls: Class, config?: EsSchemaConfig): estypes.MappingTypeMapping {
     const allTypes = SchemaRegistryIndex.getDiscriminatedClasses(cls);
-    return allTypes.reduce<estypes.MappingTypeMapping>((mapping, schemaCls) => {
-      DataUtil.deepAssign(mapping, this.generateSingleMapping(schemaCls, config));
-      return mapping;
-    }, { properties: {}, dynamic: false });
+    return allTypes.reduce<estypes.MappingTypeMapping>(
+      (mapping, schemaCls) => {
+        DataUtil.deepAssign(mapping, this.generateSingleMapping(schemaCls, config));
+        return mapping;
+      },
+      { properties: {}, dynamic: false }
+    );
   }
 
   /**
@@ -91,7 +93,7 @@ export class ElasticsearchSchemaUtil {
         if (config.precision) {
           const [digits, decimals] = config.precision;
           if (decimals) {
-            if ((decimals + digits) < 16) {
+            if (decimals + digits < 16) {
               property = { type: 'scaled_float', scaling_factor: decimals };
             } else {
               if (digits < 6 && decimals < 9) {
@@ -153,8 +155,8 @@ export class ElasticsearchSchemaUtil {
    * Gets list of all changed fields between two mappings
    */
   static getChangedFields(current: estypes.MappingTypeMapping, needed: estypes.MappingTypeMapping, prefix = ''): string[] {
-    const currentProperties = (current.properties ?? {});
-    const neededProperties = (needed.properties ?? {});
+    const currentProperties = current.properties ?? {};
+    const neededProperties = needed.properties ?? {};
     const allKeys = new Set([...Object.keys(currentProperties), ...Object.keys(neededProperties)]);
     const changed: string[] = [];
 
@@ -167,11 +169,13 @@ export class ElasticsearchSchemaUtil {
         if (currentProperty.type !== neededProperty.type) {
           changed.push(path);
         } else {
-          changed.push(...this.getChangedFields(
-            'properties' in currentProperty ? currentProperty : { properties: {} },
-            'properties' in neededProperty ? neededProperty : { properties: {} },
-            path
-          ));
+          changed.push(
+            ...this.getChangedFields(
+              'properties' in currentProperty ? currentProperty : { properties: {} },
+              'properties' in neededProperty ? neededProperty : { properties: {} },
+              path
+            )
+          );
         }
       } else if (isMappingType(currentProperty) || isMappingType(neededProperty)) {
         changed.push(path);

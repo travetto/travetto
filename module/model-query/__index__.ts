@@ -11,5 +11,4 @@ export * from './src/util/suggest.ts';
 export * from './src/util/facet.ts';
 export * from './src/util/crud.ts';
 
-
 export * from './src/verifier.ts';

@@ -1,8 +1,12 @@
 import { asFull, type Class } from '@travetto/runtime';
 import { type ModelType, type OptionalId, ModelCrudUtil } from '@travetto/model';
 import type {
-  ModelQueryCrudSupport, ModelQuerySuggestSupport, ModelQueryFacetSupport,
-  ValidStringFields, ModelQuery, PageableModelQuery
+  ModelQueryCrudSupport,
+  ModelQuerySuggestSupport,
+  ModelQueryFacetSupport,
+  ValidStringFields,
+  ModelQuery,
+  PageableModelQuery
 } from '@travetto/model-query';
 
 export class QueryModelService implements ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport {
@@ -13,8 +17,7 @@ export class QueryModelService implements ModelQueryCrudSupport, ModelQueryFacet
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     return asFull({});
   }
-  async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
-  }
+  async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {}
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     return asFull({});
   }
@@ -24,7 +27,7 @@ export class QueryModelService implements ModelQueryCrudSupport, ModelQueryFacet
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     return asFull({});
   }
-  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T[]> {
+  async *list<T extends ModelType>(cls: Class<T>): AsyncIterable<T[]> {
     yield* [];
   }
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
@@ -48,13 +51,27 @@ export class QueryModelService implements ModelQueryCrudSupport, ModelQueryFacet
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     return 0;
   }
-  async facetByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T> | undefined): Promise<{ key: string, count: number }[]> {
+  async facetByQuery<T extends ModelType>(
+    cls: Class<T>,
+    field: ValidStringFields<T>,
+    query?: ModelQuery<T> | undefined
+  ): Promise<{ key: string; count: number }[]> {
     return [];
   }
-  async suggestByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string | undefined, query?: PageableModelQuery<T> | undefined): Promise<T[]> {
+  async suggestByQuery<T extends ModelType>(
+    cls: Class<T>,
+    field: ValidStringFields<T>,
+    prefix?: string | undefined,
+    query?: PageableModelQuery<T> | undefined
+  ): Promise<T[]> {
     return [];
   }
-  async suggestValuesByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string | undefined, query?: PageableModelQuery<T> | undefined): Promise<string[]> {
+  async suggestValuesByQuery<T extends ModelType>(
+    cls: Class<T>,
+    field: ValidStringFields<T>,
+    prefix?: string | undefined,
+    query?: PageableModelQuery<T> | undefined
+  ): Promise<string[]> {
     return [];
   }
 }

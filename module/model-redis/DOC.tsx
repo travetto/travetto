@@ -6,15 +6,16 @@ import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.t
 import { RedisModelConfig } from './src/config.ts';
 import { RedisModelService } from './src/service.ts';
 
-export const text = <>
-  <c.StdHeader />
-  This module provides an {d.library('Redis')}-based implementation for the {d.module('Model')}.  This source allows the {d.module('Model')} module to read, write and query against {d.library('Redis')}. <br />
-
-  Supported features:
-  <ul>
-    {...ModelTypes(RedisModelService)}
-    {...ModelIndexedTypes(RedisModelService)}
-  </ul>
-
-  <ModelCustomConfig config={RedisModelConfig} />
-</>;
+export const text = (
+  <>
+    <c.StdHeader />
+    This module provides an {d.library('Redis')}-based implementation for the {d.module('Model')}. This source allows the{' '}
+    {d.module('Model')} module to read, write and query against {d.library('Redis')}. <br />
+    Supported features:
+    <ul>
+      {...ModelTypes(RedisModelService)}
+      {...ModelIndexedTypes(RedisModelService)}
+    </ul>
+    <ModelCustomConfig config={RedisModelConfig} />
+  </>
+);

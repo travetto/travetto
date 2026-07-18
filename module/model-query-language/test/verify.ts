@@ -29,7 +29,6 @@ class ModelUser {
 
 @Suite()
 export class VerifyTest {
-
   @BeforeAll()
   async init() {
     await Registry.init();
@@ -107,15 +106,17 @@ export class VerifyTest {
   @Test()
   async verifyArrayOperationsWithEmpty() {
     for (const op of ['$in', '$nin', '$all', '$elemMatch']) {
-
-      await assert.rejects(async () =>
-        QueryVerifier.verify(User, {
-          where: {
-            email: {
-              [op]: []
+      await assert.rejects(
+        async () =>
+          QueryVerifier.verify(User, {
+            where: {
+              email: {
+                [op]: []
+              }
             }
-          }
-        }), /Validation Error/i);
+          }),
+        /Validation Error/i
+      );
     }
   }
 }

@@ -13,7 +13,6 @@ import { SqliteConnection } from './connection.ts';
  */
 @Injectable()
 export class SqliteDialect extends SQLDialect {
-
   connection: SqliteConnection;
   config: SQLModelConfig;
 
@@ -50,7 +49,7 @@ export class SqliteDialect extends SQLDialect {
     const IGNORE_FIELDS = [this.pathField.name, this.parentPathField.name, this.idxField.name].map(field => `'${field}'`);
 
     const [columns, foreignKeys, indices] = await Promise.all([
-      this.executeSQL<{ name: string, type: string, is_not_null: 1 | 0 }>(`
+      this.executeSQL<{ name: string; type: string; is_not_null: 1 | 0 }>(`
       SELECT 
         name, 
         type, 
@@ -58,7 +57,7 @@ export class SqliteDialect extends SQLDialect {
       FROM PRAGMA_TABLE_INFO('${table}')
       WHERE name NOT IN (${IGNORE_FIELDS.join(',')})
     `),
-      this.executeSQL<{ name: string, to_table: string, from_column: string, to_column: string }>(`
+      this.executeSQL<{ name: string; to_table: string; from_column: string; to_column: string }>(`
       SELECT 
         'fk_' || '${table}' || '_' || ${this.identifier('from')} AS name, 
         ${this.identifier('from')} as from_column, 
@@ -66,7 +65,7 @@ export class SqliteDialect extends SQLDialect {
         ${this.identifier('table')} as to_table
       FROM PRAGMA_FOREIGN_KEY_LIST('${table}')
     `),
-      this.executeSQL<{ name: string, is_unique: boolean, columns: string }>(`
+      this.executeSQL<{ name: string; is_unique: boolean; columns: string }>(`
       SELECT 
         il.name as name, 
         il.${this.identifier('unique')} = 1 as is_unique, 
@@ -87,7 +86,8 @@ export class SqliteDialect extends SQLDialect {
       indices: indices.records.map(idx => ({
         name: idx.name,
         is_unique: idx.is_unique,
-        columns: idx.columns.split(',')
+        columns: idx.columns
+          .split(',')
           .map(col => col.split(' '))
           .map(([order, name, desc]) => [+order, { name, desc: desc === '1' }] as const)
           .sort((a, b) => a[0] - b[0])

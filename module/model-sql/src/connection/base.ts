@@ -9,7 +9,6 @@ export type TransactionType = 'required' | 'isolated' | 'force';
  * vs querying.
  */
 export abstract class Connection<C = unknown> {
-
   isolatedTransactions = true;
   nestedTransactions = true;
 
@@ -56,7 +55,7 @@ export abstract class Connection<C = unknown> {
    * @param rawConnection
    * @param query
    */
-  abstract execute<T = unknown>(rawConnection: C, query: string, values?: unknown[]): Promise<{ records: T[], count: number }>;
+  abstract execute<T = unknown>(rawConnection: C, query: string, values?: unknown[]): Promise<{ records: T[]; count: number }>;
 
   /**
    * Acquire new connection
@@ -99,7 +98,7 @@ export abstract class Connection<C = unknown> {
    * @param operation
    * @param args
    */
-  async * iterateWithActive<R>(operation: () => AsyncIterable<R>): AsyncIterable<R> {
+  async *iterateWithActive<R>(operation: () => AsyncIterable<R>): AsyncIterable<R> {
     if (this.active) {
       yield* operation();
     }
@@ -130,7 +129,9 @@ export abstract class Connection<C = unknown> {
           await this.commitTx(this.active!, txId);
           return result;
         } catch (error) {
-          try { await this.rollbackTx(this.active!, txId); } catch { }
+          try {
+            await this.rollbackTx(this.active!, txId);
+          } catch {}
           throw error;
         }
       } else {

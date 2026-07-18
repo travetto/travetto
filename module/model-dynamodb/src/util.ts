@@ -1,6 +1,10 @@
 import type {
-  AttributeDefinition, AttributeValue, GlobalSecondaryIndex, GlobalSecondaryIndexDescription,
-  GlobalSecondaryIndexUpdate, KeySchemaElement
+  AttributeDefinition,
+  AttributeValue,
+  GlobalSecondaryIndex,
+  GlobalSecondaryIndexDescription,
+  GlobalSecondaryIndexUpdate,
+  KeySchemaElement
 } from '@aws-sdk/client-dynamodb';
 
 import { type Class, castTo } from '@travetto/runtime';
@@ -20,8 +24,9 @@ type DynamoIndexConfig = {
  * Utility class for DynamoDB operations and transformations.
  */
 export class DynamoDBUtil {
-
-  static indexNames = (name: string): { keyIndexName: string, sortIndexName: string, keyIndexAttribute: string, sortIndexAttribute: string } => {
+  static indexNames = (
+    name: string
+  ): { keyIndexName: string; sortIndexName: string; keyIndexAttribute: string; sortIndexAttribute: string } => {
     const base = name.toLowerCase().replace(/[^A-Za-z0-9]+/g, '_');
     return {
       keyIndexName: base,
@@ -86,7 +91,7 @@ export class DynamoDBUtil {
           }
 
           keys.push({ AttributeName: keyIndexAttribute, KeyType: 'HASH' });
-          keys.push({ AttributeName: sortIndexAttribute, KeyType: 'RANGE', });
+          keys.push({ AttributeName: sortIndexAttribute, KeyType: 'RANGE' });
           attributes.push({ AttributeName: keyIndexAttribute, AttributeType: 'S' });
           attributes.push({ AttributeName: sortIndexAttribute, AttributeType: castTo(fieldType) === String ? 'S' : 'N' });
           break;
@@ -116,7 +121,10 @@ export class DynamoDBUtil {
    * Identifies attribute definitions that have changed between current and requested configurations.
    * Compares attribute names and types to determine additions, removals, or modifications.
    */
-  static findChangedAttributes(current: AttributeDefinition[] | undefined, requested: AttributeDefinition[] | undefined): AttributeDefinition[] {
+  static findChangedAttributes(
+    current: AttributeDefinition[] | undefined,
+    requested: AttributeDefinition[] | undefined
+  ): AttributeDefinition[] {
     const currentMap = Object.fromEntries((current ?? []).map(attr => [attr.AttributeName, attr]));
     const pendingMap = Object.fromEntries((requested ?? []).map(attr => [attr.AttributeName, attr]));
 
@@ -145,7 +153,10 @@ export class DynamoDBUtil {
    * Identifies global secondary indices that have changed between current and requested configurations.
    * Generates update operations for creating new indices or deleting removed indices.
    */
-  static findChangedGlobalIndexes(current: GlobalSecondaryIndexDescription[] | undefined, requested: GlobalSecondaryIndex[] | undefined): GlobalSecondaryIndexUpdate[] {
+  static findChangedGlobalIndexes(
+    current: GlobalSecondaryIndexDescription[] | undefined,
+    requested: GlobalSecondaryIndex[] | undefined
+  ): GlobalSecondaryIndexUpdate[] {
     const existingMap = Object.fromEntries((current ?? []).map(index => [index.IndexName, index]));
     const pendingMap = Object.fromEntries((requested ?? []).map(index => [index.IndexName, index]));
 

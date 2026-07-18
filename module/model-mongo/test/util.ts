@@ -7,7 +7,6 @@ import { MongoUtil, type BasicIdx } from '../src/internal/util.ts';
 
 @Suite()
 export class MongoUtilTests {
-
   @Test()
   async shouldDetectNoChange() {
     const existing: IndexDescriptionInfo = {
@@ -17,7 +16,7 @@ export class MongoUtilTests {
       sparse: false
     };
 
-    const pending: [BasicIdx, { unique?: boolean, sparse?: boolean }] = [
+    const pending: [BasicIdx, { unique?: boolean; sparse?: boolean }] = [
       { name: 1, age: -1 },
       { unique: true, sparse: false }
     ];
@@ -34,10 +33,7 @@ export class MongoUtilTests {
       unique: false
     };
 
-    const pending: [BasicIdx, { unique?: boolean }] = [
-      { name: 1 },
-      { unique: true }
-    ];
+    const pending: [BasicIdx, { unique?: boolean }] = [{ name: 1 }, { unique: true }];
 
     const result = MongoUtil.isIndexChanged(existing, pending);
     assert.strictEqual(result, true, 'Should detect unique option change');
@@ -51,10 +47,7 @@ export class MongoUtilTests {
       sparse: true
     };
 
-    const pending: [BasicIdx, { sparse?: boolean }] = [
-      { email: 1 },
-      { sparse: false }
-    ];
+    const pending: [BasicIdx, { sparse?: boolean }] = [{ email: 1 }, { sparse: false }];
 
     const result = MongoUtil.isIndexChanged(existing, pending);
     assert.strictEqual(result, true, 'Should detect sparse option change');
@@ -68,10 +61,7 @@ export class MongoUtilTests {
       expireAfterSeconds: 3600
     };
 
-    const pending: [BasicIdx, { expireAfterSeconds?: number }] = [
-      { createdAt: 1 },
-      { expireAfterSeconds: 7200 }
-    ];
+    const pending: [BasicIdx, { expireAfterSeconds?: number }] = [{ createdAt: 1 }, { expireAfterSeconds: 7200 }];
 
     const result = MongoUtil.isIndexChanged(existing, pending);
     assert.strictEqual(result, true, 'Should detect expireAfterSeconds change');
@@ -85,10 +75,7 @@ export class MongoUtilTests {
       bucketSize: 100
     };
 
-    const pending: [BasicIdx, { bucketSize?: number }] = [
-      { location: '2d' },
-      { bucketSize: 200 }
-    ];
+    const pending: [BasicIdx, { bucketSize?: number }] = [{ location: '2d' }, { bucketSize: 200 }];
 
     const result = MongoUtil.isIndexChanged(existing, pending);
     assert.strictEqual(result, true, 'Should detect bucketSize change');
@@ -101,10 +88,7 @@ export class MongoUtilTests {
       name: 'name_1_age_-1'
     };
 
-    const pending: [BasicIdx, {}] = [
-      { name: 1 },
-      {}
-    ];
+    const pending: [BasicIdx, {}] = [{ name: 1 }, {}];
 
     const result = MongoUtil.isIndexChanged(existing, pending);
     assert.strictEqual(result, true, 'Should detect change when key count differs');
@@ -117,10 +101,7 @@ export class MongoUtilTests {
       name: 'name_1_age_-1'
     };
 
-    const pending: [BasicIdx, {}] = [
-      { name: 1, email: 1 },
-      {}
-    ];
+    const pending: [BasicIdx, {}] = [{ name: 1, email: 1 }, {}];
 
     const result = MongoUtil.isIndexChanged(existing, pending);
     assert.strictEqual(result, true, 'Should detect change when keys differ');
@@ -133,10 +114,7 @@ export class MongoUtilTests {
       name: 'name_1_age_-1'
     };
 
-    const pending: [BasicIdx, {}] = [
-      { name: 1, age: 1 },
-      {}
-    ];
+    const pending: [BasicIdx, {}] = [{ name: 1, age: 1 }, {}];
 
     const result = MongoUtil.isIndexChanged(existing, pending);
     assert.strictEqual(result, true, 'Should return true when key direction changes');
@@ -149,10 +127,7 @@ export class MongoUtilTests {
       name: 'description_text'
     };
 
-    const pending: [BasicIdx, {}] = [
-      { description: 'text' },
-      {}
-    ];
+    const pending: [BasicIdx, {}] = [{ description: 'text' }, {}];
 
     const result = MongoUtil.isIndexChanged(existing, pending);
     assert.strictEqual(result, false, 'Should handle text index');
@@ -165,10 +140,7 @@ export class MongoUtilTests {
       name: 'location_2d'
     };
 
-    const pending: [BasicIdx, {}] = [
-      { location: '2d' },
-      {}
-    ];
+    const pending: [BasicIdx, {}] = [{ location: '2d' }, {}];
 
     const result = MongoUtil.isIndexChanged(existing, pending);
     assert.strictEqual(result, false, 'Should handle 2d geo index');
@@ -182,10 +154,7 @@ export class MongoUtilTests {
       unique: true
     };
 
-    const pending: [BasicIdx, { unique?: boolean }] = [
-      { name: 1, age: -1, email: 1 },
-      { unique: true }
-    ];
+    const pending: [BasicIdx, { unique?: boolean }] = [{ name: 1, age: -1, email: 1 }, { unique: true }];
 
     const result = MongoUtil.isIndexChanged(existing, pending);
     assert.strictEqual(result, false, 'Should handle compound index');
@@ -200,10 +169,7 @@ export class MongoUtilTests {
       sparse: true
     };
 
-    const pending: [BasicIdx, {}] = [
-      { email: 1 },
-      {}
-    ];
+    const pending: [BasicIdx, {}] = [{ email: 1 }, {}];
 
     const result = MongoUtil.isIndexChanged(existing, pending);
     assert.strictEqual(result, true, 'Should detect change when options are removed');
@@ -216,10 +182,7 @@ export class MongoUtilTests {
       name: 'name_1'
     };
 
-    const pending: [BasicIdx, {}] = [
-      { name: 1 },
-      {}
-    ];
+    const pending: [BasicIdx, {}] = [{ name: 1 }, {}];
 
     const result = MongoUtil.isIndexChanged(existing, pending);
     assert.strictEqual(result, false, 'Should handle empty options');
@@ -232,10 +195,7 @@ export class MongoUtilTests {
       name: 'name_1_age_-1_email_1'
     };
 
-    const pending: [BasicIdx, {}] = [
-      { name: 1, age: -1, city: 1 },
-      {}
-    ];
+    const pending: [BasicIdx, {}] = [{ name: 1, age: -1, city: 1 }, {}];
 
     const result = MongoUtil.isIndexChanged(existing, pending);
     assert.strictEqual(result, true, 'Should detect partial key overlap');
@@ -249,11 +209,11 @@ export class MongoUtilTests {
       weights: { description: 1, oregano: 1 },
       textIndexVersion: 1,
       default_language: 'english',
-      language_override: 'lang',
+      language_override: 'lang'
     };
 
     // Change in weights
-    let pending: [BasicIdx, { weights?: Record<string, number>, default_language?: string, language_override?: string }] = [
+    let pending: [BasicIdx, { weights?: Record<string, number>; default_language?: string; language_override?: string }] = [
       { description: 'text' },
       { weights: { description: 2 }, default_language: 'english', language_override: 'lang' }
     ];
@@ -261,10 +221,7 @@ export class MongoUtilTests {
     assert.strictEqual(result, true, 'Should detect change in text index weights');
 
     // Change in default_language
-    pending = [
-      { description: 'text' },
-      { weights: { description: 1 }, default_language: 'french', language_override: 'lang' }
-    ];
+    pending = [{ description: 'text' }, { weights: { description: 1 }, default_language: 'french', language_override: 'lang' }];
     result = MongoUtil.isIndexChanged(existing, pending);
     assert.strictEqual(result, true, 'Should detect change in text index default_language');
 

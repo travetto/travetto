@@ -1,7 +1,15 @@
 /* eslint-disable @stylistic/indent */
 import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex, type Point } from '@travetto/schema';
 import { type Class, RuntimeError, TypedObject, TimeUtil, castTo, castKey, toConcrete, JSONUtil } from '@travetto/runtime';
-import { type SelectClause, type Query, type SortClause, type WhereClause, type RetainQueryPrimitiveFields, ModelQueryUtil, isModelQueryIndex } from '@travetto/model-query';
+import {
+  type SelectClause,
+  type Query,
+  type SortClause,
+  type WhereClause,
+  type RetainQueryPrimitiveFields,
+  ModelQueryUtil,
+  isModelQueryIndex
+} from '@travetto/model-query';
 import { IndexNotSupported, type BulkResponse, type IndexConfig, type ModelType } from '@travetto/model';
 import { isModelIndexedIndex } from '@travetto/model-indexed';
 
@@ -18,9 +26,9 @@ interface Alias {
 }
 
 export type SQLTableDescription = {
-  columns: { name: string, type: string, is_not_null: boolean }[];
-  foreignKeys: { name: string, from_column: string, to_column: string, to_table: string }[];
-  indices: { name: string, columns: { name: string, desc: boolean }[], is_unique: boolean }[];
+  columns: { name: string; type: string; is_not_null: boolean }[];
+  foreignKeys: { name: string; from_column: string; to_column: string; to_table: string }[];
+  indices: { name: string; columns: { name: string; desc: boolean }[]; is_unique: boolean }[];
 };
 
 function makeField(name: string, type: Class, required: boolean, extra: Partial<SchemaFieldConfig>): SchemaFieldConfig {
@@ -163,7 +171,7 @@ export abstract class SQLDialect implements DialectState {
    */
   abstract describeTable(table: string): Promise<SQLTableDescription | undefined>;
 
-  executeSQL<T>(sql: string): Promise<{ records: T[], count: number }> {
+  executeSQL<T>(sql: string): Promise<{ records: T[]; count: number }> {
     return this.connection.execute<T>(this.connection.active, sql);
   }
 
@@ -174,7 +182,7 @@ export abstract class SQLDialect implements DialectState {
     if (field === '*') {
       return field;
     } else {
-      const name = (typeof field === 'string') ? field : field.name;
+      const name = typeof field === 'string' ? field : field.name;
       return `${this.ID_AFFIX}${name}${this.ID_AFFIX}`;
     }
   }
@@ -300,9 +308,7 @@ export abstract class SQLDialect implements DialectState {
    */
   async getCountForQuery<T extends ModelType>(cls: Class<T>, query: Query<T>): Promise<number> {
     const { records } = await this.executeSQL<{ total: number }>(
-      this.getQueryCountSQL(cls,
-        ModelQueryUtil.getWhereClause(cls, query.where)
-      )
+      this.getQueryCountSQL(cls, ModelQueryUtil.getWhereClause(cls, query.where))
     );
     return DataUtil.coerceType(records[0].total, Number);
   }
@@ -451,14 +457,18 @@ export abstract class SQLDialect implements DialectState {
           const resolve = this.resolveValue.bind(this, field);
 
           switch (subKey) {
-            case '$nin': case '$in': {
+            case '$nin':
+            case '$in': {
               const arr = (Array.isArray(value) ? value : [value]).map(resolve);
               items.push(`${sPath} ${SQL_OPS[subKey]} (${arr.join(',')})`);
               break;
             }
             case '$all': {
               const set = new Set();
-              const arr = [value].flat().filter(item => !set.has(item) && !!set.add(item)).map(resolve);
+              const arr = [value]
+                .flat()
+                .filter(item => !set.has(item) && !!set.add(item))
+                .map(resolve);
               const valueTable = this.parentTable(sStack);
               const alias = `_all_${sStack.length}`;
               const pPath = this.identifier(this.parentPathField.name);
@@ -512,7 +522,8 @@ export abstract class SQLDialect implements DialectState {
               }
               break;
             }
-            case '$ne': case '$eq': {
+            case '$ne':
+            case '$eq': {
               if (value === null || value === undefined) {
                 items.push(`${sPath} ${subKey === '$ne' ? SQL_OPS.$isNot : SQL_OPS.$is} NULL`);
               } else {
@@ -521,9 +532,13 @@ export abstract class SQLDialect implements DialectState {
               }
               break;
             }
-            case '$lt': case '$gt': case '$gte': case '$lte': {
-              const subItems = TypedObject.keys(castTo<typeof SQL_OPS>(top))
-                .map(subSubKey => `${sPath} ${SQL_OPS[subSubKey]} ${resolve(top[subSubKey])}`);
+            case '$lt':
+            case '$gt':
+            case '$gte':
+            case '$lte': {
+              const subItems = TypedObject.keys(castTo<typeof SQL_OPS>(top)).map(
+                subSubKey => `${sPath} ${SQL_OPS[subSubKey]} ${resolve(top[subSubKey])}`
+              );
               items.push(subItems.length > 1 ? `(${subItems.join(` ${SQL_OPS.$and} `)})` : subItems[0]);
               break;
             }
@@ -569,20 +584,18 @@ export abstract class SQLDialect implements DialectState {
    * Generate WHERE clause
    */
   getWhereSQL<T>(cls: Class<T>, where?: WhereClause<T>): string {
-    return !where || !Object.keys(where).length ?
-      '' :
-      `WHERE ${this.getWhereGroupingSQL(cls, castTo(where))}`;
+    return !where || !Object.keys(where).length ? '' : `WHERE ${this.getWhereGroupingSQL(cls, castTo(where))}`;
   }
 
   /**
    * Generate ORDER BY clause
    */
   getOrderBySQL<T>(cls: Class<T>, sortBy?: SortClause<T>[]): string {
-    return !sortBy ?
-      '' :
-      `ORDER BY ${SQLModelUtil.orderBy(cls, sortBy).map((item) =>
-        `${this.resolveName(item.stack)} ${item.asc ? 'ASC' : 'DESC'}`
-      ).join(', ')}`;
+    return !sortBy
+      ? ''
+      : `ORDER BY ${SQLModelUtil.orderBy(cls, sortBy)
+          .map(item => `${this.resolveName(item.stack)} ${item.asc ? 'ASC' : 'DESC'}`)
+          .join(', ')}`;
   }
 
   /**
@@ -590,13 +603,11 @@ export abstract class SQLDialect implements DialectState {
    */
   getSelectSQL<T>(cls: Class<T>, select?: SelectClause<T>): string {
     const stack = SQLModelUtil.classToStack(cls);
-    const columns = select && SQLModelUtil.select(cls, select).map((sel) => this.resolveName([...stack, sel]));
+    const columns = select && SQLModelUtil.select(cls, select).map(sel => this.resolveName([...stack, sel]));
     if (columns) {
       columns.unshift(this.alias(this.pathField));
     }
-    return !columns ?
-      `SELECT ${this.rootAlias}.* ` :
-      `SELECT ${columns.join(', ')}`;
+    return !columns ? `SELECT ${this.rootAlias}.* ` : `SELECT ${columns.join(', ')}`;
   }
 
   /**
@@ -606,39 +617,39 @@ export abstract class SQLDialect implements DialectState {
     const stack = SQLModelUtil.classToStack(cls);
     const aliases = this.getAliasCache(stack, this.namespace);
     const tables = [...aliases.keys()].toSorted((a, b) => a.length - b.length); // Shortest first
-    return `FROM ${tables.map((table) => {
-      const { alias, path } = aliases.get(table)!;
-      let from = `${this.identifier(table)} ${alias}`;
-      if (path.length > 1) {
-        const key = this.namespaceParent(path);
-        const { alias: parentAlias } = aliases.get(key)!;
-        from = `
+    return `FROM ${tables
+      .map(table => {
+        const { alias, path } = aliases.get(table)!;
+        let from = `${this.identifier(table)} ${alias}`;
+        if (path.length > 1) {
+          const key = this.namespaceParent(path);
+          const { alias: parentAlias } = aliases.get(key)!;
+          from = `
 LEFT OUTER JOIN ${from} ON
   ${this.alias(this.parentPathField, alias)} = ${this.alias(this.pathField, parentAlias)}
 `;
-      }
-      return from;
-    }).join('\n')}`;
+        }
+        return from;
+      })
+      .join('\n')}`;
   }
 
   /**
    * Generate LIMIT clause
    */
   getLimitSQL<T>(cls: Class<T>, query?: Query<T>): string {
-    return !query || (!query.limit && !query.offset) ?
-      '' :
-      `LIMIT ${query.limit ?? 200} OFFSET ${query.offset ?? 0}`;
+    return !query || (!query.limit && !query.offset) ? '' : `LIMIT ${query.limit ?? 200} OFFSET ${query.offset ?? 0}`;
   }
 
   /**
    * Generate GROUP BY clause
    */
   getGroupBySQL<T>(cls: Class<T>, query: Query<T>): string {
-    const sortFields = !query.sort ?
-      '' :
-      SQLModelUtil.orderBy(cls, query.sort)
-        .map(item => this.resolveName(item.stack))
-        .join(', ');
+    const sortFields = !query.sort
+      ? ''
+      : SQLModelUtil.orderBy(cls, query.sort)
+          .map(item => this.resolveName(item.stack))
+          .join(', ');
 
     return `GROUP BY ${this.alias(this.idField)}${sortFields ? `, ${sortFields}` : ''}`;
   }
@@ -660,9 +671,11 @@ ${this.getLimitSQL(cls, query)}`;
     const config = stack.at(-1)!;
     const parent = stack.length > 1;
     const array = parent && config.array;
-    const fields = SchemaRegistryIndex.has(config.type) ?
-      [...SQLModelUtil.getFieldsByLocation(stack).local] :
-      (array ? [castTo<SchemaFieldConfig>(config)] : []);
+    const fields = SchemaRegistryIndex.has(config.type)
+      ? [...SQLModelUtil.getFieldsByLocation(stack).local]
+      : array
+        ? [castTo<SchemaFieldConfig>(config)]
+        : [];
 
     if (!parent) {
       const idField = fields.find(field => field.name === this.idField.name);
@@ -680,12 +693,14 @@ ${this.getLimitSQL(cls, query)}`;
 CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   ${fieldSql}${fieldSql.length ? ',' : ''}
   ${this.getColumnDefinition(this.pathField)} UNIQUE,
-  ${!parent ?
-        `PRIMARY KEY (${this.identifier(this.idField)})` :
-        `${this.getColumnDefinition(this.parentPathField)},
+  ${
+    !parent
+      ? `PRIMARY KEY (${this.identifier(this.idField)})`
+      : `${this.getColumnDefinition(this.parentPathField)},
     ${array ? `${this.getColumnDefinition(this.idxField)},` : ''}
   PRIMARY KEY (${this.identifier(this.pathField)}),
-  FOREIGN KEY (${this.identifier(this.parentPathField)}) REFERENCES ${this.parentTable(stack)}(${this.identifier(this.pathField)}) ON DELETE CASCADE`}
+  FOREIGN KEY (${this.identifier(this.parentPathField)}) REFERENCES ${this.parentTable(stack)}(${this.identifier(this.pathField)}) ON DELETE CASCADE`
+  }
 );`;
     return out;
   }
@@ -710,8 +725,14 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   getCreateAllTablesSQL(cls: Class): string[] {
     const out: string[] = [];
     SQLModelUtil.visitSchemaSync(SchemaRegistryIndex.getConfig(cls), {
-      onRoot: ({ path, descend }) => { out.push(this.getCreateTableSQL(path)); descend(); },
-      onSub: ({ path, descend }) => { out.push(this.getCreateTableSQL(path)); descend(); },
+      onRoot: ({ path, descend }) => {
+        out.push(this.getCreateTableSQL(path));
+        descend();
+      },
+      onSub: ({ path, descend }) => {
+        out.push(this.getCreateTableSQL(path));
+        descend();
+      },
       onSimple: ({ path }) => out.push(this.getCreateTableSQL(path))
     });
     return out;
@@ -746,7 +767,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
         if (DataUtil.isPlainObject(value)) {
           throw new IndexNotSupported(cls, idx, 'Only indexed and query indices are supported in SQL');
         }
-        return [castTo(key), typeof value === 'number' ? value === 1 : (!!value)];
+        return [castTo(key), typeof value === 'number' ? value === 1 : !!value];
       });
       return `CREATE ${idx.unique ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields
         .map(([name, sel]) => `${this.identifier(name)} ${sel ? 'ASC' : 'DESC'}`)
@@ -757,12 +778,12 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
         console.debug('Nested fields are not supported in ModelIndexed indices SQL', { index: idx.name });
         return;
       }
-      const fields = all
-        .map(({ path, value }) => `${this.identifier(path.join('_'))} ${value === -1 ? 'DESC' : 'ASC'}`)
-        .join(', ');
+      const fields = all.map(({ path, value }) => `${this.identifier(path.join('_'))} ${value === -1 ? 'DESC' : 'ASC'}`).join(', ');
       switch (idx.type) {
-        case 'indexed:keyed': return `CREATE ${idx.unique ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields});`;
-        case 'indexed:sorted': return `CREATE INDEX ${constraint} ON ${this.identifier(table)} (${fields});`;
+        case 'indexed:keyed':
+          return `CREATE ${idx.unique ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.identifier(table)} (${fields});`;
+        case 'indexed:sorted':
+          return `CREATE INDEX ${constraint} ON ${this.identifier(table)} (${fields});`;
       }
     } else {
       throw new IndexNotSupported(cls, idx, 'Only indexed and query indices are supported in SQL');
@@ -783,8 +804,14 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   getDropAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
     const out: string[] = [];
     SQLModelUtil.visitSchemaSync(SchemaRegistryIndex.getConfig(cls), {
-      onRoot: ({ path, descend }) => { descend(); out.push(this.getDropTableSQL(path)); },
-      onSub: ({ path, descend }) => { descend(); out.push(this.getDropTableSQL(path)); },
+      onRoot: ({ path, descend }) => {
+        descend();
+        out.push(this.getDropTableSQL(path));
+      },
+      onSub: ({ path, descend }) => {
+        descend();
+        out.push(this.getDropTableSQL(path));
+      },
       onSimple: ({ path }) => out.push(this.getDropTableSQL(path))
     });
     return out;
@@ -796,8 +823,14 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   getTruncateAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
     const out: string[] = [];
     SQLModelUtil.visitSchemaSync(SchemaRegistryIndex.getConfig(cls), {
-      onRoot: ({ path, descend }) => { descend(); out.push(this.getTruncateTableSQL(path)); },
-      onSub: ({ path, descend }) => { descend(); out.push(this.getTruncateTableSQL(path)); },
+      onRoot: ({ path, descend }) => {
+        descend();
+        out.push(this.getTruncateTableSQL(path));
+      },
+      onSub: ({ path, descend }) => {
+        descend();
+        out.push(this.getTruncateTableSQL(path));
+      },
       onSimple: ({ path }) => out.push(this.getTruncateTableSQL(path))
     });
     return out;
@@ -808,8 +841,8 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    */
   getInsertSQL(stack: VisitStack[], instances: InsertWrapper['records']): string | undefined {
     const config = stack.at(-1)!;
-    const columns = SQLModelUtil.getFieldsByLocation(stack).local
-      .filter(field => !SchemaRegistryIndex.has(field.type))
+    const columns = SQLModelUtil.getFieldsByLocation(stack)
+      .local.filter(field => !SchemaRegistryIndex.has(field.type))
       .toSorted((a, b) => a.name.localeCompare(b.name));
     const columnNames = columns.map(column => column.name);
 
@@ -842,8 +875,9 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
       return;
     }
 
-    const matrix = instances.map(inst => columns.map(column =>
-      this.resolveValue(column, castTo<Record<string, unknown>>(inst.value)[column.name])));
+    const matrix = instances.map(inst =>
+      columns.map(column => this.resolveValue(column, castTo<Record<string, unknown>>(inst.value)[column.name]))
+    );
 
     columnNames.push(this.pathField.name);
     if (hasParent) {
@@ -879,7 +913,9 @@ ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
    */
   getAllInsertSQL<T extends ModelType>(cls: Class<T>, instance: T): string[] {
     const out: string[] = [];
-    const add = (text?: string): void => { text && out.push(text); };
+    const add = (text?: string): void => {
+      text && out.push(text);
+    };
     SQLModelUtil.visitSchemaInstance(cls, instance, {
       onRoot: ({ value, path }) => add(this.getInsertSQL(path, [{ stack: path, value }])),
       onSub: ({ value, path }) => add(this.getInsertSQL(path, [{ stack: path, value }])),
@@ -897,10 +933,10 @@ ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
     return `
 UPDATE ${this.table(stack)} ${this.rootAlias}
 SET
-  ${Object
-        .entries(data)
-        .filter(([key]) => key in localMap)
-        .map(([key, value]) => `${this.identifier(key)}=${this.resolveValue(localMap[key], value)}`).join(', ')}
+  ${Object.entries(data)
+    .filter(([key]) => key in localMap)
+    .map(([key, value]) => `${this.identifier(key)}=${this.resolveValue(localMap[key], value)}`)
+    .join(', ')}
   ${this.getWhereSQL(type, where)};`;
   }
 
@@ -917,11 +953,9 @@ ${this.getWhereSQL(type, where)};`;
    */
   getSelectRowsByIdsSQL(stack: VisitStack[], ids: string[], select: SchemaFieldConfig[] = []): string {
     const config = stack.at(-1)!;
-    const orderBy = !config.array ?
-      '' :
-      `ORDER BY ${this.rootAlias}.${this.idxField.name} ASC`;
+    const orderBy = !config.array ? '' : `ORDER BY ${this.rootAlias}.${this.idxField.name} ASC`;
 
-    const idField = (stack.length > 1 ? this.parentPathField : this.idField);
+    const idField = stack.length > 1 ? this.parentPathField : this.idField;
 
     return `
 SELECT ${select.length ? select.map(field => this.alias(field)).join(',') : '*'}
@@ -948,7 +982,7 @@ ${this.getWhereSQL(cls, where!)}`;
       SQLModelUtil.collectDependents(this, stack.at(-1)!, children, field);
 
     await SQLModelUtil.visitSchema(SchemaRegistryIndex.getConfig(cls), {
-      onRoot: async (config) => {
+      onRoot: async config => {
         const fieldSet = buildSet(items); // Already filtered by initial select query
         selectStack.push(select);
         stack.push(fieldSet);
@@ -962,8 +996,8 @@ ${this.getWhereSQL(cls, where!)}`;
         const subSelectTop: SelectClause<T> | undefined = castTo(selectTop?.[fieldKey]);
 
         // See if a selection exists at all
-        const selected: SchemaFieldConfig[] = subSelectTop ? fields
-          .filter(field => typeof subSelectTop === 'object' && subSelectTop[castTo<typeof fieldKey>(field.name)] === 1)
+        const selected: SchemaFieldConfig[] = subSelectTop
+          ? fields.filter(field => typeof subSelectTop === 'object' && subSelectTop[castTo<typeof fieldKey>(field.name)] === 1)
           : [];
 
         if (selected.length) {
@@ -975,11 +1009,7 @@ ${this.getWhereSQL(cls, where!)}`;
 
         // If children and selection exists
         if (ids.length && (!subSelectTop || selected)) {
-          const { records: children } = await this.executeSQL<unknown[]>(this.getSelectRowsByIdsSQL(
-            path,
-            ids,
-            selected
-          ));
+          const { records: children } = await this.executeSQL<unknown[]>(this.getSelectRowsByIdsSQL(path, ids, selected));
 
           const fieldSet = buildSet(children, config);
           try {
@@ -996,10 +1026,7 @@ ${this.getWhereSQL(cls, where!)}`;
         const top = stack.at(-1)!;
         const ids = Object.keys(top);
         if (ids.length) {
-          const { records: matching } = await this.executeSQL(this.getSelectRowsByIdsSQL(
-            path,
-            ids
-          ));
+          const { records: matching } = await this.executeSQL(this.getSelectRowsByIdsSQL(path, ids));
           buildSet(matching, config);
         }
       }
@@ -1024,7 +1051,12 @@ ${this.getWhereSQL(cls, where!)}`;
   /**
    * Do bulk process
    */
-  async bulkProcess(deletes: DeleteWrapper[], inserts: InsertWrapper[], upserts: InsertWrapper[], updates: InsertWrapper[]): Promise<BulkResponse> {
+  async bulkProcess(
+    deletes: DeleteWrapper[],
+    inserts: InsertWrapper[],
+    upserts: InsertWrapper[],
+    updates: InsertWrapper[]
+  ): Promise<BulkResponse> {
     const out = {
       counts: {
         delete: deletes.reduce((count, item) => count + item.ids.length, 0),
@@ -1048,13 +1080,19 @@ ${this.getWhereSQL(cls, where!)}`;
         ...upserts
           .filter(item => item.stack.length === 1)
           .map(item =>
-            this.deleteByIds(item.stack, item.records.map(value => castTo<Record<string, string>>(value.value)[idx]))
+            this.deleteByIds(
+              item.stack,
+              item.records.map(value => castTo<Record<string, string>>(value.value)[idx])
+            )
           ),
         ...updates
           .filter(item => item.stack.length === 1)
           .map(item =>
-            this.deleteByIds(item.stack, item.records.map(value => castTo<Record<string, string>>(value.value)[idx]))
-          ),
+            this.deleteByIds(
+              item.stack,
+              item.records.map(value => castTo<Record<string, string>>(value.value)[idx])
+            )
+          )
       ]);
     }
 
@@ -1064,15 +1102,18 @@ ${this.getWhereSQL(cls, where!)}`;
         continue;
       }
       let level = 1; // Add by level
-      for (; ;) { // Loop until done
+      for (;;) {
+        // Loop until done
         const leveled = items.filter(insertWrapper => insertWrapper.stack.length === level);
         if (!leveled.length) {
           break;
         }
-        await Promise.all(leveled
-          .map(inserted => this.getInsertSQL(inserted.stack, inserted.records))
-          .filter(sql => !!sql)
-          .map(sql => this.executeSQL(sql!)));
+        await Promise.all(
+          leveled
+            .map(inserted => this.getInsertSQL(inserted.stack, inserted.records))
+            .filter(sql => !!sql)
+            .map(sql => this.executeSQL(sql!))
+        );
         level += 1;
       }
     }
@@ -1083,11 +1124,11 @@ ${this.getWhereSQL(cls, where!)}`;
   /**
    * Determine if a column has changed
    */
-  isColumnChanged(requested: SchemaFieldConfig, existing: SQLTableDescription['columns'][number],): boolean {
+  isColumnChanged(requested: SchemaFieldConfig, existing: SQLTableDescription['columns'][number]): boolean {
     const requestedColumnType = this.getColumnType(requested);
     const result =
-      (requested.name !== this.idField.name && !!requested.required?.active !== !!existing.is_not_null)
-      || (requestedColumnType.toUpperCase() !== existing.type.toUpperCase());
+      (requested.name !== this.idField.name && !!requested.required?.active !== !!existing.is_not_null) ||
+      requestedColumnType.toUpperCase() !== existing.type.toUpperCase();
 
     return result;
   }
@@ -1097,7 +1138,7 @@ ${this.getWhereSQL(cls, where!)}`;
    */
   isIndexChanged(requested: IndexConfig, existing: SQLTableDescription['indices'][number]): boolean {
     if (isModelQueryIndex(requested)) {
-      const uniqueChanged = (existing.is_unique && !requested.unique);
+      const uniqueChanged = existing.is_unique && !requested.unique;
       const columnSizeChanged = requested.fields.length !== existing.columns.length;
       let result = uniqueChanged || columnSizeChanged;
       for (let i = 0; i < requested.fields.length && !result; i++) {
@@ -1112,7 +1153,7 @@ ${this.getWhereSQL(cls, where!)}`;
       const sort = Object.entries(requested.sort);
       const all = [...keys, ...sort];
 
-      const uniqueChanged = (requested.type === 'indexed:keyed' && existing.is_unique && !requested.unique);
+      const uniqueChanged = requested.type === 'indexed:keyed' && existing.is_unique && !requested.unique;
       const columnSizeChanged = all.length !== existing.columns.length;
       let result = uniqueChanged || columnSizeChanged;
 

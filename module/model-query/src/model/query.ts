@@ -1,17 +1,15 @@
 import type { WhereClauseRaw, RetainQueryPrimitiveFields } from './where-clause.ts';
 
 type SelectClauseRaw<T> = {
-  [P in keyof T]?:
-  T[P] extends object ? SelectClauseRaw<RetainQueryPrimitiveFields<T[P]>> : (1 | 0 | boolean);
+  [P in keyof T]?: T[P] extends object ? SelectClauseRaw<RetainQueryPrimitiveFields<T[P]>> : 1 | 0 | boolean;
 };
 
 type GroupClauseRaw<T> = {
-  [P in keyof T]?: T[P] extends object ? GroupClauseRaw<RetainQueryPrimitiveFields<T[P]>> : (1 | 0 | boolean);
+  [P in keyof T]?: T[P] extends object ? GroupClauseRaw<RetainQueryPrimitiveFields<T[P]>> : 1 | 0 | boolean;
 };
 
 type SortClauseRaw<T> = {
-  [P in keyof T]?:
-  T[P] extends object ? SortClauseRaw<RetainQueryPrimitiveFields<T[P]>> : 1 | -1;
+  [P in keyof T]?: T[P] extends object ? SortClauseRaw<RetainQueryPrimitiveFields<T[P]>> : 1 | -1;
 };
 
 type QueryOptionsRaw<T> = {

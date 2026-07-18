@@ -4,7 +4,7 @@ import { Runtime, toConcrete } from '@travetto/runtime';
 
 import type { ModelQueryCrudSupport } from '../src/types/crud.ts';
 import type { ModelQuerySupport } from '../src/types/query.ts';
-import type { ModelQueryFacetSupport, } from '../src/types/facet.ts';
+import type { ModelQueryFacetSupport } from '../src/types/facet.ts';
 import type { ModelQuerySuggestSupport } from '../src/types/suggest.ts';
 
 const toLink = (title: string, target: Function): DocJSXElementByFn<'CodeLink'> =>
@@ -14,7 +14,7 @@ export const Links = {
   QueryCrud: toLink('Query Crud', toConcrete<ModelQueryCrudSupport>()),
   QueryFacet: toLink('Facet', toConcrete<ModelQueryFacetSupport>()),
   QuerySuggest: toLink('Suggest', toConcrete<ModelQuerySuggestSupport>()),
-  Query: toLink('Query', toConcrete<ModelQuerySupport>()),
+  Query: toLink('Query', toConcrete<ModelQuerySupport>())
 };
 
 export const ModelQueryTypes = (fn: Function): DocJSXElement[] => {

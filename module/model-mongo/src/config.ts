@@ -55,7 +55,7 @@ export class MongoModelConfig {
    */
   @Field({ type: Object })
   options: Omit<mongo.MongoClientOptions, 'cert'> & {
-    cert?: | Buffer | string | BinaryType | (BinaryType | Buffer | string)[];
+    cert?: Buffer | string | BinaryType | (BinaryType | Buffer | string)[];
   } = {};
   /**
    * Allow storage modification at runtime
@@ -104,8 +104,7 @@ export class MongoModelConfig {
     const options = this.options;
     if (options.ssl) {
       if (options.cert) {
-        options.cert = (await Promise.all([options.cert].flat(2).map(readCert)))
-          .map(BinaryUtil.binaryArrayToUint8Array);
+        options.cert = (await Promise.all([options.cert].flat(2).map(readCert))).map(BinaryUtil.binaryArrayToUint8Array);
       }
       if (options.tlsCertificateKeyFile) {
         options.tlsCertificateKeyFile = await RuntimeResources.resolve(options.tlsCertificateKeyFile);
@@ -128,15 +127,12 @@ export class MongoModelConfig {
    * Build connection URLs
    */
   get url(): string {
-    const hosts = this.hosts!
-      .map(host => (this.srvRecord || host.includes(':')) ? host : `${host}:${this.port ?? 27017}`)
-      .join(',');
+    const hosts = this.hosts!.map(host => (this.srvRecord || host.includes(':') ? host : `${host}:${this.port ?? 27017}`)).join(',');
     const optionString = new URLSearchParams(
       Object.entries(this.options)
         .filter((pair): pair is [string, string | number | boolean] => ['string', 'number', 'boolean'].includes(typeof pair[1]))
         .map(([k, v]) => [k, `${v}`])
-    )
-      .toString();
+    ).toString();
     let creds = '';
     if (this.username) {
       creds = `${[this.username, this.password].filter(part => !!part).join(':')}@`;

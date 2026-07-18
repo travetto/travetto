@@ -9,7 +9,7 @@
   "files": {
     "ignoreUnknown": true,
     "includes": [
-      "**",      
+      "**",
       "!**/*.d.ts",
       "!**/fixtures",
       "!**/resources",
@@ -21,7 +21,7 @@
     "formatWithErrors": false,
     "indentStyle": "space",
     "indentWidth": 2,
-    "lineWidth": 140
+    "lineWidth": 140,
   },
   "assist": {
     "actions": {
@@ -30,7 +30,10 @@
           "level": "on",
           "options": {
             "groups": [
-              [":NODE:",":BUN:"],
+              [
+                ":NODE:",
+                ":BUN:"
+              ],
               ":BLANK_LINE:",
               [
                 ":PACKAGE:",
@@ -41,7 +44,7 @@
               ":BLANK_LINE:",
               "@travetto/**/*.ts",
               ":BLANK_LINE:",
-               [
+              [
                 ":ALIAS:",
                 ":PATH:"
               ]
@@ -58,7 +61,7 @@
       "style": {
         "useImportType": "error",
         "noNonNullAssertion": "off",
-        "useConst": "error"
+        "useConst": "error",
       },
       "correctness": {
         "noUnusedFunctionParameters": "off",
@@ -66,8 +69,12 @@
           "level": "on",
           "options": {
             "ignore": {
-              "class": ["*"],
-              "typeParameter": ["*"]
+              "class": [
+                "*"
+              ],
+              "typeParameter": [
+                "*"
+              ]
             }
           }
         }
@@ -92,7 +99,7 @@
       "quoteStyle": "single",
       "semicolons": "always",
       "arrowParentheses": "asNeeded",
-      "trailingCommas": "all"
+      "trailingCommas": "none"
     },
     "parser": {
       "unsafeParameterDecoratorsEnabled": true

@@ -14,7 +14,7 @@ export interface ModelQueryCrudSupport extends ModelCrudSupport, ModelQuerySuppo
    * @param cls The model class
    * @param data The data
    * @param query The additional query to validate
-  */
+   */
   updateByQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T>;
   /**
    * Update all with partial data, by query

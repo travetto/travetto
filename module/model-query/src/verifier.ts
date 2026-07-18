@@ -28,24 +28,19 @@ const WHERE = 'where';
 const SORT = 'sort';
 // const GROUP_BY = 'groupBy';
 
-const MULTIPLE_KEYS_ALLOWED = new Set([
-  '$maxDistance', '$gt', '$gte',
-  '$minDistance', '$lt', '$lte',
-  '$near'
-]);
+const MULTIPLE_KEYS_ALLOWED = new Set(['$maxDistance', '$gt', '$gte', '$minDistance', '$lt', '$lte', '$near']);
 
 /**
  * Query verification service.  Used to verify the query is valid before running.
  */
 export class QueryVerifier {
-
   /**
    * Internal mapping for various clauses
    */
   static #mapping = [
     [SELECT, 'processSelectClause'] as const,
     [WHERE, 'processWhereClause'] as const,
-    [SORT, 'processSortClause'] as const,
+    [SORT, 'processSortClause'] as const
   ];
 
   /**
@@ -64,7 +59,6 @@ export class QueryVerifier {
     }
 
     for (const [key, value] of Object.entries(clause)) {
-
       // Validate value is correct, and key is valid
       if (value === undefined || value === null) {
         // state.log(`${key} cannot be undefined or null`);
@@ -109,7 +103,13 @@ export class QueryVerifier {
   /**
    * Check operator clause
    */
-  static checkOperatorClause(state: State, declaredType: SimpleType, value: unknown, allowed: Record<string, Set<string>>, isArray: boolean): void {
+  static checkOperatorClause(
+    state: State,
+    declaredType: SimpleType,
+    value: unknown,
+    allowed: Record<string, Set<string>>,
+    isArray: boolean
+  ): void {
     if (isArray && Array.isArray(value)) {
       // Handle array literal
       for (const item of value) {
@@ -128,11 +128,7 @@ export class QueryVerifier {
     } else {
       const keys = Object.keys(value).toSorted();
 
-      if (keys.length !== 1 && !(
-        keys.length >= 2 &&
-        MULTIPLE_KEYS_ALLOWED.has(keys[0]) ||
-        MULTIPLE_KEYS_ALLOWED.has(keys[1])
-      )) {
+      if (keys.length !== 1 && !((keys.length >= 2 && MULTIPLE_KEYS_ALLOWED.has(keys[0])) || MULTIPLE_KEYS_ALLOWED.has(keys[1]))) {
         state.log('One and only one operation may be specified in an operator clause');
         return;
       }
@@ -244,7 +240,7 @@ export class QueryVerifier {
           }
           state.log('Only true, false 0, and 1 are allowed for including/excluding fields');
         } else {
-        /* if (actual === 'string') {
+          /* if (actual === 'string') {
           if (!/[A-Za-z_$0-9]/.test(value)) {
             state.log(`Only A-Z, a-z, 0-9, '$' and '_' are allowed in aliases for selecting fields`);
             return;
@@ -258,7 +254,8 @@ export class QueryVerifier {
             // or { alias: string, calc?: string }
             // console.log('Yay');
           }
-        */}
+        */
+        }
         state.log('Only true, false, 0, and 1 are allowed for selecting fields');
       }
     });
@@ -293,10 +290,7 @@ export class QueryVerifier {
         continue;
       }
 
-      if (!(key in query)
-        || query[key] === undefined
-        || query[key] === null
-      ) {
+      if (!(key in query) || query[key] === undefined || query[key] === null) {
         continue;
       }
 

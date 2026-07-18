@@ -12,7 +12,6 @@ import { ElasticsearchSchemaUtil } from './internal/schema.ts';
  * Manager for elasticsearch indices and schemas
  */
 export class IndexManager implements ModelStorageSupport {
-
   #identities = new Map<Class, { index: string }>();
   #client: Client;
   config: ElasticsearchModelConfig;
@@ -90,8 +89,7 @@ export class IndexManager implements ModelStorageSupport {
     const { index } = this.getIdentity(cls);
     const aliasedIndices = await this.#client.indices.getAlias();
 
-    const toDelete = Object.keys(aliasedIndices[index]?.aliases ?? {})
-      .filter(item => index in (aliasedIndices[item]?.aliases ?? {}));
+    const toDelete = Object.keys(aliasedIndices[index]?.aliases ?? {}).filter(item => index in (aliasedIndices[item]?.aliases ?? {}));
 
     console.debug('Deleting Model', { index, toDelete });
     await Promise.all(toDelete.map(target => this.#client.indices.delete({ index: target })));
@@ -111,7 +109,8 @@ export class IndexManager implements ModelStorageSupport {
       const pendingMapping = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
       const changedFields = ElasticsearchSchemaUtil.getChangedFields(resolvedAlias[currentIndex].mappings, pendingMapping);
 
-      if (changedFields.length) { // If any fields changed, reindex
+      if (changedFields.length) {
+        // If any fields changed, reindex
         console.debug('Updated Model', { index, currentIndex, changedFields });
         const pendingIndex = await this.createIndex(cls, false);
 
@@ -132,7 +131,8 @@ export class IndexManager implements ModelStorageSupport {
         const toDelete = Object.keys(resolvedAlias).filter(item => item !== pendingIndex);
         await Promise.all(toDelete.map(alias => this.#client.indices.delete({ index: alias })));
       }
-    } else { // Create if non-existent
+    } else {
+      // Create if non-existent
       console.debug('Creating Model', { index });
       await this.createIndex(cls);
     }

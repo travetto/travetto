@@ -84,7 +84,6 @@ class S3BlobSuite extends ModelBlobSuite {
     await configCustom.finalizeConfig();
     assert(configCustom.publicBaseUrl === 'https://cdn.example.com');
 
-
     // 4. publicBaseUrl derived from localhost endpoint directly
     const configLocalhost = new S3ModelConfig();
     configLocalhost.bucket = 'my-bucket';

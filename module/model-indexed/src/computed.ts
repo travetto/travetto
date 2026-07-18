@@ -1,9 +1,7 @@
 import type { ModelType } from '@travetto/model';
 import { castTo, type Any } from '@travetto/runtime';
 
-import type {
-  AllIndexes, KeyedIndexBody, FullKeyedIndexBody, TemplateValue, TemplatePart
-} from './types/indexes.ts';
+import type { AllIndexes, KeyedIndexBody, FullKeyedIndexBody, TemplateValue, TemplatePart } from './types/indexes.ts';
 import { IndexedFieldError } from './types/error.ts';
 
 const DEFAULT_SEP = '\u8203';
@@ -18,7 +16,7 @@ type IndexPart<T extends TemplateValue = TemplateValue, V = unknown> = {
 function buildIndexParts<T extends TemplateValue = TemplateValue>(
   template: TemplatePart<T>[],
   body: Record<string, unknown> | undefined,
-  checkValueType?: (value: unknown) => boolean,
+  checkValueType?: (value: unknown) => boolean
 ): IndexPart<T>[] {
   const out: IndexPart<T>[] = [];
   for (const { path, value: templateValue } of template) {
@@ -63,13 +61,10 @@ function validate<T extends ModelType>(idx: AllIndexes<T>, parts: IndexPart[]): 
 
 type Body<T extends ModelType> = KeyedIndexBody<T, Any> | FullKeyedIndexBody<T, Any, Any> | Partial<T>;
 
-type IndexProcessConfig<T = {}> = T & { keyed?: boolean, sort?: boolean };
+type IndexProcessConfig<T = {}> = T & { keyed?: boolean; sort?: boolean };
 
 export class ModelIndexedComputedIndex<T extends ModelType> {
-  static get<T extends ModelType>(
-    idx: AllIndexes<T>,
-    body: Body<T>,
-  ): ModelIndexedComputedIndex<T> {
+  static get<T extends ModelType>(idx: AllIndexes<T>, body: Body<T>): ModelIndexedComputedIndex<T> {
     return new ModelIndexedComputedIndex(idx, body);
   }
 
@@ -78,16 +73,21 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
   idPart: IndexPart<true, string> | undefined;
   idx: AllIndexes<T>;
 
-  constructor(
-    idx: AllIndexes<T>,
-    body: Body<T>,
-  ) {
+  constructor(idx: AllIndexes<T>, body: Body<T>) {
     this.idx = idx;
     this.keyedParts = buildIndexParts(idx.keyTemplate, castTo(body));
-    this.sortParts = buildIndexParts(idx.sortTemplate, castTo(body),
-      value => typeof value === 'number' || value instanceof Date || typeof value === 'string');
+    this.sortParts = buildIndexParts(
+      idx.sortTemplate,
+      castTo(body),
+      value => typeof value === 'number' || value instanceof Date || typeof value === 'string'
+    );
     if ('id' in body && typeof body.id === 'string') {
-      this.idPart = { path: ['id'], value: body.id, state: body.id === null || body.id === undefined ? 'empty' : 'found', templateValue: true };
+      this.idPart = {
+        path: ['id'],
+        value: body.id,
+        state: body.id === null || body.id === undefined ? 'empty' : 'found',
+        templateValue: true
+      };
     }
   }
 
@@ -109,12 +109,15 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
   getKey(config: IndexProcessConfig<{ sep?: string }> = {}): string {
     const { keyed = true, sort = false, sep = DEFAULT_SEP } = config;
     const parts = [keyed ? this.keyedParts : [], sort ? this.sortParts : []].flat();
-    return parts.map(({ value }) => value).map(value => `${value}`).join(sep);
+    return parts
+      .map(({ value }) => value)
+      .map(value => `${value}`)
+      .join(sep);
   }
 
   getSort(): number | string {
     const { value } = this.sortParts[0] ?? {};
-    const direction = (this.sortParts[0]?.templateValue ?? 1);
+    const direction = this.sortParts[0]?.templateValue ?? 1;
     if (value instanceof Date) {
       return value.getTime() * direction;
     } else if (typeof value === 'number') {
@@ -126,7 +129,7 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
     }
   }
 
-  project(config: IndexProcessConfig<{ emptyValue?: unknown, includeId?: boolean }> = {}): Record<string, unknown> {
+  project(config: IndexProcessConfig<{ emptyValue?: unknown; includeId?: boolean }> = {}): Record<string, unknown> {
     const { keyed = true, sort = false, emptyValue = null, includeId } = config;
     const response: Record<string, unknown> = {};
     if (keyed) {
@@ -135,7 +138,7 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
         const all = path.slice(0);
         const last = all.pop()!;
         for (const part of all) {
-          sub = castTo(sub[part] ??= {});
+          sub = castTo((sub[part] ??= {}));
         }
         sub[last] = state === 'empty' ? emptyValue : value;
       }
@@ -146,7 +149,7 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
         const all = path.slice(0);
         const last = all.pop()!;
         for (const part of all) {
-          sub = castTo(sub[part] ??= {});
+          sub = castTo((sub[part] ??= {}));
         }
         sub[last] = state === 'empty' ? emptyValue : value;
       }

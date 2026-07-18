@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import type * as  estypes from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/api/types';
 
 import { Registry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
@@ -52,7 +52,6 @@ class Numerical {
 
 @Suite()
 class SchemaSuite {
-
   @BeforeAll()
   async init() {
     await Registry.init();
@@ -74,7 +73,7 @@ class SchemaSuite {
           type: 'object',
           properties: {
             street1: { type: 'keyword', fields: { text: { type: 'text' } } },
-            street2: { type: 'keyword', fields: { text: { type: 'text' } } },
+            street2: { type: 'keyword', fields: { text: { type: 'text' } } }
           },
           dynamic: false
         }
@@ -90,7 +89,7 @@ class SchemaSuite {
           type: 'nested',
           properties: {
             street1: { type: 'keyword', fields: { text: { type: 'text' } } },
-            street2: { type: 'keyword', fields: { text: { type: 'text' } } },
+            street2: { type: 'keyword', fields: { text: { type: 'text' } } }
           },
           dynamic: false
         },

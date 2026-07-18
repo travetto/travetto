@@ -17,7 +17,6 @@ type FieldCacheEntry = {
  * Utilities for dealing with SQL operations
  */
 export class SQLModelUtil {
-
   static #schemaFieldsCache = new Map<Class, FieldCacheEntry>();
 
   /**
@@ -37,7 +36,13 @@ export class SQLModelUtil {
       return item.filter(value => value !== null && value !== undefined).map(value => this.cleanResults(state, value));
     } else if (!DataUtil.isSimpleValue(item)) {
       for (const key of TypedObject.keys(item)) {
-        if (item[key] === null || item[key] === undefined || key === state.parentPathField.name || key === state.pathField.name || key === state.idxField.name) {
+        if (
+          item[key] === null ||
+          item[key] === undefined ||
+          key === state.parentPathField.name ||
+          key === state.pathField.name ||
+          key === state.idxField.name
+        ) {
           delete item[key];
         } else {
           item[key] = this.cleanResults(state, item[key]);
@@ -60,11 +65,14 @@ export class SQLModelUtil {
       return this.#schemaFieldsCache.get(config.class)!;
     }
 
-    if (!config) { // If a simple type, it is it's own field
+    if (!config) {
+      // If a simple type, it is it's own field
       const field: SchemaFieldConfig = castTo({ ...top });
       return {
-        local: [field], localMap: { [field.name]: field },
-        foreign: [], foreignMap: {}
+        local: [field],
+        localMap: { [field.name]: field },
+        foreign: [],
+        foreignMap: {}
       };
     }
 
@@ -103,7 +111,11 @@ export class SQLModelUtil {
   /**
    * Process a schema structure, synchronously
    */
-  static visitSchemaSync(config: SchemaClassConfig | SchemaFieldConfig, handler: VisitHandler<void>, state: VisitState = { path: [] }): void {
+  static visitSchemaSync(
+    config: SchemaClassConfig | SchemaFieldConfig,
+    handler: VisitHandler<void>,
+    state: VisitState = { path: [] }
+  ): void {
     const path = 'fields' in config ? this.classToStack(config.class) : [...state.path, config];
     const { local: fields, foreign } = this.getFieldsByLocation(path);
 
@@ -131,7 +143,11 @@ export class SQLModelUtil {
   /**
    * Visit a Schema structure
    */
-  static async visitSchema(config: SchemaClassConfig | SchemaFieldConfig, handler: VisitHandler<Promise<void>>, state: VisitState = { path: [] }): Promise<void> {
+  static async visitSchema(
+    config: SchemaClassConfig | SchemaFieldConfig,
+    handler: VisitHandler<Promise<void>>,
+    state: VisitState = { path: [] }
+  ): Promise<void> {
     const path = 'fields' in config ? this.classToStack(config.class) : [...state.path, config];
     const { local: fields, foreign } = this.getFieldsByLocation(path);
 
@@ -159,16 +175,20 @@ export class SQLModelUtil {
   /**
    * Process a schema instance by visiting it synchronously.  This is synchronous to prevent concurrent calls from breaking
    */
-  static visitSchemaInstance<T extends ModelType>(cls: Class<T>, instance: T | OptionalId<T>, handler: VisitHandler<unknown, VisitInstanceNode<unknown>>): void {
+  static visitSchemaInstance<T extends ModelType>(
+    cls: Class<T>,
+    instance: T | OptionalId<T>,
+    handler: VisitHandler<unknown, VisitInstanceNode<unknown>>
+  ): void {
     const pathStack: unknown[] = [instance];
     this.visitSchemaSync(SchemaRegistryIndex.getConfig(cls), {
-      onRoot: (config) => {
+      onRoot: config => {
         const { path } = config;
         path[0].name = instance.id!;
         handler.onRoot({ ...config, value: instance });
         return config.descend();
       },
-      onSub: (config) => {
+      onSub: config => {
         const { config: field } = config;
         const topObject: Record<string, unknown> = castTo(pathStack.at(-1));
         const top = config.path.at(-1)!;
@@ -196,7 +216,7 @@ export class SQLModelUtil {
           }
         }
       },
-      onSimple: (config) => {
+      onSimple: config => {
         const { config: field } = config;
         const topObject: Record<string, unknown> = castTo(pathStack.at(-1));
         const value = topObject[field.name];
@@ -266,7 +286,7 @@ export class SQLModelUtil {
       for (const item of items) {
         const parentKey: string = castTo(item[castKey<T>(state.parentPathField.name)]);
         const root = castTo<Record<string, Record<string, unknown>>>(parent)[parentKey];
-        const fieldKey = castKey<(typeof root) | T>(field.name);
+        const fieldKey = castKey<typeof root | T>(field.name);
         if (field.array) {
           if (!root[fieldKey]) {
             root[fieldKey] = [isSimple ? item : item[fieldKey]];
@@ -295,7 +315,7 @@ export class SQLModelUtil {
   static buildTable(list: VisitStack[]): string {
     const top = list.at(-1)!;
     if (!top[TableSymbol]) {
-      top[TableSymbol] = list.map((item, i) => i === 0 ? ModelRegistryIndex.getStoreName(item.type) : item.name).join('_');
+      top[TableSymbol] = list.map((item, i) => (i === 0 ? ModelRegistryIndex.getStoreName(item.type) : item.name)).join('_');
     }
     return top[TableSymbol]!;
   }
@@ -304,7 +324,7 @@ export class SQLModelUtil {
    * Build property path for a table/field given the current stack
    */
   static buildPath(list: VisitStack[]): string {
-    return list.map((item) => `${item.name}${item.index ? `[${item.index}]` : ''}`).join('.');
+    return list.map(item => `${item.name}${item.index ? `[${item.index}]` : ''}`).join('.');
   }
 
   /**
@@ -323,7 +343,8 @@ export class SQLModelUtil {
         onRoot: ({ path, value }) => track(path, value),
         onSub: ({ path, value }) => track(path, value),
         onSimple: ({ path, value }) => track(path, value)
-      }));
+      })
+    );
 
     const result = [...Object.values(wrappers)].toSorted((a, b) => a.stack.length - b.stack.length);
     return result;

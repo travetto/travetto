@@ -16,13 +16,12 @@ import { QueryIndex } from '@travetto/model-query';
 @QueryIndex({
   name: 'uniqueUser',
   fields: [{ name: true }],
-  unique: true,
+  unique: true
 })
 class UniqueUser {
   id: string;
   name: string;
 }
-
 
 @Suite()
 class MongoBasicSuite extends ModelBasicSuite {

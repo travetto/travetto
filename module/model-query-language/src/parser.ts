@@ -15,7 +15,6 @@ function isBoolean(value: unknown): value is Token & { type: 'boolean' } {
  * Language parser
  */
 export class QueryLanguageParser {
-
   /**
    * Handle all clauses
    */
@@ -101,7 +100,6 @@ export class QueryLanguageParser {
    * Parse all tokens
    */
   static parse(tokens: Token[], position: number = 0): AllNode {
-
     let top: (AllNode | Token)[] = [];
     const stack: (typeof top)[] = [top];
     let list: Literal[] | undefined;
@@ -111,7 +109,7 @@ export class QueryLanguageParser {
       switch (token.type) {
         case 'grouping':
           if (token.value === 'start') {
-            stack.push(top = []);
+            stack.push((top = []));
           } else {
             const group = stack.pop()!;
             top = stack.at(-1)!;
@@ -184,7 +182,8 @@ export class QueryLanguageParser {
         }
         return top;
       }
-      default: throw new Error(`Unexpected node type: ${node.type}`);
+      default:
+        throw new Error(`Unexpected node type: ${node.type}`);
     }
   }
 

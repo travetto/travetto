@@ -10,7 +10,6 @@ import { Address, Person, Todo, BigIntModel } from './model.ts';
 import type { ModelQueryCrudSupport } from '../../src/types/crud.ts';
 import { QueryIndex } from '../../__index__.ts';
 
-
 @Model()
 @QueryIndex({
   name: 'uniqueUser2',
@@ -24,10 +23,9 @@ class UniqueUser2 {
 
 @Suite()
 export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudSupport & ModelCrudSupport> {
-
   supportsUniqueIndexes = true;
 
-  @Test({ skip: (self) => !castTo<ModelQueryCrudSuite>(self).supportsUniqueIndexes })
+  @Test({ skip: self => !castTo<ModelQueryCrudSuite>(self).supportsUniqueIndexes })
   async testUnique() {
     const svc = await this.service;
     await svc.create(UniqueUser2, UniqueUser2.from({ name: 'bob' }));
@@ -43,31 +41,44 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
     assert(todo1.id);
     assert(todo1.version === 0);
 
-    const todo1v2 = await svc.updateByQuery(Todo, Todo.from({
-      id: todo1.id,
-      text: `${todo1.text}!!`,
-      version: todo1.version + 1
-    }), { where: { id: todo1.id, version: todo1.version } },);
+    const todo1v2 = await svc.updateByQuery(
+      Todo,
+      Todo.from({
+        id: todo1.id,
+        text: `${todo1.text}!!`,
+        version: todo1.version + 1
+      }),
+      { where: { id: todo1.id, version: todo1.version } }
+    );
 
     assert(todo1v2.id === todo1.id);
     assert(todo1v2.version > todo1.version);
 
     await assert.rejects(
-      () => svc.updateByQuery(Todo, Todo.from({
-        id: todo1.id,
-        text: `${todo1.text}!!`,
-        version: todo1.version + 1
-      }), { where: { id: todo1.id, version: todo1.version } }),
+      () =>
+        svc.updateByQuery(
+          Todo,
+          Todo.from({
+            id: todo1.id,
+            text: `${todo1.text}!!`,
+            version: todo1.version + 1
+          }),
+          { where: { id: todo1.id, version: todo1.version } }
+        ),
       NotFoundError
     );
 
     const todo2 = await svc.create(Todo, Todo.from({ text: 'bob2' }));
 
-    const result = await svc.updateByQuery(Todo, Todo.from({
-      id: todo2.id,
-      text: `${todo1.text}!!`,
-      version: todo1.version + 1
-    }), { where: { id: todo2.id, text: 'bob2' } });
+    const result = await svc.updateByQuery(
+      Todo,
+      Todo.from({
+        id: todo2.id,
+        text: `${todo1.text}!!`,
+        version: todo1.version + 1
+      }),
+      { where: { id: todo2.id, text: 'bob2' } }
+    );
 
     assert(result.id === todo2.id);
   }
@@ -115,15 +126,20 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
   async testDeleteByQuery() {
     const svc = await this.service;
 
-    const count = await this.saveAll(Person, [1, 2, 3, 4, 5].map(d => Person.from({
-      age: d,
-      gender: 'm',
-      name: `Test ${d}`,
-      address: Address.from({
-        street1: 'street1',
-        street2: 'street2'
-      })
-    })));
+    const count = await this.saveAll(
+      Person,
+      [1, 2, 3, 4, 5].map(d =>
+        Person.from({
+          age: d,
+          gender: 'm',
+          name: `Test ${d}`,
+          address: Address.from({
+            street1: 'street1',
+            street2: 'street2'
+          })
+        })
+      )
+    );
 
     assert(count === 5);
 
@@ -131,33 +147,37 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
 
     assert(c === 2);
 
-    assert(await svc.queryCount(Person, {}) === 3);
+    assert((await svc.queryCount(Person, {})) === 3);
 
     const c2 = await svc.deleteByQuery(Person, { where: { age: { $lte: 3 } } });
 
     assert(c2 === 3);
 
-    assert(await svc.queryCount(Person, {}) === 0);
-
+    assert((await svc.queryCount(Person, {})) === 0);
   }
 
   @Test()
   async testUpdateByQuery() {
     const svc = await this.service;
 
-    const count = await this.saveAll(Person, [1, 2, 3, 4, 5].map(d => Person.from({
-      age: d,
-      gender: 'm',
-      name: `Test ${d}`,
-      address: Address.from({
-        street1: 'street1',
-        street2: 'street2'
-      })
-    })));
+    const count = await this.saveAll(
+      Person,
+      [1, 2, 3, 4, 5].map(d =>
+        Person.from({
+          age: d,
+          gender: 'm',
+          name: `Test ${d}`,
+          address: Address.from({
+            street1: 'street1',
+            street2: 'street2'
+          })
+        })
+      )
+    );
 
     assert(count === 5);
 
-    assert(await svc.queryCount(Person, { where: { gender: 'm' } }) === 5);
+    assert((await svc.queryCount(Person, { where: { gender: 'm' } })) === 5);
 
     const c = await svc.updatePartialByQuery(Person, { where: { age: { $gt: 3 } } }, { gender: 'f' });
 
@@ -165,15 +185,14 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
 
     assert(c === 2);
 
-    assert(await svc.queryCount(Person, { where: { gender: 'm' } }) === 3);
+    assert((await svc.queryCount(Person, { where: { gender: 'm' } })) === 3);
 
     const c2 = await svc.updatePartialByQuery(Person, { where: { gender: 'm' } }, { gender: 'f' });
 
     assert(c2 === 3);
 
-    assert(await svc.queryCount(Person, { where: { gender: 'f' } }) === 5);
-    assert(await svc.queryCount(Person, { where: { gender: 'm' } }) === 0);
-
+    assert((await svc.queryCount(Person, { where: { gender: 'f' } })) === 5);
+    assert((await svc.queryCount(Person, { where: { gender: 'm' } })) === 0);
   }
 
   @Test()
@@ -186,7 +205,7 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
       BigIntModel.from({ largeNumber: 200n, optionalBigInt: 2000n }),
       BigIntModel.from({ largeNumber: 300n }),
       BigIntModel.from({ largeNumber: 9007199254740991n, optionalBigInt: 1234567890123456789n }),
-      BigIntModel.from({ largeNumber: 18014398509481982n }),
+      BigIntModel.from({ largeNumber: 18014398509481982n })
     ]);
 
     assert(count === 5);
@@ -229,17 +248,13 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
     const count = await this.saveAll(BigIntModel, [
       BigIntModel.from({ largeNumber: 100n, optionalBigInt: 1000n }),
       BigIntModel.from({ largeNumber: 200n, optionalBigInt: 2000n }),
-      BigIntModel.from({ largeNumber: 300n }),
+      BigIntModel.from({ largeNumber: 300n })
     ]);
 
     assert(count === 3);
 
     // Update records with bigint condition
-    const updated = await svc.updatePartialByQuery(
-      BigIntModel,
-      { where: { largeNumber: { $lte: 200n } } },
-      { optionalBigInt: 5000n }
-    );
+    const updated = await svc.updatePartialByQuery(BigIntModel, { where: { largeNumber: { $lte: 200n } } }, { optionalBigInt: 5000n });
 
     assert(updated === 2);
 
@@ -259,7 +274,7 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
       BigIntModel.from({ largeNumber: 200n }),
       BigIntModel.from({ largeNumber: 300n }),
       BigIntModel.from({ largeNumber: 400n }),
-      BigIntModel.from({ largeNumber: 500n }),
+      BigIntModel.from({ largeNumber: 500n })
     ]);
 
     assert(count === 5);
@@ -277,4 +292,3 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
     assert(all.every(x => x.largeNumber <= 300n));
   }
 }
-

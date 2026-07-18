@@ -4,15 +4,31 @@ import os from 'node:os';
 import path from 'node:path';
 
 import {
-  type Class, type TimeSpan, Runtime, type BinaryMetadata, type ByteRange, type BinaryType,
-  BinaryUtil, JSONUtil, BinaryMetadataUtil
+  type Class,
+  type TimeSpan,
+  Runtime,
+  type BinaryMetadata,
+  type ByteRange,
+  type BinaryType,
+  BinaryUtil,
+  JSONUtil,
+  BinaryMetadataUtil
 } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
 import {
-  type ModelCrudSupport, type ModelExpirySupport, type ModelStorageSupport, type ModelType, ModelRegistryIndex,
-  NotFoundError, type OptionalId, ExistsError, type ModelBlobSupport, ModelCrudUtil, ModelExpiryUtil,
+  type ModelCrudSupport,
+  type ModelExpirySupport,
+  type ModelStorageSupport,
+  type ModelType,
+  ModelRegistryIndex,
+  NotFoundError,
+  type OptionalId,
+  ExistsError,
+  type ModelBlobSupport,
+  ModelCrudUtil,
+  ModelExpiryUtil,
   type ModelListOptions
 } from '@travetto/model';
 
@@ -33,20 +49,23 @@ export class FileModelConfig {
 
   @PostConstruct()
   async finalizeConfig(): Promise<void> {
-    this.folder ??= path.resolve(os.tmpdir(), `trv_file_${Runtime.main.name.replace(/[^a-z]/ig, '_')}`);
+    this.folder ??= path.resolve(os.tmpdir(), `trv_file_${Runtime.main.name.replace(/[^a-z]/gi, '_')}`);
   }
 }
 
-const exists = (file: string): Promise<boolean> => fs.stat(file).then(() => true, () => false);
+const exists = (file: string): Promise<boolean> =>
+  fs.stat(file).then(
+    () => true,
+    () => false
+  );
 
 /**
  * Standard file support
  */
 @Injectable()
 export class FileModelService implements ModelCrudSupport, ModelBlobSupport, ModelExpirySupport, ModelStorageSupport {
-
   /** @private */
-  static async * scanFolder(folder: string, suffix: string, options?: ModelListOptions): AsyncGenerator<[id: string, field: string][]> {
+  static async *scanFolder(folder: string, suffix: string, options?: ModelListOptions): AsyncGenerator<[id: string, field: string][]> {
     const found: [id: string, field: string][] = [];
     const batchSize = options?.batchSizeHint ?? 100;
     const maxCount = options?.limit ?? Number.MAX_SAFE_INTEGER;
@@ -79,7 +98,9 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   idSource = ModelCrudUtil.uuidSource();
   config: FileModelConfig;
 
-  constructor(config: FileModelConfig) { this.config = config; }
+  constructor(config: FileModelConfig) {
+    this.config = config;
+  }
 
   /**
    * The root location for all activity
@@ -181,7 +202,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     await fs.unlink(file);
   }
 
-  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
     for await (const batch of FileModelService.scanFolder(await this.#resolveName(cls, '.json'), '.json', options)) {
       yield ModelCrudUtil.filterOutNotFound(batch.map(([id]) => this.get(cls, id)));
     }
@@ -189,16 +210,20 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
 
   // Blob
   async upsertBlob(location: string, input: BinaryType, metadata?: BinaryMetadata, overwrite = true): Promise<void> {
-    if (!overwrite && await this.getBlobMetadata(location).then(() => true, () => false)) {
+    if (
+      !overwrite &&
+      (await this.getBlobMetadata(location).then(
+        () => true,
+        () => false
+      ))
+    ) {
       return;
     }
     const resolved = await BinaryMetadataUtil.compute(input, metadata);
     const file = await this.#resolveName(ModelBlobNamespace, BIN, location);
     await Promise.all([
       BinaryUtil.pipeline(input, createWriteStream(file)),
-      BinaryUtil.pipeline(
-        JSONUtil.toBinaryArray(resolved),
-        createWriteStream(file.replace(BIN, META)))
+      BinaryUtil.pipeline(JSONUtil.toBinaryArray(resolved), createWriteStream(file.replace(BIN, META)))
     ]);
   }
 
@@ -219,10 +244,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   async deleteBlob(location: string): Promise<void> {
     const file = await this.#resolveName(ModelBlobNamespace, BIN, location);
     if (await exists(file)) {
-      await Promise.all([
-        fs.unlink(file),
-        fs.unlink(file.replace('.bin', META))
-      ]);
+      await Promise.all([fs.unlink(file), fs.unlink(file.replace('.bin', META))]);
     } else {
       throw new NotFoundError(ModelBlobNamespace, location);
     }
@@ -244,7 +266,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
             await fs.rm(file, { force: true });
             deleted += 1;
           }
-        } catch { } // Don't let a single failure stop the process
+        } catch {} // Don't let a single failure stop the process
       }
     }
     return deleted;

@@ -10,7 +10,6 @@ import type { ModelQuerySuggestSupport } from '../types/suggest.ts';
  * Tools for building suggestion queries
  */
 export class ModelQuerySuggestUtil {
-
   /**
    * Type guard for determining if service supports query suggest operations
    */
@@ -44,9 +43,9 @@ export class ModelQuerySuggestUtil {
     const polymorphicConfig = SchemaRegistryIndex.getDiscriminatedConfig(cls);
     if (polymorphicConfig) {
       clauses.push({
-        [polymorphicConfig.discriminatedField]: polymorphicConfig.discriminatedBase ?
-          { $in: SchemaRegistryIndex.getDiscriminatedTypes(cls) } :
-          polymorphicConfig.discriminatedType
+        [polymorphicConfig.discriminatedField]: polymorphicConfig.discriminatedBase
+          ? { $in: SchemaRegistryIndex.getDiscriminatedTypes(cls) }
+          : polymorphicConfig.discriminatedType
       });
       if (query?.select) {
         Object.assign(select, { [polymorphicConfig.discriminatedField]: true });
@@ -98,7 +97,7 @@ export class ModelQuerySuggestUtil {
     }
     return out
       .toSorted((a, b) => a[0].localeCompare(b[0]))
-      .map((a) => a[1])
+      .map(a => a[1])
       .filter((result, i, arr) => result !== arr[i - 1])
       .slice(0, limit ?? 10);
   }
@@ -106,7 +105,12 @@ export class ModelQuerySuggestUtil {
   /**
    * Build suggestion query
    */
-  static getSuggestFieldQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Query<T> {
+  static getSuggestFieldQuery<T extends ModelType>(
+    cls: Class<T>,
+    field: ValidStringFields<T>,
+    prefix?: string,
+    query?: PageableModelQuery<T>
+  ): Query<T> {
     return this.getSuggestQuery<T>(cls, castTo(field), prefix, query);
   }
 }

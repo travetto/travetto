@@ -1,13 +1,39 @@
 import { TimeUtil } from '@travetto/runtime';
 import type { Token, TokenizeState, TokenType } from './types.ts';
 
-const OPEN_PARENS = 0x28, CLOSE_PARENS = 0x29, OPEN_BRACKET = 0x5b, CLOSE_BRACKET = 0x5d, COMMA = 0x2c;
-const GREATER_THAN = 0x3e, LESS_THAN = 0x3c, EQUAL = 0x3d, NOT = 0x21, MODULO = 0x25, TILDE = 0x7e, AND = 0x26, OR = 0x7c;
-const SPACE = 0x20, TAB = 0x09;
-const DBL_QUOTE = 0x22, SGL_QUOTE = 0x27, FORWARD_SLASH = 0x2f, BACKSLASH = 0x5c;
-const PERIOD = 0x2e, UNDERSCORE = 0x54, DOLLAR_SIGN = 0x24, DASH = 0x2d;
-const ZERO = 0x30, NINE = 0x39, UPPER_A = 0x41, UPPER_Z = 0x5a, LOWER_A = 0x61, LOWER_Z = 0x7a;
-const LOWER_I = 0x69, LOWER_G = 0x67, LOWER_M = 0x6d, LOWER_S = 0x73;
+const OPEN_PARENS = 0x28,
+  CLOSE_PARENS = 0x29,
+  OPEN_BRACKET = 0x5b,
+  CLOSE_BRACKET = 0x5d,
+  COMMA = 0x2c;
+const GREATER_THAN = 0x3e,
+  LESS_THAN = 0x3c,
+  EQUAL = 0x3d,
+  NOT = 0x21,
+  MODULO = 0x25,
+  TILDE = 0x7e,
+  AND = 0x26,
+  OR = 0x7c;
+const SPACE = 0x20,
+  TAB = 0x09;
+const DBL_QUOTE = 0x22,
+  SGL_QUOTE = 0x27,
+  FORWARD_SLASH = 0x2f,
+  BACKSLASH = 0x5c;
+const PERIOD = 0x2e,
+  UNDERSCORE = 0x54,
+  DOLLAR_SIGN = 0x24,
+  DASH = 0x2d;
+const ZERO = 0x30,
+  NINE = 0x39,
+  UPPER_A = 0x41,
+  UPPER_Z = 0x5a,
+  LOWER_A = 0x61,
+  LOWER_Z = 0x7a;
+const LOWER_I = 0x69,
+  LOWER_G = 0x67,
+  LOWER_M = 0x6d,
+  LOWER_S = 0x73;
 
 const ESCAPE: Record<string, string> = {
   '\\n': '\n',
@@ -34,14 +60,13 @@ const TOKEN_MAPPING: Record<string, Token> = {
   ')': { type: 'grouping', value: 'end' },
   null: { type: 'literal', value: null },
   true: { type: 'literal', value: true },
-  false: { type: 'literal', value: false },
+  false: { type: 'literal', value: false }
 };
 
 /**
  * Tokenizer for the query language
  */
 export class QueryLanguageTokenizer {
-
   /**
    * Process the next token.  Can specify expected type as needed
    */
@@ -51,8 +76,7 @@ export class QueryLanguageTokenizer {
     let value: unknown = text;
     if (!result && state.mode === 'literal') {
       if (/^["']/.test(text)) {
-        value = text.substring(1, text.length - 1)
-          .replace(/\\[.]/g, (a, b) => ESCAPE[a] || b);
+        value = text.substring(1, text.length - 1).replace(/\\[.]/g, (a, b) => ESCAPE[a] || b);
       } else if (/^\//.test(text)) {
         const start = 1;
         const end = text.lastIndexOf('/');
@@ -94,13 +118,15 @@ export class QueryLanguageTokenizer {
    * Determine if valid token identifier
    */
   static #isValidIdentToken(ch: number): boolean {
-    return (ch >= ZERO && ch <= NINE) ||
+    return (
+      (ch >= ZERO && ch <= NINE) ||
       (ch >= UPPER_A && ch <= UPPER_Z) ||
       (ch >= LOWER_A && ch <= LOWER_Z) ||
-      (ch === UNDERSCORE) ||
-      (ch === DASH) ||
-      (ch === DOLLAR_SIGN) ||
-      (ch === PERIOD);
+      ch === UNDERSCORE ||
+      ch === DASH ||
+      ch === DOLLAR_SIGN ||
+      ch === PERIOD
+    );
   }
 
   /**
@@ -142,25 +168,39 @@ export class QueryLanguageTokenizer {
       const ch = text.charCodeAt(state.position);
       switch (ch) {
         // Handle punctuation
-        case OPEN_PARENS: case CLOSE_PARENS: case OPEN_BRACKET: case CLOSE_BRACKET: case COMMA:
+        case OPEN_PARENS:
+        case CLOSE_PARENS:
+        case OPEN_BRACKET:
+        case CLOSE_BRACKET:
+        case COMMA:
           this.#flush(state);
           state.mode = 'punctuation';
           break;
         // Handle operator
-        case GREATER_THAN: case LESS_THAN: case EQUAL:
-        case MODULO: case NOT: case TILDE: case AND: case OR:
+        case GREATER_THAN:
+        case LESS_THAN:
+        case EQUAL:
+        case MODULO:
+        case NOT:
+        case TILDE:
+        case AND:
+        case OR:
           this.#flush(state, 'operator');
           break;
         // Handle whitespace
-        case SPACE: case TAB:
+        case SPACE:
+        case TAB:
           this.#flush(state, 'whitespace');
           break;
         // Handle quotes and slashes
-        case DBL_QUOTE: case SGL_QUOTE: case FORWARD_SLASH:
+        case DBL_QUOTE:
+        case SGL_QUOTE:
+        case FORWARD_SLASH:
           this.#flush(state);
           state.mode = 'literal';
           state.position = this.readString(text, state.position) + 1;
-          if (ch === FORWARD_SLASH) { // Read modifiers, not used by all, but useful in general
+          if (ch === FORWARD_SLASH) {
+            // Read modifiers, not used by all, but useful in general
             while (this.#isValidRegexFlag(text.charCodeAt(state.position))) {
               state.position += 1;
             }

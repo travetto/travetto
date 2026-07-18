@@ -36,7 +36,6 @@ type FirestoreIndexSet = {
  */
 @CliCommand()
 export class FirestoreIndexesCommand implements CliCommandShape {
-
   indexFile = 'firestore.indexes.json';
   firebaseFile = 'firebase.json';
 
@@ -61,14 +60,16 @@ export class FirestoreIndexesCommand implements CliCommandShape {
       const indices = ModelRegistryIndex.getIndices(cls)
         .filter(isModelIndexedIndex)
         // We need at least 2 fields.  All 1 field indices are already handled
-        .filter((idx => (idx.keyTemplate?.length ?? 0) + (idx.sortTemplate?.length ?? 0) >= 2));
+        .filter(idx => (idx.keyTemplate?.length ?? 0) + (idx.sortTemplate?.length ?? 0) >= 2);
 
       for (const idx of indices) {
         indexesList.push({
           collectionGroup: FirestoreModelService.resolveTable(cls, config.namespace),
           queryScope: 'COLLECTION',
-          fields: [...idx.keyTemplate, ...idx.sortTemplate]
-            .map(part => ({ fieldPath: part.path.join('.'), order: part.value === -1 ? 'DESCENDING' : 'ASCENDING' }))
+          fields: [...idx.keyTemplate, ...idx.sortTemplate].map(part => ({
+            fieldPath: part.path.join('.'),
+            order: part.value === -1 ? 'DESCENDING' : 'ASCENDING'
+          }))
         });
       }
     }
@@ -83,17 +84,19 @@ export class FirestoreIndexesCommand implements CliCommandShape {
     await ManifestFileUtil.bufferedFileWrite(this.indexFile, text);
 
     const firebaseLocation = Runtime.workspaceRelative(this.firebaseFile);
-    if (!await fs.stat(firebaseLocation, { throwIfNoEntry: false })) {
+    if (!(await fs.stat(firebaseLocation, { throwIfNoEntry: false }))) {
       await ManifestFileUtil.bufferedFileWrite(firebaseLocation, '{}');
     }
 
-    const firebaseContext = JSONUtil.fromBinaryArray<{ firestore?: { database?: string, indexes?: string }[] }>(await fs.readFile(firebaseLocation));
+    const firebaseContext = JSONUtil.fromBinaryArray<{ firestore?: { database?: string; indexes?: string }[] }>(
+      await fs.readFile(firebaseLocation)
+    );
     const existing = (firebaseContext.firestore ??= []);
     const found = existing.find(x => x.database === config.databaseId);
 
     let changed = true;
     if (!found) {
-      existing.push(({ indexes: this.indexFile, database: config.databaseId }));
+      existing.push({ indexes: this.indexFile, database: config.databaseId });
     } else if (found.indexes !== this.indexFile) {
       found.indexes = this.indexFile;
     } else {
@@ -106,11 +109,12 @@ export class FirestoreIndexesCommand implements CliCommandShape {
 
     if (this.deploy) {
       const child = cp.spawn(
-        'firebase', ['deploy', '--only', 'firestore:indexes'],
+        'firebase',
+        ['deploy', '--only', 'firestore:indexes'],
         // Complete take over
-        { stdio: 'inherit' },
+        { stdio: 'inherit' }
       );
-      await ExecUtil.getResult(child)
+      await ExecUtil.getResult(child);
     }
   }
 }

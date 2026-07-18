@@ -12,11 +12,10 @@ import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/sugge
 import { QueryModelService } from './query-service.ts';
 
 @Config('model.custom')
-class CustomModelConfig { }
+class CustomModelConfig {}
 
 @Injectable()
-class CustomModelService extends QueryModelService implements ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport {
-}
+class CustomModelService extends QueryModelService implements ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport {}
 
 @Suite()
 class CustomQuerySuite extends ModelQuerySuite {

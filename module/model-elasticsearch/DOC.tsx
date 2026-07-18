@@ -7,16 +7,19 @@ import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.suppo
 import { ElasticsearchModelConfig } from './src/config.ts';
 import { ElasticsearchModelService } from './src/service.ts';
 
-export const text = <>
-  <c.StdHeader />
-  This module provides an {d.library('Elasticsearch')}-based implementation of the {d.module('Model')}.  This source allows the {d.module('Model')} module to read, write and query against {d.library('Elasticsearch')}. In development mode, {ElasticsearchModelService} will also modify the {d.library('Elasticsearch')} schema in real time to minimize impact to development. <br />
-
-  Supported features:
-  <ul>
-    {...ModelTypes(ElasticsearchModelService)}
-    {...ModelIndexedTypes(ElasticsearchModelService)}
-    {...ModelQueryTypes(ElasticsearchModelService)}
-  </ul>
-
-  <ModelCustomConfig config={ElasticsearchModelConfig} />
-</>;
+export const text = (
+  <>
+    <c.StdHeader />
+    This module provides an {d.library('Elasticsearch')}-based implementation of the {d.module('Model')}. This source allows the{' '}
+    {d.module('Model')} module to read, write and query against {d.library('Elasticsearch')}. In development mode,{' '}
+    {ElasticsearchModelService} will also modify the {d.library('Elasticsearch')} schema in real time to minimize impact to development.{' '}
+    <br />
+    Supported features:
+    <ul>
+      {...ModelTypes(ElasticsearchModelService)}
+      {...ModelIndexedTypes(ElasticsearchModelService)}
+      {...ModelQueryTypes(ElasticsearchModelService)}
+    </ul>
+    <ModelCustomConfig config={ElasticsearchModelConfig} />
+  </>
+);

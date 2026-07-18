@@ -18,7 +18,6 @@ import { ModelQueryCrudUtil } from '../../src/util/crud.ts';
 
 @Suite()
 export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQuerySupport & ModelCrudSupport> {
-
   @Test()
   async testQuery() {
     const svc = await this.service;
@@ -36,9 +35,9 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
     assert((await svc.query(Doctor, {})).length === 2);
     assert((await svc.query(Engineer, {})).length === 1);
 
-    assert(await svc.queryCount(Worker, { where: { name: 'bob' } }) === 1);
-    assert(await svc.queryCount(Doctor, { where: { name: 'bob' } }) === 1);
-    assert(await svc.queryCount(Engineer, { where: { name: 'bob' } }) === 0);
+    assert((await svc.queryCount(Worker, { where: { name: 'bob' } })) === 1);
+    assert((await svc.queryCount(Doctor, { where: { name: 'bob' } })) === 1);
+    assert((await svc.queryCount(Engineer, { where: { name: 'bob' } })) === 0);
 
     assert((await svc.queryOne(Worker, { where: { name: 'bob' } })) instanceof Doctor);
     await assert.rejects(() => svc.queryOne(Firefighter, { where: { name: 'bob' } }), NotFoundError);
@@ -55,7 +54,7 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
     ];
 
     await this.saveAll(Worker, [doc, doc2, fire, eng]);
-    assert(await this.getSize(Worker) === 4);
+    assert((await this.getSize(Worker)) === 4);
 
     const c = await svc.updatePartialByQuery(Doctor, { where: { specialty: 'feet' } }, { specialty: 'eyes' });
     assert(c === 1);
@@ -66,8 +65,8 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
 
     assert(removed === 1);
 
-    assert(await this.getSize(Worker) === 3);
-    assert(await this.getSize(Firefighter) === 0);
+    assert((await this.getSize(Worker)) === 3);
+    assert((await this.getSize(Firefighter)) === 0);
   }
 
   @Test({ skip: ModelQueryPolymorphismSuite.ifNot(ModelQuerySuggestUtil.isSupported) })
@@ -81,7 +80,7 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
     ];
 
     await this.saveAll(Worker, [doc, doc2, fire, eng]);
-    assert(await this.getSize(Worker) === 4);
+    assert((await this.getSize(Worker)) === 4);
 
     assert((await svc.suggestByQuery(Worker, 'name', '')).length === 4);
     assert((await svc.suggestValuesByQuery(Worker, 'name', '')).length === 4);
@@ -105,7 +104,7 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
     ];
 
     await this.saveAll(Worker, [doc, doc2, fire, eng]);
-    assert(await this.getSize(Worker) === 4);
+    assert((await this.getSize(Worker)) === 4);
 
     assert((await svc.facetByQuery(Worker, 'name')).length === 4);
     const docFacet = await svc.facetByQuery(Doctor, 'specialty');

@@ -9,7 +9,6 @@ class MongoIndexedSuite extends ModelIndexedSuite {
   configClass = MongoModelConfig;
 }
 
-
 @Suite()
 class MongoIndexedPolymorphicSuite extends ModelIndexedPolymorphismSuite {
   serviceClass = MongoModelService;

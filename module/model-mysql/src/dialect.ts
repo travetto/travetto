@@ -13,7 +13,6 @@ import { MySQLConnection } from './connection.ts';
  */
 @Injectable()
 export class MySQLDialect extends SQLDialect {
-
   connection: MySQLConnection;
   tablePostfix = 'COLLATE=utf8mb4_bin ENGINE=InnoDB';
 
@@ -47,7 +46,7 @@ export class MySQLDialect extends SQLDialect {
     } else {
       // Customer operators
       Object.assign(this.SQL_OPS, {
-        $regex: 'REGEXP',
+        $regex: 'REGEXP'
       });
       // Double escape
       this.regexWordBoundary = '\\\\b';
@@ -73,7 +72,7 @@ export class MySQLDialect extends SQLDialect {
     const IGNORE_FIELDS = [this.pathField.name, this.parentPathField.name, this.idxField.name].map(field => `'${field}'`);
     const [columns, foreignKeys, indices] = await Promise.all([
       // 1. Columns
-      this.executeSQL<{ name: string, type: string, is_not_null: boolean }>(`
+      this.executeSQL<{ name: string; type: string; is_not_null: boolean }>(`
       SELECT 
         COLUMN_NAME AS name, 
         COLUMN_TYPE AS type, 
@@ -86,7 +85,7 @@ export class MySQLDialect extends SQLDialect {
     `),
 
       // 2. Foreign Keys
-      this.executeSQL<{ name: string, from_column: string, to_column: string, to_table: string }>(`
+      this.executeSQL<{ name: string; from_column: string; to_column: string; to_table: string }>(`
       SELECT 
         CONSTRAINT_NAME AS name, 
         COLUMN_NAME AS from_column, 
@@ -99,7 +98,7 @@ export class MySQLDialect extends SQLDialect {
     `),
 
       // 3. Indices
-      this.executeSQL<{ name: string, is_unique: number, columns: string }>(`
+      this.executeSQL<{ name: string; is_unique: number; columns: string }>(`
       SELECT 
         stat.INDEX_NAME AS name, 
         stat.NON_UNIQUE = 0 AS is_unique, 
@@ -167,10 +166,6 @@ export class MySQLDialect extends SQLDialect {
    * Suppress foreign key checks
    */
   override getTruncateAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
-    return [
-      'SET FOREIGN_KEY_CHECKS = 0;',
-      ...super.getTruncateAllTablesSQL(cls),
-      'SET FOREIGN_KEY_CHECKS = 1;'
-    ];
+    return ['SET FOREIGN_KEY_CHECKS = 0;', ...super.getTruncateAllTablesSQL(cls), 'SET FOREIGN_KEY_CHECKS = 1;'];
   }
 }

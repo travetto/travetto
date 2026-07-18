@@ -1,28 +1,81 @@
 import {
-  type Binary, type Db, GridFSBucket, MongoClient, type GridFSFile, type Collection,
-  type ObjectId, type RootFilterOperators, type Filter, type WithId as MongoWithId, type FindCursor,
-  MongoServerError,
+  type Binary,
+  type Db,
+  GridFSBucket,
+  MongoClient,
+  type GridFSFile,
+  type Collection,
+  type ObjectId,
+  type RootFilterOperators,
+  type Filter,
+  type WithId as MongoWithId,
+  type FindCursor,
+  MongoServerError
 } from 'mongodb';
 
 import {
-  ModelRegistryIndex, type ModelType, type OptionalId, type ModelCrudSupport, type ModelStorageSupport, type ModelExpirySupport,
-  type ModelBulkSupport, type BulkOperation, type BulkResponse, NotFoundError, ExistsError, type ModelBlobSupport,
-  ModelCrudUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, type ModelListOptions,
+  ModelRegistryIndex,
+  type ModelType,
+  type OptionalId,
+  type ModelCrudSupport,
+  type ModelStorageSupport,
+  type ModelExpirySupport,
+  type ModelBulkSupport,
+  type BulkOperation,
+  type BulkResponse,
+  NotFoundError,
+  ExistsError,
+  type ModelBlobSupport,
+  ModelCrudUtil,
+  ModelStorageUtil,
+  ModelExpiryUtil,
+  ModelBulkUtil,
+  type ModelListOptions
 } from '@travetto/model';
 import {
-  type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
-  type PageableModelQuery, type ValidStringFields, type WhereClause, type ModelQuerySuggestSupport,
-  QueryVerifier, ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil, type ModelQueryFacet,
+  type ModelQuery,
+  type ModelQueryCrudSupport,
+  type ModelQueryFacetSupport,
+  type ModelQuerySupport,
+  type PageableModelQuery,
+  type ValidStringFields,
+  type WhereClause,
+  type ModelQuerySuggestSupport,
+  QueryVerifier,
+  ModelQueryUtil,
+  ModelQuerySuggestUtil,
+  ModelQueryCrudUtil,
+  type ModelQueryFacet
 } from '@travetto/model-query';
 import {
-  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex, type ModelIndexedSearchOptions, type SortedIndexSelectionType,
+  type ModelIndexedSupport,
+  type KeyedIndexSelection,
+  type KeyedIndexBody,
+  type ModelPageOptions,
+  ModelIndexedUtil,
+  type SingleItemIndex,
+  type SortedIndexSelection,
+  type ModelPageResult,
+  type SortedIndex,
+  type FullKeyedIndexBody,
+  type FullKeyedIndexWithPartialBody,
+  ModelIndexedComputedIndex,
+  type ModelIndexedSearchOptions,
+  type SortedIndexSelectionType
 } from '@travetto/model-indexed';
 
 import {
-  ShutdownManager, type Class, TypedObject, castTo, asFull, type BinaryMetadata, type ByteRange, type BinaryType,
-  BinaryUtil, BinaryMetadataUtil, JSONUtil,
+  ShutdownManager,
+  type Class,
+  TypedObject,
+  castTo,
+  asFull,
+  type BinaryMetadata,
+  type ByteRange,
+  type BinaryType,
+  BinaryUtil,
+  BinaryMetadataUtil,
+  JSONUtil
 } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 
@@ -33,8 +86,7 @@ type BlobRaw = GridFSFile & { metadata?: BinaryMetadata };
 
 type MongoTextSearch = RootFilterOperators<unknown>['$text'];
 
-const isDuplicateKeyError = (error: unknown): boolean =>
-  error instanceof MongoServerError && error.message.includes('duplicate key error');
+const isDuplicateKeyError = (error: unknown): boolean => error instanceof MongoServerError && error.message.includes('duplicate key error');
 
 export const ModelBlobNamespace = '__blobs';
 
@@ -42,30 +94,41 @@ export const ModelBlobNamespace = '__blobs';
  * Mongo-based model source
  */
 @Injectable()
-export class MongoModelService implements
-  ModelCrudSupport, ModelStorageSupport,
-  ModelBulkSupport, ModelBlobSupport,
-  ModelIndexedSupport, ModelQuerySupport,
-  ModelQueryCrudSupport, ModelQueryFacetSupport,
-  ModelQuerySuggestSupport, ModelExpirySupport {
-
+export class MongoModelService
+  implements
+    ModelCrudSupport,
+    ModelStorageSupport,
+    ModelBulkSupport,
+    ModelBlobSupport,
+    ModelIndexedSupport,
+    ModelQuerySupport,
+    ModelQueryCrudSupport,
+    ModelQueryFacetSupport,
+    ModelQuerySuggestSupport,
+    ModelExpirySupport
+{
   #db: Db;
   #bucket: GridFSBucket;
   idSource = ModelCrudUtil.uuidSource();
   client: MongoClient;
   config: MongoModelConfig;
 
-  constructor(config: MongoModelConfig) { this.config = config; }
+  constructor(config: MongoModelConfig) {
+    this.config = config;
+  }
 
-  async * #iterateCursor<T extends ModelType>(cls: Class<T>, cursor: FindCursor, options?: ModelListOptions & ModelPageOptions<number>): AsyncGenerator<T[]> {
+  async *#iterateCursor<T extends ModelType>(
+    cls: Class<T>,
+    cursor: FindCursor,
+    options?: ModelListOptions & ModelPageOptions<number>
+  ): AsyncGenerator<T[]> {
     const batchSize = options?.batchSizeHint ?? 100;
     let batch: T[] = [];
     const maxCount = options?.limit ?? Number.MAX_SAFE_INTEGER;
     for await (const item of cursor
       .batchSize(batchSize)
       .limit(maxCount)
-      .skip(options?.offset ?? 0)
-    ) {
+      .skip(options?.offset ?? 0)) {
       if (options?.abort?.aborted) {
         cursor.close();
         break;
@@ -95,8 +158,7 @@ export class MongoModelService implements
     }
 
     const where = this.getWhereFilter(cls, whereClause);
-    let q = store.find(where, { timeout: true })
-      .batchSize(100);
+    let q = store.find(where, { timeout: true }).batchSize(100);
 
     // TODO: We could cache this
     if ('sort' in idx) {
@@ -105,7 +167,7 @@ export class MongoModelService implements
     return q;
   }
 
-  restoreId(item: { id?: string, _id?: unknown }): void {
+  restoreId(item: { id?: string; _id?: unknown }): void {
     if (item._id) {
       item.id ??= MongoUtil.idToString(castTo(item._id));
       delete item._id;
@@ -125,10 +187,10 @@ export class MongoModelService implements
     return item;
   }
 
-  preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary, id: string }): string;
+  preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary; id: string }): string;
   preUpdate<T extends OptionalId<ModelType>>(item: Omit<T, 'id'> & { _id?: Binary }): undefined;
-  preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary, id: undefined }): undefined;
-  preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary, id?: string }): string | undefined {
+  preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary; id: undefined }): undefined;
+  preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary; id?: string }): string | undefined {
     if (item?.id) {
       const id = item.id;
       item._id = MongoUtil.uuid(id);
@@ -153,7 +215,7 @@ export class MongoModelService implements
   async initializeClient(): Promise<void> {
     this.client = await MongoClient.connect(this.config.url, {
       ...this.config.connectionOptions,
-      useBigInt64: true,
+      useBigInt64: true
     });
     this.#db = this.client.db(this.config.namespace);
     this.#bucket = new GridFSBucket(this.#db, {
@@ -174,7 +236,7 @@ export class MongoModelService implements
   }
 
   // Storage
-  async createStorage(): Promise<void> { }
+  async createStorage(): Promise<void> {}
 
   async deleteStorage(): Promise<void> {
     await this.#db.dropDatabase();
@@ -182,10 +244,7 @@ export class MongoModelService implements
 
   async upsertModel(cls: Class): Promise<void> {
     const col = await this.getStore(cls);
-    const indices = [
-      ...ModelRegistryIndex.getIndices(cls).map(idx => MongoUtil.getIndex(cls, idx)),
-      ...MongoUtil.getExtraIndices(cls)
-    ];
+    const indices = [...ModelRegistryIndex.getIndices(cls).map(idx => MongoUtil.getIndex(cls, idx)), ...MongoUtil.getExtraIndices(cls)];
     const existingIndices = (await col.indexes().catch(() => [])).filter(idx => idx.name !== '_id_');
 
     const pendingMap = Object.fromEntries(indices.map(pair => [pair[1].name!, pair]));
@@ -219,7 +278,7 @@ export class MongoModelService implements
   }
 
   async truncateBlob(): Promise<void> {
-    await this.#bucket.drop().catch(() => { });
+    await this.#bucket.drop().catch(() => {});
   }
 
   /**
@@ -275,11 +334,7 @@ export class MongoModelService implements
     const store = await this.getStore(cls);
 
     try {
-      await store.updateOne(
-        this.getIdFilter(cls, id, false),
-        { $set: cleaned },
-        { upsert: true }
-      );
+      await store.updateOne(this.getIdFilter(cls, id, false), { $set: cleaned }, { upsert: true });
     } catch (error) {
       throw isDuplicateKeyError(error) ? new ExistsError(cls, id) : error;
     }
@@ -292,24 +347,23 @@ export class MongoModelService implements
     const final = await ModelCrudUtil.prePartialUpdate(cls, item, view);
     const simple = MongoUtil.extractSimple(cls, final, undefined, false);
 
-    const operation: Partial<T> = castTo(Object
-      .entries(simple)
-      .reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>((document, [key, value]) => {
+    const operation: Partial<T> = castTo(
+      Object.entries(simple).reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>((document, [key, value]) => {
         if (value === null || value === undefined) {
           (document.$unset ??= {})[key] = value;
         } else {
           (document.$set ??= {})[key] = value;
         }
         return document;
-      }, {}));
+      }, {})
+    );
 
     const id = item.id;
 
-    const result = await store.findOneAndUpdate(
-      this.getIdFilter(cls, id),
-      operation,
-      { returnDocument: 'after', includeResultMetadata: true }
-    );
+    const result = await store.findOneAndUpdate(this.getIdFilter(cls, id), operation, {
+      returnDocument: 'after',
+      includeResultMetadata: true
+    });
 
     if (!result.value) {
       throw new NotFoundError(cls, id);
@@ -326,7 +380,7 @@ export class MongoModelService implements
     }
   }
 
-  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
     const store = await this.getStore(cls);
     const cursor = store.find(this.getWhereFilter(cls, {}), { timeout: true });
     yield* this.#iterateCursor(cls, cursor, options);
@@ -334,7 +388,10 @@ export class MongoModelService implements
 
   // Blob
   async upsertBlob(location: string, input: BinaryType, metadata?: BinaryMetadata, overwrite = true): Promise<void> {
-    const existing = await this.getBlobMetadata(location).then(() => true, () => false);
+    const existing = await this.getBlobMetadata(location).then(
+      () => true,
+      () => false
+    );
     if (!overwrite && existing) {
       return;
     }
@@ -366,10 +423,9 @@ export class MongoModelService implements
   }
 
   async updateBlobMetadata(location: string, metadata: BinaryMetadata): Promise<void> {
-    await this.#db.collection<{ metadata: BinaryMetadata }>(`${ModelBlobNamespace}.files`).findOneAndUpdate(
-      { filename: location },
-      { $set: { metadata, contentType: metadata.contentType! } },
-    );
+    await this.#db
+      .collection<{ metadata: BinaryMetadata }>(`${ModelBlobNamespace}.files`)
+      .findOneAndUpdate({ filename: location }, { $set: { metadata, contentType: metadata.contentType! } });
   }
 
   // Bulk
@@ -402,7 +458,10 @@ export class MongoModelService implements
         bulk.insert(operation.insert);
       } else if (operation.upsert) {
         const id = this.preUpdate(operation.upsert);
-        bulk.find({ _id: MongoUtil.uuid(id!) }).upsert().updateOne({ $set: operation.upsert });
+        bulk
+          .find({ _id: MongoUtil.uuid(id!) })
+          .upsert()
+          .updateOne({ $set: operation.upsert });
       } else if (operation.update) {
         const id = this.preUpdate(operation.update);
         bulk.find({ _id: MongoUtil.uuid(id) }).update({ $set: operation.update });
@@ -451,89 +510,77 @@ export class MongoModelService implements
   }
 
   // Indexed
-  async getByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
+  async getByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: FullKeyedIndexBody<T, K, S>
+  ): Promise<T> {
     const store = await this.getStore(cls);
 
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
 
-    const result = await store.findOne(
-      this.getWhereFilter(cls, castTo(computed.project({ sort: true, includeId: true })))
-    );
+    const result = await store.findOne(this.getWhereFilter(cls, castTo(computed.project({ sort: true, includeId: true }))));
     if (!result) {
       throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
     return await this.postLoad(cls, result);
   }
 
-  async deleteByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<void> {
+  async deleteByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: FullKeyedIndexBody<T, K, S>
+  ): Promise<void> {
     const store = await this.getStore(cls);
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
 
-    const result = await store.deleteOne(
-      this.getWhereFilter(cls, castTo(computed.project({ sort: true, includeId: true })))
-    );
+    const result = await store.deleteOne(this.getWhereFilter(cls, castTo(computed.project({ sort: true, includeId: true }))));
     if (!result.deletedCount) {
       throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
   }
 
-  upsertByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: OptionalId<T>): Promise<T> {
+  upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: OptionalId<T>
+  ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
 
-  updateByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: T): Promise<T> {
+  updateByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: T
+  ): Promise<T> {
     return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
   }
 
-  async updatePartialByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K>, body: FullKeyedIndexWithPartialBody<T, K, S>): Promise<T> {
+  async updatePartialByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K>,
+    body: FullKeyedIndexWithPartialBody<T, K, S>
+  ): Promise<T> {
     const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
     return this.update(cls, item);
   }
 
-  async pageByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(
+  async pageByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options?: ModelPageOptions,
+    options?: ModelPageOptions
   ): Promise<ModelPageResult<T>> {
     {
       const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-      const cursor = (await this.#buildIndexQuery(cls, idx, body));
+      const cursor = await this.#buildIndexQuery(cls, idx, body);
       const batches = await Array.fromAsync(this.#iterateCursor(cls, cursor, { limit: 100, ...options, offset }));
       const items = batches.flat();
       return { items, nextOffset: items.length ? JSONUtil.toBase64(offset + items.length) : undefined };
     }
   }
 
-  async *  listByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(
+  async *listByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
@@ -548,18 +595,17 @@ export class MongoModelService implements
     S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>,
     B extends SortedIndexSelectionType<T, S> & string
-  >(
-    cls: Class<T>,
-    idx: SortedIndex<T, K, S>,
-    body: KeyedIndexBody<T, K>,
-    prefix: B,
-    options?: ModelIndexedSearchOptions
-  ): Promise<T[]> {
-    const cursor = (await this.#buildIndexQuery(cls, idx, body, (where) => castTo({
-      $and: [where, {
-        [idx.sortTemplate[0].path.join('.')]: ModelIndexedUtil.getSuggestRegex(prefix)
-      }]
-    })));
+  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]> {
+    const cursor = await this.#buildIndexQuery(cls, idx, body, where =>
+      castTo({
+        $and: [
+          where,
+          {
+            [idx.sortTemplate[0].path.join('.')]: ModelIndexedUtil.getSuggestRegex(prefix)
+          }
+        ]
+      })
+    );
     const batches = await Array.fromAsync(this.#iterateCursor(cls, cursor, { limit: 10, ...options }));
 
     return batches.flat();
@@ -622,15 +668,14 @@ export class MongoModelService implements
     const item = await ModelCrudUtil.prePartialUpdate(cls, data);
     const col = await this.getStore(cls);
     const items = MongoUtil.extractSimple(cls, item);
-    const final = Object.entries(items).reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>(
-      (document, [key, value]) => {
-        if (value === null || value === undefined) {
-          (document.$unset ??= {})[key] = value;
-        } else {
-          (document.$set ??= {})[key] = value;
-        }
-        return document;
-      }, {});
+    const final = Object.entries(items).reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>((document, [key, value]) => {
+      if (value === null || value === undefined) {
+        (document.$unset ??= {})[key] = value;
+      } else {
+        (document.$set ??= {})[key] = value;
+      }
+      return document;
+    }, {});
 
     const filter = MongoUtil.extractWhereFilter(cls, query.where);
     const result = await col.updateMany(filter, castTo(final));
@@ -664,7 +709,7 @@ export class MongoModelService implements
       }
     ];
 
-    const result = await col.aggregate<{ _id: ObjectId, count: number }>(aggregations).toArray();
+    const result = await col.aggregate<{ _id: ObjectId; count: number }>(aggregations).toArray();
 
     return result
       .map(item => ({
@@ -675,14 +720,24 @@ export class MongoModelService implements
   }
 
   // Suggest
-  async suggestValuesByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+  async suggestValuesByQuery<T extends ModelType>(
+    cls: Class<T>,
+    field: ValidStringFields<T>,
+    prefix?: string,
+    query?: PageableModelQuery<T>
+  ): Promise<string[]> {
     await QueryVerifier.verify(cls, query);
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestFieldQuery<T>(cls, field, prefix, query);
     const results = await this.query<T>(cls, resolvedQuery);
-    return ModelQuerySuggestUtil.combineSuggestResults<T, string>(cls, field, prefix, results, (a) => a, query?.limit);
+    return ModelQuerySuggestUtil.combineSuggestResults<T, string>(cls, field, prefix, results, a => a, query?.limit);
   }
 
-  async suggestByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+  async suggestByQuery<T extends ModelType>(
+    cls: Class<T>,
+    field: ValidStringFields<T>,
+    prefix?: string,
+    query?: PageableModelQuery<T>
+  ): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
     const results = await this.query<T>(cls, resolvedQuery);
@@ -699,9 +754,11 @@ export class MongoModelService implements
       search = { $search: search, $language: 'en' };
     }
 
-    (query.sort ??= []).unshift(castTo<(typeof query.sort[0])>({
-      score: { $meta: 'textScore' }
-    }));
+    (query.sort ??= []).unshift(
+      castTo<(typeof query.sort)[0]>({
+        score: { $meta: 'textScore' }
+      })
+    );
 
     const cursor = col.find(castTo({ $and: [{ $text: search }, filter] }), {});
     const items = await MongoUtil.prepareCursor(cls, cursor, query).toArray();

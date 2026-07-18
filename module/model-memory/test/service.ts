@@ -39,7 +39,7 @@ class MemoryExpirySuite extends ModelExpirySuite {
   async ensureCulled() {
     const service = await this.service;
 
-    let total:number;
+    let total: number;
 
     total = await this.getSize(ExpiryUser);
     assert(total === 0);
@@ -48,10 +48,13 @@ class MemoryExpirySuite extends ModelExpirySuite {
     console.log('Start memory', startMemory / KB);
 
     // Create
-    await service.upsert(ExpiryUser, ExpiryUser.from({
-      expiresAt: TimeUtil.fromNow('500ms'),
-      payload: 'abcdefghij'.repeat(5 * KB) // 50mb
-    }));
+    await service.upsert(
+      ExpiryUser,
+      ExpiryUser.from({
+        expiresAt: TimeUtil.fromNow('500ms'),
+        payload: 'abcdefghij'.repeat(5 * KB) // 50mb
+      })
+    );
 
     const sizedMemory = process.memoryUsage().arrayBuffers;
     console.log('Sized memory', sizedMemory / KB);

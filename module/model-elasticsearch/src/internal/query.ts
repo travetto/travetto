@@ -12,7 +12,6 @@ import type { EsSchemaConfig } from './types.ts';
  * Support tools for dealing with elasticsearch specific requirements
  */
 export class ElasticsearchQueryUtil {
-
   /**
    * Convert `a : { b : { c : ... }}` to `a.b.c`
    */
@@ -61,16 +60,21 @@ export class ElasticsearchQueryUtil {
         return { [key]: { order: value === 1 || value === true ? 'asc' : 'desc' } };
       });
     } else {
-      return sort.sortTemplate.map<estypes.SortOptions>(field =>
-        ({ [field.path.join('.')]: { order: field.value === 1 ? 'asc' : 'desc' } })
-      );
+      return sort.sortTemplate.map<estypes.SortOptions>(field => ({
+        [field.path.join('.')]: { order: field.value === 1 ? 'asc' : 'desc' }
+      }));
     }
   }
 
   /**
    * Extract specific term for a class, and a given field
    */
-  static extractWhereTermQuery<T>(cls: Class<T>, item: Record<string, unknown>, config?: EsSchemaConfig, path: string = ''): Record<string, unknown> {
+  static extractWhereTermQuery<T>(
+    cls: Class<T>,
+    item: Record<string, unknown>,
+    config?: EsSchemaConfig,
+    path: string = ''
+  ): Record<string, unknown> {
     const items = [];
     const fields = SchemaRegistryIndex.get(cls).getFields();
 
@@ -78,22 +82,18 @@ export class ElasticsearchQueryUtil {
       const top = item[property];
       const declaredSchema = fields[property];
       const declaredType = declaredSchema.type;
-      const subPath = declaredType === String ?
-        ((property === 'id' && !path) ? '_id' : `${path}${property}`) :
-        `${path}${property}`;
+      const subPath = declaredType === String ? (property === 'id' && !path ? '_id' : `${path}${property}`) : `${path}${property}`;
 
-      const subPathQuery = (value: unknown): {} => (property === 'id' && !path) ?
-        { ids: { values: Array.isArray(value) ? value : [value] } } :
-        { [Array.isArray(value) ? 'terms' : 'term']: { [subPath]: value } };
+      const subPathQuery = (value: unknown): {} =>
+        property === 'id' && !path
+          ? { ids: { values: Array.isArray(value) ? value : [value] } }
+          : { [Array.isArray(value) ? 'terms' : 'term']: { [subPath]: value } };
 
       if (DataUtil.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];
         if (!subKey.startsWith('$')) {
           const inner = this.extractWhereTermQuery(declaredType, top, config, `${subPath}.`);
-          items.push(declaredSchema.array ?
-            { nested: { path: subPath, query: inner } } :
-            inner
-          );
+          items.push(declaredSchema.array ? { nested: { path: subPath, query: inner } } : inner);
         } else {
           const value = top[subKey];
 
@@ -141,16 +141,15 @@ export class ElasticsearchQueryUtil {
             }
             case '$regex': {
               const pattern = DataUtil.toRegex(castTo(value));
-              if (pattern.source.startsWith('^')) { // We have a prefix query
+              if (pattern.source.startsWith('^')) {
+                // We have a prefix query
                 if (/^\^[A-Za-z0-9_-]+/.test(pattern.source)) {
                   items.push({ prefix: { [subPath]: pattern.source.substring(1) } });
                 } else {
                   items.push({ regexp: { [subPath]: pattern.source.substring(1) } });
                 }
               } else if (pattern.source.startsWith('\\b') && pattern.source.endsWith('.*') && declaredSchema.specifiers?.includes('text')) {
-                const textField = !pattern.flags.includes('i') && config && config.caseSensitive ?
-                  `${subPath}.text_cs` :
-                  `${subPath}.text`;
+                const textField = !pattern.flags.includes('i') && config && config.caseSensitive ? `${subPath}.text_cs` : `${subPath}.text`;
                 const query = pattern.source.substring(2, pattern.source.length - 2);
                 items.push({
                   match_phrase_prefix: {
@@ -217,7 +216,11 @@ export class ElasticsearchQueryUtil {
    * @param cls
    * @param search
    */
-  static getSearchQuery<T extends ModelType>(cls: Class<T>, search: Record<string, unknown>, checkExpiry = true): estypes.QueryDslQueryContainer {
+  static getSearchQuery<T extends ModelType>(
+    cls: Class<T>,
+    search: Record<string, unknown>,
+    checkExpiry = true
+  ): estypes.QueryDslQueryContainer {
     const clauses: estypes.QueryDslQueryContainer[] = [];
     if (search && Object.keys(search).length) {
       clauses.push(search);
@@ -226,12 +229,9 @@ export class ElasticsearchQueryUtil {
     if (checkExpiry && expiresAt) {
       clauses.push({
         bool: {
-          should: [
-            { exists: { field: expiresAt } },
-            { range: { [expiresAt]: { gte: new Date().toISOString() } } },
-          ],
+          should: [{ exists: { field: expiresAt } }, { range: { [expiresAt]: { gte: new Date().toISOString() } } }],
           minimum_should_match: 1
-        },
+        }
       });
     }
     const polymorphicConfig = SchemaRegistryIndex.getDiscriminatedConfig(cls);
@@ -242,18 +242,19 @@ export class ElasticsearchQueryUtil {
         clauses.push({ term: { [polymorphicConfig.discriminatedField]: { value: polymorphicConfig.discriminatedType } } });
       }
     }
-    return clauses.length === 0 ? {} :
-      clauses.length === 1 ? clauses[0] :
-        { bool: { must: clauses } };
+    return clauses.length === 0 ? {} : clauses.length === 1 ? clauses[0] : { bool: { must: clauses } };
   }
 
   /**
    * Build a base search object from a class and a query
    */
   static getSearchObject<T extends ModelType>(
-    cls: Class<T>, query: Query<T>, config?: EsSchemaConfig, checkExpiry = true
+    cls: Class<T>,
+    query: Query<T>,
+    config?: EsSchemaConfig,
+    checkExpiry = true
   ): estypes.SearchRequest & Omit<estypes.DeleteByQueryRequest, 'index' | 'sort'> {
-    const search: (estypes.SearchRequest & Omit<estypes.DeleteByQueryRequest, 'index' | 'sort'>) = {
+    const search: estypes.SearchRequest & Omit<estypes.DeleteByQueryRequest, 'index' | 'sort'> = {
       query: this.getSearchQuery(cls, this.extractWhereQuery(cls, query.where ?? {}, config), checkExpiry)
     };
 

@@ -12,11 +12,11 @@ export class User {
 export const usersByNameAge = sortedIndex(User, {
   name: 'usersByNameAge',
   key: { name: true },
-  sort: { age: 1 }  // 1 for ascending, -1 for descending
+  sort: { age: 1 } // 1 for ascending, -1 for descending
 });
 
 export const recentUsers = sortedIndex(User, {
   name: 'recentUsers',
-  key: {},  // No key filtering
-  sort: { createdAt: -1 }  // Most recent first
+  key: {}, // No key filtering
+  sort: { createdAt: -1 } // Most recent first
 });

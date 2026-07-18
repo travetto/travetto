@@ -17,7 +17,6 @@ class TextAble {
 
 @Suite()
 class TextTestSuite {
-
   @BeforeAll()
   async init() {
     await Registry.init();
@@ -39,6 +38,5 @@ class TextTestSuite {
     assert(schema.properties.messages.fields);
     assert(schema.properties.messages.fields.text);
     assert(schema.properties.messages.fields.text.type === 'text');
-
   }
 }

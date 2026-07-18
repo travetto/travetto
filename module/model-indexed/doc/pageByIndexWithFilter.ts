@@ -16,10 +16,15 @@ const usersByNameAge = sortedIndex(User, {
 
 export async function listWithFilterExample(modelService: ModelIndexedSupport) {
   // Get all users named 'John' sorted by age
-  const result = await modelService.pageByIndex(User, usersByNameAge, {
-    name: 'John'
-  }, {
-    limit: 10
-  });
+  const result = await modelService.pageByIndex(
+    User,
+    usersByNameAge,
+    {
+      name: 'John'
+    },
+    {
+      limit: 10
+    }
+  );
   return result;
 }

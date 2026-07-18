@@ -4,7 +4,8 @@ import { JSONUtil } from '@travetto/runtime';
 
 import { QueryLanguageParser } from './parser.ts';
 
-const parse = <T>(key: string): T | undefined => !key || typeof key !== 'string' || !/^[{[]/.test(key) ? undefined : JSONUtil.fromUTF8(key);
+const parse = <T>(key: string): T | undefined =>
+  !key || typeof key !== 'string' || !/^[{[]/.test(key) ? undefined : JSONUtil.fromUTF8(key);
 
 @Schema()
 export class QueryLanguageModelQuery {
@@ -13,10 +14,11 @@ export class QueryLanguageModelQuery {
       ...(self.limit ? { limit: self.limit } : {}),
       ...(self.offset ? { offset: self.offset } : {}),
       ...(self.sort ? { sort: parse(self.sort) } : {}),
-      ...(self.where ? {
-        where: parse(self.where) ??
-          QueryLanguageParser.parseToQuery(self.where)
-      } : {}),
+      ...(self.where
+        ? {
+            where: parse(self.where) ?? QueryLanguageParser.parseToQuery(self.where)
+          }
+        : {})
     };
   }
 

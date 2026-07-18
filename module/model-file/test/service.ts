@@ -42,10 +42,15 @@ class FileExpirySuite extends ModelExpirySuite {
     const store = ModelRegistryIndex.getStoreName(ExpiryUser);
     const folder = `${config.folder}/${config.namespace}/${store}`;
 
-    const countFiles = () => fs.stat(folder)
-      .then(() => fs.readdir(folder, { recursive: true }), () => [])
-      .then(v => v.filter(x => x.endsWith('.json')))
-      .then(v => v.length);
+    const countFiles = () =>
+      fs
+        .stat(folder)
+        .then(
+          () => fs.readdir(folder, { recursive: true }),
+          () => []
+        )
+        .then(v => v.filter(x => x.endsWith('.json')))
+        .then(v => v.length);
 
     let total: number;
     let allFiles = await countFiles();
@@ -55,9 +60,12 @@ class FileExpirySuite extends ModelExpirySuite {
     assert(allFiles === 0);
 
     // Create
-    await service.upsert(ExpiryUser, ExpiryUser.from({
-      expiresAt: TimeUtil.fromNow('500ms'),
-    }));
+    await service.upsert(
+      ExpiryUser,
+      ExpiryUser.from({
+        expiresAt: TimeUtil.fromNow('500ms')
+      })
+    );
 
     allFiles = await countFiles();
     assert(allFiles > 0);
