@@ -1,10 +1,20 @@
-import * as vscode from 'vscode';
-import timers from 'node:timers/promises';
-import path from 'node:path';
+import { type ChildProcess, type SpawnOptions, spawn } from 'node:child_process';
 import fs from 'node:fs';
-import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
+import path from 'node:path';
+import timers from 'node:timers/promises';
 
-import { type IndexedFile, type IndexedModule, type ManifestContext, ManifestIndex, ManifestModuleUtil, ManifestUtil, PackageUtil } from '@travetto/manifest';
+import * as vscode from 'vscode';
+
+import {
+  type IndexedFile,
+  type IndexedModule,
+  type ManifestContext,
+  ManifestIndex,
+  ManifestModuleUtil,
+  ManifestUtil,
+  PackageUtil
+} from '@travetto/manifest';
+
 import type { CompilerStateType } from '@travetto/compiler/src/types.ts';
 
 const SUFFIXES = ['.ts', '.js', '.tsx', '.jsx', '.d.ts'];
@@ -13,7 +23,6 @@ const SUFFIXES = ['.ts', '.js', '.tsx', '.jsx', '.d.ts'];
  * Standard set of workspace utilities
  */
 export class Workspace {
-
   static #context: vscode.ExtensionContext;
   static #manifestContext: ManifestContext;
   static #workspaceIndex: ManifestIndex;
@@ -31,7 +40,9 @@ export class Workspace {
   static set compilerState(state: CompilerStateType) {
     if (state !== this.#compilerState) {
       this.#compilerState = state;
-      for (const listener of this.#compilerStateListeners) { listener(this.compilerState); }
+      for (const listener of this.#compilerStateListeners) {
+        listener(this.compilerState);
+      }
     }
   }
 
@@ -75,7 +86,7 @@ export class Workspace {
 
   /** Get workspace index */
   static get workspaceIndex(): ManifestIndex {
-    return this.#workspaceIndex ??= new ManifestIndex(ManifestUtil.getManifestLocation(this.#manifestContext));
+    return (this.#workspaceIndex ??= new ManifestIndex(ManifestUtil.getManifestLocation(this.#manifestContext)));
   }
 
   /**
@@ -110,13 +121,18 @@ export class Workspace {
 
   /** Show a message for a limited time, with the ability to dismiss */
   static async showEphemeralMessage(text: string, duration = 3000): Promise<void> {
-    await vscode.window.withProgress({
-      location: vscode.ProgressLocation.Notification, title: text, cancellable: true,
-    }, async (_, token) => {
-      const controller = new AbortController();
-      token.onCancellationRequested(() => controller.abort());
-      await timers.setTimeout(duration, undefined, { signal: controller.signal }).catch(() => { });
-    });
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: text,
+        cancellable: true
+      },
+      async (_, token) => {
+        const controller = new AbortController();
+        token.onCancellationRequested(() => controller.abort());
+        await timers.setTimeout(duration, undefined, { signal: controller.signal }).catch(() => {});
+      }
+    );
   }
 
   static reloadManifest(): void {
@@ -170,7 +186,7 @@ export class Workspace {
       }
     }
 
-    return this.#importToFile[imp] = resolved;
+    return (this.#importToFile[imp] = resolved);
   }
 
   /** Spawn a package command */

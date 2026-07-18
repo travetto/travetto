@@ -1,22 +1,21 @@
 import type * as vscode from 'vscode';
 
-import { ExecUtil, Env, JSONUtil, CodecUtil } from '@travetto/runtime';
+import { CodecUtil, Env, ExecUtil, JSONUtil } from '@travetto/runtime';
 
-import type { RunChoice, ResolvedRunChoice } from './types.ts';
-import { Workspace } from '../../../core/workspace.ts';
 import { ParameterSelector } from '../../../core/parameter.ts';
-import type { LaunchConfig } from '../../../core/types.ts';
 import { RunUtil } from '../../../core/run.ts';
+import type { LaunchConfig } from '../../../core/types.ts';
+import { Workspace } from '../../../core/workspace.ts';
+import type { ResolvedRunChoice, RunChoice } from './types.ts';
 
 type PickItem = vscode.QuickPickItem & { target: RunChoice };
 
-type ModuleGraphItem<T> = { name: string, children: T, workspace?: boolean };
+type ModuleGraphItem<T> = { name: string; children: T; workspace?: boolean };
 
 /**
  * Utils for handling cli running
  */
 export class CliRunUtil {
-
   /**
    * Build choice details for quick pick
    * @param choice
@@ -96,7 +95,7 @@ export class CliRunUtil {
   }
 
   /** Spawn CLI  */
-  static async #startCli(command: string, args: string[], action: string): Promise<{ stdout: string, stderr: string }> {
+  static async #startCli(command: string, args: string[], action: string): Promise<{ stdout: string; stderr: string }> {
     const subProcess = Workspace.spawnPackageCommand('trv', [command, ...args], {
       stdio: [0, 'pipe', 'pipe', 'ignore'],
       cwd: Workspace.path,
@@ -168,9 +167,7 @@ export class CliRunUtil {
   static async makeChoice(title: string, choices: RunChoice[]): Promise<ResolvedRunChoice | undefined>;
   static async makeChoice(title: string, choices: RunChoice[]): Promise<RunChoice | undefined>;
   static async makeChoice(title: string, choices: RunChoice[]): Promise<RunChoice | ResolvedRunChoice | undefined> {
-    const items = choices
-      .map(item => this.#buildQuickPickItem(item))
-      .filter(item => !!item);
+    const items = choices.map(item => this.#buildQuickPickItem(item)).filter(item => !!item);
 
     const result = await ParameterSelector.getObjectQuickPickList(title, items);
     let choice: RunChoice | undefined = result?.target;
@@ -197,7 +194,7 @@ export class CliRunUtil {
       name: `[Travetto] ${choice.name}${args ? `: ${args}` : ''}`,
       useCli: true,
       main: choice.name,
-      args: [...choice.inputFlags ?? [], ...choice.inputs],
+      args: [...(choice.inputFlags ?? []), ...choice.inputs]
     };
   }
 }

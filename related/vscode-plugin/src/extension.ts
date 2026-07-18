@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 
 import '@travetto/runtime/support/patch.js';
 
-import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { getManifestContext } from '@travetto/manifest';
+import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { ActivationManager } from './core/activation.ts';
 import { Workspace } from './core/workspace.ts';

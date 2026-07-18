@@ -1,8 +1,6 @@
 {
   "extends": "@travetto/compiler/tsconfig.trv.json",
   "watchOptions": {
-    "excludeDirectories": [
-      "out/"
-    ]
+    "excludeDirectories": ["out/"]
   }
 }

@@ -1,13 +1,13 @@
-import type { ExtensionContext } from 'vscode';
 import http from 'node:http';
 
-import { BinaryUtil, CodecUtil, Env, JSONUtil, type BinaryArray } from '@travetto/runtime';
+import type { ExtensionContext } from 'vscode';
 
-import type { TargetEvent } from './types.ts';
+import { type BinaryArray, BinaryUtil, CodecUtil, Env, JSONUtil } from '@travetto/runtime';
+
 import { Log } from './log.ts';
+import type { TargetEvent } from './types.ts';
 
 export class IpcSupport {
-
   static async readJSONRequest<T>(request: http.IncomingMessage): Promise<T> {
     const chunks: BinaryArray[] = [];
     for await (const chunk of request) {
@@ -20,7 +20,7 @@ export class IpcSupport {
   #handler: (response: TargetEvent) => void | Promise<void>;
   #log = new Log('travetto.vscode.ipc');
 
-  constructor(handler: (response: TargetEvent) => (void | Promise<void>)) {
+  constructor(handler: (response: TargetEvent) => void | Promise<void>) {
     this.#handler = handler;
   }
 

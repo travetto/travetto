@@ -1,18 +1,17 @@
 import * as vscode from 'vscode';
 
 import { IpcSupport } from './ipc.ts';
-import type { ActivationTarget, TargetEvent, ActivationTargetConfig } from './types.ts';
 import { Log } from './log.ts';
+import type { ActivationTarget, ActivationTargetConfig, TargetEvent } from './types.ts';
 
 interface ActivationFactory<T extends ActivationTarget = ActivationTarget> {
-  new(cfg: ActivationTargetConfig): T;
+  new (cfg: ActivationTargetConfig): T;
 }
 
 /**
  * Activation manager
  */
 class $ActivationManager {
-
   #registry = new Set<ActivationTarget>();
   #commandRegistry = new Map<string, ActivationTarget>();
   #ipcSupport = new IpcSupport(event => this.onTargetEvent(event));
@@ -21,7 +20,7 @@ class $ActivationManager {
   add(cls: ActivationFactory, config: ActivationTargetConfig): void {
     const resolved = {
       ...config,
-      priority: config.priority ?? 100,
+      priority: config.priority ?? 100
     } as const;
 
     this.#log.info('Registering activation target', `${resolved.module}.${resolved.command}`, resolved);
@@ -35,8 +34,7 @@ class $ActivationManager {
   }
 
   async activate(ctx: vscode.ExtensionContext): Promise<void> {
-    const byPriority = [...this.#registry.values()]
-      .toSorted((a, b) => (a.priority ?? 100) - (b.priority ?? 100));
+    const byPriority = [...this.#registry.values()].toSorted((a, b) => (a.priority ?? 100) - (b.priority ?? 100));
     let hasIpcActivated = false;
     for (const instance of byPriority) {
       if (instance.available) {

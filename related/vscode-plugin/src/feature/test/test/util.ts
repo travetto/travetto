@@ -3,11 +3,16 @@ import type { ResultsSummary, TestResult, TestStatus } from '@travetto/test';
 export class TestModelUtil {
   static computeTestStatus(summary: ResultsSummary): TestStatus {
     switch (true) {
-      case summary.errored > 0: return 'errored';
-      case summary.failed > 0: return 'failed';
-      case summary.skipped > 0: return 'skipped';
-      case summary.unknown > 0: return 'unknown';
-      default: return 'passed';
+      case summary.errored > 0:
+        return 'errored';
+      case summary.failed > 0:
+        return 'failed';
+      case summary.skipped > 0:
+        return 'skipped';
+      case summary.unknown > 0:
+        return 'unknown';
+      default:
+        return 'passed';
     }
   }
 
@@ -19,7 +24,7 @@ export class TestModelUtil {
     for (const test of tests) {
       summary[test.status] += 1;
       summary.total += 1;
-      summary.selfDuration += (test.selfDuration ?? 0);
+      summary.selfDuration += test.selfDuration ?? 0;
     }
     return summary;
   }

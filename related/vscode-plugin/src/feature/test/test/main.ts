@@ -1,18 +1,17 @@
-import { existsSync } from 'node:fs';
-import * as vscode from 'vscode';
 import type { ChildProcess, SpawnOptions } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 
-import type { IndexedModule, ManifestModule } from '@travetto/manifest';
-import type { TestWatchEvent } from '@travetto/test';
-import { CodecUtil, Env } from '@travetto/runtime';
+import * as vscode from 'vscode';
 
-import { Workspace } from '../../../core/workspace.ts';
+import type { IndexedModule, ManifestModule } from '@travetto/manifest';
+import { CodecUtil, Env } from '@travetto/runtime';
+import type { TestWatchEvent } from '@travetto/test';
+
 import { Activatible } from '../../../core/activation.ts';
 import { RunUtil } from '../../../core/run.ts';
-
+import { Workspace } from '../../../core/workspace.ts';
 import { BaseFeature } from '../../base.ts';
-
 import { WorkspaceResultsManager } from './workspace.ts';
 
 /**
@@ -20,13 +19,14 @@ import { WorkspaceResultsManager } from './workspace.ts';
  */
 @Activatible({ module: '@travetto/test', command: 'test' })
 class TestRunnerFeature extends BaseFeature {
-
   #server: ChildProcess | undefined;
   #consumer: WorkspaceResultsManager;
   #codeLensUpdated: (event: void) => unknown;
 
   #stopServer(force = false): void {
-    if (!this.#server) { return; }
+    if (!this.#server) {
+      return;
+    }
 
     this.log.info('Stopping server');
     this.#server.kill();
@@ -42,7 +42,9 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   #startServer(): void {
-    if (this.#server || Workspace.compilerState !== 'watch-start') { return; }
+    if (this.#server || Workspace.compilerState !== 'watch-start') {
+      return;
+    }
 
     this.log.info('Starting server');
     const config: SpawnOptions = {
@@ -50,27 +52,34 @@ class TestRunnerFeature extends BaseFeature {
       env: {
         ...process.env,
         ...Env.TRV_MANIFEST.export(undefined),
-        ...Env.TRV_QUIET.export(true),
+        ...Env.TRV_QUIET.export(true)
       },
       stdio: ['pipe', 'pipe', 2, 'ipc']
     };
 
-    this.#server = Workspace.spawnPackageCommand('trv', ['test:watch', '--format', 'exec', '--mode', 'change'], config)
-      .on('message', (event: TestWatchEvent) => {
+    this.#server = Workspace.spawnPackageCommand('trv', ['test:watch', '--format', 'exec', '--mode', 'change'], config).on(
+      'message',
+      (event: TestWatchEvent) => {
         switch (event.type) {
-          case 'log': return this.log.info('[Log  ]', event.message);
-          case 'test': this.log.info('[Event]', event.type, event.phase, event.test.classId, event.test.methodName); break;
-          case 'removeTest': this.log.info('[Remove]', event.type, event.import, event.classId, event.methodName); break;
+          case 'log':
+            return this.log.info('[Log  ]', event.message);
+          case 'test':
+            this.log.info('[Event]', event.type, event.phase, event.test.classId, event.test.methodName);
+            break;
+          case 'removeTest':
+            this.log.info('[Remove]', event.type, event.import, event.classId, event.methodName);
+            break;
         }
         this.#consumer.onEvent(event);
         this.#codeLensUpdated?.();
-      });
+      }
+    );
 
     if (this.#server.stderr) {
-      CodecUtil.readLines(this.#server.stderr, (line) => this.log.debug(`> stderr > ${line.trimEnd()}`));
+      CodecUtil.readLines(this.#server.stderr, line => this.log.debug(`> stderr > ${line.trimEnd()}`));
     }
     if (this.#server.stdout) {
-      CodecUtil.readLines(this.#server.stdout, (line) => this.log.debug(`> stdout > ${line.trimEnd()}`));
+      CodecUtil.readLines(this.#server.stdout, line => this.log.debug(`> stdout > ${line.trimEnd()}`));
     }
   }
 
@@ -130,7 +139,7 @@ class TestRunnerFeature extends BaseFeature {
       return;
     }
 
-    line ??= (editor.selection.start.line + 1);
+    line ??= editor.selection.start.line + 1;
     const file = path.resolve(editor.document.fileName ?? '');
     const prettyFile = file.replace(`${Workspace.path}/`, '');
     const module = Workspace.workspaceIndex.findModuleForArbitraryFile(file)!;
@@ -219,27 +228,31 @@ class TestRunnerFeature extends BaseFeature {
     this.register('restart', () => this.#restartServer());
     this.register('rerun', () => this.#rerunActive());
 
-    Workspace.onCompilerState(state => (state === 'watch-start') ?
-      this.onChangedActiveEditor(vscode.window.activeTextEditor) :
-      this.#stopServer()
+    Workspace.onCompilerState(state =>
+      state === 'watch-start' ? this.onChangedActiveEditor(vscode.window.activeTextEditor) : this.#stopServer()
     );
     vscode.workspace.onDidOpenTextDocument(document => this.onOpenTextDocument(document), null, context.subscriptions);
     vscode.workspace.onDidCloseTextDocument(document => this.onCloseTextDocument(document), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(editor => this.onChangedActiveEditor(editor), null, context.subscriptions);
     vscode.workspace.onDidRenameFiles(event => this.renameFiles(event.files), null, context.subscriptions);
 
-    context.subscriptions.push(vscode.languages.registerCodeLensProvider({
-      pattern: {
-        baseUri: Workspace.uri,
-        base: Workspace.path,
-        pattern: '**/test/**/*.{ts,tsx}'
-      }
-    }, {
-      provideCodeLenses: doc => this.buildCodeLenses(doc),
-      onDidChangeCodeLenses: listener => {
-        this.#codeLensUpdated = listener;
-        return { dispose: (): void => { } };
-      }
-    }));
+    context.subscriptions.push(
+      vscode.languages.registerCodeLensProvider(
+        {
+          pattern: {
+            baseUri: Workspace.uri,
+            base: Workspace.path,
+            pattern: '**/test/**/*.{ts,tsx}'
+          }
+        },
+        {
+          provideCodeLenses: doc => this.buildCodeLenses(doc),
+          onDidChangeCodeLenses: listener => {
+            this.#codeLensUpdated = listener;
+            return { dispose: (): void => {} };
+          }
+        }
+      )
+    );
   }
 }

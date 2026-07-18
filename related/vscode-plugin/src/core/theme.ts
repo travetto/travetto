@@ -1,6 +1,7 @@
-import * as vscode from 'vscode';
-import path from 'node:path';
 import fs from 'node:fs';
+import path from 'node:path';
+
+import * as vscode from 'vscode';
 
 type TokenColor = {
   scope: string | string[];
@@ -13,16 +14,15 @@ type ThemeNode = {
   tokenColors?: TokenColor[];
 };
 
-type ThemeRef = { path: string, label: string, id: string };
+type ThemeRef = { path: string; label: string; id: string };
 
 export class ThemeUtil {
-
   static #theme: Map<string, string> | undefined;
 
   static resolveThemePath(themeId: string | undefined): string | undefined {
     for (const extension of vscode.extensions.all) {
       const themes: ThemeRef[] = extension.packageJSON.contributes?.themes;
-      const currentTheme = themes?.find((theme) => theme.id === themeId);
+      const currentTheme = themes?.find(theme => theme.id === themeId);
       if (currentTheme) {
         return path.join(extension.extensionPath, currentTheme.path);
       }
@@ -57,7 +57,6 @@ export class ThemeUtil {
             for (const [key, value] of Object.entries(rule.settings)) {
               tokenColors.set(`${scope}.${key}`, value);
             }
-
           }
         }
       }

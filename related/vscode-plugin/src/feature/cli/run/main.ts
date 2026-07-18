@@ -3,22 +3,19 @@ import * as vscode from 'vscode';
 import { JSONUtil } from '@travetto/runtime';
 
 import { Activatible } from '../../../core/activation.ts';
-import { ActionStorage } from '../../../core/storage.ts';
-import { Workspace } from '../../../core/workspace.ts';
-
-import { BaseFeature } from '../../base.ts';
-import type { EnvDict, TargetEvent } from '../../../core/types.ts';
 import { RunUtil } from '../../../core/run.ts';
-
+import { ActionStorage } from '../../../core/storage.ts';
+import type { EnvDict, TargetEvent } from '../../../core/types.ts';
+import { Workspace } from '../../../core/workspace.ts';
+import { BaseFeature } from '../../base.ts';
 import type { RunChoice } from './types.ts';
 import { CliRunUtil } from './util.ts';
 
-type Recent = { mode: 'recent', count: number };
+type Recent = { mode: 'recent'; count: number };
 type All = { mode: 'all' };
 
 @Activatible({ module: '@travetto/cli', command: 'run' })
 export class CliRunFeature extends BaseFeature {
-
   #storage: ActionStorage<RunChoice>;
 
   /**
@@ -28,9 +25,8 @@ export class CliRunFeature extends BaseFeature {
   async getValidRecent(count: number): Promise<RunChoice[]> {
     const choices = await CliRunUtil.getChoices();
 
-    return this.#storage.getRecentAndFilterState(count * 2, choice =>
-      !choices.some(a => a.name === choice.name)
-    )
+    return this.#storage
+      .getRecentAndFilterState(count * 2, choice => !choices.some(a => a.name === choice.name))
       .map(choice => choice.data)
       .slice(0, count);
   }
@@ -63,9 +59,7 @@ export class CliRunFeature extends BaseFeature {
    */
   async chooseAndRun(title: string, mode: Recent | All): Promise<void> {
     try {
-      const choices = mode.mode === 'all' ?
-        await CliRunUtil.getChoices() :
-        await this.getValidRecent(mode.count);
+      const choices = mode.mode === 'all' ? await CliRunUtil.getChoices() : await this.getValidRecent(mode.count);
 
       const choice = await CliRunUtil.makeChoice(title, choices);
 
@@ -88,13 +82,15 @@ export class CliRunFeature extends BaseFeature {
 
     if (choice) {
       this.log.info('Running', choice.name, inputs);
-      await RunUtil.debug(CliRunUtil.getLaunchConfig({
-        ...choice,
-        inputs: inputs ?? choice.inputs ?? [],
-        resolved: true,
-        key: choice.key ?? '',
-        time: choice.time ?? Date.now()
-      }));
+      await RunUtil.debug(
+        CliRunUtil.getLaunchConfig({
+          ...choice,
+          inputs: inputs ?? choice.inputs ?? [],
+          resolved: true,
+          key: choice.key ?? '',
+          time: choice.time ?? Date.now()
+        })
+      );
     } else {
       this.log.info('No target selected');
     }
@@ -116,7 +112,7 @@ export class CliRunFeature extends BaseFeature {
   /**
    * On IPC trigger to run a target
    */
-  async onEvent(event: TargetEvent<{ name: string, args: string[], cwd: string, env: EnvDict }>): Promise<void> {
+  async onEvent(event: TargetEvent<{ name: string; args: string[]; cwd: string; env: EnvDict }>): Promise<void> {
     const args = event.data.args;
     await RunUtil.debug({
       name: `[Travetto] ${event.data.name}${args ? `: ${args.join(' ')}` : ''}`,
