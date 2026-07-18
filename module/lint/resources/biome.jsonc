@@ -13,6 +13,7 @@
       "!**/*.d.ts",
       "!**/fixtures",
       "!**/resources",
+      "!**/DOC.html",
     ]
   },
   "formatter": {
@@ -96,10 +97,13 @@
         "**/test/**/*.ts*",
         "**/support/test/**/*.ts*",
         "global-test/**",
-        "**/doc/**/*.ts*"
+        "**/doc/**/*.ts*",
+        "**/sample-*.tsx",
+        "**/doc/**/*.html"
       ],
       "linter": {
         "rules": {
+          "a11y": "off",
           "correctness": {
             "noUnusedVariables": "off",
             "noUnusedFunctionParameters": "off"

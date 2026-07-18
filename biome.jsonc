@@ -9,7 +9,10 @@
       "!**/api-client",
       "!**/*.d.ts",
       "!**/fixtures",
-      "!**/resources",      
+      "!**/resources",
+      "!**/DOC.html",
+      "!**/README.md",
+      "!related/travetto.github.io/**"
     ]
   }
 }

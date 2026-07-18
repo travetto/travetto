@@ -12,11 +12,11 @@ class InkyTest {
 
   @Test('does not choke on inline elements')
   async testInline() {
-    const input = <Container>This is a link to <a href="#">ZURB.com</a>.</Container>;
+    const input = <Container>This is a link to <a href="#test">ZURB.com</a>.</Container>;
     const expected = <table align="center" className="container">
       <tbody>
         <tr>
-          <td>This is a link to <a href="#">ZURB.com</a>.</td>
+          <td>This is a link to <a href="#test">ZURB.com</a>.</td>
         </tr>
       </tbody>
     </table>;
@@ -26,11 +26,11 @@ class InkyTest {
 
   @Test('does not choke on special characters')
   async testSpecial() {
-    const input = <Container>This is a link tö <a href="#">ZURB.com</a>.</Container>;
+    const input = <Container>This is a link tö <a href="#test">ZURB.com</a>.</Container>;
     const expected = <table align="center" className="container">
       <tbody>
         <tr>
-          <td>This is a link tö <a href="#">ZURB.com</a>.</td>
+          <td>This is a link tö <a href="#test">ZURB.com</a>.</td>
         </tr>
       </tbody>
     </table>;

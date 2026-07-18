@@ -16,7 +16,7 @@ export default (
     <Container className='header-container' style={'background-image: url(/images/crab.png);'}>
       <Row className='top-header'>
         <Column className='logo-container' large={8}>
-          <img src='/images/crab.png' />
+          <img src='/images/crab.png' alt="crab"/>
           <Spacer size={32} />
           <p className='bold text-xl'>
             Did you make a purchase at change <Value attr='vendor' />
@@ -26,7 +26,7 @@ export default (
           </p>
         </Column>
         <Column large={4} className='illustration-header'>
-          <img src='/images/crab.png' />
+          <img src='/images/crab.png' alt='crab'/>
         </Column>
       </Row>
       <Row>

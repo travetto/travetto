@@ -38,7 +38,7 @@ export class CenterComponentTest {
   async testFloat() {
     const input = <Center>
       <Menu>
-        <Item href="#"></Item>
+        <Item href="#test">.</Item>
       </Menu>
     </Center>;
 
@@ -51,7 +51,7 @@ export class CenterComponentTest {
                 <tbody>
                   <tr>
                     <th className="float-center menu-item">
-                      <a href="#"></a>
+                      <a href="#test">.</a>
                     </th>
                   </tr>
                 </tbody>
