@@ -51,7 +51,7 @@ const validateInputs = (value: string[]): value is [keyof typeof COMMANDS, ...st
  */
 export async function invoke(...input: string[]): Promise<unknown> {
   if (!validateInputs(input)) {
-    return showHelp(input[0] ? `Unknown trvc command: ${input[0]}` : undefined);;
+    return showHelp(input[0] ? `Unknown trvc command: ${input[0]}` : undefined);
   }
 
   const [command, ...args] = input;

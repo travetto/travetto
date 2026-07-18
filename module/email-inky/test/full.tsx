@@ -59,7 +59,7 @@ class ContainerTest {
 
     const output = await wrapper.html();
     assert(/[{]{2}#paid[}]{2}\s*Payment!\s*[{]{2}\/paid[}]{2}/gsm.test(output));
-    assert(/[{]{2}[^]unpaid[}]{2}\s*No Payment!\s*[{]{2}\/unpaid[}]{2}/gsm.test(output));
+    assert(/[{]{2}\^unpaid[}]{2}\s*No Payment!\s*[{]{2}\/unpaid[}]{2}/gsm.test(output));
     assert(/[{]{2}amount[}]{2}/gsm.test(output));
     assert(/[{]{2}amount-two[}]{2}/gsm.test(output));
     assert(/[{]{3}amount-three[}]{3}/gsm.test(output));

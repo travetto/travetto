@@ -17,6 +17,7 @@ interface Child {
  */
 class SampleRegistryAdapter implements RegistryAdapter<Group> {
 
+  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: needed for docs
   #class: Class;
   #config: Group;
 

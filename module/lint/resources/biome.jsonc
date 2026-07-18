@@ -61,7 +61,16 @@
         "useConst": "error"
       },
       "correctness": {
-        "noUnusedFunctionParameters": "off"
+        "noUnusedFunctionParameters": "off",
+        "noUnusedVariables": {
+          "level": "on",
+          "options": {
+            "ignore": {
+              "class": ["*"],
+              "typeParameter": ["*"]
+            }
+          }
+        }
       },
       "complexity": {
         "noStaticOnlyClass": "off",
@@ -96,10 +105,10 @@
   "overrides": [
     {
       "includes": [
-        "**/test/**/*.ts*",
-        "**/support/test/**/*.ts*",
-        "global-test/**",
-        "**/doc/**/*.ts*"
+        "**/test/**",
+        "**/support/test/**",
+        "**/doc/**",
+        "!module/test/src/**"
       ],
       "linter": {
         "rules": {

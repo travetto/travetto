@@ -1,5 +1,5 @@
 /* eslint-disable no-bitwise */
-import ts, { ObjectFlags } from 'typescript';
+import ts from 'typescript';
 
 import { path, ManifestModuleUtil } from '@travetto/manifest';
 
