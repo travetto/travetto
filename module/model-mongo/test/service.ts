@@ -1,28 +1,27 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
+import { Model } from '@travetto/model';
 import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
+import { QueryIndex } from '@travetto/model-query';
+import { Suite, Test } from '@travetto/test';
 
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
-import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
+import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
 import { ModelBulkSuite } from '@travetto/model/support/test/bulk.ts';
+import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
-import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
-import { Model } from '@travetto/model';
-import { QueryIndex } from '@travetto/model-query';
 
 @Model()
 @QueryIndex({
   name: 'uniqueUser',
   fields: [{ name: true }],
-  unique: true,
+  unique: true
 })
 class UniqueUser {
   id: string;
   name: string;
 }
-
 
 @Suite()
 class MongoBasicSuite extends ModelBasicSuite {

@@ -4,7 +4,6 @@ import { ManifestModuleUtil, type ManifestRoot, type Package } from '@travetto/m
  * Standard utilities for compiler
  */
 export class CompilerUtil {
-
   /**
    * Rewrites the package.json to target output file names, and pins versions
    * @param manifest
@@ -40,7 +39,6 @@ export class CompilerUtil {
     let hash = 5381;
 
     for (let i = 0; i < text.length; i++) {
-      // eslint-disable-next-line no-bitwise
       hash = (hash * 33) ^ text.charCodeAt(i);
     }
 

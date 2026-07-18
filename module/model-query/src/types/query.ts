@@ -1,5 +1,5 @@
-import type { Class } from '@travetto/runtime';
 import type { ModelType } from '@travetto/model';
+import type { Class } from '@travetto/runtime';
 
 import type { ModelQuery, PageableModelQuery } from '../model/query.ts';
 

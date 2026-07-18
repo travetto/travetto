@@ -1,12 +1,11 @@
-import { spawn } from 'node:child_process';
 import assert from 'node:assert';
+import { spawn } from 'node:child_process';
 
 import { ExecUtil, Runtime } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 @Suite()
 class PackAppSuite {
-
   @Test({ timeout: 60000 })
   async testPack() {
     const tag = `tag-${Math.random()}`.replace(/[0][.]/, '');

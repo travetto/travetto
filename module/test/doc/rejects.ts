@@ -4,7 +4,6 @@ import { Suite, Test } from '@travetto/test';
 
 @Suite()
 class SimpleTest {
-
   @Test()
   async testRejects() {
     await assert.rejects(async () => {
@@ -12,7 +11,6 @@ class SimpleTest {
     });
 
     await assert.doesNotReject(async () => {
-      // eslint-disable-next-line
       let a = 5;
     });
   }

@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { type TransformerState, DeclarationUtil, CoreUtil, TransformerHandler } from '@travetto/transformer';
+import { CoreUtil, DeclarationUtil, TransformerHandler, type TransformerState } from '@travetto/transformer';
 
 /**
  * Which types are candidates for deep literal checking
@@ -89,7 +89,6 @@ interface Command {
  * and result generation
  */
 export class AssertTransformer {
-
   static {
     TransformerHandler(this, this.onAssertCheck, 'before', 'method', ['AssertCheck']);
     TransformerHandler(this, this.afterAssertCheck, 'after', 'method', ['AssertCheck']);
@@ -104,8 +103,9 @@ export class AssertTransformer {
       Object.keys(ts.SyntaxKind)
         .filter(kind => !/^\d+$/.test(kind))
         .filter((kind): kind is keyof typeof OPTOKEN_ASSERT => !/^(Last|First)/.test(kind))
-        .forEach(kind =>
-          OP_TOKEN_TO_NAME.set(ts.SyntaxKind[kind], kind));
+        .forEach(kind => {
+          OP_TOKEN_TO_NAME.set(ts.SyntaxKind[kind], kind);
+        });
     }
 
     const name = OP_TOKEN_TO_NAME.get(key)!;
@@ -120,19 +120,18 @@ export class AssertTransformer {
    * Determine if element is a deep literal (should use deep comparison)
    */
   static isDeepLiteral(state: TransformerState, node: ts.Expression): boolean {
-    let found = ts.isArrayLiteralExpression(node) ||
+    let found =
+      ts.isArrayLiteralExpression(node) ||
       ts.isObjectLiteralExpression(node) ||
-      (
-        ts.isNewExpression(node) &&
-        DEEP_LITERAL_TYPES.has(node.expression.getText())
-      );
+      (ts.isNewExpression(node) && DEEP_LITERAL_TYPES.has(node.expression.getText()));
 
     // If looking at an identifier, see if it's in a diff file or if its const
     if (!found && ts.isIdentifier(node)) {
-      found = !!state.getDeclarations(node).find(declaration =>
-        // In a separate file or is const
-        declaration.getSourceFile().fileName !== state.source.fileName ||
-        DeclarationUtil.isConstantDeclaration(declaration));
+      found = !!state.getDeclarations(node).find(
+        declaration =>
+          // In a separate file or is const
+          declaration.getSourceFile().fileName !== state.source.fileName || DeclarationUtil.isConstantDeclaration(declaration)
+      );
     }
 
     return found;
@@ -148,7 +147,7 @@ export class AssertTransformer {
         assert: asrt,
         assertCheck: CoreUtil.createAccess(state.factory, asrt, ASSERT_UTIL, 'check'),
         checkThrow: CoreUtil.createAccess(state.factory, asrt, ASSERT_UTIL, 'checkThrow'),
-        checkThrowAsync: CoreUtil.createAccess(state.factory, asrt, ASSERT_UTIL, 'checkThrowAsync'),
+        checkThrowAsync: CoreUtil.createAccess(state.factory, asrt, ASSERT_UTIL, 'checkThrowAsync')
       };
     }
   }
@@ -163,16 +162,20 @@ export class AssertTransformer {
     const firstText = first?.getText() ?? node.getText();
 
     cmd.args = cmd.args.filter(arg => arg !== undefined && arg !== null);
-    const check = state.factory.createCallExpression(state[AssertSymbol]!.assertCheck, undefined, state.factory.createNodeArray([
-      state.fromLiteral({
-        module: state.getModuleIdentifier(),
-        line: state.fromLiteral(ts.getLineAndCharacterOfPosition(state.source, node.getStart()).line + 1),
-        text: state.fromLiteral(firstText),
-        operator: state.fromLiteral(cmd.fn)
-      }),
-      state.fromLiteral(!cmd.negate),
-      ...cmd.args
-    ]));
+    const check = state.factory.createCallExpression(
+      state[AssertSymbol]!.assertCheck,
+      undefined,
+      state.factory.createNodeArray([
+        state.fromLiteral({
+          module: state.getModuleIdentifier(),
+          line: state.fromLiteral(ts.getLineAndCharacterOfPosition(state.source, node.getStart()).line + 1),
+          text: state.fromLiteral(firstText),
+          operator: state.fromLiteral(cmd.fn)
+        }),
+        state.fromLiteral(!cmd.negate),
+        ...cmd.args
+      ])
+    );
 
     return check;
   }
@@ -197,7 +200,8 @@ export class AssertTransformer {
         }),
         state.fromLiteral(key.startsWith('doesNot')),
         ...args
-      ]));
+      ])
+    );
   }
 
   /**
@@ -234,7 +238,6 @@ export class AssertTransformer {
    * Check various `assert.*` method calls
    */
   static doMethodCall(state: TransformerState, comp: ts.Expression, args: Args): Command {
-
     if (ts.isCallExpression(comp) && ts.isPropertyAccessExpression(comp.expression)) {
       const root = comp.expression.expression;
       const key = comp.expression.name;
@@ -242,10 +245,13 @@ export class AssertTransformer {
       const matched = METHODS[key.text!];
       if (matched) {
         const resolved = state.resolveType(root);
-        if (resolved.key === 'literal' && matched.find(type => resolved.ctor === type)) { // Ensure method is against real type
+        if (resolved.key === 'literal' && matched.find(type => resolved.ctor === type)) {
+          // Ensure method is against real type
           switch (key.text) {
-            case 'includes': return { fn: key.text, args: [comp.expression.expression, comp.arguments[0], ...args.slice(1)] };
-            case 'test': return { fn: key.text, args: [comp.arguments[0], comp.expression.expression, ...args.slice(1)] };
+            case 'includes':
+              return { fn: key.text, args: [comp.expression.expression, comp.arguments[0], ...args.slice(1)] };
+            case 'test':
+              return { fn: key.text, args: [comp.arguments[0], comp.expression.expression, ...args.slice(1)] };
           }
         }
       }
@@ -294,13 +300,15 @@ export class AssertTransformer {
     const exp = node.expression;
 
     // Determine if calling assert directly
-    if (ts.isIdentifier(exp) && exp.getSourceFile() && exp.getText() === ASSERT_CMD) { // Straight assert
+    if (ts.isIdentifier(exp) && exp.getSourceFile() && exp.getText() === ASSERT_CMD) {
+      // Straight assert
       const cmd = this.getCommand(state, node.arguments);
       if (cmd) {
         node = this.doAssert(state, node, cmd);
       }
       // If calling `assert.*`
-    } else if (ts.isPropertyAccessExpression(exp) && ts.isIdentifier(exp.expression)) { // Assert method call
+    } else if (ts.isPropertyAccessExpression(exp) && ts.isIdentifier(exp.expression)) {
+      // Assert method call
       const identifier = exp.expression;
       const fn = exp.name.escapedText.toString();
       if (identifier.escapedText === ASSERT_CMD) {

@@ -1,14 +1,13 @@
-import { ShutdownManager, type Class, type TimeSpan, TimeUtil, Util, castTo, hasFunction } from '@travetto/runtime';
+import { type Class, castTo, hasFunction, ShutdownManager, type TimeSpan, TimeUtil, Util } from '@travetto/runtime';
 
+import { ModelRegistryIndex } from '../registry/registry-index.ts';
 import type { ModelExpirySupport } from '../types/expiry.ts';
 import type { ModelType } from '../types/model.ts';
-import { ModelRegistryIndex } from '../registry/registry-index.ts';
 
 /**
  * Utils for model expiry
  */
 export class ModelExpiryUtil {
-
   /**
    * Type guard for determining if model supports expiry
    */
@@ -17,7 +16,7 @@ export class ModelExpiryUtil {
   /**
    * Get expiry info for a given item
    */
-  static getExpiryState<T extends ModelType>(cls: Class<T>, item: T): { expiresAt?: Date, expired?: boolean } {
+  static getExpiryState<T extends ModelType>(cls: Class<T>, item: T): { expiresAt?: Date; expired?: boolean } {
     const expKey = ModelRegistryIndex.getExpiryFieldName(cls);
     const expiresAt: Date = castTo(item[expKey]);
 

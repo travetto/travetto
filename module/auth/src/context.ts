@@ -1,9 +1,9 @@
-import { Inject, Injectable } from '@travetto/di';
 import { type AsyncContext, AsyncContextValue } from '@travetto/context';
+import { Inject, Injectable } from '@travetto/di';
 
-import type { AuthToken } from './types/token.ts';
-import type { Principal } from './types/principal.ts';
 import type { AuthenticatorState } from './types/authenticator.ts';
+import type { Principal } from './types/principal.ts';
+import type { AuthToken } from './types/token.ts';
 
 /**
  * Provides the primary context for the authenticated state
@@ -12,7 +12,6 @@ import type { AuthenticatorState } from './types/authenticator.ts';
  */
 @Injectable()
 export class AuthContext {
-
   #principal = new AsyncContextValue<Principal>(this, { failIfUnbound: { write: true } });
   #authToken = new AsyncContextValue<AuthToken>(this, { failIfUnbound: { write: true } });
   #authState = new AsyncContextValue<AuthenticatorState>(this, { failIfUnbound: { write: true } });

@@ -20,16 +20,16 @@ function bindPoint(input: unknown): [number, number] | typeof InvalidSymbol | un
  */
 function validatePoint(input: unknown): 'type' | undefined {
   const bound = bindPoint(input);
-  return bound !== InvalidSymbol && bound && !isNaN(bound[0]) && !isNaN(bound[1]) ? undefined : 'type';
+  return bound !== InvalidSymbol && bound && !Number.isNaN(bound[0]) && !Number.isNaN(bound[1]) ? undefined : 'type';
 }
 
 /**
  * Point Contract
  */
-export class PointContract { }
+export class PointContract {}
 
 SchemaTypeUtil.setSchemaTypeConfig(PointContract, {
   validate: validatePoint,
-  bind: bindPoint,
+  bind: bindPoint
 });
 Object.defineProperty(PointContract, 'name', { value: 'Point' });

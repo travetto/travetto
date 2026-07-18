@@ -13,7 +13,6 @@ export type BulkPreStore<T extends ModelType> = {
 };
 
 export class ModelBulkUtil {
-
   /**
    * Type guard for determining if service supports bulk operation
    */
@@ -25,7 +24,11 @@ export class ModelBulkUtil {
    * @param operations
    * @param provider
    */
-  static async preStore<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[], provider: ModelCrudProvider): Promise<BulkPreStore<T>> {
+  static async preStore<T extends ModelType>(
+    cls: Class<T>,
+    operations: BulkOperation<T>[],
+    provider: ModelCrudProvider
+  ): Promise<BulkPreStore<T>> {
     const insertedIds = new Map<number, string>();
     const upsertedIds = new Map<number, string>();
     const updatedIds = new Map<number, string>();

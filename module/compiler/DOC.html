@@ -19,12 +19,12 @@ This module expands upon the <a target="_blank" class="external-link" href="http
 <ul> <li>Integration with the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/transformer" title="Functionality for AST transformations, with transformer registration, and general utils">Transformation</a> module, allowing for rich, type-aware transformations</li>
 <li>Automatic conversion to either <a target="_blank" class="external-link" href="https://nodejs.org/api/esm.html">Ecmascript Module</a> or <a target="_blank" class="external-link" href="https://nodejs.org/api/modules.html">CommonJS</a> based on the <a target="_blank" class="external-link" href="https://docs.npmjs.com/cli/v9/configuring-npm/package-json">Package JSON</a> <code class="item field">type</code> value</li>
 <li>Removal of type only imports which can break <a target="_blank" class="external-link" href="https://nodejs.org/api/esm.html">Ecmascript Module</a>-style output</li>
-<li>Automatic addition of <code class="item path">.js</code> extension to imports to also support  <a target="_blank" class="external-link" href="https://nodejs.org/api/esm.html">Ecmascript Module</a>-style output</li>
+<li>Automatic addition of <code class="item path">.js</code> extension to imports to also support <a target="_blank" class="external-link" href="https://nodejs.org/api/esm.html">Ecmascript Module</a>-style output</li>
 </ul>
 Beyond the <a target="_blank" class="external-link" href="https://typescriptlang.org">Typescript</a> compiler functionality, the module provides the primary entry point into the development process.
 <h2 id="cli">CLI</h2>
 
-The compiler cli, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js">trvc</a> is the entry point for compilation-related operations. It has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, the compilation always targets the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. <br><br>
+The compiler cli, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js">trvc</a> is the entry point for compilation-related operations. It has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time. Within the framework, regardless of mono-repo or not, the compilation always targets the entire project. With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. <br><br>
 The compiler cli supports the following operations:
 <ul> <li><code class="item method">start</code> - Run the compiler in watch mode</li>
 <li><code class="item method">stop</code> - Stop the compiler if running</li>
@@ -37,7 +37,7 @@ The compiler cli supports the following operations:
 <li><code class="item method">manifest [output]</code> - Generate the project manifest</li>
 <li><code class="item method">manifest:production [output]</code> - Generate the production project manifest</li>
 </ul>
-In addition to the normal output, the compiler supports an environment variable <code class="item input">TRV_BUILD</code> that supports the following values: <code class="item input">debug</code>, <code class="item input">info</code>, <code class="item input">warn</code> or <code class="item input">none</code>.  This provides different level of logging during the build process which is helpful to diagnose any odd behaviors.  When invoking an unknown command (e.g. <code class="item method">&lt;other&gt;</code> from above), the default level is <code class="item input">warn</code>.  Otherwise the default logging level is <code class="item input">info</code>.
+In addition to the normal output, the compiler supports an environment variable <code class="item input">TRV_BUILD</code> that supports the following values: <code class="item input">debug</code>, <code class="item input">info</code>, <code class="item input">warn</code> or <code class="item input">none</code>. This provides different level of logging during the build process which is helpful to diagnose any odd behaviors. When invoking an unknown command (e.g. <code class="item method">&lt;other&gt;</code> from above), the default level is <code class="item input">warn</code>. Otherwise the default logging level is <code class="item input">info</code>.
 
   <figure class="terminal">
     <figcaption class="terminal">Sample trv output with debug logging

@@ -1,8 +1,8 @@
 import { RuntimeError } from '@travetto/runtime';
 
 import type { Cookie, CookieGetOptions, CookieSetOptions } from '../types/cookie.ts';
-import { KeyGrip } from './keygrip.ts';
 import { WebHeaderUtil } from './header.ts';
+import { KeyGrip } from './keygrip.ts';
 
 const pairText = (cookie: Cookie): string => `${cookie.name}=${cookie.value}`;
 const pair = (key: string, value: unknown): string => `${key}=${value}`;
@@ -10,18 +10,17 @@ const pair = (key: string, value: unknown): string => `${key}=${value}`;
 type CookieJarOptions = CookieSetOptions;
 
 export class CookieJar {
-
   #grip: KeyGrip;
   #cookies: Record<string, Cookie> = {};
   #setOptions: CookieSetOptions = {};
   #deleteOptions: CookieSetOptions = { maxAge: 0, expires: undefined };
 
   constructor(options: CookieJarOptions = {}, keys?: string[] | KeyGrip) {
-    this.#grip = (keys instanceof KeyGrip ? keys : new KeyGrip(keys ?? []));
+    this.#grip = keys instanceof KeyGrip ? keys : new KeyGrip(keys ?? []);
     this.#setOptions = {
       secure: false,
       path: '/',
-      ...options,
+      ...options
     };
   }
 
@@ -84,7 +83,7 @@ export class CookieJar {
       ...this.#setOptions,
       ...cookie,
       response: true,
-      ...(cookie.value === null || cookie.value === undefined) ? this.#deleteOptions : {},
+      ...(cookie.value === null || cookie.value === undefined ? this.#deleteOptions : {})
     };
 
     alias.signed ??= this.shouldSign;
@@ -117,15 +116,14 @@ export class CookieJar {
   }
 
   exportCookieHeader(): Promise<string> {
-    return Promise.all(this.getAll()
-      .map(cookie => this.export(cookie)))
-      .then(parts => parts.flat().join('; '));
+    return Promise.all(this.getAll().map(cookie => this.export(cookie))).then(parts => parts.flat().join('; '));
   }
 
   exportSetCookieHeader(): Promise<string[]> {
-    return Promise.all(this.getAll()
-      .filter(cookie => cookie.response)
-      .map(cookie => this.export(cookie, true)))
-      .then(parts => parts.flat());
+    return Promise.all(
+      this.getAll()
+        .filter(cookie => cookie.response)
+        .map(cookie => this.export(cookie, true))
+    ).then(parts => parts.flat());
   }
 }

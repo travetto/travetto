@@ -1,4 +1,4 @@
-import { PACKAGE_MANAGERS, type NodePackageManager } from '@travetto/manifest';
+import { type NodePackageManager, PACKAGE_MANAGERS } from '@travetto/manifest';
 import { Runtime } from '@travetto/runtime';
 
 export class PackageDocUtil {
@@ -8,8 +8,10 @@ export class PackageDocUtil {
   static getPackageCommand(pkg: string, args: string[] = [], manager?: NodePackageManager): string {
     switch (manager ?? Runtime.workspace.manager) {
       case 'npm':
-      case 'yarn': return `npx ${pkg} ${args.join(' ')}`.trim();
-      case 'pnpm': return `pnpm ${pkg} ${args.join(' ')}`.trim();
+      case 'yarn':
+        return `npx ${pkg} ${args.join(' ')}`.trim();
+      case 'pnpm':
+        return `pnpm ${pkg} ${args.join(' ')}`.trim();
     }
   }
 
@@ -18,9 +20,12 @@ export class PackageDocUtil {
    */
   static getWorkspaceInitCommand(manager?: NodePackageManager): string {
     switch (manager ?? Runtime.workspace.manager) {
-      case 'npm': return 'npm init -f';
-      case 'yarn': return 'yarn init -y';
-      case 'pnpm': return 'pnpm init -y';
+      case 'npm':
+        return 'npm init -f';
+      case 'yarn':
+        return 'yarn init -y';
+      case 'pnpm':
+        return 'pnpm init -y';
     }
   }
 
@@ -29,9 +34,12 @@ export class PackageDocUtil {
    */
   static getInstallCommand(pkg: string, production = false, manager?: NodePackageManager): string {
     switch (manager ?? Runtime.workspace.manager) {
-      case 'npm': return `npm install ${production ? '' : '--save-dev '}${pkg}`;
-      case 'yarn': return `yarn add ${production ? '' : '--dev '}${pkg}`;
-      case 'pnpm': return `pnpm add ${production ? '' : '--dev '}${pkg}`;
+      case 'npm':
+        return `npm install ${production ? '' : '--save-dev '}${pkg}`;
+      case 'yarn':
+        return `yarn add ${production ? '' : '--dev '}${pkg}`;
+      case 'pnpm':
+        return `pnpm add ${production ? '' : '--dev '}${pkg}`;
     }
   }
 
@@ -39,8 +47,6 @@ export class PackageDocUtil {
    * Get install example for a given package
    */
   static getInstallInstructions(pkg: string, production = false): string {
-    return PACKAGE_MANAGERS
-      .map(manager => this.getInstallCommand(pkg, production, manager.type))
-      .join('\n\n# or\n\n');
+    return PACKAGE_MANAGERS.map(manager => this.getInstallCommand(pkg, production, manager.type)).join('\n\n# or\n\n');
   }
 }

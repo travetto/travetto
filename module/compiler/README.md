@@ -17,12 +17,12 @@ This module expands upon the [Typescript](https://typescriptlang.org) compiler, 
    *  Integration with the [Transformation](https://github.com/travetto/travetto/tree/main/module/transformer#readme "Functionality for AST transformations, with transformer registration, and general utils") module, allowing for rich, type-aware transformations
    *  Automatic conversion to either [Ecmascript Module](https://nodejs.org/api/esm.html) or [CommonJS](https://nodejs.org/api/modules.html) based on the [Package JSON](https://docs.npmjs.com/cli/v9/configuring-npm/package-json) `type` value
    *  Removal of type only imports which can break [Ecmascript Module](https://nodejs.org/api/esm.html)-style output
-   *  Automatic addition of `.js` extension to imports to also support  [Ecmascript Module](https://nodejs.org/api/esm.html)-style output
+   *  Automatic addition of `.js` extension to imports to also support [Ecmascript Module](https://nodejs.org/api/esm.html)-style output
 
 Beyond the [Typescript](https://typescriptlang.org) compiler functionality, the module provides the primary entry point into the development process.
 
 ## CLI
-The compiler cli, [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js) is the entry point for compilation-related operations. It has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, the compilation always targets the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. 
+The compiler cli, [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js) is the entry point for compilation-related operations. It has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time. Within the framework, regardless of mono-repo or not, the compilation always targets the entire project. With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. 
 
 The compiler cli supports the following operations:
    *  `start` - Run the compiler in watch mode
@@ -36,7 +36,7 @@ The compiler cli supports the following operations:
    *  `manifest [output]` - Generate the project manifest
    *  `manifest:production [output]` - Generate the production project manifest
 
-In addition to the normal output, the compiler supports an environment variable `TRV_BUILD` that supports the following values: `debug`, `info`, `warn` or `none`.  This provides different level of logging during the build process which is helpful to diagnose any odd behaviors.  When invoking an unknown command (e.g. `<other>` from above), the default level is `warn`.  Otherwise the default logging level is `info`.
+In addition to the normal output, the compiler supports an environment variable `TRV_BUILD` that supports the following values: `debug`, `info`, `warn` or `none`. This provides different level of logging during the build process which is helpful to diagnose any odd behaviors. When invoking an unknown command (e.g. `<other>` from above), the default level is `warn`. Otherwise the default logging level is `info`.
 
 **Terminal: Sample trv output with debug logging**
 ```bash

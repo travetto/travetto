@@ -1,7 +1,7 @@
 import { castTo, type MethodDescriptor, type TimeSpan, TimeUtil } from '@travetto/runtime';
 
 import type { CacheService } from './service.ts';
-import { type CoreCacheConfig, type CacheConfig, type CacheAware, CacheConfigSymbol, EvictConfigSymbol } from './types.ts';
+import { type CacheAware, type CacheConfig, CacheConfigSymbol, type CoreCacheConfig, EvictConfigSymbol } from './types.ts';
 
 /**
  * Indicates a method is intended to cache.  The return type must be properly serializable
@@ -9,10 +9,16 @@ import { type CoreCacheConfig, type CacheConfig, type CacheAware, CacheConfigSym
  * @param config The additional cache configuration
  * @kind decorator
  */
-export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, maxAge: number | TimeSpan, config?: Omit<CacheConfig, 'maxAge'>): MethodDecorator;
+export function Cache<F extends string, U extends Record<F, CacheService>>(
+  field: F,
+  maxAge: number | TimeSpan,
+  config?: Omit<CacheConfig, 'maxAge'>
+): MethodDecorator;
 export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, input?: CacheConfig): MethodDecorator;
 export function Cache<F extends string, U extends Record<F, CacheService>>(
-  field: F, input?: number | TimeSpan | CacheConfig, config: Exclude<CacheConfig, 'maxAge'> = {}
+  field: F,
+  input?: number | TimeSpan | CacheConfig,
+  config: Exclude<CacheConfig, 'maxAge'> = {}
 ): MethodDecorator {
   if (input !== undefined) {
     if (typeof input === 'string' || typeof input === 'number') {
@@ -21,12 +27,17 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(
       config = input;
     }
   }
-  const decorator = function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {
+  const decorator = function <R extends Promise<unknown>>(
+    target: U & CacheAware,
+    propertyKey: string,
+    descriptor: MethodDescriptor<R>
+  ): void {
     config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
     (target[CacheConfigSymbol] ??= {})[propertyKey] = config;
     const handler = descriptor.value!;
     // Allows for DI to run, as the service will not be bound until after the decorator is run
     descriptor.value = castTo(function (this: typeof target) {
+      // biome-ignore lint/complexity/noArguments: We want to use arguments here
       return this[field].cache(this, propertyKey, handler, [...arguments]);
     });
     Object.defineProperty(descriptor.value, 'name', { value: propertyKey, writable: false });
@@ -48,6 +59,7 @@ export function EvictCache<F extends string, U extends Record<F, CacheService>>(
     const handler = descriptor.value!;
     // Allows for DI to run, as the service will not be bound until after the decorator is run
     descriptor.value = castTo(function (this: typeof target) {
+      // biome-ignore lint/complexity/noArguments: We want to use arguments here
       return this[field].evict(this, propertyKey, handler, [...arguments]);
     });
     Object.defineProperty(descriptor.value, 'name', { value: propertyKey, writable: false });

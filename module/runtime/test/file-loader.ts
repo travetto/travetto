@@ -1,13 +1,12 @@
-import fs from 'node:fs/promises';
 import assert from 'node:assert';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { Suite, Test } from '@travetto/test';
 import { FileLoader, Runtime } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
 
 @Suite()
 class FileLoaderSuite {
-
   @Test()
   async simpleTest() {
     const loader = new FileLoader([Runtime.modulePath('@#test/fixtures')]);

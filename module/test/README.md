@@ -18,10 +18,10 @@ This module provides unit testing functionality that integrates with the framewo
    *  [JSON](https://www.json.org), best for integrating with at a code level
    *  [xUnit](https://en.wikipedia.org/wiki/XUnit), standard format for CI/CD systems e.g. Jenkins, Bamboo, etc.
 
-**Note**: All tests should be under the `**/*` folders.  The pattern for tests is defined as as a standard glob using [Node](https://nodejs.org)'s built in globbing support.
+**Note**: All tests should be under the `**/*` folders. The pattern for tests is defined as as a standard glob using [Node](https://nodejs.org)'s built in globbing support.
 
 ## Definition
-A test suite is a collection of individual tests.  All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L13) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L25) decorator.  All tests intrinsically support `async`/`await`. 
+A test suite is a collection of individual tests. All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L13) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L25) decorator. All tests intrinsically support `async`/`await`. 
 
 A simple example would be:
 
@@ -33,7 +33,6 @@ import { Suite, Test } from '@travetto/test';
 
 @Suite()
 class SimpleTest {
-
   #complexService: {
     doLongOperation(): Promise<number>;
     getText(): string;
@@ -54,7 +53,7 @@ class SimpleTest {
 ```
 
 ## Assertions
-A common aspect of the tests themselves are the assertions that are made.  [Node](https://nodejs.org) provides a built-in [assert](https://nodejs.org/api/assert.html) library.  The framework uses AST transformations to modify the assertions to provide integration with the test module, and to provide a much higher level of detail in the failed assertions.  For example:
+A common aspect of the tests themselves are the assertions that are made. [Node](https://nodejs.org) provides a built-in [assert](https://nodejs.org/api/assert.html) library. The framework uses AST transformations to modify the assertions to provide integration with the test module, and to provide a much higher level of detail in the failed assertions. For example:
 
 **Code: Example assertion for deep comparison**
 ```typescript
@@ -64,7 +63,6 @@ import { Suite, Test } from '@travetto/test';
 
 @Suite()
 class SimpleTest {
-
   @Test()
   async test() {
     assert.deepStrictEqual({ size: 20, address: { state: 'VA' } }, {});
@@ -86,11 +84,11 @@ const Δm_1 = ["@travetto/test", "doc/assert-example.ts"];
 import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 let SimpleTest = class SimpleTest {
-    static { Δfunction.registerFunction(SimpleTest, Δm_1, { hash: 1887908328, lines: [5, 12] }, { test: { hash: 102834457, lines: [8, 11, 10] } }, false); }
+    static { Δfunction.registerFunction(SimpleTest, Δm_1, { hash: 539050626, lines: [5, 11] }, { test: { hash: 102834457, lines: [7, 10, 9] } }, false); }
     async test() {
         if (Δdebug.tryDebugger)
             debugger;
-        Δcheck.AssertCheck.check({ module: Δm_1, line: 10, text: "{ size: 20, address: { state: 'VA' } }", operator: "deepStrictEqual" }, true, { size: 20, address: { state: 'VA' } }, {});
+        Δcheck.AssertCheck.check({ module: Δm_1, line: 9, text: "{ size: 20, address: { state: 'VA' } }", operator: "deepStrictEqual" }, true, { size: 20, address: { state: 'VA' } }, {});
     }
 };
 __decorate([
@@ -125,7 +123,7 @@ The equivalences for all of the [assert](https://nodejs.org/api/assert.html) ope
    *  `assert(a.includes(b))` as `assert.ok(a.includes(b))`
    *  `assert(/a/.test(b))` as `assert.ok(/a/.test(b))`
 
-In addition to the standard operations, there is support for throwing/rejecting errors (or the inverse).  This is useful for testing error states or ensuring errors do not occur.
+In addition to the standard operations, there is support for throwing/rejecting errors (or the inverse). This is useful for testing error states or ensuring errors do not occur.
 
 ### Throws
 `throws`/`doesNotThrow` is for catching synchronous rejections
@@ -138,7 +136,6 @@ import { Suite, Test } from '@travetto/test';
 
 @Suite()
 class SimpleTest {
-
   @Test()
   async testThrows() {
     assert.throws(() => {
@@ -146,7 +143,6 @@ class SimpleTest {
     });
 
     assert.doesNotThrow(() => {
-
       let a = 5;
     });
   }
@@ -164,7 +160,6 @@ import { Suite, Test } from '@travetto/test';
 
 @Suite()
 class SimpleTest {
-
   @Test()
   async testRejects() {
     await assert.rejects(async () => {
@@ -172,7 +167,6 @@ class SimpleTest {
     });
 
     await assert.doesNotReject(async () => {
-
       let a = 5;
     });
   }
@@ -193,7 +187,6 @@ import { Suite, Test } from '@travetto/test';
 
 @Suite()
 class SimpleTest {
-
   @Test()
   async errorTypes() {
     assert.throws(() => {
@@ -208,10 +201,11 @@ class SimpleTest {
       throw new Error('Big Error');
     }, Error);
 
-    await assert.rejects(() => {
-      throw new Error('Big Error');
-    }, (error: Error) =>
-      error.message.startsWith('Big') && error.message.length > 4
+    await assert.rejects(
+      () => {
+        throw new Error('Big Error');
+      },
+      (error: Error) => error.message.startsWith('Big') && error.message.length > 4
     );
   }
 }
@@ -245,9 +239,9 @@ Options:
 The regexes are the patterns of tests you want to run, and all tests must be found under the `test/` folder.
 
 ### Travetto Plugin
-The [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) also supports test running,  which will provide even more functionality for real-time testing and debugging.
+The [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) also supports test running, which will provide even more functionality for real-time testing and debugging.
 
 ## Additional Considerations
-During the test execution, a few things additionally happen that should be helpful.  The primary addition, is that all console output is captured, and will be exposed in the test output.  This allows for investigation at a later point in time by analyzing the output. 
+During the test execution, a few things additionally happen that should be helpful. The primary addition, is that all console output is captured, and will be exposed in the test output. This allows for investigation at a later point in time by analyzing the output. 
 
-Like output, all promises are also intercepted.  This allows the code to ensure that all promises have been resolved before completing the test.  Any uncompleted promises will automatically trigger an error state and fail the test.
+Like output, all promises are also intercepted. This allows the code to ensure that all promises have been resolved before completing the test. Any uncompleted promises will automatically trigger an error state and fail the test.

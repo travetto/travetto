@@ -6,7 +6,6 @@ import { Max, Min } from '@travetto/schema';
  */
 @CliCommand()
 export class CustomCommand {
-
   /**
    * The message to send back to the user
    * @alias -m

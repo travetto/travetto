@@ -5,7 +5,7 @@ import { SchemaTypeUtil } from '@travetto/schema';
  */
 export type SpecialType = string | number | true;
 
-export class SpecialTypeTarget { }
+export class SpecialTypeTarget {}
 
 SchemaTypeUtil.setSchemaTypeConfig(SpecialTypeTarget, {
   validate(input: unknown) {
@@ -24,7 +24,8 @@ SchemaTypeUtil.setSchemaTypeConfig(SpecialTypeTarget, {
           }
           return;
         }
-        case 'string': return;
+        case 'string':
+          return;
         default:
           return 'type';
       }

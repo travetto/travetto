@@ -3,11 +3,10 @@ import path from 'node:path';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import { Log, type Logger } from '../log.ts';
 import { CommonUtil } from '../common.ts';
+import { Log, type Logger } from '../log.ts';
 
 export class ProcessHandle {
-
   #file: string;
   #log: Logger;
 
@@ -22,13 +21,17 @@ export class ProcessHandle {
   }
 
   getProcessId(): Promise<number | undefined> {
-    return fs.readFile(this.#file, 'utf8')
-      .then(processId => +processId > 0 ? +processId : undefined, () => undefined);
+    return fs.readFile(this.#file, 'utf8').then(
+      processId => (+processId > 0 ? +processId : undefined),
+      () => undefined
+    );
   }
 
   async isRunning(): Promise<boolean> {
     const processId = await this.getProcessId();
-    if (!processId) { return false; }
+    if (!processId) {
+      return false;
+    }
     try {
       process.kill(processId, 0); // See if process is still running
       this.#log.debug('Is running', processId);
@@ -41,11 +44,11 @@ export class ProcessHandle {
 
   async kill(): Promise<boolean> {
     const processId = await this.getProcessId();
-    if (processId && await this.isRunning()) {
+    if (processId && (await this.isRunning())) {
       try {
         this.#log.debug('Killing', processId);
         return process.kill(processId);
-      } catch { }
+      } catch {}
     }
     return false;
   }
@@ -58,8 +61,9 @@ export class ProcessHandle {
     }
 
     this.#log.debug('Ensuring Killed', processId);
-    while ((Date.now() - start) < gracePeriod) { // Ensure its done
-      if (!await this.isRunning()) {
+    while (Date.now() - start < gracePeriod) {
+      // Ensure its done
+      if (!(await this.isRunning())) {
         return true;
       }
       await CommonUtil.blockingTimeout(100);
@@ -67,7 +71,7 @@ export class ProcessHandle {
     try {
       this.#log.debug('Force Killing', processId);
       process.kill(processId); // Force kill
-    } catch { }
+    } catch {}
     this.#log.debug('Did Kill', this.#file, !!processId);
     return true;
   }

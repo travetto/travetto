@@ -1,20 +1,18 @@
-import { RuntimeError, type Class, Runtime, describeFunction } from '@travetto/runtime';
-import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
+import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
+import { type Class, describeFunction, Runtime, RuntimeError } from '@travetto/runtime';
 
 import type { SuiteConfig } from '../model/suite.ts';
 import type { TestConfig, TestRun } from '../model/test.ts';
 import { SuiteRegistryAdapter } from './registry-adapter.ts';
 
-const sortedTests = (config: SuiteConfig): TestConfig[] =>
-  Object.values(config.tests).toSorted((a, b) => a.lineStart - b.lineStart);
+const sortedTests = (config: SuiteConfig): TestConfig[] => Object.values(config.tests).toSorted((a, b) => a.lineStart - b.lineStart);
 
-type SuiteTests = { suite: SuiteConfig, tests: TestConfig[] };
+type SuiteTests = { suite: SuiteConfig; tests: TestConfig[] };
 
 /**
  * Test Suite registry
  */
 export class SuiteRegistryIndex implements RegistryIndex {
-
   static #instance = Registry.registerIndex(this);
 
   static getForRegister(cls: Class): SuiteRegistryAdapter {
@@ -43,7 +41,9 @@ export class SuiteRegistryIndex implements RegistryIndex {
 
   store = new RegistryIndexStore(SuiteRegistryAdapter);
 
-  /** @private */ constructor(source: unknown) { Registry.validateConstructor(source); }
+  /** @private */ constructor(source: unknown) {
+    Registry.validateConstructor(source);
+  }
 
   /**
    * Find all valid tests (ignoring abstract)
@@ -64,7 +64,8 @@ export class SuiteRegistryIndex implements RegistryIndex {
     const imp = run.import;
     const methodNames = run.methodNames ?? [];
 
-    if (clsId && /^\d+$/.test(clsId)) { // If we only have a line number
+    if (clsId && /^\d+$/.test(clsId)) {
+      // If we only have a line number
       const line = parseInt(clsId, 10);
       const suites = this.getValidClasses()
         .filter(cls => Runtime.getImport(cls) === imp)
@@ -79,7 +80,8 @@ export class SuiteRegistryIndex implements RegistryIndex {
       } else {
         return suites.map(config => ({ suite: config, tests: sortedTests(config) }));
       }
-    } else { // Else lookup directly
+    } else {
+      // Else lookup directly
       if (methodNames.length) {
         const cls = this.getValidClasses().find(type => type.Ⲑid === clsId);
         if (!cls) {
@@ -98,7 +100,7 @@ export class SuiteRegistryIndex implements RegistryIndex {
       } else {
         const suites = this.getValidClasses()
           .map(type => this.getConfig(type))
-          .filter(config => !describeFunction(config.class).abstract);  // Do not run abstract suites
+          .filter(config => !describeFunction(config.class).abstract); // Do not run abstract suites
         return suites.map(config => ({ suite: config, tests: sortedTests(config) }));
       }
     }

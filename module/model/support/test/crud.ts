@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
+import { Model, type ModelCrudSupport, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
+import { Precision, Required, Schema, Text } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
-import { Schema, Text, Precision, Required, } from '@travetto/schema';
-import { type ModelCrudSupport, Model, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
 
 import { BaseModelSuite } from './base.ts';
 
@@ -42,7 +42,7 @@ class SimpleList {
 }
 
 @Model()
-@PrePersist((item) => {
+@PrePersist(item => {
   item.name = `${item.name}-suffix`;
 })
 class User2 {
@@ -75,27 +75,26 @@ class BigIntModel {
 
 @Suite()
 export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
-
   indexLimitSkew = 0;
 
   @Test('save it')
   async save() {
     const service = await this.service;
 
-    const people = [1, 2, 3, 8].map(x => Person.from({
-      id: service.idSource.create(),
-      name: 'Bob',
-      age: 20 + x,
-      gender: 'm',
-      address: {
-        street1: 'a',
-        ...(x === 1 ? { street2: 'b' } : {})
-      }
-    }));
-
-    await Promise.all(
-      people.map(el => service.upsert(Person, el))
+    const people = [1, 2, 3, 8].map(x =>
+      Person.from({
+        id: service.idSource.create(),
+        name: 'Bob',
+        age: 20 + x,
+        gender: 'm',
+        address: {
+          street1: 'a',
+          ...(x === 1 ? { street2: 'b' } : {})
+        }
+      })
     );
+
+    await Promise.all(people.map(el => service.upsert(Person, el)));
 
     const single = await service.get(Person, people[2].id);
     assert(single !== undefined);
@@ -122,15 +121,18 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   @Test('Verify partial update with field removal')
   async testPartialUpdate() {
     const service = await this.service;
-    const o = await service.create(Person, Person.from({
-      name: 'bob',
-      age: 20,
-      gender: 'm',
-      address: {
-        street1: 'road',
-        street2: 'roader'
-      }
-    }));
+    const o = await service.create(
+      Person,
+      Person.from({
+        name: 'bob',
+        age: 20,
+        gender: 'm',
+        address: {
+          street1: 'road',
+          street2: 'roader'
+        }
+      })
+    );
     assert(o.id);
     assert(o.name === 'bob');
 
@@ -147,7 +149,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
       id: o2.id,
       gender: 'f',
       address: {
-        street1: 'changed\n',
+        street1: 'changed\n'
       }
     });
 
@@ -169,20 +171,23 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   @Test('Verify partial update with field removal and lists')
   async testPartialUpdateList() {
     const service = await this.service;
-    const o = await service.create(SimpleList, SimpleList.from({
-      names: ['a', 'b', 'c'],
-      simples: [
-        {
-          name: 'a',
-        },
-        {
-          name: 'b',
-        },
-        {
-          name: 'c',
-        }
-      ]
-    }));
+    const o = await service.create(
+      SimpleList,
+      SimpleList.from({
+        names: ['a', 'b', 'c'],
+        simples: [
+          {
+            name: 'a'
+          },
+          {
+            name: 'b'
+          },
+          {
+            name: 'c'
+          }
+        ]
+      })
+    );
 
     const o2 = await service.updatePartial(SimpleList, {
       id: o.id,
@@ -197,9 +202,12 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   @Test('Verify partial update with field removal and lists')
   async testBlankPartialUpdate() {
     const service = await this.service;
-    const o = await service.create(User2, User2.from({
-      name: 'bob',
-    }));
+    const o = await service.create(
+      User2,
+      User2.from({
+        name: 'bob'
+      })
+    );
 
     assert(o.address === undefined);
     assert(o.name === 'bob-suffix');
@@ -247,20 +255,20 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   async list() {
     const service = await this.service;
 
-    const people = [1, 2, 3].map(x => Person.from({
-      id: service.idSource.create(),
-      name: 'Bob',
-      age: 20 + x,
-      gender: 'm',
-      address: {
-        street1: 'a',
-        ...(x === 1 ? { street2: 'b' } : {})
-      }
-    }));
-
-    await Promise.all(
-      people.map(el => service.upsert(Person, el))
+    const people = [1, 2, 3].map(x =>
+      Person.from({
+        id: service.idSource.create(),
+        name: 'Bob',
+        age: 20 + x,
+        gender: 'm',
+        address: {
+          street1: 'a',
+          ...(x === 1 ? { street2: 'b' } : {})
+        }
+      })
     );
+
+    await Promise.all(people.map(el => service.upsert(Person, el)));
 
     const found = (await this.toArray(service.list(Person))).toSorted((a, b) => a.age - b.age);
 
@@ -274,16 +282,21 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     const service = await this.service;
 
     await Promise.all(
-      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(x => service.upsert(Person, Person.from({
-        id: service.idSource.create(),
-        name: 'Bob',
-        age: 20 + x,
-        gender: 'm',
-        address: {
-          street1: 'a',
-          ...(x === 1 ? { street2: 'b' } : {})
-        }
-      })))
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(x =>
+        service.upsert(
+          Person,
+          Person.from({
+            id: service.idSource.create(),
+            name: 'Bob',
+            age: 20 + x,
+            gender: 'm',
+            address: {
+              street1: 'a',
+              ...(x === 1 ? { street2: 'b' } : {})
+            }
+          })
+        )
+      )
     );
 
     const controller = new AbortController();
@@ -307,15 +320,17 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     const service = await this.service;
 
     const people = await Promise.all(
-      [1, 2, 3, 8].map((x, i) => service[i % 2 === 0 ? 'upsert' : 'create'](Person, {
-        name: 'Bob',
-        age: 20 + x,
-        gender: 'm',
-        address: {
-          street1: 'a',
-          ...(x === 1 ? { street2: 'b' } : {})
-        }
-      }))
+      [1, 2, 3, 8].map((x, i) =>
+        service[i % 2 === 0 ? 'upsert' : 'create'](Person, {
+          name: 'Bob',
+          age: 20 + x,
+          gender: 'm',
+          address: {
+            street1: 'a',
+            ...(x === 1 ? { street2: 'b' } : {})
+          }
+        })
+      )
     );
 
     const single = await service.get(Person, people[2].id);
@@ -365,10 +380,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     const service = await this.service;
     const o = await service.create(SimpleList, {
       names: ['rob', 'tom'],
-      simples: [
-        { name: 'roger' },
-        { name: 'dodger' }
-      ]
+      simples: [{ name: 'roger' }, { name: 'dodger' }]
     });
     assert(o.names.length === 2);
     assert(o.simples);
@@ -390,10 +402,13 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     const service = await this.service;
 
     // Create with bigint values
-    const created = await service.create(BigIntModel, BigIntModel.from({
-      largeNumber: 9007199254740991n, // Number.MAX_SAFE_INTEGER as bigint
-      optionalBigInt: 1234567890123456789n
-    }));
+    const created = await service.create(
+      BigIntModel,
+      BigIntModel.from({
+        largeNumber: 9007199254740991n, // Number.MAX_SAFE_INTEGER as bigint
+        optionalBigInt: 1234567890123456789n
+      })
+    );
 
     assert(created.id);
     assert.strictEqual(created.largeNumber, 9007199254740991n);
@@ -405,11 +420,14 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert.strictEqual(retrieved.optionalBigInt, 1234567890123456789n);
 
     // Update with new bigint value
-    const updated = await service.update(BigIntModel, BigIntModel.from({
-      id: created.id,
-      largeNumber: 18014398509481982n,
-      optionalBigInt: undefined
-    }));
+    const updated = await service.update(
+      BigIntModel,
+      BigIntModel.from({
+        id: created.id,
+        largeNumber: 18014398509481982n,
+        optionalBigInt: undefined
+      })
+    );
 
     assert.strictEqual(updated.largeNumber, 18014398509481982n);
     assert.strictEqual(updated.optionalBigInt, undefined);

@@ -1,14 +1,14 @@
-import { Registry } from '@travetto/registry';
-import { castTo, type Class } from '@travetto/runtime';
-import { AfterAll, BeforeAll } from '@travetto/test';
+import type { ConfigPayload, ConfigSource } from '@travetto/config';
 import { DependencyRegistryIndex, Injectable } from '@travetto/di';
-import type { ConfigSource, ConfigPayload } from '@travetto/config';
+import { Registry } from '@travetto/registry';
+import { type Class, castTo } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
+import { AfterAll, BeforeAll } from '@travetto/test';
 
 import type { WebDispatcher } from '../../../src/types/dispatch.ts';
+import type { WebMessageInit } from '../../../src/types/message.ts';
 import { WebRequest, type WebRequestContext } from '../../../src/types/request.ts';
 import type { WebResponse } from '../../../src/types/response.ts';
-import type { WebMessageInit } from '../../../src/types/message.ts';
 
 @Injectable()
 export class WebTestConfig implements ConfigSource {
@@ -20,7 +20,7 @@ export class WebTestConfig implements ConfigSource {
           trustProxy: { ips: ['*'] },
           http: {
             tls: false,
-            port: -1,
+            port: -1
           },
           etag: {
             minimumSize: 1
@@ -38,7 +38,6 @@ export class WebTestConfig implements ConfigSource {
  */
 @Schema()
 export abstract class BaseWebSuite {
-
   #cleanup?: () => void;
   #dispatcher: WebDispatcher;
 
@@ -60,7 +59,9 @@ export abstract class BaseWebSuite {
 
   async request<T>(cfg: WebMessageInit<unknown, WebRequestContext>, throwOnError: boolean = true): Promise<WebResponse<T>> {
     const response = await this.#dispatcher.dispatch({ request: new WebRequest(cfg) });
-    if (throwOnError && response.context.httpStatusCode && response.context.httpStatusCode >= 400) { throw response.body; }
+    if (throwOnError && response.context.httpStatusCode && response.context.httpStatusCode >= 400) {
+      throw response.body;
+    }
     return castTo(response);
   }
 }

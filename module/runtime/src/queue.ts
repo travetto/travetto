@@ -2,7 +2,6 @@
  * An asynchronous queue
  */
 export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
-
   #buffer: X[] = [];
   #done = false;
   #ready = Promise.withResolvers<void>();

@@ -1,6 +1,6 @@
 import { ManifestModuleUtil } from '@travetto/manifest';
 
-export type FunctionMetadataTag = { hash: number, lines: [start: number, end: number, bodyStart?: number] };
+export type FunctionMetadataTag = { hash: number; lines: [start: number, end: number, bodyStart?: number] };
 export type FunctionMetadata = FunctionMetadataTag & {
   id: string;
   import: string;
@@ -26,13 +26,16 @@ const pending = new Set<Function>([]);
  * @private
  */
 export function registerFunction(
-  input: Function, [module, relativePath]: [string, string], tag: FunctionMetadataTag,
-  methods?: Record<string, FunctionMetadataTag>, abstract?: boolean,
+  input: Function,
+  [module, relativePath]: [string, string],
+  tag: FunctionMetadataTag,
+  methods?: Record<string, FunctionMetadataTag>,
+  abstract?: boolean
 ): void {
   const modulePath = ManifestModuleUtil.withoutSourceExtension(relativePath);
 
   const metadata: FunctionMetadata = {
-    id: (input.name ? `${module}:${modulePath}#${input.name}` : `${module}:${modulePath}`),
+    id: input.name ? `${module}:${modulePath}#${input.name}` : `${module}:${modulePath}`,
     import: `${module}/${relativePath}`,
     module,
     modulePath,
@@ -65,5 +68,10 @@ export function describeFunction(input?: Function): FunctionMetadata | undefined
 
 const foreignTypeRegistry = new Map<string, Function>();
 export function foreignType(id: string): Function {
-  return foreignTypeRegistry.getOrInsert(id, class { static Ⲑid = id; });
+  return foreignTypeRegistry.getOrInsert(
+    id,
+    class {
+      static Ⲑid = id;
+    }
+  );
 }

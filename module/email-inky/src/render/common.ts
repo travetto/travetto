@@ -1,4 +1,4 @@
-import { type JSXElement, isJSXElement } from '../../support/jsx-runtime.ts';
+import { isJSXElement, type JSXElement } from '../../support/jsx-runtime.ts';
 
 export const getChildren = (node: JSXElement): JSXElement[] => {
   const kids = node?.props?.children;
@@ -42,12 +42,17 @@ export const classString = (existing: string | undefined, ...toAdd: string[]): s
   return out.join(' ');
 };
 
-export const combinePropsToString = (allowedProps: Set<string>, props: { className?: string } & Record<string, unknown>, addClasses: string[] = []): string => {
+export const combinePropsToString = (
+  allowedProps: Set<string>,
+  props: { className?: string } & Record<string, unknown>,
+  addClasses: string[] = []
+): string => {
   const out = { ...props, className: classString(props.className, ...addClasses) };
   return Object.entries(out)
     .filter(([key, value]) => allowedProps.has(key) && value !== undefined && value !== null && value !== '')
     .map(([key, value]) => [key === 'className' ? 'class' : key, value])
-    .map(([key, value]) => `${key}="${value}"`).join(' ');
+    .map(([key, value]) => `${key}="${value}"`)
+    .join(' ');
 };
 
 export const isOfType = (node: JSXElement, type: string): boolean => typeof node.type === 'function' && node.type.name === type;

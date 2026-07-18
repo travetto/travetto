@@ -1,7 +1,7 @@
-import { MailService, type EmailOptions, type MailTransport } from '@travetto/email';
 import { DependencyRegistryIndex, Injectable } from '@travetto/di';
-import { toConcrete } from '@travetto/runtime';
+import { type EmailOptions, MailService, type MailTransport } from '@travetto/email';
 import { Registry } from '@travetto/registry';
+import { toConcrete } from '@travetto/runtime';
 
 import { EditorConfig } from './config.ts';
 
@@ -10,7 +10,6 @@ import { EditorConfig } from './config.ts';
  */
 @Injectable()
 export class EditorSendService {
-
   ethereal = false;
 
   async service(): Promise<MailService> {
@@ -22,14 +21,14 @@ export class EditorSendService {
       try {
         const { NodemailerTransport } = await import('@travetto/email-nodemailer');
         const senderConfig = await EditorConfig.get('sender');
-        const cls = class { };
+        const cls = class {};
         DependencyRegistryIndex.getForRegister(cls).register({
           candidates: {
             factory: {
               candidateType: MailTransportTarget,
               factory: () => new NodemailerTransport(senderConfig),
               class: cls,
-              method: 'factory',
+              method: 'factory'
             }
           }
         });
@@ -37,8 +36,12 @@ export class EditorSendService {
 
         this.ethereal = !!senderConfig.host?.includes('ethereal.email');
       } catch {
-        console.error('A mail transport is currently needed to support sending emails.  Please install @travetto/email-nodemailer or any other compatible transport');
-        throw new Error('A mail transport is currently needed to support sending emails.  Please install @travetto/email-nodemailer or any other compatible transport');
+        console.error(
+          'A mail transport is currently needed to support sending emails.  Please install @travetto/email-nodemailer or any other compatible transport'
+        );
+        throw new Error(
+          'A mail transport is currently needed to support sending emails.  Please install @travetto/email-nodemailer or any other compatible transport'
+        );
       }
     }
     const service = await DependencyRegistryIndex.getInstance(MailService);

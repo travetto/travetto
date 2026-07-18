@@ -1,15 +1,16 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
-import { BinaryMetadataUtil, BinaryUtil, castTo } from '@travetto/runtime';
-import { S3ModelConfig, S3ModelService } from '@travetto/model-s3';
 import { S3 } from '@aws-sdk/client-s3';
 
+import { S3ModelConfig, S3ModelService } from '@travetto/model-s3';
+import { BinaryMetadataUtil, BinaryUtil, castTo } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
+
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
+import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
-import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
 
 @Suite()
 class S3BasicSuite extends ModelBasicSuite {
@@ -43,7 +44,7 @@ class S3BlobSuite extends ModelBlobSuite {
   @Test({ timeout: 15000 })
   async largeFile() {
     const service: S3ModelService = castTo(await this.service);
-    const buffer = BinaryUtil.binaryArrayToBuffer(BinaryUtil.makeBinaryArray(1.5 * service['config'].chunkSize));
+    const buffer = BinaryUtil.binaryArrayToBuffer(BinaryUtil.makeBinaryArray(1.5 * service.config.chunkSize));
     for (let i = 0; i < buffer.byteLength; i++) {
       buffer.writeUInt8(Math.trunc(Math.random() * 255), i);
     }
@@ -83,7 +84,6 @@ class S3BlobSuite extends ModelBlobSuite {
     configCustom.endpoint = 'https://cdn.example.com';
     await configCustom.finalizeConfig();
     assert(configCustom.publicBaseUrl === 'https://cdn.example.com');
-
 
     // 4. publicBaseUrl derived from localhost endpoint directly
     const configLocalhost = new S3ModelConfig();

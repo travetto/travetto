@@ -1,12 +1,6 @@
-import {
-  type InstallGuidance,
-  type LlmOperation,
-  type RecommendationQuery,
-  type RecommendationResponse,
-  type WorkflowGuidance
-} from './types.ts';
 import { INSTALL_BUNDLES } from './install-guidance.ts';
 import { recommendSnippets } from './snippet-catalog.ts';
+import type { InstallGuidance, LlmOperation, RecommendationQuery, RecommendationResponse, WorkflowGuidance } from './types.ts';
 import { WORKFLOWS } from './workflow-guidance.ts';
 
 const OPERATIONS: LlmOperation[] = [
@@ -237,11 +231,11 @@ const OPERATIONS: LlmOperation[] = [
     excluded: true
   },
   {
-    id: 'excluded-eslint-profile',
+    id: 'excluded-lint-profile',
     category: 'quality',
-    title: 'ESLint profile generation (excluded)',
+    title: 'Lint profile generation (excluded)',
     summary: 'Excluded by scope decision.',
-    requiredModules: ['@travetto/eslint'],
+    requiredModules: ['@travetto/lint'],
     optionalModules: [],
     excluded: true
   },
@@ -274,9 +268,7 @@ export function recommendWorkflows(ids?: string[]): WorkflowGuidance[] {
 
 export function recommendOperations(query: RecommendationQuery = {}): LlmOperation[] {
   const { categories, includeExcluded = false } = query;
-  const selected = categories && categories.length ?
-    OPERATIONS.filter(item => categories.includes(item.category)) :
-    OPERATIONS;
+  const selected = categories?.length ? OPERATIONS.filter(item => categories.includes(item.category)) : OPERATIONS;
   return selected.filter(item => includeExcluded || !item.excluded);
 }
 
@@ -299,8 +291,6 @@ export async function recommend(query: RecommendationQuery = {}): Promise<Recomm
   };
 }
 
-export const EXCLUDED_OPERATION_IDS = OPERATIONS
-  .filter(item => item.excluded)
-  .map(item => item.id);
+export const EXCLUDED_OPERATION_IDS = OPERATIONS.filter(item => item.excluded).map(item => item.id);
 
 export const LLM_OPERATIONS = OPERATIONS;

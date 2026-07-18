@@ -1,22 +1,18 @@
 import { type Pool, type PoolClient, default as pg } from 'pg';
 
-import { castTo, ShutdownManager } from '@travetto/runtime';
 import { type AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
-import { type SQLModelConfig, Connection } from '@travetto/model-sql';
+import { Connection, type SQLModelConfig } from '@travetto/model-sql';
+import { castTo, ShutdownManager } from '@travetto/runtime';
 
 /**
  * Connection support for postgresql
  */
 export class PostgreSQLConnection extends Connection<PoolClient> {
-
   #pool: Pool;
   #config: SQLModelConfig;
 
-  constructor(
-    context: AsyncContext,
-    config: SQLModelConfig
-  ) {
+  constructor(context: AsyncContext, config: SQLModelConfig) {
     super(context);
     this.#config = config;
   }
@@ -33,7 +29,7 @@ export class PostgreSQLConnection extends Connection<PoolClient> {
       host: this.#config.host,
       port: this.#config.port,
       ...castTo({
-        parseInputDatesAsUTC: true,
+        parseInputDatesAsUTC: true
       }),
       ...(this.#config.options || {})
     });
@@ -52,7 +48,7 @@ export class PostgreSQLConnection extends Connection<PoolClient> {
     ShutdownManager.signal.addEventListener('abort', () => this.#pool.end());
   }
 
-  async execute<T = unknown>(pool: PoolClient, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {
+  async execute<T = unknown>(pool: PoolClient, query: string, values?: unknown[]): Promise<{ count: number; records: T[] }> {
     console.debug('Executing query', { query });
     try {
       const out = await pool.query(query, values);
@@ -62,10 +58,13 @@ export class PostgreSQLConnection extends Connection<PoolClient> {
       const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
       switch (code) {
         // Index already exists
-        case '42P07': throw new ExistsError('index', query);
+        case '42P07':
+          throw new ExistsError('index', query);
         // Unique violation
-        case '23505': throw new ExistsError('query', query);
-        default: throw error;
+        case '23505':
+          throw new ExistsError('query', query);
+        default:
+          throw error;
       }
     }
   }

@@ -1,14 +1,14 @@
-import { castKey, castTo, type Class, type ClassInstance, TypedObject } from '@travetto/runtime';
+import { type Class, type ClassInstance, castKey, castTo, TypedObject } from '@travetto/runtime';
 
-import type { SchemaInputConfig, SchemaFieldMap } from '../service/types.ts';
-import type { ValidationError, ValidationKindCore, ValidationResult } from './types.ts';
-import { Messages } from './messages.ts';
-import { isValidationError, TypeMismatchError, ValidationResultError } from './error.ts';
 import { DataUtil } from '../data.ts';
-import { CommonRegexToName } from './regex.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
+import type { SchemaFieldMap, SchemaInputConfig } from '../service/types.ts';
 import { SchemaTypeUtil } from '../type-config.ts';
 import { UnknownType } from '../types.ts';
+import { isValidationError, TypeMismatchError, ValidationResultError } from './error.ts';
+import { Messages } from './messages.ts';
+import { CommonRegexToName } from './regex.ts';
+import type { ValidationError, ValidationKindCore, ValidationResult } from './types.ts';
 
 const PrimitiveTypes = new Set<Function>([String, Number, BigInt, Boolean]);
 type NumericComparable = number | bigint | Date;
@@ -32,7 +32,7 @@ function isRangeValue(value: unknown): value is NumericComparable {
 }
 
 function isLengthValue(value: unknown): value is { length: number } {
-  return (typeof value === 'string' || (typeof value === 'object' && !!value && 'length' in value && typeof value.length === 'number'));
+  return typeof value === 'string' || (typeof value === 'object' && !!value && 'length' in value && typeof value.length === 'number');
 }
 
 /**
@@ -40,7 +40,6 @@ function isLengthValue(value: unknown): value is { length: number } {
  * for errors
  */
 export class SchemaValidator {
-
   /**
    * Validate the schema for a given object
    * @param fields The config to validate against
@@ -51,7 +50,8 @@ export class SchemaValidator {
     let errors: ValidationError[] = [];
 
     for (const [field, fieldConfig] of TypedObject.entries(fields)) {
-      if (fieldConfig.access !== 'readonly') { // Do not validate readonly fields
+      if (fieldConfig.access !== 'readonly') {
+        // Do not validate readonly fields
         errors = errors.concat(this.#validateInputSchema(fieldConfig, item[castKey<T>(field)], relative));
       }
     }
@@ -66,9 +66,14 @@ export class SchemaValidator {
    * @param relative The relative path of object traversal
    */
   static #validateInputSchema(input: SchemaInputConfig, value: unknown, relative: string = ''): ValidationError[] {
-    const key = 'name' in input ? input.name : ('index' in input ? input.index : 'unknown');
+    const key = 'name' in input ? input.name : 'index' in input ? input.index : 'unknown';
     const path = `${relative}${relative ? '.' : ''}${key}`;
-    const hasValue = !(value === undefined || value === null || (typeof value === 'string' && value === '') || (Array.isArray(value) && value.length === 0));
+    const hasValue = !(
+      value === undefined ||
+      value === null ||
+      (typeof value === 'string' && value === '') ||
+      (Array.isArray(value) && value.length === 0)
+    );
 
     if (!hasValue) {
       if (input.required?.active !== false) {
@@ -116,8 +121,8 @@ export class SchemaValidator {
    */
   static #validateRange(input: SchemaInputConfig, key: 'min' | 'max', value: NumericComparable): boolean {
     const config = input[key]!;
-    const parsed = (value instanceof Date ? value.getTime() : value);
-    const boundary = (config.limit instanceof Date) ? config.limit.getTime() : config.limit;
+    const parsed = value instanceof Date ? value.getTime() : value;
+    const boundary = config.limit instanceof Date ? config.limit.getTime() : config.limit;
     return key === 'min' ? parsed < boundary : parsed > boundary;
   }
 
@@ -134,9 +139,12 @@ export class SchemaValidator {
     if (config?.validate) {
       const kind = config.validate(value);
       switch (kind) {
-        case undefined: break;
-        case 'type': return [{ kind, type: input.type.name }];
-        default: return [{ kind, value }];
+        case undefined:
+          break;
+        case 'type':
+          return [{ kind, type: input.type.name }];
+        default:
+          return [{ kind, value }];
       }
     } else if (PrimitiveTypes.has(input.type)) {
       if (typeof value !== input.type.name.toLowerCase()) {
@@ -145,7 +153,8 @@ export class SchemaValidator {
         return [{ kind: 'type', type: 'number' }];
       }
     } else if (SchemaRegistryIndex.has(input.type)) {
-      if (!(value instanceof input.type)) { // If not an instance of the type
+      if (!(value instanceof input.type)) {
+        // If not an instance of the type
         return [{ kind: 'type', type: input.type.name }];
       }
     }
@@ -192,21 +201,16 @@ export class SchemaValidator {
         message: '',
         regex: CommonRegexToName.get(result.regex!) ?? result.regex?.source ?? '',
         path,
-        type: (typeof result.type === 'function' ? result.type.name : result.type)
+        type: typeof result.type === 'function' ? result.type.name : result.type
       };
 
       if (!error.regex) {
         delete error.regex;
       }
 
-      const message = result.message ?? (
-        Messages.get(error.regex ?? '') ??
-        Messages.get(error.kind) ??
-        Messages.get('default')!
-      );
+      const message = result.message ?? Messages.get(error.regex ?? '') ?? Messages.get(error.kind) ?? Messages.get('default')!;
 
-      error.message = message
-        .replace(/\{([^}]+)\}/g, (_, key: (keyof ValidationError)) => `${error[key]}`);
+      error.message = message.replace(/\{([^}]+)\}/g, (_, key: keyof ValidationError) => `${error[key]}`);
 
       out.push(error);
     }
@@ -261,10 +265,7 @@ export class SchemaValidator {
     const fields = SchemaRegistryIndex.get(cls).getFields(view);
 
     // Validate using standard behaviors
-    const errors = [
-      ...this.#validateFields(fields, item, ''),
-      ... await this.#validateClassLevel(cls, item, view)
-    ];
+    const errors = [...this.#validateFields(fields, item, ''), ...(await this.#validateClassLevel(cls, item, view))];
     if (errors.length) {
       throw new ValidationResultError(errors);
     }
@@ -279,8 +280,7 @@ export class SchemaValidator {
    * @param view The view to limit by
    */
   static async validateAll<T>(cls: Class<T>, items: T[], view?: string): Promise<T[]> {
-    return await Promise.all<T>((items ?? [])
-      .map(item => this.validate(cls, item, view)));
+    return await Promise.all<T>((items ?? []).map(item => this.validate(cls, item, view)));
   }
 
   /**
@@ -294,7 +294,8 @@ export class SchemaValidator {
     try {
       await this.validate(cls, item, view);
     } catch (error) {
-      if (error instanceof ValidationResultError) { // Don't check required fields
+      if (error instanceof ValidationResultError) {
+        // Don't check required fields
         const errs = error.details.errors.filter(validationError => validationError.kind !== 'required');
         if (errs.length) {
           error.details.errors = errs;
@@ -318,17 +319,14 @@ export class SchemaValidator {
 
     for (const param of config.parameters) {
       const i = param.index;
-      errors.push(...[
-        ... this.#validateInputSchema(param, params[i]),
-        ... await this.#validateClassLevel(param.type, params[i])
-      ].map(error => {
-        if (param.name && typeof param.name === 'string') {
-          error.path = !prefixes[i] ?
-            error.path.replace(`${param.name}.`, '') :
-            error.path.replace(param.name, prefixes[i]!);
-        }
-        return error;
-      }));
+      errors.push(
+        ...[...this.#validateInputSchema(param, params[i]), ...(await this.#validateClassLevel(param.type, params[i]))].map(error => {
+          if (param.name && typeof param.name === 'string') {
+            error.path = !prefixes[i] ? error.path.replace(`${param.name}.`, '') : error.path.replace(param.name, prefixes[i]!);
+          }
+          return error;
+        })
+      );
     }
     for (const validator of config.validators) {
       const error = await validator(...params);

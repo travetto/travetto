@@ -1,9 +1,9 @@
-import { type ChildProcess, spawn, type SpawnOptions } from 'node:child_process';
+import { type ChildProcess, type SpawnOptions, spawn } from 'node:child_process';
 
-import { castTo } from './types.ts';
-import { RuntimeIndex } from './manifest-index.ts';
-import { BinaryUtil, type BinaryArray } from './binary.ts';
+import { type BinaryArray, BinaryUtil } from './binary.ts';
 import { CodecUtil } from './codec.ts';
+import { RuntimeIndex } from './manifest-index.ts';
+import { castTo } from './types.ts';
 
 const ResultSymbol = Symbol();
 
@@ -39,7 +39,6 @@ type ExecutionBaseResult = Omit<ExecutionResult, 'stdout' | 'stderr'>;
  * Standard utilities for managing executions
  */
 export class ExecUtil {
-
   /** Read stream as string from a result */
   static toString(result: ExecutionResult<BinaryArray | string>, stream: 'stdout' | 'stderr' | 'any'): string {
     if (stream === 'any') {
@@ -61,11 +60,14 @@ export class ExecUtil {
    * @param options The options to use to enhance the process
    */
   static getResult(subProcess: ChildProcess): Promise<ExecutionResult<string>>;
-  static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary?: false }): Promise<ExecutionResult<string>>;
-  static getResult(subProcess: ChildProcess, options: { catch?: boolean, binary: true }): Promise<ExecutionResult<BinaryArray>>;
-  static getResult<T extends string | BinaryArray>(subProcess: ChildProcess, options: { catch?: boolean, binary?: boolean } = {}): Promise<ExecutionResult<T>> {
+  static getResult(subProcess: ChildProcess, options: { catch?: boolean; binary?: false }): Promise<ExecutionResult<string>>;
+  static getResult(subProcess: ChildProcess, options: { catch?: boolean; binary: true }): Promise<ExecutionResult<BinaryArray>>;
+  static getResult<T extends string | BinaryArray>(
+    subProcess: ChildProcess,
+    options: { catch?: boolean; binary?: boolean } = {}
+  ): Promise<ExecutionResult<T>> {
     const typed: ChildProcess & { [ResultSymbol]?: Promise<ExecutionResult> } = subProcess;
-    const result = typed[ResultSymbol] ??= new Promise<ExecutionResult>(resolve => {
+    const result = (typed[ResultSymbol] ??= new Promise<ExecutionResult>(resolve => {
       const stdout: BinaryArray[] = [];
       const stderr: BinaryArray[] = [];
       let done = false;
@@ -77,7 +79,7 @@ export class ExecUtil {
 
         const buffers = {
           stdout: BinaryUtil.combineBinaryArrays(stdout),
-          stderr: BinaryUtil.combineBinaryArrays(stderr),
+          stderr: BinaryUtil.combineBinaryArrays(stderr)
         };
 
         const final = {
@@ -86,33 +88,33 @@ export class ExecUtil {
           ...finalResult
         };
 
-        resolve(!final.valid ?
-          { ...final, message: `${final.message || final.stderr || final.stdout || 'failed'}` } :
-          final
-        );
+        resolve(!final.valid ? { ...final, message: `${final.message || final.stderr || final.stdout || 'failed'}` } : final);
       };
 
       subProcess.stdout?.on('data', data => stdout.push(CodecUtil.readChunk(data, subProcess.stdout?.readableEncoding)));
       subProcess.stderr?.on('data', data => stderr.push(CodecUtil.readChunk(data, subProcess.stderr?.readableEncoding)));
 
-      subProcess.on('error', (error: Error) =>
-        finish({ code: 1, message: error.message, valid: false }));
+      subProcess.on('error', (error: Error) => finish({ code: 1, message: error.message, valid: false }));
 
-      subProcess.on('close', (code: number) =>
-        finish({ code, valid: code === null || code === 0 }));
+      subProcess.on('close', (code: number) => finish({ code, valid: code === null || code === 0 }));
 
-      if (subProcess.exitCode !== null) { // We are already done
+      if (subProcess.exitCode !== null) {
+        // We are already done
         finish({ code: subProcess.exitCode, valid: subProcess.exitCode === 0 });
       }
-    });
-
-    return castTo(options.catch ? result : result.then(executionResult => {
-      if (executionResult.valid) {
-        return executionResult;
-      } else {
-        throw new Error(executionResult.message);
-      }
     }));
+
+    return castTo(
+      options.catch
+        ? result
+        : result.then(executionResult => {
+            if (executionResult.valid) {
+              return executionResult;
+            } else {
+              throw new Error(executionResult.message);
+            }
+          })
+    );
   }
 
   /** Spawn a package command */

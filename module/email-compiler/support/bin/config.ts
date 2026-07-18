@@ -1,8 +1,9 @@
 import fs from 'node:fs/promises';
+
 import { parse, stringify } from 'yaml';
 
-import { Runtime } from '@travetto/runtime';
 import { ManifestFileUtil } from '@travetto/manifest';
+import { Runtime } from '@travetto/runtime';
 
 import type { EditorConfigType } from './types.ts';
 
@@ -12,7 +13,6 @@ export const CONFIG_FILE = 'resources/email/local.yml';
  * Configuration utils
  */
 export class EditorConfig {
-
   static DEFAULT_CONFIG = {
     to: 'my-email@gmail.com',
     from: 'from-email@gmail.com',
@@ -25,8 +25,8 @@ export class EditorConfig {
       auth: {
         user: 'email@blah.com',
         pass: 'password'
-      },
-    },
+      }
+    }
   };
 
   /**

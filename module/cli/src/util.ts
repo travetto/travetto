@@ -1,11 +1,11 @@
-import { spawn, type ChildProcess } from 'node:child_process';
+import { type ChildProcess, spawn } from 'node:child_process';
 
-import { RuntimeError, JSONUtil, Env, ExecUtil, Runtime, ShutdownManager, Util, WatchUtil } from '@travetto/runtime';
+import { Env, ExecUtil, JSONUtil, Runtime, RuntimeError, ShutdownManager, Util, WatchUtil } from '@travetto/runtime';
 
 const IPC_VALID_ENV = new Set(['NODE_OPTIONS', 'PATH', Env.DEBUG.key, Env.NODE_ENV.key]);
-const IPC_INVALID_ENV = new Set([
-  Env.TRV_CLI_IPC, Env.TRV_DEBUG_IPC, Env.TRV_DEBUG_BREAK, Env.TRV_MANIFEST, Env.TRV_MODULE, Env.TRV_RESTART_TARGET
-].map(item => item.key));
+const IPC_INVALID_ENV = new Set(
+  [Env.TRV_CLI_IPC, Env.TRV_DEBUG_IPC, Env.TRV_DEBUG_BREAK, Env.TRV_MANIFEST, Env.TRV_MODULE, Env.TRV_RESTART_TARGET].map(item => item.key)
+);
 const validEnv = ([key]: [key: string, value: unknown]): boolean =>
   IPC_VALID_ENV.has(key) || (key.startsWith('TRV_') && !IPC_INVALID_ENV.has(key));
 
@@ -14,7 +14,7 @@ export class CliUtil {
    * Get a simplified version of a module name
    */
   static getSimpleModuleName(placeholder: string, module?: string): string {
-    const simple = (module ?? Runtime.main.name).replace(/[\/]/, '_').replace(/@/, '');
+    const simple = (module ?? Runtime.main.name).replace(/[/]/, '_').replace(/@/, '');
     return simple ? placeholder.replace('<module>', simple) : placeholder;
   }
 
@@ -35,9 +35,7 @@ export class CliUtil {
     let child: ChildProcess | undefined;
     await WatchUtil.watchCompilerEvents('file', () => ShutdownManager.shutdownChild(child!, { reason: 'restart', mode: 'exit' }));
 
-    process
-      .on('SIGINT', () => ShutdownManager.shutdownChild(child!, { mode: 'exit' }))
-      .on('message', message => child?.send?.(message!));
+    process.on('SIGINT', () => ShutdownManager.shutdownChild(child!, { mode: 'exit' })).on('message', message => child?.send?.(message!));
 
     const env = { ...process.env, ...Env.TRV_RESTART_TARGET.export(true) };
 
@@ -51,12 +49,13 @@ export class CliUtil {
         maxRetries: 5,
         onRetry: async (state, config) => {
           const duration = WatchUtil.computeRestartDelay(state, config);
-          console.error(
-            '[cli-restart] Restarting subprocess due to change...',
-            { waiting: duration, iteration: state.iteration, errorIterations: state.errorIterations || undefined }
-          );
+          console.error('[cli-restart] Restarting subprocess due to change...', {
+            waiting: duration,
+            iteration: state.iteration,
+            errorIterations: state.errorIterations || undefined
+          });
           await Util.nonBlockingTimeout(duration);
-        },
+        }
       }
     );
 
@@ -84,7 +83,7 @@ export class CliUtil {
         name,
         env: Object.fromEntries(Object.entries(process.env).filter(validEnv)),
         cwd: process.cwd(),
-        args: process.argv.slice(3),
+        args: process.argv.slice(3)
       }
     };
 
@@ -102,8 +101,7 @@ export class CliUtil {
    * Write data to channel and ensure its flushed before continuing
    */
   static async writeAndEnsureComplete(data: unknown, channel: 'stdout' | 'stderr' = 'stdout'): Promise<void> {
-    await new Promise<unknown>(resolve => process[channel].write(typeof data === 'string' ? data :
-      JSONUtil.toUTF8Pretty(data), resolve));
+    await new Promise<unknown>(resolve => process[channel].write(typeof data === 'string' ? data : JSONUtil.toUTF8Pretty(data), resolve));
   }
 
   /**

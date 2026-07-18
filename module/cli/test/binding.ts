@@ -1,16 +1,15 @@
 import assert from 'node:assert';
 
-import { AssertCheck, BeforeAll, Suite, Test } from '@travetto/test';
 import { CliCommand, CliCommandSchemaUtil, CliFlag, CliParseUtil, type ParsedState } from '@travetto/cli';
-import { SchemaRegistryIndex } from '@travetto/schema';
 import { Registry } from '@travetto/registry';
+import { SchemaRegistryIndex } from '@travetto/schema';
+import { AssertCheck, BeforeAll, Suite, Test } from '@travetto/test';
 
 /**
  * My command
  */
 @CliCommand()
 class Entity {
-
   ids?: number[] = [];
 
   fun?: boolean;
@@ -32,7 +31,7 @@ class Entity {
   @CliFlag({ short: 'hp' })
   happy?: number;
 
-  main(file: string, force: boolean, args?: string[]) { }
+  main(file: string, force: boolean, args?: string[]) {}
 }
 
 const get = async (...args: string[]) => CliParseUtil.parse(SchemaRegistryIndex.getConfig(Entity), args);
@@ -40,7 +39,6 @@ const unused = (state: ParsedState) => state.unknown;
 
 @Suite()
 class SchemaBindingSuite {
-
   @AssertCheck()
   async checkArgs(args: string[], expected: unknown[], raw?: unknown[]) {
     const entity = new Entity();
@@ -50,7 +48,7 @@ class SchemaBindingSuite {
     if (raw) {
       assert.deepStrictEqual(unused(parsed), raw);
     }
-  };
+  }
 
   @BeforeAll()
   async init() {
@@ -85,7 +83,7 @@ class SchemaBindingSuite {
     assert(entity.age === undefined);
 
     CliCommandSchemaUtil.bindInput(entity, await get('--age', '20', '-g', 'red'));
-    assert(isNaN(entity.age));
+    assert(Number.isNaN(entity.age));
 
     process.env.COLOREO = '100';
     CliCommandSchemaUtil.bindInput(entity, await get('--color'));
@@ -123,11 +121,13 @@ class SchemaBindingSuite {
     await this.checkArgs(['-g', '20', 'george', '1'], ['george', true, undefined]);
     await this.checkArgs(['-g', '20', 'george', 'red'], ['george', false, undefined]);
     await this.checkArgs(['-g', '20', 'george', 'true', 'orange'], ['george', true, ['orange']]);
-    await this.checkArgs(['-g', '20', 'george', 'true', '--', '--age', '20', 'orange'],
+    await this.checkArgs(
+      ['-g', '20', 'george', 'true', '--', '--age', '20', 'orange'],
       ['george', true, undefined],
       ['--age', '20', 'orange']
     );
-    await this.checkArgs(['-g', '20', 'george', 'true', '-z', '--gravy', '--', '--age', '20', 'orange'],
+    await this.checkArgs(
+      ['-g', '20', 'george', 'true', '-z', '--gravy', '--', '--age', '20', 'orange'],
       ['george', true, undefined],
       ['-z', '--gravy', '--age', '20', 'orange']
     );
@@ -135,7 +135,6 @@ class SchemaBindingSuite {
 
   @Test()
   async bindNegativeNumbers() {
-
     const entity = new Entity();
     let state = await get('-i', '10', '-i', '20', 'george');
 

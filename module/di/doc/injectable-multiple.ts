@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
 
 @Injectable()
 class CustomService {

@@ -1,5 +1,5 @@
-import { Suite } from '@travetto/test';
 import { FirestoreModelConfig, FirestoreModelService } from '@travetto/model-firestore';
+import { Suite } from '@travetto/test';
 
 import { ModelIndexedSuite } from '@travetto/model-indexed/support/test/indexed.ts';
 import { ModelIndexedPolymorphismSuite } from '@travetto/model-indexed/support/test/polymorphism.ts';

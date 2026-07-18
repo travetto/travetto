@@ -1,5 +1,5 @@
-import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { Injectable } from '@travetto/di';
 
 import type { LogAppender, LogEvent } from '../types.ts';
 
@@ -13,7 +13,6 @@ export class ConsoleLogAppenderConfig {
  */
 @Injectable()
 export class ConsoleLogAppender implements LogAppender {
-
   config: ConsoleLogAppenderConfig;
 
   constructor(config: ConsoleLogAppenderConfig) {

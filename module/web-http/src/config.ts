@@ -1,18 +1,17 @@
 import { Config, EnvVar } from '@travetto/config';
-import { Ignore, Secret } from '@travetto/schema';
-import { RuntimeError, Runtime, RuntimeResources } from '@travetto/runtime';
-import { NetUtil } from '@travetto/web';
 import { PostConstruct } from '@travetto/di';
+import { Runtime, RuntimeError, RuntimeResources } from '@travetto/runtime';
+import { Ignore, Secret } from '@travetto/schema';
+import { NetUtil } from '@travetto/web';
 
-import type { WebSecureKeyPair } from './types.ts';
 import { WebTlsUtil } from './tls.ts';
+import type { WebSecureKeyPair } from './types.ts';
 
 /**
  * Web HTTP configuration
  */
 @Config('web.http')
 export class WebHttpConfig {
-
   /**
    * What version of HTTP to use
    * Version 2 requires SSL for direct browser access
@@ -48,8 +47,8 @@ export class WebHttpConfig {
 
   @PostConstruct()
   async finalizeConfig(): Promise<void> {
-    this.tls ??= (this.httpVersion === '2' || !!this.tlsKeys);
-    this.port = (this.port < 0 ? await NetUtil.getFreePort() : this.port);
+    this.tls ??= this.httpVersion === '2' || !!this.tlsKeys;
+    this.port = this.port < 0 ? await NetUtil.getFreePort() : this.port;
     this.bindAddress ||= NetUtil.getLocalAddress();
 
     if (!this.tls) {
@@ -61,7 +60,8 @@ export class WebHttpConfig {
       }
       this.tlsKeys = await WebTlsUtil.generateKeyPair();
     } else {
-      if (this.tlsKeys.key.length < 100) { // We have files or resources
+      if (this.tlsKeys.key.length < 100) {
+        // We have files or resources
         this.tlsKeys.key = await RuntimeResources.readUTF8(this.tlsKeys.key);
         this.tlsKeys.cert = await RuntimeResources.readUTF8(this.tlsKeys.cert);
       }

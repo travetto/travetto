@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { Schema, SchemaValidator, ValidationResultError, Validator } from '@travetto/schema';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 @Schema()
 @Validator((user: User) => {
@@ -44,7 +44,6 @@ class AsyncUser {
 
 @Suite()
 export class CustomTest {
-
   @BeforeAll()
   async init() {
     await Registry.init();
@@ -56,7 +55,8 @@ export class CustomTest {
       password: 'orange'
     });
     await assert.rejects(() => SchemaValidator.validate(User, u), 'Validation errors');
-    await assert.rejects(() => SchemaValidator.validate(User, u),
+    await assert.rejects(
+      () => SchemaValidator.validate(User, u),
       e => e instanceof ValidationResultError && e.details.errors.some(x => x.message.includes('A password must'))
     );
   }
@@ -67,7 +67,8 @@ export class CustomTest {
       passwordSpecial: 'orange'
     });
     await assert.rejects(() => SchemaValidator.validate(AsyncUser, u), 'Validation errors');
-    await assert.rejects(() => SchemaValidator.validate(AsyncUser, u),
+    await assert.rejects(
+      () => SchemaValidator.validate(AsyncUser, u),
       e => e instanceof ValidationResultError && e.details.errors.some(x => x.message.includes('A password must'))
     );
   }

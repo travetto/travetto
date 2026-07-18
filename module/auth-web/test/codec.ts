@@ -1,17 +1,16 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
-import { Inject } from '@travetto/di';
-import { WebResponse } from '@travetto/web';
 import { type AuthContextInterceptor, CommonPrincipalCodecSymbol, type JWTPrincipalCodec, type WebAuthConfig } from '@travetto/auth-web';
+import { Inject } from '@travetto/di';
 import { JSONUtil } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
+import { WebResponse } from '@travetto/web';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 
 @Suite()
 @InjectableSuite()
 export class CodecTest {
-
   @Inject()
   interceptor: AuthContextInterceptor;
 
@@ -26,14 +25,12 @@ export class CodecTest {
     const response = new WebResponse();
     this.interceptor.config.mode = 'header';
 
-    await this.interceptor.codec.encode(response,
-      {
-        id: 'true',
-        details: {
-          data: 'hello'
-        }
+    await this.interceptor.codec.encode(response, {
+      id: 'true',
+      details: {
+        data: 'hello'
       }
-    );
+    });
 
     assert(response.headers.has('Authorization'));
   }
@@ -50,31 +47,38 @@ export class CodecTest {
 
   @Test()
   async keyRotation() {
-    this.interceptor.config.keyMap['orange'] = {
+    this.interceptor.config.keyMap.orange = {
       id: 'orange',
       key: 'green'
     };
 
-    const token = await this.codec.create({
-      id: 'bob',
-      details: {}
-    }, 'orange');
-
-    await assert.doesNotReject(() =>
-      this.codec.verify(token)
-    );
-
-    await assert.rejects(() =>
-      this.codec.create({
+    const token = await this.codec.create(
+      {
         id: 'bob',
         details: {}
-      }, 'orange2')
+      },
+      'orange'
     );
 
-    const token1 = await this.codec.create({
-      id: 'bob',
-      details: {}
-    }, 'orange');
+    await assert.doesNotReject(() => this.codec.verify(token));
+
+    await assert.rejects(() =>
+      this.codec.create(
+        {
+          id: 'bob',
+          details: {}
+        },
+        'orange2'
+      )
+    );
+
+    const token1 = await this.codec.create(
+      {
+        id: 'bob',
+        details: {}
+      },
+      'orange'
+    );
 
     const token2 = await this.codec.create({
       id: 'bob',

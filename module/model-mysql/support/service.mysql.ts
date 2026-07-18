@@ -12,5 +12,5 @@ export const service: ServiceDescriptor = {
     MYSQL_PASSWORD: 'travetto',
     MYSQL_USER: 'travetto',
     MYSQL_DATABASE: 'app'
-  },
+  }
 };

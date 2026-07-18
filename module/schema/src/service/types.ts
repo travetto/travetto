@@ -3,7 +3,7 @@ import type { Any, Class, IntrinsicType, NumericLikeIntrinsic, Primitive } from 
 import type { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
 
 type TemplateLiteralPart = string | NumberConstructor | StringConstructor | BooleanConstructor;
-export type TemplateLiteral = { operation: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };
+export type TemplateLiteral = { operation: 'and' | 'or'; values: (TemplateLiteralPart | TemplateLiteral)[] };
 
 export const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';
 
@@ -160,31 +160,31 @@ export interface SchemaInputConfig extends SchemaCoreConfig, SchemaBasicType {
   /**
    * Is the field required
    */
-  required?: { active: boolean, message?: string };
+  required?: { active: boolean; message?: string };
   /**
    * Does the field expect a match
    */
-  match?: { regex: RegExp, message?: string, template?: TemplateLiteral };
+  match?: { regex: RegExp; message?: string; template?: TemplateLiteral };
   /**
    * Minimum value configuration
    */
-  min?: { limit: NumericLikeIntrinsic, message?: string };
+  min?: { limit: NumericLikeIntrinsic; message?: string };
   /**
    * Maximum value configuration
    */
-  max?: { limit: NumericLikeIntrinsic, message?: string };
+  max?: { limit: NumericLikeIntrinsic; message?: string };
   /**
    * Minimum length configuration
    */
-  minlength?: { limit: number, message?: string };
+  minlength?: { limit: number; message?: string };
   /**
    * Maximum length configuration
    */
-  maxlength?: { limit: number, message?: string };
+  maxlength?: { limit: number; message?: string };
   /**
    * Enumerated values
    */
-  enum?: { values: Primitive[], message: string };
+  enum?: { values: Primitive[]; message: string };
   /**
    * Default value
    */
@@ -235,4 +235,4 @@ export interface SchemaFieldConfig extends SchemaInputConfig {
   accessor?: boolean;
 }
 
-export type ViewFieldsConfig<T> = { with: Extract<(keyof T), string>[] } | { without: Extract<(keyof T), string>[] };
+export type ViewFieldsConfig<T> = { with: Extract<keyof T, string>[] } | { without: Extract<keyof T, string>[] };

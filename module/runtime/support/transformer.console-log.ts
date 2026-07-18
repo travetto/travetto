@@ -1,11 +1,11 @@
 import ts from 'typescript';
 
-import { type TransformerState, LiteralUtil, TransformerHandler } from '@travetto/transformer';
+import { LiteralUtil, TransformerHandler, type TransformerState } from '@travetto/transformer';
 
 const CONSOLE_IMPORT = '@travetto/runtime/src/console.ts';
 
 type CustomState = TransformerState & {
-  scope: { type: 'method' | 'class' | 'function', name: string }[];
+  scope: { type: 'method' | 'class' | 'function'; name: string }[];
   imported?: ts.Identifier;
 };
 
@@ -21,7 +21,6 @@ const VALID_LEVELS: Record<string, string> = {
  * Logging support with code-location aware messages.
  */
 export class ConsoleLogTransformer {
-
   static {
     TransformerHandler(this, this.startClassForLog, 'before', 'class');
     TransformerHandler(this, this.leaveClassForLog, 'after', 'class');
@@ -91,21 +90,16 @@ export class ConsoleLogTransformer {
     const level = name.escapedText!;
 
     if (VALID_LEVELS[level]) {
-      const identifier = state.imported ??= state.importFile(CONSOLE_IMPORT).identifier;
-      return state.factory.updateCallExpression(
-        node,
-        state.createAccess(identifier, 'log'),
-        node.typeArguments,
-        [
-          LiteralUtil.fromLiteral(state.factory, {
-            level: state.factory.createStringLiteral(VALID_LEVELS[level]),
-            import: state.getModuleIdentifier(),
-            line: state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1,
-            scope: state.scope?.map(part => part.name).join(':'),
-            args: node.arguments.slice(0)
-          }),
-        ]
-      );
+      const identifier = (state.imported ??= state.importFile(CONSOLE_IMPORT).identifier);
+      return state.factory.updateCallExpression(node, state.createAccess(identifier, 'log'), node.typeArguments, [
+        LiteralUtil.fromLiteral(state.factory, {
+          level: state.factory.createStringLiteral(VALID_LEVELS[level]),
+          import: state.getModuleIdentifier(),
+          line: state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1,
+          scope: state.scope?.map(part => part.name).join(':'),
+          args: node.arguments.slice(0)
+        })
+      ]);
     } else {
       return node;
     }

@@ -1,34 +1,29 @@
 import type { AsyncLocalStorage } from 'node:async_hooks';
 
-import { RuntimeError, castTo } from '@travetto/runtime';
+import { castTo, RuntimeError } from '@travetto/runtime';
 
 type Payload<T> = Record<string | symbol, T | undefined>;
 type Storage<T = unknown> = AsyncLocalStorage<Payload<T>>;
 type Key = string | symbol;
 type StorageSource = Storage | (() => Storage) | { storage: Storage } | { context: { storage: Storage } };
 
-type ReadWriteConfig = { read?: boolean, write?: boolean };
+type ReadWriteConfig = { read?: boolean; write?: boolean };
 type ContextConfig = { failIfUnbound?: ReadWriteConfig };
 
 /**
  * Async Context Value
  */
 export class AsyncContextValue<T = unknown> {
-
   #source: () => Storage<T>;
   #storage?: Storage<T>;
   #key: Key = Symbol();
   #failIfUnbound: ReadWriteConfig;
 
   constructor(source: StorageSource, config?: ContextConfig) {
-    this.#source = castTo(typeof source === 'function' ?
-      source :
-      ((): Storage => 'getStore' in source ?
-        source :
-        ('storage' in source ?
-          source.storage :
-          source.context.storage
-        ))
+    this.#source = castTo(
+      typeof source === 'function'
+        ? source
+        : (): Storage => ('getStore' in source ? source : 'storage' in source ? source.storage : source.context.storage)
     );
     this.#failIfUnbound = { read: true, write: true, ...config?.failIfUnbound };
   }

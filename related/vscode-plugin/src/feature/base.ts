@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { RuntimeIndex } from '@travetto/runtime';
 
 import { Log } from '../core/log.ts';
-import { ActivationTarget, type ActivationTargetConfig } from '../core/types.ts';
+import type { ActivationTarget, ActivationTargetConfig } from '../core/types.ts';
 import { Workspace } from '../core/workspace.ts';
 
 /**

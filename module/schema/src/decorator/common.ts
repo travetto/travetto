@@ -1,7 +1,7 @@
 import { type Class, type ClassInstance, getClass } from '@travetto/runtime';
 
-import type { SchemaCoreConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
+import type { SchemaCoreConfig } from '../service/types.ts';
 
 /**
  * Describe a model or a field
@@ -31,7 +31,7 @@ export function Describe(config: Partial<Omit<SchemaCoreConfig, 'metadata'>>) {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export const IsPrivate = (): (instanceOrCls: Class | ClassInstance, property?: string) => void => Describe({ private: true });
+export const IsPrivate = (): ((instanceOrCls: Class | ClassInstance, property?: string) => void) => Describe({ private: true });
 
 /**
  * Mark a field/method as ignored
@@ -39,5 +39,5 @@ export const IsPrivate = (): (instanceOrCls: Class | ClassInstance, property?: s
  * @kind decorator
  */
 export function Ignore(): PropertyDecorator {
-  return () => { };
+  return () => {};
 }

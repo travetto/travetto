@@ -1,8 +1,7 @@
-
-import { InjectableFactory } from '@travetto/di';
-import { Suite } from '@travetto/test';
 import { SessionModelSymbol } from '@travetto/auth-session';
-import { MongoModelService, MongoModelConfig } from '@travetto/model-mongo';
+import { InjectableFactory } from '@travetto/di';
+import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
+import { Suite } from '@travetto/test';
 
 import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
 

@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 
-import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Registry } from '@travetto/registry';
-import { Schema, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 import type { BinaryStream } from '@travetto/runtime';
+import { Schema, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import type { Address2 } from './models/address.ts';
 
@@ -31,7 +31,6 @@ class User {
 
 @Suite()
 class ViewsTest {
-
   @BeforeAll()
   ready() {
     return Registry.init();

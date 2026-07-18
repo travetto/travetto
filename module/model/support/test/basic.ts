@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
+import { Model, type ModelCrudSupport, ModelCrudUtil, NotFoundError, TransientField } from '@travetto/model';
 import { Suite, Test } from '@travetto/test';
-import { type ModelCrudSupport, Model, NotFoundError, ModelCrudUtil, TransientField } from '@travetto/model';
 
 import { BaseModelSuite } from './base.ts';
 
@@ -27,7 +27,6 @@ class Person {
 
 @Suite()
 export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
-
   @Test('create, read, delete')
   async create() {
     const service = await this.service;
@@ -76,11 +75,14 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
   async testComputed() {
     const service = await this.service;
     const id = service.idSource.create();
-    await service.create(ComputedPerson, ComputedPerson.from({
-      id,
-      name: 'Bob',
-      ignoredField: 'secret'
-    }));
+    await service.create(
+      ComputedPerson,
+      ComputedPerson.from({
+        id,
+        name: 'Bob',
+        ignoredField: 'secret'
+      })
+    );
 
     const retrieved = await service.get(ComputedPerson, id);
     assert(retrieved.nameUpper === 'BOB');

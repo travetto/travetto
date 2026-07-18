@@ -1,10 +1,10 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { RuntimeError, asFull, castTo, type Class, type RetainIntrinsicFields, safeAssign } from '@travetto/runtime';
-import { WebHeaders } from '@travetto/web';
+import { asFull, type Class, castTo, type RetainIntrinsicFields, RuntimeError, safeAssign } from '@travetto/runtime';
 import { type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { WebHeaders } from '@travetto/web';
 
-import type { ControllerConfig, EndpointConfig, EndpointParameterConfig, EndpointParamLocation } from './types.ts';
 import type { WebInterceptor } from '../types/interceptor.ts';
+import type { ControllerConfig, EndpointConfig, EndpointParameterConfig, EndpointParamLocation } from './types.ts';
 
 function combineCommon<T extends ControllerConfig | EndpointConfig>(base: T, override: Partial<T>): T {
   base.filters = [...(base.filters ?? []), ...(override.filters ?? [])];
@@ -20,7 +20,7 @@ function combineClassConfigs(base: ControllerConfig, ...overrides: Partial<Contr
     combineCommon(base, override);
     Object.assign(base, {
       basePath: override.basePath || base.basePath,
-      contextParams: { ...base.contextParams, ...override.contextParams },
+      contextParams: { ...base.contextParams, ...override.contextParams }
     });
   }
   // Ensure we have full path
@@ -30,20 +30,21 @@ function combineClassConfigs(base: ControllerConfig, ...overrides: Partial<Contr
   return base;
 }
 
-function combineEndpointConfigs(controller: ControllerConfig, base: EndpointConfig, ...overrides: Partial<EndpointConfig>[]): EndpointConfig {
+function combineEndpointConfigs(
+  controller: ControllerConfig,
+  base: EndpointConfig,
+  ...overrides: Partial<EndpointConfig>[]
+): EndpointConfig {
   for (const override of overrides) {
     combineCommon(base, override);
-    Object.assign(
-      base,
-      {
-        cacheable: override.cacheable ?? base.cacheable,
-        httpMethod: override.httpMethod ?? base.httpMethod,
-        allowsBody: override.allowsBody ?? base.allowsBody,
-        path: override.path || base.path,
-        parameters: (override.parameters ?? base.parameters).map(endpoint => ({ ...endpoint })),
-        responseFinalizer: override.responseFinalizer ?? base.responseFinalizer,
-      }
-    );
+    Object.assign(base, {
+      cacheable: override.cacheable ?? base.cacheable,
+      httpMethod: override.httpMethod ?? base.httpMethod,
+      allowsBody: override.allowsBody ?? base.allowsBody,
+      path: override.path || base.path,
+      parameters: (override.parameters ?? base.parameters).map(endpoint => ({ ...endpoint })),
+      responseFinalizer: override.responseFinalizer ?? base.responseFinalizer
+    });
   }
   // Ensure we have full path
   if (!base.path.startsWith('/')) {

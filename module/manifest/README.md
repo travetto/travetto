@@ -13,7 +13,7 @@ npm install @travetto/manifest
 yarn add @travetto/manifest
 ```
 
-This module aims to be the boundary between the file system and the code.  The module provides:
+This module aims to be the boundary between the file system and the code. The module provides:
    *  Project Manifesting
    *  Manifest Delta
    *  Class and Function Metadata
@@ -30,7 +30,7 @@ During the compilation process, the compiler needs to know every file that is el
 Additionally, once the code has been compiled (or even bundled after that), the executing process needs to know what files are available for loading, and any patterns necessary for knowing which files to load versus which ones to ignore. This allows for dynamic loading of modules/files without knowledge/access to the file system, and in a more performant manner.
 
 ## Manifest Delta
-During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The [ManifestDeltaUtil](https://github.com/travetto/travetto/tree/main/module/manifest/src/delta.ts#L23) provides the functionality for a given manifest, and will produce a stream of changes grouped by module.  This is the primary input into the [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework")'s incremental behavior to know when a file has changed and needs to be recompiled.
+During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The [ManifestDeltaUtil](https://github.com/travetto/travetto/tree/main/module/manifest/src/delta.ts#L31) provides the functionality for a given manifest, and will produce a stream of changes grouped by module. This is the primary input into the [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework")'s incremental behavior to know when a file has changed and needs to be recompiled.
 
 ## Module Indexing
 Once the manifest is created, the application runtime can now read this manifest, which allows for influencing runtime behavior. The most common patterns include:
@@ -43,7 +43,7 @@ Once the manifest is created, the application runtime can now read this manifest
    *  Providing contextual information when provided a filename, import name, etc (e.g. logging, testing output)
 
 ## Path Normalization
-By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style.  This works appropriately within a Unix and a Windows environment.  This module offers up [path](https://github.com/travetto/travetto/tree/main/module/manifest/src/path.ts#L46) as an equivalent to [Node](https://nodejs.org)'s [path](https://nodejs.org/api/path.html) library.  This allows for consistent behavior across all file-interactions.
+By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style. This works appropriately within a Unix and a Windows environment. This module offers up [path](https://github.com/travetto/travetto/tree/main/module/manifest/src/path.ts#L48) as an equivalent to [Node](https://nodejs.org)'s [path](https://nodejs.org/api/path.html) library. This allows for consistent behavior across all file-interactions.
 
 ## Anatomy of a Manifest
 
@@ -131,7 +131,7 @@ The context contains:
    *  The main module to execute. (*This primarily pertains to mono-repo support when there are multiple modules in the project*)
    *  The root path of the project/workspace
    *  Whether or not the project is a mono-repo. (*This is determined by using the 'workspaces' field in your [Package JSON](https://docs.npmjs.com/cli/v9/configuring-npm/package-json)*)
-   *  The location where all compiled code will be stored.  Defaults to: `.trv_output`. (*Can be overridden in your [Package JSON](https://docs.npmjs.com/cli/v9/configuring-npm/package-json) in 'travetto.outputFolder'*)
+   *  The location where all compiled code will be stored. Defaults to: `.trv_output`. (*Can be overridden in your [Package JSON](https://docs.npmjs.com/cli/v9/configuring-npm/package-json) in 'travetto.outputFolder'*)
    *  The location where the intermediate compiler will be created. Defaults to: `.trv_compiler`
    *  The location where tooling will be able to write to. Defaults to: `.trv_output`
    *  Which package manager is in use [Npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)/[Yarn](https://yarnpkg.com)
@@ -140,7 +140,7 @@ The context contains:
    *  The framework version (based on @travetto/manifest)
 
 ### Modules
-The modules represent all of the [Travetto](https://travetto.dev)-aware dependencies (including dev dependencies) used for compiling, testing and executing.  A production-only version is produced when packaging the final output. Each module contains:
+The modules represent all of the [Travetto](https://travetto.dev)-aware dependencies (including dev dependencies) used for compiling, testing and executing. A production-only version is produced when packaging the final output. Each module contains:
    *  The dependency npm name
    *  The dependency version
    *  A flag to determine if its a local module
@@ -148,7 +148,7 @@ The modules represent all of the [Travetto](https://travetto.dev)-aware dependen
    *  The path to the source folder, relative to the workspace root
    *  The path to the output folder, relative to the workspace output root
    *  The list of all files
-   *  The profiles a module applies to.  Values are std, test, compile, doc.  Any empty value implies std
+   *  The profiles a module applies to. Values are std, test, compile, doc. Any empty value implies std
    *  Parent modules that imported this module
 
 ### Module Files
@@ -162,10 +162,10 @@ The module files are a simple categorization of files into a predetermined set o
    *  `resources` - Packaged resource, meant to pertain to the main module only. Files, under `resources/`
    *  `support` - All .ts files under the `support/` folder
    *  `support/resources` - Packaged resource files, meant to be included by other modules, under `support/resources/`
-   *  `support/fixtures` - Test resources meant to shared across modules.  Under `support/fixtures/`
+   *  `support/fixtures` - Test resources meant to shared across modules. Under `support/fixtures/`
    *  `doc` - Documentation files. `DOC.tsx` and All .ts/.tsx files under the `doc/` folder
-   *  `$transformer` - All .ts files under the pattern `support/transform*`.  These are used during compilation and never at runtime
-   *  `bin` - Entry point .js files.  All .js files under the `bin/` folder
+   *  `$transformer` - All .ts files under the pattern `support/transform*`. These are used during compilation and never at runtime
+   *  `bin` - Entry point .js files. All .js files under the `bin/` folder
 
 Within each file there is a pattern of either a 3 or 4 element array:
 

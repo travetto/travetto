@@ -3,9 +3,9 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
+import { FileLoader, JSONUtil, RuntimeResources } from '@travetto/runtime';
 import { SchemaValidator } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
-import { FileLoader, JSONUtil, RuntimeResources } from '@travetto/runtime';
 
 import { executeOperations, getUnimplementedOperations } from '../src/execute.ts';
 import { recommendOperations } from '../src/recommendation.ts';
@@ -38,7 +38,6 @@ async function assertFilesExist(loader: FileLoader, files: string[]): Promise<vo
 
 @Suite()
 class LlmSupportExecuteTest {
-
   @Test()
   async dryRunDoesNotCreateFiles() {
     const { target, loader } = await createTarget('llm-support-dry-run-');
@@ -52,15 +51,9 @@ class LlmSupportExecuteTest {
     assert(output.artifacts.some(item => item.status === 'planned'));
     assert(output.artifacts.some(item => item.file.endsWith('package.json')));
 
-    await assert.rejects(
-      () => loader.resolve('resources/application.yml'),
-      /Unable to find/
-    );
+    await assert.rejects(() => loader.resolve('resources/application.yml'), /Unable to find/);
 
-    await assert.rejects(
-      () => loader.resolve('package.json'),
-      /Unable to find/
-    );
+    await assert.rejects(() => loader.resolve('package.json'), /Unable to find/);
   }
 
   @Test()
@@ -76,12 +69,7 @@ class LlmSupportExecuteTest {
 
     assert(output.artifacts.some(item => item.status === 'created'));
 
-    await assertFilesExist(loader, [
-      'package.json',
-      'resources/application.yml',
-      'src/service/home.ts',
-      'src/web/home.ts'
-    ]);
+    await assertFilesExist(loader, ['package.json', 'resources/application.yml', 'src/service/home.ts', 'src/web/home.ts']);
 
     const pkgRaw: {
       name?: string;
@@ -160,11 +148,7 @@ class LlmSupportExecuteTest {
 
     assert(output.artifacts.some(item => item.status === 'created'));
 
-    await assertFilesExist(loader, [
-      'package.json',
-      'packages/api/package.json',
-      'packages/api/resources/application.yml'
-    ]);
+    await assertFilesExist(loader, ['package.json', 'packages/api/package.json', 'packages/api/resources/application.yml']);
 
     const rootPkgRaw: {
       scripts?: Record<string, string>;
@@ -254,7 +238,7 @@ class LlmSupportExecuteTest {
       'test/email/preview.ts',
       'test/email/fixtures/transactional.json'
     ]);
-    assert((await loader.readUTF8('test/email/fixtures/transactional.json')) === await renderSnippet('email-fixture.json.tpl'));
+    assert((await loader.readUTF8('test/email/fixtures/transactional.json')) === (await renderSnippet('email-fixture.json.tpl')));
   }
 
   @Test()
@@ -306,12 +290,7 @@ class LlmSupportExecuteTest {
     const { target, loader } = await createTarget('llm-support-platform-');
 
     const output = await executeOperations({
-      operations: [
-        'workflow-gcp-deploy',
-        'workflow-cloudfront-deploy',
-        'create-web-interceptor',
-        'cache-enhancements'
-      ],
+      operations: ['workflow-gcp-deploy', 'workflow-cloudfront-deploy', 'create-web-interceptor', 'cache-enhancements'],
       targetDir: target,
       dryRun: false
     });
@@ -412,16 +391,22 @@ class LlmSupportExecuteTest {
     const { target, loader } = await createTarget('llm-support-lint-merge-');
     const pkgFile = path.join(target, 'package.json');
 
-    await fs.writeFile(pkgFile, JSONUtil.toUTF8({
-      name: 'existing-app',
-      scripts: {
-        test: 'node --test',
-        lint: 'eslint .'
-      },
-      devDependencies: {
-        typescript: '^5.0.0'
-      }
-    }, { indent: 2 }));
+    await fs.writeFile(
+      pkgFile,
+      JSONUtil.toUTF8(
+        {
+          name: 'existing-app',
+          scripts: {
+            test: 'node --test',
+            lint: 'eslint .'
+          },
+          devDependencies: {
+            typescript: '^5.0.0'
+          }
+        },
+        { indent: 2 }
+      )
+    );
 
     await executeOperations({
       operations: ['enable-linting'],

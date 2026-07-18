@@ -1,10 +1,9 @@
 import { type AnyMap, castKey, castTo, JSONUtil } from '@travetto/runtime';
 
-
 /**
  * @concrete
  */
-export interface SessionData extends AnyMap { }
+export interface SessionData extends AnyMap {}
 
 /**
  * Full session object, with metadata

@@ -1,10 +1,11 @@
 import assert from 'node:assert';
-import type * as  estypes from '@elastic/elasticsearch/api/types';
 
-import { Registry } from '@travetto/registry';
-import { Suite, Test, BeforeAll } from '@travetto/test';
+import type * as estypes from '@elastic/elasticsearch/api/types';
+
 import { Model } from '@travetto/model';
-import { Currency, Integer, Precision, Float, Text, Schema } from '@travetto/schema';
+import { Registry } from '@travetto/registry';
+import { Currency, Float, Integer, Precision, Schema, Text } from '@travetto/schema';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { ElasticsearchSchemaUtil } from '@travetto/model-elasticsearch/src/internal/schema.ts';
 
@@ -52,7 +53,6 @@ class Numerical {
 
 @Suite()
 class SchemaSuite {
-
   @BeforeAll()
   async init() {
     await Registry.init();
@@ -74,7 +74,7 @@ class SchemaSuite {
           type: 'object',
           properties: {
             street1: { type: 'keyword', fields: { text: { type: 'text' } } },
-            street2: { type: 'keyword', fields: { text: { type: 'text' } } },
+            street2: { type: 'keyword', fields: { text: { type: 'text' } } }
           },
           dynamic: false
         }
@@ -90,7 +90,7 @@ class SchemaSuite {
           type: 'nested',
           properties: {
             street1: { type: 'keyword', fields: { text: { type: 'text' } } },
-            street2: { type: 'keyword', fields: { text: { type: 'text' } } },
+            street2: { type: 'keyword', fields: { text: { type: 'text' } } }
           },
           dynamic: false
         },

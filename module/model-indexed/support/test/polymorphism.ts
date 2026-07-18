@@ -1,14 +1,14 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
-import { Discriminated } from '@travetto/schema';
 import { Model, NotFoundError, SubTypeNotSupportedError } from '@travetto/model';
+import { Discriminated } from '@travetto/schema';
+import { Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
+import { keyedIndex } from '../../src/indexes.ts';
 import type { ModelIndexedSupport } from '../../src/types/service.ts';
 import { ModelIndexedUtil } from '../../src/util.ts';
-import { keyedIndex } from '../../src/indexes.ts';
 
 @Model()
 @Discriminated('type')
@@ -41,7 +41,6 @@ export class IndexedEngineer extends IndexedWorker {
 
 @Suite()
 export abstract class ModelIndexedPolymorphismSuite extends BaseModelSuite<ModelIndexedSupport> {
-
   @Test('Polymorphic index', { skip: BaseModelSuite.ifNot(ModelIndexedUtil.isSupported) })
   async polymorphicIndexGet() {
     const service = await this.service;
@@ -84,15 +83,15 @@ export abstract class ModelIndexedPolymorphismSuite extends BaseModelSuite<Model
 
     await this.saveAll(IndexedWorker, [doc, fire, eng]);
 
-    assert(await this.getSize(IndexedWorker) === 3);
+    assert((await this.getSize(IndexedWorker)) === 3);
 
     await service.deleteByIndex(IndexedWorker, workerNameIndex, {
       age: now,
       name: 'bob'
     });
 
-    assert(await this.getSize(IndexedWorker) === 2);
-    assert(await this.getSize(IndexedDoctor) === 0);
+    assert((await this.getSize(IndexedWorker)) === 2);
+    assert((await this.getSize(IndexedDoctor)) === 0);
 
     try {
       await service.deleteByIndex(IndexedFirefighter, workerNameIndex, {

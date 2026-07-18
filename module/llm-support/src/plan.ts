@@ -1,11 +1,5 @@
 import { recommend, recommendOperations } from './recommendation.ts';
-import type {
-  LlmOperation,
-  OperationPlan,
-  PlanResponse,
-  PlannedChange,
-  RecommendationQuery
-} from './types.ts';
+import type { LlmOperation, OperationPlan, PlannedChange, PlanResponse, RecommendationQuery } from './types.ts';
 
 function filesFor(op: LlmOperation): string[] {
   switch (op.id) {
@@ -90,21 +84,24 @@ function toPlan(op: LlmOperation): OperationPlan {
 }
 
 export async function buildPlans(query: RecommendationQuery = {}): Promise<PlanResponse> {
-  const operations = query.operations && query.operations.length > 0 ?
-    recommendOperations({
-      categories: query.categories,
-      includeExcluded: query.includeExcluded
-    }).filter(item => query.operations?.includes(item.id)) :
-    recommendOperations({
-      categories: query.categories,
-      includeExcluded: query.includeExcluded
-    });
+  const operations =
+    query.operations && query.operations.length > 0
+      ? recommendOperations({
+          categories: query.categories,
+          includeExcluded: query.includeExcluded
+        }).filter(item => query.operations?.includes(item.id))
+      : recommendOperations({
+          categories: query.categories,
+          includeExcluded: query.includeExcluded
+        });
 
   const plans = operations.map(toPlan);
-  const snippets = (await recommend({
-    ...query,
-    operations: plans.map(item => item.operationId)
-  })).snippets;
+  const snippets = (
+    await recommend({
+      ...query,
+      operations: plans.map(item => item.operationId)
+    })
+  ).snippets;
 
   return { plans, snippets };
 }

@@ -1,5 +1,5 @@
-import { keyedIndex } from '@travetto/model-indexed';
 import { Model } from '@travetto/model';
+import { keyedIndex } from '@travetto/model-indexed';
 
 @Model()
 export class User {

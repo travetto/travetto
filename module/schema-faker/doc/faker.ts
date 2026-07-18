@@ -1,5 +1,5 @@
-import { SchemaFaker } from '@travetto/schema-faker';
 import { Schema } from '@travetto/schema';
+import { SchemaFaker } from '@travetto/schema-faker';
 
 @Schema()
 class Address {

@@ -1,21 +1,24 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c } from '@travetto/doc';
+import { c, d } from '@travetto/doc';
 
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
 
-import { DynamoDBModelService } from './src/service.ts';
 import { DynamoDBModelConfig } from './src/config.ts';
+import { DynamoDBModelService } from './src/service.ts';
 
-export const text = <>
-  <c.StdHeader />
-  This module provides an {d.library('DynamoDB')}-based implementation for the {d.module('Model')}.  This source allows the {d.module('Model')} module to read, write and query against {d.library('DynamoDB')}. The entire document is stored as a single value, so nothing is needed to handle schema updates in real time. Indices on the other hand are more complicated, and will not be retroactively computed for new values. <br />
-
-  Supported features:
-  <ul>
-    {...ModelTypes(DynamoDBModelService)}
-    {...ModelIndexedTypes(DynamoDBModelService)}
-  </ul>
-
-  <ModelCustomConfig config={DynamoDBModelConfig} />
-</>;
+export const text = (
+  <>
+    <c.StdHeader />
+    This module provides an {d.library('DynamoDB')}-based implementation for the {d.module('Model')}. This source allows the{' '}
+    {d.module('Model')} module to read, write and query against {d.library('DynamoDB')}. The entire document is stored as a single value, so
+    nothing is needed to handle schema updates in real time. Indices on the other hand are more complicated, and will not be retroactively
+    computed for new values. <br />
+    Supported features:
+    <ul>
+      {...ModelTypes(DynamoDBModelService)}
+      {...ModelIndexedTypes(DynamoDBModelService)}
+    </ul>
+    <ModelCustomConfig config={DynamoDBModelConfig} />
+  </>
+);

@@ -1,11 +1,11 @@
 import ts from 'typescript';
+
 import { CoreUtil } from './core.ts';
 
 /**
  * Utilities for dealing with decorators
  */
 export class DecoratorUtil {
-
   static #getIdentFromExpression(expr: ts.Expression): ts.Identifier {
     if (ts.isCallExpression(expr) && ts.isIdentifier(expr.expression)) {
       return expr.expression;

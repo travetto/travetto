@@ -1,24 +1,28 @@
 import fs from 'node:fs';
-import type { CompilerHost, SourceFile, CompilerOptions, Program, ScriptTarget } from 'typescript';
 
-import { path, ManifestModuleUtil, type ManifestModule, type ManifestRoot, type ManifestIndex, type ManifestModuleFolderType } from '@travetto/manifest';
+import type { CompilerHost, CompilerOptions, Program, ScriptTarget, SourceFile } from 'typescript';
+
+import {
+  type ManifestIndex,
+  type ManifestModule,
+  type ManifestModuleFolderType,
+  ManifestModuleUtil,
+  type ManifestRoot,
+  path
+} from '@travetto/manifest';
 import type { TransformerManager } from '@travetto/transformer';
 
-import { CompilerUtil } from './util.ts';
-import type { CompileStateEntry } from './types.ts';
 import { CommonUtil } from './common.ts';
 import { tsProxy as ts, tsProxyInit } from './ts-proxy.ts';
+import type { CompileStateEntry } from './types.ts';
+import { CompilerUtil } from './util.ts';
 
 const TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'support', 'src', '$package']);
 
 export class CompilerState implements CompilerHost {
-
   static async get(idx: ManifestIndex): Promise<CompilerState> {
     return new CompilerState().init(idx);
   }
-
-  /** @private */
-  constructor() { }
 
   #outputPath: string;
   #typingsPath: string;
@@ -44,7 +48,9 @@ export class CompilerState implements CompilerHost {
     try {
       return ts.sys.readFile(location, 'utf8');
     } catch {
-      try { return fs.readFileSync(location, 'utf8'); } catch { }
+      try {
+        return fs.readFileSync(location, 'utf8');
+      } catch {}
     }
     return undefined;
   }
@@ -61,13 +67,17 @@ export class CompilerState implements CompilerHost {
   #fileExists(location: string): boolean {
     try {
       return ts.sys.fileExists(location);
-    } catch { return fs.existsSync(location); }
+    } catch {
+      return fs.existsSync(location);
+    }
   }
 
   #directoryExists(location: string): boolean {
     try {
       return ts.sys.directoryExists(location);
-    } catch { return fs.existsSync(location); }
+    } catch {
+      return fs.existsSync(location);
+    }
   }
 
   #writeExternalTypings(location: string, text: string, bom?: boolean): void {
@@ -120,14 +130,14 @@ export class CompilerState implements CompilerHost {
     for (const module of this.#modules) {
       const base = module?.files ?? {};
       const files = [
-        ...base.bin ?? [],
-        ...base.src ?? [],
-        ...base.support ?? [],
-        ...base.doc ?? [],
-        ...base.test ?? [],
-        ...base.$transformer ?? [],
-        ...base.$index ?? [],
-        ...base.$package ?? []
+        ...(base.bin ?? []),
+        ...(base.src ?? []),
+        ...(base.support ?? []),
+        ...(base.doc ?? []),
+        ...(base.test ?? []),
+        ...(base.$transformer ?? []),
+        ...(base.$index ?? []),
+        ...(base.$package ?? [])
       ];
       for (const [file, type] of files) {
         if (ManifestModuleUtil.isSourceType(type)) {
@@ -158,9 +168,7 @@ export class CompilerState implements CompilerHost {
   }
 
   getArbitraryInputFile(): string {
-    const randomSource = this.#manifestIndex.getWorkspaceModules()
-      .filter(module => module.files.src?.length)[0]
-      .files.src[0].sourceFile;
+    const randomSource = this.#manifestIndex.getWorkspaceModules().filter(module => module.files.src?.length)[0].files.src[0].sourceFile;
 
     return this.getBySource(randomSource)!.sourceFile;
   }
@@ -168,7 +176,12 @@ export class CompilerState implements CompilerHost {
   async getProgram(force = false): Promise<Program> {
     if (force || !this.#program) {
       await this.initializeTypescript();
-      this.#program = ts.createProgram({ rootNames: this.getAllFiles(), host: this, options: this.#compilerOptions, oldProgram: this.#program });
+      this.#program = ts.createProgram({
+        rootNames: this.getAllFiles(),
+        host: this,
+        options: this.#compilerOptions,
+        oldProgram: this.#program
+      });
       this.#transformerManager.init(this.#program.getTypeChecker());
       await CommonUtil.queueMacroTask();
     }
@@ -191,30 +204,34 @@ export class CompilerState implements CompilerHost {
         break;
       }
       case 'js':
-      case 'typings': this.writeFile(output, this.readFile(sourceFile)!); break;
+      case 'typings':
+        this.writeFile(output, this.readFile(sourceFile)!);
+        break;
       case 'ts': {
         const program = await this.getProgram(needsNewProgram);
         const tsSourceFile = program.getSourceFile(sourceFile)!;
         program.emit(
           tsSourceFile,
-          (...args) => this.writeFile(args[0], args[1], args[2]), undefined, false,
+          (...args) => this.writeFile(args[0], args[1], args[2]),
+          undefined,
+          false,
           this.#transformerManager.get()
         );
         return [
           ...program.getSemanticDiagnostics(tsSourceFile),
           ...program.getSyntacticDiagnostics(tsSourceFile),
-          ...program.getDeclarationDiagnostics(tsSourceFile),
+          ...program.getDeclarationDiagnostics(tsSourceFile)
         ]
           .filter(d => d.category === ts.DiagnosticCategory.Error)
           .map(diag => {
             let message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
             if (
-              message.includes("is not under 'rootDir'")
-              || message.includes("does not exist on type 'EnvDataCombinedType'")
-              || message.startsWith('Could not find a declaration file for module')
-              || message.startsWith("Cannot find module '@travetto")
-              || message.startsWith("This JSX tag requires the module path '@travetto")
-              || message.startsWith("JSX element implicitly has type 'any'")
+              message.includes("is not under 'rootDir'") ||
+              message.includes("does not exist on type 'EnvDataCombinedType'") ||
+              message.startsWith('Could not find a declaration file for module') ||
+              message.startsWith("Cannot find module '@travetto") ||
+              message.startsWith("This JSX tag requires the module path '@travetto") ||
+              message.startsWith("JSX element implicitly has type 'any'")
             ) {
               return '';
             }
@@ -235,7 +252,11 @@ export class CompilerState implements CompilerHost {
 
   isCompilerFile(file: string): boolean {
     const entry = this.getBySource(file);
-    return (entry?.moduleFile && ManifestModuleUtil.getFileRole(entry.moduleFile) === 'compile') || entry?.module.roles.includes('compile') || false;
+    return (
+      (entry?.moduleFile && ManifestModuleUtil.getFileRole(entry.moduleFile) === 'compile') ||
+      entry?.module.roles.includes('compile') ||
+      false
+    );
   }
 
   registerInput(module: ManifestModule, moduleFile: string): CompileStateEntry {
@@ -309,12 +330,24 @@ export class CompilerState implements CompilerHost {
   }
 
   /* Start Compiler Host */
-  getCanonicalFileName(file: string): string { return file; }
-  getCurrentDirectory(): string { return this.#manifest.workspace.path; }
-  getDefaultLibFileName(options: CompilerOptions): string { return ts.getDefaultLibFileName(options); }
-  getNewLine(): string { return ts.sys.newLine; }
-  useCaseSensitiveFileNames(): boolean { return ts.sys.useCaseSensitiveFileNames; }
-  getDefaultLibLocation(): string { return path.dirname(ts.getDefaultLibFilePath(this.#compilerOptions)); }
+  getCanonicalFileName(file: string): string {
+    return file;
+  }
+  getCurrentDirectory(): string {
+    return this.#manifest.workspace.path;
+  }
+  getDefaultLibFileName(options: CompilerOptions): string {
+    return ts.getDefaultLibFileName(options);
+  }
+  getNewLine(): string {
+    return ts.sys.newLine;
+  }
+  useCaseSensitiveFileNames(): boolean {
+    return ts.sys.useCaseSensitiveFileNames;
+  }
+  getDefaultLibLocation(): string {
+    return path.dirname(ts.getDefaultLibFilePath(this.#compilerOptions));
+  }
 
   fileExists(sourceFile: string): boolean {
     return this.#sourceToEntry.has(sourceFile) || this.#fileExists(sourceFile);
@@ -334,7 +367,7 @@ export class CompilerState implements CompilerHost {
       this.#writeExternalTypings(location, text, bom);
     }
 
-    return this.#writeFile(location, text, bom);
+    this.#writeFile(location, text, bom);
   }
 
   readFile(sourceFile: string): string | undefined {

@@ -1,8 +1,8 @@
 import { createInterface } from 'node:readline/promises';
 
-import { BinaryUtil, type BinaryArray, type BinaryType } from './binary.ts';
+import { type BinaryArray, type BinaryType, BinaryUtil } from './binary.ts';
 import { RuntimeError } from './error.ts';
-import { castTo, type Any } from './types.ts';
+import { type Any, castTo } from './types.ts';
 
 type TextInput = string | BinaryArray;
 
@@ -13,7 +13,6 @@ const UTF8_ENCODER = new TextEncoder();
  * Utilities for encoding and decoding common formats
  */
 export class CodecUtil {
-
   /** Generate buffer from hex string  */
   static fromHexString(value: string): BinaryArray {
     try {
@@ -102,8 +101,9 @@ export class CodecUtil {
     if (!encoding) {
       return this.readUtf8Chunk(chunk);
     }
-    return BinaryUtil.isBinaryArray(chunk) ? chunk :
-      Buffer.from(typeof chunk === 'string' ? chunk : `${chunk}`, castTo(encoding ?? 'utf8'));
+    return BinaryUtil.isBinaryArray(chunk)
+      ? chunk
+      : Buffer.from(typeof chunk === 'string' ? chunk : `${chunk}`, castTo(encoding ?? 'utf8'));
   }
 
   static readFirstLine(data: string): string;

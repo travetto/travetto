@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 
 import { Registry } from '@travetto/registry';
-import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Precision, Max, Min, Schema } from '@travetto/schema';
+import { Max, Min, Precision, Schema } from '@travetto/schema';
 import { SchemaFaker } from '@travetto/schema-faker';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 @Schema()
 class Tag {
@@ -46,7 +46,6 @@ class UserScore {
 
 @Suite()
 class DataGenerationSuite {
-
   @BeforeAll()
   async init() {
     await Registry.init();

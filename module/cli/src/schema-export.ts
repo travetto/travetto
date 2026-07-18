@@ -1,4 +1,4 @@
-import { castTo, type Class, describeFunction } from '@travetto/runtime';
+import { type Class, castTo, describeFunction } from '@travetto/runtime';
 import { type SchemaInputConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { CliCommandRegistryIndex } from './registry/registry-index.ts';
@@ -32,24 +32,30 @@ export interface CliCommandSchema<K extends string = string> {
 }
 
 export class CliSchemaExportUtil {
-
   /**
    * Get the base type for a CLI command input
    */
   static baseInputType(config: SchemaInputConfig): Pick<CliCommandInput, 'type' | 'fileExtensions'> {
     switch (castTo<Function>(config.type)) {
-      case Date: return { type: 'date' };
-      case Boolean: return { type: 'boolean' };
-      case Number: return { type: 'number' };
-      case RegExp: return { type: 'regex' };
-      case BigInt: return { type: 'bigint' };
+      case Date:
+        return { type: 'date' };
+      case Boolean:
+        return { type: 'boolean' };
+      case Number:
+        return { type: 'number' };
+      case RegExp:
+        return { type: 'regex' };
+      case BigInt:
+        return { type: 'bigint' };
       case String: {
         switch (true) {
-          case config.specifiers?.includes('module'): return { type: 'module' };
-          case config.specifiers?.includes('file'): return {
-            type: 'file',
-            fileExtensions: config.specifiers?.map(specifier => specifier.split('ext:')[1]).filter(specifier => !!specifier)
-          };
+          case config.specifiers?.includes('module'):
+            return { type: 'module' };
+          case config.specifiers?.includes('file'):
+            return {
+              type: 'file',
+              fileExtensions: config.specifiers?.map(specifier => specifier.split('ext:')[1]).filter(specifier => !!specifier)
+            };
         }
       }
     }
@@ -62,14 +68,17 @@ export class CliSchemaExportUtil {
   static processInput(config: SchemaInputConfig): CliCommandInput {
     return {
       ...this.baseInputType(config),
-      ...(('name' in config && typeof config.name === 'string') ? { name: config.name } : { name: '' }),
+      ...('name' in config && typeof config.name === 'string' ? { name: config.name } : { name: '' }),
       description: config.description,
       array: config.array,
       required: config.required?.active !== false,
       choices: config.enum?.values,
       default: Array.isArray(config.default) ? config.default.slice(0) : config.default,
       flagNames: (config.aliases ?? []).slice(0).filter(value => !value.startsWith('env.')),
-      envVars: (config.aliases ?? []).slice(0).filter(value => value.startsWith('env.')).map(value => value.replace('env.', ''))
+      envVars: (config.aliases ?? [])
+        .slice(0)
+        .filter(value => value.startsWith('env.'))
+        .map(value => value.replace('env.', ''))
     };
   }
 

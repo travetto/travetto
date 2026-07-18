@@ -1,17 +1,16 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
-import { Inject } from '@travetto/di';
 import { type AsyncContext, AsyncContextValue, WithAsyncContext } from '@travetto/context';
+import { Inject } from '@travetto/di';
+import { Suite, Test } from '@travetto/test';
 
-import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
+import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 
 @Suite()
 @InjectableSuite()
 @WithSuiteContext()
 class WithSuiteContextSuite {
-
   @Inject()
   context: AsyncContext;
 

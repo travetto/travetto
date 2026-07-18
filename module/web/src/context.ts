@@ -1,6 +1,6 @@
-import { AsyncContextValue, type AsyncContext } from '@travetto/context';
+import { type AsyncContext, AsyncContextValue } from '@travetto/context';
 import { Inject, Injectable, PostConstruct } from '@travetto/di';
-import { RuntimeError, castTo, type Class } from '@travetto/runtime';
+import { type Class, castTo, RuntimeError } from '@travetto/runtime';
 
 import { WebRequest } from './types/request.ts';
 
@@ -9,7 +9,6 @@ import { WebRequest } from './types/request.ts';
  */
 @Injectable()
 export class WebAsyncContext {
-
   #request = new AsyncContextValue<WebRequest>(this);
   #byType = new Map<string, () => unknown>();
 

@@ -6,7 +6,6 @@ import type { CoreCacheConfig } from './types.ts';
  * Standard cache utilities
  */
 export class CacheUtil {
-
   /**
    * Generate key given config, cache source and input params
    */

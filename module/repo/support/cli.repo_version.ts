@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { CliModuleUtil, type CliCommandShape, CliCommand, CliScmUtil } from '@travetto/cli';
+import { CliCommand, type CliCommandShape, CliModuleUtil, CliScmUtil } from '@travetto/cli';
 import { ExecUtil, Runtime, RuntimeError } from '@travetto/runtime';
 import { Validator } from '@travetto/schema';
 
@@ -15,8 +15,8 @@ const CHANGE_LEVELS = new Set<SemverLevel>(['prerelease', 'patch', 'prepatch']);
  * versions after the version bump operation completes.
  */
 @CliCommand()
-@Validator(async (cmd) => {
-  if (!cmd.force && await CliScmUtil.isWorkspaceDirty()) {
+@Validator(async cmd => {
+  if (!cmd.force && (await CliScmUtil.isWorkspaceDirty())) {
     return { message: 'Cannot update versions with uncommitted changes', path: 'custom', kind: 'invalid' };
   }
 })
@@ -38,7 +38,7 @@ export class RepoVersionCommand implements CliCommandShape {
   async main(level: SemverLevel, prefix?: string): Promise<void> {
     const mode = this.mode ?? (CHANGE_LEVELS.has(level) ? 'changed' : 'workspace');
 
-    this.tag ??= (level === 'minor' || level === 'major');
+    this.tag ??= level === 'minor' || level === 'major';
 
     const allModules = await CliModuleUtil.findModules(mode === 'direct' ? 'all' : mode);
 

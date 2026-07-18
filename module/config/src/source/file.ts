@@ -3,8 +3,8 @@ import path from 'node:path';
 
 import { Env, Runtime, RuntimeResources } from '@travetto/runtime';
 
-import type { ConfigSource, ConfigPayload } from './types.ts';
 import type { ParserManager } from '../parser/parser.ts';
+import type { ConfigPayload, ConfigSource } from './types.ts';
 
 type Profile = [string, number] | readonly [string, number];
 
@@ -12,11 +12,8 @@ type Profile = [string, number] | readonly [string, number];
  * File-based config source, relies on resource search paths for finding files
  */
 export class FileConfigSource implements ConfigSource {
-
   static getProfiles(): Profile[] {
-    const profiles: Profile[] = [
-      ['application', 100]
-    ];
+    const profiles: Profile[] = [['application', 100]];
     if (Runtime.role === 'std') {
       if (Runtime.localDevelopment) {
         profiles.push(['local', 200]);
@@ -24,8 +21,7 @@ export class FileConfigSource implements ConfigSource {
     } else {
       profiles.push([Runtime.role, 200]);
     }
-    profiles.push(...(Env.TRV_PROFILES.list ?? [])
-      .map((profile, i) => [profile, 300 + i * 10] as const));
+    profiles.push(...(Env.TRV_PROFILES.list ?? []).map((profile, i) => [profile, 300 + i * 10] as const));
     return profiles;
   }
 
@@ -51,12 +47,14 @@ export class FileConfigSource implements ConfigSource {
           if (this.#parser.matches(file) && path.basename(file, path.extname(file)) === profile) {
             const full = path.resolve(folder, file);
             const configPriority = i++;
-            configs.push(this.#parser.parse(full).then(data => ({
-              data,
-              priority: configPriority,
-              source: `file://${profile}`,
-              detail: Runtime.stripWorkspacePath(full)
-            })));
+            configs.push(
+              this.#parser.parse(full).then(data => ({
+                data,
+                priority: configPriority,
+                source: `file://${profile}`,
+                detail: Runtime.stripWorkspacePath(full)
+              }))
+            );
           }
         }
       }

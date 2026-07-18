@@ -2,10 +2,10 @@ import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
 import { castTo } from '@travetto/runtime';
 
-import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import type { WebInterceptorCategory } from '../types/core.ts';
-import type { WebResponse } from '../types/response.ts';
 import type { WebChainedContext } from '../types/filter.ts';
+import type { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
+import type { WebResponse } from '../types/response.ts';
 
 @Config('web.trustProxy')
 export class TrustProxyConfig {
@@ -21,7 +21,6 @@ export class TrustProxyConfig {
 
 @Injectable()
 export class TrustProxyInterceptor implements WebInterceptor<TrustProxyConfig> {
-
   category: WebInterceptorCategory = 'pre-request';
 
   @Inject()

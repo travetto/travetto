@@ -4,8 +4,8 @@ import { Env, Util } from '@travetto/runtime';
 
 import { TerminalWriter } from './writer.ts';
 
-type TerminalStreamingConfig = { minDelay?: number, outputStreamToMain?: boolean };
-type Coord = { x: number, y: number };
+type TerminalStreamingConfig = { minDelay?: number; outputStreamToMain?: boolean };
+type Coord = { x: number; y: number };
 
 export const WAIT_TOKEN = '%WAIT%';
 const STD_WAIT_STATES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
@@ -15,7 +15,6 @@ const lineMain = (line: string): string => line.replace(WAIT_TOKEN, '').trim();
 
 /** An basic tty wrapper */
 export class Terminal {
-
   #interactive: boolean;
   #writer: TerminalWriter;
   #width: number;
@@ -24,15 +23,18 @@ export class Terminal {
 
   async #showWaitingIndicator(position: Coord, signal: AbortSignal): Promise<void> {
     let done = false;
-    signal.addEventListener('abort', () => done = true);
+    signal.addEventListener('abort', () => (done = true));
     let i = 0;
     while (!done) {
-      await this.#writer.setPosition(position).write(STD_WAIT_STATES[i++ % STD_WAIT_STATES.length]).commit(true);
+      await this.#writer
+        .setPosition(position)
+        .write(STD_WAIT_STATES[i++ % STD_WAIT_STATES.length])
+        .commit(true);
       await Util.blockingTimeout(100);
     }
   }
 
-  constructor(output?: tty.WriteStream, config?: { width?: number, height?: number }) {
+  constructor(output?: tty.WriteStream, config?: { width?: number; height?: number }) {
     this.#output = output ?? process.stdout;
     this.#interactive = this.#output.isTTY && !Env.TRV_QUIET.isTrue;
     this.#width = config?.width ?? (this.#output.isTTY ? this.#output.columns : 120);
@@ -40,11 +42,21 @@ export class Terminal {
     this.#writer = new TerminalWriter(this);
   }
 
-  get output(): tty.WriteStream { return this.#output; }
-  get width(): number { return this.#width; }
-  get height(): number { return this.#height; }
-  get writer(): TerminalWriter { return this.#writer; }
-  get interactive(): boolean { return this.#interactive; }
+  get output(): tty.WriteStream {
+    return this.#output;
+  }
+  get width(): number {
+    return this.#width;
+  }
+  get height(): number {
+    return this.#height;
+  }
+  get writer(): TerminalWriter {
+    return this.#writer;
+  }
+  get interactive(): boolean {
+    return this.#interactive;
+  }
 
   /**
    * Stream lines if interactive, with waiting indicator, otherwise print out
@@ -57,7 +69,10 @@ export class Terminal {
         }
       }
     } else {
-      await this.streamToBottom(Util.mapAsyncIterable(source, line => `%WAIT% ${line}`), { outputStreamToMain: true });
+      await this.streamToBottom(
+        Util.mapAsyncIterable(source, line => `%WAIT% ${line}`),
+        { outputStreamToMain: true }
+      );
     }
   }
 
@@ -73,9 +88,13 @@ export class Terminal {
     let start = Date.now();
 
     try {
-      await this.#writer.hideCursor()
-        .storePosition().scrollRange({ end: -2 }).restorePosition()
-        .changePosition({ y: -1 }).write('\n')
+      await this.#writer
+        .hideCursor()
+        .storePosition()
+        .scrollRange({ end: -2 })
+        .restorePosition()
+        .changePosition({ y: -1 })
+        .write('\n')
         .commit();
 
       for await (const line of source) {
@@ -84,7 +103,7 @@ export class Terminal {
           await this.writer.writeLine(lineMain(previous)).commit();
         }
 
-        if (line && (Date.now() - start) >= minDelay) {
+        if (line && Date.now() - start >= minDelay) {
           start = Date.now();
           stop?.abort();
           this.writer.setPosition(writePosition).write(lineStatus(line)).clearLine(1).commit(true);
@@ -113,7 +132,7 @@ export class Terminal {
   /**
    * Consumes a stream, of events, tied to specific list indices, and updates in place
    */
-  async streamList(source: AsyncIterable<{ idx: number, text: string, done?: boolean }>): Promise<void> {
+  async streamList(source: AsyncIterable<{ idx: number; text: string; done?: boolean }>): Promise<void> {
     if (!this.#interactive) {
       const collected = [];
       for await (const event of source) {
@@ -133,7 +152,11 @@ export class Terminal {
         await this.#writer.write('\n'.repeat(idx)).setPosition({ x: 0 }).write(text).clearLine(1).changePosition({ y: -idx }).commit();
       }
     } finally {
-      await this.#writer.changePosition({ y: max + 1 }).writeLine('\n').reset().commit();
+      await this.#writer
+        .changePosition({ y: max + 1 })
+        .writeLine('\n')
+        .reset()
+        .commit();
     }
   }
 }

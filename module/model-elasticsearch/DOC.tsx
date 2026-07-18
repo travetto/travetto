@@ -1,22 +1,26 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, c } from '@travetto/doc';
-import { ModelQueryTypes } from '@travetto/model-query/support/doc.support.ts';
-import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
+import { c, d } from '@travetto/doc';
+
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
+import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
+import { ModelQueryTypes } from '@travetto/model-query/support/doc.support.ts';
 
 import { ElasticsearchModelConfig } from './src/config.ts';
 import { ElasticsearchModelService } from './src/service.ts';
 
-export const text = <>
-  <c.StdHeader />
-  This module provides an {d.library('Elasticsearch')}-based implementation of the {d.module('Model')}.  This source allows the {d.module('Model')} module to read, write and query against {d.library('Elasticsearch')}. In development mode, {ElasticsearchModelService} will also modify the {d.library('Elasticsearch')} schema in real time to minimize impact to development. <br />
-
-  Supported features:
-  <ul>
-    {...ModelTypes(ElasticsearchModelService)}
-    {...ModelIndexedTypes(ElasticsearchModelService)}
-    {...ModelQueryTypes(ElasticsearchModelService)}
-  </ul>
-
-  <ModelCustomConfig config={ElasticsearchModelConfig} />
-</>;
+export const text = (
+  <>
+    <c.StdHeader />
+    This module provides an {d.library('Elasticsearch')}-based implementation of the {d.module('Model')}. This source allows the{' '}
+    {d.module('Model')} module to read, write and query against {d.library('Elasticsearch')}. In development mode,{' '}
+    {ElasticsearchModelService} will also modify the {d.library('Elasticsearch')} schema in real time to minimize impact to development.{' '}
+    <br />
+    Supported features:
+    <ul>
+      {...ModelTypes(ElasticsearchModelService)}
+      {...ModelIndexedTypes(ElasticsearchModelService)}
+      {...ModelQueryTypes(ElasticsearchModelService)}
+    </ul>
+    <ModelCustomConfig config={ElasticsearchModelConfig} />
+  </>
+);

@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import type * as vscode from 'vscode';
 
 type TimeEntry<T> = { key: string, data: T, time: number };
 

@@ -1,12 +1,12 @@
 import { fork } from 'node:child_process';
 
-import { JSONUtil, Env, RuntimeIndex } from '@travetto/runtime';
+import { Env, JSONUtil, RuntimeIndex } from '@travetto/runtime';
 import { IpcChannel } from '@travetto/worker';
 
-import { TestWorkerEvents, type TestLogEvent } from './types.ts';
 import type { TestConsumerShape } from '../consumer/types.ts';
 import type { TestEvent, TestRemoveEvent } from '../model/event.ts';
 import type { TestDiffInput, TestRun } from '../model/test.ts';
+import { type TestLogEvent, TestWorkerEvents } from './types.ts';
 
 const log = (message: string | TestLogEvent): void => {
   const event: TestLogEvent = typeof message === 'string' ? { type: 'log', message } : message;
@@ -20,16 +20,13 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
   log(`Worker Input ${JSONUtil.toUTF8(run)}`);
 
   const channel = new IpcChannel<TestEvent & { error?: Error }>(
-    fork(
-      RuntimeIndex.resolveFileImport('@travetto/cli/support/entry.trv.ts'), ['test:child'],
-      {
-        env: {
-          ...process.env,
-          ...Env.TRV_QUIET.export(true)
-        },
-        stdio: ['ignore', 'ignore', 2, 'ipc']
-      }
-    )
+    fork(RuntimeIndex.resolveFileImport('@travetto/cli/support/entry.trv.ts'), ['test:child'], {
+      env: {
+        ...process.env,
+        ...Env.TRV_QUIET.export(true)
+      },
+      stdio: ['ignore', 'ignore', 2, 'ipc']
+    })
   );
 
   await channel.once(TestWorkerEvents.READY); // Wait for the child to be ready
@@ -45,7 +42,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
         log(`Received remove event ${JSONUtil.toUTF8(event)}@${consumer.constructor.name}`);
         consumer.onRemoveEvent?.(parsed); // Forward remove events
       } else {
-        consumer.onEvent(parsed);  // Forward standard events
+        consumer.onEvent(parsed); // Forward standard events
       }
     } catch {
       // Do nothing

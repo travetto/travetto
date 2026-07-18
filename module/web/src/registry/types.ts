@@ -1,12 +1,12 @@
 import type { Any, Class, TypedFunction } from '@travetto/runtime';
 import type { SchemaClassConfig } from '@travetto/schema';
 
-import type { WebInterceptor } from '../types/interceptor.ts';
-import type { WebChainedFilter, WebFilter } from '../types/filter.ts';
 import type { HttpMethod } from '../types/core.ts';
+import type { WebChainedFilter, WebFilter } from '../types/filter.ts';
 import type { WebHeaders } from '../types/headers.ts';
-import type { WebResponse, WebResponseContext } from '../types/response.ts';
+import type { WebInterceptor } from '../types/interceptor.ts';
 import type { WebRequest } from '../types/request.ts';
+import type { WebResponse, WebResponseContext } from '../types/response.ts';
 
 export type EndpointFunction = TypedFunction<Any, unknown>;
 export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunction>;
@@ -14,10 +14,8 @@ export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunctio
 /**
  * Endpoint decorator for composition of routing logic
  */
-export type EndpointDecorator = (
-  (<T extends Class>(target: T) => void) &
-  (<U>(target: U, property: string, descriptor?: EndpointFunctionDescriptor) => void)
-);
+export type EndpointDecorator = (<T extends Class>(target: T) => void) &
+  (<U>(target: U, property: string, descriptor?: EndpointFunctionDescriptor) => void);
 
 export type EndpointParamLocation = 'path' | 'query' | 'body' | 'header';
 
@@ -44,7 +42,7 @@ interface CoreConfig {
   /**
    * Should the resource only be used conditionally?
    */
-  conditional?: () => (boolean | Promise<boolean>);
+  conditional?: () => boolean | Promise<boolean>;
   /**
    * Control which interceptors are excluded
    */
@@ -171,7 +169,6 @@ export type ControllerVisitorOptions = { skipPrivate?: boolean };
  * Controller visitor pattern
  */
 export interface ControllerVisitor<T = unknown> {
-
   getOptions?: () => ControllerVisitorOptions;
 
   onControllerStart?(controller: ControllerConfig): Promise<unknown> | unknown;

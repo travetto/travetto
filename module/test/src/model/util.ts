@@ -8,11 +8,16 @@ import type { TestConfig, TestResult, TestRun, TestStatus } from './test.ts';
 export class TestModelUtil {
   static computeTestStatus(summary: ResultsSummary): TestStatus {
     switch (true) {
-      case summary.errored > 0: return 'errored';
-      case summary.failed > 0: return 'failed';
-      case summary.skipped > 0: return 'skipped';
-      case summary.unknown > 0: return 'unknown';
-      default: return 'passed';
+      case summary.errored > 0:
+        return 'errored';
+      case summary.failed > 0:
+        return 'failed';
+      case summary.skipped > 0:
+        return 'skipped';
+      case summary.unknown > 0:
+        return 'unknown';
+      default:
+        return 'passed';
     }
   }
 
@@ -24,12 +29,11 @@ export class TestModelUtil {
     for (const test of tests) {
       summary[test.status] += 1;
       summary.total += 1;
-      summary.selfDuration += (test.selfDuration ?? 0);
-      summary.duration += (test.duration ?? 0);
+      summary.selfDuration += test.selfDuration ?? 0;
+      summary.duration += test.duration ?? 0;
     }
     return summary;
   }
-
 
   /**
    * An empty suite result based on a suite config
@@ -81,15 +85,21 @@ export class TestModelUtil {
     const common = { classId, duration: 0, lineStart: 1, lineEnd: 1, import: run.import } as const;
     return asFull<SuiteResult>({
       ...common,
-      status: 'errored', errored: 1,
+      status: 'errored',
+      errored: 1,
       tests: {
         impport: asFull<TestResult>({
           ...common,
           status: 'errored',
-          assertions: [{
-            ...common, line: common.lineStart,
-            methodName: 'import', operator: 'import', text: `Failed to import ${run.import}`,
-          }]
+          assertions: [
+            {
+              ...common,
+              line: common.lineStart,
+              methodName: 'import',
+              operator: 'import',
+              text: `Failed to import ${run.import}`
+            }
+          ]
         })
       }
     });

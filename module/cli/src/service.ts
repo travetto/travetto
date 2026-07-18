@@ -1,15 +1,12 @@
 import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
-import rl from 'node:readline/promises';
 import net from 'node:net';
+import rl from 'node:readline/promises';
 
 import { ExecUtil, Runtime, RuntimeIndex, TimeUtil, Util } from '@travetto/runtime';
 
 const ports = (value: number | `${number}:${number}`): [number, number] =>
-  typeof value === 'number' ?
-    [value, value] :
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    value.split(':').map(number => parseInt(number, 10)) as [number, number];
+  typeof value === 'number' ? [value, value] : (value.split(':').map(number => parseInt(number, 10)) as [number, number]);
 
 type BodyCheck = (body: string) => boolean;
 
@@ -23,7 +20,7 @@ export interface ServiceDescriptor {
   privileged?: boolean;
   image: string;
   args?: string[];
-  ready?: { url: string, test?: BodyCheck };
+  ready?: { url: string; test?: BodyCheck };
   volumes?: Record<string, string>;
   env?: Record<string, string>;
   startupTimeout?: number;
@@ -35,37 +32,39 @@ export type ServiceAction = 'start' | 'stop' | 'status' | 'restart';
  * Service runner
  */
 export class ServiceRunner {
-
   /**
    * Find all services
    */
   static async findServices(services: string[]): Promise<ServiceDescriptor[]> {
-    return (await Promise.all(
-      RuntimeIndex.find({
-        module: module => module.roles.includes('std'),
-        folder: folder => folder === 'support',
-        file: file => /support\/service[.]/.test(file.sourceFile)
-      })
-        .map(file => Runtime.importFrom<{ service: ServiceDescriptor }>(file.import).then(value => value.service))
-    ))
+    return (
+      await Promise.all(
+        RuntimeIndex.find({
+          module: module => module.roles.includes('std'),
+          folder: folder => folder === 'support',
+          file: file => /support\/service[.]/.test(file.sourceFile)
+        }).map(file => Runtime.importFrom<{ service: ServiceDescriptor }>(file.import).then(value => value.service))
+      )
+    )
       .filter(file => !!file)
-      .filter(file => services?.length ? services.includes(file.name) : true)
+      .filter(file => (services?.length ? services.includes(file.name) : true))
       .toSorted((a, b) => a.name.localeCompare(b.name));
   }
 
   #descriptor: ServiceDescriptor;
-  constructor(descriptor: ServiceDescriptor) { this.#descriptor = descriptor; }
+  constructor(descriptor: ServiceDescriptor) {
+    this.#descriptor = descriptor;
+  }
 
   async #isRunning(full = false): Promise<boolean> {
     const port = ports(this.#descriptor.port!)[0];
     const start = Date.now();
-    const timeoutMs = TimeUtil.duration(full ? this.#descriptor.startupTimeout ?? 5000 : 100, 'ms');
-    while ((Date.now() - start) < timeoutMs) {
+    const timeoutMs = TimeUtil.duration(full ? (this.#descriptor.startupTimeout ?? 5000) : 100, 'ms');
+    while (Date.now() - start < timeoutMs) {
       try {
         const sock = net.createConnection(port, 'localhost');
-        await new Promise<void>((resolve, reject) =>
-          sock.on('connect', resolve).on('timeout', reject).on('error', reject)
-        ).finally(() => sock.destroy());
+        await new Promise<void>((resolve, reject) => sock.on('connect', resolve).on('timeout', reject).on('error', reject)).finally(() =>
+          sock.destroy()
+        );
 
         if (!this.#descriptor.ready?.url || !full) {
           return true;
@@ -89,7 +88,7 @@ export class ServiceRunner {
     return result.valid;
   }
 
-  async * #pullImage(): AsyncIterable<string> {
+  async *#pullImage(): AsyncIterable<string> {
     const subProcess = spawn('docker', ['pull', this.#descriptor.image], { stdio: [0, 'pipe', 'pipe'] });
     yield* rl.createInterface(subProcess.stdout!);
     await ExecUtil.getResult(subProcess);
@@ -100,13 +99,14 @@ export class ServiceRunner {
       'run',
       '--rm',
       '--detach',
-      ...this.#descriptor.privileged ? ['--privileged'] : [],
-      '--label', `trv-${this.#descriptor.name}`,
+      ...(this.#descriptor.privileged ? ['--privileged'] : []),
+      '--label',
+      `trv-${this.#descriptor.name}`,
       ...Object.entries(this.#descriptor.env ?? {}).flatMap(([key, value]) => ['--env', `${key}=${value}`]),
-      ...this.#descriptor.port ? ['-p', ports(this.#descriptor.port).join(':')] : [],
+      ...(this.#descriptor.port ? ['-p', ports(this.#descriptor.port).join(':')] : []),
       ...Object.entries(this.#descriptor.volumes ?? {}).flatMap(([key, value]) => ['--volume', `${key}:${value}`]),
       this.#descriptor.image,
-      ...this.#descriptor.args ?? [],
+      ...(this.#descriptor.args ?? [])
     ];
 
     for (const item of Object.keys(this.#descriptor.volumes ?? {})) {
@@ -124,13 +124,14 @@ export class ServiceRunner {
     await ExecUtil.getResult(spawn('docker', ['kill', containerId]));
   }
 
-  async * action(operation: ServiceAction): AsyncIterable<['success' | 'failure' | 'message', string]> {
+  async *action(operation: ServiceAction): AsyncIterable<['success' | 'failure' | 'message', string]> {
     try {
       const containerId = await this.#getContainerId();
       const port = this.#descriptor.port ? ports(this.#descriptor.port)[0] : 0;
-      const running = !!containerId && (!port || await this.#isRunning());
+      const running = !!containerId && (!port || (await this.#isRunning()));
 
-      if (running && !containerId) { // We don't own
+      if (running && !containerId) {
+        // We don't own
         return yield [operation === 'status' ? 'message' : 'failure', 'Running but not managed'];
       }
 
@@ -149,7 +150,7 @@ export class ServiceRunner {
       }
 
       if (operation === 'restart' || operation === 'start') {
-        if (!await this.#hasImage()) {
+        if (!(await this.#hasImage())) {
           yield ['message', 'Starting image download'];
           for await (const line of this.#pullImage()) {
             yield ['message', `Downloading: ${line}`];
@@ -162,7 +163,7 @@ export class ServiceRunner {
 
         if (port) {
           yield ['message', `Waiting for ${this.#descriptor.ready?.url ?? 'container'}...`];
-          if (!await this.#isRunning(true)) {
+          if (!(await this.#isRunning(true))) {
             yield ['failure', 'Failed to start service correctly'];
           }
         }

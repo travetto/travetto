@@ -8,7 +8,7 @@ export const OverrideConfigSymbol = Symbol.for('@travetto/config:overrides');
  */
 export type OverrideConfig = {
   namespace?: string;
-  fields?: Record<string, () => (unknown | undefined)>;
+  fields?: Record<string, () => unknown | undefined>;
 };
 
 /**
@@ -23,7 +23,7 @@ export class ConfigOverrideUtil {
     const out: Required<OverrideConfig>[] = [];
     for (const cls of SchemaRegistryIndex.getClasses()) {
       const config = this.getOverrideConfig(cls);
-      if (config && config.fields && config.namespace) {
+      if (config?.fields && config.namespace) {
         out.push(asFull(config));
       }
     }
@@ -31,11 +31,9 @@ export class ConfigOverrideUtil {
   }
 
   static setOverrideConfigField(cls: Class<Any>, field: string, names: string[]): void {
-    const env = SchemaRegistryIndex.getForRegister(cls)
-      .registerMetadata<OverrideConfig>(OverrideConfigSymbol, {});
+    const env = SchemaRegistryIndex.getForRegister(cls).registerMetadata<OverrideConfig>(OverrideConfigSymbol, {});
 
-    (env.fields ??= {})[field] = (): string | undefined =>
-      process.env[names.find(name => !!process.env[name])!];
+    (env.fields ??= {})[field] = (): string | undefined => process.env[names.find(name => !!process.env[name])!];
   }
 
   static setOverrideConfig(cls: Class<Any>, namespace: string): void {

@@ -1,13 +1,12 @@
 import assert from 'node:assert';
 
-import { BeforeAll, Suite, Test } from '@travetto/test';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 import { TrustProxyInterceptor, WebRequest, WebResponse } from '@travetto/web';
 
 @Suite()
 class TrustProxyInterceptorSuite {
-
   @BeforeAll()
   async init() {
     await Registry.init();
@@ -88,7 +87,7 @@ class TrustProxyInterceptorSuite {
       headers: {
         'X-Forwarded-For': 'blue',
         'X-Forwarded-Proto': 'https',
-        'X-Forwarded-Host': 'google.com',
+        'X-Forwarded-Host': 'google.com'
       }
     });
 
@@ -120,7 +119,7 @@ class TrustProxyInterceptorSuite {
         }
       },
       headers: {
-        'X-Forwarded-For': 'blue',
+        'X-Forwarded-For': 'blue'
       }
     });
 

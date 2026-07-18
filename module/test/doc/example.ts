@@ -4,7 +4,6 @@ import { Suite, Test } from '@travetto/test';
 
 @Suite()
 class SimpleTest {
-
   #complexService: {
     doLongOperation(): Promise<number>;
     getText(): string;

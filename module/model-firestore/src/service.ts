@@ -1,17 +1,35 @@
 import { type DocumentData, FieldValue, Firestore, type Query } from '@google-cloud/firestore';
 
-import { castTo, JSONUtil, ShutdownManager, type Class, RuntimeError } from '@travetto/runtime';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
-  type ModelCrudSupport, ModelRegistryIndex, type ModelStorageSupport, type ModelType, NotFoundError, type OptionalId, ModelCrudUtil,
+  type ModelCrudSupport,
+  ModelCrudUtil,
   type ModelListOptions,
+  ModelRegistryIndex,
+  type ModelStorageSupport,
+  type ModelType,
+  NotFoundError,
+  type OptionalId
 } from '@travetto/model';
 import {
-  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex, warnIfIndexedUniqueIndex, warnIfNonIndexedIndex,
-  type ModelIndexedSearchOptions, type SortedIndexSelectionType
+  type FullKeyedIndexBody,
+  type FullKeyedIndexWithPartialBody,
+  type KeyedIndexBody,
+  type KeyedIndexSelection,
+  ModelIndexedComputedIndex,
+  type ModelIndexedSearchOptions,
+  type ModelIndexedSupport,
+  ModelIndexedUtil,
+  type ModelPageOptions,
+  type ModelPageResult,
+  type SingleItemIndex,
+  type SortedIndex,
+  type SortedIndexSelection,
+  type SortedIndexSelectionType,
+  warnIfIndexedUniqueIndex,
+  warnIfNonIndexedIndex
 } from '@travetto/model-indexed';
+import { type Class, castTo, JSONUtil, RuntimeError, ShutdownManager } from '@travetto/runtime';
 
 import type { FirestoreModelConfig } from './config.ts';
 
@@ -24,7 +42,6 @@ const setMissingValues = <T>(input: T, missingValue: unknown): T =>
  */
 @Injectable()
 export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupport, ModelIndexedSupport {
-
   static resolveTable(cls: Class, namespace?: string): string {
     let table = ModelRegistryIndex.getStoreName(cls);
     if (namespace) {
@@ -37,7 +54,9 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   client: Firestore;
   config: FirestoreModelConfig;
 
-  constructor(config: FirestoreModelConfig) { this.config = config; }
+  constructor(config: FirestoreModelConfig) {
+    this.config = config;
+  }
 
   #resolveTable(cls: Class): string {
     return FirestoreModelService.resolveTable(cls, this.config.namespace);
@@ -47,11 +66,11 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return this.client.collection(this.#resolveTable(cls));
   }
 
-  async #getIdByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<string> {
+  async #getIdByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: FullKeyedIndexBody<T, K, S>
+  ): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
     const query = [...computed.allParts, ...(computed.idPart ? [computed.idPart] : [])].reduce<Query>(
@@ -73,8 +92,10 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     ModelCrudUtil.ensureNotSubType(cls);
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
 
-    let query = computed.keyedParts.reduce<Query>((result, { path, value, state }) =>
-      result.where(path.join('.'), '==', (state === 'empty' ? null : value)), this.#getCollection(cls));
+    let query = computed.keyedParts.reduce<Query>(
+      (result, { path, value, state }) => result.where(path.join('.'), '==', state === 'empty' ? null : value),
+      this.#getCollection(cls)
+    );
 
     for (const { path, value } of idx.sortTemplate) {
       query = query.orderBy(path.join('.'), value === 1 ? 'asc' : 'desc');
@@ -82,18 +103,18 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return query;
   }
 
-  async * #scanCollection<T extends ModelType>(
+  async *#scanCollection<T extends ModelType>(
     cls: Class<T>,
     queryBuilder: () => Query,
     options?: ModelListOptions & ModelPageOptions<number>
-  ): AsyncIterable<{ items: T[], nextOffset?: number }> {
+  ): AsyncIterable<{ items: T[]; nextOffset?: number }> {
     const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
     const batchSize = Math.min(options?.batchSizeHint ?? 100, limit);
 
     let offset = options?.offset ?? 0;
     let produced = 0;
 
-    while (!(options?.abort?.aborted) && produced < limit) {
+    while (!options?.abort?.aborted && produced < limit) {
       const query = queryBuilder().limit(batchSize).offset(offset);
 
       const { docs, size } = await query.get();
@@ -101,12 +122,11 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
         break;
       }
 
-      const remaining = (produced + size > limit) ? docs.slice(0, limit - produced) : docs;
+      const remaining = produced + size > limit ? docs.slice(0, limit - produced) : docs;
 
       offset += size;
 
-      const items = await ModelCrudUtil.filterOutNotFound(
-        remaining.map(item => ModelCrudUtil.load(cls, item.data()!)));
+      const items = await ModelCrudUtil.filterOutNotFound(remaining.map(item => ModelCrudUtil.load(cls, item.data()!)));
       produced += items.length;
 
       yield { items, nextOffset: offset };
@@ -126,7 +146,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
       warnIfNonIndexedIndex(this, cls, ModelRegistryIndex.getIndices(cls));
     }
   }
-  async deleteStorage(): Promise<void> { }
+  async deleteStorage(): Promise<void> {}
 
   async deleteModel<T extends ModelType>(cls: Class<T>): Promise<void> {
     await this.client.recursiveDelete(this.#getCollection(cls));
@@ -136,7 +156,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     const result = await this.#getCollection(cls).doc(id).get();
 
-    if (result && result.exists) {
+    if (result?.exists) {
       return await ModelCrudUtil.load(cls, result.data()!);
     }
     throw new NotFoundError(cls, id);
@@ -167,7 +187,9 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     const id = item.id;
     const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, view);
     const cleaned = setMissingValues(full, FieldValue.delete());
-    await this.#getCollection(cls).doc(id).set(cleaned, { mergeFields: Object.keys(full) });
+    await this.#getCollection(cls)
+      .doc(id)
+      .set(cleaned, { mergeFields: Object.keys(full) });
     return this.get(cls, id);
   }
 
@@ -183,7 +205,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     }
   }
 
-  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
     for await (const { items } of this.#scanCollection(cls, () => this.#getCollection(cls), options)) {
       yield items;
     }
@@ -191,56 +213,52 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   // Indexed contract
 
-  async getByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
+  async getByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: FullKeyedIndexBody<T, K, S>
+  ): Promise<T> {
     return this.get(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
-  async deleteByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<void> {
+  async deleteByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: FullKeyedIndexBody<T, K, S>
+  ): Promise<void> {
     return this.delete(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
-  upsertByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: OptionalId<T>): Promise<T> {
+  upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: OptionalId<T>
+  ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
 
-  updateByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: T): Promise<T> {
+  updateByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: T
+  ): Promise<T> {
     return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
   }
 
-  async updatePartialByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexWithPartialBody<T, K, S>): Promise<T> {
+  async updatePartialByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: FullKeyedIndexWithPartialBody<T, K, S>
+  ): Promise<T> {
     const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
     return this.update(cls, item);
   }
 
-  async pageByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(
+  async pageByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    options?: ModelPageOptions,
+    options?: ModelPageOptions
   ): Promise<ModelPageResult<T>> {
     const items: T[] = [];
     let nextOffset: number | undefined;
@@ -256,11 +274,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return { items, nextOffset: nextOffset ? JSONUtil.toBase64(nextOffset) : undefined };
   }
 
-  async * listByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(
+  async *listByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
@@ -281,12 +295,11 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
     const field = idx.sortTemplate[0].path.join('.');
 
-    for await (const { items } of this.#scanCollection(cls,
-      () => this.#buildIndexQuery(cls, idx, body)
-        .where(field, '>=', prefix)
-        .where(field, '<', `${prefix}\uf8ff`),
-      { limit: 10, ...options })
-    ) {
+    for await (const { items } of this.#scanCollection(
+      cls,
+      () => this.#buildIndexQuery(cls, idx, body).where(field, '>=', prefix).where(field, '<', `${prefix}\uf8ff`),
+      { limit: 10, ...options }
+    )) {
       results.push(...items);
     }
 

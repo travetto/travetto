@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 import { IpcSupport } from './ipc.ts';
-import { ActivationTarget, TargetEvent, type ActivationTargetConfig } from './types.ts';
+import type { ActivationTarget, TargetEvent, ActivationTargetConfig } from './types.ts';
 import { Log } from './log.ts';
 
 interface ActivationFactory<T extends ActivationTarget = ActivationTarget> {

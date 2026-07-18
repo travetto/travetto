@@ -1,10 +1,10 @@
-import path from 'node:path';
-import { spawn, type ChildProcess } from 'node:child_process';
+import { type ChildProcess, spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
+import path from 'node:path';
 
-import { JSONUtil, type ExecutionResult, Runtime, ExecUtil } from '@travetto/runtime';
-import { type IndexedModule, type Package, PackageUtil } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
+import { type IndexedModule, type Package, PackageUtil } from '@travetto/manifest';
+import { ExecUtil, type ExecutionResult, JSONUtil, Runtime } from '@travetto/runtime';
 import { TerminalUtil } from '@travetto/terminal';
 
 export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease' | 'premajor' | 'preminor' | 'prepatch';
@@ -13,7 +13,6 @@ export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease' | 'premajor
  * Utilities for working with package managers
  */
 export class PackageManager {
-
   /**
    * Check if npm login is needed
    */
@@ -43,10 +42,12 @@ export class PackageManager {
    */
   static async requestOtp(): Promise<string | undefined> {
     if (TerminalUtil.isInteractive()) {
-      console.log([
-        'OTP token is required for publishing. Please provide an OTP token to proceed with publishing.',
-        'This value will not be stored, and is only used for the current publish operation.'
-      ].join(' '));
+      console.log(
+        [
+          'OTP token is required for publishing. Please provide an OTP token to proceed with publishing.',
+          'This value will not be stored, and is only used for the current publish operation.'
+        ].join(' ')
+      );
       return await TerminalUtil.prompt('Enter OTP token: ');
     }
   }
@@ -81,7 +82,9 @@ export class PackageManager {
     switch (Runtime.workspace.manager) {
       case 'npm':
       case 'yarn':
-      case 'pnpm': args = ['info', `${module.name}@${module.version}`, '--json']; break;
+      case 'pnpm':
+        args = ['info', `${module.name}@${module.version}`, '--json'];
+        break;
     }
     return spawn(Runtime.workspace.manager, args, { cwd: module.sourceFolder });
   }
@@ -98,7 +101,8 @@ export class PackageManager {
     const stdout = ExecUtil.toString(result, 'stdout');
     type PackageInfo = { dist?: { integrity?: string } };
     let parsed = JSONUtil.fromUTF8<PackageInfo | { data: PackageInfo }>(stdout || '{}');
-    if ('data' in parsed) { // Yarn support
+    if ('data' in parsed) {
+      // Yarn support
       parsed = parsed.data;
     }
     return parsed.dist?.integrity !== undefined;
@@ -113,7 +117,9 @@ export class PackageManager {
     switch (Runtime.workspace.manager) {
       case 'npm':
       case 'yarn':
-      case 'pnpm': args = ['version', '--no-workspaces-update', level, ...(preid ? ['--preid', preid] : [])]; break;
+      case 'pnpm':
+        args = ['version', '--no-workspaces-update', level, ...(preid ? ['--preid', preid] : [])];
+        break;
     }
     return spawn(Runtime.workspace.manager, [...args, ...moduleArgs], { cwd: Runtime.workspace.path, stdio: 'inherit' });
   }
@@ -126,7 +132,9 @@ export class PackageManager {
     switch (Runtime.workspace.manager) {
       case 'npm':
       case 'yarn':
-      case 'pnpm': args = ['pack', '--dry-run']; break;
+      case 'pnpm':
+        args = ['pack', '--dry-run'];
+        break;
     }
     return spawn(Runtime.workspace.manager, args, { cwd: module.sourcePath });
   }
@@ -144,7 +152,9 @@ export class PackageManager {
     switch (Runtime.workspace.manager) {
       case 'npm':
       case 'yarn':
-      case 'pnpm': args = ['publish', '--tag', versionTag, '--access', 'public', ...(otp ? ['--otp', otp] : [])]; break;
+      case 'pnpm':
+        args = ['publish', '--tag', versionTag, '--access', 'public', ...(otp ? ['--otp', otp] : [])];
+        break;
     }
     return spawn(Runtime.workspace.manager, args, { cwd: module.sourcePath });
   }
@@ -174,12 +184,7 @@ export class PackageManager {
     });
 
     for (const { pkg } of packages) {
-      for (const group of [
-        pkg.dependencies ?? {},
-        pkg.devDependencies ?? {},
-        pkg.optionalDependencies ?? {},
-        pkg.peerDependencies ?? {}
-      ]) {
+      for (const group of [pkg.dependencies ?? {}, pkg.devDependencies ?? {}, pkg.optionalDependencies ?? {}, pkg.peerDependencies ?? {}]) {
         for (const [module, ver] of Object.entries(versions)) {
           if (module in group && !/^[*]|(file:.*)$/.test(group[module])) {
             group[module] = ver;

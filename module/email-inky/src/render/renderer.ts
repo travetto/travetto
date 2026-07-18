@@ -1,15 +1,14 @@
 import { castTo } from '@travetto/runtime';
 
-import { EMPTY_ELEMENT, getComponentName, type JSXElementByFn, type c } from '../components.ts';
+import { createFragment, isJSXElement, type JSXChild, type JSXElement, JSXFragmentType } from '../../support/jsx-runtime.ts';
+import { type c, EMPTY_ELEMENT, getComponentName, type JSXElementByFn } from '../components.ts';
 import type { RenderProvider, RenderState } from '../types.ts';
 import { RenderContext, type RenderContextInit } from './context.ts';
-import { isJSXElement, type JSXElement, createFragment, JSXFragmentType, type JSXChild } from '../../support/jsx-runtime.ts';
 
 /**
  * Inky Renderer
  */
 export class InkyRenderer {
-
   static async #render(
     ctx: RenderContext,
     renderer: RenderProvider<RenderContext>,
@@ -46,9 +45,12 @@ export class InkyRenderer {
         const recurse = (): Promise<string> => this.#render(ctx, renderer, final.props.children ?? [], [...stack, final]);
         // @ts-expect-error
         const state: RenderState<JSXElement, RenderContext> = {
-          node: final, props: final.props, recurse, stack, context: ctx
+          node: final,
+          props: final.props,
+          recurse,
+          stack,
+          context: ctx
         };
-        // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
         state.createState = (key, props) => this.createState(ctx, renderer, state, key, props);
         // @ts-expect-error
         return renderer[name](state);
@@ -66,7 +68,7 @@ export class InkyRenderer {
     renderer: RenderProvider<RenderContext>,
     state: RenderState<JSXElement, RenderContext>,
     key: K,
-    props: JSXElementByFn<K>['props'],
+    props: JSXElementByFn<K>['props']
     // @ts-expect-error
   ): RenderState<JSXElementByFn<K>, RenderContext> {
     const node = ctx.createElement(key, props);

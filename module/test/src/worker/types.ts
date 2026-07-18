@@ -11,16 +11,12 @@ export const TestWorkerEvents = {
   READY: 'ready'
 };
 
-export type TestRunEvent = { type: 'runTest', import: string };
+export type TestRunEvent = { type: 'runTest'; import: string };
 
 export const isTestRunEvent = (event: unknown): event is TestRunEvent =>
   typeof event === 'object' && !!event && 'type' in event && event.type === 'runTest';
 
 export type TestReadyEvent = { type: 'ready' };
-export type TestLogEvent = { type: 'log', message: string };
+export type TestLogEvent = { type: 'log'; message: string };
 
-export type TestWatchEvent =
-  TestEvent |
-  TestRemoveEvent |
-  TestReadyEvent |
-  TestLogEvent;
+export type TestWatchEvent = TestEvent | TestRemoveEvent | TestReadyEvent | TestLogEvent;

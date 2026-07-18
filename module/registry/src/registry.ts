@@ -1,9 +1,8 @@
-import { RuntimeError, castTo, type Class, Env, flushPendingFunctions, isClass, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { type Class, castTo, Env, flushPendingFunctions, isClass, Runtime, RuntimeError, RuntimeIndex } from '@travetto/runtime';
 
 import type { RegistryIndex, RegistryIndexClass } from './types.ts';
 
 class $Registry {
-
   #resolved = false;
   #initialized?: Promise<unknown>;
   #indexByClass = new Map<RegistryIndexClass, RegistryIndex>();
@@ -44,7 +43,10 @@ class $Registry {
 
     const byIndex = new Map<RegistryIndex, Class[]>();
     for (const index of this.#indexes) {
-      byIndex.set(index, classes.filter(cls => index.store.has(cls)));
+      byIndex.set(
+        index,
+        classes.filter(cls => index.store.has(cls))
+      );
     }
 
     for (const index of this.#indexes) {
@@ -73,14 +75,13 @@ class $Registry {
 
       // Ensure everything is loaded
       for (const entry of RuntimeIndex.find({
-        module: (module) => {
+        module: module => {
           const role = Env.TRV_ROLE.value;
-          return role !== 'test' && // Skip all modules when in test
+          return (
+            role !== 'test' && // Skip all modules when in test
             module.roles.includes('std') &&
-            (
-              !Runtime.production || module.production ||
-              (role === 'doc' && module.roles.includes(role))
-            );
+            (!Runtime.production || module.production || (role === 'doc' && module.roles.includes(role)))
+          );
         },
         folder: folder => folder === 'src' || folder === '$index'
       })) {
@@ -123,7 +124,7 @@ class $Registry {
     if (this.trace && this.#initialized) {
       console.trace('Trying to re-initialize', { initialized: !!this.#initialized });
     }
-    return this.#initialized ??= this.#init();
+    return (this.#initialized ??= this.#init());
   }
 
   /**

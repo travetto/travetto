@@ -1,6 +1,6 @@
+import type { ConfigurationService } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
 import type { StandardWebRouter } from '@travetto/web';
-import type { ConfigurationService } from '@travetto/config';
 
 import type { WebHttpConfig } from './config.ts';
 import { WebHttpUtil } from './http.ts';
@@ -11,7 +11,6 @@ import type { WebHttpServer, WebServerHandle } from './types.ts';
  */
 @Injectable()
 export class NodeWebHttpServer implements WebHttpServer {
-
   @Inject()
   serverConfig: WebHttpConfig;
 
@@ -22,7 +21,7 @@ export class NodeWebHttpServer implements WebHttpServer {
   configService: ConfigurationService;
 
   async serve(): Promise<WebServerHandle> {
-    const handle = await WebHttpUtil.startHttpServer({ ...this.serverConfig, dispatcher: this.router, });
+    const handle = await WebHttpUtil.startHttpServer({ ...this.serverConfig, dispatcher: this.router });
     console.log('Initialized', await this.configService.initBanner());
     console.log('Listening', { port: this.serverConfig.port });
     return handle;

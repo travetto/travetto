@@ -1,13 +1,13 @@
 import assert from 'node:assert';
+
 import { Suite, Test } from '@travetto/test';
 
-import { WebHeaderUtil } from '../src/util/header.ts';
-import { WebHeaders } from '../src/types/headers.ts';
 import type { Cookie } from '../src/types/cookie.ts';
+import { WebHeaders } from '../src/types/headers.ts';
+import { WebHeaderUtil } from '../src/util/header.ts';
 
 @Suite('WebHeaderUtil')
 class WebHeaderUtilSuite {
-
   @Test('parseCookieHeader - empty and single')
   testParseCookieHeader() {
     assert(WebHeaderUtil.parseCookieHeader('').length === 0);

@@ -9,4 +9,4 @@ import { BasePackCommand } from './pack.base.ts';
  * common entry point for module packaging workflows.
  */
 @CliCommand()
-export class PackCommand extends BasePackCommand { }
+export class PackCommand extends BasePackCommand {}

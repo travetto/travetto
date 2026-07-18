@@ -1,13 +1,12 @@
 import { existsSync, readFileSync } from 'node:fs';
-import path from 'node:path';
 import { createRequire } from 'node:module';
+import path from 'node:path';
 
-import { type Package, PACKAGE_MANAGERS } from './types/package.ts';
 import type { ManifestContext } from './types/context.ts';
+import { PACKAGE_MANAGERS, type Package } from './types/package.ts';
 
 type Pkg = Package & { path: string };
 
-// eslint-disable-next-line no-bitwise
 const toPort = (location: string): number => (Math.abs([...location].reduce((a, b) => (a * 33) ^ b.charCodeAt(0), 5381)) % 29000) + 20000;
 const toPosix = (location: string): string => location.replaceAll('\\', '/');
 const readPackage = (file: string): Pkg => ({ ...JSON.parse(readFileSync(file, 'utf8')), path: toPosix(path.dirname(file)) });
@@ -47,10 +46,12 @@ const WORKSPACE_FILES = PACKAGE_MANAGERS.map(x => x.workspaceFile!).filter(Boole
  * Gets build context
  */
 export function getManifestContext(root: string = process.cwd()): ManifestContext {
-  const workspace = findPackage(root, pkg =>
-    !!pkg?.workspaces ||
-    !!pkg?.travetto?.build?.isolated ||
-    (!!pkg && WORKSPACE_FILES.some(file => existsSync(path.resolve(pkg.path, file))))
+  const workspace = findPackage(
+    root,
+    pkg =>
+      !!pkg?.workspaces ||
+      !!pkg?.travetto?.build?.isolated ||
+      (!!pkg && WORKSPACE_FILES.some(file => existsSync(path.resolve(pkg.path, file))))
   );
   if (workspace.type !== 'module') {
     throw new Error('Only ESM modules are supported, package.json must be of type module');
@@ -60,9 +61,10 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
   const resolve = createRequire(path.resolve(workspace.path, 'node_modules')).resolve.bind(null);
   const wsPrefix = `${workspace.path}/`;
   const moduleName = process.env.TRV_MODULE === workspace.name ? workspace.path : process.env.TRV_MODULE;
-  const modulePkg = (!!workspace.workspaces && moduleName) ?
-    readPackage(resolve(`${moduleName}/package.json`)) :
-    findPackage(root, pkg => !!pkg) ?? workspace;
+  const modulePkg =
+    workspace.workspaces && moduleName
+      ? readPackage(resolve(`${moduleName}/package.json`))
+      : (findPackage(root, pkg => !!pkg) ?? workspace);
 
   return {
     workspace: {

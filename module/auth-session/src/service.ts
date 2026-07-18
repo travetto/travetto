@@ -1,18 +1,17 @@
-import { Injectable, Inject } from '@travetto/di';
-import { JSONUtil } from '@travetto/runtime';
-import { type ModelExpirySupport, NotFoundError } from '@travetto/model';
 import type { AuthContext, AuthService } from '@travetto/auth';
+import { Inject, Injectable } from '@travetto/di';
+import { type ModelExpirySupport, NotFoundError } from '@travetto/model';
+import { JSONUtil } from '@travetto/runtime';
 
-import { Session } from './session.ts';
-import { SessionEntry, SessionModelSymbol } from './model.ts';
 import type { SessionContext } from './context.ts';
+import { SessionEntry, SessionModelSymbol } from './model.ts';
+import { Session } from './session.ts';
 
 /**
  * Service for supporting the session and managing the session state
  */
 @Injectable()
 export class SessionService {
-
   @Inject()
   context: SessionContext;
 
@@ -43,7 +42,7 @@ export class SessionService {
 
       // Validate session
       if (session.isExpired()) {
-        await this.#modelService.delete(SessionEntry, session.id).catch(() => { });
+        await this.#modelService.delete(SessionEntry, session.id).catch(() => {});
         return new Session({ action: 'destroy' });
       } else {
         return session;
@@ -78,14 +77,18 @@ export class SessionService {
 
       // If expiration time has changed, send new session information
       if (session.action === 'create' || session.isChanged()) {
-        await this.#modelService.upsert(SessionEntry, SessionEntry.from({
-          ...session,
-          data: JSONUtil.toBase64(session.data)
-        }));
+        await this.#modelService.upsert(
+          SessionEntry,
+          SessionEntry.from({
+            ...session,
+            data: JSONUtil.toBase64(session.data)
+          })
+        );
       }
       // If destroying
-    } else if (session.id) { // If destroy and id
-      await this.#modelService.delete(SessionEntry, session.id).catch(() => { });
+    } else if (session.id) {
+      // If destroy and id
+      await this.#modelService.delete(SessionEntry, session.id).catch(() => {});
     }
   }
 

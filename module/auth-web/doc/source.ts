@@ -1,6 +1,6 @@
 import { AuthenticationError, type Authenticator } from '@travetto/auth';
 
-type User = { username: string, password: string };
+type User = { username: string; password: string };
 
 export class SimpleAuthenticator implements Authenticator<User> {
   async authenticate({ username, password }: User) {

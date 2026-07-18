@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, type DocJSXElementByFn, type DocJSXElement, DocFileUtil } from '@travetto/doc';
-import { Runtime, toConcrete } from '@travetto/runtime';
+import { DocFileUtil, type DocJSXElement, type DocJSXElementByFn, d } from '@travetto/doc';
+import { castKey, Runtime, toConcrete } from '@travetto/runtime';
 
 import type { ModelIndexedSupport } from '../src/types/service.ts';
 
@@ -8,7 +8,7 @@ const toLink = (title: string, target: Function): DocJSXElementByFn<'CodeLink'> 
   d.codeLink(title, Runtime.getSourceFile(target), new RegExp(`\\binterface\\s+${target.name}`));
 
 export const Links = {
-  Indexed: toLink('Indexed', toConcrete<ModelIndexedSupport>()),
+  Indexed: toLink('Indexed', toConcrete<ModelIndexedSupport>())
 };
 
 export const ModelIndexedTypes = (fn: Function): DocJSXElement[] => {
@@ -18,8 +18,7 @@ export const ModelIndexedTypes = (fn: Function): DocJSXElement[] => {
   for (const [, key] of content.matchAll(/Model(Indexed)Support/g)) {
     if (!seen.has(key) && key in Links) {
       seen.add(key);
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const link = Links[key as keyof typeof Links];
+      const link = Links[castKey(key)];
       found.push(link);
     }
   }

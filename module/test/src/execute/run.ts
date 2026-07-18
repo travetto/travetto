@@ -1,21 +1,21 @@
 import { createReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
-import readline from 'node:readline/promises';
 import path from 'node:path';
+import readline from 'node:readline/promises';
 
-import { Env, ExecUtil, Util, RuntimeIndex, Runtime, TimeUtil, JSONUtil, describeFunction } from '@travetto/runtime';
-import { WorkPool } from '@travetto/worker';
 import { Registry } from '@travetto/registry';
+import { describeFunction, Env, ExecUtil, JSONUtil, Runtime, RuntimeIndex, TimeUtil, Util } from '@travetto/runtime';
+import { WorkPool } from '@travetto/worker';
 
-import type { TestConfig, TestRunInput, TestRun, TestGlobInput, TestDiffInput } from '../model/test.ts';
-import type { TestRemoveEvent } from '../model/event.ts';
-import type { TestConsumerShape } from '../consumer/types.ts';
-import { RunnableTestConsumer } from '../consumer/types/runnable.ts';
-import type { TestConsumerConfig } from './types.ts';
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
-import { TestExecutor } from './executor.ts';
-import { buildStandardTestManager } from '../worker/standard.ts';
+import { RunnableTestConsumer } from '../consumer/types/runnable.ts';
+import type { TestConsumerShape } from '../consumer/types.ts';
+import type { TestRemoveEvent } from '../model/event.ts';
+import type { TestConfig, TestDiffInput, TestGlobInput, TestRun, TestRunInput } from '../model/test.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
+import { buildStandardTestManager } from '../worker/standard.ts';
+import { TestExecutor } from './executor.ts';
+import type { TestConsumerConfig } from './types.ts';
 
 type RunState = {
   runs: TestRun[];
@@ -26,7 +26,6 @@ type RunState = {
  * Test Utilities for Running
  */
 export class RunUtil {
-
   /**
    * Determine if a given file path is a valid test file
    */
@@ -47,7 +46,7 @@ export class RunUtil {
   /**
    * Find all valid test files given the globs
    */
-  static async* getTestImports(globs?: string[]): AsyncIterable<string> {
+  static async *getTestImports(globs?: string[]): AsyncIterable<string> {
     const all = RuntimeIndex.find({
       module: module => module.roles.includes('test') || module.roles.includes('std'),
       folder: folder => folder === 'test',
@@ -60,7 +59,7 @@ export class RunUtil {
       for await (const item of fs.glob(globs)) {
         const source = Runtime.workspaceRelative(path.resolve(item));
         const match = allFiles.get(source);
-        if (match && await this.isTestFile(match.sourceFile)) {
+        if (match && (await this.isTestFile(match.sourceFile))) {
           yield match.import;
         }
       }
@@ -80,7 +79,7 @@ export class RunUtil {
   static async resolveGlobInput({ globs, tags, metadata }: TestGlobInput): Promise<TestRun[]> {
     const digestProcess = await ExecUtil.getResult(
       ExecUtil.spawnPackageCommand('trv', ['test:digest', '-o', 'json', ...globs], {
-        env: { ...process.env, ...Env.FORCE_COLOR.export(0), ...Env.NO_COLOR.export(true) },
+        env: { ...process.env, ...Env.FORCE_COLOR.export(0), ...Env.NO_COLOR.export(true) }
       }),
       { catch: true }
     );
@@ -89,20 +88,20 @@ export class RunUtil {
       throw new Error(digestProcess.stderr);
     }
 
-    const testFilter = tags?.length ?
-      Util.allowDeny<string, [TestConfig]>(
-        tags,
-        rule => rule,
-        (rule, core) => core.tags?.includes(rule) ?? false
-      ) :
-      ((): boolean => true);
+    const testFilter = tags?.length
+      ? Util.allowDeny<string, [TestConfig]>(
+          tags,
+          rule => rule,
+          (rule, core) => core.tags?.includes(rule) ?? false
+        )
+      : (): boolean => true;
 
     const parsed: TestConfig[] = JSONUtil.fromUTF8(digestProcess.stdout);
 
     const events = parsed.filter(testFilter).reduce((runs, test) => {
-      runs.getOrInsert(test.classId,
-        { import: test.import, classId: test.classId, methodNames: [], runId: Util.uuid(), metadata }
-      ).methodNames!.push(test.methodName);
+      runs
+        .getOrInsert(test.classId, { import: test.import, classId: test.classId, methodNames: [], runId: Util.uuid(), metadata })
+        .methodNames!.push(test.methodName);
       return runs;
     }, new Map<string, TestRun>());
 
@@ -141,18 +140,22 @@ export class RunUtil {
     // Looking at Diff
     for (const [clsId, config] of Object.entries(diff)) {
       const local = classes[clsId];
-      if (!local) { // Removed classes
+      if (!local) {
+        // Removed classes
         removeTest(clsId);
-      } else if (local.sourceHash !== config.sourceHash) { // Class changed or added
+      } else if (local.sourceHash !== config.sourceHash) {
+        // Class changed or added
         // Methods to run, defaults to newly added
         const methods: string[] = Object.keys(local.tests ?? {}).filter(key => !config.methods[key]);
         let didRemove = false;
         for (const key of Object.keys(config.methods)) {
           const localMethod = local.tests?.[key];
-          if (!localMethod) { // Test is removed
+          if (!localMethod) {
+            // Test is removed
             removeTest(clsId, key);
             didRemove = true;
-          } else if (localMethod.sourceHash !== config.methods[key]) { // Method changed or added
+          } else if (localMethod.sourceHash !== config.methods[key]) {
+            // Method changed or added
             methods.push(key);
           }
         }
@@ -162,7 +165,8 @@ export class RunUtil {
       }
     }
 
-    if (runs.length === 0 && removes.length === 0) { // Re-run entire file, classes unchanged
+    if (runs.length === 0 && removes.length === 0) {
+      // Re-run entire file, classes unchanged
       addRun(undefined);
     }
 
@@ -225,15 +229,11 @@ export class RunUtil {
     if (runs.length === 1) {
       await new TestExecutor(consumer).execute(runs[0], true);
     } else {
-      await WorkPool.run(
-        run => buildStandardTestManager(consumer, run),
-        runs,
-        {
-          idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),
-          min: 1,
-          max: consumerConfig.concurrency
-        }
-      );
+      await WorkPool.run(run => buildStandardTestManager(consumer, run), runs, {
+        idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),
+        min: 1,
+        max: consumerConfig.concurrency
+      });
     }
 
     return consumer.summarizeAsBoolean();

@@ -1,4 +1,4 @@
-import { Schema, Integer } from '@travetto/schema';
+import { Integer, Schema } from '@travetto/schema';
 
 @Schema()
 export class Address {

@@ -8,9 +8,7 @@ class CookieJarSuite {
   @Test()
   async simpleTest() {
     const jar = new CookieJar();
-    await jar.importCookieHeader(
-      'age=  20, gonzo; height=30; auth=10000000xx; borange!!!'
-    );
+    await jar.importCookieHeader('age=  20, gonzo; height=30; auth=10000000xx; borange!!!');
 
     assert(jar.get('age') === '20, gonzo');
     assert(jar.get('height') === '30');

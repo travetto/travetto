@@ -1,6 +1,6 @@
-import { Util, type Class, TimeUtil, castTo } from '@travetto/runtime';
+import { AuthenticationError, type Authenticator, type Authorizer, type Principal } from '@travetto/auth';
 import { type ModelCrudSupport, type ModelType, NotFoundError, type OptionalId } from '@travetto/model';
-import { type Principal, type Authenticator, type Authorizer, AuthenticationError } from '@travetto/auth';
+import { type Class, castTo, TimeUtil, Util } from '@travetto/runtime';
 
 import { AuthModelUtil } from './util.ts';
 
@@ -38,7 +38,6 @@ type FromPrincipal<T extends ModelType> = (item: Partial<RegisteredPrincipal>) =
  * A model-based auth service
  */
 export class ModelAuthService<T extends ModelType> implements Authenticator<T>, Authorizer {
-
   #modelService: ModelCrudSupport;
   #cls: Class<T>;
 
@@ -52,12 +51,7 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
    * @param toPrincipal Convert a model to an principal
    * @param fromPrincipal Convert an identity to the model
    */
-  constructor(
-    modelService: ModelCrudSupport,
-    cls: Class<T>,
-    toPrincipal: ToPrincipal<T>,
-    fromPrincipal: FromPrincipal<T>,
-  ) {
+  constructor(modelService: ModelCrudSupport, cls: Class<T>, toPrincipal: ToPrincipal<T>, fromPrincipal: FromPrincipal<T>) {
     this.#modelService = modelService;
     this.#cls = cls;
     this.toPrincipal = toPrincipal;

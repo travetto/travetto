@@ -1,4 +1,5 @@
 import { castTo } from '@travetto/runtime';
+
 import { WebHeaders, type WebHeadersInit } from './headers.ts';
 
 export interface WebMessageInit<B = unknown, C = unknown> {

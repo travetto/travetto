@@ -1,4 +1,4 @@
-import type { SchemaFieldConfig, SchemaClassConfig } from '@travetto/schema';
+import type { SchemaClassConfig, SchemaFieldConfig } from '@travetto/schema';
 
 import type { VisitStack } from '../types.ts';
 
@@ -7,7 +7,7 @@ import type { VisitStack } from '../types.ts';
  */
 export interface InsertWrapper {
   stack: VisitStack[];
-  records: { stack: VisitStack[], value: unknown }[];
+  records: { stack: VisitStack[]; value: unknown }[];
 }
 
 /**

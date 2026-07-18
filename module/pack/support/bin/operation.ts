@@ -2,18 +2,17 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { cliTpl } from '@travetto/cli';
-import { JSONUtil, Env, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { Env, JSONUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import type { CommonPackConfig } from '../../src/types.ts';
-import { PackUtil } from './util.ts';
 import { ActiveShellCommand, ShellCommands } from './shell.ts';
+import { PackUtil } from './util.ts';
 
 /**
  * General pack operations
  */
 export class PackOperation {
-
-  static async * title(config: CommonPackConfig, title: string): AsyncIterable<string[]> {
+  static async *title(config: CommonPackConfig, title: string): AsyncIterable<string[]> {
     if (config.ejectFile) {
       yield ActiveShellCommand.comment(title);
       yield ActiveShellCommand.echo(title);
@@ -25,7 +24,7 @@ export class PackOperation {
   /**
    * Clean out pack workspace, removing all content
    */
-  static async * clean(config: CommonPackConfig): AsyncIterable<string[]> {
+  static async *clean(config: CommonPackConfig): AsyncIterable<string[]> {
     if (!config.clean) {
       return;
     }
@@ -50,39 +49,47 @@ export class PackOperation {
   /**
    * Invoke bundler (rollup) to produce output in workspace folder
    */
-  static async * bundle(config: CommonPackConfig): AsyncIterable<string[]> {
+  static async *bundle(config: CommonPackConfig): AsyncIterable<string[]> {
     const cwd = RuntimeIndex.outputRoot;
     const out = RuntimeIndex.manifest.build.outputFolder;
 
-    const bundleCommand = [process.argv0, RuntimeIndex.resolvePackageCommand('rollup'), '-c', RuntimeIndex.resolveFileImport(config.rollupConfiguration)];
+    const bundleCommand = [
+      process.argv0,
+      RuntimeIndex.resolvePackageCommand('rollup'),
+      '-c',
+      RuntimeIndex.resolveFileImport(config.rollupConfiguration)
+    ];
 
     const entryPointFile = RuntimeIndex.getFromImport(config.entryPoint)!.outputFile.split(`${out}/`)[1];
 
     const env = {
-      ...Object.fromEntries(([
-        ['BUNDLE_ENTRY', entryPointFile],
-        ['BUNDLE_MAIN_FILE', config.mainFile],
-        ['BUNDLE_COMPRESS', config.minify],
-        ['BUNDLE_SOURCEMAP', config.sourcemap],
-        ['BUNDLE_SOURCES', config.includeSources],
-        ['BUNDLE_OUTPUT', config.buildDirectory],
-        ['BUNDLE_ENV_FILE', config.envFile],
-        ['BUNDLE_EXTERNAL', config.externalDependencies.map(module => module.split(':')[0]).join(',')]
-      ] as const)
-        .filter(pair => pair[1] === false || pair[1])
-        .map(pair => [pair[0], `${pair[1]}`])
+      ...Object.fromEntries(
+        (
+          [
+            ['BUNDLE_ENTRY', entryPointFile],
+            ['BUNDLE_MAIN_FILE', config.mainFile],
+            ['BUNDLE_COMPRESS', config.minify],
+            ['BUNDLE_SOURCEMAP', config.sourcemap],
+            ['BUNDLE_SOURCES', config.includeSources],
+            ['BUNDLE_OUTPUT', config.buildDirectory],
+            ['BUNDLE_ENV_FILE', config.envFile],
+            ['BUNDLE_EXTERNAL', config.externalDependencies.map(module => module.split(':')[0]).join(',')]
+          ] as const
+        )
+          .filter(pair => pair[1] === false || pair[1])
+          .map(pair => [pair[0], `${pair[1]}`])
       ),
-      ...Env.TRV_MANIFEST.export(RuntimeIndex.getModule(config.module)!.outputPath),
+      ...Env.TRV_MANIFEST.export(RuntimeIndex.getModule(config.module)!.outputPath)
     };
 
     const properties = (['minify', 'sourcemap', 'entryPoint'] as const)
-      .map(key => cliTpl`${{ subtitle: key }}=${{ param: config[key] }}`).join(' ');
+      .map(key => cliTpl`${{ subtitle: key }}=${{ param: config[key] }}`)
+      .join(' ');
 
     yield* PackOperation.title(config, cliTpl`${{ title: 'Bundling Output' }} ${properties}`);
 
     if (config.ejectFile) {
-      yield* Object
-        .entries(env)
+      yield* Object.entries(env)
         .filter(pair => !!pair[1])
         .map(pair => ActiveShellCommand.export(pair[0], pair[1]));
       yield ActiveShellCommand.chdir(cwd);
@@ -98,29 +105,23 @@ export class PackOperation {
   /**
    * Write out package.json, to help define how output .js file should be interpreted
    */
-  static async * writePackageJson(config: CommonPackConfig): AsyncIterable<string[]> {
+  static async *writePackageJson(config: CommonPackConfig): AsyncIterable<string[]> {
     const file = 'package.json';
     const pkg = { type: 'module', main: config.mainFile };
 
     yield* PackOperation.title(config, cliTpl`${{ title: 'Writing' }} ${{ path: file }}`);
 
     if (config.ejectFile) {
-      yield* ActiveShellCommand.createFile(
-        path.resolve(config.buildDirectory, file),
-        [JSONUtil.toUTF8(pkg)]
-      );
+      yield* ActiveShellCommand.createFile(path.resolve(config.buildDirectory, file), [JSONUtil.toUTF8(pkg)]);
     } else {
-      await PackUtil.writeRawFile(
-        path.resolve(config.buildDirectory, file),
-        [JSONUtil.toUTF8Pretty(pkg)]
-      );
+      await PackUtil.writeRawFile(path.resolve(config.buildDirectory, file), [JSONUtil.toUTF8Pretty(pkg)]);
     }
   }
 
   /**
    * Define .env.js file to control manifest location
    */
-  static async * writeEnv(config: CommonPackConfig): AsyncIterable<string[]> {
+  static async *writeEnv(config: CommonPackConfig): AsyncIterable<string[]> {
     const file = path.resolve(config.buildDirectory, config.envFile);
     const env = {
       ...Env.NODE_ENV.export('production'),
@@ -129,40 +130,34 @@ export class PackOperation {
       ...Env.TRV_CLI_IPC.export(undefined),
       ...Env.TRV_RESOURCE_OVERRIDES.export({
         '@#resources': '@@#resources',
-        ...(config.includeWorkspaceResources ? {
-          '@@#resources': `@@#${config.workspaceResourceFolder}`
-        } : {})
+        ...(config.includeWorkspaceResources
+          ? {
+              '@@#resources': `@@#${config.workspaceResourceFolder}`
+            }
+          : {})
       })
     };
 
     yield* PackOperation.title(config, cliTpl`${{ title: 'Writing' }} ${{ path: file }}`);
 
     if (config.ejectFile) {
-      yield* ActiveShellCommand.createFile(
-        path.resolve(config.buildDirectory, file),
-        PackUtil.buildEnvFile(env)
-      );
+      yield* ActiveShellCommand.createFile(path.resolve(config.buildDirectory, file), PackUtil.buildEnvFile(env));
     } else {
-      await PackUtil.writeRawFile(
-        path.resolve(config.buildDirectory, file),
-        PackUtil.buildEnvFile(env)
-      );
+      await PackUtil.writeRawFile(path.resolve(config.buildDirectory, file), PackUtil.buildEnvFile(env));
     }
   }
 
   /**
    * Create launcher scripts (.sh, .cmd) to run output
    */
-  static async * writeEntryScript(config: CommonPackConfig): AsyncIterable<string[]> {
+  static async *writeEntryScript(config: CommonPackConfig): AsyncIterable<string[]> {
     if (!config.mainScripts && !config.entryPoint.includes('@travetto/cli')) {
       return;
     }
 
     const title = 'Writing entry scripts';
     for (const sh of [ShellCommands.posix, ShellCommands.win32]) {
-      const { ext, contents } = sh.script(
-        sh.callCommandWithAllArgs('node', config.mainFile, ...config.entryArguments), true
-      );
+      const { ext, contents } = sh.script(sh.callCommandWithAllArgs('node', config.mainFile, ...config.entryArguments), true);
       const file = `${config.mainName}${ext}`;
       const args = config.entryArguments.join(' ');
 
@@ -170,7 +165,6 @@ export class PackOperation {
 
       if (config.ejectFile) {
         yield* ActiveShellCommand.createFile(path.resolve(config.buildDirectory, file), contents, '755');
-
       } else {
         await PackUtil.writeRawFile(path.resolve(config.buildDirectory, file), contents, '755');
       }
@@ -180,7 +174,7 @@ export class PackOperation {
   /**
    * Copy over repo /resources folder into workspace, will get packaged into final output
    */
-  static async * copyMonoRepoResources(config: CommonPackConfig): AsyncIterable<string[]> {
+  static async *copyMonoRepoResources(config: CommonPackConfig): AsyncIterable<string[]> {
     if (!config.includeWorkspaceResources) {
       return;
     }
@@ -200,7 +194,7 @@ export class PackOperation {
   /**
    * Copy over /resources folder into workspace, will get packaged into final output
    */
-  static async * copyResources(config: CommonPackConfig): AsyncIterable<string[]> {
+  static async *copyResources(config: CommonPackConfig): AsyncIterable<string[]> {
     const resources = {
       count: RuntimeIndex.mainModule.files.resources?.length ?? 0,
       sourceDirectory: path.resolve(Runtime.mainSourcePath, 'resources'),
@@ -223,7 +217,7 @@ export class PackOperation {
   /**
    * Produce the output manifest, only including production dependencies
    */
-  static async * writeManifest(config: CommonPackConfig): AsyncIterable<string[]> {
+  static async *writeManifest(config: CommonPackConfig): AsyncIterable<string[]> {
     const out = path.resolve(config.buildDirectory, config.manifestFile);
     const cmd = [process.argv0, RuntimeIndex.resolvePackageCommand('trvc'), 'manifest:production', out];
     const env = { ...Env.TRV_MODULE.export(config.module) };
@@ -240,8 +234,7 @@ export class PackOperation {
   /**
    * Generate ZIP file for workspace
    */
-  static async * compress(config: CommonPackConfig): AsyncIterable<string[]> {
-
+  static async *compress(config: CommonPackConfig): AsyncIterable<string[]> {
     yield* PackOperation.title(config, cliTpl`${{ title: 'Compressing' }} ${{ path: config.output }}`);
 
     if (config.ejectFile) {

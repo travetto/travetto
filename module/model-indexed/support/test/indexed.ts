@@ -1,24 +1,36 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Suite, Test } from '@travetto/test';
-import { castTo, TimeUtil } from '@travetto/runtime';
 import { ExistsError, ModelBulkUtil, NotFoundError } from '@travetto/model';
+import { castTo, TimeUtil } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
+
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
-import type { ModelIndexedSupport } from '../../src/types/service.ts';
 import { IndexedFieldError } from '../../src/types/error.ts';
-
-import { SUGGEST_DATA, SuggestItem, suggestSort } from './models/suggest.ts';
+import type { ModelIndexedSupport } from '../../src/types/service.ts';
 import {
-  childAgeIndex, nameCreatedIndex, UniqueUser, User, User2, User3, User4, userAgeIndex,
-  userAgeNoKeyIndex, userAgeReversedIndex, userNameIndex, userUniqueNameIndex,
-  ComputedIndexedUser, computedNameIndex, TransientIndexedUser, transientNameIndex
+  ComputedIndexedUser,
+  childAgeIndex,
+  computedNameIndex,
+  nameCreatedIndex,
+  TransientIndexedUser,
+  transientNameIndex,
+  UniqueUser,
+  User,
+  User2,
+  User3,
+  User4,
+  userAgeIndex,
+  userAgeNoKeyIndex,
+  userAgeReversedIndex,
+  userNameIndex,
+  userUniqueNameIndex
 } from './models/indexed.ts';
+import { SUGGEST_DATA, SuggestItem, suggestSort } from './models/suggest.ts';
 
 @Suite()
 export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSupport> {
-
   indexLimitSkew = 0;
   supportsDeepIndexes = true;
   supportsUniqueIndexes = true;
@@ -26,7 +38,10 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   async #seed(names: string[]): Promise<void> {
     const service = await this.service;
     if (ModelBulkUtil.isSupported(service)) {
-      await service.processBulk(SuggestItem, names.map(name => ({ insert: { name } })));
+      await service.processBulk(
+        SuggestItem,
+        names.map(name => ({ insert: { name } }))
+      );
     } else {
       for (const item of names) {
         await service.create(SuggestItem, SuggestItem.from({ name: item }));
@@ -54,7 +69,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     assert(found2.name === 'bob2');
   }
 
-  @Test({ skip: (self) => !castTo<ModelIndexedSuite>(self).supportsUniqueIndexes })
+  @Test({ skip: self => !castTo<ModelIndexedSuite>(self).supportsUniqueIndexes })
   async writeRejectsDuplicateUniqueIndex() {
     const service = await this.service;
 
@@ -84,10 +99,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
 
     assert(found.id === second.id);
 
-    await assert.rejects(
-      () => service.getByIndex(User, userNameIndex, { name: 'bob', id: first.id }),
-      NotFoundError
-    );
+    await assert.rejects(() => service.getByIndex(User, userNameIndex, { name: 'bob', id: first.id }), NotFoundError);
 
     await service.deleteByIndex(User, userNameIndex, { name: 'sam', id: first.id });
 
@@ -196,7 +208,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await assert.rejects(() => service.getByIndex(User3, userAgeNoKeyIndex, {}), IndexedFieldError);
   }
 
-  @Test({ skip: (self) => !castTo<ModelIndexedSuite>(self).supportsDeepIndexes })
+  @Test({ skip: self => !castTo<ModelIndexedSuite>(self).supportsDeepIndexes })
   async queryDeepList() {
     const service = await this.service;
 
@@ -213,7 +225,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await assert.rejects(() => service.pageByIndex(User4, childAgeIndex, {}), IndexedFieldError);
   }
 
-  @Test({ skip: (self) => !castTo<ModelIndexedSuite>(self).supportsDeepIndexes })
+  @Test({ skip: self => !castTo<ModelIndexedSuite>(self).supportsDeepIndexes })
   async queryComplexDateList() {
     const service = await this.service;
 
@@ -344,9 +356,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   async listByIndexAbortSignal() {
     const service = await this.service;
 
-    await Promise.all(
-      [20, 30, 40].map(age => service.create(User3, User3.from({ name: 'page', age, color: `${age}` })))
-    );
+    await Promise.all([20, 30, 40].map(age => service.create(User3, User3.from({ name: 'page', age, color: `${age}` }))));
 
     const controller = new AbortController();
     const found: User3[] = [];
@@ -428,9 +438,6 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
 
     await service.create(TransientIndexedUser, TransientIndexedUser.from({ name: 'bob' }));
 
-    await assert.rejects(
-      () => service.getByIndex(TransientIndexedUser, transientNameIndex, { name: 'bob' }),
-      NotFoundError
-    );
+    await assert.rejects(() => service.getByIndex(TransientIndexedUser, transientNameIndex, { name: 'bob' }), NotFoundError);
   }
 }

@@ -1,10 +1,10 @@
+import { type Class, castTo } from '@travetto/runtime';
 import { SchemaRegistryIndex, UnknownType } from '@travetto/schema';
-import { castTo, type Class } from '@travetto/runtime';
 
-import { getDefaultQualifier, type InjectableCandidate, PrimaryCandidateSymbol, type ResolutionType } from '../types.ts';
 import { InjectionError } from '../error.ts';
+import { getDefaultQualifier, type InjectableCandidate, PrimaryCandidateSymbol, type ResolutionType } from '../types.ts';
 
-type Resolved<T> = { candidate: InjectableCandidate<T>, qualifier: symbol, target: Class };
+type Resolved<T> = { candidate: InjectableCandidate<T>; qualifier: symbol; target: Class };
 
 function setInMap<T>(map: Map<Class, Map<typeof key, T>>, cls: Class, key: symbol | string, dest: T): void {
   map.getOrInsert(cls, new Map()).set(key, dest);
@@ -35,9 +35,7 @@ export class DependencyRegistryResolver {
     if (qualifiers.has(PrimaryCandidateSymbol)) {
       return PrimaryCandidateSymbol;
     } else {
-      const filtered = resolved
-        .filter(qualifier => !!qualifier)
-        .filter(qualifier => this.#defaultSymbols.has(qualifier));
+      const filtered = resolved.filter(qualifier => !!qualifier).filter(qualifier => this.#defaultSymbols.has(qualifier));
       // If there is only one default symbol
       if (filtered.length === 1) {
         return filtered[0];
@@ -82,8 +80,7 @@ export class DependencyRegistryResolver {
     setInMap(this.#byCandidateType, candidateType, qualifier, config);
 
     // Track interface aliases as targets
-    const interfaces = SchemaRegistryIndex.has(candidateType) ?
-      SchemaRegistryIndex.get(candidateType).get().interfaces : [];
+    const interfaces = SchemaRegistryIndex.has(candidateType) ? SchemaRegistryIndex.get(candidateType).get().interfaces : [];
 
     for (const type of interfaces) {
       setInMap(this.#byCandidateType, type, qualifier, config);
@@ -151,7 +148,7 @@ export class DependencyRegistryResolver {
     return {
       candidate: castTo(config),
       qualifier,
-      target: (config.target ?? config.candidateType)
+      target: config.target ?? config.candidateType
     };
   }
 
@@ -162,10 +159,10 @@ export class DependencyRegistryResolver {
   }
 
   getCandidateEntries(candidateType: Class): [symbol, InjectableCandidate][] {
-    return [...this.#byCandidateType.get(candidateType)?.entries() ?? []];
+    return [...(this.#byCandidateType.get(candidateType)?.entries() ?? [])];
   }
 
   getContainerEntries(containerType: Class): [symbol, InjectableCandidate][] {
-    return [...this.#byContainerType.get(containerType)?.entries() ?? []];
+    return [...(this.#byContainerType.get(containerType)?.entries() ?? [])];
   }
 }

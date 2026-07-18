@@ -1,11 +1,10 @@
 import { timingSafeEqual } from 'node:crypto';
 
-import { BinaryUtil, CodecUtil, type BinaryArray } from '@travetto/runtime';
+import { type BinaryArray, BinaryUtil, CodecUtil } from '@travetto/runtime';
 
 const CHAR_MAPPING: Record<string, string> = { '/': '_', '+': '-', '=': '' };
 
 export class KeyGrip {
-
   static async getRandomHmacKey(): Promise<CryptoKey> {
     const keyBytes = crypto.getRandomValues(new Uint8Array(32));
     return crypto.subtle.importKey('raw', keyBytes, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
@@ -51,10 +50,7 @@ export class KeyGrip {
     for (let i = 0; i < this.#keys.length; i++) {
       const signedBytes = BinaryUtil.binaryArrayToUint8Array(await KeyGrip.hmac(await this.sign(data, this.#keys[i]), key));
 
-      if (
-        signedBytes.byteLength === digestBytes.byteLength &&
-        timingSafeEqual(digestBytes, signedBytes)
-      ) {
+      if (signedBytes.byteLength === digestBytes.byteLength && timingSafeEqual(digestBytes, signedBytes)) {
         return i === 0 ? 'valid' : 'stale';
       }
     }

@@ -19,21 +19,25 @@ This module provides [inky](https://github.com/zurb/inky) support via [JSX](http
 ```typescript
 /** @jsxImportSource @travetto/email-inky/support */
 
-import { Title, Container, Summary, Row, Column, If, Button, Value, InkyTemplate } from '@travetto/email-inky';
+import { Button, Column, Container, If, InkyTemplate, Row, Summary, Title, Value } from '@travetto/email-inky';
 
-export default <InkyTemplate>
-  <Title>Test Email</Title>
-  <Summary>Email Summary</Summary>
-  <Container>
-    <If attr='person'>
-      <Row>
-        <Column small={5}>
-          <Button href='https://google.com/{{query}}'>Hello <Value attr='name' /></Button>
-        </Column>
-      </Row>
-    </If>
-  </Container>
-</InkyTemplate>;
+export default (
+  <InkyTemplate>
+    <Title>Test Email</Title>
+    <Summary>Email Summary</Summary>
+    <Container>
+      <If attr="person">
+        <Row>
+          <Column small={5}>
+            <Button href="https://google.com/{{query}}">
+              Hello <Value attr="name" />
+            </Button>
+          </Column>
+        </Row>
+      </If>
+    </Container>
+  </InkyTemplate>
+);
 ```
 
 Please see the [inky](https://github.com/zurb/inky) documentation for more information on the [component specifications](#https-get-foundation-emails-docs-inky-html)
@@ -43,7 +47,7 @@ The underlying [Email](https://github.com/travetto/travetto/tree/main/module/ema
 
 This means this module, while showing [inky](https://github.com/zurb/inky) components, will ultimately produce HTML/markdown that is [mustache](https://github.com/janl/mustache.js/) compatible. The syntax used by [mustache](https://github.com/janl/mustache.js/) and the syntax used by [JSX](https://en.wikipedia.org/wiki/JSX_(JavaScript)) are in conflict due to both of the tools relying on the uniqueness of `{}` brackets.
 
-To that end, the module introduces additional components ([If Component](https://github.com/travetto/travetto/tree/main/module/email-inky/src/components.ts#L28), [Unless Component](https://github.com/travetto/travetto/tree/main/module/email-inky/src/components.ts#L30), and [For Component](https://github.com/travetto/travetto/tree/main/module/email-inky/src/components.ts#L31)) to assist with control flow logic.  When it comes to variable substitution, and a desire to intermingle seamlessly with component properties, `{{value}}` can be used within a string value. To leverage substitutions outside of string contexts, a more formal version can be found in the [Value Component](https://github.com/travetto/travetto/tree/main/module/email-inky/src/components.ts#L29) component, but this cannot be integrated into properties (e.g. an href).
+To that end, the module introduces additional components ([If Component](https://github.com/travetto/travetto/tree/main/module/email-inky/src/components.ts#L32), [Unless Component](https://github.com/travetto/travetto/tree/main/module/email-inky/src/components.ts#L34), and [For Component](https://github.com/travetto/travetto/tree/main/module/email-inky/src/components.ts#L35)) to assist with control flow logic. When it comes to variable substitution, and a desire to intermingle seamlessly with component properties, `{{value}}` can be used within a string value. To leverage substitutions outside of string contexts, a more formal version can be found in the [Value Component](https://github.com/travetto/travetto/tree/main/module/email-inky/src/components.ts#L33) component, but this cannot be integrated into properties (e.g. an href).
 
 ## Template Extension Points
 The template extension points are defined at:

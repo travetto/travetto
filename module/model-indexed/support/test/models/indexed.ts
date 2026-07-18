@@ -106,5 +106,3 @@ export const transientNameIndex = keyedIndex(TransientIndexedUser, {
   name: 'transientName',
   key: { name: true }
 });
-
-

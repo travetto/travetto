@@ -1,15 +1,14 @@
-import { RuntimeIndex, type Class } from '@travetto/runtime';
 import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
+import { type Class, RuntimeIndex } from '@travetto/runtime';
 
-import type { TestConsumerShape } from './types.ts';
 import type { TestConsumerConfig } from '../execute/types.ts';
 import { TestConsumerRegistryAdapter } from './registry-adapter.ts';
+import type { TestConsumerShape } from './types.ts';
 
 /**
  * Test Results Handler Registry
  */
 export class TestConsumerRegistryIndex implements RegistryIndex {
-
   static #instance = Registry.registerIndex(this);
 
   static getForRegister(cls: Class): TestConsumerRegistryAdapter {
@@ -34,7 +33,9 @@ export class TestConsumerRegistryIndex implements RegistryIndex {
   #initialized: Promise<void>;
   store = new RegistryIndexStore(TestConsumerRegistryAdapter);
 
-  /** @private */ constructor(source: unknown) { Registry.validateConstructor(source); }
+  /** @private */ constructor(source: unknown) {
+    Registry.validateConstructor(source);
+  }
 
   /**
    * Manual initialization when running outside of the bootstrap process

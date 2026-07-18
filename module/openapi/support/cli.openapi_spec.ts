@@ -1,10 +1,10 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { type CliCommandShape, CliCommand, CliModuleFlag } from '@travetto/cli';
-import { JSONUtil, Env } from '@travetto/runtime';
-import { Registry } from '@travetto/registry';
+import { CliCommand, type CliCommandShape, CliModuleFlag } from '@travetto/cli';
 import { DependencyRegistryIndex } from '@travetto/di';
+import { Registry } from '@travetto/registry';
+import { Env, JSONUtil } from '@travetto/runtime';
 
 /**
  * Generate the OpenAPI specification for the selected module.
@@ -14,7 +14,6 @@ import { DependencyRegistryIndex } from '@travetto/di';
  */
 @CliCommand()
 export class OpenApiSpecCommand implements CliCommandShape {
-
   /** Output files */
   output?: string;
 

@@ -1,5 +1,5 @@
+import { Registry, type RegistryAdapter, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
 import type { Class } from '@travetto/runtime';
-import { type RegistryAdapter, type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
 
 interface Group {
   class: Class;
@@ -16,7 +16,6 @@ interface Child {
  * The adapter to handle mapping/modeling a specific class
  */
 class SampleRegistryAdapter implements RegistryAdapter<Group> {
-
   #class: Class;
   #config: Group;
 
@@ -28,10 +27,7 @@ class SampleRegistryAdapter implements RegistryAdapter<Group> {
     for (const group of groups) {
       Object.assign(this.#config, {
         ...group,
-        children: [
-          ...(this.#config?.children ?? []),
-          ...(group.children ?? [])
-        ]
+        children: [...(this.#config?.children ?? []), ...(group.children ?? [])]
       });
     }
     return this.#config;

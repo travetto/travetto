@@ -1,15 +1,13 @@
 import type { Class } from '@travetto/runtime';
 
-import type { ModelListOptions, ModelType, OptionalId } from './model.ts';
-
 import type { ModelBasicSupport } from './basic.ts';
+import type { ModelListOptions, ModelType, OptionalId } from './model.ts';
 
 /**
  * Interface for simple CRUD
  * @concrete
  */
 export interface ModelCrudSupport extends ModelBasicSupport {
-
   /**
    * Update an item
    * @param item The document to update.

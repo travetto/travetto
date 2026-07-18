@@ -1,5 +1,6 @@
-import { Suite } from '@travetto/test';
 import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
+import { Suite } from '@travetto/test';
+
 import { ModelIndexedSuite } from '@travetto/model-indexed/support/test/indexed.ts';
 import { ModelIndexedPolymorphismSuite } from '@travetto/model-indexed/support/test/polymorphism.ts';
 
@@ -8,7 +9,6 @@ class MongoIndexedSuite extends ModelIndexedSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }
-
 
 @Suite()
 class MongoIndexedPolymorphicSuite extends ModelIndexedPolymorphismSuite {

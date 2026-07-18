@@ -1,10 +1,10 @@
-import type { TestConsumerShape } from '../types.ts';
-import type { TestEvent, TestRemoveEvent } from '../../model/event.ts';
-import type { TestConfig, TestDiffSource, TestResult } from '../../model/test.ts';
-import type { SuiteConfig, SuiteResult } from '../../model/suite.ts';
-import { DelegatingConsumer } from './delegating.ts';
 import type { SuiteCore } from '../../model/common.ts';
+import type { TestEvent, TestRemoveEvent } from '../../model/event.ts';
+import type { SuiteConfig, SuiteResult } from '../../model/suite.ts';
+import type { TestConfig, TestDiffSource, TestResult } from '../../model/test.ts';
 import { TestModelUtil } from '../../model/util.ts';
+import type { TestConsumerShape } from '../types.ts';
+import { DelegatingConsumer } from './delegating.ts';
 
 type ClassId = string;
 type ImportName = string;
@@ -32,7 +32,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
   }
 
   getOrCreateSuite({ tests: _, ...core }: SuiteConfig | SuiteResult): CumulativeSuiteResult {
-    return (this.#state[core.import] ??= {})[core.classId] ??= { ...core, tests: {} };
+    return ((this.#state[core.import] ??= {})[core.classId] ??= { ...core, tests: {} });
   }
 
   onTestBefore(config: TestConfig): TestConfig {

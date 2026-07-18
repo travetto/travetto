@@ -15,7 +15,7 @@
 <span class="token function">yarn</span> <span class="token function">add</span> &#64;travetto/schema-faker</code></pre>
   </figure>
 
-In the course of application development, there is often a need to generate fake data on demand. Given all the information that we have about the schemas provided, translating that into data generation is fairly straightforward.  The generation utility is built upon <a target="_blank" class="external-link" href="https://github.com/faker-js/faker">faker</a>, mapping data types, and various field names into specific <a target="_blank" class="external-link" href="https://github.com/faker-js/faker">faker</a> generation routines. <br><br>
+In the course of application development, there is often a need to generate fake data on demand. Given all the information that we have about the schemas provided, translating that into data generation is fairly straightforward. The generation utility is built upon <a target="_blank" class="external-link" href="https://github.com/faker-js/faker">faker</a>, mapping data types, and various field names into specific <a target="_blank" class="external-link" href="https://github.com/faker-js/faker">faker</a> generation routines. <br><br>
 By default all types are mapped as-is:
 <ul> <li><code class="item input">string</code></li>
 <li><code class="item input">number</code></li>
@@ -35,7 +35,7 @@ In addition to the general types, the code relies upon name matching to provide 
 
   <figure class="code">
     <figcaption class="code">Supported Mappings
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/schema-faker/src/faker.ts#L21">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/schema-faker/src/faker.ts#L20">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">static</span> #namesToType <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
@@ -68,7 +68,7 @@ In addition to the general types, the code relies upon name matching to provide 
     <span class="token punctuation">[</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">dob|birth</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Date <span class="token operator">=></span> faker<span class="token punctuation">.</span>date<span class="token punctuation">.</span><span class="token function">past</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> years<span class="token operator">:</span> <span class="token number">60</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
     <span class="token punctuation">[</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">creat(e|ion)</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">#between</span><span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">200</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
     <span class="token punctuation">[</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">(update|modif(y|ied))</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">#between</span><span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">100</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">50</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
-  <span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">)</span>
 <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span></code></pre>
   </figure>
 
@@ -79,8 +79,8 @@ An example of this would be:
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/schema-faker/doc/faker.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SchemaFaker <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/schema-faker'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Schema <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/schema'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Schema <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/schema'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SchemaFaker <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/schema-faker'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Schema</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">Address</span> <span class="token punctuation">{{'{'}}</span>

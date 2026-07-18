@@ -1,4 +1,4 @@
-import { type NodeTransformer, type TransformPhase, type TransformerType, type Transformer, ModuleNameSymbol } from './types/visitor.ts';
+import { ModuleNameSymbol, type NodeTransformer, type Transformer, type TransformerType, type TransformPhase } from './types/visitor.ts';
 
 const HandlersSymbol = Symbol();
 
@@ -18,7 +18,7 @@ export function getAllTransformers(inputs: Record<string, { [HandlersSymbol]?: N
       if (isTransformer(value)) {
         value[ModuleNameSymbol] = module;
       }
-      return (value[HandlersSymbol] ?? []);
+      return value[HandlersSymbol] ?? [];
     })
     .map(handler => ({
       ...handler,
@@ -28,6 +28,12 @@ export function getAllTransformers(inputs: Record<string, { [HandlersSymbol]?: N
 }
 
 // Store handlers in class
-export function TransformerHandler(cls: TransformerWithHandlers, fn: Function, phase: TransformPhase, type: TransformerType, target?: string[]): void {
+export function TransformerHandler(
+  cls: TransformerWithHandlers,
+  fn: Function,
+  phase: TransformPhase,
+  type: TransformerType,
+  target?: string[]
+): void {
   (cls[HandlersSymbol] ??= []).push({ key: fn.name, [phase]: fn.bind(cls), type, target });
 }

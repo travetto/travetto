@@ -1,11 +1,11 @@
-import { RuntimeError, type ErrorCategory, Util } from '@travetto/runtime';
+import { type ErrorCategory, RuntimeError, Util } from '@travetto/runtime';
 
-import { WebResponse } from '../types/response.ts';
-import type { WebRequest } from '../types/request.ts';
 import type { WebError } from '../types/error.ts';
+import type { WebRequest } from '../types/request.ts';
+import { WebResponse } from '../types/response.ts';
 
 type List<T> = T[] | readonly T[];
-type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
+type OrderedState<T> = { after?: List<T>; before?: List<T>; key: T };
 
 const WebRequestParamsSymbol = Symbol();
 
@@ -21,19 +21,18 @@ const ERROR_CATEGORY_STATUS: Record<ErrorCategory, number> = {
   permissions: 403,
   authentication: 401,
   timeout: 408,
-  unavailable: 503,
+  unavailable: 503
 };
 
 const UNIT_MAPPING: Record<string, number> = {
   kb: 2 ** 10,
   mb: 2 ** 20,
-  gb: 2 ** 30,
+  gb: 2 ** 30
 };
 
 export class WebCommonUtil {
   static #convert(rule: string): RegExp {
-    const core = (rule.endsWith('/*') || !rule.includes('/')) ?
-      `${rule.replace(/[/].{0,20}$/, '')}\/.*` : rule;
+    const core = rule.endsWith('/*') || !rule.includes('/') ? `${rule.replace(/[/].{0,20}$/, '')}/.*` : rule;
     return new RegExp(`^${core}[ ]{0,10}(;|$)`);
   }
 
@@ -76,7 +75,6 @@ export class WebCommonUtil {
     // Loop through all items again
     const keys: T[] = [];
     while (edgeMap.size > 0) {
-
       // Find node with no dependencies
       const key = [...edgeMap].find(([, after]) => after.size === 0)?.[0];
       if (!key) {
@@ -101,9 +99,9 @@ export class WebCommonUtil {
    * Get status code
    */
   static getStatusCode(response: WebResponse): number {
-    return (response.headers.has('Content-Range') && response.context.httpStatusCode === 200) ?
-      206 :
-      response.context.httpStatusCode ?? 200;
+    return response.headers.has('Content-Range') && response.context.httpStatusCode === 200
+      ? 206
+      : (response.context.httpStatusCode ?? 200);
   }
 
   /**
@@ -114,10 +112,12 @@ export class WebCommonUtil {
       return error;
     }
 
-    const body = error instanceof Error ? error :
-      (!!error && typeof error === 'object' && ('message' in error && typeof error.message === 'string')) ?
-        new RuntimeError(error.message, { details: error }) :
-        new RuntimeError(`${error}`);
+    const body =
+      error instanceof Error
+        ? error
+        : error && typeof error === 'object' && 'message' in error && typeof error.message === 'string'
+          ? new RuntimeError(error.message, { details: error })
+          : new RuntimeError(`${error}`);
 
     const webError: Error & Partial<WebError> = body;
     const statusCode = webError.details?.statusCode ?? ERROR_CATEGORY_STATUS[webError.category!] ?? 500;

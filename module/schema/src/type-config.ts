@@ -1,7 +1,7 @@
-import { isUint8Array, isUint16Array, isUint32Array, isArrayBuffer } from 'node:util/types';
 import { Readable } from 'node:stream';
+import { isArrayBuffer, isUint8Array, isUint16Array, isUint32Array } from 'node:util/types';
 
-import { type Class, type BinaryArray, type BinaryType, type BinaryStream, BinaryUtil, toConcrete } from '@travetto/runtime';
+import { type BinaryArray, type BinaryStream, type BinaryType, BinaryUtil, type Class, toConcrete } from '@travetto/runtime';
 
 type SchemaTypeConfig = {
   /**
@@ -40,7 +40,7 @@ export class SchemaTypeUtil {
 
   static register(type: Class | Function, fn: (value: unknown) => boolean): void {
     SchemaTypeUtil.setSchemaTypeConfig(type, {
-      validate: (item: unknown) => fn(item) ? undefined : 'type'
+      validate: (item: unknown) => (fn(item) ? undefined : 'type')
     });
   }
 

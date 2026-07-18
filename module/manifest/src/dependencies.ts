@@ -1,11 +1,10 @@
 import { PackageUtil } from './package.ts';
 import path from './path.ts';
-
-import type { Package, PackageDependencyType } from './types/package.ts';
 import type { ManifestContext } from './types/context.ts';
 import type { PackageModule } from './types/manifest.ts';
+import type { Package, PackageDependencyType } from './types/package.ts';
 
-type CreateOpts = Partial<Pick<PackageModule, 'main' | 'workspace' | 'production'>> & { roleRoot?: boolean, parent?: PackageModule };
+type CreateOpts = Partial<Pick<PackageModule, 'main' | 'workspace' | 'production'>> & { roleRoot?: boolean; parent?: PackageModule };
 
 type VisitableNode = {
   /** Request package */
@@ -22,10 +21,11 @@ type VisitableNode = {
  * Used for walking dependencies for collecting modules for the manifest
  */
 export class PackageModuleVisitor {
-
   static async visit(ctx: ManifestContext): Promise<Iterable<PackageModule>> {
-    const visitor = new PackageModuleVisitor(ctx, Object.fromEntries((await PackageUtil.resolveWorkspaces(ctx))
-      .map(workspace => [workspace.name, workspace.path])));
+    const visitor = new PackageModuleVisitor(
+      ctx,
+      Object.fromEntries((await PackageUtil.resolveWorkspaces(ctx)).map(workspace => [workspace.name, workspace.path]))
+    );
     return visitor.visit();
   }
 
@@ -45,22 +45,26 @@ export class PackageModuleVisitor {
    */
   #create(sourcePath: string, { main, workspace, production = false, roleRoot = false, parent }: CreateOpts = {}): VisitableNode {
     const pkg = PackageUtil.readPackage(sourcePath);
-    const value = this.#cache[sourcePath] ??= {
+    const value = (this.#cache[sourcePath] ??= {
       main,
       production,
       name: pkg.name,
       version: pkg.version,
-      workspace: workspace ?? (pkg.name in this.#workspaceModules),
+      workspace: workspace ?? pkg.name in this.#workspaceModules,
       internal: pkg.private === true,
       sourceFolder: sourcePath === this.#ctx.workspace.path ? '' : sourcePath.replace(`${this.#ctx.workspace.path}/`, ''),
       outputFolder: `node_modules/${pkg.name}`,
       state: {
-        childSet: new Set(), parentSet: new Set(), roleSet: new Set(), roleRoot,
-        travetto: pkg.travetto, dependencies: new Set(Object.keys(pkg.dependencies ?? {}))
+        childSet: new Set(),
+        parentSet: new Set(),
+        roleSet: new Set(),
+        roleRoot,
+        travetto: pkg.travetto,
+        dependencies: new Set(Object.keys(pkg.dependencies ?? {}))
       }
-    };
+    });
 
-    const dependencies: PackageDependencyType[] = ['dependencies', ...(value.main ? ['devDependencies'] as const : [])];
+    const dependencies: PackageDependencyType[] = ['dependencies', ...(value.main ? (['devDependencies'] as const) : [])];
     const children = Object.fromEntries(dependencies.flatMap(dependency => Object.entries(pkg[dependency] ?? {})));
     return { pkg, value, children, parent };
   }
@@ -69,19 +73,22 @@ export class PackageModuleVisitor {
    * Get monorepo root includes
    */
   #getMonoRootIncludes(parent: VisitableNode): VisitableNode[] {
-    if (!(this.#ctx.workspace.mono && !this.#ctx.main.folder)) { // If not mono root, bail
+    if (!(this.#ctx.workspace.mono && !this.#ctx.main.folder)) {
+      // If not mono root, bail
       return [];
     }
 
-    return Object.values(this.#workspaceModules)
-      .map(folder => this.#create(folder, { main: true, workspace: true, roleRoot: true, parent: parent.value }));
+    return Object.values(this.#workspaceModules).map(folder =>
+      this.#create(folder, { main: true, workspace: true, roleRoot: true, parent: parent.value })
+    );
   }
 
   /**
    * Determine default includes
    */
   #getIncludes(parent: VisitableNode): VisitableNode[] {
-    if (this.#ctx.workspace.mono && !this.#ctx.main.folder) { // If mono and not at mono root, bail
+    if (this.#ctx.workspace.mono && !this.#ctx.main.folder) {
+      // If mono and not at mono root, bail
       return [];
     }
 
@@ -92,7 +99,7 @@ export class PackageModuleVisitor {
       );
     } else {
       return Object.values(this.#workspaceModules)
-        .filter((folder) => PackageUtil.readPackage(folder).travetto?.workspaceInclude)
+        .filter(folder => PackageUtil.readPackage(folder).travetto?.workspaceInclude)
         .map(folder => this.#create(folder, { workspace: true, parent: parent.value }));
     }
   }
@@ -106,9 +113,12 @@ export class PackageModuleVisitor {
     // All first-level dependencies should have role filled in (for propagation)
     for (const dependency of [...modules].filter(module => module.state.roleRoot)) {
       dependency.state.roleSet.clear(); // Ensure the roleRoot is empty
-      for (const child of dependency.state.childSet) { // Visit children
+      for (const child of dependency.state.childSet) {
+        // Visit children
         const childDependency = mapping.get(child)!.item;
-        if (childDependency.state.roleRoot) { continue; }
+        if (childDependency.state.roleRoot) {
+          continue;
+        }
         // Set roles for all top level modules
         childDependency.state.roleSet = new Set(childDependency.state.travetto?.roles ?? ['std']);
       }
@@ -124,7 +134,9 @@ export class PackageModuleVisitor {
       for (const { item } of toProcess) {
         for (const childName of item.state.childSet) {
           const child = mapping.get(childName);
-          if (!child) { continue; }
+          if (!child) {
+            continue;
+          }
           child.parent.delete(item.name);
           // Propagate roles from parent to child
           if (!child.item.state.roleRoot) {
@@ -133,7 +145,7 @@ export class PackageModuleVisitor {
             }
           }
           // Allow production to trickle down as needed
-          child.item.production ||= (item.production && item.state.dependencies.has(childName));
+          child.item.production ||= item.production && item.state.dependencies.has(childName);
         }
       }
       // Remove from mapping
@@ -144,7 +156,7 @@ export class PackageModuleVisitor {
 
     // Mark as standard at the end
     for (const dependency of [...modules].filter(module => module.state.roleRoot)) {
-      dependency.state.roleSet = new Set(['std', ...dependency.state.travetto?.roles ?? []]);
+      dependency.state.roleSet = new Set(['std', ...(dependency.state.travetto?.roles ?? [])]);
     }
 
     return [...modules].toSorted((a, b) => a.name.localeCompare(b.name));
@@ -157,11 +169,7 @@ export class PackageModuleVisitor {
     const seen = new Set<PackageModule>();
     const mainRequire = this.#create(this.#mainSourcePath, { main: true, workspace: true, roleRoot: true, production: true });
 
-    const queue = [
-      mainRequire,
-      ...this.#getMonoRootIncludes(mainRequire),
-      ...this.#getIncludes(mainRequire)
-    ];
+    const queue = [mainRequire, ...this.#getMonoRootIncludes(mainRequire), ...this.#getIncludes(mainRequire)];
 
     while (queue.length) {
       const { value: node, parent, children, pkg } = queue.shift()!; // Visit initial set first

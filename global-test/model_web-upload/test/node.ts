@@ -1,6 +1,6 @@
+import { DependencyRegistryIndex } from '@travetto/di';
 import { Suite } from '@travetto/test';
 import { NodeWebHttpServer } from '@travetto/web-http';
-import { DependencyRegistryIndex } from '@travetto/di';
 
 import { FetchWebDispatcher } from '@travetto/web-http/support/test/dispatcher.ts';
 

@@ -15,10 +15,10 @@
 <span class="token function">yarn</span> <span class="token function">add</span> &#64;travetto/model-s3</code></pre>
   </figure>
 
-This module provides an <a target="_blank" class="external-link" href="https://aws.amazon.com/documentation/s3/">s3</a>-based implementation for the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a>.  This source allows the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> module to read, write and stream against <a target="_blank" class="external-link" href="https://aws.amazon.com/documentation/s3/">s3</a>. <br><br>
+This module provides an <a target="_blank" class="external-link" href="https://aws.amazon.com/documentation/s3/">s3</a>-based implementation for the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a>. This source allows the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> module to read, write and stream against <a target="_blank" class="external-link" href="https://aws.amazon.com/documentation/s3/">s3</a>. <br><br>
 Supported features:
-<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11">CRUD</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8">Blob</a></li>
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8">Blob</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10">CRUD</a></li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10">Expiry</a></li>
 </ul>
 Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source or config, you can override and register it with the <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module.
@@ -121,4 +121,4 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
 
 Additionally, you can see that the class is registered with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13">&#64;Config</a> annotation, and so these values can be overridden using the standard <a class="module-link" routerLink="/docs/config" title="Configuration support">Configuration</a> resolution paths.
 
-<p class="note"><strong>Note</strong> Do not commit your <code class="item input">accessKeyId</code> or <code class="item input">secretAccessKey</code> values to your source repository, especially if it is public facing.  Not only is it a security risk, but Amazon will scan public repos, looking for keys, and if found will react swiftly.</p>
+<p class="note"><strong>Note</strong> Do not commit your <code class="item input">accessKeyId</code> or <code class="item input">secretAccessKey</code> values to your source repository, especially if it is public facing. Not only is it a security risk, but Amazon will scan public repos, looking for keys, and if found will react swiftly.</p>

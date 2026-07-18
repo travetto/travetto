@@ -13,7 +13,7 @@ npm install @travetto/email
 yarn add @travetto/email
 ```
 
-A standard API for sending and rendering emails. The mail transport must be defined to allow for mail to be sent properly.  Out of the box, the only transport available by default is the [NullTransport](https://github.com/travetto/travetto/tree/main/module/email/src/transport.ts#L16) which will just drop emails. The structure of the API is derived from  [nodemailer](https://nodemailer.com/about/), but is compatible with any library that can handle the [EmailOptions](https://github.com/travetto/travetto/tree/main/module/email/src/types.ts#L44) input. 
+A standard API for sending and rendering emails. The mail transport must be defined to allow for mail to be sent properly. Out of the box, the only transport available by default is the [NullTransport](https://github.com/travetto/travetto/tree/main/module/email/src/transport.ts#L17) which will just drop emails. The structure of the API is derived from [nodemailer](https://nodemailer.com/about/), but is compatible with any library that can handle the [EmailOptions](https://github.com/travetto/travetto/tree/main/module/email/src/types.ts#L44) input. 
 
 To expose the necessary email transport, the following pattern is commonly used:
 
@@ -30,12 +30,12 @@ class Config {
 }
 ```
 
-Given the amorphous nature of transports, the `transport` field in [MailConfig](https://github.com/travetto/travetto/tree/main/module/email/src/config.ts#L7) is open for any configuration that you may want there. Additionally, the templating engine is optional.  The code will only fail if you attempt to send a templated email without declaring the dependency first.
+Given the amorphous nature of transports, the `transport` field in [MailConfig](https://github.com/travetto/travetto/tree/main/module/email/src/config.ts#L7) is open for any configuration that you may want there. Additionally, the templating engine is optional. The code will only fail if you attempt to send a templated email without declaring the dependency first.
 
 ## Sending Compiled Templates
-By design, sending an email requires the sender to specify the html, text optionally, and subject.  To integrate with other tools, the framework also has the ability to send an email as a set of templates, based off a single key. The module will look for:
+By design, sending an email requires the sender to specify the html, text optionally, and subject. To integrate with other tools, the framework also has the ability to send an email as a set of templates, based off a single key. The module will look for:
    *  `resources/<key>.compiled.html`
    *  `resources/<key>.compiled.text`
    *  `resources/<key>.compiled.subject`
 
-With `.html` being the only required field.  The [Email Compilation Support](https://github.com/travetto/travetto/tree/main/module/email-compiler#readme "Email compiling module") module supports this format, and will generate files accordingly. Also, note that `<key>` can include slashes, allowing for nesting folders.
+With `.html` being the only required field. The [Email Compilation Support](https://github.com/travetto/travetto/tree/main/module/email-compiler#readme "Email compiling module") module supports this format, and will generate files accordingly. Also, note that `<key>` can include slashes, allowing for nesting folders.

@@ -1,4 +1,4 @@
-import { Runtime, CodecUtil, BinaryMetadataUtil } from '@travetto/runtime';
+import { BinaryMetadataUtil, CodecUtil, Runtime } from '@travetto/runtime';
 
 import type { EmailAttachment, EmailIdentity, EmailIdentityList, EmailOptions } from './types.ts';
 
@@ -26,7 +26,7 @@ export class MailUtil {
    *
    * @param html
    */
-  static async extractImageAttachments(html: string): Promise<{ html: string, attachments: EmailAttachment[] }> {
+  static async extractImageAttachments(html: string): Promise<{ html: string; attachments: EmailAttachment[] }> {
     let idx = 0;
     const attachments: EmailAttachment[] = [];
     const contentMap = new Map<string, string>();
@@ -35,7 +35,7 @@ export class MailUtil {
     html = html.replace(/data:(image\/[^;]{1,50});base64,([^"']{1,10000000})/g, (__, contentType: string, content: string) =>
       // Ensure same data uris map to a single cid
       contentMap.getOrInsertComputed(content, () => {
-        const contentId = `image-${idx += 1}`;
+        const contentId = `image-${(idx += 1)}`;
         const ext = contentType.split('/')[1];
         attachments.push({
           cid: contentId,
@@ -48,7 +48,8 @@ export class MailUtil {
           contentType
         });
         return `cid:${contentId}`;
-      }));
+      })
+    );
 
     return { html, attachments };
   }
@@ -63,7 +64,7 @@ export class MailUtil {
     if (Array.isArray(identity)) {
       identity = identity[0];
     }
-    return (typeof identity === 'string') ? identity : identity.address;
+    return typeof identity === 'string' ? identity : identity.address;
   }
 
   /**

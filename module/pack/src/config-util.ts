@@ -18,11 +18,14 @@ export class PackConfigUtil {
     const { os, packages } = config.dockerRuntime;
     if (packages?.length) {
       switch (os) {
-        case 'alpine': return `RUN apk --update add ${packages.join(' ')} && rm -rf /var/cache/apk/*`;
-        case 'debian': return `RUN apt update && apt install -y ${packages.join(' ')} && rm -rf  /var/lib/{apt,dpkg,cache,log}/`;
-        case 'centos': return `RUN yum -y install ${packages.join(' ')} && yum -y clean all && rm -fr /var/cache`;
-        case 'unknown':
-        default: throw new Error('Unable to install packages in an unknown os');
+        case 'alpine':
+          return `RUN apk --update add ${packages.join(' ')} && rm -rf /var/cache/apk/*`;
+        case 'debian':
+          return `RUN apt update && apt install -y ${packages.join(' ')} && rm -rf  /var/lib/{apt,dpkg,cache,log}/`;
+        case 'centos':
+          return `RUN yum -y install ${packages.join(' ')} && yum -y clean all && rm -fr /var/cache`;
+        default:
+          throw new Error('Unable to install packages in an unknown os');
       }
     } else {
       return '';
@@ -38,9 +41,11 @@ export class PackConfigUtil {
       const [name, directive] = item.split(':');
       switch (directive) {
         case 'from-source':
-          out.push(`RUN npm_config_build_from_source=true npm install ${name} --build-from-source`); break;
+          out.push(`RUN npm_config_build_from_source=true npm install ${name} --build-from-source`);
+          break;
         default:
-          out.push(`RUN npm install ${name}`); break;
+          out.push(`RUN npm install ${name}`);
+          break;
       }
     }
     if (out.length) {
@@ -65,11 +70,13 @@ export class PackConfigUtil {
       return '';
     } else {
       switch (os) {
-        case 'alpine': return `RUN addgroup -g ${groupId} ${group} && adduser -D -G ${group} -u ${userId} ${user}`;
+        case 'alpine':
+          return `RUN addgroup -g ${groupId} ${group} && adduser -D -G ${group} -u ${userId} ${user}`;
         case 'debian':
-        case 'centos': return `RUN groupadd --gid ${groupId} ${group} && useradd -u ${userId} -g ${group} ${user}`;
-        case 'unknown':
-        default: throw new Error('Unable to add user/group for an unknown os');
+        case 'centos':
+          return `RUN groupadd --gid ${groupId} ${group} && useradd -u ${userId} -g ${group} ${user}`;
+        default:
+          throw new Error('Unable to add user/group for an unknown os');
       }
     }
   }
@@ -78,9 +85,7 @@ export class PackConfigUtil {
    * Setup Env Vars for NODE_OPTIONS and other standard environment variables
    */
   static dockerEnvVars(config: DockerPackConfig): string {
-    return [
-      `ENV NODE_OPTIONS="${[...(config.sourcemap ? ['--enable-source-maps'] : [])].join(' ')}"`,
-    ].join('\n');
+    return [`ENV NODE_OPTIONS="${[...(config.sourcemap ? ['--enable-source-maps'] : [])].join(' ')}"`].join('\n');
   }
 
   /**
@@ -88,9 +93,7 @@ export class PackConfigUtil {
    */
   static dockerAppFolder(config: DockerPackConfig): string {
     const { folder, user, group } = config.dockerRuntime;
-    return [
-      `RUN mkdir ${folder} && chown ${user}:${group} ${folder}`,
-    ].join('\n');
+    return [`RUN mkdir ${folder} && chown ${user}:${group} ${folder}`].join('\n');
   }
 
   /**
@@ -106,11 +109,7 @@ export class PackConfigUtil {
    */
   static dockerEntrypoint(config: DockerPackConfig): string {
     const { user, folder } = config.dockerRuntime;
-    return [
-      `USER ${user}`,
-      `WORKDIR ${folder}`,
-      `ENTRYPOINT ["${folder}/${config.mainName}.sh"]`,
-    ].join('\n');
+    return [`USER ${user}`, `WORKDIR ${folder}`, `ENTRYPOINT ["${folder}/${config.mainName}.sh"]`].join('\n');
   }
   /**
    * Common docker environment setup
@@ -122,8 +121,10 @@ export class PackConfigUtil {
       this.dockerPackageInstall(config),
       this.dockerAppFolder(config),
       this.dockerAppFiles(config),
-      this.dockerEnvVars(config),
-    ].filter(line => !!line).join('\n');
+      this.dockerEnvVars(config)
+    ]
+      .filter(line => !!line)
+      .join('\n');
   }
 
   /**

@@ -1,11 +1,11 @@
 import fs from 'node:fs/promises';
 
-import { Env, JSONUtil, RuntimeIndex } from '@travetto/runtime';
 import { CliCommand, CliUtil } from '@travetto/cli';
+import { Env, JSONUtil, RuntimeIndex } from '@travetto/runtime';
 import { IsPrivate } from '@travetto/schema';
 
-import { runTests, type TestConsumerType } from './bin/run.ts';
 import type { TestDiffSource } from '../src/model/test.ts';
+import { runTests, type TestConsumerType } from './bin/run.ts';
 
 /**
  * Run tests scoped by a precomputed diff source file.
@@ -16,7 +16,6 @@ import type { TestDiffSource } from '../src/model/test.ts';
 @CliCommand()
 @IsPrivate()
 export class TestDiffCommand {
-
   /** Output format for test results */
   format: TestConsumerType = 'tap';
 
@@ -34,12 +33,12 @@ export class TestDiffCommand {
 
   async main(importOrFile: string, diff: string): Promise<void> {
     const diffSource = await fs.readFile(diff).then(JSONUtil.fromBinaryArray<TestDiffSource>);
-    const importPath = RuntimeIndex.getFromImportOrSource(importOrFile)?.import!;
+    const importPath = RuntimeIndex.getFromImportOrSource(importOrFile)!.import;
 
     return runTests(
       {
         consumer: this.format,
-        consumerOptions: CliUtil.readExtendedOptions(this.formatOptions),
+        consumerOptions: CliUtil.readExtendedOptions(this.formatOptions)
       },
       {
         import: importPath,

@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { MaxLength, Method, MethodValidator, Schema, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
+import { Suite, Test } from '@travetto/test';
 
 const nameValidator = (name: string): ValidationError | undefined => {
   if (name === 'bob') {
@@ -26,7 +26,6 @@ const EvenValidator = MethodValidator((name: string): ValidationError | undefine
 
 @Schema()
 class TestClass {
-
   @MethodValidator(nameValidator)
   @EvenValidator
   @Method()
@@ -37,18 +36,14 @@ class TestClass {
 
 @Suite('SchemaValidator - Method Level Validations')
 class SchemaValidatorMethodSuite {
-
   @Test('should validate method with correct schema')
   async testValidMethod() {
     await Registry.init();
 
-    await assert.doesNotReject(() =>
-      SchemaValidator.validateMethod(TestClass, 'value', ['greg'])
-    );
+    await assert.doesNotReject(() => SchemaValidator.validateMethod(TestClass, 'value', ['greg']));
 
     await assert.rejects(
-      async () =>
-        SchemaValidator.validateMethod(TestClass, 'value', ['bob']),
+      async () => SchemaValidator.validateMethod(TestClass, 'value', ['bob']),
       e => e instanceof ValidationResultError && e.details.errors.some(x => /name cannot be bob/i.test(x.message))
     );
 

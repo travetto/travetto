@@ -1,33 +1,28 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { DatabaseSync, type DatabaseSyncOptions, type SQLInputValue, } from 'node:sqlite';
+import { DatabaseSync, type DatabaseSyncOptions, type SQLInputValue } from 'node:sqlite';
 
-import { type Pool, createPool } from 'generic-pool';
+import { createPool, type Pool } from 'generic-pool';
 
-import { ShutdownManager, Util, Runtime, RuntimeError, castTo } from '@travetto/runtime';
 import { type AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
-import { type SQLModelConfig, Connection } from '@travetto/model-sql';
+import { Connection, type SQLModelConfig } from '@travetto/model-sql';
+import { castTo, Runtime, RuntimeError, ShutdownManager, Util } from '@travetto/runtime';
 
 const RECOVERABLE_MESSAGE = /database( table| schema)? is (locked|busy)/;
 
-const isRecoverableError = (error: unknown): error is Error =>
-  error instanceof Error && RECOVERABLE_MESSAGE.test(error.message);
+const isRecoverableError = (error: unknown): error is Error => error instanceof Error && RECOVERABLE_MESSAGE.test(error.message);
 
 /**
  * Connection support for Sqlite
  */
 export class SqliteConnection extends Connection<DatabaseSync> {
-
   isolatedTransactions = false;
 
   #config: SQLModelConfig<DatabaseSyncOptions & { file?: string }>;
   #pool: Pool<DatabaseSync>;
 
-  constructor(
-    context: AsyncContext,
-    config: SQLModelConfig<DatabaseSyncOptions & { file?: string }>
-  ) {
+  constructor(context: AsyncContext, config: SQLModelConfig<DatabaseSyncOptions & { file?: string }>) {
     super(context);
     this.#config = config;
   }
@@ -51,14 +46,10 @@ export class SqliteConnection extends Connection<DatabaseSync> {
     const file = path.resolve(this.#config.options.file ?? Runtime.toolPath('@', 'sqlite_db'));
     await fs.mkdir(path.dirname(file), { recursive: true });
     const db = new DatabaseSync(file, this.#config.options);
-    for (const q of [
-      'PRAGMA foreign_keys = ON',
-      'PRAGMA journal_mode = WAL',
-      'PRAGMA synchronous = NORMAL',
-    ]) {
+    for (const q of ['PRAGMA foreign_keys = ON', 'PRAGMA journal_mode = WAL', 'PRAGMA synchronous = NORMAL']) {
       await this.#withRetries(async () => db.exec(q));
     }
-    db.function('regexp', (a, b) => new RegExp(`${a}`).test(`${b}`) ? 1 : 0);
+    db.function('regexp', (a, b) => (new RegExp(`${a}`).test(`${b}`) ? 1 : 0));
     return db;
   }
 
@@ -71,16 +62,21 @@ export class SqliteConnection extends Connection<DatabaseSync> {
 
     await this.#create();
 
-    this.#pool = createPool<DatabaseSync>({
-      create: () => this.#withRetries(() => this.#create()),
-      destroy: async db => { db.close(); }
-    }, { max: 1 });
+    this.#pool = createPool<DatabaseSync>(
+      {
+        create: () => this.#withRetries(() => this.#create()),
+        destroy: async db => {
+          db.close();
+        }
+      },
+      { max: 1 }
+    );
 
     // Close postgres
     ShutdownManager.signal.addEventListener('abort', () => this.#pool.clear());
   }
 
-  async execute<T = unknown>(connection: DatabaseSync, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {
+  async execute<T = unknown>(connection: DatabaseSync, query: string, values?: unknown[]): Promise<{ count: number; records: T[] }> {
     const isSelect = query.trim().startsWith('SELECT');
     return this.#withRetries(async () => {
       console.debug('Executing query', { query });
@@ -98,7 +94,7 @@ export class SqliteConnection extends Connection<DatabaseSync> {
         }
       } catch (error) {
         const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
-        const message = (Error.isError(error) || error instanceof Error) ? error.message : undefined;
+        const message = Error.isError(error) || error instanceof Error ? error.message : undefined;
         switch (code) {
           case 'ERR_SQLITE_ERROR': {
             if (message?.startsWith('UNIQUE')) {
@@ -108,8 +104,9 @@ export class SqliteConnection extends Connection<DatabaseSync> {
           }
           case 'SQLITE_CONSTRAINT_PRIMARYKEY':
           case 'SQLITE_CONSTRAINT_UNIQUE':
-          case 'SQLITE_CONSTRAINT_INDEX': throw new ExistsError('query', query);
-        };
+          case 'SQLITE_CONSTRAINT_INDEX':
+            throw new ExistsError('query', query);
+        }
         if (/index.*?already exists/.test(message ?? '')) {
           throw new ExistsError('index', query);
         }

@@ -1,25 +1,24 @@
 import assert from 'node:assert';
 
-import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import type { Class } from '@travetto/runtime';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 import { CacheControl, Controller, ControllerRegistryIndex, Patch, SetHeaders } from '@travetto/web';
 
 @Controller('/test')
 class TestController {
   @CacheControl('1s')
   @Patch('/a')
-  async patch() { }
+  async patch() {}
 
   @SetHeaders({ 'Content-Type': '20' })
   @CacheControl('500ms')
   @Patch('/b')
-  async patchSmaller() { }
+  async patchSmaller() {}
 }
 
 @Suite()
 export class ConfigureTest {
-
   @BeforeAll()
   async init() {
     await Registry.init();

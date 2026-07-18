@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Put, Delete } from '@travetto/web';
 import { Inject } from '@travetto/di';
+import { Controller, Delete, Get, Post, Put } from '@travetto/web';
 
-import type { TodoService } from './service.ts';
 import type { Todo, TodoSearch } from './model.ts';
+import type { TodoService } from './service.ts';
 
 /**
  * Todo request
@@ -11,7 +11,6 @@ type TodoRequest = Omit<Todo, 'id'>;
 
 @Controller('/todo')
 export class TodoController {
-
   _service: TodoService;
 
   @Inject()

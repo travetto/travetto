@@ -6,7 +6,6 @@ const ID_REGEX = /(\d{1,100})Δ$/;
  * Name resolver, specifically for synthetic types
  */
 export class SchemaNameResolver {
-
   #schemaIdToName = new Map<string, string>();
   #digits: number;
 

@@ -1,22 +1,18 @@
 import ts from 'typescript';
 
-import { type TransformerState, TransformerHandler } from '@travetto/transformer';
+import { TransformerHandler, type TransformerState } from '@travetto/transformer';
 
 const PATH_IMPORT = '@travetto/manifest/src/path.ts';
 
 const isImport = (node: ts.Node): node is ts.ImportDeclaration =>
-  ts.isImportDeclaration(node)
-  && ts.isStringLiteral(node.moduleSpecifier)
-  && (
-    node.moduleSpecifier.text === 'node:path'
-    || node.moduleSpecifier.text === 'path'
-  );
+  ts.isImportDeclaration(node) &&
+  ts.isStringLiteral(node.moduleSpecifier) &&
+  (node.moduleSpecifier.text === 'node:path' || node.moduleSpecifier.text === 'path');
 
 /**
  * Rewriting path imports to use manifest's path
  */
 export class PathImportTransformer {
-
   static {
     TransformerHandler(this, this.rewritePathImport, 'before', 'file');
   }
@@ -31,9 +27,10 @@ export class PathImportTransformer {
         state.factory.createStringLiteral(PATH_IMPORT),
         statement.attributes
       );
-      return state.factory.updateSourceFile(node, node.statements.map(item =>
-        item === statement ? updated : item
-      ));
+      return state.factory.updateSourceFile(
+        node,
+        node.statements.map(item => (item === statement ? updated : item))
+      );
     }
     return node;
   }

@@ -1,16 +1,15 @@
 import { ConsoleManager, getClass, Runtime, ShutdownManager, Util } from '@travetto/runtime';
 
 import { HelpUtil } from './help.ts';
+import { CliParseUtil } from './parse.ts';
 import { CliCommandRegistryIndex } from './registry/registry-index.ts';
 import { CliCommandSchemaUtil } from './schema.ts';
-import { CliParseUtil } from './parse.ts';
 import type { CliCommandShape } from './types.ts';
 
 /**
  * Execution manager
  */
 export class ExecutionManager {
-
   /** Command Execution */
   static async execute(instance: CliCommandShape, args: unknown[]): Promise<void> {
     const config = CliCommandRegistryIndex.get(getClass(instance));

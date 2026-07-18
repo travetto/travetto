@@ -1,18 +1,17 @@
-import fs from 'node:fs/promises';
 import { spawn } from 'node:child_process';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { JSONUtil, ExecUtil, Runtime } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
+import { ExecUtil, JSONUtil, Runtime } from '@travetto/runtime';
 
 /**
  * Help utility for openapi client command
  */
 export class OpenApiClientHelp {
-
   static async getListOfFormats(dockerImage: string): Promise<string[]> {
     const formatCache = Runtime.toolPath('openapi-formats.json');
-    if (!await fs.stat(formatCache, { throwIfNoEntry: false })) {
+    if (!(await fs.stat(formatCache, { throwIfNoEntry: false }))) {
       const { stdout } = await ExecUtil.getResult(spawn('docker', ['run', '--rm', dockerImage, 'list']));
       const lines = stdout
         .split('DOCUMENTATION')[0]
@@ -22,7 +21,7 @@ export class OpenApiClientHelp {
         .map(line => line.replace(/^\s+-\s+/, '').trim());
 
       await fs.mkdir(path.dirname(formatCache), { recursive: true });
-      await fs.writeFile(formatCache, JSONUtil.toUTF8([...lines.toSorted(),]));
+      await fs.writeFile(formatCache, JSONUtil.toUTF8([...lines.toSorted()]));
     }
     return await fs.readFile(formatCache).then(JSONUtil.fromBinaryArray<string[]>);
   }

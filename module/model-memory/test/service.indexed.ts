@@ -1,5 +1,5 @@
-import { Suite } from '@travetto/test';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
+import { Suite } from '@travetto/test';
 
 import { ModelIndexedSuite } from '@travetto/model-indexed/support/test/indexed.ts';
 import { ModelIndexedPolymorphismSuite } from '@travetto/model-indexed/support/test/polymorphism.ts';

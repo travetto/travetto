@@ -1,12 +1,12 @@
 import assert from 'node:assert';
 
-import { Registry } from '@travetto/registry';
-import { castTo, type Class } from '@travetto/runtime';
-import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Schema } from '@travetto/schema';
 import { Model, type ModelType } from '@travetto/model';
-import { QueryVerifier, type Query, type ModelQuery } from '@travetto/model-query';
+import { type ModelQuery, type Query, QueryVerifier } from '@travetto/model-query';
 import { QueryLanguageParser } from '@travetto/model-query-language';
+import { Registry } from '@travetto/registry';
+import { type Class, castTo } from '@travetto/runtime';
+import { Schema } from '@travetto/schema';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 @Schema()
 class Preferences {
@@ -29,7 +29,6 @@ class ModelUser {
 
 @Suite()
 export class VerifyTest {
-
   @BeforeAll()
   async init() {
     await Registry.init();
@@ -107,15 +106,17 @@ export class VerifyTest {
   @Test()
   async verifyArrayOperationsWithEmpty() {
     for (const op of ['$in', '$nin', '$all', '$elemMatch']) {
-
-      await assert.rejects(async () =>
-        QueryVerifier.verify(User, {
-          where: {
-            email: {
-              [op]: []
+      await assert.rejects(
+        async () =>
+          QueryVerifier.verify(User, {
+            where: {
+              email: {
+                [op]: []
+              }
             }
-          }
-        }), /Validation Error/i);
+          }),
+        /Validation Error/i
+      );
     }
   }
 }

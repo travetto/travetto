@@ -1,4 +1,5 @@
 import type ts from 'typescript';
+
 import type { AnyType } from './types.ts';
 
 /**

@@ -1,4 +1,4 @@
-import { type Class } from '@travetto/runtime';
+import type { Class } from '@travetto/runtime';
 
 export const TableSymbol = Symbol.for('@travetto/model-sql:table');
 

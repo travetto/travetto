@@ -1,13 +1,13 @@
 import path from 'node:path';
 
-import { type EmailTemplateModule, type EmailTemplateLocation, EmailResourceLoader } from '@travetto/email';
+import { EmailResourceLoader, type EmailTemplateLocation, type EmailTemplateModule } from '@travetto/email';
 import { PackageUtil } from '@travetto/manifest';
 
-import { InkyRenderer } from './render/renderer.ts';
+import type { JSXElement } from '../support/jsx-runtime.ts';
 import { Html } from './render/html.ts';
 import { Markdown } from './render/markdown.ts';
+import { InkyRenderer } from './render/renderer.ts';
 import { Subject } from './render/subject.ts';
-import type { JSXElement } from '../support/jsx-runtime.ts';
 
 export async function prepare(node: JSXElement, location: EmailTemplateLocation): Promise<EmailTemplateModule> {
   const ctx = {
@@ -23,6 +23,6 @@ export async function prepare(node: JSXElement, location: EmailTemplateLocation)
   `,
     html: () => InkyRenderer.render(node, Html, ctx),
     text: () => InkyRenderer.render(node, Markdown, ctx),
-    subject: () => InkyRenderer.render(node, Subject, ctx),
+    subject: () => InkyRenderer.render(node, Subject, ctx)
   };
 }

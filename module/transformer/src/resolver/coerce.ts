@@ -1,15 +1,17 @@
-const REGEX_PATTERN = /[\/](.*)[\/](i|g|m|s)?/;
+const REGEX_PATTERN = /[/](.*)[/](i|g|m|s)?/;
 
 export class CoerceUtil {
   /**
    * Is a value a plain JS object, created using {}
    */
   static #isPlainObject(value: unknown): value is Record<string, unknown> {
-    return typeof value === 'object' // separate from primitives
-      && value !== undefined
-      && value !== null         // is obvious
-      && value.constructor === Object // separate instances (Array, DOM, ...)
-      && Object.prototype.toString.call(value) === '[object Object]'; // separate build-in like Math
+    return (
+      typeof value === 'object' && // separate from primitives
+      value !== undefined &&
+      value !== null && // is obvious
+      value.constructor === Object && // separate instances (Array, DOM, ...)
+      Object.prototype.toString.call(value) === '[object Object]'
+    ); // separate build-in like Math
   }
 
   /**
@@ -50,8 +52,7 @@ export class CoerceUtil {
 
     switch (type) {
       case Date: {
-        const value = typeof input === 'number' || /^[-]?\d+$/.test(`${input}`) ?
-          new Date(parseInt(`${input}`, 10)) : new Date(`${input}`);
+        const value = typeof input === 'number' || /^[-]?\d+$/.test(`${input}`) ? new Date(parseInt(`${input}`, 10)) : new Date(`${input}`);
         if (strict && Number.isNaN(value.getTime())) {
           throw new Error(`Invalid date value: ${input}`);
         }
@@ -106,7 +107,8 @@ export class CoerceUtil {
         }
       }
       case undefined:
-      case String: return `${input}`;
+      case String:
+        return `${input}`;
     }
     throw new Error(`Unknown type ${type.name}`);
   }

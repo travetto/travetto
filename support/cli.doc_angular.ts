@@ -13,7 +13,6 @@ const page = (file: string): string => path.resolve('related/travetto.github.io/
  */
 @CliCommand()
 export class DocAngularCommand {
-
   static async prepareAngularHtml(module: IndexedModule): Promise<void> {
     const moduleName = module.name.endsWith('mono-repo') ? 'overview' : module.name.split('/')[1];
     try {
@@ -27,12 +26,11 @@ export class DocAngularCommand {
         .replaceAll('process.env.NODE_ENV', text => text.replaceAll('.', '\u2024'));
 
       if (moduleName === 'todo-app') {
-        html = html
-          .replace(
-            /(<h1>(?:[\n\r]|.)*)(<h2.*?\s*<ol>(?:[\r\n]|.)*?<\/ol>)((?:[\r\n]|.)*)/m,
-            (_, heading, toc, text) =>
-              `<div class="toc"><div class="inner">${toc.trim()}</div></div>\n<div class="documentation">\n${heading}\n${text}\n</div>\n`
-          );
+        html = html.replace(
+          /(<h1>(?:[\n\r]|.)*)(<h2.*?\s*<ol>(?:[\r\n]|.)*?<\/ol>)((?:[\r\n]|.)*)/m,
+          (_, heading, toc, text) =>
+            `<div class="toc"><div class="inner">${toc.trim()}</div></div>\n<div class="documentation">\n${heading}\n${text}\n</div>\n`
+        );
       }
 
       await fs.writeFile(page(`app/documentation/gen/${moduleName}/${moduleName}.component.html`), html, 'utf8');
@@ -50,17 +48,20 @@ export class DocAngularCommand {
   async main(target?: string): Promise<void> {
     const root = Runtime.workspace.path;
 
-    if (target && target.startsWith(root)) {
+    if (target?.startsWith(root)) {
       target = target.replace(root, '').split('/').at(-1);
     }
 
-    const modules = new Set((await CliModuleUtil.findModules('workspace'))
-      .filter(module => !target || module.sourcePath === path.resolve(root, target))
-      .filter(module => (module.files.doc ?? []).some(file => /DOC[.]tsx?$/.test(file.sourceFile))));
+    const modules = new Set(
+      (await CliModuleUtil.findModules('workspace'))
+        .filter(module => !target || module.sourcePath === path.resolve(root, target))
+        .filter(module => (module.files.doc ?? []).some(file => /DOC[.]tsx?$/.test(file.sourceFile)))
+    );
 
     if (modules.size > 1) {
       // Build out docs
-      await RepoExecUtil.execOnModules('workspace',
+      await RepoExecUtil.execOnModules(
+        'workspace',
         module => {
           const subProcess = ExecUtil.spawnPackageCommand('trv', ['doc'], {
             timeout: 20000,
@@ -85,14 +86,17 @@ export class DocAngularCommand {
           includeMonorepoRoot: true,
           filter: module => modules.has(module),
           showProgressList: true
-        });
+        }
+      );
     } else {
       const module = [...modules][0];
-      await ExecUtil.getResult(ExecUtil.spawnPackageCommand('trv', ['doc'], {
-        env: { ...process.env, ...Env.TRV_MANIFEST.export(''), ...Env.TRV_BUILD.export('none') },
-        cwd: module.sourcePath,
-        stdio: 'inherit'
-      }));
+      await ExecUtil.getResult(
+        ExecUtil.spawnPackageCommand('trv', ['doc'], {
+          env: { ...process.env, ...Env.TRV_MANIFEST.export(''), ...Env.TRV_BUILD.export('none') },
+          cwd: module.sourcePath,
+          stdio: 'inherit'
+        })
+      );
       await DocAngularCommand.prepareAngularHtml(module);
     }
   }

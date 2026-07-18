@@ -1,4 +1,5 @@
-import { type CliCommandShape, CliCommand } from '@travetto/cli';
+import { CliCommand, type CliCommandShape } from '@travetto/cli';
+
 import { PackageManager } from './bin/package-manager.ts';
 
 /**

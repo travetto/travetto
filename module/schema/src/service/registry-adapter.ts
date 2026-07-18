@@ -1,34 +1,43 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { RuntimeError, BinaryUtil, castKey, castTo, type Class, describeFunction, safeAssign } from '@travetto/runtime';
+import { BinaryUtil, type Class, castKey, castTo, describeFunction, RuntimeError, safeAssign } from '@travetto/runtime';
 
 import {
-  type SchemaClassConfig, type SchemaMethodConfig, type SchemaFieldConfig,
-  type SchemaParameterConfig, type SchemaInputConfig, type SchemaFieldMap, type SchemaCoreConfig,
-  CONSTRUCTOR_PROPERTY
+  CONSTRUCTOR_PROPERTY,
+  type SchemaClassConfig,
+  type SchemaCoreConfig,
+  type SchemaFieldConfig,
+  type SchemaFieldMap,
+  type SchemaInputConfig,
+  type SchemaMethodConfig,
+  type SchemaParameterConfig
 } from './types.ts';
 
 export type SchemaDiscriminatedInfo = Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>>;
 
-const classToDiscriminatedType = (cls: Class): string => cls.name
-  .replace(/([A-Z])([A-Z][a-z])/g, (all, left, right) => `${left}_${right.toLowerCase()}`)
-  .replace(/([a-z]|\b)([A-Z])/g, (all, left, right) => left ? `${left}_${right.toLowerCase()}` : right.toLowerCase())
-  .toLowerCase();
+const classToDiscriminatedType = (cls: Class): string =>
+  cls.name
+    .replace(/([A-Z])([A-Z][a-z])/g, (all, left, right) => `${left}_${right.toLowerCase()}`)
+    .replace(/([a-z]|\b)([A-Z])/g, (all, left, right) => (left ? `${left}_${right.toLowerCase()}` : right.toLowerCase()))
+    .toLowerCase();
 
 function assignMetadata<T>(key: symbol, base: SchemaCoreConfig, data: Partial<T>[]): T {
-  const metadata = base.metadata ??= {};
-  const out = metadata[key] ??= {};
+  const metadata = (base.metadata ??= {});
+  const out = (metadata[key] ??= {});
   for (const d of data) {
     safeAssign(out, d);
   }
   return castTo(out);
 }
 
-function combineCore<T extends SchemaCoreConfig>(base: T, config: Partial<T>): Pick<Partial<T>, 'metadata' | 'private' | 'description' | 'examples'> {
+function combineCore<T extends SchemaCoreConfig>(
+  base: T,
+  config: Partial<T>
+): Pick<Partial<T>, 'metadata' | 'private' | 'description' | 'examples'> {
   return {
-    ...config.metadata ? { metadata: { ...base.metadata, ...config.metadata } } : {},
-    ...config.private ? { private: config.private ?? base.private } : {},
-    ...config.description ? { description: config.description || base.description } : {},
-    ...config.examples ? { examples: [...(base.examples ?? []), ...(config.examples ?? [])] } : {},
+    ...(config.metadata ? { metadata: { ...base.metadata, ...config.metadata } } : {}),
+    ...(config.private ? { private: config.private ?? base.private } : {}),
+    ...(config.description ? { description: config.description || base.description } : {}),
+    ...(config.examples ? { examples: [...(base.examples ?? []), ...(config.examples ?? [])] } : {})
   };
 }
 
@@ -37,14 +46,16 @@ function combineInputs<T extends SchemaInputConfig>(base: T, configs: Partial<T>
     if (config) {
       safeAssign(base, {
         ...config,
-        ...config.aliases ? { aliases: [...base.aliases ?? [], ...config.aliases ?? []] } : {},
-        ...config.specifiers ? { specifiers: [...base.specifiers ?? [], ...config.specifiers ?? []] } : {},
-        ...config.enum ? {
-          enum: {
-            message: config.enum?.message ?? base.enum?.message,
-            values: (config.enum?.values ?? base.enum?.values ?? []).toSorted()
-          }
-        } : {},
+        ...(config.aliases ? { aliases: [...(base.aliases ?? []), ...(config.aliases ?? [])] } : {}),
+        ...(config.specifiers ? { specifiers: [...(base.specifiers ?? []), ...(config.specifiers ?? [])] } : {}),
+        ...(config.enum
+          ? {
+              enum: {
+                message: config.enum?.message ?? base.enum?.message,
+                values: (config.enum?.values ?? base.enum?.values ?? []).toSorted()
+              }
+            }
+          : {}),
         ...combineCore(base, config)
       });
     }
@@ -58,7 +69,7 @@ function combineMethods<T extends SchemaMethodConfig>(base: T, configs: Partial<
       ...config,
       ...combineCore(base, config),
       parameters: config.parameters ?? base.parameters,
-      validators: [...base.validators, ...(config.validators ?? [])],
+      validators: [...base.validators, ...(config.validators ?? [])]
     });
     if (config.parameters) {
       for (const param of config.parameters) {
@@ -84,25 +95,28 @@ function getConstructorConfig<T extends SchemaClassConfig>(base: Partial<T>, par
 
 function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T): T {
   safeAssign(base, {
-    ...base.views ? { views: { ...parent.views, ...base.views } } : {},
-    ...base.validators ? { validators: [...parent.validators, ...base.validators] } : {},
-    ...base.metadata ? { metadata: { ...parent.metadata, ...base.metadata } } : {},
+    ...(base.views ? { views: { ...parent.views, ...base.views } } : {}),
+    ...(base.validators ? { validators: [...parent.validators, ...base.validators] } : {}),
+    ...(base.metadata ? { metadata: { ...parent.metadata, ...base.metadata } } : {}),
     interfaces: [...parent.interfaces, ...base.interfaces],
     methods: { ...parent.methods, ...base.methods },
     description: base.description || parent.description,
     examples: [...(parent.examples ?? []), ...(base.examples ?? [])],
-    discriminatedField: base.discriminatedField ?? parent.discriminatedField,
+    discriminatedField: base.discriminatedField ?? parent.discriminatedField
   });
   switch (base.mappedOperation) {
     case 'Required':
     case 'Partial': {
       base.fields = Object.fromEntries(
-        Object.entries(parent.fields).map(([key, value]) => [key, {
-          ...value,
-          required: {
-            active: base.mappedOperation === 'Required'
+        Object.entries(parent.fields).map(([key, value]) => [
+          key,
+          {
+            ...value,
+            required: {
+              active: base.mappedOperation === 'Required'
+            }
           }
-        }])
+        ])
       );
       break;
     }
@@ -110,9 +124,7 @@ function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T)
     case 'Omit': {
       const keys = new Set<string>(base.mappedFields ?? []);
       base.fields = Object.fromEntries(
-        Object.entries(parent.fields).filter(([key]) =>
-          base.mappedOperation === 'Pick' ? keys.has(key) : !keys.has(key)
-        )
+        Object.entries(parent.fields).filter(([key]) => (base.mappedOperation === 'Pick' ? keys.has(key) : !keys.has(key)))
       );
       break;
     }
@@ -127,19 +139,18 @@ function combineClasses<T extends SchemaClassConfig>(base: T, configs: Partial<T
   for (const config of configs) {
     Object.assign(base, {
       ...config,
-      ...config.views ? { views: { ...base.views, ...config.views } } : {},
-      ...config.validators ? { validators: [...base.validators, ...config.validators] } : {},
+      ...(config.views ? { views: { ...base.views, ...config.views } } : {}),
+      ...(config.validators ? { validators: [...base.validators, ...config.validators] } : {}),
       ...combineCore(base, config),
       interfaces: [...base.interfaces, ...(config.interfaces ?? [])],
       methods: { ...base.methods, ...config.methods },
-      fields: { ...base.fields, ...config.fields },
+      fields: { ...base.fields, ...config.fields }
     });
   }
   return base;
 }
 
 export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig> {
-
   #cls: Class;
   #config: SchemaClassConfig;
   #views: Map<string, SchemaFieldMap> = new Map();
@@ -150,14 +161,14 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   register(...data: Partial<SchemaClassConfig>[]): SchemaClassConfig {
-    const config = this.#config ??= {
+    const config = (this.#config ??= {
       methods: {},
       class: this.#cls,
       views: {},
       validators: [],
       interfaces: [],
-      fields: {},
-    };
+      fields: {}
+    });
     return combineClasses(config, data);
   }
 
@@ -173,7 +184,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   registerField(field: string, ...data: Partial<SchemaFieldConfig>[]): SchemaFieldConfig {
     const classConfig = this.register({});
-    const config = classConfig.fields[field] ??= { name: field, class: this.#cls, type: null! };
+    const config = (classConfig.fields[field] ??= { name: field, class: this.#cls, type: null! });
     const combined = combineInputs(config, data);
     return combined;
   }
@@ -202,7 +213,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   registerMethod(method: string, ...data: Partial<SchemaMethodConfig>[]): SchemaMethodConfig {
     const classConfig = this.register();
-    const config = classConfig.methods[method] ??= { class: this.#cls, parameters: [], validators: [] };
+    const config = (classConfig.methods[method] ??= { class: this.#cls, parameters: [], validators: [] });
     return combineMethods(config, data);
   }
 
@@ -218,7 +229,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
   registerParameter(method: string, idx: number, ...data: Partial<SchemaParameterConfig>[]): SchemaParameterConfig {
     const params = this.registerMethod(method, {}).parameters;
-    const config = params[idx] ??= { method, index: idx, class: this.#cls, array: false, type: null! };
+    const config = (params[idx] ??= { method, index: idx, class: this.#cls, array: false, type: null! });
     return combineInputs(config, data);
   }
 
@@ -251,8 +262,8 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
         },
         enum: {
           values: [config.discriminatedType],
-          message: `${config.discriminatedField} can only be '${config.discriminatedType}'`,
-        },
+          message: `${config.discriminatedField} can only be '${config.discriminatedType}'`
+        }
       };
     }
 
@@ -260,11 +271,14 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     for (const view of Object.keys(config.views)) {
       const fields = config.views[view];
       const withoutSet = 'without' in fields ? new Set<string>(fields.without) : undefined;
-      const fieldList = withoutSet ?
-        Object.keys(config.fields).filter(field => !withoutSet.has(field)) :
-        ('with' in fields ? fields.with : []);
+      const fieldList = withoutSet
+        ? Object.keys(config.fields).filter(field => !withoutSet.has(field))
+        : 'with' in fields
+          ? fields.with
+          : [];
 
-      this.#views.set(view,
+      this.#views.set(
+        view,
         fieldList.reduce<SchemaFieldMap>((map, value) => {
           map[value] = config.fields[value];
           return map;
@@ -275,7 +289,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     config.methods[CONSTRUCTOR_PROPERTY] = getConstructorConfig(config, parent);
 
     for (const method of Object.values(config.methods)) {
-      method.parameters = method.parameters.toSorted((a, b) => (a.index! - b.index!));
+      method.parameters = method.parameters.toSorted((a, b) => a.index! - b.index!);
       if (method.returnType?.type) {
         method.returnType.binary = BinaryUtil.isBinaryTypeReference(method.returnType.type);
       }

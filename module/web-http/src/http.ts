@@ -1,11 +1,11 @@
-import type net from 'node:net';
 import http from 'node:http';
 import http2 from 'node:http2';
 import https from 'node:https';
+import type net from 'node:net';
 import { TLSSocket } from 'node:tls';
 
-import { WebBodyUtil, WebCommonUtil, type WebDispatcher, WebRequest, WebResponse } from '@travetto/web';
 import { type BinaryType, BinaryUtil, castTo, ShutdownManager } from '@travetto/runtime';
+import { WebBodyUtil, WebCommonUtil, type WebDispatcher, WebRequest, WebResponse } from '@travetto/web';
 
 import type { WebSecureKeyPair, WebServerHandle } from './types.ts';
 
@@ -24,7 +24,6 @@ type WebHttpServerConfig = {
 };
 
 export class WebHttpUtil {
-
   /**
    * Build a simple request handler
    * @param dispatcher
@@ -69,9 +68,7 @@ export class WebHttpUtil {
       socket.on('close', () => activeConnections.delete(socket));
     });
 
-    target.listen(config.port, config.bindAddress)
-      .on('error', reject)
-      .on('listening', resolve);
+    target.listen(config.port, config.bindAddress).on('error', reject).on('listening', resolve);
 
     await promise;
 
@@ -115,7 +112,7 @@ export class WebHttpUtil {
         },
         httpMethod: castTo(request.method?.toUpperCase()),
         path,
-        httpQuery: Object.fromEntries(new URLSearchParams(query)),
+        httpQuery: Object.fromEntries(new URLSearchParams(query))
       },
       headers: request.headers,
       body: WebBodyUtil.markRawBinary(request)
@@ -127,7 +124,9 @@ export class WebHttpUtil {
    */
   static async respondToServerResponse(webResponse: WebResponse, response: HttpResponse): Promise<void> {
     const binaryResponse = new WebResponse<BinaryType>({ context: webResponse.context, ...WebBodyUtil.toBinaryMessage(webResponse) });
-    binaryResponse.headers.forEach((value, key) => response.setHeader(key, value));
+    binaryResponse.headers.forEach((value, key) => {
+      response.setHeader(key, value);
+    });
     response.statusCode = WebCommonUtil.getStatusCode(binaryResponse);
 
     if (binaryResponse.body) {

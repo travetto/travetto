@@ -1,7 +1,7 @@
-import { JSONUtil, Runtime, RuntimeResources } from '@travetto/runtime';
 import { Config } from '@travetto/config';
-import { Schema, SchemaValidator } from '@travetto/schema';
 import { PostConstruct } from '@travetto/di';
+import { JSONUtil, Runtime, RuntimeResources } from '@travetto/runtime';
+import { Schema, SchemaValidator } from '@travetto/schema';
 
 @Schema()
 class FirestoreModelConfigCredentials {

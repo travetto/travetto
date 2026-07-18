@@ -1,20 +1,18 @@
 import { Inject, Injectable } from '@travetto/di';
-import { MailUtil, type EmailCompiled, type MailInterpolator } from '@travetto/email';
+import { type EmailCompiled, type MailInterpolator, MailUtil } from '@travetto/email';
 import { RuntimeError, TypedObject, WatchUtil } from '@travetto/runtime';
-
-import type { EditorSendService } from './send.ts';
-import { EditorConfig } from './config.ts';
-import type { EditorRequest, EditorResponse } from './types.ts';
 
 import { EmailCompiler } from '../../src/compiler.ts';
 import { EmailCompileUtil } from '../../src/util.ts';
+import { EditorConfig } from './config.ts';
+import type { EditorSendService } from './send.ts';
+import type { EditorRequest, EditorResponse } from './types.ts';
 
 /**
  * Utils for interacting with editors
  */
 @Injectable()
 export class EditorService {
-
   @Inject()
   sender: EditorSendService;
 
@@ -28,12 +26,11 @@ export class EditorService {
   async #renderTemplate(templateFile: string, context: Record<string, unknown>): Promise<EmailCompiled> {
     const email = await EmailCompiler.compile(templateFile);
     return TypedObject.fromEntries(
-      await Promise.all(TypedObject.entries(email).map(([key, value]) =>
-        this.#interpolate(value, context).then((result) => [key, result])))
+      await Promise.all(TypedObject.entries(email).map(([key, value]) => this.#interpolate(value, context).then(result => [key, result])))
     );
   }
 
-  async #renderFile(file: string): Promise<{ content: EmailCompiled, file: string }> {
+  async #renderFile(file: string): Promise<{ content: EmailCompiled; file: string }> {
     const content = await this.#renderTemplate(file, await EditorConfig.get('context'));
     return { content, file };
   }
@@ -41,7 +38,9 @@ export class EditorService {
   async #response<T>(operation: Promise<T>, success: (value: T) => EditorResponse, fail?: (error: Error) => EditorResponse): Promise<void> {
     try {
       const response = await operation;
-      if (process.connected) { process.send?.(success(response)); }
+      if (process.connected) {
+        process.send?.(success(response));
+      }
     } catch (error) {
       if (fail && process.connected && error && error instanceof Error) {
         process.send?.(fail(error));
@@ -51,11 +50,11 @@ export class EditorService {
     }
   }
 
-  async sendFile(file: string, to?: string): Promise<{ to: string, file: string, url?: string | false | undefined }> {
+  async sendFile(file: string, to?: string): Promise<{ to: string; file: string; url?: string | false | undefined }> {
     const config = await EditorConfig.get();
     to ||= config.to;
     const content = await this.#renderTemplate(file, config.context ?? {});
-    return { to, file, ...await this.sender.send({ from: config.from, to, ...content, }) };
+    return { to, file, ...(await this.sender.send({ from: config.from, to, ...content })) };
   }
 
   /**
@@ -71,7 +70,8 @@ export class EditorService {
           return await this.#response(EditorConfig.ensureConfig(), file => ({ type: 'configured', file }));
         }
         case 'compile': {
-          return await this.#response(this.#renderFile(request.file),
+          return await this.#response(
+            this.#renderFile(request.file),
             result => ({ type: 'compiled', ...result }),
             error => ({ type: 'compiled-failed', message: error.message, stack: error.stack, file: request.file })
           );
@@ -88,13 +88,19 @@ export class EditorService {
 
     process.send({ type: 'init' });
 
-    await WatchUtil.watchCompilerEvents('change',
-      ({ file }) => EmailCompiler.spawnCompile(file).then(success =>
-        success ? this.#response(this.#renderFile(file),
-          result => ({ type: 'compiled', ...result }),
-          error => ({ type: 'compiled-failed', message: error.message, stack: error.stack, file })
-        ) : undefined
-      ),
-      ({ file }) => EmailCompileUtil.isTemplateFile(file));
+    await WatchUtil.watchCompilerEvents(
+      'change',
+      ({ file }) =>
+        EmailCompiler.spawnCompile(file).then(success =>
+          success
+            ? this.#response(
+                this.#renderFile(file),
+                result => ({ type: 'compiled', ...result }),
+                error => ({ type: 'compiled-failed', message: error.message, stack: error.stack, file })
+              )
+            : undefined
+        ),
+      ({ file }) => EmailCompileUtil.isTemplateFile(file)
+    );
   }
 }

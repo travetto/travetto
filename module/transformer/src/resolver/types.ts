@@ -1,4 +1,5 @@
 import type ts from 'typescript';
+
 import type { TemplateLiteral } from '../types/shared.ts';
 
 type TemplateArgument = [templateName: string, type: ts.Type];
@@ -222,11 +223,19 @@ export interface ForeignType extends Type<'foreign'> {
 /**
  * Unknown type, should default to object
  */
-export interface UnknownType extends Type<'unknown'> { }
+export interface UnknownType extends Type<'unknown'> {}
 
 export type AnyType =
-  TupleType | ShapeType | CompositionType | LiteralType | MappedType |
-  ManagedType | PointerType | UnknownType | ForeignType | TemplateType;
+  | TupleType
+  | ShapeType
+  | CompositionType
+  | LiteralType
+  | MappedType
+  | ManagedType
+  | PointerType
+  | UnknownType
+  | ForeignType
+  | TemplateType;
 
 /**
  * Simple interface for checked methods

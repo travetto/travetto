@@ -1,13 +1,14 @@
 import path from 'node:path';
+
 import { stringify } from 'yaml';
 
-import { Terminal, StyleUtil } from '@travetto/terminal';
-import { TimeUtil, RuntimeIndex } from '@travetto/runtime';
+import { RuntimeIndex, TimeUtil } from '@travetto/runtime';
+import { StyleUtil, Terminal } from '@travetto/terminal';
 
 import type { TestEvent } from '../../model/event.ts';
-import type { SuitesSummary, TestConsumerShape } from '../types.ts';
 import { TestConsumer } from '../decorator.ts';
-import { type TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer.ts';
+import { CONSOLE_ENHANCER, type TestResultsEnhancer } from '../enhancer.ts';
+import type { SuitesSummary, TestConsumerShape } from '../types.ts';
 import { TestConsumerUtil } from './util.ts';
 
 const SPACE = ' ';
@@ -23,10 +24,7 @@ export class TapEmitter implements TestConsumerShape {
   #options?: Record<string, unknown>;
   #start: number = 0;
 
-  constructor(
-    terminal = new Terminal(),
-    enhancer: TestResultsEnhancer = CONSOLE_ENHANCER
-  ) {
+  constructor(terminal = new Terminal(), enhancer: TestResultsEnhancer = CONSOLE_ENHANCER) {
     this.#terminal = terminal;
     this.#enhancer = enhancer;
   }
@@ -53,7 +51,10 @@ export class TapEmitter implements TestConsumerShape {
   logMeta(metadata: Record<string, unknown>): void {
     const lineLength = this.#terminal.width - 5;
     let body = stringify(metadata, { lineWidth: lineLength, indent: 2 });
-    body = body.split('\n').map(line => `  ${line}`).join('\n');
+    body = body
+      .split('\n')
+      .map(line => `  ${line}`)
+      .join('\n');
     this.log(`---\n${this.#enhancer.objectInspect(body)}\n...`);
   }
 
@@ -71,7 +72,7 @@ export class TapEmitter implements TestConsumerShape {
         StyleUtil.link(suiteId, `file://${suiteSourceFile}#${test.suiteLineStart ?? 1}`),
         ' - ',
         StyleUtil.link(this.#enhancer.testName(test.methodName), `file://${testSourceFile}#${test.lineStart}`),
-        ...test.description ? [`: ${this.#enhancer.testDescription(test.description)}`] : []
+        ...(test.description ? [`: ${this.#enhancer.testDescription(test.description)}`] : [])
       ].join('');
 
       this.log(`# ${header}`);
@@ -110,10 +111,17 @@ export class TapEmitter implements TestConsumerShape {
       // Track test result
       let status = `${this.#enhancer.testNumber(++this.#count)} `;
       switch (test.status) {
-        case 'passed': `${this.#enhancer.success('ok')} ${status}`; break;
-        case 'skipped': status += ' # SKIP'; break;
-        case 'unknown': break;
-        default: status = `${this.#enhancer.failure('not ok')} ${status}`; break;
+        case 'passed':
+          `${this.#enhancer.success('ok')} ${status}`;
+          break;
+        case 'skipped':
+          status += ' # SKIP';
+          break;
+        case 'unknown':
+          break;
+        default:
+          status = `${this.#enhancer.failure('not ok')} ${status}`;
+          break;
       }
       status += header;
 
@@ -156,20 +164,40 @@ export class TapEmitter implements TestConsumerShape {
 
     const allPassed = !summary.failed && !summary.errored;
 
-    this.log([
-      this.#enhancer[allPassed ? 'success' : 'failure']('Results'), SPACE,
-      `${this.#enhancer.total(summary.passed)}/${this.#enhancer.total(summary.total)},`, SPACE,
-      allPassed ? 'failed' : this.#enhancer.failure('failed'), SPACE,
-      `${this.#enhancer.total(summary.failed)}`, SPACE,
-      allPassed ? 'errored' : this.#enhancer.failure('errored'), SPACE,
-      `${this.#enhancer.total(summary.errored)}`, SPACE,
-      'skipped', SPACE,
-      this.#enhancer.total(summary.skipped), SPACE,
-      '#', SPACE, '(Timings:', SPACE,
-      'Self=', TimeUtil.asClock(summary.selfDuration), ',', SPACE,
-      'Total=', TimeUtil.asClock(summary.duration), ',', SPACE,
-      'Clock=', TimeUtil.asClock(Date.now() - this.#start),
-      ')',
-    ].join(''));
+    this.log(
+      [
+        this.#enhancer[allPassed ? 'success' : 'failure']('Results'),
+        SPACE,
+        `${this.#enhancer.total(summary.passed)}/${this.#enhancer.total(summary.total)},`,
+        SPACE,
+        allPassed ? 'failed' : this.#enhancer.failure('failed'),
+        SPACE,
+        `${this.#enhancer.total(summary.failed)}`,
+        SPACE,
+        allPassed ? 'errored' : this.#enhancer.failure('errored'),
+        SPACE,
+        `${this.#enhancer.total(summary.errored)}`,
+        SPACE,
+        'skipped',
+        SPACE,
+        this.#enhancer.total(summary.skipped),
+        SPACE,
+        '#',
+        SPACE,
+        '(Timings:',
+        SPACE,
+        'Self=',
+        TimeUtil.asClock(summary.selfDuration),
+        ',',
+        SPACE,
+        'Total=',
+        TimeUtil.asClock(summary.duration),
+        ',',
+        SPACE,
+        'Clock=',
+        TimeUtil.asClock(Date.now() - this.#start),
+        ')'
+      ].join('')
+    );
   }
 }

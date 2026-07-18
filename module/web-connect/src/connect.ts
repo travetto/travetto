@@ -1,10 +1,9 @@
-import type { OutgoingHttpHeaders, IncomingMessage, ServerResponse } from 'node:http';
+import type { IncomingMessage, OutgoingHttpHeaders, ServerResponse } from 'node:http';
 
-import { BinaryUtil, castTo, CodecUtil, type BinaryArray } from '@travetto/runtime';
+import { type BinaryArray, BinaryUtil, CodecUtil, castTo } from '@travetto/runtime';
 import { type WebRequest, WebResponse } from '@travetto/web';
 
 export class ConnectRequest implements Pick<IncomingMessage, 'url' | 'headers'> {
-
   /**
    * Get a connect incoming message given a framework request
    */
@@ -34,11 +33,9 @@ export class ConnectRequest implements Pick<IncomingMessage, 'url' | 'headers'> 
   }
 }
 
-export class ConnectResponse implements Pick<ServerResponse,
-  'getHeader' | 'getHeaderNames' | 'getHeaders' | 'hasHeader' |
-  'headersSent' | 'write' | 'flushHeaders'
-> {
-
+export class ConnectResponse
+  implements Pick<ServerResponse, 'getHeader' | 'getHeaderNames' | 'getHeaders' | 'hasHeader' | 'headersSent' | 'write' | 'flushHeaders'>
+{
   /**
    * Get a connect server response given a framework response
    */

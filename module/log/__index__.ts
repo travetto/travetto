@@ -1,10 +1,11 @@
-import type { } from './src/trv.d.ts';
-export * from './src/service.ts';
-export * from './src/formatter/json.ts';
-export * from './src/formatter/line.ts';
-export * from './src/formatter/google.ts';
-export * from './src/formatter/util.ts';
+import type {} from './src/trv.d.ts';
+
 export * from './src/appender/console.ts';
 export * from './src/appender/file.ts';
-export * from './src/types.ts';
 export * from './src/common.ts';
+export * from './src/formatter/google.ts';
+export * from './src/formatter/json.ts';
+export * from './src/formatter/line.ts';
+export * from './src/formatter/util.ts';
+export * from './src/service.ts';
+export * from './src/types.ts';

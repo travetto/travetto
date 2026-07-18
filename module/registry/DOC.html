@@ -33,8 +33,8 @@ This flow ensures all files are loaded and processed before application starts. 
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/registry/doc/registry.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> Class <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> <span class="token keyword">type</span> <span class="token class-name">RegistryAdapter</span><span class="token punctuation">,</span> <span class="token keyword">type</span> <span class="token class-name">RegistryIndex</span><span class="token punctuation">,</span> RegistryIndexStore<span class="token punctuation">,</span> Registry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/registry'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Registry<span class="token punctuation">,</span> <span class="token keyword">type</span> <span class="token class-name">RegistryAdapter</span><span class="token punctuation">,</span> <span class="token keyword">type</span> <span class="token class-name">RegistryIndex</span><span class="token punctuation">,</span> RegistryIndexStore <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/registry'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> Class <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">interface</span> <span class="token class-name">Group</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">class</span><span class="token operator">:</span> Class<span class="token punctuation">;</span>
@@ -51,7 +51,6 @@ This flow ensures all files are loaded and processed before application starts. 
  * The adapter to handle mapping/modeling a specific class
  */</span>
 <span class="token keyword">class</span> <span class="token class-name">SampleRegistryAdapter</span> <span class="token keyword">implements</span> <span class="token class-name">RegistryAdapter<span class="token operator">&lt;</span>Group<span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
-
   #<span class="token keyword">class</span><span class="token operator">:</span> Class<span class="token punctuation">;</span>
   #config<span class="token operator">:</span> Group<span class="token punctuation">;</span>
 
@@ -63,10 +62,7 @@ This flow ensures all files are loaded and processed before application starts. 
     <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> group <span class="token keyword">of</span> groups<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       Object<span class="token punctuation">.</span><span class="token function">assign</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>#config<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
         <span class="token operator">...</span>group<span class="token punctuation">,</span>
-        children<span class="token operator">:</span> <span class="token punctuation">[</span>
-          <span class="token operator">...</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>#config<span class="token operator">?.</span>children <span class="token operator">??</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-          <span class="token operator">...</span><span class="token punctuation">(</span>group<span class="token punctuation">.</span>children <span class="token operator">??</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-        <span class="token punctuation">]</span>
+        children<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token operator">...</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>#config<span class="token operator">?.</span>children <span class="token operator">??</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token operator">...</span><span class="token punctuation">(</span>group<span class="token punctuation">.</span>children <span class="token operator">??</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
       <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
     <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>#config<span class="token punctuation">;</span>

@@ -8,11 +8,7 @@ export class MockService {
     };
   }
 
-  async update({ name }: { name: string }) {
+  async update({ name }: { name: string }) {}
 
-  }
-
-  async fetchImage(path: string, options: { width?: number, height?: number }) {
-
-  }
+  async fetchImage(path: string, options: { width?: number; height?: number }) {}
 }

@@ -1,15 +1,14 @@
-import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import type { IndexedModule } from '@travetto/manifest';
+import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { CliScmUtil } from './scm.ts';
 
-type ModuleGraphEntry = { children: Set<string>, name: string, active: Set<string>, parents?: string[] };
+type ModuleGraphEntry = { children: Set<string>; name: string; active: Set<string>; parents?: string[] };
 
 /**
  * Simple utilities for understanding modules for CLI use cases
  */
 export class CliModuleUtil {
-
   /**
    * Find modules that changed, and the dependent modules
    * @param fromHash
@@ -34,8 +33,7 @@ export class CliModuleUtil {
       }
     }
 
-    return [...out.values()]
-      .toSorted((a, b) => a.name.localeCompare(b.name));
+    return [...out.values()].toSorted((a, b) => a.name.localeCompare(b.name));
   }
 
   /**
@@ -45,9 +43,10 @@ export class CliModuleUtil {
    * @returns
    */
   static async findModules(mode: 'all' | 'changed' | 'workspace', fromHash?: string, toHash?: string): Promise<IndexedModule[]> {
-    return (mode === 'changed' ?
-      await this.findChangedModulesRecursive(fromHash, toHash, true) :
-      [...RuntimeIndex.getModuleList(mode)].map(name => RuntimeIndex.getModule(name)!)
+    return (
+      mode === 'changed'
+        ? await this.findChangedModulesRecursive(fromHash, toHash, true)
+        : [...RuntimeIndex.getModuleList(mode)].map(name => RuntimeIndex.getModule(name)!)
     ).filter(module => module.sourcePath !== Runtime.workspace.path);
   }
 
@@ -103,7 +102,7 @@ export class CliModuleUtil {
   /**
    * Find changed paths, either files between two git commits, or all folders for changed modules
    */
-  static async findChangedPaths(config: { since?: string, changed?: boolean, logError?: boolean } = {}): Promise<string[]> {
+  static async findChangedPaths(config: { since?: string; changed?: boolean; logError?: boolean } = {}): Promise<string[]> {
     if (config.since) {
       try {
         const files = await CliScmUtil.findChangedFiles(config.since, 'HEAD');

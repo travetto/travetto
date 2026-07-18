@@ -1,13 +1,19 @@
 import {
-  Binary, type CreateIndexesOptions, type Filter, type FindCursor, type IndexDirection, ObjectId, type WithId as MongoWithId,
-  type IndexDescriptionInfo
+  Binary,
+  type CreateIndexesOptions,
+  type Filter,
+  type FindCursor,
+  type IndexDescriptionInfo,
+  type IndexDirection,
+  type WithId as MongoWithId,
+  ObjectId
 } from 'mongodb';
 
-import { RuntimeError, CodecUtil, castTo, type Class, toConcrete, BinaryUtil } from '@travetto/runtime';
-import { type DistanceUnit, type PageableModelQuery, type WhereClause, isModelQueryIndex, ModelQueryUtil } from '@travetto/model-query';
-import { type ModelType, type IndexConfig, IndexNotSupported } from '@travetto/model';
-import { DataUtil, SchemaRegistryIndex, type Point } from '@travetto/schema';
+import { type IndexConfig, IndexNotSupported, type ModelType } from '@travetto/model';
 import { isModelIndexedIndex } from '@travetto/model-indexed';
+import { type DistanceUnit, isModelQueryIndex, ModelQueryUtil, type PageableModelQuery, type WhereClause } from '@travetto/model-query';
+import { BinaryUtil, type Class, CodecUtil, castTo, RuntimeError, toConcrete } from '@travetto/runtime';
+import { DataUtil, type Point, SchemaRegistryIndex } from '@travetto/schema';
 
 const PointConcrete = toConcrete<Point>();
 
@@ -42,19 +48,13 @@ function flattenKeys(obj: Record<string, unknown>, prefix = ''): Record<string, 
  * Basic mongo utils for conforming to the model module
  */
 export class MongoUtil {
-
   static namespaceIndex(cls: Class, name: string): string {
     return `${cls.Ⲑid}__${name}`.replace(/[^a-zA-Z0-9_]+/g, '_');
   }
 
   static uuid(value: string): Binary {
     try {
-      return new Binary(
-        BinaryUtil.binaryArrayToUint8Array(
-          CodecUtil.fromHexString(value.replaceAll('-', ''))
-        ),
-        Binary.SUBTYPE_UUID
-      );
+      return new Binary(BinaryUtil.binaryArrayToUint8Array(CodecUtil.fromHexString(value.replaceAll('-', ''))), Binary.SUBTYPE_UUID);
     } catch (err) {
       if (err instanceof RuntimeError && err.message === 'Invalid hex string') {
         return null!;
@@ -94,7 +94,12 @@ export class MongoUtil {
   }
 
   /**/
-  static extractSimple<T>(base: Class<T> | undefined, item: Record<string, unknown>, path: string = '', recursive: boolean = true): Record<string, unknown> {
+  static extractSimple<T>(
+    base: Class<T> | undefined,
+    item: Record<string, unknown>,
+    path: string = '',
+    recursive: boolean = true
+  ): Record<string, unknown> {
     const fields = base ? SchemaRegistryIndex.getOptional(base)?.getFields() : undefined;
     const out: Record<string, unknown> = {};
     const sub = item;
@@ -140,7 +145,7 @@ export class MongoUtil {
           value.$regex = DataUtil.toRegex(castTo(value.$regex));
         } else if (firstKey && '$near' in value) {
           const dist: number = castTo(value.$maxDistance);
-          const distance = dist / RADIANS_TO[(castTo<DistanceUnit>(value.$unit) ?? 'km')];
+          const distance = dist / RADIANS_TO[castTo<DistanceUnit>(value.$unit) ?? 'km'];
           value.$maxDistance = distance;
           delete value.$unit;
         } else if (firstKey && '$geoWithin' in value) {
@@ -187,8 +192,9 @@ export class MongoUtil {
     const name = this.namespaceIndex(cls, idx.name);
     if (isModelQueryIndex(idx)) {
       const out = idx.fields.reduce(
-        (acc, field) => ({ ...acc, ...flattenKeys(castTo(field)) }),
-        castTo<Record<string, -1 | 0 | 1>>({}));
+        (acc, field) => Object.assign(acc, { ...flattenKeys(castTo(field)) }),
+        castTo<Record<string, -1 | 0 | 1>>({})
+      );
 
       return [out, { name, unique: !!idx.unique }];
     } else if (isModelIndexedIndex(idx)) {
@@ -197,23 +203,29 @@ export class MongoUtil {
         ...idx.sortTemplate.map(({ path, value }) => [path.join('.'), value === -1 ? -1 : 1])
       ]);
       switch (idx.type) {
-        case 'indexed:keyed': return [filter, { name, unique: idx.unique }];
-        case 'indexed:sorted': return [filter, { name }];
+        case 'indexed:keyed':
+          return [filter, { name, unique: idx.unique }];
+        case 'indexed:sorted':
+          return [filter, { name }];
       }
     } else {
       throw new IndexNotSupported(cls, idx);
     }
   }
 
-  static prepareCursor<T extends ModelType>(cls: Class<T>, cursor: FindCursor<T | MongoWithId<T>>, query: PageableModelQuery<T>): FindCursor<T> {
+  static prepareCursor<T extends ModelType>(
+    cls: Class<T>,
+    cursor: FindCursor<T | MongoWithId<T>>,
+    query: PageableModelQuery<T>
+  ): FindCursor<T> {
     if (query.select) {
       const selectKey = Object.keys(query.select)[0];
       const select = typeof selectKey === 'string' && selectKey.startsWith('$') ? query.select : this.extractSimple(cls, query.select);
       // Remove id if not explicitly defined, and selecting fields directly
-      if (!select['_id']) {
+      if (!select._id) {
         const values = new Set([...Object.values(select)]);
         if (values.has(1) || values.has(true)) {
-          select['_id'] = false;
+          select._id = false;
         }
       }
       cursor.project(select);
@@ -241,9 +253,9 @@ export class MongoUtil {
       existing.expireAfterSeconds !== pendingOptions.expireAfterSeconds ||
       existing.bucketSize !== pendingOptions.bucketSize;
 
-    const existingFields = existing.textIndexVersion ?
-      Object.fromEntries(Object.entries(existing.weights ?? {}).map(([key]) => [key, 'text'])) :
-      existing.key;
+    const existingFields = existing.textIndexVersion
+      ? Object.fromEntries(Object.entries(existing.weights ?? {}).map(([key]) => [key, 'text']))
+      : existing.key;
 
     const pendingKeySet = new Set(Object.keys(pendingKey));
     const existingKeySet = new Set(Object.keys(existingFields));

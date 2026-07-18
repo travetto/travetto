@@ -1,11 +1,10 @@
-import path from './path.ts';
-import { ManifestModuleUtil } from './module.ts';
 import { ManifestFileUtil } from './file.ts';
+import { ManifestModuleUtil } from './module.ts';
 import { PackageUtil } from './package.ts';
-
+import path from './path.ts';
+import type { ChangeEventType } from './types/common.ts';
 import type { ManifestContext } from './types/context.ts';
 import type { ManifestRoot } from './types/manifest.ts';
-import type { ChangeEventType } from './types/common.ts';
 
 const MANIFEST_FILE = 'manifest.json';
 
@@ -22,7 +21,7 @@ export class ManifestUtil {
       workspace: ctx.workspace,
       build: ctx.build,
       main: ctx.main,
-      modules: await ManifestModuleUtil.produceModules(ctx),
+      modules: await ManifestModuleUtil.produceModules(ctx)
     };
   }
 
@@ -45,14 +44,17 @@ export class ManifestUtil {
       build: {
         ...manifest.build,
         // Mark output folder/workspace path as portable
-        outputFolder: '$$PRODUCTION$$',
+        outputFolder: '$$PRODUCTION$$'
       },
       main: manifest.main,
       modules: Object.fromEntries(
-        modules.map(module => [module.name, Object.assign(module, {
-          parents: module.parents.filter(parent => moduleNames.has(parent))
-        })])
-      ),
+        modules.map(module => [
+          module.name,
+          Object.assign(module, {
+            parents: module.parents.filter(parent => moduleNames.has(parent))
+          })
+        ])
+      )
     };
   }
 
@@ -117,15 +119,17 @@ export class ManifestUtil {
    * Produce the manifest context for the workspace module
    */
   static getWorkspaceContext(ctx: ManifestContext): ManifestContext {
-    return ctx.workspace.mono ? {
-      workspace: ctx.workspace,
-      build: ctx.build,
-      main: {
-        name: ctx.workspace.name,
-        folder: '',
-        version: '0.0.0',
-      }
-    } : ctx;
+    return ctx.workspace.mono
+      ? {
+          workspace: ctx.workspace,
+          build: ctx.build,
+          main: {
+            name: ctx.workspace.name,
+            folder: '',
+            version: '0.0.0'
+          }
+        }
+      : ctx;
   }
 
   /**
@@ -151,9 +155,11 @@ export class ManifestUtil {
    * Efficient lookup for path-based graphs
    */
   static lookupTrie<T>(
-    inputs: T[], getPath: (value: T) => string[], validateUnknown?: (inputPath: string[]) => boolean
+    inputs: T[],
+    getPath: (value: T) => string[],
+    validateUnknown?: (inputPath: string[]) => boolean
   ): (inputPath: string[]) => T | undefined {
-    type TrieNode = { value?: T, subPaths: Record<string, TrieNode> };
+    type TrieNode = { value?: T; subPaths: Record<string, TrieNode> };
     const root: TrieNode = { subPaths: {} };
     for (const item of inputs) {
       const inputPath = getPath(item);
@@ -197,13 +203,17 @@ export class ManifestUtil {
     const fileType = ManifestModuleUtil.getFileType(relativeFile);
     const roleType = ManifestModuleUtil.getFileRole(relativeFile)!;
 
-    const manifestModuleFiles = manifest.modules[moduleName].files[folderKey] ??= [];
+    const manifestModuleFiles = (manifest.modules[moduleName].files[folderKey] ??= []);
     const idx = manifestModuleFiles.findIndex(indexedFile => indexedFile[0] === relativeFile);
     const wrappedIdx = idx < 0 ? manifestModuleFiles.length : idx;
 
     switch (action) {
-      case 'create': manifestModuleFiles[wrappedIdx] = [relativeFile, fileType, Date.now(), roleType]; break;
-      case 'delete': idx >= 0 && manifestModuleFiles.splice(idx, 1); break;
+      case 'create':
+        manifestModuleFiles[wrappedIdx] = [relativeFile, fileType, Date.now(), roleType];
+        break;
+      case 'delete':
+        idx >= 0 && manifestModuleFiles.splice(idx, 1);
+        break;
     }
   }
 }

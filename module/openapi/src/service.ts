@@ -1,10 +1,11 @@
 import { createReadStream, existsSync } from 'node:fs';
+
 import type { OpenAPIObject } from 'openapi3-ts/oas31';
 import { stringify } from 'yaml';
 
+import { Inject, Injectable, PostConstruct } from '@travetto/di';
 import { ManifestFileUtil } from '@travetto/manifest';
 import { BinaryMetadataUtil, JSONUtil } from '@travetto/runtime';
-import { Injectable, Inject, PostConstruct } from '@travetto/di';
 import { ControllerVisitUtil, type WebConfig } from '@travetto/web';
 
 import type { ApiHostConfig, ApiInfoConfig, ApiSpecConfig } from './config.ts';
@@ -15,7 +16,6 @@ import { OpenapiVisitor } from './generate.ts';
  */
 @Injectable()
 export class OpenApiService {
-
   @Inject()
   apiHostConfig: ApiHostConfig;
 
@@ -60,7 +60,7 @@ export class OpenApiService {
       this.#spec = {
         ...this.apiHostConfig,
         info: { ...this.apiInfoConfig },
-        ...await ControllerVisitUtil.visit(new OpenapiVisitor(this.apiSpecConfig))
+        ...(await ControllerVisitUtil.visit(new OpenapiVisitor(this.apiSpecConfig)))
       };
     }
     return this.#spec!;
@@ -75,9 +75,7 @@ export class OpenApiService {
 
       const spec = await this.getSpec();
 
-      const output = this.apiSpecConfig.output.endsWith('.json') ?
-        JSONUtil.toUTF8Pretty(spec) :
-        stringify(spec);
+      const output = this.apiSpecConfig.output.endsWith('.json') ? JSONUtil.toUTF8Pretty(spec) : stringify(spec);
 
       if (existsSync(this.apiSpecConfig.output)) {
         const existing = await BinaryMetadataUtil.hash(createReadStream(this.apiSpecConfig.output));

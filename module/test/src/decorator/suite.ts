@@ -1,4 +1,4 @@
-import { castTo, type Class, type ClassInstance, getClass } from '@travetto/runtime';
+import { type Class, type ClassInstance, castTo, getClass } from '@travetto/runtime';
 
 import type { SuiteConfig } from '../model/suite.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
@@ -18,7 +18,7 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
     SuiteRegistryIndex.getForRegister(cls).register(
       ...(typeof description !== 'string' && description ? [description] : []),
       ...rest,
-      ...(typeof description === 'string' ? [{ description }] : []),
+      ...(typeof description === 'string' ? [{ description }] : [])
     );
     return cls;
   };

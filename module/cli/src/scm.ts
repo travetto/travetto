@@ -2,8 +2,8 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { RuntimeError, ExecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import type { IndexedModule } from '@travetto/manifest';
+import { ExecUtil, Runtime, RuntimeError, RuntimeIndex } from '@travetto/runtime';
 
 export class CliScmUtil {
   /**
@@ -12,17 +12,20 @@ export class CliScmUtil {
    * @returns
    */
   static isRepoRoot(folder: string): Promise<boolean> {
-    return fs.stat(path.resolve(folder, '.git')).then(() => true, () => false);
+    return fs.stat(path.resolve(folder, '.git')).then(
+      () => true,
+      () => false
+    );
   }
 
   /**
    * Get author information
    * @returns
    */
-  static async getAuthor(): Promise<{ name?: string, email: string }> {
+  static async getAuthor(): Promise<{ name?: string; email: string }> {
     const [name, email] = await Promise.all([
       ExecUtil.getResult(spawn('git', ['config', 'user.name']), { catch: true }),
-      ExecUtil.getResult(spawn('git', ['config', 'user.email'])),
+      ExecUtil.getResult(spawn('git', ['config', 'user.email']))
     ]);
     return {
       name: (name.valid ? name.stdout.trim() : '') || process.env.USER,
@@ -38,7 +41,8 @@ export class CliScmUtil {
     const result = await ExecUtil.getResult(spawn('git', ['log', '--pretty=oneline'], { cwd: Runtime.workspace.path }));
     return result.stdout
       .split(/\n/)
-      .find(line => /Publish /.test(line))?.split(/\s+/)?.[0];
+      .find(line => /Publish /.test(line))
+      ?.split(/\s+/)?.[0];
   }
 
   /**
@@ -48,9 +52,15 @@ export class CliScmUtil {
    */
   static async findChangedFiles(fromHash: string, toHash: string = 'HEAD'): Promise<string[]> {
     const rootPath = Runtime.workspace.path;
-    const result = await ExecUtil.getResult(spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: rootPath }), { catch: true });
+    const result = await ExecUtil.getResult(
+      spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: rootPath }),
+      { catch: true }
+    );
     if (!result.valid) {
-      throw new RuntimeError('Unable to detect changes between', { category: 'data', details: { fromHash, toHash, output: (result.stderr || result.stdout) } });
+      throw new RuntimeError('Unable to detect changes between', {
+        category: 'data',
+        details: { fromHash, toHash, output: result.stderr || result.stdout }
+      });
     }
     const out = new Set<string>();
     for (const line of result.stdout.split(/\n/g)) {
@@ -76,8 +86,7 @@ export class CliScmUtil {
       .map(file => RuntimeIndex.getModule(file.module))
       .filter(module => !!module);
 
-    return [...new Set(modules)]
-      .toSorted((a, b) => a.name.localeCompare(b.name));
+    return [...new Set(modules)].toSorted((a, b) => a.name.localeCompare(b.name));
   }
 
   /**

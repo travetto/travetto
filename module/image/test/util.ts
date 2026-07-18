@@ -1,17 +1,16 @@
-import os from 'node:os';
 import assert from 'node:assert';
-import fs from 'node:fs/promises';
-import { pipeline } from 'node:stream/promises';
 import { createReadStream, createWriteStream } from 'node:fs';
+import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
+import { pipeline } from 'node:stream/promises';
 
-import { Test, Suite, TestFixtures } from '@travetto/test';
 import { ImageUtil } from '@travetto/image';
 import { BinaryUtil } from '@travetto/runtime';
+import { Suite, Test, TestFixtures } from '@travetto/test';
 
 @Suite()
 class ImageUtilSuite {
-
   fixture = new TestFixtures();
 
   @Test('resize test')
@@ -79,57 +78,87 @@ class ImageUtilSuite {
     const out = await ImageUtil.convert(createReadStream(imgFile), {
       w: 50,
       h: 50,
-      optimize: true,
+      optimize: true
     });
 
     const outFile = path.resolve(os.tmpdir(), `temp.${Date.now()}.${Math.random()}.png`);
     await pipeline(out, createWriteStream(outFile));
-    assert.ok(await fs.stat(outFile).then(() => true, () => false));
+    assert.ok(
+      await fs.stat(outFile).then(
+        () => true,
+        () => false
+      )
+    );
 
     const dims = await ImageUtil.getMetadata(createReadStream(outFile));
     assert(dims.height === 50);
     assert(dims.width === 50);
 
     await fs.unlink(outFile);
-    assert(await fs.stat(outFile).then(() => false, () => true));
+    assert(
+      await fs.stat(outFile).then(
+        () => false,
+        () => true
+      )
+    );
   }
 
   @Test()
   async resizeLooseWidthToFile() {
     const imgStream = await this.fixture.readBinaryStream('lincoln.jpg');
     const out = await ImageUtil.convert(imgStream, {
-      w: 100,
+      w: 100
     });
 
     const outFile = path.resolve(os.tmpdir(), `temp.${Date.now()}.${Math.random()}.png`);
     await pipeline(out, createWriteStream(outFile));
-    assert.ok(await fs.stat(outFile).then(() => true, () => false));
+    assert.ok(
+      await fs.stat(outFile).then(
+        () => true,
+        () => false
+      )
+    );
 
     const dims = await ImageUtil.getMetadata(createReadStream(outFile));
     assert(dims.width === 100);
     assert(dims.height === 134);
 
     await fs.unlink(outFile);
-    assert(await fs.stat(outFile).then(() => false, () => true));
+    assert(
+      await fs.stat(outFile).then(
+        () => false,
+        () => true
+      )
+    );
   }
 
   @Test()
   async resizeLooseHeightToFile() {
     const imgStream = await this.fixture.readBinaryStream('lincoln.jpg');
     const out = await ImageUtil.convert(imgStream, {
-      h: 134.00005,
+      h: 134.00005
     });
 
     const outFile = path.resolve(os.tmpdir(), `temp.${Date.now()}.${Math.random()}.png`);
     await pipeline(out, createWriteStream(outFile));
-    assert.ok(await fs.stat(outFile).then(() => true, () => false));
+    assert.ok(
+      await fs.stat(outFile).then(
+        () => true,
+        () => false
+      )
+    );
 
     const dims = await ImageUtil.getMetadata(createReadStream(outFile));
     assert(dims.width === 100);
     assert(dims.height === 134);
 
     await fs.unlink(outFile);
-    assert(await fs.stat(outFile).then(() => false, () => true));
+    assert(
+      await fs.stat(outFile).then(
+        () => false,
+        () => true
+      )
+    );
   }
 
   @Test()
@@ -138,12 +167,17 @@ class ImageUtilSuite {
     const out = await ImageUtil.convert(imgStream, {
       w: 200,
       h: 200,
-      format: 'avif',
+      format: 'avif'
     });
 
     const outFile = path.resolve(os.tmpdir(), `temp.${Date.now()}.${Math.random()}.avif`);
     await pipeline(out, createWriteStream(outFile));
-    assert.ok(await fs.stat(outFile).then(() => true, () => false));
+    assert.ok(
+      await fs.stat(outFile).then(
+        () => true,
+        () => false
+      )
+    );
 
     const meta = await ImageUtil.getMetadata(createReadStream(outFile));
     assert(meta.width === 200);
@@ -153,6 +187,11 @@ class ImageUtilSuite {
     assert(meta.format === 'avif');
 
     await fs.unlink(outFile);
-    assert(await fs.stat(outFile).then(() => false, () => true));
+    assert(
+      await fs.stat(outFile).then(
+        () => false,
+        () => true
+      )
+    );
   }
 }

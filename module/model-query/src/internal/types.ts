@@ -1,8 +1,8 @@
-import type { SchemaFieldConfig, Point } from '@travetto/schema';
-import { castTo, type Class, toConcrete } from '@travetto/runtime';
+import { type Class, castTo, toConcrete } from '@travetto/runtime';
+import type { Point, SchemaFieldConfig } from '@travetto/schema';
 
 const st = (value: string | string[], isArray: boolean = false): Set<string> =>
-  new Set((Array.isArray(value) ? value : [value]).map(item => isArray ? `${item}[]` : item));
+  new Set((Array.isArray(value) ? value : [value]).map(item => (isArray ? `${item}[]` : item)));
 
 const basic = (types: Set<string>): Record<string, Set<string>> => ({ $ne: types, $eq: types, $exists: st('boolean') });
 const scalar = (types: Set<string>): Record<string, Set<string>> => ({ $in: types, $nin: types });
@@ -42,12 +42,18 @@ export class TypeUtil {
   static getDeclaredType(field: SchemaFieldConfig | Function | Class): keyof typeof TypeUtil.OPERATORS | undefined {
     const type = 'type' in field ? field.type : field;
     switch (type) {
-      case String: return 'string';
-      case Number: return 'number';
-      case Boolean: return 'boolean';
-      case BigInt: return 'bigint';
-      case Date: return 'Date';
-      case PointConcrete: return 'Point';
+      case String:
+        return 'string';
+      case Number:
+        return 'number';
+      case Boolean:
+        return 'boolean';
+      case BigInt:
+        return 'bigint';
+      case Date:
+        return 'Date';
+      case PointConcrete:
+        return 'Point';
       default: {
         if ('type' in field && field.array) {
           return this.getDeclaredType(field.type);

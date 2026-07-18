@@ -1,11 +1,11 @@
 import { type Class, type ClassInstance, getClass, type RetainIntrinsicFields, type TimeSpan, TimeUtil } from '@travetto/runtime';
 
-import { ControllerRegistryIndex } from '../registry/registry-index.ts';
-import type { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { AcceptInterceptor } from '../interceptor/accept.ts';
+import { ControllerRegistryIndex } from '../registry/registry-index.ts';
+import type { ControllerConfig, EndpointConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
 import type { WebInterceptor } from '../types/interceptor.ts';
 
-function isClass(target: unknown, property: unknown,): target is Class<unknown> {
+function isClass(target: unknown, property: unknown): target is Class<unknown> {
   return !property;
 }
 
@@ -33,16 +33,21 @@ export function SetHeaders(headers: EndpointConfig['responseHeaders']): Endpoint
  * Specifies content type for response
  * @kind decorator
  */
-export function Produces(mime: string): EndpointDecorator { return SetHeaders({ 'Content-Type': mime }); }
+export function Produces(mime: string): EndpointDecorator {
+  return SetHeaders({ 'Content-Type': mime });
+}
 
-type CacheControlInput = { cacheableAge?: number | TimeSpan, isPrivate?: boolean };
+type CacheControlInput = { cacheableAge?: number | TimeSpan; isPrivate?: boolean };
 
 /**
  * Set the max-age of a response based on the config
  * @param value The value for the duration
  * @kind decorator
  */
-export function CacheControl(input: TimeSpan | number | CacheControlInput, extra?: Omit<CacheControlInput, 'cacheableAge'>): EndpointDecorator {
+export function CacheControl(
+  input: TimeSpan | number | CacheControlInput,
+  extra?: Omit<CacheControlInput, 'cacheableAge'>
+): EndpointDecorator {
   if (typeof input === 'string' || typeof input === 'number') {
     input = { ...extra, cacheableAge: input };
   }
@@ -50,7 +55,7 @@ export function CacheControl(input: TimeSpan | number | CacheControlInput, extra
   return register({
     responseContext: {
       ...(cacheableAge !== undefined ? { cacheableAge: TimeUtil.duration(cacheableAge, 's') } : {}),
-      ...isPrivate !== undefined ? { isPrivate } : {}
+      ...(isPrivate !== undefined ? { isPrivate } : {})
     }
   });
 }
@@ -76,14 +81,13 @@ export const ConfigureInterceptor = <T extends WebInterceptor>(
   cls: Class<T>,
   config: Partial<RetainIntrinsicFields<T['config']>>,
   extra?: Partial<EndpointConfig & ControllerConfig>
-): EndpointDecorator =>
-  ControllerRegistryIndex.createInterceptorConfigDecorator(cls, config, extra);
+): EndpointDecorator => ControllerRegistryIndex.createInterceptorConfigDecorator(cls, config, extra);
 
 /**
  * Specifies if endpoint should be conditional
  * @kind decorator
  */
-export function ConditionalRegister(handler: () => (boolean | Promise<boolean>)): EndpointDecorator {
+export function ConditionalRegister(handler: () => boolean | Promise<boolean>): EndpointDecorator {
   return register({ conditional: handler });
 }
 
@@ -93,4 +97,4 @@ export function ConditionalRegister(handler: () => (boolean | Promise<boolean>))
  */
 export function ExcludeInterceptors(interceptorExclude: (value: WebInterceptor) => boolean): EndpointDecorator {
   return register({ interceptorExclude });
-};
+}

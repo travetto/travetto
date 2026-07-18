@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
 import { RuntimeIndex } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
 
 @Suite()
 class RuntimeIndexTests {
@@ -13,7 +13,6 @@ class RuntimeIndexTests {
 
   @Test()
   async testModuleExpression() {
-
     const found = RuntimeIndex.getModuleList('workspace');
     assert(found.size >= 1);
     assert(found.has('@travetto/runtime'));

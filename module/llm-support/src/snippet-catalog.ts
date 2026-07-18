@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { SchemaValidator } from '@travetto/schema';
 import { JSONUtil, RuntimeIndex } from '@travetto/runtime';
+import { SchemaValidator } from '@travetto/schema';
 
 import { type RecommendationQuery, type SnippetSource, SnippetSourceSchema } from './types.ts';
 
@@ -31,9 +31,7 @@ async function loadSnippets(): Promise<SnippetSource[]> {
   try {
     const dir = snippetDirectory();
     const files = await fs.readdir(dir);
-    const filtered = files
-      .filter(file => file.endsWith('.md'))
-      .sort();
+    const filtered = files.filter(file => file.endsWith('.md')).sort();
     return Promise.all(filtered.map(file => loadSnippet(path.join(dir, file))));
   } catch (err) {
     if (isErrnoException(err) && (err.code === 'ENOENT' || err.code === 'ERR_MODULE_NOT_FOUND')) {
@@ -60,13 +58,15 @@ function matchesAny(value: string[], desired?: string[]): boolean {
 
 export async function recommendSnippets(query: RecommendationQuery = {}): Promise<SnippetSource[]> {
   const snippets = await getSnippets();
-  const byOperation = query.operations && query.operations.length > 0 ?
-    snippets.filter(item => matchesAny(item.operationIds ?? [], query.operations)) :
-    snippets;
+  const byOperation =
+    query.operations && query.operations.length > 0
+      ? snippets.filter(item => matchesAny(item.operationIds ?? [], query.operations))
+      : snippets;
 
-  const byTag = query.snippetTags && query.snippetTags.length > 0 ?
-    byOperation.filter(item => matchesAny(item.capabilityTags, query.snippetTags)) :
-    byOperation;
+  const byTag =
+    query.snippetTags && query.snippetTags.length > 0
+      ? byOperation.filter(item => matchesAny(item.capabilityTags, query.snippetTags))
+      : byOperation;
 
   return byTag;
 }

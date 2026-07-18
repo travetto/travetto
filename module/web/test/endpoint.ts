@@ -1,66 +1,65 @@
 import assert from 'node:assert';
 
 import { Registry } from '@travetto/registry';
-import { Suite, Test, BeforeAll } from '@travetto/test';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Controller, ControllerRegistryIndex, EndpointUtil, Get, Post } from '@travetto/web';
 
 @Controller('/')
 class EndpointController {
   @Post('/:name')
-  async endpoint() { }
+  async endpoint() {}
 
   @Post('/login')
-  async login() { }
+  async login() {}
 
   @Post('/user/:id')
-  async users() { }
+  async users() {}
 
   @Post('/req/res')
-  async reqRes() { }
+  async reqRes() {}
 
   @Post('/array')
-  async array() { }
+  async array() {}
 
   @Get('/array/names')
-  async arrayNames() { }
+  async arrayNames() {}
 
   @Post('/array2')
-  async array2() { }
+  async array2() {}
 
   @Get('/job/output/:jobId')
-  async jobOutput() { }
+  async jobOutput() {}
 
   @Get('/job/:output/jobId')
-  async jobOutput4() { }
+  async jobOutput4() {}
 
   @Get('/job/output-min/:jobId')
-  async jobOutputMin() { }
+  async jobOutputMin() {}
 
   @Get('/job/output/extra')
-  async jobOutput3() { }
+  async jobOutput3() {}
 
   @Get('/job/output2')
-  async jobOutput2() { }
+  async jobOutput2() {}
 
   @Get('/user/bob')
-  async getBob() { }
+  async getBob() {}
 
   @Post('/alias')
-  async alias() { }
+  async alias() {}
 
   @Get('/list/todo')
-  async listTodo() { }
+  async listTodo() {}
 
   @Get('/a/b/c')
-  async abc() { }
+  async abc() {}
 
   @Get('/a/*')
-  async wildcard() { }
+  async wildcard() {}
 }
 
 @Suite()
 export class RouterUtilTest {
-
   @BeforeAll()
   async init() {
     await Registry.init();
@@ -71,24 +70,27 @@ export class RouterUtilTest {
     const controller = ControllerRegistryIndex.getConfig(EndpointController);
     const endpoints = EndpointUtil.orderEndpoints(controller.endpoints);
 
-    assert.deepStrictEqual(endpoints.map(x => x.path), [
-      '/a/b/c',
-      '/job/output/extra',
-      '/job/output-min/:jobId',
-      '/job/output/:jobId',
-      '/job/:output/jobId',
-      '/array/names',
-      '/job/output2',
-      '/list/todo',
-      '/req/res',
-      '/user/bob',
-      '/user/:id',
-      '/a/*',
-      '/alias',
-      '/array',
-      '/array2',
-      '/login',
-      '/:name',
-    ]);
+    assert.deepStrictEqual(
+      endpoints.map(x => x.path),
+      [
+        '/a/b/c',
+        '/job/output/extra',
+        '/job/output-min/:jobId',
+        '/job/output/:jobId',
+        '/job/:output/jobId',
+        '/array/names',
+        '/job/output2',
+        '/list/todo',
+        '/req/res',
+        '/user/bob',
+        '/user/:id',
+        '/a/*',
+        '/alias',
+        '/array',
+        '/array2',
+        '/login',
+        '/:name'
+      ]
+    );
   }
 }

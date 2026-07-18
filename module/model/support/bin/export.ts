@@ -1,5 +1,5 @@
-import type { Class } from '@travetto/runtime';
 import type { ModelStorageSupport, ModelType } from '@travetto/model';
+import type { Class } from '@travetto/runtime';
 
 export class ModelExportUtil {
   static async run(provider: ModelStorageSupport, models: Class<ModelType>[]): Promise<void> {

@@ -1,10 +1,10 @@
 /** @jsxImportSource @travetto/doc/support */
-import { d, type DocJSXElementByFn, type DocJSXElement, DocFileUtil } from '@travetto/doc';
-import { Runtime, toConcrete } from '@travetto/runtime';
+import { DocFileUtil, type DocJSXElement, type DocJSXElementByFn, d } from '@travetto/doc';
+import { castKey, Runtime, toConcrete } from '@travetto/runtime';
 
 import type { ModelQueryCrudSupport } from '../src/types/crud.ts';
+import type { ModelQueryFacetSupport } from '../src/types/facet.ts';
 import type { ModelQuerySupport } from '../src/types/query.ts';
-import type { ModelQueryFacetSupport, } from '../src/types/facet.ts';
 import type { ModelQuerySuggestSupport } from '../src/types/suggest.ts';
 
 const toLink = (title: string, target: Function): DocJSXElementByFn<'CodeLink'> =>
@@ -14,7 +14,7 @@ export const Links = {
   QueryCrud: toLink('Query Crud', toConcrete<ModelQueryCrudSupport>()),
   QueryFacet: toLink('Facet', toConcrete<ModelQueryFacetSupport>()),
   QuerySuggest: toLink('Suggest', toConcrete<ModelQuerySuggestSupport>()),
-  Query: toLink('Query', toConcrete<ModelQuerySupport>()),
+  Query: toLink('Query', toConcrete<ModelQuerySupport>())
 };
 
 export const ModelQueryTypes = (fn: Function): DocJSXElement[] => {
@@ -24,8 +24,7 @@ export const ModelQueryTypes = (fn: Function): DocJSXElement[] => {
   for (const [, key] of content.matchAll(/Model(Query(Suggest|Facet|Crud)?)Support/g)) {
     if (!seen.has(key) && key in Links) {
       seen.add(key);
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const link = Links[key as keyof typeof Links];
+      const link = Links[castKey(key)];
       found.push(link);
     }
   }

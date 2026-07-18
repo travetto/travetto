@@ -22,10 +22,8 @@ class Type {
 
 @Suite()
 export class QueryTest {
-
   @Test()
   async validateQuery() {
-
     const out = MongoUtil.extractSimple(User, { a: { b: { c: 5 } } });
     assert(out['a.b.c'] === 5);
 
@@ -42,13 +40,7 @@ export class QueryTest {
     });
 
     assert.deepEqual(out2, {
-      $and: [
-        { ['a.b.c']: 5 },
-        { ['d.e']: true },
-        { $or: [{ name: 5 }, { age: 10 }] },
-        { ['g.z']: 'a' },
-        { ['a.d']: { $gt: 20 } },
-      ]
+      $and: [{ 'a.b.c': 5 }, { 'd.e': true }, { $or: [{ name: 5 }, { age: 10 }] }, { 'g.z': 'a' }, { 'a.d': { $gt: 20 } }]
     });
   }
 
@@ -56,15 +48,15 @@ export class QueryTest {
   async translateIds() {
     const ids = ['a'.repeat(24), 'b'.repeat(24), 'c'.repeat(24)];
     const out = MongoUtil.extractWhereClause(User, {
-      $and: [
-        { id: { $in: ids } }
-      ]
+      $and: [{ id: { $in: ids } }]
     });
 
     assert.deepStrictEqual(out, {
-      $and: [{
-        _id: { $in: ids.map(x => MongoUtil.uuid(x)) }
-      }]
+      $and: [
+        {
+          _id: { $in: ids.map(x => MongoUtil.uuid(x)) }
+        }
+      ]
     });
   }
 

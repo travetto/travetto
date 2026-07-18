@@ -11,8 +11,8 @@ const input = {
   assertLine: ['#ffffe0'], // light yellow
   objectInspect: ['#cd00cd'], // Magenta
   suiteName: ['#cdcd00'], // Yellow
-  testName: ['#00cdcd'],  // Cyan
-  total: ['#e5e5e5'], // White
+  testName: ['#00cdcd'], // Cyan
+  total: ['#e5e5e5'] // White
 } as const;
 
 export const CONSOLE_ENHANCER = StyleUtil.getPalette(input);

@@ -3,8 +3,9 @@ import util from 'node:util';
 import { ConfigurationService } from '@travetto/config';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
-import { DBConfig } from '@travetto/config/doc/dbconfig.ts';
 import { hasToJSON } from '@travetto/runtime';
+
+import { DBConfig } from '@travetto/config/doc/dbconfig.ts';
 
 util.inspect.defaultOptions.depth = 5;
 

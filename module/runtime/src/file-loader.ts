@@ -2,14 +2,13 @@ import { createReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+import { type BinaryArray, type BinaryStream, BinaryUtil } from './binary.ts';
 import { RuntimeError } from './error.ts';
-import { BinaryUtil, type BinaryArray, type BinaryStream } from './binary.ts';
 
 /**
  * File loader that will search for files across the provided search paths
  */
 export class FileLoader {
-
   #searchPaths: readonly string[];
 
   constructor(paths: string[]) {

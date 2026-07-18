@@ -1,15 +1,14 @@
 import assert from 'node:assert';
 
-import { Test, Suite, BeforeAll } from '@travetto/test';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
 import { Env } from '@travetto/runtime';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { NameConfig, TestConfig } from './shared.ts';
 
 @Suite()
 export class EnvConfigTest {
-
   @BeforeAll()
   async init() {
     Object.assign(process.env, {

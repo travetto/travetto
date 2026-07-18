@@ -2,7 +2,6 @@ import { CacheControl, ContextParam, Controller, Get, type WebRequest, WebRespon
 
 @Controller('/context')
 class ContextController {
-
   @ContextParam()
   request: WebRequest;
 

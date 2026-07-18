@@ -1,14 +1,13 @@
-import { type RegistrationMethods, type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { RuntimeError, castKey, castTo, type Class, classConstruct, getParentClass } from '@travetto/runtime';
+import { type RegistrationMethods, Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
+import { type Class, castKey, castTo, classConstruct, getParentClass, RuntimeError } from '@travetto/runtime';
 
-import type { SchemaFieldConfig, SchemaClassConfig } from './types.ts';
 import { type SchemaDiscriminatedInfo, SchemaRegistryAdapter } from './registry-adapter.ts';
+import type { SchemaClassConfig, SchemaFieldConfig } from './types.ts';
 
 /**
  * Schema registry index for managing schema configurations across classes
  */
 export class SchemaRegistryIndex implements RegistryIndex {
-
   static #instance = Registry.registerIndex(SchemaRegistryIndex);
 
   static getForRegister(cls: Class): SchemaRegistryAdapter {
@@ -36,7 +35,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
   }
 
   static visitFields<T>(cls: Class<T>, onField: (field: SchemaFieldConfig, path: SchemaFieldConfig[]) => void): void {
-    return this.#instance.visitFields(cls, onField);
+    this.#instance.visitFields(cls, onField);
   }
 
   static getDiscriminatedClasses(cls: Class): Class[] {
@@ -63,7 +62,9 @@ export class SchemaRegistryIndex implements RegistryIndex {
   #baseSchema = new Map<Class, Class>();
   #byDiscriminatedTypes = new Map<Class, Map<string, Class>>();
 
-  /** @private */ constructor(source: unknown) { Registry.validateConstructor(source); }
+  /** @private */ constructor(source: unknown) {
+    Registry.validateConstructor(source);
+  }
 
   /**
    * Register discriminated types for a class
@@ -128,7 +129,9 @@ export class SchemaRegistryIndex implements RegistryIndex {
       }
       const requested = map.get(type)!;
       if (!(classConstruct(requested) instanceof targetClass)) {
-        throw new RuntimeError(`Resolved discriminated type '${type}' for class ${base.name} is not an instance of requested type ${targetClass.name}`);
+        throw new RuntimeError(
+          `Resolved discriminated type '${type}' for class ${base.name} is not an instance of requested type ${targetClass.name}`
+        );
       }
       return requested;
     }
@@ -137,10 +140,13 @@ export class SchemaRegistryIndex implements RegistryIndex {
   /**
    * Visit fields recursively
    */
-  visitFields<T>(cls: Class<T>, onField: (field: SchemaFieldConfig, path: SchemaFieldConfig[]) => void, _path: SchemaFieldConfig[] = [], root = cls): void {
-    const fields = SchemaRegistryIndex.has(cls) ?
-      Object.values(this.getClassConfig(cls).fields) :
-      [];
+  visitFields<T>(
+    cls: Class<T>,
+    onField: (field: SchemaFieldConfig, path: SchemaFieldConfig[]) => void,
+    _path: SchemaFieldConfig[] = [],
+    root = cls
+  ): void {
+    const fields = SchemaRegistryIndex.has(cls) ? Object.values(this.getClassConfig(cls).fields) : [];
     for (const field of fields) {
       if (SchemaRegistryIndex.has(field.type)) {
         this.visitFields(field.type, onField, [..._path, field], root);
@@ -155,7 +161,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
    * @param cls The base class to resolve from
    */
   getDiscriminatedClasses(cls: Class): Class[] {
-    return [...this.#byDiscriminatedTypes.get(cls)?.values() ?? []];
+    return [...(this.#byDiscriminatedTypes.get(cls)?.values() ?? [])];
   }
 
   /**

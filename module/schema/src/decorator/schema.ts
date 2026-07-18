@@ -1,9 +1,9 @@
-import { castTo, type Class, type DeepPartial } from '@travetto/runtime';
+import { type Class, castTo, type DeepPartial } from '@travetto/runtime';
 
 import { BindUtil } from '../bind-util.ts';
+import { SchemaRegistryIndex } from '../service/registry-index.ts';
 import type { SchemaClassConfig, ViewFieldsConfig } from '../service/types.ts';
 import type { ValidatorFn } from '../validate/types.ts';
-import { SchemaRegistryIndex } from '../service/registry-index.ts';
 
 /**
  * Provides all the valid string type fields from a given type T
@@ -31,7 +31,8 @@ export function Schema(config?: Partial<Pick<SchemaClassConfig, 'validators' | '
  * @param fn The validator function
  * @kind decorator
  */
-export const Validator = <T>(fn: ValidatorFn<T, string>) =>
+export const Validator =
+  <T>(fn: ValidatorFn<T, string>) =>
   (cls: Class<T>): void => {
     SchemaRegistryIndex.getForRegister(cls).register({ validators: [castTo(fn)] });
   };

@@ -1,34 +1,34 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
+import { type ModelCrudSupport, NotFoundError } from '@travetto/model';
 import { TimeUtil } from '@travetto/runtime';
-import { NotFoundError, type ModelCrudSupport } from '@travetto/model';
+import { Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
-import { Aged, Location, Names, Note, Person, SimpleList, WithNestedLists, WithNestedNestedLists } from './model.ts';
-
 import type { ModelQuerySupport } from '../../src/types/query.ts';
+import { Aged, Location, Names, Note, Person, SimpleList, WithNestedLists, WithNestedNestedLists } from './model.ts';
 
 @Suite()
 export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport & ModelCrudSupport> {
-
   supportsGeo = true;
 
   @Test()
   async testIds() {
     const svc = await this.service;
 
-    const people = [1, 2, 3, 8].map(x => Person.from({
-      id: svc.idSource.create(),
-      name: 'Bob Omber',
-      age: 20 + x,
-      gender: 'm',
-      address: {
-        street1: 'a',
-        ...(x === 1 ? { street2: 'b' } : {})
-      }
-    }));
+    const people = [1, 2, 3, 8].map(x =>
+      Person.from({
+        id: svc.idSource.create(),
+        name: 'Bob Omber',
+        age: 20 + x,
+        gender: 'm',
+        address: {
+          street1: 'a',
+          ...(x === 1 ? { street2: 'b' } : {})
+        }
+      })
+    );
 
     await this.saveAll(Person, people);
 
@@ -48,15 +48,20 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   @Test('verify word boundary')
   async testWordBoundary() {
     const service = await this.service;
-    await this.saveAll(Person, [1, 2, 3, 8].map(x => Person.from({
-      name: 'Bob Omber',
-      age: 20 + x,
-      gender: 'm',
-      address: {
-        street1: 'a',
-        ...(x === 1 ? { street2: 'b' } : {})
-      }
-    })));
+    await this.saveAll(
+      Person,
+      [1, 2, 3, 8].map(x =>
+        Person.from({
+          name: 'Bob Omber',
+          age: 20 + x,
+          gender: 'm',
+          address: {
+            street1: 'a',
+            ...(x === 1 ? { street2: 'b' } : {})
+          }
+        })
+      )
+    );
 
     const results = await service.query(Person, { where: { name: { $regex: /\bomb.*/i } } });
     assert(results.length === 4);
@@ -71,15 +76,20 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   @Test('verify query one behavior')
   async testQueryOne() {
     const service = await this.service;
-    await this.saveAll(Person, [1, 2, 3, 8].map(x => Person.from({
-      name: 'Bob Omber',
-      age: 20 + x,
-      gender: 'm',
-      address: {
-        street1: 'a',
-        ...(x === 1 ? { street2: 'b' } : {})
-      }
-    })));
+    await this.saveAll(
+      Person,
+      [1, 2, 3, 8].map(x =>
+        Person.from({
+          name: 'Bob Omber',
+          age: 20 + x,
+          gender: 'm',
+          address: {
+            street1: 'a',
+            ...(x === 1 ? { street2: 'b' } : {})
+          }
+        })
+      )
+    );
 
     await assert.rejects(() => service.queryOne(Person, { where: { gender: 'm' } }), /Invalid number of results/);
     await assert.rejects(() => service.queryOne(Person, { where: { gender: 'z' } }), NotFoundError);
@@ -91,13 +101,19 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   @Test('Verify array $in queries work properly')
   async testArrayContains() {
     const svc = await this.service;
-    const first = await svc.create(SimpleList, SimpleList.from({
-      names: ['a', 'b', 'c']
-    }));
+    const first = await svc.create(
+      SimpleList,
+      SimpleList.from({
+        names: ['a', 'b', 'c']
+      })
+    );
 
-    const second = await svc.create(SimpleList, SimpleList.from({
-      names: ['b', 'c', 'd']
-    }));
+    const second = await svc.create(
+      SimpleList,
+      SimpleList.from({
+        names: ['b', 'c', 'd']
+      })
+    );
 
     const single = await svc.query(SimpleList, {
       where: {
@@ -161,7 +177,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     await this.saveAll(Names, [
       Names.from({ values: ['a', 'b', 'c'] }),
       Names.from({ values: ['a', 'b'] }),
-      Names.from({ values: ['b', 'c'] }),
+      Names.from({ values: ['b', 'c'] })
     ]);
 
     const results = await service.query(Names, {});
@@ -212,23 +228,27 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   async testSorting() {
     const service = await this.service;
 
-    const people = [1, 2, 3, 8].map(x => Person.from({
-      id: service.idSource.create(),
-      name: 'Bob',
-      age: 20 + x,
-      gender: 'm',
-      address: {
-        street1: 'a',
-        ...(x === 1 ? { street2: 'b' } : {})
-      }
-    }));
+    const people = [1, 2, 3, 8].map(x =>
+      Person.from({
+        id: service.idSource.create(),
+        name: 'Bob',
+        age: 20 + x,
+        gender: 'm',
+        address: {
+          street1: 'a',
+          ...(x === 1 ? { street2: 'b' } : {})
+        }
+      })
+    );
 
     await this.saveAll(Person, people);
 
     const all = await service.query(Person, {
-      sort: [{
-        age: -1
-      }]
+      sort: [
+        {
+          age: -1
+        }
+      ]
     });
     assert(all[0].age >= all[1].age);
   }
@@ -245,21 +265,28 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
 
     for (let i = 0; i < 5; i++) {
       for (let j = 0; j < 5; j++) {
-        toAdd.push(Location.from({
-          point: [i, j],
-        }));
+        toAdd.push(
+          Location.from({
+            point: [i, j]
+          })
+        );
       }
     }
 
     await this.saveAll(Location, toAdd);
 
-    assert(await svc.queryCount(Location, {}) === 25);
+    assert((await svc.queryCount(Location, {})) === 25);
 
     const result = await svc.query(Location, {
       limit: 100,
       where: {
         point: {
-          $geoWithin: [[-1, -1], [-1, 6], [6, 6], [6, -1]]
+          $geoWithin: [
+            [-1, -1],
+            [-1, 6],
+            [6, 6],
+            [6, -1]
+          ]
         }
       }
     });
@@ -286,15 +313,18 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
 
     const id = service.idSource.create();
 
-    await service.create(Note, Note.from({
-      id,
-      entities: [
-        {
-          label: 'hi',
-          id
-        }
-      ]
-    }));
+    await service.create(
+      Note,
+      Note.from({
+        id,
+        entities: [
+          {
+            label: 'hi',
+            id
+          }
+        ]
+      })
+    );
 
     const out = await service.queryCount(Note, {
       where: {
@@ -320,9 +350,12 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   @Test()
   async verifyDateRange() {
     const service = await this.service;
-    await this.saveAll(Aged, (['-5d', '-4d', '-3d', '-2d', '-1d', '0d', '1d', '2d', '3d', '4d', '5d'] as const).map(delta =>
-      Aged.from({ createdAt: TimeUtil.fromNow(delta) })
-    ));
+    await this.saveAll(
+      Aged,
+      (['-5d', '-4d', '-3d', '-2d', '-1d', '0d', '1d', '2d', '3d', '4d', '5d'] as const).map(delta =>
+        Aged.from({ createdAt: TimeUtil.fromNow(delta) })
+      )
+    );
 
     const simple = await service.queryCount(Aged, {
       where: {
@@ -371,7 +404,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     });
 
     await service.create(WithNestedLists, {
-      names: ['c', 'd'],
+      names: ['c', 'd']
     });
 
     await service.create(WithNestedLists, {
@@ -442,7 +475,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     });
 
     await service.create(WithNestedNestedLists, {
-      sub: { names: ['c', 'd'] },
+      sub: { names: ['c', 'd'] }
     });
 
     await service.create(WithNestedNestedLists, {
@@ -505,4 +538,3 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     assert(total === 1);
   }
 }
-

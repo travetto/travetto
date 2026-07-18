@@ -2,31 +2,29 @@ import os from 'node:os';
 import path from 'node:path';
 
 import { type CliCommandShape, CliFlag, CliModuleFlag, CliParseUtil, cliTpl } from '@travetto/cli';
-import { TimeUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
-import { Terminal } from '@travetto/terminal';
+import { type IndexedModule, PackageUtil } from '@travetto/manifest';
+import { Runtime, RuntimeIndex, TimeUtil } from '@travetto/runtime';
 import { Ignore, Method, Required, Schema } from '@travetto/schema';
-import { PackageUtil, type IndexedModule } from '@travetto/manifest';
+import { Terminal } from '@travetto/terminal';
 
 import { PackOperation } from './bin/operation.ts';
 import { PackUtil } from './bin/util.ts';
 
-export type PackOperationShape<T> = ((config: T) => AsyncIterable<string[]>);
+export type PackOperationShape<T> = (config: T) => AsyncIterable<string[]>;
 
 @Schema()
 export abstract class BasePackCommand implements CliCommandShape {
-
   static get entryPoints(): string[] {
     return RuntimeIndex.find({
       module: module => module.production,
       folder: folder => folder === 'support',
       file: file => file.sourceFile.includes('entry.')
-    })
-      .map(file => file.import.replace(/[.][^.]+s$/, ''));
+    }).map(file => file.import.replace(/[.][^.]+s$/, ''));
   }
 
   /** Workspace for building */
   @CliFlag({ short: 'b', full: 'buildDir' })
-  buildDirectory: string = path.resolve(os.tmpdir(), Runtime.mainSourcePath.replace(/[\/\\: ]/g, '_'));
+  buildDirectory: string = path.resolve(os.tmpdir(), Runtime.mainSourcePath.replace(/[/\\: ]/g, '_'));
 
   /** Clean workspace */
   clean = true;
@@ -105,14 +103,14 @@ export abstract class BasePackCommand implements CliCommandShape {
       PackOperation.copyMonoRepoResources,
       PackOperation.copyResources,
       PackOperation.writeManifest,
-      PackOperation.bundle,
+      PackOperation.bundle
     ];
   }
 
   /**
    * Run all operations
    */
-  async * runOperations(): AsyncIterable<string> {
+  async *runOperations(): AsyncIterable<string> {
     for (const operation of this.getOperations()) {
       for await (const message of operation(this)) {
         yield message.join(' ');
@@ -128,8 +126,7 @@ export abstract class BasePackCommand implements CliCommandShape {
       .map(name => RuntimeIndex.getModule(name))
       .filter((module): module is IndexedModule => !!module?.production)
       .map(module => PackageUtil.readPackage(module?.sourcePath))
-      .map(pkg => pkg?.travetto?.build?.externalDependencies ?? [])
-      .flat();
+      .flatMap(pkg => pkg?.travetto?.build?.externalDependencies ?? []);
   }
 
   @Method()
@@ -141,7 +138,7 @@ export abstract class BasePackCommand implements CliCommandShape {
 
     // Update entry points
     const parsed = CliParseUtil.getState(this);
-    this.entryArguments = [...this.entryArguments ?? [], ...args, ...parsed?.unknown ?? []];
+    this.entryArguments = [...(this.entryArguments ?? []), ...args, ...(parsed?.unknown ?? [])];
     this.module ||= Runtime.main.name;
     this.mainName ??= path.basename(this.module);
     this.mainFile = `${this.mainName}.js`;

@@ -7,7 +7,6 @@ type Paging = {
 
 @Controller('/user')
 class UserController {
-
   private service: {
     search(query: Paging): Promise<number>;
   };

@@ -1,7 +1,7 @@
-import { inspect, type InspectOptions } from 'node:util';
+import { type InspectOptions, inspect } from 'node:util';
 
-import { DataUtil } from '@travetto/schema';
 import { safeAssign } from '@travetto/runtime';
+import { DataUtil } from '@travetto/schema';
 
 import type { LogEvent } from '../types.ts';
 
@@ -21,7 +21,7 @@ export class LogFormatUtil {
 
   /** Get log message */
   static getLogMessage(event: LogEvent, options: InspectOptions = INSPECT_OPTIONS): string {
-    const formatted = event.args?.map(arg => typeof arg === 'string' ? arg : inspect(arg, options)) ?? [];
+    const formatted = event.args?.map(arg => (typeof arg === 'string' ? arg : inspect(arg, options))) ?? [];
     return (event.message ? [event.message, ...formatted] : formatted).join(' ');
   }
 }

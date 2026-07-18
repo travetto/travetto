@@ -1,17 +1,16 @@
-import { toConcrete, type Class } from '@travetto/runtime';
-import { type InjectableCandidate, DependencyRegistryIndex } from '@travetto/di';
+import { DependencyRegistryIndex, type InjectableCandidate } from '@travetto/di';
+import { type Class, toConcrete } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import type { ModelStorageSupport } from '../../src/types/storage.ts';
-import type { ModelType } from '../../src/types/model.ts';
 import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
+import type { ModelType } from '../../src/types/model.ts';
+import type { ModelStorageSupport } from '../../src/types/storage.ts';
 
 /**
  * Utilities for finding candidates for model operations
  */
 export class ModelCandidateUtil {
-
-  static async export(operation: keyof ModelStorageSupport): Promise<{ models: string[], providers: string[] }> {
+  static async export(operation: keyof ModelStorageSupport): Promise<{ models: string[]; providers: string[] }> {
     return {
       models: await this.getModelNames(),
       providers: await this.getProviderNames(operation)
@@ -48,9 +47,7 @@ export class ModelCandidateUtil {
    * Get list of names of all viable providers
    */
   static async getProviderNames(operation?: keyof ModelStorageSupport): Promise<string[]> {
-    return (await this.getProviders(operation))
-      .map(x => x.class.name.replace(/ModelService/, ''))
-      .toSorted();
+    return (await this.getProviders(operation)).map(x => x.class.name.replace(/ModelService/, '')).toSorted();
   }
 
   /**
@@ -67,7 +64,7 @@ export class ModelCandidateUtil {
    * @param models
    * @returns
    */
-  static async resolve(provider: string, models: string[]): Promise<{ provider: ModelStorageSupport, models: Class<ModelType>[] }> {
+  static async resolve(provider: string, models: string[]): Promise<{ provider: ModelStorageSupport; models: Class<ModelType>[] }> {
     return {
       provider: await this.getProvider(provider),
       models: await this.#getModels(models)

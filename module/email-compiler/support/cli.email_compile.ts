@@ -1,5 +1,5 @@
+import { CliCommand, type CliCommandShape, cliTpl } from '@travetto/cli';
 import { Registry } from '@travetto/registry';
-import { type CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
 import { Env, Runtime, WatchUtil } from '@travetto/runtime';
 
 import { EmailCompiler } from '../src/compiler.ts';
@@ -14,7 +14,6 @@ import { EmailCompileUtil } from '../src/util.ts';
  */
 @CliCommand()
 export class EmailCompileCommand implements CliCommandShape {
-
   /** Recompile templates whenever source templates change. */
   watch?: boolean;
 
@@ -34,9 +33,11 @@ export class EmailCompileCommand implements CliCommandShape {
     }
 
     if (this.watch) {
-      await WatchUtil.watchCompilerEvents('change',
+      await WatchUtil.watchCompilerEvents(
+        'change',
         ({ file }) => EmailCompiler.spawnCompile(file),
-        ({ file }) => EmailCompileUtil.isTemplateFile(file));
+        ({ file }) => EmailCompileUtil.isTemplateFile(file)
+      );
     }
   }
 }

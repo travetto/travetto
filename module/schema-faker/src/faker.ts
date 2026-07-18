@@ -1,13 +1,12 @@
 import { faker } from '@faker-js/faker';
 
-import { castTo, type Class, TimeUtil } from '@travetto/runtime';
-import { BindUtil, type SchemaFieldConfig, CommonRegex, SchemaRegistryIndex } from '@travetto/schema';
+import { type Class, castTo, TimeUtil } from '@travetto/runtime';
+import { BindUtil, CommonRegex, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 /**
  * Provide a faker utility for generating content
  */
 export class SchemaFaker {
-
   static #stringToReType = new Map<RegExp, () => string>([
     [CommonRegex.email, faker.internet.email],
     [CommonRegex.url, faker.internet.url],
@@ -48,7 +47,7 @@ export class SchemaFaker {
       [/dob|birth/, (): Date => faker.date.past({ years: 60 })],
       [/creat(e|ion)/, this.#between.bind(null, -200, -100)],
       [/(update|modif(y|ied))/, this.#between.bind(null, -100, -50)]
-    ]),
+    ])
   };
 
   static #between(fromDays: number, toDays: number): Date {
@@ -89,10 +88,10 @@ export class SchemaFaker {
     let offset = 1;
 
     if (precision !== undefined) {
-      min ??= -((10 ** precision[0]) - 1);
-      max ??= ((10 ** precision[0]) - 1);
+      min ??= -(10 ** precision[0] - 1);
+      max ??= 10 ** precision[0] - 1;
       if (precision[1] !== undefined) {
-        offset = (10 ** (precision[1] || 0));
+        offset = 10 ** (precision[1] || 0);
       }
     }
 
@@ -101,9 +100,8 @@ export class SchemaFaker {
 
     const range = (max - min) * offset;
     const result = Math.trunc(Math.random() * range);
-    return (result / offset) + min;
+    return result / offset + min;
   }
-
 
   /**
    * Get a new bigint value
@@ -112,7 +110,7 @@ export class SchemaFaker {
   static #bigInt(config: SchemaFieldConfig): bigint {
     const min = config.min && typeof config.min.limit === 'bigint' ? config.min.limit : 0n;
     const max = config.max && typeof config.max.limit === 'bigint' ? config.max.limit : 1000n;
-    return faker.number.bigInt({ min, max, });
+    return faker.number.bigInt({ min, max });
   }
 
   /**
@@ -144,7 +142,7 @@ export class SchemaFaker {
     const name = config.name.toLowerCase();
 
     if (config.match) {
-      const mre = config.match && config.match.regex;
+      const mre = config.match.regex;
       for (const [regex, fn] of this.#stringToReType) {
         if (mre === regex) {
           return fn();
@@ -172,11 +170,16 @@ export class SchemaFaker {
       return faker.helpers.arrayElement(config.enum.values);
     } else {
       switch (config.type) {
-        case Number: return this.#number(config);
-        case castTo(BigInt): return this.#bigInt(config);
-        case String: return this.#string(config);
-        case Date: return this.#date(config);
-        case Boolean: return faker.datatype.boolean();
+        case Number:
+          return this.#number(config);
+        case castTo(BigInt):
+          return this.#bigInt(config);
+        case String:
+          return this.#string(config);
+        case Date:
+          return this.#date(config);
+        case Boolean:
+          return faker.datatype.boolean();
       }
       if (SchemaRegistryIndex.has(config.type)) {
         return this.generate(config.type);
@@ -194,10 +197,11 @@ export class SchemaFaker {
     const out: Record<string, unknown> = {};
 
     for (const [name, fieldConfig] of Object.entries(fields)) {
-      if (name === 'type' || name === 'id') { // Do not set primary fields
+      if (name === 'type' || name === 'id') {
+        // Do not set primary fields
         continue;
       }
-      if (fieldConfig.required?.active === false && (Math.random() < .5)) {
+      if (fieldConfig.required?.active === false && Math.random() < 0.5) {
         continue;
       }
       out[name] = this.#value(fieldConfig);

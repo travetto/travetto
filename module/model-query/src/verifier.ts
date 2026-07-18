@@ -1,10 +1,10 @@
 /* eslint @typescript-eslint/no-unused-vars: ["error", { "args": "none"} ] */
-import { DataUtil, ValidationResultError, type ValidationError, SchemaRegistryIndex } from '@travetto/schema';
-import { JSONUtil, type Class } from '@travetto/runtime';
 
-import type { ModelQuery, Query, PageableModelQuery } from './model/query.ts';
+import { type Class, JSONUtil } from '@travetto/runtime';
+import { DataUtil, SchemaRegistryIndex, type ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { TypeUtil } from './internal/types.ts';
+import type { ModelQuery, PageableModelQuery, Query } from './model/query.ts';
 
 type SimpleType = keyof typeof TypeUtil.OPERATORS;
 
@@ -28,24 +28,19 @@ const WHERE = 'where';
 const SORT = 'sort';
 // const GROUP_BY = 'groupBy';
 
-const MULTIPLE_KEYS_ALLOWED = new Set([
-  '$maxDistance', '$gt', '$gte',
-  '$minDistance', '$lt', '$lte',
-  '$near'
-]);
+const MULTIPLE_KEYS_ALLOWED = new Set(['$maxDistance', '$gt', '$gte', '$minDistance', '$lt', '$lte', '$near']);
 
 /**
  * Query verification service.  Used to verify the query is valid before running.
  */
 export class QueryVerifier {
-
   /**
    * Internal mapping for various clauses
    */
   static #mapping = [
     [SELECT, 'processSelectClause'] as const,
     [WHERE, 'processWhereClause'] as const,
-    [SORT, 'processSortClause'] as const,
+    [SORT, 'processSortClause'] as const
   ];
 
   /**
@@ -59,19 +54,18 @@ export class QueryVerifier {
       return;
     }
 
-    if (handler.preMember && handler.preMember(state, clause)) {
+    if (handler.preMember?.(state, clause)) {
       return;
     }
 
     for (const [key, value] of Object.entries(clause)) {
-
       // Validate value is correct, and key is valid
       if (value === undefined || value === null) {
         // state.log(`${key} cannot be undefined or null`);
         continue;
       }
 
-      if (handler.preMember && handler.preMember(state, value)) {
+      if (handler.preMember?.(state, value)) {
         continue;
       }
 
@@ -91,7 +85,7 @@ export class QueryVerifier {
         // Otherwise recurse
         const subCls = field.type;
         const subValue = value;
-        if (handler.onComplexType && handler.onComplexType(state, subCls, subValue, field.array ?? false)) {
+        if (handler.onComplexType?.(state, subCls, subValue, field.array ?? false)) {
           continue;
         }
         this.processGenericClause(state.extend(key), subCls, subValue, handler);
@@ -109,7 +103,13 @@ export class QueryVerifier {
   /**
    * Check operator clause
    */
-  static checkOperatorClause(state: State, declaredType: SimpleType, value: unknown, allowed: Record<string, Set<string>>, isArray: boolean): void {
+  static checkOperatorClause(
+    state: State,
+    declaredType: SimpleType,
+    value: unknown,
+    allowed: Record<string, Set<string>>,
+    isArray: boolean
+  ): void {
     if (isArray && Array.isArray(value)) {
       // Handle array literal
       for (const item of value) {
@@ -128,11 +128,7 @@ export class QueryVerifier {
     } else {
       const keys = Object.keys(value).toSorted();
 
-      if (keys.length !== 1 && !(
-        keys.length >= 2 &&
-        MULTIPLE_KEYS_ALLOWED.has(keys[0]) ||
-        MULTIPLE_KEYS_ALLOWED.has(keys[1])
-      )) {
+      if (keys.length !== 1 && !((keys.length >= 2 && MULTIPLE_KEYS_ALLOWED.has(keys[0])) || MULTIPLE_KEYS_ALLOWED.has(keys[1]))) {
         state.log('One and only one operation may be specified in an operator clause');
         return;
       }
@@ -172,7 +168,7 @@ export class QueryVerifier {
    * Process where clause
    */
   static processWhereClause<T>(st: State, cls: Class<T>, passed: object): void {
-    return this.processGenericClause(st, cls, passed, {
+    this.processGenericClause(st, cls, passed, {
       preMember: (state: State, value: Record<string, unknown>) => {
         const keys = Object.keys(value);
         const firstKey = keys[0];
@@ -221,7 +217,7 @@ export class QueryVerifier {
    * Handle sort clause
    */
   static processSortClause<T>(st: State, cls: Class<T>, passed: object): void {
-    return this.processGenericClause(st, cls, passed, {
+    this.processGenericClause(st, cls, passed, {
       onSimpleType: (state, type, value) => {
         if (value === 1 || value === -1 || typeof value === 'boolean') {
           return;
@@ -235,7 +231,7 @@ export class QueryVerifier {
    * Handle select clause
    */
   static processSelectClause<T>(st: State, cls: Class<T>, passed: object): void {
-    return this.processGenericClause(st, cls, passed, {
+    this.processGenericClause(st, cls, passed, {
       onSimpleType: (state, type, value) => {
         const actual = TypeUtil.getActualType(value);
         if (actual === 'number' || actual === 'boolean') {
@@ -244,7 +240,7 @@ export class QueryVerifier {
           }
           state.log('Only true, false 0, and 1 are allowed for including/excluding fields');
         } else {
-        /* if (actual === 'string') {
+          /* if (actual === 'string') {
           if (!/[A-Za-z_$0-9]/.test(value)) {
             state.log(`Only A-Z, a-z, 0-9, '$' and '_' are allowed in aliases for selecting fields`);
             return;
@@ -258,7 +254,8 @@ export class QueryVerifier {
             // or { alias: string, calc?: string }
             // console.log('Yay');
           }
-        */}
+        */
+        }
         state.log('Only true, false, 0, and 1 are allowed for selecting fields');
       }
     });
@@ -293,10 +290,7 @@ export class QueryVerifier {
         continue;
       }
 
-      if (!(key in query)
-        || query[key] === undefined
-        || query[key] === null
-      ) {
+      if (!(key in query) || query[key] === undefined || query[key] === null) {
         continue;
       }
 

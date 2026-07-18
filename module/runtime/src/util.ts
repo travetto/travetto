@@ -1,20 +1,21 @@
 import timers from 'node:timers/promises';
+
 import { path } from '@travetto/manifest';
 
 import { castTo } from './types.ts';
 
 type MapFn<T, U> = (value: T, i: number) => U | Promise<U>;
-type StackFrame = { message: string, filename: string, line: number, column: number };
+type StackFrame = { message: string; filename: string; line: number; column: number };
 
-const STACK_POSITION_PATTERN = /[(]\s{0,5}(?<filename>[^()]{1,1000}[.]([cm]?[jt]s))([:](?<line>\d{1,10}))?([:](?<column>\d{1,10}))?\s{0,5}[)]/;
+const STACK_POSITION_PATTERN =
+  /[(]\s{0,5}(?<filename>[^()]{1,1000}[.]([cm]?[jt]s))([:](?<line>\d{1,10}))?([:](?<column>\d{1,10}))?\s{0,5}[)]/;
 
 /**
  * Grab bag of common utilities
  */
 export class Util {
-
   static #match<T, K extends unknown[]>(
-    rules: { value: T, positive: boolean }[],
+    rules: { value: T; positive: boolean }[],
     compare: (rule: T, ...compareInput: K) => boolean,
     unmatchedValue: boolean,
     ...input: K
@@ -28,14 +29,14 @@ export class Util {
   }
 
   static #allowDenyRuleInput<T>(
-    rule: (string | T | [value: T, positive: boolean] | [value: T]),
+    rule: string | T | [value: T, positive: boolean] | [value: T],
     convert: (inputRule: string) => T
-  ): { value: T, positive: boolean } {
-    return typeof rule === 'string' ?
-      { value: convert(rule.replace(/^!/, '')), positive: !rule.startsWith('!') } :
-      Array.isArray(rule) ?
-        { value: rule[0], positive: rule[1] ?? true } :
-        { value: rule, positive: true };
+  ): { value: T; positive: boolean } {
+    return typeof rule === 'string'
+      ? { value: convert(rule.replace(/^!/, '')), positive: !rule.startsWith('!') }
+      : Array.isArray(rule)
+        ? { value: rule[0], positive: rule[1] ?? true }
+        : { value: rule, positive: true };
   }
 
   /**
@@ -44,10 +45,9 @@ export class Util {
    */
   static uuid(length: number = 32): string {
     const bytes = crypto.getRandomValues(new Uint8Array(Math.ceil(length / 2)));
-    if (length === 32) { // Make valid uuid-v4
-      // eslint-disable-next-line no-bitwise
+    if (length === 32) {
+      // Make valid uuid-v4
       bytes[6] = (bytes[6] & 0x0f) | 0x40;
-      // eslint-disable-next-line no-bitwise
       bytes[8] = (bytes[8] & 0x3f) | 0x80;
     }
     return bytes.toHex().substring(0, length);
@@ -59,7 +59,7 @@ export class Util {
   static mapAsyncIterable<T, U, V, W>(source: AsyncIterable<T>, fn1: MapFn<T, U>, fn2: MapFn<U, V>, fn3: MapFn<V, W>): AsyncIterable<W>;
   static mapAsyncIterable<T, U, V>(source: AsyncIterable<T>, fn1: MapFn<T, U>, fn2: MapFn<U, V>): AsyncIterable<V>;
   static mapAsyncIterable<T, U>(source: AsyncIterable<T>, fn: MapFn<T, U>): AsyncIterable<U>;
-  static async * mapAsyncIterable<T>(input: AsyncIterable<T>, ...fns: MapFn<unknown, unknown>[]): AsyncIterable<unknown> {
+  static async *mapAsyncIterable<T>(input: AsyncIterable<T>, ...fns: MapFn<unknown, unknown>[]): AsyncIterable<unknown> {
     let idx = -1;
     for await (const item of input) {
       if (item !== undefined) {
@@ -77,14 +77,14 @@ export class Util {
    * Non-blocking timeout
    */
   static nonBlockingTimeout(time: number): Promise<void> {
-    return timers.setTimeout(time, undefined, { ref: false }).catch(() => { });
+    return timers.setTimeout(time, undefined, { ref: false }).catch(() => {});
   }
 
   /**
    * Blocking timeout
    */
   static blockingTimeout(time: number): Promise<void> {
-    return timers.setTimeout(time, undefined, { ref: true }).catch(() => { });
+    return timers.setTimeout(time, undefined, { ref: true }).catch(() => {});
   }
 
   /**
@@ -104,16 +104,14 @@ export class Util {
     compare: (rule: T, ...compareInput: K) => boolean,
     cacheKey?: (...keyInput: K) => string
   ): (...input: K) => boolean {
-
-    const rawRules = (Array.isArray(rules) ? rules : rules.split(/,/g).map(rule => rule.trim()));
+    const rawRules = Array.isArray(rules) ? rules : rules.split(/,/g).map(rule => rule.trim());
     const convertedRules = rawRules.map(rule => this.#allowDenyRuleInput(rule, convert));
     const unmatchedValue = !convertedRules.some(rule => rule.positive);
 
     if (convertedRules.length) {
       if (cacheKey) {
         const cache: Record<string, boolean> = {};
-        return (...input: K) =>
-          cache[cacheKey(...input)] ??= this.#match(convertedRules, compare, unmatchedValue, ...input);
+        return (...input: K) => (cache[cacheKey(...input)] ??= this.#match(convertedRules, compare, unmatchedValue, ...input));
       } else {
         return (...input: K) => this.#match(convertedRules, compare, unmatchedValue, ...input);
       }
@@ -133,7 +131,7 @@ export class Util {
       .split('\n')
       .map(frameText => {
         const match = STACK_POSITION_PATTERN.exec(frameText);
-        if (!match || !match.groups) {
+        if (!match?.groups) {
           return undefined;
         }
         const { filename, line, column } = match.groups;

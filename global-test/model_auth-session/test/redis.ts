@@ -1,8 +1,7 @@
-
-import { InjectableFactory } from '@travetto/di';
-import { Suite } from '@travetto/test';
 import { SessionModelSymbol } from '@travetto/auth-session';
-import { RedisModelService, RedisModelConfig } from '@travetto/model-redis';
+import { InjectableFactory } from '@travetto/di';
+import { RedisModelConfig, RedisModelService } from '@travetto/model-redis';
+import { Suite } from '@travetto/test';
 
 import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
 

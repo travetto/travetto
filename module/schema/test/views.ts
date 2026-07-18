@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
-import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { Schema, View } from '@travetto/schema';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 @Schema()
 class BaseAccount {
@@ -22,7 +22,6 @@ class UserAccount extends BaseAccount {
 
 @Suite()
 export class ViewsTest {
-
   @BeforeAll()
   ready() {
     return Registry.init();
@@ -30,7 +29,6 @@ export class ViewsTest {
 
   @Test()
   async testWith() {
-
     const user = UserAccount.from({
       name: 'bob',
       email: 'bob@bob.com',
@@ -45,13 +43,16 @@ export class ViewsTest {
     assert.ok(user.password);
     assert.ok(user.id);
 
-    const auth = UserAccount.from({
-      name: 'bob',
-      email: 'bob@bob.com',
-      age: 20,
-      password: 'b0b',
-      id: '6'
-    }, 'auth');
+    const auth = UserAccount.from(
+      {
+        name: 'bob',
+        email: 'bob@bob.com',
+        age: 20,
+        password: 'b0b',
+        id: '6'
+      },
+      'auth'
+    );
 
     assert.ok(!auth.name);
     assert.ok(auth.email);
@@ -62,13 +63,16 @@ export class ViewsTest {
 
   @Test()
   async testWithOut() {
-    const auth = UserAccount.from({
-      name: 'bob',
-      email: 'bob@bob.com',
-      age: 20,
-      password: 'b0b',
-      id: '7'
-    }, 'secure');
+    const auth = UserAccount.from(
+      {
+        name: 'bob',
+        email: 'bob@bob.com',
+        age: 20,
+        password: 'b0b',
+        id: '7'
+      },
+      'secure'
+    );
 
     assert.ok(auth.name);
     assert.ok(auth.email);

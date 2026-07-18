@@ -1,11 +1,10 @@
 import assert from 'node:assert';
 
-import { Test, Suite } from '@travetto/test';
+import { Suite, Test } from '@travetto/test';
 import { WebCommonUtil } from '@travetto/web';
 
 @Suite()
 export class WebCommonUtilTest {
-
   @Test()
   orderDependents() {
     const items = [
@@ -35,13 +34,16 @@ export class WebCommonUtilTest {
     ] as const;
 
     const ordered = WebCommonUtil.ordered(items);
-    assert.deepStrictEqual(ordered.map(x => x.key), ['first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
+    assert.deepStrictEqual(
+      ordered.map(x => x.key),
+      ['first', 'third', 'second', 'fourth', 'fifth', 'sixth']
+    );
 
-    const ordered2 = WebCommonUtil.ordered([
-      { key: 'tenth', before: ['second'] },
-      ...items
-    ]);
-    assert.deepStrictEqual(ordered2.map(x => x.key), ['tenth', 'first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
+    const ordered2 = WebCommonUtil.ordered([{ key: 'tenth', before: ['second'] }, ...items]);
+    assert.deepStrictEqual(
+      ordered2.map(x => x.key),
+      ['tenth', 'first', 'third', 'second', 'fourth', 'fifth', 'sixth']
+    );
   }
 
   @Test()

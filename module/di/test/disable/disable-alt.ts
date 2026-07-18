@@ -1,14 +1,13 @@
 import assert from 'node:assert';
 
-import { BeforeAll, Suite, Test } from '@travetto/test';
-import { InjectionError, DependencyRegistryIndex } from '@travetto/di';
+import { DependencyRegistryIndex, InjectionError } from '@travetto/di';
 import { Registry } from '@travetto/registry';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { MyCustomClass3, MyCustomClass4 } from './types.ts';
 
 @Suite()
 class AltDisableSuite {
-
   @BeforeAll()
   before(): void {
     process.env.NAME = 'production';

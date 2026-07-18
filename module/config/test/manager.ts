@@ -1,11 +1,11 @@
 import assert from 'node:assert';
 
-import { Test, Suite, BeforeEach } from '@travetto/test';
-import { ValidationResultError } from '@travetto/schema';
+import { Config, type ConfigSource, ConfigurationService, MemoryConfigSource } from '@travetto/config';
 import { DependencyRegistryIndex, InjectableFactory } from '@travetto/di';
 import { Registry } from '@travetto/registry';
 import { Env } from '@travetto/runtime';
-import { Config, type ConfigSource, ConfigurationService, MemoryConfigSource } from '@travetto/config';
+import { ValidationResultError } from '@travetto/schema';
+import { BeforeEach, Suite, Test } from '@travetto/test';
 
 @Config('ignore')
 class TestConfig {
@@ -42,27 +42,30 @@ class Properties {
 class Setup {
   @InjectableFactory()
   static getMemoryConfig(): ConfigSource {
-    return new MemoryConfigSource('override', {
-      test: { beta: { values: [2, 4, 5] } },
-      'test.alpha': {
-        values: [1, 2, 3]
-      },
-      nested: { user: { age: 52 } },
-      vague: {
-        name: 'bob',
-        props: {
-          person: 20,
-          age: true,
-          child: { name: [1, 2, 3] }
+    return new MemoryConfigSource(
+      'override',
+      {
+        test: { beta: { values: [2, 4, 5] } },
+        'test.alpha': {
+          values: [1, 2, 3]
+        },
+        nested: { user: { age: 52 } },
+        vague: {
+          name: 'bob',
+          props: {
+            person: 20,
+            age: true,
+            child: { name: [1, 2, 3] }
+          }
         }
-      }
-    }, 1000);
+      },
+      1000
+    );
   }
 }
 
 @Suite()
 export class ManagerTest {
-
   config: ConfigurationService;
 
   @BeforeEach()

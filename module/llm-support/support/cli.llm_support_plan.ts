@@ -9,7 +9,6 @@ import { LlmSupportScopedSnippetCommandBase } from './base-command.ts';
  */
 @CliCommand()
 export class LlmSupportPlanCommand extends LlmSupportScopedSnippetCommandBase {
-
   @CliFlag({ short: 'o', full: 'operations' })
   @Required(false)
   @MinLength(1)

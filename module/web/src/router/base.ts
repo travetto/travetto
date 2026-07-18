@@ -1,13 +1,12 @@
-import { type Class, toConcrete } from '@travetto/runtime';
 import { DependencyRegistryIndex, Injectable, PostConstruct } from '@travetto/di';
+import { type Class, toConcrete } from '@travetto/runtime';
 import { ControllerRegistryIndex } from '@travetto/web';
 
 import type { ControllerConfig, EndpointConfig } from '../registry/types.ts';
 import type { WebRouter } from '../types/dispatch.ts';
+import type { WebFilterContext } from '../types/filter.ts';
 import type { WebInterceptor } from '../types/interceptor.ts';
 import type { WebResponse } from '../types/response.ts';
-import type { WebFilterContext } from '../types/filter.ts';
-
 import { EndpointUtil } from '../util/endpoint.ts';
 
 /**
@@ -15,7 +14,6 @@ import { EndpointUtil } from '../util/endpoint.ts';
  */
 @Injectable()
 export abstract class BaseWebRouter implements WebRouter {
-
   #interceptors: WebInterceptor[];
 
   async #register(cls: Class): Promise<void> {
@@ -29,14 +27,13 @@ export abstract class BaseWebRouter implements WebRouter {
     }
 
     await this.register(endpoints, config);
-  };
+  }
 
   /**
    * Initialize router, encapsulating common patterns for standard router setup
    */
   @PostConstruct()
   async registerRoutes(): Promise<void> {
-
     this.#interceptors = await DependencyRegistryIndex.getInstances(toConcrete<WebInterceptor>());
     this.#interceptors = EndpointUtil.orderInterceptors(this.#interceptors);
     const names = this.#interceptors.map(interceptor => interceptor.constructor.name);

@@ -1,9 +1,9 @@
 import { spawn } from 'node:child_process';
 
-import { CliCommand, CliParseUtil, type CliCommandShape } from '@travetto/cli';
-import { WorkPool } from '@travetto/worker';
+import { CliCommand, type CliCommandShape, CliParseUtil } from '@travetto/cli';
 import { Env } from '@travetto/runtime';
 import { Max, Min } from '@travetto/schema';
+import { WorkPool } from '@travetto/worker';
 
 import { RepoExecUtil } from './bin/exec.ts';
 
@@ -15,12 +15,12 @@ import { RepoExecUtil } from './bin/exec.ts';
  */
 @CliCommand()
 export class RepoExecCommand implements CliCommandShape {
-
   /** Only changed modules */
   changed = false;
 
   /** Number of concurrent workers */
-  @Min(1) @Max(WorkPool.MAX_SIZE)
+  @Min(1)
+  @Max(WorkPool.MAX_SIZE)
   workers = WorkPool.DEFAULT_SIZE;
 
   /** Prefix output by folder */
@@ -35,23 +35,24 @@ export class RepoExecCommand implements CliCommandShape {
 
   async main(cmd: string, args: string[] = []): Promise<void> {
     const parsed = CliParseUtil.getState(this);
-    const finalArgs = [...args, ...parsed?.unknown ?? []];
+    const finalArgs = [...args, ...(parsed?.unknown ?? [])];
 
     await RepoExecUtil.execOnModules(
       this.changed ? 'changed' : 'workspace',
-      module => spawn(cmd, finalArgs, {
-        cwd: module.sourceFolder,
-        env: {
-          ...process.env,
-          ...Env.TRV_MODULE.export(module.name),
-          ...Env.TRV_MANIFEST.export(undefined)
-        }
-      }),
+      module =>
+        spawn(cmd, finalArgs, {
+          cwd: module.sourceFolder,
+          env: {
+            ...process.env,
+            ...Env.TRV_MODULE.export(module.name),
+            ...Env.TRV_MANIFEST.export(undefined)
+          }
+        }),
       {
         progressMessage: module => `Running '${cmd} ${finalArgs.join(' ')}' [%completed/%total] ${module?.sourceFolder ?? ''}`,
         showStdout: this.showStdout,
         prefixOutput: this.prefixOutput,
-        workerCount: this.workers,
+        workerCount: this.workers
       }
     );
   }

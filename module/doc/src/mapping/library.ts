@@ -37,7 +37,7 @@ export const LIBRARIES = {
   JSDoc: { title: 'JSDoc', href: 'http://usejsdoc.org/about-getting-started.html' },
   CodeLens: {
     title: 'CodeLens',
-    href: 'https://code.visualstudio.com/api/language-extensions/programmatic-language-features#codelens-show-actionable-context-information-within-source-code',
+    href: 'https://code.visualstudio.com/api/language-extensions/programmatic-language-features#codelens-show-actionable-context-information-within-source-code'
   },
   ORM: { title: 'Object Relationship Mapping', href: 'https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping' },
   UUID: { title: 'UUID', href: 'https://en.wikipedia.org/wiki/Universally_unique_identifier' },
@@ -116,5 +116,5 @@ export const LIBRARIES = {
   ServerlessExpress: { title: 'aws-serverless-express', href: 'https://github.com/awslabs/aws-serverless-express/blob/master/README.md' },
   AwsLambdaFastify: { title: '@fastify/aws-lambda', href: 'https://github.com/fastify/aws-lambda-fastify/blob/master/README.md' },
   Fastify: { title: 'fastify', href: 'https://www.fastify.io/' },
-  Koa: { title: 'koa', href: 'https://koajs.com/' },
+  Koa: { title: 'koa', href: 'https://koajs.com/' }
 } as const;

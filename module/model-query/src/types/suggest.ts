@@ -1,9 +1,9 @@
-import type { Class } from '@travetto/runtime';
 import type { ModelType } from '@travetto/model';
+import type { Class } from '@travetto/runtime';
 
 import type { PageableModelQuery } from '../model/query.ts';
-import type { ModelQuerySupport } from './query.ts';
 import type { ValidStringFields } from '../model/where-clause.ts';
+import type { ModelQuerySupport } from './query.ts';
 
 /**
  * The contract for a model service with suggesting support
@@ -18,7 +18,12 @@ export interface ModelQuerySuggestSupport extends ModelQuerySupport {
    * @param prefix The search prefix for the given field
    * @param query A query to filter the search on, in addition to the prefix
    */
-  suggestByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]>;
+  suggestByQuery<T extends ModelType>(
+    cls: Class<T>,
+    field: ValidStringFields<T>,
+    prefix?: string,
+    query?: PageableModelQuery<T>
+  ): Promise<T[]>;
   /**
    * Suggest distinct values for a given cls and a given field
    *
@@ -27,5 +32,10 @@ export interface ModelQuerySuggestSupport extends ModelQuerySupport {
    * @param prefix The search prefix for the given field
    * @param query A query to filter the search on, in addition to the prefix
    */
-  suggestValuesByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]>;
+  suggestValuesByQuery<T extends ModelType>(
+    cls: Class<T>,
+    field: ValidStringFields<T>,
+    prefix?: string,
+    query?: PageableModelQuery<T>
+  ): Promise<string[]>;
 }

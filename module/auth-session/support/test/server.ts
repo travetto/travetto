@@ -1,11 +1,11 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
-import { Inject } from '@travetto/di';
-import type { SessionContext, SessionService } from '@travetto/auth-session';
 import { type AuthContext, AuthenticationError } from '@travetto/auth';
+import type { SessionContext, SessionService } from '@travetto/auth-session';
 import { type AsyncContext, WithAsyncContext } from '@travetto/context';
-import { Util, type Class } from '@travetto/runtime';
+import { Inject } from '@travetto/di';
+import { type Class, Util } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 import { ModelSuite } from '@travetto/model/support/test/suite.ts';
@@ -14,7 +14,6 @@ import { ModelSuite } from '@travetto/model/support/test/suite.ts';
 @ModelSuite()
 @InjectableSuite()
 export abstract class AuthSessionServerSuite<T> {
-
   timeScale = 1;
   serviceClass: Class<T>;
   configClass: Class;
@@ -41,7 +40,7 @@ export abstract class AuthSessionServerSuite<T> {
     };
 
     assert(this.sessionContext.get() === undefined);
-    assert(await this.session.load() === undefined);
+    assert((await this.session.load()) === undefined);
 
     const session = this.sessionContext.get(true);
     assert(session.id === this.auth.principal.sessionId);
@@ -50,7 +49,7 @@ export abstract class AuthSessionServerSuite<T> {
 
     this.sessionContext.set(undefined); // Disconnect
 
-    assert(await this.session.load() !== undefined);
+    assert((await this.session.load()) !== undefined);
     const session2 = this.sessionContext.get(true);
     assert(session2.data?.name === 'bob');
 
@@ -62,7 +61,7 @@ export abstract class AuthSessionServerSuite<T> {
 
     this.sessionContext.set(undefined); // Disconnect
 
-    assert(await this.session.load() === undefined);
+    assert((await this.session.load()) === undefined);
     const session3 = this.sessionContext.get(true);
     assert.deepStrictEqual(session3.data, {});
   }

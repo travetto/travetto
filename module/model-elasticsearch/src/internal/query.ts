@@ -1,18 +1,17 @@
 import type * as estypes from '@elastic/elasticsearch/api/types';
 
-import { type Any, castTo, type Class, TypedObject } from '@travetto/runtime';
-import { type WhereClause, type SelectClause, type SortClause, type Query, ModelQueryUtil } from '@travetto/model-query';
-import { type ModelType, ModelRegistryIndex } from '@travetto/model';
-import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
+import { ModelRegistryIndex, type ModelType } from '@travetto/model';
 import type { SortedIndex } from '@travetto/model-indexed';
+import { ModelQueryUtil, type Query, type SelectClause, type SortClause, type WhereClause } from '@travetto/model-query';
+import { type Any, type Class, castTo, TypedObject } from '@travetto/runtime';
+import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
-import { type EsSchemaConfig } from './types.ts';
+import type { EsSchemaConfig } from './types.ts';
 
 /**
  * Support tools for dealing with elasticsearch specific requirements
  */
 export class ElasticsearchQueryUtil {
-
   /**
    * Convert `a : { b : { c : ... }}` to `a.b.c`
    */
@@ -61,16 +60,21 @@ export class ElasticsearchQueryUtil {
         return { [key]: { order: value === 1 || value === true ? 'asc' : 'desc' } };
       });
     } else {
-      return sort.sortTemplate.map<estypes.SortOptions>(field =>
-        ({ [field.path.join('.')]: { order: field.value === 1 ? 'asc' : 'desc' } })
-      );
+      return sort.sortTemplate.map<estypes.SortOptions>(field => ({
+        [field.path.join('.')]: { order: field.value === 1 ? 'asc' : 'desc' }
+      }));
     }
   }
 
   /**
    * Extract specific term for a class, and a given field
    */
-  static extractWhereTermQuery<T>(cls: Class<T>, item: Record<string, unknown>, config?: EsSchemaConfig, path: string = ''): Record<string, unknown> {
+  static extractWhereTermQuery<T>(
+    cls: Class<T>,
+    item: Record<string, unknown>,
+    config?: EsSchemaConfig,
+    path: string = ''
+  ): Record<string, unknown> {
     const items = [];
     const fields = SchemaRegistryIndex.get(cls).getFields();
 
@@ -78,22 +82,18 @@ export class ElasticsearchQueryUtil {
       const top = item[property];
       const declaredSchema = fields[property];
       const declaredType = declaredSchema.type;
-      const subPath = declaredType === String ?
-        ((property === 'id' && !path) ? '_id' : `${path}${property}`) :
-        `${path}${property}`;
+      const subPath = declaredType === String ? (property === 'id' && !path ? '_id' : `${path}${property}`) : `${path}${property}`;
 
-      const subPathQuery = (value: unknown): {} => (property === 'id' && !path) ?
-        { ids: { values: Array.isArray(value) ? value : [value] } } :
-        { [Array.isArray(value) ? 'terms' : 'term']: { [subPath]: value } };
+      const subPathQuery = (value: unknown): {} =>
+        property === 'id' && !path
+          ? { ids: { values: Array.isArray(value) ? value : [value] } }
+          : { [Array.isArray(value) ? 'terms' : 'term']: { [subPath]: value } };
 
       if (DataUtil.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];
         if (!subKey.startsWith('$')) {
           const inner = this.extractWhereTermQuery(declaredType, top, config, `${subPath}.`);
-          items.push(declaredSchema.array ?
-            { nested: { path: subPath, query: inner } } :
-            inner
-          );
+          items.push(declaredSchema.array ? { nested: { path: subPath, query: inner } } : inner);
         } else {
           const value = top[subKey];
 
@@ -112,7 +112,7 @@ export class ElasticsearchQueryUtil {
               break;
             }
             case '$nin': {
-              items.push({ bool: { ['must_not']: [subPathQuery(Array.isArray(value) ? value : [value])] } });
+              items.push({ bool: { must_not: [subPathQuery(Array.isArray(value) ? value : [value])] } });
               break;
             }
             case '$eq': {
@@ -120,12 +120,12 @@ export class ElasticsearchQueryUtil {
               break;
             }
             case '$ne': {
-              items.push({ bool: { ['must_not']: [subPathQuery(value)] } });
+              items.push({ bool: { must_not: [subPathQuery(value)] } });
               break;
             }
             case '$exists': {
               const clause = { exists: { field: subPath } };
-              items.push(value ? clause : { bool: { ['must_not']: clause } });
+              items.push(value ? clause : { bool: { must_not: clause } });
               break;
             }
             case '$lt':
@@ -141,19 +141,18 @@ export class ElasticsearchQueryUtil {
             }
             case '$regex': {
               const pattern = DataUtil.toRegex(castTo(value));
-              if (pattern.source.startsWith('^')) { // We have a prefix query
-                if (/^\^[A-Za-z0-9_\-]+/.test(pattern.source)) {
+              if (pattern.source.startsWith('^')) {
+                // We have a prefix query
+                if (/^\^[A-Za-z0-9_-]+/.test(pattern.source)) {
                   items.push({ prefix: { [subPath]: pattern.source.substring(1) } });
                 } else {
                   items.push({ regexp: { [subPath]: pattern.source.substring(1) } });
                 }
               } else if (pattern.source.startsWith('\\b') && pattern.source.endsWith('.*') && declaredSchema.specifiers?.includes('text')) {
-                const textField = !pattern.flags.includes('i') && config && config.caseSensitive ?
-                  `${subPath}.text_cs` :
-                  `${subPath}.text`;
+                const textField = !pattern.flags.includes('i') && config && config.caseSensitive ? `${subPath}.text_cs` : `${subPath}.text`;
                 const query = pattern.source.substring(2, pattern.source.length - 2);
                 items.push({
-                  ['match_phrase_prefix']: {
+                  match_phrase_prefix: {
                     [textField]: query
                   }
                 });
@@ -163,7 +162,7 @@ export class ElasticsearchQueryUtil {
               break;
             }
             case '$geoWithin': {
-              items.push({ ['geo_polygon']: { [subPath]: { points: value } } });
+              items.push({ geo_polygon: { [subPath]: { points: value } } });
               break;
             }
             case '$unit':
@@ -176,7 +175,7 @@ export class ElasticsearchQueryUtil {
                 unit = 'km';
               }
               items.push({
-                ['geo_distance']: {
+                geo_distance: {
                   distance: `${dist}${unit}`,
                   [subPath]: top.$near
                 }
@@ -206,7 +205,7 @@ export class ElasticsearchQueryUtil {
     } else if (ModelQueryUtil.has$Or(clause)) {
       return { bool: { should: clause.$or.map(item => this.extractWhereQuery<T>(cls, item, config)), minimum_should_match: 1 } };
     } else if (ModelQueryUtil.has$Not(clause)) {
-      return { bool: { ['must_not']: this.extractWhereQuery<T>(cls, clause.$not, config) } };
+      return { bool: { must_not: this.extractWhereQuery<T>(cls, clause.$not, config) } };
     } else {
       return this.extractWhereTermQuery(cls, clause, config);
     }
@@ -217,7 +216,11 @@ export class ElasticsearchQueryUtil {
    * @param cls
    * @param search
    */
-  static getSearchQuery<T extends ModelType>(cls: Class<T>, search: Record<string, unknown>, checkExpiry = true): estypes.QueryDslQueryContainer {
+  static getSearchQuery<T extends ModelType>(
+    cls: Class<T>,
+    search: Record<string, unknown>,
+    checkExpiry = true
+  ): estypes.QueryDslQueryContainer {
     const clauses: estypes.QueryDslQueryContainer[] = [];
     if (search && Object.keys(search).length) {
       clauses.push(search);
@@ -226,12 +229,9 @@ export class ElasticsearchQueryUtil {
     if (checkExpiry && expiresAt) {
       clauses.push({
         bool: {
-          should: [
-            { exists: { field: expiresAt } },
-            { range: { [expiresAt]: { gte: new Date().toISOString() } } },
-          ],
+          should: [{ exists: { field: expiresAt } }, { range: { [expiresAt]: { gte: new Date().toISOString() } } }],
           minimum_should_match: 1
-        },
+        }
       });
     }
     const polymorphicConfig = SchemaRegistryIndex.getDiscriminatedConfig(cls);
@@ -242,18 +242,19 @@ export class ElasticsearchQueryUtil {
         clauses.push({ term: { [polymorphicConfig.discriminatedField]: { value: polymorphicConfig.discriminatedType } } });
       }
     }
-    return clauses.length === 0 ? {} :
-      clauses.length === 1 ? clauses[0] :
-        { bool: { must: clauses } };
+    return clauses.length === 0 ? {} : clauses.length === 1 ? clauses[0] : { bool: { must: clauses } };
   }
 
   /**
    * Build a base search object from a class and a query
    */
   static getSearchObject<T extends ModelType>(
-    cls: Class<T>, query: Query<T>, config?: EsSchemaConfig, checkExpiry = true
+    cls: Class<T>,
+    query: Query<T>,
+    config?: EsSchemaConfig,
+    checkExpiry = true
   ): estypes.SearchRequest & Omit<estypes.DeleteByQueryRequest, 'index' | 'sort'> {
-    const search: (estypes.SearchRequest & Omit<estypes.DeleteByQueryRequest, 'index' | 'sort'>) = {
+    const search: estypes.SearchRequest & Omit<estypes.DeleteByQueryRequest, 'index' | 'sort'> = {
       query: this.getSearchQuery(cls, this.extractWhereQuery(cls, query.where ?? {}, config), checkExpiry)
     };
 

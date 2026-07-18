@@ -1,9 +1,9 @@
-import { Suite } from '@travetto/test';
 import { ElasticsearchModelConfig, ElasticsearchModelService } from '@travetto/model-elasticsearch';
+import { Suite } from '@travetto/test';
 
-import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
 import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
 import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.ts';
+import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
 import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest.ts';
 
 @Suite()

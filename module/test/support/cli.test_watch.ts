@@ -1,5 +1,5 @@
-import { Env } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
+import { Env } from '@travetto/runtime';
 
 import type { TestConsumerType } from './bin/run.ts';
 
@@ -11,7 +11,6 @@ import type { TestConsumerType } from './bin/run.ts';
  */
 @CliCommand()
 export class TestWatcherCommand {
-
   /** Output format for test results */
   format: TestConsumerType = 'tap';
 

@@ -1,9 +1,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { TypedObject, RuntimeIndex, Runtime, ExecUtil } from '@travetto/runtime';
-import { type EmailCompiled, MailUtil, type EmailTemplateImport, type EmailTemplateModule } from '@travetto/email';
+import { type EmailCompiled, type EmailTemplateImport, type EmailTemplateModule, MailUtil } from '@travetto/email';
 import { ManifestFileUtil } from '@travetto/manifest';
+import { ExecUtil, Runtime, RuntimeIndex, TypedObject } from '@travetto/runtime';
 
 import { EmailCompileUtil } from './util.ts';
 
@@ -11,7 +11,6 @@ import { EmailCompileUtil } from './util.ts';
  * Email compilation support
  */
 export class EmailCompiler {
-
   /**
    * Load Template
    */
@@ -25,13 +24,11 @@ export class EmailCompiler {
    * Grab list of all available templates
    */
   static findAllTemplates(moduleName?: string): string[] {
-    return RuntimeIndex
-      .find({
-        module: module => (!moduleName ? module.roles.includes('std') : moduleName === module.name) && module.production,
-        folder: folder => folder === 'support',
-        file: file => EmailCompileUtil.isTemplateFile(file.sourceFile)
-      })
-      .map(file => file.sourceFile);
+    return RuntimeIndex.find({
+      module: module => (!moduleName ? module.roles.includes('std') : moduleName === module.name) && module.production,
+      folder: folder => folder === 'support',
+      file: file => EmailCompileUtil.isTemplateFile(file.sourceFile)
+    }).map(file => file.sourceFile);
   }
 
   /**
@@ -55,14 +52,16 @@ export class EmailCompiler {
    */
   static async writeTemplate(file: string, message: EmailCompiled): Promise<void> {
     const outs = this.getOutputFiles(file);
-    await Promise.all(TypedObject.keys(outs).map(async key => {
-      if (message[key]) {
-        const content = MailUtil.buildBrand(file, message[key], 'trv email:compile');
-        await ManifestFileUtil.bufferedFileWrite(outs[key], content);
-      } else {
-        await fs.rm(outs[key], { force: true }); // Remove file if data not provided
-      }
-    }));
+    await Promise.all(
+      TypedObject.keys(outs).map(async key => {
+        if (message[key]) {
+          const content = MailUtil.buildBrand(file, message[key], 'trv email:compile');
+          await ManifestFileUtil.bufferedFileWrite(outs[key], content);
+        } else {
+          await fs.rm(outs[key], { force: true }); // Remove file if data not provided
+        }
+      })
+    );
   }
 
   /**
@@ -90,7 +89,7 @@ export class EmailCompiler {
   static async spawnCompile(file: string): Promise<boolean> {
     const child = ExecUtil.spawnPackageCommand('trv', ['email:compile', file], {
       cwd: Runtime.mainSourcePath,
-      env: { ...process.env },
+      env: { ...process.env }
     });
 
     const result = await ExecUtil.getResult(child, { catch: true });

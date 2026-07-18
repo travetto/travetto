@@ -1,14 +1,13 @@
 import assert from 'node:assert';
 
-import { Suite, Test, BeforeAll, BeforeEach } from '@travetto/test';
-import { castTo, type ConsoleListener, ConsoleManager } from '@travetto/runtime';
 import { DependencyRegistryIndex, Injectable } from '@travetto/di';
-import { Registry } from '@travetto/registry';
 import { JsonLogFormatter, type LogDecorator, type LogEvent, LogFormatUtil, type Logger, LogService } from '@travetto/log';
+import { Registry } from '@travetto/registry';
+import { type ConsoleListener, ConsoleManager, castTo } from '@travetto/runtime';
+import { BeforeAll, BeforeEach, Suite, Test } from '@travetto/test';
 
 @Injectable()
 class CustomLogger implements Logger {
-
   values: LogEvent[] = [];
 
   log(ev: LogEvent): void {
@@ -30,7 +29,6 @@ class Decorator implements LogDecorator {
 
 @Suite('Suite')
 class LoggerTest {
-
   manager: ConsoleListener;
 
   @BeforeAll()
@@ -119,7 +117,7 @@ class LoggerTest {
     const context = LogFormatUtil.getContext(logger.values[0]);
     assert(context?.secret === true);
     const context2 = LogFormatUtil.getContext(logger.values[1]);
-    assert.deepStrictEqual(Object.keys(context2 ?? {}), ['extra',]);
+    assert.deepStrictEqual(Object.keys(context2 ?? {}), ['extra']);
     assert(logger.values[1].message === undefined);
     const context3 = LogFormatUtil.getContext(logger.values[2]);
     assert.deepStrictEqual(Object.keys(context3 ?? {}), ['extra']);

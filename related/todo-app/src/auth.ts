@@ -1,6 +1,6 @@
-import { Controller, Get, Post, ContextParam, WebResponse } from '@travetto/web';
-import { Login, Authenticated, Logout } from '@travetto/auth-web';
 import type { Principal } from '@travetto/auth';
+import { Authenticated, Login, Logout } from '@travetto/auth-web';
+import { ContextParam, Controller, Get, Post, WebResponse } from '@travetto/web';
 
 import { BasicAuthSymbol } from './auth.config.ts';
 
@@ -9,7 +9,6 @@ import { BasicAuthSymbol } from './auth.config.ts';
  */
 @Controller('/auth')
 export class AuthController {
-
   @ContextParam()
   user: Principal;
 

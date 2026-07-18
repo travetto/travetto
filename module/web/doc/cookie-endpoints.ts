@@ -1,11 +1,17 @@
 import {
-  Controller, Get, QueryParam, type WebRequest, ContextParam,
-  WebResponse, type CookieJar, type CookieGetOptions, type CookieSetOptions
+  ContextParam,
+  Controller,
+  type CookieGetOptions,
+  type CookieJar,
+  type CookieSetOptions,
+  Get,
+  QueryParam,
+  type WebRequest,
+  WebResponse
 } from '@travetto/web';
 
 @Controller('/simple')
 export class SimpleEndpoints {
-
   private getOptions: CookieGetOptions;
   private setOptions: CookieSetOptions;
 

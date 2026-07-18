@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
-import { JSONUtil } from '@travetto/runtime';
 import { PassportUtil } from '@travetto/auth-web-passport';
+import { JSONUtil } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
 
 @Suite()
 class PassportUtilSuite {

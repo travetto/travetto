@@ -1,10 +1,10 @@
-import { InjectableFactory } from '@travetto/di';
-import { Suite } from '@travetto/test';
-import type { AsyncContext } from '@travetto/context';
 import { CacheModelSymbol } from '@travetto/cache';
+import type { AsyncContext } from '@travetto/context';
+import { InjectableFactory } from '@travetto/di';
 import type { ModelExpirySupport } from '@travetto/model';
-import { SQLModelService, SQLModelConfig } from '@travetto/model-sql';
 import { PostgreSQLDialect } from '@travetto/model-postgres';
+import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
+import { Suite } from '@travetto/test';
 
 import { CacheServiceSuite } from '@travetto/cache/support/test/service.ts';
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';

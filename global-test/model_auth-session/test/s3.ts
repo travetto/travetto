@@ -1,8 +1,7 @@
-
-import { InjectableFactory } from '@travetto/di';
-import { Suite } from '@travetto/test';
 import { SessionModelSymbol } from '@travetto/auth-session';
-import { S3ModelService, S3ModelConfig } from '@travetto/model-s3';
+import { InjectableFactory } from '@travetto/di';
+import { S3ModelConfig, S3ModelService } from '@travetto/model-s3';
+import { Suite } from '@travetto/test';
 
 import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
 

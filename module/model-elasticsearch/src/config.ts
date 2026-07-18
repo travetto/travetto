@@ -1,6 +1,6 @@
-import type { TimeSpan } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 import { PostConstruct } from '@travetto/di';
+import type { TimeSpan } from '@travetto/runtime';
 
 import type { EsSchemaConfig } from './internal/types.ts';
 
@@ -45,8 +45,8 @@ export class ElasticsearchModelConfig {
    * Base index create settings
    */
   indexCreate = {
-    ['number_of_replicas']: 0,
-    ['number_of_shards']: 1
+    number_of_replicas: 0,
+    number_of_shards: 1
   };
 
   /**
@@ -61,7 +61,7 @@ export class ElasticsearchModelConfig {
   finalizeConfig(): void {
     console.debug('Constructed', { config: this });
     this.hosts = this.hosts
-      .map(host => host.includes(':') ? host : `${host}:${this.port}`)
-      .map(host => host.startsWith('http') ? host : `http://${host}`);
+      .map(host => (host.includes(':') ? host : `${host}:${this.port}`))
+      .map(host => (host.startsWith('http') ? host : `http://${host}`));
   }
 }

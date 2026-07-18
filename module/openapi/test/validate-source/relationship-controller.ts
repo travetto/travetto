@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete } from '@travetto/web';
+import { Controller, Delete, Get, Post, Put } from '@travetto/web';
 
 import { User, type UserSearch } from './model.ts';
 
@@ -7,7 +7,6 @@ import { User, type UserSearch } from './model.ts';
  */
 @Controller('/relationship')
 export class RelationshipController {
-
   /**
    * Get user by name.
    * @param name User name
@@ -37,15 +36,11 @@ export class RelationshipController {
    * @param id User id
    */
   @Put('/:id')
-  async updateUser(id: number, user: User): Promise<void> {
-
-  }
+  async updateUser(id: number, user: User): Promise<void> {}
   /**
    * Delete user by id
    * @param id User id
    */
   @Delete('/:id')
-  async removeUser(id: number): Promise<void> {
-
-  }
+  async removeUser(id: number): Promise<void> {}
 }

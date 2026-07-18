@@ -1,8 +1,7 @@
 import type { ModelType } from '@travetto/model';
-import { RuntimeError, type Class } from '@travetto/runtime';
+import { type Class, RuntimeError } from '@travetto/runtime';
 
 import type { AllIndexes } from './indexes.ts';
-
 
 export class IndexedFieldError<T extends ModelType> extends RuntimeError {
   constructor(cls: Class<T>, idx: AllIndexes<T>, fieldPath: string, message: string) {

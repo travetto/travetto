@@ -1,5 +1,5 @@
-import { isPromise } from 'node:util/types';
 import { createHook, executionAsyncId } from 'node:async_hooks';
+import { isPromise } from 'node:util/types';
 
 import { type TimeSpan, TimeUtil, Util } from '@travetto/runtime';
 
@@ -11,7 +11,7 @@ export class Barrier {
   /**
    * Track timeout
    */
-  static timeout(duration: number | TimeSpan, operation: string = 'Operation'): { promise: Promise<void>, resolve: () => unknown } {
+  static timeout(duration: number | TimeSpan, operation: string = 'Operation'): { promise: Promise<void>; resolve: () => unknown } {
     const resolver = Promise.withResolvers<void>();
     const durationMs = TimeUtil.duration(duration, 'ms');
     let timeout: NodeJS.Timeout;
@@ -22,25 +22,31 @@ export class Barrier {
       timeout = setTimeout(() => resolver.reject(new TimeoutError(msg)), durationMs).unref();
     }
 
-    resolver.promise.finally(() => { clearTimeout(timeout); });
+    resolver.promise.finally(() => {
+      clearTimeout(timeout);
+    });
     return resolver;
   }
 
   /**
    * Track uncaught error
    */
-  static uncaughtErrorPromise(): { promise: Promise<void>, resolve: () => unknown } {
+  static uncaughtErrorPromise(): { promise: Promise<void>; resolve: () => unknown } {
     const uncaught = Promise.withResolvers<void>();
-    const onError = (error: Error): void => { Util.queueMacroTask().then(() => uncaught.reject(error)); };
+    const onError = (error: Error): void => {
+      Util.queueMacroTask().then(() => uncaught.reject(error));
+    };
     UNCAUGHT_ERR_EVENTS.map(key => process.on(key, onError));
-    uncaught.promise.finally(() => { UNCAUGHT_ERR_EVENTS.map(key => process.off(key, onError)); });
+    uncaught.promise.finally(() => {
+      UNCAUGHT_ERR_EVENTS.map(key => process.off(key, onError));
+    });
     return uncaught;
   }
 
   /**
    * Promise capturer
    */
-  static capturePromises(): { start: () => Promise<void>, finish: () => Promise<void>, cleanup: () => void } {
+  static capturePromises(): { start: () => Promise<void>; finish: () => Promise<void>; cleanup: () => void } {
     const pending = new Map<number, Promise<unknown>>();
     let id: number = 0;
 
@@ -90,7 +96,7 @@ export class Barrier {
       let capturedError: Error | undefined;
       const opProm = operation().then(() => promises.finish());
 
-      await Promise.race([opProm, uncaught.promise, timer.promise]).catch(error => capturedError ??= error);
+      await Promise.race([opProm, uncaught.promise, timer.promise]).catch(error => (capturedError ??= error));
 
       return capturedError;
     } finally {

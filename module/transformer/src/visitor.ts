@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { type ManifestModuleFolderType, ManifestModuleUtil } from '@travetto/manifest';
 
-import type { DecoratorMeta, TransformerType, NodeTransformer, TransformerSet, State, TransformPhase } from './types/visitor.ts';
+import type { DecoratorMeta, NodeTransformer, State, TransformerSet, TransformerType, TransformPhase } from './types/visitor.ts';
 import { CoreUtil } from './util/core.ts';
 
 const COMPILER_SOURCE = new Set<ManifestModuleFolderType>(['support', 'src', '$index']);
@@ -11,7 +11,6 @@ const COMPILER_SOURCE = new Set<ManifestModuleFolderType>(['support', 'src', '$i
  * AST Visitor Factory, combines all active transformers into a single pass transformer for the ts compiler
  */
 export class VisitorFactory<S extends State = State> {
-
   /**
    * Get the type of transformer from a given a ts.node
    */
@@ -19,8 +18,7 @@ export class VisitorFactory<S extends State = State> {
     if (ts.isConstructorDeclaration(node)) {
       return 'constructor';
     } else if (ts.isMethodDeclaration(node)) {
-      // eslint-disable-next-line no-bitwise
-      return (ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Static) ? 'static-method' : 'method';
+      return ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Static ? 'static-method' : 'method';
     } else if (ts.isPropertyDeclaration(node)) {
       return 'property';
     } else if (ts.isCallExpression(node)) {
@@ -62,7 +60,7 @@ export class VisitorFactory<S extends State = State> {
     for (const trn of transformers) {
       const set = this.#transformers.getOrInsert(trn.type, new Map());
 
-      const targets = trn.target && trn.target.length ? trn.target : ['__all__'];
+      const targets = trn.target?.length ? trn.target : ['__all__'];
 
       for (const target of targets) {
         for (const phase of ['before', 'after'] as const) {
@@ -78,52 +76,54 @@ export class VisitorFactory<S extends State = State> {
    * Produce a visitor for a given a file
    */
   visitor(): ts.TransformerFactory<ts.SourceFile> {
-    return (context: ts.TransformationContext) => (file: ts.SourceFile): ts.SourceFile => {
-      const type = ManifestModuleUtil.getFileType(file.fileName);
-      if (type !== 'ts' || /^\/\/\s*@trv-no-transform/.test(file.getFullText())) { // Skip all non-ts files
-        return file;
-      }
-
-      try {
-        const state = this.#getState(context, file);
-        // Skip transforming all the compiler related content
-        if (
-          /@travetto[/](compiler|manifest|transformer)/.test(state.importName) &&
-          COMPILER_SOURCE.has(ManifestModuleUtil.getFolderKey(state.importName.replace(/@travetto[/][^/]+[/]/, '')))
-        ) {
-          return state.finalize(file);
+    return (context: ts.TransformationContext) =>
+      (file: ts.SourceFile): ts.SourceFile => {
+        const type = ManifestModuleUtil.getFileType(file.fileName);
+        if (type !== 'ts' || /^\/\/\s*@trv-no-transform/.test(file.getFullText())) {
+          // Skip all non-ts files
+          return file;
         }
 
-        let node = this.visit(state, context, file);
-
-        // Process added content
-        const changed = state.added.size;
-        let statements: ts.NodeArray<ts.Statement> | ts.Statement[] = node.statements;
-        while (state.added.size) {
-          for (const [idx, all] of [...state.added].toSorted(([idxA], [idxB]) => idxB - idxA)) {
-            statements = [
-              ...statements.slice(0, Math.max(idx, 0)),
-              ...all.map(value => this.visit(state, context, value)),
-              ...statements.slice(Math.max(idx, 0))
-            ];
-            state.added.delete(idx);
+        try {
+          const state = this.#getState(context, file);
+          // Skip transforming all the compiler related content
+          if (
+            /@travetto[/](compiler|manifest|transformer)/.test(state.importName) &&
+            COMPILER_SOURCE.has(ManifestModuleUtil.getFolderKey(state.importName.replace(/@travetto[/][^/]+[/]/, '')))
+          ) {
+            return state.finalize(file);
           }
-        }
 
-        if (changed) {
-          node = CoreUtil.updateSource(context.factory, node, statements);
+          let node = this.visit(state, context, file);
+
+          // Process added content
+          const changed = state.added.size;
+          let statements: ts.NodeArray<ts.Statement> | ts.Statement[] = node.statements;
+          while (state.added.size) {
+            for (const [idx, all] of [...state.added].toSorted(([idxA], [idxB]) => idxB - idxA)) {
+              statements = [
+                ...statements.slice(0, Math.max(idx, 0)),
+                ...all.map(value => this.visit(state, context, value)),
+                ...statements.slice(Math.max(idx, 0))
+              ];
+              state.added.delete(idx);
+            }
+          }
+
+          if (changed) {
+            node = CoreUtil.updateSource(context.factory, node, statements);
+          }
+          return state.finalize(node);
+        } catch (error) {
+          if (!(error instanceof Error)) {
+            throw error;
+          }
+          console!.error('Failed transforming', { error: `${error.message}\n${error.stack}`, file: file.fileName });
+          const out = new Error(`Failed transforming: ${file.fileName}: ${error.message}`);
+          out.stack = error.stack;
+          throw out;
         }
-        return state.finalize(node);
-      } catch (error) {
-        if (!(error instanceof Error)) {
-          throw error;
-        }
-        console!.error('Failed transforming', { error: `${error.message}\n${error.stack}`, file: file.fileName });
-        const out = new Error(`Failed transforming: ${file.fileName}: ${error.message}`);
-        out.stack = error.stack;
-        throw out;
-      }
-    };
+      };
   }
 
   /**
@@ -162,7 +162,7 @@ export class VisitorFactory<S extends State = State> {
 
     for (const [key, decorator] of targets.entries()) {
       const values = set.get(phase)!.get(key);
-      if (!values || !values.length) {
+      if (!values?.length) {
         continue;
       }
 

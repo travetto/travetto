@@ -1,10 +1,20 @@
 import { TextDecoder } from 'node:util';
 
-import { type BinaryType, BinaryUtil, type BinaryArray, castTo, Util, CodecUtil, hasToJSON, BinaryMetadataUtil, JSONUtil } from '@travetto/runtime';
+import {
+  type BinaryArray,
+  BinaryMetadataUtil,
+  type BinaryType,
+  BinaryUtil,
+  CodecUtil,
+  castTo,
+  hasToJSON,
+  JSONUtil,
+  Util
+} from '@travetto/runtime';
 
-import type { WebMessage } from '../types/message.ts';
-import { WebHeaders } from '../types/headers.ts';
 import { WebError } from '../types/error.ts';
+import { WebHeaders } from '../types/headers.ts';
+import type { WebMessage } from '../types/message.ts';
 
 const WebRawBinarySymbol = Symbol();
 
@@ -14,7 +24,6 @@ const NULL_TERMINATOR = BinaryUtil.makeBinaryArray(0);
  * Utility classes for supporting web body operations
  */
 export class WebBodyUtil {
-
   /** Get Metadata Headers */
   static getMetadataHeaders(value: BinaryType): [string, string][] {
     const metadata = BinaryMetadataUtil.read(value);
@@ -30,7 +39,7 @@ export class WebBodyUtil {
       ...(metadata.range ? [['Content-Range', `bytes ${metadata.range.start}-${metadata.range.end}/${metadata.size}`]] : []),
       ...(metadata.filename ? [['Content-Disposition', `attachment; filename="${metadata.filename}"`]] : [])
     ]
-      .map((pair) => [pair[0], pair[1]?.toString()])
+      .map(pair => [pair[0], pair[1]?.toString()])
       .filter((pair): pair is [string, string] => pair[1] !== undefined);
 
     return result;
@@ -39,14 +48,14 @@ export class WebBodyUtil {
   /**
    * Generate multipart body
    */
-  static async * buildMultiPartBody(form: FormData, boundary: string): AsyncIterable<BinaryArray> {
+  static async *buildMultiPartBody(form: FormData, boundary: string): AsyncIterable<BinaryArray> {
     const bytes = (value: string = '', suffix = '\r\n'): BinaryArray => CodecUtil.fromUTF8String(`${value}${suffix}`);
     for (const [key, item] of form.entries()) {
       yield bytes(`--${boundary}`);
       const binaryValue = typeof item === 'string' ? CodecUtil.fromUTF8String(item) : item.slice();
 
       // Headers
-      if (typeof item == 'string') {
+      if (typeof item === 'string') {
         BinaryMetadataUtil.write(binaryValue, { size: item.length });
       }
 
@@ -146,16 +155,19 @@ export class WebBodyUtil {
    */
   static parseBody(type: string, body: string): unknown {
     switch (type) {
-      case 'text': return body;
-      case 'json': return JSONUtil.fromUTF8(body);
-      case 'form': return Object.fromEntries(new URLSearchParams(body));
+      case 'text':
+        return body;
+      case 'json':
+        return JSONUtil.fromUTF8(body);
+      case 'form':
+        return Object.fromEntries(new URLSearchParams(body));
     }
   }
 
   /**
    * Read text from an input source
    */
-  static async readText(input: BinaryType, limit: number, encoding?: string): Promise<{ text: string, read: number }> {
+  static async readText(input: BinaryType, limit: number, encoding?: string): Promise<{ text: string; read: number }> {
     encoding ??= CodecUtil.detectEncoding(input) ?? 'utf-8';
 
     let decoder: TextDecoder;

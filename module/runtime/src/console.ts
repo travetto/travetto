@@ -1,4 +1,5 @@
 import util from 'node:util';
+
 import debug from 'debug';
 
 import { RuntimeIndex } from './manifest-index.ts';
@@ -21,7 +22,7 @@ export interface ConsoleEvent {
   scope?: string;
   /** Arguments passed to the console call*/
   args: unknown[];
-};
+}
 
 /**
  * @concrete
@@ -41,7 +42,6 @@ const DEBUG_HANDLE = { formatArgs: debug.formatArgs, log: debug.log };
  * @alias ConsoleManager
  */
 class $ConsoleManager implements ConsoleListener {
-
   /**
    * The current listener
    */
@@ -84,10 +84,15 @@ class $ConsoleManager implements ConsoleListener {
         args.unshift(this.namespace);
         args.push(debug.humanize(this.diff));
       };
-      debug.log = (modulePath, ...args: string[]): void => this.log({
-        level: 'debug', module: '@npm:debug', modulePath,
-        args: [util.format(...args)], line: 0, timestamp: new Date()
-      });
+      debug.log = (modulePath, ...args: string[]): void =>
+        this.log({
+          level: 'debug',
+          module: '@npm:debug',
+          modulePath,
+          args: [util.format(...args)],
+          line: 0,
+          timestamp: new Date()
+        });
     } else {
       debug.formatArgs = DEBUG_HANDLE.formatArgs;
       debug.log = DEBUG_HANDLE.log;
@@ -118,10 +123,9 @@ class $ConsoleManager implements ConsoleListener {
       modulePath: event.modulePath ?? event.import?.[1]
     };
 
-    if (this.#filters[result.level] && !this.#filters[result.level]!(result)) {
-      return; // Do nothing
-    } else {
-      return this.#listener.log(result);
+    const filter = this.#filters[result.level];
+    if (!filter || filter(result)) {
+      this.#listener.log(result);
     }
   }
 
@@ -140,5 +144,9 @@ class $ConsoleManager implements ConsoleListener {
   }
 }
 
-export const ConsoleManager = new $ConsoleManager({ log(event): void { console![event.level](...event.args); } });
+export const ConsoleManager = new $ConsoleManager({
+  log(event): void {
+    console![event.level](...event.args);
+  }
+});
 export const log = ConsoleManager.log.bind(ConsoleManager);

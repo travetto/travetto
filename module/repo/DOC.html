@@ -15,7 +15,7 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/repo</code></pre>
   </figure>
 
-The repo module aims to provide concise monorepo based tools.  The monorepo support within the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> framework, is backed by the built in functionality of <a target="_blank" class="external-link" href="https://docs.npmjs.com/downloading-and-installing-node-js-and-npm">Npm</a>/<a target="_blank" class="external-link" href="https://yarnpkg.com">Yarn</a>.  This module is not a requirement for monorepo support, but provides some quality of life improvements for:
+The repo module aims to provide concise monorepo based tools. The monorepo support within the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> framework, is backed by the built in functionality of <a target="_blank" class="external-link" href="https://docs.npmjs.com/downloading-and-installing-node-js-and-npm">Npm</a>/<a target="_blank" class="external-link" href="https://yarnpkg.com">Yarn</a>. This module is not a requirement for monorepo support, but provides some quality of life improvements for:
 <ul> <li>Versioning releases</li>
 <li>Publishing releases</li>
 <li>Listing local modules</li>
@@ -24,7 +24,7 @@ The repo module aims to provide concise monorepo based tools.  The monorepo supp
 
 <h2 id="cli-repo-version">CLI - repo:version</h2>
 
-The versioning operation will find all the changed modules (and the modules that depend on the changed), and will update the versions in accordance with the user preferences.  The versioning logic is backed by <a target="_blank" class="external-link" href="https://docs.npmjs.com/downloading-and-installing-node-js-and-npm">Npm</a>/<a target="_blank" class="external-link" href="https://yarnpkg.com">Yarn</a>'s versioning functionality and so it is identical to using the tool manually. The determination of what has or hasn't changed is relative to the last versioning commit.
+The versioning operation will find all the changed modules (and the modules that depend on the changed), and will update the versions in accordance with the user preferences. The versioning logic is backed by <a target="_blank" class="external-link" href="https://docs.npmjs.com/downloading-and-installing-node-js-and-npm">Npm</a>/<a target="_blank" class="external-link" href="https://yarnpkg.com">Yarn</a>'s versioning functionality and so it is identical to using the tool manually. The determination of what has or hasn't changed is relative to the last versioning commit.
 
   <figure class="terminal">
     <figcaption class="terminal">Showing help for repo:version
@@ -49,7 +49,7 @@ Options:
   <span class="token parameter variable">--help</span>                       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
-Level is a standard semver level of: major, minor, patch or prerelease.  The prefix argument only applies to the prerelease and allows for determining the prerelease level.  For example:
+Level is a standard semver level of: major, minor, patch or prerelease. The prefix argument only applies to the prerelease and allows for determining the prerelease level. For example:
 
   <figure class="terminal">
     <figcaption class="terminal">Cutting a release candidate
@@ -74,7 +74,7 @@ Date:   Thu Feb <span class="token number">23</span> <span class="token number">
 
 <h2 id="cli-repo-publish">CLI - repo:publish</h2>
 
-The publish functionality is relatively naive, but consistent.  The code will look at all modules in the mono-repo and check the listed version against what is available in the npm registry.  If the local version is newer, it is a candidate for publishing.
+The publish functionality is relatively naive, but consistent. The code will look at all modules in the mono-repo and check the listed version against what is available in the npm registry. If the local version is newer, it is a candidate for publishing.
 
   <figure class="terminal">
     <figcaption class="terminal">Showing help for repo:publish

@@ -1,5 +1,5 @@
-import { Precision, Schema, Text, type Point } from '@travetto/schema';
 import { Model, type ModelType } from '@travetto/model';
+import { type Point, Precision, Schema, Text } from '@travetto/schema';
 
 @Schema()
 export class Address {

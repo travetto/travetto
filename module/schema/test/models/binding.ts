@@ -1,4 +1,4 @@
-import { Schema, View, Field, Float, Integer, Alias, Url, Required, Discriminated } from '@travetto/schema';
+import { Alias, Discriminated, Field, Float, Integer, Required, Schema, Url, View } from '@travetto/schema';
 
 import { Address } from './address.ts';
 
@@ -15,7 +15,6 @@ export class RegexSimple {
 
 @Schema()
 export class Count {
-
   @Field({ type: String })
   area: string;
 
@@ -27,7 +26,6 @@ export class Count {
 @Schema()
 @View('test', { with: ['address', 'counts'] })
 export class Person {
-
   name: string;
 
   dob: Date;
@@ -43,7 +41,6 @@ export class Person {
 
 @Schema()
 export class Response {
-
   questionId: string;
   answer?: string | boolean | number | string[];
 
@@ -78,9 +75,7 @@ export class Poly2 extends BasePoly {
 
 @Schema()
 export class Accessors {
-
   #area: string;
-  // eslint-disable-next-line no-unused-private-class-members
   #color: string;
   readonly myName: string = 'name';
 
@@ -101,9 +96,7 @@ export class Accessors {
     return this.#area;
   }
 
-  set optional(v: string | undefined) {
-
-  }
+  set optional(v: string | undefined) {}
 
   get age() {
     return this.area.length;

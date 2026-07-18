@@ -33,12 +33,11 @@ export function highlight(text: string, lang: string): string | undefined {
     indent: 0
   });
 
-  text = text
-    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(code))
-    .replace(/&[a-z][^;]*;/g, a => tokenMapping[a] || a);
+  text = text.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(code)).replace(/&[a-z][^;]*;/g, a => tokenMapping[a] || a);
 
   try {
-    return prismJs.highlight(text, prismJs.languages[lang], lang)
+    return prismJs
+      .highlight(text, prismJs.languages[lang], lang)
       .replace(/(@\s*<span[^>]*)function("\s*>)/g, (a, pre, post) => `${pre}meta${post}`)
       .replace(/[{}]/g, a => `{{'${a}'}}`);
   } catch (error) {
@@ -49,4 +48,3 @@ export function highlight(text: string, lang: string): string | undefined {
     }
   }
 }
-

@@ -1,15 +1,15 @@
 import { type AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ModelRegistryIndex } from '@travetto/model';
-import { type Class } from '@travetto/runtime';
-import { SchemaRegistryIndex, type SchemaFieldConfig } from '@travetto/schema';
+import type { Class } from '@travetto/runtime';
+import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
+import type { Connection } from './connection/base.ts';
 import { Connected, Transactional } from './connection/decorator.ts';
 import type { SQLDialect } from './dialect/base.ts';
-import { SQLModelUtil } from './util.ts';
-import type { Connection } from './connection/base.ts';
 import type { VisitStack } from './types.ts';
+import { SQLModelUtil } from './util.ts';
 
-type UpsertStructure = { dropIndex: string[], createIndex: string[], table: string[] };
+type UpsertStructure = { dropIndex: string[]; createIndex: string[]; table: string[] };
 const isSimpleField = (input: VisitStack | undefined): input is SchemaFieldConfig =>
   !!input && (!('type' in input) || (input.type && !SchemaRegistryIndex.has(input.type)));
 
@@ -17,7 +17,6 @@ const isSimpleField = (input: VisitStack | undefined): input is SchemaFieldConfi
  * Manage creation/updating of all tables
  */
 export class TableManager {
-
   #dialect: SQLDialect;
   context: AsyncContext;
 
@@ -26,7 +25,7 @@ export class TableManager {
     this.context = context;
   }
 
-  #exec<T = unknown>(sql: string): Promise<{ records: T[], count: number }> {
+  #exec<T = unknown>(sql: string): Promise<{ records: T[]; count: number }> {
     return this.#dialect.executeSQL<T>(sql);
   }
 
@@ -70,7 +69,8 @@ export class TableManager {
       // Manage fields
       if (!existingFields.size) {
         sqlCommands.table.push(this.#dialect.getCreateTableSQL(path));
-      } else { // Existing
+      } else {
+        // Existing
         // Fields
         const requestedFields = new Map(fields.map(field => [field.name, field]));
         const top = path.at(-1);
@@ -121,9 +121,17 @@ export class TableManager {
 
     const schema = SchemaRegistryIndex.getConfig(cls);
     await SQLModelUtil.visitSchema(schema, {
-      onRoot: async ({ config, path, fields, descend }) => { await onVisit(config.class, fields, path); return descend(); },
-      onSub: async ({ config, path, fields, descend }) => { await onVisit(config.type, fields, path); return descend(); },
-      onSimple: async ({ config, path, fields }) => { await onVisit(config.type, fields, path); }
+      onRoot: async ({ config, path, fields, descend }) => {
+        await onVisit(config.class, fields, path);
+        return descend();
+      },
+      onSub: async ({ config, path, fields, descend }) => {
+        await onVisit(config.type, fields, path);
+        return descend();
+      },
+      onSimple: async ({ config, path, fields }) => {
+        await onVisit(config.type, fields, path);
+      }
     });
     return sqlCommands;
   }

@@ -1,8 +1,8 @@
-import type { Class } from '@travetto/runtime';
 import type { ModelCrudSupport, ModelType } from '@travetto/model';
+import type { Class } from '@travetto/runtime';
 
-import type { ModelQuerySupport } from './query.ts';
 import type { ModelQuery } from '../model/query.ts';
+import type { ModelQuerySupport } from './query.ts';
 
 /**
  * The contract for a model service with query support
@@ -14,7 +14,7 @@ export interface ModelQueryCrudSupport extends ModelCrudSupport, ModelQuerySuppo
    * @param cls The model class
    * @param data The data
    * @param query The additional query to validate
-  */
+   */
   updateByQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T>;
   /**
    * Update all with partial data, by query

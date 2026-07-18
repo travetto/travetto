@@ -1,12 +1,11 @@
-import { RuntimeError } from '@travetto/runtime';
-import { Injectable, Inject } from '@travetto/di';
 import type { ModelAuthService } from '@travetto/auth-model';
+import { Inject, Injectable } from '@travetto/di';
+import { RuntimeError } from '@travetto/runtime';
 
 import type { User } from './model.ts';
 
 @Injectable()
 class UserService {
-
   @Inject()
   private auth: ModelAuthService<User>;
 

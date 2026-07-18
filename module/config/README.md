@@ -13,7 +13,7 @@ npm install @travetto/config
 yarn add @travetto/config
 ```
 
-The config module provides support for loading application config on startup. Configuration values support the common [YAML](https://en.wikipedia.org/wiki/YAML) constructs as defined in [yaml](https://github.com/eemeli/yaml).  Additionally, the configuration is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") module, to enforce type correctness, and allow for validation of configuration as an entrypoint into the application.  Given that all [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) classes are [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19)-based classes, all the standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19) and [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L24) functionality applies.
+The config module provides support for loading application config on startup. Configuration values support the common [YAML](https://en.wikipedia.org/wiki/YAML) constructs as defined in [yaml](https://github.com/eemeli/yaml). Additionally, the configuration is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") module, to enforce type correctness, and allow for validation of configuration as an entrypoint into the application. Given that all [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) classes are [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19)-based classes, all the standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L19) and [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L26) functionality applies.
 
 ## Resolution
 The configuration information is comprised of:
@@ -30,7 +30,7 @@ Config loading follows a defined resolution path, below is the order in increasi
 By default all configuration data is inert, and will only be applied when constructing an instance of a configuration class.
 
 ### Mono Repo Support
-When working in a monorepo, the parent resources folder will also be searched with a lower priority than the the module's specific resources.  This allows for shared-global configuration that can be overridden at the module level. The general priority is:
+When working in a monorepo, the parent resources folder will also be searched with a lower priority than the the module's specific resources. This allows for shared-global configuration that can be overridden at the module level. The general priority is:
    1. Mono-repo root
    1. Module root
    1. Folders for `TRV_RESOURCES`, in order
@@ -104,12 +104,12 @@ Config {
 ```
 
 ### Standard Configuration Extension
-The framework provides two simple base classes that assist with existing patterns of usage to make adding in new configuration sources as easy as possible.  The goal here is for the developer to either instantiate or extend these classes and produce a configuration source unique to their needs:
+The framework provides two simple base classes that assist with existing patterns of usage to make adding in new configuration sources as easy as possible. The goal here is for the developer to either instantiate or extend these classes and produce a configuration source unique to their needs:
 
 **Code: Memory Provider**
 ```typescript
 import type { ConfigData } from '../parser/types.ts';
-import type { ConfigSource, ConfigPayload } from './types.ts';
+import type { ConfigPayload, ConfigSource } from './types.ts';
 
 /**
  * Meant to be instantiated and provided as a unique config source
@@ -130,7 +130,8 @@ export class MemoryConfigSource implements ConfigSource {
 **Code: Environment JSON Provider**
 ```typescript
 import { JSONUtil } from '@travetto/runtime';
-import type { ConfigSource, ConfigPayload } from './types.ts';
+
+import type { ConfigPayload, ConfigSource } from './types.ts';
 
 /**
  * Represents the environment mapped data as a JSON blob
@@ -156,11 +157,11 @@ export class EnvConfigSource implements ConfigSource {
 ```
 
 ### Custom Configuration Provider
-In addition to files and environment variables, configuration sources can also be provided via the class itself.  This is useful for reading remote configurations, or dealing with complex configuration normalization.  The only caveat to this pattern, is that the these configuration sources cannot rely on the [ConfigurationService](https://github.com/travetto/travetto/tree/main/module/config/src/service.ts#L24) service for input.  This means any needed configuration will need to be accessed via specific patterns.
+In addition to files and environment variables, configuration sources can also be provided via the class itself. This is useful for reading remote configurations, or dealing with complex configuration normalization. The only caveat to this pattern, is that the these configuration sources cannot rely on the [ConfigurationService](https://github.com/travetto/travetto/tree/main/module/config/src/service.ts#L24) service for input. This means any needed configuration will need to be accessed via specific patterns.
 
 **Code: Custom Configuration Source**
 ```typescript
-import type { ConfigSource, ConfigPayload } from '@travetto/config';
+import type { ConfigPayload, ConfigSource } from '@travetto/config';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
@@ -176,13 +177,13 @@ export class CustomConfigSource implements ConfigSource {
 ```
 
 ## Startup
-At startup, the [ConfigurationService](https://github.com/travetto/travetto/tree/main/module/config/src/service.ts#L24) service will log out all the registered configuration objects.  The configuration state output is useful to determine if everything is configured properly when diagnosing runtime errors.  This service will find all configurations, and output a redacted version with all secrets removed.  The default pattern for secrets is `/password|private|secret/i`.  More values can be added in your configuration under the path `config.secrets`.  These values can either be simple strings (for exact match), or `/pattern/` to create a regular expression.
+At startup, the [ConfigurationService](https://github.com/travetto/travetto/tree/main/module/config/src/service.ts#L24) service will log out all the registered configuration objects. The configuration state output is useful to determine if everything is configured properly when diagnosing runtime errors. This service will find all configurations, and output a redacted version with all secrets removed. The default pattern for secrets is `/password|private|secret/i`. More values can be added in your configuration under the path `config.secrets`. These values can either be simple strings (for exact match), or `/pattern/` to create a regular expression.
 
 ## Consuming
-The [ConfigurationService](https://github.com/travetto/travetto/tree/main/module/config/src/service.ts#L24) service provides injectable access to all of the loaded configuration. For simplicity, a decorator, [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) allows for classes to automatically be bound with config information on post construction via the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
+The [ConfigurationService](https://github.com/travetto/travetto/tree/main/module/config/src/service.ts#L24) service provides injectable access to all of the loaded configuration. For simplicity, a decorator, [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) allows for classes to automatically be bound with config information on post construction via the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration. This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
 
 ### Environment Variables
-Additionally there are times in which you may want to also support configuration via environment variables.  [@EnvVar](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L36) supports override configuration values when environment variables are present. 
+Additionally there are times in which you may want to also support configuration via environment variables. [@EnvVar](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L36) supports override configuration values when environment variables are present. 
 
 The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
 
@@ -231,7 +232,7 @@ $ trv main doc/dbconfig-run.ts
 }
 ```
 
-What you see, is that the configuration structure must be honored and the application will fail to start if the constraints do not hold true.  This helps to ensure that the configuration, as input to the system, is verified and correct. 
+What you see, is that the configuration structure must be honored and the application will fail to start if the constraints do not hold true. This helps to ensure that the configuration, as input to the system, is verified and correct. 
 
 By passing in the port via the environment variable, the config will construct properly, and the application will startup correctly:
 

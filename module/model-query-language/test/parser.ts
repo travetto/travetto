@@ -1,13 +1,12 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
 import { QueryLanguageParser, QueryLanguageTokenizer } from '@travetto/model-query-language';
+import { Suite, Test } from '@travetto/test';
 
-type UserType<R = string> = { user: { address: { state: String, city: string }, role: R } };
+type UserType<R = string> = { user: { address: { state: String; city: string }; role: R } };
 
 @Suite('Query String Tests')
 export class QueryStringTest {
-
   @Test('Tokenizer')
   async tokenize() {
     assert.deepStrictEqual(QueryLanguageTokenizer.tokenize('A(B,C,D)'), [
@@ -23,7 +22,7 @@ export class QueryStringTest {
     assert.deepStrictEqual(QueryLanguageTokenizer.tokenize('A.b.c  ==  D'), [
       { type: 'identifier', value: 'A.b.c' },
       { type: 'operator', value: '==' },
-      { type: 'identifier', value: 'D' },
+      { type: 'identifier', value: 'D' }
     ]);
     assert.deepStrictEqual(QueryLanguageTokenizer.tokenize(`"${'A.b.c'}"   =='  D'`), [
       { type: 'literal', value: 'A.b.c' },
@@ -52,16 +51,10 @@ export class QueryStringTest {
     assert.deepStrictEqual(parsed, {
       $or: [
         {
-          $and: [
-            { A: { $eq: 5 } },
-            { B: { $eq: 6 } }
-          ]
+          $and: [{ A: { $eq: 5 } }, { B: { $eq: 6 } }]
         },
         {
-          $and: [
-            { C: { $eq: -7 } },
-            { d: { $eq: 8 } }
-          ]
+          $and: [{ C: { $eq: -7 } }, { d: { $eq: 8 } }]
         },
         { e: { $eq: 10 } }
       ]
@@ -82,12 +75,9 @@ export class QueryStringTest {
                   $or: [
                     { B: { $eq: 6 } },
                     {
-                      $and: [
-                        { C: { $eq: 7 } },
-                        { G: { $eq: 1 } }
-                      ],
+                      $and: [{ C: { $eq: 7 } }, { G: { $eq: 1 } }]
                     }
-                  ],
+                  ]
                 }
               ]
             },
@@ -103,10 +93,7 @@ export class QueryStringTest {
   async parseNegation() {
     const res2 = QueryLanguageParser.parseToQuery('A == 5 and NOT B == 6');
     assert.deepStrictEqual(res2, {
-      $and: [
-        { A: { $eq: 5 } },
-        { $not: { B: { $eq: 6 } } }
-      ]
+      $and: [{ A: { $eq: 5 } }, { $not: { B: { $eq: 6 } } }]
     });
   }
 
@@ -117,10 +104,7 @@ export class QueryStringTest {
       $and: [
         { A: { b: { c: { $eq: 5 } } } },
         {
-          $or: [
-            { $not: { B: { z: { $eq: -6.2 } } } },
-            { c: { $eq: /a/ } }
-          ]
+          $or: [{ $not: { B: { z: { $eq: -6.2 } } } }, { c: { $eq: /a/ } }]
         }
       ]
     });
@@ -152,15 +136,13 @@ export class QueryStringTest {
   @Test('Parse complex')
   async parseComplex() {
     const parsed = QueryLanguageParser.parseToQuery<UserType>(
-      "user.role in ['admin', 'root'] && (user.address.state == 'VA' || user.address.city == 'Springfield')");
+      "user.role in ['admin', 'root'] && (user.address.state == 'VA' || user.address.city == 'Springfield')"
+    );
     assert.deepStrictEqual(parsed, {
       $and: [
         { user: { role: { $in: ['admin', 'root'] } } },
         {
-          $or: [
-            { user: { address: { state: { $eq: 'VA' } } } },
-            { user: { address: { city: { $eq: 'Springfield' } } } }
-          ]
+          $or: [{ user: { address: { state: { $eq: 'VA' } } } }, { user: { address: { city: { $eq: 'Springfield' } } } }]
         }
       ]
     });
@@ -195,7 +177,9 @@ export class QueryStringTest {
 
   @Test('Relative date ranges')
   async parseRelativeDateRanges() {
-    const parsed = QueryLanguageParser.parseToQuery<{ createdAt: { $gt: string }, deleteAt: { $gt: string } }>('createdAt > -7d AND deleteAt > 0d');
+    const parsed = QueryLanguageParser.parseToQuery<{ createdAt: { $gt: string }; deleteAt: { $gt: string } }>(
+      'createdAt > -7d AND deleteAt > 0d'
+    );
     assert.deepStrictEqual(parsed, { $and: [{ createdAt: { $gt: '-7d' } }, { deleteAt: { $gt: '0d' } }] });
   }
 }

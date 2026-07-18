@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
-import { Suite, Test, TestFixtures } from '@travetto/test';
 import { BinaryMetadataUtil, BinaryUtil, Util } from '@travetto/runtime';
+import { Suite, Test, TestFixtures } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
@@ -10,7 +10,6 @@ import { ModelBlobUtil } from '../../src/util/blob.ts';
 
 @Suite()
 export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
-
   fixture = new TestFixtures(['@travetto/model']);
 
   @Test()
@@ -90,7 +89,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const partialMeta = BinaryMetadataUtil.read(partial)!;
     const subContent = await partial.text();
     const range = BinaryMetadataUtil.enforceRange({ start: 10, end: 20 }, partialMeta);
-    assert(subContent.length === (range.end - range.start) + 1);
+    assert(subContent.length === range.end - range.start + 1);
 
     const og = await this.fixture.readUTF8('/text.txt');
 
@@ -100,7 +99,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const partialUnboundedMeta = BinaryMetadataUtil.read(partialUnbounded)!;
     const subContent2 = await partialUnbounded.text();
     const range2 = BinaryMetadataUtil.enforceRange({ start: 10 }, partialUnboundedMeta);
-    assert(subContent2.length === (range2.end - range2.start) + 1);
+    assert(subContent2.length === range2.end - range2.start + 1);
     assert(subContent2.startsWith('klm'));
     assert(subContent2.endsWith('xyz'));
 
@@ -161,14 +160,14 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     }
 
     const writable = await service.getBlobWriteUrl!('largeFile/one', {
-      contentType: 'image/jpeg',
+      contentType: 'image/jpeg'
     });
 
     assert(writable);
 
     const response = await fetch(writable, {
       method: 'PUT',
-      body: new File([bytes], 'gary', { type: 'image/jpeg' }),
+      body: new File([bytes], 'gary', { type: 'image/jpeg' })
     });
 
     console.error(await response.text());
@@ -179,7 +178,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
       contentType: 'image/jpeg',
       title: 'orange',
       filename: 'gary',
-      size: bytes.byteLength,
+      size: bytes.byteLength
     });
 
     const found = await service.getBlob('largeFile/one');

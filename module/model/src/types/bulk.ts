@@ -7,11 +7,7 @@ import type { ModelType, OptionalId } from './model.ts';
 /**
  * Bulk operation. Each operation has a single action and payload
  */
-export type BulkOperation<T extends ModelType> =
-  { delete?: T } &
-  { insert?: OptionalId<T> } &
-  { update?: T } &
-  { upsert?: OptionalId<T> };
+export type BulkOperation<T extends ModelType> = { delete?: T } & { insert?: OptionalId<T> } & { update?: T } & { upsert?: OptionalId<T> };
 
 /**
  * Bulk response provides a summary of all the operations
@@ -37,13 +33,13 @@ export interface BulkResponse<E = unknown> {
   };
 }
 
-type BulkErrorItem = { message: string, type: string, errors?: ValidationError[], idx: number };
+type BulkErrorItem = { message: string; type: string; errors?: ValidationError[]; idx: number };
 
 /**
  * Bulk processing error
  */
 export class BulkProcessError extends RuntimeError<{ errors: BulkErrorItem[] }> {
-  constructor(errors: { idx: number, error: ValidationResultError }[]) {
+  constructor(errors: { idx: number; error: ValidationResultError }[]) {
     super('Bulk processing errors have occurred', {
       category: 'data',
       details: {

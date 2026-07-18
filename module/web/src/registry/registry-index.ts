@@ -1,15 +1,14 @@
-import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { type Class, type ClassInstance, getClass, isClass, type RetainIntrinsicFields } from '@travetto/runtime';
 import { DependencyRegistryIndex } from '@travetto/di';
+import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
+import { type Class, type ClassInstance, getClass, isClass, type RetainIntrinsicFields } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import { ControllerRegistryAdapter } from './registry-adapter.ts';
-import type { ControllerConfig, EndpointConfig, EndpointDecorator } from './types.ts';
 import { WebAsyncContext } from '../context.ts';
 import type { WebInterceptor } from '../types/interceptor.ts';
+import { ControllerRegistryAdapter } from './registry-adapter.ts';
+import type { ControllerConfig, EndpointConfig, EndpointDecorator } from './types.ts';
 
 export class ControllerRegistryIndex implements RegistryIndex {
-
   static #instance = Registry.registerIndex(this);
 
   static getClasses(): Class[] {
@@ -56,7 +55,9 @@ export class ControllerRegistryIndex implements RegistryIndex {
 
   store = new RegistryIndexStore(ControllerRegistryAdapter);
 
-  /** @private */ constructor(source: unknown) { Registry.validateConstructor(source); }
+  /** @private */ constructor(source: unknown) {
+    Registry.validateConstructor(source);
+  }
 
   async #bindContextParams<T>(instance: ClassInstance<T>): Promise<void> {
     const ctx = await DependencyRegistryIndex.getInstance(WebAsyncContext);
@@ -76,7 +77,9 @@ export class ControllerRegistryIndex implements RegistryIndex {
   bindContextParamsOnPostConstruct(cls: Class): void {
     const bind = (instance: ClassInstance): Promise<void> => this.#bindContextParams(instance);
     DependencyRegistryIndex.registerPostConstruct(cls, {
-      operation(this: ClassInstance): Promise<void> { return bind(this); },
+      operation(this: ClassInstance): Promise<void> {
+        return bind(this);
+      },
       priority: 100
     });
   }

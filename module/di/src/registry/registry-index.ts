@@ -1,10 +1,10 @@
-import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { castKey, castTo, type Class, describeFunction, getParentClass, TypedObject } from '@travetto/runtime';
+import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
+import { type Class, castKey, castTo, describeFunction, getParentClass, TypedObject } from '@travetto/runtime';
 import { type SchemaFieldConfig, type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
+import { InjectionError } from '../error.ts';
 import type { Dependency, InjectableCandidate, InjectableConfig, PostConstructor, ResolutionType } from '../types.ts';
 import { DependencyRegistryAdapter } from './registry-adapter.ts';
-import { InjectionError } from '../error.ts';
 import { DependencyRegistryResolver } from './registry-resolver.ts';
 
 const MetadataSymbol = Symbol();
@@ -15,7 +15,6 @@ function readMetadata(item: { metadata?: Record<symbol, unknown> }): Dependency 
 }
 
 export class DependencyRegistryIndex implements RegistryIndex {
-
   static #instance = Registry.registerIndex(DependencyRegistryIndex);
 
   static getForRegister(cls: Class): DependencyRegistryAdapter {
@@ -79,7 +78,9 @@ export class DependencyRegistryIndex implements RegistryIndex {
 
   store = new RegistryIndexStore(DependencyRegistryAdapter);
 
-  /** @private */ constructor(source: unknown) { Registry.validateConstructor(source); }
+  /** @private */ constructor(source: unknown) {
+    Registry.validateConstructor(source);
+  }
 
   getConfig(cls: Class): InjectableConfig {
     return this.store.get(cls).get();
@@ -91,7 +92,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
     for (const config of adapter.getCandidateConfigs()) {
       const parentClass = getParentClass(config.candidateType);
       const parentConfig = parentClass ? this.store.getOptional(parentClass) : undefined;
-      const hasParentBase = (parentConfig || (parentClass && !!describeFunction(parentClass)?.abstract));
+      const hasParentBase = parentConfig || (parentClass && !!describeFunction(parentClass)?.abstract);
       const baseParent = hasParentBase ? parentClass : undefined;
       this.#resolver.registerClass(config, baseParent);
     }
@@ -128,11 +129,11 @@ export class DependencyRegistryIndex implements RegistryIndex {
    * Retrieve list dependencies
    */
   async fetchDependencyParameters<T>(candidate: InjectableCandidate<T>): Promise<unknown[]> {
-    const inputs = SchemaRegistryIndex.has(candidate.class) ?
-      SchemaRegistryIndex.get(candidate.class).getMethod(candidate.method).parameters : [];
+    const inputs = SchemaRegistryIndex.has(candidate.class)
+      ? SchemaRegistryIndex.get(candidate.class).getMethod(candidate.method).parameters
+      : [];
 
-    const promises = inputs
-      .map(input => this.#resolveDependencyValue(readMetadata(input) ?? {}, input, candidate.class));
+    const promises = inputs.map(input => this.#resolveDependencyValue(readMetadata(input) ?? {}, input, candidate.class));
 
     return await Promise.all(promises);
   }
@@ -144,7 +145,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
     const inputs = SchemaRegistryIndex.getOptional(candidateType)?.getFields() ?? {};
 
     const promises = TypedObject.entries(inputs)
-      .filter(([key, input]) => readMetadata(input) !== undefined && (input.access !== 'readonly' && instance[castKey(key)] === undefined))
+      .filter(([key, input]) => readMetadata(input) !== undefined && input.access !== 'readonly' && instance[castKey(key)] === undefined)
       .map(async ([key, input]) => [key, await this.#resolveDependencyValue(readMetadata(input) ?? {}, input, sourceClass)] as const);
 
     const pairs = await Promise.all(promises);
@@ -188,8 +189,8 @@ export class DependencyRegistryIndex implements RegistryIndex {
   async getInstance<T>(candidateType: Class<T>, requestedQualifier?: symbol, resolution?: ResolutionType): Promise<T> {
     const { target, qualifier } = this.#resolver.resolveCandidate(candidateType, requestedQualifier, resolution);
 
-    return castTo(this.#instancePromises
-      .getOrInsert(target, new Map())
-      .getOrInsertComputed(qualifier, () => this.construct(target, qualifier)));
+    return castTo(
+      this.#instancePromises.getOrInsert(target, new Map()).getOrInsertComputed(qualifier, () => this.construct(target, qualifier))
+    );
   }
 }

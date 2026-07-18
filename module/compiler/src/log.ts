@@ -15,7 +15,6 @@ export type LogShape = Record<'info' | 'debug' | 'warn' | 'error', (message: str
 const ESC = '\x1b[';
 
 export class Logger implements LogConfig, LogShape {
-
   static #linePartial: boolean | undefined;
 
   /** Rewrite text line, tracking cleanup as necessary */
@@ -23,7 +22,8 @@ export class Logger implements LogConfig, LogShape {
     if ((!text && !this.#linePartial) || !process.stdout.isTTY) {
       return;
     }
-    if (this.#linePartial === undefined) { // First time
+    if (this.#linePartial === undefined) {
+      // First time
       process.stdout.write(`${ESC}?25l`); // Hide cursor
       process.on('exit', () => this.reset());
     }
@@ -35,7 +35,9 @@ export class Logger implements LogConfig, LogShape {
     }
   }
 
-  static reset(): void { process.stdout.write(`${ESC}!p${ESC}?25h`); }
+  static reset(): void {
+    process.stdout.write(`${ESC}!p${ESC}?25h`);
+  }
 
   level?: CompilerLogLevel | 'none';
   root: string = process.cwd();
@@ -47,28 +49,38 @@ export class Logger implements LogConfig, LogShape {
   }
 
   valid(event: CompilerLogEvent): boolean {
-    return LEVEL_TO_PRIORITY[this.level ?? this.parent?.level!] <= LEVEL_TO_PRIORITY[event.level];
+    return LEVEL_TO_PRIORITY[this.level ?? this.parent?.level ?? 'none'] <= LEVEL_TO_PRIORITY[event.level];
   }
 
   /** Log event with filtering by level */
   render(event: CompilerLogEvent): void {
-    if (!this.valid(event)) { return; }
-    const params = [event.message, ...event.args ?? []]
-      .map(arg => typeof arg === 'string' ? arg.replaceAll(this.root ?? this.parent?.root!, '.') : arg);
+    if (!this.valid(event)) {
+      return;
+    }
+    const params = [event.message, ...(event.args ?? [])].map(arg =>
+      typeof arg === 'string' ? arg.replaceAll(this.root ?? this.parent?.root, '.') : arg
+    );
 
     if (event.scope ?? this.scope) {
       params.unshift(`[${(event.scope ?? this.scope!).padEnd(SCOPE_MAX, ' ')}]`);
     }
     params.unshift(new Date().toISOString(), `${event.level.padEnd(5)}`);
     Logger.rewriteLine(''); // Clear out progress line, if active
-    // eslint-disable-next-line no-console
     console[event.level]!(...params);
   }
 
-  info(message: string, ...args: unknown[]): void { return this.render({ level: 'info', message, args }); }
-  debug(message: string, ...args: unknown[]): void { return this.render({ level: 'debug', message, args }); }
-  warn(message: string, ...args: unknown[]): void { return this.render({ level: 'warn', message, args }); }
-  error(message: string, ...args: unknown[]): void { return this.render({ level: 'error', message, args }); }
+  info(message: string, ...args: unknown[]): void {
+    this.render({ level: 'info', message, args });
+  }
+  debug(message: string, ...args: unknown[]): void {
+    this.render({ level: 'debug', message, args });
+  }
+  warn(message: string, ...args: unknown[]): void {
+    this.render({ level: 'warn', message, args });
+  }
+  error(message: string, ...args: unknown[]): void {
+    this.render({ level: 'error', message, args });
+  }
 }
 
 class $RootLogger extends Logger {
@@ -86,9 +98,17 @@ class $RootLogger extends Logger {
   initLevel(defaultLevel: CompilerLogLevel | 'none'): void {
     const value = process.env.TRV_QUIET !== 'true' ? process.env.TRV_BUILD : 'none';
     switch (value) {
-      case 'debug': case 'warn': case 'error': case 'info': this.level = value; break;
-      case undefined: this.level = defaultLevel; break;
-      case 'none': default: this.level = 'none';
+      case 'debug':
+      case 'warn':
+      case 'error':
+      case 'info':
+        this.level = value;
+        break;
+      case undefined:
+        this.level = defaultLevel;
+        break;
+      default:
+        this.level = 'none';
     }
   }
 
@@ -100,21 +120,34 @@ class $RootLogger extends Logger {
   /** Scope and provide a callback pattern for access to a logger */
   wrap<T = unknown>(scope: string, operation: (log: Logger) => Promise<T>, basic = true): Promise<T> {
     const logger = this.scoped(scope);
-    return basic ? (logger.debug('Started'), operation(logger).finally(() => logger.debug('Completed'))) : operation(logger);
+    if (basic) {
+      logger.debug('Started');
+      return operation(logger).finally(() => logger.debug('Completed'));
+    } else {
+      return operation(logger);
+    }
   }
 
   /** Write progress event, if active */
   onProgressEvent(event: CompilerProgressEvent): void | Promise<void> {
-    if (!(this.logProgress)) { return; }
-    const progress = Math.trunc(event.idx * 100 / event.total);
-    const text = event.complete ? '' : `Compiling [${'#'.repeat(Math.trunc(progress / 10)).padEnd(10, ' ')}] [${event.idx}/${event.total}] ${event.message}`;
+    if (!this.logProgress) {
+      return;
+    }
+    const progress = Math.trunc((event.idx * 100) / event.total);
+    const text = event.complete
+      ? ''
+      : `Compiling [${'#'.repeat(Math.trunc(progress / 10)).padEnd(10, ' ')}] [${event.idx}/${event.total}] ${event.message}`;
     return Logger.rewriteLine(text);
   }
 
   /** Write all progress events if active */
   async consumeProgressEvents(input: () => AsyncIterable<CompilerProgressEvent>): Promise<void> {
-    if (!(this.logProgress)) { return; }
-    for await (const event of input()) { this.onProgressEvent(event); }
+    if (!this.logProgress) {
+      return;
+    }
+    for await (const event of input()) {
+      this.onProgressEvent(event);
+    }
     Logger.reset();
   }
 }
@@ -123,7 +156,9 @@ export const Log = new $RootLogger();
 
 export class IpcLogger extends Logger {
   render(event: CompilerLogEvent): void {
-    if (!this.valid(event)) { return; }
+    if (!this.valid(event)) {
+      return;
+    }
     if (process.connected && process.send) {
       process.send({ type: 'log', payload: event });
     }

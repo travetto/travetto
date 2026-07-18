@@ -38,6 +38,7 @@
     "@travetto/compiler": "^8.0.0-alpha.1",
     "@travetto/doc": "^8.0.0-alpha.1",
     "@travetto/email-compiler": "^8.0.0-alpha.1",
+    "@travetto/lint": "^8.0.0-alpha.1",
     "@travetto/log": "^8.0.0-alpha.1",
     "@travetto/pack": "^8.0.0-alpha.1",
     "@travetto/test": "^8.0.0-alpha.1",

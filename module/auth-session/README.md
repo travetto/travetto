@@ -13,11 +13,11 @@ npm install @travetto/auth-session
 yarn add @travetto/auth-session
 ```
 
-This is a module that adds session support to the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication support for the Travetto framework") framework, via [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") storage.  The concept here, is that the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication support for the Travetto framework") module provides the solid foundation for ensuring authentication to the system, and transitively to the session data. The [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7) provides a session identifier, which refers to a unique authentication session.  Each login will produce a novel session id.  This id provides the contract between [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication support for the Travetto framework") and[Auth Session](https://github.com/travetto/travetto/tree/main/module/auth-session#readme "Session provider for the travetto auth module.").  
+This is a module that adds session support to the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication support for the Travetto framework") framework, via [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") storage. The concept here, is that the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication support for the Travetto framework") module provides the solid foundation for ensuring authentication to the system, and transitively to the session data. The [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7) provides a session identifier, which refers to a unique authentication session. Each login will produce a novel session id. This id provides the contract between [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication support for the Travetto framework") and[Auth Session](https://github.com/travetto/travetto/tree/main/module/auth-session#readme "Session provider for the travetto auth module."). 
 
-This session identifier, is then used when retrieving data from [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") storage. This storage mechanism is not tied to a request/response model, but the [Web Auth Session](https://github.com/travetto/travetto/tree/main/module/auth-web-session#readme "Web authentication session integration support for the Travetto framework") does provide a natural integration with the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") module.   
+This session identifier, is then used when retrieving data from [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") storage. This storage mechanism is not tied to a request/response model, but the [Web Auth Session](https://github.com/travetto/travetto/tree/main/module/auth-web-session#readme "Web authentication session integration support for the Travetto framework") does provide a natural integration with the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") module. 
 
-Within the framework the sessions are stored against any [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementation that provides [ModelExpirySupport](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10), as the data needs to be able to be expired appropriately.  The list of supported model providers are:
+Within the framework the sessions are stored against any [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementation that provides [ModelExpirySupport](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10), as the data needs to be able to be expired appropriately. The list of supported model providers are:
    *  [Redis Model Support](https://github.com/travetto/travetto/tree/main/module/model-redis#readme "Redis backing for the travetto model module.")
    *  [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module.")
    *  [S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.")
@@ -26,12 +26,11 @@ Within the framework the sessions are stored against any [Data Modeling Support]
    *  [File Model Support](https://github.com/travetto/travetto/tree/main/module/model-file#readme "File system backing for the travetto model module.")
    *  [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module.")
 
-While the expiry is not necessarily a hard requirement, the implementation without it can be quite messy.  To that end, the ability to add [ModelExpirySupport](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10) to the model provider would be the natural extension point if more expiry support is needed.
+While the expiry is not necessarily a hard requirement, the implementation without it can be quite messy. To that end, the ability to add [ModelExpirySupport](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10) to the model provider would be the natural extension point if more expiry support is needed.
 
 **Code: Sample usage of Session Service**
 ```typescript
 export class AuthSessionInterceptor implements WebInterceptor {
-
   category: WebInterceptorCategory = 'application';
   dependsOn = [AuthContextInterceptor];
 
@@ -61,7 +60,7 @@ export class AuthSessionInterceptor implements WebInterceptor {
 }
 ```
 
-The [SessionService](https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L14) provides the basic integration with the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L14) to authenticate and isolate session data.  The usage is fairly simple, but the import pattern to follow is:
+The [SessionService](https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L14) provides the basic integration with the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L14) to authenticate and isolate session data. The usage is fairly simple, but the import pattern to follow is:
    *  load
    *  read/modify
    *  persist

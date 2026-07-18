@@ -1,8 +1,26 @@
 const exclude = new Set([
-  'parent', 'checker', 'end', 'pos', 'id', 'source', 'sourceFile', 'getSourceFile',
-  'statements', 'stringIndexInfo', 'numberIndexInfo', 'instantiations', 'thisType',
-  'members', 'properties', 'outerTypeParameters', 'exports', 'transformFlags', 'flowNode',
-  'nextContainer', 'modifierFlagsCache', 'declaredProperties'
+  'parent',
+  'checker',
+  'end',
+  'pos',
+  'id',
+  'source',
+  'sourceFile',
+  'getSourceFile',
+  'statements',
+  'stringIndexInfo',
+  'numberIndexInfo',
+  'instantiations',
+  'thisType',
+  'members',
+  'properties',
+  'outerTypeParameters',
+  'exports',
+  'transformFlags',
+  'flowNode',
+  'nextContainer',
+  'modifierFlagsCache',
+  'declaredProperties'
 ]);
 
 const TypedObject: { keys<T = unknown, K extends keyof T = keyof T>(value: T): K[] } & ObjectConstructor = Object;

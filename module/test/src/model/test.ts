@@ -5,10 +5,13 @@ import type { Skip, TestCore } from './common.ts';
 export type ThrowableError = string | RegExp | Class<Error> | ((error: Error | string) => boolean | void | undefined);
 export type TestLog = Omit<ConsoleEvent, 'args' | 'scope'> & { message: string };
 
-export type TestDiffSource = Record<string, {
-  sourceHash: number;
-  methods: Record<string, number>;
-}>;
+export type TestDiffSource = Record<
+  string,
+  {
+    sourceHash: number;
+    methods: Record<string, number>;
+  }
+>;
 
 export type TestStatus = 'passed' | 'skipped' | 'errored' | 'failed' | 'unknown';
 

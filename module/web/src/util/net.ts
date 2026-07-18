@@ -1,12 +1,11 @@
-import os from 'node:os';
-import net from 'node:net';
 import { spawn } from 'node:child_process';
+import net from 'node:net';
+import os from 'node:os';
 
 import { ExecUtil } from '@travetto/runtime';
 
 /** Net utilities */
 export class NetUtil {
-
   /** Is an error an address in use error */
   static isPortUsedError(error: unknown): error is Error & { port: number } {
     return !!error && error instanceof Error && error.message.includes('EADDRINUSE') && 'port' in error && typeof error.port === 'number';
@@ -36,7 +35,9 @@ export class NetUtil {
           return;
         }
         const { port } = addr;
-        server.close(() => { resolve(port); });
+        server.close(() => {
+          resolve(port);
+        });
       });
     });
   }
@@ -45,8 +46,7 @@ export class NetUtil {
    * Get local address for listening
    */
   static getLocalAddress(): string {
-    const useIPv4 = !![...Object.values(os.networkInterfaces())]
-      .find(interfaces => interfaces?.find(item => item.family === 'IPv4'));
+    const useIPv4 = !![...Object.values(os.networkInterfaces())].find(interfaces => interfaces?.find(item => item.family === 'IPv4'));
 
     return useIPv4 ? '0.0.0.0' : '::';
   }
@@ -56,7 +56,7 @@ export class NetUtil {
    * @param error The error that may indicate a port conflict
    * @returns Returns true if the port was freed, false if not handled
    */
-  static async freePortOnConflict(error: unknown): Promise<{ processId?: number, port: number } | undefined> {
+  static async freePortOnConflict(error: unknown): Promise<{ processId?: number; port: number } | undefined> {
     if (this.isPortUsedError(error)) {
       const processId = await this.getPortProcessId(error.port);
       if (processId) {

@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 
 import { Injectable } from '@travetto/di';
-import { RuntimeError, AsyncQueue, castTo } from '@travetto/runtime';
+import { AsyncQueue, castTo, RuntimeError } from '@travetto/runtime';
 
 type Ctx<T = unknown> = Record<string | symbol, T>;
 
@@ -10,7 +10,6 @@ type Ctx<T = unknown> = Record<string | symbol, T>;
  */
 @Injectable()
 export class AsyncContext {
-
   storage = new AsyncLocalStorage<Ctx>();
 
   constructor() {

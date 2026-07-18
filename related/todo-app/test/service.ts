@@ -1,19 +1,19 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
 import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
+import { Suite, Test } from '@travetto/test';
+
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 import { ModelSuite } from '@travetto/model/support/test/suite.ts';
 
-import type { TodoService } from '../src/service.ts';
 import { Todo } from '../src/model.ts';
+import type { TodoService } from '../src/service.ts';
 
 @Suite()
 @ModelSuite()
 @InjectableSuite()
 export class TodoTest {
-
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 

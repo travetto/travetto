@@ -1,7 +1,12 @@
 import { Inject, Injectable } from '@travetto/di';
 import {
-  BodyInterceptor, type WebInterceptor, type WebInterceptorCategory, type WebChainedContext,
-  type WebResponse, DecompressInterceptor, type WebInterceptorContext
+  BodyInterceptor,
+  DecompressInterceptor,
+  type WebChainedContext,
+  type WebInterceptor,
+  type WebInterceptorCategory,
+  type WebInterceptorContext,
+  type WebResponse
 } from '@travetto/web';
 
 import type { WebUploadConfig } from './config.ts';
@@ -9,7 +14,6 @@ import { WebUploadUtil } from './util.ts';
 
 @Injectable()
 export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
-
   category: WebInterceptorCategory = 'request';
   runsBefore = [BodyInterceptor];
   dependsOn = [DecompressInterceptor];
@@ -24,7 +28,7 @@ export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
     base.uploads ??= {};
     // Override the uploads object with all the data from the inputs
     for (const [key, config] of inputs.flatMap(inputConfig => Object.entries(inputConfig.uploads ?? {}))) {
-      Object.assign(base.uploads[key] ??= {}, config);
+      Object.assign((base.uploads[key] ??= {}), config);
     }
     return base;
   }

@@ -1,8 +1,16 @@
-import { type Any, type Class, type ClassInstance, getClass, type NumericLikeIntrinsic, type NumericPrimitive, type Primitive } from '@travetto/runtime';
+import {
+  type Any,
+  type Class,
+  type ClassInstance,
+  getClass,
+  type NumericLikeIntrinsic,
+  type NumericPrimitive,
+  type Primitive
+} from '@travetto/runtime';
 
-import { CommonRegex } from '../validate/regex.ts';
-import { CONSTRUCTOR_PROPERTY, type SchemaInputConfig } from '../service/types.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
+import { CONSTRUCTOR_PROPERTY, type SchemaInputConfig } from '../service/types.ts';
+import { CommonRegex } from '../validate/regex.ts';
 
 type StringType = string | string[];
 type LengthType = string | unknown[] | Uint8Array | Uint16Array | Uint32Array;
@@ -10,9 +18,11 @@ type NumberType = NumericPrimitive | NumericPrimitive[];
 type NumberLikeType = NumericLikeIntrinsic | NumericLikeIntrinsic[];
 type EnumType = Exclude<Primitive, 'boolean'> | Exclude<Primitive, 'boolean'>[];
 
-type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(
-  instance: T, property: K, idx?: TypedPropertyDescriptor<Any> | number
-) => void);
+type PropType<V> = <T extends Partial<Record<K, V | Function>>, K extends string>(
+  instance: T,
+  property: K,
+  idx?: TypedPropertyDescriptor<Any> | number
+) => void;
 
 function input<V>(...configs: Partial<SchemaInputConfig>[]): PropType<V> {
   return (instanceOrCls: ClassInstance | Class, property: string, idx?: number | TypedPropertyDescriptor<Any>): void => {
@@ -43,7 +53,9 @@ export function Input(type: Pick<SchemaInputConfig, 'type' | 'array'>, ...config
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Alias(...aliases: string[]): PropType<unknown> { return input({ aliases }); }
+export function Alias(...aliases: string[]): PropType<unknown> {
+  return input({ aliases });
+}
 
 /**
  * Mark an input as required
@@ -52,7 +64,9 @@ export function Alias(...aliases: string[]): PropType<unknown> { return input({ 
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Required(active = true, message?: string): PropType<unknown> { return input({ required: { active, message } }); }
+export function Required(active = true, message?: string): PropType<unknown> {
+  return input({ required: { active, message } });
+}
 
 /**
  * Define an input as a set of enumerated values
@@ -71,14 +85,18 @@ export function Enum(values: string[], message?: string): PropType<EnumType> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Text(): PropType<StringType> { return input({ specifiers: ['text'] }); }
+export function Text(): PropType<StringType> {
+  return input({ specifiers: ['text'] });
+}
 
 /**
  * Mark the input to indicate it's for long form text
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function LongText(): PropType<StringType> { return input({ specifiers: ['text', 'long'] }); }
+export function LongText(): PropType<StringType> {
+  return input({ specifiers: ['text', 'long'] });
+}
 
 /**
  * Require the input to match a specific RegExp
@@ -87,7 +105,9 @@ export function LongText(): PropType<StringType> { return input({ specifiers: ['
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Match(regex: RegExp, message?: string): PropType<StringType> { return input({ match: { regex, message } }); }
+export function Match(regex: RegExp, message?: string): PropType<StringType> {
+  return input({ match: { regex, message } });
+}
 
 /**
  * The minimum length for the string or array
@@ -107,7 +127,9 @@ export function MinLength(limit: number, message?: string): PropType<LengthType>
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function MaxLength(limit: number, message?: string): PropType<LengthType> { return input({ maxlength: { limit, message } }); }
+export function MaxLength(limit: number, message?: string): PropType<LengthType> {
+  return input({ maxlength: { limit, message } });
+}
 
 /**
  * The minimum value
@@ -137,7 +159,9 @@ export function Max(limit: NumericLikeIntrinsic, message?: string): PropType<Num
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Email(message?: string): PropType<StringType> { return Match(CommonRegex.email, message); }
+export function Email(message?: string): PropType<StringType> {
+  return Match(CommonRegex.email, message);
+}
 
 /**
  * Mark an input as an telephone number
@@ -145,7 +169,9 @@ export function Email(message?: string): PropType<StringType> { return Match(Com
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Telephone(message?: string): PropType<StringType> { return Match(CommonRegex.telephone, message); }
+export function Telephone(message?: string): PropType<StringType> {
+  return Match(CommonRegex.telephone, message);
+}
 
 /**
  * Mark an input as a url
@@ -153,7 +179,9 @@ export function Telephone(message?: string): PropType<StringType> { return Match
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Url(message?: string): PropType<StringType> { return Match(CommonRegex.url, message); }
+export function Url(message?: string): PropType<StringType> {
+  return Match(CommonRegex.url, message);
+}
 
 /**
  * Determine the numeric precision of the value
@@ -162,35 +190,45 @@ export function Url(message?: string): PropType<StringType> { return Match(Commo
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Precision(digits: number, decimals?: number): PropType<number> { return input({ precision: [digits, decimals] }); }
+export function Precision(digits: number, decimals?: number): PropType<number> {
+  return input({ precision: [digits, decimals] });
+}
 
 /**
  * Mark a number as an integer
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Integer(): PropType<NumberType> { return Precision(0); }
+export function Integer(): PropType<NumberType> {
+  return Precision(0);
+}
 
 /**
  * Mark a number as a float
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Float(): PropType<number> { return Precision(10, 7); }
+export function Float(): PropType<number> {
+  return Precision(10, 7);
+}
 
 /**
  * Mark a number as a long value
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Long(): PropType<NumberType> { return Precision(19, 0); }
+export function Long(): PropType<NumberType> {
+  return Precision(19, 0);
+}
 
 /**
  * Mark a number as a currency
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Currency(): PropType<NumberType> { return Precision(13, 2); }
+export function Currency(): PropType<NumberType> {
+  return Precision(13, 2);
+}
 
 /**
  * Specifier for the input
@@ -198,14 +236,16 @@ export function Currency(): PropType<NumberType> { return Precision(13, 2); }
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Specifier(...specifiers: string[]): PropType<unknown> { return input({ specifiers }); }
+export function Specifier(...specifiers: string[]): PropType<unknown> {
+  return input({ specifiers });
+}
 
 /**
  * Sets the discriminator field via a property decorator
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function DiscriminatorField(): ((instance: ClassInstance, property: string) => void) {
+export function DiscriminatorField(): (instance: ClassInstance, property: string) => void {
   return (instance: ClassInstance, property: string): void => {
     SchemaRegistryIndex.getForRegister(getClass(instance)).register({
       discriminatedBase: true,

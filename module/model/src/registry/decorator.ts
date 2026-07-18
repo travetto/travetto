@@ -1,9 +1,9 @@
-import { castTo, type Class, getClass } from '@travetto/runtime';
+import { type Class, castTo, getClass } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelType } from '../types/model.ts';
-import type { DataHandler, ModelConfig, PrePersistScope } from './types.ts';
 import { ModelRegistryIndex } from './registry-index.ts';
+import type { DataHandler, ModelConfig, PrePersistScope } from './types.ts';
 
 /**
  * Model decorator, extends `@Schema`
@@ -43,10 +43,12 @@ export function ExpiresAt() {
 export function PrePersist<T>(handler: DataHandler<T>, scope: PrePersistScope = 'all') {
   return function (cls: Class<T>): void {
     ModelRegistryIndex.getForRegister(cls).register({
-      prePersist: [{
-        scope,
-        handler: castTo(handler)
-      }]
+      prePersist: [
+        {
+          scope,
+          handler: castTo(handler)
+        }
+      ]
     });
   };
 }
@@ -59,13 +61,15 @@ export function PrePersist<T>(handler: DataHandler<T>, scope: PrePersistScope = 
 export function PersistValue<T>(handler: (current: T | undefined) => T, scope: PrePersistScope = 'all') {
   return function <K extends string, C extends Partial<Record<K, T>>>(instance: C, property: K): void {
     ModelRegistryIndex.getForRegister(getClass(instance)).register({
-      prePersist: [{
-        scope,
-        handler: (inst): void => {
-          const cInst: Record<K, T> = castTo(inst);
-          cInst[property] = handler(cInst[property]);
+      prePersist: [
+        {
+          scope,
+          handler: (inst): void => {
+            const cInst: Record<K, T> = castTo(inst);
+            cInst[property] = handler(cInst[property]);
+          }
         }
-      }]
+      ]
     });
   };
 }
@@ -78,13 +82,15 @@ export function PersistValue<T>(handler: (current: T | undefined) => T, scope: P
 export function Transient<T>() {
   return function <K extends string, C extends Partial<Record<K, T>>>(instance: C, property: K): void {
     ModelRegistryIndex.getForRegister(getClass(instance)).register({
-      prePersist: [{
-        scope: 'all',
-        handler: (inst): void => {
-          const cInst: Record<K, T> = castTo(inst);
-          delete cInst[property];
+      prePersist: [
+        {
+          scope: 'all',
+          handler: (inst): void => {
+            const cInst: Record<K, T> = castTo(inst);
+            delete cInst[property];
+          }
         }
-      }]
+      ]
     });
   };
 }

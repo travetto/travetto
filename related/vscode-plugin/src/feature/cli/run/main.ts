@@ -7,10 +7,10 @@ import { ActionStorage } from '../../../core/storage.ts';
 import { Workspace } from '../../../core/workspace.ts';
 
 import { BaseFeature } from '../../base.ts';
-import { EnvDict, TargetEvent } from '../../../core/types.ts';
+import type { EnvDict, TargetEvent } from '../../../core/types.ts';
 import { RunUtil } from '../../../core/run.ts';
 
-import { RunChoice } from './types.ts';
+import type { RunChoice } from './types.ts';
 import { CliRunUtil } from './util.ts';
 
 type Recent = { mode: 'recent', count: number };
@@ -48,7 +48,7 @@ export class CliRunFeature extends BaseFeature {
 
       const config = RunUtil.buildDebugConfig(CliRunUtil.getLaunchConfig(choice));
       const launchConfig = vscode.workspace.getConfiguration('launch');
-      const configurations = launchConfig['configurations'];
+      const configurations = launchConfig.configurations;
       configurations.push(config);
       await launchConfig.update('configurations', configurations, false);
 

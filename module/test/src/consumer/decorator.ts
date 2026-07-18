@@ -1,7 +1,7 @@
 import type { Class } from '@travetto/runtime';
 
-import type { TestConsumerShape } from './types.ts';
 import { TestConsumerRegistryIndex } from './registry-index.ts';
+import type { TestConsumerShape } from './types.ts';
 
 /**
  * Registers a class a valid test consumer

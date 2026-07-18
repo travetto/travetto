@@ -9,7 +9,6 @@ class SearchParams {
 
 @Controller('/user')
 class UserController {
-
   private service: {
     search(query: SearchParams): Promise<number[]>;
   };

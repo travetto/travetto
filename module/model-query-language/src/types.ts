@@ -1,10 +1,7 @@
 /**
  * Supported token types
  */
-export type TokenType =
-  'literal' | 'identifier' | 'boolean' |
-  'operator' | 'grouping' | 'array' |
-  'whitespace' | 'punctuation' | 'unary';
+export type TokenType = 'literal' | 'identifier' | 'boolean' | 'operator' | 'grouping' | 'array' | 'whitespace' | 'punctuation' | 'unary';
 
 /**
  * Tokenization state
@@ -76,11 +73,16 @@ export type AllNode = ArrayNode | UnaryNode | GroupNode | ClauseNode;
  * Translation of operators to model query keys
  */
 export const OPERATOR_TRANSLATION: Record<string, string> = {
-  '<': '$lt', '<=': '$lte',
-  '>': '$gt', '>=': '$gte',
-  '!=': '$ne', '==': '$eq',
-  '~': '$regex', '!': '$not',
-  in: '$in', 'not-in': '$nin'
+  '<': '$lt',
+  '<=': '$lte',
+  '>': '$gt',
+  '>=': '$gte',
+  '!=': '$ne',
+  '==': '$eq',
+  '~': '$regex',
+  '!': '$not',
+  in: '$in',
+  'not-in': '$nin'
 };
 
 export const VALID_OPERATORS = new Set(Object.keys(OPERATOR_TRANSLATION));

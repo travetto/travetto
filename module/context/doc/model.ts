@@ -1,3 +1,1 @@
-export interface Preferences {
-
-}
+export interface Preferences {}

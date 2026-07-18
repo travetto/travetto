@@ -1,9 +1,9 @@
-import { RuntimeResources } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
+import { RuntimeResources } from '@travetto/runtime';
 
-import type { EmailCompiled, EmailOptions, SentEmail } from './types.ts';
-import type { MailTransport } from './transport.ts';
 import type { MailInterpolator } from './template.ts';
+import type { MailTransport } from './transport.ts';
+import type { EmailCompiled, EmailOptions, SentEmail } from './types.ts';
 import { MailUtil } from './util.ts';
 
 type MessageWithoutBody = Omit<EmailOptions, keyof EmailCompiled>;
@@ -13,16 +13,12 @@ type MessageWithoutBody = Omit<EmailOptions, keyof EmailCompiled>;
  */
 @Injectable()
 export class MailService {
-
   #compiled = new Map<string, EmailCompiled>();
   #transport: MailTransport;
   #interpolator: MailInterpolator;
   #cacheResults = true;
 
-  constructor(
-    transport: MailTransport,
-    interpolator: MailInterpolator,
-  ) {
+  constructor(transport: MailTransport, interpolator: MailInterpolator) {
     this.#interpolator = interpolator;
     this.#transport = transport;
   }
@@ -36,11 +32,13 @@ export class MailService {
    */
   async getCompiled(key: string): Promise<EmailCompiled> {
     if (!this.#compiled.has(key)) {
-      const [html, text, subject] = await Promise.all([
-        RuntimeResources.readUTF8(`${key}.compiled.html`),
-        RuntimeResources.readUTF8(`${key}.compiled.text`),
-        RuntimeResources.readUTF8(`${key}.compiled.subject`)
-      ].map(file => file.then(MailUtil.purgeBrand)));
+      const [html, text, subject] = await Promise.all(
+        [
+          RuntimeResources.readUTF8(`${key}.compiled.html`),
+          RuntimeResources.readUTF8(`${key}.compiled.text`),
+          RuntimeResources.readUTF8(`${key}.compiled.subject`)
+        ].map(file => file.then(MailUtil.purgeBrand))
+      );
       if (this.#cacheResults) {
         this.#compiled.set(key, { html, text, subject });
       }
@@ -55,7 +53,7 @@ export class MailService {
    * @returns
    */
   async renderMessage(keyOrMessage: string | EmailCompiled | EmailOptions, ctx: Record<string, unknown>): Promise<EmailCompiled> {
-    const template = (typeof keyOrMessage === 'string' ? await this.getCompiled(keyOrMessage) : keyOrMessage);
+    const template = typeof keyOrMessage === 'string' ? await this.getCompiled(keyOrMessage) : keyOrMessage;
 
     const [html, text, subject] = await Promise.all([
       this.#interpolator.render(template.html, ctx),
@@ -83,7 +81,7 @@ export class MailService {
     base?: MessageWithoutBody
   ): Promise<S> {
     const keyOrMessage = key ?? ('html' in message ? message : '') ?? '';
-    const context = ctx ?? (('context' in message) ? message.context : {}) ?? {};
+    const context = ctx ?? ('context' in message ? message.context : {}) ?? {};
     const compiled = await this.renderMessage(keyOrMessage, context);
 
     const final = { ...base, ...message, ...compiled, context };
@@ -113,15 +111,21 @@ export class MailService {
    * Send multiple messages.
    */
   async sendAll<S extends SentEmail = SentEmail>(messages: EmailOptions[], base: Partial<EmailOptions> = {}): Promise<S[]> {
-    return Promise.all(messages.map(message => this.send<S>({
-      ...base,
-      ...message,
-      ...(message.context || base.context ? {
-        context: {
-          ...(base.context || {}),
-          ...(message.context || {})
-        }
-      } : {})
-    })));
+    return Promise.all(
+      messages.map(message =>
+        this.send<S>({
+          ...base,
+          ...message,
+          ...(message.context || base.context
+            ? {
+                context: {
+                  ...(base.context || {}),
+                  ...(message.context || {})
+                }
+              }
+            : {})
+        })
+      )
+    );
   }
 }

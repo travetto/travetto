@@ -1,12 +1,12 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Suite, Test } from '@travetto/test';
-import { type ModelExpirySupport } from '@travetto/model';
-import { ModelIndexedUtil } from '@travetto/model-indexed';
 import { Inject, Injectable } from '@travetto/di';
-import { castTo, type Class } from '@travetto/runtime';
+import type { ModelExpirySupport } from '@travetto/model';
+import { ModelIndexedUtil } from '@travetto/model-indexed';
+import { type Class, castTo } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
+import { Suite, Test } from '@travetto/test';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 import { ModelSuite } from '@travetto/model/support/test/suite.ts';
@@ -16,11 +16,10 @@ import type { CacheService } from '../../src/service.ts';
 import { CacheModelSymbol } from '../../src/types.ts';
 
 @Schema()
-class User { }
+class User {}
 
 @Injectable()
 class SampleService {
-
   @Inject()
   source: CacheService;
 
@@ -86,7 +85,6 @@ class SampleService {
 @ModelSuite(CacheModelSymbol)
 @InjectableSuite()
 export abstract class CacheServiceSuite {
-
   serviceClass: Class<ModelExpirySupport>;
   configClass: Class;
 
@@ -107,7 +105,7 @@ export abstract class CacheServiceSuite {
     start = Date.now();
     res = await service.basic(10);
     diff = Date.now() - start;
-    assert(diff < (100 + this.baseLatency));
+    assert(diff < 100 + this.baseLatency);
     assert(res === 20);
   }
 
@@ -146,7 +144,7 @@ export abstract class CacheServiceSuite {
       start = Date.now();
       res = await service.ageExtension(10);
       diff = Date.now() - start;
-      assert(diff < (100 + this.baseLatency));
+      assert(diff < 100 + this.baseLatency);
       assert(res === 30);
     }
 
@@ -203,12 +201,12 @@ export abstract class CacheServiceSuite {
     await service.getUser('200');
     const start = Date.now();
     await service.getUser('200');
-    assert((Date.now() - start) <= (this.baseLatency + 100));
+    assert(Date.now() - start <= this.baseLatency + 100);
 
     await service.deleteUser('200');
     const start2 = Date.now();
     await service.getUser('200');
-    assert((Date.now() - start2) >= 100);
+    assert(Date.now() - start2 >= 100);
 
     // First time is free
     await service.deleteUser('200');
@@ -228,14 +226,14 @@ export abstract class CacheServiceSuite {
     for (let i = 0; i < 10; i++) {
       const start = Date.now();
       await service.getUser(`${i}`);
-      assert((Date.now() - start) >= 100);
+      assert(Date.now() - start >= 100);
     }
 
     // Read cache
     for (let i = 0; i < 10; i++) {
       const start = Date.now();
       await service.getUser(`${i}`);
-      assert((Date.now() - start) <= (this.baseLatency + 100));
+      assert(Date.now() - start <= this.baseLatency + 100);
     }
 
     await service.deleteAllUsers();
@@ -244,14 +242,14 @@ export abstract class CacheServiceSuite {
     for (let i = 0; i < 10; i++) {
       const start = Date.now();
       await service.getUser(`${i}`);
-      assert((Date.now() - start) >= 100);
+      assert(Date.now() - start >= 100);
     }
 
     // Read cache
     for (let i = 0; i < 10; i++) {
       const start = Date.now();
       await service.getUser(`${i}`);
-      assert((Date.now() - start) <= (this.baseLatency + 100));
+      assert(Date.now() - start <= this.baseLatency + 100);
     }
   }
 }

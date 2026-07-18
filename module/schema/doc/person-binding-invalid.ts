@@ -3,7 +3,6 @@ import { SchemaValidator } from '@travetto/schema';
 import { Person } from './person.ts';
 
 export async function validate(): Promise<void> {
-
   const person = Person.from({
     name: 'Test',
     // @ts-expect-error

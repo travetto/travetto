@@ -10,7 +10,6 @@ const EXCL = '!'.charCodeAt(0);
 
 @Injectable()
 export class PropertiesConfigParser implements ConfigParser {
-
   static parseLine(text: string): [key: string, value: string] | undefined {
     if (text.charCodeAt(0) === HASH || text.charCodeAt(0) === EXCL) {
       return;
@@ -19,11 +18,12 @@ export class PropertiesConfigParser implements ConfigParser {
     let value: string | undefined;
     for (let i = 0; i < text.length; i += 1) {
       const ch = text.charCodeAt(i);
-      if (ch === EQUALS || ch === COLON) { // Break
+      if (ch === EQUALS || ch === COLON) {
+        // Break
         value = text.substring(i + 1).trimStart();
         break;
       } else if (ch === BACKSLASH) {
-        key.push(text.charCodeAt(i += 1));
+        key.push(text.charCodeAt((i += 1)));
       } else {
         key.push(ch);
       }
@@ -42,7 +42,7 @@ export class PropertiesConfigParser implements ConfigParser {
     for (let i = 0; i < lines.length; i++) {
       let line = lines[i];
       while (i < lines.length && line.endsWith('\\')) {
-        line = `${line.replace(/[\\]$/, '')}${lines[i += 1].trimStart()}`;
+        line = `${line.replace(/[\\]$/, '')}${lines[(i += 1)].trimStart()}`;
       }
       const entry = PropertiesConfigParser.parseLine(line);
       if (entry) {

@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { type TransformerState, CoreUtil, TransformerHandler } from '@travetto/transformer';
+import { CoreUtil, TransformerHandler, type TransformerState } from '@travetto/transformer';
 
 import type { FunctionMetadataTag } from '../src/function.ts';
 import { MetadataRegistrationUtil } from './transformer/metadata.ts';
@@ -17,7 +17,6 @@ interface MetadataInfo {
  * Providing metadata for classes
  */
 export class RegisterTransformer {
-
   static {
     TransformerHandler(this, this.collectClassMetadata, 'before', 'class');
     TransformerHandler(this, this.collectMethodMetadata, 'before', 'method');
@@ -64,7 +63,10 @@ export class RegisterTransformer {
   /**
    * Register proper functions
    */
-  static registerFunctionMetadata(state: TransformerState & MetadataInfo, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
+  static registerFunctionMetadata(
+    state: TransformerState & MetadataInfo,
+    node: ts.FunctionDeclaration | ts.FunctionExpression
+  ): typeof node {
     if (!MetadataRegistrationUtil.isValid(state) || !ts.isFunctionDeclaration(node)) {
       return node;
     }

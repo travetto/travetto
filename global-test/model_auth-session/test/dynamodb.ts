@@ -1,8 +1,7 @@
-
-import { InjectableFactory } from '@travetto/di';
-import { Suite } from '@travetto/test';
 import { SessionModelSymbol } from '@travetto/auth-session';
-import { DynamoDBModelService, DynamoDBModelConfig } from '@travetto/model-dynamodb';
+import { InjectableFactory } from '@travetto/di';
+import { DynamoDBModelConfig, DynamoDBModelService } from '@travetto/model-dynamodb';
+import { Suite } from '@travetto/test';
 
 import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
 

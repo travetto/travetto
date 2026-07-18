@@ -1,9 +1,9 @@
-import { RuntimeError, toConcrete, type ClassInstance, getClass } from '@travetto/runtime';
-import { ControllerRegistryIndex, type EndpointParameterConfig, Param } from '@travetto/web';
+import { type ClassInstance, getClass, RuntimeError, toConcrete } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
+import { ControllerRegistryIndex, type EndpointParameterConfig, Param } from '@travetto/web';
 
-import { WebUploadInterceptor } from './interceptor.ts';
 import type { WebUploadConfig } from './config.ts';
+import { WebUploadInterceptor } from './interceptor.ts';
 import type { FileMap } from './types.ts';
 import { WebUploadUtil } from './util.ts';
 
@@ -18,9 +18,8 @@ const FileMapContract = toConcrete<FileMap>();
  * @kind decorator
  */
 export function Upload(
-  param: Partial<EndpointParameterConfig> & UploadConfig = {},
+  param: Partial<EndpointParameterConfig> & UploadConfig = {}
 ): (instance: ClassInstance, property: string, idx: number) => void {
-
   const finalConfig = { ...param };
 
   return (instance: ClassInstance, property: string, idx: number): void => {
@@ -30,28 +29,24 @@ export function Upload(
     const getName = (): string => SchemaRegistryIndex.get(cls).getMethod(property).parameters[idx].name!;
 
     adapter.registerFinalizeHandler(() => {
-      adapter.registerEndpointInterceptorConfig(
-        property,
-        WebUploadInterceptor,
-        {
-          applies: true,
-          maxSize: finalConfig.maxSize,
-          types: finalConfig.types,
-          cleanupFiles: finalConfig.cleanupFiles,
-          uploads: {
-            [getName()]: {
-              maxSize: finalConfig.maxSize,
-              types: finalConfig.types,
-              cleanupFiles: finalConfig.cleanupFiles
-            }
+      adapter.registerEndpointInterceptorConfig(property, WebUploadInterceptor, {
+        applies: true,
+        maxSize: finalConfig.maxSize,
+        types: finalConfig.types,
+        cleanupFiles: finalConfig.cleanupFiles,
+        uploads: {
+          [getName()]: {
+            maxSize: finalConfig.maxSize,
+            types: finalConfig.types,
+            cleanupFiles: finalConfig.cleanupFiles
           }
         }
-      );
+      });
     });
 
-    return Param('body', {
+    Param('body', {
       ...finalConfig,
-      extract: (request) => {
+      extract: request => {
         const input = SchemaRegistryIndex.get(cls).getMethod(property).parameters[idx];
 
         if (!input) {
@@ -59,7 +54,9 @@ export function Upload(
         }
 
         if (!(input.type === Blob || input.type === File || input.type === FileMapContract)) {
-          throw new RuntimeError(`Cannot use upload decorator with ${input.type.name}, but only an ${Blob.name}, ${File.name} or ${FileMapContract.name}`);
+          throw new RuntimeError(
+            `Cannot use upload decorator with ${input.type.name}, but only an ${Blob.name}, ${File.name} or ${FileMapContract.name}`
+          );
         }
 
         const isMap = input.type === FileMapContract;

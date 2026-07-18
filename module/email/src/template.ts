@@ -22,7 +22,6 @@ export interface MailInterpolator {
 
 @Injectable()
 export class MustacheInterpolator implements MailInterpolator {
-
   /**
    * Resolved nested templates
    */

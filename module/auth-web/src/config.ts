@@ -1,9 +1,9 @@
 import { Config } from '@travetto/config';
 import { PostConstruct } from '@travetto/di';
-import { Runtime, RuntimeError, BinaryMetadataUtil } from '@travetto/runtime';
+import { BinaryMetadataUtil, Runtime, RuntimeError } from '@travetto/runtime';
 import { Ignore, Secret } from '@travetto/schema';
 
-type KeyEntry = { key: string, id: string };
+type KeyEntry = { key: string; id: string };
 
 @Config('web.auth')
 export class WebAuthConfig {
@@ -21,7 +21,9 @@ export class WebAuthConfig {
   @PostConstruct()
   finalize(): void {
     if (!this.signingKey && Runtime.production) {
-      throw new RuntimeError('The default signing key is only valid for development use, please specify a config value at web.auth.signingKey');
+      throw new RuntimeError(
+        'The default signing key is only valid for development use, please specify a config value at web.auth.signingKey'
+      );
     }
     this.signingKey ??= 'dummy';
 

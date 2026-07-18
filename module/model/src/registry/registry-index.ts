@@ -1,16 +1,15 @@
-import { type RegistryIndex, RegistryIndexStore, Registry } from '@travetto/registry';
-import { RuntimeError, castTo, type Class } from '@travetto/runtime';
+import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
+import { type Class, castTo, RuntimeError } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import type { IndexConfig, ModelConfig } from './types.ts';
 import type { ModelType } from '../types/model.ts';
 import { ModelRegistryAdapter } from './registry-adapter.ts';
+import type { IndexConfig, ModelConfig } from './types.ts';
 
 /**
  * Model registry index for managing model configurations across classes
  */
 export class ModelRegistryIndex implements RegistryIndex {
-
   static #instance = Registry.registerIndex(this);
 
   static getForRegister(cls: Class): ModelRegistryAdapter {
@@ -50,7 +49,9 @@ export class ModelRegistryIndex implements RegistryIndex {
 
   store = new RegistryIndexStore(ModelRegistryAdapter);
 
-  /** @private */ constructor(source: unknown) { Registry.validateConstructor(source); }
+  /** @private */ constructor(source: unknown) {
+    Registry.validateConstructor(source);
+  }
 
   onCreate(cls: Class): void {
     const schema = SchemaRegistryIndex.getConfig(cls);
@@ -63,7 +64,7 @@ export class ModelRegistryIndex implements RegistryIndex {
     const { store } = this.getConfig(cls);
     let classes = this.#modelNameMapping.get(store);
     if (!classes) {
-      this.#modelNameMapping.set(store, classes = new Set());
+      this.#modelNameMapping.set(store, (classes = new Set()));
     }
     classes.add(cls.Ⲑid);
 

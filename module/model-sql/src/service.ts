@@ -1,31 +1,64 @@
-import {
-  type ModelType,
-  type BulkOperation, type BulkResponse, type ModelCrudSupport, type ModelStorageSupport, type ModelBulkSupport, NotFoundError,
-  ModelRegistryIndex, ExistsError, type OptionalId, type ModelIdSource, ModelExpiryUtil, ModelCrudUtil, ModelStorageUtil, ModelBulkUtil,
-  type ModelListOptions,
-} from '@travetto/model';
-import {
-  type ModelIndexedSupport, type KeyedIndexSelection, type KeyedIndexBody, type ModelPageOptions, ModelIndexedUtil,
-  type SingleItemIndex, type SortedIndexSelection, type ModelPageResult, type SortedIndex, type FullKeyedIndexBody,
-  type FullKeyedIndexWithPartialBody, ModelIndexedComputedIndex, type ModelIndexedSearchOptions, type SortedIndexSelectionType
-} from '@travetto/model-indexed';
-import { castTo, type Class, JSONUtil } from '@travetto/runtime';
-import { DataUtil } from '@travetto/schema';
 import type { AsyncContext } from '@travetto/context';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
-  type ModelQuery, type ModelQueryCrudSupport, type ModelQueryFacetSupport, type ModelQuerySupport,
-  type PageableModelQuery, type ValidStringFields, type WhereClauseRaw, QueryVerifier, type ModelQuerySuggestSupport,
-  ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil, type ModelQueryFacet,
+  type BulkOperation,
+  type BulkResponse,
+  ExistsError,
+  type ModelBulkSupport,
+  ModelBulkUtil,
+  type ModelCrudSupport,
+  ModelCrudUtil,
+  ModelExpiryUtil,
+  type ModelIdSource,
+  type ModelListOptions,
+  ModelRegistryIndex,
+  type ModelStorageSupport,
+  ModelStorageUtil,
+  type ModelType,
+  NotFoundError,
+  type OptionalId
+} from '@travetto/model';
+import {
+  type FullKeyedIndexBody,
+  type FullKeyedIndexWithPartialBody,
+  type KeyedIndexBody,
+  type KeyedIndexSelection,
+  ModelIndexedComputedIndex,
+  type ModelIndexedSearchOptions,
+  type ModelIndexedSupport,
+  ModelIndexedUtil,
+  type ModelPageOptions,
+  type ModelPageResult,
+  type SingleItemIndex,
+  type SortedIndex,
+  type SortedIndexSelection,
+  type SortedIndexSelectionType
+} from '@travetto/model-indexed';
+import {
+  type ModelQuery,
+  type ModelQueryCrudSupport,
+  ModelQueryCrudUtil,
+  type ModelQueryFacet,
+  type ModelQueryFacetSupport,
+  type ModelQuerySuggestSupport,
+  ModelQuerySuggestUtil,
+  type ModelQuerySupport,
+  ModelQueryUtil,
+  type PageableModelQuery,
+  QueryVerifier,
+  type ValidStringFields,
+  type WhereClauseRaw
 } from '@travetto/model-query';
+import { type Class, castTo, JSONUtil } from '@travetto/runtime';
+import { DataUtil } from '@travetto/schema';
 
 import type { SQLModelConfig } from './config.ts';
-import { Connected, ConnectedIterator, Transactional } from './connection/decorator.ts';
-import { SQLModelUtil } from './util.ts';
-import type { SQLDialect } from './dialect/base.ts';
-import { TableManager } from './table-manager.ts';
 import type { Connection } from './connection/base.ts';
+import { Connected, ConnectedIterator, Transactional } from './connection/decorator.ts';
+import type { SQLDialect } from './dialect/base.ts';
 import type { InsertWrapper } from './internal/types.ts';
+import { TableManager } from './table-manager.ts';
+import { SQLModelUtil } from './util.ts';
 
 /**
  * Core for SQL Model Source.  Should not have any direct queries,
@@ -33,13 +66,17 @@ import type { InsertWrapper } from './internal/types.ts';
  * as needed.
  */
 @Injectable()
-export class SQLModelService implements
-  ModelCrudSupport, ModelStorageSupport,
-  ModelBulkSupport, ModelQuerySupport,
-  ModelQueryCrudSupport, ModelQueryFacetSupport,
-  ModelIndexedSupport,
-  ModelQuerySuggestSupport {
-
+export class SQLModelService
+  implements
+    ModelCrudSupport,
+    ModelStorageSupport,
+    ModelBulkSupport,
+    ModelQuerySupport,
+    ModelQueryCrudSupport,
+    ModelQueryFacetSupport,
+    ModelIndexedSupport,
+    ModelQuerySuggestSupport
+{
   #manager: TableManager;
   #context: AsyncContext;
   #dialect: SQLDialect;
@@ -51,11 +88,7 @@ export class SQLModelService implements
     return this.#dialect;
   }
 
-  constructor(
-    context: AsyncContext,
-    config: SQLModelConfig,
-    dialect: SQLDialect
-  ) {
+  constructor(context: AsyncContext, config: SQLModelConfig, dialect: SQLDialect) {
     this.#context = context;
     this.#dialect = dialect;
     this.config = config;
@@ -70,17 +103,19 @@ export class SQLModelService implements
     toCheck: Map<string, number>
   ): Promise<Map<number, string>> {
     // Get all upsert ids
-    const all = toCheck.size ?
-      (await this.#exec<ModelType>(
-        this.#dialect.getSelectRowsByIdsSQL(
-          SQLModelUtil.classToStack(cls), [...toCheck.keys()], [this.#dialect.idField]
-        )
-      )).records : [];
+    const all = toCheck.size
+      ? (
+          await this.#exec<ModelType>(
+            this.#dialect.getSelectRowsByIdsSQL(SQLModelUtil.classToStack(cls), [...toCheck.keys()], [this.#dialect.idField])
+          )
+        ).records
+      : [];
 
     const allIds = new Set(all.map(type => type.id));
 
     for (const [id, idx] of toCheck.entries()) {
-      if (!allIds.has(id)) { // If not found
+      if (!allIds.has(id)) {
+        // If not found
         addedIds.set(idx, id);
       }
     }
@@ -88,12 +123,12 @@ export class SQLModelService implements
     return addedIds;
   }
 
-  #exec<T = unknown>(sql: string): Promise<{ records: T[], count: number }> {
+  #exec<T = unknown>(sql: string): Promise<{ records: T[]; count: number }> {
     return this.#dialect.executeSQL<T>(sql);
   }
 
   async #deleteRaw<T extends ModelType>(cls: Class<T>, id: string, where?: WhereClauseRaw<T>, checkExpiry = true): Promise<void> {
-    castTo<WhereClauseRaw<ModelType>>(where ??= {}).id = id;
+    castTo<WhereClauseRaw<ModelType>>((where ??= {})).id = id;
 
     const count = await this.#dialect.deleteAndGetCount<ModelType>(cls, {
       where: ModelQueryUtil.getWhereClause(cls, where, checkExpiry)
@@ -103,17 +138,17 @@ export class SQLModelService implements
     }
   }
 
-  async * #scanTable<T extends ModelType>(
+  async *#scanTable<T extends ModelType>(
     cls: Class<T>,
     buildQuery: () => PageableModelQuery<T>,
     options?: ModelListOptions & ModelPageOptions<number>
-  ): AsyncIterable<{ items: T[], nextOffset?: number }> {
+  ): AsyncIterable<{ items: T[]; nextOffset?: number }> {
     const batchSize = options?.batchSizeHint ?? 100;
     const maxCount = options?.limit ?? Number.MAX_SAFE_INTEGER;
     let offset = options?.offset ?? 0;
     let lastOffset = -1;
     let produced = 0;
-    while (offset !== lastOffset && produced < maxCount && !(options?.abort?.aborted)) {
+    while (offset !== lastOffset && produced < maxCount && !options?.abort?.aborted) {
       const limit = Math.min(batchSize, maxCount - produced);
       lastOffset = offset;
       const items = await this.query<T>(cls, {
@@ -158,8 +193,8 @@ export class SQLModelService implements
     await this.#manager.truncateTables(cls);
   }
 
-  async createStorage(): Promise<void> { }
-  async deleteStorage(): Promise<void> { }
+  async createStorage(): Promise<void> {}
+  async deleteStorage(): Promise<void> {}
 
   @Transactional()
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
@@ -215,7 +250,7 @@ export class SQLModelService implements
   }
 
   @ConnectedIterator()
-  async * list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
     for await (const { items } of this.#scanTable(cls, () => ({}), options)) {
       yield items;
     }
@@ -228,15 +263,11 @@ export class SQLModelService implements
 
   @Transactional()
   async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse> {
-
     const { insertedIds, upsertedIds, existingUpsertedIds } = await ModelBulkUtil.preStore(cls, operations, this);
 
     const addedIds = new Map([...insertedIds.entries(), ...upsertedIds.entries()]);
 
-    await this.#checkUpsertedIds(cls,
-      addedIds,
-      new Map([...existingUpsertedIds.entries()].map(([key, value]) => [value, key]))
-    );
+    await this.#checkUpsertedIds(cls, addedIds, new Map([...existingUpsertedIds.entries()].map(([key, value]) => [value, key])));
 
     const get = <K extends keyof BulkOperation<T>>(key: K): Required<BulkOperation<T>>[K][] =>
       operations.map(item => item[key]).filter((item): item is Required<BulkOperation<T>>[K] => !!item);
@@ -244,14 +275,11 @@ export class SQLModelService implements
     const getStatements = async (key: keyof BulkOperation<T>): Promise<InsertWrapper[]> =>
       (await SQLModelUtil.getInserts(cls, get(key))).filter(wrapper => !!wrapper.records.length);
 
-    const deletes = [{ stack: SQLModelUtil.classToStack(cls), ids: get('delete').map(wrapper => wrapper.id) }]
-      .filter(wrapper => !!wrapper.ids.length);
+    const deletes = [{ stack: SQLModelUtil.classToStack(cls), ids: get('delete').map(wrapper => wrapper.id) }].filter(
+      wrapper => !!wrapper.ids.length
+    );
 
-    const [inserts, upserts, updates] = await Promise.all([
-      getStatements('insert'),
-      getStatements('upsert'),
-      getStatements('update')
-    ]);
+    const [inserts, upserts, updates] = await Promise.all([getStatements('insert'), getStatements('upsert'), getStatements('update')]);
 
     const result = await this.#dialect.bulkProcess(deletes, inserts, upserts, updates);
     result.insertedIds = addedIds;
@@ -269,7 +297,7 @@ export class SQLModelService implements
     await QueryVerifier.verify(cls, query);
     const { records } = await this.#exec<T>(this.#dialect.getQuerySQL(cls, query, ModelQueryUtil.getWhereClause(cls, query.where)));
     if (ModelRegistryIndex.has(cls)) {
-      await this.#dialect.fetchDependents(cls, records, query && query.select);
+      await this.#dialect.fetchDependents(cls, records, query?.select);
     }
 
     const cleaned = SQLModelUtil.cleanResults<T>(this.#dialect, records);
@@ -303,7 +331,9 @@ export class SQLModelService implements
   async updatePartialByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
     await QueryVerifier.verify(cls, query);
     const item = await ModelCrudUtil.prePartialUpdate(cls, data);
-    const { count } = await this.#exec(this.#dialect.getUpdateSQL(SQLModelUtil.classToStack(cls), item, ModelQueryUtil.getWhereClause(cls, query.where)));
+    const { count } = await this.#exec(
+      this.#dialect.getUpdateSQL(SQLModelUtil.classToStack(cls), item, ModelQueryUtil.getWhereClause(cls, query.where))
+    );
     return count;
   }
 
@@ -311,12 +341,19 @@ export class SQLModelService implements
   @Transactional()
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     await QueryVerifier.verify(cls, query);
-    const { count } = await this.#exec(this.#dialect.getDeleteSQL(SQLModelUtil.classToStack(cls), ModelQueryUtil.getWhereClause(cls, query.where, false)));
+    const { count } = await this.#exec(
+      this.#dialect.getDeleteSQL(SQLModelUtil.classToStack(cls), ModelQueryUtil.getWhereClause(cls, query.where, false))
+    );
     return count;
   }
 
   @Connected()
-  async suggestByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+  async suggestByQuery<T extends ModelType>(
+    cls: Class<T>,
+    field: ValidStringFields<T>,
+    prefix?: string,
+    query?: PageableModelQuery<T>
+  ): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
     const results = await this.query<T>(cls, resolvedQuery);
@@ -324,7 +361,12 @@ export class SQLModelService implements
   }
 
   @Connected()
-  async suggestValuesByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+  async suggestValuesByQuery<T extends ModelType>(
+    cls: Class<T>,
+    field: ValidStringFields<T>,
+    prefix?: string,
+    query?: PageableModelQuery<T>
+  ): Promise<string[]> {
     await QueryVerifier.verify(cls, query);
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestFieldQuery(cls, field, prefix, query);
     const results = await this.query(cls, resolvedQuery);
@@ -339,19 +381,11 @@ export class SQLModelService implements
     const col = this.#dialect.identifier(field);
     const ttl = this.#dialect.identifier('count');
     const key = this.#dialect.identifier('key');
-    const sql = [
-      `SELECT ${col} as ${key}, COUNT(${col}) as ${ttl}`,
-      this.#dialect.getFromSQL(cls),
-    ];
-    sql.push(
-      this.#dialect.getWhereSQL(cls, ModelQueryUtil.getWhereClause(cls, query?.where))
-    );
-    sql.push(
-      `GROUP BY ${col}`,
-      `ORDER BY ${ttl} DESC`
-    );
+    const sql = [`SELECT ${col} as ${key}, COUNT(${col}) as ${ttl}`, this.#dialect.getFromSQL(cls)];
+    sql.push(this.#dialect.getWhereSQL(cls, ModelQueryUtil.getWhereClause(cls, query?.where)));
+    sql.push(`GROUP BY ${col}`, `ORDER BY ${ttl} DESC`);
 
-    const results = await this.#exec<{ key: string, count: number }>(sql.join('\n'));
+    const results = await this.#exec<{ key: string; count: number }>(sql.join('\n'));
     return results.records.map(result => {
       result.count = DataUtil.coerceType(result.count, Number);
       return result;
@@ -360,11 +394,11 @@ export class SQLModelService implements
 
   // Indexed support
   @Connected()
-  async getByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T> {
+  async getByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: FullKeyedIndexBody<T, K, S>
+  ): Promise<T> {
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
     const results = await this.query(cls, castTo({ where: computed.project({ sort: true, includeId: true }) }));
     if (results.length !== 1) {
@@ -375,11 +409,11 @@ export class SQLModelService implements
 
   @Connected()
   @Transactional()
-  async deleteByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<void> {
+  async deleteByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: FullKeyedIndexBody<T, K, S>
+  ): Promise<void> {
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
     const count = await this.deleteByQuery(cls, castTo({ where: computed.project({ sort: true, includeId: true }) }));
     if (count === 0) {
@@ -389,41 +423,37 @@ export class SQLModelService implements
 
   @Connected()
   @Transactional()
-  upsertByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: OptionalId<T>): Promise<T> {
+  upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: OptionalId<T>
+  ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
 
   @Connected()
   @Transactional()
-  updateByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: T): Promise<T> {
+  updateByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: T
+  ): Promise<T> {
     return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
   }
 
   @Connected()
   @Transactional()
-  async updatePartialByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexWithPartialBody<T, K, S>): Promise<T> {
+  async updatePartialByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: FullKeyedIndexWithPartialBody<T, K, S>
+  ): Promise<T> {
     const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
     return this.update(cls, item);
   }
 
   @Connected()
-  async pageByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(
+  async pageByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
@@ -434,7 +464,7 @@ export class SQLModelService implements
 
     const baseQuery = castTo<ModelQuery<T>>({
       where: computed.project(),
-      sort: idx.sortTemplate.map(part => ({ [part.path.join('.')]: part.value })),
+      sort: idx.sortTemplate.map(part => ({ [part.path.join('.')]: part.value }))
     });
 
     const items: T[] = [];
@@ -447,11 +477,7 @@ export class SQLModelService implements
   }
 
   @ConnectedIterator()
-  async * listByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(
+  async *listByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
@@ -460,7 +486,7 @@ export class SQLModelService implements
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
     const baseQuery = castTo<ModelQuery<T>>({
       where: computed.project(),
-      sort: idx.sortTemplate.map(part => ({ [part.path.join('.')]: part.value })),
+      sort: idx.sortTemplate.map(part => ({ [part.path.join('.')]: part.value }))
     });
     for await (const { items } of this.#scanTable<T>(cls, () => baseQuery, options)) {
       yield items;
@@ -479,17 +505,14 @@ export class SQLModelService implements
     const nested: Record<string, unknown> = {};
     let current = nested;
     for (const key of idx.sortTemplate[0].path.slice(0, -1)) {
-      current = (current[key] = {});
+      current = current[key] = {};
     }
     current[idx.sortTemplate[0].path.at(-1)!] = { $regex: ModelIndexedUtil.getSuggestRegex(prefix) };
 
     const baseQuery = castTo<ModelQuery<T>>({
       where: {
-        $and: [
-          computed.project(),
-          nested
-        ]
-      },
+        $and: [computed.project(), nested]
+      }
     });
 
     for await (const batch of this.#scanTable<T>(cls, () => baseQuery, { limit: 10, ...options })) {

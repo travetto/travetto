@@ -1,24 +1,23 @@
 import { DocFileUtil } from './file.ts';
 import type { CodeProps, CodeSourceInput } from './types.ts';
 
-export type ResolvedRef = { title: string, file: string, line: number };
-export type ResolvedCode = { text: string, language: string, file?: string };
-export type ResolvedSnippet = { text: string, language: string, file: string, line: number };
-export type ResolvedSnippetLink = { file: string, line: number };
+export type ResolvedRef = { title: string; file: string; line: number };
+export type ResolvedCode = { text: string; language: string; file?: string };
+export type ResolvedSnippet = { text: string; language: string; file: string; line: number };
+export type ResolvedSnippetLink = { file: string; line: number };
 
 /**
  * Resolve utilities
  */
 export class DocResolveUtil {
-
   static async resolveRef(title: string, file: string): Promise<ResolvedRef> {
-
     let line = 0;
     const result = DocFileUtil.readSource(file);
     file = result.file;
 
     if (result.content) {
-      line = result.content.split(/\n/g)
+      line = result.content
+        .split(/\n/g)
         .findIndex(lineText => new RegExp(`(class|interface|function)[ ]+${RegExp.escape(title)}`).test(lineText));
       if (line < 0) {
         line = 0;
@@ -67,9 +66,9 @@ export class DocResolveUtil {
 
   static applyCodePropDefaults(props: CodeProps): void {
     const type = typeof props.src === 'function' ? props.src : undefined;
-    props.startRe ??= (type ? new RegExp(`^(export)?\\s*(interface|class)\\s+${RegExp.escape(type.name)}\\b`) : undefined);
-    props.language ??= (type ? 'typescript' : undefined);
-    props.endRe ??= (type ? /^[}]/ : undefined);
-    props.title ??= typeof props.src == 'function' ? props.src.name.replace(/^[$]/, '') : undefined;
+    props.startRe ??= type ? new RegExp(`^(export)?\\s*(interface|class)\\s+${RegExp.escape(type.name)}\\b`) : undefined;
+    props.language ??= type ? 'typescript' : undefined;
+    props.endRe ??= type ? /^[}]/ : undefined;
+    props.title ??= typeof props.src === 'function' ? props.src.name.replace(/^[$]/, '') : undefined;
   }
 }

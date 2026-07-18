@@ -15,15 +15,15 @@ yarn add @travetto/transformer
 
 This module provides support for enhanced AST transformations, and declarative transformer registration, with common patterns to support all the transformers used throughout the framework. Transformations are located by `support/transformer.<name>.ts` as the filename. 
 
-The module is primarily aimed at extremely advanced usages for things that cannot be detected at runtime.  The [Registry](https://github.com/travetto/travetto/tree/main/module/registry#readme "Patterns and utilities for handling registration of metadata and functionality for run-time use") module already has knowledge of all `class`es and `field`s, and is able to listen to changes there.  Many of the modules build upon work by some of the foundational transformers defined in [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching"), [Registry](https://github.com/travetto/travetto/tree/main/module/registry#readme "Patterns and utilities for handling registration of metadata and functionality for run-time use"), [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") and [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.").  These all center around defining a registry of classes, and associated type information. 
+The module is primarily aimed at extremely advanced usages for things that cannot be detected at runtime. The [Registry](https://github.com/travetto/travetto/tree/main/module/registry#readme "Patterns and utilities for handling registration of metadata and functionality for run-time use") module already has knowledge of all `class`es and `field`s, and is able to listen to changes there. Many of the modules build upon work by some of the foundational transformers defined in [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching"), [Registry](https://github.com/travetto/travetto/tree/main/module/registry#readme "Patterns and utilities for handling registration of metadata and functionality for run-time use"), [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") and [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support."). These all center around defining a registry of classes, and associated type information. 
 
 Because working with the [Typescript](https://typescriptlang.org) API can be delicate (and open to breaking changes), creating new transformers should be done cautiously.
 
 ## Monorepos and Idempotency
-Within the framework, any build or compile step will target the entire workspace, and for mono-repo projects, will include all modules.  The optimization this provides is great, but comes with a strict requirement that all compilation processes need to be idempotent.  This means that compiling a module directly, versus as a dependency should always produce the same output. This produces a requirement that all transformers are opt-in by the source code, and which transformers are needed in a file should be code-evident.  This also means that no transformers are optional, as that could produce different output depending on the dependency graph for a given module.
+Within the framework, any build or compile step will target the entire workspace, and for mono-repo projects, will include all modules. The optimization this provides is great, but comes with a strict requirement that all compilation processes need to be idempotent. This means that compiling a module directly, versus as a dependency should always produce the same output. This produces a requirement that all transformers are opt-in by the source code, and which transformers are needed in a file should be code-evident. This also means that no transformers are optional, as that could produce different output depending on the dependency graph for a given module.
 
 ## Custom Transformer
-Below is an example of a transformer that upper cases all `class`, `method` and `param` declarations.  This will break any code that depends upon it as we are redefining all the identifiers at compile time.
+Below is an example of a transformer that upper cases all `class`, `method` and `param` declarations. This will break any code that depends upon it as we are redefining all the identifiers at compile time.
 
 **Code: Sample Transformer - Upper case all declarations**
 ```typescript
@@ -32,7 +32,6 @@ import type ts from 'typescript';
 import { TransformerHandler, type TransformerState } from '@travetto/transformer';
 
 export class MakeUpper {
-
   static isValid(state: TransformerState): boolean {
     return state.importName !== '@travetto/transformer/doc/upper.ts';
   }
@@ -44,39 +43,45 @@ export class MakeUpper {
   }
 
   static handleProperty(state: TransformerState, node: ts.PropertyDeclaration): ts.PropertyDeclaration {
-    return !this.isValid(state) ? node : state.factory.updatePropertyDeclaration(
-      node,
-      node.modifiers,
-      node.name.getText().toUpperCase(),
-      undefined,
-      node.type,
-      node.initializer ?? state.createIdentifier('undefined')
-    );
+    return !this.isValid(state)
+      ? node
+      : state.factory.updatePropertyDeclaration(
+          node,
+          node.modifiers,
+          node.name.getText().toUpperCase(),
+          undefined,
+          node.type,
+          node.initializer ?? state.createIdentifier('undefined')
+        );
   }
 
   static handleClass(state: TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    return !this.isValid(state) ? node : state.factory.updateClassDeclaration(
-      node,
-      node.modifiers,
-      state.createIdentifier(node.name!.getText().toUpperCase()),
-      node.typeParameters,
-      node.heritageClauses,
-      node.members
-    );
+    return !this.isValid(state)
+      ? node
+      : state.factory.updateClassDeclaration(
+          node,
+          node.modifiers,
+          state.createIdentifier(node.name!.getText().toUpperCase()),
+          node.typeParameters,
+          node.heritageClauses,
+          node.members
+        );
   }
 
   static handleMethod(state: TransformerState, node: ts.MethodDeclaration): ts.MethodDeclaration {
-    return !this.isValid(state) ? node : state.factory.updateMethodDeclaration(
-      node,
-      node.modifiers,
-      undefined,
-      state.createIdentifier(node.name.getText().toUpperCase()),
-      undefined,
-      node.typeParameters,
-      node.parameters,
-      node.type,
-      node.body
-    );
+    return !this.isValid(state)
+      ? node
+      : state.factory.updateMethodDeclaration(
+          node,
+          node.modifiers,
+          undefined,
+          state.createIdentifier(node.name.getText().toUpperCase()),
+          undefined,
+          node.typeParameters,
+          node.parameters,
+          node.type,
+          node.body
+        );
   }
 }
 ```
@@ -91,7 +96,7 @@ export class Test {
   dob: Date;
 
   computeAge(): void {
-    this['age'] = (Date.now() - this.dob.getTime());
+    this.age = Date.now() - this.dob.getTime();
   }
 }
 ```
@@ -101,12 +106,12 @@ export class Test {
 import * as Δfunction from "@travetto/runtime/src/function.js";
 const Δm_1 = ["@travetto/transformer", "doc/upper.ts"];
 export class TEST {
-    static { Δfunction.registerFunction(TEST, Δm_1, { hash: 649563175, lines: [1, 9] }, { COMPUTEAGE: { hash: 1286718349, lines: [6, 8, 7] } }, false); }
+    static { Δfunction.registerFunction(TEST, Δm_1, { hash: 2002713074, lines: [1, 9] }, { COMPUTEAGE: { hash: 731903366, lines: [6, 8, 7] } }, false); }
     NAME;
     AGE;
     DOB;
     COMPUTEAGE() {
-        this['AGE'] = (Date.now() - this.DOB.getTime());
+        this.AGE = Date.now() - this.DOB.getTime();
     }
 }
 ```

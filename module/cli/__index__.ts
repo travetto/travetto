@@ -1,15 +1,16 @@
-import type { } from './src/trv.d.ts';
-export * from './src/types.ts';
+import type {} from './src/trv.d.ts';
+
+export * from './src/color.ts';
 export * from './src/execute.ts';
+export * from './src/help.ts';
+export * from './src/module.ts';
+export * from './src/parse.ts';
+export * from './src/registry/decorator.ts';
+export * from './src/registry/registry-adapter.ts';
+export * from './src/registry/registry-index.ts';
 export * from './src/schema.ts';
 export * from './src/schema-export.ts';
-export * from './src/registry/decorator.ts';
-export * from './src/registry/registry-index.ts';
-export * from './src/registry/registry-adapter.ts';
-export * from './src/help.ts';
-export * from './src/color.ts';
-export * from './src/module.ts';
 export * from './src/scm.ts';
-export * from './src/parse.ts';
 export * from './src/service.ts';
+export * from './src/types.ts';
 export * from './src/util.ts';

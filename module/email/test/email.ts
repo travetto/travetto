@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
-import { Test, Suite } from '@travetto/test';
 import { Inject, InjectableFactory } from '@travetto/di';
-import { type MailTransport, type MailService, NullTransport } from '@travetto/email';
+import { type MailService, type MailTransport, NullTransport } from '@travetto/email';
+import { Suite, Test } from '@travetto/test';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 
@@ -16,7 +16,6 @@ class Config {
 @Suite('Emails')
 @InjectableSuite()
 class EmailSuite {
-
   @Inject()
   instance: MailService;
 

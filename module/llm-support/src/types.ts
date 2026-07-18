@@ -47,10 +47,10 @@ export class RecommendationQuerySchema {
 }
 
 @Schema()
-export class LlmSupportRecommendToolInput extends RecommendationQuerySchema { }
+export class LlmSupportRecommendToolInput extends RecommendationQuerySchema {}
 
 @Schema()
-export class LlmSupportPlanToolInput extends RecommendationQuerySchema { }
+export class LlmSupportPlanToolInput extends RecommendationQuerySchema {}
 
 @Schema()
 export class LlmSupportExecuteToolInput {

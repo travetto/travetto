@@ -1,11 +1,11 @@
 import { stripVTControlCharacters } from 'node:util';
 
-import { type CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
-import { Terminal } from '@travetto/terminal';
+import { CliCommand, type CliCommandShape, cliTpl } from '@travetto/cli';
 import { AsyncQueue, Util } from '@travetto/runtime';
 import { MethodValidator, type ValidationError } from '@travetto/schema';
+import { Terminal } from '@travetto/terminal';
 
-import { ServiceRunner, type ServiceAction } from '../src/service.ts';
+import { type ServiceAction, ServiceRunner } from '../src/service.ts';
 
 async function validateService(_: ServiceAction, services: string[]): Promise<ValidationError | undefined> {
   const all = await ServiceRunner.findServices(services);
@@ -23,7 +23,6 @@ async function validateService(_: ServiceAction, services: string[]): Promise<Va
  */
 @CliCommand()
 export class CliServiceCommand implements CliCommandShape {
-
   quiet = false;
 
   async help(): Promise<string[]> {
@@ -41,7 +40,7 @@ export class CliServiceCommand implements CliCommandShape {
     const maxName = Math.max(...all.map(service => service.name.length), 'Service'.length) + 3;
     const maxVersion = Math.max(...all.map(service => `${service.version}`.length), 'Version'.length) + 3;
     const maxStatus = 20;
-    const queue = new AsyncQueue<{ idx: number, text: string, done?: boolean }>();
+    const queue = new AsyncQueue<{ idx: number; text: string; done?: boolean }>();
 
     const failureMessages: string[] = [];
 
@@ -51,7 +50,7 @@ export class CliServiceCommand implements CliCommandShape {
       let message: string;
       for await (const [valueType, value] of new ServiceRunner(descriptor).action(action)) {
         const details = { [valueType === 'message' ? 'subtitle' : valueType]: value };
-        queue.add({ idx: i, text: message = cliTpl`${{ identifier }} ${{ type }} ${details}` });
+        queue.add({ idx: i, text: (message = cliTpl`${{ identifier }} ${{ type }} ${details}`) });
         if (valueType === 'failure') {
           failureMessages.push(message);
         }
@@ -59,22 +58,26 @@ export class CliServiceCommand implements CliCommandShape {
       queue.add({ idx: i, done: true, text: message! });
     });
 
-    Promise.all(jobs).then(() => Util.queueMacroTask()).then(() => queue.close());
-
+    Promise.all(jobs)
+      .then(() => Util.queueMacroTask())
+      .then(() => queue.close());
 
     if (this.quiet) {
-      for await (const _ of queue) { }
+      for await (const _ of queue) {
+      }
       if (failureMessages.length) {
         console.error('Failure');
         failureMessages.map(stripVTControlCharacters).map(item => console.error(item));
       }
     } else {
       const term = new Terminal();
-      await term.writer.writeLines([
-        '',
-        cliTpl`${{ title: 'Service'.padEnd(maxName) }} ${{ title: 'Version'.padEnd(maxVersion) }} ${{ title: 'Status' }}`,
-        ''.padEnd(maxName + maxVersion + maxStatus + 3, '-'),
-      ]).commit();
+      await term.writer
+        .writeLines([
+          '',
+          cliTpl`${{ title: 'Service'.padEnd(maxName) }} ${{ title: 'Version'.padEnd(maxVersion) }} ${{ title: 'Status' }}`,
+          ''.padEnd(maxName + maxVersion + maxStatus + 3, '-')
+        ])
+        .commit();
 
       await term.streamList(queue);
     }

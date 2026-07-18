@@ -2,7 +2,6 @@ import { type AsyncContext, AsyncContextValue, WithAsyncContext } from '@travett
 import { Inject } from '@travetto/di';
 
 export class ContextValueService {
-
   @Inject()
   context: AsyncContext;
 

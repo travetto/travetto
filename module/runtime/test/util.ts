@@ -1,11 +1,10 @@
 import assert from 'node:assert';
 
-import { Test, Suite } from '@travetto/test';
-import { Util, AsyncQueue } from '@travetto/runtime';
+import { AsyncQueue, Util } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
 
 @Suite()
 export class UtilTest {
-
   @Test()
   verifyUUID() {
     assert(Util.uuid(32).length === 32);
@@ -198,7 +197,7 @@ export class UtilTest {
     const stack = [
       'Error: something went wrong',
       '    at MyClass.myMethod (/project/src/file.ts:10:5)',
-      '    at Object.<anonymous> (/project/src/other.ts:20:3)',
+      '    at Object.<anonymous> (/project/src/other.ts:20:3)'
     ].join('\n');
 
     const parts = Util.stackTraceToParts(stack);
@@ -229,11 +228,7 @@ export class UtilTest {
 
   @Test()
   stackTraceToPartsFiltersNonFrameLines() {
-    const stack = [
-      'Error: oops',
-      'some plain text line',
-      '    at realFrame (/src/index.ts:1:1)',
-    ].join('\n');
+    const stack = ['Error: oops', 'some plain text line', '    at realFrame (/src/index.ts:1:1)'].join('\n');
 
     const parts = Util.stackTraceToParts(stack);
     assert(parts.length === 1);

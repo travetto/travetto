@@ -1,7 +1,8 @@
 import ts from 'typescript';
 
 import { CoreUtil, type Import, SystemUtil, type TransformerState } from '@travetto/transformer';
-import { type FunctionMetadataTag } from '../../src/function.ts';
+
+import type { FunctionMetadataTag } from '../../src/function.ts';
 
 const RegisterImportSymbol = Symbol();
 
@@ -13,7 +14,6 @@ interface MetadataInfo {
  * Utils for registering function/class metadata at compile time
  */
 export class MetadataRegistrationUtil {
-
   static REGISTER_IMPORT = '@travetto/runtime/src/function.ts';
   static REGISTER_FN = 'registerFunction';
 
@@ -41,7 +41,8 @@ export class MetadataRegistrationUtil {
   /**
    * Register metadata on a function
    */
-  static registerFunction(state: TransformerState & MetadataInfo,
+  static registerFunction(
+    state: TransformerState & MetadataInfo,
     node: ts.FunctionDeclaration | ts.FunctionExpression,
     source?: ts.FunctionDeclaration | ts.FunctionExpression | ts.InterfaceDeclaration | ts.TypeAliasDeclaration
   ): void {
@@ -52,11 +53,7 @@ export class MetadataRegistrationUtil {
     const metadata = state.factory.createCallExpression(
       state.createAccess(state[RegisterImportSymbol].identifier, this.REGISTER_FN),
       [],
-      [
-        state.createIdentifier(node.name!.text),
-        state.getModuleIdentifier(),
-        state.fromLiteral(tag),
-      ]
+      [state.createIdentifier(node.name!.text), state.getModuleIdentifier(), state.fromLiteral(tag)]
     );
     state.addStatements([state.factory.createExpressionStatement(metadata)]);
   }
@@ -65,10 +62,11 @@ export class MetadataRegistrationUtil {
    * Register metadata on a class
    */
   static registerClass(
-    state: TransformerState & MetadataInfo, node: ts.ClassDeclaration,
-    cls: FunctionMetadataTag, methods?: Record<string, FunctionMetadataTag>
+    state: TransformerState & MetadataInfo,
+    node: ts.ClassDeclaration,
+    cls: FunctionMetadataTag,
+    methods?: Record<string, FunctionMetadataTag>
   ): ts.ClassDeclaration {
-
     state[RegisterImportSymbol] ??= state.importFile(this.REGISTER_IMPORT);
 
     const name = node.name?.escapedText.toString() ?? '';
@@ -81,24 +79,13 @@ export class MetadataRegistrationUtil {
         state.getModuleIdentifier(),
         state.fromLiteral(cls),
         state.extendObjectLiteral(methods ?? {}),
-        state.fromLiteral(CoreUtil.isAbstract(node)),
+        state.fromLiteral(CoreUtil.isAbstract(node))
       ]
     );
 
-    return state.factory.updateClassDeclaration(
-      node,
-      node.modifiers,
-      node.name,
-      node.typeParameters,
-      node.heritageClauses,
-      [
-        state.factory.createClassStaticBlockDeclaration(
-          state.factory.createBlock([
-            state.factory.createExpressionStatement(metadata)
-          ])
-        ),
-        ...node.members
-      ]
-    );
+    return state.factory.updateClassDeclaration(node, node.modifiers, node.name, node.typeParameters, node.heritageClauses, [
+      state.factory.createClassStaticBlockDeclaration(state.factory.createBlock([state.factory.createExpressionStatement(metadata)])),
+      ...node.members
+    ]);
   }
 }

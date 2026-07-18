@@ -1,16 +1,16 @@
 import { castTo } from '@travetto/runtime';
 
+import type { JSXElement } from '../../support/jsx-runtime.ts';
 import type { RenderProvider, RenderState } from '../types.ts';
 import type { RenderContext } from './context.ts';
-import type { JSXElement } from '../../support/jsx-runtime.ts';
 
 const visit = ({ recurse }: RenderState<JSXElement, RenderContext>): Promise<string> => recurse();
 const ignore = async (_: RenderState<JSXElement, RenderContext>): Promise<string> => '';
 
 export const Markdown: RenderProvider<RenderContext> = {
-  finalize: (text) => {
+  finalize: text => {
     text = text
-      .replace(/(\[[^\]]{1,100}\]\([^)]{1,1000}\))([A-Za-z0-9$]{1,100})/g, (all, link, value) => value === 's' ? all : `${link} ${value}`)
+      .replace(/(\[[^\]]{1,100}\]\([^)]{1,1000}\))([A-Za-z0-9$]{1,100})/g, (all, link, value) => (value === 's' ? all : `${link} ${value}`))
       .replace(/(\S)\n(#)/g, (_, left, right) => `${left}\n\n${right}`);
     return text;
   },
@@ -18,7 +18,7 @@ export const Markdown: RenderProvider<RenderContext> = {
   For: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
   If: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
   Unless: async ({ recurse, props }) => `{{^${props.attr}}}${await recurse()}{{/${props.attr}}}`,
-  Value: async ({ props }) => props.raw ? `{{{${props.attr}}}}` : `{{${props.attr}}}`,
+  Value: async ({ props }) => (props.raw ? `{{{${props.attr}}}}` : `{{${props.attr}}}`),
 
   strong: async ({ recurse }) => `**${await recurse()}**`,
   hr: async () => '\n------------------\n',
@@ -31,7 +31,7 @@ export const Markdown: RenderProvider<RenderContext> = {
   li: async ({ recurse, stack }) => {
     const parent = stack.toReversed().find(node => node.type === 'ol' || node.type === 'ul');
     const depth = stack.filter(node => node.type === 'ol' || node.type === 'ul').length;
-    return `${'   '.repeat(depth)}${(parent && parent.type === 'ol') ? '1.' : '* '} ${await recurse()}\n`;
+    return `${'   '.repeat(depth)}${parent && parent.type === 'ol' ? '1.' : '* '} ${await recurse()}\n`;
   },
   th: async ({ recurse }) => `|${await recurse()}`,
   td: async ({ recurse }) => `|${await recurse()}`,
@@ -44,12 +44,17 @@ export const Markdown: RenderProvider<RenderContext> = {
   h2: async ({ recurse }) => `\n## ${await recurse()}\n\n`,
   h3: async ({ recurse }) => `\n### ${await recurse()}\n\n`,
   h4: async ({ recurse }) => `\n#### ${await recurse()}\n\n`,
-  a: async ({ recurse, props }) => `\n[${await recurse()}](${(castTo<{ href: string }>(props)).href})\n`,
+  a: async ({ recurse, props }) => `\n[${await recurse()}](${castTo<{ href: string }>(props).href})\n`,
   Button: async ({ recurse, props }) => `\n[${await recurse()}](${props.href})\n`,
 
   InkyTemplate: visit,
-  Callout: visit, Center: visit, Container: visit,
-  Column: visit, Wrapper: visit, Row: visit, BlockGrid: visit,
+  Callout: visit,
+  Center: visit,
+  Container: visit,
+  Column: visit,
+  Wrapper: visit,
+  Row: visit,
+  BlockGrid: visit,
 
   Menu: async ({ recurse }) => `\n${await recurse()}`,
   Item: async ({ recurse, stack, props }) => {
@@ -58,7 +63,14 @@ export const Markdown: RenderProvider<RenderContext> = {
   },
   Spacer: async () => '\n\n',
 
-  Summary: ignore, Title: ignore,
+  Summary: ignore,
+  Title: ignore,
   img: ignore,
-  div: visit, title: visit, span: visit, center: visit, table: visit, tbody: visit, small: visit
+  div: visit,
+  title: visit,
+  span: visit,
+  center: visit,
+  table: visit,
+  tbody: visit,
+  small: visit
 };

@@ -10,7 +10,9 @@ export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
     }
   }
 
-  [Symbol.asyncIterator](): AsyncIterator<X> { return this; }
+  [Symbol.asyncIterator](): AsyncIterator<X> {
+    return this;
+  }
 
   async next(): Promise<IteratorResult<X>> {
     while (!this.#done && !this.#queue.length) {

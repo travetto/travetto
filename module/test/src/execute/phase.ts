@@ -60,7 +60,7 @@ export class TestPhaseManager {
    */
   async onError(phase: 'all' | 'each', error: unknown): Promise<Error> {
     if (!(error instanceof Error)) {
-      await this.endPhase(phase).catch(() => { });
+      await this.endPhase(phase).catch(() => {});
       throw error;
     }
     return error;

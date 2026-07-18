@@ -1,14 +1,18 @@
 import { createPool } from 'mysql2';
-import type { PoolConnection, Pool, OkPacket, ResultSetHeader, TypeCastField } from 'mysql2/promise';
+import type { OkPacket, Pool, PoolConnection, PreparedStatementInfo, ResultSetHeader, TypeCastField } from 'mysql2/promise';
 
-import { castTo, JSONUtil, ShutdownManager } from '@travetto/runtime';
 import type { AsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { Connection, type SQLModelConfig } from '@travetto/model-sql';
+import { castTo, JSONUtil, ShutdownManager } from '@travetto/runtime';
 
 function isSimplePacket(value: unknown): value is OkPacket | ResultSetHeader {
-  return value !== null && value !== undefined && typeof value === 'object' && 'constructor' in value && (
-    value.constructor.name === 'OkPacket' || value.constructor.name === 'ResultSetHeader'
+  return (
+    value !== null &&
+    value !== undefined &&
+    typeof value === 'object' &&
+    'constructor' in value &&
+    (value.constructor.name === 'OkPacket' || value.constructor.name === 'ResultSetHeader')
   );
 }
 
@@ -16,14 +20,10 @@ function isSimplePacket(value: unknown): value is OkPacket | ResultSetHeader {
  * Connection support for mysql
  */
 export class MySQLConnection extends Connection<PoolConnection> {
-
   #pool: Pool;
   #config: SQLModelConfig;
 
-  constructor(
-    context: AsyncContext,
-    config: SQLModelConfig
-  ) {
+  constructor(context: AsyncContext, config: SQLModelConfig) {
     super(context);
     this.#config = config;
   }
@@ -56,7 +56,7 @@ export class MySQLConnection extends Connection<PoolConnection> {
         if (typeof result === 'string' && result.charAt(0) === '{' && result.charAt(result.length - 1) === '}') {
           try {
             return JSONUtil.fromUTF8(result);
-          } catch { }
+          } catch {}
         }
         break;
       }
@@ -64,12 +64,12 @@ export class MySQLConnection extends Connection<PoolConnection> {
     return result;
   }
 
-  async execute<T = unknown>(pool: PoolConnection, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {
+  async execute<T = unknown>(pool: PoolConnection, query: string, values?: unknown[]): Promise<{ count: number; records: T[] }> {
     console.debug('Executing query', { query });
-    let prepared;
+    let prepared: PreparedStatementInfo | undefined;
     try {
       prepared = (values?.length ?? 0) > 0 ? await pool.prepare(query) : undefined;
-      const [results,] = await (prepared ? prepared.execute(values) : pool.query(query));
+      const [results] = await (prepared ? prepared.execute(values) : pool.query(query));
       if (isSimplePacket(results)) {
         return { records: [], count: results.affectedRows };
       } else {
@@ -83,14 +83,17 @@ export class MySQLConnection extends Connection<PoolConnection> {
       console.debug('Failed query', { error, query });
       const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
       switch (code) {
-        case 'ER_DUP_ENTRY': throw new ExistsError('query', query);
-        case 'ER_DUP_KEYNAME': throw new ExistsError('index', query);
-        default: throw error;
+        case 'ER_DUP_ENTRY':
+          throw new ExistsError('query', query);
+        case 'ER_DUP_KEYNAME':
+          throw new ExistsError('index', query);
+        default:
+          throw error;
       }
     } finally {
       try {
         await prepared?.close();
-      } catch { }
+      } catch {}
     }
   }
 

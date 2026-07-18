@@ -15,7 +15,7 @@
 <span class="token function">yarn</span> <span class="token function">add</span> &#64;travetto/web-rpc</code></pre>
   </figure>
 
-This module allows for a highly focused scenario, of supporting RPC operations within a <a class="module-link" routerLink="/docs/web" title="Declarative support for creating Web Applications">Web API</a> application.  The module takes care of producing the appropriate handler for the RPC commands along with the ability to generate the appropriate client to be used to interact with the RPC functionality.  The generated client uses Proxy-based objects, along with <a target="_blank" class="external-link" href="https://typescriptlang.org">Typescript</a> magic to create a dynamic client that does not rely on generating a lot of code.
+This module allows for a highly focused scenario, of supporting RPC operations within a <a class="module-link" routerLink="/docs/web" title="Declarative support for creating Web Applications">Web API</a> application. The module takes care of producing the appropriate handler for the RPC commands along with the ability to generate the appropriate client to be used to interact with the RPC functionality. The generated client uses Proxy-based objects, along with <a target="_blank" class="external-link" href="https://typescriptlang.org">Typescript</a> magic to create a dynamic client that does not rely on generating a lot of code.
 <h2 id="cli-web-rpc-client">CLI - web:rpc-client</h2>
 
 <p>Generate web-rpc client artifacts from a specified provider or leveraging local config.</p>
@@ -51,10 +51,9 @@ Options:
 
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/draft'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">DraftController</span> <span class="token punctuation">{{'{'}}</span>
-
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/suggest/tags'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">getTags</span><span class="token punctuation">(</span>q<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token punctuation">[</span><span class="token operator">...</span><span class="token comment">/* To fill in */</span><span class="token punctuation">[</span>q <span class="token operator">??</span> <span class="token string">''</span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token punctuation">[</span><span class="token operator">...</span><span class="token comment">/* To fill in */</span> <span class="token punctuation">[</span>q <span class="token operator">??</span> <span class="token string">''</span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>

@@ -1,17 +1,16 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
 import { type ConsoleEvent, ConsoleManager } from '@travetto/runtime';
+import { Suite, Test } from '@travetto/test';
 
 @Suite()
 export class ConsoleManagerTest {
-
   @Test()
   async testConsole() {
     const logs: ConsoleEvent[] = [];
     const og = ConsoleManager.get();
     ConsoleManager.set({
-      log: (ev) => logs.push(ev)
+      log: ev => logs.push(ev)
     });
     console.log('a', 'b', 'c');
     assert(logs.length === 1);

@@ -1,16 +1,15 @@
 import assert from 'node:assert';
 
-import { Test, Suite, BeforeAll } from '@travetto/test';
 import { Registry } from '@travetto/registry';
 import { castTo, RuntimeError } from '@travetto/runtime';
 import { BindUtil, SchemaValidator } from '@travetto/schema';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { Address } from './models/address.ts';
-import { Person, Count, Response, SuperAddress, BasePoly, Poly1, Poly2, RegexSimple, Accessors } from './models/binding.ts';
+import { Accessors, BasePoly, Count, Person, Poly1, Poly2, RegexSimple, Response, SuperAddress } from './models/binding.ts';
 
 @Suite('Data Binding')
 class DataBinding {
-
   @BeforeAll()
   async init() {
     await Registry.init();
@@ -43,17 +42,20 @@ class DataBinding {
     assert(person.counts[0] instanceof Count);
     assert(person.counts[0].value === 20.55555);
 
-    const viewPerson = Person.from({
-      name: 'Test',
-      address: {
-        street1: '1234 Fun',
-        street2: 'Unit 20'
+    const viewPerson = Person.from(
+      {
+        name: 'Test',
+        address: {
+          street1: '1234 Fun',
+          street2: 'Unit 20'
+        },
+        counts: [
+          { area: 'A', value: 20 },
+          { area: 'B', value: 30 }
+        ]
       },
-      counts: [
-        { area: 'A', value: 20 },
-        { area: 'B', value: 30 }
-      ]
-    }, 'test');
+      'test'
+    );
 
     assert(viewPerson.address instanceof Address);
     assert(viewPerson.address.street1 === '1234 Fun');
@@ -86,11 +88,13 @@ class DataBinding {
 
   @Test('Should handle aliases')
   validateAliases() {
-    const response = Response.from(castTo({
-      correct: true,
-      status: 'orange',
-      valid: 'true'
-    }));
+    const response = Response.from(
+      castTo({
+        correct: true,
+        status: 'orange',
+        valid: 'true'
+      })
+    );
 
     console.log('Response', { ...response });
 
@@ -115,7 +119,8 @@ class DataBinding {
         {
           area: 'b',
           value: 6
-        }]
+        }
+      ]
     });
 
     assert(p.counts);
@@ -150,15 +155,19 @@ class DataBinding {
     assert(items[1] instanceof Poly2);
     assert(items[1].type === 'poly2');
     assert(!('name' in items[1]));
-    assert(typeof items[1]['age'] === 'string');
+    assert(typeof items[1].age === 'string');
   }
 
   @Test('Should handle invalid-polymorphic structure')
   validateInvalidPolymorphism() {
-    assert.throws(() => Poly2.from({
-      type: 'poly1',
-      names: ['1', '2', '3'],
-    }), RuntimeError);
+    assert.throws(
+      () =>
+        Poly2.from({
+          type: 'poly1',
+          names: ['1', '2', '3']
+        }),
+      RuntimeError
+    );
   }
 
   @Test('should handle regex fields')
@@ -229,48 +238,38 @@ class DataBinding {
 
   @Test()
   async validateRealWorld() {
-    assert.deepStrictEqual(BindUtil.expandPaths({
-      'children[0].age': 20
-    }), {
-      children: [
-        { age: 20 }
-      ]
-    });
+    assert.deepStrictEqual(
+      BindUtil.expandPaths({
+        'children[0].age': 20
+      }),
+      {
+        children: [{ age: 20 }]
+      }
+    );
   }
 
   @Test()
   async validateEmptyBind() {
     assert.deepStrictEqual(
       BindUtil.flattenPaths({
-        children: [
-          { age: '' }
-        ]
+        children: [{ age: '' }]
       }),
       { 'children[0].age': '' }
     );
 
-    assert.deepStrictEqual(
-      BindUtil.expandPaths(
-        { 'children[0].age': undefined }
-      ),
-      {
-        children: [
-          { age: undefined }
-        ]
-      }
-    );
+    assert.deepStrictEqual(BindUtil.expandPaths({ 'children[0].age': undefined }), {
+      children: [{ age: undefined }]
+    });
   }
 
   @Test()
   async validateArrayMixedBind() {
     assert.deepStrictEqual(
-      BindUtil.expandPaths(
-        {
-          'children[0]': 1,
-          'children[1]': 2,
-          'children[2]': 3,
-        }
-      ),
+      BindUtil.expandPaths({
+        'children[0]': 1,
+        'children[1]': 2,
+        'children[2]': 3
+      }),
       {
         children: [1, 2, 3]
       }

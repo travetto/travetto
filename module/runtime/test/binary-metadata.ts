@@ -1,14 +1,13 @@
-import crypto from 'node:crypto';
 import assert from 'node:assert';
-import { buffer } from 'node:stream/consumers';
+import crypto from 'node:crypto';
 import { Readable } from 'node:stream';
+import { buffer } from 'node:stream/consumers';
 
-import { Test, Suite, TestFixtures } from '@travetto/test';
 import { BinaryMetadataUtil, BinaryUtil } from '@travetto/runtime';
+import { Suite, Test, TestFixtures } from '@travetto/test';
 
 @Suite()
 export class BinaryMetadataUtilSuite {
-
   fixture = new TestFixtures();
 
   @Test()
@@ -53,7 +52,6 @@ export class BinaryMetadataUtilSuite {
 
     assert(BinaryMetadataUtil.hash('', { length: 20 }) !== key.substring(0, 20));
   }
-
 
   @Test()
   async verifyAsyncHash() {

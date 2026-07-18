@@ -1,3 +1,19 @@
 {
-  "extends": ["./node_modules/@travetto/lint/resources/biome.jsonc"]
+  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
+  "extends": ["./node_modules/@travetto/lint/resources/biome.jsonc"],
+  "files": {
+    "includes": [
+      "**",      
+      "!**/out",
+      "!**/ui",
+      "!**/api-client",
+      "!**/*.d.ts",
+      "!**/fixtures",
+      "!**/resources",
+      "!**/DOC.html",
+      "!**/README.md",
+      "!archived/**",
+      "!related/travetto.github.io/**"
+    ]
+  }
 }

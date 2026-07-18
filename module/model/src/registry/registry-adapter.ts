@@ -10,7 +10,7 @@ function combineClasses(target: ModelConfig, sources: Partial<ModelConfig>[]): M
       indices: { ...(target.indices || {}), ...(source.indices || {}) },
       postLoad: [...(target.postLoad || []), ...(source.postLoad || [])],
       prePersist: [...(target.prePersist || []), ...(source.prePersist || [])],
-      transientFields: [...(target.transientFields || []), ...(source.transientFields || [])],
+      transientFields: [...(target.transientFields || []), ...(source.transientFields || [])]
     });
   }
   if (target.store) {
@@ -28,7 +28,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
   }
 
   register(...data: Partial<ModelConfig>[]): ModelConfig {
-    const config = this.#config ??= {
+    const config = (this.#config ??= {
       class: this.#cls,
       indices: {},
       autoCreate: 'development',
@@ -36,7 +36,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
       postLoad: [],
       prePersist: [],
       transientFields: []
-    };
+    });
     combineClasses(config, data);
     return config;
   }
@@ -50,9 +50,9 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
         config.store = parent.store;
       }
 
-      config.postLoad = [...parent.postLoad ?? [], ...config.postLoad ?? []];
-      config.prePersist = [...parent.prePersist ?? [], ...config.prePersist ?? []];
-      config.transientFields = [...parent.transientFields ?? [], ...config.transientFields ?? []];
+      config.postLoad = [...(parent.postLoad ?? []), ...(config.postLoad ?? [])];
+      config.prePersist = [...(parent.prePersist ?? []), ...(config.prePersist ?? [])];
+      config.transientFields = [...(parent.transientFields ?? []), ...(config.transientFields ?? [])];
     }
   }
 

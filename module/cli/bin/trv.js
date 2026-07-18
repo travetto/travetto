@@ -2,5 +2,6 @@
 // @ts-check
 import '@travetto/runtime/support/patch.js';
 import '@travetto/compiler/bin/hook.js';
+
 const { invoke } = await import('@travetto/compiler/support/invoke.ts');
 await invoke('exec', '@travetto/cli/support/entry.trv.ts', ...process.argv.slice(2));

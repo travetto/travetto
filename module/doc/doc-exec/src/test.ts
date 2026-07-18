@@ -1,3 +1,3 @@
 class TestFile {
-  static method(): void { }
+  static method(): void {}
 }

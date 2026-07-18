@@ -2,8 +2,8 @@ import type tty from 'node:tty';
 
 import { ShutdownManager } from '@travetto/runtime';
 
-type State = { output: tty.WriteStream, height: number, width: number };
-type TermCoord = { x: number, y: number };
+type State = { output: tty.WriteStream; height: number; width: number };
+type TermCoord = { x: number; y: number };
 
 const ESC = '\x1b[';
 const clamp = (input: number, size: number): number => Math.max(Math.min(input + (input < 0 ? size : 0), size - 1), 0);
@@ -23,10 +23,9 @@ const Codes = {
 
   DEBUG: (text: string): string => text.replaceAll(ESC, '<ESC>').replaceAll('\n', '<NL>'),
   CURSOR_MOVE: (x?: number, y?: number): string => `${delta(x, 'C', 'D')}${delta(y, 'B', 'A')}`,
-  POSITION_SET: (x: number, y: number | undefined, maxX: number, maxY: number): string => y !== undefined ?
-    `${ESC}${clamp(y, maxY) + 1};${clamp(x, maxX) + 1}H` : `${ESC}${clamp(x, maxX) + 1}G`,
-  SCROLL_RANGE_SET: (start: number, end: number, max: number): string =>
-    `${ESC}${clamp(start, max) + 1};${clamp(end, max) + 1}r`
+  POSITION_SET: (x: number, y: number | undefined, maxX: number, maxY: number): string =>
+    y !== undefined ? `${ESC}${clamp(y, maxY) + 1};${clamp(x, maxX) + 1}H` : `${ESC}${clamp(x, maxX) + 1}G`,
+  SCROLL_RANGE_SET: (start: number, end: number, max: number): string => `${ESC}${clamp(start, max) + 1};${clamp(end, max) + 1}r`
 };
 
 /**
@@ -63,7 +62,7 @@ export class TerminalWriter {
 
   /** Pad to width of terminal */
   padToWidth(text: string, offset = 0, ellipsis = '...'): string {
-    if (text.length > (this.#term.width - offset)) {
+    if (text.length > this.#term.width - offset) {
       return `${text.substring(0, this.#term.width - (offset + ellipsis.length))}${ellipsis}`;
     }
     return text.padEnd(this.#term.width - offset, ' ');
@@ -107,9 +106,12 @@ export class TerminalWriter {
   /** Clear line, -1 (left), 0 (both), 1 (right), from current cursor */
   clearLine(dir: -1 | 0 | 1 = 0): this {
     switch (dir) {
-      case 0: return this.write(Codes.ERASE_LINE_ALL);
-      case 1: return this.write(Codes.ERASE_LINE_RIGHT);
-      case -1: return this.write(Codes.ERASE_LINE_LEFT);
+      case 0:
+        return this.write(Codes.ERASE_LINE_ALL);
+      case 1:
+        return this.write(Codes.ERASE_LINE_RIGHT);
+      case -1:
+        return this.write(Codes.ERASE_LINE_LEFT);
     }
   }
 
@@ -152,7 +154,7 @@ export class TerminalWriter {
   }
 
   /** Set scrolling range */
-  scrollRange({ start = 0, end = -1 }: { start?: number, end?: number }): this {
+  scrollRange({ start = 0, end = -1 }: { start?: number; end?: number }): this {
     return this.trackDirty(true).write(Codes.SCROLL_RANGE_SET(start, end, this.#term.height));
   }
 

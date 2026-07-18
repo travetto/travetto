@@ -1,5 +1,5 @@
-import util from 'node:util';
 import { AssertionError } from 'node:assert';
+import util from 'node:util';
 
 import { TypedObject } from '@travetto/runtime';
 
@@ -11,9 +11,12 @@ export class TestConsumerUtil {
     if (error instanceof AssertionError) {
       return;
     } else if (error instanceof Error) {
-      const stack = error.stack ?
-        error.stack.split(/\n/).slice(0, verbose ? -1 : 5).join('\n') :
-        error.message;
+      const stack = error.stack
+        ? error.stack
+            .split(/\n/)
+            .slice(0, verbose ? -1 : 5)
+            .join('\n')
+        : error.message;
       const subObject: Record<string, unknown> = {};
       for (const key of TypedObject.keys(error)) {
         if (key !== 'stack' && key !== 'message' && key !== 'name') {

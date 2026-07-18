@@ -1,14 +1,14 @@
 import { ManifestModuleUtil } from '@travetto/manifest';
 import { Registry } from '@travetto/registry';
-import { WorkPool } from '@travetto/worker';
 import { AsyncQueue, TimeUtil, WatchUtil } from '@travetto/runtime';
+import { WorkPool } from '@travetto/worker';
 
-import { buildStandardTestManager } from '../worker/standard.ts';
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
 import type { TestDiffInput, TestRun } from '../model/test.ts';
-import { RunUtil } from './run.ts';
+import { buildStandardTestManager } from '../worker/standard.ts';
 import { isTestRunEvent, type TestReadyEvent } from '../worker/types.ts';
+import { RunUtil } from './run.ts';
 
 /**
  * Test Watcher.
@@ -16,7 +16,6 @@ import { isTestRunEvent, type TestReadyEvent } from '../worker/types.ts';
  * Runs all tests on startup, and then listens for changes to run tests again
  */
 export class TestWatcher {
-
   /**
    * Start watching all test files
    */
@@ -28,13 +27,11 @@ export class TestWatcher {
     const events: (TestRun | TestDiffInput)[] = [];
 
     if (runAllOnStart) {
-      events.push(...await RunUtil.resolveGlobInput({ globs: [] }));
+      events.push(...(await RunUtil.resolveGlobInput({ globs: [] })));
     }
 
     const queue = new AsyncQueue(events);
-    const consumer = new CumulativeSummaryConsumer(
-      await TestConsumerRegistryIndex.getInstance({ consumer: format })
-    );
+    const consumer = new CumulativeSummaryConsumer(await TestConsumerRegistryIndex.getInstance({ consumer: format }));
 
     process.on('message', event => {
       if (isTestRunEvent(event)) {
@@ -44,19 +41,15 @@ export class TestWatcher {
 
     process.send?.({ type: 'ready' } satisfies TestReadyEvent);
 
-    const queueProcessor = WorkPool.run(
-      buildStandardTestManager.bind(null, consumer),
-      queue,
-      {
-        idleTimeoutMillis: TimeUtil.duration('2m', 'ms'),
-        min: 2,
-        max: WorkPool.DEFAULT_SIZE
-      }
-    );
+    const queueProcessor = WorkPool.run(buildStandardTestManager.bind(null, consumer), queue, {
+      idleTimeoutMillis: TimeUtil.duration('2m', 'ms'),
+      min: 2,
+      max: WorkPool.DEFAULT_SIZE
+    });
 
     await WatchUtil.watchCompilerEvents('change', event => {
       const fileType = ManifestModuleUtil.getFileType(event.file);
-      if ((fileType === 'ts' || fileType === 'js')) {
+      if (fileType === 'ts' || fileType === 'js') {
         if (event.action === 'delete') {
           consumer.removeTest(event.import);
         } else {

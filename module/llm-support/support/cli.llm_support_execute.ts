@@ -11,7 +11,6 @@ import { LlmSupportCommandBase } from './base-command.ts';
  */
 @CliCommand()
 export class LlmSupportExecuteCommand extends LlmSupportCommandBase {
-
   @CliFlag({ short: 'o', full: 'operations' })
   @MinLength(1)
   operations?: string[];

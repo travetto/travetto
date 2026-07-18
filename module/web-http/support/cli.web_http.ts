@@ -1,8 +1,8 @@
-import { Runtime, toConcrete } from '@travetto/runtime';
+import { CliCommand, type CliCommandShape, CliDebugIpcFlag, CliModuleFlag, CliProfilesFlag, CliRestartOnChangeFlag } from '@travetto/cli';
 import { DependencyRegistryIndex } from '@travetto/di';
-import { CliCommand, CliDebugIpcFlag, CliModuleFlag, CliProfilesFlag, CliRestartOnChangeFlag, type CliCommandShape } from '@travetto/cli';
-import { NetUtil } from '@travetto/web';
 import { Registry } from '@travetto/registry';
+import { Runtime, toConcrete } from '@travetto/runtime';
+import { NetUtil } from '@travetto/web';
 
 import type { WebHttpServer } from '../src/types.ts';
 
@@ -18,7 +18,6 @@ import type { WebHttpServer } from '../src/types.ts';
  */
 @CliCommand()
 export class WebHttpCommand implements CliCommandShape {
-
   /** Port to run on */
   port?: number;
 

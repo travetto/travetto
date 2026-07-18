@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 import type { TestWatchEvent } from '@travetto/test';
 
-import { Log } from '../../../core/log.ts';
+import type { Log } from '../../../core/log.ts';
 import { Workspace } from '../../../core/workspace.ts';
 
 import { DocumentResultsManager } from './document.ts';

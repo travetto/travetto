@@ -1,4 +1,5 @@
-import { Injectable, Inject } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
+
 import { Util } from './util.ts';
 
 @Injectable()
@@ -23,6 +24,4 @@ export class DbConfig {
   }
 }
 
-export class AltConfig {
-
-}
+export class AltConfig {}

@@ -1,9 +1,9 @@
-import { createWriteStream, type WriteStream, mkdirSync, openSync, appendFileSync } from 'node:fs';
+import { appendFileSync, createWriteStream, mkdirSync, openSync, type WriteStream } from 'node:fs';
 import path from 'node:path';
 
-import { Env, Runtime } from '@travetto/runtime';
-import { Injectable, PostConstruct } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
+import { Injectable, PostConstruct } from '@travetto/di';
+import { Env, Runtime } from '@travetto/runtime';
 
 import type { LogAppender, LogEvent } from '../types.ts';
 

@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process';
+
 import { CliCommand, type CliCommandShape, CliModuleUtil, CliParseUtil } from '@travetto/cli';
 import { Env, ExecUtil, Runtime } from '@travetto/runtime';
 
@@ -33,10 +34,20 @@ export class LintCommand implements CliCommandShape {
 
     const state = CliParseUtil.getState(this);
     const result = await ExecUtil.getResult(
-      spawn(process.argv0, [Runtime.workspaceRelative('node_modules', '.bin', 'biome'), 'check', ...(this.fix ? ['--write'] : []), ...paths, ...state?.unknown ?? []], {
-        stdio: 'inherit',
-      }),
-      { catch: true },
+      spawn(
+        process.argv0,
+        [
+          Runtime.workspaceRelative('node_modules', '.bin', 'biome'),
+          'check',
+          ...(this.fix ? ['--write'] : []),
+          ...paths,
+          ...(state?.unknown ?? [])
+        ],
+        {
+          stdio: 'inherit'
+        }
+      ),
+      { catch: true }
     );
 
     process.exitCode = result.code;

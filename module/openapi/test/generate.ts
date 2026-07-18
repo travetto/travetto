@@ -1,11 +1,11 @@
 import assert from 'node:assert';
 
-import { Registry } from '@travetto/registry';
-import { IsPrivate } from '@travetto/schema';
-import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Post, Put, QueryParam } from '@travetto/web';
-import { BeforeAll, Suite, Test } from '@travetto/test';
 import { OpenapiVisitor } from '@travetto/openapi';
+import { Registry } from '@travetto/registry';
 import { BinaryUtil } from '@travetto/runtime';
+import { IsPrivate } from '@travetto/schema';
+import { BeforeAll, Suite, Test } from '@travetto/test';
+import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Post, Put, QueryParam } from '@travetto/web';
 
 import { TestUser } from './model.ts';
 
@@ -46,21 +46,18 @@ class TestCont {
   }
 
   @Patch('/who')
-  async updateWho(who?: { name: string, color: string }) {
+  async updateWho(who?: { name: string; color: string }) {
     return [who?.color];
   }
 
   @Delete('/:id')
-  async remove(id: string) {
-  }
+  async remove(id: string) {}
 
   @Delete('/all/:id')
-  async removeAll(id: string, match: TestUser) {
-  }
+  async removeAll(id: string, match: TestUser) {}
 
   @Head('/all/:id')
-  async headAll(id: string, match?: TestUser) {
-  }
+  async headAll(id: string, match?: TestUser) {}
 
   @Get('/download')
   async download(size?: number) {
@@ -69,9 +66,7 @@ class TestCont {
 
   @IsPrivate()
   @Delete('/random')
-  async ignore(): Promise<void> {
-
-  }
+  async ignore(): Promise<void> {}
 }
 
 @IsPrivate()
@@ -85,7 +80,6 @@ class IgnoredCont {
 
 @Suite()
 class GenerateSuite {
-
   @BeforeAll()
   async init() {
     await Registry.init();
@@ -197,7 +191,7 @@ class GenerateSuite {
       },
       description: ''
     });
-    assert.deepStrictEqual(config.components.schemas['who__12130'], {
+    assert.deepStrictEqual(config.components.schemas.who__12130, {
       description: undefined,
       examples: undefined,
       properties: {
@@ -210,10 +204,7 @@ class GenerateSuite {
           type: 'string'
         }
       },
-      required: [
-        'name',
-        'color'
-      ],
+      required: ['name', 'color']
     });
   }
 
@@ -382,7 +373,6 @@ class GenerateSuite {
       },
       description: ''
     });
-
   }
 
   @Test()

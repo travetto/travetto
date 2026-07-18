@@ -4,18 +4,17 @@ import ts from 'typescript';
  * Core utilities util
  */
 export class CoreUtil {
-
   /**
    * See if inbound node has an original property
    */
-  static hasOriginal(value: ts.Node): value is (ts.Node & { original: ts.Node }) {
+  static hasOriginal(value: ts.Node): value is ts.Node & { original: ts.Node } {
     return 'original' in value && !!value.original;
   }
 
   /**
    * See if type has target
    */
-  static hasTarget(value: ts.Type): value is (ts.Type & { target: ts.Type }) {
+  static hasTarget(value: ts.Type): value is ts.Type & { target: ts.Type } {
     return 'target' in value && !!value.target;
   }
 
@@ -37,7 +36,7 @@ export class CoreUtil {
     node: ts.CallExpression | undefined,
     pred: (expr: ts.Expression) => expr is T
   ): T | undefined {
-    if (node && node.arguments && node.arguments.length) {
+    if (node?.arguments?.length) {
       return node.arguments.find(pred);
     }
   }
@@ -46,7 +45,7 @@ export class CoreUtil {
    * Find the first argument of a call expression, or decorator.
    */
   static firstArgument(node: ts.CallExpression | undefined): ts.Expression | undefined {
-    if (node && node!.arguments && node!.arguments.length) {
+    if (node?.arguments?.length) {
       return node.arguments[0];
     }
   }
@@ -55,10 +54,7 @@ export class CoreUtil {
    * Create a static field for a class
    */
   static createStaticField(factory: ts.NodeFactory, name: string, value: ts.Expression): ts.PropertyDeclaration {
-    return factory.createPropertyDeclaration(
-      [factory.createToken(ts.SyntaxKind.StaticKeyword)],
-      name, undefined, undefined, value
-    );
+    return factory.createPropertyDeclaration([factory.createToken(ts.SyntaxKind.StaticKeyword)], name, undefined, undefined, value);
   }
 
   /**
@@ -79,9 +75,18 @@ export class CoreUtil {
    * @param source
    * @param statements
    */
-  static updateSource(factory: ts.NodeFactory, source: ts.SourceFile, statements: ts.NodeArray<ts.Statement> | ts.Statement[]): ts.SourceFile {
+  static updateSource(
+    factory: ts.NodeFactory,
+    source: ts.SourceFile,
+    statements: ts.NodeArray<ts.Statement> | ts.Statement[]
+  ): ts.SourceFile {
     return factory.updateSourceFile(
-      source, statements, source.isDeclarationFile, source.referencedFiles, source.typeReferenceDirectives, source.hasNoDefaultLib
+      source,
+      statements,
+      source.isDeclarationFile,
+      source.referencedFiles,
+      source.typeReferenceDirectives,
+      source.hasNoDefaultLib
     );
   }
 
@@ -98,9 +103,10 @@ export class CoreUtil {
       first = factory.createIdentifier(first);
     }
     return items.reduce<ts.Expression>(
-      (expr, value) => typeof value === 'number' ?
-        factory.createElementAccessExpression(expr, value) :
-        factory.createPropertyAccessExpression(expr, value),
+      (expr, value) =>
+        typeof value === 'number'
+          ? factory.createElementAccessExpression(expr, value)
+          : factory.createPropertyAccessExpression(expr, value),
       factory.createPropertyAccessExpression(first, second)
     );
   }
@@ -122,7 +128,6 @@ export class CoreUtil {
    * Is declaration abstract?
    */
   static isAbstract(node: ts.Declaration): boolean {
-    // eslint-disable-next-line no-bitwise
     return !!(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Abstract);
   }
 }

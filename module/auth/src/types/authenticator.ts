@@ -1,4 +1,5 @@
 import type { AnyMap } from '@travetto/runtime';
+
 import type { Principal } from './principal.ts';
 
 /**
@@ -6,7 +7,7 @@ import type { Principal } from './principal.ts';
  *
  * @concrete
  */
-export interface AuthenticatorState extends AnyMap { }
+export interface AuthenticatorState extends AnyMap {}
 
 /**
  * Supports validation payload of type T into an authenticated principal

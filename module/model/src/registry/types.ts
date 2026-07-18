@@ -2,7 +2,7 @@ import type { Class } from '@travetto/runtime';
 
 import type { ModelType } from '../types/model.ts';
 
-export type DataHandler<T = unknown> = (inst: T) => (Promise<T | void> | T | void);
+export type DataHandler<T = unknown> = (inst: T) => Promise<T | void> | T | void;
 
 export type PrePersistScope = 'full' | 'partial' | 'all';
 
@@ -55,7 +55,7 @@ export class ModelConfig<T extends ModelType = ModelType> {
   /**
    * Pre-persist handlers
    */
-  prePersist?: { scope: PrePersistScope, handler: DataHandler<unknown> }[];
+  prePersist?: { scope: PrePersistScope; handler: DataHandler<unknown> }[];
   /**
    * Post-load handlers
    */

@@ -26,7 +26,7 @@ Usage: lint:register [options]
 Description:
   Generate the workspace Biome configuration entry file.
 
-  This bootstraps `biome.json` to extend the framework-provided rules configuration.
+  This bootstraps `biome.jsonc` to extend the framework-provided rules configuration.
 
 Options:
   --help  display help for command
@@ -37,7 +37,23 @@ When registration completes, this is the file the linter will use, and any other
 **Code: Sample configuration**
 ```json
 {
-  "extends": ["./node_modules/@travetto/lint/biome.json"]
+  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
+  "extends": ["./node_modules/@travetto/lint/resources/biome.jsonc"],
+  "files": {
+    "includes": [
+      "**",      
+      "!**/out",
+      "!**/ui",
+      "!**/api-client",
+      "!**/*.d.ts",
+      "!**/fixtures",
+      "!**/resources",
+      "!**/DOC.html",
+      "!**/README.md",
+      "!archived/**",
+      "!related/travetto.github.io/**"
+    ]
+  }
 }
 ```
 

@@ -1,5 +1,5 @@
-import { Suite } from '@travetto/test';
 import { DynamoDBModelConfig, DynamoDBModelService } from '@travetto/model-dynamodb';
+import { Suite } from '@travetto/test';
 
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';

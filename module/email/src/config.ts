@@ -13,6 +13,6 @@ export class MailConfig {
     /** Default from */
     from: 'Travetto Mailer <mailer@travetto.dev>',
     /** Default reply-to */
-    replyTo: 'Travetto Mailer <mailer@travetto.dev>',
+    replyTo: 'Travetto Mailer <mailer@travetto.dev>'
   };
 }

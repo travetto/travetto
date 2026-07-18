@@ -1,16 +1,14 @@
-import { Util, AsyncQueue } from '@travetto/runtime';
+import { AsyncQueue, Util } from '@travetto/runtime';
 import { Terminal, TerminalUtil } from '@travetto/terminal';
 
 import type { TestEvent } from '../../model/event.ts';
-import type { TestResult } from '../../model/test.ts';
-
-import type { SuitesSummary, TestConsumerShape, TestRunState } from '../types.ts';
-import { TestConsumer } from '../decorator.ts';
-
-import { TapEmitter } from './tap.ts';
-import { CONSOLE_ENHANCER, type TestResultsEnhancer } from '../enhancer.ts';
 import type { SuiteResult } from '../../model/suite.ts';
+import type { TestResult } from '../../model/test.ts';
 import { TestModelUtil } from '../../model/util.ts';
+import { TestConsumer } from '../decorator.ts';
+import { CONSOLE_ENHANCER, type TestResultsEnhancer } from '../enhancer.ts';
+import type { SuitesSummary, TestConsumerShape, TestRunState } from '../types.ts';
+import { TapEmitter } from './tap.ts';
 
 type Result = {
   key: string;
@@ -23,7 +21,6 @@ type Result = {
  */
 @TestConsumer()
 export class TapSummaryEmitter implements TestConsumerShape {
-
   #timings = new Map<'test' | 'module' | 'file' | 'suite', Map<string, Result>>();
 
   #terminal: Terminal;
@@ -53,20 +50,16 @@ export class TapSummaryEmitter implements TestConsumerShape {
     foundModule.duration += suite.duration;
     foundModule.tests += testCount;
 
-    const foundFile = this.#timings
-      .getOrInsert('file', new Map<string, Result>())
-      .getOrInsert(file, { key: file, duration: 0, tests: 0 });
+    const foundFile = this.#timings.getOrInsert('file', new Map<string, Result>()).getOrInsert(file, { key: file, duration: 0, tests: 0 });
 
     foundFile.duration += suite.duration;
     foundFile.tests += testCount;
 
-    this.#timings
-      .getOrInsert('suite', new Map<string, Result>())
-      .set(suite.classId, {
-        key: suite.classId,
-        duration: suite.duration,
-        tests: testCount
-      });
+    this.#timings.getOrInsert('suite', new Map<string, Result>()).set(suite.classId, {
+      key: suite.classId,
+      duration: suite.duration,
+      tests: testCount
+    });
   }
 
   #renderTimings(): void {
@@ -77,7 +70,9 @@ export class TapSummaryEmitter implements TestConsumerShape {
       const top10 = [...results.values()].toSorted((a, b) => b.duration - a.duration).slice(0, count);
 
       for (const result of top10) {
-        console.log(`  * ${this.#enhancer.testName(result.key)} - ${this.#enhancer.total(result.duration)}ms / ${this.#enhancer.total(result.tests)} tests`);
+        console.log(
+          `  * ${this.#enhancer.testName(result.key)} - ${this.#enhancer.total(result.duration)}ms / ${this.#enhancer.total(result.tests)} tests`
+        );
       }
       this.#consumer.log('');
     }
@@ -101,7 +96,7 @@ export class TapSummaryEmitter implements TestConsumerShape {
     this.#progress = this.#terminal.streamToBottom(
       Util.mapAsyncIterable(
         this.#results,
-        (value) => {
+        value => {
           TestModelUtil.countTestResult(total, [value]);
           const statusLine = `${total.failed} failed, ${total.errored} errored, ${total.skipped} skipped`;
           return {

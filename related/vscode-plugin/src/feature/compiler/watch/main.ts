@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ChildProcess } from 'node:child_process';
+import type { ChildProcess } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 

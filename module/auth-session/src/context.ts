@@ -1,6 +1,6 @@
-import { Injectable, Inject } from '@travetto/di';
-import { type AsyncContext, AsyncContextValue } from '@travetto/context';
 import { type AuthContext, AuthenticationError } from '@travetto/auth';
+import { type AsyncContext, AsyncContextValue } from '@travetto/context';
+import { Inject, Injectable } from '@travetto/di';
 
 import { Session } from './session.ts';
 
@@ -9,7 +9,6 @@ import { Session } from './session.ts';
  */
 @Injectable()
 export class SessionContext {
-
   @Inject()
   context: AsyncContext;
 
@@ -28,7 +27,7 @@ export class SessionContext {
       expiresAt: principal.expiresAt,
       issuedAt: principal.issuedAt,
       action: 'create',
-      data: {},
+      data: {}
     });
   }
 
@@ -40,7 +39,7 @@ export class SessionContext {
   get(createIfMissing?: boolean): Session | undefined {
     let value = this.#value.get();
     if (!value && createIfMissing) {
-      this.set(value = this.#create());
+      this.set((value = this.#create()));
     }
     return value;
   }

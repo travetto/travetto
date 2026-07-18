@@ -1,6 +1,5 @@
 import { InjectableFactory } from '@travetto/di';
-
-import { DynamoDBModelService, type DynamoDBModelConfig } from '@travetto/model-dynamodb';
+import { type DynamoDBModelConfig, DynamoDBModelService } from '@travetto/model-dynamodb';
 
 export class Init {
   @InjectableFactory({ primary: true })

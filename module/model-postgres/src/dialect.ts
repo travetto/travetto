@@ -1,10 +1,9 @@
-import type { SchemaFieldConfig } from '@travetto/schema';
-import { Injectable } from '@travetto/di';
 import type { AsyncContext } from '@travetto/context';
+import { Injectable } from '@travetto/di';
 import type { ModelType } from '@travetto/model';
-import { castTo, type Class } from '@travetto/runtime';
-
-import { SQLDialect, type SQLModelConfig, SQLModelUtil, type VisitStack, type SQLTableDescription } from '@travetto/model-sql';
+import { SQLDialect, type SQLModelConfig, SQLModelUtil, type SQLTableDescription, type VisitStack } from '@travetto/model-sql';
+import { type Class, castTo } from '@travetto/runtime';
+import type { SchemaFieldConfig } from '@travetto/schema';
 
 import { PostgreSQLConnection } from './connection.ts';
 
@@ -13,7 +12,6 @@ import { PostgreSQLConnection } from './connection.ts';
  */
 @Injectable()
 export class PostgreSQLDialect extends SQLDialect {
-
   connection: PostgreSQLConnection;
 
   constructor(context: AsyncContext, config: SQLModelConfig) {
@@ -48,7 +46,7 @@ export class PostgreSQLDialect extends SQLDialect {
     const IGNORE_FIELDS = [this.pathField.name, this.parentPathField.name, this.idxField.name].map(field => `'${field}'`);
 
     // 1. Columns
-    const columns = await this.executeSQL<{ name: string, type: string, is_not_null: boolean }>(`
+    const columns = await this.executeSQL<{ name: string; type: string; is_not_null: boolean }>(`
       SELECT
         a.attname AS name,
         pg_catalog.format_type(a.atttypid, a.atttypmod) AS type,
@@ -72,7 +70,7 @@ export class PostgreSQLDialect extends SQLDialect {
     }
 
     // 2. Foreign Keys
-    const foreignKeys = await this.executeSQL<{ name: string, from_column: string, to_column: string, to_table: string }>(`
+    const foreignKeys = await this.executeSQL<{ name: string; from_column: string; to_column: string; to_table: string }>(`
       SELECT
         tc.constraint_name AS name, 
         kcu.column_name AS from_column,
@@ -88,7 +86,7 @@ export class PostgreSQLDialect extends SQLDialect {
     `);
 
     // 3. Indices
-    const indices = await this.executeSQL<{ name: string, is_unique: boolean, columns: string[] }>(`
+    const indices = await this.executeSQL<{ name: string; is_unique: boolean; columns: string[] }>(`
       SELECT
         i.relname AS name,
         ix.indisunique AS is_unique,
@@ -109,20 +107,15 @@ export class PostgreSQLDialect extends SQLDialect {
     return {
       columns: columns.records.map(col => ({
         ...col,
-        type: col.type.toUpperCase()
-          .replace('CHARACTER VARYING', 'VARCHAR')
-          .replace('INTEGER', 'INT'),
+        type: col.type.toUpperCase().replace('CHARACTER VARYING', 'VARCHAR').replace('INTEGER', 'INT'),
         is_not_null: !!col.is_not_null
       })),
       foreignKeys: foreignKeys.records,
-      indices: indices.records
-        .map(idx => ({
-          name: idx.name,
-          is_unique: idx.is_unique,
-          columns: idx.columns
-            .map(column => column.split(' '))
-            .map(([name, desc]) => ({ name, desc: desc === '1' }))
-        }))
+      indices: indices.records.map(idx => ({
+        name: idx.name,
+        is_unique: idx.is_unique,
+        columns: idx.columns.map(column => column.split(' ')).map(([name, desc]) => ({ name, desc: desc === '1' }))
+      }))
     };
   }
 

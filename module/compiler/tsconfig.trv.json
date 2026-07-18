@@ -2,12 +2,8 @@
   "compilerOptions": {
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "lib": [
-      "ESNext",
-    ],
-    "types": [
-      "node"
-    ],
+    "lib": ["ESNext"],
+    "types": ["node"],
     "jsx": "react-jsx",
     "declaration": true,
     "declarationMap": true,
@@ -28,10 +24,6 @@
     "noEmit": true
   },
   "watchOptions": {
-    "excludeDirectories": [
-      "**/node_modules",
-      "**/.trv",
-      "**/.git",
-    ]
+    "excludeDirectories": ["**/node_modules", "**/.trv", "**/.git"]
   }
 }

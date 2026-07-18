@@ -6,6 +6,6 @@ interface TreeNode<T> {
 
 export class Service {
   getTree(): TreeNode<number> | undefined {
-    return { ['value']: 5 };
+    return { value: 5 };
   }
 }

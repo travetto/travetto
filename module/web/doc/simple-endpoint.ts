@@ -1,10 +1,9 @@
-import { Get, Controller } from '@travetto/web';
+import { Controller, Get } from '@travetto/web';
 
-class Data { }
+class Data {}
 
 @Controller('/simple')
 class SimpleController {
-
   /**
    * Gets the most basic of data
    */

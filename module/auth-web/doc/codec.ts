@@ -2,7 +2,7 @@ import type { Principal } from '@travetto/auth';
 import type { PrincipalCodec } from '@travetto/auth-web';
 import { Injectable } from '@travetto/di';
 import { BinaryMetadataUtil } from '@travetto/runtime';
-import type { WebResponse, WebRequest } from '@travetto/web';
+import type { WebRequest, WebResponse } from '@travetto/web';
 
 @Injectable()
 export class CustomCodec implements PrincipalCodec {

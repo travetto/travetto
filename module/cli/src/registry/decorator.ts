@@ -1,14 +1,14 @@
-import { type Class, type ClassInstance, Env, Runtime, RuntimeIndex, castTo, describeFunction, getClass } from '@travetto/runtime';
+import { type Class, type ClassInstance, castTo, describeFunction, Env, getClass, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { SchemaRegistryIndex, type ValidationError } from '@travetto/schema';
 
-import type { CliCommandShape } from '../types.ts';
-import { CliCommandRegistryIndex } from './registry-index.ts';
 import { CliModuleUtil } from '../module.ts';
 import { CliParseUtil } from '../parse.ts';
+import type { CliCommandShape } from '../types.ts';
 import { CliUtil } from '../util.ts';
+import { CliCommandRegistryIndex } from './registry-index.ts';
 
 type CliCommandConfigOptions = { runTarget?: boolean };
-type CliFlagOptions = { full?: string, short?: string, envVars?: string[] };
+type CliFlagOptions = { full?: string; short?: string; envVars?: string[] };
 
 /**
  * Decorator to register a CLI command
@@ -32,8 +32,7 @@ export function CliCommand(config: CliCommandConfigOptions = {}) {
  */
 export function CliFlag(config: CliFlagOptions) {
   return function (instance: ClassInstance, property: string): void {
-    SchemaRegistryIndex.getForRegister(getClass(instance))
-      .registerField(property, CliParseUtil.buildAliases(config));
+    SchemaRegistryIndex.getForRegister(getClass(instance)).registerField(property, CliParseUtil.buildAliases(config));
   };
 }
 
@@ -65,9 +64,9 @@ export function CliProfilesFlag(config: CliFlagOptions = {}) {
       description: 'Application profiles'
     });
 
-    CliCommandRegistryIndex.registerPreMain<typeof instance>(cls, 1, cmd => Env.TRV_PROFILES.add(...cmd[property] ?? []));
+    CliCommandRegistryIndex.registerPreMain<typeof instance>(cls, 1, cmd => Env.TRV_PROFILES.add(...(cmd[property] ?? [])));
   };
-};
+}
 
 /**
  * Registers a flag to support targeting a specific module
@@ -84,28 +83,35 @@ export function CliModuleFlag(config: CliFlagOptions & { scope?: 'current' | 'co
       ...CliParseUtil.buildAliases(config, Env.TRV_MODULE.key),
       description: 'Module to run for',
       specifiers: ['module'],
-      required: { active: Runtime.monoRoot && config.scope !== 'command' },
+      required: { active: Runtime.monoRoot && config.scope !== 'command' }
     });
 
     SchemaRegistryIndex.getForRegister(cls).register({
-      validators: [async (cmd: CliCommandShape): Promise<ValidationError | undefined> => {
-        const typed: (typeof cmd) & { [property]?: string } = castTo(cmd);
-        const providedModule = typed[property];
-        const runModule = (config.scope === 'command' ? commandModule : providedModule) || Runtime.main.name;
+      validators: [
+        async (cmd: CliCommandShape): Promise<ValidationError | undefined> => {
+          const typed: typeof cmd & { [property]?: string } = castTo(cmd);
+          const providedModule = typed[property];
+          const runModule = (config.scope === 'command' ? commandModule : providedModule) || Runtime.main.name;
 
-        // If we need to run as a specific module
-        if (runModule !== Runtime.main.name && RuntimeIndex.getModule(runModule) === undefined) {
-          return { source: 'flag', message: `${runModule} is an unknown module`, kind: 'custom', path: property };
-        }
+          // If we need to run as a specific module
+          if (runModule !== Runtime.main.name && RuntimeIndex.getModule(runModule) === undefined) {
+            return { source: 'flag', message: `${runModule} is an unknown module`, kind: 'custom', path: property };
+          }
 
-        if (!(await CliModuleUtil.moduleHasDependency(runModule, commandModule))) {
-          return { source: 'flag', message: `${runModule} does not have ${commandModule} as a dependency`, kind: 'custom', path: property };
+          if (!(await CliModuleUtil.moduleHasDependency(runModule, commandModule))) {
+            return {
+              source: 'flag',
+              message: `${runModule} does not have ${commandModule} as a dependency`,
+              kind: 'custom',
+              path: property
+            };
+          }
         }
-      }],
+      ]
     });
 
     CliCommandRegistryIndex.registerPreMain<typeof instance>(cls, 5, cmd => {
-      const typed: (typeof cmd) & { [property]?: string } = castTo(cmd);
+      const typed: typeof cmd & { [property]?: string } = castTo(cmd);
       const providedModule = typed[property];
       const runModule = (config.scope === 'command' ? commandModule : providedModule) || Runtime.main.name;
       if (runModule !== Runtime.main.name) {
@@ -123,7 +129,9 @@ export function CliModuleFlag(config: CliFlagOptions & { scope?: 'current' | 'co
 export function CliRestartOnChangeFlag(config: CliFlagOptions = {}) {
   return function <K extends string, T extends Partial<Record<K, boolean>>>(instance: T, property: K): void {
     const cls = getClass(instance);
-    if (Runtime.production) { return; }
+    if (Runtime.production) {
+      return;
+    }
 
     SchemaRegistryIndex.getForRegister(cls).registerField(property, {
       ...CliParseUtil.buildAliases(config),
@@ -142,7 +150,9 @@ export function CliRestartOnChangeFlag(config: CliFlagOptions = {}) {
  */
 export function CliDebugIpcFlag(config: CliFlagOptions = {}) {
   return function <K extends string, T extends Partial<Record<K, boolean>>>(instance: T, property: K): void {
-    if (Runtime.production) { return; }
+    if (Runtime.production) {
+      return;
+    }
 
     const cls = getClass(instance);
     SchemaRegistryIndex.getForRegister(cls).registerField(property, {

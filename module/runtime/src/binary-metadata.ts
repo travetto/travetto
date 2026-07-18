@@ -1,16 +1,16 @@
 import crypto from 'node:crypto';
+import { createReadStream, ReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { createReadStream, ReadStream } from 'node:fs';
 
-import { BinaryUtil, type BinaryArray, type BinaryContainer, type BinaryStream, type BinaryType } from './binary.ts';
-import { RuntimeError } from './error.ts';
+import { type BinaryArray, type BinaryContainer, type BinaryStream, type BinaryType, BinaryUtil } from './binary.ts';
 import { CodecUtil } from './codec.ts';
+import { RuntimeError } from './error.ts';
 
-type BlobInput = BinaryType | (() => (BinaryType | Promise<BinaryType>));
+type BlobInput = BinaryType | (() => BinaryType | Promise<BinaryType>);
 
 /** Range of bytes, inclusive */
-export type ByteRange = { start: number, end?: number };
+export type ByteRange = { start: number; end?: number };
 
 export interface BinaryMetadata {
   /** Size of binary data */
@@ -45,7 +45,7 @@ export class BinaryMetadataUtil {
   /** Set metadata for a binary type  */
   static write(input: BinaryType, metadata: BinaryMetadata): BinaryMetadata {
     const withMeta: BinaryType & { [BinaryMetaSymbol]?: BinaryMetadata } = input;
-    return withMeta[BinaryMetaSymbol] = metadata;
+    return (withMeta[BinaryMetaSymbol] = metadata);
   }
 
   /** Read metadata for a binary type, if available  */
@@ -75,15 +75,13 @@ export class BinaryMetadataUtil {
       hash.update(BinaryUtil.binaryArrayToUint8Array(input));
       return hash.digest(outputEncoding).substring(0, length);
     } else {
-      return BinaryUtil.pipeline(input, hash).then(() =>
-        hash.digest(outputEncoding).substring(0, length)
-      );
+      return BinaryUtil.pipeline(input, hash).then(() => hash.digest(outputEncoding).substring(0, length));
     }
   }
 
   /** Compute the length of the binary data to be returned */
   static readLength(metadata: BinaryMetadata): number | undefined {
-    return metadata.range ? (metadata.range.end - metadata.range.start + 1) : metadata.size;
+    return metadata.range ? metadata.range.end - metadata.range.start + 1 : metadata.size;
   }
 
   /** Compute metadata for a given binary input */
@@ -119,13 +117,25 @@ export class BinaryMetadataUtil {
    * Rewrite a blob to support metadata, and provide a dynamic input source
    */
   static defineBlob<T extends Blob>(target: T, input: BlobInput, metadata: BinaryMetadata = {}): typeof target {
-    const inputFn = async (): Promise<BinaryType> => typeof input === 'function' ? await input() : input;
+    const inputFn = async (): Promise<BinaryType> => (typeof input === 'function' ? await input() : input);
     this.write(target, metadata);
 
     Object.defineProperties(target, {
-      size: { get() { return BinaryMetadataUtil.readLength(metadata); } },
-      type: { get() { return metadata.contentType; } },
-      name: { get() { return metadata.filename; } },
+      size: {
+        get() {
+          return BinaryMetadataUtil.readLength(metadata);
+        }
+      },
+      type: {
+        get() {
+          return metadata.contentType;
+        }
+      },
+      name: {
+        get() {
+          return metadata.filename;
+        }
+      },
       arrayBuffer: { value: () => inputFn().then(BinaryUtil.toArrayBuffer) },
       stream: { value: () => BinaryUtil.toReadableStream(BinaryUtil.toSynchronous(input)) },
       bytes: { value: () => inputFn().then(BinaryUtil.toBuffer) },
@@ -133,11 +143,15 @@ export class BinaryMetadataUtil {
       slice: {
         value: (start?: number, end?: number, _contentType?: string) => {
           const result = target instanceof File ? new File([], '') : new Blob([]);
-          return BinaryMetadataUtil.defineBlob(result,
-            () => inputFn().then(BinaryUtil.toBinaryArray).then(data => BinaryUtil.sliceByteArray(data, start, end)),
+          return BinaryMetadataUtil.defineBlob(
+            result,
+            () =>
+              inputFn()
+                .then(BinaryUtil.toBinaryArray)
+                .then(data => BinaryUtil.sliceByteArray(data, start, end)),
             {
               ...metadata,
-              range: { start: start ?? 0, end: end ?? metadata.size! - 1 },
+              range: { start: start ?? 0, end: end ?? metadata.size! - 1 }
             }
           );
         }
@@ -163,7 +177,7 @@ export class BinaryMetadataUtil {
     const size = metadata.size;
 
     // End is inclusive
-    const [start, end] = [range.start, Math.min(range.end ?? (size - 1), size - 1)];
+    const [start, end] = [range.start, Math.min(range.end ?? size - 1, size - 1)];
 
     if (Number.isNaN(start) || Number.isNaN(end) || !Number.isFinite(start) || start >= size || start < 0 || start > end) {
       throw new RuntimeError('Invalid position, out of range', { category: 'data', details: { start, end, size } });

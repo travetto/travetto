@@ -1,13 +1,13 @@
-import { toConcrete } from '@travetto/runtime';
-import type { WebInterceptor, WebAsyncContext, WebInterceptorCategory, WebChainedContext, WebResponse } from '@travetto/web';
-import { Injectable, Inject, DependencyRegistryIndex, PostConstruct } from '@travetto/di';
 import type { AuthContext, AuthService, AuthToken, Principal } from '@travetto/auth';
+import { DependencyRegistryIndex, Inject, Injectable, PostConstruct } from '@travetto/di';
+import { toConcrete } from '@travetto/runtime';
 import { Required } from '@travetto/schema';
+import type { WebAsyncContext, WebChainedContext, WebInterceptor, WebInterceptorCategory, WebResponse } from '@travetto/web';
 
-import { CommonPrincipalCodecSymbol, type PrincipalCodec } from '../types.ts';
 import type { WebAuthConfig } from '../config.ts';
+import { CommonPrincipalCodecSymbol, type PrincipalCodec } from '../types.ts';
 
-const toDate = (value: string | Date | undefined): Date | undefined => (typeof value === 'string') ? new Date(value) : value;
+const toDate = (value: string | Date | undefined): Date | undefined => (typeof value === 'string' ? new Date(value) : value);
 
 /**
  * Auth Context interceptor
@@ -18,7 +18,6 @@ const toDate = (value: string | Date | undefined): Date | undefined => (typeof v
  */
 @Injectable()
 export class AuthContextInterceptor implements WebInterceptor {
-
   category: WebInterceptorCategory = 'application';
 
   @Inject()
@@ -68,7 +67,8 @@ export class AuthContextInterceptor implements WebInterceptor {
       const result = this.authContext.principal;
       this.authService.manageExpiry(result);
 
-      if ((!!decoded !== !!checked) || result !== checked || lastExpiresAt !== result?.expiresAt) { // If it changed
+      if (!!decoded !== !!checked || result !== checked || lastExpiresAt !== result?.expiresAt) {
+        // If it changed
         value = await this.codec.encode(value, result);
       }
 
@@ -77,5 +77,4 @@ export class AuthContextInterceptor implements WebInterceptor {
       this.authContext.clear();
     }
   }
-
 }

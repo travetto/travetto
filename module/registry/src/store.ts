@@ -1,4 +1,4 @@
-import { RuntimeError, castTo, type Class, getParentClass } from '@travetto/runtime';
+import { type Class, castTo, getParentClass, RuntimeError } from '@travetto/runtime';
 
 import type { RegistrationMethods, RegistryAdapter, RegistrySimpleStore } from './types.ts';
 
@@ -6,11 +6,12 @@ import type { RegistrationMethods, RegistryAdapter, RegistrySimpleStore } from '
  * Base registry index implementation
  */
 export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<{}>> implements RegistrySimpleStore {
-
   // Core data
   #adapters = new Map<Class, A>();
   #idToCls = new Map<string, Class>();
-  #adapterCls: new (cls: Class) => A;
+  #adapterCls: new (
+    cls: Class
+  ) => A;
   #finalized = new Map<Class, boolean>();
 
   constructor(adapterCls: new (cls: Class) => A) {

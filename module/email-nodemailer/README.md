@@ -57,7 +57,7 @@ class Config {
       SES: {
         sesClient: new SESv2Client(),
         SendEmailCommand
-      },
+      }
     });
   }
 }

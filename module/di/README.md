@@ -13,10 +13,10 @@ npm install @travetto/di
 yarn add @travetto/di
 ```
 
-[Dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) is a framework primitive.  When used in conjunction with automatic file scanning, it provides for handling of application dependency wiring. Due to the nature of [Typescript](https://typescriptlang.org) and type erasure of interfaces, dependency injection only supports `class`es as a type signifier. The primary goal of dependency injection is to allow for separation of concerns of object creation and it's usage.
+[Dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) is a framework primitive. When used in conjunction with automatic file scanning, it provides for handling of application dependency wiring. Due to the nature of [Typescript](https://typescriptlang.org) and type erasure of interfaces, dependency injection only supports `class`es as a type signifier. The primary goal of dependency injection is to allow for separation of concerns of object creation and it's usage.
 
 ## Declaration
-The [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16) and [@InjectableFactory](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L48) decorators provide the registration of dependencies.   Dependency declaration revolves around exposing `class`es and subtypes thereof to provide necessary functionality.  Additionally, the framework will utilize dependencies to satisfy contracts with various implementation.
+The [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16) and [@InjectableFactory](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L48) decorators provide the registration of dependencies. Dependency declaration revolves around exposing `class`es and subtypes thereof to provide necessary functionality. Additionally, the framework will utilize dependencies to satisfy contracts with various implementation.
 
 **Code: Example Injectable**
 ```typescript
@@ -30,11 +30,11 @@ class CustomService {
 }
 ```
 
-When declaring a dependency, you can also provide a token to allow for multiple instances of the dependency to be defined.  This can be used in many situations:
+When declaring a dependency, you can also provide a token to allow for multiple instances of the dependency to be defined. This can be used in many situations:
 
 **Code: Example Injectable with multiple targets**
 ```typescript
-import { Injectable, Inject } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
 
 @Injectable()
 class CustomService {
@@ -59,7 +59,7 @@ class Consumer {
 }
 ```
 
-As you can see, the `target` field is also set, which indicates to the dependency registration process what `class` the injectable is compatible with.  Additionally, when using `abstract` classes, the parent `class` is always considered as a valid candidate type.
+As you can see, the `target` field is also set, which indicates to the dependency registration process what `class` the injectable is compatible with. Additionally, when using `abstract` classes, the parent `class` is always considered as a valid candidate type.
 
 **Code: Example Injectable with target via abstract class**
 ```typescript
@@ -77,16 +77,14 @@ class SpecificService extends BaseService {
 }
 ```
 
-In this scenario, `SpecificService` is a valid candidate for `BaseService` due to the abstract inheritance. Sometimes, you may want to provide a slight variation to  a dependency without extending a class.  To this end, the [@InjectableFactory](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L48) decorator denotes a `static` class method that produces an [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16).
+In this scenario, `SpecificService` is a valid candidate for `BaseService` due to the abstract inheritance. Sometimes, you may want to provide a slight variation to a dependency without extending a class. To this end, the [@InjectableFactory](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L48) decorator denotes a `static` class method that produces an [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16).
 
 **Code: Example InjectableFactory**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
 
 // Not injectable by default
-class CoolService {
-
-}
+class CoolService {}
 
 class Config {
   @InjectableFactory()
@@ -96,12 +94,12 @@ class Config {
 }
 ```
 
-Given the `static` method `initService`, the function will be provided as a valid candidate for `CoolService`.  Instead of calling the constructor of the type directly, this function will work as a factory for producing the injectable.
+Given the `static` method `initService`, the function will be provided as a valid candidate for `CoolService`. Instead of calling the constructor of the type directly, this function will work as a factory for producing the injectable.
 
 **Code: Example Conditional Dependency**
 ```typescript
-import { Runtime } from '@travetto/runtime';
 import { Inject, Injectable } from '@travetto/di';
+import { Runtime } from '@travetto/runtime';
 
 @Injectable({ enabled: Runtime.production })
 class ProductionLogger {
@@ -123,18 +121,19 @@ class RuntimeService {
 }
 ```
 
-In this example, the enabled flag is specified in relationship to the deployment environment.  When coupled with optional properties, and optional chaining, allows for seamless inclusion of optional dependencies at runtime.
+In this example, the enabled flag is specified in relationship to the deployment environment. When coupled with optional properties, and optional chaining, allows for seamless inclusion of optional dependencies at runtime.
 
-**Note**: Other modules are able to provide aliases to [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16) that also provide additional functionality.  For example, the [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support") module @Config or the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") module @Controller decorator registers the associated class as an injectable element.
+**Note**: Other modules are able to provide aliases to [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16) that also provide additional functionality. For example, the [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support") module @Config or the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") module @Controller decorator registers the associated class as an injectable element.
 
 ## Injection
-Once all of your necessary dependencies are defined, now is the time to provide those [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16) instances to your code.  There are three primary methods for injection: 
+Once all of your necessary dependencies are defined, now is the time to provide those [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16) instances to your code. There are three primary methods for injection: 
 
-The [@Inject](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16) decorator, which denotes a desire to inject a value directly.  These will be set post construction. 
+The [@Inject](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16) decorator, which denotes a desire to inject a value directly. These will be set post construction. 
 
 **Code: Example Injectable with dependencies as Inject fields**
 ```typescript
-import { Injectable, Inject } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
+
 import type { DependentService } from './dependency.ts';
 
 @Injectable()
@@ -153,11 +152,11 @@ The [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/d
 **Code: Example Injectable with dependencies in constructor**
 ```typescript
 import { Injectable } from '@travetto/di';
+
 import type { DependentService } from './dependency.ts';
 
 @Injectable()
 class CustomService {
-
   dependentService: DependentService;
 
   constructor(service: DependentService) {
@@ -176,7 +175,7 @@ Via [@InjectableFactory](https://github.com/travetto/travetto/tree/main/module/d
 ```typescript
 import { InjectableFactory } from '@travetto/di';
 
-import { type DependentService, CustomService } from './dependency.ts';
+import { CustomService, type DependentService } from './dependency.ts';
 
 class Config {
   @InjectableFactory()
@@ -191,17 +190,15 @@ If you are building modules for others to consume, often times it is possible to
 
 **Code: Example Multiple Candidate Types**
 ```typescript
-import { Injectable, Inject } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
 
-export abstract class Contract {
-
-}
+export abstract class Contract {}
 
 @Injectable()
-class SimpleContract extends Contract { }
+class SimpleContract extends Contract {}
 
 @Injectable()
-export class ComplexContract extends Contract { }
+export class ComplexContract extends Contract {}
 
 @Injectable()
 class ContractConsumer {
@@ -211,12 +208,13 @@ class ContractConsumer {
 }
 ```
 
-By default, if there is only one candidate without qualification, then that candidate will be used.  If multiple candidates are found, then the injection system will bail.  To overcome this the end user will need to specify which candidate type should be considered `primary`:
+By default, if there is only one candidate without qualification, then that candidate will be used. If multiple candidates are found, then the injection system will bail. To overcome this the end user will need to specify which candidate type should be considered `primary`:
 
 **Code: Example Multiple Candidate Types**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
-import type { Contract, ComplexContract } from './injectable-multiple-default.ts';
+
+import type { ComplexContract, Contract } from './injectable-multiple-default.ts';
 
 class Config {
   // Complex will be marked as the available Contract
@@ -228,9 +226,9 @@ class Config {
 ```
 
 ## Non-Framework Dependencies
-The module is built around the framework's management of class registration, and being able to decorate the code with [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16) decorators. There may also be a desire to leverage external code and pull it into the dependency injection framework.  This could easily be achieved using a wrapper class that is owned by the framework. 
+The module is built around the framework's management of class registration, and being able to decorate the code with [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16) decorators. There may also be a desire to leverage external code and pull it into the dependency injection framework. This could easily be achieved using a wrapper class that is owned by the framework. 
 
-It is also possible to directly reference external types, and they will be converted into unique symbols.  These symbols cannot be used manually, but can be leveraged using [@Inject](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16) decorators.
+It is also possible to directly reference external types, and they will be converted into unique symbols. These symbols cannot be used manually, but can be leveraged using [@Inject](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16) decorators.
 
 **Code: Example External Dependencies**
 ```typescript
@@ -272,10 +270,10 @@ Some times you will need to lookup a dependency dynamically, or you want to cont
 
 **Code: Example of Manual Lookup**
 ```typescript
-import { Injectable, DependencyRegistryIndex } from '@travetto/di';
+import { DependencyRegistryIndex, Injectable } from '@travetto/di';
 
 @Injectable()
-class Complex { }
+class Complex {}
 
 class ManualLookup {
   async invoke() {
@@ -307,7 +305,6 @@ class MyCustomService implements ServiceContract {
 
 @Injectable()
 class SpecificService {
-
   @Inject()
   service: ServiceContract;
 }

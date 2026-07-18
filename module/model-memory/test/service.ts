@@ -1,14 +1,14 @@
 import assert from 'node:assert';
 
+import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 import { TimeUtil } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
-import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 
+import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
+import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 import { ExpiryUser, ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
-import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
-import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
 
 const KB = 2 ** 20;
 
@@ -39,7 +39,7 @@ class MemoryExpirySuite extends ModelExpirySuite {
   async ensureCulled() {
     const service = await this.service;
 
-    let total;
+    let total: number;
 
     total = await this.getSize(ExpiryUser);
     assert(total === 0);
@@ -48,10 +48,13 @@ class MemoryExpirySuite extends ModelExpirySuite {
     console.log('Start memory', startMemory / KB);
 
     // Create
-    await service.upsert(ExpiryUser, ExpiryUser.from({
-      expiresAt: TimeUtil.fromNow('500ms'),
-      payload: 'abcdefghij'.repeat(5 * KB) // 50mb
-    }));
+    await service.upsert(
+      ExpiryUser,
+      ExpiryUser.from({
+        expiresAt: TimeUtil.fromNow('500ms'),
+        payload: 'abcdefghij'.repeat(5 * KB) // 50mb
+      })
+    );
 
     const sizedMemory = process.memoryUsage().arrayBuffers;
     console.log('Sized memory', sizedMemory / KB);

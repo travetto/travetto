@@ -1,15 +1,15 @@
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
 import { Model } from '@travetto/model';
-import { LongText } from '@travetto/schema';
-import { castTo } from '@travetto/runtime';
 import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
+import { castTo } from '@travetto/runtime';
+import { LongText } from '@travetto/schema';
+import { Suite, Test } from '@travetto/test';
 
-import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
 import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
 import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.ts';
 import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism.ts';
+import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
 import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest.ts';
 
 @Model()
@@ -58,7 +58,7 @@ class MongoQuerySuite extends ModelQuerySuite {
     await this.saveAll(TextModel, [
       TextModel.from({ document: 'I was running from bear that was running as well' }),
       TextModel.from({ document: 'I ran at a bear, ferociously' }),
-      TextModel.from({ document: 'We run from Bears fans on the weekend' }),
+      TextModel.from({ document: 'We run from Bears fans on the weekend' })
     ]);
     const svc: MongoModelService = castTo(await this.service);
 
@@ -77,7 +77,6 @@ class MongoQuerySuite extends ModelQuerySuite {
 
     const all8 = await svc.queryText(TextModel, 'run from bear -ferocious');
     assert(all8.length === 2);
-
   }
 }
 

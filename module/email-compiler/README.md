@@ -13,14 +13,14 @@ npm install @travetto/email-compiler
 yarn add @travetto/email-compiler
 ```
 
-This is primarily a set of command line tools for compiling and developing templates.  The inputs are compiled files, generally under the `support/` folder, that represents the necessary input for the email compilation.  [Email Inky Templates](https://github.com/travetto/travetto/tree/main/module/email-inky#readme "Email Inky templating module") shows this pattern by leveraging [JSX](https://en.wikipedia.org/wiki/JSX_(JavaScript)) bindings for the [inky](https://github.com/zurb/inky) framework, allowing for compile-time checked templates.
+This is primarily a set of command line tools for compiling and developing templates. The inputs are compiled files, generally under the `support/` folder, that represents the necessary input for the email compilation. [Email Inky Templates](https://github.com/travetto/travetto/tree/main/module/email-inky#readme "Email Inky templating module") shows this pattern by leveraging [JSX](https://en.wikipedia.org/wiki/JSX_(JavaScript)) bindings for the [inky](https://github.com/zurb/inky) framework, allowing for compile-time checked templates.
 
 ## Asset Management
-The templating process involves loading various assets (html, css, images), and so there is provision for asset management and loading.  The templating config allows for specifying asset paths, with the following paths (in order of precedence):
+The templating process involves loading various assets (html, css, images), and so there is provision for asset management and loading. The templating config allows for specifying asset paths, with the following paths (in order of precedence):
    1. `%ROOT%/resources/email`
    1. `@travetto/email-{engine}/resources/email`
 
-When looking up a resources, every asset folder is consulted, in order, and the first to resolve an asset wins.  This allows for overriding of default templating resources, as needed.  The compilation process will convert `.email.html` files into `.compiled.html`, `.compiled.text` and `.compiled.subject` suffixes to generate the outputs respectively.
+When looking up a resources, every asset folder is consulted, in order, and the first to resolve an asset wins. This allows for overriding of default templating resources, as needed. The compilation process will convert `.email.html` files into `.compiled.html`, `.compiled.text` and `.compiled.subject` suffixes to generate the outputs respectively.
 
 ## Template Extension
 The template extension points are defined at:
@@ -40,10 +40,10 @@ When referencing an image from the `resources` folder in a template, e.g.
 
 **Code: Sample Image Reference**
 ```html
-<img src="/email/logo.png">
+<img src="/email/logo.png" alt="logo">
 ```
 
-The image will be extracted out and embedded in the email as a multi part message.  This allows for compression and optimization of images as well as externalizing resources that may not be immediately public.  The currently supported set of image types are:
+The image will be extracted out and embedded in the email as a multi part message. This allows for compression and optimization of images as well as externalizing resources that may not be immediately public. The currently supported set of image types are:
    *  jpeg
    *  png
 
@@ -73,7 +73,7 @@ Options:
   --help       display help for command
 ```
 
-Will convert all `.email.html` files into the appropriate `.compiled.html`, `.compiled.text` and `.compiled.subject` files.  These will be used during the running of the application.  By default these files are added to the `.gitignore` as they are generally not intended to be saved but to be generated during the build process.
+Will convert all `.email.html` files into the appropriate `.compiled.html`, `.compiled.text` and `.compiled.subject` files. These will be used during the running of the application. By default these files are added to the `.gitignore` as they are generally not intended to be saved but to be generated during the build process.
 
 ## VSCode Plugin
 In addition to command line tools, the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) also supports:

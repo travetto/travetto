@@ -2,12 +2,12 @@ import ts from 'typescript';
 
 import { ManifestModuleUtil, PackageUtil, path } from '@travetto/manifest';
 
-import type { AnyType, TransformResolver, ManagedType, MappedType } from './resolver/types.ts';
-import { ImportUtil } from './util/import.ts';
-import { CoreUtil } from './util/core.ts';
+import type { AnyType, ManagedType, MappedType, TransformResolver } from './resolver/types.ts';
 import type { Import } from './types/shared.ts';
-import { LiteralUtil } from './util/literal.ts';
+import { CoreUtil } from './util/core.ts';
 import { DeclarationUtil } from './util/declaration.ts';
+import { ImportUtil } from './util/import.ts';
+import { LiteralUtil } from './util/literal.ts';
 
 const D_OR_D_TS_EXT_REGEX = /[.]d([.]ts)?$/;
 
@@ -15,7 +15,6 @@ const D_OR_D_TS_EXT_REGEX = /[.]d([.]ts)?$/;
  * Manages imports within a ts.SourceFile
  */
 export class ImportManager {
-
   #newImports = new Map<string, Import>();
   #imports: Map<string, Import>;
   #idx: Record<string, number> = {};
@@ -51,19 +50,13 @@ export class ImportManager {
         const type = this.#resolver.getType(element.name);
         const objFlags = DeclarationUtil.getObjectFlags(type);
         const typeFlags = type.getFlags();
-        // eslint-disable-next-line no-bitwise
         if (!(objFlags & (ts.SymbolFlags.Type | ts.SymbolFlags.Interface)) || !(typeFlags & ts.TypeFlags.Any)) {
           newBindings.push(element);
         }
       }
     }
     if (newBindings.length !== bindings.elements.length) {
-      return this.factory.updateImportClause(
-        clause,
-        clause.isTypeOnly,
-        clause.name,
-        this.factory.createNamedImports(newBindings)
-      );
+      return this.factory.updateImportClause(clause, clause.isTypeOnly, clause.name, this.factory.createNamedImports(newBindings));
     } else {
       return clause;
     }
@@ -82,9 +75,7 @@ export class ImportManager {
       }
     }
 
-    return fileOrImport ?
-      (fileOrImport.startsWith('.') || this.#resolver.isKnownFile(fileOrImport)) :
-      false;
+    return fileOrImport ? fileOrImport.startsWith('.') || this.#resolver.isKnownFile(fileOrImport) : false;
   }
 
   /**
@@ -96,10 +87,8 @@ export class ImportManager {
 
       const type = ManifestModuleUtil.getFileType(specText);
       if (type === 'js' || type === 'ts') {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         return LiteralUtil.fromLiteral(this.factory, ManifestModuleUtil.withOutputExtension(specText)) as unknown as T;
       } else {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         return LiteralUtil.fromLiteral(this.factory, `${specText}${ManifestModuleUtil.OUTPUT_EXT}`) as unknown as T;
       }
     }
@@ -115,7 +104,7 @@ export class ImportManager {
         return this.factory.createIdentifier(name);
       } else {
         const key = path.basename(file, path.extname(file)).replace(/\W+/g, '_');
-        const suffix = this.#idx[key] = (this.#idx[key] ?? -1) + 1;
+        const suffix = (this.#idx[key] = (this.#idx[key] ?? -1) + 1);
         return this.factory.createIdentifier(`Δ${key}${suffix ? suffix : ''}`);
       }
     });
@@ -140,7 +129,8 @@ export class ImportManager {
       const identifier = this.getIdentifier(file, name);
       const uniqueName = identifier.text;
 
-      if (this.#imports.has(uniqueName)) { // Already imported, be cool
+      if (this.#imports.has(uniqueName)) {
+        // Already imported, be cool
         return this.#imports.get(uniqueName)!;
       }
 
@@ -161,10 +151,16 @@ export class ImportManager {
       }
       switch (type.key) {
         case 'managed':
-        case 'literal': this.importFromResolved(...type.typeArguments || []); break;
+        case 'literal':
+          this.importFromResolved(...(type.typeArguments || []));
+          break;
         case 'composition':
-        case 'tuple': this.importFromResolved(...type.subTypes || []); break;
-        case 'shape': this.importFromResolved(...Object.values(type.fieldTypes)); break;
+        case 'tuple':
+          this.importFromResolved(...(type.subTypes || []));
+          break;
+        case 'shape':
+          this.importFromResolved(...Object.values(type.fieldTypes));
+          break;
       }
     }
   }
@@ -191,7 +187,8 @@ export class ImportManager {
         ...importStmts,
         ...file.statements.filter((node: ts.Statement & { remove?: boolean }) => !node.remove) // Exclude culled imports
       ]);
-    } catch (error) { // Missing import
+    } catch (error) {
+      // Missing import
       if (!(error instanceof Error)) {
         throw error;
       }
@@ -207,24 +204,28 @@ export class ImportManager {
     for (const statement of source.statements) {
       if (ts.isExportDeclaration(statement)) {
         if (!statement.isTypeOnly) {
-          toAdd.push(this.factory.updateExportDeclaration(
-            statement,
-            statement.modifiers,
-            statement.isTypeOnly,
-            statement.exportClause,
-            this.normalizeModuleSpecifier(statement.moduleSpecifier),
-            statement.attributes
-          ));
+          toAdd.push(
+            this.factory.updateExportDeclaration(
+              statement,
+              statement.modifiers,
+              statement.isTypeOnly,
+              statement.exportClause,
+              this.normalizeModuleSpecifier(statement.moduleSpecifier),
+              statement.attributes
+            )
+          );
         }
       } else if (ts.isImportDeclaration(statement)) {
         if (statement.importClause?.phaseModifier !== ts.SyntaxKind.TypeKeyword) {
-          toAdd.push(this.factory.updateImportDeclaration(
-            statement,
-            statement.modifiers,
-            this.#rewriteImportClause(statement.moduleSpecifier, statement.importClause)!,
-            this.normalizeModuleSpecifier(statement.moduleSpecifier)!,
-            statement.attributes
-          ));
+          toAdd.push(
+            this.factory.updateImportDeclaration(
+              statement,
+              statement.modifiers,
+              this.#rewriteImportClause(statement.moduleSpecifier, statement.importClause)!,
+              this.normalizeModuleSpecifier(statement.moduleSpecifier)!,
+              statement.attributes
+            )
+          );
         }
       } else {
         toAdd.push(statement);

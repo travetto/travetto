@@ -1,4 +1,4 @@
-import { Schema, Match } from '@travetto/schema';
+import { Match, Schema } from '@travetto/schema';
 
 /**
  * User instance for framework

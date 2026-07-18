@@ -1,17 +1,16 @@
 import ts from 'typescript';
 
-import { path, type ManifestIndex } from '@travetto/manifest';
+import { type ManifestIndex, path } from '@travetto/manifest';
 
-import type { ManagedType, AnyType, ForeignType, MappedType } from './resolver/types.ts';
-import { type State, type DecoratorMeta, type Transformer, ModuleNameSymbol } from './types/visitor.ts';
-import { SimpleResolver } from './resolver/service.ts';
 import { ImportManager } from './importer.ts';
+import { SimpleResolver } from './resolver/service.ts';
+import type { AnyType, ForeignType, ManagedType, MappedType } from './resolver/types.ts';
 import type { Import } from './types/shared.ts';
-
-import { DocUtil } from './util/doc.ts';
-import { DecoratorUtil } from './util/decorator.ts';
-import { DeclarationUtil } from './util/declaration.ts';
+import { type DecoratorMeta, ModuleNameSymbol, type State, type Transformer } from './types/visitor.ts';
 import { CoreUtil } from './util/core.ts';
+import { DeclarationUtil } from './util/declaration.ts';
+import { DecoratorUtil } from './util/decorator.ts';
+import { DocUtil } from './util/doc.ts';
 import { LiteralUtil } from './util/literal.ts';
 import { SystemUtil } from './util/system.ts';
 
@@ -105,9 +104,12 @@ export class TransformerState implements State {
   typeToIdentifier(node: ts.Type | AnyType): ts.Identifier | ts.PropertyAccessExpression | undefined {
     const type = 'flags' in node ? this.resolveType(node) : node;
     switch (type.key) {
-      case 'literal': return this.factory.createIdentifier(type.ctor!.name);
-      case 'managed': return this.getOrImport(type);
-      case 'shape': return;
+      case 'literal':
+        return this.factory.createIdentifier(type.ctor!.name);
+      case 'managed':
+        return this.getOrImport(type);
+      case 'shape':
+        return;
     }
   }
 
@@ -173,9 +175,7 @@ export class TransformerState implements State {
     const targets = DocUtil.readAugments(type);
     const example = DocUtil.readExample(type);
     const module = file ? moduleImport : undefined;
-    const name = identifier ?
-      identifier.escapedText?.toString()! :
-      undefined;
+    const name = identifier ? identifier.escapedText?.toString() : undefined;
 
     if (identifier && name) {
       return { decorator, identifier, file, module, targets, name, options: example };
@@ -186,9 +186,9 @@ export class TransformerState implements State {
    * Get list of all #decorators for a node
    */
   getDecoratorList(node: ts.Node): DecoratorMeta[] {
-    return ts.canHaveDecorators(node) ? (ts.getDecorators(node) ?? [])
-      .map(decorator => this.getDecoratorMeta(decorator))
-      .filter(metadata => !!metadata) : [];
+    return ts.canHaveDecorators(node)
+      ? (ts.getDecorators(node) ?? []).map(decorator => this.getDecoratorMeta(decorator)).filter(metadata => !!metadata)
+      : [];
   }
 
   /**
@@ -257,7 +257,11 @@ export class TransformerState implements State {
   /**
    * Create property access
    */
-  createAccess(first: string | ts.Expression, second: string | ts.Identifier, ...items: (string | number | ts.Identifier)[]): ts.Expression {
+  createAccess(
+    first: string | ts.Expression,
+    second: string | ts.Identifier,
+    ...items: (string | number | ts.Identifier)[]
+  ): ts.Expression {
     return CoreUtil.createAccess(this.factory, first, second, ...items);
   }
 
@@ -298,12 +302,16 @@ export class TransformerState implements State {
   getModuleIdentifier(): ts.Expression {
     if (this.#moduleIdentifier === undefined) {
       this.#moduleIdentifier = this.factory.createUniqueName('Δm');
-      const declaration = this.factory.createVariableDeclaration(this.#moduleIdentifier, undefined, undefined,
+      const declaration = this.factory.createVariableDeclaration(
+        this.#moduleIdentifier,
+        undefined,
+        undefined,
         this.fromLiteral(this.getModuleIdentifierTarget())
       );
-      this.addStatements([
-        this.factory.createVariableStatement([], this.factory.createVariableDeclarationList([declaration], ts.NodeFlags.Const))
-      ], -1);
+      this.addStatements(
+        [this.factory.createVariableStatement([], this.factory.createVariableDeclarationList([declaration], ts.NodeFlags.Const))],
+        -1
+      );
     }
     return this.#moduleIdentifier;
   }
@@ -320,7 +328,7 @@ export class TransformerState implements State {
     const targetScope = typeof input === 'string' ? input : input[ModuleNameSymbol]!;
     const target = `${targetScope}:${name}`;
     const list = this.getDecoratorList(node);
-    return list.find(item => item.targets?.includes(target) && (!module || item.name === name && item.module === module))?.decorator;
+    return list.find(item => item.targets?.includes(target) && (!module || (item.name === name && item.module === module)))?.decorator;
   }
 
   /**
@@ -341,7 +349,8 @@ export class TransformerState implements State {
       const tgt = DeclarationUtil.getPrimaryDeclarationNode(type.original!);
       const fileName = tgt.getSourceFile().fileName;
 
-      if (fileName === this.source.fileName) { // if in same file suffix with location
+      if (fileName === this.source.fileName) {
+        // if in same file suffix with location
         let child: ts.Node = tgt;
         while (child && !ts.isSourceFile(child)) {
           if (isRedefinableDeclaration(child) || ts.isMethodDeclaration(child) || ts.isParameter(child)) {
@@ -362,7 +371,8 @@ export class TransformerState implements State {
       unique = [type.name ?? 'unknown']; // Type is only unique piece
     }
 
-    if (unique.length) { // Make unique to file
+    if (unique.length) {
+      // Make unique to file
       unique.unshift(this.#resolver.getFileImportName(this.source.fileName));
       return `${name}__${SystemUtil.naiveHashString(unique.join(':'), 12)}${suffix || ''}`;
     } else {
@@ -390,7 +400,8 @@ export class TransformerState implements State {
   findMethodByName(cls: ts.ClassLikeDeclaration | ts.Type, method: string): ts.MethodDeclaration | undefined {
     if ('getSourceFile' in cls) {
       return cls.members.find(
-        (value): value is ts.MethodDeclaration => ts.isMethodDeclaration(value) && ts.isIdentifier(value.name) && value.name.escapedText === method
+        (value): value is ts.MethodDeclaration =>
+          ts.isMethodDeclaration(value) && ts.isIdentifier(value.name) && value.name.escapedText === method
       );
     } else {
       const properties = this.#resolver.getPropertiesOfType(cls);
@@ -416,12 +427,11 @@ export class TransformerState implements State {
    */
   getForeignTarget(typeOrClassId: ForeignType | string): ts.Expression {
     const file = this.importFile(FOREIGN_TYPE_REGISTRY_FILE);
-    return this.factory.createCallExpression(this.createAccess(
-      file.identifier,
-      this.factory.createIdentifier('foreignType'),
-    ), [], [
-      this.fromLiteral(typeof typeOrClassId === 'string' ? typeOrClassId : typeOrClassId.classId)
-    ]);
+    return this.factory.createCallExpression(
+      this.createAccess(file.identifier, this.factory.createIdentifier('foreignType')),
+      [],
+      [this.fromLiteral(typeof typeOrClassId === 'string' ? typeOrClassId : typeOrClassId.classId)]
+    );
   }
 
   /**
@@ -456,7 +466,10 @@ export class TransformerState implements State {
    */
   getApparentTypeOfField(value: ts.Type, field: string): AnyType | undefined {
     const checker = this.#resolver.getChecker();
-    const properties = checker.getApparentType(value).getApparentProperties().find(property => property.escapedName === field);
+    const properties = checker
+      .getApparentType(value)
+      .getApparentProperties()
+      .find(property => property.escapedName === field);
     return properties ? this.resolveType(checker.getTypeOfSymbol(properties)) : undefined;
   }
 }

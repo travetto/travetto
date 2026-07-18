@@ -14,7 +14,6 @@ export interface CapturedAssertion extends Partial<Assertion> {
  * Assertion capturer
  */
 class $AssertCapture {
-
   #emitter = new EventEmitter();
 
   /**

@@ -1,6 +1,7 @@
 import util from 'node:util';
 
 import { type ConsoleEvent, type ConsoleListener, ConsoleManager } from '@travetto/runtime';
+
 import type { TestLog } from '../model/test.ts';
 
 /**
@@ -21,9 +22,7 @@ export class ConsoleCapture implements ConsoleListener {
   log({ args, scope: _, ...rest }: ConsoleEvent): void {
     this.out.push({
       ...rest,
-      message: args
-        .map((arg => typeof arg === 'string' ? arg : util.inspect(arg, false, 5)))
-        .join(' ')
+      message: args.map(arg => (typeof arg === 'string' ? arg : util.inspect(arg, false, 5))).join(' ')
     });
   }
 
