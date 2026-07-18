@@ -6,6 +6,7 @@ import { Log } from './log.ts';
 import type { EnvDict, LaunchConfig } from './types.ts';
 import { Workspace } from './workspace.ts';
 
+// biome-ignore lint/suspicious/noTemplateCurlyInString: Should be correct
 const WORKSPACE = '${workspaceFolder}';
 
 const logger = new Log('run');
