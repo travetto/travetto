@@ -2,7 +2,6 @@ import { CliCommand } from '@travetto/cli';
 
 @CliCommand()
 export class BasicCommand {
-
   loud?: boolean;
 
   main() {

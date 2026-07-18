@@ -10,7 +10,6 @@ import type { CliCommandShape } from './types.ts';
  * Execution manager
  */
 export class ExecutionManager {
-
   /** Command Execution */
   static async execute(instance: CliCommandShape, args: unknown[]): Promise<void> {
     const config = CliCommandRegistryIndex.get(getClass(instance));

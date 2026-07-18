@@ -6,9 +6,29 @@ import { asFull, castTo } from '@travetto/runtime';
 import { SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 
 import {
-  Response, Parent, MinTest, Nested, ViewSpecific, Grade, Ccccz, AllAs, Bbbbz, Aaaaz,
-  CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema, Address, Opaque, TemplateLit,
-  RangeSchema, BigIntSchema, BigIntRangeSchema, BigIntOptionalSchema, NumberArrayMinMaxSchema, BigIntArrayMinMaxSchema
+  Response,
+  Parent,
+  MinTest,
+  Nested,
+  ViewSpecific,
+  Grade,
+  Ccccz,
+  AllAs,
+  Bbbbz,
+  Aaaaz,
+  CustomValidated,
+  StringMatches,
+  NotRequiredUndefinable,
+  DateTestSchema,
+  Address,
+  Opaque,
+  TemplateLit,
+  RangeSchema,
+  BigIntSchema,
+  BigIntRangeSchema,
+  BigIntOptionalSchema,
+  NumberArrayMinMaxSchema,
+  BigIntArrayMinMaxSchema
 } from './models/validation.ts';
 import { Accessors } from './models/binding.ts';
 
@@ -18,7 +38,6 @@ function findError(errors: ValidationError[], path: string, message: string) {
 
 @Suite()
 class Validation {
-
   @BeforeAll()
   async init() {
     await Registry.init();
@@ -89,14 +108,16 @@ class Validation {
   @Test('Nested validations should be fine')
   @ShouldThrow(ValidationResultError)
   async nestedObjectErrors() {
-    const obj = Nested.from(castTo({
-      name: 5,
-      address: {
-        street1: 'abc',
-        city: 'city',
-        zip: 400
-      }
-    }));
+    const obj = Nested.from(
+      castTo({
+        name: 5,
+        address: {
+          street1: 'abc',
+          city: 'city',
+          zip: 400
+        }
+      })
+    );
 
     await SchemaValidator.validate(Nested, obj);
   }
@@ -121,14 +142,17 @@ class Validation {
 
   @Test('Nested view')
   async validateViewsNested() {
-    const obj = ViewSpecific.from({
-      name: 'bob',
-      address: {
-        street1: '5',
-        zip: 200,
-        postal: '55555'
-      }
-    }, 'profile');
+    const obj = ViewSpecific.from(
+      {
+        name: 'bob',
+        address: {
+          street1: '5',
+          zip: 200,
+          postal: '55555'
+        }
+      },
+      'profile'
+    );
 
     await SchemaValidator.validate(ViewSpecific, obj, 'profile');
   }
@@ -145,50 +169,59 @@ class Validation {
       names: ['bc', 'ab', 'bac']
     });
 
-    await assert.rejects(
-      () => SchemaValidator.validate(StringMatches, obj2),
-      ValidationResultError
-    );
+    await assert.rejects(() => SchemaValidator.validate(StringMatches, obj2), ValidationResultError);
   }
 
   @Test('manually unRequired')
   async unRequired() {
-    const o = NotRequiredUndefinable.from({
-
-    });
+    const o = NotRequiredUndefinable.from({});
 
     await SchemaValidator.validate(NotRequiredUndefinable, o);
   }
 
   @Test('date tests')
   async dates() {
+    await assert.rejects(
+      () => {
+        const o = DateTestSchema.from({ date: undefined });
+        return SchemaValidator.validate(DateTestSchema, o);
+      },
+      e => e instanceof ValidationResultError && e.details.errors[0].kind === 'required'
+    );
 
-    await assert.rejects(() => {
-      const o = DateTestSchema.from({ date: undefined });
-      return SchemaValidator.validate(DateTestSchema, o);
-    }, e => e instanceof ValidationResultError && e.details.errors[0].kind === 'required');
+    await assert.rejects(
+      () => {
+        // @ts-ignore
+        const o = DateTestSchema.from({ date: NaN });
+        return SchemaValidator.validate(DateTestSchema, o);
+      },
+      e => e instanceof ValidationResultError && e.details.errors[0].kind === 'type'
+    );
 
-    await assert.rejects(() => {
-      // @ts-ignore
-      const o = DateTestSchema.from({ date: NaN });
-      return SchemaValidator.validate(DateTestSchema, o);
-    }, e => e instanceof ValidationResultError && e.details.errors[0].kind === 'type');
+    await assert.rejects(
+      () => {
+        const o = CustomValidated.from({ age: Number.NaN, age2: 1 });
+        return SchemaValidator.validate(CustomValidated, o);
+      },
+      e => e instanceof ValidationResultError && e.details.errors[0].kind === 'type'
+    );
 
-    await assert.rejects(() => {
-      const o = CustomValidated.from({ age: Number.NaN, age2: 1 });
-      return SchemaValidator.validate(CustomValidated, o);
-    }, e => e instanceof ValidationResultError && e.details.errors[0].kind === 'type');
+    await assert.rejects(
+      () => {
+        const o = CustomValidated.from({ age: 1, age2: 1 });
+        return SchemaValidator.validate(CustomValidated, o);
+      },
+      e => e instanceof ValidationResultError && e.details.errors[0].kind === 'custom'
+    );
 
-    await assert.rejects(() => {
-      const o = CustomValidated.from({ age: 1, age2: 1 });
-      return SchemaValidator.validate(CustomValidated, o);
-    }, e => e instanceof ValidationResultError && e.details.errors[0].kind === 'custom');
-
-    await assert.rejects(() => {
-      // @ts-ignore
-      const o = DateTestSchema.from({ date: '' });
-      return SchemaValidator.validate(DateTestSchema, o);
-    }, e => e instanceof ValidationResultError && e.details.errors[0].kind === 'required');
+    await assert.rejects(
+      () => {
+        // @ts-ignore
+        const o = DateTestSchema.from({ date: '' });
+        return SchemaValidator.validate(DateTestSchema, o);
+      },
+      e => e instanceof ValidationResultError && e.details.errors[0].kind === 'required'
+    );
   }
 
   @Test()
@@ -208,16 +241,20 @@ class Validation {
   @Test()
   async verifyNestedPolymorphic() {
     const item = AllAs.from({
-      all: [{
-        type: 'bbbbz',
-        a: true
-      }, {
-        type: 'ccccz',
-        a: false
-      }, {
-        type: 'aaaaz',
-        a: false
-      }]
+      all: [
+        {
+          type: 'bbbbz',
+          a: true
+        },
+        {
+          type: 'ccccz',
+          a: false
+        },
+        {
+          type: 'aaaaz',
+          a: false
+        }
+      ]
     });
 
     assert(item.all);
@@ -267,7 +304,7 @@ class Validation {
   async badValidate() {
     const addr = Address.from({
       city: 'city',
-      postal: '30000',
+      postal: '30000'
     });
 
     await SchemaValidator.validate(Address, addr);
@@ -276,9 +313,11 @@ class Validation {
   @Test()
   async nestedList() {
     AllAs.from({
-      all: [{
-        a: false
-      }]
+      all: [
+        {
+          a: false
+        }
+      ]
     });
   }
 
@@ -297,13 +336,15 @@ class Validation {
   @Test()
   @ShouldThrow(ValidationResultError)
   async badOpaqueChild() {
-    const child = Opaque.from(castTo({
-      name: 5,
-      age: 'bob',
-      details: {
-        age: 20
-      }
-    }));
+    const child = Opaque.from(
+      castTo({
+        name: 5,
+        age: 'bob',
+        details: {
+          age: 20
+        }
+      })
+    );
 
     const validated = await SchemaValidator.validate(Opaque, child);
     assert(validated.name === '5');
@@ -312,32 +353,40 @@ class Validation {
   @Test()
   async verifyRawNestedPolymorphic() {
     const item = {
-      all: [{
-        type: 'bbbbz',
-        a: true
-      }, {
-        type: 'ccccz',
-        a: false
-      }, {
-        type: 'aaaaz',
-        a: false
-      }]
+      all: [
+        {
+          type: 'bbbbz',
+          a: true
+        },
+        {
+          type: 'ccccz',
+          a: false
+        },
+        {
+          type: 'aaaaz',
+          a: false
+        }
+      ]
     };
 
-    await assert.rejects(() => SchemaValidator.validate(AllAs, item), err => {
-      assert(err instanceof ValidationResultError);
-      assert(err.details.errors[0].path === 'all[0].b');
-      assert(err.details.errors[0].message === 'all[0].b is required');
-      assert(err.details.errors[1].path === 'all[1].b');
-      assert(err.details.errors[1].message === 'all[1].b is required');
-      assert(err.details.errors[2].path === 'all[1].c');
-      assert(err.details.errors[2].message === 'all[1].c is required');
-    });
+    await assert.rejects(
+      () => SchemaValidator.validate(AllAs, item),
+      err => {
+        assert(err instanceof ValidationResultError);
+        assert(err.details.errors[0].path === 'all[0].b');
+        assert(err.details.errors[0].message === 'all[0].b is required');
+        assert(err.details.errors[1].path === 'all[1].b');
+        assert(err.details.errors[1].message === 'all[1].b is required');
+        assert(err.details.errors[2].path === 'all[1].c');
+        assert(err.details.errors[2].message === 'all[1].c is required');
+      }
+    );
   }
 
   @Test()
   async verifyAccessors() {
-    await assert.rejects(() => SchemaValidator.validate(Accessors, asFull({})),
+    await assert.rejects(
+      () => SchemaValidator.validate(Accessors, asFull({})),
       err => {
         assert(err instanceof ValidationResultError);
         assert(err.details.errors.length === 2);
@@ -345,16 +394,16 @@ class Validation {
         assert(err.details.errors[0].message === 'color is required');
         assert(err.details.errors[1].path === 'area');
         assert(err.details.errors[1].message === 'area is required');
-      });
-
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(Accessors, asFull({ color: 'green', area: '5' }))
+      }
     );
+
+    await assert.doesNotReject(() => SchemaValidator.validate(Accessors, asFull({ color: 'green', area: '5' })));
   }
 
   @Test()
   async verifyTemplateLiteral() {
-    await assert.rejects(() => SchemaValidator.validate(TemplateLit, asFull({})),
+    await assert.rejects(
+      () => SchemaValidator.validate(TemplateLit, asFull({})),
       err => {
         assert(err instanceof ValidationResultError);
         assert(err.details.errors.length === 1);
@@ -364,7 +413,8 @@ class Validation {
     );
 
     for (const age of ['bob', '19-s', '19-es', 'z-y', '19-y']) {
-      await assert.rejects(() => SchemaValidator.validate(TemplateLit, castTo({ age })),
+      await assert.rejects(
+        () => SchemaValidator.validate(TemplateLit, castTo({ age })),
         err => {
           assert(err instanceof ValidationResultError);
           assert(err.details.errors.length === 1);
@@ -374,19 +424,16 @@ class Validation {
       );
     }
 
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(TemplateLit, asFull({ age: '19-ys' }))
-    );
+    await assert.doesNotReject(() => SchemaValidator.validate(TemplateLit, asFull({ age: '19-ys' })));
   }
 
   @Test()
   async verifyTemplateLiteralArray() {
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(TemplateLit, castTo({ age: '19-ys', height: ['10ft', '9m'] }))
-    );
+    await assert.doesNotReject(() => SchemaValidator.validate(TemplateLit, castTo({ age: '19-ys', height: ['10ft', '9m'] })));
 
     for (const heights of [['bob'], ['19-s'], ['19-es'], ['z-y'], ['19-y'], ['8mm', '10ft']] as const) {
-      await assert.rejects(() => SchemaValidator.validate(TemplateLit, castTo({ age: '19-ys', heights })),
+      await assert.rejects(
+        () => SchemaValidator.validate(TemplateLit, castTo({ age: '19-ys', heights })),
         err => {
           assert(err instanceof ValidationResultError);
           assert(err.details.errors.length === 1);
@@ -400,215 +447,231 @@ class Validation {
   @Test()
   async verifyMinMaxValues() {
     // Valid cases
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(RangeSchema, { value: 10 })
-    );
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(RangeSchema, { value: 50 })
-    );
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(RangeSchema, { value: 100 })
-    );
+    await assert.doesNotReject(() => SchemaValidator.validate(RangeSchema, { value: 10 }));
+    await assert.doesNotReject(() => SchemaValidator.validate(RangeSchema, { value: 50 }));
+    await assert.doesNotReject(() => SchemaValidator.validate(RangeSchema, { value: 100 }));
 
     // Invalid cases
-    await assert.rejects(() => SchemaValidator.validate(RangeSchema, { value: 9 }), err => {
-      assert(err instanceof ValidationResultError);
-      assert(err.details.errors.length === 1);
-      assert(err.details.errors[0].path === 'value');
-      assert(err.details.errors[0].message.includes('is less than (10)'));
-    });
+    await assert.rejects(
+      () => SchemaValidator.validate(RangeSchema, { value: 9 }),
+      err => {
+        assert(err instanceof ValidationResultError);
+        assert(err.details.errors.length === 1);
+        assert(err.details.errors[0].path === 'value');
+        assert(err.details.errors[0].message.includes('is less than (10)'));
+      }
+    );
 
-    await assert.rejects(() => SchemaValidator.validate(RangeSchema, { value: 101 }), err => {
-      assert(err instanceof ValidationResultError);
-      assert(err.details.errors.length === 1);
-      assert(err.details.errors[0].path === 'value');
-      assert(err.details.errors[0].message.includes('is greater than (100)'));
-    });
+    await assert.rejects(
+      () => SchemaValidator.validate(RangeSchema, { value: 101 }),
+      err => {
+        assert(err instanceof ValidationResultError);
+        assert(err.details.errors.length === 1);
+        assert(err.details.errors[0].path === 'value');
+        assert(err.details.errors[0].message.includes('is greater than (100)'));
+      }
+    );
   }
 
   @Test()
   async verifyBigIntValidation() {
     // Valid bigint
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(BigIntSchema, { value: 42n })
-    );
+    await assert.doesNotReject(() => SchemaValidator.validate(BigIntSchema, { value: 42n }));
 
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(BigIntSchema, { value: 9007199254740991n })
-    );
+    await assert.doesNotReject(() => SchemaValidator.validate(BigIntSchema, { value: 9007199254740991n }));
 
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(BigIntSchema, { value: -123n })
-    );
+    await assert.doesNotReject(() => SchemaValidator.validate(BigIntSchema, { value: -123n }));
 
     // Invalid type - should fail validation
-    await assert.rejects(() => SchemaValidator.validate(BigIntSchema, castTo({ value: 42 })), err => {
-      assert(err instanceof ValidationResultError);
-      assert(err.details.errors.length === 1);
-      assert(err.details.errors[0].path === 'value');
-      assert(err.details.errors[0].kind === 'type');
-    });
+    await assert.rejects(
+      () => SchemaValidator.validate(BigIntSchema, castTo({ value: 42 })),
+      err => {
+        assert(err instanceof ValidationResultError);
+        assert(err.details.errors.length === 1);
+        assert(err.details.errors[0].path === 'value');
+        assert(err.details.errors[0].kind === 'type');
+      }
+    );
 
-    await assert.rejects(() => SchemaValidator.validate(BigIntSchema, castTo({ value: '42' })), err => {
-      assert(err instanceof ValidationResultError);
-      assert(err.details.errors.length === 1);
-      assert(err.details.errors[0].path === 'value');
-      assert(err.details.errors[0].kind === 'type');
-    });
+    await assert.rejects(
+      () => SchemaValidator.validate(BigIntSchema, castTo({ value: '42' })),
+      err => {
+        assert(err instanceof ValidationResultError);
+        assert(err.details.errors.length === 1);
+        assert(err.details.errors[0].path === 'value');
+        assert(err.details.errors[0].kind === 'type');
+      }
+    );
 
     // Missing required field
-    await assert.rejects(() => SchemaValidator.validate(BigIntSchema, castTo({})), err => {
-      assert(err instanceof ValidationResultError);
-      assert(err.details.errors.length === 1);
-      assert(err.details.errors[0].path === 'value');
-      assert(err.details.errors[0].kind === 'required');
-    });
+    await assert.rejects(
+      () => SchemaValidator.validate(BigIntSchema, castTo({})),
+      err => {
+        assert(err instanceof ValidationResultError);
+        assert(err.details.errors.length === 1);
+        assert(err.details.errors[0].path === 'value');
+        assert(err.details.errors[0].kind === 'required');
+      }
+    );
   }
 
   @Test()
   async verifyBigIntOptional() {
     // Valid with value
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(BigIntOptionalSchema, castTo({ value: 42n }))
-    );
+    await assert.doesNotReject(() => SchemaValidator.validate(BigIntOptionalSchema, castTo({ value: 42n })));
 
     // Valid without value
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(BigIntOptionalSchema, castTo({}))
-    );
+    await assert.doesNotReject(() => SchemaValidator.validate(BigIntOptionalSchema, castTo({})));
 
     // Invalid type
-    await assert.rejects(() => SchemaValidator.validate(BigIntOptionalSchema, castTo({ value: 42 })), err => {
-      assert(err instanceof ValidationResultError);
-      assert(err.details.errors.length === 1);
-      assert(err.details.errors[0].path === 'value');
-      assert(err.details.errors[0].kind === 'type');
-    });
+    await assert.rejects(
+      () => SchemaValidator.validate(BigIntOptionalSchema, castTo({ value: 42 })),
+      err => {
+        assert(err instanceof ValidationResultError);
+        assert(err.details.errors.length === 1);
+        assert(err.details.errors[0].path === 'value');
+        assert(err.details.errors[0].kind === 'type');
+      }
+    );
   }
 
   @Test()
   async verifyBigIntMinMaxValues() {
     // Valid cases
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(BigIntRangeSchema, { value: 10n })
-    );
+    await assert.doesNotReject(() => SchemaValidator.validate(BigIntRangeSchema, { value: 10n }));
 
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(BigIntRangeSchema, { value: 50n })
-    );
+    await assert.doesNotReject(() => SchemaValidator.validate(BigIntRangeSchema, { value: 50n }));
 
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(BigIntRangeSchema, { value: 100n })
-    );
+    await assert.doesNotReject(() => SchemaValidator.validate(BigIntRangeSchema, { value: 100n }));
 
     // Below minimum
-    await assert.rejects(() => SchemaValidator.validate(BigIntRangeSchema, { value: 9n }), err => {
-      assert(err instanceof ValidationResultError);
-      assert(err.details.errors.length === 1);
-      assert(err.details.errors[0].path === 'value');
-      assert(err.details.errors[0].kind === 'min');
-      assert(err.details.errors[0].message.includes('is less than'));
-    });
+    await assert.rejects(
+      () => SchemaValidator.validate(BigIntRangeSchema, { value: 9n }),
+      err => {
+        assert(err instanceof ValidationResultError);
+        assert(err.details.errors.length === 1);
+        assert(err.details.errors[0].path === 'value');
+        assert(err.details.errors[0].kind === 'min');
+        assert(err.details.errors[0].message.includes('is less than'));
+      }
+    );
 
     // Above maximum
-    await assert.rejects(() => SchemaValidator.validate(BigIntRangeSchema, { value: 101n }), err => {
-      assert(err instanceof ValidationResultError);
-      assert(err.details.errors.length === 1);
-      assert(err.details.errors[0].path === 'value');
-      assert(err.details.errors[0].kind === 'max');
-      assert(err.details.errors[0].message.includes('is greater than'));
-    });
+    await assert.rejects(
+      () => SchemaValidator.validate(BigIntRangeSchema, { value: 101n }),
+      err => {
+        assert(err instanceof ValidationResultError);
+        assert(err.details.errors.length === 1);
+        assert(err.details.errors[0].path === 'value');
+        assert(err.details.errors[0].kind === 'max');
+        assert(err.details.errors[0].message.includes('is greater than'));
+      }
+    );
 
     // Large values
-    await assert.rejects(() => SchemaValidator.validate(BigIntRangeSchema, { value: 9007199254740991n }), err => {
-      assert(err instanceof ValidationResultError);
-      assert(err.details.errors.length === 1);
-      assert(err.details.errors[0].path === 'value');
-      assert(err.details.errors[0].kind === 'max');
-    });
+    await assert.rejects(
+      () => SchemaValidator.validate(BigIntRangeSchema, { value: 9007199254740991n }),
+      err => {
+        assert(err instanceof ValidationResultError);
+        assert(err.details.errors.length === 1);
+        assert(err.details.errors[0].path === 'value');
+        assert(err.details.errors[0].kind === 'max');
+      }
+    );
 
-    await assert.rejects(() => SchemaValidator.validate(BigIntRangeSchema, { value: -10n }), err => {
-      assert(err instanceof ValidationResultError);
-      assert(err.details.errors.length === 1);
-      assert(err.details.errors[0].path === 'value');
-      assert(err.details.errors[0].kind === 'min');
-    });
+    await assert.rejects(
+      () => SchemaValidator.validate(BigIntRangeSchema, { value: -10n }),
+      err => {
+        assert(err instanceof ValidationResultError);
+        assert(err.details.errors.length === 1);
+        assert(err.details.errors[0].path === 'value');
+        assert(err.details.errors[0].kind === 'min');
+      }
+    );
   }
 
   @Test()
   async verifyNumberArrayMinMax() {
     // All values meet min requirement
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(NumberArrayMinMaxSchema, { values: [0, 5, 10, 100] })
-    );
+    await assert.doesNotReject(() => SchemaValidator.validate(NumberArrayMinMaxSchema, { values: [0, 5, 10, 100] }));
 
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(NumberArrayMinMaxSchema, { values: [0] })
-    );
+    await assert.doesNotReject(() => SchemaValidator.validate(NumberArrayMinMaxSchema, { values: [0] }));
 
     // Value below minimum
-    await assert.rejects(() => SchemaValidator.validate(NumberArrayMinMaxSchema, { values: [0, 5, -1] }), err => {
-      assert(err instanceof ValidationResultError);
-      assert(err.details.errors.length === 1);
-      assert(err.details.errors[0].path === 'values[2]');
-      assert(err.details.errors[0].kind === 'min');
-      assert(err.details.errors[0].message.includes('is less than'));
-    });
+    await assert.rejects(
+      () => SchemaValidator.validate(NumberArrayMinMaxSchema, { values: [0, 5, -1] }),
+      err => {
+        assert(err instanceof ValidationResultError);
+        assert(err.details.errors.length === 1);
+        assert(err.details.errors[0].path === 'values[2]');
+        assert(err.details.errors[0].kind === 'min');
+        assert(err.details.errors[0].message.includes('is less than'));
+      }
+    );
 
-    await assert.rejects(() => SchemaValidator.validate(NumberArrayMinMaxSchema, { values: [-10, 5, 10] }), err => {
-      assert(err instanceof ValidationResultError);
-      assert(err.details.errors.length === 1);
-      assert(err.details.errors[0].path === 'values[0]');
-      assert(err.details.errors[0].kind === 'min');
-    });
+    await assert.rejects(
+      () => SchemaValidator.validate(NumberArrayMinMaxSchema, { values: [-10, 5, 10] }),
+      err => {
+        assert(err instanceof ValidationResultError);
+        assert(err.details.errors.length === 1);
+        assert(err.details.errors[0].path === 'values[0]');
+        assert(err.details.errors[0].kind === 'min');
+      }
+    );
 
     // Empty array should fail required check
-    await assert.rejects(() => SchemaValidator.validate(NumberArrayMinMaxSchema, { values: [] }), err => {
-      assert(err instanceof ValidationResultError);
-      assert(err.details.errors.length === 1);
-      assert(err.details.errors[0].path === 'values');
-      assert(err.details.errors[0].kind === 'required');
-    });
+    await assert.rejects(
+      () => SchemaValidator.validate(NumberArrayMinMaxSchema, { values: [] }),
+      err => {
+        assert(err instanceof ValidationResultError);
+        assert(err.details.errors.length === 1);
+        assert(err.details.errors[0].path === 'values');
+        assert(err.details.errors[0].kind === 'required');
+      }
+    );
   }
 
   @Test()
   async verifyBigIntArrayMinMax() {
     // All values meet min requirement
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(BigIntArrayMinMaxSchema, { values: [0n, 5n, 10n, 100n] })
-    );
+    await assert.doesNotReject(() => SchemaValidator.validate(BigIntArrayMinMaxSchema, { values: [0n, 5n, 10n, 100n] }));
 
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(BigIntArrayMinMaxSchema, { values: [0n] })
-    );
+    await assert.doesNotReject(() => SchemaValidator.validate(BigIntArrayMinMaxSchema, { values: [0n] }));
 
     // Value below minimum
-    await assert.rejects(() => SchemaValidator.validate(BigIntArrayMinMaxSchema, { values: [0n, 5n, -1n] }), err => {
-      assert(err instanceof ValidationResultError);
-      assert(err.details.errors.length === 1);
-      assert(err.details.errors[0].path === 'values[2]');
-      assert(err.details.errors[0].kind === 'min');
-      assert(err.details.errors[0].message.includes('is less than'));
-    });
-
-    await assert.rejects(() => SchemaValidator.validate(BigIntArrayMinMaxSchema, { values: [-10n, 5n, 10n] }), err => {
-      assert(err instanceof ValidationResultError);
-      assert(err.details.errors.length === 1);
-      assert(err.details.errors[0].path === 'values[0]');
-      assert(err.details.errors[0].kind === 'min');
-    });
-
-    // Large bigint values
-    await assert.doesNotReject(() =>
-      SchemaValidator.validate(BigIntArrayMinMaxSchema, { values: [9007199254740991n, 5n] })
+    await assert.rejects(
+      () => SchemaValidator.validate(BigIntArrayMinMaxSchema, { values: [0n, 5n, -1n] }),
+      err => {
+        assert(err instanceof ValidationResultError);
+        assert(err.details.errors.length === 1);
+        assert(err.details.errors[0].path === 'values[2]');
+        assert(err.details.errors[0].kind === 'min');
+        assert(err.details.errors[0].message.includes('is less than'));
+      }
     );
 
+    await assert.rejects(
+      () => SchemaValidator.validate(BigIntArrayMinMaxSchema, { values: [-10n, 5n, 10n] }),
+      err => {
+        assert(err instanceof ValidationResultError);
+        assert(err.details.errors.length === 1);
+        assert(err.details.errors[0].path === 'values[0]');
+        assert(err.details.errors[0].kind === 'min');
+      }
+    );
+
+    // Large bigint values
+    await assert.doesNotReject(() => SchemaValidator.validate(BigIntArrayMinMaxSchema, { values: [9007199254740991n, 5n] }));
+
     // Empty array should fail required check
-    await assert.rejects(() => SchemaValidator.validate(BigIntArrayMinMaxSchema, { values: [] }), err => {
-      assert(err instanceof ValidationResultError);
-      assert(err.details.errors.length === 1);
-      assert(err.details.errors[0].path === 'values');
-      assert(err.details.errors[0].kind === 'required');
-    });
+    await assert.rejects(
+      () => SchemaValidator.validate(BigIntArrayMinMaxSchema, { values: [] }),
+      err => {
+        assert(err instanceof ValidationResultError);
+        assert(err.details.errors.length === 1);
+        assert(err.details.errors[0].path === 'values');
+        assert(err.details.errors[0].kind === 'required');
+      }
+    );
   }
 }

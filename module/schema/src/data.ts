@@ -9,30 +9,38 @@ const REGEX_PATTERN = /[/](.*)[/](i|g|m|s)?/;
  * Utilities for data conversion and binding
  */
 export class DataUtil {
-
   /**
    * Is a value a plain JS object, created using {}
    * @param value Object to check
    */
   static isPlainObject(value: unknown): value is Record<string, unknown> {
-    return typeof value === 'object' // separate from primitives
-      && value !== undefined
-      && value !== null         // is obvious
-      && value.constructor === Object // separate instances (Array, DOM, ...)
-      && Object.prototype.toString.call(value) === '[object Object]'; // separate build-in like Math
+    return (
+      typeof value === 'object' && // separate from primitives
+      value !== undefined &&
+      value !== null && // is obvious
+      value.constructor === Object && // separate instances (Array, DOM, ...)
+      Object.prototype.toString.call(value) === '[object Object]'
+    ); // separate build-in like Math
   }
 
   /**
    * Is a value of primitive type
    * @param value Value to check
    */
-  static isPrimitive(value: unknown): value is (string | boolean | number | RegExp) {
+  static isPrimitive(value: unknown): value is string | boolean | number | RegExp {
     switch (typeof value) {
-      case 'string': case 'boolean': case 'number': case 'bigint': return true;
-      case 'object': return !!value && (
-        value instanceof RegExp || value instanceof Date || isStringObject(value) || isNumberObject(value) || isBooleanObject(value)
-      );
-      default: return false;
+      case 'string':
+      case 'boolean':
+      case 'number':
+      case 'bigint':
+        return true;
+      case 'object':
+        return (
+          !!value &&
+          (value instanceof RegExp || value instanceof Date || isStringObject(value) || isNumberObject(value) || isBooleanObject(value))
+        );
+      default:
+        return false;
     }
   }
 
@@ -53,7 +61,8 @@ export class DataUtil {
 
     let value: unknown;
 
-    if (isEmptyA || isEmptyB) { // If no `a`, `b` always wins
+    if (isEmptyA || isEmptyB) {
+      // If no `a`, `b` always wins
       if (mode === 'replace' || b === null || !isEmptyB) {
         value = isEmptyB ? b : this.shallowClone(b);
       } else if (!isEmptyA) {
@@ -65,7 +74,8 @@ export class DataUtil {
       if (isArrA !== isArrB || isSimpA !== isSimpB) {
         throw new Error(`Cannot merge differing types ${a} and ${b}`);
       }
-      if (Array.isArray(b)) { // Arrays
+      if (Array.isArray(b)) {
+        // Arrays
         value = a; // Write onto A
         if (mode === 'replace') {
           value = b;
@@ -76,18 +86,23 @@ export class DataUtil {
             valueArray[i] = this.#deepAssignRaw(valueArray[i], bArray[i], mode);
           }
         }
-      } else if (isSimpB) { // Scalars
+      } else if (isSimpB) {
+        // Scalars
         const match = typeof a === typeof b;
         value = b;
 
-        if (!match) { // If types do not match
-          if (mode === 'strict') { // Bail on strict
+        if (!match) {
+          // If types do not match
+          if (mode === 'strict') {
+            // Bail on strict
             throw new Error(`Cannot merge ${a} [${typeof a}] with ${b} [${typeof b}]`);
-          } else if (mode === 'coerce') { // Force on coerce
+          } else if (mode === 'coerce') {
+            // Force on coerce
             value = this.coerceType(b, asConstructable(a).constructor, false);
           }
         }
-      } else { // Object merge
+      } else {
+        // Object merge
         value = a;
         const bObject: Record<string, unknown> = castTo(b);
         const valueObject: Record<string, unknown> = castTo(value);
@@ -148,15 +163,16 @@ export class DataUtil {
         if (typeof input === 'object' && 'toDate' in input && typeof input.toDate === 'function') {
           value = castTo(input.toDate());
         } else {
-          value = input instanceof Date ?
-            input :
-            typeof input === 'number' ?
-              new Date(input) :
-              typeof input === 'bigint' ?
-                new Date(Number(input)) :
-                (typeof input === 'string' && /^[-]?\d+$/.test(input)) ?
-                  new Date(parseInt(input, 10)) :
-                  new Date(input.toString());
+          value =
+            input instanceof Date
+              ? input
+              : typeof input === 'number'
+                ? new Date(input)
+                : typeof input === 'bigint'
+                  ? new Date(Number(input))
+                  : typeof input === 'string' && /^[-]?\d+$/.test(input)
+                    ? new Date(parseInt(input, 10))
+                    : new Date(input.toString());
         }
         if (strict && value && Number.isNaN(value.getTime())) {
           throw new Error(`Invalid date value: ${input}`);
@@ -178,8 +194,7 @@ export class DataUtil {
           return input;
         }
         try {
-          return BigInt((typeof input === 'boolean' || typeof input === 'number') ?
-            input : `${input}`.replace(/n$/i, ''));
+          return BigInt(typeof input === 'boolean' || typeof input === 'number' ? input : `${input}`.replace(/n$/i, ''));
         } catch {
           if (strict) {
             throw new Error(`Invalid numeric value: ${input}`);
@@ -222,7 +237,8 @@ export class DataUtil {
         }
       }
       case undefined:
-      case String: return `${input}`;
+      case String:
+        return `${input}`;
     }
     if (!strict || this.isPlainObject(input)) {
       return input;
@@ -236,7 +252,7 @@ export class DataUtil {
    * @param value Object to clone
    */
   static shallowClone<T>(value: T): T {
-    return castTo(Array.isArray(value) ? value.slice(0) : (this.isSimpleValue(value) ? value : { ...castTo<object>(value) }));
+    return castTo(Array.isArray(value) ? value.slice(0) : this.isSimpleValue(value) ? value : { ...castTo<object>(value) });
   }
 
   /**
@@ -245,7 +261,7 @@ export class DataUtil {
    * @param b The source
    * @param mode How the assignment should be handled
    */
-  static deepAssign<T, U>(a: T, b: U, mode: | 'replace' | 'loose' | 'strict' | 'coerce' = 'loose'): T & U {
+  static deepAssign<T, U>(a: T, b: U, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose'): T & U {
     if (!a || this.isSimpleValue(a)) {
       throw new Error(`Cannot merge onto a simple value, ${a}`);
     }

@@ -2,7 +2,6 @@ import { Schema, Field, Required } from '@travetto/schema';
 
 @Schema()
 export class Address {
-
   @Field({ type: String })
   @Required()
   street1: string;

@@ -1,9 +1,5 @@
 import type { TimeUnit } from '@travetto/runtime';
-import {
-  Schema, Float, MinLength, Match, Max, Min,
-  CommonRegex, View, Url, Required, Validator,
-  Discriminated
-} from '@travetto/schema';
+import { Schema, Float, MinLength, Match, Max, Min, CommonRegex, View, Url, Required, Validator, Discriminated } from '@travetto/schema';
 
 @Schema()
 @Validator((o: CustomValidated) => {
@@ -22,7 +18,6 @@ export class CustomValidated {
 
 @Schema()
 export class StringMatches {
-
   @Match(/^ab*c$/)
   names: string[];
 }
@@ -62,7 +57,6 @@ export class AllAs {
 
 @Schema()
 export class Response {
-
   questionId: string;
 
   answer?: unknown;
@@ -80,7 +74,6 @@ export class Response {
 
 @Schema()
 export class Parent {
-
   response: Response;
   responses: Response[];
 }
@@ -139,7 +132,8 @@ export class TemplateLit {
 
 @Schema()
 export class RangeSchema {
-  @Min(10) @Max(100)
+  @Min(10)
+  @Max(100)
   value: number;
 }
 
@@ -150,7 +144,8 @@ export class BigIntSchema {
 
 @Schema()
 export class BigIntRangeSchema {
-  @Min(10n) @Max(100n)
+  @Min(10n)
+  @Max(100n)
   value: bigint;
 }
 

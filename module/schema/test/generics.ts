@@ -46,7 +46,6 @@ class GenericMethodContainer {
 
 @Suite()
 class GenericInstantiationSuite {
-
   @BeforeAll()
   ready() {
     return Registry.init();

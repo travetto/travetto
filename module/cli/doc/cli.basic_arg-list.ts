@@ -3,7 +3,6 @@ import { Max, Min } from '@travetto/schema';
 
 @CliCommand()
 export class BasicCommand {
-
   reverse?: boolean;
 
   main(@Min(1) @Max(10) volumes: number[]) {

@@ -25,12 +25,11 @@ const STATE_SYMBOL = Symbol();
  * Parsing support for the cli
  */
 export class CliParseUtil {
-
   static toEnvField(key: string): string {
     return key.startsWith(ENV_PREFIX) ? key : `${ENV_PREFIX}${key}`;
   }
 
-  static readToken(text: string, start = 0): { next: number, value?: string } {
+  static readToken(text: string, start = 0): { next: number; value?: string } {
     const collected: number[] = [];
     let i = start;
     let done = false;
@@ -48,9 +47,13 @@ export class CliParseUtil {
         done = true;
       } else {
         switch (ch) {
-          case 92: /* Backslash */ escaped = true; break;
-          case 39: /* Single quote */ case 34: /* Double quote */
-            if (quote === ch) { // End quote
+          case 92:
+            /* Backslash */ escaped = true;
+            break;
+          case 39: /* Single quote */
+          case 34 /* Double quote */:
+            if (quote === ch) {
+              // End quote
               quote = undefined;
             } else if (!quote) {
               quote = ch;
@@ -58,7 +61,8 @@ export class CliParseUtil {
               collected.push(ch);
             }
             break;
-          default: collected.push(ch);
+          default:
+            collected.push(ch);
         }
       }
     }
@@ -73,10 +77,9 @@ export class CliParseUtil {
     const input = Object.values(schema.fields).find(config => config.specifiers?.includes('module'));
     const envKey = input?.aliases?.filter(alias => alias.startsWith(ENV_PREFIX)).map(alias => alias.replace(ENV_PREFIX, ''))[0] ?? '';
     const flags = new Set(input?.aliases ?? []);
-    const check = (key?: string, value?: string): string | undefined => flags.has(key!) ? value : undefined;
+    const check = (key?: string, value?: string): string | undefined => (flags.has(key!) ? value : undefined);
     return args.reduce(
-      (name, value, i, values) =>
-        (i < separatorIndex ? check(values[i - 1], value) ?? check(...value.split('=')) : undefined) ?? name,
+      (name, value, i, values) => (i < separatorIndex ? (check(values[i - 1], value) ?? check(...value.split('='))) : undefined) ?? name,
       process.env[envKey]
     );
   }
@@ -89,18 +92,20 @@ export class CliParseUtil {
     const overrides = { '@': module ?? Runtime.main.name };
 
     // We have a file
-    const relativePath = (key.includes('/') ? key : `@#support/pack.${key}.flags`)
-      .replace(/^(@[^#]*)#(.*)$/, (_, imp, rest) => `${Runtime.modulePath(imp, overrides)}/${rest}`);
+    const relativePath = (key.includes('/') ? key : `@#support/pack.${key}.flags`).replace(
+      /^(@[^#]*)#(.*)$/,
+      (_, imp, rest) => `${Runtime.modulePath(imp, overrides)}/${rest}`
+    );
 
     const file = path.resolve(relativePath);
 
-    if (!await fs.stat(file, { throwIfNoEntry: false })) {
+    if (!(await fs.stat(file, { throwIfNoEntry: false }))) {
       throw new Error(`Missing flag file: ${key}, unable to proceed`);
     }
 
     const data = await fs.readFile(file, 'utf8');
     const args: string[] = [];
-    let token: { next: number, value?: string } = { next: 0 };
+    let token: { next: number; value?: string } = { next: 0 };
     while (token.next < data.length) {
       token = this.readToken(data, token.next);
       if (token.value !== undefined) {
@@ -114,7 +119,7 @@ export class CliParseUtil {
    * Parse args to extract command from argv along with other params.  Will skip
    * argv[0] and argv[1] if equal to process.argv[0:2]
    */
-  static getArgs(argv: string[]): { cmd?: string, args: string[], help?: boolean } {
+  static getArgs(argv: string[]): { cmd?: string; args: string[]; help?: boolean } {
     let offset = 0;
     if (argv[0] === process.argv[0] && argv[1] === process.argv[1]) {
       offset = 2;
@@ -135,11 +140,12 @@ export class CliParseUtil {
   static async expandArgs(schema: SchemaClassConfig, args: string[]): Promise<string[]> {
     const separatorIndex = args.includes(RAW_SEPARATOR) ? args.indexOf(RAW_SEPARATOR) : args.length;
     const module = this.getSpecifiedModule(schema, args);
-    return Promise
-      .all(args.map(async (arg, i) =>
-        await (arg.startsWith(CONFIG_PREFIX) && (i < separatorIndex || separatorIndex < 0) ? this.readFlagFile(arg, module) : arg))
+    return Promise.all(
+      args.map(
+        async (arg, i) =>
+          await (arg.startsWith(CONFIG_PREFIX) && (i < separatorIndex || separatorIndex < 0) ? this.readFlagFile(arg, module) : arg)
       )
-      .then(expanded => expanded.flat());
+    ).then(expanded => expanded.flat());
   }
 
   /**
@@ -159,7 +165,9 @@ export class CliParseUtil {
         if (simple in process.env) {
           const value: string = process.env[simple]!;
           if (field.array) {
-            out.push(...value.split(/\s*,\s*/g).map(item => ({ type: 'flag', fieldName: field.name, input: envName, value: item }) as const));
+            out.push(
+              ...value.split(/\s*,\s*/g).map(item => ({ type: 'flag', fieldName: field.name, input: envName, value: item }) as const)
+            );
           } else {
             out.push({ type: 'flag', fieldName: field.name, input: envName, value });
           }
@@ -172,7 +180,8 @@ export class CliParseUtil {
     for (let i = 0; i < inputs.length; i += 1) {
       const input = inputs[i];
 
-      if (input === RAW_SEPARATOR) { // Raw separator
+      if (input === RAW_SEPARATOR) {
+        // Raw separator
         out.push(...inputs.slice(i + 1).map((arg, idx) => ({ type: 'unknown', input: arg, index: argIdx + idx }) as const));
         break;
       } else if (LONG_FLAG_WITH_EQ.test(input)) {
@@ -183,7 +192,8 @@ export class CliParseUtil {
         } else {
           out.push({ type: 'unknown', input });
         }
-      } else if (VALID_FLAG.test(input)) { // Flag
+      } else if (VALID_FLAG.test(input)) {
+        // Flag
         const field = flagMap.get(input);
         if (!field) {
           out.push({ type: 'unknown', input });
@@ -224,27 +234,33 @@ export class CliParseUtil {
    * Parse aliases into categories for registration
    */
   static parseAliases(aliases: string[]): AliasesParseResult {
-    return aliases.reduce<AliasesParseResult>((result, alias) => {
-      if (VALID_FLAG.test(alias)) {
-        if (alias.startsWith('--')) {
-          result.long.push(alias);
+    return aliases.reduce<AliasesParseResult>(
+      (result, alias) => {
+        if (VALID_FLAG.test(alias)) {
+          if (alias.startsWith('--')) {
+            result.long.push(alias);
+          } else {
+            result.short.push(alias);
+          }
+        } else if (alias.startsWith(ENV_PREFIX)) {
+          result.env.push(alias);
         } else {
-          result.short.push(alias);
+          result.raw.push(alias);
         }
-      } else if (alias.startsWith(ENV_PREFIX)) {
-        result.env.push(alias);
-      } else {
-        result.raw.push(alias);
-      }
-      return result;
-    }, { long: [], short: [], raw: [], env: [] });
+        return result;
+      },
+      { long: [], short: [], raw: [], env: [] }
+    );
   }
 
   /**
    * Build aliases for a schema config
    */
-  static buildAliases(config: { full?: string, short?: string, envVars?: string[] }, ...extraEnvVars: string[]): Partial<SchemaFieldConfig> {
-    const envVars = [...config.envVars ?? [], ...extraEnvVars];
+  static buildAliases(
+    config: { full?: string; short?: string; envVars?: string[] },
+    ...extraEnvVars: string[]
+  ): Partial<SchemaFieldConfig> {
+    const envVars = [...(config.envVars ?? []), ...extraEnvVars];
     return {
       aliases: [
         ...(config.full ? [config.full.startsWith('-') ? config.full : `--${config.full}`] : []),

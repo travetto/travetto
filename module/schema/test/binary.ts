@@ -10,7 +10,6 @@ import { type BinaryArray, type BinaryStream, type BinaryType, castTo } from '@t
 
 @Schema()
 class BinaryTestContainer {
-
   notString: string;
   notBoolean: boolean;
   notNumber: number;
@@ -38,7 +37,6 @@ class BinaryTestContainer {
 
 @Suite()
 class BinaryTest {
-
   findError(errors: ValidationError[], path: string) {
     return errors.some(x => x.path === path);
   }
@@ -169,9 +167,9 @@ class BinaryTest {
     });
 
     await assert.rejects(
-      () =>
-        SchemaValidator.validate(BinaryTestContainer, payload2),
-      e => e instanceof ValidationResultError &&
+      () => SchemaValidator.validate(BinaryTestContainer, payload2),
+      e =>
+        e instanceof ValidationResultError &&
         this.findError(e.details.errors, 'buffer') &&
         this.findError(e.details.errors, 'unit16Array') &&
         this.findError(e.details.errors, 'webStream')

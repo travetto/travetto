@@ -33,7 +33,6 @@ async function nameValidator(names?: string[]): Promise<ValidationError | undefi
 @CliCommand()
 @IsPrivate()
 export class CliSchemaCommand implements CliCommandShape {
-
   finalize(): void {
     Env.DEBUG.set(false);
   }
@@ -42,8 +41,7 @@ export class CliSchemaCommand implements CliCommandShape {
   async main(names?: string[]): Promise<void> {
     const resolved = await CliCommandRegistryIndex.load(names);
 
-    const output = resolved
-      .map(result => CliSchemaExportUtil.exportSchema(result.config.cls));
+    const output = resolved.map(result => CliSchemaExportUtil.exportSchema(result.config.cls));
 
     await CliUtil.writeAndEnsureComplete(output);
   }

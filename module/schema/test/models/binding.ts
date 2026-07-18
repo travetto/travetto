@@ -15,7 +15,6 @@ export class RegexSimple {
 
 @Schema()
 export class Count {
-
   @Field({ type: String })
   area: string;
 
@@ -27,7 +26,6 @@ export class Count {
 @Schema()
 @View('test', { with: ['address', 'counts'] })
 export class Person {
-
   name: string;
 
   dob: Date;
@@ -43,7 +41,6 @@ export class Person {
 
 @Schema()
 export class Response {
-
   questionId: string;
   answer?: string | boolean | number | string[];
 
@@ -78,8 +75,7 @@ export class Poly2 extends BasePoly {
 
 @Schema()
 export class Accessors {
-
-  #area: string;  
+  #area: string;
   // biome-ignore lint/correctness/noUnusedPrivateClassMembers: needed for test
   #color: string;
   readonly myName: string = 'name';
@@ -101,9 +97,7 @@ export class Accessors {
     return this.#area;
   }
 
-  set optional(v: string | undefined) {
-
-  }
+  set optional(v: string | undefined) {}
 
   get age() {
     return this.area.length;

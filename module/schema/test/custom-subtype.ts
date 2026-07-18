@@ -34,17 +34,23 @@ class CustomSubtypeSuite {
 
     assert(true);
 
-    assert(Vanilla.from({
-      beans: 20
-    }).flavor === 'vanilla');
+    assert(
+      Vanilla.from({
+        beans: 20
+      }).flavor === 'vanilla'
+    );
 
-    assert(Chocolate.from({
-      beans: 20
-    }).flavor === 'chocolate');
+    assert(
+      Chocolate.from({
+        beans: 20
+      }).flavor === 'chocolate'
+    );
 
-    assert(ExtraChocolate.from({
-      beans: 20
-    }).flavor === 'extra_chocolate');
+    assert(
+      ExtraChocolate.from({
+        beans: 20
+      }).flavor === 'extra_chocolate'
+    );
 
     assert.throws(() => {
       Vanilla.from(
@@ -54,24 +60,32 @@ class CustomSubtypeSuite {
       );
     });
 
-    assert(CustomBase.from({
-      flavor: 'extra_chocolate',
-      beans: 20
-    }) instanceof ExtraChocolate);
+    assert(
+      CustomBase.from({
+        flavor: 'extra_chocolate',
+        beans: 20
+      }) instanceof ExtraChocolate
+    );
 
-    assert(CustomBase.from({
-      flavor: 'chocolate',
-      beans: 20
-    }) instanceof Chocolate);
+    assert(
+      CustomBase.from({
+        flavor: 'chocolate',
+        beans: 20
+      }) instanceof Chocolate
+    );
 
-    assert(Chocolate.from({
-      flavor: 'chocolate',
-      beans: 20
-    }) instanceof Chocolate);
+    assert(
+      Chocolate.from({
+        flavor: 'chocolate',
+        beans: 20
+      }) instanceof Chocolate
+    );
 
-    assert(Chocolate.from({
-      flavor: 'extra_chocolate',
-      beans: 20
-    }) instanceof ExtraChocolate);
+    assert(
+      Chocolate.from({
+        flavor: 'extra_chocolate',
+        beans: 20
+      }) instanceof ExtraChocolate
+    );
   }
 }

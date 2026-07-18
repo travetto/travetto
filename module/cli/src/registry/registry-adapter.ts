@@ -9,13 +9,14 @@ const CLI_FILE_REGEX = /\/cli[.](?<name>.{0,100}?)([.]tsx?)?$/;
 
 const getName = (name: string): string => (name.match(CLI_FILE_REGEX)?.groups?.name ?? name).replaceAll('_', ':');
 const stripDashes = (flag?: string): string | undefined => flag?.replace(/^-+/, '');
-const toFlagName = (field: string): string => field.replace(/([a-z])([A-Z])/g, (_, left: string, right: string) => `${left}-${right.toLowerCase()}`);
+const toFlagName = (field: string): string =>
+  field.replace(/([a-z])([A-Z])/g, (_, left: string, right: string) => `${left}-${right.toLowerCase()}`);
 
 function combineClasses(base: CliCommandConfig, ...configs: Partial<CliCommandConfig>[]): CliCommandConfig {
   for (const config of configs) {
     base.runTarget = config.runTarget ?? base.runTarget;
     if (config.preMain) {
-      base.preMain = [...base.preMain ?? [], ...config.preMain ?? []];
+      base.preMain = [...(base.preMain ?? []), ...(config.preMain ?? [])];
     }
   }
   return base;
@@ -33,10 +34,11 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
   finalize(parent?: CliCommandConfig): void {
     // Add help command
     const schema = SchemaRegistryIndex.getConfig(this.#cls);
-    const used = new Set(Object.values(schema.fields)
-      .flatMap(field => field.aliases ?? [])
-      .filter(alias => !alias.startsWith(ENV_PREFIX))
-      .map(stripDashes)
+    const used = new Set(
+      Object.values(schema.fields)
+        .flatMap(field => field.aliases ?? [])
+        .filter(alias => !alias.startsWith(ENV_PREFIX))
+        .map(stripDashes)
     );
 
     for (const field of Object.values(schema.fields)) {
@@ -45,7 +47,7 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
 
       let short = stripDashes(shortAliases?.[0]) ?? rawAliases.find(alias => alias.length <= 2);
       const long = stripDashes(longAliases?.[0]) ?? rawAliases.find(alias => alias.length >= 3) ?? toFlagName(fieldName);
-      const aliases: string[] = field.aliases = [...envAliases];
+      const aliases: string[] = (field.aliases = [...envAliases]);
 
       if (short === undefined) {
         short = fieldName.charAt(0);
@@ -65,7 +67,7 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
     }
 
     if (parent) {
-      this.#config.preMain = [...this.#config.preMain, ...parent?.preMain ?? []];
+      this.#config.preMain = [...this.#config.preMain, ...(parent?.preMain ?? [])];
     }
 
     // Sort

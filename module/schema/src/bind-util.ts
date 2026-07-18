@@ -19,7 +19,6 @@ function isInstance<T>(value: unknown): value is T {
  * Utilities for binding objects to schemas
  */
 export class BindUtil {
-
   /**
    * Utility to make a property accessor enumerable at runtime
    */
@@ -43,9 +42,11 @@ export class BindUtil {
       value = DataUtil.coerceType(value, config.type, false);
 
       if (config.type === Number && config.precision && typeof value === 'number') {
-        if (config.precision[1]) { // Supports decimal
+        if (config.precision[1]) {
+          // Supports decimal
           value = +value.toFixed(config.precision[1]);
-        } else { // 0 digits
+        } else {
+          // 0 digits
           value = Math.trunc(value);
         }
       }
@@ -74,7 +75,7 @@ export class BindUtil {
         const name = part.split(/[^A-Za-z_0-9]/)[0];
         // biome-ignore lint/complexity/noUselessEscapeInRegex: Consistent escaping for open and close
         const idx = partArrayIndex ? part.split(/[\[\]]/)[1] : '';
-        const key = partArrayIndex ? (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined)) : undefined;
+        const key = partArrayIndex ? (/^\d+$/.test(idx) ? parseInt(idx, 10) : idx.trim() || undefined) : undefined;
 
         if (!(name in sub)) {
           sub[name] = typeof key === 'number' ? [] : {};
@@ -100,8 +101,8 @@ export class BindUtil {
         // biome-ignore lint/complexity/noUselessEscapeInRegex: Consistent escaping for open and close
         const idx = last.split(/[\[\]]/)[1];
 
-        let key = (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined));
-        sub[name] ??= (typeof key === 'string') ? {} : [];
+        let key = /^\d+$/.test(idx) ? parseInt(idx, 10) : idx.trim() || undefined;
+        sub[name] ??= typeof key === 'string' ? {} : [];
 
         const arrSub: Record<string, unknown> & { length: number } = castTo(sub[name]);
         if (key === undefined) {
@@ -127,8 +128,7 @@ export class BindUtil {
     for (const [key, value] of Object.entries(data)) {
       const pre = `${prefix}${key}`;
       if (DataUtil.isPlainObject(value)) {
-        Object.assign(out, this.flattenPaths(value, `${pre}.`)
-        );
+        Object.assign(out, this.flattenPaths(value, `${pre}.`));
       } else if (Array.isArray(value)) {
         for (let i = 0; i < value.length; i++) {
           const element = value[i];
@@ -164,7 +164,8 @@ export class BindUtil {
       const resolvedCls = SchemaRegistryIndex.resolveInstanceType<T>(cls, asFull<T>(data));
       const instance = classConstruct<T & { type?: string }>(resolvedCls);
 
-      for (const key of TypedObject.keys(instance)) { // Do not retain undefined fields
+      for (const key of TypedObject.keys(instance)) {
+        // Do not retain undefined fields
         const descriptor = Object.getOwnPropertyDescriptor(instance, key);
         if (descriptor?.writable === false || descriptor?.get) {
           continue;
@@ -217,7 +218,7 @@ export class BindUtil {
           if (schemaFieldName in data) {
             inboundField = schemaFieldName;
           } else if (field.aliases) {
-            for (const aliasedField of (field.aliases ?? [])) {
+            for (const aliasedField of field.aliases ?? []) {
               if (aliasedField in data) {
                 inboundField = aliasedField;
                 break;
@@ -282,7 +283,8 @@ export class BindUtil {
       return value;
     }
     const complex = SchemaRegistryIndex.has(config.type);
-    const bindConfig: BindConfig | undefined = (complex && 'view' in config && typeof config.view === 'string') ? { view: config.view } : undefined;
+    const bindConfig: BindConfig | undefined =
+      complex && 'view' in config && typeof config.view === 'string' ? { view: config.view } : undefined;
     if (config.array) {
       const subValue = !Array.isArray(value) ? [value] : value;
       if (complex) {

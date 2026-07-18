@@ -8,7 +8,7 @@ async function validateMain(fileOrImport: string): Promise<ValidationError | und
   } catch {
     return { message: `Unknown file: ${fileOrImport}`, source: 'arg', kind: 'invalid', path: 'fileOrImport' };
   }
-};
+}
 
 /**
  * Execute a module `main()` entrypoint directly.
@@ -19,22 +19,23 @@ async function validateMain(fileOrImport: string): Promise<ValidationError | und
 @CliCommand()
 @IsPrivate()
 export class MainCommand implements CliCommandShape {
-
   @MethodValidator(validateMain)
   async main(fileOrImport: string, args: string[] = []): Promise<void> {
     const parsed = CliParseUtil.getState(this);
     let result: unknown;
     try {
       const module = await Runtime.importFrom<{ main(..._: unknown[]): Promise<unknown> }>(fileOrImport);
-      result = await module.main(...args, ...parsed?.unknown ?? []);
+      result = await module.main(...args, ...(parsed?.unknown ?? []));
     } catch (error) {
       result = error;
       process.exitCode = Math.max(process.exitCode ? +process.exitCode : 1, 1);
     }
 
     if (result !== undefined) {
-      if (process.connected) { process.send?.(result); }
-      const payload = typeof result === 'string' ? result : (result instanceof Error ? result.stack : JSONUtil.toUTF8(result));
+      if (process.connected) {
+        process.send?.(result);
+      }
+      const payload = typeof result === 'string' ? result : result instanceof Error ? result.stack : JSONUtil.toUTF8(result);
       process[process.exitCode ? 'stderr' : 'stdout'].write(`${payload}\n`);
     }
   }

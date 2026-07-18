@@ -21,7 +21,6 @@ interface AutoState {
  * Processes `@Schema` to register class as a valid Schema
  */
 export class SchemaTransformer {
-
   static {
     TransformerHandler(this, this.startSchema, 'before', 'class', ['Schema']);
     TransformerHandler(this, this.finalizeSchema, 'after', 'class', ['Schema']);
@@ -74,7 +73,8 @@ export class SchemaTransformer {
     for (const item of state.getDecoratorList(node)) {
       if (item.targets?.includes('@travetto/schema:Schema')) {
         state[IsOptIn] ||= item.options?.includes('opt-in') ?? false;
-        const methodEnrolls = item.options?.filter(option => option.startsWith('method:'))?.map(option => option.replace('method:', '')) ?? [];
+        const methodEnrolls =
+          item.options?.filter(option => option.startsWith('method:'))?.map(option => option.replace('method:', '')) ?? [];
         for (const method of methodEnrolls) {
           state[AutoEnrollMethods].add(method);
         }
@@ -123,7 +123,7 @@ export class SchemaTransformer {
         [CONSTRUCTOR_PROPERTY]: {
           parameters: cons.parameters
             .map((parameter, i) => SchemaTransformUtil.computeInputDecoratorParams(state, parameter, { index: i }))
-            .map(expr => state.extendObjectLiteral({}, ...expr)),
+            .map(expr => state.extendObjectLiteral({}, ...expr))
         }
       };
     }
@@ -138,17 +138,15 @@ export class SchemaTransformer {
     if (accessors.length > 0) {
       node = DeclarationUtil.ensureConstructor(state.factory, node);
 
-      const accessorStatements = accessors.map(accessorName =>
-        SchemaTransformUtil.createAccessorDefineProperty(state, accessorName)
-      );
+      const accessorStatements = accessors.map(accessorName => SchemaTransformUtil.createAccessorDefineProperty(state, accessorName));
 
       const consIndex = node.members.findIndex(member => ts.isConstructorDeclaration(member));
       const consNode = node.members[consIndex] as ts.ConstructorDeclaration;
       const insertIndex = DeclarationUtil.getConstructorInsertIndex(consNode);
       const newStatements = [
-        ...consNode.body?.statements.slice(0, insertIndex) ?? [],
+        ...(consNode.body?.statements.slice(0, insertIndex) ?? []),
         ...accessorStatements,
-        ...consNode.body?.statements.slice(insertIndex) ?? []
+        ...(consNode.body?.statements.slice(insertIndex) ?? [])
       ];
       const updatedCons = state.factory.updateConstructorDeclaration(
         consNode,
@@ -156,11 +154,7 @@ export class SchemaTransformer {
         consNode.parameters,
         state.factory.createBlock(newStatements, true)
       );
-      newMembers = ts.factory.createNodeArray([
-        ...node.members.slice(0, consIndex),
-        updatedCons,
-        ...node.members.slice(consIndex + 1)
-      ]);
+      newMembers = ts.factory.createNodeArray([...node.members.slice(0, consIndex), updatedCons, ...node.members.slice(consIndex + 1)]);
     }
 
     delete state[InSchema];
@@ -171,9 +165,7 @@ export class SchemaTransformer {
 
     return state.factory.updateClassDeclaration(
       node,
-      DecoratorUtil.spliceDecorators(node, existing, [
-        state.createDecorator(SchemaTransformUtil.SCHEMA_IMPORT, 'Schema', ...params)
-      ]),
+      DecoratorUtil.spliceDecorators(node, existing, [state.createDecorator(SchemaTransformUtil.SCHEMA_IMPORT, 'Schema', ...params)]),
       node.name,
       node.typeParameters,
       node.heritageClauses,
@@ -186,8 +178,13 @@ export class SchemaTransformer {
    */
   static processSchemaMethod(state: TransformerState & AutoState, node: ts.MethodDeclaration): ts.MethodDeclaration {
     if (
-      this.isInvisible(state, node, node.modifiers?.some(m => m.kind === ts.SyntaxKind.StaticKeyword)) &&
-      !state[AutoEnrollMethods]?.has(node.name.getText())) {
+      this.isInvisible(
+        state,
+        node,
+        node.modifiers?.some(m => m.kind === ts.SyntaxKind.StaticKeyword)
+      ) &&
+      !state[AutoEnrollMethods]?.has(node.name.getText())
+    ) {
       return node;
     }
 
@@ -205,9 +202,7 @@ export class SchemaTransformer {
 
     return state.factory.updateMethodDeclaration(
       node,
-      DecoratorUtil.spliceDecorators(node, existing, [
-        state.createDecorator(SchemaTransformUtil.METHOD_IMPORT, 'Method', ...params)
-      ]),
+      DecoratorUtil.spliceDecorators(node, existing, [state.createDecorator(SchemaTransformUtil.METHOD_IMPORT, 'Method', ...params)]),
       node.asteriskToken,
       node.name,
       node.questionToken,

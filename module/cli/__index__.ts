@@ -1,4 +1,4 @@
-import type { } from './src/trv.d.ts';
+import type {} from './src/trv.d.ts';
 export * from './src/types.ts';
 export * from './src/execute.ts';
 export * from './src/schema.ts';

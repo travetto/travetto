@@ -7,9 +7,12 @@ const getSource = (source: string | undefined, defaultSource: ValidationError['s
   switch (source) {
     case 'custom':
     case 'arg':
-    case 'flag': return source;
-    case undefined: return defaultSource;
-    default: return 'custom';
+    case 'flag':
+      return source;
+    case undefined:
+      return defaultSource;
+    default:
+      return 'custom';
   }
 };
 
@@ -41,7 +44,7 @@ export class CliCommandSchemaUtil {
           const key = castKey<T>(item.fieldName);
           const value = item.value!;
           if (item.array) {
-            castTo<unknown[]>(template[key] ??= castTo([])).push(value);
+            castTo<unknown[]>((template[key] ??= castTo([]))).push(value);
           } else {
             template[key] = castTo(value);
           }
@@ -49,7 +52,7 @@ export class CliCommandSchemaUtil {
         }
         case 'arg': {
           if (item.array) {
-            castTo<unknown[]>(bound[item.index] ??= []).push(item.input);
+            castTo<unknown[]>((bound[item.index] ??= [])).push(item.input);
           } else {
             bound[item.index] = item.input;
           }
@@ -67,11 +70,13 @@ export class CliCommandSchemaUtil {
    */
   static async validate(command: CliCommandShape, args: unknown[]): Promise<typeof command> {
     const cls = getClass(command);
-    const paramNames = SchemaRegistryIndex.get(cls).getMethod('main').parameters.map(config => config.name!);
+    const paramNames = SchemaRegistryIndex.get(cls)
+      .getMethod('main')
+      .parameters.map(config => config.name!);
 
     const results = await Promise.all([
       SchemaValidator.validate(cls, command).then(() => [], transformFlagErrors),
-      SchemaValidator.validateMethod(cls, 'main', args, paramNames).then(() => [], transformArgErrors),
+      SchemaValidator.validateMethod(cls, 'main', args, paramNames).then(() => [], transformArgErrors)
     ]);
 
     const errors = results.flat();

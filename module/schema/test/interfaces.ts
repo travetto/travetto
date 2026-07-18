@@ -31,7 +31,6 @@ class User {
 
 @Suite()
 class ViewsTest {
-
   @BeforeAll()
   ready() {
     return Registry.init();

@@ -8,7 +8,6 @@ import { Unknowable } from './models/unknown.ts';
 
 @Suite()
 export class UnknownTest {
-
   @Test()
   async basic() {
     await Registry.init();

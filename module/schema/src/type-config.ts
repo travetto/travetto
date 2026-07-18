@@ -40,7 +40,7 @@ export class SchemaTypeUtil {
 
   static register(type: Class | Function, fn: (value: unknown) => boolean): void {
     SchemaTypeUtil.setSchemaTypeConfig(type, {
-      validate: (item: unknown) => fn(item) ? undefined : 'type'
+      validate: (item: unknown) => (fn(item) ? undefined : 'type')
     });
   }
 

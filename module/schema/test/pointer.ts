@@ -13,7 +13,6 @@ class Custom {
 
 @Suite()
 class PointerSuite {
-
   @BeforeAll()
   ready() {
     return Registry.init();

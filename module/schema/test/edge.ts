@@ -22,7 +22,6 @@ class SingleField {
 
 @Suite()
 class EdgeCases {
-
   @BeforeAll()
   async init() {
     await Registry.init();

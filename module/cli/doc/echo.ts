@@ -5,7 +5,6 @@ import { type CliCommandShape, CliCommand } from '@travetto/cli';
  */
 @CliCommand()
 export class CliEchoCommand implements CliCommandShape {
-
   /** Upper case */
   uppercase?: boolean;
 

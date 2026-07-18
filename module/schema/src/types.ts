@@ -1,4 +1,4 @@
-export class UnknownType { }
+export class UnknownType {}
 
 /**
  * Geometric Point as [number,number] with validation and binding support

@@ -31,7 +31,8 @@ export function Schema(config?: Partial<Pick<SchemaClassConfig, 'validators' | '
  * @param fn The validator function
  * @kind decorator
  */
-export const Validator = <T>(fn: ValidatorFn<T, string>) =>
+export const Validator =
+  <T>(fn: ValidatorFn<T, string>) =>
   (cls: Class<T>): void => {
     SchemaRegistryIndex.getForRegister(cls).register({ validators: [castTo(fn)] });
   };

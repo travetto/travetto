@@ -36,7 +36,6 @@ class Container {
 
 @Suite()
 class MappedTypeSuite {
-
   @BeforeAll()
   ready() {
     return Registry.init();

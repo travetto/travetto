@@ -3,9 +3,9 @@ import type { Any, Class } from '@travetto/runtime';
 export const HELP_FLAG = '--help';
 
 type OrProm<T> = T | Promise<T>;
-type ParsedFlag = { type: 'flag', input: string, array?: boolean, fieldName: string, value?: unknown };
-type ParsedArg = { type: 'arg', input: string, array?: boolean, index: number };
-type ParsedUnknown = { type: 'unknown', input: string };
+type ParsedFlag = { type: 'flag'; input: string; array?: boolean; fieldName: string; value?: unknown };
+type ParsedArg = { type: 'arg'; input: string; array?: boolean; index: number };
+type ParsedUnknown = { type: 'unknown'; input: string };
 type ParsedInput = ParsedUnknown | ParsedFlag | ParsedArg;
 
 export type ParsedState = {
@@ -34,7 +34,7 @@ export interface CliCommandShape {
   help?(): OrProm<string[]>;
 }
 
-export type PreMainHandler<T extends Any = Any> = { priority: number, handler: (cmd: T) => Any };
+export type PreMainHandler<T extends Any = Any> = { priority: number; handler: (cmd: T) => Any };
 
 /**
  * CLI Command schema shape

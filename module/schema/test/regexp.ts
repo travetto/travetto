@@ -5,7 +5,6 @@ import { CommonRegex } from '@travetto/schema';
 
 @Suite()
 export class RegExpTest {
-
   @Test()
   telephone() {
     assert(CommonRegex.telephone.test('555-555-5545'));

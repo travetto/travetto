@@ -1,13 +1,18 @@
 import ts from 'typescript';
 import {
-  type AnyType, DeclarationUtil, LiteralUtil,
-  DecoratorUtil, DocUtil, type ParamDocumentation, type TransformerState, transformCast,
+  type AnyType,
+  DeclarationUtil,
+  LiteralUtil,
+  DecoratorUtil,
+  DocUtil,
+  type ParamDocumentation,
+  type TransformerState,
+  transformCast
 } from '@travetto/transformer';
 
-export type ComputeConfig = { type?: AnyType, root?: ts.Node, name?: string, index?: number };
+export type ComputeConfig = { type?: AnyType; root?: ts.Node; name?: string; index?: number };
 
 export class SchemaTransformUtil {
-
   static SCHEMA_IMPORT = '@travetto/schema/src/decorator/schema.ts';
   static METHOD_IMPORT = '@travetto/schema/src/decorator/method.ts';
   static FIELD_IMPORT = '@travetto/schema/src/decorator/field.ts';
@@ -21,12 +26,16 @@ export class SchemaTransformUtil {
    */
   static toConcreteType(state: TransformerState, type: AnyType, node: ts.Node, root: ts.Node = node): ts.Expression {
     switch (type.key) {
-      case 'pointer': return this.toConcreteType(state, type.target, node, root);
-      case 'managed': return state.getOrImport(type);
-      case 'tuple': return state.fromLiteral(type.subTypes.map(subType => this.toConcreteType(state, subType, node, root)!));
-      case 'template': return state.createIdentifier(type.ctor.name);
+      case 'pointer':
+        return this.toConcreteType(state, type.target, node, root);
+      case 'managed':
+        return state.getOrImport(type);
+      case 'tuple':
+        return state.fromLiteral(type.subTypes.map(subType => this.toConcreteType(state, subType, node, root)!));
+      case 'template':
+        return state.createIdentifier(type.ctor.name);
       case 'literal': {
-        if ((type.ctor === Array) && type.typeArguments?.length) {
+        if (type.ctor === Array && type.typeArguments?.length) {
           return state.fromLiteral([this.toConcreteType(state, type.typeArguments[0], node, root)]);
         } else if (type.ctor) {
           return state.createIdentifier(type.ctor.name!);
@@ -40,16 +49,20 @@ export class SchemaTransformUtil {
         if (!existing) {
           const cls = state.factory.createClassDeclaration(
             [
-              state.createDecorator(this.SCHEMA_IMPORT, 'Schema', state.fromLiteral({
-
-                description: type.description,
-                mappedOperation: type.operation,
-                mappedFields: type.fields,
-              })),
+              state.createDecorator(
+                this.SCHEMA_IMPORT,
+                'Schema',
+                state.fromLiteral({
+                  description: type.description,
+                  mappedOperation: type.operation,
+                  mappedFields: type.fields
+                })
+              )
             ],
-            id, [], [state.factory.createHeritageClause(
-              ts.SyntaxKind.ExtendsKeyword, [state.factory.createExpressionWithTypeArguments(base, [])]
-            )], []
+            id,
+            [],
+            [state.factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [state.factory.createExpressionWithTypeArguments(base, [])])],
+            []
           );
           cls.getText = (): string => `
 class ${uniqueId} extends ${type.mappedClassName} { 
@@ -72,32 +85,43 @@ class ${uniqueId} extends ${type.mappedClassName} {
         if (!existing) {
           const cls = state.factory.createClassDeclaration(
             [
-              state.createDecorator(this.SCHEMA_IMPORT, 'Schema', state.fromLiteral({
-                description: type.description
-              })),
+              state.createDecorator(
+                this.SCHEMA_IMPORT,
+                'Schema',
+                state.fromLiteral({
+                  description: type.description
+                })
+              )
             ],
             id,
             [],
-            type.extendsFrom ? [
-              state.factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
-                state.factory.createExpressionWithTypeArguments(state.getOrImport(type.extendsFrom), [])
-              ])
-            ] : [],
-            Object.entries(type.fieldTypes)
-              .map(([key, value]) =>
-                this.computeInput(state, state.factory.createPropertyDeclaration(
-                  [], /\W/.test(key) ? state.factory.createComputedPropertyName(state.fromLiteral(key)) : key,
+            type.extendsFrom
+              ? [
+                  state.factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
+                    state.factory.createExpressionWithTypeArguments(state.getOrImport(type.extendsFrom), [])
+                  ])
+                ]
+              : [],
+            Object.entries(type.fieldTypes).map(([key, value]) =>
+              this.computeInput(
+                state,
+                state.factory.createPropertyDeclaration(
+                  [],
+                  /\W/.test(key) ? state.factory.createComputedPropertyName(state.fromLiteral(key)) : key,
                   value.undefinable || value.nullable ? state.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
-                  value.key === 'unknown' ? state.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword) : undefined, undefined
-                ), { type: value, root })
+                  value.key === 'unknown' ? state.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword) : undefined,
+                  undefined
+                ),
+                { type: value, root }
               )
+            )
           );
-          cls.getText = (): string => [
-            `class ${uniqueId} {`,
-            ...Object.entries(type.fieldTypes)
-              .map(([key, value]) => `  ${key}${value.nullable ? '?' : ''}: ${value.name};`),
-            '}'
-          ].join('\n');
+          cls.getText = (): string =>
+            [
+              `class ${uniqueId} {`,
+              ...Object.entries(type.fieldTypes).map(([key, value]) => `  ${key}${value.nullable ? '?' : ''}: ${value.name};`),
+              '}'
+            ].join('\n');
           state.addStatements([cls], root || node);
         }
         return id;
@@ -111,7 +135,7 @@ class ${uniqueId} extends ${type.mappedClassName} {
       case 'foreign': {
         break;
       }
-      default: { 
+      default: {
         // Object
       }
     }
@@ -121,11 +145,9 @@ class ${uniqueId} extends ${type.mappedClassName} {
   /**
    * Compute decorator params from property/parameter/getter/setter
    */
-  static computeInputDecoratorParams<T extends ts.PropertyDeclaration | ts.ParameterDeclaration | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration>(
-    state: TransformerState,
-    node: T,
-    config?: ComputeConfig
-  ): ts.Expression[] {
+  static computeInputDecoratorParams<
+    T extends ts.PropertyDeclaration | ts.ParameterDeclaration | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration
+  >(state: TransformerState, node: T, config?: ComputeConfig): ts.Expression[] {
     const typeExpr = config?.type ?? state.resolveType(ts.isSetAccessor(node) ? node.parameters[0] : node);
     const attrs: Record<string, string | boolean | object | number | ts.Expression> = {};
 
@@ -136,12 +158,13 @@ class ${uniqueId} extends ${type.mappedClassName} {
       } else if (node.questionToken || typeExpr.undefinable || node.initializer) {
         attrs.required = { active: false };
       }
-      if (node.initializer !== undefined && (
-        ts.isLiteralExpression(node.initializer) ||
-        node.initializer.kind === ts.SyntaxKind.TrueKeyword ||
-        node.initializer.kind === ts.SyntaxKind.FalseKeyword ||
-        (ts.isArrayLiteralExpression(node.initializer) && node.initializer.elements.length === 0)
-      )) {
+      if (
+        node.initializer !== undefined &&
+        (ts.isLiteralExpression(node.initializer) ||
+          node.initializer.kind === ts.SyntaxKind.TrueKeyword ||
+          node.initializer.kind === ts.SyntaxKind.FalseKeyword ||
+          (ts.isArrayLiteralExpression(node.initializer) && node.initializer.elements.length === 0))
+      ) {
         attrs.default = node.initializer;
       }
     } else {
@@ -157,7 +180,7 @@ class ${uniqueId} extends ${type.mappedClassName} {
       }
     }
 
-    const rawName = node.getSourceFile()?.text ? node.name.getText() ?? undefined : undefined;
+    const rawName = node.getSourceFile()?.text ? (node.name.getText() ?? undefined) : undefined;
     const providedName = config?.name ?? rawName!;
     attrs.name = providedName;
 
@@ -171,7 +194,7 @@ class ${uniqueId} extends ${type.mappedClassName} {
     // If we have a composition type
     if (primaryExpr.key === 'composition') {
       const values = primaryExpr.subTypes
-        .map(subType => subType.key === 'literal' ? subType.value : undefined)
+        .map(subType => (subType.key === 'literal' ? subType.value : undefined))
         .filter(value => value !== undefined && value !== null);
 
       if (values.length === primaryExpr.subTypes.length) {
@@ -191,8 +214,8 @@ class ${uniqueId} extends ${type.mappedClassName} {
 
     if (ts.isParameter(node)) {
       const parentComments = DocUtil.describeDocs(node.parent);
-      const paramComments: Partial<ParamDocumentation> = (parentComments.params ?? [])
-        .find(param => param.name === node.name.getText()) || {};
+      const paramComments: Partial<ParamDocumentation> =
+        (parentComments.params ?? []).find(param => param.name === node.name.getText()) || {};
 
       if (paramComments.description) {
         attrs.description = paramComments.description;
@@ -225,13 +248,19 @@ class ${uniqueId} extends ${type.mappedClassName} {
     }
 
     const resolved = this.toConcreteType(state, typeExpr, node, config?.root ?? node);
-    const type = typeExpr.key === 'foreign' ? state.getConcreteType(node, state.factory.createIdentifier('Object')) :
-      ts.isArrayLiteralExpression(resolved) ? resolved.elements[0] : resolved;
+    const type =
+      typeExpr.key === 'foreign'
+        ? state.getConcreteType(node, state.factory.createIdentifier('Object'))
+        : ts.isArrayLiteralExpression(resolved)
+          ? resolved.elements[0]
+          : resolved;
 
-    params.unshift(LiteralUtil.fromLiteral(state.factory, {
-      array: ts.isArrayLiteralExpression(resolved),
-      type
-    }));
+    params.unshift(
+      LiteralUtil.fromLiteral(state.factory, {
+        array: ts.isArrayLiteralExpression(resolved),
+        type
+      })
+    );
 
     if (existing) {
       const args = DecoratorUtil.getArguments(existing) ?? [];
@@ -250,7 +279,9 @@ class ${uniqueId} extends ${type.mappedClassName} {
    * Compute property information from declaration
    */
   static computeInput<T extends ts.PropertyDeclaration | ts.ParameterDeclaration | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration>(
-    state: TransformerState, node: T, config?: ComputeConfig
+    state: TransformerState,
+    node: T,
+    config?: ComputeConfig
   ): T {
     const existingField = state.findDecorator('@travetto/schema', node, 'Field', this.FIELD_IMPORT);
     const existingInput = state.findDecorator('@travetto/schema', node, 'Input', this.INPUT_IMPORT);
@@ -267,17 +298,21 @@ class ${uniqueId} extends ${type.mappedClassName} {
 
     let result: unknown;
     if (ts.isPropertyDeclaration(node)) {
-      result = state.factory.updatePropertyDeclaration(node,
-        modifiers, node.name, node.questionToken, node.type, node.initializer);
+      result = state.factory.updatePropertyDeclaration(node, modifiers, node.name, node.questionToken, node.type, node.initializer);
     } else if (ts.isParameter(node)) {
-      result = state.factory.updateParameterDeclaration(node,
-        modifiers, node.dotDotDotToken, node.name, node.questionToken, node.type, node.initializer);
+      result = state.factory.updateParameterDeclaration(
+        node,
+        modifiers,
+        node.dotDotDotToken,
+        node.name,
+        node.questionToken,
+        node.type,
+        node.initializer
+      );
     } else if (ts.isGetAccessorDeclaration(node)) {
-      result = state.factory.updateGetAccessorDeclaration(node,
-        modifiers, node.name, node.parameters, node.type, node.body);
+      result = state.factory.updateGetAccessorDeclaration(node, modifiers, node.name, node.parameters, node.type, node.body);
     } else {
-      result = state.factory.updateSetAccessorDeclaration(node,
-        modifiers, node.name, node.parameters, node.body);
+      result = state.factory.updateSetAccessorDeclaration(node, modifiers, node.name, node.parameters, node.body);
     }
     return transformCast(result);
   }
@@ -285,7 +320,7 @@ class ${uniqueId} extends ${type.mappedClassName} {
   /**
    * Unwrap type
    */
-  static unwrapType(type: AnyType): { out: Record<string, unknown>, type: AnyType } {
+  static unwrapType(type: AnyType): { out: Record<string, unknown>; type: AnyType } {
     const out: Record<string, unknown> = {};
 
     while (type?.key === 'literal' && type.typeArguments?.length) {
@@ -309,15 +344,21 @@ class ${uniqueId} extends ${type.mappedClassName} {
         out.type = state.getForeignTarget(type);
         break;
       }
-      case 'managed': out.type = state.typeToIdentifier(type); break;
-      case 'mapped': out.type = this.toConcreteType(state, type, target); break;
-      case 'shape': out.type = this.toConcreteType(state, type, target); break;
-      case 'template': out.type = state.factory.createIdentifier(type.ctor.name); break;
+      case 'managed':
+        out.type = state.typeToIdentifier(type);
+        break;
+      case 'mapped':
+        out.type = this.toConcreteType(state, type, target);
+        break;
+      case 'shape':
+        out.type = this.toConcreteType(state, type, target);
+        break;
+      case 'template':
+        out.type = state.factory.createIdentifier(type.ctor.name);
+        break;
       case 'literal': {
         if (type.ctor) {
-          out.type = out.array ?
-            this.toConcreteType(state, type, target) :
-            state.factory.createIdentifier(type.ctor.name);
+          out.type = out.array ? this.toConcreteType(state, type, target) : state.factory.createIdentifier(type.ctor.name);
         }
       }
     }
@@ -334,14 +375,16 @@ class ${uniqueId} extends ${type.mappedClassName} {
   static findInnerReturnMethod(state: TransformerState, node: ts.MethodDeclaration, methodName: string): ts.MethodDeclaration | undefined {
     // Process returnType
     const { type } = this.unwrapType(state.resolveReturnType(node));
-    let cls:ts.Type|ts.ClassDeclaration|undefined;
+    let cls: ts.Type | ts.ClassDeclaration | undefined;
     switch (type?.key) {
       case 'managed': {
         const [decorator] = DeclarationUtil.getDeclarations(type.original!);
         cls = decorator && ts.isClassDeclaration(decorator) ? decorator : undefined;
         break;
       }
-      case 'shape': cls = type.original; break;
+      case 'shape':
+        cls = type.original;
+        break;
     }
     if (cls) {
       return state.findMethodByName(cls, methodName);
@@ -375,14 +418,10 @@ class ${uniqueId} extends ${type.mappedClassName} {
   static createAccessorDefineProperty(state: TransformerState, accessorName: string): ts.Statement {
     const bindUtilImport = state.importFile(this.BIND_UTIL_IMPORT);
     return state.factory.createExpressionStatement(
-      state.factory.createCallExpression(
-        state.createAccess(bindUtilImport.identifier, 'BindUtil', 'registerAccessor'),
-        undefined,
-        [
-          state.factory.createThis(),
-          state.factory.createStringLiteral(accessorName)
-        ]
-      )
+      state.factory.createCallExpression(state.createAccess(bindUtilImport.identifier, 'BindUtil', 'registerAccessor'), undefined, [
+        state.factory.createThis(),
+        state.factory.createStringLiteral(accessorName)
+      ])
     );
   }
 }

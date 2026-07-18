@@ -5,7 +5,6 @@ import { DataUtil } from '@travetto/schema';
 
 @Suite()
 class DataUtilTests {
-
   @Test()
   testCoerceNothing() {
     assert(DataUtil.coerceType(null, Boolean) === null);
@@ -76,8 +75,8 @@ class DataUtilTests {
   @Test()
   testMerge() {
     assert(DataUtil.deepAssign({ a: 1, b: 2 }, { a: 5 }).a === 5);
-    assert(typeof DataUtil.deepAssign({ a: 1, b: () => { } }, { a: 5, c: 10 }).b !== 'number');
-    assert.deepEqual(DataUtil.deepAssign({ a: 1, b: () => { }, d: [1, 2, 3] }, { a: 5, c: 10, d: [1, 5, 6, 7] }).d, [1, 5, 6, 7]);
+    assert(typeof DataUtil.deepAssign({ a: 1, b: () => {} }, { a: 5, c: 10 }).b !== 'number');
+    assert.deepEqual(DataUtil.deepAssign({ a: 1, b: () => {}, d: [1, 2, 3] }, { a: 5, c: 10, d: [1, 5, 6, 7] }).d, [1, 5, 6, 7]);
 
     const right = {
       lines: { start: 15, end: 21 },
@@ -106,9 +105,7 @@ class DataUtilTests {
 
   @Test()
   testStrict() {
-    assert.throws(() =>
-      DataUtil.deepAssign({ a: 1 }, { a: '5' }, 'strict')
-    );
+    assert.throws(() => DataUtil.deepAssign({ a: 1 }, { a: '5' }, 'strict'));
   }
 
   @Test()
@@ -132,7 +129,10 @@ class DataUtilTests {
     // @ts-expect-error
     assert.deepStrictEqual(DataUtil.deepAssign({ a: { b: 5, c: [1, 2, 3] } }, { a: { b: undefined, c: [1, 2] } }, 'replace').a.c, [1, 2]);
     // @ts-expect-error
-    assert.deepStrictEqual(DataUtil.deepAssign({ a: { b: 5, c: [1, 2, 3] } }, { a: { b: undefined, c: [1, 2] } }, 'replace').a.b, undefined);
+    assert.deepStrictEqual(
+      DataUtil.deepAssign({ a: { b: 5, c: [1, 2, 3] } }, { a: { b: undefined, c: [1, 2] } }, 'replace').a.b,
+      undefined
+    );
   }
 
   @Test()
@@ -163,14 +163,15 @@ class DataUtilTests {
     assert.deepStrictEqual(DataUtil.filterByKeys({ name: 'bob', age: 20 }, [/a/]), {});
     assert.deepStrictEqual(DataUtil.filterByKeys({ name: 'bob', age: 20 }, ['age', /name/]), {});
     assert.deepStrictEqual(DataUtil.filterByKeys({ name: 'bob', age: 20 }, ['age', /namE/]), { name: 'bob' });
-    assert.deepStrictEqual(
-      DataUtil.filterByKeys({ name: 'bob', age: 20, child: { age: 11, name: 'gob' } }, ['age', /namE/]),
-      { name: 'bob', child: { name: 'gob' } }
-    );
-    assert.deepStrictEqual(
-      DataUtil.filterByKeys({ name: 'bob', age: 20, child: { age: 11, name: 'gob' } }, []),
-      { name: 'bob', age: 20, child: { name: 'gob', age: 11 } }
-    );
+    assert.deepStrictEqual(DataUtil.filterByKeys({ name: 'bob', age: 20, child: { age: 11, name: 'gob' } }, ['age', /namE/]), {
+      name: 'bob',
+      child: { name: 'gob' }
+    });
+    assert.deepStrictEqual(DataUtil.filterByKeys({ name: 'bob', age: 20, child: { age: 11, name: 'gob' } }, []), {
+      name: 'bob',
+      age: 20,
+      child: { name: 'gob', age: 11 }
+    });
   }
 
   @Test()
@@ -179,9 +180,9 @@ class DataUtilTests {
     assert(DataUtil.isSimpleValue(Number(5)));
     assert(DataUtil.isSimpleValue(Boolean(5)));
     assert(DataUtil.isSimpleValue(Function));
-    assert(DataUtil.isSimpleValue(() => { }));
-    assert(DataUtil.isSimpleValue(class { }));
-    assert(!DataUtil.isSimpleValue(new class { }()));
+    assert(DataUtil.isSimpleValue(() => {}));
+    assert(DataUtil.isSimpleValue(class {}));
+    assert(!DataUtil.isSimpleValue(new (class {})()));
   }
 
   @Test()
@@ -190,7 +191,7 @@ class DataUtilTests {
       assert(DataUtil.isPrimitive(v));
     }
 
-    for (const v of [[], {}, () => { }, new class { }(), null, undefined]) {
+    for (const v of [[], {}, () => {}, new (class {})(), null, undefined]) {
       assert(!DataUtil.isPrimitive(v));
     }
   }
@@ -216,8 +217,8 @@ class DataUtilTests {
     // biome-ignore lint/complexity/useRegexLiterals: Testing fully constructed vs literal Regexes
     assert(DataUtil.isPrimitive(new RegExp('.')));
     assert(!DataUtil.isPrimitive(Function));
-    assert(!DataUtil.isPrimitive(class { }));
-    assert(!DataUtil.isPrimitive(new class { }()));
+    assert(!DataUtil.isPrimitive(class {}));
+    assert(!DataUtil.isPrimitive(new (class {})()));
   }
 
   @Test()
@@ -226,6 +227,6 @@ class DataUtilTests {
     assert(DataUtil.isPlainObject(Object.create({})));
     assert(DataUtil.isPlainObject(Object.create(null)) !== true);
     assert(DataUtil.isPlainObject(Object.create(Function)) !== true);
-    assert(DataUtil.isPlainObject(new class { }()) !== true);
+    assert(DataUtil.isPlainObject(new (class {})()) !== true);
   }
 }

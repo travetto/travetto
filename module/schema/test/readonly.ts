@@ -7,7 +7,6 @@ import { ReadonlyUser } from './models/readonly.ts';
 
 @Suite('Readonly')
 class ReadonlySuite {
-
   @BeforeAll()
   async init() {
     await Registry.init();

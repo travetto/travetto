@@ -6,7 +6,6 @@ import { Registry } from '@travetto/registry';
 
 @Schema()
 class MyClass {
-
   /** @alias bob */
   @Alias('bob1', 'bob2')
   field: string;

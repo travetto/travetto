@@ -26,10 +26,10 @@ function validatePoint(input: unknown): 'type' | undefined {
 /**
  * Point Contract
  */
-export class PointContract { }
+export class PointContract {}
 
 SchemaTypeUtil.setSchemaTypeConfig(PointContract, {
   validate: validatePoint,
-  bind: bindPoint,
+  bind: bindPoint
 });
 Object.defineProperty(PointContract, 'name', { value: 'Point' });
