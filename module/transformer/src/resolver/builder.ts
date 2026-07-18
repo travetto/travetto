@@ -1,5 +1,5 @@
 /* eslint-disable no-bitwise */
-import ts from 'typescript';
+import ts, { ObjectFlags } from 'typescript';
 
 import { path, ManifestModuleUtil } from '@travetto/manifest';
 
@@ -288,7 +288,7 @@ export const TypeBuilder: {
           importName: first.importName,
           name: first.name,
           key: 'shape',
-          fieldTypes: subTypes.reduce((map, subType) => ({ ...map, ...subType.fieldTypes }), {})
+          fieldTypes: subTypes.reduce((map, subType) => Object.assign(map, {...subType.fieldTypes}), {})
         };
       }
       return type;
@@ -347,7 +347,7 @@ export const TypeBuilder: {
             !member.getName().includes('@') && // if not a symbol
             !memberType.getCallSignatures().length // if not a function
           ) {
-            if ((ts.isPropertySignature(declaration) || ts.isPropertyDeclaration(declaration)) && !!declaration.questionToken) {
+            if ((ts.isPropertySignature(declaration) || ts.isPropertyDeclaration(declaration)) && declaration.questionToken) {
               Object.defineProperty(memberType, UNDEFINED, { value: true });
             }
             tsFieldTypes[member.getName()] = memberType;

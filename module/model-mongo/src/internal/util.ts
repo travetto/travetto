@@ -187,7 +187,7 @@ export class MongoUtil {
     const name = this.namespaceIndex(cls, idx.name);
     if (isModelQueryIndex(idx)) {
       const out = idx.fields.reduce(
-        (acc, field) => ({ ...acc, ...flattenKeys(castTo(field)) }),
+        (acc, field) => Object.assign(acc, {...flattenKeys(castTo(field)) }),
         castTo<Record<string, -1 | 0 | 1>>({}));
 
       return [out, { name, unique: !!idx.unique }];
