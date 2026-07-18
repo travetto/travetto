@@ -65,6 +65,7 @@
       },
       "correctness": {
         "noUnusedFunctionParameters": "off",
+        "noUnusedPrivateClassMembers": "off",
         "noUnusedVariables": {
           "level": "on",
           "options": {

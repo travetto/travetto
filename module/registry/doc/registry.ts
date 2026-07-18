@@ -16,7 +16,6 @@ interface Child {
  * The adapter to handle mapping/modeling a specific class
  */
 class SampleRegistryAdapter implements RegistryAdapter<Group> {
-  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: needed for docs
   #class: Class;
   #config: Group;
 

@@ -76,7 +76,6 @@ export class Poly2 extends BasePoly {
 @Schema()
 export class Accessors {
   #area: string;
-  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: needed for test
   #color: string;
   readonly myName: string = 'name';
 
