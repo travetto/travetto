@@ -23,7 +23,7 @@ class Config {
     cfg.maxAgeMs = 2000;
 
     return {
-      async authenticate(body: { username?: string, password?: string }) {
+      async authenticate(body: { username?: string; password?: string }) {
         if (body.username === 'super-user' && body.password === 'password') {
           return {
             id: '5',
@@ -33,14 +33,13 @@ class Config {
           };
         }
         throw new AuthenticationError('User unknown');
-      }
+      },
     };
   }
 }
 
 @Controller('/test/auth')
 class TestAuthController {
-
   @Inject()
   authContext: AuthContext;
 
@@ -72,7 +71,6 @@ class TestAuthController {
 @Controller('/test/auth-all')
 @Authenticated()
 class TestAuthAllController {
-
   @Inject()
   authContext: AuthContext;
 
@@ -85,7 +83,6 @@ class TestAuthAllController {
 @Suite()
 @InjectableSuite()
 export abstract class AuthWebServerSuite extends BaseWebSuite {
-
   @Inject()
   config: WebAuthConfig;
 
@@ -108,13 +105,18 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
 
   @Test()
   async testBadAuth() {
-    const { context: { httpStatusCode: statusCode } } = await this.request({
-      context: { httpMethod: 'POST', path: '/test/auth/login' },
-      body: {
-        username: 'Todd',
-        password: 'Rod'
-      }
-    }, false);
+    const {
+      context: { httpStatusCode: statusCode },
+    } = await this.request(
+      {
+        context: { httpMethod: 'POST', path: '/test/auth/login' },
+        body: {
+          username: 'Todd',
+          password: 'Rod',
+        },
+      },
+      false,
+    );
     assert(statusCode === 401);
   }
 
@@ -122,13 +124,19 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testGoodAuth() {
     this.config.mode = 'cookie';
 
-    const { headers, context: { httpStatusCode: statusCode } } = await this.request({
-      context: { httpMethod: 'POST', path: '/test/auth/login' },
-      body: {
-        username: 'super-user',
-        password: 'password'
-      }
-    }, false);
+    const {
+      headers,
+      context: { httpStatusCode: statusCode },
+    } = await this.request(
+      {
+        context: { httpMethod: 'POST', path: '/test/auth/login' },
+        body: {
+          username: 'super-user',
+          password: 'password',
+        },
+      },
+      false,
+    );
     assert(headers.getSetCookie().length);
     assert(statusCode === 201);
   }
@@ -137,9 +145,14 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testBlockedAuthenticated() {
     this.config.mode = 'header';
 
-    const { context: { httpStatusCode: statusCode } } = await this.request({
-      context: { httpMethod: 'GET', path: '/test/auth/self' }
-    }, false);
+    const {
+      context: { httpStatusCode: statusCode },
+    } = await this.request(
+      {
+        context: { httpMethod: 'GET', path: '/test/auth/self' },
+      },
+      false,
+    );
     assert(statusCode === 401);
   }
 
@@ -147,21 +160,32 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testGoodAuthenticatedCookie() {
     this.config.mode = 'cookie';
 
-    const { headers, context: { httpStatusCode: statusCode } } = await this.request({
-      context: { httpMethod: 'POST', path: '/test/auth/login' },
-      body: {
-        username: 'super-user',
-        password: 'password'
-      }
-    }, false);
+    const {
+      headers,
+      context: { httpStatusCode: statusCode },
+    } = await this.request(
+      {
+        context: { httpMethod: 'POST', path: '/test/auth/login' },
+        body: {
+          username: 'super-user',
+          password: 'password',
+        },
+      },
+      false,
+    );
     assert(statusCode === 201);
     const cookie = await this.getCookieHeader(headers);
     assert(cookie);
 
-    const { context: { httpStatusCode: lastStatus } } = await this.request({
-      context: { httpMethod: 'GET', path: '/test/auth/self' },
-      headers: { cookie }
-    }, false);
+    const {
+      context: { httpStatusCode: lastStatus },
+    } = await this.request(
+      {
+        context: { httpMethod: 'GET', path: '/test/auth/self' },
+        headers: { cookie },
+      },
+      false,
+    );
     assert(lastStatus === 200);
   }
 
@@ -169,21 +193,32 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testGoodAuthenticatedHeader() {
     this.config.mode = 'header';
 
-    const { headers, context: { httpStatusCode: statusCode } } = await this.request({
-      context: { httpMethod: 'POST', path: '/test/auth/login' },
-      body: {
-        username: 'super-user',
-        password: 'password'
-      }
-    }, false);
+    const {
+      headers,
+      context: { httpStatusCode: statusCode },
+    } = await this.request(
+      {
+        context: { httpMethod: 'POST', path: '/test/auth/login' },
+        body: {
+          username: 'super-user',
+          password: 'password',
+        },
+      },
+      false,
+    );
     assert(statusCode === 201);
 
-    const { context: { httpStatusCode: lastStatus } } = await this.request({
-      context: { httpMethod: 'GET', path: '/test/auth/self' },
-      headers: {
-        Authorization: headers.get('Authorization')!
-      }
-    }, false);
+    const {
+      context: { httpStatusCode: lastStatus },
+    } = await this.request(
+      {
+        context: { httpMethod: 'GET', path: '/test/auth/self' },
+        headers: {
+          Authorization: headers.get('Authorization')!,
+        },
+      },
+      false,
+    );
     assert(lastStatus === 200);
   }
 
@@ -191,26 +226,42 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testAllAuthenticated() {
     this.config.mode = 'header';
 
-    const { context: { httpStatusCode: statusCode } } = await this.request({
-      context: { httpMethod: 'GET', path: '/test/auth-all/self' }
-    }, false);
+    const {
+      context: { httpStatusCode: statusCode },
+    } = await this.request(
+      {
+        context: { httpMethod: 'GET', path: '/test/auth-all/self' },
+      },
+      false,
+    );
     assert(statusCode === 401);
 
-    const { headers, context: { httpStatusCode: authStatus } } = await this.request({
-      context: { httpMethod: 'POST', path: '/test/auth/login' },
-      body: {
-        username: 'super-user',
-        password: 'password'
-      }
-    }, false);
+    const {
+      headers,
+      context: { httpStatusCode: authStatus },
+    } = await this.request(
+      {
+        context: { httpMethod: 'POST', path: '/test/auth/login' },
+        body: {
+          username: 'super-user',
+          password: 'password',
+        },
+      },
+      false,
+    );
     assert(authStatus === 201);
 
-    const { context: { httpStatusCode: lastStatus } } = await this.request({
-      context: { httpMethod: 'GET', path: '/test/auth-all/self' },
-      headers: {
-        Authorization: headers.get('Authorization')!
-      }
-    }, false);
+    const {
+      context: { httpStatusCode: lastStatus },
+    } = await this.request(
+      {
+        context: { httpMethod: 'GET', path: '/test/auth-all/self' },
+        headers: {
+          Authorization: headers.get('Authorization')!,
+        },
+      },
+      false,
+    );
     assert(lastStatus === 200);
   }
 
@@ -218,21 +269,33 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testTokenRetrieval() {
     this.config.mode = 'cookie';
 
-    const { headers, context: { httpStatusCode: statusCode } } = await this.request({
-      context: { httpMethod: 'POST', path: '/test/auth/login' },
-      body: {
-        username: 'super-user',
-        password: 'password'
-      }
-    }, false);
+    const {
+      headers,
+      context: { httpStatusCode: statusCode },
+    } = await this.request(
+      {
+        context: { httpMethod: 'POST', path: '/test/auth/login' },
+        body: {
+          username: 'super-user',
+          password: 'password',
+        },
+      },
+      false,
+    );
     assert(statusCode === 201);
     const cookie = await this.getCookieHeader(headers);
     assert(cookie);
 
-    const { body, context: { httpStatusCode: lastStatus } } = await this.request({
-      context: { httpMethod: 'GET', path: '/test/auth/token' },
-      headers: { cookie }
-    }, false);
+    const {
+      body,
+      context: { httpStatusCode: lastStatus },
+    } = await this.request(
+      {
+        context: { httpMethod: 'GET', path: '/test/auth/token' },
+        headers: { cookie },
+      },
+      false,
+    );
     assert(lastStatus === 200);
     assert(typeof body === 'string');
 
@@ -244,13 +307,19 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testCookieRollingRenewAuthenticated() {
     this.config.mode = 'cookie';
 
-    const { headers, context: { httpStatusCode: statusCode } } = await this.request({
-      context: { httpMethod: 'POST', path: '/test/auth/login' },
-      body: {
-        username: 'super-user',
-        password: 'password'
-      }
-    }, false);
+    const {
+      headers,
+      context: { httpStatusCode: statusCode },
+    } = await this.request(
+      {
+        context: { httpMethod: 'POST', path: '/test/auth/login' },
+        body: {
+          username: 'super-user',
+          password: 'password',
+        },
+      },
+      false,
+    );
     assert(statusCode === 201);
 
     const start = Date.now();
@@ -260,21 +329,33 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     const expires = await this.getCookieExpires(headers);
     assert(expires);
 
-    const { headers: selfHeaders, context: { httpStatusCode: lastStatus } } = await this.request({
-      context: { httpMethod: 'GET', path: '/test/auth/self' },
-      headers: { cookie }
-    }, false);
-    assert(await this.getCookie(selfHeaders) === undefined);
+    const {
+      headers: selfHeaders,
+      context: { httpStatusCode: lastStatus },
+    } = await this.request(
+      {
+        context: { httpMethod: 'GET', path: '/test/auth/self' },
+        headers: { cookie },
+      },
+      false,
+    );
+    assert((await this.getCookie(selfHeaders)) === undefined);
     assert(lastStatus === 200);
 
-    const used = (Date.now() - start);
+    const used = Date.now() - start;
     assert(used < 1000);
     await timers.setTimeout((2000 - used) / 2);
 
-    const { headers: selfHeadersRenew, context: { httpStatusCode: lastStatus2 } } = await this.request({
-      context: { httpMethod: 'GET', path: '/test/auth/self' },
-      headers: { cookie }
-    }, false);
+    const {
+      headers: selfHeadersRenew,
+      context: { httpStatusCode: lastStatus2 },
+    } = await this.request(
+      {
+        context: { httpMethod: 'GET', path: '/test/auth/self' },
+        headers: { cookie },
+      },
+      false,
+    );
     assert(lastStatus2 === 200);
     assert(await this.getCookie(selfHeadersRenew));
 

@@ -13,7 +13,6 @@ import type { WebAuthConfig } from './config.ts';
  */
 @Injectable(CommonPrincipalCodecSymbol)
 export class JWTPrincipalCodec implements PrincipalCodec {
-
   @Inject()
   config: WebAuthConfig;
 
@@ -29,7 +28,9 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   @PostConstruct()
   async finalizeVerifier(): Promise<void> {
     // Weird issue with their ES module support
-    const { default: { createVerifier } } = await import('njwt');
+    const {
+      default: { createVerifier },
+    } = await import('njwt');
     this.#verifier = createVerifier()
       .setSigningAlgorithm(this.#algorithm)
       .withKeyResolver((keyId, callback) => {
@@ -41,7 +42,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   async verify(token: string): Promise<Principal> {
     try {
       const jwt: Jwt & { body: { core: Principal } } = await new Promise((resolve, reject) =>
-        this.#verifier.verify(token, (error, verified) => error ? reject(error) : resolve(castTo(verified)))
+        this.#verifier.verify(token, (error, verified) => (error ? reject(error) : resolve(castTo(verified)))),
       );
       return jwt.body.core;
     } catch (error) {
@@ -53,9 +54,10 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   }
 
   token(request: WebRequest): AuthToken | undefined {
-    const value = (this.config.mode === 'header') ?
-      request.headers.getWithPrefix(this.config.header, this.config.headerPrefix) :
-      this.webAsyncContext.getValue(CookieJar).get(this.config.cookie, { signed: false });
+    const value =
+      this.config.mode === 'header'
+        ? request.headers.getWithPrefix(this.config.header, this.config.headerPrefix)
+        : this.webAsyncContext.getValue(CookieJar).get(this.config.cookie, { signed: false });
     return value ? { type: 'jwt', value } : undefined;
   }
 
@@ -70,7 +72,9 @@ export class JWTPrincipalCodec implements PrincipalCodec {
       throw new RuntimeError('Requested unknown key for signing');
     }
     // Weird issue with their ES module support
-    const { default: { create } } = await import('njwt');
+    const {
+      default: { create },
+    } = await import('njwt');
     const jwt = create({}, '-')
       .setExpiration(value.expiresAt!)
       .setIssuedAt(TimeUtil.duration((value.issuedAt ?? new Date()).getTime(), 's'))

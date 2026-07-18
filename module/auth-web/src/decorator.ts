@@ -11,14 +11,18 @@ import { AuthLogoutInterceptor } from './interceptors/logout.ts';
  * @kind decorator
  */
 export function Login(source: symbol, ...sources: symbol[]): EndpointDecorator {
-  return ControllerRegistryIndex.createInterceptorConfigDecorator(AuthLoginInterceptor, {
-    providers: [source, ...sources],
-    applies: true
-  }, {
-    responseContext: {
-      isPrivate: true
-    }
-  });
+  return ControllerRegistryIndex.createInterceptorConfigDecorator(
+    AuthLoginInterceptor,
+    {
+      providers: [source, ...sources],
+      applies: true,
+    },
+    {
+      responseContext: {
+        isPrivate: true,
+      },
+    },
+  );
 }
 
 /**
@@ -27,15 +31,19 @@ export function Login(source: symbol, ...sources: symbol[]): EndpointDecorator {
  * @kind decorator
  */
 export function Authenticated(permissions: string[] = []): EndpointDecorator {
-  return ControllerRegistryIndex.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
-    state: 'authenticated',
-    permissions,
-    applies: true,
-  }, {
-    responseContext: {
-      isPrivate: true
-    }
-  });
+  return ControllerRegistryIndex.createInterceptorConfigDecorator(
+    AuthVerifyInterceptor,
+    {
+      state: 'authenticated',
+      permissions,
+      applies: true,
+    },
+    {
+      responseContext: {
+        isPrivate: true,
+      },
+    },
+  );
 }
 
 /**
@@ -45,7 +53,7 @@ export function Authenticated(permissions: string[] = []): EndpointDecorator {
 export function Unauthenticated(): EndpointDecorator {
   return ControllerRegistryIndex.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
     state: 'unauthenticated',
-    applies: true
+    applies: true,
   });
 }
 
@@ -54,9 +62,13 @@ export function Unauthenticated(): EndpointDecorator {
  * @kind decorator
  */
 export function Logout(): EndpointDecorator {
-  return ControllerRegistryIndex.createInterceptorConfigDecorator(AuthLogoutInterceptor, { applies: true }, {
-    responseContext: {
-      isPrivate: true
-    }
-  });
+  return ControllerRegistryIndex.createInterceptorConfigDecorator(
+    AuthLogoutInterceptor,
+    { applies: true },
+    {
+      responseContext: {
+        isPrivate: true,
+      },
+    },
+  );
 }

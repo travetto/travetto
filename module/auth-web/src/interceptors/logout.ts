@@ -20,7 +20,6 @@ export class WebAuthLogoutConfig {
  */
 @Injectable()
 export class AuthLogoutInterceptor implements WebInterceptor<WebAuthLogoutConfig> {
-
   category: WebInterceptorCategory = 'application';
   dependsOn = [AuthContextInterceptor];
 

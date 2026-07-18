@@ -27,7 +27,6 @@ export class WebAuthLoginConfig {
  */
 @Injectable()
 export class AuthLoginInterceptor implements WebInterceptor<WebAuthLoginConfig> {
-
   category: WebInterceptorCategory = 'application';
   dependsOn = [AuthContextInterceptor];
 

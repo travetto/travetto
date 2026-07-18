@@ -1,6 +1,6 @@
 import { AuthenticationError, type Authenticator } from '@travetto/auth';
 
-type User = { username: string, password: string };
+type User = { username: string; password: string };
 
 export class SimpleAuthenticator implements Authenticator<User> {
   async authenticate({ username, password }: User) {
@@ -10,8 +10,8 @@ export class SimpleAuthenticator implements Authenticator<User> {
         source: 'simple',
         permissions: [],
         details: {
-          username: 'test'
-        }
+          username: 'test',
+        },
       };
     } else {
       throw new AuthenticationError('Invalid credentials');

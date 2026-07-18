@@ -6,7 +6,6 @@ import { FbAuthSymbol } from './config.ts';
 
 @Controller('/auth')
 export class SampleAuth {
-
   @ContextParam()
   request: WebRequest;
 
@@ -20,9 +19,7 @@ export class SampleAuth {
 
   @Get('/facebook')
   @Login(FbAuthSymbol)
-  async fbLogin() {
-
-  }
+  async fbLogin() {}
 
   @Get('/self')
   @Authenticated()
@@ -38,7 +35,7 @@ export class SampleAuth {
 
   @Post('/logout')
   @Logout()
-  async logout() { }
+  async logout() {}
 
   /**
    * Simple Echo

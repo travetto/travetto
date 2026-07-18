@@ -13,6 +13,4 @@ export class PrincipalSchema implements Principal {
   permissions?: string[] | undefined;
 }
 
-SchemaRegistryIndex.getForRegister(toConcrete<Principal>()).register(
-  SchemaRegistryIndex.getConfig(PrincipalSchema)
-);
+SchemaRegistryIndex.getForRegister(toConcrete<Principal>()).register(SchemaRegistryIndex.getConfig(PrincipalSchema));

@@ -9,7 +9,6 @@ import { AuthContextInterceptor } from '@travetto/auth-web';
  */
 @Injectable()
 export class AuthSessionInterceptor implements WebInterceptor {
-
   category: WebInterceptorCategory = 'application';
   dependsOn = [AuthContextInterceptor];
 

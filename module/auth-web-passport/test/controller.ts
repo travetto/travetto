@@ -9,10 +9,10 @@ const LOGIN = Symbol();
 
 @Controller('/auth')
 export class LoginTestController {
-
   @InjectableFactory()
   static config(): Authenticator {
-    return new PassportAuthenticator('local',
+    return new PassportAuthenticator(
+      'local',
       {
         name: 'local',
         authenticate(req, options) {
@@ -21,15 +21,13 @@ export class LoginTestController {
           } else {
             throw new Error(`Unknown user ${req.query}`);
           }
-        }
+        },
       },
-      v => castTo(v)
+      v => castTo(v),
     );
   }
 
   @Post('/user')
   @Login(LOGIN)
-  async login() {
-
-  }
+  async login() {}
 }

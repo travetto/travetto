@@ -14,7 +14,8 @@ export const FbAuthSymbol = Symbol.for('auth_facebook');
 export class AppConfig {
   @InjectableFactory(FbAuthSymbol)
   static facebookPassport(): Authenticator {
-    return new PassportAuthenticator('facebook',
+    return new PassportAuthenticator(
+      'facebook',
       new FacebookStrategy(
         {
           clientID: '<appId>',
@@ -22,23 +23,22 @@ export class AppConfig {
           callbackURL: 'http://localhost:3000/auth/facebook/callback',
           profileFields: ['id', 'username', 'displayName', 'photos', 'email'],
         },
-        (accessToken, refreshToken, profile, callback) =>
-          callback(undefined, profile)
+        (accessToken, refreshToken, profile, callback) => callback(undefined, profile),
       ),
       (user: FbUser) => ({
         id: user.username,
         permissions: user.permissions,
-        details: user
-      })
+        details: user,
+      }),
     );
   }
 
   @InjectableFactory()
   static principalSource(): Authorizer {
-    return new class implements Authorizer {
+    return new (class implements Authorizer {
       async authorize(principal: Principal) {
         return principal;
       }
-    }();
+    })();
   }
 }

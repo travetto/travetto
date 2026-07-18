@@ -6,7 +6,6 @@ import { FbAuthSymbol } from './facebook.ts';
 
 @Controller('/auth')
 export class SampleAuth {
-
   @ContextParam()
   user: Principal;
 

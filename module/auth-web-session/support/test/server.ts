@@ -6,8 +6,17 @@ import { AuthContextInterceptor, type WebAuthConfig } from '@travetto/auth-web';
 import type { SessionService, SessionData } from '@travetto/auth-session';
 import { Inject, Injectable } from '@travetto/di';
 import {
-  Controller, Get, Body, Post, Put, type WebRequest, type WebInterceptor,
-  ContextParam, type WebInterceptorCategory, type WebChainedContext, type WebInterceptorContext
+  Controller,
+  Get,
+  Body,
+  Post,
+  Put,
+  type WebRequest,
+  type WebInterceptor,
+  ContextParam,
+  type WebInterceptorCategory,
+  type WebChainedContext,
+  type WebInterceptorContext,
 } from '@travetto/web';
 import { castTo, Util } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
@@ -19,11 +28,10 @@ import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 // Ensure auth-session is loaded
 import '../../src/interceptor.ts';
 
-type Aged = { age: number, payload?: Record<string, unknown> };
+type Aged = { age: number; payload?: Record<string, unknown> };
 
 @Injectable()
 class AutoLogin implements WebInterceptor {
-
   category: WebInterceptorCategory = 'application';
   dependsOn = [AuthContextInterceptor];
 
@@ -39,7 +47,7 @@ class AutoLogin implements WebInterceptor {
       id: Util.uuid(),
       sessionId: Util.uuid(),
       issuedAt: new Date(),
-      details: {}
+      details: {},
     };
     return next();
   }
@@ -47,7 +55,6 @@ class AutoLogin implements WebInterceptor {
 
 @Controller('/test/session')
 class TestController {
-
   @Inject()
   session: SessionService;
 
@@ -77,7 +84,6 @@ class TestController {
 @Suite()
 @InjectableSuite()
 export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
-
   @Inject()
   authCfg: AuthConfig;
 

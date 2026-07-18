@@ -42,7 +42,6 @@ export class WebAuthVerifyConfig {
  */
 @Injectable()
 export class AuthVerifyInterceptor implements WebInterceptor<WebAuthVerifyConfig> {
-
   category: WebInterceptorCategory = 'application';
   dependsOn = [AuthContextInterceptor];
 
@@ -53,10 +52,7 @@ export class AuthVerifyInterceptor implements WebInterceptor<WebAuthVerifyConfig
   authContext: AuthContext;
 
   finalizeConfig({ config }: WebInterceptorContext<WebAuthVerifyConfig>): WebAuthVerifyConfig {
-    config.matcher = Util.allowDeny<string[], [Set<string>]>(config.permissions ?? [],
-      item => item.split('|'),
-      matchPermissionSet,
-    );
+    config.matcher = Util.allowDeny<string[], [Set<string>]>(config.permissions ?? [], item => item.split('|'), matchPermissionSet);
     return config;
   }
 

@@ -5,19 +5,17 @@ import { castTo, JSONUtil } from '@travetto/runtime';
  * Passport utilities
  */
 export class PassportUtil {
-
   /**
    * Read passport state string as bas64 encoded JSON value
    * @param input The input for a state read (string, or a request)
    */
   static readState<T = Record<string, unknown>>(input?: string | WebRequest): T | undefined {
-    const state = (typeof input === 'string' ? input :
-      (typeof input?.context.httpQuery?.state === 'string' ?
-        input?.context.httpQuery?.state : ''));
+    const state =
+      typeof input === 'string' ? input : typeof input?.context.httpQuery?.state === 'string' ? input?.context.httpQuery?.state : '';
     if (state) {
       try {
         return JSONUtil.fromBase64(state);
-      } catch { }
+      } catch {}
     }
   }
 
@@ -40,7 +38,7 @@ export class PassportUtil {
   static addToState(state: string | Record<string, unknown>, current?: string | WebRequest, key?: string): string {
     const original = this.readState(current) ?? {};
     const toAdd: Record<string, unknown> = typeof state === 'string' ? JSONUtil.fromUTF8(state) : state;
-    const base: Record<string, unknown> = key ? castTo(original[key] ??= {}) : original;
+    const base: Record<string, unknown> = key ? castTo((original[key] ??= {})) : original;
     for (const property of Object.keys(toAdd)) {
       if (property === '__proto__' || property === 'constructor' || property === 'prototype') {
         continue;

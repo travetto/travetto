@@ -20,7 +20,6 @@ class SessionConfig {
 @Authenticated()
 @Controller('/session')
 export class SessionEndpoints {
-
   @Inject()
   session: SessionContext;
 

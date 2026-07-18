@@ -11,7 +11,6 @@ import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 @Suite()
 @InjectableSuite()
 export class CodecTest {
-
   @Inject()
   interceptor: AuthContextInterceptor;
 
@@ -26,14 +25,12 @@ export class CodecTest {
     const response = new WebResponse();
     this.interceptor.config.mode = 'header';
 
-    await this.interceptor.codec.encode(response,
-      {
-        id: 'true',
-        details: {
-          data: 'hello'
-        }
-      }
-    );
+    await this.interceptor.codec.encode(response, {
+      id: 'true',
+      details: {
+        data: 'hello',
+      },
+    });
 
     assert(response.headers.has('Authorization'));
   }
@@ -52,33 +49,40 @@ export class CodecTest {
   async keyRotation() {
     this.interceptor.config.keyMap.orange = {
       id: 'orange',
-      key: 'green'
+      key: 'green',
     };
 
-    const token = await this.codec.create({
-      id: 'bob',
-      details: {}
-    }, 'orange');
-
-    await assert.doesNotReject(() =>
-      this.codec.verify(token)
+    const token = await this.codec.create(
+      {
+        id: 'bob',
+        details: {},
+      },
+      'orange',
     );
+
+    await assert.doesNotReject(() => this.codec.verify(token));
 
     await assert.rejects(() =>
-      this.codec.create({
-        id: 'bob',
-        details: {}
-      }, 'orange2')
+      this.codec.create(
+        {
+          id: 'bob',
+          details: {},
+        },
+        'orange2',
+      ),
     );
 
-    const token1 = await this.codec.create({
-      id: 'bob',
-      details: {}
-    }, 'orange');
+    const token1 = await this.codec.create(
+      {
+        id: 'bob',
+        details: {},
+      },
+      'orange',
+    );
 
     const token2 = await this.codec.create({
       id: 'bob',
-      details: {}
+      details: {},
     });
 
     const sig1: { kid: string } = JSONUtil.fromBase64(token1.split('.')[0]);

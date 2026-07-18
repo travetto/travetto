@@ -7,13 +7,12 @@ import { WebConnectUtil } from '@travetto/web-connect';
 import { PassportUtil } from './util.ts';
 
 type SimplePrincipal = Omit<Principal, 'issuedAt' | 'expiresAt'>;
-type PassportUser = Express.User & { _raw?: unknown, _json?: unknown, source?: unknown };
+type PassportUser = Express.User & { _raw?: unknown; _json?: unknown; source?: unknown };
 
 /**
  * Authenticator via passport
  */
 export class PassportAuthenticator<V extends PassportUser = PassportUser> implements Authenticator<object, WebFilterContext> {
-
   #strategyName: string;
   #strategy: passport.Strategy;
   #toPrincipal: (user: V, issuer?: string) => SimplePrincipal;
@@ -37,7 +36,7 @@ export class PassportAuthenticator<V extends PassportUser = PassportUser> implem
     this.#strategyName = strategyName;
     this.#strategy = strategy;
     this.#toPrincipal = toPrincipal;
-    this.#passportOptions = typeof options === 'function' ? options : ((): Partial<passport.AuthenticateOptions> => options);
+    this.#passportOptions = typeof options === 'function' ? options : (): Partial<passport.AuthenticateOptions> => options;
     passport.use(this.#strategyName, this.#strategy);
   }
 
@@ -58,11 +57,11 @@ export class PassportAuthenticator<V extends PassportUser = PassportUser> implem
       session: this.session,
       failWithError: true,
       ...requestOptions,
-      state: PassportUtil.enhanceState(ctx, requestOptions.state)
+      state: PassportUtil.enhanceState(ctx, requestOptions.state),
     };
 
     const user = await WebConnectUtil.invoke<V>(ctx, (request, response, next) =>
-      passport.authenticate(this.#strategyName, options, next)(request, response)
+      passport.authenticate(this.#strategyName, options, next)(request, response),
     );
 
     if (user) {
