@@ -4,7 +4,6 @@ import { ManifestModuleUtil, type ManifestRoot, type Package } from '@travetto/m
  * Standard utilities for compiler
  */
 export class CompilerUtil {
-
   /**
    * Rewrites the package.json to target output file names, and pins versions
    * @param manifest

@@ -7,7 +7,6 @@ const isNamed = (value: ts.Declaration): value is ts.Declaration & { name: ts.No
  * Declaration utils
  */
 export class DeclarationUtil {
-
   /**
    * Searches upward from the node until it finds the variable declaration list,
    * and then checks the toString for `const `
@@ -25,8 +24,10 @@ export class DeclarationUtil {
    */
   static isPublic(node: ts.Declaration): boolean {
     // eslint-disable-next-line no-bitwise
-    return !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.NonPublicAccessibilityModifier) &&
-      (!isNamed(node) || !ts.isPrivateIdentifier(node.name));
+    return (
+      !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.NonPublicAccessibilityModifier) &&
+      (!isNamed(node) || !ts.isPrivateIdentifier(node.name))
+    );
   }
 
   /**
@@ -66,7 +67,7 @@ export class DeclarationUtil {
   static getObjectFlags(type: ts.Type): ts.ObjectFlags {
     const _ts: typeof ts & { getObjectFlags?(node: ts.Type): ts.ObjectFlags } = ts;
     // eslint-disable-next-line no-bitwise
-    return _ts.getObjectFlags!(type) & ~(ts.NodeFlags.ThisNodeOrAnySubNodesHasError);
+    return _ts.getObjectFlags!(type) & ~ts.NodeFlags.ThisNodeOrAnySubNodesHasError;
   }
 
   /**
@@ -75,10 +76,14 @@ export class DeclarationUtil {
    * @param node
    * @returns
    */
-  static getAccessorPair(
-    node: ts.GetAccessorDeclaration | ts.SetAccessorDeclaration
-  ): { getter?: ts.GetAccessorDeclaration, setter?: ts.SetAccessorDeclaration } {
-    const pair = { getter: ts.isGetAccessorDeclaration(node) ? node : undefined, setter: ts.isSetAccessorDeclaration(node) ? node : undefined };
+  static getAccessorPair(node: ts.GetAccessorDeclaration | ts.SetAccessorDeclaration): {
+    getter?: ts.GetAccessorDeclaration;
+    setter?: ts.SetAccessorDeclaration;
+  } {
+    const pair = {
+      getter: ts.isGetAccessorDeclaration(node) ? node : undefined,
+      setter: ts.isSetAccessorDeclaration(node) ? node : undefined
+    };
     if (ts.isClassDeclaration(node.parent)) {
       for (const member of node.parent.members) {
         if (member.name && member.name.getText() === node.name.getText()) {
@@ -128,27 +133,15 @@ export class DeclarationUtil {
       ];
       newConsStatements.push(
         factory.createExpressionStatement(
-          factory.createCallExpression(
-            factory.createSuper(),
-            undefined,
-            [factory.createSpreadElement(factory.createIdentifier('args'))]
-          )
+          factory.createCallExpression(factory.createSuper(), undefined, [factory.createSpreadElement(factory.createIdentifier('args'))])
         )
       );
     }
-    const newCons = factory.createConstructorDeclaration(
-      undefined,
-      parameters,
-      factory.createBlock(newConsStatements, true)
-    );
-    return factory.updateClassDeclaration(
-      node,
-      node.modifiers,
-      node.name,
-      node.typeParameters,
-      node.heritageClauses,
-      [...node.members, newCons]
-    );
+    const newCons = factory.createConstructorDeclaration(undefined, parameters, factory.createBlock(newConsStatements, true));
+    return factory.updateClassDeclaration(node, node.modifiers, node.name, node.typeParameters, node.heritageClauses, [
+      ...node.members,
+      newCons
+    ]);
   }
 
   /**
@@ -157,8 +150,12 @@ export class DeclarationUtil {
   static getConstructorInsertIndex(node: ts.ConstructorDeclaration): number {
     if (node.body) {
       const first = node.body.statements[0];
-      if (first && ts.isExpressionStatement(first) && ts.isCallExpression(first.expression) &&
-          first.expression.expression.kind === ts.SyntaxKind.SuperKeyword) {
+      if (
+        first &&
+        ts.isExpressionStatement(first) &&
+        ts.isCallExpression(first.expression) &&
+        first.expression.expression.kind === ts.SyntaxKind.SuperKeyword
+      ) {
         return 1;
       }
     }

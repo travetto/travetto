@@ -17,7 +17,7 @@ const log = Log.scoped('compiler-exec');
  */
 export class CompilerManager {
   /** Run compile process */
-  static async * #runTarget(ctx: ManifestContext, watching: boolean, signal: AbortSignal): AsyncIterable<CompilerEvent> {
+  static async *#runTarget(ctx: ManifestContext, watching: boolean, signal: AbortSignal): AsyncIterable<CompilerEvent> {
     if (signal.aborted) {
       log.debug('Skipping, shutting down');
       return;
@@ -30,17 +30,17 @@ export class CompilerManager {
       env: {
         ...process.env,
         TRV_COMPILER_WATCH: String(watching),
-        TRV_MANIFEST: CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.workspace.name),
+        TRV_MANIFEST: CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.workspace.name)
       },
       detached: true,
-      stdio: ['pipe', 1, 2, 'ipc'],
+      stdio: ['pipe', 1, 2, 'ipc']
     })
       .on('message', message => EventUtil.isCompilerEvent(message) && queue.add(message))
       .on('exit', () => queue.close());
 
     const kill = (): unknown => {
       log.debug('Shutting down process');
-      return (subProcess.connected ? subProcess.send('shutdown', () => subProcess.kill()) : subProcess.kill());
+      return subProcess.connected ? subProcess.send('shutdown', () => subProcess.kill()) : subProcess.kill();
     };
 
     process.once('SIGINT', kill);
@@ -58,11 +58,15 @@ export class CompilerManager {
   }
 
   /** Main entry point for compilation */
-  static async compile(ctx: ManifestContext, client: CompilerClient, config: { watch?: boolean, logLevel?: CompilerLogLevel, forceRestart?: boolean }): Promise<void> {
+  static async compile(
+    ctx: ManifestContext,
+    client: CompilerClient,
+    config: { watch?: boolean; logLevel?: CompilerLogLevel; forceRestart?: boolean }
+  ): Promise<void> {
     Log.initLevel(config.logLevel ?? 'info');
     const watch = !!config.watch;
 
-    if (config.forceRestart && await client.stop()) {
+    if (config.forceRestart && (await client.stop())) {
       log.info('Stopped existing server');
     }
 
@@ -84,7 +88,8 @@ export class CompilerManager {
 
   /** Compile only if necessary */
   static async compileIfNecessary(ctx: ManifestContext, client: CompilerClient): Promise<void> {
-    if (!(await client.isWatching())) { // Short circuit if we can
+    if (!(await client.isWatching())) {
+      // Short circuit if we can
       await this.compile(ctx, client, { watch: false, logLevel: 'error' });
     }
   }

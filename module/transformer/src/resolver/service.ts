@@ -45,8 +45,10 @@ export class SimpleResolver implements TransformResolver {
 
     const sourceType = ManifestModuleUtil.getFileType(sourceFile);
 
-    return this.#manifestIndex.getEntry((sourceType === 'ts' || sourceType === 'js') ? sourceFile : undefined!) ??
-      this.#manifestIndex.getFromImport(ManifestModuleUtil.withoutSourceExtension(sourceFile).replace(/^.*node_modules\//, ''));
+    return (
+      this.#manifestIndex.getEntry(sourceType === 'ts' || sourceType === 'js' ? sourceFile : undefined!) ??
+      this.#manifestIndex.getFromImport(ManifestModuleUtil.withoutSourceExtension(sourceFile).replace(/^.*node_modules\//, ''))
+    );
   }
 
   /**
@@ -69,8 +71,7 @@ export class SimpleResolver implements TransformResolver {
    * Is the file/import known to the index, helpful for determine ownership
    */
   isKnownFile(fileOrImport: string): boolean {
-    return (this.#manifestIndex.getFromSource(fileOrImport) !== undefined) ||
-      (this.#manifestIndex.getFromImport(fileOrImport) !== undefined);
+    return this.#manifestIndex.getFromSource(fileOrImport) !== undefined || this.#manifestIndex.getFromImport(fileOrImport) !== undefined;
   }
 
   /**
@@ -116,7 +117,8 @@ export class SimpleResolver implements TransformResolver {
    * Get list of properties
    */
   getPropertiesOfType(type: ts.Type): ts.Symbol[] {
-    return this.#tsChecker.getPropertiesOfType(type)
+    return this.#tsChecker
+      .getPropertiesOfType(type)
       .filter(property => property.getName() !== '__proto__' && property.getName() !== 'prototype');
   }
 
@@ -128,7 +130,8 @@ export class SimpleResolver implements TransformResolver {
     const resolve = (resType: ts.Type, context?: Omit<ResolverContext, 'node' | 'importName'>): AnyType => {
       const { depth = 0 } = context ?? {};
 
-      if (depth > 20) { // Max depth is 20
+      if (depth > 20) {
+        // Max depth is 20
         throw new Error(`Object structure too nested: ${'getText' in node ? node.getText() : ''}`);
       }
 
@@ -137,7 +140,7 @@ export class SimpleResolver implements TransformResolver {
       const typeArguments: ts.Type[] =
         'resolvedTypeArguments' in resType && resType.resolvedTypeArguments ? transformCast(resType.resolvedTypeArguments) : [];
 
-      let result = TypeBuilder[category].build(this, type, { ...context, node: (node && 'kind' in node) ? node : undefined, importName });
+      let result = TypeBuilder[category].build(this, type, { ...context, node: node && 'kind' in node ? node : undefined, importName });
 
       // Convert via cache if needed
       result = visited.getOrSet(type, result);
@@ -149,14 +152,18 @@ export class SimpleResolver implements TransformResolver {
 
         try {
           result.description = DocUtil.describeDocs(type).description;
-        } catch { }
+        } catch {}
 
         if ('tsTypeArguments' in result) {
           const tsTypeArguments = result.tsTypeArguments!;
           if (typeArguments.length) {
-            result.typeArguments = typeArguments.map((item, i) => resolve(item, { alias: type.aliasSymbol, templateTypeName: tsTypeArguments[i][0], depth: depth + 1 }));
+            result.typeArguments = typeArguments.map((item, i) =>
+              resolve(item, { alias: type.aliasSymbol, templateTypeName: tsTypeArguments[i][0], depth: depth + 1 })
+            );
           } else {
-            result.typeArguments = tsTypeArguments.map((item) => resolve(item[1], { alias: type.aliasSymbol, templateTypeName: item[0], depth: depth + 1 }));
+            result.typeArguments = tsTypeArguments.map(item =>
+              resolve(item[1], { alias: type.aliasSymbol, templateTypeName: item[0], depth: depth + 1 })
+            );
           }
           delete result.tsTypeArguments;
         }
@@ -169,7 +176,7 @@ export class SimpleResolver implements TransformResolver {
           delete result.tsFieldTypes;
         }
         if ('tsSubTypes' in result) {
-          result.subTypes = result.tsSubTypes!.map((item) => resolve(item, { alias: type.aliasSymbol, depth: depth + 1 }));
+          result.subTypes = result.tsSubTypes!.map(item => resolve(item, { alias: type.aliasSymbol, depth: depth + 1 }));
           delete result.tsSubTypes;
         }
         if (isFinalizeType(result.key)) {

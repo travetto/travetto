@@ -29,7 +29,7 @@ export type Import = {
 
 /** Template Literal Types */
 export type TemplateLiteralPart = string | NumberConstructor | StringConstructor | BooleanConstructor | BigIntConstructor;
-export type TemplateLiteral = { operation: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };
+export type TemplateLiteral = { operation: 'and' | 'or'; values: (TemplateLiteralPart | TemplateLiteral)[] };
 
 export function transformCast<T>(input: unknown): T {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

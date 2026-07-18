@@ -8,8 +8,11 @@ import { CommonUtil } from '../src/common.ts';
 import { EventUtil } from '../src/event.ts';
 
 const hasColor = (process.stdout.isTTY && /^(0)*$/.test(process.env.NO_COLOR ?? '')) || /1\d*/.test(process.env.FORCE_COLOR ?? '');
-const color = (code: number) => (value: string): string => hasColor ? `\x1b[${code}m${value}\x1b[0m` : `${value}`;
-const STYLE = { error: color(91), title: color(36), main: color(92), command: color(35), arg: color(37), description: color(33), };
+const color =
+  (code: number) =>
+  (value: string): string =>
+    hasColor ? `\x1b[${code}m${value}\x1b[0m` : `${value}`;
+const STYLE = { error: color(91), title: color(36), main: color(92), command: color(35), arg: color(37), description: color(33) };
 
 const COMMANDS = {
   start: { description: 'Run the compiler in watch mode' },
@@ -31,17 +34,26 @@ function showHelp(errorMessage?: string): void {
 
   const commandWidth = Math.max(...PREPARED.map(config => config.commandLength));
 
-  console.log([
-    ...(errorMessage ? ['', STYLE.error(errorMessage)] : []),
-    '', `${STYLE.main('trvc')} ${STYLE.command('[command]')}`,
-    '', STYLE.title('Available Commands'),
-    ...PREPARED.map(({ name, args, description, commandLength }) => [
-      '*', STYLE.command(name), ...args.map(arg => STYLE.arg(arg)),
-      ' '.repeat(commandWidth - commandLength), '-', STYLE.description(description)
-
-    ].join(' ')),
-    ''
-  ].join('\n'));
+  console.log(
+    [
+      ...(errorMessage ? ['', STYLE.error(errorMessage)] : []),
+      '',
+      `${STYLE.main('trvc')} ${STYLE.command('[command]')}`,
+      '',
+      STYLE.title('Available Commands'),
+      ...PREPARED.map(({ name, args, description, commandLength }) =>
+        [
+          '*',
+          STYLE.command(name),
+          ...args.map(arg => STYLE.arg(arg)),
+          ' '.repeat(commandWidth - commandLength),
+          '-',
+          STYLE.description(description)
+        ].join(' ')
+      ),
+      ''
+    ].join('\n')
+  );
 }
 
 const validateInputs = (value: string[]): value is [keyof typeof COMMANDS, ...string[]] => !!value.length && value[0] in COMMANDS;
@@ -62,9 +74,12 @@ export async function invoke(...input: string[]): Promise<unknown> {
   Log.root = ctx.workspace.path;
 
   switch (command) {
-    case 'start': return CompilerManager.compile(ctx, client, { watch: true });
-    case 'build': return CompilerManager.compile(ctx, client, { watch: false });
-    case 'restart': return CompilerManager.compile(ctx, client, { watch: true, forceRestart: true });
+    case 'start':
+      return CompilerManager.compile(ctx, client, { watch: true });
+    case 'build':
+      return CompilerManager.compile(ctx, client, { watch: false });
+    case 'restart':
+      return CompilerManager.compile(ctx, client, { watch: true, forceRestart: true });
     case 'info': {
       const info = await client.info();
       return CommonUtil.writeStdout(2, info);

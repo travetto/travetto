@@ -11,7 +11,7 @@ export class DocUtil {
   /**
    * See if node has js docs
    */
-  static hasJSDoc(node: ts.Node): node is (ts.Node & { jsDoc: ts.JSDoc[] }) {
+  static hasJSDoc(node: ts.Node): node is ts.Node & { jsDoc: ts.JSDoc[] } {
     return 'jsDoc' in node && node.jsDoc !== null && node.jsDoc !== undefined && Array.isArray(node.jsDoc) && node.jsDoc.length > 0;
   }
 
@@ -26,8 +26,7 @@ export class DocUtil {
    * Read JS Docs from a `ts.Declaration`
    */
   static describeDocs(node: ts.Declaration | ts.Type): DeclDocumentation {
-    let toDescribe = (node && !('getSourceFile' in node)) ?
-      DeclarationUtil.getOptionalPrimaryDeclarationNode(node) : node;
+    let toDescribe = node && !('getSourceFile' in node) ? DeclarationUtil.getOptionalPrimaryDeclarationNode(node) : node;
 
     const out: DeclDocumentation = {
       description: undefined,
@@ -75,9 +74,7 @@ export class DocUtil {
    */
   static readDocTag(type: ts.Type | ts.Symbol, name: string): string[] {
     const tags = CoreUtil.getSymbol(type)?.getJsDocTags() ?? [];
-    return tags
-      .filter(tag => tag.name === name && !!tag.text)
-      .map(tag => tag.text!.map(part => part.text).join('')); // Join all text
+    return tags.filter(tag => tag.name === name && !!tag.text).map(tag => tag.text!.map(part => part.text).join('')); // Join all text
   }
 
   /**

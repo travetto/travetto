@@ -26,7 +26,6 @@ const streamAgent = new Agent({
  * Compiler Client Operations
  */
 export class CompilerClient {
-
   #url: string;
   #log: LogShape;
   #handle: Record<'compiler' | 'server', ProcessHandle>;
@@ -47,17 +46,18 @@ export class CompilerClient {
     return this.#url;
   }
 
-  async #fetch(urlPath: string, options?: RequestInit & { timeout?: number }, logTimeout = true): Promise<{ ok: boolean, text: string }> {
+  async #fetch(urlPath: string, options?: RequestInit & { timeout?: number }, logTimeout = true): Promise<{ ok: boolean; text: string }> {
     const controller = new AbortController();
     const timeoutController = new AbortController();
 
     options?.signal?.addEventListener('abort', () => controller.abort());
-    timers.setTimeout(options?.timeout ?? 100, undefined, { ref: false, signal: timeoutController.signal })
+    timers
+      .setTimeout(options?.timeout ?? 100, undefined, { ref: false, signal: timeoutController.signal })
       .then(() => {
         logTimeout && this.#log.error(`Timeout on request to ${this.#url}${urlPath}`);
         controller.abort('TIMEOUT');
       })
-      .catch(() => { });
+      .catch(() => {});
     const response = await fetch(`${this.#url}${urlPath}`, { ...options, signal: controller.signal });
     const out = { ok: response.ok, text: await response.text() };
     timeoutController.abort();
@@ -66,7 +66,10 @@ export class CompilerClient {
 
   /** Get server information, if server is running */
   info(): Promise<CompilerServerInfo | undefined> {
-    return this.#fetch('/info', { timeout: 200 }, false).then(response => JSON.parse(response.text), () => undefined);
+    return this.#fetch('/info', { timeout: 200 }, false).then(
+      response => JSON.parse(response.text),
+      () => undefined
+    );
   }
 
   async isWatching(): Promise<boolean> {
@@ -75,13 +78,19 @@ export class CompilerClient {
 
   /** Clean the server */
   async clean(forceOnFailure?: boolean): Promise<boolean> {
-    const result = await this.#fetch('/clean', { timeout: 300 }).then(response => response.ok, () => false);
+    const result = await this.#fetch('/clean', { timeout: 300 }).then(
+      response => response.ok,
+      () => false
+    );
     if (!result && forceOnFailure) {
       this.#log.warn('Clean request failed, forcing cleanup');
       try {
-        await Promise.all([this.#ctx.build.outputFolder, this.#ctx.build.typesFolder]
-          .map(file => fs.rm(CommonUtil.resolveWorkspace(this.#ctx, file), { force: true, recursive: true })));
-      } catch { }
+        await Promise.all(
+          [this.#ctx.build.outputFolder, this.#ctx.build.typesFolder].map(file =>
+            fs.rm(CommonUtil.resolveWorkspace(this.#ctx, file), { force: true, recursive: true })
+          )
+        );
+      } catch {}
     }
     return result;
   }
@@ -91,18 +100,20 @@ export class CompilerClient {
     const info = await this.info();
     if (!info) {
       this.#log.debug('Stopping server, info not found, manual killing');
-      return Promise.all([this.#handle.server.kill(), this.#handle.compiler.kill()])
-        .then(results => results.some(result => result));
+      return Promise.all([this.#handle.server.kill(), this.#handle.compiler.kill()]).then(results => results.some(result => result));
     }
 
-    await this.#fetch('/stop').catch(() => { }); // Trigger
+    await this.#fetch('/stop').catch(() => {}); // Trigger
     this.#log.debug('Waiting for compiler to exit');
     await this.#handle.compiler.ensureKilled();
     return true;
   }
 
   /** Fetch compiler events */
-  async * fetchEvents<V extends CompilerEventType, T extends CompilerEventPayload<V>>(type: V, config: FetchEventsConfig<T> = {}): AsyncIterable<T> {
+  async *fetchEvents<V extends CompilerEventType, T extends CompilerEventPayload<V>>(
+    type: V,
+    config: FetchEventsConfig<T> = {}
+  ): AsyncIterable<T> {
     let info = await this.info();
     if (!info) {
       return;
@@ -121,14 +132,13 @@ export class CompilerClient {
 
     const { iteration } = info;
 
-    for (; ;) {
+    for (;;) {
       const controller = new AbortController();
       const quit = (): void => controller.abort();
       try {
         signal.addEventListener('abort', quit);
         const response = await new Promise<http.IncomingMessage>((resolve, reject) =>
-          http.get(`${this.#url}/event/${type}`, { agent: streamAgent, signal: controller.signal }, resolve)
-            .on('error', reject)
+          http.get(`${this.#url}/event/${type}`, { agent: streamAgent, signal: controller.signal }, resolve).on('error', reject)
         );
 
         for await (const line of rl.createInterface(response)) {
@@ -143,7 +153,9 @@ export class CompilerClient {
         }
       } catch (error) {
         const aborted = controller.signal.aborted || (typeof error === 'object' && error && 'code' in error && error.code === 'ECONNRESET');
-        if (!aborted) { throw error; }
+        if (!aborted) {
+          throw error;
+        }
       }
       signal.removeEventListener('abort', quit);
 
@@ -156,7 +168,8 @@ export class CompilerClient {
         return;
       }
 
-      if (controller.signal.aborted || !info || (config.enforceIteration && info.iteration !== iteration)) { // If health check fails, or aborted
+      if (controller.signal.aborted || !info || (config.enforceIteration && info.iteration !== iteration)) {
+        // If health check fails, or aborted
         this.#log.debug(`Stopping watch for events of type "${type}"`);
         return;
       } else {
@@ -170,7 +183,8 @@ export class CompilerClient {
     const set = new Set(states);
     // Loop until
     this.#log.debug(`Waiting for states, ${states.join(', ')}`);
-    for await (const _ of this.fetchEvents('state', { signal, until: event => set.has(event.state) })) { }
+    for await (const _ of this.fetchEvents('state', { signal, until: event => set.has(event.state) })) {
+    }
     this.#log.debug(`Found state, one of ${states.join(', ')} `);
     if (message) {
       this.#log.info(message);

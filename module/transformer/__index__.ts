@@ -14,6 +14,14 @@ export * from './src/util/log.ts';
 export * from './src/util/system.ts';
 
 export type {
-  AnyType, ForeignType, ManagedType, PointerType, LiteralType, ShapeType,
-  CompositionType, TupleType, UnknownType, TemplateType
+  AnyType,
+  ForeignType,
+  ManagedType,
+  PointerType,
+  LiteralType,
+  ShapeType,
+  CompositionType,
+  TupleType,
+  UnknownType,
+  TemplateType
 } from './src/resolver/types.ts';

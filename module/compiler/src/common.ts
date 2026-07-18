@@ -6,11 +6,14 @@ import { type ManifestContext, path } from '@travetto/manifest';
 import { Log } from './log.ts';
 
 export class CommonUtil {
-
   /**
    * Restartable Event Stream
    */
-  static async * restartableEvents<T>(input: (signal: AbortSignal) => AsyncIterable<T>, parent: AbortSignal, shouldRestart: (item: T) => boolean): AsyncIterable<T> {
+  static async *restartableEvents<T>(
+    input: (signal: AbortSignal) => AsyncIterable<T>,
+    parent: AbortSignal,
+    shouldRestart: (item: T) => boolean
+  ): AsyncIterable<T> {
     const log = Log.scoped('event-stream');
     outer: while (!parent.aborted) {
       const controller = new AbortController();
@@ -37,7 +40,8 @@ export class CommonUtil {
       log.debug('Finished event stream');
 
       // Natural exit, we done
-      if (!controller.signal.aborted) { // Shutdown source if still running
+      if (!controller.signal.aborted) {
+        // Shutdown source if still running
         controller.abort();
       }
       return;
@@ -48,14 +52,14 @@ export class CommonUtil {
    * Non-blocking timeout
    */
   static nonBlockingTimeout(time: number): Promise<void> {
-    return timers.setTimeout(time, undefined, { ref: false }).catch(() => { });
+    return timers.setTimeout(time, undefined, { ref: false }).catch(() => {});
   }
 
   /**
    * Blocking timeout
    */
   static blockingTimeout(time: number): Promise<void> {
-    return timers.setTimeout(time, undefined, { ref: true }).catch(() => { });
+    return timers.setTimeout(time, undefined, { ref: true }).catch(() => {});
   }
 
   /**
@@ -76,8 +80,10 @@ export class CommonUtil {
    * Write to stdout with backpressure handling
    */
   static async writeStdout(level: number, data: unknown): Promise<void> {
-    if (data === undefined) { return; }
+    if (data === undefined) {
+      return;
+    }
     process.stdout.write(`${JSON.stringify(data, undefined, level)}\n`) ||
-      await new Promise(resolve => process.stdout.once('drain', resolve));
-  };
+      (await new Promise(resolve => process.stdout.once('drain', resolve)));
+  }
 }

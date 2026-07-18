@@ -10,7 +10,7 @@ module.registerHooks({
     if (/[.]tsx?$/.test(url)) {
       const source = readFileSync(fileURLToPath(url), 'utf8');
       try {
-        process.emitWarning = () => { };
+        process.emitWarning = () => {};
         return { format: 'module', source: module.stripTypeScriptTypes(source), shortCircuit: true };
       } finally {
         process.emitWarning = ogEmitWarning;

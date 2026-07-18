@@ -11,7 +11,6 @@ import { getAllTransformers } from './register.ts';
  * Manages the typescript transformers
  */
 export class TransformerManager {
-
   /**
    * Create transformer manager
    * @param transformerFiles
@@ -23,16 +22,19 @@ export class TransformerManager {
 
     const transformers: NodeTransformer<TransformerState>[] = [];
 
-    for (const file of transformerFiles) { // Exclude based on blacklist
+    for (const file of transformerFiles) {
+      // Exclude based on blacklist
       const entry = manifestIndex.getEntry(file)!;
       transformers.push(...getAllTransformers(await import(entry.import), entry.module));
     }
 
     for (const transformer of transformers) {
       process.send?.({
-        type: 'log', payload: {
+        type: 'log',
+        payload: {
           level: 'debug',
-          message: `Loaded Transformer: ${transformer.key}#${transformer.type}`, scope: 'transformers'
+          message: `Loaded Transformer: ${transformer.key}#${transformer.type}`,
+          scope: 'transformers'
         }
       });
     }

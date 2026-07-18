@@ -20,7 +20,6 @@ function isKnownFn(value: unknown): value is Function {
  * Utilities for dealing with literals
  */
 export class LiteralUtil {
-
   /**
    * Determine if a type is a literal type
    * @param type
@@ -43,7 +42,8 @@ export class LiteralUtil {
   static fromLiteral(factory: ts.NodeFactory, value: number): ts.NumericLiteral;
   static fromLiteral(factory: ts.NodeFactory, value: boolean): ts.BooleanLiteral;
   static fromLiteral(factory: ts.NodeFactory, value: unknown): ts.Node {
-    if (isNode(value)) { // If already a node
+    if (isNode(value)) {
+      // If already a node
       return value;
     } else if (Array.isArray(value)) {
       value = factory.createArrayLiteralExpression(value.map(element => this.fromLiteral(factory, element)));
@@ -69,9 +69,7 @@ export class LiteralUtil {
       const pairs: ts.PropertyAssignment[] = [];
       for (const key of TypedObject.keys(ov)) {
         if (ov[key] !== undefined) {
-          pairs.push(
-            factory.createPropertyAssignment(key, this.fromLiteral(factory, ov[key]))
-          );
+          pairs.push(factory.createPropertyAssignment(key, this.fromLiteral(factory, ov[key])));
         }
       }
       return factory.createObjectLiteralExpression(pairs);
@@ -142,12 +140,16 @@ export class LiteralUtil {
   /**
    * Extend object literal, whether JSON or ts.ObjectLiteralExpression
    */
-  static extendObjectLiteral(factory: ts.NodeFactory, source: object | ts.Expression, ...rest: (object | ts.Expression)[]): ts.ObjectLiteralExpression {
+  static extendObjectLiteral(
+    factory: ts.NodeFactory,
+    source: object | ts.Expression,
+    ...rest: (object | ts.Expression)[]
+  ): ts.ObjectLiteralExpression {
     let literal = this.fromLiteral(factory, source);
     if (rest.find(item => !!item)) {
       literal = factory.createObjectLiteralExpression([
         factory.createSpreadAssignment(literal),
-        ...(rest.filter(item => !!item).map(expression => factory.createSpreadAssignment(this.fromLiteral(factory, expression))))
+        ...rest.filter(item => !!item).map(expression => factory.createSpreadAssignment(this.fromLiteral(factory, expression)))
       ]);
     }
     return literal;

@@ -4,6 +4,6 @@ export class Test {
   dob: Date;
 
   computeAge(): void {
-    this.age = (Date.now() - this.dob.getTime());
+    this.age = Date.now() - this.dob.getTime();
   }
 }

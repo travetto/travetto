@@ -17,7 +17,6 @@ const log = new IpcLogger({ level: 'debug' });
  * Compilation support
  */
 export class Compiler {
-
   /**
    * Run compiler as a main entry point
    */
@@ -44,9 +43,7 @@ export class Compiler {
     this.#shutdownController = new AbortController();
     this.#shutdownSignal = this.#shutdownController.signal;
     setMaxListeners(1000, this.#shutdownSignal);
-    process
-      .once('disconnect', () => this.#shutdown('manual'))
-      .on('message', event => (event === 'shutdown') && this.#shutdown('manual'));
+    process.once('disconnect', () => this.#shutdown('manual')).on('message', event => event === 'shutdown' && this.#shutdown('manual'));
   }
 
   #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset', errorMessage?: string): void {
@@ -111,7 +108,7 @@ export class Compiler {
   /**
    * Emit all files as a stream
    */
-  async * emit(files: string[]): AsyncIterable<CompileEmitEvent> {
+  async *emit(files: string[]): AsyncIterable<CompileEmitEvent> {
     let i = 0;
     let lastSent = Date.now();
 
@@ -122,8 +119,9 @@ export class Compiler {
       const nodeModSeparator = 'node_modules/';
       const nodeModIdx = file.lastIndexOf(nodeModSeparator);
       const imp = nodeModIdx >= 0 ? file.substring(nodeModIdx + nodeModSeparator.length) : file;
-      yield { file: imp, i: i += 1, errors, total: files.length, duration };
-      if ((Date.now() - lastSent) > 50) { // Limit to 1 every 50ms
+      yield { file: imp, i: (i += 1), errors, total: files.length, duration };
+      if (Date.now() - lastSent > 50) {
+        // Limit to 1 every 50ms
         lastSent = Date.now();
         EventUtil.sendEvent('progress', { total: files.length, idx: i, message: imp, operation: 'compile' });
       }
@@ -154,7 +152,7 @@ export class Compiler {
 
     const metrics: CompileEmitEvent[] = [];
     const isCompilerChanged = this.#deltaEvents.some(event => this.#state.isCompilerFile(event.sourceFile));
-    const changedFiles = (isCompilerChanged ? this.#state.getAllFiles() : this.#deltaEvents.map(event => event.sourceFile));
+    const changedFiles = isCompilerChanged ? this.#state.getAllFiles() : this.#deltaEvents.map(event => event.sourceFile);
 
     if (changedFiles.length) {
       for await (const event of this.emit(changedFiles)) {
@@ -174,9 +172,9 @@ export class Compiler {
         log.debug('Compilation aborted');
       } else if (failures.size) {
         const sortedFailures = [...failures.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-        log.error('Compilation failed',
-          ['', sortedFailures.flatMap(([file, count]) => `- ${file}: ${count} errors found`)]
-            .flat(3).join('\n')
+        log.error(
+          'Compilation failed',
+          ['', sortedFailures.flatMap(([file, count]) => `- ${file}: ${count} errors found`)].flat(3).join('\n')
         );
       } else {
         log.debug('Compilation succeeded');

@@ -17,7 +17,6 @@ const log = Log.scoped('server');
  * Compiler Server Class
  */
 export class CompilerServer {
-
   #ctx: ManifestContext;
   #server: http.Server;
   #listenersAll = new Set<http.ServerResponse>();
@@ -46,11 +45,14 @@ export class CompilerServer {
       url: this.#url
     };
 
-    this.#server = http.createServer({
-      keepAlive: true,
-      requestTimeout: 1000 * 60 * 60,
-      keepAliveTimeout: 1000 * 60 * 60,
-    }, (request, response) => this.#onRequest(request, response));
+    this.#server = http.createServer(
+      {
+        keepAlive: true,
+        requestTimeout: 1000 * 60 * 60,
+        keepAliveTimeout: 1000 * 60 * 60
+      },
+      (request, response) => this.#onRequest(request, response)
+    );
 
     setMaxListeners(1000, this.signal);
   }
@@ -74,7 +76,7 @@ export class CompilerServer {
         .on('error', async error => {
           if ('code' in error && error.code === 'EADDRINUSE') {
             const info = await this.#client.info();
-            resolve((info && !info.watching && this.watching) ? 'retry' : 'running');
+            resolve(info && !info.watching && this.watching ? 'retry' : 'running');
           } else {
             log.warn('Failed in running server', error);
             reject(error);
@@ -106,7 +108,8 @@ export class CompilerServer {
     const id = `id_${Date.now()}_${Math.random()}`.replace('.', '1');
     (this.#listeners[type] ??= {})[id] = response;
     this.#listenersAll.add(response);
-    if (type === 'state' || type === 'all') { // Send on initial connect
+    if (type === 'state' || type === 'all') {
+      // Send on initial connect
       this.#emitEvent({ type: 'state', payload: { state: this.info.state } }, id);
     } else {
       response.write('\n'); // Send at least one byte on listen
@@ -146,15 +149,20 @@ export class CompilerServer {
     this.info.iteration = Date.now();
     await CommonUtil.blockingTimeout(20);
     for (const listener of this.#listenersAll) {
-      try { listener.end(); } catch { }
+      try {
+        listener.end();
+      } catch {}
     }
     this.#listeners = {}; // Ensure its empty
     this.#listenersAll.clear();
   }
 
   async #clean(): Promise<{ clean: boolean }> {
-    await Promise.all([this.#ctx.build.outputFolder, this.#ctx.build.typesFolder]
-      .map(folder => fs.rm(CommonUtil.resolveWorkspace(this.#ctx, folder), { recursive: true, force: true })));
+    await Promise.all(
+      [this.#ctx.build.outputFolder, this.#ctx.build.typesFolder].map(folder =>
+        fs.rm(CommonUtil.resolveWorkspace(this.#ctx, folder), { recursive: true, force: true })
+      )
+    );
     return { clean: true };
   }
 
@@ -175,9 +183,16 @@ export class CompilerServer {
         }
         return;
       }
-      case 'clean': out = await this.#clean(); break;
-      case 'stop': out = JSON.stringify({ closing: true }); close = true; break;
-      default: out = this.info ?? {}; break;
+      case 'clean':
+        out = await this.#clean();
+        break;
+      case 'stop':
+        out = JSON.stringify({ closing: true });
+        close = true;
+        break;
+      default:
+        out = this.info ?? {};
+        break;
     }
     response.end(JSON.stringify(out));
     if (close) {
@@ -198,7 +213,12 @@ export class CompilerServer {
 
       if (event.type === 'state') {
         this.info.state = event.payload.state;
-        if (event.payload.state === 'init' && event.payload.extra && 'processId' in event.payload.extra && typeof event.payload.extra.processId === 'number') {
+        if (
+          event.payload.state === 'init' &&
+          event.payload.extra &&
+          'processId' in event.payload.extra &&
+          typeof event.payload.extra.processId === 'number'
+        ) {
           if (this.info.watching && !this.info.compilerProcessId) {
             // Ensure we are killing in watch mode on first set
             await this.#handle.compiler.kill();
@@ -246,7 +266,8 @@ export class CompilerServer {
           this.#shutdown.abort();
         });
       });
-    } catch { // Timeout or other error
+    } catch {
+      // Timeout or other error
       // Force shutdown
       this.#server.closeAllConnections();
       await this.#handle.compiler.kill();
@@ -259,7 +280,7 @@ export class CompilerServer {
    * Start the server listening
    */
   async listen(): Promise<CompilerServer | undefined> {
-    const running = await this.#tryListen() === 'ok';
+    const running = (await this.#tryListen()) === 'ok';
     log.info(running ? 'Starting server' : 'Server already running under a different process', this.#url);
     return running ? this : undefined;
   }
