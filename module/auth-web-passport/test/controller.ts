@@ -21,9 +21,9 @@ export class LoginTestController {
           } else {
             throw new Error(`Unknown user ${req.query}`);
           }
-        },
+        }
       },
-      v => castTo(v),
+      v => castTo(v)
     );
   }
 

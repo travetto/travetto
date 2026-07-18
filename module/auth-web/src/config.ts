@@ -22,7 +22,7 @@ export class WebAuthConfig {
   finalize(): void {
     if (!this.signingKey && Runtime.production) {
       throw new RuntimeError(
-        'The default signing key is only valid for development use, please specify a config value at web.auth.signingKey',
+        'The default signing key is only valid for development use, please specify a config value at web.auth.signingKey'
       );
     }
     this.signingKey ??= 'dummy';

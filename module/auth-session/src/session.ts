@@ -120,7 +120,7 @@ export class Session<T extends SessionData = SessionData> {
       signature: this.signature,
       expiresAt: this.expiresAt?.getTime(),
       issuedAt: this.issuedAt?.getTime(),
-      data: this.data,
+      data: this.data
     };
   }
 }

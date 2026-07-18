@@ -21,15 +21,15 @@ export class AppConfig {
           clientID: '<appId>',
           clientSecret: '<appSecret>',
           callbackURL: 'http://localhost:3000/auth/facebook/callback',
-          profileFields: ['id', 'username', 'displayName', 'photos', 'email'],
+          profileFields: ['id', 'username', 'displayName', 'photos', 'email']
         },
-        (accessToken, refreshToken, profile, callback) => callback(undefined, profile),
+        (accessToken, refreshToken, profile, callback) => callback(undefined, profile)
       ),
       (user: FbUser) => ({
         id: user.username,
         permissions: user.permissions,
-        details: user,
-      }),
+        details: user
+      })
     );
   }
 

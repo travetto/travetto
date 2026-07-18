@@ -36,7 +36,7 @@ export abstract class AuthSessionServerSuite<T> {
     this.auth.principal = {
       id: 'orange',
       details: {},
-      sessionId: Util.uuid(),
+      sessionId: Util.uuid()
     };
 
     assert(this.sessionContext.get() === undefined);
@@ -56,7 +56,7 @@ export abstract class AuthSessionServerSuite<T> {
     this.auth.principal = {
       id: 'orange',
       details: {},
-      sessionId: Util.uuid(),
+      sessionId: Util.uuid()
     };
 
     this.sessionContext.set(undefined); // Disconnect

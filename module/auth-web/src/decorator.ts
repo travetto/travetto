@@ -15,13 +15,13 @@ export function Login(source: symbol, ...sources: symbol[]): EndpointDecorator {
     AuthLoginInterceptor,
     {
       providers: [source, ...sources],
-      applies: true,
+      applies: true
     },
     {
       responseContext: {
-        isPrivate: true,
-      },
-    },
+        isPrivate: true
+      }
+    }
   );
 }
 
@@ -36,13 +36,13 @@ export function Authenticated(permissions: string[] = []): EndpointDecorator {
     {
       state: 'authenticated',
       permissions,
-      applies: true,
+      applies: true
     },
     {
       responseContext: {
-        isPrivate: true,
-      },
-    },
+        isPrivate: true
+      }
+    }
   );
 }
 
@@ -53,7 +53,7 @@ export function Authenticated(permissions: string[] = []): EndpointDecorator {
 export function Unauthenticated(): EndpointDecorator {
   return ControllerRegistryIndex.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
     state: 'unauthenticated',
-    applies: true,
+    applies: true
   });
 }
 
@@ -67,8 +67,8 @@ export function Logout(): EndpointDecorator {
     { applies: true },
     {
       responseContext: {
-        isPrivate: true,
-      },
-    },
+        isPrivate: true
+      }
+    }
   );
 }

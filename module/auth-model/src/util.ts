@@ -19,7 +19,7 @@ export class AuthModelUtil {
       BinaryUtil.binaryArrayToBuffer(CodecUtil.fromUTF8String(value)),
       { name: 'PBKDF2' },
       false,
-      ['deriveBits'],
+      ['deriveBits']
     );
 
     const result = await crypto.subtle.deriveBits(
@@ -27,10 +27,10 @@ export class AuthModelUtil {
         name: 'PBKDF2',
         hash: { name: digest },
         salt: BinaryUtil.binaryArrayToBuffer(CodecUtil.fromUTF8String(salt)),
-        iterations,
+        iterations
       },
       hashKey,
-      keylen * 8,
+      keylen * 8
     );
 
     return BinaryUtil.binaryArrayToUint8Array(result).toHex().substring(0, keylen);

@@ -28,8 +28,8 @@ export class CodecTest {
     await this.interceptor.codec.encode(response, {
       id: 'true',
       details: {
-        data: 'hello',
-      },
+        data: 'hello'
+      }
     });
 
     assert(response.headers.has('Authorization'));
@@ -49,15 +49,15 @@ export class CodecTest {
   async keyRotation() {
     this.interceptor.config.keyMap.orange = {
       id: 'orange',
-      key: 'green',
+      key: 'green'
     };
 
     const token = await this.codec.create(
       {
         id: 'bob',
-        details: {},
+        details: {}
       },
-      'orange',
+      'orange'
     );
 
     await assert.doesNotReject(() => this.codec.verify(token));
@@ -66,23 +66,23 @@ export class CodecTest {
       this.codec.create(
         {
           id: 'bob',
-          details: {},
+          details: {}
         },
-        'orange2',
-      ),
+        'orange2'
+      )
     );
 
     const token1 = await this.codec.create(
       {
         id: 'bob',
-        details: {},
+        details: {}
       },
-      'orange',
+      'orange'
     );
 
     const token2 = await this.codec.create({
       id: 'bob',
-      details: {},
+      details: {}
     });
 
     const sig1: { kid: string } = JSONUtil.fromBase64(token1.split('.')[0]);

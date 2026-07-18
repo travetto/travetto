@@ -37,7 +37,7 @@ export class SessionService {
 
       const session = new Session({
         ...record,
-        data: JSONUtil.fromBase64(record.data),
+        data: JSONUtil.fromBase64(record.data)
       });
 
       // Validate session
@@ -81,8 +81,8 @@ export class SessionService {
           SessionEntry,
           SessionEntry.from({
             ...session,
-            data: JSONUtil.toBase64(session.data),
-          }),
+            data: JSONUtil.toBase64(session.data)
+          })
         );
       }
       // If destroying

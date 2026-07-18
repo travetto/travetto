@@ -10,8 +10,8 @@ export class SimpleAuthenticator implements Authenticator<User> {
         source: 'simple',
         permissions: [],
         details: {
-          username: 'test',
-        },
+          username: 'test'
+        }
       };
     } else {
       throw new AuthenticationError('Invalid credentials');

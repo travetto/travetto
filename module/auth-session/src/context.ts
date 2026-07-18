@@ -27,7 +27,7 @@ export class SessionContext {
       expiresAt: principal.expiresAt,
       issuedAt: principal.issuedAt,
       action: 'create',
-      data: {},
+      data: {}
     });
   }
 

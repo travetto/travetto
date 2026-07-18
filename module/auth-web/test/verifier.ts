@@ -7,7 +7,7 @@ const base = {
   applies: true,
   matcher: () => {
     throw new Error('Function not implemented.');
-  },
+  }
 } as const;
 
 @Suite()

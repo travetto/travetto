@@ -10,7 +10,7 @@ import {
   WebAuthConfig,
   JWTPrincipalCodec,
   AuthContextInterceptor,
-  type PrincipalCodec,
+  type PrincipalCodec
 } from '@travetto/auth-web';
 import { toConcrete } from '@travetto/runtime';
 import { AuthContext, type Authenticator, type AuthenticatorState, type Principal } from '@travetto/auth';

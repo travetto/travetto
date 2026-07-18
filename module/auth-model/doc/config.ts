@@ -21,7 +21,7 @@ class AuthConfig {
         resetToken: user.resetToken,
         resetExpires: user.resetExpires,
         password: user.password,
-        details: user,
+        details: user
       }),
       user =>
         User.from({
@@ -31,8 +31,8 @@ class AuthConfig {
           hash: user.hash,
           salt: user.salt,
           resetToken: user.resetToken,
-          resetExpires: user.resetExpires,
-        }),
+          resetExpires: user.resetExpires
+        })
     );
   }
 }

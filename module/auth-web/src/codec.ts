@@ -29,7 +29,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   async finalizeVerifier(): Promise<void> {
     // Weird issue with their ES module support
     const {
-      default: { createVerifier },
+      default: { createVerifier }
     } = await import('njwt');
     this.#verifier = createVerifier()
       .setSigningAlgorithm(this.#algorithm)
@@ -42,7 +42,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   async verify(token: string): Promise<Principal> {
     try {
       const jwt: Jwt & { body: { core: Principal } } = await new Promise((resolve, reject) =>
-        this.#verifier.verify(token, (error, verified) => (error ? reject(error) : resolve(castTo(verified)))),
+        this.#verifier.verify(token, (error, verified) => (error ? reject(error) : resolve(castTo(verified))))
       );
       return jwt.body.core;
     } catch (error) {
@@ -73,7 +73,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     }
     // Weird issue with their ES module support
     const {
-      default: { create },
+      default: { create }
     } = await import('njwt');
     const jwt = create({}, '-')
       .setExpiration(value.expiresAt!)

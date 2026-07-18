@@ -16,7 +16,7 @@ import {
   ContextParam,
   type WebInterceptorCategory,
   type WebChainedContext,
-  type WebInterceptorContext,
+  type WebInterceptorContext
 } from '@travetto/web';
 import { castTo, Util } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
@@ -47,7 +47,7 @@ class AutoLogin implements WebInterceptor {
       id: Util.uuid(),
       sessionId: Util.uuid(),
       issuedAt: new Date(),
-      details: {},
+      details: {}
     };
     return next();
   }

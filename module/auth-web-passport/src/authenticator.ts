@@ -31,7 +31,7 @@ export class PassportAuthenticator<V extends PassportUser = PassportUser> implem
     strategyName: string,
     strategy: passport.Strategy,
     toPrincipal: (user: V) => SimplePrincipal,
-    options: passport.AuthenticateOptions | ((ctx: WebFilterContext) => passport.AuthenticateOptions) = {},
+    options: passport.AuthenticateOptions | ((ctx: WebFilterContext) => passport.AuthenticateOptions) = {}
   ) {
     this.#strategyName = strategyName;
     this.#strategy = strategy;
@@ -57,11 +57,11 @@ export class PassportAuthenticator<V extends PassportUser = PassportUser> implem
       session: this.session,
       failWithError: true,
       ...requestOptions,
-      state: PassportUtil.enhanceState(ctx, requestOptions.state),
+      state: PassportUtil.enhanceState(ctx, requestOptions.state)
     };
 
     const user = await WebConnectUtil.invoke<V>(ctx, (request, response, next) =>
-      passport.authenticate(this.#strategyName, options, next)(request, response),
+      passport.authenticate(this.#strategyName, options, next)(request, response)
     );
 
     if (user) {
