@@ -1,9 +1,9 @@
-import { ExtensionContext } from 'vscode';
+import type { ExtensionContext } from 'vscode';
 import http from 'node:http';
 
-import { BinaryUtil, CodecUtil, Env, JSONUtil, BinaryArray } from '@travetto/runtime';
+import { BinaryUtil, CodecUtil, Env, JSONUtil, type BinaryArray } from '@travetto/runtime';
 
-import { TargetEvent } from './types.ts';
+import type { TargetEvent } from './types.ts';
 import { Log } from './log.ts';
 
 export class IpcSupport {

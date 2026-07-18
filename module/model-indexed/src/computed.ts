@@ -1,8 +1,8 @@
 import type { ModelType } from '@travetto/model';
 import { castTo, type Any } from '@travetto/runtime';
 
-import {
-  type AllIndexes, type KeyedIndexBody, type FullKeyedIndexBody, type TemplateValue, type TemplatePart
+import type {
+  AllIndexes, KeyedIndexBody, FullKeyedIndexBody, TemplateValue, TemplatePart
 } from './types/indexes.ts';
 import { IndexedFieldError } from './types/error.ts';
 

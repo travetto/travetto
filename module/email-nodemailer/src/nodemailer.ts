@@ -6,7 +6,7 @@ import type smtp from 'nodemailer/lib/smtp-transport';
 import type ses from 'nodemailer/lib/ses-transport';
 import type sendmail from 'nodemailer/lib/sendmail-transport';
 
-import { type MailTransport, type EmailOptions, type SentEmail } from '@travetto/email';
+import type { MailTransport, EmailOptions, SentEmail } from '@travetto/email';
 import { BinaryUtil, castTo, CodecUtil } from '@travetto/runtime';
 
 type Transport = TransportType | json.Options | smtp.Options | ses.Options | sendmail.Options;

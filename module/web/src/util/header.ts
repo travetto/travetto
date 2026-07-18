@@ -1,6 +1,6 @@
 import { type ByteRange, castKey, castTo } from '@travetto/runtime';
 
-import { type Cookie } from '../types/cookie.ts';
+import type { Cookie } from '../types/cookie.ts';
 import type { WebHeaders } from '../types/headers.ts';
 
 export type WebParsedHeader = { value: string, parameters: Record<string, string>, q?: number };

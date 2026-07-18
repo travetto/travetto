@@ -1,4 +1,4 @@
-import { type WorkflowGuidance } from './types.ts';
+import type { WorkflowGuidance } from './types.ts';
 
 export const WORKFLOWS: WorkflowGuidance[] = [
   {

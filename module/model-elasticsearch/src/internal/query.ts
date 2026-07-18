@@ -6,7 +6,7 @@ import { type ModelType, ModelRegistryIndex } from '@travetto/model';
 import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 import type { SortedIndex } from '@travetto/model-indexed';
 
-import { type EsSchemaConfig } from './types.ts';
+import type { EsSchemaConfig } from './types.ts';
 
 /**
  * Support tools for dealing with elasticsearch specific requirements

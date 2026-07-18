@@ -3,7 +3,7 @@ import { d, c } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
 
 import { Registry } from './src/registry.ts';
-import { type RegistryIndex } from './src/types.ts';
+import type { RegistryIndex } from './src/types.ts';
 
 const RegistryIndexContract = toConcrete<RegistryIndex>();
 

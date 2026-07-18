@@ -72,7 +72,8 @@
         "noVar": "error",
         "noTsIgnore": "off",
         "noConfusingVoidType": "off",
-        "noEmptyInterface": "off"
+        "noEmptyInterface": "off",
+        "noAssignInExpressions": "off"
       }
     }
   },
@@ -98,12 +99,16 @@
         "**/test/**/*.ts",
         "**/support/test/**/*.ts",
         "global-test/**",
+        "**/doc/**/*.ts"
       ],
       "linter": {
         "rules": {
           "correctness": {
             "noUnusedVariables": "off",
             "noUnusedFunctionParameters": "off"
+          },
+          "style": {
+            "useConst": "off"
           },
           "suspicious": {
             "noSelfCompare": "off"

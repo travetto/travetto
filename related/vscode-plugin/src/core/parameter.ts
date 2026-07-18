@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { CliCommandInput } from '@travetto/cli';
+import type { CliCommandInput } from '@travetto/cli';
 import { CodecUtil, ExecUtil } from '@travetto/runtime';
 
 import { Workspace } from './workspace.ts';

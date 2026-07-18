@@ -1,11 +1,11 @@
-import * as vscode from 'vscode';
+import type * as vscode from 'vscode';
 
 import { ExecUtil, Env, JSONUtil, CodecUtil } from '@travetto/runtime';
 
-import { RunChoice, ResolvedRunChoice } from './types.ts';
+import type { RunChoice, ResolvedRunChoice } from './types.ts';
 import { Workspace } from '../../../core/workspace.ts';
 import { ParameterSelector } from '../../../core/parameter.ts';
-import { LaunchConfig } from '../../../core/types.ts';
+import type { LaunchConfig } from '../../../core/types.ts';
 import { RunUtil } from '../../../core/run.ts';
 
 type PickItem = vscode.QuickPickItem & { target: RunChoice };

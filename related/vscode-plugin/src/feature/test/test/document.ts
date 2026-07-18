@@ -1,11 +1,11 @@
-import * as vscode from 'vscode';
+import type * as vscode from 'vscode';
 
 import { TypedObject } from '@travetto/runtime';
 
 import type { Assertion, TestResult, SuiteResult, SuiteConfig, TestConfig, TestWatchEvent, TestStatus, TestRemoveEvent } from '@travetto/test';
 
 import { Decorations } from './decoration.ts';
-import { AllState, TestState, ResultState, SuiteState, TestLevel, Result } from './types.ts';
+import type { AllState, TestState, ResultState, SuiteState, TestLevel, Result } from './types.ts';
 import { Workspace } from '../../../core/workspace.ts';
 
 type TestItem = Assertion | TestResult | TestConfig | SuiteResult | SuiteConfig;

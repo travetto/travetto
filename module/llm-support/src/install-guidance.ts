@@ -1,4 +1,4 @@
-import { type DependencyGraphNode, type InstallGuidance } from './types.ts';
+import type { DependencyGraphNode, InstallGuidance } from './types.ts';
 
 export const INSTALL_BUNDLES: InstallGuidance[] = [
   {

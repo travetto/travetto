@@ -1,6 +1,6 @@
 import { type AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ModelRegistryIndex } from '@travetto/model';
-import { type Class } from '@travetto/runtime';
+import type { Class } from '@travetto/runtime';
 import { SchemaRegistryIndex, type SchemaFieldConfig } from '@travetto/schema';
 
 import { Connected, Transactional } from './connection/decorator.ts';

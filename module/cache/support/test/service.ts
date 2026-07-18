@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
 import { Suite, Test } from '@travetto/test';
-import { type ModelExpirySupport } from '@travetto/model';
+import type { ModelExpirySupport } from '@travetto/model';
 import { ModelIndexedUtil } from '@travetto/model-indexed';
 import { Inject, Injectable } from '@travetto/di';
 import { castTo, type Class } from '@travetto/runtime';

@@ -7,10 +7,10 @@ import { ActionStorage } from '../../../core/storage.ts';
 import { Workspace } from '../../../core/workspace.ts';
 
 import { BaseFeature } from '../../base.ts';
-import { EnvDict, TargetEvent } from '../../../core/types.ts';
+import type { EnvDict, TargetEvent } from '../../../core/types.ts';
 import { RunUtil } from '../../../core/run.ts';
 
-import { RunChoice } from './types.ts';
+import type { RunChoice } from './types.ts';
 import { CliRunUtil } from './util.ts';
 
 type Recent = { mode: 'recent', count: number };

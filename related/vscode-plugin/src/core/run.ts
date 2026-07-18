@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 import { Env, JSONUtil } from '@travetto/runtime';
 
-import { EnvDict, LaunchConfig } from './types.ts';
+import type { EnvDict, LaunchConfig } from './types.ts';
 import { Workspace } from './workspace.ts';
 import { Log } from './log.ts';
 

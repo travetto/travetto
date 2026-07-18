@@ -1,4 +1,4 @@
-import { type OutputOptions } from 'rollup';
+import type { OutputOptions } from 'rollup';
 import type terser from '@rollup/plugin-terser';
 
 export type CommonPackConfig = {

@@ -1,9 +1,9 @@
-import {
-  type InstallGuidance,
-  type LlmOperation,
-  type RecommendationQuery,
-  type RecommendationResponse,
-  type WorkflowGuidance
+import type {
+  InstallGuidance,
+  LlmOperation,
+  RecommendationQuery,
+  RecommendationResponse,
+  WorkflowGuidance
 } from './types.ts';
 import { INSTALL_BUNDLES } from './install-guidance.ts';
 import { recommendSnippets } from './snippet-catalog.ts';

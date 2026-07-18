@@ -1,9 +1,9 @@
 import { type IndexConfig, type ModelType, ModelRegistryIndex } from '@travetto/model';
 import { type Class, type Any, castTo, type ClassInstance } from '@travetto/runtime';
 
-import {
-  type AllIndexes, type KeyedIndexSelection, type KeyedIndex,
-  type SortedIndexSelection, type SortedIndex, type TemplatePart, type TemplateValue
+import type {
+  AllIndexes, KeyedIndexSelection, KeyedIndex,
+  SortedIndexSelection, SortedIndex, TemplatePart, TemplateValue
 } from './types/indexes.ts';
 
 function buildTemplateParts<T extends TemplateValue = TemplateValue>(
