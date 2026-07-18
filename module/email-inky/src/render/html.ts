@@ -12,12 +12,25 @@ export const SUMMARY_STYLE = Object.entries({
   'max-width': '0px',
   opacity: '0',
   overflow: 'hidden'
-}).map(([key, value]) => `${key}: ${value}`).join('; ');
+})
+  .map(([key, value]) => `${key}: ${value}`)
+  .join('; ');
 
 const allowedProps = new Set([
-  'className', 'id', 'dir', 'name', 'src',
-  'alt', 'href', 'title', 'height', 'target',
-  'width', 'style', 'align', 'valign'
+  'className',
+  'id',
+  'dir',
+  'name',
+  'src',
+  'alt',
+  'href',
+  'title',
+  'height',
+  'target',
+  'width',
+  'style',
+  'align',
+  'valign'
 ]);
 
 const propsToString = combinePropsToString.bind(null, allowedProps);
@@ -44,8 +57,14 @@ export const Html: RenderProvider<RenderContext> = {
       // Force summary to top, and title to head
       const final = wrapper
         .replace('<!-- BODY -->', html)
-        .replace(/<title>.*?<\/title>/, a => { headerTop.push(a); return ''; })
-        .replace(/<span[^>]+id="summary"[^>]*>(.*?)<\/span>/sm, a => { bodyTop.push(a); return ''; })
+        .replace(/<title>.*?<\/title>/, a => {
+          headerTop.push(a);
+          return '';
+        })
+        .replace(/<span[^>]+id="summary"[^>]*>(.*?)<\/span>/ms, a => {
+          bodyTop.push(a);
+          return '';
+        })
         .replace(/<head( [^>]*)?>/, tag => `${tag}\n${headerTop.join('\n')}`)
         .replace(/<body[^>]*>/, tag => `${tag}\n${bodyTop.join('\n')}`);
 
@@ -61,16 +80,32 @@ export const Html: RenderProvider<RenderContext> = {
   For: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
   If: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
   Unless: async ({ recurse, props }) => `{{^${props.attr}}}${await recurse()}{{/${props.attr}}}`,
-  Value: async ({ props }) => props.raw ? `{{{${props.attr}}}}` : `{{${props.attr}}}`,
+  Value: async ({ props }) => (props.raw ? `{{{${props.attr}}}}` : `{{${props.attr}}}`),
 
   br: async () => '<br>\n',
-  hr: async (node) => `<table ${propsToString(node.props)}><th></th></table>`,
-  strong: standardInline, em: standardInline, p: standardFull,
-  h1: standardFull, h2: standardFull, h3: standardFull, h4: standardFull,
-  li: standard, ol: standardFull, ul: standardFull,
-  table: standardFull, thead: standard, tr: standard, td: standard, th: standard, tbody: standard, center: standard, img: standardInline,
+  hr: async node => `<table ${propsToString(node.props)}><th></th></table>`,
+  strong: standardInline,
+  em: standardInline,
+  p: standardFull,
+  h1: standardFull,
+  h2: standardFull,
+  h3: standardFull,
+  h4: standardFull,
+  li: standard,
+  ol: standardFull,
+  ul: standardFull,
+  table: standardFull,
+  thead: standard,
+  tr: standard,
+  td: standard,
+  th: standard,
+  tbody: standard,
+  center: standard,
+  img: standardInline,
   title: standard,
-  div: standard, span: standardInline, small: standardInline,
+  div: standard,
+  span: standardInline,
+  small: standardInline,
   a: async ({ recurse, props }) => `<a ${propsToString(props)}>${await recurse()}</a>`,
 
   InkyTemplate: ctx => ctx.recurse(),
@@ -78,7 +113,6 @@ export const Html: RenderProvider<RenderContext> = {
   Summary: async ({ recurse }) => `<span id="summary" style="${SUMMARY_STYLE}">${await recurse()}</span>`,
 
   Column: async ({ props, recurse, stack, node, context }): Promise<string> => {
-
     recurse();
 
     let expander = '';
@@ -88,7 +122,7 @@ export const Html: RenderProvider<RenderContext> = {
     const colCount = siblings.length || 1;
 
     if (parent) {
-      const parentNode: (typeof parent) & { columnVisited?: boolean } = parent;
+      const parentNode: typeof parent & { columnVisited?: boolean } = parent;
       if (!parentNode.columnVisited) {
         parentNode.columnVisited = true;
         if (siblings.length) {
@@ -107,9 +141,9 @@ export const Html: RenderProvider<RenderContext> = {
     // If the column contains a nested row, the .expander class should not be used
     if (largeSize === context.columnCount && !props.noExpander) {
       let hasRow = false;
-      visit(node, (child) => {
+      visit(node, child => {
         if (isOfType(child, 'Row')) {
-          return hasRow = true;
+          return (hasRow = true);
         }
       });
       if (!hasRow) {
@@ -217,11 +251,11 @@ export const Html: RenderProvider<RenderContext> = {
 
   Menu: async ({ recurse, node, props }): Promise<string> => {
     let hasItem = false;
-    visit(node, (child) => {
+    visit(node, child => {
       if (isOfType(child, 'Item')) {
-        return hasItem = true;
+        return (hasItem = true);
       } else if ((child.type === 'td' || child.type === 'th') && child.props.className?.includes('menu-item')) {
-        return hasItem = true;
+        return (hasItem = true);
       }
     });
 
@@ -280,7 +314,6 @@ export const Html: RenderProvider<RenderContext> = {
   },
 
   Callout: async ({ recurse, props }): Promise<string> => {
-
     const innerProps: JSXElement['props'] = { className: props.className };
     delete props.className;
 

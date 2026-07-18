@@ -15,7 +15,6 @@ import { EditorService } from './bin/editor.ts';
  */
 @CliCommand()
 export class EmailTestCommand implements CliCommandShape {
-
   @CliProfilesFlag()
   profile: string[];
 

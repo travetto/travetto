@@ -9,7 +9,6 @@ import { isJSXElement, type JSXElement, createFragment, JSXFragmentType, type JS
  * Inky Renderer
  */
 export class InkyRenderer {
-
   static async #render(
     ctx: RenderContext,
     renderer: RenderProvider<RenderContext>,
@@ -46,7 +45,11 @@ export class InkyRenderer {
         const recurse = (): Promise<string> => this.#render(ctx, renderer, final.props.children ?? [], [...stack, final]);
         // @ts-expect-error
         const state: RenderState<JSXElement, RenderContext> = {
-          node: final, props: final.props, recurse, stack, context: ctx
+          node: final,
+          props: final.props,
+          recurse,
+          stack,
+          context: ctx
         };
         // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
         state.createState = (key, props) => this.createState(ctx, renderer, state, key, props);
@@ -66,7 +69,7 @@ export class InkyRenderer {
     renderer: RenderProvider<RenderContext>,
     state: RenderState<JSXElement, RenderContext>,
     key: K,
-    props: JSXElementByFn<K>['props'],
+    props: JSXElementByFn<K>['props']
     // @ts-expect-error
   ): RenderState<JSXElementByFn<K>, RenderContext> {
     const node = ctx.createElement(key, props);

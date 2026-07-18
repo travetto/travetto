@@ -5,7 +5,6 @@ import { EmailCompileUtil } from '@travetto/email-compiler';
 
 @Suite()
 class ImageUtilTest {
-
   fixture = new TestFixtures();
 
   @Test('Verify Image Extraction')

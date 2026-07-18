@@ -3,7 +3,8 @@ import { Html, InkyRenderer } from '@travetto/email-inky';
 import type { JSXElement } from '@travetto/email-inky/support/jsx-runtime.ts';
 
 export function cleanseOutput(output: string) {
-  return output.trim()
+  return output
+    .trim()
     .replace(/\s*<!--\s*[$]:([^ -]+)\s*-->\s*(<\/[^>]+>)/g, (_, suf, tag) => `${tag}${suf}`)
     .replace(/(<[^/][^>]+>)\s*<!--\s*[#]:([^ ]+)\s*-->\s*/g, (_, tag, pre) => `${pre}${tag}`)
     .replace(/[ ]+>/g, '>')
@@ -15,9 +16,5 @@ export function cleanseOutput(output: string) {
 }
 
 export async function renderJSX(element: JSXElement): Promise<string> {
-  return cleanseOutput(await InkyRenderer.render(
-    element,
-    Html,
-    { file: '', module: Runtime.main.name }, false)
-  );
+  return cleanseOutput(await InkyRenderer.render(element, Html, { file: '', module: Runtime.main.name }, false));
 }

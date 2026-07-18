@@ -23,6 +23,6 @@ export async function prepare(node: JSXElement, location: EmailTemplateLocation)
   `,
     html: () => InkyRenderer.render(node, Html, ctx),
     text: () => InkyRenderer.render(node, Markdown, ctx),
-    subject: () => InkyRenderer.render(node, Subject, ctx),
+    subject: () => InkyRenderer.render(node, Subject, ctx)
   };
 }

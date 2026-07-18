@@ -9,18 +9,19 @@ import { renderJSX } from './util.ts';
 
 @Suite('Container')
 class ContainerTest {
-
   @Test('works when rendering a containers')
   async testFull() {
     const input = <Container></Container>;
-    const expected = <table align="center" className="container">
-      <tbody>
-        <tr>
-          <td></td>
-        </tr>
-      </tbody>
-    </table>;
+    const expected = (
+      <table align="center" className="container">
+        <tbody>
+          <tr>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    );
 
-    assert(await renderJSX(input) === await renderJSX(expected));
+    assert((await renderJSX(input)) === (await renderJSX(expected)));
   }
 }

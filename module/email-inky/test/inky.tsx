@@ -9,60 +9,79 @@ import { renderJSX } from './util.ts';
 
 @Suite('Inky')
 class InkyTest {
-
   @Test('does not choke on inline elements')
   async testInline() {
-    const input = <Container>This is a link to <a href="#test">ZURB.com</a>.</Container>;
-    const expected = <table align="center" className="container">
-      <tbody>
-        <tr>
-          <td>This is a link to <a href="#test">ZURB.com</a>.</td>
-        </tr>
-      </tbody>
-    </table>;
+    const input = (
+      <Container>
+        This is a link to <a href="#test">ZURB.com</a>.
+      </Container>
+    );
+    const expected = (
+      <table align="center" className="container">
+        <tbody>
+          <tr>
+            <td>
+              This is a link to <a href="#test">ZURB.com</a>.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    );
 
-    assert(await renderJSX(input) === await renderJSX(expected));
+    assert((await renderJSX(input)) === (await renderJSX(expected)));
   }
 
   @Test('does not choke on special characters')
   async testSpecial() {
-    const input = <Container>This is a link tö <a href="#test">ZURB.com</a>.</Container>;
-    const expected = <table align="center" className="container">
-      <tbody>
-        <tr>
-          <td>This is a link tö <a href="#test">ZURB.com</a>.</td>
-        </tr>
-      </tbody>
-    </table>;
+    const input = (
+      <Container>
+        This is a link tö <a href="#test">ZURB.com</a>.
+      </Container>
+    );
+    const expected = (
+      <table align="center" className="container">
+        <tbody>
+          <tr>
+            <td>
+              This is a link tö <a href="#test">ZURB.com</a>.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    );
 
-    assert(await renderJSX(input) === await renderJSX(expected));
+    assert((await renderJSX(input)) === (await renderJSX(expected)));
   }
 
   @Test('does not convert these characters into entities')
   async testEntities() {
     const input = <Container>There's &nbsp; some amazing things here!</Container>;
-    const expected = <table align="center" className="container">
-      <tbody>
-        <tr>
-          <td>There's &nbsp; some amazing things here!</td>
-        </tr>
-      </tbody>
-    </table>;
+    const expected = (
+      <table align="center" className="container">
+        <tbody>
+          <tr>
+            <td>There's &nbsp; some amazing things here!</td>
+          </tr>
+        </tbody>
+      </table>
+    );
 
-    assert(await renderJSX(input) === await renderJSX(expected));
+    assert((await renderJSX(input)) === (await renderJSX(expected)));
   }
 
   @Test('does not decode entities if non default cheerio config is given')
   async testDecode() {
     const input = <Container>"should not replace quotes"</Container>;
-    const expected = <table align="center" className="container">
-      <tbody>
-        <tr>
-          <td>"should not replace quotes"</td>
-        </tr>
-      </tbody>
-    </table>;
+    const expected = (
+      <table align="center" className="container">
+        <tbody>
+          <tr>
+            <td>"should not replace quotes"</td>
+          </tr>
+        </tbody>
+      </table>
+    );
 
-    assert(await renderJSX(input) === await renderJSX(expected));
+    assert((await renderJSX(input)) === (await renderJSX(expected)));
   }
 }

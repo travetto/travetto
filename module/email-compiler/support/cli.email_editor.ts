@@ -13,7 +13,6 @@ import { EditorService } from './bin/editor.ts';
  */
 @CliCommand()
 export class EmailEditorCommand {
-
   @CliProfilesFlag()
   profile: string[];
 

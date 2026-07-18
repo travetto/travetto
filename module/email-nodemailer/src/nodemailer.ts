@@ -15,13 +15,15 @@ type Transport = TransportType | json.Options | smtp.Options | ses.Options | sen
  * Nodemailer transport, takes in a transport factory as the input
  */
 export class NodemailerTransport implements MailTransport {
-  #transport: Transporter<SentEmail & {
-    rejected?: unknown[];
-  }>;
+  #transport: Transporter<
+    SentEmail & {
+      rejected?: unknown[];
+    }
+  >;
 
   /**
-  * Enforce attachment content is a buffer or stream, converting from string or binary array if needed
-  */
+   * Enforce attachment content is a buffer or stream, converting from string or binary array if needed
+   */
   #enforceAttachmentContent(message: EmailOptions): EmailOptions<Readable | Buffer> {
     for (const attachment of message.attachments ?? []) {
       if (attachment.content) {
@@ -41,7 +43,10 @@ export class NodemailerTransport implements MailTransport {
    * Force content into alternative slots
    */
   #forceContentToAlternative(message: EmailOptions): EmailOptions {
-    for (const [key, mime] of [['text', 'text/plain'], ['html', 'text/html']] as const) {
+    for (const [key, mime] of [
+      ['text', 'text/plain'],
+      ['html', 'text/html']
+    ] as const) {
       if (message[key]) {
         (message.alternatives ??= []).push({
           content: message[key],
@@ -61,7 +66,6 @@ export class NodemailerTransport implements MailTransport {
   }
 
   async send<S extends SentEmail = SentEmail>(mail: EmailOptions): Promise<S> {
-
     const forced = this.#enforceAttachmentContent(this.#forceContentToAlternative(mail));
 
     const response = await this.#transport.sendMail(forced);

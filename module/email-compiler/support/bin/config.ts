@@ -12,7 +12,6 @@ export const CONFIG_FILE = 'resources/email/local.yml';
  * Configuration utils
  */
 export class EditorConfig {
-
   static DEFAULT_CONFIG = {
     to: 'my-email@gmail.com',
     from: 'from-email@gmail.com',
@@ -25,8 +24,8 @@ export class EditorConfig {
       auth: {
         user: 'email@blah.com',
         pass: 'password'
-      },
-    },
+      }
+    }
   };
 
   /**

@@ -24,7 +24,6 @@ const EXT = /[.]email[.]tsx$/;
  * Email compile tools
  */
 export class EmailCompileUtil {
-
   /**
    * Is file a template?
    */
@@ -47,7 +46,7 @@ export class EmailCompileUtil {
     return {
       html: this.buildOutputPath(file, '.compiled.html', prefix),
       subject: this.buildOutputPath(file, '.compiled.subject', prefix),
-      text: this.buildOutputPath(file, '.compiled.text', prefix),
+      text: this.buildOutputPath(file, '.compiled.text', prefix)
     };
   }
 
@@ -63,10 +62,11 @@ export class EmailCompileUtil {
     const tokens = new Map();
     for (const pattern of patterns) {
       for (const { 0: all, groups: { prefix, source } = { prefix: '', source: '' } } of text.matchAll(pattern)) {
-        if (source.includes('://')) { // No urls
+        if (source.includes('://')) {
+          // No urls
           continue;
         }
-        const token = `@@${id += 1}@@`;
+        const token = `@@${(id += 1)}@@`;
         tokens.set(token, source);
         text = text.replace(all, `${prefix}${token}`);
       }
@@ -85,7 +85,7 @@ export class EmailCompileUtil {
     const compilerOptions: Options<'async'> = {
       sourceMap: false,
       quietDeps: true,
-      loadPaths: options.loader.searchPaths.slice(0),
+      loadPaths: options.loader.searchPaths.slice(0)
     };
 
     let result: CompileResult;
@@ -105,7 +105,7 @@ export class EmailCompileUtil {
     const purge = new PurgeCSS();
     const [result] = await purge.purge({
       content: [{ raw: html, extension: 'html' }],
-      css: [{ raw: css }],
+      css: [{ raw: css }]
     });
     return result.css;
   }
@@ -124,8 +124,9 @@ export class EmailCompileUtil {
         preserveMediaQueries: true,
         removeStyleTags: true,
         removeLinkTags: true,
-        applyStyleTags: true,
-      });
+        applyStyleTags: true
+      }
+    );
   }
 
   /**
@@ -166,15 +167,17 @@ export class EmailCompileUtil {
    */
   static handleHtmlEdgeCases(html: string): string {
     return html
-      .replace(/\n{3,100}/msg, '\n\n')
+      .replace(/\n{3,100}/gms, '\n\n')
       .replace(/<(meta|img|link|hr|br)[^>]{0,200}>/g, a => a.replace(/>/g, '/>')) // Fix self closing
       .replace(/&apos;/g, '&#39;') // Fix apostrophes, as outlook hates them
-      .replace(/(background(?:-color)?:\s*)([#0-9a-f]{6,8})([^>.#,]+)>/ig,
-        (all, property, color, rest) => `${property}${color}${rest} bgcolor="${color}">`) // Inline bg-color
-      .replace(/<([^>]+vertical-align:\s*(top|bottom|middle)[^>]+)>/g,
-        (a, tag, valign) => tag.indexOf('valign') ? `<${tag}>` : `<${tag} valign="${valign}">`) // Vertically align if it has the style
-      .replace(/<(table[^>]+expand[^>]+width:\s*)(100%\s+!important)([^>]+)>/g,
-        (a, left, size, right) => `<${left}100%${right}>`) // Drop important as a fix for outlook
+      .replace(
+        /(background(?:-color)?:\s*)([#0-9a-f]{6,8})([^>.#,]+)>/gi,
+        (all, property, color, rest) => `${property}${color}${rest} bgcolor="${color}">`
+      ) // Inline bg-color
+      .replace(/<([^>]+vertical-align:\s*(top|bottom|middle)[^>]+)>/g, (a, tag, valign) =>
+        tag.indexOf('valign') ? `<${tag}>` : `<${tag} valign="${valign}">`
+      ) // Vertically align if it has the style
+      .replace(/<(table[^>]+expand[^>]+width:\s*)(100%\s+!important)([^>]+)>/g, (a, left, size, right) => `<${left}100%${right}>`) // Drop important as a fix for outlook
       .trim()
       .concat('\n');
   }
@@ -183,10 +186,7 @@ export class EmailCompileUtil {
    * Apply styles into a given html document
    */
   static async applyStyles(html: string, options: EmailTemplateResource): Promise<string> {
-    const styles = [
-      options.globalStyles ?? '',
-      await options.loader.readUTF8('/email/main.scss').catch(() => '')
-    ]
+    const styles = [options.globalStyles ?? '', await options.loader.readUTF8('/email/main.scss').catch(() => '')]
       .filter(line => !!line)
       .join('\n');
 

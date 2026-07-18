@@ -4,13 +4,12 @@ import { type EmailTemplateLocation, EmailResourceLoader } from '@travetto/email
 import { type JSXElementByFn, c } from '../components.ts';
 import { createElement } from '../../support/jsx-runtime.ts';
 
-export type RenderContextInit = EmailTemplateLocation & { loader?: FileLoader, columnCount?: number };
+export type RenderContextInit = EmailTemplateLocation & { loader?: FileLoader; columnCount?: number };
 
 /**
  * Render Context
  */
 export class RenderContext implements RenderContextInit {
-
   columnCount: number = 12;
   file: string;
   module: string;
