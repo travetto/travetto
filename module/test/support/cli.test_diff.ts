@@ -16,7 +16,6 @@ import type { TestDiffSource } from '../src/model/test.ts';
 @CliCommand()
 @IsPrivate()
 export class TestDiffCommand {
-
   /** Output format for test results */
   format: TestConsumerType = 'tap';
 
@@ -39,7 +38,7 @@ export class TestDiffCommand {
     return runTests(
       {
         consumer: this.format,
-        consumerOptions: CliUtil.readExtendedOptions(this.formatOptions),
+        consumerOptions: CliUtil.readExtendedOptions(this.formatOptions)
       },
       {
         import: importPath,

@@ -13,7 +13,6 @@ import { runTests, type TestConsumerType } from './bin/run.ts';
 @CliCommand()
 @IsPrivate()
 export class TestDirectCommand {
-
   /** Output format for test results */
   format: TestConsumerType = 'tap';
 
@@ -36,12 +35,12 @@ export class TestDirectCommand {
     return runTests(
       {
         consumer: this.format,
-        consumerOptions: CliUtil.readExtendedOptions(this.formatOptions),
+        consumerOptions: CliUtil.readExtendedOptions(this.formatOptions)
       },
       {
         import: importPath,
         classId: clsId,
-        methodNames: methodsNames,
+        methodNames: methodsNames
       }
     );
   }

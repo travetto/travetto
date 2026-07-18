@@ -3,7 +3,8 @@ import timers from 'node:timers/promises';
 
 import { Suite, BeforeAll, AfterEach, AfterAll, BeforeEach, Test, TestExecutionError } from '@travetto/test';
 
-let a: unknown = 0; a = 1;
+let a: unknown = 0;
+a = 1;
 
 class Alt {
   includes(o: unknown): boolean {
@@ -16,7 +17,6 @@ class Alt {
 
 @Suite()
 class Simple {
-
   @BeforeAll()
   initAll() {
     console.debug('b4-all');
@@ -119,9 +119,11 @@ class Simple {
       throw new Error('Big Error');
     }, Error);
 
-    assert.throws(() => {
-      throw new Error('Big Error');
-    }, (err: Error) => err.message.startsWith('Big') && err.message.length > 4
+    assert.throws(
+      () => {
+        throw new Error('Big Error');
+      },
+      (err: Error) => err.message.startsWith('Big') && err.message.length > 4
     );
   }
 

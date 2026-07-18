@@ -9,7 +9,6 @@ import { TestConsumerRegistryAdapter } from './registry-adapter.ts';
  * Test Results Handler Registry
  */
 export class TestConsumerRegistryIndex implements RegistryIndex {
-
   static #instance = Registry.registerIndex(this);
 
   static getForRegister(cls: Class): TestConsumerRegistryAdapter {
@@ -34,7 +33,9 @@ export class TestConsumerRegistryIndex implements RegistryIndex {
   #initialized: Promise<void>;
   store = new RegistryIndexStore(TestConsumerRegistryAdapter);
 
-  /** @private */ constructor(source: unknown) { Registry.validateConstructor(source); }
+  /** @private */ constructor(source: unknown) {
+    Registry.validateConstructor(source);
+  }
 
   /**
    * Manual initialization when running outside of the bootstrap process

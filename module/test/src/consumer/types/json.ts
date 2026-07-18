@@ -10,14 +10,13 @@ import { TestConsumer } from '../decorator.ts';
  */
 @TestConsumer()
 export class JSONEmitter {
-
   #stream: Writable;
 
   constructor(stream: Writable = process.stdout) {
     this.#stream = stream;
   }
 
-  onEvent(): void { }
+  onEvent(): void {}
 
   onSummary(summary: SuitesSummary): void {
     this.#stream.write(JSONUtil.toUTF8Pretty(summary));

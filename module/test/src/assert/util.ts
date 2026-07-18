@@ -16,7 +16,12 @@ export class AssertUtil {
    */
   static cleanValue(value: unknown): unknown {
     switch (typeof value) {
-      case 'number': case 'boolean': case 'bigint': case 'string': case 'undefined': return value;
+      case 'number':
+      case 'boolean':
+      case 'bigint':
+      case 'string':
+      case 'undefined':
+        return value;
       case 'object': {
         if (isCleanable(value)) {
           return value.toClean();
@@ -38,12 +43,11 @@ export class AssertUtil {
   /**
    * Determine file location for a given error and the stack trace
    */
-  static getPositionOfError(error: Error): { import: string, line: number } | undefined {
-    const frames = Util.stackTraceToParts(error.stack ?? new Error().stack!)
-      .map(frame => {
-        const entry = RuntimeIndex.getEntry(frame.filename);
-        return { ...frame, import: entry?.import ?? undefined!, line: entry?.type === 'ts' ? frame.line : 1 };
-      });
+  static getPositionOfError(error: Error): { import: string; line: number } | undefined {
+    const frames = Util.stackTraceToParts(error.stack ?? new Error().stack!).map(frame => {
+      const entry = RuntimeIndex.getEntry(frame.filename);
+      return { ...frame, import: entry?.import ?? undefined!, line: entry?.type === 'ts' ? frame.line : 1 };
+    });
 
     return frames.find(frame => frame.import);
   }
@@ -51,9 +55,9 @@ export class AssertUtil {
   /**
    * Generate a suite error given a suite config, and an error
    */
-  static generateAssertion(config: { suite: SuiteConfig, test: TestConfig, error: Error, importLocation?: string }): Assertion {
+  static generateAssertion(config: { suite: SuiteConfig; test: TestConfig; error: Error; importLocation?: string }): Assertion {
     const { suite, test, error: errorValue, importLocation } = config;
-    const error = (errorValue.cause && errorValue.cause instanceof Error) ? errorValue.cause : errorValue;
+    const error = errorValue.cause && errorValue.cause instanceof Error ? errorValue.cause : errorValue;
     const testImport = importLocation ?? test.import;
     const position = this.getPositionOfError(error);
     const line = position?.line ?? (testImport === suite.import ? suite.lineStart : 1);

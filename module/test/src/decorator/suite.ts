@@ -18,7 +18,7 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
     SuiteRegistryIndex.getForRegister(cls).register(
       ...(typeof description !== 'string' && description ? [description] : []),
       ...rest,
-      ...(typeof description === 'string' ? [{ description }] : []),
+      ...(typeof description === 'string' ? [{ description }] : [])
     );
     return cls;
   };

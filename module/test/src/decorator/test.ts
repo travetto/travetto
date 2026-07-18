@@ -27,10 +27,12 @@ export function Test(...rest: Partial<TestConfig>[]): MethodDecorator;
 export function Test(description: string, ...rest: Partial<TestConfig>[]): MethodDecorator;
 export function Test(description?: string | Partial<TestConfig>, ...rest: Partial<TestConfig>[]): MethodDecorator {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor) => {
-    SuiteRegistryIndex.getForRegister(getClass(instance)).registerTest(property, descriptor.value,
-      ...(typeof description !== 'string' && description) ? [description] : [],
+    SuiteRegistryIndex.getForRegister(getClass(instance)).registerTest(
+      property,
+      descriptor.value,
+      ...(typeof description !== 'string' && description ? [description] : []),
       ...rest,
-      ...(typeof description === 'string') ? [{ description }] : []
+      ...(typeof description === 'string' ? [{ description }] : [])
     );
     return descriptor;
   };

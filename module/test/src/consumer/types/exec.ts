@@ -10,7 +10,6 @@ import { TestConsumer } from '../decorator.ts';
  */
 @TestConsumer()
 export class ExecutionEmitter extends IpcChannel<TestEvent> implements TestConsumerShape {
-
   sendPayload(payload: unknown & { type: string }): void {
     this.send(payload.type, JSONUtil.cloneForTransmit(payload));
   }

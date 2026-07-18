@@ -37,7 +37,10 @@ export class XunitEmitter implements TestConsumerShape {
     }
     if (Object.keys(metadata).length) {
       let body = stringify(metadata);
-      body = body.split('\n').map(line => `  ${line}`).join('\n');
+      body = body
+        .split('\n')
+        .map(line => `  ${line}`)
+        .join('\n');
       return `<![CDATA[\n${body}\n]]>`;
     } else {
       return '';
@@ -49,7 +52,6 @@ export class XunitEmitter implements TestConsumerShape {
    */
   onEvent(event: TestEvent): void {
     if (event.type === 'test' && event.phase === 'after') {
-
       const { test } = event;
 
       let name = `${test.methodName}`;
@@ -79,8 +81,7 @@ export class XunitEmitter implements TestConsumerShape {
       ${body}
       <system-out>${this.buildMeta({ log: groupedByLevel.log, info: groupedByLevel.info, debug: groupedByLevel.debug })}</system-out>
       <system-err>${this.buildMeta({ error: groupedByLevel.error, warn: groupedByLevel.warn })}</system-err>
-    </testcase>`
-      );
+    </testcase>`);
     } else if (event.type === 'suite' && event.phase === 'after') {
       const { suite } = event;
       const testBodies = this.#tests.slice(0);

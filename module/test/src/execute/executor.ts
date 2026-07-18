@@ -19,7 +19,6 @@ const TEST_TIMEOUT = TimeUtil.duration(Env.TRV_TEST_TIMEOUT.value || 5000, 'ms')
  * Support execution of the tests
  */
 export class TestExecutor {
-
   #consumer: TestConsumerShape;
 
   constructor(consumer: TestConsumerShape) {
@@ -57,16 +56,15 @@ export class TestExecutor {
    * Execute the test, capture output, assertions and promises
    */
   async executeTest(instance: unknown, test: TestConfig, suite: SuiteConfig, override?: Partial<TestResult>): Promise<TestResult> {
-
     const result = TestModelUtil.createTestResult(suite, test, override);
 
     // Mark test start
     this.#consumer.onEvent({ type: 'test', phase: 'before', test });
 
-
     // Emit every assertion as it occurs
     const getAssertions = AssertCapture.collector(test, item =>
-      this.#consumer.onEvent({ type: 'assertion', phase: 'after', assertion: item }));
+      this.#consumer.onEvent({ type: 'assertion', phase: 'after', assertion: item })
+    );
 
     const consoleCapture = new ConsoleCapture().start(); // Capture all output from transpiled code
 
@@ -75,7 +73,9 @@ export class TestExecutor {
       if (result.error) {
         result.assertions.push(AssertUtil.generateAssertion({ suite, test, error: result.error }));
       }
-      for (const item of result.assertions ?? []) { AssertCapture.add(item); }
+      for (const item of result.assertions ?? []) {
+        AssertCapture.add(item);
+      }
     } else {
       // Run method and get result
       const startTime = Date.now();
@@ -101,7 +101,6 @@ export class TestExecutor {
    * Execute an entire suite
    */
   async executeSuite(suite: SuiteConfig, tests: TestConfig[]): Promise<void> {
-
     const instance = classConstruct(suite.class);
 
     const shouldSkip = await this.#shouldSkip(suite, instance);
@@ -110,7 +109,8 @@ export class TestExecutor {
 
     if (shouldSkip) {
       this.#consumer.onEvent({
-        phase: 'after', type: 'suite',
+        phase: 'after',
+        type: 'suite',
         suite: {
           ...result,
           status: 'skipped',
@@ -130,9 +130,7 @@ export class TestExecutor {
     const testResultOverrides: Record<string, Partial<TestResult>> = {};
 
     const validTestMethodNames = new Set(tests.map(t => t.methodName));
-    const testConfigs = Object.fromEntries(
-      Object.entries(suite.tests).filter(([key]) => validTestMethodNames.has(key))
-    );
+    const testConfigs = Object.fromEntries(Object.entries(suite.tests).filter(([key]) => validTestMethodNames.has(key)));
 
     // Mark suite start
     this.#consumer.onEvent({ phase: 'before', type: 'suite', suite: { ...suite, tests: testConfigs } });
@@ -162,7 +160,7 @@ export class TestExecutor {
 
       try {
         // Handle BeforeEach
-        testResultOverride.status || await manager.startPhase('each');
+        testResultOverride.status || (await manager.startPhase('each'));
       } catch (someError) {
         const testError = await manager.onError('each', someError);
         testResultOverride.error = testError;
@@ -174,9 +172,11 @@ export class TestExecutor {
 
       // Handle after each
       try {
-        testResultOverride.status || await manager.endPhase('each');
+        testResultOverride.status || (await manager.endPhase('each'));
       } catch (testError) {
-        if (!(testError instanceof Error)) { throw testError; };
+        if (!(testError instanceof Error)) {
+          throw testError;
+        }
         console.error('Failed to properly shutdown test', testError.message);
       }
 
@@ -189,7 +189,9 @@ export class TestExecutor {
       // Handle after all
       await manager.endPhase('all');
     } catch (suiteError) {
-      if (!(suiteError instanceof Error)) { throw suiteError; };
+      if (!(suiteError instanceof Error)) {
+        throw suiteError;
+      }
       console.error('Failed to properly shutdown test', suiteError.message);
     }
 
@@ -210,7 +212,9 @@ export class TestExecutor {
     try {
       await Runtime.importFrom(run.import);
     } catch (error) {
-      if (!(error instanceof Error)) { throw error; }
+      if (!(error instanceof Error)) {
+        throw error;
+      }
       const suite = TestModelUtil.createImportErrorSuiteResult(run);
       console.error(error);
       this.#consumer.onEvent({ type: 'suite', phase: 'after', suite });

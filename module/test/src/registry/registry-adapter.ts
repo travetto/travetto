@@ -8,7 +8,7 @@ import type { TestConfig } from '../model/test.ts';
 function combineClasses(baseConfig: SuiteConfig, ...subConfig: Partial<SuiteConfig>[]): SuiteConfig {
   for (const config of subConfig) {
     if (config.tags) {
-      baseConfig.tags = [...new Set([...baseConfig.tags ?? [], ...config.tags])];
+      baseConfig.tags = [...new Set([...(baseConfig.tags ?? []), ...config.tags])];
     }
     baseConfig.skip = config.skip ?? baseConfig.skip;
 
@@ -22,7 +22,7 @@ function combineClasses(baseConfig: SuiteConfig, ...subConfig: Partial<SuiteConf
           ...test,
           class: baseConfig.class,
           classId: baseConfig.classId,
-          import: baseConfig.import,
+          import: baseConfig.import
         };
       }
     }
@@ -31,7 +31,7 @@ function combineClasses(baseConfig: SuiteConfig, ...subConfig: Partial<SuiteConf
 }
 
 function combineWithParent(baseConfig: SuiteConfig, parentConfig: SuiteConfig): SuiteConfig {
-  baseConfig.tags = [...parentConfig.tags ?? [], ...baseConfig.tags ?? []];
+  baseConfig.tags = [...(parentConfig.tags ?? []), ...(baseConfig.tags ?? [])];
   baseConfig.skip = baseConfig.skip ?? parentConfig.skip;
   baseConfig.phaseHandlers = [...(parentConfig.phaseHandlers ?? []), ...(baseConfig.phaseHandlers ?? [])];
   for (const [key, test] of Object.entries(parentConfig.tests ?? {})) {
@@ -39,7 +39,7 @@ function combineWithParent(baseConfig: SuiteConfig, parentConfig: SuiteConfig): 
       ...test,
       class: baseConfig.class,
       classId: baseConfig.classId,
-      import: baseConfig.import,
+      import: baseConfig.import
     };
   }
   return baseConfig;
@@ -50,10 +50,7 @@ function combineMethods(suite: SuiteConfig, baseConfig: TestConfig, ...subConfig
   baseConfig.import = suite.import;
   for (const config of subConfig) {
     safeAssign(baseConfig, config, {
-      tags: [
-        ...baseConfig.tags ?? [],
-        ...config.tags ?? []
-      ]
+      tags: [...(baseConfig.tags ?? []), ...(config.tags ?? [])]
     });
   }
   return baseConfig;
@@ -80,7 +77,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
         lineEnd: lines?.[1],
         sourceHash: hash,
         tests: {},
-        phaseHandlers: [],
+        phaseHandlers: []
       });
     }
     combineClasses(this.#config, ...data);
@@ -102,7 +99,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
         lineEnd: lines?.[1],
         lineBodyStart: lines?.[2],
         methodName: method,
-        sourceHash: hash,
+        sourceHash: hash
       });
       this.#config.tests[method] = config;
     }
@@ -118,7 +115,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
     }
 
     for (const test of Object.values(this.#config.tests)) {
-      test.tags = [...new Set([...test.tags ?? [], ...this.#config.tags ?? []])];
+      test.tags = [...new Set([...(test.tags ?? []), ...(this.#config.tags ?? [])])];
       test.description ||= SchemaRegistryIndex.get(this.#cls).getMethod(test.methodName).description;
     }
   }

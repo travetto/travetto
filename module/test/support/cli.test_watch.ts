@@ -11,7 +11,6 @@ import type { TestConsumerType } from './bin/run.ts';
  */
 @CliCommand()
 export class TestWatcherCommand {
-
   /** Output format for test results */
   format: TestConsumerType = 'tap';
 

@@ -5,11 +5,10 @@ import { Env } from '@travetto/runtime';
 import { StyleUtil, type TermStyleFn, type TermStyleInput } from './style.ts';
 import { type Terminal, WAIT_TOKEN } from './terminal.ts';
 
-export type ProgressEvent<T> = { total?: number, completed: number, value: T, failed?: number };
-type ProgressStyle = { complete: TermStyleFn, failed: TermStyleFn, incomplete?: TermStyleFn };
+export type ProgressEvent<T> = { total?: number; completed: number; value: T; failed?: number };
+type ProgressStyle = { complete: TermStyleFn; failed: TermStyleFn; incomplete?: TermStyleFn };
 
 export class TerminalUtil {
-
   /**
    * Determine if the terminal session is interactive
    */
@@ -39,21 +38,24 @@ export class TerminalUtil {
     term: Terminal,
     config?: {
       withWaiting?: boolean;
-      style?: { complete: TermStyleInput, failed?: TermStyleInput, incomplete?: TermStyleInput } | (() => ProgressStyle);
+      style?: { complete: TermStyleInput; failed?: TermStyleInput; incomplete?: TermStyleInput } | (() => ProgressStyle);
     }
   ): (event: ProgressEvent<string>) => string {
-    const styleBase = typeof config?.style !== 'function' ? {
-      complete: StyleUtil.getStyle(config?.style?.complete ?? { background: '#248613', text: '#ffffff' }),
-      failed: StyleUtil.getStyle({ background: '#880000', text: '#ffffff', inverse: false }),
-      incomplete: config?.style?.incomplete ? StyleUtil.getStyle(config.style.incomplete) : undefined,
-    } : undefined;
+    const styleBase =
+      typeof config?.style !== 'function'
+        ? {
+            complete: StyleUtil.getStyle(config?.style?.complete ?? { background: '#248613', text: '#ffffff' }),
+            failed: StyleUtil.getStyle({ background: '#880000', text: '#ffffff', inverse: false }),
+            incomplete: config?.style?.incomplete ? StyleUtil.getStyle(config.style.incomplete) : undefined
+          }
+        : undefined;
 
     const style = typeof config?.style === 'function' ? config.style : (): ProgressStyle => styleBase!;
 
     let width: number;
     return event => {
       const text = event.value ?? (event.total ? '%completed/%total' : '%completed');
-      const progress = event.total === undefined ? 0 : (event.completed / event.total);
+      const progress = event.total === undefined ? 0 : event.completed / event.total;
       if (event.total) {
         width ??= Math.trunc(Math.ceil(Math.log10(event.total ?? 10000)));
       }

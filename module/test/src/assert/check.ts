@@ -10,11 +10,11 @@ import { ASSERT_FN_OPERATOR, OP_MAPPING } from './types.ts';
 import { TestExecutionError } from '../model/error.ts';
 
 type StringFields<T> = {
-  [K in Extract<keyof T, string>]:
-  (T[K] extends string ? K : never)
+  [K in Extract<keyof T, string>]: T[K] extends string ? K : never;
 }[Extract<keyof T, string>];
 
-const isClass = (input: unknown): input is Class => input === Error || input === RuntimeError || Object.getPrototypeOf(input) !== Object.getPrototypeOf(Function);
+const isClass = (input: unknown): input is Class =>
+  input === Error || input === RuntimeError || Object.getPrototypeOf(input) !== Object.getPrototypeOf(Function);
 
 /**
  * Check assertion
@@ -55,7 +55,7 @@ export class AssertCheck {
     } else if (fn === 'ok' || fn === 'assert') {
       fn = assertion.operator = 'ok';
       [assertion.actual, assertion.message] = castTo(args);
-      assertion.expected = { toClean: (): string => positive ? 'truthy' : 'falsy' };
+      assertion.expected = { toClean: (): string => (positive ? 'truthy' : 'falsy') };
       common.state = 'should be';
     } else if (fn === 'includes') {
       assertion.operator = fn;
@@ -64,7 +64,8 @@ export class AssertCheck {
       assertion.operator = fn;
       [assertion.actual, assertion.expected, assertion.message] = castTo(args);
       assertion.actual = asConstructable(assertion.actual)?.constructor;
-    } else { // Handle unknown
+    } else {
+      // Handle unknown
       assertion.operator = fn ?? '';
       [assertion.actual, assertion.expected, assertion.message] = castTo(args);
     }
@@ -83,17 +84,36 @@ export class AssertCheck {
 
       // Actually run the assertion
       switch (fn) {
-        case 'includes': assertFn(castTo<unknown[]>(actual).includes(expected), message); break;
-        case 'test': assertFn(castTo<RegExp>(expected).test(castTo(actual)), message); break;
-        case 'instanceof': assertFn(actual instanceof castTo<Class>(expected), message); break;
-        case 'in': assertFn(castTo<string>(actual) in castTo<object>(expected), message); break;
-        case 'lessThan': assertFn(castTo<number>(actual) < castTo<number>(expected), message); break;
-        case 'lessThanEqual': assertFn(castTo<number>(actual) <= castTo<number>(expected), message); break;
-        case 'greaterThan': assertFn(castTo<number>(actual) > castTo<number>(expected), message); break;
-        case 'greaterThanEqual': assertFn(castTo<number>(actual) >= castTo<number>(expected), message); break;
-        case 'ok': assertFn.apply(null, castTo(args)); break;
+        case 'includes':
+          assertFn(castTo<unknown[]>(actual).includes(expected), message);
+          break;
+        case 'test':
+          assertFn(castTo<RegExp>(expected).test(castTo(actual)), message);
+          break;
+        case 'instanceof':
+          assertFn(actual instanceof castTo<Class>(expected), message);
+          break;
+        case 'in':
+          assertFn(castTo<string>(actual) in castTo<object>(expected), message);
+          break;
+        case 'lessThan':
+          assertFn(castTo<number>(actual) < castTo<number>(expected), message);
+          break;
+        case 'lessThanEqual':
+          assertFn(castTo<number>(actual) <= castTo<number>(expected), message);
+          break;
+        case 'greaterThan':
+          assertFn(castTo<number>(actual) > castTo<number>(expected), message);
+          break;
+        case 'greaterThanEqual':
+          assertFn(castTo<number>(actual) >= castTo<number>(expected), message);
+          break;
+        case 'ok':
+          assertFn.apply(null, castTo(args));
+          break;
         default:
-          if (fn && assert[castKey<typeof assert>(fn)]) { // Assert call
+          if (fn && assert[castKey<typeof assert>(fn)]) {
+            // Assert call
             if (/not/i.test(fn)) {
               common.state = 'should not';
             }
@@ -107,7 +127,7 @@ export class AssertCheck {
       // On error, produce the appropriate error message
       if (error instanceof assert.AssertionError) {
         if (!assertion.message) {
-          assertion.message = (OP_MAPPING[fn] ?? '{state} be {expected}');
+          assertion.message = OP_MAPPING[fn] ?? '{state} be {expected}';
         }
         assertion.message = assertion.message
           .replace(/[{]([A-Za-z]+)[}]/g, (a, key: StringFields<Assertion>) => common[key] || assertion[key]!)
@@ -126,7 +146,8 @@ export class AssertCheck {
    * @param error The provided error
    */
   static checkError(shouldThrow: ThrowableError | undefined, error: Error | string | undefined): Error | undefined {
-    if (!shouldThrow) { // If we shouldn't be throwing anything, we are good
+    if (!shouldThrow) {
+      // If we shouldn't be throwing anything, we are good
       return;
     } else if (!error) {
       return new assert.AssertionError({ message: 'Expected to throw an error, but got nothing' });
@@ -152,7 +173,7 @@ export class AssertCheck {
       if (!(error instanceof shouldThrow)) {
         return new assert.AssertionError({
           message: `Expected to throw ${shouldThrow.name}, but got ${error}`,
-          actual: (error ?? 'nothing'),
+          actual: error ?? 'nothing',
           expected: shouldThrow.name
         });
       }
@@ -220,7 +241,10 @@ export class AssertCheck {
         if (typeof shouldThrow === 'function') {
           shouldThrow = shouldThrow.name;
         }
-        throw (missed = new assert.AssertionError({ message: `No error thrown, but expected ${shouldThrow ?? 'an error'}`, expected: shouldThrow ?? 'an error' }));
+        throw (missed = new assert.AssertionError({
+          message: `No error thrown, but expected ${shouldThrow ?? 'an error'}`,
+          expected: shouldThrow ?? 'an error'
+        }));
       }
     } catch (error) {
       this.#onError(positive, message, error, missed, shouldThrow, assertion);
@@ -256,7 +280,10 @@ export class AssertCheck {
         if (typeof shouldThrow === 'function') {
           shouldThrow = shouldThrow.name;
         }
-        throw (missed = new assert.AssertionError({ message: `No error thrown, but expected ${shouldThrow ?? 'an error'}`, expected: shouldThrow ?? 'an error' }));
+        throw (missed = new assert.AssertionError({
+          message: `No error thrown, but expected ${shouldThrow ?? 'an error'}`,
+          expected: shouldThrow ?? 'an error'
+        }));
       }
     } catch (error) {
       this.#onError(positive, message, error, missed, shouldThrow, assertion);

@@ -7,7 +7,6 @@ import { DelegatingConsumer } from './delegating.ts';
  * Test consumer with support for multiple nested consumers, and summarization
  */
 export class RunnableTestConsumer extends DelegatingConsumer {
-
   #results?: TestResultsSummarizer;
 
   constructor(...consumers: TestConsumerShape[]) {
@@ -22,7 +21,6 @@ export class RunnableTestConsumer extends DelegatingConsumer {
 
   async summarizeAsBoolean(): Promise<boolean> {
     await this.summarize(this.#results?.summary);
-    return (this.#results?.summary.failed ?? 0) <= 0 &&
-      (this.#results?.summary.errored ?? 0) <= 0;
+    return (this.#results?.summary.failed ?? 0) <= 0 && (this.#results?.summary.errored ?? 0) <= 0;
   }
 }

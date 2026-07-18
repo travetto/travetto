@@ -15,12 +15,12 @@ import type { TestConsumerType } from './bin/run.ts';
  */
 @CliCommand()
 export class TestCommand implements CliCommandShape {
-
   /** Output format for test results */
   format: TestConsumerType = 'tap';
 
   /** Number of tests to run concurrently */
-  @Min(1) @Max(WorkPool.MAX_SIZE)
+  @Min(1)
+  @Max(WorkPool.MAX_SIZE)
   concurrency: number = WorkPool.DEFAULT_SIZE;
 
   /**
@@ -52,16 +52,18 @@ export class TestCommand implements CliCommandShape {
       {
         concurrency: this.concurrency,
         consumer: this.format,
-        consumerOptions: CliUtil.readExtendedOptions(this.formatOptions),
+        consumerOptions: CliUtil.readExtendedOptions(this.formatOptions)
       },
-      importPath ? {
-        import: importPath,
-        classId: globs[0],
-        methodNames: globs.slice(1),
-      } : {
-        globs: [first, ...globs],
-        tags: this.tags,
-      }
+      importPath
+        ? {
+            import: importPath,
+            classId: globs[0],
+            methodNames: globs.slice(1)
+          }
+        : {
+            globs: [first, ...globs],
+            tags: this.tags
+          }
     );
   }
 }

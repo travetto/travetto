@@ -4,17 +4,34 @@ import { Env, TypedObject } from '@travetto/runtime';
 
 type TemplatePrim = number | string | bigint | boolean | RegExp;
 type Color = `#${string}`;
-export type TermStyleInput = Color | { text: Color, background?: Color, inverse?: boolean, bold?: boolean, italic?: boolean, underline?: boolean };
+export type TermStyleInput =
+  | Color
+  | { text: Color; background?: Color; inverse?: boolean; bold?: boolean; italic?: boolean; underline?: boolean };
 type TermStylePairInput = [dark: TermStyleInput, light?: TermStyleInput] | readonly [dark: TermStyleInput, light?: TermStyleInput];
 export type TermStyleFn = (input: TemplatePrim) => string;
-export type TermStyledTemplate<T extends string> = (values: TemplateStringsArray, ...keys: (Partial<Record<T, TemplatePrim>> | string)[]) => string;
+export type TermStyledTemplate<T extends string> = (
+  values: TemplateStringsArray,
+  ...keys: (Partial<Record<T, TemplatePrim>> | string)[]
+) => string;
 export type ColorLevel = 0 | 1 | 2 | 3;
 
 const ANSI_16_RGB: [number, number, number][] = [
-  [0, 0, 0], [128, 0, 0], [0, 128, 0], [128, 128, 0],
-  [0, 0, 128], [128, 0, 128], [0, 128, 128], [192, 192, 192],
-  [128, 128, 128], [255, 0, 0], [0, 255, 0], [255, 255, 0],
-  [0, 0, 255], [255, 0, 255], [0, 255, 255], [255, 255, 255]
+  [0, 0, 0],
+  [128, 0, 0],
+  [0, 128, 0],
+  [128, 128, 0],
+  [0, 0, 128],
+  [128, 0, 128],
+  [0, 128, 128],
+  [192, 192, 192],
+  [128, 128, 128],
+  [255, 0, 0],
+  [0, 255, 0],
+  [255, 255, 0],
+  [0, 0, 255],
+  [255, 0, 255],
+  [0, 255, 255],
+  [255, 255, 255]
 ];
 
 const toLinear = (v: number): number => {
@@ -25,7 +42,6 @@ const toLinear = (v: number): number => {
 const ESC = '\x1b';
 
 export class StyleUtil {
-
   /** Compute RGB values for ANSI 256 color code */
   static computeRGBForAnsi256(code: number): [number, number, number] {
     if (code < 16) {
@@ -49,7 +65,7 @@ export class StyleUtil {
     return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
   }
 
-  static #scheme: { key: string, dark: boolean } = { key: '', dark: true };
+  static #scheme: { key: string; dark: boolean } = { key: '', dark: true };
 
   /**
    * Create text render function from style input using current color levels
@@ -61,9 +77,15 @@ export class StyleUtil {
       let style = chalk;
       for (const key of TypedObject.keys(input)) {
         switch (key) {
-          case 'text': style = style.hex(input[key]!); break;
-          case 'background': style = style.bgHex(input[key]!); break;
-          default: style = (input[key] ? style[key] : style); break;
+          case 'text':
+            style = style.hex(input[key]!);
+            break;
+          case 'background':
+            style = style.bgHex(input[key]!);
+            break;
+          default:
+            style = input[key] ? style[key] : style;
+            break;
         }
       }
       return style;
@@ -106,8 +128,7 @@ export class StyleUtil {
    * Build style palette, with support for background theme awareness
    */
   static getPalette<K extends string>(input: Record<K, TermStylePairInput>): Record<K, TermStyleFn> {
-    return TypedObject.fromEntries(
-      TypedObject.entries(input).map(([key, value]) => [key, this.getThemedStyle(value)]));
+    return TypedObject.fromEntries(TypedObject.entries(input).map(([key, value]) => [key, this.getThemedStyle(value)]));
   }
 
   /**

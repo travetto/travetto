@@ -6,5 +6,5 @@ import { TestConsumer } from '../decorator.ts';
  */
 @TestConsumer()
 export class NoopConsumer implements TestConsumerShape {
-  onEvent(): void { }
+  onEvent(): void {}
 }

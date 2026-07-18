@@ -32,7 +32,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
   }
 
   getOrCreateSuite({ tests: _, ...core }: SuiteConfig | SuiteResult): CumulativeSuiteResult {
-    return (this.#state[core.import] ??= {})[core.classId] ??= { ...core, tests: {} };
+    return ((this.#state[core.import] ??= {})[core.classId] ??= { ...core, tests: {} });
   }
 
   onTestBefore(config: TestConfig): TestConfig {

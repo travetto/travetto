@@ -7,7 +7,6 @@ import { TestModelUtil } from '../../model/util.ts';
  * Test Result Collector, combines all results into a single Suite Result
  */
 export class TestResultsSummarizer implements TestConsumerShape {
-
   summary: SuitesSummary = {
     ...TestModelUtil.buildSummary(),
     suites: []

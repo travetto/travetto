@@ -4,7 +4,6 @@ import { Suite, Test } from '@travetto/test';
 
 @Suite()
 class SimpleTest {
-
   @Test()
   async testThrows() {
     assert.throws(() => {

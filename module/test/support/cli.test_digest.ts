@@ -15,7 +15,6 @@ import { RunUtil } from '../src/execute/run.ts';
  * order for planning, sharding, or change detection workflows.
  */
 export class TestDigestCommand {
-
   /** Output mode for digest emission. */
   output: 'json' | 'text' = 'text';
 
