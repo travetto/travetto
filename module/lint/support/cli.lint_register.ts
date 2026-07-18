@@ -12,11 +12,16 @@ import { Runtime } from "@travetto/runtime";
 export class LintRegisterCommand implements CliCommandShape {
   async main(): Promise<void> {
     const content = `{
+  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
   "extends": ["./node_modules/@travetto/lint/resources/biome.jsonc"]
 }
 `;
     const output = Runtime.workspaceRelative("biome.jsonc");
-    await fs.writeFile(output, content);
-    console.log(`Wrote biome config to ${output}`);
+    if (!(await fs.stat(output, { throwIfNoEntry: false }))) {
+      await fs.writeFile(output, content);
+      console.log(`Wrote lint config to ${output}`);
+    } else {
+      console.log(`Lint config already present ${output}`);
+    }
   }
 }

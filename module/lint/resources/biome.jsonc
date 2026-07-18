@@ -10,15 +10,9 @@
     "ignoreUnknown": true,
     "includes": [
       "**",
-      "!**/node_modules",
-      "!**/dist",
-      "!**/out",
       "!**/*.d.ts",
-      "!**/.trv",
       "!**/fixtures",
       "!**/resources",
-      "!**/ui",
-      "!**/api-client"
     ]
   },
   "formatter": {
@@ -31,7 +25,28 @@
   "assist": {
     "actions": {
       "source": {
-        "organizeImports": "on"
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              [":NODE:",":BUN:"],
+              ":BLANK_LINE:",
+              [
+                ":PACKAGE:",
+                "!@travetto/**"
+              ],
+              ":BLANK_LINE:",
+              "@travetto/*",
+              ":BLANK_LINE:",
+              "@travetto/**/*.ts",
+              ":BLANK_LINE:",
+               [
+                ":ALIAS:",
+                ":PATH:"
+              ]
+            ]
+          }
+        }
       }
     }
   },
@@ -51,14 +66,11 @@
         "noStaticOnlyClass": "off",
         "noThisInStatic": "off",
         "noBannedTypes": "off",
-        "noUselessSwitchCase": "warn",
-        "noUselessLabel": "warn"
       },
       "suspicious": {
         "noVar": "error",
-        "noTsIgnore": "warn",
-        "noAssignInExpressions": "warn",
-        "noNonNullAssertedOptionalChain": "warn"
+        "noTsIgnore": "off",
+        "noConfusingVoidType": "off",
       }
     }
   },
@@ -67,7 +79,7 @@
       "quoteStyle": "single",
       "semicolons": "always",
       "arrowParentheses": "asNeeded",
-      "trailingCommas": "none"
+      "trailingCommas": "all"
     },
     "parser": {
       "unsafeParameterDecoratorsEnabled": true
@@ -83,46 +95,7 @@
       "includes": [
         "**/test/**/*.ts*",
         "**/support/test/**/*.ts*",
-        "global-test/**"
-      ],
-      "assist": {
-        "actions": {
-          "source": {
-            "organizeImports": "off"
-          }
-        }
-      },
-      "linter": {
-        "rules": {
-          "correctness": {
-            "noUnusedVariables": "off",
-            "noUnusedFunctionParameters": "off"
-          },
-          "complexity": {
-            "useLiteralKeys": "off"
-          },
-          "suspicious": {
-            "noTsIgnore": "warn",
-            "noAssignInExpressions": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": [
-        "**/*.tsx",
-        "**/*.html"
-      ],
-      "linter": {
-        "rules": {
-          "a11y": {
-            "useValidAnchor": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": [
+        "global-test/**",
         "**/doc/**/*.ts*"
       ],
       "linter": {
@@ -130,12 +103,6 @@
           "correctness": {
             "noUnusedVariables": "off",
             "noUnusedFunctionParameters": "off"
-          },
-          "complexity": {
-            "useLiteralKeys": "off"
-          },
-          "suspicious": {
-            "noTsIgnore": "warn"
           }
         }
       }
