@@ -12,7 +12,6 @@ import { ModelCandidateUtil } from './bin/candidate.ts';
  */
 @Schema()
 export abstract class BaseModelCommand implements CliCommandShape {
-
   static async validate(operation: keyof ModelStorageSupport, provider: string, models: string[]): Promise<ValidationError | undefined> {
     const candidates = await ModelCandidateUtil.export(operation);
     if (provider && !candidates.providers.includes(provider)) {

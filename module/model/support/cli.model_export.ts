@@ -13,8 +13,9 @@ import { ModelCandidateUtil } from './bin/candidate.ts';
  */
 @CliCommand()
 export class ModelExportCommand extends BaseModelCommand {
-
-  getOperation(): 'exportModel' { return 'exportModel'; }
+  getOperation(): 'exportModel' {
+    return 'exportModel';
+  }
 
   @MethodValidator(BaseModelCommand.validate.bind(null, 'exportModel'))
   async main(provider: string, models: string[]): Promise<void> {

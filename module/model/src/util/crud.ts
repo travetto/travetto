@@ -19,7 +19,6 @@ export type ModelCrudProvider = {
  * Crud utilities
  */
 export class ModelCrudUtil {
-
   /**
    * Type guard for determining if service supports crud operations
    */
@@ -38,15 +37,17 @@ export class ModelCrudUtil {
     if (!actions) {
       return [];
     }
-    return (await Promise.allSettled(actions)).map(p => {
-      if (p.status === 'fulfilled') {
-        return p.value;
-      } else if (p.reason instanceof NotFoundError) {
-        return undefined!;
-      } else {
-        throw p.reason;
-      }
-    }).filter(item => !!item);
+    return (await Promise.allSettled(actions))
+      .map(p => {
+        if (p.status === 'fulfilled') {
+          return p.value;
+        } else if (p.reason instanceof NotFoundError) {
+          return undefined!;
+        } else {
+          throw p.reason;
+        }
+      })
+      .filter(item => !!item);
   }
 
   /**
@@ -54,11 +55,13 @@ export class ModelCrudUtil {
    * @param cls Class to load model for
    * @param input Input as string or plain object
    */
-  static async load<T extends ModelType>(cls: Class<T>, input: ModelLoadInput, onTypeMismatch: 'notfound' | 'exists' = 'notfound'): Promise<T> {
+  static async load<T extends ModelType>(
+    cls: Class<T>,
+    input: ModelLoadInput,
+    onTypeMismatch: 'notfound' | 'exists' = 'notfound'
+  ): Promise<T> {
     const resolvedInput: object =
-      typeof input === 'string' ? JSONUtil.fromUTF8(input) :
-        BinaryUtil.isBinaryArray(input) ? JSONUtil.fromBinaryArray(input) :
-          input;
+      typeof input === 'string' ? JSONUtil.fromUTF8(input) : BinaryUtil.isBinaryArray(input) ? JSONUtil.fromBinaryArray(input) : input;
 
     const result = SchemaRegistryIndex.getBaseClass(cls).from(resolvedInput);
 
@@ -79,7 +82,12 @@ export class ModelCrudUtil {
    * @param cls Type to store for
    * @param item Item to store
    */
-  static async preStore<T extends ModelType>(cls: Class<T>, item: Partial<OptionalId<T>>, provider: ModelCrudProvider, scope: PrePersistScope = 'all'): Promise<T> {
+  static async preStore<T extends ModelType>(
+    cls: Class<T>,
+    item: Partial<OptionalId<T>>,
+    provider: ModelCrudProvider,
+    scope: PrePersistScope = 'all'
+  ): Promise<T> {
     if (!item.id) {
       item.id = provider.idSource.create();
     }
@@ -128,7 +136,7 @@ export class ModelCrudUtil {
       };
 
       const hasTargets = Object.keys(schema.fields).some(key => isCleanTarget(key));
-      
+
       let res = item;
       if (hasTargets) {
         res = { ...item };
@@ -190,10 +198,10 @@ export class ModelCrudUtil {
    */
   static async prePersist<T>(cls: Class<T>, item: T, scope: PrePersistScope): Promise<T> {
     const config = ModelRegistryIndex.getConfig(cls);
-    for (const state of (config.prePersist ?? [])) {
+    for (const state of config.prePersist ?? []) {
       if (state.scope === scope || scope === 'all' || state.scope === 'all') {
         const handler: DataHandler<T> = castTo(state.handler);
-        item = await handler(item) ?? item;
+        item = (await handler(item)) ?? item;
       }
     }
     return this.cleanTransientFields(cls, item);
@@ -205,7 +213,7 @@ export class ModelCrudUtil {
   static async postLoad<T>(cls: Class<T>, item: T): Promise<T> {
     const config = ModelRegistryIndex.getConfig(cls);
     for (const handler of castTo<DataHandler<T>[]>(config.postLoad ?? [])) {
-      item = await handler(item) ?? item;
+      item = (await handler(item)) ?? item;
     }
     return item;
   }
@@ -215,7 +223,9 @@ export class ModelCrudUtil {
    */
   static async prePartialUpdate<T extends ModelType>(cls: Class<T>, item: Partial<T>, view?: string): Promise<Partial<T>> {
     if (!DataUtil.isPlainObject(item)) {
-      throw new RuntimeError(`A partial update requires a plain object, not an instance of ${castTo<Function>(item).constructor.name}`, { category: 'data' });
+      throw new RuntimeError(`A partial update requires a plain object, not an instance of ${castTo<Function>(item).constructor.name}`, {
+        category: 'data'
+      });
     }
     const keys = Object.keys(item);
     if ((keys.length === 1 && item.id) || keys.length === 0) {

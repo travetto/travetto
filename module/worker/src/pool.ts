@@ -4,17 +4,22 @@ import { type Pool, createPool } from 'generic-pool';
 import { Env, Util, AsyncQueue } from '@travetto/runtime';
 
 import {
-  isWorkerFactory, WorkPoolResultError, type IterableSource, type Worker, type WorkerInput,
-  type WorkPoolCompleteEvent, type WorkPoolConfig, type WorkPoolProgress
+  isWorkerFactory,
+  WorkPoolResultError,
+  type IterableSource,
+  type Worker,
+  type WorkerInput,
+  type WorkPoolCompleteEvent,
+  type WorkPoolConfig,
+  type WorkPoolProgress
 } from './types.ts';
 
 /**
  * Work pool support
  */
 export class WorkPool {
-
   static MAX_SIZE = os.availableParallelism();
-  static DEFAULT_SIZE = Math.max(Math.trunc(WorkPool.MAX_SIZE * .75), 4);
+  static DEFAULT_SIZE = Math.max(Math.trunc(WorkPool.MAX_SIZE * 0.75), 4);
 
   static #shouldTrace(): boolean {
     return (Env.DEBUG.value ?? '').includes('@travetto/worker');
@@ -27,35 +32,38 @@ export class WorkPool {
     const trace = this.#shouldTrace();
 
     // Create the pool
-    const pool = createPool({
-      async create() {
-        try {
-          pendingAcquires += 1;
-          const factoryInput = isWorkerFactory(input) ? await input() : { execute: input };
-          const worker: Worker<I, O> = {
-            id: Util.uuid(),
-            active: true,
-            ...factoryInput,
-          };
-          await worker.init?.();
-          return worker;
-        } finally {
-          pendingAcquires -= 1;
-        }
+    const pool = createPool(
+      {
+        async create() {
+          try {
+            pendingAcquires += 1;
+            const factoryInput = isWorkerFactory(input) ? await input() : { execute: input };
+            const worker: Worker<I, O> = {
+              id: Util.uuid(),
+              active: true,
+              ...factoryInput
+            };
+            await worker.init?.();
+            return worker;
+          } finally {
+            pendingAcquires -= 1;
+          }
+        },
+        async destroy(worker) {
+          if (trace) {
+            console.debug('Destroying', { pid: process.pid, worker: worker.id });
+          }
+          return worker.destroy?.();
+        },
+        validate: async (worker: Worker<I, O>) => worker.active
       },
-      async destroy(worker) {
-        if (trace) {
-          console.debug('Destroying', { pid: process.pid, worker: worker.id });
-        }
-        return worker.destroy?.();
-      },
-      validate: async (worker: Worker<I, O>) => worker.active
-    }, {
-      evictionRunIntervalMillis: 5000,
-      ...(options ?? {}),
-      max: options?.max ?? WorkPool.DEFAULT_SIZE,
-      min: options?.min ?? 1,
-    });
+      {
+        evictionRunIntervalMillis: 5000,
+        ...(options ?? {}),
+        max: options?.max ?? WorkPool.DEFAULT_SIZE,
+        min: options?.min ?? 1
+      }
+    );
 
     // Listen for shutdown
     options?.shutdown?.addEventListener('abort', async () => {
@@ -73,7 +81,6 @@ export class WorkPool {
    * Process a given input source and worker, and fire on completion
    */
   static async run<I, O>(workerFactory: WorkerInput<I, O>, source: IterableSource<I>, options: WorkPoolConfig<I, O> = {}): Promise<void> {
-
     const trace = this.#shouldTrace();
     const pending = new Set<Promise<unknown>>();
     const errors: Error[] = [];
@@ -84,7 +91,7 @@ export class WorkPool {
     const progress: WorkPoolProgress = {
       completed: 0,
       total: options.total ?? 0,
-      failed: 0,
+      failed: 0
     };
 
     for await (const nextInput of source) {
@@ -97,7 +104,8 @@ export class WorkPool {
         progress.total = inputIdx + 1;
       }
 
-      const completion = worker.execute(nextInput, inputIdx += 1)
+      const completion = worker
+        .execute(nextInput, (inputIdx += 1))
         .then(output => {
           const success = options.isSuccess?.(output) ?? true;
           progress.failed += +!success;
@@ -118,12 +126,12 @@ export class WorkPool {
             if (worker.active) {
               try {
                 await worker.release?.();
-              } catch { }
+              } catch {}
               await pool.release(worker);
             } else {
               await pool.destroy(worker);
             }
-          } catch { }
+          } catch {}
         });
 
       completion.finally(() => pending.delete(completion));
@@ -140,11 +148,15 @@ export class WorkPool {
   /**
    * Process a given input source as an async iterable with progress information
    */
-  static runStream<I, O>(worker: WorkerInput<I, O>, source: IterableSource<I>, options?: WorkPoolConfig<I, O>): AsyncIterable<WorkPoolCompleteEvent<I, O>> {
+  static runStream<I, O>(
+    worker: WorkerInput<I, O>,
+    source: IterableSource<I>,
+    options?: WorkPoolConfig<I, O>
+  ): AsyncIterable<WorkPoolCompleteEvent<I, O>> {
     const queue = new AsyncQueue<WorkPoolCompleteEvent<I, O>>();
     const result = this.run(worker, source, {
       ...options,
-      onComplete: async (event) => {
+      onComplete: async event => {
         await options?.onComplete?.(event);
         queue.add(event);
         return;

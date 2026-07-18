@@ -4,10 +4,7 @@ import timers from 'node:timers/promises';
 import { Suite, Test } from '@travetto/test';
 import { castTo } from '@travetto/runtime';
 import { Schema, DiscriminatorField, Text, TypeMismatchError } from '@travetto/schema';
-import {
-  type ModelCrudSupport, Model,
-  NotFoundError, SubTypeNotSupportedError, PersistValue
-} from '@travetto/model';
+import { type ModelCrudSupport, Model, NotFoundError, SubTypeNotSupportedError, PersistValue } from '@travetto/model';
 
 import { ExistsError } from '../../src/error/exists.ts';
 
@@ -44,7 +41,6 @@ export class Engineer extends Worker {
 
 @Suite()
 export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSupport> {
-
   @Test('Polymorphic create and find')
   async polymorphicCreateAndFind() {
     const service = await this.service;
@@ -58,9 +54,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     assert(doc instanceof Doctor);
     assert(doc.updatedDate !== undefined);
 
-    await assert.rejects(
-      () => service.get(Engineer, doc.id),
-      NotFoundError);
+    await assert.rejects(() => service.get(Engineer, doc.id), NotFoundError);
 
     assert(doc instanceof Doctor);
     assert(fire instanceof Firefighter);
@@ -92,10 +86,13 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     const engineers = await this.toArray(service.list(Engineer));
     assert(engineers.length === 1);
 
-    await service.create(Engineer, Engineer.from({
-      major: 'foodService',
-      name: 'bob2'
-    }));
+    await service.create(
+      Engineer,
+      Engineer.from({
+        major: 'foodService',
+        name: 'bob2'
+      })
+    );
 
     const all2 = await this.toArray(service.list(Worker));
     assert(all2.length === 4);
@@ -115,16 +112,21 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
 
     await this.saveAll(Worker, [doc, fire, eng]);
 
-    assert(await service.get(Worker, doc.id) instanceof Doctor);
-    assert(await service.get(Worker, fire.id) instanceof Firefighter);
+    assert((await service.get(Worker, doc.id)) instanceof Doctor);
+    assert((await service.get(Worker, fire.id)) instanceof Firefighter);
 
     const update = new Date();
 
     await assert.rejects(
       () =>
-        service.upsert(Doctor, Doctor.from({
-          id: fire.id, name: 'gob', specialty: 'eyes'
-        })),
+        service.upsert(
+          Doctor,
+          Doctor.from({
+            id: fire.id,
+            name: 'gob',
+            specialty: 'eyes'
+          })
+        ),
       e => e instanceof SubTypeNotSupportedError || e instanceof ExistsError
     );
 
@@ -135,18 +137,28 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     await timers.setTimeout(15);
 
     try {
-      const result = await service.upsert(Doctor, Doctor.from({
-        id: doc.id, name: 'gob', specialty: 'eyes'
-      }));
+      const result = await service.upsert(
+        Doctor,
+        Doctor.from({
+          id: doc.id,
+          name: 'gob',
+          specialty: 'eyes'
+        })
+      );
 
       assert(result.updatedDate!.getTime() > update.getTime());
     } catch (err) {
       assert(err instanceof SubTypeNotSupportedError);
     }
 
-    const resAlt = await service.upsert(Worker, Doctor.from({
-      id: doc.id, name: 'gob', specialty: 'eyes'
-    }));
+    const resAlt = await service.upsert(
+      Worker,
+      Doctor.from({
+        id: doc.id,
+        name: 'gob',
+        specialty: 'eyes'
+      })
+    );
 
     assert(resAlt.updatedDate!.getTime() > update.getTime());
 
@@ -159,10 +171,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     // Delete by base class
     await service.delete(Worker, fire.id);
 
-    await assert.rejects(
-      () => service.delete(Worker, fire.id),
-      NotFoundError
-    );
+    await assert.rejects(() => service.delete(Worker, fire.id), NotFoundError);
 
     // Delete by any subtype when id is missing
     await assert.rejects(

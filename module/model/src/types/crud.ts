@@ -9,7 +9,6 @@ import type { ModelBasicSupport } from './basic.ts';
  * @concrete
  */
 export interface ModelCrudSupport extends ModelBasicSupport {
-
   /**
    * Update an item
    * @param item The document to update.

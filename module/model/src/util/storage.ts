@@ -8,7 +8,6 @@ import { ModelRegistryIndex } from '../registry/registry-index.ts';
  * Model storage util
  */
 export class ModelStorageUtil {
-
   /**
    * Type guard for determining if service supports storage operation
    */
@@ -33,7 +32,7 @@ export class ModelStorageUtil {
         return false;
       }
 
-      return (autoCreate === 'production' || !Runtime.production);
+      return autoCreate === 'production' || !Runtime.production;
     };
 
     // Initialize on startup (test manages)

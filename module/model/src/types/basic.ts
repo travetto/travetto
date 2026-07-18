@@ -6,7 +6,6 @@ import type { ModelIdSource, ModelType, OptionalId } from './model.ts';
  * @concrete
  */
 export interface ModelBasicSupport<C = unknown> {
-
   /**
    * Id Source
    */

@@ -8,9 +8,9 @@ import { ModelBlobUtil } from '../../src/util/blob.ts';
 import { ModelStorageUtil } from '../../src/util/storage.ts';
 import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
 
-type ConfigType = { autoCreate?: boolean, namespace?: string };
+type ConfigType = { autoCreate?: boolean; namespace?: string };
 
-class ModelSuiteHandler<T extends { configClass: Class<ConfigType>, serviceClass: Class }> implements SuitePhaseHandler<T> {
+class ModelSuiteHandler<T extends { configClass: Class<ConfigType>; serviceClass: Class }> implements SuitePhaseHandler<T> {
   qualifier?: symbol;
   target: Class<T>;
   constructor(target: Class<T>, qualifier?: symbol) {
@@ -35,9 +35,11 @@ class ModelSuiteHandler<T extends { configClass: Class<ConfigType>, serviceClass
     if (ModelStorageUtil.isSupported(service)) {
       await service.createStorage();
       if (service.upsertModel) {
-        await Promise.all(ModelRegistryIndex.getClasses()
-          .filter(cls => cls === SchemaRegistryIndex.getBaseClass(cls))
-          .map(modelCls => service.upsertModel!(modelCls)));
+        await Promise.all(
+          ModelRegistryIndex.getClasses()
+            .filter(cls => cls === SchemaRegistryIndex.getBaseClass(cls))
+            .map(modelCls => service.upsertModel!(modelCls))
+        );
       }
     }
   }
@@ -45,8 +47,7 @@ class ModelSuiteHandler<T extends { configClass: Class<ConfigType>, serviceClass
   async afterEach(instance: T) {
     const service = await DependencyRegistryIndex.getInstance<T>(instance.serviceClass, this.qualifier);
     if (ModelStorageUtil.isSupported(service)) {
-      const models = ModelRegistryIndex.getClasses()
-        .filter(model => model === SchemaRegistryIndex.getBaseClass(model));
+      const models = ModelRegistryIndex.getClasses().filter(model => model === SchemaRegistryIndex.getBaseClass(model));
 
       if (ModelBlobUtil.isSupported(service) && service.truncateBlob) {
         await service.truncateBlob();
@@ -83,7 +84,9 @@ class ModelSuiteHandler<T extends { configClass: Class<ConfigType>, serviceClass
  * @example opt-in
  * @kind decorator
  */
-export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean, namespace?: string }>, serviceClass: Class }>(qualifier?: symbol) {
+export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean; namespace?: string }>; serviceClass: Class }>(
+  qualifier?: symbol
+) {
   const fixtures = new TestFixtures(['@travetto/model']);
   return (target: Class<T>): void => {
     target.prototype.fixtures = fixtures;

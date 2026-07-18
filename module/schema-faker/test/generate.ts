@@ -46,7 +46,6 @@ class UserScore {
 
 @Suite()
 class DataGenerationSuite {
-
   @BeforeAll()
   async init() {
     await Registry.init();

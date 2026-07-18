@@ -20,7 +20,6 @@ export class ExpiryUser {
 
 @Suite()
 export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport> {
-
   delayFactor: number = 1;
 
   async wait(input: TimeSpan | number | string) {
@@ -34,9 +33,12 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   @Test()
   async basic() {
     const service = await this.service;
-    const result = await service.upsert(ExpiryUser, ExpiryUser.from({
-      expiresAt: this.timeFromNow('2s')
-    }));
+    const result = await service.upsert(
+      ExpiryUser,
+      ExpiryUser.from({
+        expiresAt: this.timeFromNow('2s')
+      })
+    );
     assert(result instanceof ExpiryUser);
 
     const expiry = ModelExpiryUtil.getExpiryState(ExpiryUser, await service.get(ExpiryUser, result.id));
@@ -46,9 +48,12 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   @Test()
   async aging() {
     const service = await this.service;
-    const result = await service.upsert(ExpiryUser, ExpiryUser.from({
-      expiresAt: this.timeFromNow(100)
-    }));
+    const result = await service.upsert(
+      ExpiryUser,
+      ExpiryUser.from({
+        expiresAt: this.timeFromNow(100)
+      })
+    );
 
     assert(result instanceof ExpiryUser);
 
@@ -60,9 +65,12 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   @Test()
   async updateExpired() {
     const service = await this.service;
-    const result = await service.upsert(ExpiryUser, ExpiryUser.from({
-      expiresAt: this.timeFromNow(100)
-    }));
+    const result = await service.upsert(
+      ExpiryUser,
+      ExpiryUser.from({
+        expiresAt: this.timeFromNow(100)
+      })
+    );
 
     assert(result instanceof ExpiryUser);
 
@@ -74,14 +82,17 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   @Test()
   async ageWithExtension() {
     const service = await this.service;
-    const result = await service.upsert(ExpiryUser, ExpiryUser.from({
-      expiresAt: this.timeFromNow('2s')
-    }));
+    const result = await service.upsert(
+      ExpiryUser,
+      ExpiryUser.from({
+        expiresAt: this.timeFromNow('2s')
+      })
+    );
     assert(result instanceof ExpiryUser);
 
     await this.wait(50);
 
-    assert(!ModelExpiryUtil.getExpiryState(ExpiryUser, (await service.get(ExpiryUser, result.id))).expired);
+    assert(!ModelExpiryUtil.getExpiryState(ExpiryUser, await service.get(ExpiryUser, result.id)).expired);
 
     await service.updatePartial(ExpiryUser, {
       id: result.id,
@@ -104,9 +115,16 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
 
     // Create
     await Promise.all(
-      Array(10).fill(0).map((x, i) => service.upsert(ExpiryUser, ExpiryUser.from({
-        expiresAt: this.timeFromNow(300 + i * this.delayFactor)
-      })))
+      Array(10)
+        .fill(0)
+        .map((x, i) =>
+          service.upsert(
+            ExpiryUser,
+            ExpiryUser.from({
+              expiresAt: this.timeFromNow(300 + i * this.delayFactor)
+            })
+          )
+        )
     );
 
     // Let expire

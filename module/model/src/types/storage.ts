@@ -12,7 +12,6 @@ import type { ModelType } from './model.ts';
  * @concrete
  */
 export interface ModelStorageSupport {
-
   /**
    * Should storage modification be allowed
    */

@@ -16,7 +16,6 @@ class Config {
 @Suite('Emails')
 @InjectableSuite()
 class EmailSuite {
-
   @Inject()
   instance: MailService;
 

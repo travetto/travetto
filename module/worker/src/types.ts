@@ -48,13 +48,15 @@ export type WorkPoolErrorEvent<I> = {
 };
 
 export type WorkerFactoryInput<I, O = unknown> = Partial<Worker<I, O>> & { execute: WorkerExecutor<I, O> };
-export type WorkerInput<I, O> = (() => (WorkerFactoryInput<I, O> | Promise<WorkerFactoryInput<I, O>>)) | WorkerExecutor<I, O>;
+export type WorkerInput<I, O> = (() => WorkerFactoryInput<I, O> | Promise<WorkerFactoryInput<I, O>>) | WorkerExecutor<I, O>;
 export type WorkPoolConfig<I, O> = Options & {
   isSuccess?: (output: O) => boolean;
   onComplete?: (event: WorkPoolCompleteEvent<I, O>) => void | Promise<void>;
-  onError?<R = unknown>(event: WorkPoolErrorEvent<I>): (R | Promise<R>);
+  onError?<R = unknown>(event: WorkPoolErrorEvent<I>): R | Promise<R>;
   shutdown?: AbortSignal;
   total?: number;
 };
 
-export const isWorkerFactory = <I, O>(value: WorkerInput<I, O>): value is (() => (WorkerFactoryInput<I, O> | Promise<WorkerFactoryInput<I, O>>)) => value.length === 0;
+export const isWorkerFactory = <I, O>(
+  value: WorkerInput<I, O>
+): value is () => WorkerFactoryInput<I, O> | Promise<WorkerFactoryInput<I, O>> => value.length === 0;

@@ -13,8 +13,9 @@ import { ModelCandidateUtil } from './bin/candidate.ts';
  */
 @CliCommand()
 export class ModelInstallCommand extends BaseModelCommand {
-
-  getOperation(): 'upsertModel' { return 'upsertModel'; }
+  getOperation(): 'upsertModel' {
+    return 'upsertModel';
+  }
 
   @MethodValidator(BaseModelCommand.validate.bind(null, 'upsertModel'))
   async main(provider: string, models: string[]): Promise<void> {

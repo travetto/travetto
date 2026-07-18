@@ -28,5 +28,6 @@ export type RenderState<T extends JSXElement, C> = {
 export type RenderProvider<C> = {
   ext: string;
   finalize: (text: string, ctx: C) => string;
-} & { [K in ValidHtmlTags]: (state: RenderState<JSXElement<K>, C>) => Promise<string> } & // @ts-expect-error
-{ [K in keyof typeof c]: (state: RenderState<JSXElementByFn<K>, C>) => Promise<string> };
+} & { [K in ValidHtmlTags]: (state: RenderState<JSXElement<K>, C>) => Promise<string> } & { // @ts-expect-error
+  [K in keyof typeof c]: (state: RenderState<JSXElementByFn<K>, C>) => Promise<string>;
+};

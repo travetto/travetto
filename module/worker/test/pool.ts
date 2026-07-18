@@ -5,7 +5,6 @@ import { WorkPool, WorkPoolResultError } from '@travetto/worker';
 
 @Suite()
 export class WorkPoolTest {
-
   @Test()
   async testSimpleRun() {
     const inputs = [1, 2, 3, 4, 5];
@@ -13,7 +12,7 @@ export class WorkPoolTest {
     let completeCount = 0;
 
     await WorkPool.run(
-      async (input) => {
+      async input => {
         return input * 2;
       },
       inputs,
@@ -42,21 +41,17 @@ export class WorkPoolTest {
     const inputs = [1, 2, 3, 4, 5];
     let failedCount = 0;
 
-    await WorkPool.run(
-      async (input) => input,
-      inputs,
-      {
-        max: 2,
-        isSuccess: (output) => output % 2 !== 0,
-        onComplete: ({ output, success, progress }) => {
-          if (!success) {
-            failedCount++;
-          }
-          assert.equal(success, output % 2 !== 0);
-          assert.equal(progress.failed, failedCount);
+    await WorkPool.run(async input => input, inputs, {
+      max: 2,
+      isSuccess: output => output % 2 !== 0,
+      onComplete: ({ output, success, progress }) => {
+        if (!success) {
+          failedCount++;
         }
+        assert.equal(success, output % 2 !== 0);
+        assert.equal(progress.failed, failedCount);
       }
-    );
+    });
 
     assert.equal(failedCount, 2);
   }
@@ -68,7 +63,7 @@ export class WorkPoolTest {
     await assert.rejects(
       async () => {
         await WorkPool.run(
-          async (input) => {
+          async input => {
             if (input === 2 || input === 3) {
               throw new Error(`Error ${input}`);
             }
@@ -80,7 +75,7 @@ export class WorkPoolTest {
           }
         );
       },
-      (err) => {
+      err => {
         assert(err instanceof WorkPoolResultError);
         assert.equal(err.details.errors.length, 2);
         assert.equal(err.details.errors[0].message, 'Error 2');
@@ -95,11 +90,7 @@ export class WorkPoolTest {
     const inputs = [10, 20, 30];
     const results: number[] = [];
 
-    const stream = WorkPool.runStream(
-      async (input) => input + 1,
-      inputs,
-      { max: 2 }
-    );
+    const stream = WorkPool.runStream(async input => input + 1, inputs, { max: 2 });
 
     for await (const event of stream) {
       results.push(event.output);

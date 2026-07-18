@@ -79,8 +79,8 @@ export type EmailTemplateResource = {
   globalStyles?: string;
 };
 
-type EmailTemplateContent = Record<EmailContentType, () => (Promise<string> | string)>;
+type EmailTemplateContent = Record<EmailContentType, () => Promise<string> | string>;
 
-export type EmailTemplateLocation = { file: string, module: string };
+export type EmailTemplateLocation = { file: string; module: string };
 export type EmailTemplateModule = EmailTemplateResource & EmailTemplateContent;
 export type EmailTemplateImport = { prepare(location: EmailTemplateLocation): Promise<EmailTemplateModule> };

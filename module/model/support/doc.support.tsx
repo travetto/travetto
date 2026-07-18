@@ -17,7 +17,7 @@ export const Links = {
   Crud: toLink('CRUD', toConcrete<ModelCrudSupport>()),
   Expiry: toLink('Expiry', toConcrete<ModelExpirySupport>()),
   Bulk: toLink('Bulk', toConcrete<ModelBulkSupport>()),
-  Blob: toLink('Blob', toConcrete<ModelBlobSupport>()),
+  Blob: toLink('Blob', toConcrete<ModelBlobSupport>())
 };
 
 export const ModelTypes = (fn: Function): DocJSXElement[] => {
@@ -35,16 +35,14 @@ export const ModelTypes = (fn: Function): DocJSXElement[] => {
   return found.map(type => <li>{type}</li>);
 };
 
-export const ModelCustomConfig = ({ config }: { config: Function }): DocJSXElement => <>
-  Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source
-  or config, you can override and register it with the {d.module('Di')} module.
-
-  <c.Code title='Wiring up a custom Model Source' src='doc/custom-service.ts' />
-
-  where the {config} is defined by:
-
-  <c.Code title={`Structure of ${config.name}`} src={config} startRe={/@Config/} />
-
-  Additionally, you can see that the class is registered with the {Config} annotation, and so these values can be overridden using the
-  standard {d.module('Config')}resolution paths.
-</>;
+export const ModelCustomConfig = ({ config }: { config: Function }): DocJSXElement => (
+  <>
+    Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source or
+    config, you can override and register it with the {d.module('Di')} module.
+    <c.Code title="Wiring up a custom Model Source" src="doc/custom-service.ts" />
+    where the {config} is defined by:
+    <c.Code title={`Structure of ${config.name}`} src={config} startRe={/@Config/} />
+    Additionally, you can see that the class is registered with the {Config} annotation, and so these values can be overridden using the
+    standard {d.module('Config')}resolution paths.
+  </>
+);

@@ -6,7 +6,6 @@ import type { BinaryType, BinaryMetadata, ByteRange, TimeSpan } from '@travetto/
  * @concrete
  */
 export interface ModelBlobSupport {
-
   /**
    * Upsert blob to storage
    * @param location The location of the blob

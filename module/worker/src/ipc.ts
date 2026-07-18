@@ -7,7 +7,6 @@ import { ShutdownManager, Util } from '@travetto/runtime';
  * Channel that represents ipc communication
  */
 export class IpcChannel<V = unknown> {
-
   #emitter = new EventEmitter();
   subProcess: NodeJS.Process | ChildProcess;
   parentId: number;
@@ -37,7 +36,7 @@ export class IpcChannel<V = unknown> {
    * Determines if channel is active
    */
   get active(): boolean {
-    return (this.subProcess instanceof ChildProcess) ? !this.subProcess.killed : !!this.subProcess.connected;
+    return this.subProcess instanceof ChildProcess ? !this.subProcess.killed : !!this.subProcess.connected;
   }
 
   /**
@@ -48,7 +47,7 @@ export class IpcChannel<V = unknown> {
     if (!this.active) {
       throw new Error('Cannot send message to inactive process');
     } else if (this.subProcess.send && this.subProcess.connected) {
-      this.subProcess.send({ ...(data ?? {}), type: eventType }, undefined, undefined, (error) => error && console.error(error));
+      this.subProcess.send({ ...(data ?? {}), type: eventType }, undefined, undefined, error => error && console.error(error));
     } else {
       throw new Error('this.subProcess.send was not defined');
     }
@@ -88,7 +87,7 @@ export class IpcChannel<V = unknown> {
           this.subProcess.kill();
           await Promise.race([complete, Util.nonBlockingTimeout(1000)]);
         }
-      } catch { }
+      } catch {}
     }
     this.release();
   }

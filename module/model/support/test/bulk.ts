@@ -14,7 +14,6 @@ class User {
 
 @Suite()
 export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
-
   @Test()
   async bulkInsert() {
     const service = await this.service;
@@ -48,11 +47,17 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
     const service = await this.service;
     const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}`, id: service.idSource.create() }));
 
-    const result = await service.processBulk(User, users.map(u => ({ insert: u })));
+    const result = await service.processBulk(
+      User,
+      users.map(u => ({ insert: u }))
+    );
     assert(result.counts.insert === 4);
     assert(result.insertedIds.size === 4);
 
-    const res2 = await service.processBulk(User, users.map(u => ({ update: u })));
+    const res2 = await service.processBulk(
+      User,
+      users.map(u => ({ update: u }))
+    );
     assert(res2.counts.update === 4);
     assert(res2.insertedIds.size === 0);
   }
@@ -62,11 +67,17 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
     const service = await this.service;
     const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}`, id: service.idSource.create() }));
 
-    const result = await service.processBulk(User, users.map(u => ({ insert: u })));
+    const result = await service.processBulk(
+      User,
+      users.map(u => ({ insert: u }))
+    );
     assert(result.counts.insert === 4);
     assert(result.insertedIds.size === 4);
 
-    const res2 = await service.processBulk(User, users.map(u => ({ delete: u })));
+    const res2 = await service.processBulk(
+      User,
+      users.map(u => ({ delete: u }))
+    );
     assert(res2.counts.delete === 4);
   }
 }
