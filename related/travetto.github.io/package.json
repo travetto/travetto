@@ -53,5 +53,5 @@
     "msgpackr-extract": true,
     "esbuild": true,
     "fsevents": true
-  }  
+  }
 }
