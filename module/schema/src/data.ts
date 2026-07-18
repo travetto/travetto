@@ -3,7 +3,7 @@ import { isNumberObject, isBooleanObject, isStringObject } from 'node:util/types
 import { asConstructable, castTo, type Class, asFull, TypedObject } from '@travetto/runtime';
 import { UnknownType } from './types.ts';
 
-const REGEX_PATTERN = /[\/](.*)[\/](i|g|m|s)?/;
+const REGEX_PATTERN = /[/](.*)[/](i|g|m|s)?/;
 
 /**
  * Utilities for data conversion and binding

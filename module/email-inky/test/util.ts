@@ -5,7 +5,7 @@ import type { JSXElement } from '@travetto/email-inky/support/jsx-runtime.ts';
 export function cleanseOutput(output: string) {
   return output.trim()
     .replace(/\s*<!--\s*[$]:([^ -]+)\s*-->\s*(<\/[^>]+>)/g, (_, suf, tag) => `${tag}${suf}`)
-    .replace(/(<[^\/][^>]+>)\s*<!--\s*[#]:([^ ]+)\s*-->\s*/g, (_, tag, pre) => `${pre}${tag}`)
+    .replace(/(<[^/][^>]+>)\s*<!--\s*[#]:([^ ]+)\s*-->\s*/g, (_, tag, pre) => `${pre}${tag}`)
     .replace(/[ ]+>/g, '>')
     .replaceAll('<', '\n<')
     .replaceAll('>', '>\n')

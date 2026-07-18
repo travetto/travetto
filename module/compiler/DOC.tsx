@@ -3,7 +3,7 @@ import { d, c, DocRunUtil } from '@travetto/doc';
 import { ExecUtil } from '@travetto/runtime';
 
 const TrvcEntry = d.codeLink('trvc', 'bin/trvc.js', /#/);
-const HELP_EXTRACT_PATTERN = /^\s{0,5}[*]\s+(?<name>[^\-]+?)\s{0,50}-\s{0,5}(?<description>.+?)\s*$/;
+const HELP_EXTRACT_PATTERN = /^\s{0,5}[*]\s+(?<name>[^-]+?)\s{0,50}-\s{0,5}(?<description>.+?)\s*$/;
 
 export const text = async () => {
   await DocRunUtil.run('trvc', ['build'], { workingDirectory: './doc-exec', spawn: ExecUtil.spawnPackageCommand });

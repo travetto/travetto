@@ -52,7 +52,7 @@ export const Html: RenderProvider<RenderContext> = {
       // Allow tag suffixes/prefixes via comments
       html = final
         .replace(/\s*<!--\s*[$]:([^ -]+)\s*-->\s*(<\/[^>]+>)/g, (_, suffix, tag) => `${tag}${suffix}`)
-        .replace(/(<[^\/][^>]+>)\s*<!--\s*[#]:([^ ]+)\s*-->\s*/g, (_, tag, prefix) => `${prefix}${tag}`);
+        .replace(/(<[^/][^>]+>)\s*<!--\s*[#]:([^ ]+)\s*-->\s*/g, (_, tag, prefix) => `${prefix}${tag}`);
     }
 
     return html;

@@ -72,6 +72,7 @@ export class BindUtil {
         const part = parts.shift()!;
         const partArrayIndex = part.indexOf('[') > 0;
         const name = part.split(/[^A-Za-z_0-9]/)[0];
+        // biome-ignore lint/complexity/noUselessEscapeInRegex: Consistent escaping for open and close
         const idx = partArrayIndex ? part.split(/[\[\]]/)[1] : '';
         const key = partArrayIndex ? (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined)) : undefined;
 
@@ -96,6 +97,7 @@ export class BindUtil {
         }
       } else {
         const name = last.split(/[^A-Za-z_0-9]/)[0];
+        // biome-ignore lint/complexity/noUselessEscapeInRegex: Consistent escaping for open and close
         const idx = last.split(/[\[\]]/)[1];
 
         let key = (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined));

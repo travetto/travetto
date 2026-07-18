@@ -37,7 +37,7 @@ export class DocFileUtil {
   static #decCache: Record<string, boolean> = {};
 
   static isFile(file: string): boolean {
-    return /^[@:A-Za-z0-9\/\\\-_.]+[.]([a-z]{2,10})$/.test(file);
+    return /^[@:A-Za-z0-9/\\_.-]+[.]([a-z]{2,10})$/.test(file);
   }
 
   static readSource(input: Exclude<CodeSourceInput, Promise<string>>): SourceOutput {

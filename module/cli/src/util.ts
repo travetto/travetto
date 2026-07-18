@@ -14,7 +14,7 @@ export class CliUtil {
    * Get a simplified version of a module name
    */
   static getSimpleModuleName(placeholder: string, module?: string): string {
-    const simple = (module ?? Runtime.main.name).replace(/[\/]/, '_').replace(/@/, '');
+    const simple = (module ?? Runtime.main.name).replace(/[/]/, '_').replace(/@/, '');
     return simple ? placeholder.replace('<module>', simple) : placeholder;
   }
 

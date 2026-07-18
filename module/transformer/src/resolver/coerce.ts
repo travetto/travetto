@@ -1,4 +1,4 @@
-const REGEX_PATTERN = /[\/](.*)[\/](i|g|m|s)?/;
+const REGEX_PATTERN = /[/](.*)[/](i|g|m|s)?/;
 
 export class CoerceUtil {
   /**

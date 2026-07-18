@@ -54,13 +54,13 @@ export class DocRunUtil {
       .replaceAll(rootPath, '.')
       .replaceAll(os.tmpdir(), '/tmp')
       .replaceAll(Runtime.workspace.path, '<workspace-root>')
-      .replace(/[/]tmp[/][a-z_A-Z0-9\/\-]+/g, '/tmp/<temp-folder>')
+      .replace(/[/]tmp[/][a-z_A-Z0-9/-]+/g, '/tmp/<temp-folder>')
       .replace(/^(\s*framework:\s*')(\d+[.]\d+)[^']*('[,]?\s*)$/gm, (_, pre, ver, post) => `${pre}${ver}.x${post}`)
       .replace(/^(\s*nodeVersion:\s*'v)(\d+)[^']*('[,]?\s*)$/gm, (_, pre, ver, post) => `${pre}${ver}.x.x${post}`)
       .replace(/^(.{1,4})?Compiling[.]*/, '') // Compiling message, remove
-      .replace(/[A-Za-z0-9_.\-\/\\]+\/travetto\/module\//g, '@travetto/')
+      .replace(/[A-Za-z0-9_./\\-]+\/travetto\/module\//g, '@travetto/')
       .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.#docState.getDate.bind(this.#docState))
-      .replace(/\b[0-9a-f]{4}[0-9a-f\-]{8,40}\b/ig, this.#docState.getId.bind(this.#docState))
+      .replace(/\b[0-9a-f]{4}[0-9a-f-]{8,40}\b/ig, this.#docState.getId.bind(this.#docState))
       .replace(/(\d+[.]\d+[.]\d+)-(alpha|rc)[.]\d+/g, (all, value) => value);
     if (config.filter || config.rewrite) {
       text = text.split(/\n/g)

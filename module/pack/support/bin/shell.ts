@@ -12,7 +12,7 @@ const escapedArgs = (args: string[]): string[] => args.map(arg =>
   arg.includes(' ') || arg.includes('"') ? `'${arg}'` : (arg.includes("'") ? `"${arg}"` : arg)
 );
 
-const toWin = (file: string): string => file.replace(/[\\\/]+/g, path.win32.sep);
+const toWin = (file: string): string => file.replace(/[/\\]+/g, path.win32.sep);
 
 export const ShellCommands: Record<'win32' | 'posix', ShellCommandProvider> = {
   win32: {
