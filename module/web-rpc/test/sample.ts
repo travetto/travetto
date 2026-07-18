@@ -44,7 +44,6 @@ export class UserController {
 
 @Controller('todo')
 export class TodoController {
-
   store: Todo[] = [];
 
   @Post()
@@ -77,31 +76,36 @@ export class TodoController {
     color?: 'green' | 'blue' | 'red';
 
     settings?: unknown;
-  }): Promise<void> {
-
-  }
+  }): Promise<void> {}
 }
 
 @Suite()
 class WebRpcSuite extends BaseWebSuite {
-
   dispatcherType = LocalRequestDispatcher;
 
   @Test()
   async basic() {
-    const { context: { httpStatusCode: createdStatus }, body: created } = await this.request<Todo>({
-      context: {
-        path: '/rpc/TodoController:createTodo',
-        httpMethod: 'POST',
+    const {
+      context: { httpStatusCode: createdStatus },
+      body: created
+    } = await this.request<Todo>(
+      {
+        context: {
+          path: '/rpc/TodoController:createTodo',
+          httpMethod: 'POST'
+        },
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSONUtil.toUTF8([
+          {
+            text: 'A new item',
+            userId: 'its a me'
+          }
+        ])
       },
-      headers: {
-        'content-type': 'application/json'
-      },
-      body: JSONUtil.toUTF8([{
-        text: 'A new item',
-        userId: 'its a me'
-      }])
-    }, false);
+      false
+    );
 
     assert(createdStatus === 200);
     assert(created);
@@ -111,7 +115,7 @@ class WebRpcSuite extends BaseWebSuite {
     const { body: list } = await this.request<Todo[]>({
       context: {
         path: '/rpc/TodoController:listTodo',
-        httpMethod: 'POST',
+        httpMethod: 'POST'
       },
       headers: {
         'content-type': 'application/json'
@@ -125,17 +129,18 @@ class WebRpcSuite extends BaseWebSuite {
     assert(list[0].id);
     assert(list[0].text === 'A new item');
 
-    const { context: { httpStatusCode: removedStatusCode }, body: removed } = await this.request<Todo[]>({
+    const {
+      context: { httpStatusCode: removedStatusCode },
+      body: removed
+    } = await this.request<Todo[]>({
       context: {
         path: '/rpc/TodoController:deleteTodo',
-        httpMethod: 'POST',
+        httpMethod: 'POST'
       },
       headers: {
         'content-type': 'application/json'
       },
-      body: JSONUtil.toUTF8([
-        list[0].id
-      ])
+      body: JSONUtil.toUTF8([list[0].id])
     });
 
     assert(removedStatusCode === 204);
@@ -145,10 +150,13 @@ class WebRpcSuite extends BaseWebSuite {
 
   @Test()
   async files() {
-    const { context: { httpStatusCode: createdStatus }, body: created } = await this.request<number>({
+    const {
+      context: { httpStatusCode: createdStatus },
+      body: created
+    } = await this.request<number>({
       context: {
         path: '/rpc/UserController:uploadFun',
-        httpMethod: 'POST',
+        httpMethod: 'POST'
       },
       headers: {
         'content-type': 'application/octet-stream',
@@ -160,7 +168,6 @@ class WebRpcSuite extends BaseWebSuite {
     assert(createdStatus === 200);
     assert(created === 1100);
   }
-
 
   @Test()
   async verifySerialize() {

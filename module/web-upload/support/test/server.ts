@@ -14,7 +14,6 @@ const getHash = (blob: Blob) => BinaryMetadataUtil.read(blob)?.hash;
 
 @Controller('/test/upload')
 class TestUploadController {
-
   @Post('/all')
   async uploadAll(@Upload() uploads: FileMap): Promise<{ hash?: string } | undefined> {
     for (const [, blob] of Object.entries(uploads)) {
@@ -45,18 +44,19 @@ class TestUploadController {
 
 @Suite()
 export abstract class WebUploadServerSuite extends BaseWebSuite {
-
   fixture: TestFixtures;
 
-  async getUploads(...files: { name: string, resource: string, type?: string }[]): Promise<FormData> {
+  async getUploads(...files: { name: string; resource: string; type?: string }[]): Promise<FormData> {
     const data = new FormData();
-    await Promise.all(files.map(async ({ name, type, resource }) => {
-      const file = await this.fixture.readFile(resource);
-      if (type) {
-        Object.defineProperty(file, 'type', { get: () => type });
-      }
-      data.append(name, file);
-    }));
+    await Promise.all(
+      files.map(async ({ name, type, resource }) => {
+        const file = await this.fixture.readFile(resource);
+        if (type) {
+          Object.defineProperty(file, 'type', { get: () => type });
+        }
+        data.append(name, file);
+      })
+    );
     return data;
   }
 
@@ -72,7 +72,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     const response = await this.request<{ hash: string }>({ body: uploads, context: { httpMethod: 'POST', path: '/test/upload/all' } });
 
     const file = await this.fixture.readBinaryStream('/logo.png');
-    assert(response.body?.hash === await BinaryMetadataUtil.hash(file, { hashAlgorithm: 'sha256' }));
+    assert(response.body?.hash === (await BinaryMetadataUtil.hash(file, { hashAlgorithm: 'sha256' })));
   }
 
   @Test()
@@ -82,7 +82,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     const response = await this.request<{ hash: string }>({ context: { httpMethod: 'POST', path: '/test/upload' }, body: sent });
 
     const file = await this.fixture.readBinaryStream('/logo.png');
-    assert(response.body?.hash === await BinaryMetadataUtil.hash(file, { hashAlgorithm: 'sha256' }));
+    assert(response.body?.hash === (await BinaryMetadataUtil.hash(file, { hashAlgorithm: 'sha256' })));
   }
 
   @Test()
@@ -91,7 +91,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     const response = await this.request<{ hash: string }>({ body: uploads, context: { httpMethod: 'POST', path: '/test/upload' } });
 
     const file = await this.fixture.readBinaryStream('/logo.png');
-    assert(response.body?.hash === await BinaryMetadataUtil.hash(file, { hashAlgorithm: 'sha256' }));
+    assert(response.body?.hash === (await BinaryMetadataUtil.hash(file, { hashAlgorithm: 'sha256' })));
   }
 
   @Test()
@@ -100,10 +100,11 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
       { name: 'file1', resource: 'logo.png', type: 'image/png' },
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
-    const response = await this.request<{ hash1: string, hash2: string }>({
+    const response = await this.request<{ hash1: string; hash2: string }>({
       body: uploads,
       context: {
-        httpMethod: 'POST', path: '/test/upload/all-named'
+        httpMethod: 'POST',
+        path: '/test/upload/all-named'
       }
     });
     const file = await this.fixture.readBinaryStream('/logo.png');
@@ -120,20 +121,26 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
 
-    const badResponse = await this.request<{ hash1: string, hash2: string }>({
-      body: uploadBad,
-      context: { httpMethod: 'POST', path: '/test/upload/all-named-custom' },
-    }, false);
+    const badResponse = await this.request<{ hash1: string; hash2: string }>(
+      {
+        body: uploadBad,
+        context: { httpMethod: 'POST', path: '/test/upload/all-named-custom' }
+      },
+      false
+    );
     assert(badResponse.context.httpStatusCode === 400);
 
     const uploads = await this.getUploads(
       { name: 'file1', resource: 'logo.gif', type: 'image/gif' },
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
-    const response = await this.request<{ hash1: string, hash2: string }>({
-      body: uploads,
-      context: { httpMethod: 'POST', path: '/test/upload/all-named-custom' },
-    }, false);
+    const response = await this.request<{ hash1: string; hash2: string }>(
+      {
+        body: uploads,
+        context: { httpMethod: 'POST', path: '/test/upload/all-named-custom' }
+      },
+      false
+    );
     assert(response.context.httpStatusCode === 200);
 
     const file1 = await this.fixture.readBinaryStream('/logo.gif');
@@ -153,20 +160,26 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
 
-    const badResponse = await this.request<{ hash1: string, hash2: string }>({
-      body: uploadBad,
-      context: { httpMethod: 'POST', path: '/test/upload/all-named-size' },
-    }, false);
+    const badResponse = await this.request<{ hash1: string; hash2: string }>(
+      {
+        body: uploadBad,
+        context: { httpMethod: 'POST', path: '/test/upload/all-named-size' }
+      },
+      false
+    );
     assert(badResponse.context.httpStatusCode === 400);
 
     const uploads = await this.getUploads(
       { name: 'file1', resource: 'asset.yml', type: 'text/plain' },
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
-    const response = await this.request<{ hash1: string, hash2: string }>({
-      body: uploads,
-      context: { httpMethod: 'POST', path: '/test/upload/all-named-size' },
-    }, false);
+    const response = await this.request<{ hash1: string; hash2: string }>(
+      {
+        body: uploads,
+        context: { httpMethod: 'POST', path: '/test/upload/all-named-size' }
+      },
+      false
+    );
     assert(response.context.httpStatusCode === 200);
 
     const file1 = await this.fixture.readBinaryStream('/asset.yml');

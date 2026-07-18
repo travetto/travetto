@@ -12,7 +12,6 @@ const makeData = () => [BinaryUtil.makeBinaryArray(100)];
 
 @Suite()
 export class BytesUtilTest {
-
   fixture = new TestFixtures();
 
   @Test()

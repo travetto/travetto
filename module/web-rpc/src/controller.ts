@@ -2,21 +2,37 @@ import { Inject } from '@travetto/di';
 import { type Any, RuntimeError, JSONUtil } from '@travetto/runtime';
 import { IsPrivate } from '@travetto/schema';
 import {
-  HeaderParam, Controller, ExcludeInterceptors, ControllerRegistryIndex,
-  type WebAsyncContext, Body, EndpointUtil, BodyInterceptor, Post, WebCommonUtil,
-  RespondInterceptor, DecompressInterceptor, Get, QueryParam, Delete, Put, Patch
+  HeaderParam,
+  Controller,
+  ExcludeInterceptors,
+  ControllerRegistryIndex,
+  type WebAsyncContext,
+  Body,
+  EndpointUtil,
+  BodyInterceptor,
+  Post,
+  WebCommonUtil,
+  RespondInterceptor,
+  DecompressInterceptor,
+  Get,
+  QueryParam,
+  Delete,
+  Put,
+  Patch
 } from '@travetto/web';
 
 @Controller('/rpc')
-@ExcludeInterceptors(value => !(
-  value instanceof DecompressInterceptor ||
-  value instanceof BodyInterceptor ||
-  value instanceof RespondInterceptor ||
-  value.category === 'global'
-))
+@ExcludeInterceptors(
+  value =>
+    !(
+      value instanceof DecompressInterceptor ||
+      value instanceof BodyInterceptor ||
+      value instanceof RespondInterceptor ||
+      value.category === 'global'
+    )
+)
 @IsPrivate()
 export class WebRpcController {
-
   @Inject()
   ctx: WebAsyncContext;
 
@@ -61,11 +77,13 @@ export class WebRpcController {
     // Allow request to read inputs from header
     if (paramInput) {
       params = JSONUtil.fromBase64(paramInput);
-    } else if (Array.isArray(body)) { // Params passed via body
+    } else if (Array.isArray(body)) {
+      // Params passed via body
       params = body;
 
-      const bodyParamIdx = endpoint.parameters.findIndex((config) => config.location === 'body');
-      if (bodyParamIdx >= 0) { // Re-assign body
+      const bodyParamIdx = endpoint.parameters.findIndex(config => config.location === 'body');
+      if (bodyParamIdx >= 0) {
+        // Re-assign body
         request.body = params[bodyParamIdx];
       }
     } else if (body) {
@@ -74,7 +92,9 @@ export class WebRpcController {
       params = [];
     }
 
-    const final = endpoint.parameters.map((config, i) => (config.location === 'body' && paramInput) ? EndpointUtil.MissingParamSymbol : params[i]);
+    const final = endpoint.parameters.map((config, i) =>
+      config.location === 'body' && paramInput ? EndpointUtil.MissingParamSymbol : params[i]
+    );
     WebCommonUtil.setRequestParams(request, final);
 
     // Dispatch

@@ -24,7 +24,6 @@ type WebHttpServerConfig = {
 };
 
 export class WebHttpUtil {
-
   /**
    * Build a simple request handler
    * @param dispatcher
@@ -69,9 +68,7 @@ export class WebHttpUtil {
       socket.on('close', () => activeConnections.delete(socket));
     });
 
-    target.listen(config.port, config.bindAddress)
-      .on('error', reject)
-      .on('listening', resolve);
+    target.listen(config.port, config.bindAddress).on('error', reject).on('listening', resolve);
 
     await promise;
 
@@ -115,7 +112,7 @@ export class WebHttpUtil {
         },
         httpMethod: castTo(request.method?.toUpperCase()),
         path,
-        httpQuery: Object.fromEntries(new URLSearchParams(query)),
+        httpQuery: Object.fromEntries(new URLSearchParams(query))
       },
       headers: request.headers,
       body: WebBodyUtil.markRawBinary(request)
@@ -127,7 +124,9 @@ export class WebHttpUtil {
    */
   static async respondToServerResponse(webResponse: WebResponse, response: HttpResponse): Promise<void> {
     const binaryResponse = new WebResponse<BinaryType>({ context: webResponse.context, ...WebBodyUtil.toBinaryMessage(webResponse) });
-    binaryResponse.headers.forEach((value, key) => { response.setHeader(key, value); });
+    binaryResponse.headers.forEach((value, key) => {
+      response.setHeader(key, value);
+    });
     response.statusCode = WebCommonUtil.getStatusCode(binaryResponse);
 
     if (binaryResponse.body) {

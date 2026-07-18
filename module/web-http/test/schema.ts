@@ -10,6 +10,8 @@ class NodeSchemaTest extends SchemaWebServerSuite {
   dispatcherType = FetchWebDispatcher;
 
   async serve() {
-    return DependencyRegistryIndex.getInstance(NodeWebHttpServer).then(v => v.serve()).then(v => () => v.stop());
+    return DependencyRegistryIndex.getInstance(NodeWebHttpServer)
+      .then(v => v.serve())
+      .then(v => () => v.stop());
   }
 }

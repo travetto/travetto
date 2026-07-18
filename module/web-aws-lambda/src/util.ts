@@ -4,26 +4,26 @@ import { BinaryUtil, castTo, CodecUtil, type BinaryArray } from '@travetto/runti
 import { WebBodyUtil, WebCommonUtil, WebRequest, WebResponse } from '@travetto/web';
 
 export class AwsLambdaWebUtil {
-
   /**
    * Create a request from an api gateway event
    */
   static toWebRequest(event: APIGatewayProxyEvent): WebRequest {
     // Build request
-    const body = !event.body ? undefined :
-      event.isBase64Encoded ?
-        CodecUtil.fromBase64String(event.body) :
-        CodecUtil.fromUTF8String(event.body);
+    const body = !event.body
+      ? undefined
+      : event.isBase64Encoded
+        ? CodecUtil.fromBase64String(event.body)
+        : CodecUtil.fromUTF8String(event.body);
 
     return new WebRequest({
       context: {
         connection: {
           httpProtocol: 'http',
-          ip: event.requestContext.identity?.sourceIp,
+          ip: event.requestContext.identity?.sourceIp
         },
         httpMethod: castTo(event.httpMethod.toUpperCase()),
         httpQuery: castTo(event.queryStringParameters!),
-        path: event.path,
+        path: event.path
       },
       headers: { ...event.headers, ...event.multiValueHeaders },
       body: WebBodyUtil.markRawBinary(body)
@@ -38,9 +38,7 @@ export class AwsLambdaWebUtil {
       context: response.context,
       ...WebBodyUtil.toBinaryMessage(response)
     });
-    const output: BinaryArray = binaryResponse.body ?
-      await BinaryUtil.toBinaryArray(binaryResponse.body) :
-      BinaryUtil.makeBinaryArray(0);
+    const output: BinaryArray = binaryResponse.body ? await BinaryUtil.toBinaryArray(binaryResponse.body) : BinaryUtil.makeBinaryArray(0);
 
     const isBase64Encoded = !!output.byteLength && base64Encoded;
     const headers: Record<string, string> = {};
@@ -59,7 +57,7 @@ export class AwsLambdaWebUtil {
       isBase64Encoded,
       body: isBase64Encoded ? CodecUtil.toBase64String(output) : CodecUtil.toUTF8String(output),
       headers,
-      multiValueHeaders,
+      multiValueHeaders
     };
   }
 }

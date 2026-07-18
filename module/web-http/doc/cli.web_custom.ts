@@ -8,7 +8,6 @@ import './config-override.ts';
 
 @CliCommand({ runTarget: true })
 export class SampleApp {
-
   preMain(): void {
     Env.NODE_ENV.set('production');
   }

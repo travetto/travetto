@@ -10,7 +10,6 @@ import { AwsLambdaWebUtil } from './util.ts';
 
 @Injectable()
 export class AwsLambdaWebHandler {
-
   static inst: AwsLambdaWebHandler;
 
   static entryPoint(): (event: lambda.APIGatewayProxyEvent, context: lambda.Context) => Promise<lambda.APIGatewayProxyResult> {

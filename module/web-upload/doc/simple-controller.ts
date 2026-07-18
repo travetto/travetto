@@ -3,7 +3,6 @@ import { type FileMap, Upload } from '@travetto/web-upload';
 
 @Controller('/simple')
 export class Simple {
-
   @Get('/age')
   getAge() {
     return { age: 50 };

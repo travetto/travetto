@@ -11,22 +11,21 @@ import type { WebHttpConfig } from '../../src/config.ts';
  */
 @Injectable()
 export class FetchWebDispatcher implements WebDispatcher {
-
   @Inject()
   config: WebHttpConfig;
 
   async dispatch({ request }: WebFilterContext): Promise<WebResponse> {
     const baseRequest = await WebTestDispatchUtil.applyRequestBody(request);
     const finalPath = WebTestDispatchUtil.buildPath(baseRequest);
-    const body: RequestInit['body'] = WebBodyUtil.isRawBinary(request.body) ?
-      await BinaryUtil.toBinaryArray(request.body) :
-      castTo(request.body);
-    const { context: { httpMethod: method }, headers } = request;
+    const body: RequestInit['body'] = WebBodyUtil.isRawBinary(request.body)
+      ? await BinaryUtil.toBinaryArray(request.body)
+      : castTo(request.body);
+    const {
+      context: { httpMethod: method },
+      headers
+    } = request;
 
-    const response = await fetch(
-      `${this.config.fetchUrl}${finalPath}`,
-      { method, headers, body }
-    );
+    const response = await fetch(`${this.config.fetchUrl}${finalPath}`, { method, headers, body });
 
     return await WebTestDispatchUtil.finalizeResponseBody(
       new WebResponse({

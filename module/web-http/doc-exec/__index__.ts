@@ -12,9 +12,9 @@ class Config {
         return {
           target: null!,
           complete: Promise.resolve(),
-          stop: async (): Promise<void> => { },
+          stop: async (): Promise<void> => {}
         };
-      },
+      }
     };
   }
 }

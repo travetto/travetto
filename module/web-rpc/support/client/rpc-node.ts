@@ -6,6 +6,6 @@ export async function toNodeError(payload: unknown): Promise<Error> {
     if (JSONUtil.isJSONError(payload)) {
       return JSONUtil.jsonErrorToError(payload);
     }
-  } catch { }
+  } catch {}
   return consumeError(payload);
 }

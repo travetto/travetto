@@ -12,7 +12,6 @@ import type { WebRpcClient, WebRpcConfig } from './config.ts';
 
 @Injectable({ autoInject: Runtime.localDevelopment })
 export class WebRpcClientGeneratorService {
-
   @Inject()
   config: WebRpcConfig;
 
@@ -21,7 +20,7 @@ export class WebRpcClientGeneratorService {
     this.render();
   }
 
-  async #getClasses(relativeTo: string): Promise<{ name: string, import: string }[]> {
+  async #getClasses(relativeTo: string): Promise<{ name: string; import: string }[]> {
     return ControllerRegistryIndex.getClasses()
       .filter(cls => {
         const entry = RuntimeIndex.getEntry(Runtime.getSourceFile(cls));
@@ -47,20 +46,21 @@ export class WebRpcClientGeneratorService {
     const clientOutputFile = path.resolve(config.output, path.basename(clientSourceFile));
     const clientSourceContents = await fs.readFile(clientSourceFile, 'utf8');
 
-    const flavorSourceFile = RuntimeIndex.getFromImport(`@travetto/web-rpc/support/client/rpc-${config.type}.ts`)?.sourceFile ?? '<unknown>';
+    const flavorSourceFile =
+      RuntimeIndex.getFromImport(`@travetto/web-rpc/support/client/rpc-${config.type}.ts`)?.sourceFile ?? '<unknown>';
     const flavorOutputFile = path.resolve(config.output, path.basename(flavorSourceFile));
     const flavorSourceContents = (await fs.readFile(flavorSourceFile, 'utf8').catch(() => ''))
-      .replaceAll(/^\s*\/\/\s*@ts-ignore[^\n]*\n/gsm, '')
+      .replaceAll(/^\s*\/\/\s*@ts-ignore[^\n]*\n/gms, '')
       .replaceAll(/^\/\/\s*#UNCOMMENT (.*)/gm, (_, line) => line);
 
     const factoryOutputFile = path.resolve(config.output, 'factory.ts');
     const factorySourceContents = [
       `import { ${clientFactory.name} } from './rpc';`,
-      ...classes.map((cls) => `import type { ${cls.name} } from '${cls.import}';`),
+      ...classes.map(cls => `import type { ${cls.name} } from '${cls.import}';`),
       '',
       `export const factory = ${clientFactory.name}<{`,
       ...classes.map(cls => `  ${cls.name}: ${cls.name};`),
-      '}>();',
+      '}>();'
     ].join('\n');
 
     await fs.writeFile(clientOutputFile, clientSourceContents, 'utf8');

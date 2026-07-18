@@ -18,7 +18,6 @@ import type { WebHttpServer } from '../src/types.ts';
  */
 @CliCommand()
 export class WebHttpCommand implements CliCommandShape {
-
   /** Port to run on */
   port?: number;
 

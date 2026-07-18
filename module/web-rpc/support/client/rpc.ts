@@ -1,5 +1,5 @@
 type MethodKeys<C extends {}> = {
-  [METHOD in keyof C]: C[METHOD] extends Function ? METHOD : never
+  [METHOD in keyof C]: C[METHOD] extends Function ? METHOD : never;
 }[keyof C];
 
 // biome-ignore lint/suspicious/noExplicitAny: Type safety for multiple environments (web, node)
@@ -32,12 +32,14 @@ const isBlobLike = (value: unknown): value is Record<string, Blob> | Blob => val
 
 const extendHeaders = (base: RequestInit['headers'], toAdd: Record<string, string>): Headers => {
   const headers = new Headers(base);
-  for (const [key, value] of Object.entries(toAdd)) { headers.set(key, value); }
+  for (const [key, value] of Object.entries(toAdd)) {
+    headers.set(key, value);
+  }
   return headers;
 };
 
 const jsonToString = (input: unknown): string =>
-  JSON.stringify(input, (_, value): unknown => typeof value === 'bigint' ? `${value.toString()}n` : value);
+  JSON.stringify(input, (_, value): unknown => (typeof value === 'bigint' ? `${value.toString()}n` : value));
 
 const stringToJson = <T = unknown>(input: string): T =>
   JSON.parse(input, (_, value): unknown => {
@@ -50,7 +52,6 @@ const stringToJson = <T = unknown>(input: string): T =>
     }
     return value;
   });
-
 
 export type PreRequestHandler = (item: RequestInit) => Promise<RpcRequest['core'] | undefined | void>;
 export type PostResponseHandler = (item: Response) => Promise<Response | undefined | void>;
@@ -66,32 +67,33 @@ export type RpcRequest = {
     browserRedirect?: boolean;
   };
   url: URL | string;
-  consumeJSON?: <T>(text?: unknown) => (T | Promise<T>);
-  consumeError?: (item: unknown) => (Error | Promise<Error>);
+  consumeJSON?: <T>(text?: unknown) => T | Promise<T>;
+  consumeError?: (item: unknown) => Error | Promise<Error>;
   preRequestHandlers?: PreRequestHandler[];
   postResponseHandlers?: PostResponseHandler[];
 };
 
 export type RpcClient<T extends Record<string, {}>, E extends Record<string, Function> = {}> = {
-  [C in keyof T]: Pick<T[C], MethodKeys<T[C]>> & Record<MethodKeys<T[C]>, E>
+  [C in keyof T]: Pick<T[C], MethodKeys<T[C]>> & Record<MethodKeys<T[C]>, E>;
 };
 
-export type RpcClientFactory<T extends Record<string, {}>> =
-  <R extends Record<string, Function>>(
-    baseOpts: Omit<Partial<RpcRequest>, 'url'> & { url: RpcRequest['url'] },
-    decorate?: (request: RpcRequest) => R
-  ) => RpcClient<T, R>;
+export type RpcClientFactory<T extends Record<string, {}>> = <R extends Record<string, Function>>(
+  baseOpts: Omit<Partial<RpcRequest>, 'url'> & { url: RpcRequest['url'] },
+  decorate?: (request: RpcRequest) => R
+) => RpcClient<T, R>;
 
 function isResponse(value: unknown): value is Response {
   return !!value && typeof value === 'object' && 'status' in value && !!value.status && 'headers' in value && !!value.headers;
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' // separate from primitives
-    && value !== undefined
-    && value !== null         // is obvious
-    && value.constructor === Object // separate instances (Array, DOM, ...)
-    && Object.prototype.toString.call(value) === '[object Object]'; // separate build-in like Math
+  return (
+    typeof value === 'object' && // separate from primitives
+    value !== undefined &&
+    value !== null && // is obvious
+    value.constructor === Object && // separate instances (Array, DOM, ...)
+    Object.prototype.toString.call(value) === '[object Object]'
+  ); // separate build-in like Math
 }
 
 function registerTimeout<T>(
@@ -104,17 +106,29 @@ function registerTimeout<T>(
   if (timer && typeof timer === 'object' && 'unref' in timer && typeof timer.unref === 'function') {
     timer.unref();
   }
-  controller.signal.onabort = (): void => { timer && stop(timer); };
+  controller.signal.onabort = (): void => {
+    timer && stop(timer);
+  };
 }
 
 function buildRequest<T extends RequestInit>(base: T, controller: string, endpoint: string): T {
   let verb: string;
   switch (endpoint.split(/[A-Z]/)[0]) {
-    case 'get': verb = 'GET'; break;
-    case 'update': verb = 'PUT'; break;
-    case 'delete': verb = 'DELETE'; break;
-    case 'create': verb = 'POST'; break;
-    default: verb = 'POST'; break;    
+    case 'get':
+      verb = 'GET';
+      break;
+    case 'update':
+      verb = 'PUT';
+      break;
+    case 'delete':
+      verb = 'DELETE';
+      break;
+    case 'create':
+      verb = 'POST';
+      break;
+    default:
+      verb = 'POST';
+      break;
   }
   return {
     ...base,
@@ -125,7 +139,10 @@ function buildRequest<T extends RequestInit>(base: T, controller: string, endpoi
   };
 }
 
-export function getBody(inputs: unknown[], method: string): {
+export function getBody(
+  inputs: unknown[],
+  method: string
+): {
   body: FormData | string | undefined;
   query: Record<string, string> | undefined;
   method: string;
@@ -158,15 +175,15 @@ export function getBody(inputs: unknown[], method: string): {
     };
   }
 
-  const plainInputs = inputs.map(value => isBlobLike(value) ? null : value);
+  const plainInputs = inputs.map(value => (isBlobLike(value) ? null : value));
   const form = new FormData();
 
   for (const input of inputs.filter(isBlobLike)) {
     if (input instanceof Blob) {
-      form.append('file', input, (input instanceof File) ? input.name : undefined);
+      form.append('file', input, input instanceof File ? input.name : undefined);
     } else {
       for (const [name, blob] of Object.entries(input)) {
-        form.append(name, blob, (blob instanceof File) ? blob.name : undefined);
+        form.append(name, blob, blob instanceof File ? blob.name : undefined);
       }
     }
   }
@@ -218,7 +235,9 @@ export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]):
 
   try {
     const { method, body, headers, query } = getBody(params, request.core.method);
-    if (body) { core.body = body; }
+    if (body) {
+      core.body = body;
+    }
     core.method = method;
     core.headers = extendHeaders(core.headers, headers);
 
@@ -315,32 +334,40 @@ export function clientFactory<T extends Record<string, {}>>(): RpcClientFactory<
       ...request,
       core: {
         method: 'POST',
-        path: undefined!, controller: undefined!, endpoint: undefined!,
-        timeout: 0, credentials: 'include', mode: 'cors',
+        path: undefined!,
+        controller: undefined!,
+        endpoint: undefined!,
+        timeout: 0,
+        credentials: 'include',
+        mode: 'cors',
         ...request.core
-      },
+      }
     };
     const cache: Record<string, unknown> = {};
     // @ts-ignore
-    return new Proxy({}, {
-      get: (_, controller: string) =>
-        cache[controller] ??= new Proxy({}, {
-          get: (__, endpoint: string): unknown => {
-            const final: RpcRequest = {
-              ...client,
-              core: buildRequest(client.core!, controller, endpoint)
-            };
-            const key = `${controller}/${endpoint}`;
-            cache[key] ??= Object.defineProperties(
-              invokeFetch.bind(null, final),
-              Object.fromEntries(
-                Object.entries(decorate?.(final) ?? {}).map(([key, value]) => [key, { value }])
-              )
-            );
-            return cache[key];
-          }
-        })
-    });
+    return new Proxy(
+      {},
+      {
+        get: (_, controller: string) =>
+          (cache[controller] ??= new Proxy(
+            {},
+            {
+              get: (__, endpoint: string): unknown => {
+                const final: RpcRequest = {
+                  ...client,
+                  core: buildRequest(client.core!, controller, endpoint)
+                };
+                const key = `${controller}/${endpoint}`;
+                cache[key] ??= Object.defineProperties(
+                  invokeFetch.bind(null, final),
+                  Object.fromEntries(Object.entries(decorate?.(final) ?? {}).map(([key, value]) => [key, { value }]))
+                );
+                return cache[key];
+              }
+            }
+          ))
+      }
+    );
   };
 }
 

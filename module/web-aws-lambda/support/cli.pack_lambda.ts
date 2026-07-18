@@ -10,7 +10,6 @@ import { BasePackCommand, type PackOperationShape } from '@travetto/pack/support
  */
 @CliCommand()
 export class PackLambdaCommand extends BasePackCommand {
-
   constructor() {
     super();
     this.entryPoint = '@travetto/web-aws-lambda/support/entry.handler.ts';
@@ -25,9 +24,6 @@ export class PackLambdaCommand extends BasePackCommand {
   }
 
   getOperations(): PackOperationShape<this>[] {
-    return [
-      ...super.getOperations(),
-      PackOperation.compress
-    ];
+    return [...super.getOperations(), PackOperation.compress];
   }
 }

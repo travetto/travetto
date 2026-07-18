@@ -15,7 +15,8 @@ export class WebConnectUtil {
    *
    * NOTE: If a response is written, then it is thrown as an "error"
    */
-  static async invoke<T>(ctx: WebFilterContext,
+  static async invoke<T>(
+    ctx: WebFilterContext,
     handler: (
       request: IncomingMessage,
       response: ServerResponse,
@@ -28,7 +29,7 @@ export class WebConnectUtil {
     const promise = Promise.withResolvers<T | undefined>();
     connectResponse.on('end', () => promise.resolve(null!));
 
-    handler(connectRequest, connectResponse, (error, value) => error ? promise.reject(error) : promise.resolve(value!));
+    handler(connectRequest, connectResponse, (error, value) => (error ? promise.reject(error) : promise.resolve(value!)));
     const result = await promise.promise;
     connectResponse.throwIfSent();
     return result;
