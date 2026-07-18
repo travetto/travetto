@@ -14,7 +14,7 @@ export const text = <>
     <c.CliHelpExecution commandClass={LintRegisterCommand} config={{ workingDirectory: '.' }} />
 
     When registration completes, this is the file the linter will use, and any other tooling (e.g. IDEs).
-    <c.Code title='Sample configuration' src='../../biome.json' />
+    <c.Code title='Sample configuration' src='../../biome.jsonc' />
   </c.CliHelpSection>
 
   <c.CliHelpSection commandClass={LintCommand}>

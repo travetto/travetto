@@ -19,7 +19,7 @@
   "files": [
     "support",
     "__index__.ts",
-    "biome.json"
+    "resources"
   ],
   "repository": {
     "url": "git+https://github.com/travetto/travetto.git",
