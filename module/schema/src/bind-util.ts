@@ -164,7 +164,7 @@ export class BindUtil {
 
       for (const key of TypedObject.keys(instance)) { // Do not retain undefined fields
         const descriptor = Object.getOwnPropertyDescriptor(instance, key);
-        if (descriptor?.writable === false) {
+        if (descriptor?.writable === false || !!descriptor?.get) {
           continue;
         }
         if (instance[key] === undefined) {
