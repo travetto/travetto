@@ -1,11 +1,11 @@
 import { AuthenticationError, type Authenticator, type Principal } from '@travetto/auth';
-import { InjectableFactory } from '@travetto/di';
 import { SessionModelSymbol } from '@travetto/auth-session';
+import { InjectableFactory } from '@travetto/di';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 
 export const BasicAuthSymbol = Symbol.for('AUTH_BASIC');
 
-export type User = { username: string, password: string };
+export type User = { username: string; password: string };
 
 class AuthConfig {
   @InjectableFactory(SessionModelSymbol)

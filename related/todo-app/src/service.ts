@@ -1,11 +1,10 @@
+import { Inject, Injectable } from '@travetto/di';
 import type { MongoModelService } from '@travetto/model-mongo';
-import { Injectable, Inject } from '@travetto/di';
 
 import { Todo, type TodoSearch } from './model.ts';
 
 @Injectable()
 export class TodoService {
-
   /** @private */
   @Inject() modelService: MongoModelService;
 

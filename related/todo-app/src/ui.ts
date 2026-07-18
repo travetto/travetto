@@ -1,11 +1,10 @@
-import { Controller, Get, Produces, type WebRequest, ContextParam } from '@travetto/web';
-import { RuntimeResources, type BinaryStream } from '@travetto/runtime';
+import { type BinaryStream, RuntimeResources } from '@travetto/runtime';
 import { IsPrivate } from '@travetto/schema';
+import { ContextParam, Controller, Get, Produces, type WebRequest } from '@travetto/web';
 
 @Controller('/ui')
 @IsPrivate()
 export class UIController {
-
   @ContextParam()
   request: WebRequest;
 

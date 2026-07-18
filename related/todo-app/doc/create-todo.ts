@@ -7,7 +7,6 @@ export async function main(key: string, port: number) {
     headers: {
       'Content-Type': 'application/json'
     }
-  })
-    .then(response => response.json());
+  }).then(response => response.json());
   console.log!(result);
 }
