@@ -1,12 +1,12 @@
 import assert from 'node:assert';
 
-import { Controller, Get, Post, type WebRequest, ContextParam, WebHeaderUtil } from '@travetto/web';
-import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
-import { Registry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
 import type { MemoryModelService } from '@travetto/model-memory';
-import { Upload, type FileMap } from '@travetto/web-upload';
-import { Util, type BinaryMetadata, castTo, type RuntimeError, BinaryMetadataUtil } from '@travetto/runtime';
+import { Registry } from '@travetto/registry';
+import { type BinaryMetadata, BinaryMetadataUtil, castTo, type RuntimeError, Util } from '@travetto/runtime';
+import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
+import { ContextParam, Controller, Get, Post, WebHeaderUtil, type WebRequest } from '@travetto/web';
+import { type FileMap, Upload } from '@travetto/web-upload';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
@@ -14,7 +14,6 @@ const getHash = (blob: Blob) => BinaryMetadataUtil.read(blob)?.hash;
 
 @Controller('/test/upload')
 class TestUploadController {
-
   @Inject()
   service: MemoryModelService;
 
@@ -69,18 +68,21 @@ class TestUploadController {
 
 @Suite()
 export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
-
   fixture: TestFixtures;
 
-  async getUploads(...files: { name: string, resource: string, type?: string }[]): Promise<FormData> {
+  async getUploads(...files: { name: string; resource: string; type?: string }[]): Promise<FormData> {
     const data = new FormData();
-    await Promise.all(files.map(async ({ name, type, resource }) => {
-      data.append(name, BinaryMetadataUtil.defineBlob(
-        new File([], ''),
-        () => this.fixture.readBinaryStream(resource),
-        { contentType: type, filename: resource }
-      ));
-    }));
+    await Promise.all(
+      files.map(async ({ name, type, resource }) => {
+        data.append(
+          name,
+          BinaryMetadataUtil.defineBlob(new File([], ''), () => this.fixture.readBinaryStream(resource), {
+            contentType: type,
+            filename: resource
+          })
+        );
+      })
+    );
     return data;
   }
 
@@ -108,7 +110,10 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   async testUploadDirect() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
     const sent = castTo<Blob>(uploads.get('file'));
-    const response = await this.request<{ location: string, meta: BinaryMetadata }>({ context: { httpMethod: 'POST', path: '/test/upload' }, body: sent });
+    const response = await this.request<{ location: string; meta: BinaryMetadata }>({
+      context: { httpMethod: 'POST', path: '/test/upload' },
+      body: sent
+    });
 
     const { hash } = await this.getFileMeta('/logo.png');
     assert(response.body?.meta.hash === hash);
@@ -117,9 +122,10 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   @Test()
   async testUpload() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const response = await this.request<{ location: string, meta: BinaryMetadata }>(
-      { body: uploads, context: { httpMethod: 'POST', path: '/test/upload' } }
-    );
+    const response = await this.request<{ location: string; meta: BinaryMetadata }>({
+      body: uploads,
+      context: { httpMethod: 'POST', path: '/test/upload' }
+    });
     const { hash } = await this.getFileMeta('/logo.png');
     assert(response.body?.meta.hash === hash);
   }
@@ -127,9 +133,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   @Test()
   async testCached() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const response = await this.request(
-      { body: uploads, context: { httpMethod: 'POST', path: '/test/upload/cached' } }
-    );
+    const response = await this.request({ body: uploads, context: { httpMethod: 'POST', path: '/test/upload/cached' } });
     assert(response.context.httpStatusCode === 200);
     assert(response.headers.get('Cache-Control') === 'max-age=3600');
     assert(response.headers.get('Content-Language') === 'en-GB');
@@ -141,9 +145,10 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
       { name: 'file1', resource: 'logo.png', type: 'image/png' },
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
-    const response = await this.request<{ hash1: string, hash2: string }>(
-      { body: uploads, context: { httpMethod: 'POST', path: '/test/upload/all-named' } }
-    );
+    const response = await this.request<{ hash1: string; hash2: string }>({
+      body: uploads,
+      context: { httpMethod: 'POST', path: '/test/upload/all-named' }
+    });
     const { hash } = await this.getFileMeta('/logo.png');
     assert(response.body?.hash1 === hash);
     assert(response.body?.hash2 === hash);
@@ -156,12 +161,12 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
 
-    const badResponse = await this.request<{ hash1: string, hash2: string }>(
+    const badResponse = await this.request<{ hash1: string; hash2: string }>(
       {
         body: uploadBad,
         context: {
           httpMethod: 'POST',
-          path: '/test/upload/all-named-custom',
+          path: '/test/upload/all-named-custom'
         }
       },
       false
@@ -172,11 +177,12 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
       { name: 'file1', resource: 'logo.gif', type: 'image/gif' },
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
-    const response = await this.request<{ hash1: string, hash2: string }>(
+    const response = await this.request<{ hash1: string; hash2: string }>(
       {
         body: uploads,
         context: {
-          httpMethod: 'POST', path: '/test/upload/all-named-custom',
+          httpMethod: 'POST',
+          path: '/test/upload/all-named-custom'
         }
       },
       false
@@ -197,12 +203,12 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
 
-    const badResponse = await this.request<{ hash1: string, hash2: string }>(
+    const badResponse = await this.request<{ hash1: string; hash2: string }>(
       {
         body: uploadBad,
         context: {
           httpMethod: 'POST',
-          path: '/test/upload/all-named-size',
+          path: '/test/upload/all-named-size'
         }
       },
       false
@@ -213,12 +219,12 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
       { name: 'file1', resource: 'asset.yml', type: 'text/plain' },
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
-    const response = await this.request<{ hash1: string, hash2: string }>(
+    const response = await this.request<{ hash1: string; hash2: string }>(
       {
         body: uploads,
         context: {
           httpMethod: 'POST',
-          path: '/test/upload/all-named-size',
+          path: '/test/upload/all-named-size'
         }
       },
       false
@@ -247,32 +253,29 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     assert(typeof item.body === 'string');
     assert(item.body?.length === 26);
 
-    const itemRanged = await this.request(
-      {
-        context: {
-          httpMethod: 'GET', path: `/test/upload/${loc}`,
-        },
-        headers: {
-          Range: 'bytes=0-9'
-        }
+    const itemRanged = await this.request({
+      context: {
+        httpMethod: 'GET',
+        path: `/test/upload/${loc}`
+      },
+      headers: {
+        Range: 'bytes=0-9'
       }
-    );
+    });
 
     assert(typeof itemRanged.body === 'string');
     assert(itemRanged.body === 'abcdefghij');
     assert(itemRanged.body?.length === 10);
 
-    const itemRanged2 = await this.request(
-      {
-        context: {
-          httpMethod: 'GET',
-          path: `/test/upload/${loc}`,
-        },
-        headers: {
-          Range: 'bytes=23-25'
-        }
+    const itemRanged2 = await this.request({
+      context: {
+        httpMethod: 'GET',
+        path: `/test/upload/${loc}`
+      },
+      headers: {
+        Range: 'bytes=23-25'
       }
-    );
+    });
 
     assert(typeof itemRanged2.body === 'string');
     assert(itemRanged2.body?.length === 3);
@@ -282,11 +285,11 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
       {
         context: {
           httpMethod: 'GET',
-          path: `/test/upload/${loc}`,
+          path: `/test/upload/${loc}`
         },
         headers: {
           Range: 'bytes=30-20'
-        },
+        }
       },
       false
     );

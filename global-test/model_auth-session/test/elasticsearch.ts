@@ -1,8 +1,7 @@
-
-import { InjectableFactory } from '@travetto/di';
-import { Suite } from '@travetto/test';
 import { SessionModelSymbol } from '@travetto/auth-session';
-import { ElasticsearchModelService, ElasticsearchModelConfig } from '@travetto/model-elasticsearch';
+import { InjectableFactory } from '@travetto/di';
+import { ElasticsearchModelConfig, ElasticsearchModelService } from '@travetto/model-elasticsearch';
+import { Suite } from '@travetto/test';
 
 import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
 

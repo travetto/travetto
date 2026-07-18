@@ -1,7 +1,7 @@
-import { InjectableFactory } from '@travetto/di';
-import { Suite } from '@travetto/test';
 import { CacheModelSymbol } from '@travetto/cache';
-import { RedisModelService, RedisModelConfig } from '@travetto/model-redis';
+import { InjectableFactory } from '@travetto/di';
+import { RedisModelConfig, RedisModelService } from '@travetto/model-redis';
+import { Suite } from '@travetto/test';
 
 import { CacheServiceSuite } from '@travetto/cache/support/test/service.ts';
 

@@ -1,8 +1,8 @@
-import { InjectableFactory } from '@travetto/di';
-import { Suite } from '@travetto/test';
 import type { AsyncContext } from '@travetto/context';
-import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
+import { InjectableFactory } from '@travetto/di';
 import { PostgreSQLDialect } from '@travetto/model-postgres';
+import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
+import { Suite } from '@travetto/test';
 
 import { AuthModelServiceSuite, TestModelSvcSymbol } from '@travetto/auth-model/support/test/model.ts';
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
