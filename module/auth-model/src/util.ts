@@ -4,7 +4,6 @@ import { BinaryUtil, CodecUtil, RuntimeError, Util } from '@travetto/runtime';
  * Standard auth utilities
  */
 export class AuthModelUtil {
-
   /**
    * Generate a hash for a given value
    *
@@ -20,7 +19,7 @@ export class AuthModelUtil {
       BinaryUtil.binaryArrayToBuffer(CodecUtil.fromUTF8String(value)),
       { name: 'PBKDF2' },
       false,
-      ['deriveBits']
+      ['deriveBits'],
     );
 
     const result = await crypto.subtle.deriveBits(
@@ -31,7 +30,7 @@ export class AuthModelUtil {
         iterations,
       },
       hashKey,
-      keylen * 8
+      keylen * 8,
     );
 
     return BinaryUtil.binaryArrayToUint8Array(result).toHex().substring(0, keylen);
@@ -44,7 +43,7 @@ export class AuthModelUtil {
    * @param salt Salt value, or if a number, length of salt
    * @param validator Optional function to validate your password
    */
-  static async generatePassword(password: string, salt: number | string = 32): Promise<{ salt: string, hash: string }> {
+  static async generatePassword(password: string, salt: number | string = 32): Promise<{ salt: string; hash: string }> {
     if (!password) {
       throw new RuntimeError('Password is required', { category: 'data' });
     }

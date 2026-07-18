@@ -5,7 +5,6 @@ import { AuthModelUtil } from '@travetto/auth-model';
 
 @Suite()
 export class UtilTest {
-
   @Test()
   async testHash() {
     const hash = AuthModelUtil.generateHash('hello', 'test', 100, 20);

@@ -31,7 +31,7 @@ class TestConfig {
       svc,
       User,
       u => castTo({ ...u, details: u, source: 'model' }),
-      reg => User.from({ ...reg })
+      reg => User.from({ ...reg }),
     );
     return src;
   }
@@ -41,7 +41,6 @@ class TestConfig {
 @ModelSuite()
 @InjectableSuite()
 export abstract class AuthModelServiceSuite<T> {
-
   serviceClass: Class<T>;
   configClass: Class;
 
@@ -55,7 +54,7 @@ export abstract class AuthModelServiceSuite<T> {
   async register() {
     const pre = User.from({
       password: 'bob',
-      details: {}
+      details: {},
     });
 
     const user = await this.authService.register(pre);
@@ -69,7 +68,7 @@ export abstract class AuthModelServiceSuite<T> {
     const pre = User.from({
       id: this.svc.idSource.create(),
       password: 'bob',
-      details: {}
+      details: {},
     });
 
     try {

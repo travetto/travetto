@@ -6,7 +6,6 @@ import type { User } from './model.ts';
 
 @Injectable()
 class UserService {
-
   @Inject()
   private auth: ModelAuthService<User>;
 

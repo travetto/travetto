@@ -10,7 +10,8 @@ class AuthConfig {
     return new ModelAuthService(
       service,
       User,
-      user => ({    // This converts User to a RegisteredPrincipal
+      user => ({
+        // This converts User to a RegisteredPrincipal
         source: 'model',
         provider: 'model',
         id: user.id!,
@@ -22,15 +23,16 @@ class AuthConfig {
         password: user.password,
         details: user,
       }),
-      user => User.from(({   // This converts a RegisteredPrincipal to a User
-        id: user.id,
-        permissions: [...(user.permissions || [])],
-        hash: user.hash,
-        salt: user.salt,
-        resetToken: user.resetToken,
-        resetExpires: user.resetExpires,
-      })
-      )
+      user =>
+        User.from({
+          // This converts a RegisteredPrincipal to a User
+          id: user.id,
+          permissions: [...(user.permissions || [])],
+          hash: user.hash,
+          salt: user.salt,
+          resetToken: user.resetToken,
+          resetExpires: user.resetExpires,
+        }),
     );
   }
 }
