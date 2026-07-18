@@ -118,10 +118,9 @@ class $ConsoleManager implements ConsoleListener {
       modulePath: event.modulePath ?? event.import?.[1]
     };
 
-    if (this.#filters[result.level] && !this.#filters[result.level]!(result)) {
-      return; // Do nothing
-    } else {
-      return this.#listener.log(result);
+    const filter = this.#filters[result.level];
+    if (!filter || filter(result)) {
+      this.#listener.log(result);
     }
   }
 

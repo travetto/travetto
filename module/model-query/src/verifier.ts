@@ -172,7 +172,7 @@ export class QueryVerifier {
    * Process where clause
    */
   static processWhereClause<T>(st: State, cls: Class<T>, passed: object): void {
-    return this.processGenericClause(st, cls, passed, {
+    this.processGenericClause(st, cls, passed, {
       preMember: (state: State, value: Record<string, unknown>) => {
         const keys = Object.keys(value);
         const firstKey = keys[0];
@@ -221,7 +221,7 @@ export class QueryVerifier {
    * Handle sort clause
    */
   static processSortClause<T>(st: State, cls: Class<T>, passed: object): void {
-    return this.processGenericClause(st, cls, passed, {
+    this.processGenericClause(st, cls, passed, {
       onSimpleType: (state, type, value) => {
         if (value === 1 || value === -1 || typeof value === 'boolean') {
           return;
@@ -235,7 +235,7 @@ export class QueryVerifier {
    * Handle select clause
    */
   static processSelectClause<T>(st: State, cls: Class<T>, passed: object): void {
-    return this.processGenericClause(st, cls, passed, {
+    this.processGenericClause(st, cls, passed, {
       onSimpleType: (state, type, value) => {
         const actual = TypeUtil.getActualType(value);
         if (actual === 'number' || actual === 'boolean') {

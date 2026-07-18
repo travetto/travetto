@@ -122,9 +122,9 @@ export class SQLModelUtil {
     };
 
     if ('fields' in config) {
-      return handler.onRoot({ config, fields, descend, path });
+      handler.onRoot({ config, fields, descend, path });
     } else {
-      return handler.onSub({ config, fields, descend, path });
+      handler.onSub({ config, fields, descend, path });
     }
   }
 

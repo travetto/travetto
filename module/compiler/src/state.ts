@@ -334,7 +334,7 @@ export class CompilerState implements CompilerHost {
       this.#writeExternalTypings(location, text, bom);
     }
 
-    return this.#writeFile(location, text, bom);
+    this.#writeFile(location, text, bom);
   }
 
   readFile(sourceFile: string): string | undefined {

@@ -49,7 +49,7 @@ export function Upload(
       );
     });
 
-    return Param('body', {
+    Param('body', {
       ...finalConfig,
       extract: (request) => {
         const input = SchemaRegistryIndex.get(cls).getMethod(property).parameters[idx];

@@ -36,7 +36,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
   }
 
   static visitFields<T>(cls: Class<T>, onField: (field: SchemaFieldConfig, path: SchemaFieldConfig[]) => void): void {
-    return this.#instance.visitFields(cls, onField);
+    this.#instance.visitFields(cls, onField);
   }
 
   static getDiscriminatedClasses(cls: Class): Class[] {
