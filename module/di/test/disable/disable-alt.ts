@@ -8,7 +8,6 @@ import { MyCustomClass3, MyCustomClass4 } from './types.ts';
 
 @Suite()
 class AltDisableSuite {
-
   @BeforeAll()
   before(): void {
     process.env.NAME = 'production';

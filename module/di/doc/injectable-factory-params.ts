@@ -8,4 +8,3 @@ class Config {
     return new CustomService(dependentService);
   }
 }
-

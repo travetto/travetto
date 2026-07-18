@@ -1,17 +1,13 @@
 import { Injectable, InjectableFactory } from '@travetto/di';
 
 @Injectable({ enabled: false })
-export class MyCustomClass {
-
-}
+export class MyCustomClass {}
 
 @Injectable({ enabled: true })
-export class MyCustomClass2 {
+export class MyCustomClass2 {}
 
-}
-
-export class MyCustomClass3 { }
-export class MyCustomClass4 { }
+export class MyCustomClass3 {}
+export class MyCustomClass4 {}
 
 class Factory {
   @InjectableFactory({ enabled: () => false })

@@ -1,9 +1,7 @@
 import { InjectableFactory } from '@travetto/di';
 
 // Not injectable by default
-class CoolService {
-
-}
+class CoolService {}
 
 class Config {
   @InjectableFactory()

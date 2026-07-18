@@ -8,7 +8,6 @@ import { MyCustomClass, MyCustomClass2, MyCustomClass3, MyCustomClass4 } from '.
 
 @Suite()
 class DisableSuite {
-
   @BeforeAll()
   beforeAll(): void {
     process.env.NAME = 'test';

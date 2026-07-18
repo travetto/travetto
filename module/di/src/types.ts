@@ -65,10 +65,9 @@ export interface InjectableCandidate<T = unknown> {
 
 /** Post Construct Handler */
 export type PostConstructor<T> = {
-  operation: ((this: T) => Promise<unknown> | unknown);
+  operation: (this: T) => Promise<unknown> | unknown;
   priority: number;
 };
-
 
 /**
  * Full injectable configuration for a class

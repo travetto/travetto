@@ -12,7 +12,7 @@ export interface RegistryAdapter<C extends {} = {}> {
 }
 
 export type RegistryIndexClass = {
-  new(source: unknown): RegistryIndex;
+  new (source: unknown): RegistryIndex;
 };
 
 /**
@@ -23,7 +23,7 @@ export interface RegistrySimpleStore {
   finalize(cls: Class): void;
   finalized(cls: Class): boolean;
   getClasses(): Class[];
-};
+}
 
 /**
  * Registry index definition

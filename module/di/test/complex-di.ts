@@ -6,47 +6,45 @@ import { asFull, toConcrete } from '@travetto/runtime';
 
 import { Injectable, InjectableFactory, DependencyRegistryIndex } from '@travetto/di';
 
-abstract class Common { }
+abstract class Common {}
 @Injectable()
-class SubCommonA extends Common { }
+class SubCommonA extends Common {}
 
 @Injectable()
-class SubCommonB extends Common { }
+class SubCommonB extends Common {}
 
-abstract class CommonWithSingle { }
+abstract class CommonWithSingle {}
 @Injectable()
-class SubCommonSingle extends CommonWithSingle { }
+class SubCommonSingle extends CommonWithSingle {}
 
-abstract class CommonWithPrimary { }
+abstract class CommonWithPrimary {}
 @Injectable({ primary: true })
-class SubCommonWithPrimaryA extends CommonWithPrimary { }
+class SubCommonWithPrimaryA extends CommonWithPrimary {}
 
 @Injectable()
-class SubCommonWithPrimaryB extends CommonWithPrimary { }
+class SubCommonWithPrimaryB extends CommonWithPrimary {}
 
-abstract class CommonWithCustom { }
+abstract class CommonWithCustom {}
 @Injectable(Symbol.for('blah'))
-class SubCommonWithCustomA extends CommonWithCustom { }
+class SubCommonWithCustomA extends CommonWithCustom {}
 
 @Injectable()
-class SubCommonWithCustomB extends CommonWithCustom { }
+class SubCommonWithCustomB extends CommonWithCustom {}
 
-abstract class CommonWithFactory { }
+abstract class CommonWithFactory {}
 @Injectable(Symbol.for('blah'))
-class SubCommonWithFactoryA extends CommonWithFactory { }
+class SubCommonWithFactoryA extends CommonWithFactory {}
 
 class CustomFactory {
   @InjectableFactory()
   static getCommonFactory(): CommonWithFactory {
-    return new class extends CommonWithFactory {
-
-    }();
+    return new (class extends CommonWithFactory {})();
   }
 }
 
-abstract class PrimaryWithFactory { }
+abstract class PrimaryWithFactory {}
 @Injectable()
-class SubPrimaryWithFactoryA extends PrimaryWithFactory { }
+class SubPrimaryWithFactoryA extends PrimaryWithFactory {}
 
 class PrimaryFactory {
   @InjectableFactory({ primary: true })
@@ -76,7 +74,6 @@ class PrimaryTargetFactory {
 
 @Suite('complex-di')
 class ComplexDiTest {
-
   @BeforeEach()
   init() {
     return Registry.init();
@@ -89,27 +86,27 @@ class ComplexDiTest {
 
   @Test()
   async commonWithSingle() {
-    assert(await DependencyRegistryIndex.getInstance(CommonWithSingle) instanceof SubCommonSingle);
+    assert((await DependencyRegistryIndex.getInstance(CommonWithSingle)) instanceof SubCommonSingle);
   }
 
   @Test()
   async commonWithPrimary() {
-    assert(await DependencyRegistryIndex.getInstance(CommonWithPrimary) instanceof SubCommonWithPrimaryA);
+    assert((await DependencyRegistryIndex.getInstance(CommonWithPrimary)) instanceof SubCommonWithPrimaryA);
   }
 
   @Test()
   async commonWithCustom() {
-    assert(await DependencyRegistryIndex.getInstance(CommonWithCustom) instanceof SubCommonWithCustomB);
+    assert((await DependencyRegistryIndex.getInstance(CommonWithCustom)) instanceof SubCommonWithCustomB);
   }
 
   @Test()
   async commonWithCustomFactory() {
-    assert(await DependencyRegistryIndex.getInstance(CommonWithFactory) instanceof CommonWithFactory);
+    assert((await DependencyRegistryIndex.getInstance(CommonWithFactory)) instanceof CommonWithFactory);
   }
 
   @Test()
   async primaryWithFactory() {
-    assert(!(await DependencyRegistryIndex.getInstance(PrimaryWithFactory) instanceof SubPrimaryWithFactoryA));
+    assert(!((await DependencyRegistryIndex.getInstance(PrimaryWithFactory)) instanceof SubPrimaryWithFactoryA));
   }
 
   @Test()

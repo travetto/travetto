@@ -3,7 +3,6 @@ import type { DependentService } from './dependency.ts';
 
 @Injectable()
 class CustomService {
-
   dependentService: DependentService;
 
   constructor(service: DependentService) {

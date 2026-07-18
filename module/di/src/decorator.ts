@@ -19,7 +19,7 @@ export function Injectable(input?: Partial<InjectableCandidate> | symbol) {
   };
 }
 
-export type InjectConfig = { qualifier?: symbol, resolution?: ResolutionType };
+export type InjectConfig = { qualifier?: symbol; resolution?: ResolutionType };
 
 /**
  * Indicate that a field or parameter is able to be injected
@@ -48,7 +48,7 @@ export function Inject(input?: InjectConfig | symbol) {
 export function InjectableFactory(input?: Partial<InjectableCandidate> | symbol) {
   return <T extends Class>(cls: T, property: string, descriptor: TypedPropertyDescriptor<(...args: Any[]) => Any>): void => {
     DependencyRegistryIndex.registerFactory(cls, property, fromInput(input), {
-      factory: (...params: unknown[]) => descriptor.value!.apply(cls, params),
+      factory: (...params: unknown[]) => descriptor.value!.apply(cls, params)
     });
   };
 }

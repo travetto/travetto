@@ -1,7 +1,7 @@
 import { Injectable, DependencyRegistryIndex } from '@travetto/di';
 
 @Injectable()
-class Complex { }
+class Complex {}
 
 class ManualLookup {
   async invoke() {

@@ -23,6 +23,4 @@ export class DbConfig {
   }
 }
 
-export class AltConfig {
-
-}
+export class AltConfig {}

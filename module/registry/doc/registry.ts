@@ -16,7 +16,6 @@ interface Child {
  * The adapter to handle mapping/modeling a specific class
  */
 class SampleRegistryAdapter implements RegistryAdapter<Group> {
-
   // biome-ignore lint/correctness/noUnusedPrivateClassMembers: needed for docs
   #class: Class;
   #config: Group;
@@ -29,10 +28,7 @@ class SampleRegistryAdapter implements RegistryAdapter<Group> {
     for (const group of groups) {
       Object.assign(this.#config, {
         ...group,
-        children: [
-          ...(this.#config?.children ?? []),
-          ...(group.children ?? [])
-        ]
+        children: [...(this.#config?.children ?? []), ...(group.children ?? [])]
       });
     }
     return this.#config;

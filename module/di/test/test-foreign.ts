@@ -47,7 +47,6 @@ class Source {
   static async writableAlt(): Promise<Writable> {
     return castTo({ writable: true });
   }
-
 }
 
 @Injectable()
@@ -70,7 +69,6 @@ class Child {
 
 @Suite()
 class ForeignTest {
-
   @Test()
   async testSetter() {
     await Registry.init();

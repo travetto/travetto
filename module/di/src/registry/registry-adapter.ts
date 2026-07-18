@@ -43,7 +43,7 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
       method,
       enabled: true,
       factory: undefined!,
-      candidateType: undefined!,
+      candidateType: undefined!
     };
     return combineInjectableCandidates(candidates[method], ...data);
   }
@@ -51,7 +51,7 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
   registerClass(...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
     return this.registerFactory(CONSTRUCTOR_PROPERTY, ...data, {
       factory: (...args: unknown[]) => classConstruct(this.#cls, args),
-      candidateType: this.#cls,
+      candidateType: this.#cls
     });
   }
 
@@ -67,8 +67,9 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
       candidate.qualifier ??= getDefaultQualifier(candidateType);
     }
     // Inherit post construct from parent
-    this.#config.postConstruct = [...(parent?.postConstruct ?? []), ...this.#config.postConstruct]
-      .sort((a, b) => (a.priority ?? 1) - (b.priority ?? 1));
+    this.#config.postConstruct = [...(parent?.postConstruct ?? []), ...this.#config.postConstruct].sort(
+      (a, b) => (a.priority ?? 1) - (b.priority ?? 1)
+    );
   }
 
   getCandidateConfigs(): InjectableCandidate[] {

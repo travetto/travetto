@@ -6,10 +6,23 @@ import { toConcrete } from '@travetto/runtime';
 import { DependencyRegistryIndex, InjectionError } from '@travetto/di';
 
 import {
-  ServiceInherit, ServiceInheritSymbol2, CustomServiceInheritSymbol,
-  CustomDatabaseSymbol, Database, CustomEmptySymbol, BasePattern,
-  SpecificPattern, InterfaceType, type BaseType, CustomInterfaceSymbol, UsableMainClass, UsableSubClass,
-  UsableSubSubClass, LooseResolutionClass, LooseSymbol, SetterInject
+  ServiceInherit,
+  ServiceInheritSymbol2,
+  CustomServiceInheritSymbol,
+  CustomDatabaseSymbol,
+  Database,
+  CustomEmptySymbol,
+  BasePattern,
+  SpecificPattern,
+  InterfaceType,
+  type BaseType,
+  CustomInterfaceSymbol,
+  UsableMainClass,
+  UsableSubClass,
+  UsableSubSubClass,
+  LooseResolutionClass,
+  LooseSymbol,
+  SetterInject
 } from './dependencies.ts';
 
 import { DbConfig } from './config.ts';
@@ -22,7 +35,6 @@ function doWork() {
 
 @Suite('di')
 class DiTest {
-
   @Test('run')
   async run() {
     console.log('starting');
@@ -43,7 +55,6 @@ class DiTest {
 
   @Test('runner')
   async runner() {
-
     assert(1 === 1);
 
     assert(2 + 2 === FOUR);
@@ -54,7 +65,6 @@ class DiTest {
 
 @Suite('di2')
 class DiTest2 {
-
   @BeforeAll()
   async beforeAll() {
     await Registry.init();

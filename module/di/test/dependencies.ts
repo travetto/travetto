@@ -3,10 +3,10 @@ import { Required } from '@travetto/schema';
 
 import { DbConfig, type AltConfig, Empty } from './config.ts';
 
-export abstract class BasePattern { }
+export abstract class BasePattern {}
 
 @Injectable()
-export class SpecificPattern extends BasePattern { }
+export class SpecificPattern extends BasePattern {}
 
 /**
  * @concrete
@@ -24,7 +24,6 @@ export class InterfaceType implements BaseType {
 
 @Injectable()
 export class Database {
-
   @Inject()
   dbConfig: DbConfig;
 
@@ -44,7 +43,6 @@ export class Database {
 
 @Injectable()
 export class Service {
-
   db: Database;
 
   constructor(db: Database) {
@@ -121,19 +119,19 @@ class TestConfig {
 }
 
 @Injectable()
-export class UsableMainClass { }
+export class UsableMainClass {}
 
 @Injectable()
-export class UsableSubClass extends UsableMainClass { }
+export class UsableSubClass extends UsableMainClass {}
 
 @Injectable()
-export abstract class UsableSubSubClass extends UsableSubClass { }
+export abstract class UsableSubSubClass extends UsableSubClass {}
 
 @Injectable()
-export class UsableSubSubAClass extends UsableSubSubClass { }
+export class UsableSubSubAClass extends UsableSubSubClass {}
 
 @Injectable()
-export class UsableSubSubBClass extends UsableSubSubClass { }
+export class UsableSubSubBClass extends UsableSubSubClass {}
 
 export const LooseSymbol = Symbol.for('loose');
 
@@ -145,9 +143,9 @@ export class LooseResolutionClass {
 class Config {
   @InjectableFactory(LooseSymbol)
   static getLoose(): LooseResolutionClass {
-    return new class extends LooseResolutionClass {
+    return new (class extends LooseResolutionClass {
       name = 'george';
-    }();
+    })();
   }
 }
 

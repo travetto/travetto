@@ -1,14 +1,12 @@
 import { Injectable, Inject } from '@travetto/di';
 
-export abstract class Contract {
-
-}
+export abstract class Contract {}
 
 @Injectable()
-class SimpleContract extends Contract { }
+class SimpleContract extends Contract {}
 
 @Injectable()
-export class ComplexContract extends Contract { }
+export class ComplexContract extends Contract {}
 
 @Injectable()
 class ContractConsumer {

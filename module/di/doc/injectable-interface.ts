@@ -16,7 +16,6 @@ class MyCustomService implements ServiceContract {
 
 @Injectable()
 class SpecificService {
-
   @Inject()
   service: ServiceContract;
 }

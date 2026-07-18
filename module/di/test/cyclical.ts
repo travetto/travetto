@@ -6,7 +6,6 @@ import { DependencyRegistryIndex } from '@travetto/di';
 
 @Suite('cycle')
 class CycleTest {
-
   @Test()
   @ShouldThrow('dependency')
   async tryCycle() {
