@@ -1,10 +1,9 @@
 import { type AnyMap, castKey, castTo, JSONUtil } from '@travetto/runtime';
 
-
 /**
  * @concrete
  */
-export interface SessionData extends AnyMap { }
+export interface SessionData extends AnyMap {}
 
 /**
  * Full session object, with metadata
@@ -121,7 +120,7 @@ export class Session<T extends SessionData = SessionData> {
       signature: this.signature,
       expiresAt: this.expiresAt?.getTime(),
       issuedAt: this.issuedAt?.getTime(),
-      data: this.data
+      data: this.data,
     };
   }
 }

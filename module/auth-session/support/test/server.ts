@@ -14,7 +14,6 @@ import { ModelSuite } from '@travetto/model/support/test/suite.ts';
 @ModelSuite()
 @InjectableSuite()
 export abstract class AuthSessionServerSuite<T> {
-
   timeScale = 1;
   serviceClass: Class<T>;
   configClass: Class;
@@ -37,11 +36,11 @@ export abstract class AuthSessionServerSuite<T> {
     this.auth.principal = {
       id: 'orange',
       details: {},
-      sessionId: Util.uuid()
+      sessionId: Util.uuid(),
     };
 
     assert(this.sessionContext.get() === undefined);
-    assert(await this.session.load() === undefined);
+    assert((await this.session.load()) === undefined);
 
     const session = this.sessionContext.get(true);
     assert(session.id === this.auth.principal.sessionId);
@@ -50,19 +49,19 @@ export abstract class AuthSessionServerSuite<T> {
 
     this.sessionContext.set(undefined); // Disconnect
 
-    assert(await this.session.load() !== undefined);
+    assert((await this.session.load()) !== undefined);
     const session2 = this.sessionContext.get(true);
     assert(session2.data?.name === 'bob');
 
     this.auth.principal = {
       id: 'orange',
       details: {},
-      sessionId: Util.uuid()
+      sessionId: Util.uuid(),
     };
 
     this.sessionContext.set(undefined); // Disconnect
 
-    assert(await this.session.load() === undefined);
+    assert((await this.session.load()) === undefined);
     const session3 = this.sessionContext.get(true);
     assert.deepStrictEqual(session3.data, {});
   }

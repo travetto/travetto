@@ -9,7 +9,6 @@ import { Session } from './session.ts';
  */
 @Injectable()
 export class SessionContext {
-
   @Inject()
   context: AsyncContext;
 
@@ -40,7 +39,7 @@ export class SessionContext {
   get(createIfMissing?: boolean): Session | undefined {
     let value = this.#value.get();
     if (!value && createIfMissing) {
-      this.set(value = this.#create());
+      this.set((value = this.#create()));
     }
     return value;
   }

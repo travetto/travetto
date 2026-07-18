@@ -12,7 +12,6 @@ import type { SessionContext } from './context.ts';
  */
 @Injectable()
 export class SessionService {
-
   @Inject()
   context: SessionContext;
 
@@ -38,12 +37,12 @@ export class SessionService {
 
       const session = new Session({
         ...record,
-        data: JSONUtil.fromBase64(record.data)
+        data: JSONUtil.fromBase64(record.data),
       });
 
       // Validate session
       if (session.isExpired()) {
-        await this.#modelService.delete(SessionEntry, session.id).catch(() => { });
+        await this.#modelService.delete(SessionEntry, session.id).catch(() => {});
         return new Session({ action: 'destroy' });
       } else {
         return session;
@@ -78,14 +77,18 @@ export class SessionService {
 
       // If expiration time has changed, send new session information
       if (session.action === 'create' || session.isChanged()) {
-        await this.#modelService.upsert(SessionEntry, SessionEntry.from({
-          ...session,
-          data: JSONUtil.toBase64(session.data)
-        }));
+        await this.#modelService.upsert(
+          SessionEntry,
+          SessionEntry.from({
+            ...session,
+            data: JSONUtil.toBase64(session.data),
+          }),
+        );
       }
       // If destroying
-    } else if (session.id) { // If destroy and id
-      await this.#modelService.delete(SessionEntry, session.id).catch(() => { });
+    } else if (session.id) {
+      // If destroy and id
+      await this.#modelService.delete(SessionEntry, session.id).catch(() => {});
     }
   }
 
