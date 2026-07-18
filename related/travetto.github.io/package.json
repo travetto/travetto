@@ -46,5 +46,12 @@
   "private": true,
   "publishConfig": {
     "access": "restricted"
-  }
+  },
+  "allowScripts": {
+    "@parcel/watcher": true,
+    "lmdb": true,
+    "msgpackr-extract": true,
+    "esbuild": true,
+    "fsevents": true
+  }  
 }
