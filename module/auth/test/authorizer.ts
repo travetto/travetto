@@ -9,8 +9,8 @@ const USERS: Record<string, Principal> = {
     id: 'a',
     issuer: 'none',
     permissions: ['1', '2', '3'],
-    details: {}
-  }
+    details: {},
+  },
 };
 
 class CustomAuthorizer implements Authorizer {
@@ -24,29 +24,32 @@ class CustomAuthorizer implements Authorizer {
 
 @Suite()
 export class PrincipalTest {
-
   @Test()
   async verifyTypings() {
     const source = new CustomAuthorizer();
-    await assert.rejects(() => source.authorize({
-      id: 'b',
-      details: {},
-      permissions: ['1', '2'],
-      issuer: 'none'
-    }));
+    await assert.rejects(() =>
+      source.authorize({
+        id: 'b',
+        details: {},
+        permissions: ['1', '2'],
+        issuer: 'none',
+      }),
+    );
 
-    await assert.doesNotReject(() => source.authorize({
-      id: 'a',
-      details: {},
-      permissions: ['2', '3'],
-      issuer: 'none'
-    }));
+    await assert.doesNotReject(() =>
+      source.authorize({
+        id: 'a',
+        details: {},
+        permissions: ['2', '3'],
+        issuer: 'none',
+      }),
+    );
 
     const p = await source.authorize({
       id: 'a',
       details: {},
       permissions: [],
-      issuer: 'none'
+      issuer: 'none',
     });
 
     assert(p.issuer === 'none');

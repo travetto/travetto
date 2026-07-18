@@ -5,4 +5,4 @@
 export interface AuthToken {
   value: string;
   type: string;
-};
+}

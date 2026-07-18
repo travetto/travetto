@@ -12,7 +12,6 @@ import type { AuthenticatorState } from './types/authenticator.ts';
  */
 @Injectable()
 export class AuthContext {
-
   #principal = new AsyncContextValue<Principal>(this, { failIfUnbound: { write: true } });
   #authToken = new AsyncContextValue<AuthToken>(this, { failIfUnbound: { write: true } });
   #authState = new AsyncContextValue<AuthenticatorState>(this, { failIfUnbound: { write: true } });

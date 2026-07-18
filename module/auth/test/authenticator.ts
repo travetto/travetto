@@ -3,13 +3,13 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 import { AuthenticationError, type Authenticator } from '@travetto/auth';
 
-type User = { username: string, password: string };
+type User = { username: string; password: string };
 
 class SimpleAuthenticator implements Authenticator<User> {
-  toContext(user: { id: string, username: string }) {
+  toContext(user: { id: string; username: string }) {
     return {
       id: user.id,
-      principal: user
+      principal: user,
     };
   }
   async authenticate({ username, password }: User) {
@@ -19,8 +19,8 @@ class SimpleAuthenticator implements Authenticator<User> {
         issuer: 'dummy',
         permissions: [],
         details: {
-          username: 'test'
-        }
+          username: 'test',
+        },
       };
     } else {
       throw new AuthenticationError('Unable to authenticate, credentials are invalid');
@@ -32,9 +32,7 @@ class SimpleAuthenticator implements Authenticator<User> {
 export class AuthenticatorTest {
   @Test()
   async validateAuthenticator() {
-    const ctx = await new SimpleAuthenticator().authenticate(
-      { username: 'test', password: 'test' }
-    );
+    const ctx = await new SimpleAuthenticator().authenticate({ username: 'test', password: 'test' });
     assert(ctx.id === 'test');
   }
 }

@@ -5,7 +5,6 @@ import { Ignore } from '@travetto/schema';
 
 @Config('auth')
 export class AuthConfig {
-
   maxAge: TimeSpan | number = '1h';
   rollingRenew: boolean = true;
 

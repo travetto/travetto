@@ -1,4 +1,3 @@
-
 import { DependencyRegistryIndex, getDefaultQualifier, Inject, Injectable, PostConstruct } from '@travetto/di';
 import { toConcrete, TimeUtil } from '@travetto/runtime';
 
@@ -11,7 +10,6 @@ import type { AuthConfig } from './config.ts';
 
 @Injectable()
 export class AuthService {
-
   @Inject()
   authContext: AuthContext;
 
@@ -60,10 +58,11 @@ export class AuthService {
           this.authContext.authenticatorState = await authenticator.getState(context);
         }
 
-        if (!principal) { // Multi-step login process
+        if (!principal) {
+          // Multi-step login process
           return;
         }
-        return this.authContext.principal = (await this.authorizer?.authorize(principal)) ?? principal;
+        return (this.authContext.principal = (await this.authorizer?.authorize(principal)) ?? principal);
       } catch (error) {
         if (!(error instanceof Error)) {
           throw error;
@@ -94,10 +93,12 @@ export class AuthService {
 
     principal.issuedAt ??= new Date();
 
-    if (principal.expiresAt && this.config.maxAgeMs && this.config.rollingRenew) { // Session behavior
+    if (principal.expiresAt && this.config.maxAgeMs && this.config.rollingRenew) {
+      // Session behavior
       const end = principal.expiresAt.getTime();
       const midPoint = end - this.config.maxAgeMs / 2;
-      if (Date.now() > midPoint) { // If we are past the half way mark, renew the token
+      if (Date.now() > midPoint) {
+        // If we are past the half way mark, renew the token
         principal.issuedAt = new Date();
         principal.expiresAt = TimeUtil.fromNow(this.config.maxAgeMs); // This will trigger a re-send
       }
