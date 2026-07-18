@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/consistent-type-assertions */
 import type ts from 'typescript';
 
 let state: typeof ts | undefined;

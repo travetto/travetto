@@ -3,7 +3,6 @@ import { TypedObject } from '@travetto/runtime';
 /**
  * List of common regular expressions for fields
  */
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const [CommonRegex, CommonRegexToName] = (() => {
   const regexToName = new Map<RegExp, string>();
   const regexes = {

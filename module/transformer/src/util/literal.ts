@@ -26,7 +26,6 @@ export class LiteralUtil {
    */
   static isLiteralType(type: ts.Type): type is ts.LiteralType {
     const flags = type.getFlags();
-    // eslint-disable-next-line no-bitwise
     return (flags & (ts.TypeFlags.BooleanLiteral | ts.TypeFlags.NumberLiteral | ts.TypeFlags.StringLiteral)) > 0;
   }
 

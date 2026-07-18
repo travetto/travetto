@@ -11,7 +11,6 @@ class SimpleTest {
     });
 
     await assert.doesNotReject(async () => {
-      // eslint-disable-next-line
       let a = 5;
     });
   }

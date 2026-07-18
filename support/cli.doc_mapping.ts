@@ -4,14 +4,13 @@ import { PackageUtil } from '@travetto/manifest';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 
-type DocModMapping = { simpleName: string, name: string, displayName: string, folder: string, description?: string };
+type DocModMapping = { simpleName: string; name: string; displayName: string; folder: string; description?: string };
 
 /**
  * Generate module mapping for @travetto/doc
  */
 @CliCommand()
 export class DocModuleMapping {
-
   /** Output file for mapping */
   output = 'module/doc/src/mapping/module.ts';
 
@@ -41,7 +40,7 @@ export class DocModuleMapping {
       text.push(`
   ${module.simpleName}: {
     name: '${module.name}', folder: '${module.name}', displayName: '${module.displayName}',
-    description: '${module.description?.replaceAll("'", '\\\'')}'
+    description: '${module.description?.replaceAll("'", "\\'")}'
   }`);
     }
 

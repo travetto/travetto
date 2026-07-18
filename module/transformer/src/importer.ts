@@ -50,7 +50,6 @@ export class ImportManager {
         const type = this.#resolver.getType(element.name);
         const objFlags = DeclarationUtil.getObjectFlags(type);
         const typeFlags = type.getFlags();
-        // eslint-disable-next-line no-bitwise
         if (!(objFlags & (ts.SymbolFlags.Type | ts.SymbolFlags.Interface)) || !(typeFlags & ts.TypeFlags.Any)) {
           newBindings.push(element);
         }
@@ -88,10 +87,8 @@ export class ImportManager {
 
       const type = ManifestModuleUtil.getFileType(specText);
       if (type === 'js' || type === 'ts') {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         return LiteralUtil.fromLiteral(this.factory, ManifestModuleUtil.withOutputExtension(specText)) as unknown as T;
       } else {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         return LiteralUtil.fromLiteral(this.factory, `${specText}${ManifestModuleUtil.OUTPUT_EXT}`) as unknown as T;
       }
     }

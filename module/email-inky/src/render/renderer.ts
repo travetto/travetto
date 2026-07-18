@@ -51,7 +51,6 @@ export class InkyRenderer {
           stack,
           context: ctx
         };
-        // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
         state.createState = (key, props) => this.createState(ctx, renderer, state, key, props);
         // @ts-expect-error
         return renderer[name](state);

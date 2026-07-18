@@ -1,4 +1,3 @@
-/* eslint-disable no-bitwise */
 import ts from 'typescript';
 
 import { path, ManifestModuleUtil } from '@travetto/manifest';

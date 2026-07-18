@@ -32,7 +32,6 @@ export const text = (
       automatically colorize:
       <c.Code
         title="Sample Template Usage"
-        // eslint-disable-next-line no-template-curly-in-string
         src='cliTpl`Build finished: status=${{success: "complete"}}, output=${{path: "/build.zip"}}`'
       />
       This would then produce colorized output based on the palette, and the terminal capabilities. <br />

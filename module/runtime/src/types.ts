@@ -57,7 +57,6 @@ export const TypedObject: {
 export const safeAssign = <T extends {}, U extends {}>(target: T, ...sources: U[]): T & U => Object.assign(target, ...sources);
 
 export function castTo<T>(input: unknown): T {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return input as T;
 }
 

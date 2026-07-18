@@ -231,11 +231,11 @@ const OPERATIONS: LlmOperation[] = [
     excluded: true
   },
   {
-    id: 'excluded-eslint-profile',
+    id: 'excluded-lint-profile',
     category: 'quality',
-    title: 'ESLint profile generation (excluded)',
+    title: 'Lint profile generation (excluded)',
     summary: 'Excluded by scope decision.',
-    requiredModules: ['@travetto/eslint'],
+    requiredModules: ['@travetto/lint'],
     optionalModules: [],
     excluded: true
   },

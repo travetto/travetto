@@ -128,7 +128,6 @@ export class CoreUtil {
    * Is declaration abstract?
    */
   static isAbstract(node: ts.Declaration): boolean {
-    // eslint-disable-next-line no-bitwise
     return !!(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Abstract);
   }
 }

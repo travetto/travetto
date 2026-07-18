@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import { d, c, type DocJSXElementByFn, type DocJSXElement, DocFileUtil } from '@travetto/doc';
 import { Config } from '@travetto/config';
-import { Runtime, toConcrete } from '@travetto/runtime';
+import { castKey, Runtime, toConcrete } from '@travetto/runtime';
 
 import type { ModelBasicSupport } from '../src/types/basic.ts';
 import type { ModelBlobSupport } from '../src/types/blob.ts';
@@ -27,8 +27,7 @@ export const ModelTypes = (fn: Function): DocJSXElement[] => {
   for (const [, key] of content.matchAll(/Model([A-Za-z]+)Support/g)) {
     if (!seen.has(key) && key in Links) {
       seen.add(key);
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const link = Links[key as keyof typeof Links];
+      const link = Links[castKey(key)];
       found.push(link);
     }
   }

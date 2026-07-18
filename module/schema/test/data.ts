@@ -199,16 +199,13 @@ class DataUtilTests {
   @Test()
   verifyPrimitive() {
     assert(DataUtil.isPrimitive(5));
-    // eslint-disable-next-line no-new-wrappers
     assert(DataUtil.isPrimitive(new String('5')));
     assert(DataUtil.isPrimitive(String('5')));
     assert(DataUtil.isPrimitive('5'));
-    // eslint-disable-next-line no-new-wrappers
     assert(DataUtil.isPrimitive(new Number(5)));
     assert(DataUtil.isPrimitive(Number(5)));
 
     assert(DataUtil.isPrimitive(false));
-    // eslint-disable-next-line no-new-wrappers
     assert(DataUtil.isPrimitive(new Boolean('true')));
     assert(DataUtil.isPrimitive(Boolean('false')));
 

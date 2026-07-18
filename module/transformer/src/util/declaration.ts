@@ -23,7 +23,6 @@ export class DeclarationUtil {
    * See if a declaration is public
    */
   static isPublic(node: ts.Declaration): boolean {
-    // eslint-disable-next-line no-bitwise
     return (
       !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.NonPublicAccessibilityModifier) &&
       (!isNamed(node) || !ts.isPrivateIdentifier(node.name))
@@ -66,7 +65,6 @@ export class DeclarationUtil {
    */
   static getObjectFlags(type: ts.Type): ts.ObjectFlags {
     const _ts: typeof ts & { getObjectFlags?(node: ts.Type): ts.ObjectFlags } = ts;
-    // eslint-disable-next-line no-bitwise
     return _ts.getObjectFlags!(type) & ~ts.NodeFlags.ThisNodeOrAnySubNodesHasError;
   }
 

@@ -3,7 +3,6 @@ import type { CompilerEvent, CompilerEventPayload, CompilerEventType } from './t
 const VALID_EVENT_TYPES = new Set<CompilerEventType>(['change', 'log', 'progress', 'state', 'all', 'file']);
 
 export class EventUtil {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   static isComplilerEventType = (value: string): value is CompilerEventType => VALID_EVENT_TYPES.has(value as CompilerEventType);
 
   static isCompilerEvent = (value: unknown): value is CompilerEvent =>

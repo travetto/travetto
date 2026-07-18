@@ -46,9 +46,7 @@ export class Util {
     const bytes = crypto.getRandomValues(new Uint8Array(Math.ceil(length / 2)));
     if (length === 32) {
       // Make valid uuid-v4
-      // eslint-disable-next-line no-bitwise
       bytes[6] = (bytes[6] & 0x0f) | 0x40;
-      // eslint-disable-next-line no-bitwise
       bytes[8] = (bytes[8] & 0x3f) | 0x80;
     }
     return bytes.toHex().substring(0, length);

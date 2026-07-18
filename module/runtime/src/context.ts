@@ -28,7 +28,6 @@ class $Runtime {
 
   /** The role we are running as */
   get role(): Role {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return (Env.TRV_ROLE.value as Role) ?? 'std';
   }
 

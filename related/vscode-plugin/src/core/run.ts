@@ -6,7 +6,6 @@ import type { EnvDict, LaunchConfig } from './types.ts';
 import { Workspace } from './workspace.ts';
 import { Log } from './log.ts';
 
-// eslint-disable-next-line no-template-curly-in-string
 const WORKSPACE = '${workspaceFolder}';
 
 const logger = new Log('run')

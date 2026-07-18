@@ -18,7 +18,6 @@ export class VisitorFactory<S extends State = State> {
     if (ts.isConstructorDeclaration(node)) {
       return 'constructor';
     } else if (ts.isMethodDeclaration(node)) {
-      // eslint-disable-next-line no-bitwise
       return ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Static ? 'static-method' : 'method';
     } else if (ts.isPropertyDeclaration(node)) {
       return 'property';

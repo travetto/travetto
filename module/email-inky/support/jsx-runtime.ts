@@ -84,7 +84,6 @@ export function isJSXElement(value: unknown): value is JSXElement {
 
 createFrag = Fragment;
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace JSX {
   export interface Element extends JSXElement {}
   export interface IntrinsicAttributes extends JSXProps {

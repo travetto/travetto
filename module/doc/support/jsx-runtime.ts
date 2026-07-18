@@ -58,7 +58,6 @@ export function isJSXElement(value: unknown): value is JSXElement {
   return value !== undefined && value !== null && typeof value === 'object' && JSXRuntimeTag in value;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace JSX {
   export interface Element extends JSXElement {}
   export interface IntrinsicAttributes extends JSXProps {}

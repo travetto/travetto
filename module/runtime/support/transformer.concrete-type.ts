@@ -24,7 +24,6 @@ export class ConcreteTransformer {
     const final = typeof name === 'string' ? name : name.getText();
 
     const declaration = state.factory.createFunctionDeclaration(
-      // eslint-disable-next-line no-bitwise
       state.factory.createModifiersFromModifierFlags(ts.ModifierFlags.Export | ts.ModifierFlags.Const),
       undefined,
       `${final}$Concrete`,
