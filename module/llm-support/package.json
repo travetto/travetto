@@ -23,9 +23,7 @@
     "__index__.ts",
     "src",
     "support",
-    "resources",
-    "generated",
-    "llm"
+    "resources"
   ],
   "repository": {
     "url": "git+https://github.com/travetto/travetto.git",

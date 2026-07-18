@@ -93,12 +93,8 @@ export class LlmSupportInlineCommand implements CliCommandShape {
   async main(): Promise<void> {
     const mod = RuntimeIndex.getModule('@travetto/llm-support')!;
     const sourceDir = path.resolve(mod.sourcePath, 'resources', 'snippets');
-    const targetDir = path.resolve(mod.sourcePath, 'generated', 'snippets');
 
-    console.log(`Compiling snippets from ${sourceDir} to ${targetDir}`);
-
-    await fs.rm(targetDir, { recursive: true, force: true });
-    await fs.mkdir(targetDir, { recursive: true });
+    console.log(`Compiling snippets in ${sourceDir}`);
 
     if (!(await exists(sourceDir))) {
       console.log(`Source snippets directory does not exist: ${sourceDir}`);
@@ -106,11 +102,19 @@ export class LlmSupportInlineCommand implements CliCommandShape {
     }
 
     const files = await fs.readdir(sourceDir);
-    const mdFiles = files.filter(file => file.endsWith('.md'));
+
+    // Clean up old generated files
+    for (const file of files) {
+      if (file.endsWith('.generated.md')) {
+        await fs.rm(path.join(sourceDir, file), { force: true });
+      }
+    }
+
+    const mdFiles = files.filter(file => file.endsWith('.md') && !file.endsWith('.generated.md'));
 
     for (const file of mdFiles) {
       const sourceFile = path.join(sourceDir, file);
-      const targetFile = path.join(targetDir, file);
+      const targetFile = path.join(sourceDir, file.replace(/\.md$/, '.generated.md'));
 
       const content = await fs.readFile(sourceFile, 'utf8');
       const match = content.match(/<!--\s*json\s*([\s\S]*?)\s*-->/i);

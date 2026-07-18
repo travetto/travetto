@@ -1,4 +1,3 @@
-import fsSync from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
@@ -9,10 +8,6 @@ import { type RecommendationQuery, type SnippetSource, SnippetSourceSchema } fro
 
 function snippetDirectory(): string {
   const mod = RuntimeIndex.getModule('@travetto/llm-support')!;
-  const generated = path.resolve(mod.sourcePath, 'generated', 'snippets');
-  if (fsSync.existsSync(generated)) {
-    return generated;
-  }
   return path.resolve(mod.sourcePath, 'resources', 'snippets');
 }
 
@@ -35,8 +30,23 @@ async function loadSnippets(): Promise<SnippetSource[]> {
   try {
     const dir = snippetDirectory();
     const files = await fs.readdir(dir);
-    const filtered = files.filter(file => file.endsWith('.md')).sort();
-    return Promise.all(filtered.map(file => loadSnippet(path.join(dir, file))));
+    const mdFiles = files.filter(file => file.endsWith('.md'));
+    const resolvedFiles = new Set<string>();
+
+    for (const file of mdFiles) {
+      if (file.endsWith('.generated.md')) {
+        resolvedFiles.add(file);
+        resolvedFiles.delete(file.replace(/\.generated\.md$/, '.md'));
+      } else {
+        const genName = file.replace(/\.md$/, '.generated.md');
+        if (!mdFiles.includes(genName)) {
+          resolvedFiles.add(file);
+        }
+      }
+    }
+
+    const sorted = [...resolvedFiles].sort();
+    return Promise.all(sorted.map(file => loadSnippet(path.join(dir, file))));
   } catch (err) {
     if (isErrnoException(err) && (err.code === 'ENOENT' || err.code === 'ERR_MODULE_NOT_FOUND')) {
       return [];

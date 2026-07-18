@@ -31,10 +31,10 @@ email-local-context.json
 
 # Assets
 **/support/fixtures/logo
+**/*.generated.*
 
 # Specific
 module/scaffold/**/eslintrc.json
 **/doc-exec/tsconfig.json
-module/llm-support/generated/
 
 .tmp*/
