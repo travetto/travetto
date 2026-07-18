@@ -32,6 +32,7 @@ Commands:
   lint                  Run Biome linter/formatter for the workspace or changed files.
   lint:register         Generate the workspace Biome configuration entry file.
   llm:support:execute   Execute llm-support operations with dry-run by default.
+  llm:support:inline    Inline and compile reference snippets for llm-support packaging.
   llm:support:mcp       Minimal MCP stdio server for llm-support tools.
   llm:support:plan      Build plan-first execution details for llm-support operations.
   llm:support:recommend Recommend llm-support bundles, workflows, and operations.

@@ -2,7 +2,7 @@
 {
   "sourceId": "core-email-nodemailer-provider",
   "repositoryId": "travetto",
-  "filePath": "module/email-nodemailer/src/service.ts",
+  "filePath": "module/email-nodemailer/src/nodemailer.ts",
   "capabilityTags": ["email", "provider", "transport", "nodemailer"],
   "operationIds": ["email-transport-provider", "email-send-flow"],
   "applicability": ["framework-native"],
@@ -14,7 +14,7 @@
 
 # core-email-nodemailer-provider
 
-- Source: `module/email-nodemailer/src/service.ts`
+- Source: `module/email-nodemailer/src/nodemailer.ts`
 - Capability tags: email, provider, transport, nodemailer
 - Applicability: framework-native
 - Notes:

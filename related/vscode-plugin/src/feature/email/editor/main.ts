@@ -1,14 +1,14 @@
 import type { ChildProcess } from 'node:child_process';
+
 import * as vscode from 'vscode';
 
-import { CodecUtil } from '@travetto/runtime';
 import type { EmailCompiled } from '@travetto/email';
+import { CodecUtil } from '@travetto/runtime';
 
 import type { EditorResponse } from '@travetto/email-compiler/support/bin/types.ts';
 
 import { Activatible } from '../../../core/activation.ts';
 import { Workspace } from '../../../core/workspace.ts';
-
 import { BaseFeature } from '../../base.ts';
 
 const isResource = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml|html)$/.test(file) && !/[.]compiled[.]/.test(file);
@@ -19,7 +19,6 @@ const isTemplate = (file?: string): boolean => /[.]email[.]tsx$/.test(file ?? ''
  */
 @Activatible({ module: '@travetto/email-compiler', command: 'editor' })
 export class EmailCompilerFeature extends BaseFeature {
-
   #server: ChildProcess | undefined;
   #format?: 'text' | 'html';
   #activeFile?: string;
@@ -27,7 +26,9 @@ export class EmailCompilerFeature extends BaseFeature {
   #panel?: vscode.WebviewPanel;
 
   #stopServer(): void {
-    if (!this.#server) { return; }
+    if (!this.#server) {
+      return;
+    }
 
     this.log.info('Stopping server');
     this.#server.kill();
@@ -35,42 +36,46 @@ export class EmailCompilerFeature extends BaseFeature {
   }
 
   #startServer(): void {
-    if (this.#server || Workspace.compilerState !== 'watch-start') { return; }
+    if (this.#server || Workspace.compilerState !== 'watch-start') {
+      return;
+    }
 
     this.log.info('Starting server');
     this.#server = Workspace.spawnPackageCommand('trv', ['email:editor'], {
       cwd: Workspace.path,
       stdio: ['pipe', 'pipe', 'pipe', 'ipc']
-    })
-      .on('message', async (event: EditorResponse) => {
-        switch (event.type) {
-          case 'compiled': {
-            if (event.file === this.#activeFile) {
-              this.setActiveContent(event.content);
-            }
-            break;
+    }).on('message', async (event: EditorResponse) => {
+      switch (event.type) {
+        case 'compiled': {
+          if (event.file === this.#activeFile) {
+            this.setActiveContent(event.content);
           }
-          case 'compiled-failed': return this.log.info('Email template', event);
-          case 'configured': {
-            const doc = await vscode.workspace.openTextDocument(event.file);
-            await vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside);
-            break;
-          }
-          case 'sent': return Workspace.showEphemeralMessage(`Message Sent to ${event.to}`);
-          case 'sent-failed': return vscode.window.showErrorMessage(`Message not Sent. ${event.message}`);
-          case 'init': {
-            if (vscode.window.activeTextEditor) {
-              this.setActiveFile(vscode.window.activeTextEditor.document.fileName);
-            }
+          break;
+        }
+        case 'compiled-failed':
+          return this.log.info('Email template', event);
+        case 'configured': {
+          const doc = await vscode.workspace.openTextDocument(event.file);
+          await vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside);
+          break;
+        }
+        case 'sent':
+          return Workspace.showEphemeralMessage(`Message Sent to ${event.to}`);
+        case 'sent-failed':
+          return vscode.window.showErrorMessage(`Message not Sent. ${event.message}`);
+        case 'init': {
+          if (vscode.window.activeTextEditor) {
+            this.setActiveFile(vscode.window.activeTextEditor.document.fileName);
           }
         }
-      });
+      }
+    });
 
     if (this.#server.stderr) {
-      CodecUtil.readLines(this.#server.stderr, (line) => this.log.debug(`> stderr > ${line.trimEnd()}`));
+      CodecUtil.readLines(this.#server.stderr, line => this.log.debug(`> stderr > ${line.trimEnd()}`));
     }
     if (this.#server.stdout) {
-      CodecUtil.readLines(this.#server.stdout, (line) => this.log.debug(`> stdout > ${line.trimEnd()}`));
+      CodecUtil.readLines(this.#server.stdout, line => this.log.debug(`> stdout > ${line.trimEnd()}`));
     }
   }
 
@@ -84,7 +89,9 @@ export class EmailCompilerFeature extends BaseFeature {
         viewColumn: vscode.ViewColumn.Beside,
         preserveFocus: true
       });
-      this.#panel.onDidDispose(() => { this.#panel = undefined; });
+      this.#panel.onDidDispose(() => {
+        this.#panel = undefined;
+      });
     }
     if (!this.#panel.visible) {
       this.#panel.reveal(vscode.ViewColumn.Beside, true);
@@ -121,7 +128,9 @@ export class EmailCompilerFeature extends BaseFeature {
   }
 
   async openPreview(format: 'html' | 'text'): Promise<void> {
-    if (!this.#activeFile) { return; }
+    if (!this.#activeFile) {
+      return;
+    }
 
     await this.getPanel();
 
@@ -157,9 +166,8 @@ export class EmailCompilerFeature extends BaseFeature {
     vscode.workspace.onDidSaveTextDocument(document => this.savedFile(document), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(editor => this.activeEditorChanged(editor), null, context.subscriptions);
 
-    Workspace.onCompilerState(state => state === 'watch-start' ?
-      this.activeEditorChanged(vscode.window.activeTextEditor) :
-      this.#stopServer()
+    Workspace.onCompilerState(state =>
+      state === 'watch-start' ? this.activeEditorChanged(vscode.window.activeTextEditor) : this.#stopServer()
     );
 
     this.register('preview-html', () => this.openPreview('html'));

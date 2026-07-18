@@ -31,6 +31,7 @@ email-local-context.json
 
 # Assets
 **/support/fixtures/logo
+**/*.generated.*
 
 # Specific
 module/scaffold/**/eslintrc.json

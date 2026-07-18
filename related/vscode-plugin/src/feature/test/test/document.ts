@@ -1,12 +1,20 @@
 import type * as vscode from 'vscode';
 
 import { TypedObject } from '@travetto/runtime';
+import type {
+  Assertion,
+  SuiteConfig,
+  SuiteResult,
+  TestConfig,
+  TestRemoveEvent,
+  TestResult,
+  TestStatus,
+  TestWatchEvent
+} from '@travetto/test';
 
-import type { Assertion, TestResult, SuiteResult, SuiteConfig, TestConfig, TestWatchEvent, TestStatus, TestRemoveEvent } from '@travetto/test';
-
-import { Decorations } from './decoration.ts';
-import type { AllState, TestState, ResultState, SuiteState, TestLevel, Result } from './types.ts';
 import { Workspace } from '../../../core/workspace.ts';
+import { Decorations } from './decoration.ts';
+import type { AllState, Result, ResultState, SuiteState, TestLevel, TestState } from './types.ts';
 
 type TestItem = Assertion | TestResult | TestConfig | SuiteResult | SuiteConfig;
 type KeyInput = string | [string, string] | readonly [string, string];
@@ -21,7 +29,6 @@ const isSuiteResult = (level: string, result?: Result<TestItem>): result is Resu
  * Test results manager
  */
 export class DocumentResultsManager {
-
   #results: AllState = { suite: {}, test: {} };
   #failedAssertions: Record<number, Assertion> = {};
   #document: vscode.TextDocument;
@@ -120,10 +127,14 @@ export class DocumentResultsManager {
     }
     const existing = this.#results[level][key];
     if (existing) {
-      Object.values(existing.styles).forEach(style => { style.dispose(); });
+      Object.values(existing.styles).forEach(style => {
+        style.dispose();
+      });
       if (isTestState(level, existing)) {
         existing.logStyle.dispose();
-        Object.values(existing.assertStyles).forEach(style => { style.dispose(); });
+        Object.values(existing.assertStyles).forEach(style => {
+          style.dispose();
+        });
       }
       delete this.#results[level][key];
     }
@@ -139,7 +150,7 @@ export class DocumentResultsManager {
       errored: Decorations.buildStyle(level, 'errored'),
       passed: Decorations.buildStyle(level, 'passed'),
       unknown: Decorations.buildStyle(level, 'unknown'),
-      skipped: Decorations.buildStyle(level, 'skipped'),
+      skipped: Decorations.buildStyle(level, 'skipped')
     };
   }
 
@@ -160,10 +171,14 @@ export class DocumentResultsManager {
     };
 
     if (existing) {
-      Object.values(existing.styles).forEach(style => { style.dispose(); });
+      Object.values(existing.styles).forEach(style => {
+        style.dispose();
+      });
       if (isTestState(level, existing)) {
         existing.logStyle.dispose();
-        Object.values(existing.assertStyles).forEach(style => { style.dispose(); });
+        Object.values(existing.assertStyles).forEach(style => {
+          style.dispose();
+        });
       }
     }
 
@@ -193,12 +208,18 @@ export class DocumentResultsManager {
    */
   dispose(): void {
     for (const suite of Object.values(this.#results.suite)) {
-      for (const style of Object.values(suite.styles)) { style.dispose(); }
+      for (const style of Object.values(suite.styles)) {
+        style.dispose();
+      }
     }
     for (const test of Object.values(this.#results.test)) {
       test.logStyle.dispose();
-      for (const style of Object.values(test.styles)) { style.dispose(); }
-      for (const style of Object.values(test.assertStyles)) { style.dispose(); }
+      for (const style of Object.values(test.styles)) {
+        style.dispose();
+      }
+      for (const style of Object.values(test.assertStyles)) {
+        style.dispose();
+      }
     }
   }
 
@@ -296,16 +317,19 @@ export class DocumentResultsManager {
   onEvent(event: TestWatchEvent): void {
     switch (event.type) {
       case 'ready':
-      case 'log': break;
-      case 'removeTest': this.onTestRemove(event); break;
-      case 'assertion': this.onAssertion(event.assertion); break;
-      case 'suite': (event.phase === 'before') ?
-        this.beforeSuite(event.suite) :
-        this.afterSuite(event.suite);
+      case 'log':
         break;
-      case 'test': (event.phase === 'before') ?
-        this.beforeTest(event.test) :
-        this.afterTest(event.test);
+      case 'removeTest':
+        this.onTestRemove(event);
+        break;
+      case 'assertion':
+        this.onAssertion(event.assertion);
+        break;
+      case 'suite':
+        event.phase === 'before' ? this.beforeSuite(event.suite) : this.afterSuite(event.suite);
+        break;
+      case 'test':
+        event.phase === 'before' ? this.beforeTest(event.test) : this.afterTest(event.test);
         break;
     }
   }

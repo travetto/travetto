@@ -2,16 +2,16 @@ import * as vscode from 'vscode';
 
 import { Env, JSONUtil } from '@travetto/runtime';
 
+import { Log } from './log.ts';
 import type { EnvDict, LaunchConfig } from './types.ts';
 import { Workspace } from './workspace.ts';
-import { Log } from './log.ts';
 
+// biome-ignore lint/suspicious/noTemplateCurlyInString: Should be correct
 const WORKSPACE = '${workspaceFolder}';
 
-const logger = new Log('run')
+const logger = new Log('run');
 
 export class RunUtil {
-
   static #baseEnv: EnvDict = { ...Env.DEBUG.export('') };
 
   static buildEnv(module?: string): EnvDict {
@@ -32,7 +32,7 @@ export class RunUtil {
   /** Generate debug launch config */
   static buildDebugConfig(input: LaunchConfig): vscode.DebugConfiguration {
     if (input.useCli) {
-      input.args = [input.main, ...input.args ?? []];
+      input.args = [input.main, ...(input.args ?? [])];
       input.main = Workspace.workspaceIndex.resolvePackageCommand('trv');
     }
 
@@ -70,8 +70,8 @@ export class RunUtil {
       args: (input.args ?? []).map(arg => `${arg}`),
       env: {
         ...this.buildEnv(input.module),
-        ...input.env ?? {},
-      },
+        ...(input.env ?? {})
+      }
     };
 
     logger.debug('Running with configuration', config);

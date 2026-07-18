@@ -69,7 +69,14 @@ class LlmSupportExecuteTest {
 
     assert(output.artifacts.some(item => item.status === 'created'));
 
-    await assertFilesExist(loader, ['package.json', 'resources/application.yml', 'src/service/home.ts', 'src/web/home.ts']);
+    await assertFilesExist(loader, [
+      'package.json',
+      'resources/application.yml',
+      'src/service/home.ts',
+      'src/web/home.ts',
+      '.agents/AGENTS.md',
+      '.cursorrules'
+    ]);
 
     const pkgRaw: {
       name?: string;
@@ -107,7 +114,9 @@ class LlmSupportExecuteTest {
       'packages/app/package.json',
       'packages/app/resources/application.yml',
       'packages/app/src/service/home.ts',
-      'packages/app/src/web/home.ts'
+      'packages/app/src/web/home.ts',
+      '.agents/AGENTS.md',
+      '.cursorrules'
     ]);
 
     const rootPkgRaw: {
@@ -148,7 +157,13 @@ class LlmSupportExecuteTest {
 
     assert(output.artifacts.some(item => item.status === 'created'));
 
-    await assertFilesExist(loader, ['package.json', 'packages/api/package.json', 'packages/api/resources/application.yml']);
+    await assertFilesExist(loader, [
+      'package.json',
+      'packages/api/package.json',
+      'packages/api/resources/application.yml',
+      '.agents/AGENTS.md',
+      '.cursorrules'
+    ]);
 
     const rootPkgRaw: {
       scripts?: Record<string, string>;
@@ -383,7 +398,7 @@ class LlmSupportExecuteTest {
     ]);
 
     const pkg = await loader.readUTF8('package.json');
-    assert(pkg.includes('trv eslint:register'));
+    assert(pkg.includes('trv lint:register'));
   }
 
   @Test()
@@ -420,8 +435,8 @@ class LlmSupportExecuteTest {
 
     assert(merged.scripts?.test === 'node --test');
     assert(merged.scripts?.lint === 'eslint .');
-    assert(merged.scripts?.['lint:register'] === 'trv eslint:register');
+    assert(merged.scripts?.['lint:register'] === 'trv lint:register');
     assert(merged.devDependencies?.typescript === '^5.0.0');
-    assert(Boolean(merged.devDependencies?.['@travetto/eslint']));
+    assert(Boolean(merged.devDependencies?.['@travetto/lint']));
   }
 }

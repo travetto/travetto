@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 
+import { CliCommand } from '@travetto/cli';
 import { PackageUtil } from '@travetto/manifest';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
-import { CliCommand } from '@travetto/cli';
 
 type DocModMapping = { simpleName: string; name: string; displayName: string; folder: string; description?: string };
 

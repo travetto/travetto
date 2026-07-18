@@ -3,15 +3,8 @@
   "compilerOptions": {
     "rootDir": "."
   },
-  "exclude": [
-    "related/travetto*/**",
-    "related/vscode*/**",
-    "archived/**"
-  ],
+  "exclude": ["related/travetto*/**", "related/vscode*/**", "archived/**"],
   "watchOptions": {
-    "excludeDirectories": [
-      "**/.angular",
-      "**/out"
-    ]
+    "excludeDirectories": ["**/.angular", "**/out"]
   }
 }

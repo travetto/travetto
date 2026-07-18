@@ -18,8 +18,18 @@ export const text = (
         <li>Run {d.input('trv llm:support:recommend')} to choose a bundle, workflow, category, or snippet set.</li>
         <li>Run {d.input('trv llm:support:plan')} to preview the files and changes that would be produced.</li>
         <li>Run {d.input('trv llm:support:execute')} to apply the selected operations, with dry-run behavior available by default.</li>
+        <li>Run {d.input('trv lint --fix')} to clean up formatting and styles on the generated changes.</li>
       </ol>
-      <c.Code language="bash" title="Recommended flow" src="trv llm:support:recommend\ntrv llm:support:plan\ntrv llm:support:execute" />
+      <c.Code
+        language="bash"
+        title="Recommended flow"
+        src="
+trv llm:support:recommend
+trv llm:support:plan
+trv llm:support:execute --apply
+trv lint --fix
+      "
+      />
       The recommendation command supports filtering by {d.input('bundles')}, {d.input('workflows')}, {d.input('categories')}, and{' '}
       {d.input('snippet-tags')}. The plan command focuses on selected {d.input('operations')} and produces file-level change steps.
       Execution supports dry-run, overwrite, target directory selection, monorepo bootstrap selection ({d.input('--monorepo')}), and several

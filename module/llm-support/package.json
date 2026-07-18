@@ -16,12 +16,14 @@
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
+  "scripts": {
+    "prepack": "trv llm:support:inline"
+  },
   "files": [
     "__index__.ts",
     "src",
     "support",
-    "resources",
-    "llm"
+    "resources"
   ],
   "repository": {
     "url": "git+https://github.com/travetto/travetto.git",

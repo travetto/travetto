@@ -4,9 +4,8 @@ import type { TestWatchEvent } from '@travetto/test';
 
 import type { Log } from '../../../core/log.ts';
 import { Workspace } from '../../../core/workspace.ts';
-
-import { DocumentResultsManager } from './document.ts';
 import { DiagnosticManager } from './diagnostic.ts';
+import { DocumentResultsManager } from './document.ts';
 
 /**
  * Manages results for the entire workspace, including the statusbar
@@ -45,9 +44,12 @@ export class WorkspaceResultsManager {
       return this.getLocation(target.import);
     } else {
       switch (target.type) {
-        case 'test': return this.getLocation(target.test.import);
-        case 'suite': return this.getLocation(target.suite.import);
-        case 'assertion': return this.getLocation(target.assertion.import);
+        case 'test':
+          return this.getLocation(target.test.import);
+        case 'suite':
+          return this.getLocation(target.suite.import);
+        case 'assertion':
+          return this.getLocation(target.assertion.import);
       }
     }
   }

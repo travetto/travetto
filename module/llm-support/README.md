@@ -21,10 +21,14 @@ The recommended flow is intentionally plan-first:
    1. Run `trv llm:support:recommend` to choose a bundle, workflow, category, or snippet set.
    1. Run `trv llm:support:plan` to preview the files and changes that would be produced.
    1. Run `trv llm:support:execute` to apply the selected operations, with dry-run behavior available by default.
+   1. Run `trv lint --fix` to clean up formatting and styles on the generated changes.
 
 **Code: Recommended flow**
 ```bash
-trv llm:support:recommend\ntrv llm:support:plan\ntrv llm:support:execute
+trv llm:support:recommend
+trv llm:support:plan
+trv llm:support:execute --apply
+trv lint --fix
 ```
 
 The recommendation command supports filtering by `bundles`, `workflows`, `categories`, and `snippet-tags`. The plan command focuses on selected `operations` and produces file-level change steps. Execution supports dry-run, overwrite, target directory selection, monorepo bootstrap selection (`--monorepo`), and several operation-specific hints such as route, controller, service, model, and email naming.

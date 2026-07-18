@@ -18,8 +18,7 @@ export interface ResultState<T> extends Omit<Partial<Result<T>>, 'source'> {
   source: T;
 }
 
-export interface SuiteState extends ResultState<SuiteConfig | SuiteResult> {
-}
+export interface SuiteState extends ResultState<SuiteConfig | SuiteResult> {}
 
 export interface TestState extends ResultState<TestConfig | TestResult> {
   logStyle: vscode.TextEditorDecorationType;

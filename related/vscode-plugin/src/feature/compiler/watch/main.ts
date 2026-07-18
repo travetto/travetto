@@ -1,19 +1,26 @@
-import * as vscode from 'vscode';
 import type { ChildProcess } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
+import * as vscode from 'vscode';
+
 import { CodecUtil, Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
 
-import type { CompilerEvent, CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/src/types.ts';
+import type {
+  CompilerEvent,
+  CompilerLogEvent,
+  CompilerProgressEvent,
+  CompilerStateEvent,
+  CompilerStateType
+} from '@travetto/compiler/src/types.ts';
 
-import { BaseFeature } from '../../base.ts';
+import { Activatible } from '../../../core/activation.ts';
 import { Log } from '../../../core/log.ts';
 import { Workspace } from '../../../core/workspace.ts';
-import { Activatible } from '../../../core/activation.ts';
+import { BaseFeature } from '../../base.ts';
 
-type ProgressBar = vscode.Progress<{ message: string, increment?: number }>;
-type ProgressState = { previous: number, bar: ProgressBar, cleanup: () => void };
+type ProgressBar = vscode.Progress<{ message: string; increment?: number }>;
+type ProgressState = { previous: number; bar: ProgressBar; cleanup: () => void };
 
 const SCOPE_MAX = 15;
 const SUB_LOG_REGEX = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(.\d{3})?Z?\s+(info|error|debug|warn)\s*/;
@@ -40,7 +47,7 @@ export class CompilerWatchFeature extends BaseFeature {
 
     const title = type.charAt(0).toUpperCase() + type.substring(1);
 
-    return this.#progress[type] = {
+    return (this.#progress[type] = {
       previous: 0,
       cleanup: (): void => {
         signal.removeEventListener('abort', kill);
@@ -48,15 +55,12 @@ export class CompilerWatchFeature extends BaseFeature {
         complete.resolve();
       },
       bar: await new Promise<ProgressBar>(resolve =>
-        vscode.window.withProgress(
-          { location: vscode.ProgressLocation.Notification, cancellable: false, title },
-          progress => {
-            resolve(progress);
-            return complete.promise;
-          }
-        )
+        vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, cancellable: false, title }, progress => {
+          resolve(progress);
+          return complete.promise;
+        })
       )
-    };
+    });
   }
 
   /**
@@ -68,7 +72,7 @@ export class CompilerWatchFeature extends BaseFeature {
     this.#log.trace('Running Compiler', 'trvc', command, args);
     const starting = command === 'start' || command === 'restart';
     this.#started ||= starting;
-    const subProcess = Workspace.spawnPackageCommand('trvc', [command, ...args ?? []], {
+    const subProcess = Workspace.spawnPackageCommand('trvc', [command, ...(args ?? [])], {
       cwd: Workspace.path,
       signal,
       stdio: ['pipe', starting ? 'ignore' : 'pipe', 'pipe'],
@@ -77,7 +81,7 @@ export class CompilerWatchFeature extends BaseFeature {
         ...Env.TRV_QUIET.export(true),
         ...(debug ? Env.TRV_BUILD.export('debug') : {})
       }
-    }).on('exit', (code) => {
+    }).on('exit', code => {
       this.#started &&= !starting;
       this.#log.debug('Finished command', command, 'with', code);
     });
@@ -101,12 +105,12 @@ export class CompilerWatchFeature extends BaseFeature {
     try {
       const event: CompilerStateEvent = JSONUtil.fromUTF8(stdout);
       return event.state;
-    } catch { }
+    } catch {}
   }
 
   async #trackConnected(): Promise<void> {
     while (!this.#shuttingDown) {
-      const controller = this.#stateController = new AbortController();
+      const controller = (this.#stateController = new AbortController());
       let connected = false;
       let state: string | undefined;
       try {
@@ -118,9 +122,15 @@ export class CompilerWatchFeature extends BaseFeature {
           await CodecUtil.readLines(subProcess.stdout!, line => {
             const { type, payload }: CompilerEvent = JSONUtil.fromUTF8(line);
             switch (type) {
-              case 'log': this.#ongLogEvent(payload); break;
-              case 'state': this.#onStateEvent(payload); break;
-              case 'progress': this.#onProgressEvent(payload, controller.signal); break;
+              case 'log':
+                this.#ongLogEvent(payload);
+                break;
+              case 'state':
+                this.#onStateEvent(payload);
+                break;
+              case 'progress':
+                this.#onProgressEvent(payload, controller.signal);
+                break;
             }
           });
         }
@@ -143,17 +153,27 @@ export class CompilerWatchFeature extends BaseFeature {
   }
 
   #onStateEvent(event: CompilerStateEvent | CompilerStateType | undefined): void {
-    const state = (typeof event === 'string' ? event : event?.state ?? 'closed');
+    const state = typeof event === 'string' ? event : (event?.state ?? 'closed');
 
     this.#log.info('Compiler state changed', state);
     let status: string | undefined;
     switch (state) {
-      case 'reset': status = '$(flame) Restarting'; break;
+      case 'reset':
+        status = '$(flame) Restarting';
+        break;
       case 'startup':
-      case 'init': status = '$(flame) Initializing'; break;
-      case 'compile-start': status = '$(flame) Compiling'; break;
-      case 'watch-start': status = '$(pass-filled) Ready'; break;
-      case 'closed': status = '$(debug-pause) Disconnected'; break;
+      case 'init':
+        status = '$(flame) Initializing';
+        break;
+      case 'compile-start':
+        status = '$(flame) Compiling';
+        break;
+      case 'watch-start':
+        status = '$(pass-filled) Ready';
+        break;
+      case 'closed':
+        status = '$(debug-pause) Disconnected';
+        break;
     }
     this.#status.text = status ?? this.#status.text;
     Workspace.compilerState = state;
@@ -162,7 +182,7 @@ export class CompilerWatchFeature extends BaseFeature {
   async #ongLogEvent(event: CompilerLogEvent): Promise<void> {
     const message = event.message.replaceAll(Workspace.path, '.');
     let first = message;
-    const params = [...event.args ?? []];
+    const params = [...(event.args ?? [])];
     if (event.scope) {
       params.unshift(message);
       first = `[${event.scope.padEnd(SCOPE_MAX, ' ')}]`;
@@ -221,7 +241,7 @@ export class CompilerWatchFeature extends BaseFeature {
   async activate(_: vscode.ExtensionContext): Promise<void> {
     this.#status.command = { command: `${this.moduleCommand}:status-item`, title: 'Show Logs' };
     this.register('status-item', () => this.#onStatusItemClick());
-    this.register('view-output', () => this.#viewSource())
+    this.register('view-output', () => this.#viewSource());
     this.#onStateEvent('closed');
     this.#status.show();
 

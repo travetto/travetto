@@ -59,7 +59,7 @@ export class DiagnosticManager {
   #setDiagnostics(file: string) {
     const classes = this.#tracked.get(file);
 
-    const diagnostics = [...classes?.values() ?? []]
+    const diagnostics = [...(classes?.values() ?? [])]
       .flatMap(suite => [...suite.values()])
       .filter(test => test.status === 'failed' || test.status === 'errored')
       .flatMap(test => this.#buildTestDiagnostics(file, test));
@@ -69,9 +69,7 @@ export class DiagnosticManager {
 
   refreshStatus(): void {
     const summary = TestModelUtil.buildSummary();
-    const tests = [...this.#tracked.values()]
-      .flatMap(file => [...file.values()])
-      .flatMap(suite => [...suite.values()]);
+    const tests = [...this.#tracked.values()].flatMap(file => [...file.values()]).flatMap(suite => [...suite.values()]);
 
     TestModelUtil.countTestResult(summary, tests);
 

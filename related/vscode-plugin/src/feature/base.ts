@@ -10,7 +10,6 @@ import { Workspace } from '../core/workspace.ts';
  * Base feature structure
  */
 export abstract class BaseFeature implements ActivationTarget {
-
   readonly module: string;
   readonly command: string;
   readonly log: Log;
@@ -34,7 +33,10 @@ export abstract class BaseFeature implements ActivationTarget {
     if (this.alwaysActivate) {
       return true;
     }
-    try { Workspace.resolveImport(this.module); return true; } catch { }
+    try {
+      Workspace.resolveImport(this.module);
+      return true;
+    } catch {}
     return RuntimeIndex.hasModule(this.module) ?? false;
   }
 

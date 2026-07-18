@@ -2,7 +2,7 @@
 {
   "sourceId": "core-repo-version-release",
   "repositoryId": "travetto",
-  "filePath": "module/repo/src",
+  "filePath": "module/repo/support/cli.repo_version.ts",
   "capabilityTags": ["repo", "version", "release", "monorepo"],
   "operationIds": ["repo-version-release"],
   "applicability": ["framework-native"],
@@ -14,7 +14,7 @@
 
 # core-repo-version-release
 
-- Source: `module/repo/src`
+- Source: `module/repo/support/cli.repo_version.ts`
 - Capability tags: repo, version, release, monorepo
 - Applicability: framework-native
 - Notes:

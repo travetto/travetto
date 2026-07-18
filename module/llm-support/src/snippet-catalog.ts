@@ -6,10 +6,9 @@ import { SchemaValidator } from '@travetto/schema';
 
 import { type RecommendationQuery, type SnippetSource, SnippetSourceSchema } from './types.ts';
 
-const SNIPPET_RELATIVE_DIR = 'snippets';
-
 function snippetDirectory(): string {
-  return path.resolve(RuntimeIndex.getModule('@travetto/llm-support')!.sourcePath, 'resources', SNIPPET_RELATIVE_DIR);
+  const mod = RuntimeIndex.getModule('@travetto/llm-support')!;
+  return path.resolve(mod.sourcePath, 'resources', 'snippets');
 }
 
 function isErrnoException(err: unknown): err is NodeJS.ErrnoException {
@@ -31,8 +30,23 @@ async function loadSnippets(): Promise<SnippetSource[]> {
   try {
     const dir = snippetDirectory();
     const files = await fs.readdir(dir);
-    const filtered = files.filter(file => file.endsWith('.md')).sort();
-    return Promise.all(filtered.map(file => loadSnippet(path.join(dir, file))));
+    const mdFiles = files.filter(file => file.endsWith('.md'));
+    const resolvedFiles = new Set<string>();
+
+    for (const file of mdFiles) {
+      if (file.endsWith('.generated.md')) {
+        resolvedFiles.add(file);
+        resolvedFiles.delete(file.replace(/\.generated\.md$/, '.md'));
+      } else {
+        const genName = file.replace(/\.md$/, '.generated.md');
+        if (!mdFiles.includes(genName)) {
+          resolvedFiles.add(file);
+        }
+      }
+    }
+
+    const sorted = [...resolvedFiles].sort();
+    return Promise.all(sorted.map(file => loadSnippet(path.join(dir, file))));
   } catch (err) {
     if (isErrnoException(err) && (err.code === 'ENOENT' || err.code === 'ERR_MODULE_NOT_FOUND')) {
       return [];

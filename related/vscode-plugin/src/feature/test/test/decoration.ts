@@ -1,12 +1,13 @@
-import * as vscode from 'vscode';
 import util from 'node:util';
 
-import type { TestResult, Assertion, TestConfig, TestLog, TestStatus } from '@travetto/test';
-import { CodecUtil, JSONUtil } from '@travetto/runtime';
+import * as vscode from 'vscode';
 
-import type { ErrorHoverAssertion, TestLevel } from './types.ts';
-import { Workspace } from '../../../core/workspace.ts';
+import { CodecUtil, JSONUtil } from '@travetto/runtime';
+import type { Assertion, TestConfig, TestLog, TestResult, TestStatus } from '@travetto/test';
+
 import { ThemeUtil } from '../../../core/theme.ts';
+import { Workspace } from '../../../core/workspace.ts';
+import type { ErrorHoverAssertion, TestLevel } from './types.ts';
 
 const MAX_LOG_LENGTH = 60;
 
@@ -38,11 +39,11 @@ export const Style: {
     failed: new vscode.ThemeColor('editorGutter.deletedBackground'),
     errored: new vscode.ThemeColor('editorGutter.deletedBackground'),
     passed: new vscode.ThemeColor('editorGutter.addedBackground'),
-    unknown: new vscode.ThemeColor('editor.inactiveSelectionBackground'),
+    unknown: new vscode.ThemeColor('editor.inactiveSelectionBackground')
   },
   IMAGE: {
     isWholeLine: false,
-    rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
+    rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed
   },
   ASSERT: {
     isWholeLine: false,
@@ -53,7 +54,7 @@ export const Style: {
     after: {
       textDecoration: `none; ${ITALIC}`,
       color: new vscode.ThemeColor('badge.background')
-    },
+    }
   }
 };
 
@@ -65,7 +66,6 @@ function isBatchError(value?: Error): value is Error & { details: { errors: (Err
  * Decoration utils
  */
 export class Decorations {
-
   static #imageUris: Record<string, vscode.Uri> = {};
 
   /**
@@ -81,8 +81,7 @@ export class Decorations {
 
     if (isBatchError(error)) {
       title = error.message;
-      const messages = error.details.errors
-        .map(subError => typeof subError === 'string' ? subError : subError.message);
+      const messages = error.details.errors.map(subError => (typeof subError === 'string' ? subError : subError.message));
 
       suffix = `(${title}) ${messages.join(', ')}`;
       if (suffix.length > 120) {
@@ -91,8 +90,7 @@ export class Decorations {
       body = `\t${messages.join('  \n\t')}  `;
       bodyFirst = `${title} - ${messages.join(', ')}`;
     } else if (!(assertion.expected === undefined && assertion.actual === undefined)) {
-      title = assertion.message!
-        .replace(/^.*should/, 'Should');
+      title = assertion.message!.replace(/^.*should/, 'Should');
 
       const extra = title.split(/^Should(?:\s+[a-z]+)+/)[1];
       title = title.replace(extra, '');
@@ -122,9 +120,7 @@ export class Decorations {
       body = (error.stack ?? '')
         .replaceAll(Workspace.path, '.')
         .replaceAll('\n', '  \n')
-        .replace(
-          /[(]([^):]+)[:]?(\d+(?:[:]\d+)?)?[)]/g, (_, file, loc) => loc ? `(**${file}**:_${loc}_)` : `(**${file}**)`
-        );
+        .replace(/[(]([^):]+)[:]?(\d+(?:[:]\d+)?)?[)]/g, (_, file, loc) => (loc ? `(**${file}**:_${loc}_)` : `(**${file}**)`));
       bodyFirst = body.split('\n')[0];
     }
     return { suffix, title, bodyFirst, body, markdown: new vscode.MarkdownString(`**${title}** \n\n${body}`) };
@@ -148,7 +144,7 @@ export class Decorations {
     return vscode.window.createTextEditorDecorationType({
       ...Style.ASSERT,
       borderColor: color,
-      overviewRulerColor: state === 'failed' ? color : '',
+      overviewRulerColor: state === 'failed' ? color : ''
     });
   }
 
@@ -162,8 +158,7 @@ export class Decorations {
       const relativeSize = size === 'small' ? 40 : 60;
       const offset = (100 - relativeSize) / 2;
       const gutterWidth = 16;
-      const svg =
-        `<svg 
+      const svg = `<svg 
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 100 100"
           width="${gutterWidth}" height="${gutterWidth}"
@@ -250,11 +245,11 @@ export class Decorations {
    */
   static buildTest(test: TestResult | TestConfig): vscode.DecorationOptions {
     const output: vscode.DecorationOptions = {
-      ...this.line(test.lineStart),
+      ...this.line(test.lineStart)
     };
     if ('error' in test) {
-      const error = (test.assertions || []).find(assertion => !!assertion.error) ||
-        (test.error && { error: test.error, message: test.error.message });
+      const error =
+        (test.assertions || []).find(assertion => !!assertion.error) || (test.error && { error: test.error, message: test.error.message });
       if (error) {
         const hover = this.buildErrorHover(error);
         output.hoverMessage = hover.markdown;
@@ -269,8 +264,6 @@ export class Decorations {
    * @param state
    */
   static buildStyle(entity: TestLevel, state: TestStatus): vscode.TextEditorDecorationType {
-    return (entity === 'assertion') ?
-      this.buildAssertStyle(state) :
-      this.buildImage(state, entity === 'test' ? 'small' : 'full');
+    return entity === 'assertion' ? this.buildAssertStyle(state) : this.buildImage(state, entity === 'test' ? 'small' : 'full');
   }
 }

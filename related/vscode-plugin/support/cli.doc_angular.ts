@@ -17,7 +17,7 @@ export class CliDocAngularCommand implements CliCommandShape {
       if (/[.](gif|jpe?g|png)/i.test(file.name)) {
         const target = page(`assets/images/${this.moduleName}/${file.parentPath}`);
         await fs.mkdir(path.dirname(target), { recursive: true });
-        await fs.copyFile((await path.resolve(root, file.parentPath)), target);
+        await fs.copyFile(await path.resolve(root, file.parentPath), target);
       }
     }
   }

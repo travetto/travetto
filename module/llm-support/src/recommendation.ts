@@ -10,7 +10,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Project bootstrap',
     summary: 'Create a project with guided module and backend selection.',
     requiredModules: ['@travetto/runtime', '@travetto/config'],
-    optionalModules: ['@travetto/web', '@travetto/model', '@travetto/test', '@travetto/eslint']
+    optionalModules: ['@travetto/web', '@travetto/model', '@travetto/test', '@travetto/lint']
   },
   {
     id: 'create-web-route',
@@ -77,11 +77,19 @@ const OPERATIONS: LlmOperation[] = [
     optionalModules: []
   },
   {
+    id: 'workflow-firebase-deploy',
+    category: 'workflow',
+    title: 'Generate Firebase Hosting deploy workflow',
+    summary: 'Create GitHub workflows for Firebase Hosting UI deploy pipelines.',
+    requiredModules: [],
+    optionalModules: []
+  },
+  {
     id: 'enable-linting',
     category: 'quality',
     title: 'Enable linting and fix',
     summary: 'Configure linting support and fix workflows for generated code.',
-    requiredModules: ['@travetto/eslint'],
+    requiredModules: ['@travetto/lint'],
     optionalModules: ['@travetto/test']
   },
   {

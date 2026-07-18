@@ -34,10 +34,11 @@ export const WORKFLOWS: WorkflowGuidance[] = [
       '@travetto/model-s3',
       '@travetto/model-elasticsearch'
     ],
-    commandDiscoveryRule: 'Use npx trv cli:schema before proposing model:install or model:export argument forms.',
+    commandDiscoveryRule: 'Use npx trv cli:schema before proposing model:install, model:export, or firestore:indexes argument forms.',
     verification: [
       'Ensure selected adapter family and module match datastore target and install bundle guidance.',
-      'Ensure required capability needs (blob/query/indexed/expiry) align with selected adapter support.'
+      'Ensure required capability needs (blob/query/indexed/expiry) align with selected adapter support.',
+      'If using Firestore, confirm index exporting via trv firestore:indexes is documented or planned.'
     ]
   },
   {
@@ -70,7 +71,7 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     title: 'Bootstrap a new project',
     intent: 'Create a project baseline using guided prompts for model backend, quality, and initial web stack.',
     recommendedModules: ['@travetto/web', '@travetto/web-http', '@travetto/openapi', '@travetto/runtime', '@travetto/config'],
-    optionalModules: ['@travetto/schema', '@travetto/di', '@travetto/model', '@travetto/test', '@travetto/eslint'],
+    optionalModules: ['@travetto/schema', '@travetto/di', '@travetto/model', '@travetto/test', '@travetto/lint'],
     commandDiscoveryRule: 'Validate command signatures with npx trv cli:schema before suggesting starter commands.',
     verification: [
       'Ensure generated project includes selected web and model modules from prompt answers.',
@@ -143,7 +144,7 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     id: 'quality-lint-and-test',
     title: 'Enable lint and test quality checks',
     intent: 'Enable quality features so generated projects have immediate test and lint feedback loops.',
-    recommendedModules: ['@travetto/test', '@travetto/eslint'],
+    recommendedModules: ['@travetto/test', '@travetto/lint'],
     optionalModules: [],
     commandDiscoveryRule:
       'Validate test and lint command examples with npx trv cli:schema or generated package scripts before suggesting execution.',
@@ -224,6 +225,19 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     verification: [
       'Ensure release mode and semver level are explicit and reviewed in CI inputs.',
       'Ensure release commits and tags align with repository policy.'
+    ]
+  },
+  {
+    id: 'firebase-hosting-deploy',
+    title: 'Add Firebase Hosting deploy workflow',
+    intent: 'Deploy the static UI to Firebase Hosting on merge to main branch.',
+    recommendedModules: ['@travetto/compiler'],
+    optionalModules: ['@travetto/cli'],
+    commandDiscoveryRule:
+      'Validate firebase target or build commands. If CLI command shape is uncertain, validate with npx trv cli:schema.',
+    verification: [
+      'Ensure the action-hosting-deploy maps repoToken, firebaseServiceAccount, and projectId correctly.',
+      'Ensure UI build output directory in firebase.json matches deployment paths.'
     ]
   }
 ];

@@ -1,12 +1,11 @@
 import type * as vscode from 'vscode';
 
-type TimeEntry<T> = { key: string, data: T, time: number };
+type TimeEntry<T> = { key: string; data: T; time: number };
 
 /**
  * Storage manager
  */
 export class ActionStorage<T> {
-
   /**
    * Local storage
    */
