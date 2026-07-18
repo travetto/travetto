@@ -92,7 +92,7 @@ export class ElasticsearchSchemaUtil {
           const [digits, decimals] = config.precision;
           if (decimals) {
             if ((decimals + digits) < 16) {
-              property = { type: 'scaled_float', ['scaling_factor']: decimals };
+              property = { type: 'scaled_float', scaling_factor: decimals };
             } else {
               if (digits < 6 && decimals < 9) {
                 property = { type: 'half_float' };
@@ -127,10 +127,10 @@ export class ElasticsearchSchemaUtil {
               text: { type: 'text' }
             }
           };
-          if (esSchema && esSchema.caseSensitive) {
+          if (esSchema?.caseSensitive) {
             DataUtil.deepAssign(text, {
               fields: {
-                ['text_cs']: { type: 'text', analyzer: 'whitespace' }
+                text_cs: { type: 'text', analyzer: 'whitespace' }
               }
             });
           }

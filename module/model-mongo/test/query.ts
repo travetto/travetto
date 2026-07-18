@@ -43,11 +43,11 @@ export class QueryTest {
 
     assert.deepEqual(out2, {
       $and: [
-        { ['a.b.c']: 5 },
-        { ['d.e']: true },
+        { 'a.b.c': 5 },
+        { 'd.e': true },
         { $or: [{ name: 5 }, { age: 10 }] },
-        { ['g.z']: 'a' },
-        { ['a.d']: { $gt: 20 } },
+        { 'g.z': 'a' },
+        { 'a.d': { $gt: 20 } },
       ]
     });
   }

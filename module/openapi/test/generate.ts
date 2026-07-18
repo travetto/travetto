@@ -197,7 +197,7 @@ class GenerateSuite {
       },
       description: ''
     });
-    assert.deepStrictEqual(config.components.schemas['who__12130'], {
+    assert.deepStrictEqual(config.components.schemas.who__12130, {
       description: undefined,
       examples: undefined,
       properties: {

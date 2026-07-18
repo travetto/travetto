@@ -673,7 +673,7 @@ export class ElasticsearchModelService implements
     const resolvedSearch = ElasticsearchQueryUtil.getSearchObject(cls, query ?? {}, this.config.schemaConfig);
 
     const search: estypes.SearchRequest = {
-      query: resolvedSearch.query ?? { ['match_all']: {} },
+      query: resolvedSearch.query ?? { match_all: {} },
       aggs: { [field]: { terms: { field, size: 100 } } },
       size: 0
     };

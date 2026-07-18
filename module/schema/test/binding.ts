@@ -150,7 +150,7 @@ class DataBinding {
     assert(items[1] instanceof Poly2);
     assert(items[1].type === 'poly2');
     assert(!('name' in items[1]));
-    assert(typeof items[1]['age'] === 'string');
+    assert(typeof items[1].age === 'string');
   }
 
   @Test('Should handle invalid-polymorphic structure')

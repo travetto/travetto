@@ -48,7 +48,7 @@ export class CliRunFeature extends BaseFeature {
 
       const config = RunUtil.buildDebugConfig(CliRunUtil.getLaunchConfig(choice));
       const launchConfig = vscode.workspace.getConfiguration('launch');
-      const configurations = launchConfig['configurations'];
+      const configurations = launchConfig.configurations;
       configurations.push(config);
       await launchConfig.update('configurations', configurations, false);
 

@@ -34,7 +34,7 @@ class OpenApiSuite {
 
     assert.deepStrictEqual(
       // @ts-expect-error
-      spec.components!.schemas!.Paging['properties'],
+      spec.components!.schemas!.Paging.properties,
       {
         start: { type: 'number', description: undefined },
         size: { type: 'number', description: undefined }

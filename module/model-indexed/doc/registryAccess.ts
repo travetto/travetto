@@ -11,6 +11,6 @@ export function registryAccessExample() {
   const indexes = registry.indices; // Map of all indexes for the model
 
   // Access a specific index
-  const userByName = indexes?.['userByName'];
+  const userByName = indexes?.userByName;
   return userByName;
 }

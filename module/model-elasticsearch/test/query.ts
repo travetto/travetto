@@ -54,7 +54,7 @@ type MustType = {
   ids: { values: string[] };
 };
 
-function isBool(o: unknown): o is { bool: { must: [MustType], ['must_not']: unknown, ['should_not']: unknown } } {
+function isBool(o: unknown): o is { bool: { must: [MustType], must_not: unknown, should_not: unknown } } {
   return DataUtil.isPlainObject(o) && 'bool' in o;
 }
 

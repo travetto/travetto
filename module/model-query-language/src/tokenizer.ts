@@ -26,7 +26,7 @@ const TOKEN_MAPPING: Record<string, Token> = {
   or: { type: 'boolean', value: 'or' },
   '||': { type: 'boolean', value: 'or' },
   in: { type: 'operator', value: 'in' },
-  ['not-in']: { type: 'operator', value: 'not-in' },
+  'not-in': { type: 'operator', value: 'not-in' },
   not: { type: 'unary', value: 'not' },
   '[': { type: 'array', value: 'start' },
   ']': { type: 'array', value: 'end' },

@@ -210,10 +210,10 @@ export class MongoUtil {
       const selectKey = Object.keys(query.select)[0];
       const select = typeof selectKey === 'string' && selectKey.startsWith('$') ? query.select : this.extractSimple(cls, query.select);
       // Remove id if not explicitly defined, and selecting fields directly
-      if (!select['_id']) {
+      if (!select._id) {
         const values = new Set([...Object.values(select)]);
         if (values.has(1) || values.has(true)) {
-          select['_id'] = false;
+          select._id = false;
         }
       }
       cursor.project(select);

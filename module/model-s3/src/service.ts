@@ -381,8 +381,8 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
         size: blob.ContentLength!,
       };
       if (hasLowerContentType(metadata)) {
-        metadata['contentType'] = metadata['contenttype']!;
-        delete metadata['contenttype'];
+        metadata.contentType = metadata.contenttype!;
+        delete metadata.contenttype;
       }
       return metadata;
     } else {

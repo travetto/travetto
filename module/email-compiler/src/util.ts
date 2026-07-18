@@ -62,7 +62,7 @@ export class EmailCompileUtil {
     let id = 0;
     const tokens = new Map();
     for (const pattern of patterns) {
-      for (const { [0]: all, groups: { prefix, source } = { prefix: '', source: '' } } of text.matchAll(pattern)) {
+      for (const { 0: all, groups: { prefix, source } = { prefix: '', source: '' } } of text.matchAll(pattern)) {
         if (source.includes('://')) { // No urls
           continue;
         }

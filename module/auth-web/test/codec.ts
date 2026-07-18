@@ -50,7 +50,7 @@ export class CodecTest {
 
   @Test()
   async keyRotation() {
-    this.interceptor.config.keyMap['orange'] = {
+    this.interceptor.config.keyMap.orange = {
       id: 'orange',
       key: 'green'
     };
