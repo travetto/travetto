@@ -35,7 +35,7 @@ Options:
 When registration completes, this is the file the linter will use, and any other tooling (e.g. IDEs).
 
 **Code: Sample configuration**
-```jsonc
+```json
 {
   "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
   "extends": ["./node_modules/@travetto/lint/resources/biome.jsonc"],
