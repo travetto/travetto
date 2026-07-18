@@ -15,18 +15,17 @@ yarn add @travetto/web-upload
 
 This module provides a clean and direct mechanism for processing uploads, built upon [@fastify/busboy](https://github.com/fastify/busboy). The module also provides some best practices with respect to temporary file management.
 
-Once the files are uploaded, they are exposed via [Endpoint](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14) parameters using the [@Upload](https://github.com/travetto/travetto/tree/main/module/web-upload/src/decorator.ts#L20) decorator.  This decorator requires the related field type to be a standard [Buffer](https://nodejs.org/api/buffer.html#class-file) object, or a [FileMap](https://github.com/travetto/travetto/tree/main/module/web-upload/src/types.ts#L7).
+Once the files are uploaded, they are exposed via [Endpoint](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14) parameters using the [@Upload](https://github.com/travetto/travetto/tree/main/module/web-upload/src/decorator.ts#L20) decorator. This decorator requires the related field type to be a standard [Buffer](https://nodejs.org/api/buffer.html#class-file) object, or a [FileMap](https://github.com/travetto/travetto/tree/main/module/web-upload/src/types.ts#L7).
 
 A simple example:
 
 **Code: Web controller with upload support**
 ```typescript
-import { Controller, Post, Get } from '@travetto/web';
+import { Controller, Get, Post } from '@travetto/web';
 import { type FileMap, Upload } from '@travetto/web-upload';
 
 @Controller('/simple')
 export class Simple {
-
   @Get('/age')
   getAge() {
     return { age: 50 };

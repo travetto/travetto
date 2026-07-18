@@ -15,7 +15,7 @@
 <span class="token function">yarn</span> <span class="token function">add</span> &#64;travetto/email</code></pre>
   </figure>
 
-A standard API for sending and rendering emails. The mail transport must be defined to allow for mail to be sent properly.  Out of the box, the only transport available by default is the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/email/src/transport.ts#L16">NullTransport</a> which will just drop emails. The structure of the API is derived from  <a target="_blank" class="external-link" href="https://nodemailer.com/about/">nodemailer</a>, but is compatible with any library that can handle the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/email/src/types.ts#L44">EmailOptions</a> input. <br><br>
+A standard API for sending and rendering emails. The mail transport must be defined to allow for mail to be sent properly. Out of the box, the only transport available by default is the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/email/src/transport.ts#L17">NullTransport</a> which will just drop emails. The structure of the API is derived from <a target="_blank" class="external-link" href="https://nodemailer.com/about/">nodemailer</a>, but is compatible with any library that can handle the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/email/src/types.ts#L44">EmailOptions</a> input. <br><br>
 To expose the necessary email transport, the following pattern is commonly used:
 
   <figure class="code">
@@ -34,12 +34,12 @@ To expose the necessary email transport, the following pattern is commonly used:
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-Given the amorphous nature of transports, the <code class="item input">transport</code> field in <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/email/src/config.ts#L7">MailConfig</a> is open for any configuration that you may want there. Additionally, the templating engine is optional.  The code will only fail if you attempt to send a templated email without declaring the dependency first.
+Given the amorphous nature of transports, the <code class="item input">transport</code> field in <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/email/src/config.ts#L7">MailConfig</a> is open for any configuration that you may want there. Additionally, the templating engine is optional. The code will only fail if you attempt to send a templated email without declaring the dependency first.
 <h2 id="sending-compiled-templates">Sending Compiled Templates</h2>
 
-By design, sending an email requires the sender to specify the html, text optionally, and subject.  To integrate with other tools, the framework also has the ability to send an email as a set of templates, based off a single key. The module will look for:
+By design, sending an email requires the sender to specify the html, text optionally, and subject. To integrate with other tools, the framework also has the ability to send an email as a set of templates, based off a single key. The module will look for:
 <ul> <li><code class="item input">resources/&lt;key&gt;.compiled.html</code></li>
 <li><code class="item input">resources/&lt;key&gt;.compiled.text</code></li>
 <li><code class="item input">resources/&lt;key&gt;.compiled.subject</code></li>
 </ul>
-With <code class="item input">.html</code> being the only required field.  The <a class="module-link" routerLink="/docs/email-compiler" title="Email compiling module">Email Compilation Support</a> module supports this format, and will generate files accordingly. Also, note that <code class="item input">&lt;key&gt;</code> can include slashes, allowing for nesting folders.
+With <code class="item input">.html</code> being the only required field. The <a class="module-link" routerLink="/docs/email-compiler" title="Email compiling module">Email Compilation Support</a> module supports this format, and will generate files accordingly. Also, note that <code class="item input">&lt;key&gt;</code> can include slashes, allowing for nesting folders.

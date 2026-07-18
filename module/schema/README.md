@@ -13,7 +13,7 @@ npm install @travetto/schema
 yarn add @travetto/schema
 ```
 
-This module's purpose is to allow for proper declaration and validation of data types, in the course of running a program.  The framework defined here, is leveraged in the [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support"), [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework"), [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications"), [OpenAPI Specification](https://github.com/travetto/travetto/tree/main/module/openapi#readme "OpenAPI integration support for the Travetto framework") and [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") modules.  The schema is the backbone of all data transfer, as it helps to provide validation on correctness of input, whether it is a web request, command line inputs, or a configuration file. 
+This module's purpose is to allow for proper declaration and validation of data types, in the course of running a program. The framework defined here, is leveraged in the [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support"), [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework"), [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications"), [OpenAPI Specification](https://github.com/travetto/travetto/tree/main/module/openapi#readme "OpenAPI integration support for the Travetto framework") and [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") modules. The schema is the backbone of all data transfer, as it helps to provide validation on correctness of input, whether it is a web request, command line inputs, or a configuration file. 
 
 This module provides a mechanism for registering classes and field level information as well the ability to apply that information at runtime.
 
@@ -63,29 +63,29 @@ User:
 ```
 
 ### Fields
-This schema provides a powerful base for data binding and validation at runtime.  Additionally there may be types that cannot be detected, or some information that the programmer would like to override. Below are the supported field decorators:
-   *  [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L24) defines a field that will be serialized.
-   *  [@Required](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L55) defines a that field should be required
-   *  [@Enum](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L64) defines the allowable values that a field can have
-   *  [@Match](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L90) defines a regular expression that the field value should match
-   *  [@MinLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L99) enforces min length of a string
-   *  [@MaxLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L110) enforces max length of a string
-   *  [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L99) enforces min value for a date or a number
-   *  [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L110) enforces max value for a date or a number
-   *  [@Email](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L140) ensures string field matches basic email regex
-   *  [@Telephone](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L148) ensures string field matches basic telephone regex
-   *  [@Url](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L156) ensures string field matches basic url regex
+This schema provides a powerful base for data binding and validation at runtime. Additionally there may be types that cannot be detected, or some information that the programmer would like to override. Below are the supported field decorators:
+   *  [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L26) defines a field that will be serialized.
+   *  [@Required](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L67) defines a that field should be required
+   *  [@Enum](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L78) defines the allowable values that a field can have
+   *  [@Match](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L108) defines a regular expression that the field value should match
+   *  [@MinLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L119) enforces min length of a string
+   *  [@MaxLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L130) enforces max length of a string
+   *  [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L119) enforces min value for a date or a number
+   *  [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L130) enforces max value for a date or a number
+   *  [@Email](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L162) ensures string field matches basic email regex
+   *  [@Telephone](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L172) ensures string field matches basic telephone regex
+   *  [@Url](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L182) ensures string field matches basic url regex
    *  [@Ignore](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/common.ts#L41) exclude from auto schema registration
-   *  [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L172) ensures number passed in is only a whole number
-   *  [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L179) ensures number passed in allows fractional values
-   *  [@Currency](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L193) provides support for standard currency
-   *  [@Text](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L74) indicates that a field is expecting natural language input, not just discrete values
-   *  [@LongText](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L81) same as text, but expects longer form content
-   *  [@Readonly](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L40) defines a that field should not be bindable external to the class
-   *  [@Writeonly](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L33) defines a that field should not be exported in serialization, but that it can be bound to
-   *  [@Secret](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L48) marks a field as being sensitive.  This is used by certain logging activities to ensure sensitive information is not logged out.
-   *  [@Specifier](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L201) attributes additional specifiers to a field, allowing for more specification beyond just the field's type.
-   *  [@DiscriminatorField](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L208) allows for promoting a given field as the owner of the sub type discriminator.
+   *  [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L202) ensures number passed in is only a whole number
+   *  [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L211) ensures number passed in allows fractional values
+   *  [@Currency](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L229) provides support for standard currency
+   *  [@Text](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L88) indicates that a field is expecting natural language input, not just discrete values
+   *  [@LongText](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L97) same as text, but expects longer form content
+   *  [@Readonly](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L44) defines a that field should not be bindable external to the class
+   *  [@Writeonly](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L35) defines a that field should not be exported in serialization, but that it can be bound to
+   *  [@Secret](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L54) marks a field as being sensitive. This is used by certain logging activities to ensure sensitive information is not logged out.
+   *  [@Specifier](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L239) attributes additional specifiers to a field, allowing for more specification beyond just the field's type.
+   *  [@DiscriminatorField](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L248) allows for promoting a given field as the owner of the sub type discriminator.
 
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated. 
 
@@ -96,7 +96,7 @@ Just like the class, all fields can be defined with
 And similarly, the `description` will be picked up from the [JSDoc](http://usejsdoc.org/about-getting-started.html) comments, and additionally all fields can be set using the [@Describe](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/common.ts#L12) decorator.
 
 ### Parameters
-Parameters are available in certain scenarios (e.g. [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") endpoints and [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework") main methods).  In these scenarios, all of the field decorators are valid, but need to be called slightly differently to pass the typechecker. The simple solution is to use the `Arg` field of the decorator to convince Typescript its the correct type.
+Parameters are available in certain scenarios (e.g. [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") endpoints and [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework") main methods). In these scenarios, all of the field decorators are valid, but need to be called slightly differently to pass the typechecker. The simple solution is to use the `Arg` field of the decorator to convince Typescript its the correct type.
 
 **Code: Sample Parameter Usage**
 ```typescript
@@ -119,7 +119,7 @@ Binding is a very simple operation, as it takes in a class registered as as [@Sc
 
 **Code: Sub Schemas via Address**
 ```typescript
-import { Schema, Integer } from '@travetto/schema';
+import { Integer, Schema } from '@travetto/schema';
 
 @Schema()
 export class Address {
@@ -173,7 +173,7 @@ Validation is very similar to binding, but instead of attempting to assign value
 
 **Code: Sub Schemas via Address**
 ```typescript
-import { Schema, Integer } from '@travetto/schema';
+import { Integer, Schema } from '@travetto/schema';
 
 @Schema()
 export class Address {
@@ -198,7 +198,6 @@ import { SchemaValidator } from '@travetto/schema';
 import { Person } from './person.ts';
 
 export async function validate(): Promise<void> {
-
   const person = Person.from({
     name: 'Test',
     age: 'abc',
@@ -243,11 +242,11 @@ Validation Failed {
 ```
 
 ### Custom Validators
-Within the schema framework, it is possible to add custom validators class level.  This allows for more flexibility when dealing with specific situations (e.g. password requirements or ensuring two fields match)
+Within the schema framework, it is possible to add custom validators class level. This allows for more flexibility when dealing with specific situations (e.g. password requirements or ensuring two fields match)
 
 **Code: Password Validator**
 ```typescript
-import { Schema, Validator, type ValidationError } from '@travetto/schema';
+import { Schema, type ValidationError, Validator } from '@travetto/schema';
 
 const passwordValidator = (user: User): ValidationError | undefined => {
   const password = user.password;
@@ -270,7 +269,7 @@ class User {
 }
 ```
 
-When the validator is executed, it has access to the entire object, and you can check any of the values.  The validator expects an object of a specific structure if you are looking to indicate an error has occurred.
+When the validator is executed, it has access to the entire object, and you can check any of the values. The validator expects an object of a specific structure if you are looking to indicate an error has occurred.
 
 **Code: Validation Error Structure**
 ```typescript
@@ -316,7 +315,7 @@ When working with the schema, the basic types are easily understood, but some of
 To that end, the module supports two concepts:
 
 ### Type Adapters
-This feature is meant to allow for simple Typescript types to be able to be backed by a proper class.  This is because all of the typescript type information disappears at runtime, and so only concrete types (like classes) remain.  An example of this, can be found with how the [Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support.") module handles geo data.
+This feature is meant to allow for simple Typescript types to be able to be backed by a proper class. This is because all of the typescript type information disappears at runtime, and so only concrete types (like classes) remain. An example of this, can be found with how the [Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support.") module handles geo data.
 
 **Code: Point Contract**
 ```typescript
@@ -352,17 +351,17 @@ function bindPoint(input: unknown): [number, number] | typeof InvalidSymbol | un
  */
 function validatePoint(input: unknown): 'type' | undefined {
   const bound = bindPoint(input);
-  return bound !== InvalidSymbol && bound && !isNaN(bound[0]) && !isNaN(bound[1]) ? undefined : 'type';
+  return bound !== InvalidSymbol && bound && !Number.isNaN(bound[0]) && !Number.isNaN(bound[1]) ? undefined : 'type';
 }
 
 /**
  * Point Contract
  */
-export class PointContract { }
+export class PointContract {}
 
 SchemaTypeUtil.setSchemaTypeConfig(PointContract, {
   validate: validatePoint,
-  bind: bindPoint,
+  bind: bindPoint
 });
 Object.defineProperty(PointContract, 'name', { value: 'Point' });
 ```
@@ -373,7 +372,7 @@ What you can see here is that the `Point` type is now backed by a class that sup
 
 **Code: Simple Custom Type Usage**
 ```typescript
-import { Schema, type Point } from '@travetto/schema';
+import { type Point, Schema } from '@travetto/schema';
 
 @Schema()
 export class LocationAware {
@@ -382,7 +381,7 @@ export class LocationAware {
 }
 ```
 
-All that happens now, is the type is exported, and the class above is able to properly handle point as an `[x, y]` tuple.  All standard binding and validation patterns are supported, and type enforcement will work as expected.
+All that happens now, is the type is exported, and the class above is able to properly handle point as an `[x, y]` tuple. All standard binding and validation patterns are supported, and type enforcement will work as expected.
 
 **Terminal: Custom Type Validation**
 ```bash
@@ -408,8 +407,8 @@ Validation Failed {
 ```
 
 ## Data Utilities
-Data utilities for binding values, and type conversion. Currently [DataUtil](https://github.com/travetto/travetto/tree/main/module/schema/src/data.ts#L11) includes:
-   *  `deepAssign(a, b, mode ?)` which allows for deep assignment of `b` onto `a`, the `mode` determines how aggressive the assignment is, and how flexible it is.  `mode` can have any of the following values:
+Data utilities for binding values, and type conversion. Currently [DataUtil](https://github.com/travetto/travetto/tree/main/module/schema/src/data.ts#L12) includes:
+   *  `deepAssign(a, b, mode ?)` which allows for deep assignment of `b` onto `a`, the `mode` determines how aggressive the assignment is, and how flexible it is. `mode` can have any of the following values:
       *  `loose`, which is the default is the most lenient. It will not error out, and overwrites will always happen
       *  `coerce`, will attempt to force values from `b` to fit the types of `a`, and if it can't it will error out
       *  `strict`, will error out if the types do not match

@@ -28,12 +28,12 @@ Three types of indexes are supported:
 Indexes are defined using factory functions provided by the module. Each index is registered with the model at decoration time.
 
 ### Keyed Indexes
-A [keyedIndex](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L29) provides fast lookups by computed key values. It's useful when you want to query records by specific field combinations.
+A [keyedIndex](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L34) provides fast lookups by computed key values. It's useful when you want to query records by specific field combinations.
 
 **Code: Creating a Keyed Index**
 ```typescript
-import { keyedIndex } from '@travetto/model-indexed';
 import { Model } from '@travetto/model';
+import { keyedIndex } from '@travetto/model-indexed';
 
 @Model()
 export class User {
@@ -53,12 +53,12 @@ The index definition specifies:
    *   `key` — An object where each key path should be included in the index (set to `true`)
 
 ### Unique Indexes
-A [uniqueIndex](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L47) enforces uniqueness constraints on key fields. This is useful for emails, usernames, or any field that should be globally unique.
+A [uniqueIndex](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L57) enforces uniqueness constraints on key fields. This is useful for emails, usernames, or any field that should be globally unique.
 
 **Code: Creating a Unique Index**
 ```typescript
-import { uniqueIndex } from '@travetto/model-indexed';
 import { Model } from '@travetto/model';
+import { uniqueIndex } from '@travetto/model-indexed';
 
 @Model()
 export class User {
@@ -76,12 +76,12 @@ export const emailUnique = uniqueIndex(User, {
 Unique indexes work exactly like keyed indexes, but enforce a uniqueness constraint. A model service will reject writes that violate the uniqueness guarantee.
 
 ### Sorted Indexes
-A [sortedIndex](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L65) enables range queries and paginated listing. It requires both a `key` for filtering and a `sort` field for ordering.
+A [sortedIndex](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L80) enables range queries and paginated listing. It requires both a `key` for filtering and a `sort` field for ordering.
 
 **Code: Creating a Sorted Index**
 ```typescript
-import { sortedIndex } from '@travetto/model-indexed';
 import { Model } from '@travetto/model';
+import { sortedIndex } from '@travetto/model-indexed';
 
 @Model()
 export class User {
@@ -94,13 +94,13 @@ export class User {
 export const usersByNameAge = sortedIndex(User, {
   name: 'usersByNameAge',
   key: { name: true },
-  sort: { age: 1 }  // 1 for ascending, -1 for descending
+  sort: { age: 1 } // 1 for ascending, -1 for descending
 });
 
 export const recentUsers = sortedIndex(User, {
   name: 'recentUsers',
-  key: {},  // No key filtering
-  sort: { createdAt: -1 }  // Most recent first
+  key: {}, // No key filtering
+  sort: { createdAt: -1 } // Most recent first
 });
 ```
 
@@ -111,8 +111,8 @@ Indexes can use multiple fields or nested fields in their keys. This allows quer
 
 **Code: Composite Key Index**
 ```typescript
-import { keyedIndex } from '@travetto/model-indexed';
 import { Model } from '@travetto/model';
+import { keyedIndex } from '@travetto/model-indexed';
 
 @Model()
 export class Order {
@@ -136,7 +136,7 @@ export const specificOrders = keyedIndex(Order, {
 ```
 
 ## Using Indexes
-Model services that implement [ModelIndexedSupport](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L16) allow you to query using the indexes you've defined.
+Model services that implement [ModelIndexedSupport](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L21) allow you to query using the indexes you've defined.
 
 ### Service Interface
 
@@ -149,11 +149,11 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param idx The index to search against
    * @param body The payload of fields needed to search
    */
-  getByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<T>;
+  getByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: FullKeyedIndexBody<T, K, S>
+  ): Promise<T>;
 
   /**
    * Delete entity by index as defined by fields of idx and the body fields
@@ -161,11 +161,11 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param idx The index to search against
    * @param body The payload of fields needed to search
    */
-  deleteByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexBody<T, K, S>): Promise<void>;
+  deleteByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: FullKeyedIndexBody<T, K, S>
+  ): Promise<void>;
 
   /**
    * Upsert by index, allowing the index to act as a primary key
@@ -173,11 +173,11 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param idx The index to use
    * @param body The document to potentially store
    */
-  upsertByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: OptionalId<T>): Promise<T>;
+  upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: OptionalId<T>
+  ): Promise<T>;
 
   /**
    * Update by index
@@ -185,11 +185,11 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param idx The index to update by
    * @param body The document to update
    */
-  updateByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: T): Promise<T>;
+  updateByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: T
+  ): Promise<T>;
 
   /**
    * Update partial by index
@@ -197,11 +197,11 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param idx The index to update by
    * @param body The partial document to update
    */
-  updatePartialByIndex<
-    T extends ModelType,
-    K extends KeyedIndexSelection<T>,
-    S extends SortedIndexSelection<T>
-  >(cls: Class<T>, idx: SingleItemIndex<T, K, S>, body: FullKeyedIndexWithPartialBody<T, K, S>): Promise<T>;
+  updatePartialByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: FullKeyedIndexWithPartialBody<T, K, S>
+  ): Promise<T>;
 
   /**
    * Page through entities by ranged index as defined by fields of idx
@@ -213,11 +213,12 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param body The payload of fields needed to search
    * @param options The configuration for pagination
    */
-  pageByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ModelPageOptions): Promise<ModelPageResult<T>>;
+  pageByIndex<T extends ModelType, S extends SortedIndexSelection<T>, K extends KeyedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    options?: ModelPageOptions
+  ): Promise<ModelPageResult<T>>;
 
   /**
    * List all entities by ranged index as defined by fields of idx
@@ -229,11 +230,12 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param idx The index to search against
    * @param body The payload of fields needed to search
    */
-  listByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>,
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, options?: ModelListOptions): AsyncIterable<T[]>;
+  listByIndex<T extends ModelType, S extends SortedIndexSelection<T>, K extends KeyedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    options?: ModelListOptions
+  ): AsyncIterable<T[]>;
 
   /**
    * Suggest entities by ranged index as defined by fields of idx and a prefix
@@ -359,18 +361,23 @@ Use `pageByIndex` when you want paginated access to a sorted index.
 **Code: Paging by Sorted Index**
 ```typescript
 export async function listExample(modelService: ModelIndexedSupport) {
-  const result = await modelService.pageByIndex(User, recentUsers, {}, {
-    limit: 20,
-    offset: '0'
-  });
+  const result = await modelService.pageByIndex(
+    User,
+    recentUsers,
+    {},
+    {
+      limit: 20,
+      offset: '0'
+    }
+  );
 
-  console.log(result.items);      // Array of users
+  console.log(result.items); // Array of users
   console.log(result.nextOffset); // Token for next page, if more results exist
   return result;
 }
 ```
 
-Use `listByIndex` when you want to iterate through matching items as an async stream of batches.  The same list options used by `list` are supported here, including `limit` when you want to stop after a fixed number of records.
+Use `listByIndex` when you want to iterate through matching items as an async stream of batches. The same list options used by `list` are supported here, including `limit` when you want to stop after a fixed number of records.
 
 **Code: Streaming by Sorted Index**
 ```typescript
@@ -391,17 +398,22 @@ You can also provide key values to filter within a sorted index with `pageByInde
 ```typescript
 export async function listWithFilterExample(modelService: ModelIndexedSupport) {
   // Get all users named 'John' sorted by age
-  const result = await modelService.pageByIndex(User, usersByNameAge, {
-    name: 'John'
-  }, {
-    limit: 10
-  });
+  const result = await modelService.pageByIndex(
+    User,
+    usersByNameAge,
+    {
+      name: 'John'
+    },
+    {
+      limit: 10
+    }
+  );
   return result;
 }
 ```
 
 ## Integration
-Index registration happens automatically when models are decorated with [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14). Model services like [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module."), [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module."), and [SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") implement the [ModelIndexedSupport](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L16) interface to provide indexed access.
+Index registration happens automatically when models are decorated with [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14). Model services like [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module."), [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module."), and [SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") implement the [ModelIndexedSupport](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L21) interface to provide indexed access.
 
 ### Reading Registry Information
 You can access registered indexes via [ModelRegistryIndex](https://github.com/travetto/travetto/tree/main/module/model/src/registry/registry-index.ts#L12) at runtime:
@@ -413,7 +425,7 @@ export function registryAccessExample() {
   const indexes = registry.indices; // Map of all indexes for the model
 
   // Access a specific index
-  const userByName = indexes?.['userByName'];
+  const userByName = indexes?.userByName;
   return userByName;
 }
 ```
@@ -423,5 +435,5 @@ export function registryAccessExample() {
    *  **Plan indexes strategically** — Define indexes for your common query patterns
    *  **Use composite keys** — When filtering by multiple fields, include all of them in a single index
    *  **Leverage sorting** — Use sorted indexes for paginated lists and range queries
-   *  **Enforce uniqueness** — Use [uniqueIndex](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L47) for fields that must be globally unique
-   *  **Handle errors gracefully** — Catch [IndexedFieldError](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/error.ts#L7) when working with user input
+   *  **Enforce uniqueness** — Use [uniqueIndex](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L57) for fields that must be globally unique
+   *  **Handle errors gracefully** — Catch [IndexedFieldError](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/error.ts#L6) when working with user input

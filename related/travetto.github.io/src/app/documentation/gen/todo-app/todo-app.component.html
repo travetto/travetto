@@ -12,7 +12,7 @@
 </ol></div></div>
 <div class="documentation">
 <h1>Getting Started: A Todo App </h1>
-The following tutorial wil walk you through setting up a <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/related/todo-app">Todo App</a>.  If you want the LLM-assisted path instead of manual setup, start with <code class="item input">trv llm-support:recommend</code> to pick a bundle, <code class="item input">trv llm-support:plan</code> to preview the changes, and <code class="item input">trv llm-support:execute</code> to apply them.
+The following tutorial wil walk you through setting up a <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> application from scratch. We'll be building a simple todo application. The entire source of the finished project can be found at <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/related/todo-app">Todo App</a>. If you want the LLM-assisted path instead of manual setup, start with <code class="item input">trv llm-support:recommend</code> to pick a bundle, <code class="item input">trv llm-support:plan</code> to preview the changes, and <code class="item input">trv llm-support:execute</code> to apply them.
 
 
 
@@ -45,7 +45,7 @@ $ npx trv eslint:register</code></pre>
 
 <h2 id="establishing-the-model">Establishing The Model</h2>
 
-Let's create the model for the todo application.  The fields we will need should be:
+Let's create the model for the todo application. The fields we will need should be:
 <ul> <li><code class="item field">id</code> as a unique identifier</li>
 <li><code class="item field">text</code> as the actual todo information</li>
 <li><code class="item field">created</code> the date the todo was created</li>
@@ -80,7 +80,7 @@ Create the file <code class="item path">src/model.ts</code>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-as you can see, the model structure is simple.  Everything that uses the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">&#64;Model</a> services needs to implement <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10">ModelType</a>.
+as you can see, the model structure is simple. Everything that uses the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">&#64;Model</a> services needs to implement <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10">ModelType</a>.
 
 <h2 id="building-the-service-layer">Building the Service Layer</h2>
 
@@ -97,14 +97,13 @@ Now we need to create <code class="item path">src/service.ts</code>
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/related/todo-app/src/service.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> MongoModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/model-mongo'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable<span class="token punctuation">,</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject<span class="token punctuation">,</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> MongoModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/model-mongo'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Todo<span class="token punctuation">,</span> <span class="token keyword">type</span> <span class="token class-name">TodoSearch</span> <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./model.ts'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TodoService</span> <span class="token punctuation">{{'{'}}</span>
-
   <span class="token comment">/** &#64;private */</span>
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> modelService<span class="token operator">:</span> MongoModelService<span class="token punctuation">;</span>
 
@@ -162,20 +161,20 @@ Now the tests should be defined at <code class="item path">test/service.ts</code
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> assert <span class="token keyword">from</span> <span class="token string">'node:assert'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Suite<span class="token punctuation">,</span> Test <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/test'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MongoModelConfig<span class="token punctuation">,</span> MongoModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/model-mongo'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Suite<span class="token punctuation">,</span> Test <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/test'</span><span class="token punctuation">;</span>
+
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableSuite <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di/support/test/suite.ts'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelSuite <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/model/support/test/suite.ts'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> TodoService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/service.ts'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Todo <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/model.ts'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> TodoService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/service.ts'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Suite</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">ModelSuite</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">InjectableSuite</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TodoTest</span> <span class="token punctuation">{{'{'}}</span>
-
   serviceClass <span class="token operator">=</span> MongoModelService<span class="token punctuation">;</span>
   configClass <span class="token operator">=</span> MongoModelConfig<span class="token punctuation">;</span>
 
@@ -236,11 +235,11 @@ Finally, we establish the controller at <code class="item path">src/web.ts</code
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/related/todo-app/src/web.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> Post<span class="token punctuation">,</span> Put<span class="token punctuation">,</span> Delete <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/web'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Delete<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> Post<span class="token punctuation">,</span> Put <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/web'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> TodoService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./service.ts'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> Todo<span class="token punctuation">,</span> TodoSearch <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./model.ts'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> TodoService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./service.ts'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
  * Todo request
@@ -249,7 +248,6 @@ Finally, we establish the controller at <code class="item path">src/web.ts</code
 
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/todo'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TodoController</span> <span class="token punctuation">{{'{'}}</span>
-
   _service<span class="token operator">:</span> TodoService<span class="token punctuation">;</span>
 
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -337,7 +335,7 @@ First we must start the application:
     <figcaption class="terminal">Application Startup
 
 </figcaption>
-    <pre><code class="language-bash"><span class="token number">2029</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>&#64;travetto/web-http:src/node.ts:26<span class="token punctuation">]</span> Initialized <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-bash"><span class="token number">2029</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>&#64;travetto/web-http:src/node.ts:25<span class="token punctuation">]</span> Initialized <span class="token punctuation">{{'{'}}</span>
   manifest: <span class="token punctuation">{{'{'}}</span>
     main: <span class="token punctuation">{{'{'}}</span>
       name: <span class="token string">'&#64;travetto/todo-app'</span>,
@@ -480,7 +478,7 @@ First we must start the application:
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>&#64;travetto/web-http:src/node.ts:27<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span> <span class="token punctuation">{{'}'}}</span></code></pre>
+<span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>&#64;travetto/web-http:src/node.ts:26<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span> <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 next, let's execute <a target="_blank" class="external-link" href="https://nodejs.org/api/globals.html#fetch">fetch</a> requests to interact with the new api. <br><br>
@@ -500,8 +498,7 @@ Create <code class="item path">support/create-todo.ts</code> with the following 
     headers<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token string-property property">'Content-Type'</span><span class="token operator">:</span> <span class="token string">'application/json'</span>
     <span class="token punctuation">{{'}'}}</span>
-  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
-    <span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>response <span class="token operator">=></span> response<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>response <span class="token operator">=></span> response<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token builtin">console</span><span class="token punctuation">.</span>log<span class="token operator">!</span><span class="token punctuation">(</span>result<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>

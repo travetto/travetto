@@ -15,7 +15,7 @@ yarn add @travetto/context
 
 This module provides a wrapper around node's [async_hooks](https://nodejs.org/api/async_hooks.html) to maintain context across async calls. This is generally used for retaining contextual user information at various levels of async flow. 
 
-The most common way of utilizing the context, is via the [@WithAsyncContext](https://github.com/travetto/travetto/tree/main/module/context/src/decorator.ts#L9) decorator.  The decorator requires the class it's being used in, to have a [AsyncContext](https://github.com/travetto/travetto/tree/main/module/context/src/service.ts#L12) member, as it is the source of the contextual information. 
+The most common way of utilizing the context, is via the [@WithAsyncContext](https://github.com/travetto/travetto/tree/main/module/context/src/decorator.ts#L9) decorator. The decorator requires the class it's being used in, to have a [AsyncContext](https://github.com/travetto/travetto/tree/main/module/context/src/service.ts#L12) member, as it is the source of the contextual information. 
 
 The decorator will load the context on invocation, and will keep the context active during the entire asynchronous call chain. 
 
@@ -29,7 +29,6 @@ import { Inject } from '@travetto/di';
 const NameSymbol = Symbol();
 
 export class ContextAwareService {
-
   @Inject()
   context: AsyncContext;
 
@@ -54,7 +53,7 @@ export class ContextAwareService {
 ```
 
 ## AsyncContextValue
-Within the framework that is a need to access context values, in a type safe fashion.  Additionally, we have the requirement to keep the data accesses isolated from other operations.  To this end, [AsyncContextValue](https://github.com/travetto/travetto/tree/main/module/context/src/value.ts#L16) was created to support this use case.  This class represents the ability to define a simple read/write contract for a given context field.  It also provides some supplemental functionality, e.g., the ability to suppress errors if a context is not initialized.
+Within the framework that is a need to access context values, in a type safe fashion. Additionally, we have the requirement to keep the data accesses isolated from other operations. To this end, [AsyncContextValue](https://github.com/travetto/travetto/tree/main/module/context/src/value.ts#L16) was created to support this use case. This class represents the ability to define a simple read/write contract for a given context field. It also provides some supplemental functionality, e.g., the ability to suppress errors if a context is not initialized.
 
 **Code: Source for AsyncContextValue**
 ```typescript
@@ -77,7 +76,6 @@ import { type AsyncContext, AsyncContextValue, WithAsyncContext } from '@travett
 import { Inject } from '@travetto/di';
 
 export class ContextValueService {
-
   @Inject()
   context: AsyncContext;
 

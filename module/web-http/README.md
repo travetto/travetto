@@ -13,7 +13,7 @@ npm install @travetto/web-http
 yarn add @travetto/web-http
 ```
 
-This module provides basic for running [http](https://nodejs.org/api/http.html). [https](https://nodejs.org/api/https.html)  and [http2](https://nodejs.org/api/http2.html) servers, along with support for tls key generation during development.
+This module provides basic for running [http](https://nodejs.org/api/http.html). [https](https://nodejs.org/api/https.html) and [http2](https://nodejs.org/api/http2.html) servers, along with support for tls key generation during development.
 
 ## CLI - web:http
 By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L20) for [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http/src/types.ts#L19) that will follow default behaviors, and spin up the server.
@@ -117,7 +117,6 @@ Listening on port { port: 3000 }
 **Code: Standard Web Http Config**
 ```typescript
 export class WebHttpConfig {
-
   /**
    * What version of HTTP to use
    * Version 2 requires SSL for direct browser access
@@ -153,8 +152,8 @@ export class WebHttpConfig {
 
   @PostConstruct()
   async finalizeConfig(): Promise<void> {
-    this.tls ??= (this.httpVersion === '2' || !!this.tlsKeys);
-    this.port = (this.port < 0 ? await NetUtil.getFreePort() : this.port);
+    this.tls ??= this.httpVersion === '2' || !!this.tlsKeys;
+    this.port = this.port < 0 ? await NetUtil.getFreePort() : this.port;
     this.bindAddress ||= NetUtil.getLocalAddress();
 
     if (!this.tls) {
@@ -166,7 +165,8 @@ export class WebHttpConfig {
       }
       this.tlsKeys = await WebTlsUtil.generateKeyPair();
     } else {
-      if (this.tlsKeys.key.length < 100) { // We have files or resources
+      if (this.tlsKeys.key.length < 100) {
+        // We have files or resources
         this.tlsKeys.key = await RuntimeResources.readUTF8(this.tlsKeys.key);
         this.tlsKeys.cert = await RuntimeResources.readUTF8(this.tlsKeys.cert);
       }
@@ -182,17 +182,16 @@ To customize a Web server, you may need to construct an entry point using the [@
 
 **Code: Application entry point for Web Applications**
 ```typescript
-import { Env, toConcrete } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
-import { type WebHttpServer, WebHttpConfig } from '@travetto/web-http';
+import { Env, toConcrete } from '@travetto/runtime';
+import { WebHttpConfig, type WebHttpServer } from '@travetto/web-http';
 
 import './config-override.ts';
 
 @CliCommand({ runTarget: true })
 export class SampleApp {
-
   preMain(): void {
     Env.NODE_ENV.set('production');
   }
@@ -288,7 +287,6 @@ Listening on port { port: 3000 }
 **Code: Implementation**
 ```typescript
 export class NodeWebHttpServer implements WebHttpServer {
-
   @Inject()
   serverConfig: WebHttpConfig;
 
@@ -299,7 +297,7 @@ export class NodeWebHttpServer implements WebHttpServer {
   configService: ConfigurationService;
 
   async serve(): Promise<WebServerHandle> {
-    const handle = await WebHttpUtil.startHttpServer({ ...this.serverConfig, dispatcher: this.router, });
+    const handle = await WebHttpUtil.startHttpServer({ ...this.serverConfig, dispatcher: this.router });
     console.log('Initialized', await this.configService.initBanner());
     console.log('Listening', { port: this.serverConfig.port });
     return handle;
@@ -307,7 +305,7 @@ export class NodeWebHttpServer implements WebHttpServer {
 }
 ```
 
-Current the [NodeWebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http/src/node.ts#L13) is the only provided [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http/src/types.ts#L19) implementation.  It supports http/1.1, http/2, and tls, and is the same foundation as used by express, koa, and other popular frameworks.
+Current the [NodeWebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http/src/node.ts#L13) is the only provided [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http/src/types.ts#L19) implementation. It supports http/1.1, http/2, and tls, and is the same foundation as used by express, koa, and other popular frameworks.
 
 ## Standard Utilities
 The module also provides standard utilities for starting http servers programmatically:
@@ -349,12 +347,12 @@ static buildHandler(dispatcher: WebDispatcher): (request: HttpRequest, response:
 ```
 
 we can see the structure for integrating the server behavior with the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") module dispatcher:
-   *  Converting the node primitive request to a  [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11)
+   *  Converting the node primitive request to a [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11)
    *  Dispatching the request through the framework
    *  Receiving the [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3) and sending that back over the primitive response.
 
 ## TLS Support
-Additionally the framework supports TLS out of the box, by allowing you to specify your public and private keys for the cert.  In dev mode, the framework will also automatically generate a self-signed cert if:
+Additionally the framework supports TLS out of the box, by allowing you to specify your public and private keys for the cert. In dev mode, the framework will also automatically generate a self-signed cert if:
    *  TLS support is configured
    *  [node-forge](https://www.npmjs.com/package/node-forge) is installed
    *  Not running in production
@@ -362,4 +360,4 @@ Additionally the framework supports TLS out of the box, by allowing you to speci
 
 This is useful for local development where you implicitly trust the cert. 
 
-TLS support can be enabled by setting `web.http.tls: true` in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by [RuntimeResources](https://github.com/travetto/travetto/tree/main/module/runtime/src/resources.ts#L8).
+TLS support can be enabled by setting `web.http.tls: true` in your config. The key/cert can be specified as string directly in the config file/environment variables. The key/cert can also be specified as a path to be picked up by [RuntimeResources](https://github.com/travetto/travetto/tree/main/module/runtime/src/resources.ts#L8).

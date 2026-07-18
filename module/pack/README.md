@@ -13,7 +13,7 @@ npm install @travetto/pack
 yarn add @travetto/pack
 ```
 
-This module provides the necessary tools to produce deliverable output for [Travetto](https://travetto.dev) based projects.  The main interaction with this module is through the command line interface, and the operations it provides.  Under the covers, the code bundling is performed by [Rollup](https://rollupjs.org/), with specific configuration to support the frameworks runtime expectations. 
+This module provides the necessary tools to produce deliverable output for [Travetto](https://travetto.dev) based projects. The main interaction with this module is through the command line interface, and the operations it provides. Under the covers, the code bundling is performed by [Rollup](https://rollupjs.org/), with specific configuration to support the frameworks runtime expectations. 
 
 There are three primary cli commands for packing your code:
    *  pack
@@ -61,7 +61,7 @@ This command line operation will compile your project, and produce a ready to us
 Specific to this CLI command, the `output` field determines where the final folder is written that contains all the compiled source.
 
 ### Entry Point Configuration
-Every application requires an entry point to determine execution flow (and in [Rollup](https://rollupjs.org/)'s case, tree-shaking as well.).  By default the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework") acts as the entry point.  This bypasses the [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework") intentionally, as the compiler is not available at runtime. 
+Every application requires an entry point to determine execution flow (and in [Rollup](https://rollupjs.org/)'s case, tree-shaking as well.). By default the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework") acts as the entry point. This bypasses the [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework") intentionally, as the compiler is not available at runtime. 
 
 Within the command line, the `args` are positional arguments that will be passed to the entry point on application run.
 
@@ -85,16 +85,16 @@ And this entry point would be what is executed by [docker](https://www.docker.co
 ### General Packing Operations
 Every [Pack](https://github.com/travetto/travetto/tree/main/module/pack#readme "Code packing utilities") operation extends from the base command, and that provides some consistent operations that run on every packing command.
    *  `clean` - Empties workspace before beginning, controlled by the `--clean` flag, defaults to on
-   *  `writeEnv` - Writes the .env.js files that includes the necessary details to start the application.  This is primarily to identify the location of the manifest file needed to run.
+   *  `writeEnv` - Writes the .env.js files that includes the necessary details to start the application. This is primarily to identify the location of the manifest file needed to run.
    *  `writePackageJson` - Generates the [Package JSON](https://docs.npmjs.com/cli/v9/configuring-npm/package-json) with the appropriate module type ([CommonJS](https://nodejs.org/api/modules.html) or [Ecmascript Module](https://nodejs.org/api/esm.html)) for interpreting plain `.js` files
    *  `writeEntryScript` - Create the entry script based on the `--entry-command`, `args`
    *  `copyResources` - Will pull in local `resources/**` files into the final output
-   *  `primeAppCache` - Runs `trv run` to ensure the appropriate files are generated to allow for running the application.  This only applies if the entry point is equivalent to `trv run`
-   *  `writeManifest` - Produces the `production`-ready manifest that is used at runtime.  Removes all devDependencies from the manifest.json
-   *  `bundle` - Invokes [Rollup](https://rollupjs.org/) with the appropriate file set to produce a single output .js file.  Depending on the module type ([CommonJS](https://nodejs.org/api/modules.html) or [Ecmascript Module](https://nodejs.org/api/esm.html)) the build process differs to handle the dynamic loading that application does at runtime.
+   *  `primeAppCache` - Runs `trv run` to ensure the appropriate files are generated to allow for running the application. This only applies if the entry point is equivalent to `trv run`
+   *  `writeManifest` - Produces the `production`-ready manifest that is used at runtime. Removes all devDependencies from the manifest.json
+   *  `bundle` - Invokes [Rollup](https://rollupjs.org/) with the appropriate file set to produce a single output .js file. Depending on the module type ([CommonJS](https://nodejs.org/api/modules.html) or [Ecmascript Module](https://nodejs.org/api/esm.html)) the build process differs to handle the dynamic loading that application does at runtime.
 
 ## CLI - pack:zip
-This command is nearly identical to the standard `pack` operation, except for the `output` flag.  In this scenario, the `output` flag determines the location and name of the final zip file.
+This command is nearly identical to the standard `pack` operation, except for the `output` flag. In this scenario, the `output` flag determines the location and name of the final zip file.
 
 **Terminal: Help for pack:zip**
 ```bash
@@ -178,16 +178,16 @@ Options:
 Examples:
 ```
 
-The additional flags provided are allow for specifying the base image, the final docker image name (and tags), and which registry to push to (if  any).  Additionally, there are flags for exposing which ports the image should expect to open as well.   When using the `--eject-file`  flag, the output script will produce the entire Dockerfile output inline, so that it can be easily modified as needed. 
+The additional flags provided are allow for specifying the base image, the final docker image name (and tags), and which registry to push to (if any). Additionally, there are flags for exposing which ports the image should expect to open as well. When using the `--eject-file` flag, the output script will produce the entire Dockerfile output inline, so that it can be easily modified as needed. 
 
 In addition to the standard operations, this command adds the following steps:
    *  `writeDockerFile` - Generate the docker file contents
    *  `pullDockerBaseImage` - Pull base image, to ensure its available and primed
    *  `buildDockerContainer` - Build final container
-   *  `pushDockerContainer` - Push container with appropriate tags.  Only applies if `--docker-push` is specified
+   *  `pushDockerContainer` - Push container with appropriate tags. Only applies if `--docker-push` is specified
 
 ## Ejected File
-As indicated, any of the pack operations can be ejected, and produce an output that can be run independent of the pack command.  This is helpful when integrating with more complicated build processes.
+As indicated, any of the pack operations can be ejected, and produce an output that can be run independent of the pack command. This is helpful when integrating with more complicated build processes.
 
 **Terminal: Sample Ejected File**
 ```bash

@@ -13,7 +13,7 @@ npm install @travetto/schema-faker
 yarn add @travetto/schema-faker
 ```
 
-In the course of application development, there is often a need to generate fake data on demand. Given all the information that we have about the schemas provided, translating that into data generation is fairly straightforward.  The generation utility is built upon [faker](https://github.com/faker-js/faker), mapping data types, and various field names into specific [faker](https://github.com/faker-js/faker) generation routines. 
+In the course of application development, there is often a need to generate fake data on demand. Given all the information that we have about the schemas provided, translating that into data generation is fairly straightforward. The generation utility is built upon [faker](https://github.com/faker-js/faker), mapping data types, and various field names into specific [faker](https://github.com/faker-js/faker) generation routines. 
 
 By default all types are mapped as-is:
    *  `string`
@@ -64,7 +64,7 @@ static #namesToType = {
       [/dob|birth/, (): Date => faker.date.past({ years: 60 })],
       [/creat(e|ion)/, this.#between.bind(null, -200, -100)],
       [/(update|modif(y|ied))/, this.#between.bind(null, -100, -50)]
-    ]),
+    ])
   };
 ```
 
@@ -72,8 +72,8 @@ An example of this would be:
 
 **Code: More complex Schema, used with Faker**
 ```typescript
-import { SchemaFaker } from '@travetto/schema-faker';
 import { Schema } from '@travetto/schema';
+import { SchemaFaker } from '@travetto/schema-faker';
 
 @Schema()
 class Address {

@@ -15,7 +15,7 @@
 <span class="token function">yarn</span> <span class="token function">add</span> &#64;travetto/web-http</code></pre>
   </figure>
 
-This module provides basic for running <a target="_blank" class="external-link" href="https://nodejs.org/api/http.html">http</a>. <a target="_blank" class="external-link" href="https://nodejs.org/api/https.html">https</a>  and <a target="_blank" class="external-link" href="https://nodejs.org/api/http2.html">http2</a> servers, along with support for tls key generation during development.
+This module provides basic for running <a target="_blank" class="external-link" href="https://nodejs.org/api/http.html">http</a>. <a target="_blank" class="external-link" href="https://nodejs.org/api/https.html">https</a> and <a target="_blank" class="external-link" href="https://nodejs.org/api/http2.html">http2</a> servers, along with support for tls key generation during development.
 <h2 id="cli-web-http">CLI - web:http</h2>
 
 By default, the framework provides a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L20">&#64;CliCommand</a> for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-http/src/types.ts#L19">WebHttpServer</a> that will follow default behaviors, and spin up the server.
@@ -126,7 +126,6 @@ Listening on port <span class="token punctuation">{{'{'}}</span> port: <span cla
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">WebHttpConfig</span> <span class="token punctuation">{{'{'}}</span>
-
   <span class="token comment">/**
    * What version of HTTP to use
    * Version 2 requires SSL for direct browser access
@@ -162,8 +161,8 @@ Listening on port <span class="token punctuation">{{'{'}}</span> port: <span cla
 
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">PostConstruct</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">finalizeConfig</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>tls <span class="token operator">??=</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>httpVersion <span class="token operator">===</span> <span class="token string">'2'</span> <span class="token operator">||</span> <span class="token operator">!</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>port <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>port <span class="token operator">&lt;</span> <span class="token number">0</span> <span class="token operator">?</span> <span class="token keyword">await</span> NetUtil<span class="token punctuation">.</span><span class="token function">getFreePort</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>port<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>tls <span class="token operator">??=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>httpVersion <span class="token operator">===</span> <span class="token string">'2'</span> <span class="token operator">||</span> <span class="token operator">!</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>port <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>port <span class="token operator">&lt;</span> <span class="token number">0</span> <span class="token operator">?</span> <span class="token keyword">await</span> NetUtil<span class="token punctuation">.</span><span class="token function">getFreePort</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>port<span class="token punctuation">;</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>bindAddress <span class="token operator">||=</span> NetUtil<span class="token punctuation">.</span><span class="token function">getLocalAddress</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>tls<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -175,7 +174,8 @@ Listening on port <span class="token punctuation">{{'{'}}</span> port: <span cla
       <span class="token punctuation">{{'}'}}</span>
       <span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys <span class="token operator">=</span> <span class="token keyword">await</span> WebTlsUtil<span class="token punctuation">.</span><span class="token function">generateKeyPair</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">.</span>key<span class="token punctuation">.</span>length <span class="token operator">&lt;</span> <span class="token number">100</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token comment">// We have files or resources</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">.</span>key<span class="token punctuation">.</span>length <span class="token operator">&lt;</span> <span class="token number">100</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+        <span class="token comment">// We have files or resources</span>
         <span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">.</span>key <span class="token operator">=</span> <span class="token keyword">await</span> RuntimeResources<span class="token punctuation">.</span><span class="token function">readUTF8</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">.</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">.</span>cert <span class="token operator">=</span> <span class="token keyword">await</span> RuntimeResources<span class="token punctuation">.</span><span class="token function">readUTF8</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">.</span>cert<span class="token punctuation">)</span><span class="token punctuation">;</span>
       <span class="token punctuation">{{'}'}}</span>
@@ -195,17 +195,16 @@ To customize a Web server, you may need to construct an entry point using the <a
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-http/doc/cli.web_custom.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Env<span class="token punctuation">,</span> toConcrete <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/runtime'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/cli'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/cli'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DependencyRegistryIndex <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Registry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/registry'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> <span class="token keyword">type</span> <span class="token class-name">WebHttpServer</span><span class="token punctuation">,</span> WebHttpConfig <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/web-http'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Env<span class="token punctuation">,</span> toConcrete <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/runtime'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> WebHttpConfig<span class="token punctuation">,</span> <span class="token keyword">type</span> <span class="token class-name">WebHttpServer</span> <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/web-http'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token string">'./config-override.ts'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">CliCommand</span></span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> runTarget<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleApp</span> <span class="token punctuation">{{'{'}}</span>
-
   <span class="token function">preMain</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
     Env<span class="token punctuation">.</span><span class="token constant">NODE_ENV</span><span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'production'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -306,7 +305,6 @@ Listening on port <span class="token punctuation">{{'{'}}</span> port: <span cla
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">NodeWebHttpServer</span> <span class="token keyword">implements</span> <span class="token class-name">WebHttpServer</span> <span class="token punctuation">{{'{'}}</span>
-
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   serverConfig<span class="token operator">:</span> WebHttpConfig<span class="token punctuation">;</span>
 
@@ -317,7 +315,7 @@ Listening on port <span class="token punctuation">{{'{'}}</span> port: <span cla
   configService<span class="token operator">:</span> ConfigurationService<span class="token punctuation">;</span>
 
   <span class="token keyword">async</span> <span class="token function">serve</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>WebServerHandle<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">const</span> handle <span class="token operator">=</span> <span class="token keyword">await</span> WebHttpUtil<span class="token punctuation">.</span><span class="token function">startHttpServer</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> <span class="token operator">...</span><span class="token keyword">this</span><span class="token punctuation">.</span>serverConfig<span class="token punctuation">,</span> dispatcher<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>router<span class="token punctuation">,</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> handle <span class="token operator">=</span> <span class="token keyword">await</span> WebHttpUtil<span class="token punctuation">.</span><span class="token function">startHttpServer</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> <span class="token operator">...</span><span class="token keyword">this</span><span class="token punctuation">.</span>serverConfig<span class="token punctuation">,</span> dispatcher<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>router <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Initialized'</span><span class="token punctuation">,</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>configService<span class="token punctuation">.</span><span class="token function">initBanner</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Listening'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> port<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>serverConfig<span class="token punctuation">.</span>port <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">return</span> handle<span class="token punctuation">;</span>
@@ -325,7 +323,7 @@ Listening on port <span class="token punctuation">{{'{'}}</span> port: <span cla
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-Current the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-http/src/node.ts#L13">NodeWebHttpServer</a> is the only provided <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-http/src/types.ts#L19">WebHttpServer</a> implementation.  It supports http/1.1, http/2, and tls, and is the same foundation as used by express, koa, and other popular frameworks.
+Current the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-http/src/node.ts#L13">NodeWebHttpServer</a> is the only provided <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-http/src/types.ts#L19">WebHttpServer</a> implementation. It supports http/1.1, http/2, and tls, and is the same foundation as used by express, koa, and other popular frameworks.
 
 <h2 id="standard-utilities">Standard Utilities</h2>
 
@@ -361,7 +359,7 @@ Specifically, looking at <code class="item method">buildHandler</code>,
 
   <figure class="code">
     <figcaption class="code">Web Http Utilities
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-http/src/http.ts#L32">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-http/src/http.ts#L31">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">static</span> <span class="token function">buildHandler</span><span class="token punctuation">(</span>dispatcher<span class="token operator">:</span> WebDispatcher<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token punctuation">(</span>request<span class="token operator">:</span> HttpRequest<span class="token punctuation">,</span> response<span class="token operator">:</span> HttpResponse<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
@@ -374,18 +372,18 @@ Specifically, looking at <code class="item method">buildHandler</code>,
   </figure>
 
 we can see the structure for integrating the server behavior with the <a class="module-link" routerLink="/docs/web" title="Declarative support for creating Web Applications">Web API</a> module dispatcher:
-<ul> <li>Converting the node primitive request to a  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11">WebRequest</a></li>
+<ul> <li>Converting the node primitive request to a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11">WebRequest</a></li>
 <li>Dispatching the request through the framework</li>
 <li>Receiving the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3">WebResponse</a> and sending that back over the primitive response.</li>
 </ul>
 
 <h2 id="tls-support">TLS Support</h2>
 
-Additionally the framework supports TLS out of the box, by allowing you to specify your public and private keys for the cert.  In dev mode, the framework will also automatically generate a self-signed cert if:
+Additionally the framework supports TLS out of the box, by allowing you to specify your public and private keys for the cert. In dev mode, the framework will also automatically generate a self-signed cert if:
 <ul> <li>TLS support is configured</li>
 <li><a target="_blank" class="external-link" href="https://www.npmjs.com/package/node-forge">node-forge</a> is installed</li>
 <li>Not running in production</li>
 <li>No keys provided</li>
 </ul>
 This is useful for local development where you implicitly trust the cert. <br><br>
-TLS support can be enabled by setting <code class="item input">web.http.tls: true</code> in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/resources.ts#L8">RuntimeResources</a>.
+TLS support can be enabled by setting <code class="item input">web.http.tls: true</code> in your config. The key/cert can be specified as string directly in the config file/environment variables. The key/cert can also be specified as a path to be picked up by <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/resources.ts#L8">RuntimeResources</a>.

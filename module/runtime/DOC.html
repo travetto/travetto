@@ -15,7 +15,7 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/runtime</code></pre>
   </figure>
 
-Runtime is the foundation of all <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
+Runtime is the foundation of all <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> applications. It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
 <ul> <li>Runtime Context</li>
 <li>Environment Support</li>
 <li>Standard Error Support</li>
@@ -33,7 +33,7 @@ Runtime is the foundation of all <a target="_blank" class="external-link" href="
 
 <h2 id="runtime-context">Runtime Context</h2>
 
-While running any code within the framework, there are common patterns/goals for interacting with the underlying code repository.  These include:
+While running any code within the framework, there are common patterns/goals for interacting with the underlying code repository. These include:
 <ul> <li>Determining attributes of the running environment (e.g., name, debug information, production flags)</li>
 <li>Resolving paths within the workspace (e.g. standard, tooling, resourcing, modules)</li>
 </ul>
@@ -84,11 +84,11 @@ While running any code within the framework, there are common patterns/goals for
 
 <h3 id="class-and-function-metadata">Class and Function Metadata</h3>
 
-For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every <code class="item input">class</code> is decorated with metadata, including methods, line numbers, and ultimately a unique id stored at <code class="item input">Ⲑid</code>.
+For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads. To achieve this, every <code class="item input">class</code> is decorated with metadata, including methods, line numbers, and ultimately a unique id stored at <code class="item input">Ⲑid</code>.
 
 <h2 id="environment-support">Environment Support</h2>
 
-The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114">Env</a> object, and will return a scoped <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L8">EnvProp</a>, that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports <code class="item input">true</code> or <code class="item input">false</code>
+The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L134">Env</a> object, and will return a scoped <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L8">EnvProp</a>, that is compatible with the property definition. E.g. only showing boolean related fields when the underlying flag supports <code class="item input">true</code> or <code class="item input">false</code>
 
   <figure class="code">
     <figcaption class="code">Base Known Environment Flags
@@ -155,7 +155,9 @@ For a given <a target="_blank" class="source-link" href="https://github.com/trav
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">EnvProp<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">readonly</span> key<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  <span class="token function">constructor</span><span class="token punctuation">(</span>key<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token keyword">this</span><span class="token punctuation">.</span>key <span class="token operator">=</span> key<span class="token punctuation">;</span> <span class="token punctuation">{{'}'}}</span>
+  <span class="token function">constructor</span><span class="token punctuation">(</span>key<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Set value according to type */</span>
+  <span class="token function">set</span><span class="token punctuation">(</span>value<span class="token operator">:</span> <span class="token constant">T</span> <span class="token operator">|</span> <span class="token keyword">undefined</span> <span class="token operator">|</span> <span class="token keyword">null</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
   <span class="token comment">/** Remove value */</span>
   <span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
   <span class="token comment">/** Export value */</span>
@@ -183,8 +185,8 @@ For a given <a target="_blank" class="source-link" href="https://github.com/trav
 
 <h2 id="standard-error-support">Standard Error Support</h2>
 
-While the framework is 100 % compatible with standard <code class="item input">Error</code> instances, there are cases in which additional functionality is desired. Within the framework we use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L17">RuntimeError</a> (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/web" title="Declarative support for creating Web Applications">Web API</a> module and HTTP status codes). <br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L17">RuntimeError</a> takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
+While the framework is 100 % compatible with standard <code class="item input">Error</code> instances, there are cases in which additional functionality is desired. Within the framework we use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L10">RuntimeError</a> (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/web" title="Declarative support for creating Web Applications">Web API</a> module and HTTP status codes). <br><br>
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L10">RuntimeError</a> takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
 <ul> <li><code class="item input">general</code> - General purpose errors</li>
 <li><code class="item input">system</code> - Synonym for <code class="item input">general</code></li>
 <li><code class="item input">data</code> - Data format, content, etc are incorrect. Generally correlated to bad input.</li>
@@ -210,7 +212,7 @@ The supported operations are:
 
 <h3 id="how-logging-is-instrumented">How Logging is Instrumented</h3>
 
-All of the logging instrumentation occurs at transpilation time.  All <code class="item method">console.*</code> methods are replaced with a call to a globally defined variable that delegates to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/console.ts#L43">ConsoleManager</a>.  This module, hooks into the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/console.ts#L43">ConsoleManager</a> and receives all logging events from all files compiled by the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a>. <br><br>
+All of the logging instrumentation occurs at transpilation time. All <code class="item method">console.*</code> methods are replaced with a call to a globally defined variable that delegates to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/console.ts#L44">ConsoleManager</a>. This module, hooks into the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/console.ts#L44">ConsoleManager</a> and receives all logging events from all files compiled by the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a>. <br><br>
 A sample of the instrumentation would be:
 
   <figure class="code">
@@ -253,7 +255,7 @@ A sample of the instrumentation would be:
 
 <h4 id="filtering-debug">Filtering Debug</h4>
 
-The <code class="item input">debug</code> messages can be filtered using the patterns from the <a target="_blank" class="external-link" href="https://www.npmjs.com/package/debug">debug</a>.  You can specify wild cards to only <code class="item input">DEBUG</code> specific modules, folders or files.  You can specify multiple, and you can also add negations to exclude specific packages.
+The <code class="item input">debug</code> messages can be filtered using the patterns from the <a target="_blank" class="external-link" href="https://www.npmjs.com/package/debug">debug</a>. You can specify wild cards to only <code class="item input">DEBUG</code> specific modules, folders or files. You can specify multiple, and you can also add negations to exclude specific packages.
 
   <figure class="terminal">
     <figcaption class="terminal">Sample environment flags
@@ -279,8 +281,8 @@ $ <span class="token assign-left variable">DEBUG</span><span class="token operat
 <h2 id="resource-access">Resource Access</h2>
 
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/manifest" title="Support for project indexing, manifesting, along with file watching">Manifest</a>'s data for what resources were found at manifesting time.<br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11">FileLoader</a> allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <code class="item class">Readable</code> stream.  If a file is not found, it will throw an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L17">RuntimeError</a> with a category of 'notfound'.  <br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11">FileLoader</a> also supports tying itself to <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114">Env</a>'s <code class="item field">TRV_RESOURCES</code> information on where to attempt to find a requested resource.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11">FileLoader</a> allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <code class="item class">Readable</code> stream. If a file is not found, it will throw an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L10">RuntimeError</a> with a category of 'notfound'. <br><br>
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11">FileLoader</a> also supports tying itself to <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L134">Env</a>'s <code class="item field">TRV_RESOURCES</code> information on where to attempt to find a requested resource.
 
 <h2 id="encoding-and-decoding-utilities">Encoding and Decoding Utilities</h2>
 
@@ -295,12 +297,12 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 
 <h2 id="common-utilities">Common Utilities</h2>
 
-Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L14">Util</a> includes:
+Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L16">Util</a> includes:
 <ul> <li><code class="item method">uuid(len: number)</code> generates a simple uuid for use within the application.</li>
-<li><code class="item method">allowDenyMatcher(rules[])</code> builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.</li>
+<li><code class="item method">allowDenyMatcher(rules[])</code> builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters. Negative rules are prefixed by '!'.</li>
 <li><code class="item method">hash(text: string, size?: number)</code> produces a full sha512 hash.</li>
-<li><code class="item method">resolvablePromise()</code> produces a <code class="item class">Promise</code> instance with the <code class="item method">resolve</code> and <code class="item method">reject</code> methods attached to the instance.  This is extremely useful for integrating promises into async iterations, or any other situation in which the promise creation and the execution flow don't always match up.</li>
-<li><code class="item method">bufferedFileWrite(file:string, content: string)</code> will write the file, using a temporary buffer file to ensure that the entire file is written before being moved to the final location.  This helps minimize file watch noise when writing files.</li>
+<li><code class="item method">resolvablePromise()</code> produces a <code class="item class">Promise</code> instance with the <code class="item method">resolve</code> and <code class="item method">reject</code> methods attached to the instance. This is extremely useful for integrating promises into async iterations, or any other situation in which the promise creation and the execution flow don't always match up.</li>
+<li><code class="item method">bufferedFileWrite(file:string, content: string)</code> will write the file, using a temporary buffer file to ensure that the entire file is written before being moved to the final location. This helps minimize file watch noise when writing files.</li>
 </ul>
 
   <figure class="code">
@@ -315,11 +317,11 @@ tpl`<span class="token punctuation">{{'{'}}</span><span class="token punctuation
 
 <h2 id="binary-utilities">Binary Utilities</h2>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L59">BinaryUtil</a> class provides a unified interface for working with binary data across different formats, especially bridging the gap between Node.js specific types (<code class="item input">Buffer</code>, <code class="item input">Stream</code>) and Web Standard types (<code class="item input">Blob</code>, <code class="item input">ArrayBuffer</code>). The framework leverages this to allow for seamless handling of binary data, regardless of the source.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L68">BinaryUtil</a> class provides a unified interface for working with binary data across different formats, especially bridging the gap between Node.js specific types (<code class="item input">Buffer</code>, <code class="item input">Stream</code>) and Web Standard types (<code class="item input">Blob</code>, <code class="item input">ArrayBuffer</code>). The framework leverages this to allow for seamless handling of binary data, regardless of the source.
 
 <h2 id="json-utilities">JSON Utilities</h2>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/json.ts#L33">JSONUtil</a> class provides a comprehensive set of utilities for working with JSON data, including serialization, deserialization, encoding, and deep cloning capabilities. The utility handles special types like <code class="item input">Date</code>, <code class="item input">BigInt</code>, and <code class="item input">Error</code> objects seamlessly. Key features include:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/json.ts#L39">JSONUtil</a> class provides a comprehensive set of utilities for working with JSON data, including serialization, deserialization, encoding, and deep cloning capabilities. The utility handles special types like <code class="item input">Date</code>, <code class="item input">BigInt</code>, and <code class="item input">Error</code> objects seamlessly. Key features include:
 <ul> <li><code class="item method">fromUTF8(input, config?)</code> - Parse JSON from a UTF-8 string</li>
 <li><code class="item method">toUTF8(value, config?)</code> - Serialize a value to JSON string</li>
 <li><code class="item method">toUTF8Pretty(value)</code> - Serialize with pretty formatting (2-space indent)</li>
@@ -335,11 +337,11 @@ The <code class="item input">TRANSMIT_REVIVER</code> automatically restores <cod
 
 <h2 id="time-utilities">Time Utilities</h2>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L21">TimeUtil</a> contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L37">TimeUtil</a> contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
 
   <figure class="code">
     <figcaption class="code">Time Utilities
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L21">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L37">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TimeUtil</span> <span class="token punctuation">{{'{'}}</span>
@@ -364,7 +366,7 @@ The <code class="item input">TRANSMIT_REVIVER</code> automatically restores <cod
 
 <h2 id="process-execution">Process Execution</h2>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L41">ExecUtil</a> exposes <code class="item method">getResult</code> as a means to wrap <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.<br><br>
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L41">ExecUtil</a> exposes <code class="item method">getResult</code> as a means to wrap <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>'s process object. This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.<br><br>
 A simple example would be:
 
   <figure class="code">
@@ -373,6 +375,7 @@ A simple example would be:
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> spawn <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'node:child_process'</span><span class="token punctuation">;</span>
+
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ExecUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">executeListing</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -403,4 +406,4 @@ As a registered shutdown handler, you can do.
 
 <h2 id="path-behavior">Path Behavior</h2>
 
-To ensure consistency in path usage throughout the framework, imports pointing at <code class="item input">node:path</code> and <code class="item input">path</code> are rewritten at compile time.  These imports are pointing towards <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/manifest" title="Support for project indexing, manifesting, along with file watching">Manifest</a>'s <code class="item input">path</code>  implementation.  This allows for seamless import/usage patterns with the reliability needed for cross platform support.
+To ensure consistency in path usage throughout the framework, imports pointing at <code class="item input">node:path</code> and <code class="item input">path</code> are rewritten at compile time. These imports are pointing towards <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/manifest" title="Support for project indexing, manifesting, along with file watching">Manifest</a>'s <code class="item input">path</code> implementation. This allows for seamless import/usage patterns with the reliability needed for cross platform support.

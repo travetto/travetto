@@ -2,7 +2,7 @@
 <!-- Please modify https://github.com/travetto/travetto/tree/main/related/todo-app/DOC.tsx and execute "npx trv doc" to rebuild -->
 # Getting Started: A Todo App
 
-The following tutorial wil walk you through setting up a [Travetto](https://travetto.dev) application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at [Todo App](https://github.com/travetto/travetto/tree/main/related/todo-app).  If you want the LLM-assisted path instead of manual setup, start with `trv llm-support:recommend` to pick a bundle, `trv llm-support:plan` to preview the changes, and `trv llm-support:execute` to apply them.
+The following tutorial wil walk you through setting up a [Travetto](https://travetto.dev) application from scratch. We'll be building a simple todo application. The entire source of the finished project can be found at [Todo App](https://github.com/travetto/travetto/tree/main/related/todo-app). If you want the LLM-assisted path instead of manual setup, start with `trv llm-support:recommend` to pick a bundle, `trv llm-support:plan` to preview the changes, and `trv llm-support:execute` to apply them.
 
 ## Overview
 
@@ -38,7 +38,7 @@ $ npx trv eslint:register
 ```
 
 ## Establishing The Model
-Let's create the model for the todo application.  The fields we will need should be:
+Let's create the model for the todo application. The fields we will need should be:
    *  `id` as a unique identifier
    *  `text` as the actual todo information
    *  `created` the date the todo was created
@@ -70,7 +70,7 @@ export class TodoSearch {
 }
 ```
 
-as you can see, the model structure is simple.  Everything that uses the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14) services needs to implement [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10).
+as you can see, the model structure is simple. Everything that uses the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14) services needs to implement [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10).
 
 ## Building the Service Layer
 Next we establish the functionality for the service layer. The operations we need are:
@@ -83,14 +83,13 @@ Now we need to create `src/service.ts`
 
 **Code: Service Definition**
 ```typescript
+import { Inject, Injectable } from '@travetto/di';
 import type { MongoModelService } from '@travetto/model-mongo';
-import { Injectable, Inject } from '@travetto/di';
 
 import { Todo, type TodoSearch } from './model.ts';
 
 @Injectable()
 export class TodoService {
-
   /** @private */
   @Inject() modelService: MongoModelService;
 
@@ -141,20 +140,20 @@ Now the tests should be defined at `test/service.ts`
 ```typescript
 import assert from 'node:assert';
 
-import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
 import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
+import { Suite, Test } from '@travetto/test';
+
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 import { ModelSuite } from '@travetto/model/support/test/suite.ts';
 
-import type { TodoService } from '../src/service.ts';
 import { Todo } from '../src/model.ts';
+import type { TodoService } from '../src/service.ts';
 
 @Suite()
 @ModelSuite()
 @InjectableSuite()
 export class TodoTest {
-
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 
@@ -212,11 +211,11 @@ Finally, we establish the controller at `src/web.ts`
 
 **Code: Controller contents**
 ```typescript
-import { Controller, Get, Post, Put, Delete } from '@travetto/web';
 import { Inject } from '@travetto/di';
+import { Controller, Delete, Get, Post, Put } from '@travetto/web';
 
-import type { TodoService } from './service.ts';
 import type { Todo, TodoSearch } from './model.ts';
+import type { TodoService } from './service.ts';
 
 /**
  * Todo request
@@ -225,7 +224,6 @@ type TodoRequest = Omit<Todo, 'id'>;
 
 @Controller('/todo')
 export class TodoController {
-
   _service: TodoService;
 
   @Inject()
@@ -308,7 +306,7 @@ npx trv web:http
 
 **Terminal: Application Startup**
 ```bash
-2029-03-14T04:00:00.618Z info  [@travetto/web-http:src/node.ts:26] Initialized {
+2029-03-14T04:00:00.618Z info  [@travetto/web-http:src/node.ts:25] Initialized {
   manifest: {
     main: {
       name: '@travetto/todo-app',
@@ -451,7 +449,7 @@ npx trv web:http
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/web-http:src/node.ts:27] Listening { port: 12555 }
+2029-03-14T04:00:00.837Z info  [@travetto/web-http:src/node.ts:26] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 
@@ -469,8 +467,7 @@ export async function main(key: string, port: number) {
     headers: {
       'Content-Type': 'application/json'
     }
-  })
-    .then(response => response.json());
+  }).then(response => response.json());
   console.log!(result);
 }
 ```

@@ -15,21 +15,21 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/terminal</code></pre>
   </figure>
 
-This module provides basic support for interacting with the terminal, and provides the basis for output colorization and the basic command line interactions.  The functionality can be broken down into:
+This module provides basic support for interacting with the terminal, and provides the basis for output colorization and the basic command line interactions. The functionality can be broken down into:
 <ul> <li>Output Colorization</li>
 <li>Terminal Interactions</li>
 </ul>
 
 <h2 id="output-colorization">Output Colorization</h2>
 
-Oddly enough, colorizing output in a terminal is a fairly complex process.  The standards are somewhat inconsistent and detection can be a tricky process. For terminals, <a target="_blank" class="external-link" href="https://nodejs.org">Node</a> supports 4 different levels of coloring:
+Oddly enough, colorizing output in a terminal is a fairly complex process. The standards are somewhat inconsistent and detection can be a tricky process. For terminals, <a target="_blank" class="external-link" href="https://nodejs.org">Node</a> supports 4 different levels of coloring:
 <ul> <li>0 - One color, essentially uncolored output</li>
 <li>1 - Basic color support, 16 colors</li>
 <li>2 - Enhanced color support, 225 colors, providing a fair representation of most colors</li>
-<li>3 - True color, 24bit color with R, G, B each getting 8-bits.  Can represent any color needed</li>
+<li>3 - True color, 24bit color with R, G, B each getting 8-bits. Can represent any color needed</li>
 </ul>
-This module provides the ability to define color palettes using RGB colors, and additionally provides support for palettes based on a dark or light background for a given terminal.  Support for this is widespread, but when it fails, it will gracefully assume a dark background. <br><br>
-These palettes then are usable at runtime, with the module determining light or dark palettes, as well as falling back to the closest color value based on what the existing terminal supports.  This means a color like 'olivegreen', will get the proper output in 24bit color support, a close approximation in enhanced color support, fall back to green in basic color support, and will be color less at level 0.
+This module provides the ability to define color palettes using RGB colors, and additionally provides support for palettes based on a dark or light background for a given terminal. Support for this is widespread, but when it fails, it will gracefully assume a dark background. <br><br>
+These palettes then are usable at runtime, with the module determining light or dark palettes, as well as falling back to the closest color value based on what the existing terminal supports. This means a color like 'olivegreen', will get the proper output in 24bit color support, a close approximation in enhanced color support, fall back to green in basic color support, and will be color less at level 0.
 
   <figure class="code">
     <figcaption class="code">CLI Color Palette
@@ -83,10 +83,10 @@ NODE_DISABLE_COLORS         <span class="token builtin class-name">set</span> to
 
 <h2 id="terminal-interactions">Terminal Interactions</h2>
 
-Within the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> framework, there are plenty of command line interactions that are enhanced with additional interactivity.  This mainly revolves around indicating progress while a program is executing.  The module provides support for:
+Within the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> framework, there are plenty of command line interactions that are enhanced with additional interactivity. This mainly revolves around indicating progress while a program is executing. The module provides support for:
 <ul> <li>Progress Bars</li>
 <li>Waiting Indicators</li>
 <li>Streaming Content</li>
 </ul>
-This is generally meant for use within the framework, and so is highly tailored to the specific needs and scenarios.  You can see this pattern play out in the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/compiler" title="The compiler infrastructure for the Travetto framework">Compiler</a> progress output, or in <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/pack" title="Code packing utilities">Pack</a>'s output. <br><br>
-In these scenarios, the dynamic behaviors are dependent on having an interactive TTY.  When running without access to a proper stdin, the output will default to basic line printing.    This dynamic behavior can also be disabled using the environment variable <code class="item field">TRV_QUIET</code>.  When set to <code class="item input">1</code> will provide a minimal text-based experience.
+This is generally meant for use within the framework, and so is highly tailored to the specific needs and scenarios. You can see this pattern play out in the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/compiler" title="The compiler infrastructure for the Travetto framework">Compiler</a> progress output, or in <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/pack" title="Code packing utilities">Pack</a>'s output. <br><br>
+In these scenarios, the dynamic behaviors are dependent on having an interactive TTY. When running without access to a proper stdin, the output will default to basic line printing. This dynamic behavior can also be disabled using the environment variable <code class="item field">TRV_QUIET</code>. When set to <code class="item input">1</code> will provide a minimal text-based experience.

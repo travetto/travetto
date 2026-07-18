@@ -15,7 +15,7 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/auth</code></pre>
   </figure>
 
-This module provides the high-level backdrop for managing security principals.  The goal of this module is to be a centralized location for various security frameworks to plug into.  The primary contributions are:
+This module provides the high-level backdrop for managing security principals. The goal of this module is to be a centralized location for various security frameworks to plug into. The primary contributions are:
 <ul> <li>Standard Types</li>
 <li>Authentication Contract</li>
 <li>Authorization Contract</li>
@@ -25,7 +25,7 @@ This module provides the high-level backdrop for managing security principals.  
 
 <h2 id="standard-types">Standard Types</h2>
 
-The module's goal is to be as flexible as possible.  To that end, the primary contract that this module defines, is that of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7">Principal</a>.
+The module's goal is to be as flexible as possible. To that end, the primary contract that this module defines, is that of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7">Principal</a>.
 
   <figure class="code">
     <figcaption class="code">Principal
@@ -70,7 +70,7 @@ As referenced above, a <a target="_blank" class="source-link" href="https://gith
 
   <figure class="code">
     <figcaption class="code">Authenticator
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L16">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L17">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Authenticator<span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">,</span> <span class="token constant">C</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">,</span> <span class="token constant">P</span> <span class="token keyword">extends</span> Principal <span class="token operator">=</span> Principal<span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
@@ -90,7 +90,7 @@ As referenced above, a <a target="_blank" class="source-link" href="https://gith
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L9">Authenticator</a> only requires one method to be defined, and that is <code class="item method">authenticate</code>. This method receives a generic payload, and a supplemental context as an input. The interface is responsible for converting that to an authenticated principal.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L10">Authenticator</a> only requires one method to be defined, and that is <code class="item method">authenticate</code>. This method receives a generic payload, and a supplemental context as an input. The interface is responsible for converting that to an authenticated principal.
 
 <h2 id="authorization-contract">Authorization Contract</h2>
 
@@ -123,7 +123,7 @@ Overall, the structure is simple, but drives home the primary use cases of the f
 
   <figure class="code">
     <figcaption class="code">Authorization Service
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L13">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L12">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthService</span> <span class="token punctuation">{{'{'}}</span>
@@ -149,13 +149,13 @@ Overall, the structure is simple, but drives home the primary use cases of the f
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L13">AuthService</a> operates as the owner of the current auth state for a given "request". "Request" here implies a set of operations over a period of time, with the http request/response model being an easy point of reference.  This could also tie to a CLI operation, or any other invocation that requires some concept of authentication and authorization. <br><br>
-The service allows for storing and retrieving the active <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7">Principal</a>, and/or the actively persisted auth token.  This is extremely useful for other parts of the framework that may request authenticated information (if available).  <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth-web" title="Web authentication integration support for the Travetto framework">Web Auth</a> makes heavy use of this state for enforcing endpoints when authentication is required. <br><br>
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L12">AuthService</a> operates as the owner of the current auth state for a given "request". "Request" here implies a set of operations over a period of time, with the http request/response model being an easy point of reference. This could also tie to a CLI operation, or any other invocation that requires some concept of authentication and authorization. <br><br>
+The service allows for storing and retrieving the active <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7">Principal</a>, and/or the actively persisted auth token. This is extremely useful for other parts of the framework that may request authenticated information (if available). <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth-web" title="Web authentication integration support for the Travetto framework">Web Auth</a> makes heavy use of this state for enforcing endpoints when authentication is required. <br><br>
 
 <h3 id="login">Login</h3>
 
-"Logging in" can be thought of going through the action of finding a single source that can authenticate the identity for the request credentials.  Some times there may be more than one valid source of authentication that you want to leverage, and the first one to authenticate wins. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L13">AuthService</a> operates in this fashion, in which a set of credentials and potential <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L9">Authenticator</a> s are submitted, and the service will attempt to authenticate.  <br><br>
-Upon successful authentication, an optional <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8">Authorizer</a> may be invoked to authorize the authenticated user.  The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L9">Authenticator</a> is assumed to be only one within the system, and should be tied to the specific product you are building for.  The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8">Authorizer</a> should be assumed to have multiple sources, and are generally specific to external third parties.  All of these values are collected via the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module and will be auto-registered on startup. <br><br>
+"Logging in" can be thought of going through the action of finding a single source that can authenticate the identity for the request credentials. Some times there may be more than one valid source of authentication that you want to leverage, and the first one to authenticate wins. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L12">AuthService</a> operates in this fashion, in which a set of credentials and potential <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L10">Authenticator</a> s are submitted, and the service will attempt to authenticate. <br><br>
+Upon successful authentication, an optional <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8">Authorizer</a> may be invoked to authorize the authenticated user. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L10">Authenticator</a> is assumed to be only one within the system, and should be tied to the specific product you are building for. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8">Authorizer</a> should be assumed to have multiple sources, and are generally specific to external third parties. All of these values are collected via the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module and will be auto-registered on startup. <br><br>
 If this process is too cumbersome or restrictive, manually authenticating and authorizing is still more than permissible, and setting the principal within the service is a logical equivalent to login.
 
 <h2 id="authorization-context">Authorization Context</h2>

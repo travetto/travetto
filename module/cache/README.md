@@ -13,7 +13,7 @@ npm install @travetto/cache
 yarn add @travetto/cache
 ```
 
-Provides a foundational structure for integrating caching at the method level.  This allows for easy extension with a variety of providers, and is usable with or without [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.").  The code aims to handle use cases surrounding common/basic usage.
+Provides a foundational structure for integrating caching at the method level. This allows for easy extension with a variety of providers, and is usable with or without [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support."). The code aims to handle use cases surrounding common/basic usage.
 
 The cache module requires an [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10) to provide functionality for reading and writing streams. You can use any existing providers to serve as your [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10), or you can roll your own.
 
@@ -38,16 +38,16 @@ Currently, the following are packages that provide [Expiry](https://github.com/t
    *  [File Model Support](https://github.com/travetto/travetto/tree/main/module/model-file#readme "File system backing for the travetto model module.") - @travetto/model-file
 
 ## Decorators
-The caching framework provides method decorators that enables simple use cases.  One of the requirements to use the caching decorators is that the method arguments, and return values need to be serializable into [JSON](https://www.json.org).  Any other data types are not currently supported and would require either manual usage of the caching services directly, or specification of serialization/deserialization routines in the cache config.
+The caching framework provides method decorators that enables simple use cases. One of the requirements to use the caching decorators is that the method arguments, and return values need to be serializable into [JSON](https://www.json.org). Any other data types are not currently supported and would require either manual usage of the caching services directly, or specification of serialization/deserialization routines in the cache config.
 
 Additionally, to use the decorators you will need to have a [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L35) object accessible on the class instance. This can be dependency injected, or manually constructed. The decorators will detect the field at time of method execution, which decouples construction of your class from the cache construction.
 
-[@Cache](https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L12) is a decorator that will cache all successful results, keyed by a computation based on the method arguments.  Given the desire for supporting remote caches (e.g. [redis](https://redis.io), [memcached](https://memcached.org)), only asynchronous methods are supported.
+[@Cache](https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L12) is a decorator that will cache all successful results, keyed by a computation based on the method arguments. Given the desire for supporting remote caches (e.g. [redis](https://redis.io), [memcached](https://memcached.org)), only asynchronous methods are supported.
 
 **Code: Using decorators to cache expensive async call**
 ```typescript
-import { MemoryModelService } from '@travetto/model-memory';
 import { Cache, CacheService } from '@travetto/cache';
+import { MemoryModelService } from '@travetto/model-memory';
 
 async function request(url: string): Promise<string> {
   let value: string;
@@ -56,10 +56,7 @@ async function request(url: string): Promise<string> {
 }
 
 export class Worker {
-
-  myCache = new CacheService(
-    new MemoryModelService({ namespace: '' })
-  );
+  myCache = new CacheService(new MemoryModelService({ namespace: '' }));
 
   @Cache('myCache', '1s')
   async calculateExpensiveResult(expression: string): Promise<string> {
@@ -74,26 +71,25 @@ The [@Cache](https://github.com/travetto/travetto/tree/main/module/cache/src/dec
    *  `name` the field name of the current class which points to the desired cache source.
    *  `config` the additional/optional config options, on a per invocation basis
 
-      *  `keySpace` the key space within the cache.  Defaults to class name plus method name.
-      *  `key` the function  will use the inputs to determine the cache key, defaults to all params `JSON.stringify`ied
-      *  `params` the function used to determine the inputs for computing the cache key.  This is an easier place to start to define what parameters are important in ,caching. This defaults to all inputs.
-      *  `maxAge` the number of milliseconds will hold the value before considering the cache entry to be invalid.  By default values will live infinitely.
-      *  `extendOnAccess` determines if the cache timeout should be extended on access.  This only applies to cache values that have specified a `maxAge`.
-      *  `serialize` the function to execute before storing a cacheable value.  This allows for any custom data modification needed to persist as a string properly.
-      *  `reinstate` the function to execute on return of a cached value.  This allows for any necessary operations to conform to expected output (e.g. re-establishing class instances, etc.).  This method should not be used often, as the return values of the methods should naturally serialize to/from `JSON` and the values should be usable either way.
+      *  `keySpace` the key space within the cache. Defaults to class name plus method name.
+      *  `key` the function will use the inputs to determine the cache key, defaults to all params `JSON.stringify`ied
+      *  `params` the function used to determine the inputs for computing the cache key. This is an easier place to start to define what parameters are important in ,caching. This defaults to all inputs.
+      *  `maxAge` the number of milliseconds will hold the value before considering the cache entry to be invalid. By default values will live infinitely.
+      *  `extendOnAccess` determines if the cache timeout should be extended on access. This only applies to cache values that have specified a `maxAge`.
+      *  `serialize` the function to execute before storing a cacheable value. This allows for any custom data modification needed to persist as a string properly.
+      *  `reinstate` the function to execute on return of a cached value. This allows for any necessary operations to conform to expected output (e.g. re-establishing class instances, etc.). This method should not be used often, as the return values of the methods should naturally serialize to/from `JSON` and the values should be usable either way.
 
 ### EvictCache
-Additionally, there is support for planned eviction via the [@EvictCache](https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L44) decorator.  On successful execution of a method with this decorator, the matching keySpace/key value will be evicted from the cache.  This requires coordination between multiple methods, to use the same `keySpace` and `key` to compute the expected key.
+Additionally, there is support for planned eviction via the [@EvictCache](https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L55) decorator. On successful execution of a method with this decorator, the matching keySpace/key value will be evicted from the cache. This requires coordination between multiple methods, to use the same `keySpace` and `key` to compute the expected key.
 
 **Code: Using decorators to cache/evict user access**
 ```typescript
+import { Cache, CacheService, EvictCache } from '@travetto/cache';
 import { MemoryModelService } from '@travetto/model-memory';
-import { Cache, EvictCache, CacheService } from '@travetto/cache';
 
-class User { }
+class User {}
 
 export class UserService {
-
   myCache = new CacheService(new MemoryModelService({ namespace: '' }));
   database: {
     lookupUser(id: string): Promise<User>;
@@ -119,14 +115,14 @@ export class UserService {
 ```
 
 ## Extending the Cache Service
-By design, the [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L35) relies solely on the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module.  Specifically on the [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10).   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L35).  The [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L35) is expecting the model service to be registered using the @travetto/cache:model:
+By design, the [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L35) relies solely on the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module. Specifically on the [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10). This combines basic support for CRUD as well as knowledge of how to manage expirable content. Any model service that honors these contracts is a valid candidate to power the [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L35). The [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L35) is expecting the model service to be registered using the @travetto/cache:model:
 
 **Code: Registering a Custom Model Source**
 ```typescript
+import { CacheModelSymbol } from '@travetto/cache';
 import { InjectableFactory } from '@travetto/di';
 import type { ModelExpirySupport } from '@travetto/model';
 import { MemoryModelService } from '@travetto/model-memory';
-import { CacheModelSymbol } from '@travetto/cache';
 
 class Config {
   @InjectableFactory(CacheModelSymbol)

@@ -13,25 +13,25 @@ npm install @travetto/model-mongo
 yarn add @travetto/model-mongo
 ```
 
-This module provides an [mongodb](https://mongodb.com)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [mongodb](https://mongodb.com).. Given the dynamic nature of [mongodb](https://mongodb.com), during development when models are modified, nothing needs to be done to adapt to the latest schema. 
+This module provides an [mongodb](https://mongodb.com)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations."). This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [mongodb](https://mongodb.com).. Given the dynamic nature of [mongodb](https://mongodb.com), during development when models are modified, nothing needs to be done to adapt to the latest schema. 
 
 Supported features:
-   *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11)
-   *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10)
-   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64)
    *  [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8)
-   *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L16)
+   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L60)
+   *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10)
+   *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10)
+   *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L21)
    *  [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/crud.ts#L11)
    *  [Facet](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/facet.ts#L14)
-   *  [Query](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/query.ts#L10)
    *  [Suggest](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/suggest.ts#L12)
+   *  [Query](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/query.ts#L10)
 
 Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module.
 
 **Code: Wiring up a custom Model Source**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
-import { MongoModelService, type MongoModelConfig } from '@travetto/model-mongo';
+import { type MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
 
 export class Init {
   @InjectableFactory({
@@ -82,7 +82,7 @@ export class MongoModelConfig {
    */
   @Field({ type: Object })
   options: Omit<mongo.MongoClientOptions, 'cert'> & {
-    cert?: | Buffer | string | BinaryType | (BinaryType | Buffer | string)[];
+    cert?: Buffer | string | BinaryType | (BinaryType | Buffer | string)[];
   } = {};
   /**
    * Allow storage modification at runtime
@@ -124,15 +124,14 @@ export class MongoModelConfig {
     if (!this.port || Number.isNaN(this.port)) {
       this.port = 27017;
     }
-    if (!this.hosts || !this.hosts.length) {
+    if (!this.hosts?.length) {
       this.hosts = ['localhost'];
     }
 
     const options = this.options;
     if (options.ssl) {
       if (options.cert) {
-        options.cert = (await Promise.all([options.cert].flat(2).map(readCert)))
-          .map(BinaryUtil.binaryArrayToUint8Array);
+        options.cert = (await Promise.all([options.cert].flat(2).map(readCert))).map(BinaryUtil.binaryArrayToUint8Array);
       }
       if (options.tlsCertificateKeyFile) {
         options.tlsCertificateKeyFile = await RuntimeResources.resolve(options.tlsCertificateKeyFile);
@@ -155,15 +154,12 @@ export class MongoModelConfig {
    * Build connection URLs
    */
   get url(): string {
-    const hosts = this.hosts!
-      .map(host => (this.srvRecord || host.includes(':')) ? host : `${host}:${this.port ?? 27017}`)
-      .join(',');
+    const hosts = this.hosts!.map(host => (this.srvRecord || host.includes(':') ? host : `${host}:${this.port ?? 27017}`)).join(',');
     const optionString = new URLSearchParams(
       Object.entries(this.options)
         .filter((pair): pair is [string, string | number | boolean] => ['string', 'number', 'boolean'].includes(typeof pair[1]))
         .map(([k, v]) => [k, `${v}`])
-    )
-      .toString();
+    ).toString();
     let creds = '';
     if (this.username) {
       creds = `${[this.username, this.password].filter(part => !!part).join(':')}@`;
@@ -174,4 +170,4 @@ export class MongoModelConfig {
 }
 ```
 
-Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) annotation, and so these values can be overridden using the standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support") resolution paths.The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a resource path (will attempt to lookup using [RuntimeResources](https://github.com/travetto/travetto/tree/main/module/runtime/src/resources.ts#L8)) or just a standard file path.
+Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) annotation, and so these values can be overridden using the standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support") resolution paths.The SSL file options in `clientOptions` will automatically be resolved to files when given a path. This path can be a resource path (will attempt to lookup using [RuntimeResources](https://github.com/travetto/travetto/tree/main/module/runtime/src/resources.ts#L8)) or just a standard file path.

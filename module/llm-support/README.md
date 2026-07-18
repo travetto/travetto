@@ -27,7 +27,7 @@ The recommended flow is intentionally plan-first:
 trv llm:support:recommend\ntrv llm:support:plan\ntrv llm:support:execute
 ```
 
-The recommendation command supports filtering by `bundles`, `workflows`, `categories`, and `snippet-tags`.  The plan command focuses on selected `operations` and produces file-level change steps.  Execution supports dry-run, overwrite, target directory selection, monorepo bootstrap selection (`--monorepo`), and several operation-specific hints such as route, controller, service, model, and email naming.
+The recommendation command supports filtering by `bundles`, `workflows`, `categories`, and `snippet-tags`. The plan command focuses on selected `operations` and produces file-level change steps. Execution supports dry-run, overwrite, target directory selection, monorepo bootstrap selection (`--monorepo`), and several operation-specific hints such as route, controller, service, model, and email naming.
 
 ## What It Supports
 The module covers the core assistant paths used by Travetto projects:

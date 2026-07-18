@@ -13,32 +13,33 @@ npm install @travetto/doc
 yarn add @travetto/doc
 ```
 
-This module provides the ability to generate documentation in [HTML](https://en.wikipedia.org/wiki/HTML) and/or [Markdown](https://en.wikipedia.org/wiki/Markdown).  The module relies on integrating with the source of the project, and providing a fully referenced code-base.  This allows for automatic updates when code is changed and/or refactored.
+This module provides the ability to generate documentation in [HTML](https://en.wikipedia.org/wiki/HTML) and/or [Markdown](https://en.wikipedia.org/wiki/Markdown). The module relies on integrating with the source of the project, and providing a fully referenced code-base. This allows for automatic updates when code is changed and/or refactored.
 
 **Code: Document Sample**
 ```typescript
 /** @jsxImportSource @travetto/doc/support */
 import { c } from '@travetto/doc';
 
-export const text = <>
-  <c.StdHeader />
+export const text = (
+  <>
+    <c.StdHeader />
+    Sample documentation for fictional module. This module fictitiously relies upon <c.Module name="Cache" /> functionality.
+    <ol>
+      <li>First</li>
+      <li>Second</li>
+      <li>
+        <c.Path name="Special" />
+      </li>
+    </ol>
+    <c.Section title="Content">
+      <c.Code title="Document Sample" src="./src/test.ts" />
 
-  Sample documentation for fictional module.  This module fictitiously relies upon <c.Module name='Cache' /> functionality.
-
-  <ol>
-    <li>First</li>
-    <li>Second</li>
-    <li><c.Path name='Special' /></li>
-  </ol>
-
-  <c.Section title='Content'>
-    <c.Code title='Document Sample' src='./src/test.ts' />
-
-    <c.SubSection title='Output'>
-      <c.Execution title='Run program' cmd='trv' />
-    </c.SubSection>
-  </c.Section>
-</>;
+      <c.SubSection title="Output">
+        <c.Execution title="Run program" cmd="trv" />
+      </c.SubSection>
+    </c.Section>
+  </>
+);
 ```
 
 **Code: Document Context**
@@ -51,7 +52,7 @@ export interface DocumentShape {
 
 As you can see, you need to export a field named `text` as the body of the help text. The `text` field can be either a direct invocation or an async function that returns the expected document output.
 
-**Note**: By design all the node types provided are synchronous in nature.  This is intentionally, specifically with respect to invoking commands and ensuring singular operation.
+**Note**: By design all the node types provided are synchronous in nature. This is intentionally, specifically with respect to invoking commands and ensuring singular operation.
 
 ## Node Types
 
@@ -84,10 +85,10 @@ As you can see, you need to export a field named `text` as the body of the help 
    *  `Terminal` - Terminal output
 
 ## Libraries
-Some of the more common libraries are provided as the `d.library` method.  The purpose of this is to have consistent references to common utilities to help keep external linking simple.
+Some of the more common libraries are provided as the `d.library` method. The purpose of this is to have consistent references to common utilities to help keep external linking simple.
 
 ## Modules
-You can also link to other [Travetto](https://travetto.dev) based modules as needed.  The `d.module` object relies on what is already imported into your project, and reference the package.json of the related module. If the module is not installed, doc generation will fail.
+You can also link to other [Travetto](https://travetto.dev) based modules as needed. The `d.module` object relies on what is already imported into your project, and reference the package.json of the related module. If the module is not installed, doc generation will fail.
 
 ## CLI - doc
 Generate documentation outputs from a module `DOC.tsx` entry file.
@@ -132,7 +133,7 @@ $ trv doc -o html
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto-doc/doc</code></pre>
   </figure>
 
-Sample documentation for fictional module.  This module fictitiously relies upon <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/cache" title="Caching functionality with decorators for declarative use.">Caching</a> functionality.
+Sample documentation for fictional module. This module fictitiously relies upon <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/cache" title="Caching functionality with decorators for declarative use.">Caching</a> functionality.
 <ol> <li>First</li>
 <li>Second</li>
 <li><code class="item path">Special</code></li>
@@ -146,7 +147,7 @@ Sample documentation for fictional module.  This module fictitiously relies upon
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">TestFile</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token keyword">static</span> <span class="token function">method</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
+  <span class="token keyword">static</span> <span class="token function">method</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 

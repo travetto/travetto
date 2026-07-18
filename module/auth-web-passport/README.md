@@ -15,17 +15,17 @@ yarn add @travetto/auth-web-passport
 
 This is a primary integration for the [Web Auth](https://github.com/travetto/travetto/tree/main/module/auth-web#readme "Web authentication integration support for the Travetto framework") module. 
 
-Within the node ecosystem, the most prevalent auth framework is [passport](http://passportjs.org).  With countless integrations, the desire to leverage as much of it as possible, is extremely high. To that end, this module provides support for [passport](http://passportjs.org) baked in. Registering and configuring a [passport](http://passportjs.org) strategy is fairly straightforward.
+Within the node ecosystem, the most prevalent auth framework is [passport](http://passportjs.org). With countless integrations, the desire to leverage as much of it as possible, is extremely high. To that end, this module provides support for [passport](http://passportjs.org) baked in. Registering and configuring a [passport](http://passportjs.org) strategy is fairly straightforward.
 
-**NOTE:** Given that [passport](http://passportjs.org) is oriented around [express](https://expressjs.com), this module relies on [Web Connect Support](https://github.com/travetto/travetto/tree/main/module/web-connect#readme "Web integration for Connect-Like Resources") as an adapter for the request/response handoff.  There are some limitations listed in the module, and those would translate to any [passport](http://passportjs.org) strategies that are being used.
+**NOTE:** Given that [passport](http://passportjs.org) is oriented around [express](https://expressjs.com), this module relies on [Web Connect Support](https://github.com/travetto/travetto/tree/main/module/web-connect#readme "Web integration for Connect-Like Resources") as an adapter for the request/response handoff. There are some limitations listed in the module, and those would translate to any [passport](http://passportjs.org) strategies that are being used.
 
 **Code: Sample Facebook/passport config**
 ```typescript
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 
-import { InjectableFactory } from '@travetto/di';
 import type { Authenticator, Authorizer, Principal } from '@travetto/auth';
 import { PassportAuthenticator } from '@travetto/auth-web-passport';
+import { InjectableFactory } from '@travetto/di';
 
 export class FbUser {
   username: string;
@@ -37,16 +37,16 @@ export const FbAuthSymbol = Symbol.for('auth_facebook');
 export class AppConfig {
   @InjectableFactory(FbAuthSymbol)
   static facebookPassport(): Authenticator {
-    return new PassportAuthenticator('facebook',
+    return new PassportAuthenticator(
+      'facebook',
       new FacebookStrategy(
         {
           clientID: '<appId>',
           clientSecret: '<appSecret>',
           callbackURL: 'http://localhost:3000/auth/facebook/callback',
-          profileFields: ['id', 'username', 'displayName', 'photos', 'email'],
+          profileFields: ['id', 'username', 'displayName', 'photos', 'email']
         },
-        (accessToken, refreshToken, profile, callback) =>
-          callback(undefined, profile)
+        (accessToken, refreshToken, profile, callback) => callback(undefined, profile)
       ),
       (user: FbUser) => ({
         id: user.username,
@@ -58,11 +58,11 @@ export class AppConfig {
 
   @InjectableFactory()
   static principalSource(): Authorizer {
-    return new class implements Authorizer {
+    return new (class implements Authorizer {
       async authorize(principal: Principal) {
         return principal;
       }
-    }();
+    })();
   }
 }
 ```
@@ -73,19 +73,18 @@ As you can see, [PassportAuthenticator](https://github.com/travetto/travetto/tre
    *  The conversion functions which defines the mapping between external and local identities.
 
 **Note**: You will need to provide the callback for the strategy to ensure you pass the external principal back into the framework
-After that, the provider is no different than any other, and can be used accordingly.  Additionally, because [passport](http://passportjs.org) runs first, in it's entirety, you can use the provider as you normally would any [passport](http://passportjs.org) middleware.
+After that, the provider is no different than any other, and can be used accordingly. Additionally, because [passport](http://passportjs.org) runs first, in it's entirety, you can use the provider as you normally would any [passport](http://passportjs.org) middleware.
 
 **Code: Sample endpoints using Facebook/passport provider**
 ```typescript
-import { Controller, Get, Post, type WebRequest, ContextParam, WebResponse } from '@travetto/web';
-import { Login, Authenticated, Logout } from '@travetto/auth-web';
 import type { Principal } from '@travetto/auth';
+import { Authenticated, Login, Logout } from '@travetto/auth-web';
+import { ContextParam, Controller, Get, Post, type WebRequest, WebResponse } from '@travetto/web';
 
 import { FbAuthSymbol } from './config.ts';
 
 @Controller('/auth')
 export class SampleAuth {
-
   @ContextParam()
   request: WebRequest;
 
@@ -99,9 +98,7 @@ export class SampleAuth {
 
   @Get('/facebook')
   @Login(FbAuthSymbol)
-  async fbLogin() {
-
-  }
+  async fbLogin() {}
 
   @Get('/self')
   @Authenticated()
@@ -117,7 +114,7 @@ export class SampleAuth {
 
   @Post('/logout')
   @Logout()
-  async logout() { }
+  async logout() {}
 
   /**
    * Simple Echo

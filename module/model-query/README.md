@@ -13,7 +13,7 @@ npm install @travetto/model-query
 yarn add @travetto/model-query
 ```
 
-This module provides an enhanced query contract for [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations.  This contract has been externalized due to it being more complex than many implementations can natively support.
+This module provides an enhanced query contract for [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations. This contract has been externalized due to it being more complex than many implementations can natively support.
 
 ## Contracts
 
@@ -46,7 +46,7 @@ export interface ModelQuerySupport {
 ```
 
 ### Crud
-Reinforcing the complexity provided in these contracts, the [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/crud.ts#L11) contract allows for bulk update/deletion by query.  This requires the underlying implementation to support these operations.
+Reinforcing the complexity provided in these contracts, the [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/crud.ts#L11) contract allows for bulk update/deletion by query. This requires the underlying implementation to support these operations.
 
 **Code: Query Crud**
 ```typescript
@@ -56,7 +56,7 @@ export interface ModelQueryCrudSupport extends ModelCrudSupport, ModelQuerySuppo
    * @param cls The model class
    * @param data The data
    * @param query The additional query to validate
-  */
+   */
   updateByQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T>;
   /**
    * Update all with partial data, by query
@@ -104,7 +104,12 @@ export interface ModelQuerySuggestSupport extends ModelQuerySupport {
    * @param prefix The search prefix for the given field
    * @param query A query to filter the search on, in addition to the prefix
    */
-  suggestByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]>;
+  suggestByQuery<T extends ModelType>(
+    cls: Class<T>,
+    field: ValidStringFields<T>,
+    prefix?: string,
+    query?: PageableModelQuery<T>
+  ): Promise<T[]>;
   /**
    * Suggest distinct values for a given cls and a given field
    *
@@ -113,7 +118,12 @@ export interface ModelQuerySuggestSupport extends ModelQuerySupport {
    * @param prefix The search prefix for the given field
    * @param query A query to filter the search on, in addition to the prefix
    */
-  suggestValuesByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]>;
+  suggestValuesByQuery<T extends ModelType>(
+    cls: Class<T>,
+    field: ValidStringFields<T>,
+    prefix?: string,
+    query?: PageableModelQuery<T>
+  ): Promise<string[]>;
 }
 ```
 
@@ -125,7 +135,7 @@ export interface ModelQuerySuggestSupport extends ModelQuerySupport {
 |[SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X'|X'|X'|
 
 ## Querying
-One of the complexities of abstracting multiple storage mechanisms, is providing a consistent query language.  The query language the module uses is a derivation of [mongodb](https://mongodb.com)'s query language, with some restrictions, additions, and caveats. Additionally, given the nature of typescript, all queries are statically typed, and will catch type errors at compile time.
+One of the complexities of abstracting multiple storage mechanisms, is providing a consistent query language. The query language the module uses is a derivation of [mongodb](https://mongodb.com)'s query language, with some restrictions, additions, and caveats. Additionally, given the nature of typescript, all queries are statically typed, and will catch type errors at compile time.
 
 ### General Fields
 
@@ -153,7 +163,7 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
    *  `field: { $gt: Date | RelativeTime }` checks if value is greater than
    *  `field: { $gte: Date | RelativeTime }` checks if value is greater than or equal to
 
-**Note**: Relative times are strings consisting of a number and a unit.  e.g. -1w or 30d.  These times are always relative to Date.now, but should make building queries more natural.
+**Note**: Relative times are strings consisting of a number and a unit. e.g. -1w or 30d. These times are always relative to Date.now, but should make building queries more natural.
 
 ### Array Fields
 
@@ -179,6 +189,7 @@ A sample query for `User`'s might be:
 **Code: Using the query structure for specific queries**
 ```typescript
 import type { ModelQuerySupport } from '@travetto/model-query';
+
 import { User } from './user.ts';
 
 export class UserSearch {
@@ -214,25 +225,24 @@ In addition to the provided contracts, the module also provides common utilities
 
 **Code: MongoDB Service Test Configuration**
 ```typescript
-import { Suite } from '@travetto/test';
 import { Config } from '@travetto/config';
 import { Injectable } from '@travetto/di';
-import type { ModelQueryFacetSupport, ModelQuerySuggestSupport, ModelQueryCrudSupport } from '@travetto/model-query';
+import type { ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport } from '@travetto/model-query';
+import { Suite } from '@travetto/test';
 
-import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
 import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
 import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.ts';
 import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism.ts';
+import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
 import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest.ts';
 
 import { QueryModelService } from './query-service.ts';
 
 @Config('model.custom')
-class CustomModelConfig { }
+class CustomModelConfig {}
 
 @Injectable()
-class CustomModelService extends QueryModelService implements ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport {
-}
+class CustomModelService extends QueryModelService implements ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport {}
 
 @Suite()
 class CustomQuerySuite extends ModelQuerySuite {

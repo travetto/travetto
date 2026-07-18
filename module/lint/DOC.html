@@ -29,7 +29,7 @@ Usage: lint:register <span class="token punctuation">[</span>options<span class=
 Description:
   Generate the workspace Biome configuration entry file.
 
-  This bootstraps <span class="token variable"><span class="token variable">`</span>biome.json<span class="token variable">`</span></span> to extend the framework-provided rules configuration.
+  This bootstraps <span class="token variable"><span class="token variable">`</span>biome.jsonc<span class="token variable">`</span></span> to extend the framework-provided rules configuration.
 
 Options:
   <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
@@ -39,12 +39,10 @@ When registration completes, this is the file the linter will use, and any other
 
   <figure class="code">
     <figcaption class="code">Sample configuration
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/biome.json">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/biome.jsonc">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-json"><span class="token punctuation">{{'{'}}</span>
-  <span class="token property">"extends"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"./node_modules/@travetto/lint/biome.json"</span><span class="token punctuation">]</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>
+    <pre><code class="language-jsonc"></code></pre>
   </figure>
 
 <h2 id="cli-lint">CLI - lint</h2>

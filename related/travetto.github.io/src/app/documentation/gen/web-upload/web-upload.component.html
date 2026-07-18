@@ -16,7 +16,7 @@
   </figure>
 
 This module provides a clean and direct mechanism for processing uploads, built upon <a target="_blank" class="external-link" href="https://github.com/fastify/busboy">&#64;fastify/busboy</a>. The module also provides some best practices with respect to temporary file management.<br><br>
-Once the files are uploaded, they are exposed via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14">Endpoint</a> parameters using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-upload/src/decorator.ts#L20">&#64;Upload</a> decorator.  This decorator requires the related field type to be a standard <a target="_blank" class="external-link" href="https://nodejs.org/api/buffer.html#class-file">Buffer</a> object, or a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-upload/src/types.ts#L7">FileMap</a>.<br><br>
+Once the files are uploaded, they are exposed via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14">Endpoint</a> parameters using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-upload/src/decorator.ts#L20">&#64;Upload</a> decorator. This decorator requires the related field type to be a standard <a target="_blank" class="external-link" href="https://nodejs.org/api/buffer.html#class-file">Buffer</a> object, or a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web-upload/src/types.ts#L7">FileMap</a>.<br><br>
 A simple example:
 
   <figure class="code">
@@ -24,12 +24,11 @@ A simple example:
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-upload/doc/simple-controller.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Post<span class="token punctuation">,</span> Get <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/web'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> Post <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/web'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> <span class="token keyword">type</span> <span class="token class-name">FileMap</span><span class="token punctuation">,</span> Upload <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/web-upload'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Simple</span> <span class="token punctuation">{{'{'}}</span>
-
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/age'</span><span class="token punctuation">)</span>
   <span class="token function">getAge</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span> age<span class="token operator">:</span> <span class="token number">50</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>

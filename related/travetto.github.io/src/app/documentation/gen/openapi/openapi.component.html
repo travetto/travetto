@@ -29,12 +29,12 @@ All of the high level configurations can be found in the following structure:
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> path <span class="token keyword">from</span> <span class="token string">'node:path'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> ServerObject<span class="token punctuation">,</span> ContactObject<span class="token punctuation">,</span> LicenseObject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'openapi3-ts/oas31'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> ContactObject<span class="token punctuation">,</span> LicenseObject<span class="token punctuation">,</span> ServerObject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'openapi3-ts/oas31'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/config'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> PostConstruct <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Runtime <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/runtime'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Required <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/schema'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> PostConstruct <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
  * API Information, infers as much as possible from the package.json
@@ -108,7 +108,8 @@ All of the high level configurations can be found in the following structure:
       <span class="token keyword">this</span><span class="token punctuation">.</span>persist <span class="token operator">??=</span> Runtime<span class="token punctuation">.</span>localDevelopment<span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>persist<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">[.](json|ya?ml)$</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">.</span><span class="token function">test</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>output<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token comment">// Assume a folder</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">[.](json|ya?ml)$</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">.</span><span class="token function">test</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>output<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+        <span class="token comment">// Assume a folder</span>
         <span class="token keyword">this</span><span class="token punctuation">.</span>output <span class="token operator">=</span> path<span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>output<span class="token punctuation">,</span> <span class="token string">'openapi.yml'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
       <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
@@ -118,11 +119,11 @@ All of the high level configurations can be found in the following structure:
 
 <h2 id="spec-generation">Spec Generation</h2>
 
-The framework, when in watch mode, will generate the <a target="_blank" class="external-link" href="https://github.com/OAI/OpenAPI-Specification">OpenAPI</a> specification in either <a target="_blank" class="external-link" href="https://www.json.org">JSON</a> or <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a>. This module integrates with the file watching paradigm and can regenerate the openapi spec as changes to endpoints and models are made during development.  The output format is defined by the suffix of the output file, <code class="item input">.yaml</code> or <code class="item input">.json</code>.
+The framework, when in watch mode, will generate the <a target="_blank" class="external-link" href="https://github.com/OAI/OpenAPI-Specification">OpenAPI</a> specification in either <a target="_blank" class="external-link" href="https://www.json.org">JSON</a> or <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a>. This module integrates with the file watching paradigm and can regenerate the openapi spec as changes to endpoints and models are made during development. The output format is defined by the suffix of the output file, <code class="item input">.yaml</code> or <code class="item input">.json</code>.
 
 <h2 id="cli-openapi-spec">CLI - openapi:spec</h2>
 
-The command will load your application, in non-listening mode, to collect all the endpoints and model information, to produce the <code class="item path">openapi.yml</code>.  Once produced, the code will store the output in the specified location.
+The command will load your application, in non-listening mode, to collect all the endpoints and model information, to produce the <code class="item path">openapi.yml</code>. Once produced, the code will store the output in the specified location.
 
   <figure class="terminal">
     <figcaption class="terminal">Showing help for openapi:spec
@@ -173,4 +174,4 @@ Options:
   <span class="token parameter variable">--help</span>                                display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
-This tool relies upon a custom build of <a target="_blank" class="external-link" href="https://github.com/OpenAPITools/openapi-generator">OpenAPI client generation tools</a>, which supports watching.  This allows for fast responsive client generation as the shape of the API changes.
+This tool relies upon a custom build of <a target="_blank" class="external-link" href="https://github.com/OpenAPITools/openapi-generator">OpenAPI client generation tools</a>, which supports watching. This allows for fast responsive client generation as the shape of the API changes.

@@ -13,7 +13,7 @@ npm install @travetto/runtime
 yarn add @travetto/runtime
 ```
 
-Runtime is the foundation of all [Travetto](https://travetto.dev) applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
+Runtime is the foundation of all [Travetto](https://travetto.dev) applications. It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
    *  Runtime Context
    *  Environment Support
    *  Standard Error Support
@@ -29,7 +29,7 @@ Runtime is the foundation of all [Travetto](https://travetto.dev) applications. 
    *  Path behavior
 
 ## Runtime Context
-While running any code within the framework, there are common patterns/goals for interacting with the underlying code repository.  These include:
+While running any code within the framework, there are common patterns/goals for interacting with the underlying code repository. These include:
    *  Determining attributes of the running environment (e.g., name, debug information, production flags)
    *  Resolving paths within the workspace (e.g. standard, tooling, resourcing, modules)
 
@@ -75,10 +75,10 @@ class $Runtime {
 ```
 
 ### Class and Function Metadata
-For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every `class` is decorated with metadata, including methods, line numbers, and ultimately a unique id stored at `Ⲑid`.
+For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads. To achieve this, every `class` is decorated with metadata, including methods, line numbers, and ultimately a unique id stored at `Ⲑid`.
 
 ## Environment Support
-The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L8), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
+The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L134) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L8), that is compatible with the property definition. E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
 
 **Code: Base Known Environment Flags**
 ```typescript
@@ -138,7 +138,9 @@ For a given [EnvProp](https://github.com/travetto/travetto/tree/main/module/runt
 ```typescript
 export class EnvProp<T> {
   readonly key: string;
-  constructor(key: string) { this.key = key; }
+  constructor(key: string);
+  /** Set value according to type */
+  set(value: T | undefined | null): void;
   /** Remove value */
   clear(): void;
   /** Export value */
@@ -165,9 +167,9 @@ export class EnvProp<T> {
 ```
 
 ## Standard Error Support
-While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [RuntimeError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L17) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") module and HTTP status codes). 
+While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [RuntimeError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L10) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") module and HTTP status codes). 
 
-The [RuntimeError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L17) takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
+The [RuntimeError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L10) takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
    *  `general` - General purpose errors
    *  `system` - Synonym for `general`
    *  `data` - Data format, content, etc are incorrect. Generally correlated to bad input.
@@ -190,7 +192,7 @@ The supported operations are:
 **Note**: All other console methods are excluded, specifically `trace`, `inspect`, `dir`, `time`/`timeEnd`
 
 ### How Logging is Instrumented
-All of the logging instrumentation occurs at transpilation time.  All `console.*` methods are replaced with a call to a globally defined variable that delegates to the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/runtime/src/console.ts#L43).  This module, hooks into the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/runtime/src/console.ts#L43) and receives all logging events from all files compiled by the [Travetto](https://travetto.dev). 
+All of the logging instrumentation occurs at transpilation time. All `console.*` methods are replaced with a call to a globally defined variable that delegates to the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/runtime/src/console.ts#L44). This module, hooks into the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/runtime/src/console.ts#L44) and receives all logging events from all files compiled by the [Travetto](https://travetto.dev). 
 
 A sample of the instrumentation would be:
 
@@ -227,7 +229,7 @@ export function work() {
 ```
 
 #### Filtering Debug
-The `debug` messages can be filtered using the patterns from the [debug](https://www.npmjs.com/package/debug).  You can specify wild cards to only `DEBUG` specific modules, folders or files.  You can specify multiple, and you can also add negations to exclude specific packages.
+The `debug` messages can be filtered using the patterns from the [debug](https://www.npmjs.com/package/debug). You can specify wild cards to only `DEBUG` specific modules, folders or files. You can specify multiple, and you can also add negations to exclude specific packages.
 
 **Terminal: Sample environment flags**
 ```bash
@@ -251,9 +253,9 @@ $ DEBUG=express:*,@travetto/web npx trv run web
 ## Resource Access
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s data for what resources were found at manifesting time.
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [RuntimeError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L17) with a category of 'notfound'.  
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream. If a file is not found, it will throw an [RuntimeError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L10) with a category of 'notfound'. 
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L134)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Encoding and Decoding Utilities
 The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L15) class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
@@ -265,12 +267,12 @@ The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/sr
    *  New Line Delimited UTF8
 
 ## Common Utilities
-Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L14) includes:
+Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L16) includes:
    *  `uuid(len: number)` generates a simple uuid for use within the application.
-   *  `allowDenyMatcher(rules[])` builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.
+   *  `allowDenyMatcher(rules[])` builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters. Negative rules are prefixed by '!'.
    *  `hash(text: string, size?: number)` produces a full sha512 hash.
-   *  `resolvablePromise()` produces a `Promise` instance with the `resolve` and `reject` methods attached to the instance.  This is extremely useful for integrating promises into async iterations, or any other situation in which the promise creation and the execution flow don't always match up.
-   *  `bufferedFileWrite(file:string, content: string)` will write the file, using a temporary buffer file to ensure that the entire file is written before being moved to the final location.  This helps minimize file watch noise when writing files.
+   *  `resolvablePromise()` produces a `Promise` instance with the `resolve` and `reject` methods attached to the instance. This is extremely useful for integrating promises into async iterations, or any other situation in which the promise creation and the execution flow don't always match up.
+   *  `bufferedFileWrite(file:string, content: string)` will write the file, using a temporary buffer file to ensure that the entire file is written before being moved to the final location. This helps minimize file watch noise when writing files.
 
 **Code: Sample makeTemplate Usage**
 ```typescript
@@ -281,10 +283,10 @@ tpl`{{age:20}} {{name: 'bob'}}</>;
 ```
 
 ## Binary Utilities
-The [BinaryUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L59) class provides a unified interface for working with binary data across different formats, especially bridging the gap between Node.js specific types (`Buffer`, `Stream`) and Web Standard types (`Blob`, `ArrayBuffer`). The framework leverages this to allow for seamless handling of binary data, regardless of the source.
+The [BinaryUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L68) class provides a unified interface for working with binary data across different formats, especially bridging the gap between Node.js specific types (`Buffer`, `Stream`) and Web Standard types (`Blob`, `ArrayBuffer`). The framework leverages this to allow for seamless handling of binary data, regardless of the source.
 
 ## JSON Utilities
-The [JSONUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/json.ts#L33) class provides a comprehensive set of utilities for working with JSON data, including serialization, deserialization, encoding, and deep cloning capabilities. The utility handles special types like `Date`, `BigInt`, and `Error` objects seamlessly. Key features include:
+The [JSONUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/json.ts#L39) class provides a comprehensive set of utilities for working with JSON data, including serialization, deserialization, encoding, and deep cloning capabilities. The utility handles special types like `Date`, `BigInt`, and `Error` objects seamlessly. Key features include:
    *  `fromUTF8(input, config?)` - Parse JSON from a UTF-8 string
    *  `toUTF8(value, config?)` - Serialize a value to JSON string
    *  `toUTF8Pretty(value)` - Serialize with pretty formatting (2-space indent)
@@ -299,7 +301,7 @@ The [JSONUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src
 The `TRANSMIT_REVIVER` automatically restores `Date` objects and `BigInt` values during deserialization, making it ideal for transmitting complex data structures across network boundaries.
 
 ## Time Utilities
-[TimeUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L21) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
+[TimeUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/time.ts#L37) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
 
 **Code: Time Utilities**
 ```typescript
@@ -324,13 +326,14 @@ export class TimeUtil {
 ```
 
 ## Process Execution
-[ExecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L41) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
+[ExecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L41) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object. This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
 
 A simple example would be:
 
 **Code: Running a directory listing via ls**
 ```typescript
 import { spawn } from 'node:child_process';
+
 import { ExecUtil } from '@travetto/runtime';
 
 export async function executeListing() {
@@ -357,4 +360,4 @@ export function registerShutdownHandler() {
 ```
 
 ## Path Behavior
-To ensure consistency in path usage throughout the framework, imports pointing at `node:path` and `path` are rewritten at compile time.  These imports are pointing towards [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s `path`  implementation.  This allows for seamless import/usage patterns with the reliability needed for cross platform support.
+To ensure consistency in path usage throughout the framework, imports pointing at `node:path` and `path` are rewritten at compile time. These imports are pointing towards [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s `path` implementation. This allows for seamless import/usage patterns with the reliability needed for cross platform support.

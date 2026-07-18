@@ -15,7 +15,7 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/manifest</code></pre>
   </figure>
 
-This module aims to be the boundary between the file system and the code.  The module provides:
+This module aims to be the boundary between the file system and the code. The module provides:
 <ul> <li>Project Manifesting</li>
 <li>Manifest Delta</li>
 <li>Class and Function Metadata</li>
@@ -36,7 +36,7 @@ Additionally, once the code has been compiled (or even bundled after that), the 
 
 <h2 id="manifest-delta">Manifest Delta</h2>
 
-During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/delta.ts#L23">ManifestDeltaUtil</a> provides the functionality for a given manifest, and will produce a stream of changes grouped by module.  This is the primary input into the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/compiler" title="The compiler infrastructure for the Travetto framework">Compiler</a>'s incremental behavior to know when a file has changed and needs to be recompiled.
+During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/delta.ts#L31">ManifestDeltaUtil</a> provides the functionality for a given manifest, and will produce a stream of changes grouped by module. This is the primary input into the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/compiler" title="The compiler infrastructure for the Travetto framework">Compiler</a>'s incremental behavior to know when a file has changed and needs to be recompiled.
 
 <h2 id="module-indexing">Module Indexing</h2>
 
@@ -52,7 +52,7 @@ Once the manifest is created, the application runtime can now read this manifest
 
 <h2 id="path-normalization">Path Normalization</h2>
 
-By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style.  This works appropriately within a Unix and a Windows environment.  This module offers up <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/path.ts#L46">path</a> as an equivalent to <a target="_blank" class="external-link" href="https://nodejs.org">Node</a>'s <a target="_blank" class="external-link" href="https://nodejs.org/api/path.html">path</a> library.  This allows for consistent behavior across all file-interactions.
+By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style. This works appropriately within a Unix and a Windows environment. This module offers up <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/path.ts#L48">path</a> as an equivalent to <a target="_blank" class="external-link" href="https://nodejs.org">Node</a>'s <a target="_blank" class="external-link" href="https://nodejs.org/api/path.html">path</a> library. This allows for consistent behavior across all file-interactions.
 
 <h2 id="anatomy-of-a-manifest">Anatomy of a Manifest</h2>
 
@@ -142,7 +142,7 @@ The context contains:
 <li>The main module to execute. (<em>This primarily pertains to mono-repo support when there are multiple modules in the project</em>)</li>
 <li>The root path of the project/workspace</li>
 <li>Whether or not the project is a mono-repo. (<em>This is determined by using the 'workspaces' field in your <a target="_blank" class="external-link" href="https://docs.npmjs.com/cli/v9/configuring-npm/package-json">Package JSON</a></em>)</li>
-<li>The location where all compiled code will be stored.  Defaults to: <code class="item path">.trv_output</code>. (<em>Can be overridden in your <a target="_blank" class="external-link" href="https://docs.npmjs.com/cli/v9/configuring-npm/package-json">Package JSON</a> in 'travetto.outputFolder'</em>)</li>
+<li>The location where all compiled code will be stored. Defaults to: <code class="item path">.trv_output</code>. (<em>Can be overridden in your <a target="_blank" class="external-link" href="https://docs.npmjs.com/cli/v9/configuring-npm/package-json">Package JSON</a> in 'travetto.outputFolder'</em>)</li>
 <li>The location where the intermediate compiler will be created. Defaults to: <code class="item path">.trv_compiler</code></li>
 <li>The location where tooling will be able to write to. Defaults to: <code class="item path">.trv_output</code></li>
 <li>Which package manager is in use <a target="_blank" class="external-link" href="https://docs.npmjs.com/downloading-and-installing-node-js-and-npm">Npm</a>/<a target="_blank" class="external-link" href="https://yarnpkg.com">Yarn</a></li>
@@ -153,7 +153,7 @@ The context contains:
 
 <h3 id="modules">Modules</h3>
 
-The modules represent all of the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a>-aware dependencies (including dev dependencies) used for compiling, testing and executing.  A production-only version is produced when packaging the final output. Each module contains:
+The modules represent all of the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a>-aware dependencies (including dev dependencies) used for compiling, testing and executing. A production-only version is produced when packaging the final output. Each module contains:
 <ul> <li>The dependency npm name</li>
 <li>The dependency version</li>
 <li>A flag to determine if its a local module</li>
@@ -161,7 +161,7 @@ The modules represent all of the <a target="_blank" class="external-link" href="
 <li>The path to the source folder, relative to the workspace root</li>
 <li>The path to the output folder, relative to the workspace output root</li>
 <li>The list of all files</li>
-<li>The profiles a module applies to.  Values are std, test, compile, doc.  Any empty value implies std</li>
+<li>The profiles a module applies to. Values are std, test, compile, doc. Any empty value implies std</li>
 <li>Parent modules that imported this module</li>
 </ul>
 
@@ -177,10 +177,10 @@ The module files are a simple categorization of files into a predetermined set o
 <li><code class="item path">resources</code> - Packaged resource, meant to pertain to the main module only. Files, under <code class="item path">resources/</code></li>
 <li><code class="item path">support</code> - All .ts files under the <code class="item path">support/</code> folder</li>
 <li><code class="item path">support/resources</code> - Packaged resource files, meant to be included by other modules, under <code class="item path">support/resources/</code></li>
-<li><code class="item path">support/fixtures</code> - Test resources meant to shared across modules.  Under <code class="item path">support/fixtures/</code></li>
+<li><code class="item path">support/fixtures</code> - Test resources meant to shared across modules. Under <code class="item path">support/fixtures/</code></li>
 <li><code class="item path">doc</code> - Documentation files. <code class="item path">DOC.tsx</code> and All .ts/.tsx files under the <code class="item path">doc/</code> folder</li>
-<li><code class="item path">$transformer</code> - All .ts files under the pattern <code class="item path">support/transform*</code>.  These are used during compilation and never at runtime</li>
-<li><code class="item path">bin</code> - Entry point .js files.  All .js files under the <code class="item path">bin/</code> folder</li>
+<li><code class="item path">$transformer</code> - All .ts files under the pattern <code class="item path">support/transform*</code>. These are used during compilation and never at runtime</li>
+<li><code class="item path">bin</code> - Entry point .js files. All .js files under the <code class="item path">bin/</code> folder</li>
 </ul>
 Within each file there is a pattern of either a 3 or 4 element array:
 

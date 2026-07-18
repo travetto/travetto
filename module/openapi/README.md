@@ -26,12 +26,12 @@ All of the high level configurations can be found in the following structure:
 ```typescript
 import path from 'node:path';
 
-import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/oas31';
+import type { ContactObject, LicenseObject, ServerObject } from 'openapi3-ts/oas31';
 
 import { Config } from '@travetto/config';
+import { PostConstruct } from '@travetto/di';
 import { Runtime } from '@travetto/runtime';
 import { Required } from '@travetto/schema';
-import { PostConstruct } from '@travetto/di';
 
 /**
  * API Information, infers as much as possible from the package.json
@@ -105,7 +105,8 @@ export class ApiSpecConfig {
       this.persist ??= Runtime.localDevelopment;
     }
     if (this.persist) {
-      if (!/[.](json|ya?ml) $/.test(this.output)) { // Assume a folder
+      if (!/[.](json|ya?ml) $/.test(this.output)) {
+        // Assume a folder
         this.output = path.resolve(this.output, 'openapi.yml');
       }
     }
@@ -114,10 +115,10 @@ export class ApiSpecConfig {
 ```
 
 ## Spec Generation
-The framework, when in watch mode, will generate the [OpenAPI](https://github.com/OAI/OpenAPI-Specification) specification in either [JSON](https://www.json.org) or [YAML](https://en.wikipedia.org/wiki/YAML). This module integrates with the file watching paradigm and can regenerate the openapi spec as changes to endpoints and models are made during development.  The output format is defined by the suffix of the output file, `.yaml` or `.json`.
+The framework, when in watch mode, will generate the [OpenAPI](https://github.com/OAI/OpenAPI-Specification) specification in either [JSON](https://www.json.org) or [YAML](https://en.wikipedia.org/wiki/YAML). This module integrates with the file watching paradigm and can regenerate the openapi spec as changes to endpoints and models are made during development. The output format is defined by the suffix of the output file, `.yaml` or `.json`.
 
 ## CLI - openapi:spec
-The command will load your application, in non-listening mode, to collect all the endpoints and model information, to produce the `openapi.yml`.  Once produced, the code will store the output in the specified location.
+The command will load your application, in non-listening mode, to collect all the endpoints and model information, to produce the `openapi.yml`. Once produced, the code will store the output in the specified location.
 
 **Terminal: Help for openapi:spec**
 ```bash
@@ -163,4 +164,4 @@ Options:
   --help                                display help for command
 ```
 
-This tool relies upon a custom build of [OpenAPI client generation tools](https://github.com/OpenAPITools/openapi-generator), which supports watching.  This allows for fast responsive client generation as the shape of the API changes.
+This tool relies upon a custom build of [OpenAPI client generation tools](https://github.com/OpenAPITools/openapi-generator), which supports watching. This allows for fast responsive client generation as the shape of the API changes.
