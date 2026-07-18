@@ -50,7 +50,7 @@ export class DocAngularCommand {
   async main(target?: string): Promise<void> {
     const root = Runtime.workspace.path;
 
-    if (target && target.startsWith(root)) {
+    if (target?.startsWith(root)) {
       target = target.replace(root, '').split('/').at(-1);
     }
 

@@ -144,7 +144,7 @@ export class SchemaFaker {
     const name = config.name.toLowerCase();
 
     if (config.match) {
-      const mre = config.match && config.match.regex;
+      const mre = config.match.regex;
       for (const [regex, fn] of this.#stringToReType) {
         if (mre === regex) {
           return fn();

@@ -97,7 +97,7 @@ export class MongoModelConfig {
     if (!this.port || Number.isNaN(this.port)) {
       this.port = 27017;
     }
-    if (!this.hosts || !this.hosts.length) {
+    if (!this.hosts?.length) {
       this.hosts = ['localhost'];
     }
 

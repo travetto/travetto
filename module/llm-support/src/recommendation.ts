@@ -274,7 +274,7 @@ export function recommendWorkflows(ids?: string[]): WorkflowGuidance[] {
 
 export function recommendOperations(query: RecommendationQuery = {}): LlmOperation[] {
   const { categories, includeExcluded = false } = query;
-  const selected = categories && categories.length ?
+  const selected = categories?.length ?
     OPERATIONS.filter(item => categories.includes(item.category)) :
     OPERATIONS;
   return selected.filter(item => includeExcluded || !item.excluded);

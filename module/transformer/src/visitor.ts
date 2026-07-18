@@ -62,7 +62,7 @@ export class VisitorFactory<S extends State = State> {
     for (const trn of transformers) {
       const set = this.#transformers.getOrInsert(trn.type, new Map());
 
-      const targets = trn.target && trn.target.length ? trn.target : ['__all__'];
+      const targets = trn.target?.length ? trn.target : ['__all__'];
 
       for (const target of targets) {
         for (const phase of ['before', 'after'] as const) {
@@ -162,7 +162,7 @@ export class VisitorFactory<S extends State = State> {
 
     for (const [key, decorator] of targets.entries()) {
       const values = set.get(phase)!.get(key);
-      if (!values || !values.length) {
+      if (!values?.length) {
         continue;
       }
 

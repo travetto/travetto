@@ -475,7 +475,7 @@ export abstract class SQLDialect implements DialectState {
             case '$regex': {
               const regex = DataUtil.toRegex(castTo(value));
               const regexSource = regex.source;
-              const ins = regex.flags && regex.flags.includes('i');
+              const ins = regex.flags?.includes('i');
 
               if (/^[\^]\S+[.][*][$]?$/.test(regexSource)) {
                 const inner = regexSource.substring(1, regexSource.length - 2);

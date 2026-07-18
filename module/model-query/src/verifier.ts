@@ -59,7 +59,7 @@ export class QueryVerifier {
       return;
     }
 
-    if (handler.preMember && handler.preMember(state, clause)) {
+    if (handler.preMember?.(state, clause)) {
       return;
     }
 
@@ -71,7 +71,7 @@ export class QueryVerifier {
         continue;
       }
 
-      if (handler.preMember && handler.preMember(state, value)) {
+      if (handler.preMember?.(state, value)) {
         continue;
       }
 
@@ -91,7 +91,7 @@ export class QueryVerifier {
         // Otherwise recurse
         const subCls = field.type;
         const subValue = value;
-        if (handler.onComplexType && handler.onComplexType(state, subCls, subValue, field.array ?? false)) {
+        if (handler.onComplexType?.(state, subCls, subValue, field.array ?? false)) {
           continue;
         }
         this.processGenericClause(state.extend(key), subCls, subValue, handler);

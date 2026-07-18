@@ -108,7 +108,7 @@ export class AuthService {
    * Enforce expiry, invalidating the principal if expired
    */
   enforceExpiry(principal?: Principal): Principal | undefined {
-    if (principal && principal.expiresAt && principal.expiresAt.getTime() < Date.now()) {
+    if (principal?.expiresAt && principal.expiresAt.getTime() < Date.now()) {
       return undefined;
     }
     return principal;

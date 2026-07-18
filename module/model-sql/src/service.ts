@@ -269,7 +269,7 @@ export class SQLModelService implements
     await QueryVerifier.verify(cls, query);
     const { records } = await this.#exec<T>(this.#dialect.getQuerySQL(cls, query, ModelQueryUtil.getWhereClause(cls, query.where)));
     if (ModelRegistryIndex.has(cls)) {
-      await this.#dialect.fetchDependents(cls, records, query && query.select);
+      await this.#dialect.fetchDependents(cls, records, query?.select);
     }
 
     const cleaned = SQLModelUtil.cleanResults<T>(this.#dialect, records);

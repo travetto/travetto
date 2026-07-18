@@ -23,7 +23,7 @@ export class ConfigOverrideUtil {
     const out: Required<OverrideConfig>[] = [];
     for (const cls of SchemaRegistryIndex.getClasses()) {
       const config = this.getOverrideConfig(cls);
-      if (config && config.fields && config.namespace) {
+      if (config?.fields && config.namespace) {
         out.push(asFull(config));
       }
     }

@@ -133,7 +133,7 @@ export class Util {
       .split('\n')
       .map(frameText => {
         const match = STACK_POSITION_PATTERN.exec(frameText);
-        if (!match || !match.groups) {
+        if (!match?.groups) {
           return undefined;
         }
         const { filename, line, column } = match.groups;

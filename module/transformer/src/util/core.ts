@@ -37,7 +37,7 @@ export class CoreUtil {
     node: ts.CallExpression | undefined,
     pred: (expr: ts.Expression) => expr is T
   ): T | undefined {
-    if (node && node.arguments && node.arguments.length) {
+    if (node?.arguments?.length) {
       return node.arguments.find(pred);
     }
   }
@@ -46,7 +46,7 @@ export class CoreUtil {
    * Find the first argument of a call expression, or decorator.
    */
   static firstArgument(node: ts.CallExpression | undefined): ts.Expression | undefined {
-    if (node && node!.arguments && node!.arguments.length) {
+    if (node?.arguments?.length) {
       return node.arguments[0];
     }
   }

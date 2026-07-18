@@ -52,13 +52,13 @@ export class DocUtil {
         }
       }
 
-      if (tags && tags.length) {
+      if (tags?.length) {
         for (const tag of tags) {
           if (ts.isJSDocReturnTag(tag)) {
             out.return = this.getDocComment(tag, out.return);
           } else if (ts.isJSDocParameterTag(tag)) {
             out.params!.push({
-              name: tag.name && tag.name.getText(),
+              name: tag.name?.getText(),
               description: this.getDocComment(tag, '')!
             });
           } else if (tag.tagName.getText() === 'example') {

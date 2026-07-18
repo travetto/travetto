@@ -129,7 +129,7 @@ export class MongoModelService implements
   preUpdate<T extends OptionalId<ModelType>>(item: Omit<T, 'id'> & { _id?: Binary }): undefined;
   preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary, id: undefined }): undefined;
   preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary, id?: string }): string | undefined {
-    if (item && item.id) {
+    if (item?.id) {
       const id = item.id;
       item._id = MongoUtil.uuid(id);
       if (!this.config.storeId) {
@@ -679,14 +679,14 @@ export class MongoModelService implements
     await QueryVerifier.verify(cls, query);
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestFieldQuery<T>(cls, field, prefix, query);
     const results = await this.query<T>(cls, resolvedQuery);
-    return ModelQuerySuggestUtil.combineSuggestResults<T, string>(cls, field, prefix, results, (a) => a, query && query.limit);
+    return ModelQuerySuggestUtil.combineSuggestResults<T, string>(cls, field, prefix, results, (a) => a, query?.limit);
   }
 
   async suggestByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
     const results = await this.query<T>(cls, resolvedQuery);
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (_, b) => b, query && query.limit);
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (_, b) => b, query?.limit);
   }
 
   // Other

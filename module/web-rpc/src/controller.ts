@@ -50,7 +50,7 @@ export class WebRpcController {
   async onRequest(target: string, @HeaderParam('X-TRV-RPC-INPUTS') paramInput?: string, @Body() body?: Any): Promise<unknown> {
     const endpoint = ControllerRegistryIndex.getEndpointConfigById(target);
 
-    if (!endpoint || !endpoint.filter) {
+    if (!endpoint?.filter) {
       throw new RuntimeError('Unknown endpoint', { category: 'notfound' });
     }
 

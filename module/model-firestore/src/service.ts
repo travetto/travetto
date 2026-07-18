@@ -136,7 +136,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     const result = await this.#getCollection(cls).doc(id).get();
 
-    if (result && result.exists) {
+    if (result?.exists) {
       return await ModelCrudUtil.load(cls, result.data()!);
     }
     throw new NotFoundError(cls, id);
