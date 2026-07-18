@@ -39,14 +39,23 @@ export const Html: RenderProvider<RenderContext> = {
   },
   br: async () => '<br><br>\n',
   hr: async () => '<hr>\n',
-  strong: stdInline, em: stdInline,
-  h2: stdFull, h3: stdFull, h4: stdFull,
-  li: std, ol: stdFull, ul: stdFull,
-  table: stdFull, thead: std, tr: std, td: std, tbody: std,
+  strong: stdInline,
+  em: stdInline,
+  h2: stdFull,
+  h3: stdFull,
+  h4: stdFull,
+  li: std,
+  ol: stdFull,
+  ul: stdFull,
+  table: stdFull,
+  thead: std,
+  tr: std,
+  td: std,
+  tbody: std,
   Execution: async ({ context, node, props, createState }) => {
     const output = await context.execute(node);
-    const displayCmd = props.config?.formatCommand?.(props.cmd, props.args ?? []) ??
-      `${node.props.cmd} ${(node.props.args ?? []).join(' ')}`;
+    const displayCmd =
+      props.config?.formatCommand?.(props.cmd, props.args ?? []) ?? `${node.props.cmd} ${(node.props.args ?? []).join(' ')}`;
     const sub = createState('Terminal', {
       language: 'bash',
       title: props.title,
@@ -57,12 +66,14 @@ export const Html: RenderProvider<RenderContext> = {
   CliHelpExecution: async ({ context, props, createState }) => {
     const config = context.resolveCliCommandFromClass(props.commandClass);
     const { name: command } = config;
-    return Html.Execution(createState('Execution', {
-      title: `Showing help for ${command}`,
-      cmd: 'trv',
-      args: [command, HELP_FLAG],
-      config: { ...props.config }
-    }));
+    return Html.Execution(
+      createState('Execution', {
+        title: `Showing help for ${command}`,
+        cmd: 'trv',
+        args: [command, HELP_FLAG],
+        config: { ...props.config }
+      })
+    );
   },
   CliHelpDescription: async ({ context, props }) => {
     const config = context.resolveCliCommandFromClass(props.commandClass);
@@ -79,9 +90,12 @@ export const Html: RenderProvider<RenderContext> = {
     return `\n<h2 id="${context.getAnchorId(title)}">${title}</h2>\n\n${await recurse()}`;
   },
   Install: async ({ context, node }) => {
-    const highlighted = highlight(`
+    const highlighted = highlight(
+      `
 ${PackageDocUtil.getInstallInstructions(node.props.pkg, true)}
-`, 'bash');
+`,
+      'bash'
+    );
 
     return `\n
   <figure class="install">
@@ -101,7 +115,7 @@ ${PackageDocUtil.getInstallInstructions(node.props.pkg, true)}
     const content = await context.resolveCode(node);
     let link: string = '';
     if ('src' in props && content.file) {
-      let linkCtx: { file: string, line?: number } = { file: content.file! };
+      let linkCtx: { file: string; line?: number } = { file: content.file! };
       if (props.startRe) {
         linkCtx = await DocResolveUtil.resolveCodeLink(linkCtx.file, props.startRe);
       }
@@ -148,8 +162,7 @@ ${PackageDocUtil.getInstallInstructions(node.props.pkg, true)}
     `<a class="anchor-link" routerLink="." fragment="${context.getAnchorId(props.href)}">${props.title}</a>`,
 
   File: state => Html.Ref(state),
-  Ref: async ({ context, props }) =>
-    `<a target="_blank" class="source-link" href="${context.link(props.href, props)}">${props.title}</a>`,
+  Ref: async ({ context, props }) => `<a target="_blank" class="source-link" href="${context.link(props.href, props)}">${props.title}</a>`,
   Image: async ({ context, props }) => {
     if (!/^https?:/.test(props.href) && !(await fs.stat(props.href, { throwIfNoEntry: false }))) {
       throw new RuntimeError(`${props.href} is not a valid location`);
@@ -178,7 +191,7 @@ ${PackageDocUtil.getInstallInstructions(node.props.pkg, true)}
     if (state.node.props.install !== false) {
       const sub = state.createState('Install', {
         title: pkg.name,
-        pkg: pkg.name,
+        pkg: pkg.name
       });
       install = await Html.Install(sub);
     }

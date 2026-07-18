@@ -72,10 +72,7 @@ export const INSTALL_BUNDLES: InstallGuidance[] = [
     title: 'Worker Baseline',
     required: ['@travetto/runtime', '@travetto/config', '@travetto/worker'],
     optional: ['@travetto/model', '@travetto/log', '@travetto/context'],
-    notes: [
-      'Use worker for scheduled or background job execution.',
-      'Add model when jobs persist state between runs.'
-    ]
+    notes: ['Use worker for scheduled or background job execution.', 'Add model when jobs persist state between runs.']
   },
   {
     id: 'quality-lint-and-test',

@@ -17,7 +17,7 @@ export const Markdown: RenderProvider<RenderContext> = {
   finalize: (text, context) => {
     const brand = `<!-- ${context.generatedStamp} -->\n<!-- ${context.rebuildStamp} -->`;
     const cleaned = text
-      .replace(/(\[[^\]]+\]\([^)]+\))([A-Za-z0-9$]+)/g, (_, link, value) => value === 's' ? _ : `${link} ${value}`)
+      .replace(/(\[[^\]]+\]\([^)]+\))([A-Za-z0-9$]+)/g, (_, link, value) => (value === 's' ? _ : `${link} ${value}`))
       .replace(/(\S)\n(#)/g, (_, left, right) => `${left}\n\n${right}`);
     return `${brand}\n${cleaned}`;
   },
@@ -30,7 +30,7 @@ export const Markdown: RenderProvider<RenderContext> = {
   li: async ({ recurse, stack }) => {
     const parent = stack.toReversed().find(node => node.type === 'ol' || node.type === 'ul');
     const depth = stack.filter(node => node.type === 'ol' || node.type === 'ul').length;
-    return `${'   '.repeat(depth)}${(parent && parent.type === 'ol') ? '1.' : '* '} ${await recurse()}\n`;
+    return `${'   '.repeat(depth)}${parent && parent.type === 'ol' ? '1.' : '* '} ${await recurse()}\n`;
   },
   table: async ({ recurse }) => `${await recurse()}`,
   tbody: async ({ recurse }) => `${await recurse()}`,
@@ -45,8 +45,8 @@ export const Markdown: RenderProvider<RenderContext> = {
   h4: async ({ recurse }) => `\n#### ${await recurse()}\n\n`,
   Execution: async ({ context, node, props, createState }) => {
     const output = await context.execute(node);
-    const displayCmd = props.config?.formatCommand?.(props.cmd, props.args ?? []) ??
-      `${node.props.cmd} ${(node.props.args ?? []).join(' ')}`;
+    const displayCmd =
+      props.config?.formatCommand?.(props.cmd, props.args ?? []) ?? `${node.props.cmd} ${(node.props.args ?? []).join(' ')}`;
     const state = createState('Terminal', {
       language: 'bash',
       title: node.props.title,
@@ -56,12 +56,14 @@ export const Markdown: RenderProvider<RenderContext> = {
   },
   CliHelpExecution: async ({ context, props, createState }) => {
     const { name: command } = context.resolveCliCommandFromClass(props.commandClass);
-    return await Markdown.Execution(createState('Execution', {
-      title: `Help for ${command}`,
-      cmd: 'trv',
-      args: [command, HELP_FLAG],
-      config: { ...props.config }
-    }));
+    return await Markdown.Execution(
+      createState('Execution', {
+        title: `Help for ${command}`,
+        cmd: 'trv',
+        args: [command, HELP_FLAG],
+        config: { ...props.config }
+      })
+    );
   },
   CliHelpDescription: async ({ context, props }) => {
     const { description = '' } = context.resolveCliCommandFromClass(props.commandClass);

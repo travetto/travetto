@@ -14,7 +14,6 @@ import { createElement, JSXRuntimeTag } from '../../support/jsx-runtime.ts';
  * Render Context
  */
 export class RenderContext {
-
   #executeCache: Record<string, string> = {};
 
   /**
@@ -38,7 +37,6 @@ export class RenderContext {
   repoRoot: string;
 
   constructor(file: string, baseUrl: string, repoRoot: string) {
-
     const manifestPkg = PackageUtil.readPackage(RuntimeIndex.getModule('@travetto/manifest')!.sourcePath);
 
     this.file = path.resolve(file);
@@ -64,9 +62,10 @@ export class RenderContext {
   /**
    * Generate link location
    */
-  link(text: string, line?: number | { [key: string]: unknown, line?: number }): string {
+  link(text: string, line?: number | { [key: string]: unknown; line?: number }): string {
     const num = typeof line === 'number' ? line : line?.line;
-    return `${text.replace(this.repoRoot, this.baseUrl)
+    return `${text
+      .replace(this.repoRoot, this.baseUrl)
       .replace(/.*@travetto\//, `${this.travettoBaseUrl}/module/`)}${num && num > 1 ? `#L${num}` : ''}`;
   }
 
@@ -81,7 +80,12 @@ export class RenderContext {
    * Get a consistent anchor id
    */
   getAnchorId(a: string): string {
-    return a.toLowerCase().replace(/<[^>]+>/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim().replace(/ /g, '-');
+    return a
+      .toLowerCase()
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim()
+      .replace(/ /g, '-');
   }
 
   /**
@@ -95,13 +99,13 @@ export class RenderContext {
 
     const { cmd, args = [], config = {} } = node.props;
     const result = await DocRunUtil.run(cmd, args, config);
-    return this.#executeCache[key] = result;
+    return (this.#executeCache[key] = result);
   }
 
   /**
    * Resolve CLI command metadata for a class from cli:schema output.
    */
-  resolveCliCommandFromClass(commandClass: Class): { name: string, description?: string } {
+  resolveCliCommandFromClass(commandClass: Class): { name: string; description?: string } {
     const { name } = CliCommandRegistryIndex.get(commandClass);
     const { description } = SchemaRegistryIndex.getConfig(commandClass);
     return { name, description };
@@ -125,9 +129,9 @@ export class RenderContext {
    * Resolve code/config
    */
   async resolveCode(node: JSXElementByFn<'Code' | 'Config'>): Promise<ResolvedCode> {
-    return node.props.startRe ?
-      DocResolveUtil.resolveSnippet(node.props.src, node.props.startRe, node.props.endRe, node.props.outline) :
-      DocResolveUtil.resolveCode(node.props.src, node.props.language, node.props.outline);
+    return node.props.startRe
+      ? DocResolveUtil.resolveSnippet(node.props.src, node.props.startRe, node.props.endRe, node.props.outline)
+      : DocResolveUtil.resolveCode(node.props.src, node.props.language, node.props.outline);
   }
 
   /**

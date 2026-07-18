@@ -19,5 +19,4 @@ export const CONSUMER_LLM_DOCS = {
   ]
 } as const;
 
-export const CONSUMER_LLM_DOC_COUNT =
-  CONSUMER_LLM_DOCS.compatibilityNotes.length + CONSUMER_LLM_DOCS.helperFlows.length;
+export const CONSUMER_LLM_DOC_COUNT = CONSUMER_LLM_DOCS.compatibilityNotes.length + CONSUMER_LLM_DOCS.helperFlows.length;

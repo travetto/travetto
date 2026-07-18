@@ -15,9 +15,7 @@ function toStringMap(value: unknown): Record<string, string> {
   if (!isRecord(value)) {
     return {};
   }
-  return Object.fromEntries(
-    Object.entries(value).filter((entry): entry is [string, string] => typeof entry[1] === 'string')
-  );
+  return Object.fromEntries(Object.entries(value).filter((entry): entry is [string, string] => typeof entry[1] === 'string'));
 }
 
 function toOptionalString(value: unknown): string | undefined {
@@ -140,25 +138,15 @@ const STATIC_OPERATION_SPECS: Partial<Record<OperationId, OperationFileSpec[]>> 
     { file: 'src/email/provider.ts', snippet: 'email-transport-provider.ts.tpl' },
     { file: 'src/config/email.ts', snippet: 'email-config.ts.tpl' }
   ],
-  'email-preview-snapshot': [
-    { file: 'test/email/preview.ts', snippet: 'email-preview-test.ts.tpl' }
-  ],
-  'email-test-fixtures': [
-    { file: 'test/email/fixtures/transactional.json', snippet: 'email-fixture.json.tpl' }
-  ],
+  'email-preview-snapshot': [{ file: 'test/email/preview.ts', snippet: 'email-preview-test.ts.tpl' }],
+  'email-test-fixtures': [{ file: 'test/email/fixtures/transactional.json', snippet: 'email-fixture.json.tpl' }],
   'generate-test-suite': [
     { file: 'test/unit/example.ts', snippet: 'generate-test-suite.unit.ts.tpl' },
     { file: 'test/fixtures/example.json', snippet: 'generate-test-suite.fixture.json.tpl' }
   ],
-  'workflow-gcp-deploy': [
-    { file: '.github/workflows/deploy-api.yml', snippet: 'workflow-gcp-deploy.yml.tpl' }
-  ],
-  'workflow-cloudfront-deploy': [
-    { file: '.github/workflows/deploy-ui.yml', snippet: 'workflow-cloudfront-deploy.yml.tpl' }
-  ],
-  'create-web-interceptor': [
-    { file: 'src/interceptor/request-logging.ts', snippet: 'create-web-interceptor.ts.tpl' }
-  ],
+  'workflow-gcp-deploy': [{ file: '.github/workflows/deploy-api.yml', snippet: 'workflow-gcp-deploy.yml.tpl' }],
+  'workflow-cloudfront-deploy': [{ file: '.github/workflows/deploy-ui.yml', snippet: 'workflow-cloudfront-deploy.yml.tpl' }],
+  'create-web-interceptor': [{ file: 'src/interceptor/request-logging.ts', snippet: 'create-web-interceptor.ts.tpl' }],
   'cache-enhancements': [
     { file: 'src/service/cacheable.ts', snippet: 'cache-enhancements.service.ts.tpl' },
     { file: 'src/config/cache.ts', snippet: 'cache-enhancements.config.ts.tpl' }
@@ -171,22 +159,14 @@ const STATIC_OPERATION_SPECS: Partial<Record<OperationId, OperationFileSpec[]>> 
     { file: 'src/web/auth.ts', snippet: 'enable-auth-session.controller.ts.tpl' },
     { file: 'src/web/auth.config.ts', snippet: 'enable-auth-session.config.ts.tpl' }
   ],
-  'openapi-spec-pipeline': [
-    { file: '.github/workflows/openapi-spec.yml', snippet: 'openapi-spec-pipeline.yml.tpl' }
-  ],
+  'openapi-spec-pipeline': [{ file: '.github/workflows/openapi-spec.yml', snippet: 'openapi-spec-pipeline.yml.tpl' }],
   'openapi-client-generation': [
     { file: '.github/workflows/openapi-client.yml', snippet: 'openapi-client-generation.yml.tpl' },
     { file: 'src/client/README.md', snippet: 'openapi-client-generation.readme.tpl' }
   ],
-  'aws-lambda-package-and-deploy': [
-    { file: '.github/workflows/deploy-lambda.yml', snippet: 'aws-lambda-package-and-deploy.yml.tpl' }
-  ],
-  'pack-docker-release': [
-    { file: '.github/workflows/docker-release.yml', snippet: 'pack-docker-release.yml.tpl' }
-  ],
-  'repo-version-release': [
-    { file: '.github/workflows/repo-version-release.yml', snippet: 'repo-version-release.yml.tpl' }
-  ]
+  'aws-lambda-package-and-deploy': [{ file: '.github/workflows/deploy-lambda.yml', snippet: 'aws-lambda-package-and-deploy.yml.tpl' }],
+  'pack-docker-release': [{ file: '.github/workflows/docker-release.yml', snippet: 'pack-docker-release.yml.tpl' }],
+  'repo-version-release': [{ file: '.github/workflows/repo-version-release.yml', snippet: 'repo-version-release.yml.tpl' }]
 };
 
 async function execFromSpecs(
@@ -198,13 +178,7 @@ async function execFromSpecs(
 ): Promise<void> {
   for (const spec of specs) {
     const params = typeof spec.params === 'function' ? spec.params(baseDir, request) : (spec.params ?? {});
-    await writeFile(
-      operationId,
-      path.join(baseDir, spec.file),
-      await renderSnippet(spec.snippet, params),
-      request,
-      artifacts
-    );
+    await writeFile(operationId, path.join(baseDir, spec.file), await renderSnippet(spec.snippet, params), request, artifacts);
   }
 }
 
@@ -265,11 +239,7 @@ async function mergeLintPackageJson(
   artifacts.push({ operationId, file: fullPath, status: 'created', stepId });
 }
 
-async function execProjectBootstrap(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
+async function execProjectBootstrap(baseDir: string, request: ExecutionRequest, artifacts: ExecutionArtifact[]): Promise<void> {
   const projectName = request.projectName ?? path.basename(baseDir);
   const packageName = toPackageName(projectName, 'travetto-app');
   const monorepo = request.monorepo === true;
@@ -331,11 +301,7 @@ async function execProjectBootstrap(
   );
 }
 
-async function execCreateWebRoute(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
+async function execCreateWebRoute(baseDir: string, request: ExecutionRequest, artifacts: ExecutionArtifact[]): Promise<void> {
   const routePath = (request.routePath ?? 'sample').replace(/^\/+/, '');
   const serviceName = toClassName(request.serviceName ?? `${routePath} service`, 'SampleService');
   const controllerName = toClassName(request.controllerName ?? `${routePath} controller`, 'SampleController');
@@ -365,11 +331,7 @@ async function execCreateWebRoute(
   );
 }
 
-async function execEmailCreateTemplate(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
+async function execEmailCreateTemplate(baseDir: string, request: ExecutionRequest, artifacts: ExecutionArtifact[]): Promise<void> {
   const emailName = toFileName(request.emailName ?? 'transactional', 'transactional');
   await writeFile(
     'email-create-template',
@@ -380,11 +342,7 @@ async function execEmailCreateTemplate(
   );
 }
 
-async function execEmailContextSchema(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
+async function execEmailContextSchema(baseDir: string, request: ExecutionRequest, artifacts: ExecutionArtifact[]): Promise<void> {
   const emailType = toClassName(request.emailName ?? 'transactional email', 'TransactionalEmail');
   await writeFile(
     'email-context-schema',
@@ -395,11 +353,7 @@ async function execEmailContextSchema(
   );
 }
 
-async function execEmailRenderPipeline(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
+async function execEmailRenderPipeline(baseDir: string, request: ExecutionRequest, artifacts: ExecutionArtifact[]): Promise<void> {
   const emailName = toFileName(request.emailName ?? 'transactional', 'transactional');
   await writeFile(
     'email-render-pipeline',
@@ -413,11 +367,7 @@ async function execEmailRenderPipeline(
   );
 }
 
-async function execEmailSendFlow(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
+async function execEmailSendFlow(baseDir: string, request: ExecutionRequest, artifacts: ExecutionArtifact[]): Promise<void> {
   const routePath = (request.sendRoutePath ?? 'email/send').replace(/^\/+/, '');
   await writeFile(
     'email-send-flow',
@@ -428,11 +378,7 @@ async function execEmailSendFlow(
   );
 }
 
-async function execModelIndexedAssistant(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
+async function execModelIndexedAssistant(baseDir: string, request: ExecutionRequest, artifacts: ExecutionArtifact[]): Promise<void> {
   const modelName = toClassName(request.modelName ?? 'sample item', 'SampleItem');
   const modelFile = toFileName(modelName, 'sample-item');
   const modelVar = `${modelFile.replace(/-([a-z])/g, (_, ch: string) => ch.toUpperCase())}`;
@@ -470,11 +416,7 @@ async function execModelIndexedAssistant(
   );
 }
 
-async function execModelQueryAssistant(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
+async function execModelQueryAssistant(baseDir: string, request: ExecutionRequest, artifacts: ExecutionArtifact[]): Promise<void> {
   const modelName = toClassName(request.modelName ?? 'sample item', 'SampleItem');
   const modelFile = toFileName(modelName, 'sample-item');
 
@@ -490,11 +432,7 @@ async function execModelQueryAssistant(
   );
 }
 
-async function execRestRpcClient(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
+async function execRestRpcClient(baseDir: string, request: ExecutionRequest, artifacts: ExecutionArtifact[]): Promise<void> {
   const routePath = (request.routePath ?? 'sample').replace(/^\/+/, '');
   const clientName = toClassName(`${routePath} client`, 'SampleClient');
   const clientFile = toFileName(clientName, 'sample-client').replace(/-client$/, '') || 'sample';
@@ -519,27 +457,25 @@ async function execRestRpcClient(
   );
 }
 
-async function execGenerateConfig(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
-  await execFromSpecs('generate-config', [
-    { file: 'src/config/app.ts', snippet: 'generate-config.app-config.ts.tpl' },
-    {
-      file: 'resources/application.yml',
-      snippet: 'generate-config.application.yml.tpl',
-      params: (dir, input): Record<string, string> => ({ projectName: input.projectName ?? path.basename(dir) })
-    },
-    { file: 'resources/local.yml', snippet: 'generate-config.local.yml.tpl' }
-  ], baseDir, request, artifacts);
+async function execGenerateConfig(baseDir: string, request: ExecutionRequest, artifacts: ExecutionArtifact[]): Promise<void> {
+  await execFromSpecs(
+    'generate-config',
+    [
+      { file: 'src/config/app.ts', snippet: 'generate-config.app-config.ts.tpl' },
+      {
+        file: 'resources/application.yml',
+        snippet: 'generate-config.application.yml.tpl',
+        params: (dir, input): Record<string, string> => ({ projectName: input.projectName ?? path.basename(dir) })
+      },
+      { file: 'resources/local.yml', snippet: 'generate-config.local.yml.tpl' }
+    ],
+    baseDir,
+    request,
+    artifacts
+  );
 }
 
-async function execEnableLinting(
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-): Promise<void> {
+async function execEnableLinting(baseDir: string, request: ExecutionRequest, artifacts: ExecutionArtifact[]): Promise<void> {
   await mergeLintPackageJson(
     'enable-linting',
     baseDir,
@@ -551,11 +487,7 @@ async function execEnableLinting(
   );
 }
 
-type OperationHandler = (
-  baseDir: string,
-  request: ExecutionRequest,
-  artifacts: ExecutionArtifact[]
-) => Promise<void>;
+type OperationHandler = (baseDir: string, request: ExecutionRequest, artifacts: ExecutionArtifact[]) => Promise<void>;
 
 function createStaticHandler(operationId: OperationId): OperationHandler {
   return async (baseDir: string, request: ExecutionRequest, artifacts: ExecutionArtifact[]): Promise<void> => {

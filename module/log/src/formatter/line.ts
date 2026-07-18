@@ -61,14 +61,14 @@ export class LineLogFormatterConfig {
 
   @PostConstruct()
   finalizeConfig(): void {
-    this.time ??= (!this.plain ? 'ms' : undefined);
+    this.time ??= !this.plain ? 'ms' : undefined;
     this.plain ??= !StyleUtil.enabled;
     this.colorize ??= !this.plain;
     this.links ??= !this.plain;
     this.location ??= !this.plain;
     this.level ??= !this.plain;
     this.align ??= !this.plain;
-    if (this.time !== undefined && this.time === 'ms' || this.time === 's') {
+    if ((this.time !== undefined && this.time === 'ms') || this.time === 's') {
       this.timestamp = this.time;
     }
     this.inspectOptions = {
@@ -84,7 +84,6 @@ export class LineLogFormatterConfig {
  */
 @Injectable()
 export class LineLogFormatter implements LogFormatter {
-
   config: LineLogFormatterConfig;
 
   constructor(config: LineLogFormatterConfig) {
@@ -126,7 +125,10 @@ export class LineLogFormatter implements LogFormatter {
         location = STYLES.location(location);
       }
       if (this.config.links) {
-        location = StyleUtil.link(location, `file://${RuntimeIndex.getModule(event.module)?.sourcePath}/${event.modulePath}${event.line ? `#${event.line}` : ''}`);
+        location = StyleUtil.link(
+          location,
+          `file://${RuntimeIndex.getModule(event.module)?.sourcePath}/${event.modulePath}${event.line ? `#${event.line}` : ''}`
+        );
       }
       out.push(`[${location}]`);
     }

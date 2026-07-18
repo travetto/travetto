@@ -7,16 +7,21 @@ import type { CodeProps, CodeSourceInput, RunConfig } from './util/types.ts';
 import { createElement, type JSXElement, type JSXComponentFunction as CompFn } from '../support/jsx-runtime.ts';
 import { PackageDocUtil } from './util/package.ts';
 
-type InstallProps = { title: string, pkg: string };
-type ExecProps = { title: string, cmd: string, args?: string[], config?: RunConfig & { formatCommand?(cmd: string, args: string[]): string } };
+type InstallProps = { title: string; pkg: string };
+type ExecProps = {
+  title: string;
+  cmd: string;
+  args?: string[];
+  config?: RunConfig & { formatCommand?(cmd: string, args: string[]): string };
+};
 type CliHelpProps = { commandClass: ClassType };
 type CliHelpExecutionProps = CliHelpProps & { config?: RunConfig };
-type StdHeaderProps = { module?: string, install?: boolean };
-type HeaderProps = { title: string, description?: string };
+type StdHeaderProps = { module?: string; install?: boolean };
+type HeaderProps = { title: string; description?: string };
 type ModuleProps = { name: keyof typeof MODULES };
 type LibraryProps = { name: keyof typeof LIBRARIES };
-type LinkProps = { title: string, href: string, line?: number };
-type CodeLinkProps = { title: string, src: CodeSourceInput, startRe: RegExp };
+type LinkProps = { title: string; href: string; line?: number };
+type CodeLinkProps = { title: string; src: CodeSourceInput; startRe: RegExp };
 type Named = { name: string };
 type Titled = { title: string };
 
@@ -56,19 +61,40 @@ const Module: CompFn<ModuleProps> = () => EMPTY; // Node Module Reference
 const Library: CompFn<LibraryProps> = () => EMPTY; // Library reference
 
 export const c = {
-  Input, Field, Method, Command, Path, Class,
-  Anchor, Library, Ref, File, Image, CodeLink,
-  Module, Note, Header, StdHeader,
-  Section, SubSection, SubSubSection,
-  Code, Execution, Terminal, Install, Config,
-  CliHelpSection, CliHelpDescription, CliHelpExecution,
+  Input,
+  Field,
+  Method,
+  Command,
+  Path,
+  Class,
+  Anchor,
+  Library,
+  Ref,
+  File,
+  Image,
+  CodeLink,
+  Module,
+  Note,
+  Header,
+  StdHeader,
+  Section,
+  SubSection,
+  SubSubSection,
+  Code,
+  Execution,
+  Terminal,
+  Install,
+  Config,
+  CliHelpSection,
+  CliHelpDescription,
+  CliHelpExecution
 } as const;
 
 type C = typeof c;
 
 // @ts-expect-error
 export type JSXElementByFn<K extends keyof C> = JSXElement<C[K], Parameters<C[K]>[0]>;
-export type JSXElements = { [K in keyof C]: JSXElementByFn<K>; };
+export type JSXElements = { [K in keyof C]: JSXElementByFn<K> };
 
 export const EMPTY_ELEMENT = EMPTY;
 
@@ -89,7 +115,8 @@ function CodeLinker(titleOrNode: string | JSXElement, src?: string, startRe?: Re
     props = { title: titleOrNode, src: src!, startRe: startRe! };
   } else if (titleOrNode.type === Code) {
     const node: JSXElementByFn<'Code'> = castTo(titleOrNode);
-    const srcName = typeof node.props.src === 'string' ? node.props.src : (typeof node.props.src === 'function' ? node.props.src.name : '<UNNAMED>');
+    const srcName =
+      typeof node.props.src === 'string' ? node.props.src : typeof node.props.src === 'function' ? node.props.src.name : '<UNNAMED>';
     props = {
       title: node.props.title ?? srcName,
       src: node.props.src,
@@ -112,5 +139,7 @@ export const d = {
   field: (name: string) => createElement(c.Field, { name }),
   library: (name: keyof typeof LIBRARIES) => createElement(c.Library, { name }),
   module: (name: keyof typeof MODULES) => createElement(c.Module, { name }),
-  get trv() { return PackageDocUtil.getPackageCommand('trv'); },
+  get trv() {
+    return PackageDocUtil.getPackageCommand('trv');
+  }
 };

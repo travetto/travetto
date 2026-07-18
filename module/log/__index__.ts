@@ -1,4 +1,4 @@
-import type { } from './src/trv.d.ts';
+import type {} from './src/trv.d.ts';
 export * from './src/service.ts';
 export * from './src/formatter/json.ts';
 export * from './src/formatter/line.ts';

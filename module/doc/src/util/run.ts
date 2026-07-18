@@ -25,7 +25,8 @@ class DocState {
 
   getId(id: string): string {
     if (!this.ids[id]) {
-      this.ids[id] = ' '.repeat(id.length)
+      this.ids[id] = ' '
+        .repeat(id.length)
         .split('')
         .map(_ => Math.trunc(this.rng() * 16).toString(16))
         .join('');
@@ -42,7 +43,7 @@ export class DocRunUtil {
 
   /** Build working directory from config */
   static workingDirectory(config: RunConfig): string {
-    return path.resolve(config.module ? RuntimeIndex.getModule(config.module)?.sourcePath ?? undefined! : Runtime.mainSourcePath);
+    return path.resolve(config.module ? (RuntimeIndex.getModule(config.module)?.sourcePath ?? undefined!) : Runtime.mainSourcePath);
   }
 
   /**
@@ -50,7 +51,8 @@ export class DocRunUtil {
    */
   static cleanRunOutput(text: string, config: RunConfig): string {
     const rootPath = this.workingDirectory(config);
-    text = util.stripVTControlCharacters(text.trim())
+    text = util
+      .stripVTControlCharacters(text.trim())
       .replaceAll(rootPath, '.')
       .replaceAll(os.tmpdir(), '/tmp')
       .replaceAll(Runtime.workspace.path, '<workspace-root>')
@@ -60,10 +62,11 @@ export class DocRunUtil {
       .replace(/^(.{1,4})?Compiling[.]*/, '') // Compiling message, remove
       .replace(/[A-Za-z0-9_./\\-]+\/travetto\/module\//g, '@travetto/')
       .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.#docState.getDate.bind(this.#docState))
-      .replace(/\b[0-9a-f]{4}[0-9a-f-]{8,40}\b/ig, this.#docState.getId.bind(this.#docState))
+      .replace(/\b[0-9a-f]{4}[0-9a-f-]{8,40}\b/gi, this.#docState.getId.bind(this.#docState))
       .replace(/(\d+[.]\d+[.]\d+)-(alpha|rc)[.]\d+/g, (all, value) => value);
     if (config.filter || config.rewrite) {
-      text = text.split(/\n/g)
+      text = text
+        .split(/\n/g)
         .filter(line => config.filter?.(line) ?? true)
         .map(line => config.rewrite?.(line) ?? line)
         .join('\n');

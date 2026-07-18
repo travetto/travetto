@@ -8,7 +8,6 @@ import { JsonLogFormatter, type LogDecorator, type LogEvent, LogFormatUtil, type
 
 @Injectable()
 class CustomLogger implements Logger {
-
   values: LogEvent[] = [];
 
   log(ev: LogEvent): void {
@@ -30,7 +29,6 @@ class Decorator implements LogDecorator {
 
 @Suite('Suite')
 class LoggerTest {
-
   manager: ConsoleListener;
 
   @BeforeAll()
@@ -119,7 +117,7 @@ class LoggerTest {
     const context = LogFormatUtil.getContext(logger.values[0]);
     assert(context?.secret === true);
     const context2 = LogFormatUtil.getContext(logger.values[1]);
-    assert.deepStrictEqual(Object.keys(context2 ?? {}), ['extra',]);
+    assert.deepStrictEqual(Object.keys(context2 ?? {}), ['extra']);
     assert(logger.values[1].message === undefined);
     const context3 = LogFormatUtil.getContext(logger.values[2]);
     assert.deepStrictEqual(Object.keys(context3 ?? {}), ['extra']);

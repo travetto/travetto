@@ -4,7 +4,7 @@ import { BinaryUtil, castTo, type BinaryStream, type BinaryType } from '@travett
 
 const VALID_EXTENSIONS = ['jpeg', 'jpg', 'png', 'avif', 'webp', 'gif', 'jxl'] as const;
 
-type ImageFormat = typeof VALID_EXTENSIONS[number];
+type ImageFormat = (typeof VALID_EXTENSIONS)[number];
 type ImageMetadata = {
   width: number;
   height: number;
@@ -38,7 +38,6 @@ export interface ConvertOptions {
  * Simple support for image manipulation.
  */
 export class ImageUtil {
-
   static isKnownExtension(ext: string): ext is ImageFormat {
     return VALID_EXTENSIONS.includes(castTo(ext));
   }
@@ -48,7 +47,7 @@ export class ImageUtil {
 
     let builder = sharp();
     if (options.w || options.h) {
-      const dims = [options.w, options.h].map(value => value ? Math.trunc(value) : undefined);
+      const dims = [options.w, options.h].map(value => (value ? Math.trunc(value) : undefined));
       const fluid = dims.some(value => !value);
       builder = builder.resize({
         width: dims[0],
@@ -58,13 +57,12 @@ export class ImageUtil {
     }
 
     return builder
-      .avif({ force: format === 'avif', ...optimize ? { quality: 70 } : {} })
-      .webp({ force: format === 'webp', ...optimize ? { quality: 80 } : {} })
-      .png({ force: format === 'png', ...optimize ? { compressionLevel: 9, quality: 80, adaptiveFiltering: true } : {} })
-      .jpeg({ force: format === 'jpeg' || format === 'jpg', ...optimize ? { quality: 80, progressive: true } : {} })
-      .jxl({ force: format === 'jxl', ...optimize ? { lossless: false, quality: 80 } : {} })
-      .gif({ force: format === 'gif', ...optimize ? { effort: 10 } : {} });
-
+      .avif({ force: format === 'avif', ...(optimize ? { quality: 70 } : {}) })
+      .webp({ force: format === 'webp', ...(optimize ? { quality: 80 } : {}) })
+      .png({ force: format === 'png', ...(optimize ? { compressionLevel: 9, quality: 80, adaptiveFiltering: true } : {}) })
+      .jpeg({ force: format === 'jpeg' || format === 'jpg', ...(optimize ? { quality: 80, progressive: true } : {}) })
+      .jxl({ force: format === 'jxl', ...(optimize ? { lossless: false, quality: 80 } : {}) })
+      .gif({ force: format === 'gif', ...(optimize ? { effort: 10 } : {}) });
   }
 
   /**
@@ -82,7 +80,10 @@ export class ImageUtil {
   static async getMetadata(image: BinaryType): Promise<ImageMetadata> {
     const { default: sharp } = await import('sharp');
     const out = await new Promise<Metadata>((resolve, reject) =>
-      BinaryUtil.pipeline(image, sharp().metadata((error, metadata) => error ? reject(error) : resolve(metadata)))
+      BinaryUtil.pipeline(
+        image,
+        sharp().metadata((error, metadata) => (error ? reject(error) : resolve(metadata)))
+      )
     );
     return {
       width: out.width!,

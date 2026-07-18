@@ -8,6 +8,6 @@ export class CustomLogger implements Logger {
     const headers = new Headers();
     headers.set('Content-Type', 'application/json');
     const body = JSONUtil.toUTF8(event);
-    fetch('http://localhost:8080/log', { method: 'POST', headers, body, });
+    fetch('http://localhost:8080/log', { method: 'POST', headers, body });
   }
 }

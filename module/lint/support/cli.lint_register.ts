@@ -1,7 +1,7 @@
-import fs from "node:fs/promises";
+import fs from 'node:fs/promises';
 
-import { CliCommand, type CliCommandShape } from "@travetto/cli";
-import { Runtime } from "@travetto/runtime";
+import { CliCommand, type CliCommandShape } from '@travetto/cli';
+import { Runtime } from '@travetto/runtime';
 
 /**
  * Generate the workspace Biome configuration entry file.
@@ -16,7 +16,7 @@ export class LintRegisterCommand implements CliCommandShape {
   "extends": ["./node_modules/@travetto/lint/resources/biome.jsonc"]
 }
 `;
-    const output = Runtime.workspaceRelative("biome.jsonc");
+    const output = Runtime.workspaceRelative('biome.jsonc');
     if (!(await fs.stat(output, { throwIfNoEntry: false }))) {
       await fs.writeFile(output, content);
       console.log(`Wrote lint config to ${output}`);

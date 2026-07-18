@@ -19,12 +19,12 @@ const providers = { [Html.ext]: Html, [Markdown.ext]: Markdown };
  * Doc Renderer
  */
 export class DocRenderer {
-
   static async get(file: string, manifest: Pick<ManifestContext, 'workspace'>): Promise<DocRenderer> {
     const document = await Runtime.importFrom<DocumentShape>(file);
     const pkg = PackageUtil.readPackage(manifest.workspace.path);
     const repoBaseUrl = pkg.travetto?.doc?.baseUrl ?? manifest.workspace.path;
-    return new DocRenderer(document,
+    return new DocRenderer(
+      document,
       new RenderContext(file, repoBaseUrl, path.resolve(pkg.travetto?.doc?.root ?? manifest.workspace.path))
     );
   }
@@ -38,11 +38,7 @@ export class DocRenderer {
     this.#support = support;
   }
 
-  async #buildLink(
-    renderer: RenderProvider<RenderContext>,
-    cls: Class,
-    title?: string
-  ) {
+  async #buildLink(renderer: RenderProvider<RenderContext>, cls: Class, title?: string) {
     const source = DocFileUtil.readSource(cls);
     if (source) {
       title = DocFileUtil.isDecorator(cls.name, source.file) ? `@${title ?? cls.name}` : (title ?? cls.name);
@@ -53,7 +49,11 @@ export class DocRenderer {
       });
       // @ts-expect-error
       const state: RenderState<JSXElementByFn<'CodeLink'>, RenderContext> = {
-        node, props: node.props, recurse: async () => '', context: this.#support, stack: []
+        node,
+        props: node.props,
+        recurse: async () => '',
+        context: this.#support,
+        stack: []
       };
       // @ts-expect-error
       state.createState = (key, props) => this.createState(state, key, props);
@@ -66,7 +66,6 @@ export class DocRenderer {
     input: JSXElement[] | JSXElement | string | bigint | object | number | boolean | null | undefined,
     stack: JSXElement[] = []
   ): Promise<string | undefined> {
-
     if (input === null || input === undefined) {
       return '';
     } else if (Array.isArray(input)) {
@@ -99,7 +98,11 @@ export class DocRenderer {
         const recurse = () => this.#render(renderer, final.props.children ?? [], [...stack, final]);
         // @ts-expect-error
         const state: RenderState<JSXElement, RenderContext> = {
-          node: final, props: final.props, recurse, stack, context: this.#support
+          node: final,
+          props: final.props,
+          recurse,
+          stack,
+          context: this.#support
         };
         state.createState = (key, props) => this.createState(state, key, props);
         // @ts-expect-error
@@ -110,10 +113,12 @@ export class DocRenderer {
       }
     } else {
       switch (typeof input) {
-        case 'string': return input.replace(/&nbsp;/g, ' ');
+        case 'string':
+          return input.replace(/&nbsp;/g, ' ');
         case 'number':
         case 'bigint':
-        case 'boolean': return `${input}`;
+        case 'boolean':
+          return `${input}`;
         case 'object': {
           if (input) {
             return await this.#buildLink(renderer, castTo(input.constructor), input.constructor.name.replace(/^[$]/, ''));
@@ -147,12 +152,11 @@ export class DocRenderer {
       throw new RuntimeError(`Unknown renderer with format: ${format}`);
     }
     if (!this.#rootNode) {
-      this.#rootNode = (Array.isArray(this.#root.text) || isJSXElement(this.#root.text)) ?
-        this.#root.text : await (this.#root.text());
+      this.#rootNode = Array.isArray(this.#root.text) || isJSXElement(this.#root.text) ? this.#root.text : await this.#root.text();
     }
 
     const text = await this.#render(providers[format], this.#rootNode);
-    let cleaned = `${text?.replace(/\n{3,100}/msg, '\n\n').trim()}\n`;
+    let cleaned = `${text?.replace(/\n{3,100}/gms, '\n\n').trim()}\n`;
     if (this.#root.wrap?.[format]) {
       cleaned = this.#root.wrap[format](cleaned);
     }

@@ -1,10 +1,4 @@
-import type {
-  InstallGuidance,
-  LlmOperation,
-  RecommendationQuery,
-  RecommendationResponse,
-  WorkflowGuidance
-} from './types.ts';
+import type { InstallGuidance, LlmOperation, RecommendationQuery, RecommendationResponse, WorkflowGuidance } from './types.ts';
 import { INSTALL_BUNDLES } from './install-guidance.ts';
 import { recommendSnippets } from './snippet-catalog.ts';
 import { WORKFLOWS } from './workflow-guidance.ts';
@@ -274,9 +268,7 @@ export function recommendWorkflows(ids?: string[]): WorkflowGuidance[] {
 
 export function recommendOperations(query: RecommendationQuery = {}): LlmOperation[] {
   const { categories, includeExcluded = false } = query;
-  const selected = categories?.length ?
-    OPERATIONS.filter(item => categories.includes(item.category)) :
-    OPERATIONS;
+  const selected = categories?.length ? OPERATIONS.filter(item => categories.includes(item.category)) : OPERATIONS;
   return selected.filter(item => includeExcluded || !item.excluded);
 }
 
@@ -299,8 +291,6 @@ export async function recommend(query: RecommendationQuery = {}): Promise<Recomm
   };
 }
 
-export const EXCLUDED_OPERATION_IDS = OPERATIONS
-  .filter(item => item.excluded)
-  .map(item => item.id);
+export const EXCLUDED_OPERATION_IDS = OPERATIONS.filter(item => item.excluded).map(item => item.id);
 
 export const LLM_OPERATIONS = OPERATIONS;

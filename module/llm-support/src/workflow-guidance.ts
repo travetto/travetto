@@ -93,7 +93,13 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     id: 'enable-auth-session',
     title: 'Enable auth with sessions',
     intent: 'Configure login/self/logout with session-backed identity in local memory.',
-    recommendedModules: ['@travetto/auth', '@travetto/auth-web', '@travetto/auth-session', '@travetto/auth-web-session', '@travetto/model-memory'],
+    recommendedModules: [
+      '@travetto/auth',
+      '@travetto/auth-web',
+      '@travetto/auth-session',
+      '@travetto/auth-web-session',
+      '@travetto/model-memory'
+    ],
     optionalModules: ['@travetto/model', '@travetto/model-indexed', '@travetto/web'],
     commandDiscoveryRule: 'Validate auth-web decorators and auth command references with npx trv cli:schema before publishing examples.',
     verification: [
@@ -126,7 +132,8 @@ export const WORKFLOWS: WorkflowGuidance[] = [
       '@travetto/model-postgres',
       '@travetto/model-sqlite'
     ],
-    commandDiscoveryRule: 'Validate model command signatures and adapter setup commands with npx trv cli:schema before recommendation output.',
+    commandDiscoveryRule:
+      'Validate model command signatures and adapter setup commands with npx trv cli:schema before recommendation output.',
     verification: [
       'Ensure selected adapter is supported and matches deployment datastore target.',
       'Ensure SQL-family selections include shared SQL runtime package requirements.'
@@ -138,7 +145,8 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     intent: 'Enable quality features so generated projects have immediate test and lint feedback loops.',
     recommendedModules: ['@travetto/test', '@travetto/eslint'],
     optionalModules: [],
-    commandDiscoveryRule: 'Validate test and lint command examples with npx trv cli:schema or generated package scripts before suggesting execution.',
+    commandDiscoveryRule:
+      'Validate test and lint command examples with npx trv cli:schema or generated package scripts before suggesting execution.',
     verification: [
       'Ensure generated package scripts include test and lint commands when selected.',
       'Run test and lint once after generation to catch template/config drift early.'
@@ -211,7 +219,8 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     intent: 'Automate monorepo versioning with change-aware release mode and optional tagging.',
     recommendedModules: ['@travetto/repo'],
     optionalModules: ['@travetto/registry', '@travetto/pack'],
-    commandDiscoveryRule: 'Validate repo:version and repo:publish command signatures with npx trv cli:schema before suggesting release automation.',
+    commandDiscoveryRule:
+      'Validate repo:version and repo:publish command signatures with npx trv cli:schema before suggesting release automation.',
     verification: [
       'Ensure release mode and semver level are explicit and reviewed in CI inputs.',
       'Ensure release commits and tags align with repository policy.'

@@ -13,7 +13,6 @@ export class ConsoleLogAppenderConfig {
  */
 @Injectable()
 export class ConsoleLogAppender implements LogAppender {
-
   config: ConsoleLogAppenderConfig;
 
   constructor(config: ConsoleLogAppenderConfig) {

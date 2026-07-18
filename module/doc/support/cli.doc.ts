@@ -13,14 +13,13 @@ import { PackageUtil } from '@travetto/manifest';
  * iterative documentation authoring.
  */
 @CliCommand()
-@Validator(async (cmd) => {
+@Validator(async cmd => {
   const docFile = path.resolve(cmd.input);
   if (!(await fs.stat(docFile, { throwIfNoEntry: false }))) {
     return { message: `input: ${cmd.input} does not exist`, path: 'input', source: 'flag', kind: 'invalid' };
   }
 })
 export class DocCommand implements CliCommandShape {
-
   /** Input File */
   input = 'DOC.tsx';
 
@@ -36,7 +35,7 @@ export class DocCommand implements CliCommandShape {
     Env.TRV_ROLE.set('doc');
     Env.TRV_CLI_IPC.clear();
     Env.TRV_LOG_PLAIN.set(true);
-    Env.FORCE_COLOR.set(false);// Prevent restarting
+    Env.FORCE_COLOR.set(false); // Prevent restarting
   }
 
   async runWatch(): Promise<void> {
@@ -57,8 +56,7 @@ export class DocCommand implements CliCommandShape {
     const { DocRenderer } = await import('../src/render/renderer.ts');
     const ctx = await DocRenderer.get(this.input, Runtime);
     const outputs = this.outputs.map(output =>
-      output.includes('.') ? [path.extname(output).replace('.', ''), path.resolve(output)] :
-        [output, null] as const
+      output.includes('.') ? [path.extname(output).replace('.', ''), path.resolve(output)] : ([output, null] as const)
     );
 
     for (const [format, out] of outputs) {

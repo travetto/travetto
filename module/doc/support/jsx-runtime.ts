@@ -3,31 +3,43 @@ import { castTo, type Class } from '@travetto/runtime';
 type JSXChild = JSXElement | number | bigint | boolean | object | string;
 type JSXProps = { children?: JSXChild | JSXChild[] | null };
 
-export type JSXComponentFunction<P extends {} = {}> = (props: P & JSXProps, ...args: unknown[]) => (JSXElement | null);
+export type JSXComponentFunction<P extends {} = {}> = (props: P & JSXProps, ...args: unknown[]) => JSXElement | null;
 
 export const JSXRuntimeTag = Symbol.for('@travetto/doc:jsx-runtime');
-export class JSXFragmentType { }
+export class JSXFragmentType {}
 
 let id = 0;
 
 /** Simple JSX Element */
-export interface JSXElement<
-  T extends string | Class | JSXComponentFunction<P> = string | Class | JSXComponentFunction,
-  P extends {} = {},
-> {
+export interface JSXElement<T extends string | Class | JSXComponentFunction<P> = string | Class | JSXComponentFunction, P extends {} = {}> {
   [JSXRuntimeTag]?: { id: number };
   type: T;
   key: string;
   props: P & JSXProps;
 }
 
-export type ValidHtmlTags = 'strong' | 'em' | 'br' | 'hr' | 'li' | 'ul' | 'ol' |
-  'h2' | 'h3' | 'h4' | 'td' | 'tr' | 'table' | 'thead' | 'tbody';
+export type ValidHtmlTags =
+  | 'strong'
+  | 'em'
+  | 'br'
+  | 'hr'
+  | 'li'
+  | 'ul'
+  | 'ol'
+  | 'h2'
+  | 'h3'
+  | 'h4'
+  | 'td'
+  | 'tr'
+  | 'table'
+  | 'thead'
+  | 'tbody';
 
 let createFrag: Function | undefined;
 
 export function createElement<T extends string | Class | JSXComponentFunction<P>, P extends {}>(
-  type: T, props: P & JSXProps
+  type: T,
+  props: P & JSXProps
 ): JSXElement<T, P> {
   type = castTo(type === createFrag ? JSXFragmentType : type);
   return { [JSXRuntimeTag]: { id: (id += 1) }, type, key: '', props };
@@ -48,8 +60,8 @@ export function isJSXElement(value: unknown): value is JSXElement {
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace JSX {
-  export interface Element extends JSXElement { }
-  export interface IntrinsicAttributes extends JSXProps { }
+  export interface Element extends JSXElement {}
+  export interface IntrinsicAttributes extends JSXProps {}
   type BasicElements = { [K in ValidHtmlTags]: IntrinsicAttributes };
-  export interface IntrinsicElements extends BasicElements { }
+  export interface IntrinsicElements extends BasicElements {}
 }

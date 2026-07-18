@@ -9,7 +9,6 @@ import { CommonLogger } from './common.ts';
  */
 @Injectable({ autoInject: true })
 export class LogService implements ConsoleListener {
-
   /**
    * Log listeners
    */

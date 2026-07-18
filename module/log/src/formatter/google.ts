@@ -16,7 +16,7 @@ export class GoogleLogFormatter implements LogFormatter {
 
     const extra: Record<string, unknown> = {};
     // Http request specific
-    if (context && ('method' in context && 'path' in context && 'statusCode' in context)) {
+    if (context && 'method' in context && 'path' in context && 'statusCode' in context) {
       extra.httpRequest = {
         requestMethod: context.method,
         requestUrl: context.path,
@@ -34,7 +34,7 @@ export class GoogleLogFormatter implements LogFormatter {
       severity: event.level,
       message: LogFormatUtil.getLogMessage(event),
       timestamp: event.timestamp,
-      ...extra,
+      ...extra
     });
   }
 }

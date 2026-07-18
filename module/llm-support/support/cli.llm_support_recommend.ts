@@ -9,7 +9,6 @@ import { LlmSupportScopedSnippetCommandBase } from './base-command.ts';
  */
 @CliCommand()
 export class LlmSupportRecommendCommand extends LlmSupportScopedSnippetCommandBase {
-
   @CliFlag({ short: 'b', full: 'bundles' })
   @Required(false)
   bundles?: string[];

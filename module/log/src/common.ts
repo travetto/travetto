@@ -20,7 +20,6 @@ export class CommonLoggerConfig {
 
 @Injectable()
 export class CommonLogger implements Logger {
-
   @Inject()
   config: CommonLoggerConfig;
 

@@ -13,8 +13,7 @@ interface LlmSupportValidValues {
 }
 
 export abstract class LlmSupportCommandBase implements CliCommandShape {
-
-  @CliModuleFlag(({ scope: 'command' }))
+  @CliModuleFlag({ scope: 'command' })
   module: string = '';
 
   async getValidValues(includeExcluded: boolean): Promise<LlmSupportValidValues> {
@@ -34,7 +33,6 @@ export abstract class LlmSupportCommandBase implements CliCommandShape {
 }
 
 export abstract class LlmSupportScopedCommandBase extends LlmSupportCommandBase {
-
   @CliFlag({ short: 'c', full: 'categories' })
   @Required(false)
   categories?: LlmOperationCategory[];
@@ -43,14 +41,11 @@ export abstract class LlmSupportScopedCommandBase extends LlmSupportCommandBase 
   includeExcluded = false;
 
   getScopedCategories(): LlmOperationCategory[] {
-    return this.categories?.filter(item =>
-      LLM_OPERATION_CATEGORIES.some(allowed => allowed === item)
-    ) ?? [];
+    return this.categories?.filter(item => LLM_OPERATION_CATEGORIES.some(allowed => allowed === item)) ?? [];
   }
 }
 
 export abstract class LlmSupportScopedSnippetCommandBase extends LlmSupportScopedCommandBase {
-
   @CliFlag({ short: 't', full: 'snippet-tags' })
   @Required(false)
   snippetTags?: string[];

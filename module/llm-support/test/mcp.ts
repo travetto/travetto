@@ -21,7 +21,6 @@ async function bindAndValidate<T extends object>(schema: Class<T>, payload: unkn
 
 @Suite()
 class LlmSupportMcpTest {
-
   @Test()
   async initializeRespondsWithToolCapability() {
     const output = await handleMcpRequest({

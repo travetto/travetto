@@ -7,11 +7,7 @@ import type { Class } from '@travetto/runtime';
 import { SchemaValidator } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
-import {
-  ExecutionResponseSchema,
-  PlanResponseSchema,
-  RecommendationResponseSchema
-} from '../src/types.ts';
+import { ExecutionResponseSchema, PlanResponseSchema, RecommendationResponseSchema } from '../src/types.ts';
 import { getLlmSupportToolDefinitions, runLlmSupportFlow, runLlmSupportTool } from '../src/tooling.ts';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -27,7 +23,6 @@ async function bindAndValidate<T extends object>(schema: Class<T>, value: unknow
 
 @Suite()
 class LlmSupportToolingTest {
-
   @Test()
   async exposesExpectedToolDefinitions() {
     const defs = getLlmSupportToolDefinitions();
@@ -68,10 +63,7 @@ class LlmSupportToolingTest {
     assert(bound.dryRun === true);
     assert(bound.artifacts.some(item => item.status === 'planned'));
 
-    await assert.rejects(
-      () => fs.access(path.join(target, 'package.json')),
-      /ENOENT/
-    );
+    await assert.rejects(() => fs.access(path.join(target, 'package.json')), /ENOENT/);
   }
 
   @Test()
@@ -144,10 +136,11 @@ class LlmSupportToolingTest {
   @Test()
   async rejectsExecuteWhenOperationsTypeIsInvalid() {
     await assert.rejects(
-      () => runLlmSupportTool('llm_support_execute', {
-        operations: 5,
-        targetDir: '.'
-      }),
+      () =>
+        runLlmSupportTool('llm_support_execute', {
+          operations: 5,
+          targetDir: '.'
+        }),
       /validation errors/i
     );
   }
