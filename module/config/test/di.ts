@@ -24,7 +24,6 @@ class TestConfig {
 
 @Suite()
 class DiConfigSuite {
-
   @Test('factory with autowire after')
   async simpleConfig() {
     await Registry.init();
@@ -34,5 +33,4 @@ class DiConfigSuite {
 
     assert(inst.empty.age === 10);
   }
-
 }

@@ -8,10 +8,7 @@ async function request(url: string): Promise<string> {
 }
 
 export class Worker {
-
-  myCache = new CacheService(
-    new MemoryModelService({ namespace: '' })
-  );
+  myCache = new CacheService(new MemoryModelService({ namespace: '' }));
 
   @Cache('myCache', '1s')
   async calculateExpensiveResult(expression: string): Promise<string> {

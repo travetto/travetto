@@ -9,10 +9,16 @@ import { type CoreCacheConfig, type CacheConfig, type CacheAware, CacheConfigSym
  * @param config The additional cache configuration
  * @kind decorator
  */
-export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, maxAge: number | TimeSpan, config?: Omit<CacheConfig, 'maxAge'>): MethodDecorator;
+export function Cache<F extends string, U extends Record<F, CacheService>>(
+  field: F,
+  maxAge: number | TimeSpan,
+  config?: Omit<CacheConfig, 'maxAge'>
+): MethodDecorator;
 export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, input?: CacheConfig): MethodDecorator;
 export function Cache<F extends string, U extends Record<F, CacheService>>(
-  field: F, input?: number | TimeSpan | CacheConfig, config: Exclude<CacheConfig, 'maxAge'> = {}
+  field: F,
+  input?: number | TimeSpan | CacheConfig,
+  config: Exclude<CacheConfig, 'maxAge'> = {}
 ): MethodDecorator {
   if (input !== undefined) {
     if (typeof input === 'string' || typeof input === 'number') {
@@ -22,7 +28,11 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(
     }
   }
   // biome-ignore lint/complexity/useArrowFunction: We want a proper function context here
-  const decorator = function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {
+  const decorator = function <R extends Promise<unknown>>(
+    target: U & CacheAware,
+    propertyKey: string,
+    descriptor: MethodDescriptor<R>
+  ): void {
     config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
     (target[CacheConfigSymbol] ??= {})[propertyKey] = config;
     const handler = descriptor.value!;

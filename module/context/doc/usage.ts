@@ -4,7 +4,6 @@ import { Inject } from '@travetto/di';
 const NameSymbol = Symbol();
 
 export class ContextAwareService {
-
   @Inject()
   context: AsyncContext;
 

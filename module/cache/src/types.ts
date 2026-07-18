@@ -48,4 +48,3 @@ export interface CacheAware {
   [CacheConfigSymbol]?: Record<string, CacheConfig>;
   [EvictConfigSymbol]?: Record<string, CoreCacheConfig>;
 }
-

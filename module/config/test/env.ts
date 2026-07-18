@@ -9,7 +9,6 @@ import { TestConfig } from './shared.ts';
 
 @Suite()
 export class EnvConfigTest {
-
   @BeforeAll()
   async init() {
     Env.TRV_RESOURCES.add('@#test/fixtures');

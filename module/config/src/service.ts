@@ -15,15 +15,14 @@ type ConfigSpecSimple = Omit<ConfigPayload, 'data'>;
 /**
  * Common Type for all configuration classes
  */
-export class ConfigBaseType { }
+export class ConfigBaseType {}
 
 /**
  * Manager for application configuration
  */
 @Injectable()
 export class ConfigurationService {
-
-  #storage: Record<string, unknown> = {};   // Lowered, and flattened
+  #storage: Record<string, unknown> = {}; // Lowered, and flattened
   #payloads: ConfigSpecSimple[] = [];
   #secrets: (RegExp | string)[] = [/secure(-|_|[a-z])|password|private|secret|salt|(\bkey|key\b)|serviceAccount|(api(-|_)?key)/i];
 
@@ -32,7 +31,7 @@ export class ConfigurationService {
    * @param namespace The namespace of the config to search for, can be dotted for accessing sub namespaces
    */
   #get<T extends Record<string, unknown> = Record<string, unknown>>(namespace?: string): T {
-    const parts = (namespace ? namespace.split('.') : []);
+    const parts = namespace ? namespace.split('.') : [];
     let sub: Record<string, unknown> = this.#storage;
 
     while (parts.length && sub) {
@@ -54,16 +53,16 @@ export class ConfigurationService {
     const providers = DependencyRegistryIndex.getCandidates(toConcrete<ConfigSource>());
 
     const configs = await Promise.all(
-      providers.map(async (candidate) => await DependencyRegistryIndex.getInstance<ConfigSource>(candidate.candidateType, candidate.qualifier))
+      providers.map(
+        async candidate => await DependencyRegistryIndex.getInstance<ConfigSource>(candidate.candidateType, candidate.qualifier)
+      )
     );
 
     const parser = await DependencyRegistryIndex.getInstance(ParserManager);
 
-    const possible = await Promise.all([
-      new FileConfigSource(parser),
-      ...configs,
-      new OverrideConfigSource()
-    ].map(async source => source.get()));
+    const possible = await Promise.all(
+      [new FileConfigSource(parser), ...configs, new OverrideConfigSource()].map(async source => source.get())
+    );
 
     const payloads = possible
       .flat()
@@ -93,7 +92,7 @@ export class ConfigurationService {
    * Export all active configuration, useful for displaying active state
    *   - Will not show fields marked as secret
    */
-  async exportActive(): Promise<{ sources: ConfigSpecSimple[], active: ConfigData }> {
+  async exportActive(): Promise<{ sources: ConfigSpecSimple[]; active: ConfigData }> {
     const configTargets = DependencyRegistryIndex.getCandidates(ConfigBaseType);
     const configs = await Promise.all(
       configTargets
@@ -106,9 +105,10 @@ export class ConfigurationService {
     );
     const out: Record<string, ConfigData> = {};
     for (const [candidate, inst] of configs) {
-      const data = BindUtil.bindSchemaToObject<ConfigData>(
-        getClass(inst), {}, inst, { filterInput: field => !('secret' in field) || !field.secret, filterValue: value => value !== undefined }
-      );
+      const data = BindUtil.bindSchemaToObject<ConfigData>(getClass(inst), {}, inst, {
+        filterInput: field => !('secret' in field) || !field.secret,
+        filterValue: value => value !== undefined
+      });
       out[candidate.candidateType.name] = DataUtil.filterByKeys(data, this.#secrets);
     }
     return { sources: this.#payloads, active: out };
@@ -144,23 +144,26 @@ export class ConfigurationService {
    * Produce the visible configuration state and runtime information
    */
   async initBanner(): Promise<string> {
-    return util.inspect({
-      manifest: {
-        main: Runtime.main,
-        workspace: Runtime.workspace
+    return util.inspect(
+      {
+        manifest: {
+          main: Runtime.main,
+          workspace: Runtime.workspace
+        },
+        runtime: {
+          production: Runtime.production,
+          role: Runtime.role,
+          debug: Runtime.debug,
+          resourcePaths: RuntimeResources.searchPaths,
+          profiles: Env.TRV_PROFILES.list ?? []
+        },
+        config: await this.exportActive()
       },
-      runtime: {
-        production: Runtime.production,
-        role: Runtime.role,
-        debug: Runtime.debug,
-        resourcePaths: RuntimeResources.searchPaths,
-        profiles: Env.TRV_PROFILES.list ?? []
-      },
-      config: await this.exportActive()
-    }, {
-      ...util.inspect.defaultOptions,
-      depth: 100,
-      colors: false, // Colors are not useful in logs
-    });
+      {
+        ...util.inspect.defaultOptions,
+        depth: 100,
+        colors: false // Colors are not useful in logs
+      }
+    );
   }
 }

@@ -1,10 +1,9 @@
 import { MemoryModelService } from '@travetto/model-memory';
 import { Cache, EvictCache, CacheService } from '@travetto/cache';
 
-class User { }
+class User {}
 
 export class UserService {
-
   myCache = new CacheService(new MemoryModelService({ namespace: '' }));
   database: {
     lookupUser(id: string): Promise<User>;

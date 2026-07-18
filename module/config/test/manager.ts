@@ -42,27 +42,30 @@ class Properties {
 class Setup {
   @InjectableFactory()
   static getMemoryConfig(): ConfigSource {
-    return new MemoryConfigSource('override', {
-      test: { beta: { values: [2, 4, 5] } },
-      'test.alpha': {
-        values: [1, 2, 3]
-      },
-      nested: { user: { age: 52 } },
-      vague: {
-        name: 'bob',
-        props: {
-          person: 20,
-          age: true,
-          child: { name: [1, 2, 3] }
+    return new MemoryConfigSource(
+      'override',
+      {
+        test: { beta: { values: [2, 4, 5] } },
+        'test.alpha': {
+          values: [1, 2, 3]
+        },
+        nested: { user: { age: 52 } },
+        vague: {
+          name: 'bob',
+          props: {
+            person: 20,
+            age: true,
+            child: { name: [1, 2, 3] }
+          }
         }
-      }
-    }, 1000);
+      },
+      1000
+    );
   }
 }
 
 @Suite()
 export class ManagerTest {
-
   config: ConfigurationService;
 
   @BeforeEach()

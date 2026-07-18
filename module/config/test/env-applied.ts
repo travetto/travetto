@@ -9,7 +9,6 @@ import { NameConfig, TestConfig } from './shared.ts';
 
 @Suite()
 export class EnvConfigTest {
-
   @BeforeAll()
   async init() {
     Object.assign(process.env, {

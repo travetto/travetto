@@ -33,7 +33,6 @@ const keySpaceIndex = sortedIndex(CacheRecord, {
  */
 @Injectable()
 export class CacheService {
-
   #modelService: ModelExpirySupport;
 
   constructor(@Inject({ qualifier: CacheModelSymbol, resolution: 'loose' }) modelService: ModelExpirySupport) {
@@ -51,7 +50,8 @@ export class CacheService {
     const delta = expiresAt.getTime() - Date.now();
     const maxAge = expiresAt.getTime() - issuedAt.getTime();
 
-    if (delta < 0) { // Expired
+    if (delta < 0) {
+      // Expired
       await this.#modelService.delete(CacheRecord, id);
       throw new CacheError('Key expired', { category: 'data' });
     }
@@ -79,14 +79,15 @@ export class CacheService {
   async set(id: string, keySpace: string, entry: unknown, maxAge?: number): Promise<unknown> {
     const entryText = JSONUtil.toBase64(entry);
 
-    const store = await this.#modelService.upsert(CacheRecord,
+    const store = await this.#modelService.upsert(
+      CacheRecord,
       CacheRecord.from({
         id,
         entry: entryText!,
         keySpace,
         expiresAt: TimeUtil.fromNow(maxAge || INFINITE_MAX_AGE),
         issuedAt: new Date()
-      }),
+      })
     );
 
     return JSONUtil.fromBase64(store.entry);
@@ -167,7 +168,8 @@ export class CacheService {
       result = await this.set(id, config.keySpace!, data, config.maxAge);
     }
 
-    if (config.reinstate) { // Reinstate result value if needed
+    if (config.reinstate) {
+      // Reinstate result value if needed
       result = config.reinstate(result);
     }
 

@@ -8,7 +8,6 @@ import type { ConfigData, ConfigParser } from './types.ts';
 
 @Injectable()
 export class ParserManager {
-
   #extMatch: RegExp;
   #parsers: Record<string, ConfigParser>;
 

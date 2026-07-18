@@ -10,7 +10,6 @@ type Ctx<T = unknown> = Record<string | symbol, T>;
  */
 @Injectable()
 export class AsyncContext {
-
   storage = new AsyncLocalStorage<Ctx>();
 
   constructor() {

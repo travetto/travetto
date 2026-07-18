@@ -19,7 +19,9 @@ class ContextSuiteHandler<T extends object> implements SuitePhaseHandler<T> {
       const methodName = castKey<typeof instance>(test.methodName);
       if (methodName in instance && typeof instance[methodName] === 'function') {
         const og = instance[methodName];
-        const wrapped = function (this: unknown) { return ctx.run(og.bind(this)); };
+        const wrapped = function (this: unknown) {
+          return ctx.run(og.bind(this));
+        };
         Object.defineProperty(wrapped, 'name', { value: test.methodName });
         instance[methodName] = castTo(wrapped);
       }

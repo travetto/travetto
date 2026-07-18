@@ -11,7 +11,6 @@ import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
 @InjectableSuite()
 @WithSuiteContext()
 class WithSuiteContextSuite {
-
   @Inject()
   context: AsyncContext;
 
