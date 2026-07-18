@@ -128,8 +128,8 @@ class DataUtilTests {
     assert.deepStrictEqual(DataUtil.deepAssign({ a: { b: 5, c: [1, 2, 3] } }, { a: { c: [1, 2] } }, 'replace').a, { b: 5, c: [1, 2] });
     // @ts-expect-error
     assert.deepStrictEqual(DataUtil.deepAssign({ a: { b: 5, c: [1, 2, 3] } }, { a: { b: undefined, c: [1, 2] } }, 'replace').a.c, [1, 2]);
-    // @ts-expect-error
     assert.deepStrictEqual(
+      // @ts-expect-error
       DataUtil.deepAssign({ a: { b: 5, c: [1, 2, 3] } }, { a: { b: undefined, c: [1, 2] } }, 'replace').a.b,
       undefined
     );

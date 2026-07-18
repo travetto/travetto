@@ -18,4 +18,5 @@ export type RenderState<T extends JSXElement, C> = {
  */
 export type RenderProvider<C> = { finalize: (text: string, ctx: C, isRoot?: boolean) => string | Promise<string> } & {
   [K in ValidHtmlTags]: (state: RenderState<JSXElement<K>, C>) => Promise<string>;
-} & { [K in keyof typeof c]: (state: RenderState<JSXElementByFn<K>, C>) => Promise<string> }; // @ts-expect-error - This is a bit of a hack to allow for custom components,
+  // @ts-expect-error - This is a bit of a hack to allow for custom components,
+} & { [K in keyof typeof c]: (state: RenderState<JSXElementByFn<K>, C>) => Promise<string> };
