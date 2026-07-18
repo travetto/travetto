@@ -32,14 +32,14 @@ class LlmSupportPlanTest {
   async excludesScopedOperationsByDefault() {
     const output = await buildPlans();
 
-    assert(!output.plans.some(item => item.operationId === 'excluded-eslint-profile'));
+    assert(!output.plans.some(item => item.operationId === 'excluded-lint-profile'));
   }
 
   @Test()
   async includesScopedOperationsWhenRequested() {
-    const output = await buildPlans({ includeExcluded: true, operations: ['excluded-eslint-profile'] });
+    const output = await buildPlans({ includeExcluded: true, operations: ['excluded-lint-profile'] });
 
     assert(output.plans.length === 1);
-    assert(output.plans[0].operationId === 'excluded-eslint-profile');
+    assert(output.plans[0].operationId === 'excluded-lint-profile');
   }
 }
