@@ -144,18 +144,10 @@ const STATIC_OPERATION_SPECS: Partial<Record<OperationId, OperationFileSpec[]>> 
     { file: 'test/unit/example.ts', snippet: 'generate-test-suite.unit.ts.tpl' },
     { file: 'test/fixtures/example.json', snippet: 'generate-test-suite.fixture.json.tpl' }
   ],
-  'workflow-gcp-deploy': [
-    { file: '.github/workflows/deploy-api.yml', snippet: 'workflow-gcp-deploy.yml.tpl' }
-  ],
-  'workflow-cloudfront-deploy': [
-    { file: '.github/workflows/deploy-ui.yml', snippet: 'workflow-cloudfront-deploy.yml.tpl' }
-  ],
-  'workflow-firebase-deploy': [
-    { file: '.github/workflows/firebase-hosting-merge.yml', snippet: 'workflow-firebase-deploy.yml.tpl' }
-  ],
-  'create-web-interceptor': [
-    { file: 'src/interceptor/request-logging.ts', snippet: 'create-web-interceptor.ts.tpl' }
-  ],
+  'workflow-gcp-deploy': [{ file: '.github/workflows/deploy-api.yml', snippet: 'workflow-gcp-deploy.yml.tpl' }],
+  'workflow-cloudfront-deploy': [{ file: '.github/workflows/deploy-ui.yml', snippet: 'workflow-cloudfront-deploy.yml.tpl' }],
+  'workflow-firebase-deploy': [{ file: '.github/workflows/firebase-hosting-merge.yml', snippet: 'workflow-firebase-deploy.yml.tpl' }],
+  'create-web-interceptor': [{ file: 'src/interceptor/request-logging.ts', snippet: 'create-web-interceptor.ts.tpl' }],
   'cache-enhancements': [
     { file: 'src/service/cacheable.ts', snippet: 'cache-enhancements.service.ts.tpl' },
     { file: 'src/config/cache.ts', snippet: 'cache-enhancements.config.ts.tpl' }
@@ -226,9 +218,9 @@ async function mergeLintPackageJson(
   const incomingScripts = toStringMap(incoming.scripts);
 
   const scripts = { ...currentScripts };
-  scripts['lint:register'] = incomingScripts['lint:register'] ?? 'trv eslint:register';
-  scripts.lint = scripts.lint ?? incomingScripts.lint ?? 'npm run lint:register && trv eslint';
-  scripts['lint:fix'] = scripts['lint:fix'] ?? incomingScripts['lint:fix'] ?? 'npm run lint:register && trv eslint --fix';
+  scripts['lint:register'] = incomingScripts['lint:register'] ?? 'trv lint:register';
+  scripts.lint = scripts.lint ?? incomingScripts.lint ?? 'npm run lint:register && trv lint';
+  scripts['lint:fix'] = scripts['lint:fix'] ?? incomingScripts['lint:fix'] ?? 'npm run lint:register && trv lint --fix';
 
   const devDependencies = { ...toStringMap(current.devDependencies) };
   for (const [name, version] of Object.entries(toStringMap(incoming.devDependencies))) {
@@ -311,21 +303,9 @@ async function execProjectBootstrap(baseDir: string, request: ExecutionRequest, 
 
   const agentsContent = await renderSnippet('project-bootstrap.agents.md.tpl');
 
-  await writeFile(
-    'project-bootstrap',
-    path.join(baseDir, '.agents/AGENTS.md'),
-    agentsContent,
-    request,
-    artifacts
-  );
+  await writeFile('project-bootstrap', path.join(baseDir, '.agents/AGENTS.md'), agentsContent, request, artifacts);
 
-  await writeFile(
-    'project-bootstrap',
-    path.join(baseDir, '.cursorrules'),
-    agentsContent,
-    request,
-    artifacts
-  );
+  await writeFile('project-bootstrap', path.join(baseDir, '.cursorrules'), agentsContent, request, artifacts);
 }
 
 async function execCreateWebRoute(baseDir: string, request: ExecutionRequest, artifacts: ExecutionArtifact[]): Promise<void> {

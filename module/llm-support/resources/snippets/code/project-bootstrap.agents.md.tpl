@@ -23,3 +23,10 @@ For scaffolding/generating new components (web routes, controllers, services, au
      ```bash
      npx trv llm:support:execute --operations <operation-id> --targetDir . --apply
      ```
+
+## Cleanup & Finalization
+After making/applying any changes to the codebase, always run the linter auto-fix to clean up formatting and styles:
+```bash
+npx trv lint --fix
+```
+

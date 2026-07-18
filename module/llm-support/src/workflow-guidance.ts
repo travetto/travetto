@@ -71,7 +71,7 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     title: 'Bootstrap a new project',
     intent: 'Create a project baseline using guided prompts for model backend, quality, and initial web stack.',
     recommendedModules: ['@travetto/web', '@travetto/web-http', '@travetto/openapi', '@travetto/runtime', '@travetto/config'],
-    optionalModules: ['@travetto/schema', '@travetto/di', '@travetto/model', '@travetto/test', '@travetto/eslint'],
+    optionalModules: ['@travetto/schema', '@travetto/di', '@travetto/model', '@travetto/test', '@travetto/lint'],
     commandDiscoveryRule: 'Validate command signatures with npx trv cli:schema before suggesting starter commands.',
     verification: [
       'Ensure generated project includes selected web and model modules from prompt answers.',
@@ -144,7 +144,7 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     id: 'quality-lint-and-test',
     title: 'Enable lint and test quality checks',
     intent: 'Enable quality features so generated projects have immediate test and lint feedback loops.',
-    recommendedModules: ['@travetto/test', '@travetto/eslint'],
+    recommendedModules: ['@travetto/test', '@travetto/lint'],
     optionalModules: [],
     commandDiscoveryRule:
       'Validate test and lint command examples with npx trv cli:schema or generated package scripts before suggesting execution.',
@@ -233,7 +233,8 @@ export const WORKFLOWS: WorkflowGuidance[] = [
     intent: 'Deploy the static UI to Firebase Hosting on merge to main branch.',
     recommendedModules: ['@travetto/compiler'],
     optionalModules: ['@travetto/cli'],
-    commandDiscoveryRule: 'Validate firebase target or build commands. If CLI command shape is uncertain, validate with npx trv cli:schema.',
+    commandDiscoveryRule:
+      'Validate firebase target or build commands. If CLI command shape is uncertain, validate with npx trv cli:schema.',
     verification: [
       'Ensure the action-hosting-deploy maps repoToken, firebaseServiceAccount, and projectId correctly.',
       'Ensure UI build output directory in firebase.json matches deployment paths.'

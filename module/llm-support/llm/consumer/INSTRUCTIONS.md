@@ -20,7 +20,8 @@ Do not recommend excluded operations unless explicitly requested:
 1. Discover command shapes with `npx trv cli:schema` when uncertain.
 2. Request recommendations with `npx trv llm:support:recommend`.
 3. Select bundles/workflows/operations and generate plan-first changes.
-4. Validate with lint/test and targeted compile checks.
+4. Clean up formatting and style violations by running `npx trv lint --fix`.
+5. Validate with targeted tests and compile checks.
 
 ## Framework Development Principles
 - Prefer explicit contracts over implicit behavior; generated guidance should map to named operations, modules, and outcomes.
@@ -33,7 +34,7 @@ Do not recommend excluded operations unless explicitly requested:
 - Schema-first boundaries: define input/output contracts with schema classes at ownership boundaries.
 - Dependency clarity: always separate required modules from optional adapters and explain why optional items exist.
 - Compatibility discipline: preserve stable operation ids and tool names; additive changes are preferred over breaking renames.
-- Validation before confidence: verify recommendations against command shape, then verify generated output with targeted tests/lint.
+- Validation before confidence: verify recommendations against command shape, run `npx trv lint --fix` to clean up formatting, then verify generated output with targeted tests.
 - Incremental adoption: start with baseline bundles and layer advanced features only when requirements justify complexity.
 - Explain tradeoffs: when multiple stack choices exist, provide capability-based selection criteria (query, indexed, blob, expiry, etc.).
 - Keep examples production-oriented: avoid toy guidance that skips error handling, configuration boundaries, or testability.

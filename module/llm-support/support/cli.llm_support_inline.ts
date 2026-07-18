@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { CliCommand, type CliCommandShape } from '@travetto/cli';
-import { RuntimeIndex, Runtime } from '@travetto/runtime';
+import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
 async function exists(filePath: string): Promise<boolean> {
   try {
@@ -31,13 +31,23 @@ async function resolveRepoPath(repositoryId: string): Promise<string> {
 function getLanguage(filename: string): string {
   const ext = path.extname(filename);
   switch (ext) {
-    case '.ts': case '.tsx': return 'typescript';
-    case '.js': case '.jsx': return 'javascript';
-    case '.json': return 'json';
-    case '.yml': case '.yaml': return 'yaml';
-    case '.md': return 'markdown';
-    case '.sh': return 'bash';
-    default: return '';
+    case '.ts':
+    case '.tsx':
+      return 'typescript';
+    case '.js':
+    case '.jsx':
+      return 'javascript';
+    case '.json':
+      return 'json';
+    case '.yml':
+    case '.yaml':
+      return 'yaml';
+    case '.md':
+      return 'markdown';
+    case '.sh':
+      return 'bash';
+    default:
+      return '';
   }
 }
 
@@ -80,7 +90,6 @@ async function readSourceContent(repoPath: string, relativePath: string): Promis
  */
 @CliCommand()
 export class LlmSupportInlineCommand implements CliCommandShape {
-
   async main(): Promise<void> {
     const mod = RuntimeIndex.getModule('@travetto/llm-support')!;
     const sourceDir = path.resolve(mod.sourcePath, 'resources', 'snippets');

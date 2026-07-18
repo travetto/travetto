@@ -398,7 +398,7 @@ class LlmSupportExecuteTest {
     ]);
 
     const pkg = await loader.readUTF8('package.json');
-    assert(pkg.includes('trv eslint:register'));
+    assert(pkg.includes('trv lint:register'));
   }
 
   @Test()
@@ -435,8 +435,8 @@ class LlmSupportExecuteTest {
 
     assert(merged.scripts?.test === 'node --test');
     assert(merged.scripts?.lint === 'eslint .');
-    assert(merged.scripts?.['lint:register'] === 'trv eslint:register');
+    assert(merged.scripts?.['lint:register'] === 'trv lint:register');
     assert(merged.devDependencies?.typescript === '^5.0.0');
-    assert(Boolean(merged.devDependencies?.['@travetto/eslint']));
+    assert(Boolean(merged.devDependencies?.['@travetto/lint']));
   }
 }

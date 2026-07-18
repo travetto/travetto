@@ -10,7 +10,7 @@ const OPERATIONS: LlmOperation[] = [
     title: 'Project bootstrap',
     summary: 'Create a project with guided module and backend selection.',
     requiredModules: ['@travetto/runtime', '@travetto/config'],
-    optionalModules: ['@travetto/web', '@travetto/model', '@travetto/test', '@travetto/eslint']
+    optionalModules: ['@travetto/web', '@travetto/model', '@travetto/test', '@travetto/lint']
   },
   {
     id: 'create-web-route',
@@ -89,7 +89,7 @@ const OPERATIONS: LlmOperation[] = [
     category: 'quality',
     title: 'Enable linting and fix',
     summary: 'Configure linting support and fix workflows for generated code.',
-    requiredModules: ['@travetto/eslint'],
+    requiredModules: ['@travetto/lint'],
     optionalModules: ['@travetto/test']
   },
   {
