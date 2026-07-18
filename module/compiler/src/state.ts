@@ -17,9 +17,6 @@ export class CompilerState implements CompilerHost {
     return new CompilerState().init(idx);
   }
 
-  /** @private */
-  constructor() { }
-
   #outputPath: string;
   #typingsPath: string;
   #sourceFiles = new Set<string>();

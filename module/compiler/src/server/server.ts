@@ -177,7 +177,6 @@ export class CompilerServer {
       }
       case 'clean': out = await this.#clean(); break;
       case 'stop': out = JSON.stringify({ closing: true }); close = true; break;
-      case 'info':
       default: out = this.info ?? {}; break;
     }
     response.end(JSON.stringify(out));

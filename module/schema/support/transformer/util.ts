@@ -108,8 +108,10 @@ class ${uniqueId} extends ${type.mappedClassName} {
         }
         break;
       }
-      case 'foreign':
-      default: {
+      case 'foreign': {
+        break;
+      }
+      default: { 
         // Object
       }
     }
@@ -131,7 +133,7 @@ class ${uniqueId} extends ${type.mappedClassName} {
       // eslint-disable-next-line no-bitwise
       if ((ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Readonly) > 0) {
         attrs.access = 'readonly';
-      } else if (!!node.questionToken || !!typeExpr.undefinable || !!node.initializer) {
+      } else if (node.questionToken || typeExpr.undefinable || node.initializer) {
         attrs.required = { active: false };
       }
       if (node.initializer !== undefined && (
@@ -150,7 +152,7 @@ class ${uniqueId} extends ${type.mappedClassName} {
       }
       if (!pair.getter) {
         attrs.access = 'writeonly';
-      } else if (!!typeExpr.undefinable) {
+      } else if (typeExpr.undefinable) {
         attrs.required = { active: false };
       }
     }

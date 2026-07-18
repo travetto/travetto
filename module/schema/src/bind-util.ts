@@ -164,7 +164,7 @@ export class BindUtil {
 
       for (const key of TypedObject.keys(instance)) { // Do not retain undefined fields
         const descriptor = Object.getOwnPropertyDescriptor(instance, key);
-        if (descriptor?.writable === false || !!descriptor?.get) {
+        if (descriptor?.writable === false || descriptor?.get) {
           continue;
         }
         if (instance[key] === undefined) {
@@ -189,7 +189,7 @@ export class BindUtil {
     const view = config.view; // Does not convey
     delete config.view;
 
-    if (!!data && isInstance<T>(data)) {
+    if (data && isInstance<T>(data)) {
       const adapter = SchemaRegistryIndex.get(cls);
       const schemaConfig = adapter.get();
 
@@ -208,7 +208,7 @@ export class BindUtil {
         }
 
         for (const [schemaFieldName, field] of Object.entries(schema)) {
-          let inboundField: string | undefined = undefined;
+          let inboundField: string | undefined;
           if (field.access === 'readonly' || config.filterInput?.(field) === false) {
             continue; // Skip trying to write readonly fields
           }

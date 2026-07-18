@@ -42,7 +42,7 @@ export class CompilerWatcher {
       if (item.includes('*')) {
         for await (const sub of fs.glob(item, { cwd: this.#root })) {
           if (sub.startsWith('node_modules')) {
-            continue;
+            // Continue
           } else if (sub.endsWith('/node_modules')) {
             ignores.add(sub.split('/node_modules')[0]);
           } else {

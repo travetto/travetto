@@ -29,7 +29,7 @@ export type ValidHtmlTags =
   'td' | 'tr' | 'th' | 'table' | 'thead' | 'tbody' |
   'span' | 'div' | 'center' | 'title';
 
-let createFrag: Function | undefined = undefined;
+let createFrag: Function | undefined;
 
 export function createElement<T extends string | Class | JSXComponentFunction<P>, P extends {}>(
   type: T, props: P & JSXProps

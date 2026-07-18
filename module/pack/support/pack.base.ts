@@ -128,8 +128,7 @@ export abstract class BasePackCommand implements CliCommandShape {
       .map(name => RuntimeIndex.getModule(name))
       .filter((module): module is IndexedModule => !!module?.production)
       .map(module => PackageUtil.readPackage(module?.sourcePath))
-      .map(pkg => pkg?.travetto?.build?.externalDependencies ?? [])
-      .flat();
+      .flatMap(pkg => pkg?.travetto?.build?.externalDependencies ?? []);
   }
 
   @Method()

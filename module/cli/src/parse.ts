@@ -36,14 +36,14 @@ export class CliParseUtil {
     let done = false;
     let quote: number | undefined;
     let escaped = false;
-    outer: for (; i < text.length; i += 1) {
+    for (; i < text.length; i += 1) {
       const ch = text.charCodeAt(i);
       const space = SPACE.has(ch);
       if (escaped) {
         escaped = false;
         collected.push(ch);
       } else if (done && !space) {
-        break outer;
+        break;
       } else if (!quote && space) {
         done = true;
       } else {

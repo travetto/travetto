@@ -112,9 +112,12 @@
       ],
       "linter": {
         "rules": {
+          "complexity": {
+            "noUselessConstructor": "off"
+          },
           "correctness": {
             "noUnusedVariables": "off",
-            "noUnusedFunctionParameters": "off"
+            "noUnusedFunctionParameters": "off",
           },
           "security": {
             "noBlankTarget": "off"

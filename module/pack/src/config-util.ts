@@ -21,7 +21,6 @@ export class PackConfigUtil {
         case 'alpine': return `RUN apk --update add ${packages.join(' ')} && rm -rf /var/cache/apk/*`;
         case 'debian': return `RUN apt update && apt install -y ${packages.join(' ')} && rm -rf  /var/lib/{apt,dpkg,cache,log}/`;
         case 'centos': return `RUN yum -y install ${packages.join(' ')} && yum -y clean all && rm -fr /var/cache`;
-        case 'unknown':
         default: throw new Error('Unable to install packages in an unknown os');
       }
     } else {
@@ -68,7 +67,6 @@ export class PackConfigUtil {
         case 'alpine': return `RUN addgroup -g ${groupId} ${group} && adduser -D -G ${group} -u ${userId} ${user}`;
         case 'debian':
         case 'centos': return `RUN groupadd --gid ${groupId} ${group} && useradd -u ${userId} -g ${group} ${user}`;
-        case 'unknown':
         default: throw new Error('Unable to add user/group for an unknown os');
       }
     }

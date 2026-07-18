@@ -26,6 +26,7 @@ export class EnvProp<T> {
   /** Export value */
   export(value?: T | undefined | null): Record<string, string> {
     let out: string;
+    // biome-ignore lint/complexity/noArguments: We want to use arguments here to detect if nothing was truly passed
     if (arguments.length === 0) { // If nothing passed in
       out = `${this.value}`;
     } else if (value === undefined || value === null) {

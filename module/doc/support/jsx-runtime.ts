@@ -24,7 +24,7 @@ export interface JSXElement<
 export type ValidHtmlTags = 'strong' | 'em' | 'br' | 'hr' | 'li' | 'ul' | 'ol' |
   'h2' | 'h3' | 'h4' | 'td' | 'tr' | 'table' | 'thead' | 'tbody';
 
-let createFrag: Function | undefined = undefined;
+let createFrag: Function | undefined;
 
 export function createElement<T extends string | Class | JSXComponentFunction<P>, P extends {}>(
   type: T, props: P & JSXProps

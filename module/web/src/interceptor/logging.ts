@@ -42,7 +42,7 @@ export class LoggingInterceptor implements WebInterceptor {
     const duration = Date.now() - createdDate;
 
     const error = response.body instanceof Error ? response.body : undefined;
-    const code = response.context.httpStatusCode ??= (!!error ? 500 : 200);
+    const code = response.context.httpStatusCode ??= (error ? 500 : 200);
 
     const logMessage = {
       method: request.context.httpMethod,

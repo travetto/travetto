@@ -21,12 +21,14 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(
       config = input;
     }
   }
+  // biome-ignore lint/complexity/useArrowFunction: We want a proper function context here
   const decorator = function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {
     config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
     (target[CacheConfigSymbol] ??= {})[propertyKey] = config;
     const handler = descriptor.value!;
     // Allows for DI to run, as the service will not be bound until after the decorator is run
     descriptor.value = castTo(function (this: typeof target) {
+      // biome-ignore lint/complexity/noArguments: We want to use arguments here
       return this[field].cache(this, propertyKey, handler, [...arguments]);
     });
     Object.defineProperty(descriptor.value, 'name', { value: propertyKey, writable: false });
@@ -42,12 +44,14 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(
  * @kind decorator
  */
 export function EvictCache<F extends string, U extends Record<F, CacheService>>(field: F, config: CoreCacheConfig = {}) {
+  // biome-ignore lint/complexity/useArrowFunction: We want a proper function context here
   return function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {
     config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
     (target[EvictConfigSymbol] ??= {})[propertyKey] = config;
     const handler = descriptor.value!;
     // Allows for DI to run, as the service will not be bound until after the decorator is run
     descriptor.value = castTo(function (this: typeof target) {
+      // biome-ignore lint/complexity/noArguments: We want to use arguments here
       return this[field].evict(this, propertyKey, handler, [...arguments]);
     });
     Object.defineProperty(descriptor.value, 'name', { value: propertyKey, writable: false });

@@ -820,7 +820,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
       const newInstances: typeof instances = [];
       for (const instance of instances) {
         if (instance.value === null || instance.value === undefined) {
-          continue;
+          // Continue
         } else if (Array.isArray(instance.value)) {
           const name = instance.stack.at(-1)!.name;
           for (const sel of instance.value) {

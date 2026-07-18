@@ -113,7 +113,8 @@ function buildRequest<T extends RequestInit>(base: T, controller: string, endpoi
     case 'get': verb = 'GET'; break;
     case 'update': verb = 'PUT'; break;
     case 'delete': verb = 'DELETE'; break;
-    case 'create': default: verb = 'POST'; break;
+    case 'create': verb = 'POST'; break;
+    default: verb = 'POST'; break;    
   }
   return {
     ...base,
@@ -259,7 +260,6 @@ export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]):
       } catch (error) {
         if (i < (core.retriesOnConnectFailure ?? 0)) {
           await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s
-          continue;
         } else {
           throw error;
         }

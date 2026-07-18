@@ -76,7 +76,9 @@ export const hasFunction = <T>(key: keyof T) => (value: unknown): value is T =>
 
 export const hasToJSON = hasFunction<{ toJSON(): object }>('toJSON');
 
+// biome-ignore lint/complexity/noUselessTypeConstraint: Unknown behaves slightly differently when being used for an inferred type
 export function toConcrete<T extends unknown>(): Class<T> {
+  // biome-ignore lint/complexity/noArguments: We want to use arguments here
   return arguments[0];
 }
 

@@ -12,11 +12,17 @@ if (!globalThis.Temporal) { // For anyone that doesn't have it
 }
 
 Map.prototype.getOrInsert ??= function (key, value) {
-  return (this.has(key) || this.set(key, value), this.get(key));
+  if (!this.has(key)) {
+    this.set(key, value);
+  }
+  return this.get(key);
 };
 
 Map.prototype.getOrInsertComputed ??= function (key, compute) {
-  return (this.has(key) || this.set(key, compute()), this.get(key));
+  if (!this.has(key)) {
+    this.set(key, compute());
+  }
+  return this.get(key);
 };
 
 // Allow for the throwIfNoEntry if on a version of node that is less than 25.7
