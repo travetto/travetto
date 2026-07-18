@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-memory",
-  "version": "8.0.0-alpha.24",
+  "version": "8.0.0-alpha.25",
   "type": "module",
   "description": "Memory backing for the travetto model module.",
   "keywords": [
@@ -26,15 +26,15 @@
     "directory": "module/model-memory"
   },
   "dependencies": {
-    "@travetto/config": "^8.0.0-alpha.21",
-    "@travetto/di": "^8.0.0-alpha.19",
-    "@travetto/model": "^8.0.0-alpha.22",
-    "@travetto/model-indexed": "^8.0.0-alpha.24",
-    "@travetto/schema": "^8.0.0-alpha.21"
+    "@travetto/config": "^8.0.0-alpha.22",
+    "@travetto/di": "^8.0.0-alpha.20",
+    "@travetto/model": "^8.0.0-alpha.23",
+    "@travetto/model-indexed": "^8.0.0-alpha.25",
+    "@travetto/schema": "^8.0.0-alpha.22"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.27",
-    "@travetto/test": "^8.0.0-alpha.20"
+    "@travetto/cli": "^8.0.0-alpha.28",
+    "@travetto/test": "^8.0.0-alpha.21"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
