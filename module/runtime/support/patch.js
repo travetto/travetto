@@ -7,7 +7,8 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // polyfills
-if (!globalThis.Temporal) { // For anyone that doesn't have it
+if (!globalThis.Temporal) {
+  // For anyone that doesn't have it
   void import('temporal-polyfill-lite/global');
 }
 
@@ -33,7 +34,7 @@ if (majorVersion < 25 || (majorVersion === 25 && minorVersion < 7)) {
     value: (...args) => {
       const out = og.call(fs, ...args);
       if (typeof args[1] === 'object' && args[1].throwIfNoEntry === false) {
-        return out.catch(() => { });
+        return out.catch(() => {});
       }
       return out;
     }

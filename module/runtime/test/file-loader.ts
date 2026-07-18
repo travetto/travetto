@@ -7,7 +7,6 @@ import { FileLoader, Runtime } from '@travetto/runtime';
 
 @Suite()
 class FileLoaderSuite {
-
   @Test()
   async simpleTest() {
     const loader = new FileLoader([Runtime.modulePath('@#test/fixtures')]);

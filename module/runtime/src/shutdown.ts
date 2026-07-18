@@ -4,14 +4,18 @@ import { Env } from './env.ts';
 import { Util } from './util.ts';
 import { TimeUtil } from './time.ts';
 
-const MAPPING = [['restart', 200], ['error', 1], ['quit', 0]] as const;
-export type ShutdownReason = typeof MAPPING[number][0];
+const MAPPING = [
+  ['restart', 200],
+  ['error', 1],
+  ['quit', 0]
+] as const;
+export type ShutdownReason = (typeof MAPPING)[number][0];
 
 const REASON_TO_CODE = new Map<ShutdownReason, number>(MAPPING);
 const CODE_TO_REASON = new Map<number, ShutdownReason>(MAPPING.map(([k, v]) => [v, k]));
 
 type Handler = (event: Event) => unknown;
-type ShutdownEvent = { reason?: ShutdownReason, mode?: 'exit' | 'interrupt' };
+type ShutdownEvent = { reason?: ShutdownReason; mode?: 'exit' | 'interrupt' };
 
 const isShutdownEvent = (event: unknown): event is ShutdownEvent =>
   typeof event === 'object' && event !== null && 'type' in event && event.type === 'shutdown';
@@ -33,14 +37,20 @@ export class ShutdownManager {
   static #controller = new AbortController();
 
   static {
-    this.#controller.signal.addEventListener = (_: 'abort', listener: Handler): void => { this.#registered.add(listener); };
-    this.#controller.signal.removeEventListener = (_: 'abort', listener: Handler): void => { this.#registered.delete(listener); };
+    this.#controller.signal.addEventListener = (_: 'abort', listener: Handler): void => {
+      this.#registered.add(listener);
+    };
+    this.#controller.signal.removeEventListener = (_: 'abort', listener: Handler): void => {
+      this.#registered.delete(listener);
+    };
     try {
       process
-        .on('message', event => { isShutdownEvent(event) && this.shutdown(event); })
+        .on('message', event => {
+          isShutdownEvent(event) && this.shutdown(event);
+        })
         .on('SIGINT', () => this.shutdown({ mode: 'interrupt' }))
         .on('SIGTERM', () => this.shutdown());
-    } catch { }
+    } catch {}
   }
 
   static get signal(): AbortSignal {
@@ -87,10 +97,7 @@ export class ShutdownManager {
     this.#controller.abort('Shutdown started');
     console.debug('Shutdown started', context);
 
-    const winner = await Promise.race([
-      Util.nonBlockingTimeout(timeout).then(() => this),
-      Promise.all([...this.#registered].map(wrapped))
-    ]);
+    const winner = await Promise.race([Util.nonBlockingTimeout(timeout).then(() => this), Promise.all([...this.#registered].map(wrapped))]);
 
     if (winner !== this) {
       console.debug('Shutdown completed', context);

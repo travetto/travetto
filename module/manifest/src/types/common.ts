@@ -1,9 +1,18 @@
 export type ManifestModuleFileType = 'typings' | 'ts' | 'js' | 'json' | 'package-json' | 'unknown' | 'fixture' | 'md';
 export type ManifestModuleFolderType =
-  '$root' | '$index' | '$package' |
-  'src' | 'bin' | 'support' | 'resources' | 'test' | 'doc' |
-  'test/fixtures' | 'support/fixtures' | 'support/resources' |
-  '$transformer';
+  | '$root'
+  | '$index'
+  | '$package'
+  | 'src'
+  | 'bin'
+  | 'support'
+  | 'resources'
+  | 'test'
+  | 'doc'
+  | 'test/fixtures'
+  | 'support/fixtures'
+  | 'support/resources'
+  | '$transformer';
 
 export type ManifestModuleRole = 'std' | 'test' | 'doc' | 'compile' | 'build';
 

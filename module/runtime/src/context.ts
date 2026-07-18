@@ -11,7 +11,6 @@ import { JSONUtil } from './json.ts';
 
 /** Constrained version of {@type ManifestContext} */
 class $Runtime {
-
   #idx: ManifestIndex;
   #resourceOverrides?: Record<string, string>;
 
@@ -23,14 +22,14 @@ class $Runtime {
   get #moduleAliases(): Record<string, string> {
     return {
       '@': this.#idx.mainModule.sourcePath,
-      '@@': this.#idx.manifest.workspace.path,
+      '@@': this.#idx.manifest.workspace.path
     };
   }
 
   /** The role we are running as */
   get role(): Role {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return Env.TRV_ROLE.value as Role ?? 'std';
+    return (Env.TRV_ROLE.value as Role) ?? 'std';
   }
 
   /** Are we in production mode */
@@ -45,7 +44,7 @@ class $Runtime {
 
   /** Get debug value */
   get debug(): false | string {
-    return Env.DEBUG.isFalse ? false : (Env.DEBUG.value || false);
+    return Env.DEBUG.isFalse ? false : Env.DEBUG.value || false;
   }
 
   /** Manifest main */
@@ -80,7 +79,7 @@ class $Runtime {
 
   /** Produce a workspace path for tooling, with '@' being replaced by node_module/name folder */
   toolPath(...parts: string[]): string {
-    parts = parts.flatMap(part => part === '@' ? ['node_modules', this.#idx.manifest.main.name] : [part]);
+    parts = parts.flatMap(part => (part === '@' ? ['node_modules', this.#idx.manifest.main.name] : [part]));
     return path.resolve(this.workspace.path, this.#idx.manifest.build.toolFolder, ...parts);
   }
 
@@ -95,7 +94,9 @@ class $Runtime {
 
   /** Resolve resource paths */
   resourcePaths(paths: string[] = []): string[] {
-    return [...new Set([...paths, ...Env.TRV_RESOURCES.list ?? [], '@#resources', '@@#resources'].map(module => this.modulePath(module)))];
+    return [
+      ...new Set([...paths, ...(Env.TRV_RESOURCES.list ?? []), '@#resources', '@@#resources'].map(module => this.modulePath(module)))
+    ];
   }
 
   /** Get source for function */
@@ -146,9 +147,12 @@ class $Runtime {
       }
     }
     switch (this.workspace.manager) {
-      case 'npm': return `npm install ${production ? '' : '--save-dev '}${pkg}`;
-      case 'yarn': return `yarn add ${production ? '' : '--dev '}${pkg}`;
-      case 'pnpm': return `pnpm add ${production ? '' : '--dev '}${pkg}`;
+      case 'npm':
+        return `npm install ${production ? '' : '--save-dev '}${pkg}`;
+      case 'yarn':
+        return `yarn add ${production ? '' : '--dev '}${pkg}`;
+      case 'pnpm':
+        return `pnpm add ${production ? '' : '--dev '}${pkg}`;
     }
   }
 }

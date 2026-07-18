@@ -17,11 +17,7 @@ const EXT_MAPPING: Record<string, ManifestModuleFileType> = {
   '.md': 'md'
 };
 
-const INDEX_FILES = new Set(
-  ['__index__', '__index', 'index'].flatMap(file =>
-    ['ts', 'tsx', 'js'].map(ext => `${file}.${ext}`)
-  )
-);
+const INDEX_FILES = new Set(['__index__', '__index', 'index'].flatMap(file => ['ts', 'tsx', 'js'].map(ext => `${file}.${ext}`)));
 
 const STD_TOP_FOLDERS = new Set(['src', 'bin', 'support']);
 const FULL_TOP_FOLDERS = new Set([...STD_TOP_FOLDERS, 'doc', 'test', 'resources']);
@@ -40,7 +36,6 @@ const SUPPORT_FILE_MAP: Record<string, ManifestModuleRole> = {
 const SUPPORT_FILE_REGEX = new RegExp(`^support[/](?<name>${Object.keys(SUPPORT_FILE_MAP).join('|')})[./]`);
 
 export class ManifestModuleUtil {
-
   static TYPINGS_EXT = '.d.ts';
   static OUTPUT_EXT = '.js';
   static SOURCE_DEF_EXT = '.ts';
@@ -50,7 +45,7 @@ export class ManifestModuleUtil {
 
   static #scanCache: Record<string, string[]> = {};
 
-  static #getNewest(stat: { mtimeMs: number, ctimeMs: number }): number {
+  static #getNewest(stat: { mtimeMs: number; ctimeMs: number }): number {
     return Math.max(stat.mtimeMs, stat.ctimeMs);
   }
 
@@ -70,7 +65,7 @@ export class ManifestModuleUtil {
       return this.#scanCache[key];
     }
 
-    if (!await fs.stat(folder, { throwIfNoEntry: false })) {
+    if (!(await fs.stat(folder, { throwIfNoEntry: false }))) {
       return [];
     }
 
@@ -78,7 +73,7 @@ export class ManifestModuleUtil {
 
     const exclude = new Set([
       path.resolve(ctx.workspace.path, ctx.build.outputFolder),
-      path.resolve(ctx.workspace.path, ctx.build.toolFolder),
+      path.resolve(ctx.workspace.path, ctx.build.toolFolder)
     ]);
 
     const topFolders = full ? FULL_TOP_FOLDERS : STD_TOP_FOLDERS;
@@ -94,7 +89,7 @@ export class ManifestModuleUtil {
       const [top, depth] = popped;
 
       // Don't navigate into sub-folders with package.json's
-      if (top !== folder && await fs.stat(`${top}/package.json`, { throwIfNoEntry: false })) {
+      if (top !== folder && (await fs.stat(`${top}/package.json`, { throwIfNoEntry: false }))) {
         continue;
       } else if (exclude.has(top)) {
         continue;
@@ -118,7 +113,7 @@ export class ManifestModuleUtil {
       }
     }
 
-    return this.#scanCache[key] = out;
+    return (this.#scanCache[key] = out);
   }
 
   /**
@@ -179,8 +174,10 @@ export class ManifestModuleUtil {
         case 'test':
         case 'doc':
         case 'resources':
-        case 'support': return key;
-        default: throw new Error(`Unknown folder: ${key}`);
+        case 'support':
+          return key;
+        default:
+          throw new Error(`Unknown folder: ${key}`);
       }
     } else if (/^DOC[.]tsx?$/.test(moduleFile)) {
       return 'doc';
@@ -197,7 +194,7 @@ export class ManifestModuleUtil {
    * Convert file (by ext) to a known file type and also retrieve its latest timestamp
    */
   static async transformFile(moduleFile: string, full: string): Promise<ManifestModuleFile> {
-    const updated = this.#getNewest(await fs.stat(full, { throwIfNoEntry: false }) ?? { mtimeMs: 0, ctimeMs: 0 });
+    const updated = this.#getNewest((await fs.stat(full, { throwIfNoEntry: false })) ?? { mtimeMs: 0, ctimeMs: 0 });
     const moduleFileTuple: ManifestModuleFile = [moduleFile, this.getFileType(moduleFile), updated];
     const role = this.getFileRole(moduleFile);
     return role ? [...moduleFileTuple, role] : moduleFileTuple;

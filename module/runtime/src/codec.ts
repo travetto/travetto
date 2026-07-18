@@ -13,7 +13,6 @@ const UTF8_ENCODER = new TextEncoder();
  * Utilities for encoding and decoding common formats
  */
 export class CodecUtil {
-
   /** Generate buffer from hex string  */
   static fromHexString(value: string): BinaryArray {
     try {
@@ -102,8 +101,9 @@ export class CodecUtil {
     if (!encoding) {
       return this.readUtf8Chunk(chunk);
     }
-    return BinaryUtil.isBinaryArray(chunk) ? chunk :
-      Buffer.from(typeof chunk === 'string' ? chunk : `${chunk}`, castTo(encoding ?? 'utf8'));
+    return BinaryUtil.isBinaryArray(chunk)
+      ? chunk
+      : Buffer.from(typeof chunk === 'string' ? chunk : `${chunk}`, castTo(encoding ?? 'utf8'));
   }
 
   static readFirstLine(data: string): string;

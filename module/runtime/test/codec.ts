@@ -6,7 +6,6 @@ import { castTo, CodecUtil, RuntimeError, type BinaryStream } from '@travetto/ru
 
 @Suite()
 export class CodecUtilTest {
-
   fixture = new TestFixtures();
 
   @Test()
@@ -25,22 +24,13 @@ export class CodecUtilTest {
   @Test()
   async verifyHexConversionErrors() {
     // Invalid hex string - odd length
-    assert.throws(
-      () => CodecUtil.fromHexString('abc'),
-      RuntimeError
-    );
+    assert.throws(() => CodecUtil.fromHexString('abc'), RuntimeError);
 
     // Invalid hex string - non-hex characters
-    assert.throws(
-      () => CodecUtil.fromHexString('zzzz'),
-      /Invalid hex string/
-    );
+    assert.throws(() => CodecUtil.fromHexString('zzzz'), /Invalid hex string/);
 
     // Invalid hex string - contains invalid characters
-    assert.throws(
-      () => CodecUtil.fromHexString('12gh'),
-      /Invalid hex string/
-    );
+    assert.throws(() => CodecUtil.fromHexString('12gh'), /Invalid hex string/);
   }
 
   @Test()
@@ -59,22 +49,13 @@ export class CodecUtilTest {
   @Test()
   async verifyBase64ConversionErrors() {
     // Invalid base64 string - invalid characters (!)
-    assert.throws(
-      () => CodecUtil.fromBase64String('!!!invalid!!!'),
-      RuntimeError
-    );
+    assert.throws(() => CodecUtil.fromBase64String('!!!invalid!!!'), RuntimeError);
 
     // Invalid base64 string - invalid character (@)
-    assert.throws(
-      () => CodecUtil.fromBase64String('aGVs@bG8='),
-      /Invalid base64 string/
-    );
+    assert.throws(() => CodecUtil.fromBase64String('aGVs@bG8='), /Invalid base64 string/);
 
     // Invalid base64 string - emoji
-    assert.throws(
-      () => CodecUtil.fromBase64String('hello😊world'),
-      /Invalid base64 string/
-    );
+    assert.throws(() => CodecUtil.fromBase64String('hello😊world'), /Invalid base64 string/);
   }
 
   @Test()
@@ -119,10 +100,9 @@ export class CodecUtilTest {
       }
     }
     const collected: string[] = [];
-    await CodecUtil.readLines(stream(), (line) => collected.push(line));
+    await CodecUtil.readLines(stream(), line => collected.push(line));
     assert.deepStrictEqual(collected, lines);
   }
-
 
   @Test()
   verifyReadChunk() {

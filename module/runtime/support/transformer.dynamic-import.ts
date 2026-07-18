@@ -6,7 +6,6 @@ import { TransformerHandler, type TransformerState } from '@travetto/transformer
  * Dynamic Import Transformer
  */
 export class DynamicImportTransformer {
-
   static {
     TransformerHandler(this, this.onCall, 'before', 'call');
   }

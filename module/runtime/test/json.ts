@@ -5,7 +5,6 @@ import { CodecUtil, JSONUtil } from '@travetto/runtime';
 
 @Suite()
 class JSONUtilSuite {
-
   @Test()
   async parseSafeString() {
     const obj: { name: string } = JSONUtil.fromUTF8('{"name":"test"}');
@@ -33,10 +32,12 @@ class JSONUtilSuite {
     assert(obj.date instanceof Date);
     assert.strictEqual(obj.date.toISOString().split('T')[0], '2025-12-21');
 
-
-    const obj2: { date: Date } = JSONUtil.fromUTF8(JSONUtil.toUTF8({
-      date: new Date('2025-12-21')
-    }), { reviver: JSONUtil.TRANSMIT_REVIVER });
+    const obj2: { date: Date } = JSONUtil.fromUTF8(
+      JSONUtil.toUTF8({
+        date: new Date('2025-12-21')
+      }),
+      { reviver: JSONUtil.TRANSMIT_REVIVER }
+    );
     assert(obj2.date instanceof Date);
     assert.strictEqual(obj2.date.toISOString().split('T')[0], '2025-12-21');
   }

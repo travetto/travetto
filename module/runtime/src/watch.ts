@@ -17,25 +17,25 @@ type RetryRunConfig = {
   maxRetries: number;
   maxRetryWindow: number;
   signal?: AbortSignal;
-  onRetry: (state: RetryRunState, config: RetryRunConfig) => (unknown | Promise<unknown>);
+  onRetry: (state: RetryRunState, config: RetryRunConfig) => unknown | Promise<unknown>;
 };
 
 /**
  * Utilities for watching resources
  */
 export class WatchUtil {
-
   /** Compute the delay before restarting */
   static computeRestartDelay(state: RetryRunState, config: RetryRunConfig): number {
-    return state.result === 'error'
-      ? config.maxRetryWindow / (config.maxRetries + 1)
-      : 10;
+    return state.result === 'error' ? config.maxRetryWindow / (config.maxRetries + 1) : 10;
   }
 
   /**
    * Run with restart capability
    */
-  static async runWithRetry(run: (state: RetryRunState & { signal: AbortSignal }) => Promise<ShutdownReason>, options?: Partial<RetryRunConfig>): Promise<void> {
+  static async runWithRetry(
+    run: (state: RetryRunState & { signal: AbortSignal }) => Promise<ShutdownReason>,
+    options?: Partial<RetryRunConfig>
+  ): Promise<void> {
     let retryExhausted = false;
 
     const state: RetryRunState = {
@@ -48,9 +48,8 @@ export class WatchUtil {
       maxRetryWindow: 10 * 1000,
       maxRetries: 10,
       onRetry: () => Util.nonBlockingTimeout(this.computeRestartDelay(state, config)),
-      ...options,
+      ...options
     };
-
 
     outer: while (!ShutdownManager.signal.aborted && !retryExhausted) {
       if (state.iteration > 0) {
@@ -59,15 +58,18 @@ export class WatchUtil {
 
       state.result = await run({ ...state, signal: ShutdownManager.signal }).catch(() => 'error' as const);
       switch (state.result) {
-        case 'quit': break outer;
-        case 'error': state.errorIterations += 1; break;
+        case 'quit':
+          break outer;
+        case 'error':
+          state.errorIterations += 1;
+          break;
         case 'restart': {
           state.startTime = Date.now();
           state.errorIterations = 0;
         }
       }
 
-      retryExhausted = (state.errorIterations >= config.maxRetries) || (Date.now() - state.startTime >= config.maxRetryWindow);
+      retryExhausted = state.errorIterations >= config.maxRetries || Date.now() - state.startTime >= config.maxRetryWindow;
       state.iteration += 1;
     }
 
@@ -81,25 +83,27 @@ export class WatchUtil {
     type: K,
     onChange: (input: T) => unknown,
     filter?: (input: T) => boolean,
-    options?: Partial<RetryRunConfig>,
+    options?: Partial<RetryRunConfig>
   ): Promise<void> {
     const { CompilerClient } = await import('@travetto/compiler/src/server/client.ts');
     const client = new CompilerClient(RuntimeIndex.manifest, {
       debug: (...args: unknown[]): void => console.debug(...args),
       info: (...args: unknown[]): void => console.info(...args),
       warn: (...args: unknown[]): void => console.warn(...args),
-      error: (...args: unknown[]): void => console.error(...args),
+      error: (...args: unknown[]): void => console.error(...args)
     });
 
     // pre-check
-    if (!await client.isWatching()) { // If we get here, without a watch
+    if (!(await client.isWatching())) {
+      // If we get here, without a watch
       throw new RuntimeError('Compile Server is not running');
     }
 
     void this.runWithRetry(async ({ signal }) => {
       await client.waitForState(['watch-start'], undefined, signal);
 
-      if (!await client.isWatching()) { // If we get here, without a watch
+      if (!(await client.isWatching())) {
+        // If we get here, without a watch
         return 'error';
       } else {
         for await (const event of client.fetchEvents(type, { signal, enforceIteration: true })) {

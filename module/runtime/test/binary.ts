@@ -4,14 +4,10 @@ import { ReadableStream } from 'node:stream/web';
 import { buffer } from 'node:stream/consumers';
 
 import { Test, Suite } from '@travetto/test';
-import {
-  BinaryUtil, toConcrete, type BinaryArray,
-  type BinaryStream, type BinaryType, type BinaryContainer
-} from '@travetto/runtime';
+import { BinaryUtil, toConcrete, type BinaryArray, type BinaryStream, type BinaryType, type BinaryContainer } from '@travetto/runtime';
 
 @Suite()
 export class BinaryUtilTest {
-
   @Test()
   verifyIsBinaryConstructor() {
     assert(BinaryUtil.isBinaryTypeReference(Readable));

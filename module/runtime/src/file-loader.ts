@@ -9,7 +9,6 @@ import { BinaryUtil, type BinaryArray, type BinaryStream } from './binary.ts';
  * File loader that will search for files across the provided search paths
  */
 export class FileLoader {
-
   #searchPaths: readonly string[];
 
   constructor(paths: string[]) {

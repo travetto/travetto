@@ -12,7 +12,6 @@ import { ExecUtil, Runtime } from '@travetto/runtime';
 
 @Suite()
 export class ExecUtilTest {
-
   fixture = new TestFixtures();
 
   @Test()
@@ -50,18 +49,11 @@ export class ExecUtilTest {
   async pipe() {
     const src = await this.fixture.readBinaryStream('/logo.png');
 
-    const process = spawn('gm', [
-      'convert', '-resize', '100x',
-      '-auto-orient', '-strip', '-quality', '86',
-      '-', '-'
-    ]);
+    const process = spawn('gm', ['convert', '-resize', '100x', '-auto-orient', '-strip', '-quality', '86', '-', '-']);
 
     const tempFile = path.resolve(os.tmpdir(), `${Math.random()}.png`);
 
-    await Promise.all([
-      pipeline(src, process.stdin!),
-      pipeline(process.stdout!, createWriteStream(tempFile))
-    ]);
+    await Promise.all([pipeline(src, process.stdin!), pipeline(process.stdout!, createWriteStream(tempFile))]);
 
     const test = await fs.stat(tempFile);
     await fs.unlink(tempFile);

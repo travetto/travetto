@@ -5,7 +5,6 @@ import { TimeUtil } from '@travetto/runtime';
 
 @Suite()
 class TimeSuite {
-
   @Test()
   verifyDuration() {
     assert(TimeUtil.duration(1000).milliseconds === 1000);
@@ -81,7 +80,7 @@ class TimeSuite {
     const futureDay = TimeUtil.fromNow('1d'); // Should count as 24 hours
     const diffDay = futureDay.getTime() - start;
     const dayMs = 24 * 60 * 60 * 1000;
-    assert(diffDay >= (dayMs - 1000) && diffDay <= (dayMs + 1000));
+    assert(diffDay >= dayMs - 1000 && diffDay <= dayMs + 1000);
   }
 
   @Test()

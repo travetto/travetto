@@ -3,11 +3,13 @@ import { castKey, castTo } from './types.ts';
 const IS_TRUE = /^(true|yes|on|1)$/i;
 const IS_FALSE = /^(false|no|off|0)$/i;
 
-export interface EnvData { }
+export interface EnvData {}
 
 export class EnvProp<T> {
   readonly key: string;
-  constructor(key: string) { this.key = key; }
+  constructor(key: string) {
+    this.key = key;
+  }
 
   /** Set value according to type */
   set(value: T | undefined | null): void {
@@ -27,14 +29,17 @@ export class EnvProp<T> {
   export(value?: T | undefined | null): Record<string, string> {
     let out: string;
     // biome-ignore lint/complexity/noArguments: We want to use arguments here to detect if nothing was truly passed
-    if (arguments.length === 0) { // If nothing passed in
+    if (arguments.length === 0) {
+      // If nothing passed in
       out = `${this.value}`;
     } else if (value === undefined || value === null) {
       out = '';
     } else if (Array.isArray(value)) {
       out = value.join(',');
     } else if (typeof value === 'object') {
-      out = Object.entries(value).map(([key, keyValue]) => `${key}=${keyValue}`).join(',');
+      out = Object.entries(value)
+        .map(([key, keyValue]) => `${key}=${keyValue}`)
+        .join(',');
     } else {
       out = `${value}`;
     }
@@ -42,13 +47,19 @@ export class EnvProp<T> {
   }
 
   /** Read value as string */
-  get value(): string | undefined { return process.env[this.key] || undefined; }
+  get value(): string | undefined {
+    return process.env[this.key] || undefined;
+  }
 
   /** Read value as list */
   get list(): string[] | undefined {
     const value = this.value;
-    return (value === undefined || value === '') ?
-      undefined : value.split(/[, ]+/g).map(item => item.trim()).filter(item => !!item);
+    return value === undefined || value === ''
+      ? undefined
+      : value
+          .split(/[, ]+/g)
+          .map(item => item.trim())
+          .filter(item => !!item);
   }
 
   /** Read value as object */
@@ -59,7 +70,7 @@ export class EnvProp<T> {
 
   /** Add values to list */
   add(...items: string[]): void {
-    process.env[this.key] = [... new Set([...this.list ?? [], ...items])].join(',');
+    process.env[this.key] = [...new Set([...(this.list ?? []), ...items])].join(',');
   }
 
   /** Read value as int  */
@@ -71,7 +82,7 @@ export class EnvProp<T> {
   /** Read value as boolean */
   get bool(): boolean | undefined {
     const value = this.value;
-    return (value === undefined || value === '') ? undefined : IS_TRUE.test(value);
+    return value === undefined || value === '' ? undefined : IS_TRUE.test(value);
   }
 
   /** Determine if the underlying value is truthy */
@@ -92,21 +103,29 @@ export class EnvProp<T> {
 }
 
 type EnvDataCombinedType = {
-  [K in keyof EnvData]: Pick<EnvProp<EnvData[K]>, 'key' | 'export' | 'value' | 'set' | 'clear' | 'isSet' |
-    (EnvData[K] extends unknown[] ? 'list' | 'add' : never) |
-    (Extract<EnvData[K], object> extends never ? never : 'object') |
-    (Extract<EnvData[K], number> extends never ? never : 'int') |
-    (Extract<EnvData[K], boolean> extends never ? never : 'bool' | 'isTrue' | 'isFalse')
-  >
+  [K in keyof EnvData]: Pick<
+    EnvProp<EnvData[K]>,
+    | 'key'
+    | 'export'
+    | 'value'
+    | 'set'
+    | 'clear'
+    | 'isSet'
+    | (EnvData[K] extends unknown[] ? 'list' | 'add' : never)
+    | (Extract<EnvData[K], object> extends never ? never : 'object')
+    | (Extract<EnvData[K], number> extends never ? never : 'int')
+    | (Extract<EnvData[K], boolean> extends never ? never : 'bool' | 'isTrue' | 'isFalse')
+  >;
 };
 
 function delegate<T extends object>(base: T): EnvDataCombinedType & T {
   return new Proxy(castTo(base), {
     get(target, property): unknown {
-      return typeof property !== 'string' ? undefined :
-        (property in base ? base[castKey(property)] :
-          target[castKey<typeof target>(property)] ??= castTo(new EnvProp(property))
-        );
+      return typeof property !== 'string'
+        ? undefined
+        : property in base
+          ? base[castKey(property)]
+          : (target[castKey<typeof target>(property)] ??= castTo(new EnvProp(property)));
     }
   });
 }

@@ -7,21 +7,16 @@ import { path as path2 } from '@travetto/manifest';
 
 @Suite()
 class PathTests {
-
   @Test()
   verifyRelative() {
-    const pwd = path.resolve().replace(/[a-z\- ]+/ig, '..');
+    const pwd = path.resolve().replace(/[a-z\- ]+/gi, '..');
     assert(pwd.includes('../../..'));
     assert(path.resolve(`${pwd}/test`) === '/test');
   }
 
   @Test()
   verifyPathExt() {
-    for (const file of [
-      'C:\\user\\home\\sample.2.docx',
-      'C:/user/home/sample.2.docx',
-      '/user/home/sample.2.docx'
-    ]) {
+    for (const file of ['C:\\user\\home\\sample.2.docx', 'C:/user/home/sample.2.docx', '/user/home/sample.2.docx']) {
       assert(path.basename(file) === 'sample.2.docx');
       assert(path.extname(file) === '.docx');
       assert(path.basename(file, path.extname(file)) === 'sample.2');
@@ -34,7 +29,8 @@ class PathTests {
   @Test()
   verifyWin32Paths() {
     const winResolve = (...args: string[]): string => path2.toPosix(winPath.resolve(path.resolve(), ...args.map(path2.toPosix)));
-    const winJoin = (root: string, ...args: string[]): string => path2.toPosix(winPath.join(path2.toPosix(root), ...args.map(path2.toPosix)));
+    const winJoin = (root: string, ...args: string[]): string =>
+      path2.toPosix(winPath.join(path2.toPosix(root), ...args.map(path2.toPosix)));
 
     assert(winResolve('C:\\Docs\\Bob', 'orange\\red.png') === 'C:/Docs/Bob/orange/red.png');
     assert(winResolve('C:\\Docs\\Bob', 'orange/red.png') === 'C:/Docs/Bob/orange/red.png');

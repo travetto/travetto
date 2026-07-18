@@ -66,4 +66,4 @@ export type Package = {
 
 export type PackageDependencyType = 'dependencies' | 'devDependencies' | 'optionalDependencies' | 'peerDependencies';
 
-export type PackageWorkspaceEntry = { name: string, path: string };
+export type PackageWorkspaceEntry = { name: string; path: string };

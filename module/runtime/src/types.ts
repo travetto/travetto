@@ -1,6 +1,5 @@
 import type { Readable } from 'node:stream';
 
-
 // biome-ignore lint/suspicious/noExplicitAny: This is the any reference we use explicitly
 export type Any = any;
 
@@ -21,30 +20,32 @@ export type NumericLikeIntrinsic = Date | NumericPrimitive;
 export type IntrinsicType = Primitive | Date | ArrayBuffer | Uint8Array | Uint16Array | Uint32Array | Readable | Buffer | Blob | File;
 
 export type DeepPartial<T> = {
-  [P in keyof T]?: (T[P] extends (IntrinsicType | undefined) ? (T[P] | undefined) :
-    (T[P] extends Any[] ? (DeepPartial<T[P][number]> | null | undefined)[] : DeepPartial<T[P]>));
+  [P in keyof T]?: T[P] extends IntrinsicType | undefined
+    ? T[P] | undefined
+    : T[P] extends Any[]
+      ? (DeepPartial<T[P][number]> | null | undefined)[]
+      : DeepPartial<T[P]>;
 };
 
 export type ValidFields<T, I> = {
-  [K in keyof T]:
-  (T[K] extends (Primitive | I | undefined) ? K :
-    (T[K] extends (Function | undefined) ? never :
-      K))
+  [K in keyof T]: T[K] extends Primitive | I | undefined ? K : T[K] extends Function | undefined ? never : K;
 }[keyof T];
 
 export type RetainIntrinsicFields<T> = Pick<T, ValidFields<T, IntrinsicType>>;
 
-export type KeyPaths<T, PrimitiveType = IntrinsicType | IntrinsicType[], PREFIX extends string = '', SEP extends string = '.'> =
-  { [K in keyof T]:
-    (K extends string ? (
-      (T[K] extends (IntrinsicType[] | IntrinsicType | undefined) ?
-        (T[K] extends PrimitiveType ? `${PREFIX}${K}` : never) : (
-          (T[K] extends Any[] ?
-            KeyPaths<T[K][number], PrimitiveType, `${K}${SEP}`, SEP> :
-            (T[K] extends object ? KeyPaths<T[K], PrimitiveType, `${K}${SEP}`, SEP> : never))
-        )
-      )) : never)
-  }[keyof T];
+export type KeyPaths<T, PrimitiveType = IntrinsicType | IntrinsicType[], PREFIX extends string = '', SEP extends string = '.'> = {
+  [K in keyof T]: K extends string
+    ? T[K] extends IntrinsicType[] | IntrinsicType | undefined
+      ? T[K] extends PrimitiveType
+        ? `${PREFIX}${K}`
+        : never
+      : T[K] extends Any[]
+        ? KeyPaths<T[K][number], PrimitiveType, `${K}${SEP}`, SEP>
+        : T[K] extends object
+          ? KeyPaths<T[K], PrimitiveType, `${K}${SEP}`, SEP>
+          : never
+    : never;
+}[keyof T];
 
 export const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T & string>(value: T): K[];
@@ -53,8 +54,7 @@ export const TypedObject: {
   assign<T extends {}, U extends T>(target: T, ...sources: U[]): U;
 } & ObjectConstructor = Object;
 
-export const safeAssign = <T extends {}, U extends {}>(target: T, ...sources: U[]): T & U =>
-  Object.assign(target, ...sources);
+export const safeAssign = <T extends {}, U extends {}>(target: T, ...sources: U[]): T & U => Object.assign(target, ...sources);
 
 export function castTo<T>(input: unknown): T {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -67,12 +67,14 @@ export const asFull = <T>(input: Partial<T>): T => castTo(input);
 export const asConstructable = <Z = unknown>(input: Class | unknown): { constructor: Class<Z> } => castTo(input);
 
 export function classConstruct<T>(cls: Class<T>, args: unknown[] = []): ClassInstance<T> {
-  const cons: { new(..._args: Any[]): T } = castTo(cls);
+  const cons: { new (..._args: Any[]): T } = castTo(cls);
   return castTo(new cons(...args));
 }
 
-export const hasFunction = <T>(key: keyof T) => (value: unknown): value is T =>
-  typeof value === 'object' && value !== null && typeof value[castKey(key)] === 'function';
+export const hasFunction =
+  <T>(key: keyof T) =>
+  (value: unknown): value is T =>
+    typeof value === 'object' && value !== null && typeof value[castKey(key)] === 'function';
 
 export const hasToJSON = hasFunction<{ toJSON(): object }>('toJSON');
 

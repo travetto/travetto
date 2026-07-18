@@ -16,7 +16,6 @@ const TypedObject: {
  * Manifest index
  */
 export class ManifestIndex {
-
   #arbitraryLookup?: (parts: string[]) => ManifestModule | undefined;
   #manifest: ManifestRoot;
   #modules: IndexedModule[];
@@ -81,16 +80,15 @@ export class ManifestIndex {
     this.#sourceToEntry.clear();
     this.#arbitraryLookup = undefined;
 
-    this.#modules = Object.values(this.#manifest.modules)
-      .map(module => ({
-        ...module,
-        outputPath: this.#resolveOutput(module.outputFolder),
-        sourcePath: path.resolve(this.#manifest.workspace.path, module.sourceFolder),
-        children: new Set(),
-        files: TypedObject.fromEntries(
-          TypedObject.entries(module.files).map(([folder, files]) => [folder, this.#moduleFiles(module, files ?? [])])
-        )
-      }));
+    this.#modules = Object.values(this.#manifest.modules).map(module => ({
+      ...module,
+      outputPath: this.#resolveOutput(module.outputFolder),
+      sourcePath: path.resolve(this.#manifest.workspace.path, module.sourceFolder),
+      children: new Set(),
+      files: TypedObject.fromEntries(
+        TypedObject.entries(module.files).map(([folder, files]) => [folder, this.#moduleFiles(module, files ?? [])])
+      )
+    }));
 
     for (const module of this.#modules) {
       for (const files of Object.values(module.files ?? {})) {
@@ -139,10 +137,7 @@ export class ManifestIndex {
         for (const [folder, files] of TypedObject.entries(module.files)) {
           if (config.folder?.(folder) ?? true) {
             for (const file of files) {
-              if (
-                (config.file?.(file) ?? true) &&
-                (config.sourceOnly === false || file.type === 'ts')
-              ) {
+              if ((config.file?.(file) ?? true) && (config.sourceOnly === false || file.type === 'ts')) {
                 searchSpace.push(file);
               }
             }
@@ -241,7 +236,8 @@ export class ManifestIndex {
         seen.add(next);
         const module = this.getModule(next)!;
         toProcess.push(...module[field]);
-        if (next !== this.#manifest.main.name) { // Do not include self
+        if (next !== this.#manifest.main.name) {
+          // Do not include self
           out.push(module);
         }
       }
@@ -254,13 +250,11 @@ export class ManifestIndex {
    */
   findModuleForArbitraryFile(file: string): ManifestModule | undefined {
     const base = this.#manifest.workspace.path;
-    const lookup = this.#arbitraryLookup ??= ManifestUtil.lookupTrie(
+    const lookup = (this.#arbitraryLookup ??= ManifestUtil.lookupTrie(
       Object.values(this.#manifest.modules),
       module => module.sourceFolder.split('/'),
-      sub =>
-        !existsSync(path.resolve(base, ...sub, 'package.json')) &&
-        !existsSync(path.resolve(base, ...sub, '.git'))
-    );
+      sub => !existsSync(path.resolve(base, ...sub, 'package.json')) && !existsSync(path.resolve(base, ...sub, '.git'))
+    ));
     return lookup(file.replace(`${base}/`, '').split('/'));
   }
 
@@ -306,7 +300,7 @@ export class ManifestIndex {
   /**
    * Group by lineage, data can be duplicated
    */
-  groupByLineage<T extends { action: string }>(items: { item: T, module: string }[]): Map<string, T[]> {
+  groupByLineage<T extends { action: string }>(items: { item: T; module: string }[]): Map<string, T[]> {
     const itemsByModule = new Map<string, T[]>();
     for (const event of items) {
       const moduleSet = new Set(this.getDependentModules(event.module, 'parents').map(module => module.name));

@@ -5,13 +5,12 @@ import { type ConsoleEvent, ConsoleManager } from '@travetto/runtime';
 
 @Suite()
 export class ConsoleManagerTest {
-
   @Test()
   async testConsole() {
     const logs: ConsoleEvent[] = [];
     const og = ConsoleManager.get();
     ConsoleManager.set({
-      log: (ev) => logs.push(ev)
+      log: ev => logs.push(ev)
     });
     console.log('a', 'b', 'c');
     assert(logs.length === 1);

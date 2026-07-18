@@ -28,8 +28,16 @@ export type BinaryContainer = Blob | File;
 export type BinaryType = BinaryArray | BinaryStream | BinaryContainer;
 
 const BINARY_CONSTRUCTOR_SET = new Set<unknown>([
-  Readable, Buffer, Blob, ReadableStream, ArrayBuffer, Uint8Array,
-  Uint16Array, Uint32Array, Uint8ClampedArray, File
+  Readable,
+  Buffer,
+  Blob,
+  ReadableStream,
+  ArrayBuffer,
+  Uint8Array,
+  Uint16Array,
+  Uint32Array,
+  Uint8ClampedArray,
+  File
 ]);
 
 let BINARY_REFS: Set<unknown> | undefined;
@@ -40,7 +48,7 @@ const isBinaryTypeReference = (value: unknown): boolean =>
     toConcrete<BinaryType>(),
     toConcrete<BinaryStream>(),
     toConcrete<BinaryArray>(),
-    toConcrete<BinaryContainer>(),
+    toConcrete<BinaryContainer>()
   ])).has(value);
 
 const isReadable = hasFunction<Readable>('pipe');
@@ -51,13 +59,13 @@ const isBinaryArray = (value: unknown): value is BinaryArray =>
   isUint8Array(value) || isArrayBuffer(value) || isUint16Array(value) || isUint32Array(value) || isUint8ClampedArray(value);
 const isBinaryStream = (value: unknown): value is BinaryStream => isReadable(value) || isReadableStream(value) || isAsyncIterable(value);
 const isBinaryContainer = (value: unknown): value is BinaryContainer => value instanceof Blob;
-const isBinaryType = (value: unknown): value is BinaryType => !!value && (isBinaryArray(value) || isBinaryStream(value) || isBinaryContainer(value));
+const isBinaryType = (value: unknown): value is BinaryType =>
+  !!value && (isBinaryArray(value) || isBinaryStream(value) || isBinaryContainer(value));
 
 /**
  * Common functions for dealing with binary data/streams
  */
 export class BinaryUtil {
-
   /** Is the input a byte array */
   static isBinaryArray = isBinaryArray;
   /** Is the input a byte stream */
@@ -180,8 +188,8 @@ export class BinaryUtil {
   /**
    * Convert an inbound binary type or factory into a synchronous binary type
    */
-  static toSynchronous(input: BinaryType | (() => (BinaryType | Promise<BinaryType>))): BinaryType {
-    const value = (typeof input === 'function') ? input() : input;
+  static toSynchronous(input: BinaryType | (() => BinaryType | Promise<BinaryType>)): BinaryType {
+    const value = typeof input === 'function' ? input() : input;
     if (isPromise(value)) {
       const stream = new PassThrough();
       value.then(result => BinaryUtil.pipeline(result, stream)).catch(error => stream.destroy(error));

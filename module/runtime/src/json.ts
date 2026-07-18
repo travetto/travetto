@@ -9,21 +9,27 @@ const VALID_JSON_ERROR_TYPES = ['runtime', 'plain', 'assert'] as const;
 const VALID_JSON_ERROR_TYPE_SET = new Set<unknown>(VALID_JSON_ERROR_TYPES);
 
 type JSONTransformer = (this: unknown, key: string, value: unknown) => unknown;
-type JSONOutputConfig = { indent?: number, replacer?: JSONTransformer };
+type JSONOutputConfig = { indent?: number; replacer?: JSONTransformer };
 type JSONInputConfig = { reviver?: JSONTransformer };
 type JSONCloneConfig = JSONOutputConfig & JSONInputConfig;
-type JSONError = { $trv: (typeof VALID_JSON_ERROR_TYPES)[number], name?: string } & Partial<RuntimeErrorOptions<Record<string, unknown>>>;
+type JSONError = { $trv: (typeof VALID_JSON_ERROR_TYPES)[number]; name?: string } & Partial<RuntimeErrorOptions<Record<string, unknown>>>;
 
 Object.defineProperty(BigInt.prototype, 'toJSON', {
-  value() { return `${this}n`; },
+  value() {
+    return `${this}n`;
+  }
 });
 
 Object.defineProperty(Error.prototype, 'toJSON', {
-  value() { return JSONUtil.errorToJSONError(this); },
+  value() {
+    return JSONUtil.errorToJSONError(this);
+  }
 });
 
 Object.defineProperty(RuntimeError.prototype, 'toJSON', {
-  value() { return JSONUtil.errorToJSONError(this); },
+  value() {
+    return JSONUtil.errorToJSONError(this);
+  }
 });
 
 const ISO_8601_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/;
@@ -31,7 +37,6 @@ const BIGINT_REGEX = /^-?\d+n$/;
 
 /** Utilities for JSON  */
 export class JSONUtil {
-
   static includeStackTraces = false;
 
   static TRANSMIT_REVIVER: JSONTransformer = function (this: unknown, key: string, value: unknown): unknown {
@@ -47,7 +52,6 @@ export class JSONUtil {
     return value;
   };
 
-
   static isJSONError(value: unknown): value is JSONError {
     return typeof value === 'object' && value !== null && '$trv' in value && VALID_JSON_ERROR_TYPE_SET.has(value.$trv);
   }
@@ -57,12 +61,20 @@ export class JSONUtil {
     const { $trv, message, stack, name, ...rest } = error;
     let response: Error;
     switch ($trv) {
-      case 'runtime': response = new RuntimeError(message!, castTo<Any>(rest)); break;
-      case 'assert': response = new AssertionError({ message, ...rest }); break;
-      case 'plain': response = new Error(message!); break;
+      case 'runtime':
+        response = new RuntimeError(message!, castTo<Any>(rest));
+        break;
+      case 'assert':
+        response = new AssertionError({ message, ...rest });
+        break;
+      case 'plain':
+        response = new Error(message!);
+        break;
     }
     response.stack = stack;
-    if (name) { response.name = name; }
+    if (name) {
+      response.name = name;
+    }
     return response;
   }
 
@@ -73,21 +85,29 @@ export class JSONUtil {
     includeStack ??= JSONUtil.includeStackTraces;
     let $trv: JSONError['$trv'];
     switch (true) {
-      case error instanceof RuntimeError: $trv = 'runtime'; break;
-      case error instanceof AssertionError: $trv = 'assert'; break;
-      default: $trv = 'plain'; break;
+      case error instanceof RuntimeError:
+        $trv = 'runtime';
+        break;
+      case error instanceof AssertionError:
+        $trv = 'assert';
+        break;
+      default:
+        $trv = 'plain';
+        break;
     }
     return {
       $trv,
       message: error.message,
       ...(error.cause ? { cause: `${error.cause}` } : undefined),
       ...(includeStack ? { stack: error.stack } : undefined),
-      ...(error instanceof RuntimeError ? {
-        category: error.category,
-        type: error.type,
-        at: error.at,
-        ...(error.details ? { details: error.details } : undefined!),
-      } : {})
+      ...(error instanceof RuntimeError
+        ? {
+            category: error.category,
+            type: error.type,
+            at: error.at,
+            ...(error.details ? { details: error.details } : undefined!)
+          }
+        : {})
     };
   }
 

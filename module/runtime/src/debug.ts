@@ -7,7 +7,6 @@ import type { ClassInstance } from './types.ts';
  */
 export function DebugBreak(): MethodDecorator {
   return (instance: ClassInstance, property: string | symbol, descriptor: PropertyDescriptor) => descriptor;
-
 }
 
 /**

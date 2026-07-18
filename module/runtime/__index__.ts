@@ -1,5 +1,5 @@
-import type { } from './src/global.d.ts';
-import type { } from './src/trv.d.ts';
+import type {} from './src/global.d.ts';
+import type {} from './src/trv.d.ts';
 export * from './src/binary.ts';
 export * from './src/binary-metadata.ts';
 export * from './src/console.ts';

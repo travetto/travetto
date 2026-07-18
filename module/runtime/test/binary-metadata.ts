@@ -8,7 +8,6 @@ import { BinaryMetadataUtil, BinaryUtil } from '@travetto/runtime';
 
 @Suite()
 export class BinaryMetadataUtilSuite {
-
   fixture = new TestFixtures();
 
   @Test()
@@ -53,7 +52,6 @@ export class BinaryMetadataUtilSuite {
 
     assert(BinaryMetadataUtil.hash('', { length: 20 }) !== key.substring(0, 20));
   }
-
 
   @Test()
   async verifyAsyncHash() {

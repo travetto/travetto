@@ -10,7 +10,6 @@ const SRC = '@travetto/runtime/src/types.ts';
  * Providing support for concrete types
  */
 export class ConcreteTransformer {
-
   static {
     TransformerHandler(this, this.onInterface, 'before', 'interface');
     TransformerHandler(this, this.onTypeAlias, 'before', 'type');
@@ -27,22 +26,22 @@ export class ConcreteTransformer {
     const declaration = state.factory.createFunctionDeclaration(
       // eslint-disable-next-line no-bitwise
       state.factory.createModifiersFromModifierFlags(ts.ModifierFlags.Export | ts.ModifierFlags.Const),
-      undefined, `${final}$Concrete`, [], [], undefined,
+      undefined,
+      `${final}$Concrete`,
+      [],
+      [],
+      undefined,
       state.factory.createBlock([])
     );
 
     state.addStatements([
       declaration,
       state.factory.createExpressionStatement(
-        state.factory.createCallExpression(
-          state.createAccess('Object', 'defineProperty'),
-          undefined,
-          [
-            declaration.name!,
-            state.fromLiteral('name'),
-            state.fromLiteral({ value: final })
-          ]
-        )
+        state.factory.createCallExpression(state.createAccess('Object', 'defineProperty'), undefined, [
+          declaration.name!,
+          state.fromLiteral('name'),
+          state.fromLiteral({ value: final })
+        ])
       )
     ]);
 
@@ -72,16 +71,16 @@ export class ConcreteTransformer {
   }
 
   static onToConcreteCall(state: TransformerState, node: ts.CallExpression): typeof node {
-    if (ts.isIdentifier(node.expression) && node.expression.text === 'toConcrete' && node.typeArguments?.length && node.arguments.length === 0) {
+    if (
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'toConcrete' &&
+      node.typeArguments?.length &&
+      node.arguments.length === 0
+    ) {
       const type = state.resolveType(node.expression);
       if ('importName' in type && type.importName === SRC) {
         const [target] = node.typeArguments;
-        return state.factory.updateCallExpression(
-          node,
-          node.expression,
-          node.typeArguments,
-          [state.getConcreteType(target)]
-        );
+        return state.factory.updateCallExpression(node, node.expression, node.typeArguments, [state.getConcreteType(target)]);
       }
     }
 

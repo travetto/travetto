@@ -13,7 +13,6 @@ class RuntimeIndexTests {
 
   @Test()
   async testModuleExpression() {
-
     const found = RuntimeIndex.getModuleList('workspace');
     assert(found.size >= 1);
     assert(found.has('@travetto/runtime'));

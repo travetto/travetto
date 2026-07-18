@@ -5,7 +5,6 @@ import { AsyncQueue } from '@travetto/runtime';
 
 @Suite()
 export class WorkSetTest {
-
   @Test()
   async eventSource() {
     const items = [1, 2, 3];

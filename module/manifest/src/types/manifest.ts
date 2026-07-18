@@ -3,8 +3,8 @@ import type { ManifestContext } from './context.ts';
 import type { Package } from './package.ts';
 
 export type ManifestModuleFile =
-  [path: string, type: ManifestModuleFileType, updated: number] |
-  [path: string, type: ManifestModuleFileType, updated: number, role: ManifestModuleRole];
+  | [path: string, type: ManifestModuleFileType, updated: number]
+  | [path: string, type: ManifestModuleFileType, updated: number, role: ManifestModuleRole];
 
 export type ManifestDepCore = {
   /** Package name */

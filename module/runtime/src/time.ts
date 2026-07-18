@@ -2,16 +2,32 @@ import { RuntimeError } from './error.ts';
 import { castTo } from './types.ts';
 
 const TIME_UNIT_TO_TEMPORAL_UNIT = {
-  y: 'years', year: 'years', years: 'years',
-  M: 'months', month: 'months', months: 'months',
-  w: 'weeks', week: 'weeks', weeks: 'weeks',
-  d: 'days', day: 'days', days: 'days',
-  h: 'hours', hour: 'hours', hours: 'hours',
-  m: 'minutes', minute: 'minutes', minutes: 'minutes',
-  s: 'seconds', second: 'seconds', seconds: 'seconds',
-  ms: 'milliseconds', millisecond: 'milliseconds', milliseconds: 'milliseconds'
+  y: 'years',
+  year: 'years',
+  years: 'years',
+  M: 'months',
+  month: 'months',
+  months: 'months',
+  w: 'weeks',
+  week: 'weeks',
+  weeks: 'weeks',
+  d: 'days',
+  day: 'days',
+  days: 'days',
+  h: 'hours',
+  hour: 'hours',
+  hours: 'hours',
+  m: 'minutes',
+  minute: 'minutes',
+  minutes: 'minutes',
+  s: 'seconds',
+  second: 'seconds',
+  seconds: 'seconds',
+  ms: 'milliseconds',
+  millisecond: 'milliseconds',
+  milliseconds: 'milliseconds'
 } as const;
-type TemporalUnit = typeof TIME_UNIT_TO_TEMPORAL_UNIT[keyof typeof TIME_UNIT_TO_TEMPORAL_UNIT];
+type TemporalUnit = (typeof TIME_UNIT_TO_TEMPORAL_UNIT)[keyof typeof TIME_UNIT_TO_TEMPORAL_UNIT];
 
 export type TimeSpan = `${number}${keyof typeof TIME_UNIT_TO_TEMPORAL_UNIT}`;
 export type TimeUnit = keyof typeof TIME_UNIT_TO_TEMPORAL_UNIT;
@@ -19,7 +35,6 @@ export type TimeUnit = keyof typeof TIME_UNIT_TO_TEMPORAL_UNIT;
 const TIME_PATTERN = /^(?<amount>-?[0-9]+)(?<unit>(?:year|month|week|day|hour|minute|second|millisecond)s?|y|M|w|d|h|m|s|ms)$/;
 
 export class TimeUtil {
-
   /**
    * Test to see if a string is valid for relative time
    */
@@ -50,20 +65,40 @@ export class TimeUtil {
     }
 
     switch (unit) {
-      case 'years': { unit = 'hours'; value = value * 365 * 24; break; }
-      case 'months': { value = value * 30 * 24; unit = 'hours'; break; }
-      case 'weeks': { value = value * 7 * 24; unit = 'hours'; break; }
-      case 'days': { value = value * 24; unit = 'hours'; break; }
+      case 'years': {
+        unit = 'hours';
+        value = value * 365 * 24;
+        break;
+      }
+      case 'months': {
+        value = value * 30 * 24;
+        unit = 'hours';
+        break;
+      }
+      case 'weeks': {
+        value = value * 7 * 24;
+        unit = 'hours';
+        break;
+      }
+      case 'days': {
+        value = value * 24;
+        unit = 'hours';
+        break;
+      }
     }
 
     const duration = Temporal.Duration.from({ [unit]: value });
     if (outputUnit) {
       const resolved = TIME_UNIT_TO_TEMPORAL_UNIT[outputUnit];
       switch (resolved) {
-        case 'years': return Math.trunc(duration.total('hours') / (365 * 24));
-        case 'months': return Math.trunc(duration.total('hours') / (30 * 24));
-        case 'weeks': return Math.trunc(duration.total('hours') / (7 * 24));
-        default: return Math.trunc(duration.total(resolved));
+        case 'years':
+          return Math.trunc(duration.total('hours') / (365 * 24));
+        case 'months':
+          return Math.trunc(duration.total('hours') / (30 * 24));
+        case 'weeks':
+          return Math.trunc(duration.total('hours') / (7 * 24));
+        default:
+          return Math.trunc(duration.total(resolved));
       }
     } else {
       return duration;

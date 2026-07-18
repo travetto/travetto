@@ -5,7 +5,6 @@ import { EnvProp } from '@travetto/runtime';
 
 @Suite()
 class EnvTest {
-
   @Test()
   verifyGet() {
     process.env.name = 'bob';
@@ -46,20 +45,11 @@ class EnvTest {
     process.env.missing = '';
     assert.deepStrictEqual(new EnvProp('missing').object, undefined);
 
-    assert.deepStrictEqual(
-      new EnvProp('age').export({ name: 20, height: 40 }),
-      { age: 'name=20,height=40' }
-    );
+    assert.deepStrictEqual(new EnvProp('age').export({ name: 20, height: 40 }), { age: 'name=20,height=40' });
 
-    assert.deepStrictEqual(
-      new EnvProp('age').export(),
-      { age: 'name=20,height=30' }
-    );
+    assert.deepStrictEqual(new EnvProp('age').export(), { age: 'name=20,height=30' });
 
-    assert.deepStrictEqual(
-      new EnvProp('age').export(undefined),
-      { age: '' }
-    );
+    assert.deepStrictEqual(new EnvProp('age').export(undefined), { age: '' });
   }
 
   @Test()
