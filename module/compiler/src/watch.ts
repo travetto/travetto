@@ -27,7 +27,7 @@ export class CompilerWatcher {
     this.#state = state;
     this.#root = state.manifest.workspace.path;
     this.#queue = new AsyncQueue(signal);
-    signal.addEventListener('abort', () => Object.values(this.#cleanup).forEach(fn => fn?.()));
+    signal.addEventListener('abort', () => Object.values(this.#cleanup).forEach(fn => { fn?.(); }));
   }
 
   async #getWatchIgnores(): Promise<string[]> {
@@ -68,7 +68,7 @@ export class CompilerWatcher {
       this.#state.removeSource(entry.sourceFile); // Ensure we remove it
     }
 
-    return { entry, file: entry?.sourceFile ?? file, action, moduleFile: entry?.moduleFile! };
+    return { entry, file: entry?.sourceFile ?? file, action, moduleFile: entry?.moduleFile??'' };
   }
 
   #isValidFile(file: string): boolean {
@@ -170,10 +170,17 @@ export class CompilerWatcher {
           this.#queue.add(item);
         }
       } catch (out) {
-        if (out instanceof Error && out.message.includes('Events were dropped by the FSEvents client.')) {
-          out = new CompilerReset('FSEvents failure, requires restart');
+        let error: Error;
+        if (out instanceof Error) { 
+          if (out.message.includes('Events were dropped by the FSEvents client.')) {
+            error = new CompilerReset('FSEvents failure, requires restart');
+          } else {
+            error = out;
+          }
+        } else {
+          error = new Error(`${out}`);
         }
-        return this.#queue.throw(out instanceof Error ? out : new Error(`${out} `));
+        return this.#queue.throw(error);
       }
     }, { ignore });
 

@@ -12,6 +12,7 @@
       "!**/resources",
       "!**/DOC.html",
       "!**/README.md",
+      "!archived/**",
       "!related/travetto.github.io/**"
     ]
   }

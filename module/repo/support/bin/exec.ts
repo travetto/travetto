@@ -89,7 +89,7 @@ export class RepoExecUtil {
         const prefix = prefixes[module.sourceFolder] ?? '';
         const listKey = config.progressListKey?.(module) ?? ` * ${module.name}`;
         active.add(listKey);
-        [...active].sort().forEach((text, idx) => activeItems.add({ idx, text }));
+        [...active].sort().forEach((text, idx) => { activeItems.add({ idx, text }); });
 
         const subProcess = operation(module);
         processes.set(module, subProcess);
@@ -108,7 +108,7 @@ export class RepoExecUtil {
         const result = await ExecUtil.getResult(subProcess, { catch: true });
 
         active.delete(listKey);
-        [...active].sort().forEach((text, idx) => activeItems.add({ idx, text }));
+        [...active].sort().forEach((text, idx) => { activeItems.add({ idx, text }); });
         for (let j = active.size; j < workerCount; j++) {
           activeItems.add({ idx: j, text: '' }); // Force update to remove item if needed
         }

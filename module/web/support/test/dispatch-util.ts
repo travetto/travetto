@@ -17,7 +17,9 @@ export class WebTestDispatchUtil {
   static async applyRequestBody(request: WebRequest, toByteArray: boolean = false): Promise<WebRequest<BinaryType>> {
     if (request.body !== undefined) {
       const sample = WebBodyUtil.toBinaryMessage(request);
-      sample.headers.forEach((v, k) => request.headers.set(k, Array.isArray(v) ? v.join(',') : v));
+      sample.headers.forEach((v, k) => {
+        request.headers.set(k, Array.isArray(v) ? v.join(',') : v)
+    });
       if (toByteArray) {
         sample.body = sample.body ?
           await BinaryUtil.toBinaryArray(sample.body) :
@@ -35,7 +37,9 @@ export class WebTestDispatchUtil {
     response.context.httpStatusCode = WebCommonUtil.getStatusCode(response);
 
     if (decompress && BinaryUtil.isBinaryType(result)) {
-      const bufferResult = result = await BinaryUtil.toBinaryArray(result);
+      const bufferResult = await BinaryUtil.toBinaryArray(result);
+      result = bufferResult;
+      
       if (bufferResult.byteLength) {
         try {
           result = await DecompressInterceptor.decompress(

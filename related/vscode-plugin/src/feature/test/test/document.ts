@@ -120,10 +120,10 @@ export class DocumentResultsManager {
     }
     const existing = this.#results[level][key];
     if (existing) {
-      Object.values(existing.styles).forEach(style => style.dispose());
+      Object.values(existing.styles).forEach(style => { style.dispose(); });
       if (isTestState(level, existing)) {
         existing.logStyle.dispose();
-        Object.values(existing.assertStyles).forEach(style => style.dispose());
+        Object.values(existing.assertStyles).forEach(style => { style.dispose(); });
       }
       delete this.#results[level][key];
     }
@@ -156,14 +156,14 @@ export class DocumentResultsManager {
     const base: ResultState<unknown> = {
       status: 'unknown',
       styles: this.#genStyles(level),
-      source: (existing && existing.source)
+      source: !!existing?.source
     };
 
     if (existing) {
-      Object.values(existing.styles).forEach(style => style.dispose());
+      Object.values(existing.styles).forEach(style => { style.dispose(); });
       if (isTestState(level, existing)) {
         existing.logStyle.dispose();
-        Object.values(existing.assertStyles).forEach(style => style.dispose());
+        Object.values(existing.assertStyles).forEach(style => { style.dispose(); });
       }
     }
 
@@ -296,15 +296,17 @@ export class DocumentResultsManager {
   onEvent(event: TestWatchEvent): void {
     switch (event.type) {
       case 'ready':
-      case 'log': return;
-      case 'removeTest': return this.onTestRemove(event);
+      case 'log': break;
+      case 'removeTest': this.onTestRemove(event); break;
       case 'assertion': this.onAssertion(event.assertion); break;
-      case 'suite': return (event.phase === 'before') ?
+      case 'suite': (event.phase === 'before') ?
         this.beforeSuite(event.suite) :
         this.afterSuite(event.suite);
-      case 'test': return (event.phase === 'before') ?
+        break;
+      case 'test': (event.phase === 'before') ?
         this.beforeTest(event.test) :
         this.afterTest(event.test);
+        break;
     }
   }
 }

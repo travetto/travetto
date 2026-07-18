@@ -104,8 +104,7 @@ export class AssertTransformer {
       Object.keys(ts.SyntaxKind)
         .filter(kind => !/^\d+$/.test(kind))
         .filter((kind): kind is keyof typeof OPTOKEN_ASSERT => !/^(Last|First)/.test(kind))
-        .forEach(kind =>
-          OP_TOKEN_TO_NAME.set(ts.SyntaxKind[kind], kind));
+        .forEach(kind => { OP_TOKEN_TO_NAME.set(ts.SyntaxKind[kind], kind); });
     }
 
     const name = OP_TOKEN_TO_NAME.get(key)!;

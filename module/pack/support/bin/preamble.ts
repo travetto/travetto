@@ -13,6 +13,6 @@ if (!process.env.TRV_MODULE && '%%ENV_FILE%%') {
       .split('\n')
       .map(line => line.match(/\s*(?<key>[^ =]+)\s*=\s*(?<value>\S+)/)?.groups)
       .filter(pair => !!pair)
-      .forEach(pair => process.env[pair.key] = pair.value);
+      .forEach(pair => { process.env[pair.key] = pair.value; });
   } catch { }
 }

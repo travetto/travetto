@@ -9,7 +9,7 @@
   "files": {
     "ignoreUnknown": true,
     "includes": [
-      "**",
+      "**",      
       "!**/*.d.ts",
       "!**/fixtures",
       "!**/resources",

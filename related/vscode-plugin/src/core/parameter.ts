@@ -173,7 +173,7 @@ export class ParameterSelector {
         quickPick.show();
       });
     } finally {
-      disposables.forEach(d => d.dispose());
+      disposables.forEach(d => { d.dispose(); });
     }
   }
 
@@ -222,7 +222,6 @@ export class ParameterSelector {
       case 'number': return this.getQuickInput(input);
       case 'boolean': return this.getQuickPickList(input, ['yes', 'no']).then(choice => `${choice === 'yes'}`);
       case 'file': return this.getFile(input);
-      case 'string':
       default: {
         if (input.param.choices) {
           return this.getQuickPickList(input, input.param.choices);

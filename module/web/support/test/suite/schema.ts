@@ -67,7 +67,7 @@ class SchemaAPI {
 
   @Get('/voidAll')
   async voidAllUser() {
-    return Promise.resolve([1, 2, 3].map(() => { }));
+    await Promise.resolve([1, 2, 3]);
   }
 
   @Get('/users')

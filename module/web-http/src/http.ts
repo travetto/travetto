@@ -127,7 +127,7 @@ export class WebHttpUtil {
    */
   static async respondToServerResponse(webResponse: WebResponse, response: HttpResponse): Promise<void> {
     const binaryResponse = new WebResponse<BinaryType>({ context: webResponse.context, ...WebBodyUtil.toBinaryMessage(webResponse) });
-    binaryResponse.headers.forEach((value, key) => response.setHeader(key, value));
+    binaryResponse.headers.forEach((value, key) => { response.setHeader(key, value); });
     response.statusCode = WebCommonUtil.getStatusCode(binaryResponse);
 
     if (binaryResponse.body) {
