@@ -13,7 +13,6 @@ import type { OpenApiService } from './service.ts';
 @Controller('/')
 @ConfigureInterceptor(CorsInterceptor, { origins: ['*'] })
 export class OpenApiController {
-
   @Inject()
   service: OpenApiService;
 

@@ -10,37 +10,55 @@ import { PackOperation } from './operation.ts';
 import { PackUtil } from './util.ts';
 
 export class DockerPackOperation {
-
   static getDockerTags(config: DockerPackConfig): string[] {
-    return (config.dockerTag ?? []).map(tag => config.dockerRegistry ? `${config.dockerRegistry}/${config.dockerName}:${tag}` : `${config.dockerName}:${tag}`);
+    return (config.dockerTag ?? []).map(tag =>
+      config.dockerRegistry ? `${config.dockerRegistry}/${config.dockerName}:${tag}` : `${config.dockerName}:${tag}`
+    );
   }
 
   /**
    * Detect image os
    */
-  static async* detectDockerImageOs(config: DockerPackConfig): AsyncIterable<string[]> {
+  static async *detectDockerImageOs(config: DockerPackConfig): AsyncIterable<string[]> {
     // Read os before writing
-    config.dockerRuntime.os = await PackUtil.runCommand(
-      ['docker', 'run', '--rm', '--entrypoint', '/bin/sh', config.dockerImage, '-c', 'cat /etc/*release*']
-    ).then(out => {
+    config.dockerRuntime.os = await PackUtil.runCommand([
+      'docker',
+      'run',
+      '--rm',
+      '--entrypoint',
+      '/bin/sh',
+      config.dockerImage,
+      '-c',
+      'cat /etc/*release*'
+    ]).then(out => {
       const found = out.toLowerCase().match(/\b(?:debian|alpine|centos)\b/)?.[0];
       switch (found) {
-        case 'debian': case 'alpine': case 'centos': return found;
-        default: return 'unknown';
+        case 'debian':
+        case 'alpine':
+        case 'centos':
+          return found;
+        default:
+          return 'unknown';
       }
     });
-    yield* PackOperation.title(config, cliTpl`${{ title: 'Detected Image OS' }} ${{ param: config.dockerImage }} as ${{ param: config.dockerRuntime.os }}`);
+    yield* PackOperation.title(
+      config,
+      cliTpl`${{ title: 'Detected Image OS' }} ${{ param: config.dockerImage }} as ${{ param: config.dockerRuntime.os }}`
+    );
   }
 
   /**
    * Write Docker File
    */
-  static async* writeDockerFile(config: DockerPackConfig): AsyncIterable<string[]> {
+  static async *writeDockerFile(config: DockerPackConfig): AsyncIterable<string[]> {
     const dockerFile = path.resolve(config.buildDirectory, 'Dockerfile');
     const { factory } = await Runtime.importFrom<DockerPackFactoryModule>(config.dockerFactory);
     const content = (await factory(config)).trim();
 
-    yield* PackOperation.title(config, cliTpl`${{ title: 'Generating Docker File' }} ${{ path: dockerFile }} ${{ param: config.dockerFactory }}`);
+    yield* PackOperation.title(
+      config,
+      cliTpl`${{ title: 'Generating Docker File' }} ${{ path: dockerFile }} ${{ param: config.dockerFactory }}`
+    );
 
     if (config.ejectFile) {
       yield* ActiveShellCommand.createFile(dockerFile, content.split(/\n/));
@@ -52,7 +70,7 @@ export class DockerPackOperation {
   /**
    * Pull Docker Base Image
    */
-  static async* pullDockerBaseImage(config: DockerPackConfig): AsyncIterable<string[]> {
+  static async *pullDockerBaseImage(config: DockerPackConfig): AsyncIterable<string[]> {
     const command = ['docker', 'pull', config.dockerImage];
 
     yield* PackOperation.title(config, cliTpl`${{ title: 'Pulling Docker Base Image' }} ${{ param: config.dockerImage }}`);
@@ -67,11 +85,13 @@ export class DockerPackOperation {
   /**
    * Building Docker Container
    */
-  static async* buildDockerContainer(config: DockerPackConfig): AsyncIterable<string[]> {
+  static async *buildDockerContainer(config: DockerPackConfig): AsyncIterable<string[]> {
     const cmd = [
-      'docker', 'build',
+      'docker',
+      'build',
       ...(config.dockerBuildPlatform ? ['--platform', config.dockerBuildPlatform] : []),
-      ...DockerPackOperation.getDockerTags(config).flatMap(tag => ['-t', tag]), '.'
+      ...DockerPackOperation.getDockerTags(config).flatMap(tag => ['-t', tag]),
+      '.'
     ];
 
     yield* PackOperation.title(config, cliTpl`${{ title: 'Building Docker Container' }} ${{ param: config.dockerTag?.join(',') }}`);
@@ -90,7 +110,7 @@ export class DockerPackOperation {
   /**
    * Push Docker Container
    */
-  static async* pushDockerContainer(config: DockerPackConfig): AsyncIterable<string[]> {
+  static async *pushDockerContainer(config: DockerPackConfig): AsyncIterable<string[]> {
     if (!config.dockerPush) {
       return;
     }

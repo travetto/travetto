@@ -79,7 +79,8 @@ export class ApiSpecConfig {
       this.persist ??= Runtime.localDevelopment;
     }
     if (this.persist) {
-      if (!/[.](json|ya?ml)$/.test(this.output)) { // Assume a folder
+      if (!/[.](json|ya?ml)$/.test(this.output)) {
+        // Assume a folder
         this.output = path.resolve(this.output, 'openapi.yml');
       }
     }

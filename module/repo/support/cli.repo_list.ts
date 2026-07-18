@@ -11,7 +11,6 @@ const write = (line: string): Promise<void> => new Promise(resolve => process.st
  */
 @CliCommand()
 export class ListModuleCommand implements CliCommandShape {
-
   /** Only show changed modules */
   changed = false;
 
@@ -31,7 +30,6 @@ export class ListModuleCommand implements CliCommandShape {
   toHash?: string;
 
   async main(): Promise<void> {
-
     const modules = await CliModuleUtil.findModules(this.changed ? 'changed' : 'workspace', this.fromHash, this.toHash);
     switch (this.format) {
       case 'list': {
@@ -42,11 +40,12 @@ export class ListModuleCommand implements CliCommandShape {
       }
       case 'json': {
         const outputMap = CliModuleUtil.getDependencyGraph(modules);
-        await write(JSONUtil.toUTF8(
-          Object.entries(outputMap)
-            .map(([name, children]) => ({ name, children, workspace: RuntimeIndex.getModule(name)?.workspace })),
-          { indent: 2 }
-        ));
+        await write(
+          JSONUtil.toUTF8(
+            Object.entries(outputMap).map(([name, children]) => ({ name, children, workspace: RuntimeIndex.getModule(name)?.workspace })),
+            { indent: 2 }
+          )
+        );
         break;
       }
       case 'graph': {

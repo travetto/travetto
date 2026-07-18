@@ -1,13 +1,30 @@
 import type {
-  SchemaObject, SchemasObject, ParameterObject, OperationObject,
-  RequestBodyObject, TagObject, PathsObject, PathItemObject
+  SchemaObject,
+  SchemasObject,
+  ParameterObject,
+  OperationObject,
+  RequestBodyObject,
+  TagObject,
+  PathsObject,
+  PathItemObject
 } from 'openapi3-ts/oas31';
 
-import { type EndpointConfig, type ControllerConfig, type EndpointParameterConfig, type ControllerVisitor, HTTP_METHODS } from '@travetto/web';
+import {
+  type EndpointConfig,
+  type ControllerConfig,
+  type EndpointParameterConfig,
+  type ControllerVisitor,
+  HTTP_METHODS
+} from '@travetto/web';
 import { RuntimeError, castTo, type Class, describeFunction } from '@travetto/runtime';
 import {
-  type SchemaFieldConfig, type SchemaClassConfig, SchemaNameResolver,
-  type SchemaInputConfig, SchemaRegistryIndex, type SchemaBasicType, type SchemaParameterConfig
+  type SchemaFieldConfig,
+  type SchemaClassConfig,
+  SchemaNameResolver,
+  type SchemaInputConfig,
+  SchemaRegistryIndex,
+  type SchemaBasicType,
+  type SchemaParameterConfig
 } from '@travetto/schema';
 
 import type { ApiSpecConfig } from './config.ts';
@@ -45,7 +62,12 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Convert schema to a set of dotted parameters
    */
-  #schemaToDotParams(location: 'query' | 'header', input: SchemaInputConfig, prefix: string = '', rootField: SchemaInputConfig = input): ParameterObject[] {
+  #schemaToDotParams(
+    location: 'query' | 'header',
+    input: SchemaInputConfig,
+    prefix: string = '',
+    rootField: SchemaInputConfig = input
+  ): ParameterObject[] {
     if (!SchemaRegistryIndex.has(input.type)) {
       throw new RuntimeError(`Unknown class, not registered as a schema: ${input.type.Ⲑid}`);
     }
@@ -55,17 +77,19 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     for (const sub of Object.values(fields)) {
       const name = sub.name;
       if (SchemaRegistryIndex.has(sub.type)) {
-        const suffix = (sub.array) ? '[]' : '';
+        const suffix = sub.array ? '[]' : '';
         params.push(...this.#schemaToDotParams(location, sub, prefix ? `${prefix}.${name}${suffix}` : `${name}${suffix}.`, rootField));
       } else {
         params.push({
           name: `${prefix}${name}`,
           description: sub.description,
-          schema: sub.array ? {
-            type: 'array',
-            ...this.#getType(sub)
-          } : this.#getType(sub),
-          required: (rootField?.required?.active !== false && sub.required?.active !== false),
+          schema: sub.array
+            ? {
+                type: 'array',
+                ...this.#getType(sub)
+              }
+            : this.#getType(sub),
+          required: rootField?.required?.active !== false && sub.required?.active !== false,
           in: location
         });
       }
@@ -77,7 +101,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Get the type for a given class
    */
   #getType(inputOrClass: SchemaInputConfig | Class): Record<string, unknown> {
-    let field: { type: Class, precision?: [number, number | undefined] };
+    let field: { type: Class; precision?: [number, number | undefined] };
     if (!isInputConfig(inputOrClass)) {
       field = { type: inputOrClass };
     } else {
@@ -92,7 +116,9 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       out.$ref = `${DEFINITION}/${id}`;
     } else {
       switch (field.type) {
-        case String: out.type = 'string'; break;
+        case String:
+          out.type = 'string';
+          break;
         case castTo(BigInt):
           out.type = 'integer';
           out.format = 'int64';
@@ -110,7 +136,9 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
           out.format = 'date-time';
           out.type = 'string';
           break;
-        case Boolean: out.type = 'boolean'; break;
+        case Boolean:
+          out.type = 'boolean';
+          break;
         default:
           out.type = 'object';
           break;
@@ -244,7 +272,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     } else if (body.binary) {
       return {
         content: {
-          [mime ?? 'application/octet-stream']: { schema: { type: 'string', format: 'binary' } },
+          [mime ?? 'application/octet-stream']: { schema: { type: 'string', format: 'binary' } }
         },
         description: 'Raw binary data'
       };
@@ -266,11 +294,11 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Process endpoint parameter
    */
-  #processEndpointParam(endpoint: EndpointConfig, param: EndpointParameterConfig, input: SchemaParameterConfig): (
-    { requestBody: RequestBodyObject } |
-    { parameters: ParameterObject[] } |
-    undefined
-  ) {
+  #processEndpointParam(
+    endpoint: EndpointConfig,
+    param: EndpointParameterConfig,
+    input: SchemaParameterConfig
+  ): { requestBody: RequestBodyObject } | { parameters: ParameterObject[] } | undefined {
     const complex = input.type && SchemaRegistryIndex.has(input.type);
 
     if (param.location) {
@@ -360,16 +388,10 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       paths: Object.fromEntries(
         Object.entries(this.#paths)
           .toSorted(([a], [b]) => a.localeCompare(b))
-          .map(([key, value]) => [key, Object.fromEntries(
-            Object.entries(value)
-              .toSorted(([a], [b]) => a.localeCompare(b))
-          )])
+          .map(([key, value]) => [key, Object.fromEntries(Object.entries(value).toSorted(([a], [b]) => a.localeCompare(b)))])
       ),
       components: {
-        schemas: Object.fromEntries(
-          Object.entries(this.#schemas)
-            .toSorted(([a], [b]) => a.localeCompare(b))
-        )
+        schemas: Object.fromEntries(Object.entries(this.#schemas).toSorted(([a], [b]) => a.localeCompare(b)))
       }
     };
   }

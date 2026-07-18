@@ -59,10 +59,10 @@ export type ShellCommandProvider = {
   comment(message: string): string[];
   echo(text: string): string[];
   zip(output: string): string[];
-  script(lines: string[], chdir?: boolean): { ext: string, contents: string[] };
+  script(lines: string[], chdir?: boolean): { ext: string; contents: string[] };
 };
 
-export type DockerPackFactory = (config: DockerPackConfig) => (string | Promise<string>);
+export type DockerPackFactory = (config: DockerPackConfig) => string | Promise<string>;
 export type DockerPackFactoryModule = { factory: DockerPackFactory };
 
 export type CoreRollupConfig = {

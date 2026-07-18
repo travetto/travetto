@@ -8,7 +8,7 @@ import { JSONUtil, FileLoader } from '@travetto/runtime';
 import type { CoreRollupConfig } from '../../src/types.ts';
 
 function errorString(error: unknown): string {
-  return error instanceof Error ? error.stack ?? error.toString() : JSONUtil.toUTF8(error);
+  return error instanceof Error ? (error.stack ?? error.toString()) : JSONUtil.toUTF8(error);
 }
 // Pulled from https://github.com/Azure/azure-sdk-for-js/blob/main/common/tools/dev-tool/src/config/rollup.base.config.ts#L128
 export function travettoSourcemaps(config: CoreRollupConfig): Plugin {
@@ -30,11 +30,9 @@ export function travettoSourcemaps(config: CoreRollupConfig): Plugin {
             return null;
           }
           const loader = new FileLoader([path.dirname(id)]);
-          const map = await loader.readUTF8(mapPath)
-            .then(value => value.startsWith('{') ?
-              JSONUtil.fromUTF8<SourceMapInput>(value) :
-              JSONUtil.fromBase64<SourceMapInput>(value)
-            );
+          const map = await loader
+            .readUTF8(mapPath)
+            .then(value => (value.startsWith('{') ? JSONUtil.fromUTF8<SourceMapInput>(value) : JSONUtil.fromBase64<SourceMapInput>(value)));
           return { code, map };
         }
         return { code, map: null };
@@ -42,6 +40,6 @@ export function travettoSourcemaps(config: CoreRollupConfig): Plugin {
         this.warn({ message: errorString(error), id });
         return null;
       }
-    },
+    }
   };
 }

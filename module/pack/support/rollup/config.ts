@@ -10,11 +10,10 @@ import type { CoreRollupConfig } from '../../src/types.ts';
 
 function getFilesFromModule(module: ManifestModule): string[] {
   return [
-    ...module.files.$index ?? [],
-    ...module.files.src ?? [],
+    ...(module.files.$index ?? []),
+    ...(module.files.src ?? []),
     ...(module.files.bin ?? []).filter(file => !(/bin\/trv[.]js$/.test(file[0]) && module.name === '@travetto/cli')),
-    ...(module.files.support ?? [])
-      .filter(file => !/support\/(test|doc|pack)/.test(file[0]))
+    ...(module.files.support ?? []).filter(file => !/support\/(test|doc|pack)/.test(file[0]))
   ]
     .filter(([, type]) => type === 'ts' || type === 'js' || type === 'json')
     .filter(([, , , role]) => (role ?? 'std') === 'std') // Only include standard files
@@ -26,8 +25,7 @@ export function getOutput(): OutputOptions {
   const mainFile = process.env.BUNDLE_MAIN_FILE!;
   return {
     format: 'module',
-    sourcemapPathTransform: (source, map): string =>
-      Runtime.stripWorkspacePath(path.resolve(path.dirname(map), source)),
+    sourcemapPathTransform: (source, map): string => Runtime.stripWorkspacePath(path.resolve(path.dirname(map), source)),
     sourcemap: new EnvProp('BUNDLE_SOURCEMAP').bool ?? false,
     sourcemapExcludeSources: !(new EnvProp('BUNDLE_SOURCES').bool ?? false),
     compact: new EnvProp('BUNDLE_COMPRESS').bool ?? true,
@@ -49,9 +47,7 @@ export function getFiles(entry?: string): string[] {
 }
 
 export function getIgnoredModules(): ManifestModule[] {
-  return [...RuntimeIndex.getModuleList('all')]
-    .map(name => RuntimeIndex.getManifestModule(name))
-    .filter(module => !module.production);
+  return [...RuntimeIndex.getModuleList('all')].map(name => RuntimeIndex.getManifestModule(name)).filter(module => !module.production);
 }
 
 export function getMinifyConfig(): Parameters<typeof terser>[0] {
@@ -63,7 +59,7 @@ export function getMinifyConfig(): Parameters<typeof terser>[0] {
     compress: {},
     output: {
       shebang: false,
-      comments: false,
+      comments: false
     }
   };
 }
@@ -79,7 +75,12 @@ export function getCoreConfig(): CoreRollupConfig {
   const external = new EnvProp('BUNDLE_EXTERNAL').list ?? [];
 
   return {
-    output, entry, files, envFile, minify, external,
-    ignore: new Set([...ignoreModules.map(module => module.name), ...ignoreFiles]),
+    output,
+    entry,
+    files,
+    envFile,
+    minify,
+    external,
+    ignore: new Set([...ignoreModules.map(module => module.name), ...ignoreFiles])
   };
 }

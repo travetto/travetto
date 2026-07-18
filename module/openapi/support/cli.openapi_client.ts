@@ -35,25 +35,35 @@ export class OpenApiClientCommand implements CliCommandShape {
     this.output = path.resolve(this.output);
     this.input = path.resolve(this.input);
 
-    const subProcess = cp.spawn('docker', [
-      'run',
-      '--rm',
-      '-i',
-      '-v', `${this.output}:/workspace`,
-      '-v', `${path.dirname(this.input)}:/input`,
-      '--user', `${process.geteuid?.() ?? 0}:${process.getgid?.() ?? 0}`,
-      this.dockerImage,
-      // Parameters
-      'generate',
-      '--skip-validate-spec',
-      '--remove-operation-id-prefix',
-      '-g', format,
-      '-o', '/workspace',
-      '-i', `/input/${path.basename(this.input)}`,
-      ...(this.properties.length ? ['--additional-properties', this.properties.join(',')] : [])
-    ], {
-      stdio: 'inherit'
-    });
+    const subProcess = cp.spawn(
+      'docker',
+      [
+        'run',
+        '--rm',
+        '-i',
+        '-v',
+        `${this.output}:/workspace`,
+        '-v',
+        `${path.dirname(this.input)}:/input`,
+        '--user',
+        `${process.geteuid?.() ?? 0}:${process.getgid?.() ?? 0}`,
+        this.dockerImage,
+        // Parameters
+        'generate',
+        '--skip-validate-spec',
+        '--remove-operation-id-prefix',
+        '-g',
+        format,
+        '-o',
+        '/workspace',
+        '-i',
+        `/input/${path.basename(this.input)}`,
+        ...(this.properties.length ? ['--additional-properties', this.properties.join(',')] : [])
+      ],
+      {
+        stdio: 'inherit'
+      }
+    );
 
     const result = await ExecUtil.getResult(subProcess);
 

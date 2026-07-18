@@ -10,18 +10,16 @@ import { PackageUtil, type IndexedModule } from '@travetto/manifest';
 import { PackOperation } from './bin/operation.ts';
 import { PackUtil } from './bin/util.ts';
 
-export type PackOperationShape<T> = ((config: T) => AsyncIterable<string[]>);
+export type PackOperationShape<T> = (config: T) => AsyncIterable<string[]>;
 
 @Schema()
 export abstract class BasePackCommand implements CliCommandShape {
-
   static get entryPoints(): string[] {
     return RuntimeIndex.find({
       module: module => module.production,
       folder: folder => folder === 'support',
       file: file => file.sourceFile.includes('entry.')
-    })
-      .map(file => file.import.replace(/[.][^.]+s$/, ''));
+    }).map(file => file.import.replace(/[.][^.]+s$/, ''));
   }
 
   /** Workspace for building */
@@ -105,14 +103,14 @@ export abstract class BasePackCommand implements CliCommandShape {
       PackOperation.copyMonoRepoResources,
       PackOperation.copyResources,
       PackOperation.writeManifest,
-      PackOperation.bundle,
+      PackOperation.bundle
     ];
   }
 
   /**
    * Run all operations
    */
-  async * runOperations(): AsyncIterable<string> {
+  async *runOperations(): AsyncIterable<string> {
     for (const operation of this.getOperations()) {
       for await (const message of operation(this)) {
         yield message.join(' ');
@@ -140,7 +138,7 @@ export abstract class BasePackCommand implements CliCommandShape {
 
     // Update entry points
     const parsed = CliParseUtil.getState(this);
-    this.entryArguments = [...this.entryArguments ?? [], ...args, ...parsed?.unknown ?? []];
+    this.entryArguments = [...(this.entryArguments ?? []), ...args, ...(parsed?.unknown ?? [])];
     this.module ||= Runtime.main.name;
     this.mainName ??= path.basename(this.module);
     this.mainFile = `${this.mainName}.js`;

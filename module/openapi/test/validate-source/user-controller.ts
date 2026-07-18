@@ -7,7 +7,6 @@ import type { User, UserSearch } from './model.ts';
  */
 @Controller('/user')
 export class UserController {
-
   /**
    * Get user by full name
    * @param name User name
@@ -47,15 +46,11 @@ export class UserController {
    * @param id User id
    */
   @Put('/:id')
-  async updateUser(@PathParam() id: number, @Body() user: User): Promise<void> {
-
-  }
+  async updateUser(@PathParam() id: number, @Body() user: User): Promise<void> {}
   /**
    * Delete user by id
    * @param id User id
    */
   @Delete('/:id')
-  async removeUser(@PathParam() id: number): Promise<void> {
-
-  }
+  async removeUser(@PathParam() id: number): Promise<void> {}
 }

@@ -9,8 +9,8 @@ import { BasePackCommand, type PackOperationShape } from './pack.base.ts';
 import type { DockerPackConfig } from '../src/types.ts';
 
 const NODE_MAJOR = process.version.match(/\d+/)?.[0] ?? '22';
-const asNumber = (input?: string): number | undefined => (!input || Number.isNaN(+input)) ? undefined : +input;
-const asString = (input?: string): string | undefined => (input && asNumber(input)) ? input : undefined;
+const asNumber = (input?: string): number | undefined => (!input || Number.isNaN(+input) ? undefined : +input);
+const asString = (input?: string): string | undefined => (input && asNumber(input) ? input : undefined);
 
 /**
  * Build container-ready artifacts and optionally publish Docker images.
@@ -38,7 +38,8 @@ export class PackDockerCommand extends BasePackCommand {
   dockerRuntimePackages: string[] = [];
   /**  Docker Image Port */
   @CliFlag({ short: 'dp', envVars: ['PACK_DOCKER_PORT'] })
-  @Min(1) @Max(65536)
+  @Min(1)
+  @Max(65536)
   dockerPort: number[] = [];
 
   // Publish flags
@@ -113,10 +114,7 @@ export class PackDockerCommand extends BasePackCommand {
       DockerPackOperation.pullDockerBaseImage,
       DockerPackOperation.detectDockerImageOs,
       DockerPackOperation.writeDockerFile,
-      ...this.dockerStageOnly ? [] : [
-        DockerPackOperation.buildDockerContainer,
-        DockerPackOperation.pushDockerContainer
-      ]
+      ...(this.dockerStageOnly ? [] : [DockerPackOperation.buildDockerContainer, DockerPackOperation.pushDockerContainer])
     ];
   }
 }

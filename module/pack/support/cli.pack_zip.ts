@@ -11,7 +11,6 @@ import { BasePackCommand, type PackOperationShape } from './pack.base.ts';
  */
 @CliCommand()
 export class PackZipCommand extends BasePackCommand {
-
   finalize(forHelp?: boolean): void {
     if (forHelp) {
       this.output = '<module>.zip';
@@ -20,9 +19,6 @@ export class PackZipCommand extends BasePackCommand {
   }
 
   getOperations(): PackOperationShape<this>[] {
-    return [
-      ...super.getOperations(),
-      PackOperation.compress
-    ];
+    return [...super.getOperations(), PackOperation.compress];
   }
 }

@@ -14,7 +14,6 @@ import { DependencyRegistryIndex } from '@travetto/di';
  */
 @CliCommand()
 export class OpenApiSpecCommand implements CliCommandShape {
-
   /** Output files */
   output?: string;
 

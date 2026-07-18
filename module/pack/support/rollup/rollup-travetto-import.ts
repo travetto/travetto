@@ -6,7 +6,7 @@ import magicString from 'magic-string';
 import { GLOBAL_IMPORT } from './rollup-travetto-entry.ts';
 import type { CoreRollupConfig } from '../../src/types.ts';
 
-type TNode = AstNode & { source?: { type: string }, callee?: TNode & { name?: string }, args?: TNode[] };
+type TNode = AstNode & { source?: { type: string }; callee?: TNode & { name?: string }; args?: TNode[] };
 
 /**
  * Handles importing via non-static strings (e.g. ClassSource)

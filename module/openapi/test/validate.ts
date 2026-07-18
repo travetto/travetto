@@ -19,15 +19,7 @@ class OpenApiSuite {
 
     assert.deepStrictEqual(
       [...Object.keys(spec.paths ?? {})].toSorted(),
-      [
-        '/relationship/{name}',
-        '/relationship',
-        '/relationship/{id}',
-        '/user/{name}',
-        '/user/age/{age}',
-        '/user',
-        '/user/{id}'
-      ].toSorted()
+      ['/relationship/{name}', '/relationship', '/relationship/{id}', '/user/{name}', '/user/age/{age}', '/user', '/user/{id}'].toSorted()
     );
 
     assert(spec.components?.schemas?.Paging);

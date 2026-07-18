@@ -46,21 +46,18 @@ class TestCont {
   }
 
   @Patch('/who')
-  async updateWho(who?: { name: string, color: string }) {
+  async updateWho(who?: { name: string; color: string }) {
     return [who?.color];
   }
 
   @Delete('/:id')
-  async remove(id: string) {
-  }
+  async remove(id: string) {}
 
   @Delete('/all/:id')
-  async removeAll(id: string, match: TestUser) {
-  }
+  async removeAll(id: string, match: TestUser) {}
 
   @Head('/all/:id')
-  async headAll(id: string, match?: TestUser) {
-  }
+  async headAll(id: string, match?: TestUser) {}
 
   @Get('/download')
   async download(size?: number) {
@@ -69,9 +66,7 @@ class TestCont {
 
   @IsPrivate()
   @Delete('/random')
-  async ignore(): Promise<void> {
-
-  }
+  async ignore(): Promise<void> {}
 }
 
 @IsPrivate()
@@ -85,7 +80,6 @@ class IgnoredCont {
 
 @Suite()
 class GenerateSuite {
-
   @BeforeAll()
   async init() {
     await Registry.init();
@@ -210,10 +204,7 @@ class GenerateSuite {
           type: 'string'
         }
       },
-      required: [
-        'name',
-        'color'
-      ],
+      required: ['name', 'color']
     });
   }
 
@@ -382,7 +373,6 @@ class GenerateSuite {
       },
       description: ''
     });
-
   }
 
   @Test()
