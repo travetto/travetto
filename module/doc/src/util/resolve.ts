@@ -70,6 +70,6 @@ export class DocResolveUtil {
     props.startRe ??= (type ? new RegExp(`^(export)?\\s*(interface|class)\\s+${RegExp.escape(type.name)}\\b`) : undefined);
     props.language ??= (type ? 'typescript' : undefined);
     props.endRe ??= (type ? /^[}]/ : undefined);
-    props.title ??= typeof props.src == 'function' ? props.src.name.replace(/^[$]/, '') : undefined;
+    props.title ??= typeof props.src === 'function' ? props.src.name.replace(/^[$]/, '') : undefined;
   }
 }

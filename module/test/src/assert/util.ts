@@ -42,7 +42,7 @@ export class AssertUtil {
     const frames = Util.stackTraceToParts(error.stack ?? new Error().stack!)
       .map(frame => {
         const entry = RuntimeIndex.getEntry(frame.filename);
-        return { ...frame, import: entry?.import!, line: entry?.type === 'ts' ? frame.line : 1 };
+        return { ...frame, import: entry?.import ?? undefined!, line: entry?.type === 'ts' ? frame.line : 1 };
       });
 
     return frames.find(frame => frame.import);

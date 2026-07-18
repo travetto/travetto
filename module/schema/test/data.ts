@@ -116,7 +116,7 @@ class DataUtilTests {
     assert(DataUtil.deepAssign({ a: 1 }, { a: '5' }, 'coerce').a === 5);
     assert(DataUtil.deepAssign({ a: '1' }, { a: 5 }, 'coerce').a === '5');
     // @ts-expect-error
-    assert(isNaN(DataUtil.deepAssign({ a: 1 }, { a: true }, 'coerce').a));
+    assert(Number.isNaN(DataUtil.deepAssign({ a: 1 }, { a: true }, 'coerce').a));
     // @ts-expect-error
     assert(DataUtil.deepAssign({ a: true }, { a: null }, 'coerce').a === null);
     // @ts-expect-error
@@ -213,6 +213,7 @@ class DataUtilTests {
 
     assert(DataUtil.isPrimitive(new Date()));
     assert(DataUtil.isPrimitive(/./));
+    // biome-ignore lint/complexity/useRegexLiterals: Testing fully constructed vs literal Regexes
     assert(DataUtil.isPrimitive(new RegExp('.')));
     assert(!DataUtil.isPrimitive(Function));
     assert(!DataUtil.isPrimitive(class { }));

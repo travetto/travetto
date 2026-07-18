@@ -42,7 +42,7 @@ export class DocRunUtil {
 
   /** Build working directory from config */
   static workingDirectory(config: RunConfig): string {
-    return path.resolve(config.module ? RuntimeIndex.getModule(config.module)?.sourcePath! : Runtime.mainSourcePath);
+    return path.resolve(config.module ? RuntimeIndex.getModule(config.module)?.sourcePath ?? undefined! : Runtime.mainSourcePath);
   }
 
   /**

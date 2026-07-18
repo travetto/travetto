@@ -1,4 +1,4 @@
-import { Runtime } from '@travetto/runtime';
+import { Runtime, type Any } from '@travetto/runtime';
 
 import type { WebSecureKeyPair } from './types.ts';
 
@@ -12,7 +12,7 @@ export class WebTlsUtil {
    * @param subj The subject for the app
    */
   static async generateKeyPair(subj = { C: 'US', ST: 'CA', O: 'TRAVETTO', OU: 'WEB', CN: 'DEV' }): Promise<WebSecureKeyPair> {
-    let forge;
+    let forge : Any;
 
     try {
       forge = (await import('node-forge')).default;

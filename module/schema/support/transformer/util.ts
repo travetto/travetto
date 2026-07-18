@@ -332,7 +332,7 @@ class ${uniqueId} extends ${type.mappedClassName} {
   static findInnerReturnMethod(state: TransformerState, node: ts.MethodDeclaration, methodName: string): ts.MethodDeclaration | undefined {
     // Process returnType
     const { type } = this.unwrapType(state.resolveReturnType(node));
-    let cls;
+    let cls:ts.Type|ts.ClassDeclaration|undefined;
     switch (type?.key) {
       case 'managed': {
         const [decorator] = DeclarationUtil.getDeclarations(type.original!);

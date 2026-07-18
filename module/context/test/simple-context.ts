@@ -51,7 +51,7 @@ class VerifyContext {
         const end = asyncHooks.executionAsyncId();
 
         if (this.context.get('name') !== `test-${i}`) {
-          throw new Error(`Didn\'t match: ${start} - ${end}`);
+          throw new Error(`Didn't match: ${start} - ${end}`);
         }
       }
     );

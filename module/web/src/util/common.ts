@@ -33,7 +33,7 @@ const UNIT_MAPPING: Record<string, number> = {
 export class WebCommonUtil {
   static #convert(rule: string): RegExp {
     const core = (rule.endsWith('/*') || !rule.includes('/')) ?
-      `${rule.replace(/[/].{0,20}$/, '')}\/.*` : rule;
+      `${rule.replace(/[/].{0,20}$/, '')}/.*` : rule;
     return new RegExp(`^${core}[ ]{0,10}(;|$)`);
   }
 

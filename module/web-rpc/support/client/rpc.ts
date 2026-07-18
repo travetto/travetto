@@ -1,13 +1,13 @@
 type MethodKeys<C extends {}> = {
   [METHOD in keyof C]: C[METHOD] extends Function ? METHOD : never
 }[keyof C];
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type PromiseFn = (...args: any) => Promise<unknown>;
+
+// biome-ignore lint/suspicious/noExplicitAny: Type safety for multiple environments (web, node)
+type Any = any;
+type PromiseFn = (...args: Any) => Promise<unknown>;
 type PromiseResult<V extends PromiseFn> = Awaited<ReturnType<V>>;
 
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const triggerBrowserRedirect = (world: any, url: URL): boolean => {
+const triggerBrowserRedirect = (world: Any, url: URL): boolean => {
   const location = world?.window?.location;
   if (location) {
     location.href = url.toString();
@@ -292,7 +292,7 @@ export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]):
         throw new Error(`Unknown content type: ${contentType}`);
       }
     } else {
-      let responseObject;
+      let responseObject: T | Response;
       if (contentType === 'application/json') {
         const text = await resolved.text();
         responseObject = await request.consumeJSON!(text);
@@ -308,7 +308,7 @@ export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]):
 
 export function clientFactory<T extends Record<string, {}>>(): RpcClientFactory<T> {
   // @ts-ignore
-  return function (request, decorate) {
+  return (request, decorate) => {
     const client: RpcRequest = {
       consumeJSON,
       consumeError,
@@ -330,19 +330,20 @@ export function clientFactory<T extends Record<string, {}>>(): RpcClientFactory<
               ...client,
               core: buildRequest(client.core!, controller, endpoint)
             };
-            return cache[`${controller}/${endpoint}`] ??= Object.defineProperties(
+            const key = `${controller}/${endpoint}`;
+            cache[key] ??= Object.defineProperties(
               invokeFetch.bind(null, final),
               Object.fromEntries(
                 Object.entries(decorate?.(final) ?? {}).map(([key, value]) => [key, { value }])
               )
             );
+            return cache[key];
           }
         })
     });
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function withConfigFactoryDecorator(request: RpcRequest) {
   return {
     withConfig<V extends PromiseFn>(this: V, extra: Partial<RpcRequest['core']>, ...params: Parameters<V>): Promise<PromiseResult<V>> {

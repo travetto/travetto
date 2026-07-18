@@ -76,7 +76,7 @@ export class DiagnosticManager {
     TestModelUtil.countTestResult(summary, tests);
 
     const status = TestModelUtil.computeTestStatus(summary);
-    this.setStatus(`Tests \$(pass-filled) ${summary.passed} \$(alert) ${summary.failed + summary.errored}`, status);
+    this.setStatus(`Tests $(pass-filled) ${summary.passed} $(alert) ${summary.failed + summary.errored}`, status);
   }
 
   afterTest(test: TestResult): void {

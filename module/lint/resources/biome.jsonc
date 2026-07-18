@@ -72,6 +72,7 @@
         "noVar": "error",
         "noTsIgnore": "off",
         "noConfusingVoidType": "off",
+        "noEmptyInterface": "off"
       }
     }
   },
@@ -94,19 +95,18 @@
   "overrides": [
     {
       "includes": [
-        "**/test/**/*.ts*",
-        "**/support/test/**/*.ts*",
+        "**/test/**/*.ts",
+        "**/support/test/**/*.ts",
         "global-test/**",
-        "**/doc/**/*.ts*",
-        "**/sample-*.tsx",
-        "**/doc/**/*.html"
       ],
       "linter": {
         "rules": {
-          "a11y": "off",
           "correctness": {
             "noUnusedVariables": "off",
             "noUnusedFunctionParameters": "off"
+          },
+          "suspicious": {
+            "noSelfCompare": "off"
           }
         }
       }

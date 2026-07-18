@@ -134,7 +134,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     try {
       const result = await this.client.query(query);
 
-      if (result.Count && result.Items && result.Items[0]) {
+      if (result.Count && result.Items?.[0]) {
         return result.Items[0].id.S!;
       }
       throw new NotFoundError(`${cls.name} Index=${idx}`, computed.getKey({ sort: true }));
@@ -337,7 +337,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       Key: { id: DynamoDBUtil.toValue(id) }
     });
 
-    if (result && result.Item && result.Item.body) {
+    if (result?.Item?.body) {
       return DynamoDBUtil.loadAndCheckExpiry(cls, result.Item.body.S!);
     }
     throw new NotFoundError(cls, id);
@@ -459,7 +459,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       output.push(...items);
     }
 
-    let nextOffset;
+    let nextOffset: string | undefined;
     if (output.length) {
       const last: T = output.at(-1)!;
       const computed = ModelIndexedComputedIndex.get(idx, last).validate();

@@ -174,7 +174,7 @@ export class TransformerState implements State {
     const example = DocUtil.readExample(type);
     const module = file ? moduleImport : undefined;
     const name = identifier ?
-      identifier.escapedText?.toString()! :
+      identifier.escapedText?.toString() :
       undefined;
 
     if (identifier && name) {

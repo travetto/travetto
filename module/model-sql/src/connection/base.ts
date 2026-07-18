@@ -80,7 +80,7 @@ export abstract class Connection<C = unknown> {
     }
 
     return this.context.run(async () => {
-      let connection;
+      let connection: C | undefined;
       try {
         connection = await this.acquire();
         this.#active.set(connection);

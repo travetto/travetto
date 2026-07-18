@@ -87,7 +87,7 @@ export class ImageUtil {
     return {
       width: out.width!,
       height: out.height!,
-      format: castTo(out.format?.replace('heif', 'avif')!),
+      format: castTo(out.format?.replace('heif', 'avif')),
       aspect: out.width! / out.height!
     };
   }

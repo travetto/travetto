@@ -46,7 +46,7 @@ export class WebBodyUtil {
       const binaryValue = typeof item === 'string' ? CodecUtil.fromUTF8String(item) : item.slice();
 
       // Headers
-      if (typeof item == 'string') {
+      if (typeof item === 'string') {
         BinaryMetadataUtil.write(binaryValue, { size: item.length });
       }
 

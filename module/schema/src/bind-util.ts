@@ -23,7 +23,7 @@ export class BindUtil {
   /**
    * Utility to make a property accessor enumerable at runtime
    */
-  static registerAccessor(instance: any, property: string): void {
+  static registerAccessor(instance: unknown, property: string): void {
     Object.defineProperty(instance, property, {
       ...Object.getOwnPropertyDescriptor(Object.getPrototypeOf(instance), property),
       enumerable: true

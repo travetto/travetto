@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import type { ShellCommandProvider } from '../../src/types.ts';
 
-const escape = (text: string): string =>
+const shellEscape = (text: string): string =>
   text
     .replaceAll('"', '\\"')
     .replaceAll('$', '\\$');
@@ -21,7 +21,7 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandProvider> = {
     createFile: (file, text) => [
       ['@echo', 'off'],
       ...text.map((line, i) =>
-        ['echo', `"${escape(line)}"`, i === 0 ? '>' : '>>', file]
+        ['echo', `"${shellEscape(line)}"`, i === 0 ? '>' : '>>', file]
       )
     ],
     copy: (sourceFile, destinationFile) => ['copy', sourceFile, destinationFile],
@@ -32,7 +32,7 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandProvider> = {
     export: (key, value) => ['set', `${key}=${value}`],
     chdir: (destinationDirectory) => ['cd', destinationDirectory],
     comment: (message) => ['\nREM', util.stripVTControlCharacters(message), '\n'],
-    echo: (message) => ['echo', `"${escape(util.stripVTControlCharacters(message))}"\n`],
+    echo: (message) => ['echo', `"${shellEscape(util.stripVTControlCharacters(message))}"\n`],
     zip: (outputFile) => ['powershell', 'Compress-Archive', '-Path', '.', '-DestinationPath', outputFile],
     script: (lines: string[], changeDirectory: boolean = false) => ({
       ext: '.cmd',
@@ -47,7 +47,7 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandProvider> = {
     callCommandWithAllArgs: (cmd, ...args) => [[cmd, ...escapedArgs(args), '$@'].join(' ')],
     createFile: (file, text, mode) => [
       ...text.map((line, i) =>
-        ['echo', `"${escape(line)}"`, i === 0 ? '>' : '>>', file]),
+        ['echo', `"${shellEscape(line)}"`, i === 0 ? '>' : '>>', file]),
       ...(mode ? [['chmod', mode, file]] : [])
     ],
     copy: (sourceFile, destinationFile) => ['cp', sourceFile, destinationFile],
@@ -58,7 +58,7 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandProvider> = {
     export: (key, value) => ['export', `${key}=${value}`],
     chdir: (destinationDirectory) => ['cd', destinationDirectory],
     comment: (message) => ['\n#', util.stripVTControlCharacters(message), '\n'],
-    echo: (message) => ['echo', `"${escape(util.stripVTControlCharacters(message))}"\n`],
+    echo: (message) => ['echo', `"${shellEscape(util.stripVTControlCharacters(message))}"\n`],
     zip: (outputFile) => ['zip', '-r', outputFile, '.'],
     script: (lines: string[], changeDirectory: boolean = false) => ({
       ext: '.sh',

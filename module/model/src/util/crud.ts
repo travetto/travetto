@@ -143,9 +143,9 @@ export class ModelCrudUtil {
         const fieldKey = castKey<typeof res>(key);
         if (!isCleanTarget(key) && res[fieldKey] !== undefined && res[fieldKey] !== null) {
           if (field.array && Array.isArray(res[fieldKey])) {
-            const arr = res[fieldKey] as any[];
+            const arr = res[fieldKey];
             let changed = false;
-            const newArr = arr.map(subItem => {
+            const newArray = arr.map(subItem => {
               const cleaned = this.cleanTransientFields(field.type, subItem);
               if (cleaned !== subItem) {
                 changed = true;
@@ -156,7 +156,7 @@ export class ModelCrudUtil {
               if (res === item) {
                 res = { ...item };
               }
-              res[fieldKey] = newArr as any;
+              res[fieldKey] = castTo(newArray);
             }
           } else {
             const val = res[fieldKey];

@@ -85,7 +85,7 @@ class SchemaBindingSuite {
     assert(entity.age === undefined);
 
     CliCommandSchemaUtil.bindInput(entity, await get('--age', '20', '-g', 'red'));
-    assert(isNaN(entity.age));
+    assert(Number.isNaN(entity.age));
 
     process.env.COLOREO = '100';
     CliCommandSchemaUtil.bindInput(entity, await get('--color'));

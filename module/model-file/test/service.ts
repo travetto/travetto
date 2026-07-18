@@ -47,7 +47,7 @@ class FileExpirySuite extends ModelExpirySuite {
       .then(v => v.filter(x => x.endsWith('.json')))
       .then(v => v.length);
 
-    let total;
+    let total: number;
     let allFiles = await countFiles();
 
     total = await this.getSize(ExpiryUser);

@@ -9,7 +9,7 @@ import { BasePackCommand, type PackOperationShape } from './pack.base.ts';
 import type { DockerPackConfig } from '../src/types.ts';
 
 const NODE_MAJOR = process.version.match(/\d+/)?.[0] ?? '22';
-const asNumber = (input?: string): number | undefined => (!input || isNaN(+input)) ? undefined : +input;
+const asNumber = (input?: string): number | undefined => (!input || Number.isNaN(+input)) ? undefined : +input;
 const asString = (input?: string): string | undefined => (input && asNumber(input)) ? input : undefined;
 
 /**

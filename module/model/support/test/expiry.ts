@@ -97,7 +97,7 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   async culling() {
     const service = await this.service;
 
-    let total;
+    let total: number;
 
     total = await this.getSize(ExpiryUser);
     assert(total === 0);

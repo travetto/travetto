@@ -47,28 +47,27 @@ export class Logger implements LogConfig, LogShape {
   }
 
   valid(event: CompilerLogEvent): boolean {
-    return LEVEL_TO_PRIORITY[this.level ?? this.parent?.level!] <= LEVEL_TO_PRIORITY[event.level];
+    return LEVEL_TO_PRIORITY[this.level ?? this.parent?.level ?? 'none'] <= LEVEL_TO_PRIORITY[event.level];
   }
 
   /** Log event with filtering by level */
   render(event: CompilerLogEvent): void {
     if (!this.valid(event)) { return; }
     const params = [event.message, ...event.args ?? []]
-      .map(arg => typeof arg === 'string' ? arg.replaceAll(this.root ?? this.parent?.root!, '.') : arg);
+      .map(arg => typeof arg === 'string' ? arg.replaceAll(this.root ?? this.parent?.root, '.') : arg);
 
     if (event.scope ?? this.scope) {
       params.unshift(`[${(event.scope ?? this.scope!).padEnd(SCOPE_MAX, ' ')}]`);
     }
     params.unshift(new Date().toISOString(), `${event.level.padEnd(5)}`);
     Logger.rewriteLine(''); // Clear out progress line, if active
-    // eslint-disable-next-line no-console
     console[event.level]!(...params);
   }
 
-  info(message: string, ...args: unknown[]): void { return this.render({ level: 'info', message, args }); }
-  debug(message: string, ...args: unknown[]): void { return this.render({ level: 'debug', message, args }); }
-  warn(message: string, ...args: unknown[]): void { return this.render({ level: 'warn', message, args }); }
-  error(message: string, ...args: unknown[]): void { return this.render({ level: 'error', message, args }); }
+  info(message: string, ...args: unknown[]): void {  this.render({ level: 'info', message, args }); }
+  debug(message: string, ...args: unknown[]): void {  this.render({ level: 'debug', message, args }); }
+  warn(message: string, ...args: unknown[]): void {  this.render({ level: 'warn', message, args }); }
+  error(message: string, ...args: unknown[]): void {  this.render({ level: 'error', message, args }); }
 }
 
 class $RootLogger extends Logger {
@@ -88,7 +87,7 @@ class $RootLogger extends Logger {
     switch (value) {
       case 'debug': case 'warn': case 'error': case 'info': this.level = value; break;
       case undefined: this.level = defaultLevel; break;
-      case 'none': default: this.level = 'none';
+      default: this.level = 'none';
     }
   }
 
@@ -100,7 +99,12 @@ class $RootLogger extends Logger {
   /** Scope and provide a callback pattern for access to a logger */
   wrap<T = unknown>(scope: string, operation: (log: Logger) => Promise<T>, basic = true): Promise<T> {
     const logger = this.scoped(scope);
-    return basic ? (logger.debug('Started'), operation(logger).finally(() => logger.debug('Completed'))) : operation(logger);
+    if(basic) {
+      logger.debug('Started');
+      return operation(logger).finally(() => logger.debug('Completed'));
+     } else {
+       return operation(logger);
+     }
   }
 
   /** Write progress event, if active */

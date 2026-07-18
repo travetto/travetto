@@ -150,7 +150,7 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
 
     <c.Code title='Sample makeTemplate Usage' src={`
 const tpl = makeTemplate((name: 'age'|'name', value) => \`**\${name}: \${value}**\`); 
-tpl\`{{age:20}} {{name: 'bob'}}\</>;
+tpl\`{{age:20}} {{name: 'bob'}}</>;
 // produces
 '**age: 20** **name: bob**'
 `} />

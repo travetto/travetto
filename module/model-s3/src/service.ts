@@ -243,10 +243,8 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       }
       throw new NotFoundError(cls, id);
     } catch (error) {
-      if (isMetadataBearer(error)) {
-        if (error.$metadata.httpStatusCode === 404) {
-          error = new NotFoundError(cls, id);
-        }
+      if (isMetadataBearer(error) && error.$metadata.httpStatusCode === 404) {
+        throw new NotFoundError(cls, id);        
       }
       throw error;
     }
@@ -366,10 +364,8 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     try {
       return (await this.client.headObject(query));
     } catch (error) {
-      if (isMetadataBearer(error)) {
-        if (error.$metadata.httpStatusCode === 404) {
-          error = new NotFoundError('Blob', location);
-        }
+      if (isMetadataBearer(error) && error.$metadata.httpStatusCode === 404) {
+        throw new NotFoundError('Blob', location);
       }
       throw error;
     }

@@ -60,7 +60,7 @@ export class ShutdownManager {
 
   /** Trigger a watch signal signal to a subprocess */
   static async shutdownChild(subprocess: ChildProcess, config?: ShutdownEvent): Promise<void> {
-    subprocess?.send!({ type: 'shutdown', ...config });
+    subprocess?.send?.({ type: 'shutdown', ...config });
   }
 
   /**

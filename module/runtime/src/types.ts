@@ -1,6 +1,7 @@
 import type { Readable } from 'node:stream';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+// biome-ignore lint/suspicious/noExplicitAny: This is the any reference we use explicitly
 export type Any = any;
 
 export type AnyMap = { [key: string]: Any };

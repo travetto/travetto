@@ -34,7 +34,7 @@ export class RuntimeError<T = Record<string, unknown> | undefined> extends Error
   ) {
     super(message, options?.cause ? { cause: options.cause } : undefined);
     this.type = options?.type ?? this.constructor.name;
-    this.details = options?.details!;
+    this.details = options?.details ?? undefined!;
     this.category = options?.category ?? castTo<typeof RuntimeError>(this.constructor).defaultCategory ?? 'general';
     this.at = new Date(options?.at ?? Date.now());
   }

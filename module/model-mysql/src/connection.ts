@@ -1,5 +1,5 @@
 import { createPool } from 'mysql2';
-import type { PoolConnection, Pool, OkPacket, ResultSetHeader, TypeCastField } from 'mysql2/promise';
+import type { PoolConnection, Pool, OkPacket, ResultSetHeader, TypeCastField, PreparedStatementInfo } from 'mysql2/promise';
 
 import { castTo, JSONUtil, ShutdownManager } from '@travetto/runtime';
 import type { AsyncContext } from '@travetto/context';
@@ -66,7 +66,7 @@ export class MySQLConnection extends Connection<PoolConnection> {
 
   async execute<T = unknown>(pool: PoolConnection, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {
     console.debug('Executing query', { query });
-    let prepared;
+    let prepared: PreparedStatementInfo | undefined;
     try {
       prepared = (values?.length ?? 0) > 0 ? await pool.prepare(query) : undefined;
       const [results,] = await (prepared ? prepared.execute(values) : pool.query(query));

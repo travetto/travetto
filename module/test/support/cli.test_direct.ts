@@ -31,7 +31,7 @@ export class TestDirectCommand {
 
   main(importOrFile: string, clsId?: string, methodsNames: string[] = []): Promise<void> {
     // Resolve to import
-    const importPath = RuntimeIndex.getFromImportOrSource(importOrFile)?.import!;
+    const importPath = RuntimeIndex.getFromImportOrSource(importOrFile)!.import;
 
     return runTests(
       {

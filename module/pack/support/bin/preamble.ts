@@ -1,6 +1,7 @@
 import { readFileSync as readSyncPreamble } from 'node:fs';
 
 // @ts-expect-error -- Lock to prevent __proto__ pollution in JSON
+// biome-ignore lint/suspicious/noProto: Lock to prevent __proto__ pollution in JSON
 const objectProto = Object.prototype.__proto__;
 Object.defineProperty(Object.prototype, '__proto__', {
   get() { return objectProto; },

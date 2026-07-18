@@ -34,7 +34,7 @@ export class TestDiffCommand {
 
   async main(importOrFile: string, diff: string): Promise<void> {
     const diffSource = await fs.readFile(diff).then(JSONUtil.fromBinaryArray<TestDiffSource>);
-    const importPath = RuntimeIndex.getFromImportOrSource(importOrFile)?.import!;
+    const importPath = RuntimeIndex.getFromImportOrSource(importOrFile)!.import;
 
     return runTests(
       {

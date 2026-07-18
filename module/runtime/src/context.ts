@@ -100,7 +100,7 @@ class $Runtime {
 
   /** Get source for function */
   getSourceFile(handle: Function): string {
-    return this.#idx.getFromImport(this.getImport(handle))?.sourceFile!;
+    return this.#idx.getFromImport(this.getImport(handle))?.sourceFile ?? undefined!;
   }
 
   /** Get import for function */
