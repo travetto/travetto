@@ -8,13 +8,12 @@ export type WebHeadersInit = Headers | Record<string, undefined | null | HeaderV
  * Simple Headers wrapper with additional logic for common patterns
  */
 export class WebHeaders extends Headers {
-
   constructor(input?: WebHeadersInit) {
-    const passed = (input instanceof Headers);
+    const passed = input instanceof Headers;
     super(passed ? input : undefined);
 
     if (input && !passed) {
-      for (const [key, value] of (Array.isArray(input) ? input : Object.entries(input))) {
+      for (const [key, value] of Array.isArray(input) ? input : Object.entries(input)) {
         if (value !== undefined && value !== null && !key.startsWith(':')) {
           this.append(key, castTo(value));
         }

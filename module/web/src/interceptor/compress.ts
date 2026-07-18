@@ -17,13 +17,13 @@ import { WebHeaderUtil } from '../util/header.ts';
 const STREAM_COMPRESSORS = {
   gzip: zlib.createGzip,
   deflate: zlib.createDeflate,
-  br: zlib.createBrotliCompress,
+  br: zlib.createBrotliCompress
 };
 
 const ARRAY_COMPRESSORS = {
   gzip: util.promisify(zlib.gzip),
   deflate: util.promisify(zlib.deflate),
-  br: util.promisify(zlib.brotliCompress),
+  br: util.promisify(zlib.brotliCompress)
 };
 
 type WebCompressEncoding = keyof typeof ARRAY_COMPRESSORS | 'identity';
@@ -49,7 +49,6 @@ export class CompressConfig {
  */
 @Injectable()
 export class CompressInterceptor implements WebInterceptor {
-
   category: WebInterceptorCategory = 'response';
 
   @Inject()
@@ -61,11 +60,7 @@ export class CompressInterceptor implements WebInterceptor {
 
     response.headers.append('Vary', 'Accept-Encoding');
 
-    if (
-      !response.body ||
-      response.headers.has('Content-Encoding') ||
-      response.headers.get('Cache-Control')?.includes('no-transform')
-    ) {
+    if (!response.body || response.headers.has('Content-Encoding') || response.headers.get('Cache-Control')?.includes('no-transform')) {
       return response;
     }
 
@@ -84,7 +79,7 @@ export class CompressInterceptor implements WebInterceptor {
     const chunkSize = raw.chunkSize ?? zlib.constants.Z_DEFAULT_CHUNK;
     const len = BinaryUtil.isBinaryArray(binaryResponse.body) ? binaryResponse.body.byteLength : undefined;
 
-    if (len !== undefined && len >= 0 && len < chunkSize || !binaryResponse.body) {
+    if ((len !== undefined && len >= 0 && len < chunkSize) || !binaryResponse.body) {
       return binaryResponse;
     }
 

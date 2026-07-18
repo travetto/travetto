@@ -7,7 +7,6 @@ import type { Cookie } from '../src/types/cookie.ts';
 
 @Suite('WebHeaderUtil')
 class WebHeaderUtilSuite {
-
   @Test('parseCookieHeader - empty and single')
   testParseCookieHeader() {
     assert(WebHeaderUtil.parseCookieHeader('').length === 0);

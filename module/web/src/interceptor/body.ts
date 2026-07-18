@@ -22,7 +22,7 @@ import { WebHeaderUtil } from '../util/header.ts';
 export interface BodyContentParser {
   type: string;
   parse: (source: string) => unknown;
-};
+}
 
 /**
  * Web body  configuration
@@ -55,7 +55,6 @@ export class WebBodyConfig {
  */
 @Injectable()
 export class BodyInterceptor implements WebInterceptor<WebBodyConfig> {
-
   dependsOn = [AcceptInterceptor, DecompressInterceptor];
   category: WebInterceptorCategory = 'request';
   parsers: Record<string, BodyContentParser> = {};
@@ -85,7 +84,7 @@ export class BodyInterceptor implements WebInterceptor<WebBodyConfig> {
 
     const lengthRead = +(request.headers.get('Content-Length') || '');
     const length = Number.isNaN(lengthRead) ? undefined : lengthRead;
-    const limit = config._limit ??= WebCommonUtil.parseByteSize(config.limit);
+    const limit = (config._limit ??= WebCommonUtil.parseByteSize(config.limit));
 
     if (length && length > limit) {
       throw WebError.for('Request entity too large', 413, { length, limit });
@@ -96,7 +95,7 @@ export class BodyInterceptor implements WebInterceptor<WebBodyConfig> {
       return next();
     }
 
-    const [baseMimeType,] = contentType.value.split('/');
+    const [baseMimeType] = contentType.value.split('/');
     const parserType = config.parsingTypes[contentType.value] ?? config.parsingTypes[baseMimeType];
     if (!parserType) {
       return next();
@@ -109,9 +108,7 @@ export class BodyInterceptor implements WebInterceptor<WebBodyConfig> {
     }
 
     try {
-      request.body = parserType in this.parsers ?
-        this.parsers[parserType].parse(text) :
-        WebBodyUtil.parseBody(parserType, text);
+      request.body = parserType in this.parsers ? this.parsers[parserType].parse(text) : WebBodyUtil.parseBody(parserType, text);
 
       return next();
     } catch (error) {

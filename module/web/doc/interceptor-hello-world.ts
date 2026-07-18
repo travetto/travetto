@@ -3,7 +3,6 @@ import { Injectable } from '@travetto/di';
 
 @Injectable()
 export class HelloWorldInterceptor implements WebInterceptor {
-
   category: WebInterceptorCategory = 'application';
 
   applies(context: WebInterceptorContext<unknown>): boolean {

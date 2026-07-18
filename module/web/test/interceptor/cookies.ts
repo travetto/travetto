@@ -19,41 +19,36 @@ class CookiesInterceptorSuite {
     return jar.getAll();
   }
 
-  async testCookies(
-    initialCookieHeader: string,
-    update: (cookies: CookieJar) => void,
-    grip?: KeyGrip | undefined
-  ): Promise<string[]> {
+  async testCookies(initialCookieHeader: string, update: (cookies: CookieJar) => void, grip?: KeyGrip | undefined): Promise<string[]> {
     const interceptor = await DependencyRegistryIndex.getInstance(CookieInterceptor);
     const context = await DependencyRegistryIndex.getInstance(AsyncContext);
 
     interceptor.keyGrip = grip ?? new KeyGrip([]);
     interceptor.config.secure = true;
 
-    const response = await context.run(async () => interceptor.filter({
-      request: new WebRequest({
-        headers: {
-          Cookie: initialCookieHeader
+    const response = await context.run(async () =>
+      interceptor.filter({
+        request: new WebRequest({
+          headers: {
+            Cookie: initialCookieHeader
+          }
+        }),
+        config: interceptor.config,
+        next: async () => {
+          const items = await DependencyRegistryIndex.getInstance(WebAsyncContext);
+          update?.(items.getValue(CookieJar));
+          return new WebResponse({});
         }
-      }),
-      config: interceptor.config,
-      next: async () => {
-        const items = await DependencyRegistryIndex.getInstance(WebAsyncContext);
-        update?.(items.getValue(CookieJar));
-        return new WebResponse({});
-      }
-    }));
+      })
+    );
     return response.headers.getSetCookie();
   }
 
   @Test()
   async basicTest() {
-    const headers = await this.testCookies(
-      'age=100',
-      jar => {
-        jar.set({ name: 'valid', value: (jar.get('age') === '100').toString() });
-      }
-    );
+    const headers = await this.testCookies('age=100', jar => {
+      jar.set({ name: 'valid', value: (jar.get('age') === '100').toString() });
+    });
 
     const cookies = await this.getCookies(undefined, headers);
 
@@ -87,11 +82,7 @@ class CookiesInterceptorSuite {
   @Test()
   async testRotating() {
     const grip = new KeyGrip(['billy']);
-    const headers = await this.testCookies(
-      `age=100; age.sig=${await grip.sign('age=100')}`,
-      jar => { },
-      new KeyGrip(['bally', 'billy'])
-    );
+    const headers = await this.testCookies(`age=100; age.sig=${await grip.sign('age=100')}`, jar => {}, new KeyGrip(['bally', 'billy']));
 
     const cookies = await this.getCookies(['bally'], headers);
 

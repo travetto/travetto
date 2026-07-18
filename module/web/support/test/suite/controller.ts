@@ -11,7 +11,6 @@ import type { CookieJar } from '../../../src/util/cookie.ts';
 
 @Controller('/test')
 export class TestController {
-
   @ContextParam()
   request: WebRequest;
 

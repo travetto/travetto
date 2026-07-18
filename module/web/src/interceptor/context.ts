@@ -11,7 +11,6 @@ import type { WebAsyncContext } from '../context.ts';
  */
 @Injectable()
 export class AsyncContextInterceptor implements WebInterceptor {
-
   category: WebInterceptorCategory = 'global';
 
   @Inject()

@@ -31,7 +31,6 @@ export class AcceptConfig {
  */
 @Injectable()
 export class AcceptInterceptor implements WebInterceptor<AcceptConfig> {
-
   category: WebInterceptorCategory = 'request';
 
   @Inject()
@@ -59,9 +58,9 @@ export class AcceptInterceptor implements WebInterceptor<AcceptConfig> {
     let response: WebResponse | undefined;
     try {
       this.validate(request, config);
-      return response = await next();
+      return (response = await next());
     } catch (error) {
-      throw response = WebCommonUtil.catchResponse(error);
+      throw (response = WebCommonUtil.catchResponse(error));
     } finally {
       response?.headers.setIfAbsent('Accept', config.types.join(','));
     }

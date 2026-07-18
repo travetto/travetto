@@ -26,7 +26,6 @@ export class WebLogConfig {
  */
 @Injectable()
 export class LoggingInterceptor implements WebInterceptor {
-
   category: WebInterceptorCategory = 'terminal';
 
   @Inject()
@@ -42,7 +41,7 @@ export class LoggingInterceptor implements WebInterceptor {
     const duration = Date.now() - createdDate;
 
     const error = response.body instanceof Error ? response.body : undefined;
-    const code = response.context.httpStatusCode ??= (error ? 500 : 200);
+    const code = (response.context.httpStatusCode ??= error ? 500 : 200);
 
     const logMessage = {
       method: request.context.httpMethod,
@@ -50,7 +49,7 @@ export class LoggingInterceptor implements WebInterceptor {
       query: request.context.httpQuery,
       params: request.context.pathParams,
       statusCode: code,
-      duration,
+      duration
     };
 
     if (code < 400) {
@@ -68,4 +67,3 @@ export class LoggingInterceptor implements WebInterceptor {
     return response;
   }
 }
-

@@ -76,12 +76,14 @@ class EtagInterceptorSuite {
         }
       }),
       config: { ...interceptor.config, cacheable: true },
-      next: async () => new WebResponse({
-        body: data, headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': '1000'
-        }
-      })
+      next: async () =>
+        new WebResponse({
+          body: data,
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': '1000'
+          }
+        })
     });
 
     assert(get2.context.httpStatusCode === 304);
@@ -129,11 +131,13 @@ class EtagInterceptorSuite {
         }
       }),
       config: { ...interceptor.config, cacheable: true },
-      next: async () => new WebResponse({
-        body: data, headers: {
-          'Last-Modified': TimeUtil.fromNow('-1y').toUTCString()
-        }
-      })
+      next: async () =>
+        new WebResponse({
+          body: data,
+          headers: {
+            'Last-Modified': TimeUtil.fromNow('-1y').toUTCString()
+          }
+        })
     });
 
     assert(get.context.httpStatusCode === 304);
@@ -147,11 +151,13 @@ class EtagInterceptorSuite {
         }
       }),
       config: { ...interceptor.config, cacheable: true },
-      next: async () => new WebResponse({
-        body: data, headers: {
-          'Last-Modified': TimeUtil.fromNow('1y').toUTCString()
-        }
-      })
+      next: async () =>
+        new WebResponse({
+          body: data,
+          headers: {
+            'Last-Modified': TimeUtil.fromNow('1y').toUTCString()
+          }
+        })
     });
 
     assert(get2.context.httpStatusCode === 304);

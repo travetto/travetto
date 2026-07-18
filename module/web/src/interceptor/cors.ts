@@ -49,7 +49,6 @@ export class CorsConfig {
  */
 @Injectable()
 export class CorsInterceptor implements WebInterceptor<CorsConfig> {
-
   category: WebInterceptorCategory = 'response';
 
   @Inject()
@@ -60,7 +59,7 @@ export class CorsInterceptor implements WebInterceptor<CorsConfig> {
       origins: new Set(config.origins ?? []),
       methods: (config.methods ?? Object.keys(HTTP_METHODS)).join(',').toUpperCase(),
       headers: (config.headers ?? []).join(','),
-      credentials: !!config.credentials,
+      credentials: !!config.credentials
     };
     return config;
   }
@@ -69,14 +68,14 @@ export class CorsInterceptor implements WebInterceptor<CorsConfig> {
     return config.applies;
   }
 
-  decorate(request: WebRequest, resolved: CorsConfig['resolved'], response: WebResponse,): WebResponse {
+  decorate(request: WebRequest, resolved: CorsConfig['resolved'], response: WebResponse): WebResponse {
     const origin = request.headers.get('Origin');
     if (resolved.origins.size === 0 || resolved.origins.has(origin!)) {
       for (const [header, value] of [
         ['Access-Control-Allow-Origin', origin || '*'],
         ['Access-Control-Allow-Credentials', `${resolved.credentials}`],
         ['Access-Control-Allow-Methods', resolved.methods],
-        ['Access-Control-Allow-Headers', resolved.headers || request.headers.get('Access-Control-Request-Headers') || '*'],
+        ['Access-Control-Allow-Headers', resolved.headers || request.headers.get('Access-Control-Request-Headers') || '*']
       ]) {
         response.headers.setIfAbsent(header, value);
       }

@@ -19,6 +19,4 @@ export interface WebRequestContext {
 /**
  * Web Request object
  */
-export class WebRequest<B = unknown> extends BaseWebMessage<B, Readonly<WebRequestContext>> {
-
-}
+export class WebRequest<B = unknown> extends BaseWebMessage<B, Readonly<WebRequestContext>> {}

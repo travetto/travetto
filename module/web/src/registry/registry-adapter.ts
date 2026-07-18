@@ -20,7 +20,7 @@ function combineClassConfigs(base: ControllerConfig, ...overrides: Partial<Contr
     combineCommon(base, override);
     Object.assign(base, {
       basePath: override.basePath || base.basePath,
-      contextParams: { ...base.contextParams, ...override.contextParams },
+      contextParams: { ...base.contextParams, ...override.contextParams }
     });
   }
   // Ensure we have full path
@@ -30,20 +30,21 @@ function combineClassConfigs(base: ControllerConfig, ...overrides: Partial<Contr
   return base;
 }
 
-function combineEndpointConfigs(controller: ControllerConfig, base: EndpointConfig, ...overrides: Partial<EndpointConfig>[]): EndpointConfig {
+function combineEndpointConfigs(
+  controller: ControllerConfig,
+  base: EndpointConfig,
+  ...overrides: Partial<EndpointConfig>[]
+): EndpointConfig {
   for (const override of overrides) {
     combineCommon(base, override);
-    Object.assign(
-      base,
-      {
-        cacheable: override.cacheable ?? base.cacheable,
-        httpMethod: override.httpMethod ?? base.httpMethod,
-        allowsBody: override.allowsBody ?? base.allowsBody,
-        path: override.path || base.path,
-        parameters: (override.parameters ?? base.parameters).map(endpoint => ({ ...endpoint })),
-        responseFinalizer: override.responseFinalizer ?? base.responseFinalizer,
-      }
-    );
+    Object.assign(base, {
+      cacheable: override.cacheable ?? base.cacheable,
+      httpMethod: override.httpMethod ?? base.httpMethod,
+      allowsBody: override.allowsBody ?? base.allowsBody,
+      path: override.path || base.path,
+      parameters: (override.parameters ?? base.parameters).map(endpoint => ({ ...endpoint })),
+      responseFinalizer: override.responseFinalizer ?? base.responseFinalizer
+    });
   }
   // Ensure we have full path
   if (!base.path.startsWith('/')) {

@@ -8,7 +8,6 @@ import { ControllerRegistryIndex } from './registry-index.ts';
  * Supports visiting the controller structure
  */
 export class ControllerVisitUtil {
-
   static #onSchemaEvent(visitor: ControllerVisitor, type?: Class): unknown | Promise<unknown> {
     return type && SchemaRegistryIndex.has(type) ? visitor.onSchema?.(SchemaRegistryIndex.getConfig(type)) : undefined;
   }
@@ -49,6 +48,6 @@ export class ControllerVisitUtil {
     for (const cls of ControllerRegistryIndex.getClasses()) {
       await this.visitController(visitor, cls, options);
     }
-    return await visitor.onComplete?.() ?? undefined!;
+    return (await visitor.onComplete?.()) ?? undefined!;
   }
 }

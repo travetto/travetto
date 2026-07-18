@@ -33,28 +33,36 @@ export function Param(location: EndpointParamLocation, aliasOrConfig: string | P
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function PathParam(input: string | Partial<EndpointParameterConfig> = {}): ParamDecorator { return Param('path', input); }
+export function PathParam(input: string | Partial<EndpointParameterConfig> = {}): ParamDecorator {
+  return Param('path', input);
+}
 /**
  * Define a Query param
  * @input input The param configuration or alias
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function QueryParam(input: string | Partial<EndpointParameterConfig> = {}): ParamDecorator { return Param('query', input); }
+export function QueryParam(input: string | Partial<EndpointParameterConfig> = {}): ParamDecorator {
+  return Param('query', input);
+}
 /**
  * Define a Header param
  * @input input The param configuration or alias
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function HeaderParam(input: string | Partial<EndpointParameterConfig> = {}): ParamDecorator { return Param('header', input); }
+export function HeaderParam(input: string | Partial<EndpointParameterConfig> = {}): ParamDecorator {
+  return Param('header', input);
+}
 /**
  * Define a body param as an input
  * @input input The param configuration
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Body(input: Partial<EndpointParameterConfig> = {}): ParamDecorator { return Param('body', input); }
+export function Body(input: Partial<EndpointParameterConfig> = {}): ParamDecorator {
+  return Param('body', input);
+}
 
 /**
  * A contextual field as provided by the WebAsyncContext

@@ -7,7 +7,6 @@ import { DependencyRegistryIndex } from '@travetto/di';
 
 @Suite()
 class AsyncContextInterceptorSuite {
-
   @BeforeAll()
   async init() {
     await Registry.init();

@@ -27,7 +27,7 @@ const ARRAY_DECOMPRESSORS = {
   br: util.promisify(zlib.brotliDecompress)
 };
 
-type WebDecompressEncoding = (keyof typeof ARRAY_DECOMPRESSORS) | 'identity';
+type WebDecompressEncoding = keyof typeof ARRAY_DECOMPRESSORS | 'identity';
 
 /**
  * Web body parse configuration
@@ -49,7 +49,6 @@ export class DecompressConfig {
  */
 @Injectable()
 export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
-
   static async decompress(headers: WebHeaders, input: BinaryType, config: DecompressConfig): Promise<BinaryType> {
     const encoding: WebDecompressEncoding = castTo(headers.getList('Content-Encoding')?.[0]) ?? 'identity';
 

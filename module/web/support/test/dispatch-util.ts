@@ -11,19 +11,16 @@ import { WebCommonUtil } from '../../src/util/common.ts';
  * Utilities for supporting custom test dispatchers
  */
 export class WebTestDispatchUtil {
-
   static async applyRequestBody(request: WebRequest, toByteArray: true): Promise<WebRequest<BinaryArray>>;
   static async applyRequestBody(request: WebRequest, toByteArray?: false): Promise<WebRequest<BinaryType>>;
   static async applyRequestBody(request: WebRequest, toByteArray: boolean = false): Promise<WebRequest<BinaryType>> {
     if (request.body !== undefined) {
       const sample = WebBodyUtil.toBinaryMessage(request);
       sample.headers.forEach((v, k) => {
-        request.headers.set(k, Array.isArray(v) ? v.join(',') : v)
-    });
+        request.headers.set(k, Array.isArray(v) ? v.join(',') : v);
+      });
       if (toByteArray) {
-        sample.body = sample.body ?
-          await BinaryUtil.toBinaryArray(sample.body) :
-          BinaryUtil.makeBinaryArray(0);
+        sample.body = sample.body ? await BinaryUtil.toBinaryArray(sample.body) : BinaryUtil.makeBinaryArray(0);
       }
       request.body = WebBodyUtil.markRawBinary(sample.body);
     }
@@ -39,15 +36,14 @@ export class WebTestDispatchUtil {
     if (decompress && BinaryUtil.isBinaryType(result)) {
       const bufferResult = await BinaryUtil.toBinaryArray(result);
       result = bufferResult;
-      
+
       if (bufferResult.byteLength) {
         try {
-          result = await DecompressInterceptor.decompress(
-            response.headers,
-            bufferResult,
-            { applies: true, supportedEncodings: ['br', 'deflate', 'gzip', 'identity'] }
-          );
-        } catch { }
+          result = await DecompressInterceptor.decompress(response.headers, bufferResult, {
+            applies: true,
+            supportedEncodings: ['br', 'deflate', 'gzip', 'identity']
+          });
+        } catch {}
       }
     }
 

@@ -39,7 +39,6 @@ export class EtagConfig {
  */
 @Injectable()
 export class EtagInterceptor implements WebInterceptor {
-
   category: WebInterceptorCategory = 'response';
   dependsOn = [CompressInterceptor];
 
@@ -47,9 +46,9 @@ export class EtagInterceptor implements WebInterceptor {
   config: EtagConfig;
 
   computeTag(body: BinaryArray): string {
-    return body.byteLength === 0 ?
-      '2jmj7l5rSw0yVb/vlWAYkK/YBwk' :
-      BinaryMetadataUtil.hash(body, { length: 27, hashAlgorithm: 'sha1', outputEncoding: 'base64' });
+    return body.byteLength === 0
+      ? '2jmj7l5rSw0yVb/vlWAYkK/YBwk'
+      : BinaryMetadataUtil.hash(body, { length: 27, hashAlgorithm: 'sha1', outputEncoding: 'base64' });
   }
 
   addTag(ctx: WebChainedContext<EtagConfig>, response: WebResponse): WebResponse {
@@ -71,7 +70,7 @@ export class EtagInterceptor implements WebInterceptor {
       return binaryResponse;
     }
 
-    const minSize = ctx.config._minimumSize ??= WebCommonUtil.parseByteSize(ctx.config.minimumSize);
+    const minSize = (ctx.config._minimumSize ??= WebCommonUtil.parseByteSize(ctx.config.minimumSize));
     if (body.byteLength < minSize) {
       return binaryResponse;
     }

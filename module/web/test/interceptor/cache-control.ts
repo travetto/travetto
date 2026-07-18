@@ -50,7 +50,6 @@ class TestResponseCache {
 
 @Suite()
 class CacheControlInterceptorSuite extends BaseWebSuite {
-
   dispatcherType = LocalRequestDispatcher;
 
   @Test()

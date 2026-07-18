@@ -6,9 +6,18 @@ import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Config } from '@travetto/config';
 import { Registry } from '@travetto/registry';
 import {
-  ConfigureInterceptor, Controller, ControllerRegistryIndex, CorsInterceptor, Get,
-  CacheControlInterceptor, type StandardWebRouter, type WebChainedContext, type WebInterceptor,
-  type WebInterceptorCategory, type WebInterceptorContext, WebRequest
+  ConfigureInterceptor,
+  Controller,
+  ControllerRegistryIndex,
+  CorsInterceptor,
+  Get,
+  CacheControlInterceptor,
+  type StandardWebRouter,
+  type WebChainedContext,
+  type WebInterceptor,
+  type WebInterceptorCategory,
+  type WebInterceptorContext,
+  WebRequest
 } from '@travetto/web';
 
 @Injectable()
@@ -17,12 +26,11 @@ class CustomInterceptorConfig {
   applies: boolean = true;
   name = 'bob';
 
-  weird() { }
+  weird() {}
 }
 
 @Injectable()
 class CustomInterceptor implements WebInterceptor<CustomInterceptorConfig> {
-
   category: WebInterceptorCategory = 'global';
 
   @Inject()
@@ -45,21 +53,21 @@ class CustomInterceptor implements WebInterceptor<CustomInterceptorConfig> {
 @ConfigureInterceptor(CacheControlInterceptor, { applies: false })
 class TestController {
   @Get('/')
-  async std() { }
+  async std() {}
 
   @Get('/opt-in')
-  async none() { }
+  async none() {}
 
   @Get('/opt-in/for-real')
   @ConfigureInterceptor(CustomInterceptor, {})
-  async optIn() { }
+  async optIn() {}
 
   @Get('/override')
   @ConfigureInterceptor(CustomInterceptor, { name: 'jane' })
-  async override() { }
+  async override() {}
 
   @Get('/blackListed')
-  async blackListed() { }
+  async blackListed() {}
 }
 
 @Controller('/alt-test-interceptor')
@@ -68,22 +76,22 @@ class TestController {
 @ConfigureInterceptor(CacheControlInterceptor, { applies: false })
 class AltTestController {
   @Get('/')
-  async std() { }
+  async std() {}
 
   @Get('/opt-in')
-  async none() { }
+  async none() {}
 
   @Get('/opt-in/for-real')
   @ConfigureInterceptor(CustomInterceptor, { name: 'sarah' })
-  async optIn() { }
+  async optIn() {}
 
   @Get('/override')
   @ConfigureInterceptor(CustomInterceptor, { applies: true, name: 'Randy' })
-  async override() { }
+  async override() {}
 
   @Get('/blackListed')
   @ConfigureInterceptor(CustomInterceptor, { applies: true })
-  async blackListed() { }
+  async blackListed() {}
 }
 
 @Suite()
@@ -103,27 +111,27 @@ class TestInterceptorConfigSuite {
 
   @Test()
   async verifyBasic() {
-    assert(await this.name(TestController, '/') === 'bob');
-    assert(await this.name(AltTestController, '/') === undefined);
-    assert(await this.name(TestController, '/opt-in') === 'bob');
-    assert(await this.name(AltTestController, '/opt-in') === 'greg');
+    assert((await this.name(TestController, '/')) === 'bob');
+    assert((await this.name(AltTestController, '/')) === undefined);
+    assert((await this.name(TestController, '/opt-in')) === 'bob');
+    assert((await this.name(AltTestController, '/opt-in')) === 'greg');
   }
 
   @Test()
   async verifyOptIn() {
-    assert(await this.name(TestController, '/opt-in/for-real') === 'bob');
-    assert(await this.name(AltTestController, '/opt-in/for-real') === 'sarah');
+    assert((await this.name(TestController, '/opt-in/for-real')) === 'bob');
+    assert((await this.name(AltTestController, '/opt-in/for-real')) === 'sarah');
   }
 
   @Test()
   async verifyOverride() {
-    assert(await this.name(TestController, '/override') === 'jane');
-    assert(await this.name(AltTestController, '/override') === 'Randy');
+    assert((await this.name(TestController, '/override')) === 'jane');
+    assert((await this.name(AltTestController, '/override')) === 'Randy');
   }
 
   @Test()
   async verifyBlacklist() {
-    assert(await this.name(TestController, '/blackListed') === 'bob');
-    assert(await this.name(AltTestController, '/blackListed') === 'greg');
+    assert((await this.name(TestController, '/blackListed')) === 'bob');
+    assert((await this.name(AltTestController, '/blackListed')) === 'greg');
   }
 }

@@ -10,12 +10,11 @@ import { WebCommonUtil } from '../util/common.ts';
 
 @Injectable()
 export class RespondInterceptor implements WebInterceptor {
-
   category: WebInterceptorCategory = 'terminal';
   dependsOn = [LoggingInterceptor];
 
   async filter(ctx: WebChainedContext): Promise<WebResponse> {
-    let response : WebResponse;
+    let response: WebResponse;
     try {
       response = await ctx.next();
     } catch (error) {

@@ -20,7 +20,7 @@ export class WebTestConfig implements ConfigSource {
           trustProxy: { ips: ['*'] },
           http: {
             tls: false,
-            port: -1,
+            port: -1
           },
           etag: {
             minimumSize: 1
@@ -38,7 +38,6 @@ export class WebTestConfig implements ConfigSource {
  */
 @Schema()
 export abstract class BaseWebSuite {
-
   #cleanup?: () => void;
   #dispatcher: WebDispatcher;
 
@@ -60,7 +59,9 @@ export abstract class BaseWebSuite {
 
   async request<T>(cfg: WebMessageInit<unknown, WebRequestContext>, throwOnError: boolean = true): Promise<WebResponse<T>> {
     const response = await this.#dispatcher.dispatch({ request: new WebRequest(cfg) });
-    if (throwOnError && response.context.httpStatusCode && response.context.httpStatusCode >= 400) { throw response.body; }
+    if (throwOnError && response.context.httpStatusCode && response.context.httpStatusCode >= 400) {
+      throw response.body;
+    }
     return castTo(response);
   }
 }

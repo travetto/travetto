@@ -7,13 +7,12 @@ import { Controller } from '../decorator/controller.ts';
 import { ConditionalRegister, ConfigureInterceptor } from '../decorator/common.ts';
 import { Get, Options } from '../decorator/endpoint.ts';
 import { WebConfig } from '../config.ts';
-import { LoggingInterceptor, } from '../interceptor/logging.ts';
+import { LoggingInterceptor } from '../interceptor/logging.ts';
 
 @IsPrivate()
 @Controller('/')
 @ConfigureInterceptor(LoggingInterceptor, { applies: false })
 export class GlobalHandler {
-
   @Get('')
   @ConditionalRegister(async () => {
     const config = await DependencyRegistryIndex.getInstance(WebConfig);
@@ -24,5 +23,5 @@ export class GlobalHandler {
   }
 
   @Options('*all')
-  options(): void { }
+  options(): void {}
 }

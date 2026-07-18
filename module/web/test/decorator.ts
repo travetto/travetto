@@ -9,17 +9,16 @@ import { CacheControl, Controller, ControllerRegistryIndex, Patch, SetHeaders } 
 class TestController {
   @CacheControl('1s')
   @Patch('/a')
-  async patch() { }
+  async patch() {}
 
   @SetHeaders({ 'Content-Type': '20' })
   @CacheControl('500ms')
   @Patch('/b')
-  async patchSmaller() { }
+  async patchSmaller() {}
 }
 
 @Suite()
 export class ConfigureTest {
-
   @BeforeAll()
   async init() {
     await Registry.init();

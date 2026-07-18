@@ -9,13 +9,17 @@ import { RuntimeError, BinaryUtil, castTo, type BinaryType } from '@travetto/run
 
 @Suite()
 class DecompressInterceptorSuite {
-
   @BeforeAll()
   async init() {
     await Registry.init();
   }
 
-  async decompress({ data, encoding, requestHeaders = {}, responseHeaders = {} }: {
+  async decompress({
+    data,
+    encoding,
+    requestHeaders = {},
+    responseHeaders = {}
+  }: {
     encoding: 'gzip' | 'br' | 'deflate' | 'identity';
     data: number | BinaryType;
     requestHeaders?: Record<string, string>;
@@ -30,15 +34,27 @@ class DecompressInterceptorSuite {
 
     if (BinaryUtil.isBinaryStream(data)) {
       switch (encoding) {
-        case 'br': await BinaryUtil.pipeline(data, data = createBrotliCompress()); break;
-        case 'gzip': await BinaryUtil.pipeline(data, data = createGzip()); break;
-        case 'deflate': await BinaryUtil.pipeline(data, data = createDeflate()); break;
+        case 'br':
+          await BinaryUtil.pipeline(data, (data = createBrotliCompress()));
+          break;
+        case 'gzip':
+          await BinaryUtil.pipeline(data, (data = createGzip()));
+          break;
+        case 'deflate':
+          await BinaryUtil.pipeline(data, (data = createDeflate()));
+          break;
       }
     } else if (BinaryUtil.isBinaryArray(data)) {
       switch (encoding) {
-        case 'br': data = brotliCompressSync(data); break;
-        case 'gzip': data = gzipSync(data); break;
-        case 'deflate': data = deflateSync(data); break;
+        case 'br':
+          data = brotliCompressSync(data);
+          break;
+        case 'gzip':
+          data = gzipSync(data);
+          break;
+        case 'deflate':
+          data = deflateSync(data);
+          break;
       }
     }
 
@@ -48,7 +64,7 @@ class DecompressInterceptorSuite {
       const request = new WebRequest({
         context: {
           path: '/',
-          httpMethod: 'POST',
+          httpMethod: 'POST'
         },
         body: WebBodyUtil.markRawBinary(data),
         headers: requestHeaders
@@ -76,7 +92,7 @@ class DecompressInterceptorSuite {
   async simple() {
     const response = await this.decompress({
       data: 10000,
-      encoding: 'identity',
+      encoding: 'identity'
     });
     assert(response);
     assert(BinaryUtil.isBinaryArray(response));
@@ -87,7 +103,7 @@ class DecompressInterceptorSuite {
   async simpleGzip() {
     const response = await this.decompress({
       data: 10000,
-      encoding: 'gzip',
+      encoding: 'gzip'
     });
     assert(response);
     assert(BinaryUtil.isBinaryArray(response));
@@ -98,7 +114,7 @@ class DecompressInterceptorSuite {
   async simpleBrotli() {
     const response = await this.decompress({
       data: 10000,
-      encoding: 'br',
+      encoding: 'br'
     });
     assert(response);
     assert(BinaryUtil.isBinaryArray(response));
@@ -109,7 +125,7 @@ class DecompressInterceptorSuite {
   async simpleDeflate() {
     const response = await this.decompress({
       data: 10000,
-      encoding: 'deflate',
+      encoding: 'deflate'
     });
     assert(response);
     assert(BinaryUtil.isBinaryArray(response));
@@ -122,7 +138,7 @@ class DecompressInterceptorSuite {
 
     const response = await this.decompress({
       data: preCompressed,
-      encoding: 'identity',
+      encoding: 'identity'
     });
     assert(response);
     assert(BinaryUtil.isBinaryArray(response));
@@ -135,7 +151,7 @@ class DecompressInterceptorSuite {
 
     const response = await this.decompress({
       data: BinaryUtil.toReadableStream(data),
-      encoding: 'gzip',
+      encoding: 'gzip'
     });
     assert(response);
     assert(BinaryUtil.isBinaryStream(response));
@@ -151,7 +167,7 @@ class DecompressInterceptorSuite {
       () =>
         this.decompress({
           data: BinaryUtil.toReadableStream(data),
-          encoding: castTo('google'),
+          encoding: castTo('google')
         }),
       /Unsupported.*google/
     );

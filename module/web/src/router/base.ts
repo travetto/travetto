@@ -15,7 +15,6 @@ import { EndpointUtil } from '../util/endpoint.ts';
  */
 @Injectable()
 export abstract class BaseWebRouter implements WebRouter {
-
   #interceptors: WebInterceptor[];
 
   async #register(cls: Class): Promise<void> {
@@ -29,14 +28,13 @@ export abstract class BaseWebRouter implements WebRouter {
     }
 
     await this.register(endpoints, config);
-  };
+  }
 
   /**
    * Initialize router, encapsulating common patterns for standard router setup
    */
   @PostConstruct()
   async registerRoutes(): Promise<void> {
-
     this.#interceptors = await DependencyRegistryIndex.getInstances(toConcrete<WebInterceptor>());
     this.#interceptors = EndpointUtil.orderInterceptors(this.#interceptors);
     const names = this.#interceptors.map(interceptor => interceptor.constructor.name);

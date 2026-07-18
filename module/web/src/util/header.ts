@@ -3,7 +3,7 @@ import { type ByteRange, castKey, castTo } from '@travetto/runtime';
 import type { Cookie } from '../types/cookie.ts';
 import type { WebHeaders } from '../types/headers.ts';
 
-export type WebParsedHeader = { value: string, parameters: Record<string, string>, q?: number };
+export type WebParsedHeader = { value: string; parameters: Record<string, string>; q?: number };
 
 const SPLIT_EQ = /[ ]{0,10}=[ ]{0,10}/g;
 const SPLIT_COMMA = /[ ]{0,10},[ ]{0,10}/g;
@@ -14,16 +14,17 @@ const QUOTE = '"'.charCodeAt(0);
  * Web header utils
  */
 export class WebHeaderUtil {
-
   /**
    * Parse cookie header
    */
   static parseCookieHeader(header: string): Cookie[] {
     const text = header.trim();
-    return !text ? [] : text.split(SPLIT_SEMI).map(item => {
-      const [name, value] = item.split(SPLIT_EQ);
-      return { name, value };
-    });
+    return !text
+      ? []
+      : text.split(SPLIT_SEMI).map(item => {
+          const [name, value] = item.split(SPLIT_EQ);
+          return { name, value };
+        });
   }
 
   /**
@@ -63,7 +64,7 @@ export class WebHeaderUtil {
     }
     for (const part of parts) {
       const [key, partValue = ''] = part.split(SPLIT_EQ);
-      const cleanedValue = (partValue.charCodeAt(0) === QUOTE) ? partValue.slice(1, -1) : partValue;
+      const cleanedValue = partValue.charCodeAt(0) === QUOTE ? partValue.slice(1, -1) : partValue;
       item.parameters[key] = cleanedValue;
       if (key === 'q') {
         item.q = parseFloat(cleanedValue);
@@ -77,7 +78,9 @@ export class WebHeaderUtil {
    */
   static parseHeader(input: string): WebParsedHeader[] {
     const value = input.trim();
-    if (!input) { return []; }
+    if (!input) {
+      return [];
+    }
     return value.split(SPLIT_COMMA).map(part => this.parseHeaderSegment(part));
   }
 
@@ -86,14 +89,30 @@ export class WebHeaderUtil {
    */
   static buildCookieSuffix(cookie: Cookie): string[] {
     const parts = [];
-    if (cookie.path) { parts.push(`path=${cookie.path}`); }
-    if (cookie.expires) { parts.push(`expires=${cookie.expires.toUTCString()}`); }
-    if (cookie.domain) { parts.push(`domain=${cookie.domain}`); }
-    if (cookie.priority) { parts.push(`priority=${cookie.priority.toLowerCase()}`); }
-    if (cookie.sameSite) { parts.push(`samesite=${cookie.sameSite.toLowerCase()}`); }
-    if (cookie.secure) { parts.push('secure'); }
-    if (cookie.httponly) { parts.push('httponly'); }
-    if (cookie.partitioned) { parts.push('partitioned'); }
+    if (cookie.path) {
+      parts.push(`path=${cookie.path}`);
+    }
+    if (cookie.expires) {
+      parts.push(`expires=${cookie.expires.toUTCString()}`);
+    }
+    if (cookie.domain) {
+      parts.push(`domain=${cookie.domain}`);
+    }
+    if (cookie.priority) {
+      parts.push(`priority=${cookie.priority.toLowerCase()}`);
+    }
+    if (cookie.sameSite) {
+      parts.push(`samesite=${cookie.sameSite.toLowerCase()}`);
+    }
+    if (cookie.secure) {
+      parts.push('secure');
+    }
+    if (cookie.httponly) {
+      parts.push('httponly');
+    }
+    if (cookie.partitioned) {
+      parts.push('partitioned');
+    }
     return parts;
   }
 
@@ -129,10 +148,9 @@ export class WebHeaderUtil {
     }
     const { parameters } = this.parseHeaderSegment(headers.get('Range'));
     if ('bytes' in parameters) {
-      const [start, end] = parameters.bytes.split('-')
-        .map(value => value ? parseInt(value, 10) : undefined);
+      const [start, end] = parameters.bytes.split('-').map(value => (value ? parseInt(value, 10) : undefined));
       if (start !== undefined) {
-        return { start, end: end ?? (start + chunkSize) };
+        return { start, end: end ?? start + chunkSize };
       }
     }
   }

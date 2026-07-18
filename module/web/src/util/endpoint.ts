@@ -17,7 +17,6 @@ const WebQueryExpandedSymbol = Symbol();
  * Endpoint specific utilities
  */
 export class EndpointUtil {
-
   static #compareEndpoints(a: number[], b: number[]): number {
     const al = a.length;
     const bl = b.length;
@@ -40,7 +39,7 @@ export class EndpointUtil {
    * Create a full filter chain given the provided filters
    * @param filters Filters to chain
    */
-  static createFilterChain(filters: { filter: WebChainedFilter, config?: unknown }[]): WebChainedFilter {
+  static createFilterChain(filters: { filter: WebChainedFilter; config?: unknown }[]): WebChainedFilter {
     const len = filters.length - 1;
     return function filterChain(ctx: WebChainedContext, idx: number = 0): Promise<WebResponse> {
       const { filter, config } = filters[idx]!;
@@ -60,23 +59,21 @@ export class EndpointUtil {
     endpoint: EndpointConfig,
     controller?: ControllerConfig
   ): [WebInterceptor, unknown][] {
-
     const inputByClass = Map.groupBy(
-      [...controller?.interceptorConfigs ?? [], ...endpoint.interceptorConfigs ?? []],
+      [...(controller?.interceptorConfigs ?? []), ...(endpoint.interceptorConfigs ?? [])],
       entry => entry[0]
     );
 
-    const configs = new Map<Class, unknown>(interceptors.map(inst => {
-      const cls = asConstructable<WebInterceptor>(inst).constructor;
-      const inputs = (inputByClass.get(cls) ?? []).map(entry => entry[1]);
-      const config = Object.assign({}, inst.config, ...inputs);
-      return [cls, inst.finalizeConfig?.({ config, endpoint }, castTo(inputs)) ?? config];
-    }));
+    const configs = new Map<Class, unknown>(
+      interceptors.map(inst => {
+        const cls = asConstructable<WebInterceptor>(inst).constructor;
+        const inputs = (inputByClass.get(cls) ?? []).map(entry => entry[1]);
+        const config = Object.assign({}, inst.config, ...inputs);
+        return [cls, inst.finalizeConfig?.({ config, endpoint }, castTo(inputs)) ?? config];
+      })
+    );
 
-    return interceptors.map(inst => [
-      inst,
-      configs.get(asConstructable(inst).constructor)
-    ]);
+    return interceptors.map(inst => [inst, configs.get(asConstructable(inst).constructor)]);
   }
 
   /**
@@ -88,12 +85,15 @@ export class EndpointUtil {
    */
   static extractParameterValue(request: WebRequest, param: EndpointParameterConfig, name: string, isArray?: boolean): unknown {
     switch (param.location) {
-      case 'body': return request.body;
-      case 'path': return request.context.pathParams?.[name];
-      case 'header': return isArray ? request.headers.getList(name) : request.headers.get(name);
+      case 'body':
+        return request.body;
+      case 'path':
+        return request.context.pathParams?.[name];
+      case 'header':
+        return isArray ? request.headers.getList(name) : request.headers.get(name);
       case 'query': {
         const withQuery: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
-        const query = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
+        const query = (withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {}));
         return query[name];
       }
     }
@@ -111,10 +111,12 @@ export class EndpointUtil {
     } else if (param.location === 'query') {
       // TODO: Revisit the prefix logic/structure in general
       const withQuery: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
-      const query = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
-      if (param.prefix) { // Has a prefix provided
+      const query = (withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {}));
+      if (param.prefix) {
+        // Has a prefix provided
         return query[param.prefix];
-      } else if (input.type.Ⲑid) { // Is a full type
+      } else if (input.type.Ⲑid) {
+        // Is a full type
         return query;
       }
     }
@@ -135,17 +137,19 @@ export class EndpointUtil {
     const cls = endpoint.class;
     const vals = WebCommonUtil.getRequestParams(request);
     const { parameters } = SchemaRegistryIndex.get(cls).getMethod(endpoint.methodName);
-    const combined = parameters.map((config) =>
-      ({ schema: config, param: endpoint.parameters[config.index], value: vals?.[config.index] }));
+    const combined = parameters.map(config => ({ schema: config, param: endpoint.parameters[config.index], value: vals?.[config.index] }));
 
     try {
       const extracted = combined.map(({ param, schema, value }) =>
-        (value !== undefined && value !== this.MissingParamSymbol) ?
-          value :
-          this.extractParameter(request, param, schema)
+        value !== undefined && value !== this.MissingParamSymbol ? value : this.extractParameter(request, param, schema)
       );
       const params = BindUtil.coerceMethodParams(cls, endpoint.methodName, extracted);
-      await SchemaValidator.validateMethod(cls, endpoint.methodName, params, endpoint.parameters.map(paramConfig => paramConfig.prefix));
+      await SchemaValidator.validateMethod(
+        cls,
+        endpoint.methodName,
+        params,
+        endpoint.parameters.map(paramConfig => paramConfig.prefix)
+      );
       return params;
     } catch (error) {
       if (error instanceof ValidationResultError) {
@@ -172,7 +176,9 @@ export class EndpointUtil {
       const headers = endpoint.finalizedResponseHeaders;
       let response: WebResponse;
       if (body instanceof WebResponse) {
-        for (const [key, value] of headers) { body.headers.setIfAbsent(key, value); }
+        for (const [key, value] of headers) {
+          body.headers.setIfAbsent(key, value);
+        }
         // Rewrite context
         Object.assign(body.context, { ...endpoint.responseContext, ...body.context });
         response = body;
@@ -191,28 +197,21 @@ export class EndpointUtil {
    * @param endpoint The endpoint to call
    * @param controller The controller to tie to
    */
-  static createEndpointHandler(
-    interceptors: WebInterceptor[],
-    endpoint: EndpointConfig,
-    controller?: ControllerConfig
-  ): WebFilter {
-
+  static createEndpointHandler(interceptors: WebInterceptor[], endpoint: EndpointConfig, controller?: ControllerConfig): WebFilter {
     // Filter interceptors if needed
     for (const filter of [controller?.interceptorExclude, endpoint.interceptorExclude]) {
       interceptors = filter ? interceptors.filter(interceptor => !filter(interceptor)) : interceptors;
     }
 
-    const interceptorFilters =
-      this.resolveInterceptorsWithConfig(interceptors, endpoint, controller)
-        .filter(([inst, config]) => inst.applies?.({ endpoint, config }) ?? true)
-        .map(([inst, config]) => ({ filter: inst.filter.bind(inst), config }));
+    const interceptorFilters = this.resolveInterceptorsWithConfig(interceptors, endpoint, controller)
+      .filter(([inst, config]) => inst.applies?.({ endpoint, config }) ?? true)
+      .map(([inst, config]) => ({ filter: inst.filter.bind(inst), config }));
 
     const endpointFilters = [
       ...(controller?.filters ?? []).map(fn => fn.bind(controller?.instance)),
       ...(endpoint.filters ?? []).map(fn => fn.bind(endpoint.instance)),
-      ...(endpoint.parameters.filter(config => config.resolve).map(fn => fn.resolve!))
-    ]
-      .map(fn => ({ filter: fn }));
+      ...endpoint.parameters.filter(config => config.resolve).map(fn => fn.resolve!)
+    ].map(fn => ({ filter: fn }));
 
     const result = this.createFilterChain([
       ...interceptorFilters,
@@ -230,16 +229,18 @@ export class EndpointUtil {
     const config = ControllerRegistryIndex.getConfig(cls);
 
     // Skip registering conditional controllers
-    if (config.conditional && !await config.conditional()) {
+    if (config.conditional && !(await config.conditional())) {
       return [];
     }
 
     config.instance = await DependencyRegistryIndex.getInstance(config.class);
 
     // Filter out conditional endpoints
-    const endpoints = (await Promise.all(
-      config.endpoints.map(endpoint => Promise.resolve(endpoint.conditional?.() ?? true).then(value => value ? endpoint : undefined))
-    )).filter(endpoint => !!endpoint);
+    const endpoints = (
+      await Promise.all(
+        config.endpoints.map(endpoint => Promise.resolve(endpoint.conditional?.() ?? true).then(value => (value ? endpoint : undefined)))
+      )
+    ).filter(endpoint => !!endpoint);
 
     if (!endpoints.length) {
       return [];
@@ -259,10 +260,10 @@ export class EndpointUtil {
     return endpoints
       .map(endpoint => {
         const parts = endpoint.path.replace(/^[/]|[/]$/g, '').split('/');
-        return [endpoint, parts.map(part => /[*]/.test(part) ? 1 : /:/.test(part) ? 2 : 3)] as const;
+        return [endpoint, parts.map(part => (/[*]/.test(part) ? 1 : /:/.test(part) ? 2 : 3))] as const;
       })
       .toSorted((a, b) => this.#compareEndpoints(a[1], b[1]) || a[0].path.localeCompare(b[0].path))
-      .map(([endpoint,]) => endpoint);
+      .map(([endpoint]) => endpoint);
   }
 
   /**
@@ -272,16 +273,16 @@ export class EndpointUtil {
     const categoryList = WEB_INTERCEPTOR_CATEGORIES.map(category => ({
       key: category,
       start: castTo<Class<WebInterceptor>>({ name: `${category}Start` }),
-      end: castTo<Class<WebInterceptor>>({ name: `${category}End` }),
+      end: castTo<Class<WebInterceptor>>({ name: `${category}End` })
     }));
 
     const categoryMapping = TypedObject.fromEntries(categoryList.map(category => [category.key, category]));
 
     const ordered = instances.map(category => {
       const group = categoryMapping[category.category];
-      const after = [...category.dependsOn ?? [], group.start];
-      const before = [...category.runsBefore ?? [], group.end];
-      return ({ key: category.constructor, before, after, target: category, placeholder: false });
+      const after = [...(category.dependsOn ?? []), group.start];
+      const before = [...(category.runsBefore ?? []), group.end];
+      return { key: category.constructor, before, after, target: category, placeholder: false };
     });
 
     // Add category sets into the ordering
@@ -296,7 +297,7 @@ export class EndpointUtil {
     }
 
     return WebCommonUtil.ordered(ordered)
-      .filter(category => !category.placeholder)  // Drop out the placeholders
+      .filter(category => !category.placeholder) // Drop out the placeholders
       .map(category => category.target);
   }
 }

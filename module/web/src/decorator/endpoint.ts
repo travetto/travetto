@@ -26,7 +26,7 @@ function HttpEndpoint(method: HttpMethod, path: string): EndpointFunctionDecorat
     cacheable,
     httpMethod: method,
     responseFinalizer: value => {
-      value.context.httpStatusCode ??= (value.body === null || value.body === undefined || value.body === '') ? emptyStatusCode : 200;
+      value.context.httpStatusCode ??= value.body === null || value.body === undefined || value.body === '' ? emptyStatusCode : 200;
       return value;
     }
   });
@@ -38,46 +38,60 @@ function HttpEndpoint(method: HttpMethod, path: string): EndpointFunctionDecorat
  * @augments `@travetto/schema:Method`
  * @kind decorator
  */
-export function Get(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('GET', path); }
+export function Get(path = '/'): EndpointFunctionDecorator {
+  return HttpEndpoint('GET', path);
+}
 /**
  * Registers POST requests
  * @param path The endpoint path for the request
  * @augments `@travetto/schema:Method`
  * @kind decorator
  */
-export function Post(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('POST', path); }
+export function Post(path = '/'): EndpointFunctionDecorator {
+  return HttpEndpoint('POST', path);
+}
 /**
  * Registers PUT requests
  * @param path The endpoint path for the request
  * @augments `@travetto/schema:Method`
  * @kind decorator
  */
-export function Put(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('PUT', path); }
+export function Put(path = '/'): EndpointFunctionDecorator {
+  return HttpEndpoint('PUT', path);
+}
 /**
  * Registers PATCH requests
  * @param path The endpoint path for the request
  * @augments `@travetto/schema:Method`
  * @kind decorator
  */
-export function Patch(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('PATCH', path); }
+export function Patch(path = '/'): EndpointFunctionDecorator {
+  return HttpEndpoint('PATCH', path);
+}
 /**
  * Registers DELETE requests
  * @param path The endpoint path for the request
  * @augments `@travetto/schema:Method`
  * @kind decorator
  */
-export function Delete(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('DELETE', path); }
+export function Delete(path = '/'): EndpointFunctionDecorator {
+  return HttpEndpoint('DELETE', path);
+}
 /**
  * Registers HEAD requests
  * @param path The endpoint path for the request
  * @augments `@travetto/schema:Method`
  * @kind decorator
  */
-export function Head(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('HEAD', path); }
+export function Head(path = '/'): EndpointFunctionDecorator {
+  return HttpEndpoint('HEAD', path);
+}
 /**
  * Registers OPTIONS requests
  * @param path The endpoint path for the request
  * @augments `@travetto/schema:Method`
  * @kind decorator
  */
-export function Options(path = '/'): EndpointFunctionDecorator { return HttpEndpoint('OPTIONS', path); }
+export function Options(path = '/'): EndpointFunctionDecorator {
+  return HttpEndpoint('OPTIONS', path);
+}

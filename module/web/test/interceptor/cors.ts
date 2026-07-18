@@ -6,7 +6,6 @@ import { Registry } from '@travetto/registry';
 
 @Suite()
 class CorsInterceptorSuite {
-
   @BeforeAll()
   async init() {
     await Registry.init();
@@ -14,7 +13,6 @@ class CorsInterceptorSuite {
 
   @Test()
   async basicTest() {
-
     const interceptor = new CorsInterceptor();
     interceptor.config = CorsConfig.from({});
     interceptor.finalizeConfig({ config: interceptor.config, endpoint: undefined! });
@@ -29,10 +27,7 @@ class CorsInterceptorSuite {
     assert(response.headers.get('Access-Control-Allow-Origin') === '*');
 
     assert(response.headers.has('Access-Control-Allow-Methods'));
-    assert.deepStrictEqual(
-      response.headers.getList('Access-Control-Allow-Methods'),
-      Object.keys(HTTP_METHODS)
-    );
+    assert.deepStrictEqual(response.headers.getList('Access-Control-Allow-Methods'), Object.keys(HTTP_METHODS));
 
     assert(response.headers.has('Access-Control-Allow-Headers'));
     assert(response.headers.get('Access-Control-Allow-Headers') === '*');
@@ -56,13 +51,12 @@ class CorsInterceptorSuite {
 
   @Test()
   async customized() {
-
     const interceptor = new CorsInterceptor();
     interceptor.config = CorsConfig.from({
       methods: ['GET', 'PATCH'],
       origins: ['google.com', 'boogle.com'],
       headers: ['Content-Type', 'Accept'],
-      credentials: true,
+      credentials: true
     });
     interceptor.finalizeConfig({ config: interceptor.config, endpoint: undefined! });
 
@@ -80,10 +74,7 @@ class CorsInterceptorSuite {
     assert.deepStrictEqual(response.headers.getList('Access-Control-Allow-Origin'), ['google.com']);
 
     assert(response.headers.has('Access-Control-Allow-Methods'));
-    assert.deepStrictEqual(
-      response.headers.getList('Access-Control-Allow-Methods'),
-      ['GET', 'PATCH']
-    );
+    assert.deepStrictEqual(response.headers.getList('Access-Control-Allow-Methods'), ['GET', 'PATCH']);
 
     assert(response.headers.has('Access-Control-Allow-Headers'));
     assert.deepStrictEqual(response.headers.getList('Access-Control-Allow-Headers'), ['Content-Type', 'Accept']);
@@ -94,13 +85,12 @@ class CorsInterceptorSuite {
 
   @Test()
   async unsupportedOrigin() {
-
     const interceptor = new CorsInterceptor();
     interceptor.config = CorsConfig.from({
       methods: ['GET', 'PATCH'],
       origins: ['google.com', 'boogle.com'],
       headers: ['Content-Type', 'Accept'],
-      credentials: true,
+      credentials: true
     });
     interceptor.finalizeConfig({ config: interceptor.config, endpoint: undefined! });
 

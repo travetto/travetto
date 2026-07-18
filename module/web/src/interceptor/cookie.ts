@@ -59,7 +59,6 @@ export class CookieConfig implements CookieSetOptions {
  */
 @Injectable()
 export class CookieInterceptor implements WebInterceptor<CookieConfig> {
-
   #cookieJar = new AsyncContextValue<CookieJar>(this);
 
   keyGrip: KeyGrip;
@@ -101,7 +100,9 @@ export class CookieInterceptor implements WebInterceptor<CookieConfig> {
     this.#cookieJar.set(jar);
 
     const response = await next();
-    for (const cookie of await jar.exportSetCookieHeader()) { response.headers.append('Set-Cookie', cookie); }
+    for (const cookie of await jar.exportSetCookieHeader()) {
+      response.headers.append('Set-Cookie', cookie);
+    }
     return response;
   }
 }

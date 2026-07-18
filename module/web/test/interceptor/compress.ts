@@ -9,13 +9,17 @@ import { BinaryUtil, type BinaryType, CodecUtil } from '@travetto/runtime';
 
 @Suite()
 class CompressInterceptorSuite {
-
   @BeforeAll()
   async init() {
     await Registry.init();
   }
 
-  async compress({ size, stream, requestHeaders, responseHeaders }: {
+  async compress({
+    size,
+    stream,
+    requestHeaders,
+    responseHeaders
+  }: {
     size: number;
     requestHeaders?: Record<string, string>;
     responseHeaders?: Record<string, string>;
@@ -34,7 +38,7 @@ class CompressInterceptorSuite {
         request: new WebRequest({
           context: {
             path: '/',
-            httpMethod: 'POST',
+            httpMethod: 'POST'
           },
           headers: requestHeaders
         }),
@@ -82,7 +86,7 @@ class CompressInterceptorSuite {
 
     const response2 = await this.compress({
       size: 50000,
-      requestHeaders: { 'Accept-Encoding': 'identity' },
+      requestHeaders: { 'Accept-Encoding': 'identity' }
     });
     assert(BinaryUtil.isBinaryArray(response2.body));
     assert(response2.body.byteLength === 50000);

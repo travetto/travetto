@@ -9,7 +9,6 @@ class User {
 
 @Controller('/user')
 class UserController {
-
   private service: {
     update(user: User): Promise<User>;
   };

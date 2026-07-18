@@ -19,7 +19,6 @@ const DEFAULT_HTTP_METHOD = 'POST';
  */
 @Injectable()
 export class StandardWebRouter extends BaseWebRouter {
-
   @Inject()
   config: WebConfig;
 
@@ -29,7 +28,7 @@ export class StandardWebRouter extends BaseWebRouter {
   async register(endpoints: EndpointConfig[]): Promise<void> {
     for (const endpoint of endpoints) {
       const fullPath = endpoint.fullPath.replace(/[*][^*]+/g, '*'); // Flatten wildcards
-      const handler = (): void => { };
+      const handler = (): void => {};
       this.#cache.set(handler, endpoint);
       this.raw[HTTP_METHODS[endpoint.httpMethod ?? DEFAULT_HTTP_METHOD].lower](fullPath, handler);
     }
@@ -44,7 +43,7 @@ export class StandardWebRouter extends BaseWebRouter {
     const endpoint = this.#cache.get(handler!);
     if (!endpoint) {
       return new WebResponse({
-        body: new RuntimeError(`Unknown endpoint ${httpMethod} ${request.context.path}`, { category: 'notfound' }),
+        body: new RuntimeError(`Unknown endpoint ${httpMethod} ${request.context.path}`, { category: 'notfound' })
       });
     }
     Object.assign(request.context, { pathParams: params });

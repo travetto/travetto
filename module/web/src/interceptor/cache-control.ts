@@ -21,7 +21,6 @@ export class CacheControlConfig {
  */
 @Injectable()
 export class CacheControlInterceptor implements WebInterceptor {
-
   category: WebInterceptorCategory = 'response';
   dependsOn = [EtagInterceptor];
 

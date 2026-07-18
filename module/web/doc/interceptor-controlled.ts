@@ -3,7 +3,6 @@ import { Injectable } from '@travetto/di';
 
 @Injectable()
 export class SimpleAuthInterceptor implements WebInterceptor {
-
   category: WebInterceptorCategory = 'terminal';
 
   async filter(ctx: WebChainedContext) {

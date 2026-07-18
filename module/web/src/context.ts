@@ -9,7 +9,6 @@ import { WebRequest } from './types/request.ts';
  */
 @Injectable()
 export class WebAsyncContext {
-
   #request = new AsyncContextValue<WebRequest>(this);
   #byType = new Map<string, () => unknown>();
 

@@ -3,16 +3,11 @@ import { Controller, Get, QueryParam, ConfigureInterceptor, CorsInterceptor, Exc
 @Controller('/allowDeny')
 @ConfigureInterceptor(CorsInterceptor, { applies: true })
 export class AlowDenyController {
-
   @Get('/override')
   @ConfigureInterceptor(CorsInterceptor, { applies: false })
-  withoutCors(@QueryParam() value: string) {
-
-  }
+  withoutCors(@QueryParam() value: string) {}
 
   @Get('/raw')
   @ExcludeInterceptors(({ category }) => category === 'response')
-  withoutResponse(@QueryParam() value: string) {
-
-  }
+  withoutResponse(@QueryParam() value: string) {}
 }

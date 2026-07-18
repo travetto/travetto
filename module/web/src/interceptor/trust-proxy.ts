@@ -21,7 +21,6 @@ export class TrustProxyConfig {
 
 @Injectable()
 export class TrustProxyInterceptor implements WebInterceptor<TrustProxyConfig> {
-
   category: WebInterceptorCategory = 'pre-request';
 
   @Inject()

@@ -16,7 +16,8 @@ class BigIntModel {
 
 @Schema()
 class BigIntRangeModel {
-  @Min(0n) @Max(1000n)
+  @Min(0n)
+  @Max(1000n)
   amount: bigint;
 }
 
@@ -89,7 +90,7 @@ class BigIntWebTest extends BaseWebSuite {
   @Test()
   async testBigIntInBody() {
     // Send bigint as string with 'n' suffix (the format the server sends)
-    const response1 = await this.request<{ id: string, value: string, name: string }>({
+    const response1 = await this.request<{ id: string; value: string; name: string }>({
       context: { httpMethod: 'POST', path: '/test/bigint/model' },
       body: { id: '123n', value: '456789012345678901234567890n', name: 'test' }
     });
@@ -101,7 +102,7 @@ class BigIntWebTest extends BaseWebSuite {
     assert.strictEqual(response1.body.name, 'test');
 
     // Send bigint as numeric string (without 'n' suffix)
-    const response2 = await this.request<{ id: string, value: string, name: string }>({
+    const response2 = await this.request<{ id: string; value: string; name: string }>({
       context: { httpMethod: 'POST', path: '/test/bigint/model' },
       body: { id: '999', value: '123456789012345', name: 'test2' }
     });
@@ -112,7 +113,7 @@ class BigIntWebTest extends BaseWebSuite {
     assert.strictEqual(response2.body.name, 'test2');
 
     // Send bigint as number (for values within safe integer range)
-    const response3 = await this.request<{ id: string, value: string, name: string }>({
+    const response3 = await this.request<{ id: string; value: string; name: string }>({
       context: { httpMethod: 'POST', path: '/test/bigint/model' },
       body: { id: 42, value: 9007199254740991, name: 'test3' }
     });
@@ -241,19 +242,25 @@ class BigIntWebTest extends BaseWebSuite {
     assert.strictEqual(response1.body.amount, 500n);
 
     // Below minimum
-    const response2 = await this.request<{ message: string }>({
-      context: { httpMethod: 'POST', path: '/test/bigint/range' },
-      body: { amount: '-10n' }
-    }, false);
+    const response2 = await this.request<{ message: string }>(
+      {
+        context: { httpMethod: 'POST', path: '/test/bigint/range' },
+        body: { amount: '-10n' }
+      },
+      false
+    );
 
     assert.strictEqual(response2.context.httpStatusCode, 400);
     assert(/Validation errors/.test(response2.body?.message ?? ''));
 
     // Above maximum
-    const response3 = await this.request<{ message: string }>({
-      context: { httpMethod: 'POST', path: '/test/bigint/range' },
-      body: { amount: '2000n' }
-    }, false);
+    const response3 = await this.request<{ message: string }>(
+      {
+        context: { httpMethod: 'POST', path: '/test/bigint/range' },
+        body: { amount: '2000n' }
+      },
+      false
+    );
 
     assert.strictEqual(response3.context.httpStatusCode, 400);
     assert(/Validation errors/.test(response3.body?.message ?? ''));
@@ -262,7 +269,7 @@ class BigIntWebTest extends BaseWebSuite {
   @Test()
   async testBigIntOptional() {
     // With both values
-    const response1 = await this.request<{ required: string, optional?: string }>({
+    const response1 = await this.request<{ required: string; optional?: string }>({
       context: { httpMethod: 'POST', path: '/test/bigint/optional' },
       body: { required: '100n', optional: '200n' }
     });
@@ -272,7 +279,7 @@ class BigIntWebTest extends BaseWebSuite {
     assert.strictEqual(response1.body.optional, 200n);
 
     // Without optional
-    const response2 = await this.request<{ required: string, optional?: string }>({
+    const response2 = await this.request<{ required: string; optional?: string }>({
       context: { httpMethod: 'POST', path: '/test/bigint/optional' },
       body: { required: '100n' }
     });
@@ -282,10 +289,13 @@ class BigIntWebTest extends BaseWebSuite {
     assert(response2.body.optional === undefined);
 
     // Missing required
-    const response3 = await this.request<{ message: string }>({
-      context: { httpMethod: 'POST', path: '/test/bigint/optional' },
-      body: { optional: '200n' }
-    }, false);
+    const response3 = await this.request<{ message: string }>(
+      {
+        context: { httpMethod: 'POST', path: '/test/bigint/optional' },
+        body: { optional: '200n' }
+      },
+      false
+    );
 
     assert.strictEqual(response3.context.httpStatusCode, 400);
     assert(/Validation errors/.test(response3.body?.message ?? ''));
@@ -293,7 +303,7 @@ class BigIntWebTest extends BaseWebSuite {
 
   @Test()
   async testMixedTypes() {
-    const response = await this.request<{ bigIntValue: string, numberValue: number, stringValue: string, booleanValue: boolean }>({
+    const response = await this.request<{ bigIntValue: string; numberValue: number; stringValue: string; booleanValue: boolean }>({
       context: { httpMethod: 'POST', path: '/test/bigint/mixed' },
       body: {
         bigIntValue: '9007199254740991n',
@@ -313,19 +323,25 @@ class BigIntWebTest extends BaseWebSuite {
   @Test()
   async testBigIntInvalidValues() {
     // Invalid bigint value (decimal)
-    const response1 = await this.request<{ message: string }>({
-      context: { httpMethod: 'POST', path: '/test/bigint/model' },
-      body: { id: '123.45', value: '1n', name: 'test' }
-    }, false);
+    const response1 = await this.request<{ message: string }>(
+      {
+        context: { httpMethod: 'POST', path: '/test/bigint/model' },
+        body: { id: '123.45', value: '1n', name: 'test' }
+      },
+      false
+    );
 
     assert.strictEqual(response1.context.httpStatusCode, 400);
     assert(/Validation errors/.test(response1.body?.message ?? ''));
 
     // Invalid bigint value (non-numeric)
-    const response2 = await this.request<{ message: string }>({
-      context: { httpMethod: 'POST', path: '/test/bigint/model' },
-      body: { id: 'abc', value: '1n', name: 'test' }
-    }, false);
+    const response2 = await this.request<{ message: string }>(
+      {
+        context: { httpMethod: 'POST', path: '/test/bigint/model' },
+        body: { id: 'abc', value: '1n', name: 'test' }
+      },
+      false
+    );
 
     assert.strictEqual(response2.context.httpStatusCode, 400);
     assert(/Validation errors/.test(response2.body?.message ?? ''));
@@ -336,7 +352,7 @@ class BigIntWebTest extends BaseWebSuite {
     // Very large bigint that exceeds Number.MAX_SAFE_INTEGER
     const largeValue = '99999999999999999999999999999n';
 
-    const response = await this.request<{ id: string, value: string, name: string }>({
+    const response = await this.request<{ id: string; value: string; name: string }>({
       context: { httpMethod: 'POST', path: '/test/bigint/model' },
       body: { id: '1n', value: largeValue, name: 'large' }
     });
@@ -350,7 +366,7 @@ class BigIntWebTest extends BaseWebSuite {
   @Test()
   async testBigIntResponseSerialization() {
     // Test that bigint values in responses are serialized with 'n' suffix
-    const response = await this.request<{ id: string, value: string, name: string }>({
+    const response = await this.request<{ id: string; value: string; name: string }>({
       context: { httpMethod: 'POST', path: '/test/bigint/model' },
       body: { id: '123n', value: '456n', name: 'test' }
     });
