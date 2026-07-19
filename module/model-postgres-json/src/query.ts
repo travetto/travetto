@@ -156,19 +156,22 @@ export class PostgresJsonQueryCompiler {
     }
 
     const accessorSql = (columnName: string, pathSegments: string[], isJsonb: boolean): string => {
-      if (pathSegments.length === 0) {
-        return `"${columnName}"`;
+      const escapedColumn = columnName.replaceAll('"', '""');
+      const escapedSegments = pathSegments.map(segment => segment.replaceAll("'", "''"));
+
+      if (escapedSegments.length === 0) {
+        return `"${escapedColumn}"`;
       }
       if (isJsonb) {
-        const parts = pathSegments.map(segment => `->'${segment}'`).join('');
-        return `("${columnName}"${parts})`;
+        const parts = escapedSegments.map(segment => `->'${segment}'`).join('');
+        return `("${escapedColumn}"${parts})`;
       } else {
-        const body = pathSegments
+        const body = escapedSegments
           .slice(0, -1)
           .map(segment => `->'${segment}'`)
           .join('');
-        const leaf = pathSegments[pathSegments.length - 1];
-        return `("${columnName}"${body}->>'${leaf}')`;
+        const leaf = escapedSegments[escapedSegments.length - 1];
+        return `("${escapedColumn}"${body}->>'${leaf}')`;
       }
     };
 
