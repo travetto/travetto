@@ -1,6 +1,10 @@
-import { ModelRegistryIndex } from '@travetto/model';
+import { ModelRegistryIndex, type ModelType } from '@travetto/model';
+import type { WhereClause } from '@travetto/model-query';
 import { type Class, castTo } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
+
+import { PostgresJsonQueryCompiler } from './query.ts';
+import { PostgresJsonTableManager } from './table-manager.ts';
 
 export interface FieldClassification {
   simpleFields: SchemaFieldConfig[];
@@ -92,5 +96,24 @@ export class PostgresJsonUtil {
     }
 
     return 'JSONB';
+  }
+
+  /**
+   * Compiles the where clause of a query and returns the compiled SQL, parameter values, and compiler instance.
+   */
+  static compileWhere<T extends ModelType>(
+    modelClass: Class<T>,
+    where?: WhereClause<T>
+  ): { whereSQL: string; parameters: unknown[]; compiler: PostgresJsonQueryCompiler } {
+    const tableName = PostgresJsonTableManager.getTableName(modelClass);
+    const classification = PostgresJsonUtil.classifyFields(modelClass);
+    const simpleFieldsSet = new Set(classification.simpleFields.map(field => field.name));
+    const compiler = new PostgresJsonQueryCompiler(modelClass, tableName, simpleFieldsSet);
+    const result = compiler.compile(castTo(where));
+    return {
+      whereSQL: result.whereSQL,
+      parameters: result.parameters,
+      compiler
+    };
   }
 }

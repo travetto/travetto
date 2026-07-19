@@ -283,11 +283,7 @@ export class PostgresJsonModelService
     const where = castTo<WhereClause<T>>(computed.project({ sort: true, includeId: true }));
 
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const classification = PostgresJsonUtil.classifyFields(modelClass);
-    const simpleFieldsSet = new Set(classification.simpleFields.map(field => field.name));
-    const compiler = new PostgresJsonQueryCompiler(modelClass, tableName, simpleFieldsSet);
-
-    const { whereSQL, parameters } = compiler.compile(where);
+    const { whereSQL, parameters } = PostgresJsonUtil.compileWhere(modelClass, where);
     const sql = `SELECT "id" FROM "${tableName}" WHERE ${whereSQL};`;
 
     const result = await this.connection.execute<{ id: string }>(sql, parameters);
@@ -460,12 +456,8 @@ export class PostgresJsonModelService
   // Query Support
   async query<T extends ModelType>(modelClass: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const classification = PostgresJsonUtil.classifyFields(modelClass);
-    const simpleFieldsSet = new Set(classification.simpleFields.map(field => field.name));
-    const compiler = new PostgresJsonQueryCompiler(modelClass, tableName, simpleFieldsSet);
-
     const where = ModelQueryUtil.getWhereClause(modelClass, query.where);
-    const { whereSQL, parameters } = compiler.compile(where);
+    const { whereSQL, parameters, compiler } = PostgresJsonUtil.compileWhere(modelClass, where);
 
     let sortSQL = '';
     if (query.sort) {
@@ -501,12 +493,8 @@ export class PostgresJsonModelService
 
   async queryCount<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const classification = PostgresJsonUtil.classifyFields(modelClass);
-    const simpleFieldsSet = new Set(classification.simpleFields.map(field => field.name));
-    const compiler = new PostgresJsonQueryCompiler(modelClass, tableName, simpleFieldsSet);
-
     const where = ModelQueryUtil.getWhereClause(modelClass, query.where);
-    const { whereSQL, parameters } = compiler.compile(where);
+    const { whereSQL, parameters } = PostgresJsonUtil.compileWhere(modelClass, where);
     const sql = `SELECT COUNT(*) as "total" FROM "${tableName}" ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
 
     const result = await this.connection.execute<{ total: string | number }>(sql, parameters);
@@ -547,12 +535,8 @@ export class PostgresJsonModelService
 
   async deleteByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const classification = PostgresJsonUtil.classifyFields(modelClass);
-    const simpleFieldsSet = new Set(classification.simpleFields.map(field => field.name));
-    const compiler = new PostgresJsonQueryCompiler(modelClass, tableName, simpleFieldsSet);
-
     const where = ModelQueryUtil.getWhereClause(modelClass, query.where);
-    const { whereSQL, parameters } = compiler.compile(where);
+    const { whereSQL, parameters } = PostgresJsonUtil.compileWhere(modelClass, where);
     const sql = `DELETE FROM "${tableName}" ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
 
     const result = await this.connection.execute(sql, parameters);
@@ -566,13 +550,9 @@ export class PostgresJsonModelService
     query?: ModelQuery<T>
   ): Promise<ModelQueryFacet[]> {
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const classification = PostgresJsonUtil.classifyFields(modelClass);
-    const simpleFieldsSet = new Set(classification.simpleFields.map(f => f.name));
-    const compiler = new PostgresJsonQueryCompiler(modelClass, tableName, simpleFieldsSet);
-
-    const { sqlPath } = compiler.resolvePath(String(field).split('.'));
     const where = ModelQueryUtil.getWhereClause(modelClass, query?.where);
-    const { whereSQL, parameters } = compiler.compile(where);
+    const { whereSQL, parameters, compiler } = PostgresJsonUtil.compileWhere(modelClass, where);
+    const { sqlPath } = compiler.resolvePath(String(field).split('.'));
 
     const conditions = [`${sqlPath} IS NOT NULL`];
     if (whereSQL) {
