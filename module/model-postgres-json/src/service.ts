@@ -450,7 +450,7 @@ export class PostgresJsonModelService
   async query<T extends ModelType>(modelClass: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(modelClass, query);
     const context = this.#getContext(modelClass);
-    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context);
+    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context, query.where);
     const sortSQL = PostgresJsonQueryCompiler.compileSort(context, query.sort);
 
     let pagination = '';
