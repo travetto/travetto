@@ -37,7 +37,8 @@ export class PostgresJsonQueryCompiler {
    */
   compile(where?: WhereClause<unknown>): string {
     this.#parameters = [];
-    return this.compileClause(castTo(where));
+    const resolvedWhere = ModelQueryUtil.getWhereClause(this.#modelClass, castTo(where));
+    return this.compileClause(resolvedWhere);
   }
 
   /**
