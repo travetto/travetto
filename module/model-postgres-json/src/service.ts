@@ -44,9 +44,8 @@ import {
   type WhereClause
 } from '@travetto/model-query';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
-import { SchemaRegistryIndex } from '@travetto/schema';
 
-import type { PostgresJsonConnection } from './connection.ts';
+import { type PostgresJsonConnection, Transactional } from './connection.ts';
 import { PostgresJsonQueryCompiler } from './query.ts';
 import { PostgresJsonTableManager } from './table-manager.ts';
 import { PostgresJsonUtil, type TableContext } from './util.ts';
@@ -80,6 +79,53 @@ export class PostgresJsonModelService
 
   #getContext<T extends ModelType>(modelClass: Class<T>): TableContext<T> {
     return PostgresJsonUtil.getContext(modelClass, this.connection.config.namespace);
+  }
+
+  #compilePartialUpdate<T extends ModelType>(context: TableContext<T>, preparedData: Partial<T>): { sets: string[]; values: unknown[] } {
+    const sets: string[] = [];
+    const values: unknown[] = [];
+
+    for (const [fieldName, val] of Object.entries(preparedData)) {
+      const simpleField = context.simpleFields.get(fieldName);
+      if (simpleField) {
+        sets.push(`${PostgresJsonUtil.escapeIdentifier(fieldName)} = $${values.length + 1}`);
+        values.push(val === undefined || val === null ? null : val);
+        continue;
+      }
+
+      const complexField = context.complexFields.get(fieldName);
+      if (complexField) {
+        sets.push(`${PostgresJsonUtil.escapeIdentifier(fieldName)} = $${values.length + 1}`);
+        values.push(val !== undefined && val !== null ? JSONUtil.toUTF8(val) : null);
+      }
+    }
+    return { sets, values };
+  }
+
+  async #executeUpdatePartial<T extends ModelType>(
+    modelClass: Class<T>,
+    where: WhereClause<T>,
+    data: Partial<T>,
+    returning: boolean,
+    view?: string
+  ): Promise<{ count: number; records: Record<string, unknown>[] }> {
+    const preparedData = await ModelCrudUtil.prePartialUpdate(modelClass, data, view);
+
+    const context = this.#getContext(modelClass);
+    const { sets, values } = this.#compilePartialUpdate(context, preparedData);
+    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context, where);
+
+    const conditions: string[] = [];
+    if (whereSQL) {
+      const offset = values.length;
+      const shiftedWhereSQL = whereSQL.replaceAll(/[$](\d+)/g, (_, num) => `$${Number(num) + offset}`);
+      conditions.push(shiftedWhereSQL);
+      values.push(...parameters);
+    }
+
+    const sql = `UPDATE ${PostgresJsonUtil.escapeIdentifier(context.tableName)} SET ${sets.join(', ')} ${conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''}${returning ? ' RETURNING *' : ''};`;
+
+    return await this.connection.execute<Record<string, unknown>>(sql, values);
   }
 
   @PostConstruct()
@@ -133,13 +179,13 @@ export class PostgresJsonModelService
     const columns: string[] = [];
     const values: unknown[] = [];
 
-    for (const field of context.simpleFields) {
+    for (const field of context.simpleFields.values()) {
       columns.push(PostgresJsonUtil.escapeIdentifier(field.name));
       const val = rawItem[field.name];
       values.push(val === undefined || val === null ? null : val);
     }
 
-    for (const field of context.complexFields) {
+    for (const field of context.complexFields.values()) {
       columns.push(PostgresJsonUtil.escapeIdentifier(field.name));
       const value = rawItem[field.name];
       values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
@@ -161,7 +207,7 @@ export class PostgresJsonModelService
     const sets: string[] = [];
     const values: unknown[] = [];
 
-    for (const field of context.simpleFields) {
+    for (const field of context.simpleFields.values()) {
       if (field.name === 'id') {
         continue;
       }
@@ -170,7 +216,7 @@ export class PostgresJsonModelService
       values.push(val === undefined || val === null ? null : val);
     }
 
-    for (const field of context.complexFields) {
+    for (const field of context.complexFields.values()) {
       sets.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = $${values.length + 1}`);
       const value = rawItem[field.name];
       values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
@@ -197,7 +243,7 @@ export class PostgresJsonModelService
     const values: unknown[] = [];
     const updates: string[] = [];
 
-    for (const field of context.simpleFields) {
+    for (const field of context.simpleFields.values()) {
       columns.push(PostgresJsonUtil.escapeIdentifier(field.name));
       const val = rawItem[field.name];
       values.push(val === undefined || val === null ? null : val);
@@ -206,7 +252,7 @@ export class PostgresJsonModelService
       }
     }
 
-    for (const field of context.complexFields) {
+    for (const field of context.complexFields.values()) {
       columns.push(PostgresJsonUtil.escapeIdentifier(field.name));
       const value = rawItem[field.name];
       values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
@@ -227,8 +273,14 @@ export class PostgresJsonModelService
 
   async updatePartial<T extends ModelType>(modelClass: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
     ModelCrudUtil.ensureNotSubType(modelClass);
-    const fullItem = await ModelCrudUtil.naivePartialUpdate(modelClass, () => this.get(modelClass, item.id), item, view);
-    return this.update(modelClass, fullItem);
+
+    const result = await this.#executeUpdatePartial(modelClass, castTo({ id: item.id }), item, true, view);
+
+    if (result.count === 0) {
+      throw new NotFoundError(modelClass, item.id);
+    }
+
+    return await ModelCrudUtil.load(modelClass, result.records[0]);
   }
 
   async delete<T extends ModelType>(modelClass: Class<T>, id: string): Promise<void> {
@@ -334,12 +386,21 @@ export class PostgresJsonModelService
     indexConfig: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(
-      modelClass,
-      () => this.getByIndex(modelClass, indexConfig, castTo(body)),
-      castTo(body)
-    );
-    return this.update(modelClass, item);
+    ModelCrudUtil.ensureNotSubType(modelClass);
+
+    const computed = ModelIndexedComputedIndex.get(indexConfig, castTo(body)).validate({ sort: true });
+    const where: WhereClause<T> = castTo(computed.project({ sort: true, includeId: true }));
+
+    const result = await this.#executeUpdatePartial(modelClass, where, castTo(body), true);
+
+    if (result.count === 0) {
+      throw new NotFoundError(`${modelClass.name} Index=${indexConfig}`, computed.getKey());
+    }
+    if (result.count > 1) {
+      throw new Error(`Multiple items found for index lookup ${modelClass.name} Index=${indexConfig}`);
+    }
+
+    return await ModelCrudUtil.load(modelClass, result.records[0]);
   }
 
   async *listByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
@@ -355,7 +416,7 @@ export class PostgresJsonModelService
 
     // Apply sorting template criteria
     const sortClauses = indexConfig.sortTemplate.map(({ path, value }) => {
-      const expression = PostgresJsonTableManager.compileIndexPath(context.tableName, context.simpleFieldNameSet, path);
+      const expression = PostgresJsonTableManager.compileIndexPath(context.tableName, context.simpleFields, path);
       return `${expression} ${value === -1 ? 'DESC' : 'ASC'}`;
     });
     const sortSQL = sortClauses.length ? `ORDER BY ${sortClauses.join(', ')}` : '';
@@ -495,7 +556,7 @@ export class PostgresJsonModelService
     const sets: string[] = [];
     const values: unknown[] = [];
 
-    for (const field of context.simpleFields) {
+    for (const field of context.simpleFields.values()) {
       if (field.name === 'id') {
         continue;
       }
@@ -504,7 +565,7 @@ export class PostgresJsonModelService
       values.push(val === undefined || val === null ? null : val);
     }
 
-    for (const field of context.complexFields) {
+    for (const field of context.complexFields.values()) {
       sets.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = $${values.length + 1}`);
       const value = rawItem[field.name];
       values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
@@ -532,13 +593,8 @@ export class PostgresJsonModelService
 
   async updatePartialByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
     await QueryVerifier.verify(modelClass, query);
-    const items = await this.query(modelClass, query);
-    const baseType = SchemaRegistryIndex.getBaseClass(modelClass);
-    for (const item of items) {
-      const fullItem = await ModelCrudUtil.naivePartialUpdate(modelClass, () => Promise.resolve(item), data);
-      await this.update(baseType, fullItem);
-    }
-    return items.length;
+    const result = await this.#executeUpdatePartial(modelClass, query.where!, data, false);
+    return result.count;
   }
 
   async deleteByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {

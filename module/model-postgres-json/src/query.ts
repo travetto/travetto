@@ -5,13 +5,12 @@ import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto
 
 import { PostgresJsonUtil, type TableContext } from './util.ts';
 
-/**
- * Result of query compilation
- */
-export interface QueryClause {
+interface QueryClause {
   sql?: string;
   parameters?: Record<string, unknown>;
 }
+
+type IdentPath = string;
 
 /**
  * Result of query compilation
@@ -20,8 +19,6 @@ export interface CompilationResult {
   whereSQL?: string;
   parameters?: unknown[];
 }
-
-type IdentPath = (string | number)[];
 
 const combineResults = (results: QueryClause[], op: string): QueryClause => {
   const filtered = results.filter(x => !!x.sql);
@@ -90,19 +87,19 @@ export class PostgresJsonQueryCompiler {
   static resolvePath<T extends ModelType>(context: TableContext<T>, path: string[]): { sqlPath: string; leafField?: SchemaFieldConfig } {
     const firstSegment = path[0];
 
-    if (context.simpleFieldNameSet.has(firstSegment)) {
+    if (context.simpleFields.has(firstSegment)) {
       if (path.length > 1) {
         throw new RuntimeError(`Cannot traverse nested properties under simple column "${firstSegment}" in table "${context.tableName}"`, {
           category: 'data'
         });
       }
-      const leafField = context.simpleFields.find(field => field.name === firstSegment);
-      return { sqlPath: PostgresJsonUtil.escapeIdentifier(firstSegment), leafField };
+      const leafField = context.simpleFields.get(firstSegment);
+      return { sqlPath: `"${firstSegment}"`, leafField };
     }
 
     // Traverse schema starting at root model
     let currentField: SchemaFieldConfig | undefined;
-    currentField = context.complexFields.find(field => field.name === firstSegment);
+    currentField = context.complexFields.get(firstSegment);
 
     let currentClass = currentField?.type;
     const jsonPath = path.slice(1);
@@ -163,15 +160,15 @@ export class PostgresJsonQueryCompiler {
   /**
    * Recursively compiles logical AND/OR/NOT clauses and simple field mappings
    */
-  static #compileClause<T extends ModelType>(context: TableContext<T>, clause: WhereClause<T>, identPath: IdentPath = []): QueryClause {
+  static #compileClause<T extends ModelType>(context: TableContext<T>, clause: WhereClause<T>, identPath: IdentPath = ''): QueryClause {
     if (!clause) {
       return {};
     }
     if (ModelQueryUtil.has$And(clause)) {
-      const compiled = clause.$and.map((item, i) => this.#compileClause(context, item, [...identPath, i])).filter(Boolean);
+      const compiled = clause.$and.map((item, i) => this.#compileClause(context, item, `${identPath}_${i}`)).filter(Boolean);
       return combineResults(compiled, 'AND');
     } else if (ModelQueryUtil.has$Or(clause)) {
-      const compiled = clause.$or.map((item, i) => this.#compileClause(context, item, [...identPath, i])).filter(Boolean);
+      const compiled = clause.$or.map((item, i) => this.#compileClause(context, item, `${identPath}_${i}`)).filter(Boolean);
       return combineResults(compiled, 'OR');
     } else if (ModelQueryUtil.has$Not(clause)) {
       const compiled = this.#compileClause(context, clause.$not, identPath);
@@ -218,7 +215,7 @@ export class PostgresJsonQueryCompiler {
     context: TableContext<T>,
     item: Record<string, unknown>,
     parentPath: string[] = [],
-    identPath: IdentPath = []
+    identPath: IdentPath = ''
   ): QueryClause {
     if (!item) {
       return {};
@@ -233,11 +230,11 @@ export class PostgresJsonQueryCompiler {
       const firstKey = isPlainObject ? Object.keys(value)[0] : '';
 
       const { sqlPath, leafField } = this.resolvePath(context, currentPath);
-      const nextIdentPath = [...identPath, idx];
+      const nextIdentPath = `${identPath}__${idx}`;
 
       if (leafField?.array && SchemaRegistryIndex.has(leafField.type) && isPlainObject && !firstKey.startsWith('$')) {
         const template = this.#buildJsonTemplate(value as Record<string, unknown>);
-        const ident = `%%${nextIdentPath.join('_')}%%`;
+        const ident = `%%${nextIdentPath}%%`;
         clauses.push({
           sql: `${sqlPath} @> ${ident}::jsonb`,
           parameters: {
@@ -263,7 +260,7 @@ export class PostgresJsonQueryCompiler {
     context: TableContext<T>,
     path: string[],
     operation: Record<string, unknown>,
-    identPath: IdentPath = []
+    identPath: IdentPath = ''
   ): QueryClause {
     const { sqlPath, leafField } = this.resolvePath(context, path);
     const clauses: QueryClause[] = [];
@@ -278,8 +275,8 @@ export class PostgresJsonQueryCompiler {
         value = ModelQueryUtil.resolveComparator(value);
       }
 
-      const nestedIdentPath = [...identPath, idx];
-      const ident = `%%${nestedIdentPath.join('_')}%%`;
+      const nestedIdentPath = `${identPath}_${idx}`;
+      const ident = `%%${nestedIdentPath}%%`;
 
       let clause: QueryClause;
 
@@ -293,27 +290,27 @@ export class PostgresJsonQueryCompiler {
           if (!Array.isArray(value) || value.length === 0) {
             clause = { sql: '1=0' };
           } else {
-            const innerClauses = value.map((val, i) => {
-              const innerIdent = `%%${[...nestedIdentPath, i].join('_')}%%`;
+            const choices = value.map((val, i) => {
+              const innerIdent = `%%${nestedIdentPath}_${i}%%`;
               return {
                 sql: `${sqlPath} @> ${innerIdent}::jsonb`,
                 parameters: { [innerIdent]: JSONUtil.toUTF8([val]) }
               };
             });
-            clause = combineResults(innerClauses, 'OR');
+            clause = combineResults(choices, 'OR');
           }
         } else if (operator === '$nin') {
           if (!Array.isArray(value) || value.length === 0) {
             clause = {};
           } else {
-            const innerClauses = value.map((val, i) => {
-              const innerIdent = `%%${[...nestedIdentPath, i].join('_')}%%`;
+            const choices = value.map((val, i) => {
+              const innerIdent = `%%${nestedIdentPath}_${i}%%`;
               return {
                 sql: `NOT (${sqlPath} @> ${innerIdent}::jsonb)`,
                 parameters: { [innerIdent]: JSONUtil.toUTF8([val]) }
               };
             });
-            clause = combineResults(innerClauses, 'AND');
+            clause = combineResults(choices, 'AND');
           }
         } else if (operator === '$all') {
           if (!Array.isArray(value) || value.length === 0) {
@@ -365,26 +362,26 @@ export class PostgresJsonQueryCompiler {
           if (!Array.isArray(value) || value.length === 0) {
             clause = { sql: '1=0' };
           } else {
-            const innerIdents = value.map((val, i) => {
-              const innerIdent = `%%${[...nestedIdentPath, i].join('_')}%%`;
+            const choices = value.map((val, i) => {
+              const innerIdent = `%%${nestedIdentPath}_${i}%%`;
               return [innerIdent, val];
             });
             clause = {
-              sql: `${sqlPath} IN (${innerIdents.map(x => x[0]).join(', ')})`,
-              parameters: Object.fromEntries(innerIdents)
+              sql: `${sqlPath} IN (${choices.map(x => x[0]).join(', ')})`,
+              parameters: Object.fromEntries(choices)
             };
           }
         } else if (operator === '$nin') {
           if (!Array.isArray(value) || value.length === 0) {
             clause = {};
           } else {
-            const innerIdents = value.map((val, i) => {
-              const innerIdent = `%%${[...nestedIdentPath, i].join('_')}%%`;
+            const choices = value.map((val, i) => {
+              const innerIdent = `%%${nestedIdentPath}_${i}%%`;
               return [innerIdent, val];
             });
             clause = {
-              sql: `${sqlPath} NOT IN (${innerIdents.map(x => x[0]).join(', ')})`,
-              parameters: Object.fromEntries(innerIdents)
+              sql: `${sqlPath} NOT IN (${choices.map(x => x[0]).join(', ')})`,
+              parameters: Object.fromEntries(choices)
             };
           }
         } else if (operator === '$exists') {

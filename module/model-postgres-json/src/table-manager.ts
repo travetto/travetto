@@ -2,6 +2,7 @@ import { type IndexConfig, ModelRegistryIndex } from '@travetto/model';
 import { isModelIndexedIndex } from '@travetto/model-indexed';
 import { isModelQueryIndex } from '@travetto/model-query';
 import { type Class, castTo } from '@travetto/runtime';
+import type { SchemaFieldConfig } from '@travetto/schema';
 
 import type { PostgresJsonConnection } from './connection.ts';
 import { PostgresJsonUtil } from './util.ts';
@@ -19,10 +20,10 @@ export class PostgresJsonTableManager {
   /**
    * Compiles an index path into its SQL expression
    */
-  static compileIndexPath(tableName: string, simpleFieldsSet: Set<string>, path: string[]): string {
+  static compileIndexPath(tableName: string, simpleFields: Map<string, SchemaFieldConfig>, path: string[]): string {
     const firstSegment = path[0];
     const escapedFirst = PostgresJsonUtil.escapeIdentifier(firstSegment);
-    if (simpleFieldsSet.has(firstSegment)) {
+    if (simpleFields.has(firstSegment)) {
       if (path.length > 1) {
         throw new Error(`Cannot create nested index under simple column "${firstSegment}" in table "${tableName}"`);
       }
@@ -46,7 +47,7 @@ export class PostgresJsonTableManager {
   /**
    * Generates the CREATE INDEX statement for a model index
    */
-  getCreateIndexSQL(modelClass: Class, indexConfig: IndexConfig, tableName: string, simpleFieldsSet: Set<string>): string {
+  getCreateIndexSQL(modelClass: Class, indexConfig: IndexConfig, tableName: string, simpleFields: Map<string, SchemaFieldConfig>): string {
     const indexName = ['idx', tableName, indexConfig.name.toLowerCase().replaceAll('-', '_')].join('_');
 
     if (isModelQueryIndex(indexConfig)) {
@@ -56,7 +57,7 @@ export class PostgresJsonTableManager {
         const isAscending = typeof sortDirection === 'number' ? sortDirection === 1 : !sortDirection;
 
         const path = fieldKey.split('.');
-        const expression = PostgresJsonTableManager.compileIndexPath(tableName, simpleFieldsSet, path);
+        const expression = PostgresJsonTableManager.compileIndexPath(tableName, simpleFields, path);
         return `${expression} ${isAscending ? 'ASC' : 'DESC'}`;
       });
 
@@ -64,7 +65,7 @@ export class PostgresJsonTableManager {
     } else if (isModelIndexedIndex(indexConfig)) {
       const allFields = [...indexConfig.keyTemplate, ...indexConfig.sortTemplate];
       const indexFields = allFields.map(({ path, value }) => {
-        const expression = PostgresJsonTableManager.compileIndexPath(tableName, simpleFieldsSet, path);
+        const expression = PostgresJsonTableManager.compileIndexPath(tableName, simpleFields, path);
         return `${expression} ${value === -1 ? 'DESC' : 'ASC'}`;
       });
 
@@ -115,7 +116,7 @@ export class PostgresJsonTableManager {
       // 1. Create table
       const columnDefinitions: string[] = [`${PostgresJsonUtil.escapeIdentifier('id')} VARCHAR(256) PRIMARY KEY`];
 
-      for (const field of context.simpleFields) {
+      for (const field of context.simpleFields.values()) {
         if (field.name === 'id') {
           continue;
         }
@@ -123,7 +124,7 @@ export class PostgresJsonTableManager {
         columnDefinitions.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} ${columnType}`);
       }
 
-      for (const field of context.complexFields) {
+      for (const field of context.complexFields.values()) {
         columnDefinitions.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} JSONB`);
       }
 
@@ -133,7 +134,7 @@ export class PostgresJsonTableManager {
       // 2. Create indexes
       const indexes = ModelRegistryIndex.getIndices(modelClass) || [];
       for (const index of indexes) {
-        const createIndexSQL = this.getCreateIndexSQL(modelClass, index, context.tableName, context.simpleFieldNameSet);
+        const createIndexSQL = this.getCreateIndexSQL(modelClass, index, context.tableName, context.simpleFields);
         await this.connection.execute(createIndexSQL);
       }
     } else {
@@ -148,10 +149,10 @@ export class PostgresJsonTableManager {
 
       // 2. Sync columns
       const requestedFieldsMap = new Map<string, string>();
-      for (const field of context.simpleFields) {
+      for (const field of context.simpleFields.values()) {
         requestedFieldsMap.set(field.name, PostgresJsonUtil.getColumnType(field));
       }
-      for (const field of context.complexFields) {
+      for (const field of context.complexFields.values()) {
         requestedFieldsMap.set(field.name, 'JSONB');
       }
 
@@ -203,7 +204,7 @@ export class PostgresJsonTableManager {
         const indexName = ['idx', context.tableName, index.name.toLowerCase().replaceAll('-', '_')].join('_');
         requestedIndexesMap.set(indexName, index);
 
-        const newIndexSQL = this.getCreateIndexSQL(modelClass, index, context.tableName, context.simpleFieldNameSet);
+        const newIndexSQL = this.getCreateIndexSQL(modelClass, index, context.tableName, context.simpleFields);
         if (!existingIndexes.has(indexName)) {
           await this.connection.execute(newIndexSQL);
         } else {

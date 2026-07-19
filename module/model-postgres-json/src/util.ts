@@ -4,9 +4,8 @@ import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 export interface SchemaContext<T> {
   cls: Class<T>;
-  simpleFieldNameSet: Set<string>;
-  simpleFields: SchemaFieldConfig[];
-  complexFields: SchemaFieldConfig[];
+  simpleFields: Map<string, SchemaFieldConfig>;
+  complexFields: Map<string, SchemaFieldConfig>;
   allFields: SchemaFieldConfig[];
 }
 
@@ -49,10 +48,11 @@ export class PostgresJsonUtil {
       }
     }
 
-    const simpleFields = fields.filter(field => !SchemaRegistryIndex.has(field.type) && !field.array);
-    const complexFields = fields.filter(field => SchemaRegistryIndex.has(field.type) || field.array);
-    const simpleFieldNameSet = new Set(simpleFields.map(f => f.name));
-    const context: SchemaContext<T> = { cls, simpleFields, complexFields, allFields: fields, simpleFieldNameSet };
+    const simpleFieldsList = fields.filter(field => !SchemaRegistryIndex.has(field.type) && !field.array);
+    const complexFieldsList = fields.filter(field => SchemaRegistryIndex.has(field.type) || field.array);
+    const simpleFields = new Map(simpleFieldsList.map(field => [field.name, field]));
+    const complexFields = new Map(complexFieldsList.map(field => [field.name, field]));
+    const context: SchemaContext<T> = { cls, simpleFields, complexFields, allFields: fields };
     this.SCHEMA_CACHE.set(cls, context);
     return context;
   }
