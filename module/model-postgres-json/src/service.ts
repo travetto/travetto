@@ -324,21 +324,20 @@ export class PostgresJsonModelService
     }
   }
 
-  // Indexed Support
-  async #getIdByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+  async getByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     modelClass: Class<T>,
     indexConfig: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexBody<T, K, S>
-  ): Promise<string> {
+  ): Promise<T> {
     ModelCrudUtil.ensureNotSubType(modelClass);
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate({ sort: true });
     const where: WhereClause<T> = castTo(computed.project({ sort: true, includeId: true }));
 
     const context = this.#getContext(modelClass);
     const { whereSQL, parameters } = PostgresJsonQueryCompiler.compileWhere(context, where);
-    const sql = `SELECT "id" FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} WHERE ${whereSQL};`;
+    const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} WHERE ${whereSQL};`;
 
-    const result = await this.connection.execute<{ id: string }>(sql, parameters);
+    const result = await this.connection.execute<Record<string, unknown>>(sql, parameters);
     if (result.count === 0) {
       throw new NotFoundError(`${modelClass.name} Index=${indexConfig}`, computed.getKey());
     }
@@ -346,15 +345,7 @@ export class PostgresJsonModelService
       throw new Error(`Multiple items found for index lookup ${modelClass.name} Index=${indexConfig}`);
     }
 
-    return result.records[0].id;
-  }
-
-  async getByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
-    modelClass: Class<T>,
-    indexConfig: SingleItemIndex<T, K, S>,
-    body: FullKeyedIndexBody<T, K, S>
-  ): Promise<T> {
-    return this.get(modelClass, await this.#getIdByIndex(modelClass, indexConfig, body));
+    return await ModelCrudUtil.load(modelClass, result.records[0]);
   }
 
   async deleteByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
@@ -362,9 +353,24 @@ export class PostgresJsonModelService
     indexConfig: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexBody<T, K, S>
   ): Promise<void> {
-    return this.delete(modelClass, await this.#getIdByIndex(modelClass, indexConfig, body));
+    ModelCrudUtil.ensureNotSubType(modelClass);
+    const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate({ sort: true });
+    const where: WhereClause<T> = castTo(computed.project({ sort: true, includeId: true }));
+
+    const context = this.#getContext(modelClass);
+    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compileWhere(context, where);
+    const sql = `DELETE FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} WHERE ${whereSQL};`;
+
+    const result = await this.connection.execute(sql, parameters);
+    if (result.count === 0) {
+      throw new NotFoundError(`${modelClass.name} Index=${indexConfig}`, computed.getKey());
+    }
+    if (result.count > 1) {
+      throw new Error(`Multiple items found for index lookup ${modelClass.name} Index=${indexConfig}`);
+    }
   }
 
+  @Transactional()
   upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     modelClass: Class<T>,
     indexConfig: SingleItemIndex<T, K, S>,
@@ -373,6 +379,7 @@ export class PostgresJsonModelService
     return ModelIndexedUtil.naiveUpsert(this, modelClass, indexConfig, body);
   }
 
+  @Transactional()
   updateByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     modelClass: Class<T>,
     indexConfig: SingleItemIndex<T, K, S>,
