@@ -1,16 +1,9 @@
-import { ModelQueryUtil, type WhereClause } from '@travetto/model-query';
+import { ModelQueryUtil, type SortClause, type WhereClause } from '@travetto/model-query';
 import { type Class, castTo } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
+import { PostgresJsonTableManager } from './table-manager.ts';
 import { PostgresJsonUtil } from './util.ts';
-
-/**
- * Result of query compilation
- */
-export interface CompilationResult {
-  whereSQL: string;
-  parameters: unknown[];
-}
 
 /**
  * AST Query Compiler for Postgres JSON Model service
@@ -21,22 +14,47 @@ export class PostgresJsonQueryCompiler {
   #tableName: string;
   #simpleFieldsSet: Set<string>;
 
-  constructor(modelClass: Class, tableName: string, simpleFieldsSet: Set<string>) {
+  constructor(modelClass: Class, tableName?: string, simpleFieldsSet?: Set<string>) {
     this.#modelClass = modelClass;
-    this.#tableName = tableName;
-    this.#simpleFieldsSet = simpleFieldsSet;
+    this.#tableName = tableName ?? PostgresJsonTableManager.getTableName(modelClass);
+    if (simpleFieldsSet) {
+      this.#simpleFieldsSet = simpleFieldsSet;
+    } else {
+      const classification = PostgresJsonUtil.classifyFields(modelClass);
+      this.#simpleFieldsSet = new Set(classification.simpleFields.map(f => f.name));
+    }
   }
 
   /**
-   * Compiles a Travetto WhereClause into a parameterized PostgreSQL WHERE clause
+   * Gets the parameters accumulated during where compilation.
    */
-  compile(whereClause: WhereClause<unknown>): CompilationResult {
+  get parameters(): unknown[] {
+    return this.#parameters;
+  }
+
+  /**
+   * Compiles a Travetto WhereClause into a parameterized PostgreSQL WHERE clause string
+   */
+  compile(where?: WhereClause<unknown>): string {
     this.#parameters = [];
-    const whereSQL = this.compileClause(whereClause);
-    return {
-      whereSQL,
-      parameters: this.#parameters
-    };
+    return this.compileClause(castTo(where));
+  }
+
+  /**
+   * Compiles sorting clauses into SQL ORDER BY string
+   */
+  compileSort(sort?: SortClause<unknown>[]): string {
+    if (!sort || sort.length === 0) {
+      return '';
+    }
+    const sortClauses = sort.map(sortClause => {
+      const key = Object.keys(sortClause)[0];
+      const direction = castTo<any>(sortClause)[key];
+      const path = key.split('.');
+      const { sqlPath } = this.resolvePath(path);
+      return `${sqlPath} ${direction === -1 ? 'DESC' : 'ASC'}`;
+    });
+    return sortClauses.length ? `ORDER BY ${sortClauses.join(', ')}` : '';
   }
 
   /**

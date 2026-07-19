@@ -3,9 +3,6 @@ import type { SortClause, WhereClause } from '@travetto/model-query';
 import { type Class, castTo } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import { PostgresJsonQueryCompiler } from './query.ts';
-import { PostgresJsonTableManager } from './table-manager.ts';
-
 export interface FieldClassification {
   simpleFields: SchemaFieldConfig[];
   complexFields: SchemaFieldConfig[];
@@ -99,25 +96,6 @@ export class PostgresJsonUtil {
   }
 
   /**
-   * Compiles the where clause of a query and returns the compiled SQL, parameter values, and compiler instance.
-   */
-  static compileWhere<T extends ModelType>(
-    modelClass: Class<T>,
-    where?: WhereClause<T>
-  ): { whereSQL: string; parameters: unknown[]; compiler: PostgresJsonQueryCompiler } {
-    const tableName = PostgresJsonTableManager.getTableName(modelClass);
-    const classification = PostgresJsonUtil.classifyFields(modelClass);
-    const simpleFieldsSet = new Set(classification.simpleFields.map(field => field.name));
-    const compiler = new PostgresJsonQueryCompiler(modelClass, tableName, simpleFieldsSet);
-    const result = compiler.compile(castTo(where));
-    return {
-      whereSQL: result.whereSQL,
-      parameters: result.parameters,
-      compiler
-    };
-  }
-
-  /**
    * Escapes a SQL identifier (like table or column names) by wrapping in double quotes and doubling existing double quotes.
    */
   static escapeIdentifier(name: string): string {
@@ -129,22 +107,5 @@ export class PostgresJsonUtil {
    */
   static escapeLiteral(value: string): string {
     return value.replaceAll("'", "''");
-  }
-
-  /**
-   * Compiles the sort clauses of a query and returns the compiled SQL.
-   */
-  static compileSort<T extends ModelType>(compiler: PostgresJsonQueryCompiler, sort?: SortClause<T>[]): string {
-    if (!sort || sort.length === 0) {
-      return '';
-    }
-    const sortClauses = sort.map(sortClause => {
-      const key = Object.keys(sortClause)[0];
-      const direction = castTo<any>(sortClause)[key];
-      const path = key.split('.');
-      const { sqlPath } = compiler.resolvePath(path);
-      return `${sqlPath} ${direction === -1 ? 'DESC' : 'ASC'}`;
-    });
-    return sortClauses.length ? `ORDER BY ${sortClauses.join(', ')}` : '';
   }
 }
