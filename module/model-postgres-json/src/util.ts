@@ -37,17 +37,6 @@ export class PostgresJsonUtil {
       }
     }
 
-    // Ensure the standard 'id' field is present in our list
-    if (!fields.some(field => field.name === 'id')) {
-      fields.push({
-        name: 'id',
-        class: modelClass,
-        type: String,
-        array: false,
-        required: { active: true }
-      });
-    }
-
     // Ensure polymorphic 'type' field is present for discriminated classes
     if (registryConfig.discriminatedBase && !fields.some(field => field.name === 'type')) {
       fields.push({
