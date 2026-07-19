@@ -1,5 +1,5 @@
 import { ModelRegistryIndex, type ModelType } from '@travetto/model';
-import type { WhereClause } from '@travetto/model-query';
+import type { SortClause, WhereClause } from '@travetto/model-query';
 import { type Class, castTo } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -115,5 +115,22 @@ export class PostgresJsonUtil {
       parameters: result.parameters,
       compiler
     };
+  }
+
+  /**
+   * Compiles the sort clauses of a query and returns the compiled SQL.
+   */
+  static compileSort<T extends ModelType>(compiler: PostgresJsonQueryCompiler, sort?: SortClause<T>[]): string {
+    if (!sort || sort.length === 0) {
+      return '';
+    }
+    const sortClauses = sort.map(sortClause => {
+      const key = Object.keys(sortClause)[0];
+      const direction = castTo<any>(sortClause)[key];
+      const path = key.split('.');
+      const { sqlPath } = compiler.resolvePath(path);
+      return `${sqlPath} ${direction === -1 ? 'DESC' : 'ASC'}`;
+    });
+    return sortClauses.length ? `ORDER BY ${sortClauses.join(', ')}` : '';
   }
 }

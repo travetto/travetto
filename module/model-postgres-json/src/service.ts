@@ -457,17 +457,7 @@ export class PostgresJsonModelService
     const where = ModelQueryUtil.getWhereClause(modelClass, query.where);
     const { whereSQL, parameters, compiler } = PostgresJsonUtil.compileWhere(modelClass, where);
 
-    let sortSQL = '';
-    if (query.sort) {
-      const sortClauses = query.sort.map(sortClause => {
-        const key = Object.keys(sortClause)[0];
-        const direction = castTo<any>(sortClause)[key];
-        const path = key.split('.');
-        const { sqlPath } = compiler.resolvePath(path);
-        return `${sqlPath} ${direction === -1 ? 'DESC' : 'ASC'}`;
-      });
-      sortSQL = sortClauses.length ? `ORDER BY ${sortClauses.join(', ')}` : '';
-    }
+    const sortSQL = PostgresJsonUtil.compileSort(compiler, query.sort);
 
     let pagination = '';
     if (query.limit !== undefined) {
