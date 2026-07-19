@@ -44,7 +44,7 @@ import {
   type WhereClause
 } from '@travetto/model-query';
 import type { Any } from '@travetto/runtime';
-import { type Class, castTo } from '@travetto/runtime';
+import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { PostgresJsonConnection } from './connection.ts';
@@ -148,7 +148,7 @@ export class PostgresJsonModelService
     for (const field of classification.complexFields) {
       columns.push(PostgresJsonUtil.escapeIdentifier(field.name));
       const value = rawItem[field.name];
-      values.push(value !== undefined && value !== null ? JSON.stringify(value) : null);
+      values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
     }
 
     const placeholders = columns.map((_, index) => `$${index + 1}`);
@@ -179,7 +179,7 @@ export class PostgresJsonModelService
     for (const field of classification.complexFields) {
       sets.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = $${values.length + 1}`);
       const value = rawItem[field.name];
-      values.push(value !== undefined && value !== null ? JSON.stringify(value) : null);
+      values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
     }
 
     values.push(preppedItem.id);
@@ -215,7 +215,7 @@ export class PostgresJsonModelService
     for (const field of classification.complexFields) {
       columns.push(PostgresJsonUtil.escapeIdentifier(field.name));
       const value = rawItem[field.name];
-      values.push(value !== undefined && value !== null ? JSON.stringify(value) : null);
+      values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
       updates.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = EXCLUDED.${PostgresJsonUtil.escapeIdentifier(field.name)}`);
     }
 
@@ -505,7 +505,7 @@ export class PostgresJsonModelService
     for (const field of classification.complexFields) {
       sets.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = $${values.length + 1}`);
       const value = rawItem[field.name];
-      values.push(value !== undefined && value !== null ? JSON.stringify(value) : null);
+      values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
     }
 
     const conditions = [`${PostgresJsonUtil.escapeIdentifier('id')} = $${values.length + 1}`];
@@ -522,7 +522,7 @@ export class PostgresJsonModelService
 
     const result = await this.connection.execute(sql, values);
     if (result.count === 0) {
-      throw new NotFoundError(modelClass, `Query: ${JSON.stringify(query.where)}`);
+      throw new NotFoundError(modelClass, `Query: ${JSONUtil.toUTF8(query.where)}`);
     }
 
     return preppedItem;
