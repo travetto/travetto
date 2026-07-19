@@ -482,13 +482,49 @@ export class PostgresJsonModelService
 
   async updateByQuery<T extends ModelType>(modelClass: Class<T>, item: T, query: ModelQuery<T>): Promise<T> {
     await QueryVerifier.verify(modelClass, query);
-    const where = ModelQueryUtil.getWhereClause(modelClass, query.where);
-    (where as any).id = item.id;
-    const deletedCount = await this.deleteByQuery(modelClass, { where });
-    if (deletedCount === 0) {
+    ModelCrudUtil.ensureNotSubType(modelClass);
+    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
+    const rawItem = castTo<any>(preppedItem);
+    const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
+    const classification = PostgresJsonUtil.classifyFields(modelClass);
+
+    const sets: string[] = [];
+    const values: unknown[] = [];
+
+    for (const field of classification.simpleFields) {
+      if (field.name === 'id') {
+        continue;
+      }
+      sets.push(`"${field.name}" = $${values.length + 1}`);
+      values.push(rawItem[field.name]);
+    }
+
+    for (const field of classification.complexFields) {
+      sets.push(`"${field.name}" = $${values.length + 1}`);
+      const value = rawItem[field.name];
+      values.push(value !== undefined && value !== null ? JSON.stringify(value) : null);
+    }
+
+    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compile(modelClass, query.where, tableName);
+
+    const conditions = [`"id" = $${values.length + 1}`];
+    values.push(preppedItem.id);
+
+    if (whereSQL) {
+      const offset = values.length;
+      const shiftedWhereSQL = whereSQL.replaceAll(/\$(\d+)/g, (_, num) => `$${Number(num) + offset}`);
+      conditions.push(shiftedWhereSQL);
+      values.push(...parameters);
+    }
+
+    const sql = `UPDATE "${tableName}" SET ${sets.join(', ')} WHERE ${conditions.join(' AND ')};`;
+
+    const result = await this.connection.execute(sql, values);
+    if (result.count === 0) {
       throw new NotFoundError(modelClass, `Query: ${JSON.stringify(query.where)}`);
     }
-    return this.create(modelClass, item);
+
+    return preppedItem;
   }
 
   async updatePartialByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
