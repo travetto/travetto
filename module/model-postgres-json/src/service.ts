@@ -8,6 +8,8 @@ import {
   ModelBulkUtil,
   type ModelCrudSupport,
   ModelCrudUtil,
+  type ModelExpirySupport,
+  ModelExpiryUtil,
   type ModelListOptions,
   ModelRegistryIndex,
   type ModelStorageSupport,
@@ -36,6 +38,7 @@ import {
 import {
   type ModelQuery,
   type ModelQueryCrudSupport,
+  ModelQueryCrudUtil,
   type ModelQueryFacet,
   type ModelQueryFacetSupport,
   type ModelQuerySuggestSupport,
@@ -64,6 +67,7 @@ export class PostgresJsonModelService
     ModelCrudSupport,
     ModelStorageSupport,
     ModelBulkSupport,
+    ModelExpirySupport,
     ModelIndexedSupport,
     ModelQuerySupport,
     ModelQueryCrudSupport,
@@ -119,7 +123,7 @@ export class PostgresJsonModelService
 
     const context = this.#getContext(modelClass);
     const { sets, values } = this.#compilePartialUpdate(context, preparedData);
-    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context, where);
+    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context, ModelQueryUtil.getWhereClause(modelClass, where));
 
     const conditions: string[] = [];
     if (whereSQL) {
@@ -161,7 +165,7 @@ export class PostgresJsonModelService
     }
 
     // Compile where conditions
-    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context, where);
+    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context, ModelQueryUtil.getWhereClause(modelClass, where));
 
     const conditions: string[] = [];
     if (whereSQL) {
@@ -248,6 +252,7 @@ export class PostgresJsonModelService
   async initialize(): Promise<void> {
     await this.connection.init();
     await this.createStorage();
+    ModelExpiryUtil.registerCull(this);
   }
 
   // Storage Support
@@ -275,10 +280,14 @@ export class PostgresJsonModelService
 
   // CRUD Support
   async get<T extends ModelType>(modelClass: Class<T>, id: string): Promise<T> {
-    const { tableName } = this.#getContext(modelClass);
-    const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} WHERE "id" = $1;`;
+    const context = this.#getContext(modelClass);
+    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compileWhere(
+      context,
+      ModelQueryUtil.getWhereClause(modelClass, castTo({ id }))
+    );
+    const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} WHERE ${whereSQL};`;
 
-    const result = await this.connection.execute<Record<string, unknown>>(sql, [id]);
+    const result = await this.connection.execute<Record<string, unknown>>(sql, parameters);
 
     if (result.count === 0) {
       throw new NotFoundError(modelClass, id);
@@ -340,10 +349,14 @@ export class PostgresJsonModelService
 
   async delete<T extends ModelType>(modelClass: Class<T>, id: string): Promise<void> {
     ModelCrudUtil.ensureNotSubType(modelClass);
-    const { tableName } = this.#getContext(modelClass);
-    const sql = `DELETE FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} WHERE ${PostgresJsonUtil.escapeIdentifier('id')} = $1;`;
+    const context = this.#getContext(modelClass);
+    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compileWhere(
+      context,
+      ModelQueryUtil.getWhereClause(modelClass, castTo({ id }), false)
+    );
+    const sql = `DELETE FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} WHERE ${whereSQL};`;
 
-    const result = await this.connection.execute(sql, [id]);
+    const result = await this.connection.execute(sql, parameters);
     if (result.count === 0) {
       throw new NotFoundError(modelClass, id);
     }
@@ -395,13 +408,17 @@ export class PostgresJsonModelService
     };
   }
 
+  async deleteExpired<T extends ModelType>(modelClass: Class<T>): Promise<number> {
+    return ModelQueryCrudUtil.deleteExpired(this, modelClass);
+  }
+
   async *list<T extends ModelType>(modelClass: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
     yield* this.listWithOffset(modelClass, options);
   }
 
   async *listWithOffset<T extends ModelType>(modelClass: Class<T>, options?: ModelListOptions & { offset?: number }): AsyncIterable<T[]> {
     const context = this.#getContext(modelClass);
-    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compileWhere(context);
+    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compileWhere(context, ModelQueryUtil.getWhereClause(modelClass, undefined));
 
     const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
     const batchSize = Math.min(options?.batchSizeHint ?? 100, limit);
@@ -435,7 +452,7 @@ export class PostgresJsonModelService
     const where: WhereClause<T> = castTo(computed.project({ sort: true, includeId: true }));
 
     const context = this.#getContext(modelClass);
-    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compileWhere(context, where);
+    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compileWhere(context, ModelQueryUtil.getWhereClause(modelClass, where));
     const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} WHERE ${whereSQL};`;
 
     const result = await this.connection.execute<Record<string, unknown>>(sql, parameters);
@@ -454,7 +471,7 @@ export class PostgresJsonModelService
     const where: WhereClause<T> = castTo(computed.project({ sort: true, includeId: true }));
 
     const context = this.#getContext(modelClass);
-    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compileWhere(context, where);
+    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compileWhere(context, ModelQueryUtil.getWhereClause(modelClass, where));
     const sql = `DELETE FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} WHERE ${whereSQL};`;
 
     const result = await this.connection.execute(sql, parameters);
@@ -525,7 +542,7 @@ export class PostgresJsonModelService
     let offset = options?.offset ?? 0;
     let produced = 0;
 
-    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compileWhere(context, where);
+    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compileWhere(context, ModelQueryUtil.getWhereClause(modelClass, where));
 
     while (!options?.abort?.aborted && produced < limit) {
       const batchLimit = Math.min(batchSize, limit - produced);
@@ -584,7 +601,7 @@ export class PostgresJsonModelService
     const where: WhereClause<T> = castTo(computed.project());
 
     const context = this.#getContext(modelClass);
-    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context, where);
+    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context, ModelQueryUtil.getWhereClause(modelClass, where));
 
     // Prefix matching on the first sort key segment
     const prefixFieldPath = indexConfig.sortTemplate[0].path;
@@ -609,7 +626,10 @@ export class PostgresJsonModelService
   async query<T extends ModelType>(modelClass: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(modelClass, query);
     const context = this.#getContext(modelClass);
-    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context, query.where);
+    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(
+      context,
+      ModelQueryUtil.getWhereClause(modelClass, query.where)
+    );
     const sortSQL = PostgresJsonQueryCompiler.compileSort(context, query.sort);
 
     let pagination = '';
@@ -635,7 +655,10 @@ export class PostgresJsonModelService
   async queryCount<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
     await QueryVerifier.verify(modelClass, query);
     const context = this.#getContext(modelClass);
-    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context, query.where);
+    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(
+      context,
+      ModelQueryUtil.getWhereClause(modelClass, query.where)
+    );
     const sql = `SELECT COUNT(*) as "total" FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
 
     const result = await this.connection.execute<{ total: string | number }>(sql, parameters);
@@ -649,7 +672,10 @@ export class PostgresJsonModelService
     const rawItem: Record<string, unknown> = castTo(preppedItem);
 
     const context = this.#getContext(modelClass);
-    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context, query.where);
+    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(
+      context,
+      ModelQueryUtil.getWhereClause(modelClass, query.where)
+    );
 
     const sets: string[] = [];
     const values: unknown[] = [];
@@ -698,7 +724,11 @@ export class PostgresJsonModelService
   async deleteByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
     await QueryVerifier.verify(modelClass, query);
     const context = this.#getContext(modelClass);
-    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context, query.where, false);
+    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(
+      context,
+      ModelQueryUtil.getWhereClause(modelClass, query.where, false),
+      false
+    );
 
     const sql = `DELETE FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
 
@@ -714,7 +744,10 @@ export class PostgresJsonModelService
   ): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(modelClass, query);
     const context = this.#getContext(modelClass);
-    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compileWhere(context, query?.where);
+    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compileWhere(
+      context,
+      ModelQueryUtil.getWhereClause(modelClass, query?.where)
+    );
     const { sqlPath } = PostgresJsonQueryCompiler.resolvePath(context, String(field).split('.'));
 
     const conditions = [`${sqlPath} IS NOT NULL`];
