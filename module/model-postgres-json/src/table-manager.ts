@@ -59,12 +59,11 @@ export class PostgresJsonTableManager {
    */
   getCreateIndexSQL(modelClass: Class, indexConfig: IndexConfig, tableName: string, simpleFieldsSet: Set<string>): string {
     const indexName = ['idx', tableName, indexConfig.name.toLowerCase().replaceAll('-', '_')].join('_');
-    const indexConfigRaw = castTo<any>(indexConfig);
 
     if (isModelQueryIndex(indexConfig)) {
-      const indexFields = indexConfigRaw.fields.map((field: any) => {
+      const indexFields = indexConfig.fields.map(field => {
         const fieldKey = Object.keys(field)[0];
-        const sortDirection = field[fieldKey];
+        const sortDirection = castTo<Record<string, unknown>>(field)[fieldKey];
         const isAscending = typeof sortDirection === 'number' ? sortDirection === 1 : !sortDirection;
 
         const path = fieldKey.split('.');
@@ -72,15 +71,16 @@ export class PostgresJsonTableManager {
         return `${expression} ${isAscending ? 'ASC' : 'DESC'}`;
       });
 
-      return `CREATE ${indexConfigRaw.unique ? 'UNIQUE ' : ''}INDEX "${indexName}" ON "${tableName}" (${indexFields.join(', ')});`;
+      return `CREATE ${indexConfig.unique ? 'UNIQUE ' : ''}INDEX "${indexName}" ON "${tableName}" (${indexFields.join(', ')});`;
     } else if (isModelIndexedIndex(indexConfig)) {
-      const allFields = [...indexConfigRaw.keyTemplate, ...indexConfigRaw.sortTemplate];
+      const allFields = [...indexConfig.keyTemplate, ...indexConfig.sortTemplate];
       const indexFields = allFields.map(({ path, value }) => {
         const expression = PostgresJsonTableManager.compileIndexPath(tableName, simpleFieldsSet, path);
         return `${expression} ${value === -1 ? 'DESC' : 'ASC'}`;
       });
 
-      return `CREATE ${indexConfigRaw.unique ? 'UNIQUE ' : ''}INDEX "${indexName}" ON "${tableName}" (${indexFields.join(', ')});`;
+      const isUnique = 'unique' in indexConfig && indexConfig.unique;
+      return `CREATE ${isUnique ? 'UNIQUE ' : ''}INDEX "${indexName}" ON "${tableName}" (${indexFields.join(', ')});`;
     }
 
     throw new Error(`Unsupported index configuration for class ${modelClass.name}`);

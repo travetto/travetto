@@ -127,7 +127,7 @@ export class PostgresJsonConnection {
       const records: Type[] = [...result.rows].map(row => ({ ...row }));
       return { count: result.rowCount ?? 0, records };
     } catch (error) {
-      const code = error && typeof error === 'object' && 'code' in error ? (error as any).code : undefined;
+      const code = error && typeof error === 'object' && 'code' in error ? castTo<Record<string, unknown>>(error).code : undefined;
       switch (code) {
         // Class 42: Syntax Error or Access Rule Violation (e.g. index/table already exists)
         case '42P07':

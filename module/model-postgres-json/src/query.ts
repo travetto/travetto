@@ -1,3 +1,4 @@
+import type { ModelType } from '@travetto/model';
 import { ModelQueryUtil, type SortClause, type WhereClause } from '@travetto/model-query';
 import { type Class, castTo } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
@@ -30,7 +31,12 @@ export class PostgresJsonQueryCompiler {
   /**
    * Statelessly compiles a Travetto WhereClause into a parameterized PostgreSQL WHERE clause.
    */
-  static compile(modelClass: Class, where?: WhereClause<any>, tableName?: string, checkExpiry = true): CompilationResult {
+  static compile<T extends ModelType>(
+    modelClass: Class<T>,
+    where?: WhereClause<T>,
+    tableName?: string,
+    checkExpiry = true
+  ): CompilationResult {
     const table = tableName ?? PostgresJsonTableManager.getTableName(modelClass);
     const classification = PostgresJsonUtil.classifyFields(modelClass);
     const simpleFieldsSet = new Set(classification.simpleFields.map(f => f.name));
@@ -51,7 +57,7 @@ export class PostgresJsonQueryCompiler {
   /**
    * Statelessly compiles sorting clauses into SQL ORDER BY string.
    */
-  static compileSort(modelClass: Class, sort?: SortClause<unknown>[]): string {
+  static compileSort<T extends ModelType>(modelClass: Class<T>, sort?: SortClause<T>[]): string {
     if (!sort || sort.length === 0) {
       return '';
     }
@@ -65,7 +71,7 @@ export class PostgresJsonQueryCompiler {
     };
     const sortClauses = sort.map(sortClause => {
       const key = Object.keys(sortClause)[0];
-      const direction = castTo<any>(sortClause)[key];
+      const direction = castTo<Record<string, 1 | -1>>(sortClause)[key];
       const path = key.split('.');
       const { sqlPath } = this.resolvePath(ctx, path);
       return `${sqlPath} ${direction === -1 ? 'DESC' : 'ASC'}`;
@@ -192,12 +198,13 @@ export class PostgresJsonQueryCompiler {
     for (const [k, v] of Object.entries(queryObj)) {
       if (v && typeof v === 'object' && v.constructor === Object) {
         const firstKey = Object.keys(v)[0];
+        const valObj = castTo<Record<string, unknown>>(v);
         if (firstKey === '$eq') {
-          template[k] = (v as any).$eq;
-        } else if ((v as any).$eq !== undefined) {
-          template[k] = (v as any).$eq;
+          template[k] = valObj.$eq;
+        } else if (valObj.$eq !== undefined) {
+          template[k] = valObj.$eq;
         } else if (!firstKey.startsWith('$')) {
-          template[k] = this.buildJsonTemplate(v as Record<string, unknown>);
+          template[k] = this.buildJsonTemplate(valObj);
         } else {
           throw new Error(`Unsupported operator ${firstKey} in nested array query`);
         }

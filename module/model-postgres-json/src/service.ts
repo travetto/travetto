@@ -123,7 +123,7 @@ export class PostgresJsonModelService
 
   async create<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>): Promise<T> {
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
-    const rawItem = castTo<any>(preppedItem);
+    const rawItem = castTo<Record<string, unknown>>(preppedItem);
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
     const classification = PostgresJsonUtil.classifyFields(modelClass);
 
@@ -152,7 +152,7 @@ export class PostgresJsonModelService
   async update<T extends ModelType>(modelClass: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(modelClass);
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
-    const rawItem = castTo<any>(preppedItem);
+    const rawItem = castTo<Record<string, unknown>>(preppedItem);
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
     const classification = PostgresJsonUtil.classifyFields(modelClass);
 
@@ -188,7 +188,7 @@ export class PostgresJsonModelService
   async upsert<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(modelClass);
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
-    const rawItem = castTo<any>(preppedItem);
+    const rawItem = castTo<Record<string, unknown>>(preppedItem);
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
     const classification = PostgresJsonUtil.classifyFields(modelClass);
 
@@ -487,7 +487,7 @@ export class PostgresJsonModelService
     await QueryVerifier.verify(modelClass, query);
     ModelCrudUtil.ensureNotSubType(modelClass);
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
-    const rawItem = castTo<any>(preppedItem);
+    const rawItem = castTo<Record<string, unknown>>(preppedItem);
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
     const classification = PostgresJsonUtil.classifyFields(modelClass);
 
