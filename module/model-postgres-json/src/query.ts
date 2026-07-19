@@ -6,9 +6,61 @@ import { PostgresJsonTableManager } from './table-manager.ts';
 import { PostgresJsonUtil } from './util.ts';
 
 /**
+ * Result of query compilation
+ */
+export interface CompilationResult {
+  whereSQL: string;
+  parameters: unknown[];
+}
+
+/**
  * AST Query Compiler for Postgres JSON Model service
  */
 export class PostgresJsonQueryCompiler {
+  /**
+   * Statelessly compiles a Travetto WhereClause into a parameterized PostgreSQL WHERE clause.
+   */
+  static compile(modelClass: Class, where?: WhereClause<unknown>, tableName?: string): CompilationResult {
+    const table = tableName ?? PostgresJsonTableManager.getTableName(modelClass);
+    const classification = PostgresJsonUtil.classifyFields(modelClass);
+    const simpleFieldsSet = new Set(classification.simpleFields.map(f => f.name));
+    const compiler = new PostgresJsonQueryCompiler(modelClass, table, simpleFieldsSet);
+    const resolvedWhere = ModelQueryUtil.getWhereClause(modelClass, castTo(where));
+    const whereSQL = compiler.compileClause(resolvedWhere);
+    return {
+      whereSQL,
+      parameters: compiler.#parameters
+    };
+  }
+
+  /**
+   * Statelessly compiles sorting clauses into SQL ORDER BY string.
+   */
+  static compileSort(modelClass: Class, sort?: SortClause<unknown>[]): string {
+    if (!sort || sort.length === 0) {
+      return '';
+    }
+    const classification = PostgresJsonUtil.classifyFields(modelClass);
+    const simpleFieldsSet = new Set(classification.simpleFields.map(f => f.name));
+    const compiler = new PostgresJsonQueryCompiler(modelClass, '', simpleFieldsSet);
+    const sortClauses = sort.map(sortClause => {
+      const key = Object.keys(sortClause)[0];
+      const direction = castTo<any>(sortClause)[key];
+      const path = key.split('.');
+      const { sqlPath } = compiler.resolvePath(path);
+      return `${sqlPath} ${direction === -1 ? 'DESC' : 'ASC'}`;
+    });
+    return sortClauses.length ? `ORDER BY ${sortClauses.join(', ')}` : '';
+  }
+
+  /**
+   * Statelessly resolves a field path to a database SQL expression and retrieves its schema config.
+   */
+  static resolvePath(modelClass: Class, path: string[]): { sqlPath: string; leafField?: SchemaFieldConfig } {
+    const compiler = new PostgresJsonQueryCompiler(modelClass);
+    return compiler.resolvePath(path);
+  }
+
   #parameters: unknown[] = [];
   #modelClass: Class;
   #tableName: string;
@@ -23,39 +75,6 @@ export class PostgresJsonQueryCompiler {
       const classification = PostgresJsonUtil.classifyFields(modelClass);
       this.#simpleFieldsSet = new Set(classification.simpleFields.map(f => f.name));
     }
-  }
-
-  /**
-   * Gets the parameters accumulated during where compilation.
-   */
-  get parameters(): unknown[] {
-    return this.#parameters;
-  }
-
-  /**
-   * Compiles a Travetto WhereClause into a parameterized PostgreSQL WHERE clause string
-   */
-  compile(where?: WhereClause<unknown>): string {
-    this.#parameters = [];
-    const resolvedWhere = ModelQueryUtil.getWhereClause(this.#modelClass, castTo(where));
-    return this.compileClause(resolvedWhere);
-  }
-
-  /**
-   * Compiles sorting clauses into SQL ORDER BY string
-   */
-  compileSort(sort?: SortClause<unknown>[]): string {
-    if (!sort || sort.length === 0) {
-      return '';
-    }
-    const sortClauses = sort.map(sortClause => {
-      const key = Object.keys(sortClause)[0];
-      const direction = castTo<any>(sortClause)[key];
-      const path = key.split('.');
-      const { sqlPath } = this.resolvePath(path);
-      return `${sqlPath} ${direction === -1 ? 'DESC' : 'ASC'}`;
-    });
-    return sortClauses.length ? `ORDER BY ${sortClauses.join(', ')}` : '';
   }
 
   /**
