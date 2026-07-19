@@ -34,6 +34,7 @@
     "@travetto/model": "^8.0.0-alpha.23",
     "@travetto/model-indexed": "^8.0.0-alpha.25",
     "@travetto/model-query": "^8.0.0-alpha.24",
+    "@travetto/worker": "^8.0.0-alpha.20",
     "@types/pg": "^8.20.0",
     "pg": "^8.22.0"
   },

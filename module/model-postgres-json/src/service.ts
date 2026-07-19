@@ -48,6 +48,7 @@ import {
   type WhereClause
 } from '@travetto/model-query';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
+import { WorkPool } from '@travetto/worker';
 
 import { type PostgresJsonConnection, Transactional } from './connection.ts';
 import { PostgresJsonQueryCompiler } from './query.ts';
@@ -362,26 +363,30 @@ export class PostgresJsonModelService
     };
     const errors: unknown[] = [];
 
-    for (const op of preppedOps) {
-      try {
-        if ('insert' in op && op.insert) {
-          await this.create(modelClass, op.insert);
-          counts.insert++;
-        } else if ('update' in op && op.update) {
-          await this.update(modelClass, op.update);
-          counts.update++;
-        } else if ('upsert' in op && op.upsert) {
-          await this.upsert(modelClass, op.upsert);
-          counts.upsert++;
-        } else if ('delete' in op && op.delete) {
-          await this.delete(modelClass, op.delete.id);
-          counts.delete++;
+    await WorkPool.run(
+      async op => {
+        try {
+          if ('insert' in op && op.insert) {
+            await this.create(modelClass, op.insert);
+            counts.insert++;
+          } else if ('update' in op && op.update) {
+            await this.update(modelClass, op.update);
+            counts.update++;
+          } else if ('upsert' in op && op.upsert) {
+            await this.upsert(modelClass, op.upsert);
+            counts.upsert++;
+          } else if ('delete' in op && op.delete) {
+            await this.delete(modelClass, op.delete.id);
+            counts.delete++;
+          }
+        } catch (err) {
+          counts.error++;
+          errors.push(err);
         }
-      } catch (err) {
-        counts.error++;
-        errors.push(err);
-      }
-    }
+      },
+      preppedOps,
+      { max: 8 }
+    );
 
     return {
       errors,
