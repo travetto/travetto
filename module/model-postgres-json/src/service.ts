@@ -195,7 +195,7 @@ export class PostgresJsonModelService
     return await ModelCrudUtil.load(modelClass, record);
   }
 
-  async #loadMany<T extends ModelType>(modelClass: Class<T>, records: Record<string, unknown>[]): Promise<T[]> {
+  async #loadMany<T extends ModelType>(modelClass: Class<T>, records: unknown[]): Promise<T[]> {
     return await Promise.all(records.map(row => ModelCrudUtil.load(modelClass, castTo(row))));
   }
 
