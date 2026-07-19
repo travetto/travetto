@@ -354,9 +354,7 @@ export class PostgresJsonModelService
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
     const classification = PostgresJsonUtil.classifyFields(modelClass);
     const simpleFieldsSet = new Set(classification.simpleFields.map(field => field.name));
-    const compiler = new PostgresJsonQueryCompiler(modelClass, tableName, simpleFieldsSet);
-
-    const { whereSQL, parameters } = compiler.compile(where);
+    const { whereSQL, parameters } = PostgresJsonUtil.compileWhere(modelClass, where);
 
     // Apply sorting template criteria
     const sortClauses = indexConfig.sortTemplate.map(({ path, value }) => {
