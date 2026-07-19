@@ -178,6 +178,45 @@ export class PostgresJsonModelService
     return preppedItem;
   }
 
+  async #executeUpsert<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>, conflictTarget: string[]): Promise<T> {
+    ModelCrudUtil.ensureNotSubType(modelClass);
+    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
+    const rawItem: Record<string, unknown> = castTo(preppedItem);
+    const context = this.#getContext(modelClass);
+
+    const columns: string[] = [];
+    const values: unknown[] = [];
+    const updates: string[] = [];
+
+    for (const field of context.simpleFields.values()) {
+      columns.push(PostgresJsonUtil.escapeIdentifier(field.name));
+      const val = rawItem[field.name];
+      values.push(val === undefined || val === null ? null : val);
+      if (field.name !== 'id') {
+        updates.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = EXCLUDED.${PostgresJsonUtil.escapeIdentifier(field.name)}`);
+      }
+    }
+
+    for (const field of context.complexFields.values()) {
+      columns.push(PostgresJsonUtil.escapeIdentifier(field.name));
+      const value = rawItem[field.name];
+      values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
+      updates.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = EXCLUDED.${PostgresJsonUtil.escapeIdentifier(field.name)}`);
+    }
+
+    const placeholders = columns.map((_, index) => `$${index + 1}`);
+    const sql = `
+      INSERT INTO ${PostgresJsonUtil.escapeIdentifier(context.tableName)} (${columns.join(', ')})
+      VALUES (${placeholders.join(', ')})
+      ON CONFLICT (${conflictTarget.map(c => PostgresJsonUtil.escapeIdentifier(c)).join(', ')})
+      DO UPDATE SET ${updates.join(', ')}
+      RETURNING *;
+    `;
+
+    const result = await this.connection.execute<Record<string, unknown>>(sql, values);
+    return await ModelCrudUtil.load(modelClass, result.records[0]);
+  }
+
   @PostConstruct()
   async initialize(): Promise<void> {
     await this.connection.init();
@@ -257,41 +296,7 @@ export class PostgresJsonModelService
   }
 
   async upsert<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(modelClass);
-    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
-    const rawItem: Record<string, unknown> = castTo(preppedItem);
-    const context = this.#getContext(modelClass);
-
-    const columns: string[] = [];
-    const values: unknown[] = [];
-    const updates: string[] = [];
-
-    for (const field of context.simpleFields.values()) {
-      columns.push(PostgresJsonUtil.escapeIdentifier(field.name));
-      const val = rawItem[field.name];
-      values.push(val === undefined || val === null ? null : val);
-      if (field.name !== 'id') {
-        updates.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = EXCLUDED.${PostgresJsonUtil.escapeIdentifier(field.name)}`);
-      }
-    }
-
-    for (const field of context.complexFields.values()) {
-      columns.push(PostgresJsonUtil.escapeIdentifier(field.name));
-      const value = rawItem[field.name];
-      values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
-      updates.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = EXCLUDED.${PostgresJsonUtil.escapeIdentifier(field.name)}`);
-    }
-
-    const placeholders = columns.map((_, index) => `$${index + 1}`);
-    const sql = `
-      INSERT INTO ${PostgresJsonUtil.escapeIdentifier(context.tableName)} (${columns.join(', ')})
-      VALUES (${placeholders.join(', ')})
-      ON CONFLICT (${PostgresJsonUtil.escapeIdentifier('id')})
-      DO UPDATE SET ${updates.join(', ')};
-    `;
-
-    await this.connection.execute(sql, values);
-    return preppedItem;
+    return this.#executeUpsert(modelClass, item, ['id']);
   }
 
   async updatePartial<T extends ModelType>(modelClass: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
