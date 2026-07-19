@@ -191,6 +191,14 @@ export class PostgresJsonModelService
     }
   }
 
+  async #loadSingle<T extends ModelType>(modelClass: Class<T>, record: Record<string, unknown>): Promise<T> {
+    return await ModelCrudUtil.load(modelClass, record);
+  }
+
+  async #loadMany<T extends ModelType>(modelClass: Class<T>, records: Record<string, unknown>[]): Promise<T[]> {
+    return await Promise.all(records.map(row => ModelCrudUtil.load(modelClass, castTo(row))));
+  }
+
   async #executeUpsert<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>, conflictTarget: string[]): Promise<T> {
     ModelCrudUtil.ensureNotSubType(modelClass);
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
@@ -227,7 +235,7 @@ export class PostgresJsonModelService
     `;
 
     const result = await this.connection.execute<Record<string, unknown>>(sql, values);
-    return await ModelCrudUtil.load(modelClass, result.records[0]);
+    return this.#loadSingle(modelClass, result.records[0]);
   }
 
   @PostConstruct()
@@ -270,7 +278,7 @@ export class PostgresJsonModelService
       throw new NotFoundError(modelClass, id);
     }
 
-    return await ModelCrudUtil.load(modelClass, result.records[0]);
+    return this.#loadSingle(modelClass, result.records[0]);
   }
 
   async create<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>): Promise<T> {
@@ -321,7 +329,7 @@ export class PostgresJsonModelService
       throw new NotFoundError(modelClass, item.id);
     }
 
-    return await ModelCrudUtil.load(modelClass, result.records[0]);
+    return this.#loadSingle(modelClass, result.records[0]);
   }
 
   async delete<T extends ModelType>(modelClass: Class<T>, id: string): Promise<void> {
@@ -358,7 +366,7 @@ export class PostgresJsonModelService
         break;
       }
 
-      const items = await Promise.all(result.records.map(row => ModelCrudUtil.load(modelClass, castTo(row))));
+      const items = await this.#loadMany(modelClass, result.records);
       yield items;
       produced += items.length;
       offset += items.length;
@@ -381,7 +389,7 @@ export class PostgresJsonModelService
     const result = await this.connection.execute<Record<string, unknown>>(sql, parameters);
     this.#validateIndexResult(result, modelClass, indexConfig, computed);
 
-    return await ModelCrudUtil.load(modelClass, result.records[0]);
+    return this.#loadSingle(modelClass, result.records[0]);
   }
 
   async deleteByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
@@ -438,7 +446,7 @@ export class PostgresJsonModelService
     const result = await this.#executeUpdatePartial(modelClass, where, castTo(body), true);
     this.#validateIndexResult(result, modelClass, indexConfig, computed);
 
-    return await ModelCrudUtil.load(modelClass, result.records[0]);
+    return this.#loadSingle(modelClass, result.records[0]);
   }
 
   async *listByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
@@ -476,7 +484,7 @@ export class PostgresJsonModelService
         break;
       }
 
-      const items = await Promise.all(result.records.map(row => ModelCrudUtil.load(modelClass, castTo(row))));
+      const items = await this.#loadMany(modelClass, result.records);
       yield items;
       produced += items.length;
       offset += items.length;
@@ -542,7 +550,7 @@ export class PostgresJsonModelService
     const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} WHERE ${conditions.join(' AND ')} LIMIT ${options?.limit ?? 10};`;
     const result = await this.connection.execute(sql, parameters);
 
-    return Promise.all(result.records.map(row => ModelCrudUtil.load(modelClass, castTo(row))));
+    return this.#loadMany(modelClass, result.records);
   }
 
   // Query Support
@@ -563,7 +571,7 @@ export class PostgresJsonModelService
     const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''} ${sortSQL} ${pagination};`;
     const result = await this.connection.execute(sql, parameters);
 
-    return Promise.all(result.records.map(row => ModelCrudUtil.load(modelClass, castTo(row))));
+    return this.#loadMany(modelClass, result.records);
   }
 
   async queryOne<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>, failOnMany = true): Promise<T> {
