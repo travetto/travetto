@@ -2,6 +2,7 @@ import { Suite } from '@travetto/test';
 
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
+import { ModelBulkSuite } from '@travetto/model/support/test/bulk.ts';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
 
@@ -25,6 +26,13 @@ class PostgreSQLJsonCrudSuite extends ModelCrudSuite {
 @WithSuiteContext()
 @Suite()
 class PostgreSQLJsonQueryPolymorphismSuite extends ModelPolymorphismSuite {
+  serviceClass = PostgresJsonModelService;
+  configClass = PostgresJsonModelConfig;
+}
+
+@WithSuiteContext()
+@Suite()
+class PostgreSQLJsonBulkSuite extends ModelBulkSuite {
   serviceClass = PostgresJsonModelService;
   configClass = PostgresJsonModelConfig;
 }

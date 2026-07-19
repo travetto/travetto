@@ -2,6 +2,10 @@ import type { default as pg } from 'pg';
 
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
+  type BulkOperation,
+  type BulkResponse,
+  type ModelBulkSupport,
+  ModelBulkUtil,
   type ModelCrudSupport,
   ModelCrudUtil,
   type ModelListOptions,
@@ -58,6 +62,7 @@ export class PostgresJsonModelService
   implements
     ModelCrudSupport,
     ModelStorageSupport,
+    ModelBulkSupport,
     ModelIndexedSupport,
     ModelQuerySupport,
     ModelQueryCrudSupport,
@@ -341,6 +346,48 @@ export class PostgresJsonModelService
     if (result.count === 0) {
       throw new NotFoundError(modelClass, id);
     }
+  }
+
+  async processBulk<T extends ModelType>(modelClass: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse> {
+    const { insertedIds, upsertedIds, operations: preppedOps } = await ModelBulkUtil.preStore(modelClass, operations, this);
+
+    const addedIds = new Map([...insertedIds.entries(), ...upsertedIds.entries()]);
+
+    const counts = {
+      update: 0,
+      insert: 0,
+      upsert: 0,
+      delete: 0,
+      error: 0
+    };
+    const errors: unknown[] = [];
+
+    for (const op of preppedOps) {
+      try {
+        if ('insert' in op && op.insert) {
+          await this.create(modelClass, op.insert);
+          counts.insert++;
+        } else if ('update' in op && op.update) {
+          await this.update(modelClass, op.update);
+          counts.update++;
+        } else if ('upsert' in op && op.upsert) {
+          await this.upsert(modelClass, op.upsert);
+          counts.upsert++;
+        } else if ('delete' in op && op.delete) {
+          await this.delete(modelClass, op.delete.id);
+          counts.delete++;
+        }
+      } catch (err) {
+        counts.error++;
+        errors.push(err);
+      }
+    }
+
+    return {
+      errors,
+      insertedIds: addedIds,
+      counts
+    };
   }
 
   async *list<T extends ModelType>(modelClass: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
