@@ -32,24 +32,25 @@ export class PostgresJsonTableManager {
    */
   static compileIndexPath(tableName: string, simpleFieldsSet: Set<string>, path: string[]): string {
     const firstSegment = path[0];
+    const escapedFirst = PostgresJsonUtil.escapeIdentifier(firstSegment);
     if (simpleFieldsSet.has(firstSegment)) {
       if (path.length > 1) {
         throw new Error(`Cannot create nested index under simple column "${firstSegment}" in table "${tableName}"`);
       }
-      return `"${firstSegment}"`;
+      return escapedFirst;
     } else {
       // It is a complex (JSONB) column
       const nestedSegments = path.slice(1);
       if (nestedSegments.length === 0) {
-        return `"${firstSegment}"`;
+        return escapedFirst;
       }
       const jsonAccessor = nestedSegments
         .slice(0, -1)
-        .map(segment => `->'${segment}'`)
+        .map(segment => `->'${PostgresJsonUtil.escapeLiteral(segment)}'`)
         .join('');
       const leafSegment = nestedSegments[nestedSegments.length - 1];
       // Surround with extra parentheses as required by Postgres for expression indexes
-      return `(("${firstSegment}"${jsonAccessor}->>'${leafSegment}'))`;
+      return `((${escapedFirst}${jsonAccessor}->>'${PostgresJsonUtil.escapeLiteral(leafSegment)}'))`;
     }
   }
 

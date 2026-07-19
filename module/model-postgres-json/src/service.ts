@@ -109,7 +109,7 @@ export class PostgresJsonModelService
   // CRUD Support
   async get<T extends ModelType>(modelClass: Class<T>, id: string): Promise<T> {
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const sql = `SELECT * FROM "${tableName}" WHERE "id" = $1;`;
+    const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} WHERE "id" = $1;`;
 
     const result = await this.connection.execute<Record<string, unknown>>(sql, [id]);
 
@@ -284,7 +284,7 @@ export class PostgresJsonModelService
 
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
     const { whereSQL, parameters } = PostgresJsonUtil.compileWhere(modelClass, where);
-    const sql = `SELECT "id" FROM "${tableName}" WHERE ${whereSQL};`;
+    const sql = `SELECT "id" FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} WHERE ${whereSQL};`;
 
     const result = await this.connection.execute<{ id: string }>(sql, parameters);
     if (result.count === 0) {
@@ -371,7 +371,7 @@ export class PostgresJsonModelService
 
     while (!options?.abort?.aborted && produced < limit) {
       const batchLimit = Math.min(batchSize, limit - produced);
-      const sql = `SELECT * FROM "${tableName}" ${whereSQL ? `WHERE ${whereSQL}` : ''} ${sortSQL} LIMIT ${batchLimit} OFFSET ${offset};`;
+      const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''} ${sortSQL} LIMIT ${batchLimit} OFFSET ${offset};`;
 
       const result = await this.connection.execute(sql, parameters);
       if (result.count === 0) {
@@ -467,7 +467,7 @@ export class PostgresJsonModelService
       pagination += ` OFFSET ${query.offset}`;
     }
 
-    const sql = `SELECT * FROM "${tableName}" ${whereSQL ? `WHERE ${whereSQL}` : ''} ${sortSQL} ${pagination};`;
+    const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''} ${sortSQL} ${pagination};`;
     const result = await this.connection.execute(sql, parameters);
 
     return Promise.all(result.records.map(row => ModelCrudUtil.load(modelClass, castTo(row))));
@@ -483,7 +483,7 @@ export class PostgresJsonModelService
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
     const where = ModelQueryUtil.getWhereClause(modelClass, query.where);
     const { whereSQL, parameters } = PostgresJsonUtil.compileWhere(modelClass, where);
-    const sql = `SELECT COUNT(*) as "total" FROM "${tableName}" ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
+    const sql = `SELECT COUNT(*) as "total" FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
 
     const result = await this.connection.execute<{ total: string | number }>(sql, parameters);
     return Number(result.records[0]?.total ?? 0);
@@ -525,7 +525,7 @@ export class PostgresJsonModelService
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
     const where = ModelQueryUtil.getWhereClause(modelClass, query.where);
     const { whereSQL, parameters } = PostgresJsonUtil.compileWhere(modelClass, where);
-    const sql = `DELETE FROM "${tableName}" ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
+    const sql = `DELETE FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
 
     const result = await this.connection.execute(sql, parameters);
     return result.count;

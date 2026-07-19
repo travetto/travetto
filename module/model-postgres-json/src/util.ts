@@ -118,6 +118,20 @@ export class PostgresJsonUtil {
   }
 
   /**
+   * Escapes a SQL identifier (like table or column names) by wrapping in double quotes and doubling existing double quotes.
+   */
+  static escapeIdentifier(name: string): string {
+    return `"${name.replaceAll('"', '""')}"`;
+  }
+
+  /**
+   * Escapes a SQL literal string (like string constants or JSON path segments) by doubling single quotes.
+   */
+  static escapeLiteral(value: string): string {
+    return value.replaceAll("'", "''");
+  }
+
+  /**
    * Compiles the sort clauses of a query and returns the compiled SQL.
    */
   static compileSort<T extends ModelType>(compiler: PostgresJsonQueryCompiler, sort?: SortClause<T>[]): string {

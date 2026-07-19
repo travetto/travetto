@@ -156,22 +156,21 @@ export class PostgresJsonQueryCompiler {
     }
 
     const accessorSql = (columnName: string, pathSegments: string[], isJsonb: boolean): string => {
-      const escapedColumn = columnName.replaceAll('"', '""');
-      const escapedSegments = pathSegments.map(segment => segment.replaceAll("'", "''"));
+      const escapedColumn = PostgresJsonUtil.escapeIdentifier(columnName);
 
-      if (escapedSegments.length === 0) {
-        return `"${escapedColumn}"`;
+      if (pathSegments.length === 0) {
+        return escapedColumn;
       }
       if (isJsonb) {
-        const parts = escapedSegments.map(segment => `->'${segment}'`).join('');
-        return `("${escapedColumn}"${parts})`;
+        const parts = pathSegments.map(segment => `->'${PostgresJsonUtil.escapeLiteral(segment)}'`).join('');
+        return `(${escapedColumn}${parts})`;
       } else {
-        const body = escapedSegments
+        const body = pathSegments
           .slice(0, -1)
-          .map(segment => `->'${segment}'`)
+          .map(segment => `->'${PostgresJsonUtil.escapeLiteral(segment)}'`)
           .join('');
-        const leaf = escapedSegments[escapedSegments.length - 1];
-        return `("${escapedColumn}"${body}->>'${leaf}')`;
+        const leaf = pathSegments[pathSegments.length - 1];
+        return `(${escapedColumn}${body}->>'${PostgresJsonUtil.escapeLiteral(leaf)}')`;
       }
     };
 
