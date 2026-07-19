@@ -41,7 +41,6 @@ When registration completes, this is the file the linter will use, and any other
   "extends": ["./node_modules/@travetto/lint/resources/biome.jsonc"],
   "files": {
     "includes": [
-      "**",      
       "!**/out",
       "!**/ui",
       "!**/api-client",
@@ -50,8 +49,9 @@ When registration completes, this is the file the linter will use, and any other
       "!**/resources",
       "!**/DOC.html",
       "!**/README.md",
-      "!archived/**",
-      "!related/travetto.github.io/**"
+      "!**/.vscode",
+      "!archived",
+      "!related/travetto.github.io"
     ]
   }
 }

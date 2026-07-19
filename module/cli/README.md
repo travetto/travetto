@@ -587,6 +587,7 @@ Available Services
  * mongodb@8.3
  * mysql@9.6
  * postgresql@18.3
+ * postgresql@18.3
  * redis@8.4
  * s3@4.12.4
 ```
@@ -604,6 +605,7 @@ elasticsearch      9.2.8    Running ed76ee063d13
 firestore         latest    Running feec2e5e95b4
 mongodb              8.3    Running 5513eba6734e
 mysql                9.6    Running 307bc66d442a
+postgresql          18.3    Running e78291e71040
 postgresql          18.3    Running e78291e71040
 redis                8.4    Running 77ba279b4e30
 s3                4.12.4    Running fdacfc55b9e3
