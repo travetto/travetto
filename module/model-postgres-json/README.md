@@ -28,7 +28,7 @@ Out of the box, by installing the module, everything should be wired up by defau
 **Code: Wiring up a custom Model Source**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
-import { PostgresJsonConnection, PostgresJsonModelService } from '@travetto/model-postgres-json';
+import { type PostgresJsonConnection, PostgresJsonModelService } from '@travetto/model-postgres-json';
 
 export class Init {
   @InjectableFactory({ primary: true })
