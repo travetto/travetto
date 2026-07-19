@@ -174,8 +174,21 @@ export class PostgresJsonModelService
     if (result.count > 1) {
       throw new Error(`Multiple items found for update lookup ${modelClass.name}`);
     }
-
     return preppedItem;
+  }
+
+  #validateIndexResult<T extends ModelType>(
+    result: { count: number },
+    modelClass: Class<T>,
+    indexConfig: SingleItemIndex<T>,
+    computed: ModelIndexedComputedIndex<T>
+  ): void {
+    if (result.count === 0) {
+      throw new NotFoundError(`${modelClass.name} Index=${indexConfig}`, computed.getKey());
+    }
+    if (result.count > 1) {
+      throw new Error(`Multiple items found for index lookup ${modelClass.name} Index=${indexConfig}`);
+    }
   }
 
   async #executeUpsert<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>, conflictTarget: string[]): Promise<T> {
@@ -366,12 +379,7 @@ export class PostgresJsonModelService
     const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} WHERE ${whereSQL};`;
 
     const result = await this.connection.execute<Record<string, unknown>>(sql, parameters);
-    if (result.count === 0) {
-      throw new NotFoundError(`${modelClass.name} Index=${indexConfig}`, computed.getKey());
-    }
-    if (result.count > 1) {
-      throw new Error(`Multiple items found for index lookup ${modelClass.name} Index=${indexConfig}`);
-    }
+    this.#validateIndexResult(result, modelClass, indexConfig, computed);
 
     return await ModelCrudUtil.load(modelClass, result.records[0]);
   }
@@ -390,12 +398,7 @@ export class PostgresJsonModelService
     const sql = `DELETE FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} WHERE ${whereSQL};`;
 
     const result = await this.connection.execute(sql, parameters);
-    if (result.count === 0) {
-      throw new NotFoundError(`${modelClass.name} Index=${indexConfig}`, computed.getKey());
-    }
-    if (result.count > 1) {
-      throw new Error(`Multiple items found for index lookup ${modelClass.name} Index=${indexConfig}`);
-    }
+    this.#validateIndexResult(result, modelClass, indexConfig, computed);
   }
 
   @Transactional()
@@ -433,13 +436,7 @@ export class PostgresJsonModelService
     const where: WhereClause<T> = castTo(computed.project({ sort: true, includeId: true }));
 
     const result = await this.#executeUpdatePartial(modelClass, where, castTo(body), true);
-
-    if (result.count === 0) {
-      throw new NotFoundError(`${modelClass.name} Index=${indexConfig}`, computed.getKey());
-    }
-    if (result.count > 1) {
-      throw new Error(`Multiple items found for index lookup ${modelClass.name} Index=${indexConfig}`);
-    }
+    this.#validateIndexResult(result, modelClass, indexConfig, computed);
 
     return await ModelCrudUtil.load(modelClass, result.records[0]);
   }
