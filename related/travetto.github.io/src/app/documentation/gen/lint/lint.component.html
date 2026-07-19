@@ -47,7 +47,6 @@ When registration completes, this is the file the linter will use, and any other
   <span class="token property">"extends"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"./node_modules/&#64;travetto/lint/resources/biome.jsonc"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
   <span class="token property">"files"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token property">"includes"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-      <span class="token string">"**"</span><span class="token punctuation">,</span>
       <span class="token string">"!**/out"</span><span class="token punctuation">,</span>
       <span class="token string">"!**/ui"</span><span class="token punctuation">,</span>
       <span class="token string">"!**/api-client"</span><span class="token punctuation">,</span>
@@ -56,8 +55,9 @@ When registration completes, this is the file the linter will use, and any other
       <span class="token string">"!**/resources"</span><span class="token punctuation">,</span>
       <span class="token string">"!**/DOC.html"</span><span class="token punctuation">,</span>
       <span class="token string">"!**/README.md"</span><span class="token punctuation">,</span>
-      <span class="token string">"!archived/**"</span><span class="token punctuation">,</span>
-      <span class="token string">"!related/travetto.github.io/**"</span>
+      <span class="token string">"!**/.vscode"</span><span class="token punctuation">,</span>
+      <span class="token string">"!archived"</span><span class="token punctuation">,</span>
+      <span class="token string">"!related/travetto.github.io"</span>
     <span class="token punctuation">]</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
