@@ -1,32 +1,44 @@
-import { ModelRegistryIndex } from '@travetto/model';
-import { type Class, castTo } from '@travetto/runtime';
+import { ModelRegistryIndex, type ModelType } from '@travetto/model';
+import { type Class, castTo, RuntimeError } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-export interface FieldClassification {
+export interface SchemaContext<T> {
+  cls: Class<T>;
+  simpleFieldNameSet: Set<string>;
   simpleFields: SchemaFieldConfig[];
   complexFields: SchemaFieldConfig[];
   allFields: SchemaFieldConfig[];
 }
 
 /**
+ * Compilation context containing metadata and parameters
+ */
+export interface TableContext<T extends ModelType> extends SchemaContext<T> {
+  tableName: string;
+}
+
+/**
  * Utility helpers for PostgreSQL JSON model schema mapping
  */
 export class PostgresJsonUtil {
-  /**
-   * Classifies schema fields of a class into simple (primitive columns) and complex (JSONB columns)
-   */
-  static classifyFields(modelClass: Class): FieldClassification {
-    const registryConfig = SchemaRegistryIndex.getOptional(modelClass)?.get();
+  static SCHEMA_CACHE = new Map<Class, SchemaContext<unknown>>();
+
+  static getSchemaContext<T>(cls: Class<T>): SchemaContext<T> {
+    if (this.SCHEMA_CACHE.has(cls)) {
+      return castTo(this.SCHEMA_CACHE.get(cls)!);
+    }
+
+    const registryConfig = SchemaRegistryIndex.getOptional(cls)?.get();
     if (!registryConfig) {
-      return { simpleFields: [], complexFields: [], allFields: [] };
+      throw new RuntimeError('Cannot store unregistered models', { category: 'data' });
     }
 
     const fields = Object.values(registryConfig.fields).map(field => ({ ...field }));
 
-    const hasModel = ModelRegistryIndex.has(modelClass);
+    const hasModel = ModelRegistryIndex.has(cls);
     if (hasModel && registryConfig.discriminatedBase) {
       const fieldMap = new Set(fields.map(field => field.name));
-      for (const subclass of SchemaRegistryIndex.getDiscriminatedClasses(modelClass)) {
+      for (const subclass of SchemaRegistryIndex.getDiscriminatedClasses(cls)) {
         const subclassConfig = SchemaRegistryIndex.getConfig(subclass);
         for (const field of Object.values<SchemaFieldConfig>(subclassConfig.fields)) {
           if (!fieldMap.has(field.name)) {
@@ -39,12 +51,19 @@ export class PostgresJsonUtil {
 
     const simpleFields = fields.filter(field => !SchemaRegistryIndex.has(field.type) && !field.array);
     const complexFields = fields.filter(field => SchemaRegistryIndex.has(field.type) || field.array);
+    const simpleFieldNameSet = new Set(simpleFields.map(f => f.name));
+    const context: SchemaContext<T> = { cls, simpleFields, complexFields, allFields: fields, simpleFieldNameSet };
+    this.SCHEMA_CACHE.set(cls, context);
+    return context;
+  }
 
-    return {
-      simpleFields,
-      complexFields,
-      allFields: fields
-    };
+  static getContext<T extends ModelType>(modelClass: Class<T>, namespace?: string): TableContext<T> {
+    let tableName = ModelRegistryIndex.getStoreName(modelClass);
+    if (namespace) {
+      tableName = `${namespace}_${tableName}`;
+    }
+
+    return { tableName, ...this.getSchemaContext(modelClass) };
   }
 
   /**

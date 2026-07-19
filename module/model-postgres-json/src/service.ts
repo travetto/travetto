@@ -43,14 +43,13 @@ import {
   type ValidStringFields,
   type WhereClause
 } from '@travetto/model-query';
-import type { Any } from '@travetto/runtime';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { PostgresJsonConnection } from './connection.ts';
-import { type CompilationResult, type CompilerConfig, PostgresJsonQueryCompiler } from './query.ts';
+import { PostgresJsonQueryCompiler } from './query.ts';
 import { PostgresJsonTableManager } from './table-manager.ts';
-import { PostgresJsonUtil } from './util.ts';
+import { PostgresJsonUtil, type TableContext } from './util.ts';
 
 /**
  * A PostgreSQL JSON-based document store model service
@@ -79,13 +78,8 @@ export class PostgresJsonModelService
     return this.connection.pool;
   }
 
-  #compile<T extends ModelType>(modelClass: Class<T>, where?: WhereClause<T>, extra?: Partial<CompilerConfig<Any>>): CompilationResult<T> {
-    return PostgresJsonQueryCompiler.compile({
-      modelClass,
-      where,
-      namespace: this.connection.config.namespace,
-      ...extra
-    });
+  #getContext<T extends ModelType>(modelClass: Class<T>): TableContext<T> {
+    return PostgresJsonUtil.getContext(modelClass, this.connection.config.namespace);
   }
 
   @PostConstruct()
@@ -119,7 +113,7 @@ export class PostgresJsonModelService
 
   // CRUD Support
   async get<T extends ModelType>(modelClass: Class<T>, id: string): Promise<T> {
-    const { tableName } = this.#compile(modelClass);
+    const { tableName } = this.#getContext(modelClass);
     const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} WHERE "id" = $1;`;
 
     const result = await this.connection.execute<Record<string, unknown>>(sql, [id]);
@@ -134,25 +128,25 @@ export class PostgresJsonModelService
   async create<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>): Promise<T> {
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
     const rawItem: Record<string, unknown> = castTo(preppedItem);
-    const { tableName, classification } = this.#compile(modelClass);
+    const context = this.#getContext(modelClass);
 
     const columns: string[] = [];
     const values: unknown[] = [];
 
-    for (const field of classification.simpleFields) {
+    for (const field of context.simpleFields) {
       columns.push(PostgresJsonUtil.escapeIdentifier(field.name));
       const val = rawItem[field.name];
       values.push(val === undefined || val === null ? null : val);
     }
 
-    for (const field of classification.complexFields) {
+    for (const field of context.complexFields) {
       columns.push(PostgresJsonUtil.escapeIdentifier(field.name));
       const value = rawItem[field.name];
       values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
     }
 
     const placeholders = columns.map((_, index) => `$${index + 1}`);
-    const sql = `INSERT INTO ${PostgresJsonUtil.escapeIdentifier(tableName)} (${columns.join(', ')}) VALUES (${placeholders.join(', ')});`;
+    const sql = `INSERT INTO ${PostgresJsonUtil.escapeIdentifier(context.tableName)} (${columns.join(', ')}) VALUES (${placeholders.join(', ')});`;
 
     await this.connection.execute(sql, values);
     return preppedItem;
@@ -162,12 +156,12 @@ export class PostgresJsonModelService
     ModelCrudUtil.ensureNotSubType(modelClass);
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
     const rawItem: Record<string, unknown> = castTo(preppedItem);
-    const { tableName, classification } = this.#compile(modelClass);
+    const context = this.#getContext(modelClass);
 
     const sets: string[] = [];
     const values: unknown[] = [];
 
-    for (const field of classification.simpleFields) {
+    for (const field of context.simpleFields) {
       if (field.name === 'id') {
         continue;
       }
@@ -176,14 +170,14 @@ export class PostgresJsonModelService
       values.push(val === undefined || val === null ? null : val);
     }
 
-    for (const field of classification.complexFields) {
+    for (const field of context.complexFields) {
       sets.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = $${values.length + 1}`);
       const value = rawItem[field.name];
       values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
     }
 
     values.push(preppedItem.id);
-    const sql = `UPDATE ${PostgresJsonUtil.escapeIdentifier(tableName)} SET ${sets.join(', ')} WHERE ${PostgresJsonUtil.escapeIdentifier('id')} = $${values.length};`;
+    const sql = `UPDATE ${PostgresJsonUtil.escapeIdentifier(context.tableName)} SET ${sets.join(', ')} WHERE ${PostgresJsonUtil.escapeIdentifier('id')} = $${values.length};`;
 
     const result = await this.connection.execute(sql, values);
     if (result.count === 0) {
@@ -197,13 +191,13 @@ export class PostgresJsonModelService
     ModelCrudUtil.ensureNotSubType(modelClass);
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
     const rawItem: Record<string, unknown> = castTo(preppedItem);
-    const { tableName, classification } = this.#compile(modelClass);
+    const context = this.#getContext(modelClass);
 
     const columns: string[] = [];
     const values: unknown[] = [];
     const updates: string[] = [];
 
-    for (const field of classification.simpleFields) {
+    for (const field of context.simpleFields) {
       columns.push(PostgresJsonUtil.escapeIdentifier(field.name));
       const val = rawItem[field.name];
       values.push(val === undefined || val === null ? null : val);
@@ -212,7 +206,7 @@ export class PostgresJsonModelService
       }
     }
 
-    for (const field of classification.complexFields) {
+    for (const field of context.complexFields) {
       columns.push(PostgresJsonUtil.escapeIdentifier(field.name));
       const value = rawItem[field.name];
       values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
@@ -221,7 +215,7 @@ export class PostgresJsonModelService
 
     const placeholders = columns.map((_, index) => `$${index + 1}`);
     const sql = `
-      INSERT INTO ${PostgresJsonUtil.escapeIdentifier(tableName)} (${columns.join(', ')})
+      INSERT INTO ${PostgresJsonUtil.escapeIdentifier(context.tableName)} (${columns.join(', ')})
       VALUES (${placeholders.join(', ')})
       ON CONFLICT (${PostgresJsonUtil.escapeIdentifier('id')})
       DO UPDATE SET ${updates.join(', ')};
@@ -239,7 +233,7 @@ export class PostgresJsonModelService
 
   async delete<T extends ModelType>(modelClass: Class<T>, id: string): Promise<void> {
     ModelCrudUtil.ensureNotSubType(modelClass);
-    const { tableName } = this.#compile(modelClass);
+    const { tableName } = this.#getContext(modelClass);
     const sql = `DELETE FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} WHERE ${PostgresJsonUtil.escapeIdentifier('id')} = $1;`;
 
     const result = await this.connection.execute(sql, [id]);
@@ -253,7 +247,8 @@ export class PostgresJsonModelService
   }
 
   async *listWithOffset<T extends ModelType>(modelClass: Class<T>, options?: ModelListOptions & { offset?: number }): AsyncIterable<T[]> {
-    const { tableName, whereSQL, parameters } = this.#compile(modelClass);
+    const context = this.#getContext(modelClass);
+    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compileWhere(context);
 
     const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
     const batchSize = Math.min(options?.batchSizeHint ?? 100, limit);
@@ -263,7 +258,7 @@ export class PostgresJsonModelService
 
     while (!options?.abort?.aborted && produced < limit) {
       const batchLimit = Math.min(batchSize, limit - produced);
-      const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''} LIMIT ${batchLimit} OFFSET ${offset};`;
+      const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''} LIMIT ${batchLimit} OFFSET ${offset};`;
 
       const result = await this.connection.execute(sql, parameters);
       if (result.count === 0) {
@@ -287,8 +282,9 @@ export class PostgresJsonModelService
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate({ sort: true });
     const where: WhereClause<T> = castTo(computed.project({ sort: true, includeId: true }));
 
-    const { tableName, whereSQL, parameters } = this.#compile(modelClass, where);
-    const sql = `SELECT "id" FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} WHERE ${whereSQL};`;
+    const context = this.#getContext(modelClass);
+    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compileWhere(context, where);
+    const sql = `SELECT "id" FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} WHERE ${whereSQL};`;
 
     const result = await this.connection.execute<{ id: string }>(sql, parameters);
     if (result.count === 0) {
@@ -355,11 +351,11 @@ export class PostgresJsonModelService
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate();
     const where: WhereClause<T> = castTo(computed.project());
 
-    const { tableName, whereSQL, parameters, simpleFieldsSet } = this.#compile(modelClass, where);
+    const context = this.#getContext(modelClass);
 
     // Apply sorting template criteria
     const sortClauses = indexConfig.sortTemplate.map(({ path, value }) => {
-      const expression = PostgresJsonTableManager.compileIndexPath(tableName, simpleFieldsSet, path);
+      const expression = PostgresJsonTableManager.compileIndexPath(context.tableName, context.simpleFieldNameSet, path);
       return `${expression} ${value === -1 ? 'DESC' : 'ASC'}`;
     });
     const sortSQL = sortClauses.length ? `ORDER BY ${sortClauses.join(', ')}` : '';
@@ -370,9 +366,11 @@ export class PostgresJsonModelService
     let offset = options?.offset ?? 0;
     let produced = 0;
 
+    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compileWhere(context, where);
+
     while (!options?.abort?.aborted && produced < limit) {
       const batchLimit = Math.min(batchSize, limit - produced);
-      const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''} ${sortSQL} LIMIT ${batchLimit} OFFSET ${offset};`;
+      const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''} ${sortSQL} LIMIT ${batchLimit} OFFSET ${offset};`;
 
       const result = await this.connection.execute(sql, parameters);
       if (result.count === 0) {
@@ -426,11 +424,12 @@ export class PostgresJsonModelService
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate();
     const where: WhereClause<T> = castTo(computed.project());
 
-    const { tableName, whereSQL, parameters } = this.#compile(modelClass, where);
+    const context = this.#getContext(modelClass);
+    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context, where);
 
     // Prefix matching on the first sort key segment
     const prefixFieldPath = indexConfig.sortTemplate[0].path;
-    const { sqlPath } = PostgresJsonQueryCompiler.resolvePath(modelClass, prefixFieldPath);
+    const { sqlPath } = PostgresJsonQueryCompiler.resolvePath(context, prefixFieldPath);
 
     // Postgres case insensitive ILIKE for prefix
     const placeholder = `$${parameters.length + 1}`;
@@ -441,7 +440,7 @@ export class PostgresJsonModelService
       conditions.push(whereSQL);
     }
 
-    const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} WHERE ${conditions.join(' AND ')} LIMIT ${options?.limit ?? 10};`;
+    const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} WHERE ${conditions.join(' AND ')} LIMIT ${options?.limit ?? 10};`;
     const result = await this.connection.execute(sql, parameters);
 
     return Promise.all(result.records.map(row => ModelCrudUtil.load(modelClass, castTo(row))));
@@ -450,8 +449,9 @@ export class PostgresJsonModelService
   // Query Support
   async query<T extends ModelType>(modelClass: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(modelClass, query);
-    const { tableName, whereSQL, parameters } = this.#compile(modelClass, query.where);
-    const sortSQL = PostgresJsonQueryCompiler.compileSort(modelClass, query.sort);
+    const context = this.#getContext(modelClass);
+    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context);
+    const sortSQL = PostgresJsonQueryCompiler.compileSort(context, query.sort);
 
     let pagination = '';
     if (query.limit !== undefined) {
@@ -461,7 +461,7 @@ export class PostgresJsonModelService
       pagination += ` OFFSET ${query.offset}`;
     }
 
-    const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''} ${sortSQL} ${pagination};`;
+    const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''} ${sortSQL} ${pagination};`;
     const result = await this.connection.execute(sql, parameters);
 
     return Promise.all(result.records.map(row => ModelCrudUtil.load(modelClass, castTo(row))));
@@ -475,8 +475,9 @@ export class PostgresJsonModelService
 
   async queryCount<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
     await QueryVerifier.verify(modelClass, query);
-    const { tableName, whereSQL, parameters } = this.#compile(modelClass, query.where);
-    const sql = `SELECT COUNT(*) as "total" FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
+    const context = this.#getContext(modelClass);
+    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context, query.where);
+    const sql = `SELECT COUNT(*) as "total" FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
 
     const result = await this.connection.execute<{ total: string | number }>(sql, parameters);
     return Number(result.records[0]?.total ?? 0);
@@ -488,12 +489,13 @@ export class PostgresJsonModelService
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
     const rawItem: Record<string, unknown> = castTo(preppedItem);
 
-    const { tableName, whereSQL, parameters, classification } = this.#compile(modelClass, query.where);
+    const context = this.#getContext(modelClass);
+    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context, query.where);
 
     const sets: string[] = [];
     const values: unknown[] = [];
 
-    for (const field of classification.simpleFields) {
+    for (const field of context.simpleFields) {
       if (field.name === 'id') {
         continue;
       }
@@ -502,7 +504,7 @@ export class PostgresJsonModelService
       values.push(val === undefined || val === null ? null : val);
     }
 
-    for (const field of classification.complexFields) {
+    for (const field of context.complexFields) {
       sets.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = $${values.length + 1}`);
       const value = rawItem[field.name];
       values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
@@ -518,7 +520,7 @@ export class PostgresJsonModelService
       values.push(...parameters);
     }
 
-    const sql = `UPDATE ${PostgresJsonUtil.escapeIdentifier(tableName)} SET ${sets.join(', ')} WHERE ${conditions.join(' AND ')};`;
+    const sql = `UPDATE ${PostgresJsonUtil.escapeIdentifier(context.tableName)} SET ${sets.join(', ')} WHERE ${conditions.join(' AND ')};`;
 
     const result = await this.connection.execute(sql, values);
     if (result.count === 0) {
@@ -541,8 +543,10 @@ export class PostgresJsonModelService
 
   async deleteByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
     await QueryVerifier.verify(modelClass, query);
-    const { whereSQL, parameters, tableName } = this.#compile(modelClass, query.where, { checkExpiry: false });
-    const sql = `DELETE FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
+    const context = this.#getContext(modelClass);
+    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context, query.where, false);
+
+    const sql = `DELETE FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
 
     const result = await this.connection.execute(sql, parameters);
     return result.count;
@@ -555,8 +559,9 @@ export class PostgresJsonModelService
     query?: ModelQuery<T>
   ): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(modelClass, query);
-    const { whereSQL, parameters, tableName } = this.#compile(modelClass, query?.where);
-    const { sqlPath } = PostgresJsonQueryCompiler.resolvePath(modelClass, String(field).split('.'));
+    const context = this.#getContext(modelClass);
+    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compileWhere(context, query?.where);
+    const { sqlPath } = PostgresJsonQueryCompiler.resolvePath(context, String(field).split('.'));
 
     const conditions = [`${sqlPath} IS NOT NULL`];
     if (whereSQL) {
@@ -565,7 +570,7 @@ export class PostgresJsonModelService
 
     const sql = `
       SELECT ${sqlPath}::text AS ${PostgresJsonUtil.escapeIdentifier('key')}, COUNT(*)::int AS ${PostgresJsonUtil.escapeIdentifier('count')}
-      FROM ${PostgresJsonUtil.escapeIdentifier(tableName)}
+      FROM ${PostgresJsonUtil.escapeIdentifier(context.tableName)}
       WHERE ${conditions.join(' AND ')}
       GROUP BY ${sqlPath}
       ORDER BY ${PostgresJsonUtil.escapeIdentifier('count')} DESC;

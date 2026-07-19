@@ -17,17 +17,6 @@ export class PostgresJsonTableManager {
   }
 
   /**
-   * Resolves the Postgres table name for a model class
-   */
-  static getTableName(modelClass: Class, namespace?: string): string {
-    let tableName = ModelRegistryIndex.getStoreName(modelClass);
-    if (namespace) {
-      tableName = `${namespace}_${tableName}`;
-    }
-    return tableName;
-  }
-
-  /**
    * Compiles an index path into its SQL expression
    */
   static compileIndexPath(tableName: string, simpleFieldsSet: Set<string>, path: string[]): string {
@@ -108,9 +97,7 @@ export class PostgresJsonTableManager {
    * Synchronizes table structure and indexes for a model class with the database
    */
   async upsertTable(modelClass: Class, namespace?: string): Promise<void> {
-    const tableName = PostgresJsonTableManager.getTableName(modelClass, namespace);
-    const classification = PostgresJsonUtil.classifyFields(modelClass);
-    const simpleFieldsSet = new Set(classification.simpleFields.map(field => field.name));
+    const context = PostgresJsonUtil.getContext(modelClass, namespace);
 
     // Check if table exists
     const tableCheck = await this.connection.execute<{ exists: boolean }>(
@@ -119,7 +106,7 @@ export class PostgresJsonTableManager {
         JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
         WHERE c.relname = $1 AND c.relkind = 'r'
       );`,
-      [tableName]
+      [context.tableName]
     );
 
     const tableExists = tableCheck.records[0]?.exists ?? false;
@@ -128,7 +115,7 @@ export class PostgresJsonTableManager {
       // 1. Create table
       const columnDefinitions: string[] = [`"id" VARCHAR(256) PRIMARY KEY`];
 
-      for (const field of classification.simpleFields) {
+      for (const field of context.simpleFields) {
         if (field.name === 'id') {
           continue;
         }
@@ -136,17 +123,17 @@ export class PostgresJsonTableManager {
         columnDefinitions.push(`"${field.name}" ${columnType}`);
       }
 
-      for (const field of classification.complexFields) {
+      for (const field of context.complexFields) {
         columnDefinitions.push(`"${field.name}" JSONB`);
       }
 
-      const createTableSQL = `CREATE TABLE "${tableName}" (\n  ${columnDefinitions.join(',\n  ')}\n);`;
+      const createTableSQL = `CREATE TABLE "${context.tableName}" (\n  ${columnDefinitions.join(',\n  ')}\n);`;
       await this.connection.execute(createTableSQL);
 
       // 2. Create indexes
       const indexes = ModelRegistryIndex.getIndices(modelClass) || [];
       for (const index of indexes) {
-        const createIndexSQL = this.getCreateIndexSQL(modelClass, index, tableName, simpleFieldsSet);
+        const createIndexSQL = this.getCreateIndexSQL(modelClass, index, context.tableName, context.simpleFieldNameSet);
         await this.connection.execute(createIndexSQL);
       }
     } else {
@@ -155,16 +142,16 @@ export class PostgresJsonTableManager {
         `SELECT a.attname AS name, pg_catalog.format_type(a.atttypid, a.atttypmod) AS type
          FROM pg_catalog.pg_attribute a
          WHERE a.attrelid = $1::regclass AND a.attnum > 0 AND NOT a.attisdropped;`,
-        [tableName]
+        [context.tableName]
       );
       const existingColumns = new Map(columnQuery.records.map(record => [record.name, record.type.toUpperCase()]));
 
       // 2. Sync columns
       const requestedFieldsMap = new Map<string, string>();
-      for (const field of classification.simpleFields) {
+      for (const field of context.simpleFields) {
         requestedFieldsMap.set(field.name, PostgresJsonUtil.getColumnType(field));
       }
-      for (const field of classification.complexFields) {
+      for (const field of context.complexFields) {
         requestedFieldsMap.set(field.name, 'JSONB');
       }
 
@@ -174,7 +161,7 @@ export class PostgresJsonTableManager {
           continue;
         }
         if (!existingColumns.has(columnName)) {
-          const addColumnSQL = `ALTER TABLE "${tableName}" ADD COLUMN "${columnName}" ${columnType};`;
+          const addColumnSQL = `ALTER TABLE "${context.tableName}" ADD COLUMN "${columnName}" ${columnType};`;
           await this.connection.execute(addColumnSQL);
         } else {
           const existingType = existingColumns.get(columnName)!;
@@ -183,7 +170,7 @@ export class PostgresJsonTableManager {
           const normalizedRequested = columnType.toUpperCase().replace('CHARACTER VARYING', 'VARCHAR').replace('INTEGER', 'INT');
 
           if (!normalizedExisting.startsWith(normalizedRequested) && !normalizedRequested.startsWith(normalizedExisting)) {
-            const alterColumnSQL = `ALTER TABLE "${tableName}" ALTER COLUMN "${columnName}" TYPE ${columnType} USING ("${columnName}"::${columnType});`;
+            const alterColumnSQL = `ALTER TABLE "${context.tableName}" ALTER COLUMN "${columnName}" TYPE ${columnType} USING ("${columnName}"::${columnType});`;
             await this.connection.execute(alterColumnSQL);
           }
         }
@@ -195,7 +182,7 @@ export class PostgresJsonTableManager {
           continue;
         }
         if (!requestedFieldsMap.has(columnName)) {
-          const dropColumnSQL = `ALTER TABLE "${tableName}" DROP COLUMN "${columnName}";`;
+          const dropColumnSQL = `ALTER TABLE "${context.tableName}" DROP COLUMN "${columnName}";`;
           await this.connection.execute(dropColumnSQL);
         }
       }
@@ -203,7 +190,7 @@ export class PostgresJsonTableManager {
       // 3. Sync indexes
       const indexQuery = await this.connection.execute<{ indexname: string; indexdef: string }>(
         `SELECT indexname, indexdef FROM pg_indexes WHERE tablename = $1;`,
-        [tableName]
+        [context.tableName]
       );
       const existingIndexes = new Map(
         indexQuery.records.filter(record => !record.indexname.endsWith('_pkey')).map(record => [record.indexname, record.indexdef])
@@ -213,10 +200,10 @@ export class PostgresJsonTableManager {
       const requestedIndexesMap = new Map<string, IndexConfig>();
 
       for (const index of requestedIndexes) {
-        const indexName = ['idx', tableName, index.name.toLowerCase().replaceAll('-', '_')].join('_');
+        const indexName = ['idx', context.tableName, index.name.toLowerCase().replaceAll('-', '_')].join('_');
         requestedIndexesMap.set(indexName, index);
 
-        const newIndexSQL = this.getCreateIndexSQL(modelClass, index, tableName, simpleFieldsSet);
+        const newIndexSQL = this.getCreateIndexSQL(modelClass, index, context.tableName, context.simpleFieldNameSet);
         if (!existingIndexes.has(indexName)) {
           await this.connection.execute(newIndexSQL);
         } else {
@@ -244,7 +231,7 @@ export class PostgresJsonTableManager {
    * Drops the database table for a model class
    */
   async dropTable(modelClass: Class, namespace?: string): Promise<void> {
-    const tableName = PostgresJsonTableManager.getTableName(modelClass, namespace);
+    const { tableName } = PostgresJsonUtil.getContext(modelClass, namespace);
     await this.connection.execute(`DROP TABLE IF EXISTS "${tableName}" CASCADE;`);
   }
 
@@ -252,7 +239,7 @@ export class PostgresJsonTableManager {
    * Truncates/clears all records from a model class table
    */
   async truncateTable(modelClass: Class, namespace?: string): Promise<void> {
-    const tableName = PostgresJsonTableManager.getTableName(modelClass, namespace);
+    const { tableName } = PostgresJsonUtil.getContext(modelClass, namespace);
     await this.connection.execute(`TRUNCATE TABLE "${tableName}" CASCADE;`);
   }
 }

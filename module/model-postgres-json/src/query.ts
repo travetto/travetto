@@ -1,39 +1,45 @@
 import type { ModelType } from '@travetto/model';
 import { ModelQueryUtil, type SortClause, type WhereClause } from '@travetto/model-query';
-import { type Class, castTo, RuntimeError } from '@travetto/runtime';
+import { castTo, JSONUtil, RuntimeError } from '@travetto/runtime';
 import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import { PostgresJsonTableManager } from './table-manager.ts';
-import { type FieldClassification, PostgresJsonUtil } from './util.ts';
+import { PostgresJsonUtil, type TableContext } from './util.ts';
 
-function isCompilerContext<T extends ModelType>(ctx: unknown): ctx is CompilerContext<T> {
-  return typeof ctx === 'object' && ctx !== null && 'modelClass' in ctx;
-}
+const PARAM_SEP = '_$_';
 
 /**
- * Compilation context containing metadata and parameters
+ * Result of query compilation
  */
-export interface CompilerContext<T extends ModelType> {
-  modelClass: Class<T>;
-  tableName: string;
-  simpleFieldsSet: Set<string>;
-  classification: FieldClassification;
-  parameters: unknown[];
+export interface QueryClause {
+  sql?: string;
+  parameters?: Record<string, unknown>;
 }
 
 /**
  * Result of query compilation
  */
-export interface CompilationResult<T extends ModelType> extends CompilerContext<T> {
+export interface CompilationResult {
   whereSQL?: string;
+  parameters?: unknown[];
 }
 
-export interface CompilerConfig<T extends ModelType> {
-  modelClass: Class<T>;
-  where?: WhereClause<T>;
-  checkExpiry?: boolean;
-  namespace?: string;
-}
+type IdentPath = (string | number)[];
+
+const combineResults = (results: QueryClause[], op: string): QueryClause => {
+  const filtered = results.filter(x => !!x.sql);
+
+  if (filtered.length === 0) {
+    return {};
+  } else if (filtered.length === 1) {
+    return filtered[0];
+  } else {
+    const fullOp = ` ${op} `;
+    return {
+      sql: `(${filtered.map(x => x.sql).join(fullOp)})`,
+      parameters: Object.assign({}, ...results.map(x => x.parameters))
+    };
+  }
+};
 
 /**
  * AST Query Compiler for Postgres JSON Model service
@@ -42,44 +48,37 @@ export class PostgresJsonQueryCompiler {
   /**
    * Compiles a WhereClause into a parameterized PostgreSQL WHERE clause.
    */
-  static compile<T extends ModelType>(config: CompilerConfig<T>): CompilationResult<T> {
-    const { modelClass, checkExpiry = true } = config;
-    const table = PostgresJsonTableManager.getTableName(modelClass, config.namespace);
-    const classification = PostgresJsonUtil.classifyFields(modelClass);
-    const simpleFieldsSet = new Set(classification.simpleFields.map(f => f.name));
-    const ctx: CompilerContext<T> = {
-      modelClass,
-      tableName: table,
-      simpleFieldsSet,
-      classification,
-      parameters: []
-    };
-    const resolvedWhere = ModelQueryUtil.getWhereClause(modelClass, config.where, checkExpiry);
-    const whereSQL = this.compileClause(ctx, resolvedWhere);
-    return { whereSQL, ...ctx };
+  static compileWhere<T extends ModelType>(context: TableContext<T>, where?: WhereClause<T>, checkExpiry = true): CompilationResult {
+    const resolvedWhere = ModelQueryUtil.getWhereClause(context.cls, where, checkExpiry);
+    const compiled = this.compileClause(context, resolvedWhere);
+    if (Object.entries(compiled.parameters ?? {}).length) {
+      const parameters: unknown[] = [];
+      const seen = new Map<string, string>();
+      const sql = compiled.sql!.replaceAll(/%%([^ %]{0, 200})%%/g, key => {
+        if (!seen.has(key)) {
+          parameters.push(compiled.parameters![key]);
+          seen.set(key, `$${parameters.length}`);
+        }
+        return seen.get(key)!;
+      });
+      return { whereSQL: sql, parameters };
+    } else {
+      return { whereSQL: compiled.sql };
+    }
   }
 
   /**
    * Compiles sorting clauses into SQL ORDER BY string.
    */
-  static compileSort<T extends ModelType>(modelClass: Class<T>, sort?: SortClause<T>[]): string {
+  static compileSort<T extends ModelType>(context: TableContext<T>, sort?: SortClause<T>[]): string {
     if (!sort || sort.length === 0) {
       return '';
     }
-    const classification = PostgresJsonUtil.classifyFields(modelClass);
-    const simpleFieldsSet = new Set(classification.simpleFields.map(f => f.name));
-    const ctx: CompilerContext<T> = {
-      modelClass,
-      tableName: '',
-      simpleFieldsSet,
-      classification,
-      parameters: []
-    };
     const sortClauses = sort.map(sortClause => {
       const key = Object.keys(sortClause)[0];
       const direction = castTo<Record<string, 1 | -1>>(sortClause)[key];
       const path = key.split('.');
-      const { sqlPath } = this.resolvePath(ctx, path);
+      const { sqlPath } = this.resolvePath(context, path);
       return `${sqlPath} ${direction === -1 ? 'DESC' : 'ASC'}`;
     });
     return sortClauses.length ? `ORDER BY ${sortClauses.join(', ')}` : '';
@@ -88,42 +87,22 @@ export class PostgresJsonQueryCompiler {
   /**
    * Resolves a field path to a database SQL expression and retrieves its schema config.
    */
-  static resolvePath<T extends ModelType>(
-    ctxOrModelClass: CompilerContext<T> | Class<T>,
-    path: string[]
-  ): { sqlPath: string; leafField?: SchemaFieldConfig } {
-    let ctx: CompilerContext<T>;
-    if (isCompilerContext<T>(ctxOrModelClass)) {
-      ctx = ctxOrModelClass;
-    } else {
-      const classification = PostgresJsonUtil.classifyFields(ctxOrModelClass);
-      const simpleFieldsSet = new Set(classification.simpleFields.map(f => f.name));
-      ctx = {
-        modelClass: ctxOrModelClass as Class,
-        tableName: PostgresJsonTableManager.getTableName(ctxOrModelClass),
-        simpleFieldsSet,
-        classification,
-        parameters: []
-      };
-    }
-
+  static resolvePath<T extends ModelType>(context: TableContext<T>, path: string[]): { sqlPath: string; leafField?: SchemaFieldConfig } {
     const firstSegment = path[0];
 
-    if (ctx.simpleFieldsSet.has(firstSegment)) {
+    if (context.simpleFieldNameSet.has(firstSegment)) {
       if (path.length > 1) {
-        throw new RuntimeError(`Cannot traverse nested properties under simple column "${firstSegment}" in table "${ctx.tableName}"`, {
+        throw new RuntimeError(`Cannot traverse nested properties under simple column "${firstSegment}" in table "${context.tableName}"`, {
           category: 'data'
         });
       }
-      const classification = PostgresJsonUtil.classifyFields(ctx.modelClass);
-      const leafField = classification.simpleFields.find(field => field.name === firstSegment);
+      const leafField = context.simpleFields.find(field => field.name === firstSegment);
       return { sqlPath: `"${firstSegment}"`, leafField };
     }
 
     // Traverse schema starting at root model
     let currentField: SchemaFieldConfig | undefined;
-    const classification = PostgresJsonUtil.classifyFields(ctx.modelClass);
-    currentField = classification.complexFields.find(field => field.name === firstSegment);
+    currentField = context.complexFields.find(field => field.name === firstSegment);
 
     let currentClass = currentField?.type;
     const jsonPath = path.slice(1);
@@ -184,21 +163,26 @@ export class PostgresJsonQueryCompiler {
   /**
    * Recursively compiles logical AND/OR/NOT clauses and simple field mappings
    */
-  static compileClause<T extends ModelType>(ctx: CompilerContext<T>, clause: WhereClause<T>): string {
+  static compileClause<T extends ModelType>(context: TableContext<T>, clause: WhereClause<T>, identPath: IdentPath = []): QueryClause {
     if (!clause) {
-      return '';
+      return {};
     }
     if (ModelQueryUtil.has$And(clause)) {
-      const compiled = clause.$and.map(item => this.compileClause(ctx, item)).filter(Boolean);
-      return compiled.length ? `(${compiled.join(' AND ')})` : '';
+      const compiled = clause.$and.map((item, i) => this.compileClause(context, item, [...identPath, i])).filter(Boolean);
+      return combineResults(compiled, 'AND');
     } else if (ModelQueryUtil.has$Or(clause)) {
-      const compiled = clause.$or.map(item => this.compileClause(ctx, item)).filter(Boolean);
-      return compiled.length ? `(${compiled.join(' OR ')})` : '';
+      const compiled = clause.$or.map((item, i) => this.compileClause(context, item, [...identPath, i])).filter(Boolean);
+      return combineResults(compiled, 'OR');
     } else if (ModelQueryUtil.has$Not(clause)) {
-      const compiled = this.compileClause(ctx, clause.$not);
-      return compiled ? `NOT (${compiled})` : '';
+      const compiled = this.compileClause(context, clause.$not, identPath);
+      return compiled
+        ? {
+            sql: `NOT (${compiled.sql})`,
+            parameters: compiled.parameters
+          }
+        : {};
     } else {
-      return this.compileSimple(ctx, clause);
+      return this.compileSimple(context, clause, [], identPath);
     }
   }
 
@@ -230,91 +214,123 @@ export class PostgresJsonQueryCompiler {
   /**
    * Compiles simple query object schemas recursively
    */
-  static compileSimple<T extends ModelType>(ctx: CompilerContext<T>, item: Record<string, unknown>, parentPath: string[] = []): string {
+  static compileSimple<T extends ModelType>(
+    context: TableContext<T>,
+    item: Record<string, unknown>,
+    parentPath: string[] = [],
+    identPath: IdentPath = []
+  ): QueryClause {
     if (!item) {
-      return '';
+      return {};
     }
-    const clauses: string[] = [];
+    const clauses: QueryClause[] = [];
 
+    let idx = 0;
     for (const [key, value] of Object.entries(item)) {
+      idx += 1;
       const currentPath = [...parentPath, key];
       const isPlainObject = DataUtil.isPlainObject(value);
       const firstKey = isPlainObject ? Object.keys(value)[0] : '';
 
-      const { sqlPath, leafField } = this.resolvePath(ctx, currentPath);
+      const { sqlPath, leafField } = this.resolvePath(context, currentPath);
+      const nextIdentPath = [...identPath, idx];
 
       if (leafField?.array && SchemaRegistryIndex.has(leafField.type) && isPlainObject && !firstKey.startsWith('$')) {
         const template = this.buildJsonTemplate(value as Record<string, unknown>);
-        const placeholder = `$${ctx.parameters.length + 1}`;
-        ctx.parameters.push(JSON.stringify([template]));
-        clauses.push(`${sqlPath} @> ${placeholder}::jsonb`);
+        const ident = `%%${nextIdentPath.join(PARAM_SEP)}%%`;
+        clauses.push({
+          sql: `${sqlPath} @> ${ident}::jsonb`,
+          parameters: {
+            [ident]: JSONUtil.toUTF8([template])
+          }
+        });
       } else if (isPlainObject && firstKey.startsWith('$')) {
-        clauses.push(this.compileOperator(ctx, currentPath, value as Record<string, unknown>));
+        clauses.push(this.compileOperator(context, currentPath, value as Record<string, unknown>, nextIdentPath));
       } else if (isPlainObject) {
-        clauses.push(this.compileSimple(ctx, value as Record<string, unknown>, currentPath));
+        clauses.push(this.compileSimple(context, value as Record<string, unknown>, currentPath, nextIdentPath));
       } else {
-        clauses.push(this.compileOperator(ctx, currentPath, { $eq: value }));
+        clauses.push(this.compileOperator(context, currentPath, { $eq: value }, nextIdentPath));
       }
     }
 
-    return clauses.filter(Boolean).join(' AND ');
+    return combineResults(clauses, 'AND');
   }
 
   /**
    * Compiles individual operators like $eq, $gt, $in, $regex etc.
    */
-  static compileOperator<T extends ModelType>(ctx: CompilerContext<T>, path: string[], operation: Record<string, unknown>): string {
-    const { sqlPath, leafField } = this.resolvePath(ctx, path);
-    const clauses: string[] = [];
+  static compileOperator<T extends ModelType>(
+    context: TableContext<T>,
+    path: string[],
+    operation: Record<string, unknown>,
+    identPath: IdentPath = []
+  ): QueryClause {
+    const { sqlPath, leafField } = this.resolvePath(context, path);
+    const clauses: QueryClause[] = [];
 
+    let idx = 0;
     for (let [operator, value] of Object.entries(operation)) {
+      idx += 1;
+
       if (Array.isArray(value)) {
         value = value.map(val => ModelQueryUtil.resolveComparator(val));
       } else {
         value = ModelQueryUtil.resolveComparator(value);
       }
-      const placeholder = `$${ctx.parameters.length + 1}`;
-      let clause = '';
+
+      const ident = [...identPath, idx].join(PARAM_SEP);
+      const nestedIdentPath = [...identPath, idx];
+
+      const placeholder = `%%${ident}%%`;
+      let clause: QueryClause;
 
       // Handle JSONB array queries
       if (leafField?.array) {
         if (operator === '$eq') {
-          ctx.parameters.push(JSON.stringify([value]));
-          clause = `${sqlPath} @> ${placeholder}::jsonb`;
+          clause = { parameters: { [ident]: JSONUtil.toUTF8([value]) }, sql: `${sqlPath} @> ${placeholder}::jsonb` };
         } else if (operator === '$ne') {
-          ctx.parameters.push(JSON.stringify([value]));
-          clause = `NOT (${sqlPath} @> ${placeholder}::jsonb)`;
+          clause = { parameters: { [ident]: JSONUtil.toUTF8([value]) }, sql: `NOT (${sqlPath} @> ${placeholder}::jsonb)` };
         } else if (operator === '$in') {
           if (!Array.isArray(value) || value.length === 0) {
-            clause = '1=0';
+            clause = { sql: '1=0' };
           } else {
-            const innerClauses = value.map(val => {
-              const innerPlaceholder = `$${ctx.parameters.length + 1}`;
-              ctx.parameters.push(JSON.stringify([val]));
-              return `${sqlPath} @> ${innerPlaceholder}::jsonb`;
+            const innerClauses = value.map((val, i) => {
+              const innerIdent = `%%${[...nestedIdentPath, i].join(PARAM_SEP)}%%`;
+              return {
+                sql: `${sqlPath} @> ${innerIdent}::jsonb`,
+                parameters: { [innerIdent]: JSONUtil.toUTF8([val]) }
+              };
             });
-            clause = `(${innerClauses.join(' OR ')})`;
+            clause = combineResults(innerClauses, 'OR');
           }
         } else if (operator === '$nin') {
           if (!Array.isArray(value) || value.length === 0) {
-            clause = '1=1';
+            clause = {};
           } else {
-            const innerClauses = value.map(val => {
-              const innerPlaceholder = `$${ctx.parameters.length + 1}`;
-              ctx.parameters.push(JSON.stringify([val]));
-              return `NOT (${sqlPath} @> ${innerPlaceholder}::jsonb)`;
+            const innerClauses = value.map((val, i) => {
+              const innerIdent = `%%${[...nestedIdentPath, i].join(PARAM_SEP)}%%`;
+              return {
+                sql: `NOT (${sqlPath} @> ${innerIdent}::jsonb)`,
+                parameters: { [innerIdent]: JSONUtil.toUTF8([val]) }
+              };
             });
-            clause = `(${innerClauses.join(' AND ')})`;
+            clause = combineResults(innerClauses, 'AND');
           }
         } else if (operator === '$all') {
           if (!Array.isArray(value) || value.length === 0) {
-            clause = '1=0';
+            clause = { sql: '1=0' };
           } else {
-            ctx.parameters.push(JSON.stringify(value));
-            clause = `${sqlPath} @> ${placeholder}::jsonb`;
+            clause = {
+              sql: `${sqlPath} @> ${placeholder}::jsonb`,
+              parameters: { [ident]: JSONUtil.toUTF8(value) }
+            };
           }
         } else if (operator === '$exists') {
-          clause = value ? `${sqlPath} IS NOT NULL AND ${sqlPath} <> '[]'::jsonb` : `(${sqlPath} IS NULL OR ${sqlPath} = '[]'::jsonb)`;
+          if (value) {
+            clause = { sql: `${sqlPath} IS NOT NULL AND ${sqlPath} <> '[]'::jsonb` };
+          } else {
+            clause = { sql: `(${sqlPath} IS NULL OR ${sqlPath} = '[]'::jsonb)` };
+          }
         } else {
           throw new RuntimeError(`Operator "${operator}" is not supported for JSONB arrays`, { category: 'data' });
         }
@@ -322,52 +338,65 @@ export class PostgresJsonQueryCompiler {
         // Standard scalar queries
         if (operator === '$eq') {
           if (value === null || value === undefined) {
-            clause = `${sqlPath} IS NULL`;
+            clause = { sql: `${sqlPath} IS NULL` };
           } else {
-            ctx.parameters.push(value);
-            clause = `${sqlPath} = ${placeholder}`;
+            clause = {
+              sql: `${sqlPath} = ${placeholder}`,
+              parameters: { [ident]: value }
+            };
           }
         } else if (operator === '$ne') {
           if (value === null || value === undefined) {
-            clause = `${sqlPath} IS NOT NULL`;
+            clause = { sql: `${sqlPath} IS NOT NULL` };
           } else {
-            ctx.parameters.push(value);
-            clause = `${sqlPath} <> ${placeholder}`;
+            clause = {
+              sql: `${sqlPath} <> ${placeholder}`,
+              parameters: {
+                [ident]: value
+              }
+            };
           }
         } else if (operator === '$gt' || operator === '$gte' || operator === '$lt' || operator === '$lte') {
-          ctx.parameters.push(value);
           const sqlOperator = operator === '$gt' ? '>' : operator === '$gte' ? '>=' : operator === '$lt' ? '<' : '<=';
-          clause = `${sqlPath} ${sqlOperator} ${placeholder}`;
+          clause = {
+            sql: `${sqlPath} ${sqlOperator} ${placeholder}`,
+            parameters: { [ident]: value }
+          };
         } else if (operator === '$in') {
           if (!Array.isArray(value) || value.length === 0) {
-            clause = '1=0';
+            clause = { sql: '1=0' };
           } else {
-            const placeholders = value.map(val => {
-              const innerPlaceholder = `$${ctx.parameters.length + 1}`;
-              ctx.parameters.push(val);
-              return innerPlaceholder;
+            const placeholders = value.map((val, i) => {
+              const innerIdent = `%%${[...nestedIdentPath, i].join(PARAM_SEP)}%%`;
+              return [innerIdent, val];
             });
-            clause = `${sqlPath} IN (${placeholders.join(', ')})`;
+            clause = {
+              sql: `${sqlPath} IN (${placeholders.map(x => x[0]).join(', ')})`,
+              parameters: Object.fromEntries(placeholders)
+            };
           }
         } else if (operator === '$nin') {
           if (!Array.isArray(value) || value.length === 0) {
-            clause = '1=1';
+            clause = {};
           } else {
-            const placeholders = value.map(val => {
-              const innerPlaceholder = `$${ctx.parameters.length + 1}`;
-              ctx.parameters.push(val);
-              return innerPlaceholder;
+            const placeholders = value.map((val, i) => {
+              const innerIdent = `%%${[...nestedIdentPath, i].join(PARAM_SEP)}%%`;
+              return [innerIdent, val];
             });
-            clause = `${sqlPath} NOT IN (${placeholders.join(', ')})`;
+            clause = {
+              sql: `${sqlPath} NOT IN (${placeholders.map(x => x[0]).join(', ')})`,
+              parameters: Object.fromEntries(placeholders)
+            };
           }
         } else if (operator === '$exists') {
-          clause = value ? `${sqlPath} IS NOT NULL` : `${sqlPath} IS NULL`;
+          clause = { sql: value ? `${sqlPath} IS NOT NULL` : `${sqlPath} IS NULL` };
         } else if (operator === '$regex') {
           const regex = value instanceof RegExp ? value : new RegExp(String(value));
           const caseInsensitive = regex.flags.includes('i');
-          const regexSource = regex.source.replaceAll('\\b', '\\y');
-          ctx.parameters.push(regexSource);
-          clause = `${sqlPath} ${caseInsensitive ? '~*' : '~'} ${placeholder}`;
+          clause = {
+            parameters: { [ident]: regex.source.replaceAll('\\b', '\\y') },
+            sql: `${sqlPath} ${caseInsensitive ? '~*' : '~'} ${placeholder}`
+          };
         } else {
           throw new RuntimeError(`Operator "${operator}" is not supported for scalar columns`, { category: 'data' });
         }
@@ -377,7 +406,6 @@ export class PostgresJsonQueryCompiler {
         clauses.push(clause);
       }
     }
-
-    return clauses.length > 1 ? `(${clauses.join(' AND ')})` : clauses[0] || '';
+    return combineResults(clauses, 'AND');
   }
 }
