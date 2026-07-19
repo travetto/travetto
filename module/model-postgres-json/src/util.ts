@@ -1,5 +1,4 @@
-import { ModelRegistryIndex, type ModelType } from '@travetto/model';
-import type { SortClause, WhereClause } from '@travetto/model-query';
+import { ModelRegistryIndex } from '@travetto/model';
 import { type Class, castTo } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 

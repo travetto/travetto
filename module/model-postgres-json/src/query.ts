@@ -1,27 +1,38 @@
 import type { ModelType } from '@travetto/model';
 import { ModelQueryUtil, type SortClause, type WhereClause } from '@travetto/model-query';
-import { type Class, castTo } from '@travetto/runtime';
-import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { type Class, castTo, RuntimeError } from '@travetto/runtime';
+import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { PostgresJsonTableManager } from './table-manager.ts';
-import { PostgresJsonUtil } from './util.ts';
+import { type FieldClassification, PostgresJsonUtil } from './util.ts';
 
-/**
- * Result of query compilation
- */
-export interface CompilationResult {
-  whereSQL: string;
-  parameters: unknown[];
+function isCompilerContext<T extends ModelType>(ctx: unknown): ctx is CompilerContext<T> {
+  return typeof ctx === 'object' && ctx !== null && 'modelClass' in ctx;
 }
 
 /**
  * Compilation context containing metadata and parameters
  */
-export interface CompilerContext {
-  modelClass: Class;
+export interface CompilerContext<T extends ModelType> {
+  modelClass: Class<T>;
   tableName: string;
   simpleFieldsSet: Set<string>;
+  classification: FieldClassification;
   parameters: unknown[];
+}
+
+/**
+ * Result of query compilation
+ */
+export interface CompilationResult<T extends ModelType> extends CompilerContext<T> {
+  whereSQL?: string;
+}
+
+export interface CompilerConfig<T extends ModelType> {
+  modelClass: Class<T>;
+  where?: WhereClause<T>;
+  checkExpiry?: boolean;
+  namespace?: string;
 }
 
 /**
@@ -29,33 +40,27 @@ export interface CompilerContext {
  */
 export class PostgresJsonQueryCompiler {
   /**
-   * Statelessly compiles a Travetto WhereClause into a parameterized PostgreSQL WHERE clause.
+   * Compiles a WhereClause into a parameterized PostgreSQL WHERE clause.
    */
-  static compile<T extends ModelType>(
-    modelClass: Class<T>,
-    where?: WhereClause<T>,
-    tableName?: string,
-    checkExpiry = true
-  ): CompilationResult {
-    const table = tableName ?? PostgresJsonTableManager.getTableName(modelClass);
+  static compile<T extends ModelType>(config: CompilerConfig<T>): CompilationResult<T> {
+    const { modelClass, checkExpiry = true } = config;
+    const table = PostgresJsonTableManager.getTableName(modelClass, config.namespace);
     const classification = PostgresJsonUtil.classifyFields(modelClass);
     const simpleFieldsSet = new Set(classification.simpleFields.map(f => f.name));
-    const ctx: CompilerContext = {
+    const ctx: CompilerContext<T> = {
       modelClass,
       tableName: table,
       simpleFieldsSet,
+      classification,
       parameters: []
     };
-    const resolvedWhere = ModelQueryUtil.getWhereClause(modelClass, castTo(where), checkExpiry);
+    const resolvedWhere = ModelQueryUtil.getWhereClause(modelClass, config.where, checkExpiry);
     const whereSQL = this.compileClause(ctx, resolvedWhere);
-    return {
-      whereSQL,
-      parameters: ctx.parameters
-    };
+    return { whereSQL, ...ctx };
   }
 
   /**
-   * Statelessly compiles sorting clauses into SQL ORDER BY string.
+   * Compiles sorting clauses into SQL ORDER BY string.
    */
   static compileSort<T extends ModelType>(modelClass: Class<T>, sort?: SortClause<T>[]): string {
     if (!sort || sort.length === 0) {
@@ -63,10 +68,11 @@ export class PostgresJsonQueryCompiler {
     }
     const classification = PostgresJsonUtil.classifyFields(modelClass);
     const simpleFieldsSet = new Set(classification.simpleFields.map(f => f.name));
-    const ctx: CompilerContext = {
+    const ctx: CompilerContext<T> = {
       modelClass,
       tableName: '',
       simpleFieldsSet,
+      classification,
       parameters: []
     };
     const sortClauses = sort.map(sortClause => {
@@ -80,19 +86,23 @@ export class PostgresJsonQueryCompiler {
   }
 
   /**
-   * Statelessly resolves a field path to a database SQL expression and retrieves its schema config.
+   * Resolves a field path to a database SQL expression and retrieves its schema config.
    */
-  static resolvePath(ctxOrModelClass: CompilerContext | Class, path: string[]): { sqlPath: string; leafField?: SchemaFieldConfig } {
-    let ctx: CompilerContext;
-    if (ctxOrModelClass && typeof ctxOrModelClass === 'object' && 'modelClass' in ctxOrModelClass) {
+  static resolvePath<T extends ModelType>(
+    ctxOrModelClass: CompilerContext<T> | Class<T>,
+    path: string[]
+  ): { sqlPath: string; leafField?: SchemaFieldConfig } {
+    let ctx: CompilerContext<T>;
+    if (isCompilerContext<T>(ctxOrModelClass)) {
       ctx = ctxOrModelClass;
     } else {
-      const classification = PostgresJsonUtil.classifyFields(ctxOrModelClass as Class);
+      const classification = PostgresJsonUtil.classifyFields(ctxOrModelClass);
       const simpleFieldsSet = new Set(classification.simpleFields.map(f => f.name));
       ctx = {
         modelClass: ctxOrModelClass as Class,
-        tableName: PostgresJsonTableManager.getTableName(ctxOrModelClass as Class),
+        tableName: PostgresJsonTableManager.getTableName(ctxOrModelClass),
         simpleFieldsSet,
+        classification,
         parameters: []
       };
     }
@@ -101,7 +111,9 @@ export class PostgresJsonQueryCompiler {
 
     if (ctx.simpleFieldsSet.has(firstSegment)) {
       if (path.length > 1) {
-        throw new Error(`Cannot traverse nested properties under simple column "${firstSegment}" in table "${ctx.tableName}"`);
+        throw new RuntimeError(`Cannot traverse nested properties under simple column "${firstSegment}" in table "${ctx.tableName}"`, {
+          category: 'data'
+        });
       }
       const classification = PostgresJsonUtil.classifyFields(ctx.modelClass);
       const leafField = classification.simpleFields.find(field => field.name === firstSegment);
@@ -172,7 +184,7 @@ export class PostgresJsonQueryCompiler {
   /**
    * Recursively compiles logical AND/OR/NOT clauses and simple field mappings
    */
-  static compileClause(ctx: CompilerContext, clause: WhereClause<unknown>): string {
+  static compileClause<T extends ModelType>(ctx: CompilerContext<T>, clause: WhereClause<T>): string {
     if (!clause) {
       return '';
     }
@@ -196,7 +208,7 @@ export class PostgresJsonQueryCompiler {
   static buildJsonTemplate(queryObj: Record<string, unknown>): Record<string, unknown> {
     const template: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(queryObj)) {
-      if (v && typeof v === 'object' && v.constructor === Object) {
+      if (DataUtil.isPlainObject(v)) {
         const firstKey = Object.keys(v)[0];
         const valObj = castTo<Record<string, unknown>>(v);
         if (firstKey === '$eq') {
@@ -206,7 +218,7 @@ export class PostgresJsonQueryCompiler {
         } else if (!firstKey.startsWith('$')) {
           template[k] = this.buildJsonTemplate(valObj);
         } else {
-          throw new Error(`Unsupported operator ${firstKey} in nested array query`);
+          throw new RuntimeError(`Unsupported operator ${firstKey} in nested array query`, { category: 'data' });
         }
       } else {
         template[k] = v;
@@ -218,7 +230,7 @@ export class PostgresJsonQueryCompiler {
   /**
    * Compiles simple query object schemas recursively
    */
-  static compileSimple(ctx: CompilerContext, item: Record<string, unknown>, parentPath: string[] = []): string {
+  static compileSimple<T extends ModelType>(ctx: CompilerContext<T>, item: Record<string, unknown>, parentPath: string[] = []): string {
     if (!item) {
       return '';
     }
@@ -226,7 +238,7 @@ export class PostgresJsonQueryCompiler {
 
     for (const [key, value] of Object.entries(item)) {
       const currentPath = [...parentPath, key];
-      const isPlainObject = value && typeof value === 'object' && value.constructor === Object;
+      const isPlainObject = DataUtil.isPlainObject(value);
       const firstKey = isPlainObject ? Object.keys(value)[0] : '';
 
       const { sqlPath, leafField } = this.resolvePath(ctx, currentPath);
@@ -251,7 +263,7 @@ export class PostgresJsonQueryCompiler {
   /**
    * Compiles individual operators like $eq, $gt, $in, $regex etc.
    */
-  static compileOperator(ctx: CompilerContext, path: string[], operation: Record<string, unknown>): string {
+  static compileOperator<T extends ModelType>(ctx: CompilerContext<T>, path: string[], operation: Record<string, unknown>): string {
     const { sqlPath, leafField } = this.resolvePath(ctx, path);
     const clauses: string[] = [];
 
@@ -304,7 +316,7 @@ export class PostgresJsonQueryCompiler {
         } else if (operator === '$exists') {
           clause = value ? `${sqlPath} IS NOT NULL AND ${sqlPath} <> '[]'::jsonb` : `(${sqlPath} IS NULL OR ${sqlPath} = '[]'::jsonb)`;
         } else {
-          throw new Error(`Operator "${operator}" is not supported for JSONB arrays`);
+          throw new RuntimeError(`Operator "${operator}" is not supported for JSONB arrays`, { category: 'data' });
         }
       } else {
         // Standard scalar queries
@@ -357,7 +369,7 @@ export class PostgresJsonQueryCompiler {
           ctx.parameters.push(regexSource);
           clause = `${sqlPath} ${caseInsensitive ? '~*' : '~'} ${placeholder}`;
         } else {
-          throw new Error(`Operator "${operator}" is not supported for scalar columns`);
+          throw new RuntimeError(`Operator "${operator}" is not supported for scalar columns`, { category: 'data' });
         }
       }
 

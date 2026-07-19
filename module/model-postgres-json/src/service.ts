@@ -43,11 +43,12 @@ import {
   type ValidStringFields,
   type WhereClause
 } from '@travetto/model-query';
+import type { Any } from '@travetto/runtime';
 import { type Class, castTo } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { PostgresJsonConnection } from './connection.ts';
-import { PostgresJsonQueryCompiler } from './query.ts';
+import { type CompilationResult, type CompilerConfig, PostgresJsonQueryCompiler } from './query.ts';
 import { PostgresJsonTableManager } from './table-manager.ts';
 import { PostgresJsonUtil } from './util.ts';
 
@@ -76,6 +77,15 @@ export class PostgresJsonModelService
 
   get client(): pg.Pool {
     return this.connection.pool;
+  }
+
+  #compile<T extends ModelType>(modelClass: Class<T>, where?: WhereClause<T>, extra?: Partial<CompilerConfig<Any>>): CompilationResult<T> {
+    return PostgresJsonQueryCompiler.compile({
+      modelClass,
+      where,
+      namespace: this.connection.config.namespace,
+      ...extra
+    });
   }
 
   @PostConstruct()
@@ -109,7 +119,7 @@ export class PostgresJsonModelService
 
   // CRUD Support
   async get<T extends ModelType>(modelClass: Class<T>, id: string): Promise<T> {
-    const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
+    const { tableName } = this.#compile(modelClass);
     const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} WHERE "id" = $1;`;
 
     const result = await this.connection.execute<Record<string, unknown>>(sql, [id]);
@@ -123,9 +133,8 @@ export class PostgresJsonModelService
 
   async create<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>): Promise<T> {
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
-    const rawItem = castTo<Record<string, unknown>>(preppedItem);
-    const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const classification = PostgresJsonUtil.classifyFields(modelClass);
+    const rawItem: Record<string, unknown> = castTo(preppedItem);
+    const { tableName, classification } = this.#compile(modelClass);
 
     const columns: string[] = [];
     const values: unknown[] = [];
@@ -152,9 +161,8 @@ export class PostgresJsonModelService
   async update<T extends ModelType>(modelClass: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(modelClass);
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
-    const rawItem = castTo<Record<string, unknown>>(preppedItem);
-    const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const classification = PostgresJsonUtil.classifyFields(modelClass);
+    const rawItem: Record<string, unknown> = castTo(preppedItem);
+    const { tableName, classification } = this.#compile(modelClass);
 
     const sets: string[] = [];
     const values: unknown[] = [];
@@ -188,9 +196,8 @@ export class PostgresJsonModelService
   async upsert<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(modelClass);
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
-    const rawItem = castTo<Record<string, unknown>>(preppedItem);
-    const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const classification = PostgresJsonUtil.classifyFields(modelClass);
+    const rawItem: Record<string, unknown> = castTo(preppedItem);
+    const { tableName, classification } = this.#compile(modelClass);
 
     const columns: string[] = [];
     const values: unknown[] = [];
@@ -232,7 +239,7 @@ export class PostgresJsonModelService
 
   async delete<T extends ModelType>(modelClass: Class<T>, id: string): Promise<void> {
     ModelCrudUtil.ensureNotSubType(modelClass);
-    const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
+    const { tableName } = this.#compile(modelClass);
     const sql = `DELETE FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} WHERE ${PostgresJsonUtil.escapeIdentifier('id')} = $1;`;
 
     const result = await this.connection.execute(sql, [id]);
@@ -246,8 +253,7 @@ export class PostgresJsonModelService
   }
 
   async *listWithOffset<T extends ModelType>(modelClass: Class<T>, options?: ModelListOptions & { offset?: number }): AsyncIterable<T[]> {
-    const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compile(modelClass, undefined, tableName);
+    const { tableName, whereSQL, parameters } = this.#compile(modelClass);
 
     const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
     const batchSize = Math.min(options?.batchSizeHint ?? 100, limit);
@@ -279,10 +285,9 @@ export class PostgresJsonModelService
   ): Promise<string> {
     ModelCrudUtil.ensureNotSubType(modelClass);
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate({ sort: true });
-    const where = castTo<WhereClause<T>>(computed.project({ sort: true, includeId: true }));
+    const where: WhereClause<T> = castTo(computed.project({ sort: true, includeId: true }));
 
-    const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compile(modelClass, where, tableName);
+    const { tableName, whereSQL, parameters } = this.#compile(modelClass, where);
     const sql = `SELECT "id" FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} WHERE ${whereSQL};`;
 
     const result = await this.connection.execute<{ id: string }>(sql, parameters);
@@ -348,12 +353,9 @@ export class PostgresJsonModelService
     options?: ModelListOptions & { offset?: number }
   ): AsyncIterable<T[]> {
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate();
-    const where = castTo<WhereClause<T>>(computed.project());
+    const where: WhereClause<T> = castTo(computed.project());
 
-    const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const classification = PostgresJsonUtil.classifyFields(modelClass);
-    const simpleFieldsSet = new Set(classification.simpleFields.map(field => field.name));
-    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compile(modelClass, where, tableName);
+    const { tableName, whereSQL, parameters, simpleFieldsSet } = this.#compile(modelClass, where);
 
     // Apply sorting template criteria
     const sortClauses = indexConfig.sortTemplate.map(({ path, value }) => {
@@ -422,10 +424,9 @@ export class PostgresJsonModelService
     options?: ModelIndexedSearchOptions
   ): Promise<T[]> {
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate();
-    const where = castTo<WhereClause<T>>(computed.project());
+    const where: WhereClause<T> = castTo(computed.project());
 
-    const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compile(modelClass, where, tableName);
+    const { tableName, whereSQL, parameters } = this.#compile(modelClass, where);
 
     // Prefix matching on the first sort key segment
     const prefixFieldPath = indexConfig.sortTemplate[0].path;
@@ -449,8 +450,7 @@ export class PostgresJsonModelService
   // Query Support
   async query<T extends ModelType>(modelClass: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(modelClass, query);
-    const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compile(modelClass, query.where, tableName);
+    const { tableName, whereSQL, parameters } = this.#compile(modelClass, query.where);
     const sortSQL = PostgresJsonQueryCompiler.compileSort(modelClass, query.sort);
 
     let pagination = '';
@@ -470,13 +470,12 @@ export class PostgresJsonModelService
   async queryOne<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>, failOnMany = true): Promise<T> {
     const limit = failOnMany ? 2 : 1;
     const items = await this.query<T>(modelClass, { ...query, limit });
-    return castTo<T>(ModelQueryUtil.verifyGetSingleCounts(modelClass, failOnMany, items, query.where));
+    return ModelQueryUtil.verifyGetSingleCounts<T>(modelClass, failOnMany, items, query.where);
   }
 
   async queryCount<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
     await QueryVerifier.verify(modelClass, query);
-    const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compile(modelClass, query.where, tableName);
+    const { tableName, whereSQL, parameters } = this.#compile(modelClass, query.where);
     const sql = `SELECT COUNT(*) as "total" FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
 
     const result = await this.connection.execute<{ total: string | number }>(sql, parameters);
@@ -487,9 +486,9 @@ export class PostgresJsonModelService
     await QueryVerifier.verify(modelClass, query);
     ModelCrudUtil.ensureNotSubType(modelClass);
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
-    const rawItem = castTo<Record<string, unknown>>(preppedItem);
-    const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const classification = PostgresJsonUtil.classifyFields(modelClass);
+    const rawItem: Record<string, unknown> = castTo(preppedItem);
+
+    const { tableName, whereSQL, parameters, classification } = this.#compile(modelClass, query.where);
 
     const sets: string[] = [];
     const values: unknown[] = [];
@@ -509,14 +508,12 @@ export class PostgresJsonModelService
       values.push(value !== undefined && value !== null ? JSON.stringify(value) : null);
     }
 
-    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compile(modelClass, query.where, tableName);
-
     const conditions = [`${PostgresJsonUtil.escapeIdentifier('id')} = $${values.length + 1}`];
     values.push(preppedItem.id);
 
     if (whereSQL) {
       const offset = values.length;
-      const shiftedWhereSQL = whereSQL.replaceAll(/\$(\d+)/g, (_, num) => `$${Number(num) + offset}`);
+      const shiftedWhereSQL = whereSQL.replaceAll(/[$](\d+)/g, (_, num) => `$${Number(num) + offset}`);
       conditions.push(shiftedWhereSQL);
       values.push(...parameters);
     }
@@ -556,8 +553,7 @@ export class PostgresJsonModelService
 
   async deleteByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
     await QueryVerifier.verify(modelClass, query);
-    const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compile(modelClass, query.where, tableName, false);
+    const { whereSQL, parameters, tableName } = this.#compile(modelClass, query.where, { checkExpiry: false });
     const sql = `DELETE FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
 
     const result = await this.connection.execute(sql, parameters);
@@ -571,8 +567,7 @@ export class PostgresJsonModelService
     query?: ModelQuery<T>
   ): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(modelClass, query);
-    const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compile(modelClass, query?.where, tableName);
+    const { whereSQL, parameters, tableName } = this.#compile(modelClass, query?.where);
     const { sqlPath } = PostgresJsonQueryCompiler.resolvePath(modelClass, String(field).split('.'));
 
     const conditions = [`${sqlPath} IS NOT NULL`];
