@@ -37,17 +37,6 @@ export class PostgresJsonUtil {
       }
     }
 
-    // Ensure polymorphic 'type' field is present for discriminated classes
-    if (registryConfig.discriminatedBase && !fields.some(field => field.name === 'type')) {
-      fields.push({
-        name: 'type',
-        class: modelClass,
-        type: String,
-        array: false,
-        required: { active: true }
-      });
-    }
-
     const simpleFields = fields.filter(field => !SchemaRegistryIndex.has(field.type) && !field.array);
     const complexFields = fields.filter(field => SchemaRegistryIndex.has(field.type) || field.array);
 
