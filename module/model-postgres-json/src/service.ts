@@ -128,6 +128,56 @@ export class PostgresJsonModelService
     return await this.connection.execute<Record<string, unknown>>(sql, values);
   }
 
+  async #executeUpdate<T extends ModelType>(modelClass: Class<T>, where: WhereClause<T>, item: T): Promise<T | undefined> {
+    ModelCrudUtil.ensureNotSubType(modelClass);
+    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
+    const rawItem: Record<string, unknown> = castTo(preppedItem);
+
+    const context = this.#getContext(modelClass);
+    const sets: string[] = [];
+    const values: unknown[] = [];
+
+    // Compile sets for all simple fields (excluding id)
+    for (const field of context.simpleFields.values()) {
+      if (field.name === 'id') {
+        continue;
+      }
+      sets.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = $${values.length + 1}`);
+      const val = rawItem[field.name];
+      values.push(val === undefined || val === null ? null : val);
+    }
+
+    // Compile sets for all complex fields
+    for (const field of context.complexFields.values()) {
+      sets.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = $${values.length + 1}`);
+      const value = rawItem[field.name];
+      values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
+    }
+
+    // Compile where conditions
+    const { whereSQL, parameters = [] } = PostgresJsonQueryCompiler.compileWhere(context, where);
+
+    const conditions: string[] = [];
+    if (whereSQL) {
+      const offset = values.length;
+      const shiftedWhereSQL = whereSQL.replaceAll(/[$](\d+)/g, (_, num) => `$${Number(num) + offset}`);
+      conditions.push(shiftedWhereSQL);
+      values.push(...parameters);
+    }
+
+    const sql = `UPDATE ${PostgresJsonUtil.escapeIdentifier(context.tableName)} SET ${sets.join(', ')} WHERE ${conditions.join(' AND ')}`;
+
+    const result = await this.connection.execute(sql, values);
+    if (result.count === 0) {
+      return undefined;
+    }
+    if (result.count > 1) {
+      throw new Error(`Multiple items found for update lookup ${modelClass.name}`);
+    }
+
+    return preppedItem;
+  }
+
   @PostConstruct()
   async initialize(): Promise<void> {
     await this.connection.init();
@@ -199,37 +249,10 @@ export class PostgresJsonModelService
   }
 
   async update<T extends ModelType>(modelClass: Class<T>, item: T): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(modelClass);
-    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
-    const rawItem: Record<string, unknown> = castTo(preppedItem);
-    const context = this.#getContext(modelClass);
-
-    const sets: string[] = [];
-    const values: unknown[] = [];
-
-    for (const field of context.simpleFields.values()) {
-      if (field.name === 'id') {
-        continue;
-      }
-      sets.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = $${values.length + 1}`);
-      const val = rawItem[field.name];
-      values.push(val === undefined || val === null ? null : val);
+    const preppedItem = await this.#executeUpdate(modelClass, castTo({ id: item.id }), item);
+    if (!preppedItem) {
+      throw new NotFoundError(modelClass, item.id);
     }
-
-    for (const field of context.complexFields.values()) {
-      sets.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = $${values.length + 1}`);
-      const value = rawItem[field.name];
-      values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
-    }
-
-    values.push(preppedItem.id);
-    const sql = `UPDATE ${PostgresJsonUtil.escapeIdentifier(context.tableName)} SET ${sets.join(', ')} WHERE ${PostgresJsonUtil.escapeIdentifier('id')} = $${values.length};`;
-
-    const result = await this.connection.execute(sql, values);
-    if (result.count === 0) {
-      throw new NotFoundError(modelClass, preppedItem.id);
-    }
-
     return preppedItem;
   }
 
@@ -379,13 +402,19 @@ export class PostgresJsonModelService
     return ModelIndexedUtil.naiveUpsert(this, modelClass, indexConfig, body);
   }
 
-  @Transactional()
-  updateByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+  async updateByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     modelClass: Class<T>,
     indexConfig: SingleItemIndex<T, K, S>,
     body: T
   ): Promise<T> {
-    return ModelIndexedUtil.naiveUpdate(this, modelClass, indexConfig, body);
+    const computed = ModelIndexedComputedIndex.get(indexConfig, castTo(body)).validate({ sort: true });
+    const where: WhereClause<T> = castTo(computed.project({ sort: true, includeId: true }));
+
+    const preppedItem = await this.#executeUpdate(modelClass, where, body);
+    if (!preppedItem) {
+      throw new NotFoundError(`${modelClass.name} Index=${indexConfig}`, computed.getKey());
+    }
+    return preppedItem;
   }
 
   async updatePartialByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
