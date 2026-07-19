@@ -39,6 +39,7 @@ import {
   type ModelQuerySupport,
   ModelQueryUtil,
   type PageableModelQuery,
+  QueryVerifier,
   type ValidStringFields,
   type WhereClause
 } from '@travetto/model-query';
@@ -444,6 +445,7 @@ export class PostgresJsonModelService
 
   // Query Support
   async query<T extends ModelType>(modelClass: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
+    await QueryVerifier.verify(modelClass, query);
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
     const { whereSQL, parameters } = PostgresJsonQueryCompiler.compile(modelClass, query.where, tableName);
     const sortSQL = PostgresJsonQueryCompiler.compileSort(modelClass, query.sort);
@@ -469,6 +471,7 @@ export class PostgresJsonModelService
   }
 
   async queryCount<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
+    await QueryVerifier.verify(modelClass, query);
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
     const { whereSQL, parameters } = PostgresJsonQueryCompiler.compile(modelClass, query.where, tableName);
     const sql = `SELECT COUNT(*) as "total" FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
@@ -478,6 +481,7 @@ export class PostgresJsonModelService
   }
 
   async updateByQuery<T extends ModelType>(modelClass: Class<T>, item: T, query: ModelQuery<T>): Promise<T> {
+    await QueryVerifier.verify(modelClass, query);
     const where = ModelQueryUtil.getWhereClause(modelClass, query.where);
     (where as any).id = item.id;
     const deletedCount = await this.deleteByQuery(modelClass, { where });
@@ -488,6 +492,7 @@ export class PostgresJsonModelService
   }
 
   async updatePartialByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
+    await QueryVerifier.verify(modelClass, query);
     let baseClass = modelClass;
     while (true) {
       const config = SchemaRegistryIndex.getOptional(baseClass)?.get();
@@ -510,8 +515,9 @@ export class PostgresJsonModelService
   }
 
   async deleteByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
+    await QueryVerifier.verify(modelClass, query);
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compile(modelClass, query.where, tableName);
+    const { whereSQL, parameters } = PostgresJsonQueryCompiler.compile(modelClass, query.where, tableName, false);
     const sql = `DELETE FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
 
     const result = await this.connection.execute(sql, parameters);
@@ -524,6 +530,7 @@ export class PostgresJsonModelService
     field: ValidStringFields<T>,
     query?: ModelQuery<T>
   ): Promise<ModelQueryFacet[]> {
+    await QueryVerifier.verify(modelClass, query);
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
     const { whereSQL, parameters } = PostgresJsonQueryCompiler.compile(modelClass, query?.where, tableName);
     const { sqlPath } = PostgresJsonQueryCompiler.resolvePath(modelClass, String(field).split('.'));

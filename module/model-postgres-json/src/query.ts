@@ -30,7 +30,7 @@ export class PostgresJsonQueryCompiler {
   /**
    * Statelessly compiles a Travetto WhereClause into a parameterized PostgreSQL WHERE clause.
    */
-  static compile(modelClass: Class, where?: WhereClause<unknown>, tableName?: string): CompilationResult {
+  static compile(modelClass: Class, where?: WhereClause<any>, tableName?: string, checkExpiry = true): CompilationResult {
     const table = tableName ?? PostgresJsonTableManager.getTableName(modelClass);
     const classification = PostgresJsonUtil.classifyFields(modelClass);
     const simpleFieldsSet = new Set(classification.simpleFields.map(f => f.name));
@@ -40,7 +40,7 @@ export class PostgresJsonQueryCompiler {
       simpleFieldsSet,
       parameters: []
     };
-    const resolvedWhere = ModelQueryUtil.getWhereClause(modelClass, castTo(where));
+    const resolvedWhere = ModelQueryUtil.getWhereClause(modelClass, castTo(where), checkExpiry);
     const whereSQL = this.compileClause(ctx, resolvedWhere);
     return {
       whereSQL,
