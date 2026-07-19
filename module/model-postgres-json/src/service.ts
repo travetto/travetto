@@ -530,23 +530,11 @@ export class PostgresJsonModelService
 
   async updatePartialByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
     await QueryVerifier.verify(modelClass, query);
-    let baseClass = modelClass;
-    while (true) {
-      const config = SchemaRegistryIndex.getOptional(baseClass)?.get();
-      if (!config || config.discriminatedBase) {
-        break;
-      }
-      const parent = Object.getPrototypeOf(baseClass);
-      if (!parent || !SchemaRegistryIndex.has(parent)) {
-        break;
-      }
-      baseClass = parent;
-    }
-
     const items = await this.query(modelClass, query);
+    const baseType = SchemaRegistryIndex.getBaseClass(modelClass);
     for (const item of items) {
       const fullItem = await ModelCrudUtil.naivePartialUpdate(modelClass, () => Promise.resolve(item), data);
-      await this.update(baseClass, fullItem);
+      await this.update(baseType, fullItem);
     }
     return items.length;
   }
