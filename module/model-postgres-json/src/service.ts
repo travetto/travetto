@@ -131,18 +131,19 @@ export class PostgresJsonModelService
     const values: unknown[] = [];
 
     for (const field of classification.simpleFields) {
-      columns.push(`"${field.name}"`);
-      values.push(rawItem[field.name]);
+      columns.push(PostgresJsonUtil.escapeIdentifier(field.name));
+      const val = rawItem[field.name];
+      values.push(val === undefined || val === null ? null : val);
     }
 
     for (const field of classification.complexFields) {
-      columns.push(`"${field.name}"`);
+      columns.push(PostgresJsonUtil.escapeIdentifier(field.name));
       const value = rawItem[field.name];
       values.push(value !== undefined && value !== null ? JSON.stringify(value) : null);
     }
 
     const placeholders = columns.map((_, index) => `$${index + 1}`);
-    const sql = `INSERT INTO "${tableName}" (${columns.join(', ')}) VALUES (${placeholders.join(', ')});`;
+    const sql = `INSERT INTO ${PostgresJsonUtil.escapeIdentifier(tableName)} (${columns.join(', ')}) VALUES (${placeholders.join(', ')});`;
 
     await this.connection.execute(sql, values);
     return preppedItem;
@@ -162,18 +163,19 @@ export class PostgresJsonModelService
       if (field.name === 'id') {
         continue;
       }
-      sets.push(`"${field.name}" = $${values.length + 1}`);
-      values.push(rawItem[field.name]);
+      sets.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = $${values.length + 1}`);
+      const val = rawItem[field.name];
+      values.push(val === undefined || val === null ? null : val);
     }
 
     for (const field of classification.complexFields) {
-      sets.push(`"${field.name}" = $${values.length + 1}`);
+      sets.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = $${values.length + 1}`);
       const value = rawItem[field.name];
       values.push(value !== undefined && value !== null ? JSON.stringify(value) : null);
     }
 
     values.push(preppedItem.id);
-    const sql = `UPDATE "${tableName}" SET ${sets.join(', ')} WHERE "id" = $${values.length};`;
+    const sql = `UPDATE ${PostgresJsonUtil.escapeIdentifier(tableName)} SET ${sets.join(', ')} WHERE ${PostgresJsonUtil.escapeIdentifier('id')} = $${values.length};`;
 
     const result = await this.connection.execute(sql, values);
     if (result.count === 0) {
@@ -195,25 +197,26 @@ export class PostgresJsonModelService
     const updates: string[] = [];
 
     for (const field of classification.simpleFields) {
-      columns.push(`"${field.name}"`);
-      values.push(rawItem[field.name]);
+      columns.push(PostgresJsonUtil.escapeIdentifier(field.name));
+      const val = rawItem[field.name];
+      values.push(val === undefined || val === null ? null : val);
       if (field.name !== 'id') {
-        updates.push(`"${field.name}" = EXCLUDED."${field.name}"`);
+        updates.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = EXCLUDED.${PostgresJsonUtil.escapeIdentifier(field.name)}`);
       }
     }
 
     for (const field of classification.complexFields) {
-      columns.push(`"${field.name}"`);
+      columns.push(PostgresJsonUtil.escapeIdentifier(field.name));
       const value = rawItem[field.name];
       values.push(value !== undefined && value !== null ? JSON.stringify(value) : null);
-      updates.push(`"${field.name}" = EXCLUDED."${field.name}"`);
+      updates.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = EXCLUDED.${PostgresJsonUtil.escapeIdentifier(field.name)}`);
     }
 
     const placeholders = columns.map((_, index) => `$${index + 1}`);
     const sql = `
-      INSERT INTO "${tableName}" (${columns.join(', ')})
+      INSERT INTO ${PostgresJsonUtil.escapeIdentifier(tableName)} (${columns.join(', ')})
       VALUES (${placeholders.join(', ')})
-      ON CONFLICT ("id")
+      ON CONFLICT (${PostgresJsonUtil.escapeIdentifier('id')})
       DO UPDATE SET ${updates.join(', ')};
     `;
 
@@ -230,7 +233,7 @@ export class PostgresJsonModelService
   async delete<T extends ModelType>(modelClass: Class<T>, id: string): Promise<void> {
     ModelCrudUtil.ensureNotSubType(modelClass);
     const tableName = PostgresJsonTableManager.getTableName(modelClass, this.connection.config.namespace);
-    const sql = `DELETE FROM "${tableName}" WHERE "id" = $1;`;
+    const sql = `DELETE FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} WHERE ${PostgresJsonUtil.escapeIdentifier('id')} = $1;`;
 
     const result = await this.connection.execute(sql, [id]);
     if (result.count === 0) {
@@ -254,7 +257,7 @@ export class PostgresJsonModelService
 
     while (!options?.abort?.aborted && produced < limit) {
       const batchLimit = Math.min(batchSize, limit - produced);
-      const sql = `SELECT * FROM "${tableName}" ${whereSQL ? `WHERE ${whereSQL}` : ''} LIMIT ${batchLimit} OFFSET ${offset};`;
+      const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''} LIMIT ${batchLimit} OFFSET ${offset};`;
 
       const result = await this.connection.execute(sql, parameters);
       if (result.count === 0) {
@@ -437,7 +440,7 @@ export class PostgresJsonModelService
       conditions.push(whereSQL);
     }
 
-    const sql = `SELECT * FROM "${tableName}" WHERE ${conditions.join(' AND ')} LIMIT ${options?.limit ?? 10};`;
+    const sql = `SELECT * FROM ${PostgresJsonUtil.escapeIdentifier(tableName)} WHERE ${conditions.join(' AND ')} LIMIT ${options?.limit ?? 10};`;
     const result = await this.connection.execute(sql, parameters);
 
     return Promise.all(result.records.map(row => ModelCrudUtil.load(modelClass, castTo(row))));
@@ -495,19 +498,20 @@ export class PostgresJsonModelService
       if (field.name === 'id') {
         continue;
       }
-      sets.push(`"${field.name}" = $${values.length + 1}`);
-      values.push(rawItem[field.name]);
+      sets.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = $${values.length + 1}`);
+      const val = rawItem[field.name];
+      values.push(val === undefined || val === null ? null : val);
     }
 
     for (const field of classification.complexFields) {
-      sets.push(`"${field.name}" = $${values.length + 1}`);
+      sets.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} = $${values.length + 1}`);
       const value = rawItem[field.name];
       values.push(value !== undefined && value !== null ? JSON.stringify(value) : null);
     }
 
     const { whereSQL, parameters } = PostgresJsonQueryCompiler.compile(modelClass, query.where, tableName);
 
-    const conditions = [`"id" = $${values.length + 1}`];
+    const conditions = [`${PostgresJsonUtil.escapeIdentifier('id')} = $${values.length + 1}`];
     values.push(preppedItem.id);
 
     if (whereSQL) {
@@ -517,7 +521,7 @@ export class PostgresJsonModelService
       values.push(...parameters);
     }
 
-    const sql = `UPDATE "${tableName}" SET ${sets.join(', ')} WHERE ${conditions.join(' AND ')};`;
+    const sql = `UPDATE ${PostgresJsonUtil.escapeIdentifier(tableName)} SET ${sets.join(', ')} WHERE ${conditions.join(' AND ')};`;
 
     const result = await this.connection.execute(sql, values);
     if (result.count === 0) {
@@ -577,11 +581,11 @@ export class PostgresJsonModelService
     }
 
     const sql = `
-      SELECT ${sqlPath}::text AS "key", COUNT(*)::int AS "count"
-      FROM "${tableName}"
+      SELECT ${sqlPath}::text AS ${PostgresJsonUtil.escapeIdentifier('key')}, COUNT(*)::int AS ${PostgresJsonUtil.escapeIdentifier('count')}
+      FROM ${PostgresJsonUtil.escapeIdentifier(tableName)}
       WHERE ${conditions.join(' AND ')}
       GROUP BY ${sqlPath}
-      ORDER BY "count" DESC;
+      ORDER BY ${PostgresJsonUtil.escapeIdentifier('count')} DESC;
     `;
 
     const result = await this.connection.execute<{ key: string; count: number }>(sql, parameters);
