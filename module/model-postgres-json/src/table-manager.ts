@@ -60,7 +60,7 @@ export class PostgresJsonTableManager {
         return `${expression} ${isAscending ? 'ASC' : 'DESC'}`;
       });
 
-      return `CREATE ${indexConfig.unique ? 'UNIQUE ' : ''}INDEX "${indexName}" ON "${tableName}" (${indexFields.join(', ')});`;
+      return `CREATE ${indexConfig.unique ? 'UNIQUE ' : ''}INDEX ${PostgresJsonUtil.escapeIdentifier(indexName)} ON ${PostgresJsonUtil.escapeIdentifier(tableName)} (${indexFields.join(', ')});`;
     } else if (isModelIndexedIndex(indexConfig)) {
       const allFields = [...indexConfig.keyTemplate, ...indexConfig.sortTemplate];
       const indexFields = allFields.map(({ path, value }) => {
@@ -69,7 +69,7 @@ export class PostgresJsonTableManager {
       });
 
       const isUnique = 'unique' in indexConfig && indexConfig.unique;
-      return `CREATE ${isUnique ? 'UNIQUE ' : ''}INDEX "${indexName}" ON "${tableName}" (${indexFields.join(', ')});`;
+      return `CREATE ${isUnique ? 'UNIQUE ' : ''}INDEX ${PostgresJsonUtil.escapeIdentifier(indexName)} ON ${PostgresJsonUtil.escapeIdentifier(tableName)} (${indexFields.join(', ')});`;
     }
 
     throw new Error(`Unsupported index configuration for class ${modelClass.name}`);
@@ -113,21 +113,21 @@ export class PostgresJsonTableManager {
 
     if (!tableExists) {
       // 1. Create table
-      const columnDefinitions: string[] = [`"id" VARCHAR(256) PRIMARY KEY`];
+      const columnDefinitions: string[] = [`${PostgresJsonUtil.escapeIdentifier('id')} VARCHAR(256) PRIMARY KEY`];
 
       for (const field of context.simpleFields) {
         if (field.name === 'id') {
           continue;
         }
         const columnType = PostgresJsonUtil.getColumnType(field);
-        columnDefinitions.push(`"${field.name}" ${columnType}`);
+        columnDefinitions.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} ${columnType}`);
       }
 
       for (const field of context.complexFields) {
-        columnDefinitions.push(`"${field.name}" JSONB`);
+        columnDefinitions.push(`${PostgresJsonUtil.escapeIdentifier(field.name)} JSONB`);
       }
 
-      const createTableSQL = `CREATE TABLE "${context.tableName}" (\n  ${columnDefinitions.join(',\n  ')}\n);`;
+      const createTableSQL = `CREATE TABLE ${PostgresJsonUtil.escapeIdentifier(context.tableName)} (\n  ${columnDefinitions.join(',\n  ')}\n);`;
       await this.connection.execute(createTableSQL);
 
       // 2. Create indexes
@@ -161,7 +161,7 @@ export class PostgresJsonTableManager {
           continue;
         }
         if (!existingColumns.has(columnName)) {
-          const addColumnSQL = `ALTER TABLE "${context.tableName}" ADD COLUMN "${columnName}" ${columnType};`;
+          const addColumnSQL = `ALTER TABLE ${PostgresJsonUtil.escapeIdentifier(context.tableName)} ADD COLUMN ${PostgresJsonUtil.escapeIdentifier(columnName)} ${columnType};`;
           await this.connection.execute(addColumnSQL);
         } else {
           const existingType = existingColumns.get(columnName)!;
@@ -170,7 +170,7 @@ export class PostgresJsonTableManager {
           const normalizedRequested = columnType.toUpperCase().replace('CHARACTER VARYING', 'VARCHAR').replace('INTEGER', 'INT');
 
           if (!normalizedExisting.startsWith(normalizedRequested) && !normalizedRequested.startsWith(normalizedExisting)) {
-            const alterColumnSQL = `ALTER TABLE "${context.tableName}" ALTER COLUMN "${columnName}" TYPE ${columnType} USING ("${columnName}"::${columnType});`;
+            const alterColumnSQL = `ALTER TABLE ${PostgresJsonUtil.escapeIdentifier(context.tableName)} ALTER COLUMN ${PostgresJsonUtil.escapeIdentifier(columnName)} TYPE ${columnType} USING (${PostgresJsonUtil.escapeIdentifier(columnName)}::${columnType});`;
             await this.connection.execute(alterColumnSQL);
           }
         }
@@ -182,7 +182,7 @@ export class PostgresJsonTableManager {
           continue;
         }
         if (!requestedFieldsMap.has(columnName)) {
-          const dropColumnSQL = `ALTER TABLE "${context.tableName}" DROP COLUMN "${columnName}";`;
+          const dropColumnSQL = `ALTER TABLE ${PostgresJsonUtil.escapeIdentifier(context.tableName)} DROP COLUMN ${PostgresJsonUtil.escapeIdentifier(columnName)};`;
           await this.connection.execute(dropColumnSQL);
         }
       }
@@ -212,7 +212,7 @@ export class PostgresJsonTableManager {
           const normalizedRequested = PostgresJsonTableManager.normalizeIndexDefinition(newIndexSQL);
 
           if (normalizedExisting !== normalizedRequested) {
-            await this.connection.execute(`DROP INDEX IF EXISTS "${indexName}";`);
+            await this.connection.execute(`DROP INDEX IF EXISTS ${PostgresJsonUtil.escapeIdentifier(indexName)};`);
             await this.connection.execute(newIndexSQL);
           }
         }
@@ -221,7 +221,7 @@ export class PostgresJsonTableManager {
       // Drop obsolete indexes
       for (const indexName of existingIndexes.keys()) {
         if (!requestedIndexesMap.has(indexName)) {
-          await this.connection.execute(`DROP INDEX IF EXISTS "${indexName}";`);
+          await this.connection.execute(`DROP INDEX IF EXISTS ${PostgresJsonUtil.escapeIdentifier(indexName)};`);
         }
       }
     }
@@ -232,7 +232,7 @@ export class PostgresJsonTableManager {
    */
   async dropTable(modelClass: Class, namespace?: string): Promise<void> {
     const { tableName } = PostgresJsonUtil.getContext(modelClass, namespace);
-    await this.connection.execute(`DROP TABLE IF EXISTS "${tableName}" CASCADE;`);
+    await this.connection.execute(`DROP TABLE IF EXISTS ${PostgresJsonUtil.escapeIdentifier(tableName)} CASCADE;`);
   }
 
   /**
@@ -240,6 +240,6 @@ export class PostgresJsonTableManager {
    */
   async truncateTable(modelClass: Class, namespace?: string): Promise<void> {
     const { tableName } = PostgresJsonUtil.getContext(modelClass, namespace);
-    await this.connection.execute(`TRUNCATE TABLE "${tableName}" CASCADE;`);
+    await this.connection.execute(`TRUNCATE TABLE ${PostgresJsonUtil.escapeIdentifier(tableName)} CASCADE;`);
   }
 }

@@ -97,7 +97,7 @@ export class PostgresJsonQueryCompiler {
         });
       }
       const leafField = context.simpleFields.find(field => field.name === firstSegment);
-      return { sqlPath: `"${firstSegment}"`, leafField };
+      return { sqlPath: PostgresJsonUtil.escapeIdentifier(firstSegment), leafField };
     }
 
     // Traverse schema starting at root model
