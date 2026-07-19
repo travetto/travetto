@@ -49,6 +49,7 @@ import {
   type WhereClause
 } from '@travetto/model-query';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
+import { DataUtil } from '@travetto/schema';
 import { WorkPool } from '@travetto/worker';
 
 import { type SqliteJsonConnection, Transactional } from './connection.ts';
@@ -753,7 +754,10 @@ export class SqliteJsonModelService
 
     const result = await this.connection.execute<{ key: string; count: number }>(sql, parameters);
 
-    return result.records;
+    return result.records.map(result => {
+      result.count = DataUtil.coerceType(result.count, Number);
+      return result;
+    });
   }
 
   // Suggest Support

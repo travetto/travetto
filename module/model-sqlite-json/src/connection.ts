@@ -170,20 +170,23 @@ export class SqliteJsonConnection {
       }
     }
 
-    const isSelect = query.trim().toUpperCase().startsWith('SELECT');
+    const normalizedQuery = query.trim().toUpperCase();
+    const isSelect =
+      normalizedQuery.startsWith('SELECT') || normalizedQuery.startsWith('PRAGMA') || normalizedQuery.includes(' RETURNING *');
 
     return this.#withRetries(async () => {
       try {
         const prepared = connection.prepare(query);
         prepared.setReadBigInts(true);
+        const inputValues: SQLInputValue[] = castTo((values ?? []).map(x => (x instanceof Date ? x.toString() : x)));
         if (isSelect) {
-          const output = prepared.all(...castTo<SQLInputValue[]>(values ?? []));
-          const records: Type[] = output.map(item => ({ ...castTo<Type>(item) }));
+          const output = prepared.all(...inputValues);
+          const records: Type[] = castTo(output);
           return { count: output.length, records };
         } else {
-          const output = prepared.run(...castTo<SQLInputValue[]>(values ?? []));
+          const output = prepared.run(...inputValues);
           return {
-            count: typeof output.changes === 'number' ? output.changes : Number(output.changes),
+            count: typeof output.changes === 'number' ? output.changes : +output.changes.toString(),
             records: []
           };
         }
