@@ -100,10 +100,6 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/model-postgres/model-postgres.component').then(item => item.ModelPostgresComponent)
       },
       {
-        path: 'model-postgres-json', title: 'Postgres JSON',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/model-postgres-json/model-postgres-json.component').then(item => item.ModelPostgresJsonComponent)
-      },
-      {
         path: 'model-sqlite', title: 'Sqlite',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/model-sqlite/model-sqlite.component').then(item => item.ModelSqliteComponent)
       },
