@@ -1,5 +1,5 @@
 import { createPool } from 'mysql2';
-import type { OkPacket, Pool, PoolConnection, PreparedStatementInfo, ResultSetHeader, TypeCastField } from 'mysql2/promise';
+import type { OkPacket, Pool, PoolConnection, ResultSetHeader, TypeCastField } from 'mysql2/promise';
 
 import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
@@ -91,10 +91,8 @@ export class MysqlConnection extends SQLConnection<PoolConnection> {
   async execute<Type = unknown>(query: string, values?: unknown[]): Promise<{ count: number; records: Type[] }> {
     console.debug('Executing MySQL query', { query, values });
     const client = this.active ?? (await this.acquire());
-    let prepared: PreparedStatementInfo | undefined;
     try {
-      prepared = (values?.length ?? 0) > 0 ? await client.prepare(query) : undefined;
-      const [results] = await (prepared ? prepared.execute(values) : client.query(query));
+      const [results] = await client.execute({ sql: query, values });
       if (isSimplePacket(results)) {
         return { records: [], count: results.affectedRows };
       } else {
@@ -115,9 +113,6 @@ export class MysqlConnection extends SQLConnection<PoolConnection> {
           throw error;
       }
     } finally {
-      try {
-        await prepared?.close();
-      } catch {}
       if (!this.active) {
         this.release(client);
       }

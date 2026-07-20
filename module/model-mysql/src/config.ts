@@ -1,5 +1,5 @@
+import { Config } from '@travetto/config';
 import { SQLModelConfig } from '@travetto/model-sql';
-import { Config } from '@travetto/schema';
 
 /**
  * MySQL Model Configuration

@@ -97,7 +97,29 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
    * Executes a query on the active client or pool directly
    */
   async execute<Type = unknown>(query: string, values?: unknown[]): Promise<{ count: number; records: Type[] }> {
-    const isSelect = query.trim().startsWith('SELECT') || query.trim().startsWith('PRAGMA') || query.trim().startsWith('EXISTS');
+    const isSelect = query.trim().startsWith('SELECT') || query.trim().startsWith('PRAGMA') || query.trim().startsWith('EXISTS') || query.includes('RETURNING');
+
+    const normalized = (values ?? []).map(val => {
+      if (val === undefined || val === null) {
+        return null;
+      }
+      if (typeof val === 'boolean') {
+        return val ? 1 : 0;
+      }
+      if (val instanceof Date) {
+        return val.toISOString();
+      }
+      if (typeof val === 'bigint') {
+        return val;
+      }
+      if (typeof val === 'object') {
+        if (val instanceof Uint8Array || val instanceof Buffer) {
+          return val;
+        }
+        return JSON.stringify(val);
+      }
+      return castTo<SQLInputValue>(val);
+    });
 
     return this.#withRetries(async () => {
       console.debug('Executing SQLite query', { query, values });
@@ -106,11 +128,11 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
         const prepared = client.prepare(query);
         prepared.setReadBigInts(true);
         if (isSelect) {
-          const out = prepared.all(...castTo<SQLInputValue[]>(values ?? []));
+          const out = prepared.all(...normalized);
           const records: Type[] = out.map(item => ({ ...castTo<Type>(item) }));
           return { count: out.length, records };
         } else {
-          const out = prepared.run(...castTo<SQLInputValue[]>(values ?? []));
+          const out = prepared.run(...normalized);
           return { count: typeof out.changes === 'number' ? out.changes : +out.changes.toString(), records: [] };
         }
       } catch (error) {

@@ -16,11 +16,19 @@ import { SQLModelUtil } from '../util.ts';
 
 export class SQLModelCrudUtil {
   static loadSingle<T extends ModelType>(modelClass: Class<T>, record: Record<string, unknown>): Promise<T> {
-    return ModelCrudUtil.load(modelClass, record);
+    const schemaContext = SQLModelUtil.getSchemaContext(modelClass);
+    const resolvedRecord = { ...record };
+    for (const complexFieldName of schemaContext.complexFields.keys()) {
+      const val = resolvedRecord[complexFieldName];
+      if (typeof val === 'string') {
+        resolvedRecord[complexFieldName] = JSONUtil.fromUTF8(val);
+      }
+    }
+    return ModelCrudUtil.load(modelClass, resolvedRecord);
   }
 
   static loadMany<T extends ModelType>(modelClass: Class<T>, records: unknown[]): Promise<T[]> {
-    return Promise.all(records.map(row => ModelCrudUtil.load(modelClass, castTo(row))));
+    return Promise.all(records.map(row => this.loadSingle(modelClass, castTo(row))));
   }
 
   static compilePartialUpdate<T extends ModelType>(

@@ -8,6 +8,7 @@ import {
   type ModelBulkSupport,
   type ModelCrudSupport,
   ModelCrudUtil,
+  type ModelExpirySupport,
   ModelExpiryUtil,
   type ModelListOptions,
   ModelRegistryIndex,
@@ -36,6 +37,7 @@ import {
   isModelQueryIndex,
   type ModelQuery,
   type ModelQueryCrudSupport,
+  ModelQueryCrudUtil,
   type ModelQueryFacet,
   type ModelQueryFacetSupport,
   type ModelQuerySuggestSupport,
@@ -70,6 +72,7 @@ export class MysqlModelService
     ModelCrudSupport,
     ModelStorageSupport,
     ModelBulkSupport,
+    ModelExpirySupport,
     ModelIndexedSupport,
     ModelQuerySupport,
     ModelQueryCrudSupport,
@@ -379,6 +382,29 @@ export class MysqlModelService
     return SQLModelCrudUtil.updatePartial(this.connection, this, modelClass, item, view);
   }
 
+  // Suggest Support
+  async suggestValuesByQuery<T extends ModelType>(
+    modelClass: Class<T>,
+    field: ValidStringFields<T>,
+    prefix?: string,
+    query?: PageableModelQuery<T>
+  ): Promise<string[]> {
+    const resolvedQuery = ModelQuerySuggestUtil.getSuggestFieldQuery<T>(modelClass, field, prefix, query);
+    const results = await this.query<T>(modelClass, resolvedQuery);
+    return ModelQuerySuggestUtil.combineSuggestResults<T, string>(modelClass, field, prefix, results, value => value, query?.limit);
+  }
+
+  async suggestByQuery<T extends ModelType>(
+    modelClass: Class<T>,
+    field: ValidStringFields<T>,
+    prefix?: string,
+    query?: PageableModelQuery<T>
+  ): Promise<T[]> {
+    const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(modelClass, field, prefix, query);
+    const results = await this.query<T>(modelClass, resolvedQuery);
+    return ModelQuerySuggestUtil.combineSuggestResults<T, T>(modelClass, field, prefix, results, (_, val) => val, query?.limit);
+  }
+
   delete<T extends ModelType>(modelClass: Class<T>, id: string): Promise<void> {
     return SQLModelCrudUtil.delete(this.connection, this, modelClass, id);
   }
@@ -394,7 +420,7 @@ export class MysqlModelService
 
   // Expiry Support
   deleteExpired<T extends ModelType>(modelClass: Class<T>): Promise<number> {
-    return ModelExpiryUtil.deleteExpired(this, modelClass);
+    return ModelQueryCrudUtil.deleteExpired(this, modelClass);
   }
 
   // Indexed Support
@@ -495,16 +521,6 @@ export class MysqlModelService
 
   deleteByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
     return SQLModelQueryUtil.deleteByQuery(this.connection, this, modelClass, query);
-  }
-
-  // Suggest Support
-  suggest<T extends ModelType>(
-    modelClass: Class<T>,
-    field: ValidStringFields<T>,
-    prefix?: string,
-    query?: PageableModelQuery<T>
-  ): Promise<T[]> {
-    return ModelQuerySuggestUtil.suggest(this, modelClass, field, prefix, query);
   }
 
   // Facet Support

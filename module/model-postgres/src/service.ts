@@ -1,4 +1,4 @@
-import { default as pg } from 'pg';
+import type { default as pg } from 'pg';
 
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
@@ -37,6 +37,7 @@ import {
   isModelQueryIndex,
   type ModelQuery,
   type ModelQueryCrudSupport,
+  ModelQueryCrudUtil,
   type ModelQueryFacet,
   type ModelQueryFacetSupport,
   type ModelQuerySuggestSupport,
@@ -343,7 +344,7 @@ export class PostgresModelService
       );
 
       const requestedIndexes = ModelRegistryIndex.getIndices(modelClass) || [];
-      const requestedIndexesMap = new Map<string, any>();
+      const requestedIndexesMap = new Map<string, IndexConfig>();
 
       for (const index of requestedIndexes) {
         const indexName = ['idx', context.tableName, index.name.toLowerCase().replaceAll('-', '_')].join('_');
@@ -445,7 +446,7 @@ export class PostgresModelService
 
   // Expiry Support
   deleteExpired<T extends ModelType>(modelClass: Class<T>): Promise<number> {
-    return ModelExpiryUtil.deleteExpired(this, modelClass);
+    return ModelQueryCrudUtil.deleteExpired(this, modelClass);
   }
 
   // Indexed Support
@@ -527,6 +528,7 @@ export class PostgresModelService
     return SQLModelQueryUtil.query(this.connection, this, modelClass, query);
   }
 
+  // Query Support
   queryOne<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>, failOnMany?: boolean): Promise<T> {
     return SQLModelQueryUtil.queryOne(this.connection, this, modelClass, query, failOnMany);
   }
@@ -549,13 +551,26 @@ export class PostgresModelService
   }
 
   // Suggest Support
-  suggest<T extends ModelType>(
+  async suggestValuesByQuery<T extends ModelType>(
+    modelClass: Class<T>,
+    field: ValidStringFields<T>,
+    prefix?: string,
+    query?: PageableModelQuery<T>
+  ): Promise<string[]> {
+    const resolvedQuery = ModelQuerySuggestUtil.getSuggestFieldQuery<T>(modelClass, field, prefix, query);
+    const results = await this.query<T>(modelClass, resolvedQuery);
+    return ModelQuerySuggestUtil.combineSuggestResults<T, string>(modelClass, field, prefix, results, value => value, query?.limit);
+  }
+
+  async suggestByQuery<T extends ModelType>(
     modelClass: Class<T>,
     field: ValidStringFields<T>,
     prefix?: string,
     query?: PageableModelQuery<T>
   ): Promise<T[]> {
-    return ModelQuerySuggestUtil.suggest(this, modelClass, field, prefix, query);
+    const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(modelClass, field, prefix, query);
+    const results = await this.query<T>(modelClass, resolvedQuery);
+    return ModelQuerySuggestUtil.combineSuggestResults<T, T>(modelClass, field, prefix, results, (_, val) => val, query?.limit);
   }
 
   // Facet Support
