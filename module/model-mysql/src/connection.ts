@@ -1,5 +1,5 @@
 import { createPool } from 'mysql2';
-import type { ExecuteValues, OkPacket, Pool, PoolConnection, ResultSetHeader, TypeCastField } from 'mysql2/promise';
+import type { OkPacket, Pool, PoolConnection, ResultSetHeader, TypeCastField } from 'mysql2/promise';
 
 import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
@@ -92,14 +92,13 @@ export class MysqlConnection extends SQLConnection<PoolConnection> {
     console.debug('Executing MySQL query', { query, values });
     const client = this.active ?? (await this.acquire());
     try {
-      const [results] = await client.execute(query, castTo<ExecuteValues[]>(values ?? []));
+      const [results] = await client.execute(query, castTo(values ?? []));
       if (isSimplePacket(results)) {
         return { records: [], count: results.affectedRows };
+      } else if (isSimplePacket(results[0])) {
+        return { records: [], count: results[0].affectedRows };
       } else {
-        if (isSimplePacket(results[0])) {
-          return { records: [], count: results[0].affectedRows };
-        }
-        const records: Type[] = [...castTo<unknown[]>(results)].map(value => castTo({ ...castTo<object>(value) }));
+        const records: Type[] = castTo(results);
         return { records, count: records.length };
       }
     } catch (error) {

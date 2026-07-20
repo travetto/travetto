@@ -43,7 +43,7 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
     this.config = config;
   }
 
-  async #withRetries<T>(operation: () => Promise<T>, retries = 10, delay = 250): Promise<T> {
+  async #withRetries<T>(operation: () => Promise<T>, retries = 10, delay = 300): Promise<T> {
     for (; retries > 1; retries -= 1) {
       try {
         return await operation();
