@@ -1,7 +1,7 @@
 import type { PoolConnection } from 'mysql2/promise';
 
 import { Injectable, PostConstruct } from '@travetto/di';
-import { BaseSQLModelService } from '@travetto/model-sql';
+import { BaseSQLModelService, type JSONSqlPathMode } from '@travetto/model-sql';
 import { type Class, castTo } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -78,8 +78,15 @@ export class MysqlModelService extends BaseSQLModelService {
     return 'JSON';
   }
 
-  compileJsonIndexPath(columnName: string, jsonPath: string[]): string {
-    return `((CAST(JSON_UNQUOTE(JSON_EXTRACT(${columnName}, '$.${jsonPath.join('.')}')) AS CHAR(255))))`;
+  compileJsonIndexPath(columnName: string, jsonPath: string[], mode: JSONSqlPathMode): string {
+    const result = `${columnName}->>'$.${jsonPath.join('.')}'`;
+    switch (mode) {
+      case 'createIndex':
+        return `(CAST(${result} as CHAR(255)) COLLATE utf8mb4_bin)`;
+      case 'orderBy':
+      case 'read':
+        return result;
+    }
   }
 
   compileArrayContains(sqlPath: string, ident: string, isObject: boolean, type?: Class): string {

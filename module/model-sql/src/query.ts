@@ -4,7 +4,7 @@ import { castTo, JSONUtil, RuntimeError } from '@travetto/runtime';
 import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { SQLDialect } from './dialect.ts';
-import type { CompilationResult, TableContext } from './types.ts';
+import type { CompilationResult, JSONSqlPathMode, TableContext } from './types.ts';
 
 interface QueryClause {
   sql?: string;
@@ -73,7 +73,7 @@ export class SQLQueryCompiler {
       const key = Object.keys(sortClause)[0];
       const direction = castTo<Record<string, 1 | -1>>(sortClause)[key];
       const path = key.split('.');
-      const { sqlPath } = this.resolvePath(dialect, context, path);
+      const { sqlPath } = this.resolvePath(dialect, context, path, 'orderBy');
       return `${sqlPath} ${direction === -1 ? 'DESC' : 'ASC'}`;
     });
     return sortClauses.length ? `ORDER BY ${sortClauses.join(', ')}` : '';
@@ -85,7 +85,8 @@ export class SQLQueryCompiler {
   static resolvePath<T extends ModelType>(
     dialect: SQLDialect,
     context: TableContext<T>,
-    path: string[]
+    path: string[],
+    mode: JSONSqlPathMode
   ): { sqlPath: string; leafField?: SchemaFieldConfig } {
     const firstSegment = path[0];
 
@@ -119,7 +120,7 @@ export class SQLQueryCompiler {
       currentField = subConfig?.fields[leafSegment];
     }
 
-    let compiledPath = dialect.compileIndexPath(context.tableName, context.simpleFields, path);
+    let compiledPath = dialect.compileIndexPath(context.tableName, context.simpleFields, path, mode);
 
     // Apply type casting for JSON extract values
     if (currentField && !currentField.array) {
@@ -207,7 +208,7 @@ export class SQLQueryCompiler {
       const isPlainObject = DataUtil.isPlainObject(value);
       const firstKey = isPlainObject ? Object.keys(value)[0] : '';
 
-      const { sqlPath, leafField } = this.resolvePath(dialect, context, currentPath);
+      const { sqlPath, leafField } = this.resolvePath(dialect, context, currentPath, 'read');
       const nextIdentPath = `${identPath}__${idx}`;
 
       if (leafField?.array && SchemaRegistryIndex.has(leafField.type) && isPlainObject && !firstKey.startsWith('$')) {
@@ -241,7 +242,7 @@ export class SQLQueryCompiler {
     operation: Record<string, unknown>,
     identPath: IdentPath = ''
   ): QueryClause {
-    const { sqlPath, leafField } = this.resolvePath(dialect, context, path);
+    const { sqlPath, leafField } = this.resolvePath(dialect, context, path, 'read');
     const clauses: QueryClause[] = [];
 
     let idx = 0;

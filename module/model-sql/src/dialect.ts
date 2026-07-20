@@ -2,6 +2,8 @@ import type { IndexConfig, ModelType } from '@travetto/model';
 import type { Class } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
+import type { JSONSqlPathMode } from './types';
+
 /**
  * Interface representing SQL Dialect-specific generation hooks and behaviors
  */
@@ -29,7 +31,7 @@ export interface SQLDialect {
   /**
    * Compiles an index path (e.g. ['parent', 'child', 'value']) into its SQL expression
    */
-  compileIndexPath(tableName: string, simpleFields: Map<string, SchemaFieldConfig>, path: string[]): string;
+  compileIndexPath(tableName: string, simpleFields: Map<string, SchemaFieldConfig>, path: string[], mode: JSONSqlPathMode): string;
 
   /**
    * Generates the CREATE INDEX statement for a model index

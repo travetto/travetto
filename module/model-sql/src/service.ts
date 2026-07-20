@@ -59,7 +59,7 @@ import type { SQLModelConfig } from './config.ts';
 import type { SQLConnection } from './connection.ts';
 import type { SQLDialect } from './dialect.ts';
 import { SQLQueryCompiler } from './query.ts';
-import type { TableContext } from './types.ts';
+import type { JSONSqlPathMode, TableContext } from './types.ts';
 import { SQLModelUtil } from './util.ts';
 
 /**
@@ -98,9 +98,9 @@ export abstract class BaseSQLModelService
   }
 
   abstract getColumnType(fieldConfiguration: SchemaFieldConfig): string;
-  abstract compileJsonIndexPath(columnName: string, jsonPath: string[]): string;
+  abstract compileJsonIndexPath(columnName: string, jsonPath: string[], mode: JSONSqlPathMode): string;
 
-  compileIndexPath(tableName: string, simpleFields: Map<string, SchemaFieldConfig>, path: string[]): string {
+  compileIndexPath(tableName: string, simpleFields: Map<string, SchemaFieldConfig>, path: string[], mode: JSONSqlPathMode): string {
     const firstSegment = path[0];
     const escapedFirst = this.escapeIdentifier(firstSegment);
     if (simpleFields.has(firstSegment)) {
@@ -113,7 +113,7 @@ export abstract class BaseSQLModelService
       if (nestedSegments.length === 0) {
         return escapedFirst;
       }
-      return this.compileJsonIndexPath(escapedFirst, nestedSegments);
+      return this.compileJsonIndexPath(escapedFirst, nestedSegments, mode);
     }
   }
 
@@ -127,7 +127,7 @@ export abstract class BaseSQLModelService
         const isAscending = typeof sortDirection === 'number' ? sortDirection === 1 : !sortDirection;
 
         const path = fieldKey.split('.');
-        const expression = this.compileIndexPath(tableName, simpleFields, path);
+        const expression = this.compileIndexPath(tableName, simpleFields, path, 'createIndex');
         return `${expression} ${isAscending ? 'ASC' : 'DESC'}`;
       });
 
@@ -135,7 +135,7 @@ export abstract class BaseSQLModelService
     } else if (isModelIndexedIndex(indexConfig)) {
       const allFields = [...indexConfig.keyTemplate, ...indexConfig.sortTemplate];
       const indexFields = allFields.map(({ path, value }) => {
-        const expression = this.compileIndexPath(tableName, simpleFields, path);
+        const expression = this.compileIndexPath(tableName, simpleFields, path, 'createIndex');
         return `${expression} ${value === -1 ? 'DESC' : 'ASC'}`;
       });
 
@@ -754,7 +754,7 @@ export abstract class BaseSQLModelService
     const context = SQLModelUtil.getContext(this, modelClass);
 
     const sortClauses = indexConfig.sortTemplate.map(({ path, value }) => {
-      const expression = this.compileIndexPath(context.tableName, context.simpleFields, path);
+      const expression = this.compileIndexPath(context.tableName, context.simpleFields, path, 'orderBy');
       return `${expression} ${value === -1 ? 'DESC' : 'ASC'}`;
     });
     const sortSQL = sortClauses.length ? `ORDER BY ${sortClauses.join(', ')}` : '';
@@ -827,7 +827,7 @@ export abstract class BaseSQLModelService
     const { whereSQL, parameters = [] } = SQLQueryCompiler.compileWhere(this, context, ModelQueryUtil.getWhereClause(modelClass, where));
 
     const prefixFieldPath = indexConfig.sortTemplate[0].path;
-    const { sqlPath } = SQLQueryCompiler.resolvePath(this, context, prefixFieldPath);
+    const { sqlPath } = SQLQueryCompiler.resolvePath(this, context, prefixFieldPath, 'read');
 
     const placeholder = this.getPlaceholder(parameters.length + 1);
     parameters.push(`${prefix}%`);
@@ -1000,7 +1000,7 @@ export abstract class BaseSQLModelService
     await QueryVerifier.verify(modelClass, query);
     const context = SQLModelUtil.getContext(this, modelClass);
     const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(this, context, ModelQueryUtil.getWhereClause(modelClass, query?.where));
-    const { sqlPath } = SQLQueryCompiler.resolvePath(this, context, String(field).split('.'));
+    const { sqlPath } = SQLQueryCompiler.resolvePath(this, context, String(field).split('.'), 'read');
 
     const conditions = [`${sqlPath} IS NOT NULL`];
     if (whereSQL) {
