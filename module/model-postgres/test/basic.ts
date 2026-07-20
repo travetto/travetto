@@ -1,7 +1,3 @@
-import type { AsyncContext } from '@travetto/context';
-import { InjectableFactory } from '@travetto/di';
-import { PostgreSQLDialect } from '@travetto/model-postgres';
-import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 import { Suite } from '@travetto/test';
 
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
@@ -11,44 +7,40 @@ import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
 
-class Config {
-  @InjectableFactory({ primary: true })
-  static getDialect(ctx: AsyncContext, config: SQLModelConfig) {
-    return new PostgreSQLDialect(ctx, config);
-  }
-}
+import { PostgresModelConfig } from '../src/config.ts';
+import { PostgresModelService } from '../src/service.ts';
 
 @WithSuiteContext()
 @Suite()
 class PostgreSQLBasicSuite extends ModelBasicSuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
+  serviceClass = PostgresModelService;
+  configClass = PostgresModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
 class PostgreSQLCrudSuite extends ModelCrudSuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
-}
-
-@WithSuiteContext()
-@Suite()
-class PostgreSQLBulkSuite extends ModelBulkSuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
-}
-
-@WithSuiteContext()
-@Suite()
-class PostgreSQLExpirySuite extends ModelExpirySuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
+  serviceClass = PostgresModelService;
+  configClass = PostgresModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
 class PostgreSQLQueryPolymorphismSuite extends ModelPolymorphismSuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
+  serviceClass = PostgresModelService;
+  configClass = PostgresModelConfig;
+}
+
+@WithSuiteContext()
+@Suite()
+class PostgreSQLBulkSuite extends ModelBulkSuite {
+  serviceClass = PostgresModelService;
+  configClass = PostgresModelConfig;
+}
+
+@WithSuiteContext()
+@Suite()
+class PostgreSQLExpirySuite extends ModelExpirySuite {
+  serviceClass = PostgresModelService;
+  configClass = PostgresModelConfig;
 }

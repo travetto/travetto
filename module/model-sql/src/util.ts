@@ -1,352 +1,61 @@
-import { ModelRegistryIndex, type ModelType, type OptionalId } from '@travetto/model';
-import type { SelectClause, SortClause } from '@travetto/model-query';
-import { type Class, castKey, castTo, TypedObject } from '@travetto/runtime';
-import { DataUtil, type SchemaClassConfig, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { ModelRegistryIndex, type ModelType } from '@travetto/model';
+import { type Class, castTo, RuntimeError } from '@travetto/runtime';
+import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import type { DialectState, InsertWrapper, OrderBy, VisitHandler, VisitInstanceNode, VisitState } from './internal/types.ts';
-import { TableSymbol, type VisitStack } from './types.ts';
+import type { SQLDialect } from './dialect.ts';
+import type { TableContext } from './query.ts';
 
-type FieldCacheEntry = {
-  local: SchemaFieldConfig[];
-  localMap: Record<string, SchemaFieldConfig>;
-  foreign: SchemaFieldConfig[];
-  foreignMap: Record<string, SchemaFieldConfig>;
-};
+export interface SchemaContext<T> {
+  cls: Class<T>;
+  simpleFields: Map<string, SchemaFieldConfig>;
+  complexFields: Map<string, SchemaFieldConfig>;
+  allFields: SchemaFieldConfig[];
+}
 
-/**
- * Utilities for dealing with SQL operations
- */
 export class SQLModelUtil {
-  static #schemaFieldsCache = new Map<Class, FieldCacheEntry>();
+  static SCHEMA_CACHE = new Map<Class, SchemaContext<unknown>>();
 
-  /**
-   * Creates a new visitation stack with the class as the root
-   */
-  static classToStack(type: Class): VisitStack[] {
-    return [{ type, name: type.name }];
-  }
-
-  /**
-   * Clean results from db, by dropping internal fields
-   */
-  static cleanResults<T, U = T>(state: DialectState, item: T[]): U[];
-  static cleanResults<T, U = T>(state: DialectState, item: T): U;
-  static cleanResults<T, U = T>(state: DialectState, item: T | T[]): U | U[] {
-    if (Array.isArray(item)) {
-      return item.filter(value => value !== null && value !== undefined).map(value => this.cleanResults(state, value));
-    } else if (!DataUtil.isSimpleValue(item)) {
-      for (const key of TypedObject.keys(item)) {
-        if (
-          item[key] === null ||
-          item[key] === undefined ||
-          key === state.parentPathField.name ||
-          key === state.pathField.name ||
-          key === state.idxField.name
-        ) {
-          delete item[key];
-        } else {
-          item[key] = this.cleanResults(state, item[key]);
-        }
-      }
-      return castTo({ ...item });
-    } else {
-      return castTo(item);
-    }
-  }
-
-  /**
-   * Get all available fields at current stack path
-   */
-  static getFieldsByLocation(stack: VisitStack[]): FieldCacheEntry {
-    const top = stack.at(-1)!;
-    const config = SchemaRegistryIndex.getOptional(top.type)?.get();
-
-    if (config && this.#schemaFieldsCache.has(config.class)) {
-      return this.#schemaFieldsCache.get(config.class)!;
+  static getSchemaContext<T>(cls: Class<T>): SchemaContext<T> {
+    if (this.SCHEMA_CACHE.has(cls)) {
+      return castTo(this.SCHEMA_CACHE.get(cls)!);
     }
 
-    if (!config) {
-      // If a simple type, it is it's own field
-      const field: SchemaFieldConfig = castTo({ ...top });
-      return {
-        local: [field],
-        localMap: { [field.name]: field },
-        foreign: [],
-        foreignMap: {}
-      };
+    const registryConfig = SchemaRegistryIndex.getOptional(cls)?.get();
+    if (!registryConfig) {
+      throw new RuntimeError('Cannot store unregistered models', { category: 'data' });
     }
 
-    const hasModel = ModelRegistryIndex.has(config.class)!;
-    const fields = Object.values(config.fields).map(field => ({ ...field }));
+    const fields = Object.values(registryConfig.fields).map(field => ({ ...field }));
 
-    // Polymorphic
-    if (hasModel && config.discriminatedBase) {
+    const hasModel = ModelRegistryIndex.has(cls);
+    if (hasModel && registryConfig.discriminatedBase) {
       const fieldMap = new Set(fields.map(field => field.name));
-      for (const type of SchemaRegistryIndex.getDiscriminatedClasses(config.class)) {
-        const typeConfig = SchemaRegistryIndex.getConfig(type);
-        for (const [fieldName, field] of Object.entries<SchemaFieldConfig>(typeConfig.fields)) {
-          if (!fieldMap.has(fieldName)) {
-            fieldMap.add(fieldName);
+      for (const subclass of SchemaRegistryIndex.getDiscriminatedClasses(cls)) {
+        const subclassConfig = SchemaRegistryIndex.getConfig(subclass);
+        for (const field of Object.values<SchemaFieldConfig>(subclassConfig.fields)) {
+          if (!fieldMap.has(field.name)) {
+            fieldMap.add(field.name);
             fields.push({ ...field, required: { active: false } });
           }
         }
       }
     }
 
-    const entry: FieldCacheEntry = {
-      localMap: {},
-      foreignMap: {},
-      local: fields.filter(field => !SchemaRegistryIndex.has(field.type) && !field.array),
-      foreign: fields.filter(field => SchemaRegistryIndex.has(field.type) || field.array)
-    };
-
-    entry.local.reduce((map, field) => (map[field.name] = field) && map, entry.localMap);
-    entry.foreign.reduce((map, field) => (map[field.name] = field) && map, entry.foreignMap);
-
-    this.#schemaFieldsCache.set(config.class, entry);
-
-    return entry;
+    const simpleFieldsList = fields.filter(field => !SchemaRegistryIndex.has(field.type) && !field.array);
+    const complexFieldsList = fields.filter(field => SchemaRegistryIndex.has(field.type) || field.array);
+    const simpleFields = new Map(simpleFieldsList.map(field => [field.name, field]));
+    const complexFields = new Map(complexFieldsList.map(field => [field.name, field]));
+    const context: SchemaContext<T> = { cls, simpleFields, complexFields, allFields: fields };
+    this.SCHEMA_CACHE.set(cls, context);
+    return context;
   }
 
-  /**
-   * Process a schema structure, synchronously
-   */
-  static visitSchemaSync(
-    config: SchemaClassConfig | SchemaFieldConfig,
-    handler: VisitHandler<void>,
-    state: VisitState = { path: [] }
-  ): void {
-    const path = 'fields' in config ? this.classToStack(config.class) : [...state.path, config];
-    const { local: fields, foreign } = this.getFieldsByLocation(path);
-
-    const descend = (): void => {
-      for (const field of foreign) {
-        if (SchemaRegistryIndex.has(field.type)) {
-          this.visitSchemaSync(field, handler, { path });
-        } else {
-          handler.onSimple({
-            config: field,
-            fields: [],
-            path: [...path, field]
-          });
-        }
-      }
-    };
-
-    if ('fields' in config) {
-      handler.onRoot({ config, fields, descend, path });
-    } else {
-      handler.onSub({ config, fields, descend, path });
-    }
-  }
-
-  /**
-   * Visit a Schema structure
-   */
-  static async visitSchema(
-    config: SchemaClassConfig | SchemaFieldConfig,
-    handler: VisitHandler<Promise<void>>,
-    state: VisitState = { path: [] }
-  ): Promise<void> {
-    const path = 'fields' in config ? this.classToStack(config.class) : [...state.path, config];
-    const { local: fields, foreign } = this.getFieldsByLocation(path);
-
-    const descend = async (): Promise<void> => {
-      for (const field of foreign) {
-        if (SchemaRegistryIndex.has(field.type)) {
-          await this.visitSchema(field, handler, { path });
-        } else {
-          await handler.onSimple({
-            config: field,
-            fields: [],
-            path: [...path, field]
-          });
-        }
-      }
-    };
-
-    if ('fields' in config) {
-      return handler.onRoot({ config, fields, descend, path });
-    } else {
-      return handler.onSub({ config, fields, descend, path });
-    }
-  }
-
-  /**
-   * Process a schema instance by visiting it synchronously.  This is synchronous to prevent concurrent calls from breaking
-   */
-  static visitSchemaInstance<T extends ModelType>(
-    cls: Class<T>,
-    instance: T | OptionalId<T>,
-    handler: VisitHandler<unknown, VisitInstanceNode<unknown>>
-  ): void {
-    const pathStack: unknown[] = [instance];
-    this.visitSchemaSync(SchemaRegistryIndex.getConfig(cls), {
-      onRoot: config => {
-        const { path } = config;
-        path[0].name = instance.id!;
-        handler.onRoot({ ...config, value: instance });
-        return config.descend();
-      },
-      onSub: config => {
-        const { config: field } = config;
-        const topObject: Record<string, unknown> = castTo(pathStack.at(-1));
-        const top = config.path.at(-1)!;
-
-        if (field.name in topObject) {
-          const valuesInput = topObject[field.name];
-          const values = Array.isArray(valuesInput) ? valuesInput : [valuesInput];
-
-          let i = 0;
-          for (const value of values) {
-            try {
-              pathStack.push(value);
-              config.path[config.path.length - 1] = { ...top, index: i++ };
-              handler.onSub({ ...config, value });
-              if (!field.array) {
-                config.descend();
-              }
-            } finally {
-              pathStack.pop();
-            }
-            i += 1;
-          }
-          if (field.array) {
-            config.descend();
-          }
-        }
-      },
-      onSimple: config => {
-        const { config: field } = config;
-        const topObject: Record<string, unknown> = castTo(pathStack.at(-1));
-        const value = topObject[field.name];
-        return handler.onSimple({ ...config, value });
-      }
-    });
-  }
-
-  /**
-   * Get list of selected fields
-   */
-  static select<T>(cls: Class<T>, select?: SelectClause<T>): SchemaFieldConfig[] {
-    if (!select || Object.keys(select).length === 0) {
-      return [{ type: cls, name: '*', class: cls, array: false }];
+  static getContext<T extends ModelType>(dialect: SQLDialect, modelClass: Class<T>): TableContext<T> {
+    let tableName = ModelRegistryIndex.getStoreName(modelClass);
+    if (dialect.config.namespace) {
+      tableName = `${dialect.config.namespace}_${tableName}`;
     }
 
-    const { localMap } = this.getFieldsByLocation(this.classToStack(cls));
-
-    let toGet = new Set<string>();
-
-    for (const [key, value] of TypedObject.entries(select)) {
-      if (typeof key === 'string' && !DataUtil.isPlainObject(select[key]) && localMap[key]) {
-        if (!value) {
-          if (toGet.size === 0) {
-            toGet = new Set(Object.keys(SchemaRegistryIndex.getConfig(cls).fields));
-          }
-          toGet.delete(key);
-        } else {
-          toGet.add(key);
-        }
-      }
-    }
-    return [...toGet].map(field => localMap[field]);
-  }
-
-  /**
-   * Get list of Order By clauses
-   */
-  static orderBy<T>(cls: Class<T>, sort: SortClause<T>[]): OrderBy[] {
-    return sort.map((cl: Record<string, unknown>) => {
-      let schema: SchemaClassConfig = SchemaRegistryIndex.getConfig(cls);
-      const stack = this.classToStack(cls);
-      let found: OrderBy | undefined;
-      while (!found) {
-        const key = Object.keys(cl)[0];
-        const value = cl[key];
-        const field = { ...schema.fields[key] };
-        if (DataUtil.isPrimitive(value)) {
-          stack.push(field);
-          found = { stack, asc: value === 1 };
-        } else {
-          stack.push(field);
-          schema = SchemaRegistryIndex.getConfig(field.type);
-          cl = castTo(value);
-        }
-      }
-      return found;
-    });
-  }
-
-  /**
-   * Find all dependent fields via child tables
-   */
-  static collectDependents<T>(state: DialectState, parent: unknown, items: T[], field?: SchemaFieldConfig): Record<string, T> {
-    if (field) {
-      const isSimple = SchemaRegistryIndex.has(field.type);
-      for (const item of items) {
-        const parentKey: string = castTo(item[castKey<T>(state.parentPathField.name)]);
-        const root = castTo<Record<string, Record<string, unknown>>>(parent)[parentKey];
-        const fieldKey = castKey<typeof root | T>(field.name);
-        if (field.array) {
-          if (!root[fieldKey]) {
-            root[fieldKey] = [isSimple ? item : item[fieldKey]];
-          } else if (Array.isArray(root[fieldKey])) {
-            root[fieldKey].push(isSimple ? item : item[fieldKey]);
-          }
-        } else {
-          root[fieldKey] = isSimple ? item : item[fieldKey];
-        }
-      }
-    }
-
-    const mapping: Record<string, T> = {};
-    for (const item of items) {
-      const key = item[castKey<T>(state.pathField.name)];
-      if (typeof key === 'string') {
-        mapping[key] = item;
-      }
-    }
-    return mapping;
-  }
-
-  /**
-   * Build table name via stack path
-   */
-  static buildTable(list: VisitStack[]): string {
-    const top = list.at(-1)!;
-    if (!top[TableSymbol]) {
-      top[TableSymbol] = list.map((item, i) => (i === 0 ? ModelRegistryIndex.getStoreName(item.type) : item.name)).join('_');
-    }
-    return top[TableSymbol]!;
-  }
-
-  /**
-   * Build property path for a table/field given the current stack
-   */
-  static buildPath(list: VisitStack[]): string {
-    return list.map(item => `${item.name}${item.index ? `[${item.index}]` : ''}`).join('.');
-  }
-
-  /**
-   * Get insert statements for a given class, and its child tables
-   */
-  static async getInserts<T extends ModelType>(cls: Class<T>, items: (T | OptionalId<T>)[]): Promise<InsertWrapper[]> {
-    const wrappers: Record<string, InsertWrapper> = {};
-
-    const track = (stack: VisitStack[], value: unknown): void => {
-      const key = this.buildTable(stack);
-      (wrappers[key] ??= { stack, records: [] }).records.push({ stack, value });
-    };
-
-    items.map(item =>
-      this.visitSchemaInstance(cls, item, {
-        onRoot: ({ path, value }) => track(path, value),
-        onSub: ({ path, value }) => track(path, value),
-        onSimple: ({ path, value }) => track(path, value)
-      })
-    );
-
-    const result = [...Object.values(wrappers)].toSorted((a, b) => a.stack.length - b.stack.length);
-    return result;
+    return { tableName, ...this.getSchemaContext(modelClass) };
   }
 }

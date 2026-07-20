@@ -1,45 +1,46 @@
-import { Config } from '@travetto/config';
 import { asFull, Runtime } from '@travetto/runtime';
 
 /**
- * SQL Model Config
+ * Base configuration class for SQL/JSON document model services
  */
-@Config('model.sql')
-export class SQLModelConfig<T extends {} = {}> {
+export class SQLModelConfig<ClientOptions extends {} = {}> {
   /**
-   * Host to connect to
+   * Database host to connect to
    */
   host = '127.0.0.1';
+
   /**
-   * Default port
+   * Database port to connect to
    */
   port = 0;
+
   /**
-   * Username
+   * Database username
    */
   user = Runtime.production ? '' : 'travetto';
+
   /**
-   * Password
+   * Database password
    */
   password = Runtime.production ? '' : 'travetto';
+
   /**
-   * Table prefix
+   * Namespace/schema prefix for table names
    */
   namespace = '';
+
   /**
    * Database name
    */
   database = 'app';
+
   /**
-   * Allow storage modification at runtime
+   * Allow storage modifications (like table auto-creation and schema updates) at runtime
    */
-  modifyStorage?: boolean;
+  modifyStorage = !Runtime.production;
+
   /**
-   * Db version
+   * Extra raw database client options
    */
-  version = '';
-  /**
-   * Raw client options
-   */
-  options: T = asFull({});
+  options: ClientOptions = asFull({});
 }

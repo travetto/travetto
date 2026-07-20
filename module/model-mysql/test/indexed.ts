@@ -1,32 +1,23 @@
-import type { AsyncContext } from '@travetto/context';
-import { InjectableFactory } from '@travetto/di';
-import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 import { Suite } from '@travetto/test';
 
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
 import { ModelIndexedSuite } from '@travetto/model-indexed/support/test/indexed.ts';
 import { ModelIndexedPolymorphismSuite } from '@travetto/model-indexed/support/test/polymorphism.ts';
 
-import { MySQLDialect } from '../src/dialect.ts';
-
-class Config {
-  @InjectableFactory({ primary: true })
-  static getDialect(ctx: AsyncContext, config: SQLModelConfig) {
-    return new MySQLDialect(ctx, config);
-  }
-}
+import { MysqlModelConfig } from '../src/config.ts';
+import { MysqlModelService } from '../src/service.ts';
 
 @WithSuiteContext()
 @Suite()
 class MySQLIndexedSuite extends ModelIndexedSuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
-  supportsDeepIndexes = false;
+  serviceClass = MysqlModelService;
+  configClass = MysqlModelConfig;
+  supportsDeepIndexes = true;
 }
 
 @WithSuiteContext()
 @Suite()
 class MySQLIndexedPolymorphicSuite extends ModelIndexedPolymorphismSuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
+  serviceClass = MysqlModelService;
+  configClass = MysqlModelConfig;
 }

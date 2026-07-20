@@ -1,7 +1,3 @@
-import type { AsyncContext } from '@travetto/context';
-import { InjectableFactory } from '@travetto/di';
-import { MySQLDialect } from '@travetto/model-mysql';
-import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 import { Suite } from '@travetto/test';
 
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
@@ -11,44 +7,40 @@ import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
 
-class Config {
-  @InjectableFactory({ primary: true })
-  static getDialect(ctx: AsyncContext, config: SQLModelConfig) {
-    return new MySQLDialect(ctx, config);
-  }
-}
+import { MysqlModelConfig } from '../src/config.ts';
+import { MysqlModelService } from '../src/service.ts';
 
 @WithSuiteContext()
 @Suite()
 class MySQLBasicSuite extends ModelBasicSuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
+  serviceClass = MysqlModelService;
+  configClass = MysqlModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
 class MySQLCrudSuite extends ModelCrudSuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
+  serviceClass = MysqlModelService;
+  configClass = MysqlModelConfig;
+}
+
+@WithSuiteContext()
+@Suite()
+class MySQLQueryPolymorphismSuite extends ModelPolymorphismSuite {
+  serviceClass = MysqlModelService;
+  configClass = MysqlModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
 class MySQLBulkSuite extends ModelBulkSuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
+  serviceClass = MysqlModelService;
+  configClass = MysqlModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
 class MySQLExpirySuite extends ModelExpirySuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
-}
-
-@WithSuiteContext()
-@Suite()
-class MySQLPolymorphismSuite extends ModelPolymorphismSuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
+  serviceClass = MysqlModelService;
+  configClass = MysqlModelConfig;
 }

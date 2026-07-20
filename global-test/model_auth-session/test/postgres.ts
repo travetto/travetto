@@ -1,26 +1,20 @@
 import { SessionModelSymbol } from '@travetto/auth-session';
-import type { AsyncContext } from '@travetto/context';
 import { InjectableFactory } from '@travetto/di';
 import type { ModelExpirySupport } from '@travetto/model';
-import { PostgreSQLDialect } from '@travetto/model-postgres';
-import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
+import { PostgresModelConfig, PostgresModelService } from '@travetto/model-postgres';
 import { Suite } from '@travetto/test';
 
 import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
 
 class Config {
-  @InjectableFactory({ primary: true })
-  static getSqlService(ctx: AsyncContext, config: SQLModelConfig) {
-    return new PostgreSQLDialect(ctx, config);
-  }
   @InjectableFactory(SessionModelSymbol)
-  static modelProvider(svc: SQLModelService): ModelExpirySupport {
+  static modelProvider(svc: PostgresModelService): ModelExpirySupport {
     return svc;
   }
 }
 
 @Suite()
-class PostgreSQLAuthSessionServerSuite extends AuthSessionServerSuite<SQLModelService> {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
+class PostgreSQLAuthSessionServerSuite extends AuthSessionServerSuite<PostgresModelService> {
+  serviceClass = PostgresModelService;
+  configClass = PostgresModelConfig;
 }

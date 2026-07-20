@@ -1,10 +1,13 @@
 import { createPool } from 'mysql2';
 import type { OkPacket, Pool, PoolConnection, PreparedStatementInfo, ResultSetHeader, TypeCastField } from 'mysql2/promise';
 
-import type { AsyncContext } from '@travetto/context';
+import { type AsyncContext } from '@travetto/context';
+import { Injectable } from '@travetto/di';
 import { ExistsError } from '@travetto/model';
-import { Connection, type SQLModelConfig } from '@travetto/model-sql';
+import { SQLConnection } from '@travetto/model-sql';
 import { castTo, JSONUtil, ShutdownManager } from '@travetto/runtime';
+
+import { MysqlModelConfig } from './config.ts';
 
 function isSimplePacket(value: unknown): value is OkPacket | ResultSetHeader {
   return (
@@ -17,36 +20,40 @@ function isSimplePacket(value: unknown): value is OkPacket | ResultSetHeader {
 }
 
 /**
- * Connection support for mysql
+ * MySQL Connection Manager.
+ * Operates on mysql2 promise Pool.
  */
-export class MySQLConnection extends Connection<PoolConnection> {
-  #pool: Pool;
-  #config: SQLModelConfig;
+@Injectable()
+export class MysqlConnection extends SQLConnection<PoolConnection> {
+  pool: Pool;
+  readonly config: MysqlModelConfig;
 
-  constructor(context: AsyncContext, config: SQLModelConfig) {
+  constructor(context: AsyncContext, config: MysqlModelConfig) {
     super(context);
-    this.#config = config;
-  }
-
-  async init(): Promise<void> {
-    this.#pool = createPool({
-      user: this.#config.user,
-      password: this.#config.password,
-      database: this.#config.database,
-      host: this.#config.host,
-      port: this.#config.port,
-      supportBigNumbers: true,
-      timezone: '+00:00',
-      typeCast: this.typeCast.bind(this),
-      ...(this.#config.options || {})
-    }).promise();
-
-    // Close mysql
-    ShutdownManager.signal.addEventListener('abort', () => this.#pool.end());
+    this.config = config;
   }
 
   /**
-   * Support some basic type support for JSON data
+   * Initializes the mysql2 connection pool
+   */
+  async init(): Promise<void> {
+    this.pool = createPool({
+      user: this.config.user,
+      password: this.config.password,
+      database: this.config.database,
+      host: this.config.host,
+      port: this.config.port,
+      supportBigNumbers: true,
+      timezone: '+00:00',
+      typeCast: this.typeCast.bind(this),
+      ...(this.config.options || {})
+    }).promise();
+
+    ShutdownManager.signal.addEventListener('abort', () => this.pool.end());
+  }
+
+  /**
+   * Typecasting parser for JSON and BLOB mysql columns
    */
   typeCast(field: TypeCastField, next: () => unknown): unknown {
     const result = next();
@@ -64,23 +71,40 @@ export class MySQLConnection extends Connection<PoolConnection> {
     return result;
   }
 
-  async execute<T = unknown>(pool: PoolConnection, query: string, values?: unknown[]): Promise<{ count: number; records: T[] }> {
-    console.debug('Executing query', { query });
+  /**
+   * Acquires a PoolConnection from the pool
+   */
+  acquire(): Promise<PoolConnection> {
+    return this.pool.getConnection();
+  }
+
+  /**
+   * Releases a PoolConnection back to the pool
+   */
+  release(connection: PoolConnection): void {
+    connection.release();
+  }
+
+  /**
+   * Executes a query on the active client or pool directly
+   */
+  async execute<Type = unknown>(query: string, values?: unknown[]): Promise<{ count: number; records: Type[] }> {
+    console.debug('Executing MySQL query', { query, values });
+    const client = this.active ?? await this.acquire();
     let prepared: PreparedStatementInfo | undefined;
     try {
-      prepared = (values?.length ?? 0) > 0 ? await pool.prepare(query) : undefined;
-      const [results] = await (prepared ? prepared.execute(values) : pool.query(query));
+      prepared = (values?.length ?? 0) > 0 ? await client.prepare(query) : undefined;
+      const [results] = await (prepared ? prepared.execute(values) : client.query(query));
       if (isSimplePacket(results)) {
         return { records: [], count: results.affectedRows };
       } else {
         if (isSimplePacket(results[0])) {
           return { records: [], count: results[0].affectedRows };
         }
-        const records: T[] = [...results].map(value => castTo({ ...value }));
+        const records: Type[] = [...castTo<unknown[]>(results)].map(value => castTo({ ...castTo<object>(value) }));
         return { records, count: records.length };
       }
     } catch (error) {
-      console.debug('Failed query', { error, query });
       const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
       switch (code) {
         case 'ER_DUP_ENTRY':
@@ -94,14 +118,9 @@ export class MySQLConnection extends Connection<PoolConnection> {
       try {
         await prepared?.close();
       } catch {}
+      if (!this.active) {
+        this.release(client);
+      }
     }
-  }
-
-  acquire(): Promise<PoolConnection> {
-    return this.#pool.getConnection();
-  }
-
-  release(pool: PoolConnection): void {
-    pool.release();
   }
 }

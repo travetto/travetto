@@ -1,7 +1,3 @@
-import type { AsyncContext } from '@travetto/context';
-import { InjectableFactory } from '@travetto/di';
-import { MySQLDialect } from '@travetto/model-mysql';
-import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 import { Suite } from '@travetto/test';
 
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
@@ -11,45 +7,41 @@ import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/
 import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
 import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest.ts';
 
-class Config {
-  @InjectableFactory({ primary: true })
-  static getDialect(ctx: AsyncContext, config: SQLModelConfig) {
-    return new MySQLDialect(ctx, config);
-  }
-}
+import { MysqlModelConfig } from '../src/config.ts';
+import { MysqlModelService } from '../src/service.ts';
 
 @WithSuiteContext()
 @Suite()
-class MysqlQuerySuite extends ModelQuerySuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
+class MySQLQuerySuite extends ModelQuerySuite {
+  serviceClass = MysqlModelService;
+  configClass = MysqlModelConfig;
   supportsGeo = false;
 }
 
 @WithSuiteContext()
 @Suite()
-class MysqlQueryCrudSuite extends ModelQueryCrudSuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
+class MySQLQueryCrudSuite extends ModelQueryCrudSuite {
+  serviceClass = MysqlModelService;
+  configClass = MysqlModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-class MysqlQueryFacetSuite extends ModelQueryFacetSuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
+class MySQLQueryFacetSuite extends ModelQueryFacetSuite {
+  serviceClass = MysqlModelService;
+  configClass = MysqlModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
 class MySQLQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
+  serviceClass = MysqlModelService;
+  configClass = MysqlModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
 class MySQLQuerySuggestSuite extends ModelQuerySuggestSuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
+  serviceClass = MysqlModelService;
+  configClass = MysqlModelConfig;
 }

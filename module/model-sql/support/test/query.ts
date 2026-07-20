@@ -1,13 +1,11 @@
 import assert from 'node:assert';
 
-import { castTo } from '@travetto/runtime';
-import { Schema, type SchemaFieldConfig } from '@travetto/schema';
+import { Schema } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
-import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
-
-import type { SQLModelService } from '../../src/service.ts';
-import type { VisitStack } from '../../src/types.ts';
+import type { SQLDialect } from '../../src/dialect.ts';
+import { SQLQueryCompiler } from '../../src/query.ts';
+import { SQLModelUtil } from '../../src/util.ts';
 
 @Schema()
 class User {
@@ -16,91 +14,95 @@ class User {
 }
 
 @Schema()
-class WhereTypeAB {
-  c: number;
-}
-
-@Schema()
-class WhereTypeA {
-  d: number;
-  b: WhereTypeAB;
-}
-
-@Schema()
-class WhereTypeD {
-  e: boolean;
-}
-
-@Schema()
-class WhereTypeG {
-  z: string[];
+class Nested {
+  value: string;
 }
 
 @Schema()
 class WhereType {
-  a: WhereTypeA[];
-  d: WhereTypeD;
-  g: WhereTypeG;
-  name: number;
+  id: string;
+  name: string;
   age: number;
+  nestedList: Nested[];
+  nestedObj: Nested;
 }
 
+const mockDialect: SQLDialect = {
+  config: { namespace: '' },
+  escapeIdentifier(name: string) {
+    return `"${name}"`;
+  },
+  escapeLiteral(value: string) {
+    return `'${value}'`;
+  },
+  getColumnType() {
+    return 'TEXT';
+  },
+  compileIndexPath(tableName, simpleFields, path) {
+    // Basic mock path resolution
+    const first = path[0];
+    const rest = path.slice(1);
+    if (rest.length === 0) {
+      return `"${first}"`;
+    }
+    return `"${first}"->'${rest.join("->'")}'`;
+  },
+  getCreateIndexSQL() {
+    return '';
+  },
+  getPlaceholder(index) {
+    return `$$${index}`;
+  },
+  compileArrayContains(sqlPath, ident) {
+    return `${sqlPath} CONTAINING ${ident}`;
+  },
+  getRegexOperator(caseInsensitive) {
+    return caseInsensitive ? '~*' : '~';
+  },
+  formatRegex(source) {
+    return source;
+  },
+  castColumn(sqlPath, type) {
+    if (type === Number) {
+      return `CAST(${sqlPath} AS NUMERIC)`;
+    }
+    return sqlPath;
+  },
+  getUpsertSQL() {
+    return '';
+  },
+  async upsertTable() {},
+  async dropTable() {},
+  async truncateTable() {}
+};
+
 @Suite()
-export abstract class BaseSQLTest extends BaseModelSuite<SQLModelService> {
-  get dialect() {
-    return this.service.then(s => s.client);
+export class SQLQueryCompilerTest {
+  @Test()
+  async testCompileSimple() {
+    const context = SQLModelUtil.getContext(mockDialect, User);
+    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(mockDialect, context, { name: 'john' });
+    assert(whereSQL === '"name" = $$1');
+    assert.deepStrictEqual(parameters, ['john']);
   }
 
   @Test()
-  async validateQuery() {
-    const qry = {
-      $and: [
-        { a: { b: { c: 5 } } },
-        { d: { e: true } },
-        {
-          $or: [{ name: 5 }, { age: 10 }]
-        },
-        { g: { z: { $in: ['a', 'b', 'c'] } } },
-        { a: { d: { $gt: 20 } } }
-      ]
-    };
-
-    const dct = await this.dialect;
-    dct.resolveName = (stack: VisitStack[]) => {
-      const field: SchemaFieldConfig = castTo(stack.at(-1));
-      const parent: SchemaFieldConfig = castTo(stack.at(-2));
-      return `${field.class ? field.class.name.toString() : parent.name.toString()}.${field.name.toString()}`;
-    };
-
-    const qryStr = dct.getWhereGroupingSQL(WhereType, qry);
-    assert(
-      qryStr ===
-        "(WhereTypeAB.c = 5 AND WhereTypeD.e = TRUE AND (WhereType.name = 5 OR WhereType.age = 10) AND z.z IN ('a','b','c') AND WhereTypeA.d > 20)"
-    );
+  async testCompileOperators() {
+    const context = SQLModelUtil.getContext(mockDialect, WhereType);
+    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(mockDialect, context, {
+      age: { $gt: 18, $lte: 100 }
+    });
+    assert(whereSQL === '("age" > $$1 AND "age" <= $$2)');
+    assert.deepStrictEqual(parameters, [18, 100]);
   }
 
   @Test()
-  async testRegEx() {
-    const dct = await this.dialect;
-    dct.resolveName = (stack: VisitStack[]) => {
-      const field: SchemaFieldConfig = castTo(stack.at(-1));
-      return `${field.class?.name}.${field.name.toString()}`;
-    };
-
-    const out = dct.getWhereGroupingSQL(User, {
-      name: {
-        $regex: /google.$/
-      }
+  async testCompileNested() {
+    const context = SQLModelUtil.getContext(mockDialect, WhereType);
+    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(mockDialect, context, {
+      nestedObj: { value: 'test' }
     });
-
-    assert(out === `User.name ${dct.SQL_OPS.$regex} 'google.$'`);
-
-    const outBoundary = dct.getWhereGroupingSQL(User, {
-      name: {
-        $regex: /\bgoogle\b/
-      }
-    });
-
-    assert(outBoundary === `User.name ${dct.SQL_OPS.$regex} '${dct.regexWordBoundary}google${dct.regexWordBoundary}'`);
+    assert(whereSQL === '"nestedObj"->\'value\' = $$1');
+    assert.deepStrictEqual(parameters, ['test']);
   }
 }

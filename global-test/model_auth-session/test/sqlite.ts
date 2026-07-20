@@ -1,26 +1,20 @@
 import { SessionModelSymbol } from '@travetto/auth-session';
-import type { AsyncContext } from '@travetto/context';
 import { InjectableFactory } from '@travetto/di';
 import type { ModelExpirySupport } from '@travetto/model';
-import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
-import { SqliteDialect } from '@travetto/model-sqlite';
+import { SqliteModelConfig, SqliteModelService } from '@travetto/model-sqlite';
 import { Suite } from '@travetto/test';
 
 import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
 
 class Config {
-  @InjectableFactory({ primary: true })
-  static getSqlService(ctx: AsyncContext, config: SQLModelConfig) {
-    return new SqliteDialect(ctx, config);
-  }
   @InjectableFactory(SessionModelSymbol)
-  static modelProvider(svc: SQLModelService): ModelExpirySupport {
+  static modelProvider(svc: SqliteModelService): ModelExpirySupport {
     return svc;
   }
 }
 
 @Suite()
-class SqliteAuthSessionServerSuite extends AuthSessionServerSuite<SQLModelService> {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
+class SqliteAuthSessionServerSuite extends AuthSessionServerSuite<SqliteModelService> {
+  serviceClass = SqliteModelService;
+  configClass = SqliteModelConfig;
 }

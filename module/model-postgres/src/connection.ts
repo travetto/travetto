@@ -1,79 +1,97 @@
 import { type Pool, type PoolClient, default as pg } from 'pg';
 
-import { type AsyncContext, WithAsyncContext } from '@travetto/context';
+import { type AsyncContext } from '@travetto/context';
+import { Injectable } from '@travetto/di';
 import { ExistsError } from '@travetto/model';
-import { Connection, type SQLModelConfig } from '@travetto/model-sql';
+import { SQLConnection } from '@travetto/model-sql';
 import { castTo, ShutdownManager } from '@travetto/runtime';
 
-/**
- * Connection support for postgresql
- */
-export class PostgreSQLConnection extends Connection<PoolClient> {
-  #pool: Pool;
-  #config: SQLModelConfig;
+import { PostgresModelConfig } from './config.ts';
 
-  constructor(context: AsyncContext, config: SQLModelConfig) {
+/**
+ * PostgreSQL connection manager
+ */
+@Injectable()
+export class PostgresConnection extends SQLConnection<PoolClient> {
+  pool: Pool;
+  readonly config: PostgresModelConfig;
+
+  constructor(context: AsyncContext, config: PostgresModelConfig) {
     super(context);
-    this.#config = config;
+    this.config = config;
   }
 
   /**
-   * Initializes connection and establishes crypto extension for use with hashing
+   * Initializes the pool and creates the pgcrypto extension
    */
-  @WithAsyncContext()
   async init(): Promise<void> {
-    this.#pool = new pg.Pool({
-      user: this.#config.user,
-      password: this.#config.password,
-      database: this.#config.database,
-      host: this.#config.host,
-      port: this.#config.port,
+    this.pool = new pg.Pool({
+      user: this.config.user,
+      password: this.config.password,
+      database: this.config.database,
+      host: this.config.host,
+      port: this.config.port,
       ...castTo({
         parseInputDatesAsUTC: true
       }),
-      ...(this.#config.options || {})
+      ...(this.config.options || {})
     });
 
-    await this.runWithActive(() =>
-      this.runWithTransaction('required', () =>
-        this.execute(this.active!, 'CREATE EXTENSION IF NOT EXISTS pgcrypto;').catch(error => {
-          if (!(error instanceof Error && error.message.includes('already exists'))) {
-            throw error;
-          }
-        })
-      )
-    );
+    try {
+      await this.execute('CREATE EXTENSION IF NOT EXISTS pgcrypto;');
+    } catch (error) {
+      if (!(error instanceof Error && error.message.includes('already exists'))) {
+        throw error;
+      }
+    }
 
-    // Close postgres
-    ShutdownManager.signal.addEventListener('abort', () => this.#pool.end());
+    ShutdownManager.signal.addEventListener('abort', () => this.pool.end());
   }
 
-  async execute<T = unknown>(pool: PoolClient, query: string, values?: unknown[]): Promise<{ count: number; records: T[] }> {
-    console.debug('Executing query', { query });
+  /**
+   * Acquires a client from the pool
+   */
+  acquire(): Promise<PoolClient> {
+    return this.pool.connect();
+  }
+
+  /**
+   * Releases a client back to the pool
+   */
+  release(connection: PoolClient): void {
+    connection.release();
+  }
+
+  /**
+   * Executes a query on the active client or pool directly
+   */
+  async execute<Type = unknown>(query: string, values?: unknown[]): Promise<{ count: number; records: Type[] }> {
+    console.debug('Executing PostgreSQL query', { query, values });
+
+    // Handle dynamically built savepoint names that cannot be parameterized in Postgres
+    if (query.includes('SAVEPOINT') || query.includes('ROLLBACK TO') || query.includes('RELEASE SAVEPOINT')) {
+      if (values && values.length > 0) {
+        query = query.replace('$1', `"${values[0]}"`);
+        values = [];
+      }
+    }
+
+    const client = this.active ?? this.pool;
+
     try {
-      const out = await pool.query(query, values);
-      const records: T[] = [...out.rows].map(value => ({ ...value }));
-      return { count: out.rowCount!, records };
+      const result = await client.query(query, values);
+      const records: Type[] = [...result.rows].map(row => ({ ...row }));
+      return { count: result.rowCount ?? 0, records };
     } catch (error) {
-      const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
+      const code = error && typeof error === 'object' && 'code' in error ? castTo<Record<string, unknown>>(error).code : undefined;
       switch (code) {
-        // Index already exists
         case '42P07':
           throw new ExistsError('index', query);
-        // Unique violation
         case '23505':
           throw new ExistsError('query', query);
         default:
           throw error;
       }
     }
-  }
-
-  acquire(): Promise<PoolClient> {
-    return this.#pool.connect();
-  }
-
-  release(pool: PoolClient): void {
-    pool.release();
   }
 }

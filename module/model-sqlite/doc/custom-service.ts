@@ -1,11 +1,9 @@
-import type { AsyncContext } from '@travetto/context';
 import { InjectableFactory } from '@travetto/di';
-import { type SQLModelConfig, SQLModelService } from '@travetto/model-sql';
-import { SqliteDialect } from '@travetto/model-sqlite';
+import { SqliteConnection, SqliteModelService } from '@travetto/model-sqlite';
 
 export class Init {
   @InjectableFactory({ primary: true })
-  static getModelService(ctx: AsyncContext, config: SQLModelConfig) {
-    return new SQLModelService(ctx, config, new SqliteDialect(ctx, config));
+  static getModelService(connection: SqliteConnection) {
+    return new SqliteModelService(connection);
   }
 }
