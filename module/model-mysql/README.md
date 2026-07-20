@@ -13,79 +13,32 @@ npm install @travetto/model-mysql
 yarn add @travetto/model-mysql
 ```
 
-This module provides a [MySQL](https://www.mysql.com/)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module. This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [SQL](https://en.wikipedia.org/wiki/SQL) databases. In development mode, the [SQLModelService](https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L69) will also modify the database schema in real time to minimize impact to development. 
+This module provides a [MySQL](https://www.mysql.com/)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module. This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [SQL](https://en.wikipedia.org/wiki/SQL) databases. In development mode, the [MysqlModelService](https://github.com/travetto/travetto/tree/main/module/model-mysql/src/service.ts#L14) will also modify the database schema in real time to minimize impact to development. 
 
-The schema generated will not generally map to existing tables as it is attempting to produce a document store like experience on top of a [SQL](https://en.wikipedia.org/wiki/SQL) database. Every table generated will have a `path_id` which determines it's location in the document hierarchy as well as sub tables will have a `parent_path_id` to associate records with the parent values. 
+The schema generated will not generally map to existing tables as it is attempting to produce a document store like experience on top of a [SQL](https://en.wikipedia.org/wiki/SQL) database. Every table generated maps to a model, with simple fields mapped as individual columns and complex fields/arrays mapped as native `JSON` columns. 
 
 Supported features:
-   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L60)
-   *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10)
-   *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L21)
-   *  [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/crud.ts#L11)
-   *  [Facet](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/facet.ts#L14)
-   *  [Suggest](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/suggest.ts#L12)
-   *  [Query](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/query.ts#L10)
 
 Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module.
 
 **Code: Wiring up a custom Model Source**
 ```typescript
-import type { AsyncContext } from '@travetto/context';
 import { InjectableFactory } from '@travetto/di';
-import { MySQLDialect } from '@travetto/model-mysql';
-import { type SQLModelConfig, SQLModelService } from '@travetto/model-sql';
+import { type MysqlConnection, MysqlModelService } from '@travetto/model-mysql';
 
 export class Init {
   @InjectableFactory({ primary: true })
-  static getModelService(ctx: AsyncContext, config: SQLModelConfig) {
-    return new SQLModelService(ctx, config, new MySQLDialect(ctx, config));
+  static getModelService(connection: MysqlConnection) {
+    return new MysqlModelService(connection);
   }
 }
 ```
 
-where the [SQLModelConfig](https://github.com/travetto/travetto/tree/main/module/model-sql/src/config.ts#L8) is defined by:
+where the [MysqlModelConfig](https://github.com/travetto/travetto/tree/main/module/model-mysql/src/config.ts#L8) is defined by:
 
-**Code: Structure of SQLModelConfig**
+**Code: Structure of MysqlModelConfig**
 ```typescript
-@Config('model.sql')
-export class SQLModelConfig<T extends {} = {}> {
-  /**
-   * Host to connect to
-   */
-  host = '127.0.0.1';
-  /**
-   * Default port
-   */
-  port = 0;
-  /**
-   * Username
-   */
-  user = Runtime.production ? '' : 'travetto';
-  /**
-   * Password
-   */
-  password = Runtime.production ? '' : 'travetto';
-  /**
-   * Table prefix
-   */
-  namespace = '';
-  /**
-   * Database name
-   */
-  database = 'app';
-  /**
-   * Allow storage modification at runtime
-   */
-  modifyStorage?: boolean;
-  /**
-   * Db version
-   */
-  version = '';
-  /**
-   * Raw client options
-   */
-  options: T = asFull({});
-}
+
 ```
 
 Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) annotation, and so these values can be overridden using the standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support") resolution paths.

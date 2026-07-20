@@ -316,28 +316,31 @@ The module provides the ability to generate an export of the model structure fro
 ```bash
 $ trv model:export --help
 
-Usage: model:export [options] <provider:string> <models...:string>
+TypeError: Cannot redefine property: toJSON
+    at Object.defineProperty (<anonymous>)
+    at file://<workspace-root>/module/runtime/src/json.ts:17:8
+    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)
+    at async node:internal/modules/esm/loader:650:26
+    at async $Runtime.importFrom (<workspace-root>/module/runtime/src/context.ts:136:22)
+    at async $Registry.#init (<workspace-root>/module/registry/src/registry.ts:88:9)
+    at async ModelExportCommand.help (./support/base-command.ts:38:5)
+    at async HelpUtil.getExtendedHelpMessage (<workspace-root>/module/cli/src/help.ts:121:30)
+    at async HelpUtil.renderCommandHelp (<workspace-root>/module/cli/src/help.ts:170:11)
+    at async ExecutionManager.getExecutionCommand (<workspace-root>/module/cli/src/execute.ts:49:22)
+    at async ExecutionManager.run (<workspace-root>/module/cli/src/execute.ts:67:23)
 
-Description:
-  Export model definitions for a selected provider and model set.
-
-  The command resolves candidate models and delegates to provider-specific
-  export logic to produce schema/install artifacts.
-
-Options:
-  -p, --profile <string>  Application profiles
-  -m, --module <module>   Module to run for
-  --help                  display help for command
-
-Providers
---------------------
-  * SQL
-
-Models
---------------------
-  * samplemodel
-
-Examples:
+TypeError: Cannot redefine property: toJSON
+    at Object.defineProperty (<anonymous>)
+    at file://<workspace-root>/module/runtime/src/json.ts:17:8
+    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)
+    at async node:internal/modules/esm/loader:650:26
+    at async $Runtime.importFrom (<workspace-root>/module/runtime/src/context.ts:136:22)
+    at async $Registry.#init (<workspace-root>/module/registry/src/registry.ts:88:9)
+    at async ModelExportCommand.help (./support/base-command.ts:38:5)
+    at async HelpUtil.getExtendedHelpMessage (<workspace-root>/module/cli/src/help.ts:121:30)
+    at async HelpUtil.renderCommandHelp (<workspace-root>/module/cli/src/help.ts:170:11)
+    at async ExecutionManager.getExecutionCommand (<workspace-root>/module/cli/src/execute.ts:49:22)
+    at async ExecutionManager.run (<workspace-root>/module/cli/src/execute.ts:67:23)
 ```
 
 ## CLI - model:install
@@ -347,26 +350,29 @@ The module provides the ability to install all the various [@Model](https://gith
 ```bash
 $ trv model:install --help
 
-Usage: model:install [options] <provider:string> <models...:string>
+TypeError: Cannot redefine property: toJSON
+    at Object.defineProperty (<anonymous>)
+    at file://<workspace-root>/module/runtime/src/json.ts:17:8
+    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)
+    at async node:internal/modules/esm/loader:650:26
+    at async $Runtime.importFrom (<workspace-root>/module/runtime/src/context.ts:136:22)
+    at async $Registry.#init (<workspace-root>/module/registry/src/registry.ts:88:9)
+    at async ModelInstallCommand.help (./support/base-command.ts:38:5)
+    at async HelpUtil.getExtendedHelpMessage (<workspace-root>/module/cli/src/help.ts:121:30)
+    at async HelpUtil.renderCommandHelp (<workspace-root>/module/cli/src/help.ts:170:11)
+    at async ExecutionManager.getExecutionCommand (<workspace-root>/module/cli/src/execute.ts:49:22)
+    at async ExecutionManager.run (<workspace-root>/module/cli/src/execute.ts:67:23)
 
-Description:
-  Install or update model definitions for a selected provider.
-
-  The command resolves candidate models and applies provider install/upsert
-  operations so backing stores are prepared for runtime usage.
-
-Options:
-  -p, --profile <string>  Application profiles
-  -m, --module <module>   Module to run for
-  --help                  display help for command
-
-Providers
---------------------
-  * SQL
-
-Models
---------------------
-  * samplemodel
-
-Examples:
+TypeError: Cannot redefine property: toJSON
+    at Object.defineProperty (<anonymous>)
+    at file://<workspace-root>/module/runtime/src/json.ts:17:8
+    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)
+    at async node:internal/modules/esm/loader:650:26
+    at async $Runtime.importFrom (<workspace-root>/module/runtime/src/context.ts:136:22)
+    at async $Registry.#init (<workspace-root>/module/registry/src/registry.ts:88:9)
+    at async ModelInstallCommand.help (./support/base-command.ts:38:5)
+    at async HelpUtil.getExtendedHelpMessage (<workspace-root>/module/cli/src/help.ts:121:30)
+    at async HelpUtil.renderCommandHelp (<workspace-root>/module/cli/src/help.ts:170:11)
+    at async ExecutionManager.getExecutionCommand (<workspace-root>/module/cli/src/execute.ts:49:22)
+    at async ExecutionManager.run (<workspace-root>/module/cli/src/execute.ts:67:23)
 ```

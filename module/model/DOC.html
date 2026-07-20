@@ -424,28 +424,31 @@ The module provides the ability to generate an export of the model structure fro
 </figcaption>
     <pre><code class="language-bash">$ trv model:export <span class="token parameter variable">--help</span>
 
-Usage: model:export <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>provider:string<span class="token operator">></span> <span class="token operator">&lt;</span>models<span class="token punctuation">..</span>.:string<span class="token operator">></span>
+TypeError: Cannot redefine property: toJSON
+    at Object.defineProperty <span class="token punctuation">(</span><span class="token operator">&lt;</span>anonymous<span class="token operator">></span><span class="token punctuation">)</span>
+    at file://<span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/runtime/src/json.ts:17:8
+    at ModuleJob.run <span class="token punctuation">(</span>node:internal/modules/esm/module_job:569:25<span class="token punctuation">)</span>
+    at async node:internal/modules/esm/loader:650:26
+    at async <span class="token variable">$Runtime</span>.importFrom <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/runtime/src/context.ts:136:22<span class="token punctuation">)</span>
+    at async <span class="token variable">$Registry</span><span class="token builtin class-name">.</span><span class="token comment">#init (&lt;workspace-root>/module/registry/src/registry.ts:88:9)</span>
+    at async ModelExportCommand.help <span class="token punctuation">(</span>./support/base-command.ts:38:5<span class="token punctuation">)</span>
+    at async HelpUtil.getExtendedHelpMessage <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/help.ts:121:30<span class="token punctuation">)</span>
+    at async HelpUtil.renderCommandHelp <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/help.ts:170:11<span class="token punctuation">)</span>
+    at async ExecutionManager.getExecutionCommand <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:49:22<span class="token punctuation">)</span>
+    at async ExecutionManager.run <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:67:23<span class="token punctuation">)</span>
 
-Description:
-  Export model definitions <span class="token keyword">for</span> a selected provider and model set.
-
-  The <span class="token builtin class-name">command</span> resolves candidate models and delegates to provider-specific
-  <span class="token builtin class-name">export</span> logic to produce schema/install artifacts.
-
-Options:
-  -p, <span class="token parameter variable">--profile</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Application profiles
-  -m, <span class="token parameter variable">--module</span> <span class="token operator">&lt;</span>module<span class="token operator">></span>   Module to run <span class="token keyword">for</span>
-  <span class="token parameter variable">--help</span>                  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
-
-Providers
---------------------
-  * SQL
-
-Models
---------------------
-  * samplemodel
-
-Examples:</code></pre>
+TypeError: Cannot redefine property: toJSON
+    at Object.defineProperty <span class="token punctuation">(</span><span class="token operator">&lt;</span>anonymous<span class="token operator">></span><span class="token punctuation">)</span>
+    at file://<span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/runtime/src/json.ts:17:8
+    at ModuleJob.run <span class="token punctuation">(</span>node:internal/modules/esm/module_job:569:25<span class="token punctuation">)</span>
+    at async node:internal/modules/esm/loader:650:26
+    at async <span class="token variable">$Runtime</span>.importFrom <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/runtime/src/context.ts:136:22<span class="token punctuation">)</span>
+    at async <span class="token variable">$Registry</span><span class="token builtin class-name">.</span><span class="token comment">#init (&lt;workspace-root>/module/registry/src/registry.ts:88:9)</span>
+    at async ModelExportCommand.help <span class="token punctuation">(</span>./support/base-command.ts:38:5<span class="token punctuation">)</span>
+    at async HelpUtil.getExtendedHelpMessage <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/help.ts:121:30<span class="token punctuation">)</span>
+    at async HelpUtil.renderCommandHelp <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/help.ts:170:11<span class="token punctuation">)</span>
+    at async ExecutionManager.getExecutionCommand <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:49:22<span class="token punctuation">)</span>
+    at async ExecutionManager.run <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:67:23<span class="token punctuation">)</span></code></pre>
   </figure>
 
 <h2 id="cli-model-install">CLI - model:install</h2>
@@ -458,26 +461,29 @@ The module provides the ability to install all the various <a target="_blank" cl
 </figcaption>
     <pre><code class="language-bash">$ trv model:install <span class="token parameter variable">--help</span>
 
-Usage: model:install <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>provider:string<span class="token operator">></span> <span class="token operator">&lt;</span>models<span class="token punctuation">..</span>.:string<span class="token operator">></span>
+TypeError: Cannot redefine property: toJSON
+    at Object.defineProperty <span class="token punctuation">(</span><span class="token operator">&lt;</span>anonymous<span class="token operator">></span><span class="token punctuation">)</span>
+    at file://<span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/runtime/src/json.ts:17:8
+    at ModuleJob.run <span class="token punctuation">(</span>node:internal/modules/esm/module_job:569:25<span class="token punctuation">)</span>
+    at async node:internal/modules/esm/loader:650:26
+    at async <span class="token variable">$Runtime</span>.importFrom <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/runtime/src/context.ts:136:22<span class="token punctuation">)</span>
+    at async <span class="token variable">$Registry</span><span class="token builtin class-name">.</span><span class="token comment">#init (&lt;workspace-root>/module/registry/src/registry.ts:88:9)</span>
+    at async ModelInstallCommand.help <span class="token punctuation">(</span>./support/base-command.ts:38:5<span class="token punctuation">)</span>
+    at async HelpUtil.getExtendedHelpMessage <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/help.ts:121:30<span class="token punctuation">)</span>
+    at async HelpUtil.renderCommandHelp <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/help.ts:170:11<span class="token punctuation">)</span>
+    at async ExecutionManager.getExecutionCommand <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:49:22<span class="token punctuation">)</span>
+    at async ExecutionManager.run <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:67:23<span class="token punctuation">)</span>
 
-Description:
-  Install or update model definitions <span class="token keyword">for</span> a selected provider.
-
-  The <span class="token builtin class-name">command</span> resolves candidate models and applies provider install/upsert
-  operations so backing stores are prepared <span class="token keyword">for</span> runtime usage.
-
-Options:
-  -p, <span class="token parameter variable">--profile</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Application profiles
-  -m, <span class="token parameter variable">--module</span> <span class="token operator">&lt;</span>module<span class="token operator">></span>   Module to run <span class="token keyword">for</span>
-  <span class="token parameter variable">--help</span>                  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
-
-Providers
---------------------
-  * SQL
-
-Models
---------------------
-  * samplemodel
-
-Examples:</code></pre>
+TypeError: Cannot redefine property: toJSON
+    at Object.defineProperty <span class="token punctuation">(</span><span class="token operator">&lt;</span>anonymous<span class="token operator">></span><span class="token punctuation">)</span>
+    at file://<span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/runtime/src/json.ts:17:8
+    at ModuleJob.run <span class="token punctuation">(</span>node:internal/modules/esm/module_job:569:25<span class="token punctuation">)</span>
+    at async node:internal/modules/esm/loader:650:26
+    at async <span class="token variable">$Runtime</span>.importFrom <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/runtime/src/context.ts:136:22<span class="token punctuation">)</span>
+    at async <span class="token variable">$Registry</span><span class="token builtin class-name">.</span><span class="token comment">#init (&lt;workspace-root>/module/registry/src/registry.ts:88:9)</span>
+    at async ModelInstallCommand.help <span class="token punctuation">(</span>./support/base-command.ts:38:5<span class="token punctuation">)</span>
+    at async HelpUtil.getExtendedHelpMessage <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/help.ts:121:30<span class="token punctuation">)</span>
+    at async HelpUtil.renderCommandHelp <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/help.ts:170:11<span class="token punctuation">)</span>
+    at async ExecutionManager.getExecutionCommand <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:49:22<span class="token punctuation">)</span>
+    at async ExecutionManager.run <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:67:23<span class="token punctuation">)</span></code></pre>
   </figure>
