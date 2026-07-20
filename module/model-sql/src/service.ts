@@ -58,7 +58,8 @@ import { WorkPool } from '@travetto/worker';
 import type { SQLModelConfig } from './config.ts';
 import type { SQLConnection } from './connection.ts';
 import type { SQLDialect } from './dialect.ts';
-import { SQLQueryCompiler, type TableContext } from './query.ts';
+import { SQLQueryCompiler } from './query.ts';
+import type { TableContext } from './types.ts';
 import { SQLModelUtil } from './util.ts';
 
 /**

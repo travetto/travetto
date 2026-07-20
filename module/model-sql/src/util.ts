@@ -3,14 +3,7 @@ import { type Class, castTo, RuntimeError } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { SQLDialect } from './dialect.ts';
-import type { TableContext } from './query.ts';
-
-export interface SchemaContext<T> {
-  cls: Class<T>;
-  simpleFields: Map<string, SchemaFieldConfig>;
-  complexFields: Map<string, SchemaFieldConfig>;
-  allFields: SchemaFieldConfig[];
-}
+import type { SchemaContext, TableContext } from './types.ts';
 
 export class SQLModelUtil {
   static SCHEMA_CACHE = new Map<Class, SchemaContext<unknown>>();

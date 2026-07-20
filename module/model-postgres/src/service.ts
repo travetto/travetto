@@ -16,6 +16,7 @@ export class PostgresModelService extends BaseSQLModelService {
   connection: PostgresConnection;
   suggestLikeOperator = 'ILIKE';
   returningSupport = true;
+  complexColumnType = 'JSONB';
 
   constructor(connection: PostgresConnection) {
     super();
@@ -128,8 +129,6 @@ export class PostgresModelService extends BaseSQLModelService {
   shiftPlaceholders(sql: string, offset: number): string {
     return sql.replaceAll(/[$](\d+)/g, (_, num) => `$${Number(num) + offset}`);
   }
-
-  complexColumnType = 'JSONB';
 
   async getTableExists(tableName: string): Promise<boolean> {
     const tableCheck = await this.connection.execute<{ exists: boolean }>(

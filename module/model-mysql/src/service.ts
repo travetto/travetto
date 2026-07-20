@@ -14,6 +14,7 @@ import type { MysqlConnection } from './connection.ts';
 export class MysqlModelService extends BaseSQLModelService {
   connection: MysqlConnection;
   returningSupport = false;
+  complexColumnType = 'JSON';
 
   constructor(connection: MysqlConnection) {
     super();
@@ -112,8 +113,6 @@ export class MysqlModelService extends BaseSQLModelService {
     const mysqlUpdates = updates.map(val => val.replace(/EXCLUDED\.(.*)/g, 'VALUES($1)'));
     return `INSERT INTO ${this.escapeIdentifier(tableName)} (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) ON DUPLICATE KEY UPDATE ${mysqlUpdates.join(', ')};`;
   }
-
-  complexColumnType = 'JSON';
 
   async getTableExists(tableName: string): Promise<boolean> {
     const tableCheck = await this.connection.execute<{ total: number }>(

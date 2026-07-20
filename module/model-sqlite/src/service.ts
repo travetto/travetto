@@ -15,6 +15,7 @@ import type { SqliteConnection } from './connection.ts';
 export class SqliteModelService extends BaseSQLModelService {
   connection: SqliteConnection;
   returningSupport = true;
+  complexColumnType = 'TEXT';
 
   constructor(connection: SqliteConnection) {
     super();
@@ -63,9 +64,9 @@ export class SqliteModelService extends BaseSQLModelService {
   }
 
   compileArrayContains(sqlPath: string, ident: string, isObject: boolean, type?: Class): string {
-    return isObject ?
-      `json_contains(${sqlPath}, ${ident})` :
-      `EXISTS (SELECT 1 FROM json_each(${sqlPath}) WHERE json_each.value = ${ident})`;
+    return isObject
+      ? `json_contains(${sqlPath}, ${ident})`
+      : `EXISTS (SELECT 1 FROM json_each(${sqlPath}) WHERE json_each.value = ${ident})`;
   }
 
   getRegexOperator(caseInsensitive: boolean): string {
@@ -82,8 +83,6 @@ export class SqliteModelService extends BaseSQLModelService {
     }
     return sqlPath;
   }
-
-  complexColumnType = 'TEXT';
 
   async getTableExists(tableName: string): Promise<boolean> {
     const tableCheck = await this.connection.execute<{ name: string }>(`SELECT name FROM sqlite_master WHERE type='table' AND name=?;`, [

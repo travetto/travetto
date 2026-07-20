@@ -1,9 +1,10 @@
 import type { ModelType } from '@travetto/model';
 import { ModelQueryUtil, type SortClause, type WhereClause } from '@travetto/model-query';
-import { type Class, castTo, JSONUtil, RuntimeError } from '@travetto/runtime';
+import { castTo, JSONUtil, RuntimeError } from '@travetto/runtime';
 import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { SQLDialect } from './dialect.ts';
+import type { CompilationResult, TableContext } from './types.ts';
 
 interface QueryClause {
   sql?: string;
@@ -11,22 +12,6 @@ interface QueryClause {
 }
 
 type IdentPath = string;
-
-export interface TableContext<T extends ModelType> {
-  cls: Class<T>;
-  tableName: string;
-  simpleFields: Map<string, SchemaFieldConfig>;
-  complexFields: Map<string, SchemaFieldConfig>;
-  allFields: SchemaFieldConfig[];
-}
-
-/**
- * Result of query compilation
- */
-export interface CompilationResult {
-  whereSQL?: string;
-  parameters?: unknown[];
-}
 
 const combineResults = (results: QueryClause[], op: string): QueryClause => {
   const filtered = results.filter(x => !!x.sql);
