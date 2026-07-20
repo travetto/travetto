@@ -97,7 +97,11 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
    * Executes a query on the active client or pool directly
    */
   async execute<Type = unknown>(query: string, values?: unknown[]): Promise<{ count: number; records: Type[] }> {
-    const isSelect = query.trim().startsWith('SELECT') || query.trim().startsWith('PRAGMA') || query.trim().startsWith('EXISTS') || query.includes('RETURNING');
+    const isSelect =
+      query.trim().startsWith('SELECT') ||
+      query.trim().startsWith('PRAGMA') ||
+      query.trim().startsWith('EXISTS') ||
+      query.includes('RETURNING');
 
     const normalized = (values ?? []).map(val => {
       if (val === undefined || val === null) {
