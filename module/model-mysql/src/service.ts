@@ -4,8 +4,8 @@ import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type BulkOperation,
   type BulkResponse,
+  type IndexConfig,
   type ModelBulkSupport,
-  ModelBulkUtil,
   type ModelCrudSupport,
   ModelCrudUtil,
   ModelExpiryUtil,
@@ -13,7 +13,6 @@ import {
   ModelRegistryIndex,
   type ModelStorageSupport,
   type ModelType,
-  NotFoundError,
   type OptionalId
 } from '@travetto/model';
 import {
@@ -22,7 +21,6 @@ import {
   isModelIndexedIndex,
   type KeyedIndexBody,
   type KeyedIndexSelection,
-  ModelIndexedComputedIndex,
   type ModelIndexedSearchOptions,
   type ModelIndexedSupport,
   type ModelPageOptions,
@@ -165,7 +163,7 @@ export class MysqlModelService
     }
   }
 
-  getCreateIndexSQL(modelClass: Class, indexConfig: any, tableName: string, simpleFields: Map<string, SchemaFieldConfig>): string {
+  getCreateIndexSQL(modelClass: Class, indexConfig: IndexConfig, tableName: string, simpleFields: Map<string, SchemaFieldConfig>): string {
     const indexName = ['idx', tableName, indexConfig.name.toLowerCase().replaceAll('-', '_')].join('_');
 
     if (isModelQueryIndex(indexConfig)) {
@@ -302,7 +300,7 @@ export class MysqlModelService
       const existingIndexes = new Set(indexQuery.records.map(record => record.name));
 
       const requestedIndexes = ModelRegistryIndex.getIndices(modelClass) || [];
-      const requestedIndexesMap = new Map<string, any>();
+      const requestedIndexesMap = new Map<string, IndexConfig>();
 
       for (const index of requestedIndexes) {
         const indexName = ['idx', context.tableName, index.name.toLowerCase().replaceAll('-', '_')].join('_');
@@ -362,45 +360,41 @@ export class MysqlModelService
 
   // Crud Support
   get<T extends ModelType>(modelClass: Class<T>, id: string): Promise<T> {
-    return this.connection.runWithConnection(() => SQLModelCrudUtil.get(this.connection, this, modelClass, id));
+    return SQLModelCrudUtil.get(this.connection, this, modelClass, id);
   }
 
   create<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>): Promise<T> {
-    return this.connection.runWithTransaction('required', () => SQLModelCrudUtil.create(this.connection, this, modelClass, item, this));
+    return SQLModelCrudUtil.create(this.connection, this, modelClass, item, this);
   }
 
   update<T extends ModelType>(modelClass: Class<T>, item: T): Promise<T> {
-    return this.connection.runWithTransaction('required', () => SQLModelCrudUtil.update(this.connection, this, modelClass, item, this));
+    return SQLModelCrudUtil.update(this.connection, this, modelClass, item, this);
   }
 
   upsert<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>): Promise<T> {
-    return this.connection.runWithTransaction('required', () => SQLModelCrudUtil.upsert(this.connection, this, modelClass, item, this));
+    return SQLModelCrudUtil.upsert(this.connection, this, modelClass, item, this);
   }
 
   updatePartial<T extends ModelType>(modelClass: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
-    return this.connection.runWithTransaction('required', () =>
-      SQLModelCrudUtil.updatePartial(this.connection, this, modelClass, item, view)
-    );
+    return SQLModelCrudUtil.updatePartial(this.connection, this, modelClass, item, view);
   }
 
   delete<T extends ModelType>(modelClass: Class<T>, id: string): Promise<void> {
-    return this.connection.runWithTransaction('required', () => SQLModelCrudUtil.delete(this.connection, this, modelClass, id));
+    return SQLModelCrudUtil.delete(this.connection, this, modelClass, id);
   }
 
   list<T extends ModelType>(modelClass: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
-    return this.connection.iterateWithConnection(() => SQLModelCrudUtil.list(this.connection, this, modelClass, options));
+    return SQLModelCrudUtil.list(this.connection, this, modelClass, options);
   }
 
   // Bulk Support
   processBulk<T extends ModelType>(modelClass: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse> {
-    return this.connection.runWithTransaction('required', () =>
-      SQLModelBulkUtil.processBulk(this.connection, this, modelClass, operations, this)
-    );
+    return SQLModelBulkUtil.processBulk(this.connection, this, modelClass, operations, this);
   }
 
   // Expiry Support
-  async deleteExpired<T extends ModelType>(modelClass: Class<T>): Promise<number> {
-    return this.connection.runWithTransaction('required', () => ModelExpiryUtil.deleteExpired(this, modelClass));
+  deleteExpired<T extends ModelType>(modelClass: Class<T>): Promise<number> {
+    return ModelExpiryUtil.deleteExpired(this, modelClass);
   }
 
   // Indexed Support
@@ -409,7 +403,7 @@ export class MysqlModelService
     index: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexBody<T, K, S>
   ): Promise<T> {
-    return this.connection.runWithConnection(() => SQLModelIndexedUtil.getByIndex(this.connection, this, modelClass, index, body));
+    return SQLModelIndexedUtil.getByIndex(this.connection, this, modelClass, index, body);
   }
 
   deleteByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
@@ -417,9 +411,7 @@ export class MysqlModelService
     index: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexBody<T, K, S>
   ): Promise<void> {
-    return this.connection.runWithTransaction('required', () =>
-      SQLModelIndexedUtil.deleteByIndex(this.connection, this, modelClass, index, body)
-    );
+    return SQLModelIndexedUtil.deleteByIndex(this.connection, this, modelClass, index, body);
   }
 
   upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
@@ -427,7 +419,7 @@ export class MysqlModelService
     index: SingleItemIndex<T, K, S>,
     body: OptionalId<T>
   ): Promise<T> {
-    return this.connection.runWithTransaction('required', () => SQLModelIndexedUtil.upsertByIndex(this, modelClass, index, body));
+    return SQLModelIndexedUtil.upsertByIndex(this, modelClass, index, body);
   }
 
   updateByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
@@ -435,9 +427,7 @@ export class MysqlModelService
     index: SingleItemIndex<T, K, S>,
     body: T
   ): Promise<T> {
-    return this.connection.runWithTransaction('required', () =>
-      SQLModelIndexedUtil.updateByIndex(this.connection, this, modelClass, index, body, this)
-    );
+    return SQLModelIndexedUtil.updateByIndex(this.connection, this, modelClass, index, body, this);
   }
 
   updatePartialByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
@@ -445,9 +435,7 @@ export class MysqlModelService
     index: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    return this.connection.runWithTransaction('required', () =>
-      SQLModelIndexedUtil.updatePartialByIndex(this.connection, this, modelClass, index, body)
-    );
+    return SQLModelIndexedUtil.updatePartialByIndex(this.connection, this, modelClass, index, body);
   }
 
   listByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
@@ -456,9 +444,7 @@ export class MysqlModelService
     body: KeyedIndexBody<T, K>,
     options?: ModelListOptions
   ): AsyncIterable<T[]> {
-    return this.connection.iterateWithConnection(() =>
-      SQLModelIndexedUtil.listByIndex(this.connection, this, modelClass, index, body, options)
-    );
+    return SQLModelIndexedUtil.listByIndex(this.connection, this, modelClass, index, body, options);
   }
 
   pageByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
@@ -467,9 +453,7 @@ export class MysqlModelService
     body: KeyedIndexBody<T, K>,
     options?: ModelPageOptions
   ): Promise<ModelPageResult<T>> {
-    return this.connection.runWithConnection(() =>
-      SQLModelIndexedUtil.pageByIndex(this.connection, this, modelClass, index, body, options)
-    );
+    return SQLModelIndexedUtil.pageByIndex(this.connection, this, modelClass, index, body, options);
   }
 
   suggestByIndex<
@@ -484,39 +468,33 @@ export class MysqlModelService
     prefix: B,
     options?: ModelIndexedSearchOptions
   ): Promise<T[]> {
-    return this.connection.runWithConnection(() =>
-      SQLModelIndexedUtil.suggestByIndex(this.connection, this, modelClass, index, body, prefix, options)
-    );
+    return SQLModelIndexedUtil.suggestByIndex(this.connection, this, modelClass, index, body, prefix, options);
   }
 
   // Query Support
   query<T extends ModelType>(modelClass: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
-    return this.connection.runWithConnection(() => SQLModelQueryUtil.query(this.connection, this, modelClass, query));
+    return SQLModelQueryUtil.query(this.connection, this, modelClass, query);
   }
 
   queryOne<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>, failOnMany?: boolean): Promise<T> {
-    return this.connection.runWithConnection(() => SQLModelQueryUtil.queryOne(this.connection, this, modelClass, query, failOnMany));
+    return SQLModelQueryUtil.queryOne(this.connection, this, modelClass, query, failOnMany);
   }
 
   queryCount<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
-    return this.connection.runWithConnection(() => SQLModelQueryUtil.queryCount(this.connection, this, modelClass, query));
+    return SQLModelQueryUtil.queryCount(this.connection, this, modelClass, query);
   }
 
   // Query Crud Support
   updateByQuery<T extends ModelType>(modelClass: Class<T>, item: T, query: ModelQuery<T>): Promise<T> {
-    return this.connection.runWithTransaction('required', () =>
-      SQLModelQueryUtil.updateByQuery(this.connection, this, modelClass, item, query, this)
-    );
+    return SQLModelQueryUtil.updateByQuery(this.connection, this, modelClass, item, query, this);
   }
 
   updatePartialByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
-    return this.connection.runWithTransaction('required', () =>
-      SQLModelQueryUtil.updatePartialByQuery(this.connection, this, modelClass, query, data)
-    );
+    return SQLModelQueryUtil.updatePartialByQuery(this.connection, this, modelClass, query, data);
   }
 
   deleteByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
-    return this.connection.runWithTransaction('required', () => SQLModelQueryUtil.deleteByQuery(this.connection, this, modelClass, query));
+    return SQLModelQueryUtil.deleteByQuery(this.connection, this, modelClass, query);
   }
 
   // Suggest Support
