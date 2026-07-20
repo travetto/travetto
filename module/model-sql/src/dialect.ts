@@ -47,8 +47,8 @@ export interface SQLDialect {
    * MySQL: `JSON_CONTAINS(${sqlPath}, ${ident})`
    * SQLite: `EXISTS (SELECT 1 FROM json_each(${sqlPath}) WHERE json_each.value = ${isObject ? `json(${ident})` : ident})`
    */
-  compileArrayContains(sqlPath: string, ident: string, isObject: boolean): string;
-
+  compileArrayContains(sqlPath: string, ident: string, isObject: boolean, type?: Class): string;
+  compileJsonEquality?(sqlPath: string, ident: string): string;
   /**
    * Database-specific regex operator (e.g., '~*' for Postgres case-insensitive, 'REGEXP' for MySQL/SQLite)
    */

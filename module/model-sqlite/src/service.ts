@@ -62,8 +62,10 @@ export class SqliteModelService extends BaseSQLModelService {
     return `json_extract(${columnName}, '$.${jsonPath.join('.')}')`;
   }
 
-  compileArrayContains(sqlPath: string, ident: string, isObject: boolean): string {
-    return `EXISTS (SELECT 1 FROM json_each(${sqlPath}) WHERE json_each.value = ${isObject ? `json(${ident})` : ident})`;
+  compileArrayContains(sqlPath: string, ident: string, isObject: boolean, type?: Class): string {
+    return isObject ?
+      `json_contains(${sqlPath}, ${ident})` :
+      `EXISTS (SELECT 1 FROM json_each(${sqlPath}) WHERE json_each.value = ${ident})`;
   }
 
   getRegexOperator(caseInsensitive: boolean): string {

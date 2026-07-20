@@ -78,15 +78,19 @@ export class MysqlModelService extends BaseSQLModelService {
   }
 
   compileJsonIndexPath(columnName: string, jsonPath: string[]): string {
-    return `((JSON_EXTRACT(${columnName}, '$.${jsonPath.join('.')}')))`;
+    return `((CAST(JSON_UNQUOTE(JSON_EXTRACT(${columnName}, '$.${jsonPath.join('.')}')) AS CHAR(255))))`;
   }
 
-  compileArrayContains(sqlPath: string, ident: string, isObject: boolean): string {
-    return `JSON_CONTAINS(${sqlPath}, ${ident})`;
+  compileArrayContains(sqlPath: string, ident: string, isObject: boolean, type?: Class): string {
+    return isObject ? `JSON_CONTAINS(${sqlPath}, ${ident})` : `JSON_CONTAINS(${sqlPath}, JSON_ARRAY(${ident}))`;
+  }
+
+  compileJsonEquality(sqlPath: string, ident: string): string {
+    return `${sqlPath} = CAST(${ident} AS JSON)`;
   }
 
   getRegexOperator(caseInsensitive: boolean): string {
-    return caseInsensitive ? 'REGEXP' : 'REGEXP BINARY';
+    return caseInsensitive ? 'REGEXP' : 'COLLATE utf8mb4_bin REGEXP';
   }
 
   formatRegex(source: string, caseInsensitive: boolean): string {

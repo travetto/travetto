@@ -54,7 +54,45 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
       await this.#withRetries(async () => db.exec(q));
     }
     // Register custom regex function for SQL regex support
-    db.function('regexp', (a, b) => (new RegExp(`${a}`).test(`${b}`) ? 1 : 0));
+    db.function('regexp', (pattern, value) => {
+      const patStr = String(pattern);
+      const valStr = String(value);
+      if (patStr.startsWith('(?i)')) {
+        return new RegExp(patStr.slice(4), 'i').test(valStr) ? 1 : 0;
+      }
+      return new RegExp(patStr).test(valStr) ? 1 : 0;
+    });
+    // Register custom json_contains function for JSON containment checks
+    db.function('json_contains', (target, candidate) => {
+      try {
+        const tgt = JSON.parse(String(target));
+        const cand = JSON.parse(String(candidate));
+
+        const matches = (t: any, c: any): boolean => {
+          if (c === null) {
+            return t === null;
+          }
+          if (typeof c === 'object') {
+            if (typeof t !== 'object' || t === null) {
+              return false;
+            }
+            if (Array.isArray(c)) {
+              if (!Array.isArray(t)) {
+                return false;
+              }
+              return c.every(cv => t.some(tv => matches(tv, cv)));
+            } else {
+              return Object.keys(c).every(k => matches(t[k], c[k]));
+            }
+          }
+          return t === c;
+        };
+
+        return matches(tgt, cand) ? 1 : 0;
+      } catch {
+        return 0;
+      }
+    });
     return db;
   }
 

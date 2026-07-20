@@ -89,8 +89,19 @@ export class PostgresModelService extends BaseSQLModelService {
     return `$${index}`;
   }
 
-  compileArrayContains(sqlPath: string, ident: string, isObject: boolean): string {
-    return `${sqlPath} @> ${ident}::jsonb`;
+  compileArrayContains(sqlPath: string, ident: string, isObject: boolean, type?: Class): string {
+    if (isObject) {
+      return `${sqlPath} @> ${ident}::jsonb`;
+    }
+    let cast = 'text';
+    if (type === Number) {
+      cast = 'numeric';
+    } else if (type === Boolean) {
+      cast = 'boolean';
+    } else if (type === Date) {
+      cast = 'timestamp with time zone';
+    }
+    return `${sqlPath} @> jsonb_build_array(${ident}::${cast})`;
   }
 
   getRegexOperator(caseInsensitive: boolean): string {

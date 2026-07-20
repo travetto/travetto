@@ -149,7 +149,7 @@ export abstract class BaseSQLModelService
     return '?';
   }
 
-  abstract compileArrayContains(sqlPath: string, ident: string, isObject: boolean): string;
+  abstract compileArrayContains(sqlPath: string, ident: string, isObject: boolean, type?: Class): string;
   abstract getRegexOperator(caseInsensitive: boolean): string;
   abstract formatRegex(source: string, caseInsensitive: boolean): string;
   abstract castColumn(sqlPath: string, type: Class): string;

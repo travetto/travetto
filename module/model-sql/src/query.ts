@@ -229,7 +229,7 @@ export class SQLQueryCompiler {
         const template = this.#buildJsonTemplate(value as Record<string, unknown>);
         const ident = `%%${nextIdentPath}%%`;
         clauses.push({
-          sql: dialect.compileArrayContains(sqlPath, ident, true),
+          sql: dialect.compileArrayContains(sqlPath, ident, true, leafField?.type),
           parameters: {
             [ident]: JSONUtil.toUTF8([template])
           }
@@ -281,13 +281,13 @@ export class SQLQueryCompiler {
           const formatted = isObject ? JSONUtil.toUTF8(value) : value;
           clause = {
             parameters: { [ident]: formatted },
-            sql: dialect.compileArrayContains(sqlPath, ident, isObject)
+            sql: dialect.compileArrayContains(sqlPath, ident, isObject, leafField?.type)
           };
         } else if (operator === '$ne') {
           const formatted = isObject ? JSONUtil.toUTF8(value) : value;
           clause = {
             parameters: { [ident]: formatted },
-            sql: `NOT (${dialect.compileArrayContains(sqlPath, ident, isObject)})`
+            sql: `NOT (${dialect.compileArrayContains(sqlPath, ident, isObject, leafField?.type)})`
           };
         } else if (operator === '$in') {
           if (!Array.isArray(value) || value.length === 0) {
@@ -298,7 +298,7 @@ export class SQLQueryCompiler {
               const innerIsObject = typeof val === 'object' && val !== null;
               const formattedVal = innerIsObject ? JSONUtil.toUTF8(val) : val;
               return {
-                sql: dialect.compileArrayContains(sqlPath, innerIdent, innerIsObject),
+                sql: dialect.compileArrayContains(sqlPath, innerIdent, innerIsObject, leafField?.type),
                 parameters: { [innerIdent]: formattedVal }
               };
             });
@@ -313,7 +313,7 @@ export class SQLQueryCompiler {
               const innerIsObject = typeof val === 'object' && val !== null;
               const formattedVal = innerIsObject ? JSONUtil.toUTF8(val) : val;
               return {
-                sql: `NOT (${dialect.compileArrayContains(sqlPath, innerIdent, innerIsObject)})`,
+                sql: `NOT (${dialect.compileArrayContains(sqlPath, innerIdent, innerIsObject, leafField?.type)})`,
                 parameters: { [innerIdent]: formattedVal }
               };
             });
@@ -333,7 +333,7 @@ export class SQLQueryCompiler {
               const innerIsObject = typeof val === 'object' && val !== null;
               const formattedVal = innerIsObject ? JSONUtil.toUTF8(val) : val;
               return {
-                sql: dialect.compileArrayContains(sqlPath, innerIdent, innerIsObject),
+                sql: dialect.compileArrayContains(sqlPath, innerIdent, innerIsObject, leafField?.type),
                 parameters: { [innerIdent]: formattedVal }
               };
             });
@@ -341,17 +341,15 @@ export class SQLQueryCompiler {
           }
         } else if (operator === '$exists') {
           const emptyArrayStr = JSONUtil.toUTF8([]);
+          const isNull = `${sqlPath} IS NULL`;
+          const isEmpty = dialect.compileJsonEquality ? dialect.compileJsonEquality(sqlPath, ident) : `${sqlPath} = ${ident}`;
           if (value) {
             // Check that it's not null and not empty array
-            const isNull = `${sqlPath} IS NULL`;
-            const isEmpty = `${sqlPath} = ${ident}`;
             clause = {
               parameters: { [ident]: emptyArrayStr },
               sql: `NOT (${isNull} OR ${isEmpty})`
             };
           } else {
-            const isNull = `${sqlPath} IS NULL`;
-            const isEmpty = `${sqlPath} = ${ident}`;
             clause = {
               parameters: { [ident]: emptyArrayStr },
               sql: `(${isNull} OR ${isEmpty})`
