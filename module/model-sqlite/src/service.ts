@@ -58,21 +58,8 @@ export class SqliteModelService extends BaseSQLModelService {
     return 'TEXT';
   }
 
-  compileIndexPath(tableName: string, simpleFields: Map<string, SchemaFieldConfig>, path: string[]): string {
-    const firstSegment = path[0];
-    const escapedFirst = this.escapeIdentifier(firstSegment);
-    if (simpleFields.has(firstSegment)) {
-      if (path.length > 1) {
-        throw new Error(`Cannot create nested index under simple column "${firstSegment}" in table "${tableName}"`);
-      }
-      return escapedFirst;
-    } else {
-      const nestedSegments = path.slice(1);
-      if (nestedSegments.length === 0) {
-        return escapedFirst;
-      }
-      return `json_extract(${escapedFirst}, '$.${nestedSegments.join('.')}')`;
-    }
+  compileJsonIndexPath(columnName: string, jsonPath: string[]): string {
+    return `json_extract(${columnName}, '$.${jsonPath.join('.')}')`;
   }
 
   compileArrayContains(sqlPath: string, ident: string, isObject: boolean): string {
@@ -92,10 +79,6 @@ export class SqliteModelService extends BaseSQLModelService {
       return `CAST(${sqlPath} AS NUMERIC)`;
     }
     return sqlPath;
-  }
-
-  getUpsertSQL(tableName: string, columns: string[], placeholders: string[], conflictTarget: string[], updates: string[]): string {
-    return `INSERT INTO ${this.escapeIdentifier(tableName)} (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) ON CONFLICT (${conflictTarget.join(', ')}) DO UPDATE SET ${updates.join(', ')} RETURNING *;`;
   }
 
   complexColumnType = 'TEXT';
@@ -122,18 +105,6 @@ export class SqliteModelService extends BaseSQLModelService {
     return new Map(
       indexQuery.records.filter(record => record.sql && !record.name.startsWith('sqlite_')).map(record => [record.name, record.sql])
     );
-  }
-
-  normalizeIndexDefinition(sql: string): string {
-    return sql
-      .toLowerCase()
-      .replaceAll('"', '')
-      .replaceAll("'", '')
-      .replaceAll(' ', '')
-      .replaceAll('asc', '')
-      .replaceAll('desc', '')
-      .replaceAll('(', '')
-      .replaceAll(')', '');
   }
 
   async dropIndex(tableName: string, indexName: string): Promise<void> {

@@ -97,7 +97,24 @@ export abstract class BaseSQLModelService
   }
 
   abstract getColumnType(fieldConfiguration: SchemaFieldConfig): string;
-  abstract compileIndexPath(tableName: string, simpleFields: Map<string, SchemaFieldConfig>, path: string[]): string;
+  abstract compileJsonIndexPath(columnName: string, jsonPath: string[]): string;
+
+  compileIndexPath(tableName: string, simpleFields: Map<string, SchemaFieldConfig>, path: string[]): string {
+    const firstSegment = path[0];
+    const escapedFirst = this.escapeIdentifier(firstSegment);
+    if (simpleFields.has(firstSegment)) {
+      if (path.length > 1) {
+        throw new Error(`Cannot create nested index under simple column "${firstSegment}" in table "${tableName}"`);
+      }
+      return escapedFirst;
+    } else {
+      const nestedSegments = path.slice(1);
+      if (nestedSegments.length === 0) {
+        return escapedFirst;
+      }
+      return this.compileJsonIndexPath(escapedFirst, nestedSegments);
+    }
+  }
 
   getCreateIndexSQL(modelClass: Class, indexConfig: IndexConfig, tableName: string, simpleFields: Map<string, SchemaFieldConfig>): string {
     const indexName = ['idx', tableName, indexConfig.name.toLowerCase().replaceAll('-', '_')].join('_');
@@ -136,14 +153,31 @@ export abstract class BaseSQLModelService
   abstract getRegexOperator(caseInsensitive: boolean): string;
   abstract formatRegex(source: string, caseInsensitive: boolean): string;
   abstract castColumn(sqlPath: string, type: Class): string;
-  abstract getUpsertSQL(tableName: string, columns: string[], placeholders: string[], conflictTarget: string[], updates: string[]): string;
+  getUpsertSQL(tableName: string, columns: string[], placeholders: string[], conflictTarget: string[], updates: string[]): string {
+    return `INSERT INTO ${this.escapeIdentifier(tableName)} (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) ON CONFLICT (${conflictTarget.join(', ')}) DO UPDATE SET ${updates.join(', ')} RETURNING *;`;
+  }
+
+  normalizeIndexDefinition(sql: string): string {
+    return sql
+      .toLowerCase()
+      .replaceAll('"', '')
+      .replaceAll("'", '')
+      .replaceAll(' ', '')
+      .replaceAll('asc', '')
+      .replaceAll('desc', '')
+      .replaceAll('btree', '')
+      .replaceAll('public.', '')
+      .replaceAll('::text', '')
+      .replaceAll('(', '')
+      .replaceAll(')', '');
+  }
+
   abstract complexColumnType: string;
   abstract getTableExists(tableName: string): Promise<boolean>;
   abstract getExistingColumns(tableName: string): Promise<Map<string, string>>;
   abstract getExistingIndexes(tableName: string): Promise<Map<string, string>>;
   abstract dropIndex(tableName: string, indexName: string): Promise<void>;
 
-  normalizeIndexDefinition?(sql: string): string;
   handleColumnTypeMismatch?(tableName: string, columnName: string, columnType: string, existingType: string): Promise<void>;
 
   async upsertTable(modelClass: Class<ModelType>): Promise<void> {
@@ -246,7 +280,10 @@ export abstract class BaseSQLModelService
     await this.connection.execute(`DROP TABLE IF EXISTS ${this.escapeIdentifier(tableName)};`);
   }
 
-  abstract truncateTable(modelClass: Class<ModelType>): Promise<void>;
+  async truncateTable(modelClass: Class<ModelType>): Promise<void> {
+    const { tableName } = SQLModelUtil.getContext(this, modelClass);
+    await this.connection.execute(`TRUNCATE TABLE ${this.escapeIdentifier(tableName)};`);
+  }
 
   async initialize(): Promise<void> {
     await this.connection.init();

@@ -75,27 +75,14 @@ export class PostgresModelService extends BaseSQLModelService {
     return 'JSONB';
   }
 
-  compileIndexPath(tableName: string, simpleFields: Map<string, SchemaFieldConfig>, path: string[]): string {
-    const firstSegment = path[0];
-    const escapedFirst = this.escapeIdentifier(firstSegment);
-    if (simpleFields.has(firstSegment)) {
-      if (path.length > 1) {
-        throw new Error(`Cannot create nested index under simple column "${firstSegment}" in table "${tableName}"`);
-      }
-      return escapedFirst;
-    } else {
-      const nestedSegments = path.slice(1);
-      if (nestedSegments.length === 0) {
-        return escapedFirst;
-      }
-      const jsonAccessor = nestedSegments
-        .slice(0, -1)
-        .map(segment => `->'${this.escapeLiteral(segment)}'`)
-        .join('');
-      const leafSegment = nestedSegments[nestedSegments.length - 1];
-      // Surround with extra parentheses as required by Postgres for expression indexes
-      return `((${escapedFirst}${jsonAccessor}->>'${this.escapeLiteral(leafSegment)}'))`;
-    }
+  compileJsonIndexPath(columnName: string, jsonPath: string[]): string {
+    const jsonAccessor = jsonPath
+      .slice(0, -1)
+      .map(segment => `->'${this.escapeLiteral(segment)}'`)
+      .join('');
+    const leafSegment = jsonPath[jsonPath.length - 1];
+    // Surround with extra parentheses as required by Postgres for expression indexes
+    return `((${columnName}${jsonAccessor}->>'${this.escapeLiteral(leafSegment)}'))`;
   }
 
   getPlaceholder(index: number): string {
@@ -125,10 +112,6 @@ export class PostgresModelService extends BaseSQLModelService {
       return `(${sqlPath})::text`;
     }
     return sqlPath;
-  }
-
-  getUpsertSQL(tableName: string, columns: string[], placeholders: string[], conflictTarget: string[], updates: string[]): string {
-    return `INSERT INTO ${this.escapeIdentifier(tableName)} (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) ON CONFLICT (${conflictTarget.join(', ')}) DO UPDATE SET ${updates.join(', ')} RETURNING *;`;
   }
 
   shiftPlaceholders(sql: string, offset: number): string {
@@ -177,21 +160,6 @@ export class PostgresModelService extends BaseSQLModelService {
     return new Map(
       indexQuery.records.filter(record => !record.indexname.endsWith('_pkey')).map(record => [record.indexname, record.indexdef])
     );
-  }
-
-  normalizeIndexDefinition(sql: string): string {
-    return sql
-      .toLowerCase()
-      .replaceAll('"', '')
-      .replaceAll("'", '')
-      .replaceAll(' ', '')
-      .replaceAll('asc', '')
-      .replaceAll('desc', '')
-      .replaceAll('btree', '')
-      .replaceAll('public.', '')
-      .replaceAll('::text', '')
-      .replaceAll('(', '')
-      .replaceAll(')', '');
   }
 
   async dropIndex(tableName: string, indexName: string): Promise<void> {

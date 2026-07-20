@@ -1,8 +1,7 @@
 import type { PoolConnection } from 'mysql2/promise';
 
 import { Injectable, PostConstruct } from '@travetto/di';
-import type { ModelType } from '@travetto/model';
-import { BaseSQLModelService, SQLModelUtil } from '@travetto/model-sql';
+import { BaseSQLModelService } from '@travetto/model-sql';
 import { type Class, castTo } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -78,21 +77,8 @@ export class MysqlModelService extends BaseSQLModelService {
     return 'JSON';
   }
 
-  compileIndexPath(tableName: string, simpleFields: Map<string, SchemaFieldConfig>, path: string[]): string {
-    const firstSegment = path[0];
-    const escapedFirst = this.escapeIdentifier(firstSegment);
-    if (simpleFields.has(firstSegment)) {
-      if (path.length > 1) {
-        throw new Error(`Cannot create nested index under simple column "${firstSegment}" in table "${tableName}"`);
-      }
-      return escapedFirst;
-    } else {
-      const nestedSegments = path.slice(1);
-      if (nestedSegments.length === 0) {
-        return escapedFirst;
-      }
-      return `((JSON_EXTRACT(${escapedFirst}, '$.${nestedSegments.join('.')}')))`;
-    }
+  compileJsonIndexPath(columnName: string, jsonPath: string[]): string {
+    return `((JSON_EXTRACT(${columnName}, '$.${jsonPath.join('.')}')))`;
   }
 
   compileArrayContains(sqlPath: string, ident: string, isObject: boolean): string {
@@ -151,11 +137,6 @@ export class MysqlModelService extends BaseSQLModelService {
 
   async dropIndex(tableName: string, indexName: string): Promise<void> {
     await this.connection.execute(`DROP INDEX ${this.escapeIdentifier(indexName)} ON ${this.escapeIdentifier(tableName)};`);
-  }
-
-  async truncateTable(modelClass: Class<ModelType>): Promise<void> {
-    const { tableName } = SQLModelUtil.getContext(this, modelClass);
-    await this.connection.execute(`TRUNCATE TABLE ${this.escapeIdentifier(tableName)};`);
   }
 
   @PostConstruct()
