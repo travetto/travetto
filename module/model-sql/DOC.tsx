@@ -16,9 +16,9 @@ export const text = (
       is stored in the database. The primary goal of the {d.library('SQL')} support is not to handle every scenario that a relational
       database can provide, but to integrate with the {d.module('Model')} structure, while leveraging relational datastores to the best of
       their abilities. <br />
-      The primary design maps each model class to a single table where simple fields are mapped to individual columns, and complex fields (objects and arrays)
-      are serialized and stored as native JSON document columns. Every table requires a primary key column, and indices are compiled directly
-      to standard database columns or SQL functional expressions over JSON paths.
+      The primary design maps each model class to a single table where simple fields are mapped to individual columns, and complex fields
+      (objects and arrays) are serialized and stored as native JSON document columns. Every table requires a primary key column, and indices
+      are compiled directly to standard database columns or SQL functional expressions over JSON paths.
     </c.Section>
   </>
 );

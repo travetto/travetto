@@ -15,7 +15,8 @@ export const text = (
     {d.module('Model')} module to read, write and query against {d.library('SQL')} databases. In development mode, the {SqliteModelService}{' '}
     will also modify the database schema in real time to minimize impact to development. <br />
     The schema generated will not generally map to existing tables as it is attempting to produce a document store like experience on top of
-    a {d.library('SQL')} database. Every table generated maps to a model, with simple fields mapped as individual columns and complex fields/arrays mapped as serialized {d.input('TEXT')} columns. <br />
+    a {d.library('SQL')} database. Every table generated maps to a model, with simple fields mapped as individual columns and complex
+    fields/arrays mapped as serialized {d.input('TEXT')} columns. <br />
     Supported features:
     <ul>
       {...ModelTypes(SqliteModelService)}

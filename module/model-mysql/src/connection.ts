@@ -1,13 +1,13 @@
 import { createPool } from 'mysql2';
 import type { OkPacket, Pool, PoolConnection, PreparedStatementInfo, ResultSetHeader, TypeCastField } from 'mysql2/promise';
 
-import { type AsyncContext } from '@travetto/context';
+import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { ExistsError } from '@travetto/model';
 import { SQLConnection } from '@travetto/model-sql';
 import { castTo, JSONUtil, ShutdownManager } from '@travetto/runtime';
 
-import { MysqlModelConfig } from './config.ts';
+import type { MysqlModelConfig } from './config.ts';
 
 function isSimplePacket(value: unknown): value is OkPacket | ResultSetHeader {
   return (
@@ -90,7 +90,7 @@ export class MysqlConnection extends SQLConnection<PoolConnection> {
    */
   async execute<Type = unknown>(query: string, values?: unknown[]): Promise<{ count: number; records: Type[] }> {
     console.debug('Executing MySQL query', { query, values });
-    const client = this.active ?? await this.acquire();
+    const client = this.active ?? (await this.acquire());
     let prepared: PreparedStatementInfo | undefined;
     try {
       prepared = (values?.length ?? 0) > 0 ? await client.prepare(query) : undefined;

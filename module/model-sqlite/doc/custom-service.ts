@@ -1,5 +1,5 @@
 import { InjectableFactory } from '@travetto/di';
-import { SqliteConnection, SqliteModelService } from '@travetto/model-sqlite';
+import { type SqliteConnection, SqliteModelService } from '@travetto/model-sqlite';
 
 export class Init {
   @InjectableFactory({ primary: true })

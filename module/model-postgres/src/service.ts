@@ -1,4 +1,4 @@
-import { default as pg } from 'pg';
+import type { default as pg } from 'pg';
 
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
@@ -20,22 +20,23 @@ import {
 import {
   type FullKeyedIndexBody,
   type FullKeyedIndexWithPartialBody,
+  isModelIndexedIndex,
   type KeyedIndexBody,
   type KeyedIndexSelection,
   ModelIndexedComputedIndex,
   type ModelIndexedSearchOptions,
   type ModelIndexedSupport,
+  type ModelPageOptions,
+  type ModelPageResult,
   type SingleItemIndex,
   type SortedIndex,
   type SortedIndexSelection,
   type SortedIndexSelectionType,
-  type ModelPageOptions,
-  type ModelPageResult,
-  isModelIndexedIndex,
   warnIfIndexedUniqueIndex,
   warnIfNonIndexedIndex
 } from '@travetto/model-indexed';
 import {
+  isModelQueryIndex,
   type ModelQuery,
   type ModelQueryCrudSupport,
   type ModelQueryFacet,
@@ -46,23 +47,22 @@ import {
   ModelQueryUtil,
   type PageableModelQuery,
   QueryVerifier,
-  type ValidStringFields,
-  isModelQueryIndex
+  type ValidStringFields
 } from '@travetto/model-query';
-import { type Class, castTo } from '@travetto/runtime';
-import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 import {
   type SQLDialect,
-  SQLModelCrudUtil,
-  SQLModelQueryUtil,
-  SQLModelIndexedUtil,
   SQLModelBulkUtil,
+  SQLModelCrudUtil,
+  SQLModelIndexedUtil,
+  SQLModelQueryUtil,
   SQLModelStorageUtil,
-  SQLQueryCompiler,
-  SQLModelUtil
+  SQLModelUtil,
+  SQLQueryCompiler
 } from '@travetto/model-sql';
+import { type Class, castTo } from '@travetto/runtime';
+import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import { PostgresConnection } from './connection.ts';
+import type { PostgresConnection } from './connection.ts';
 
 /**
  * A PostgreSQL JSON-based document store model service
@@ -429,7 +429,9 @@ export class PostgresModelService
   }
 
   updatePartial<T extends ModelType>(modelClass: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
-    return this.connection.runWithTransaction('required', () => SQLModelCrudUtil.updatePartial(this.connection, this, modelClass, item, view));
+    return this.connection.runWithTransaction('required', () =>
+      SQLModelCrudUtil.updatePartial(this.connection, this, modelClass, item, view)
+    );
   }
 
   delete<T extends ModelType>(modelClass: Class<T>, id: string): Promise<void> {
@@ -442,7 +444,9 @@ export class PostgresModelService
 
   // Bulk Support
   processBulk<T extends ModelType>(modelClass: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse> {
-    return this.connection.runWithTransaction('required', () => SQLModelBulkUtil.processBulk(this.connection, this, modelClass, operations, this));
+    return this.connection.runWithTransaction('required', () =>
+      SQLModelBulkUtil.processBulk(this.connection, this, modelClass, operations, this)
+    );
   }
 
   // Expiry Support
@@ -464,7 +468,9 @@ export class PostgresModelService
     index: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexBody<T, K, S>
   ): Promise<void> {
-    return this.connection.runWithTransaction('required', () => SQLModelIndexedUtil.deleteByIndex(this.connection, this, modelClass, index, body));
+    return this.connection.runWithTransaction('required', () =>
+      SQLModelIndexedUtil.deleteByIndex(this.connection, this, modelClass, index, body)
+    );
   }
 
   upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
@@ -480,7 +486,9 @@ export class PostgresModelService
     index: SingleItemIndex<T, K, S>,
     body: T
   ): Promise<T> {
-    return this.connection.runWithTransaction('required', () => SQLModelIndexedUtil.updateByIndex(this.connection, this, modelClass, index, body, this));
+    return this.connection.runWithTransaction('required', () =>
+      SQLModelIndexedUtil.updateByIndex(this.connection, this, modelClass, index, body, this)
+    );
   }
 
   updatePartialByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
@@ -488,7 +496,9 @@ export class PostgresModelService
     index: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    return this.connection.runWithTransaction('required', () => SQLModelIndexedUtil.updatePartialByIndex(this.connection, this, modelClass, index, body));
+    return this.connection.runWithTransaction('required', () =>
+      SQLModelIndexedUtil.updatePartialByIndex(this.connection, this, modelClass, index, body)
+    );
   }
 
   listByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
@@ -497,7 +507,9 @@ export class PostgresModelService
     body: KeyedIndexBody<T, K>,
     options?: ModelListOptions
   ): AsyncIterable<T[]> {
-    return this.connection.iterateWithConnection(() => SQLModelIndexedUtil.listByIndex(this.connection, this, modelClass, index, body, options));
+    return this.connection.iterateWithConnection(() =>
+      SQLModelIndexedUtil.listByIndex(this.connection, this, modelClass, index, body, options)
+    );
   }
 
   pageByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
@@ -506,7 +518,9 @@ export class PostgresModelService
     body: KeyedIndexBody<T, K>,
     options?: ModelPageOptions
   ): Promise<ModelPageResult<T>> {
-    return this.connection.runWithConnection(() => SQLModelIndexedUtil.pageByIndex(this.connection, this, modelClass, index, body, options));
+    return this.connection.runWithConnection(() =>
+      SQLModelIndexedUtil.pageByIndex(this.connection, this, modelClass, index, body, options)
+    );
   }
 
   suggestByIndex<
@@ -521,7 +535,9 @@ export class PostgresModelService
     prefix: B,
     options?: ModelIndexedSearchOptions
   ): Promise<T[]> {
-    return this.connection.runWithConnection(() => SQLModelIndexedUtil.suggestByIndex(this.connection, this, modelClass, index, body, prefix, options));
+    return this.connection.runWithConnection(() =>
+      SQLModelIndexedUtil.suggestByIndex(this.connection, this, modelClass, index, body, prefix, options)
+    );
   }
 
   // Query Support
@@ -539,11 +555,15 @@ export class PostgresModelService
 
   // Query Crud Support
   updateByQuery<T extends ModelType>(modelClass: Class<T>, item: T, query: ModelQuery<T>): Promise<T> {
-    return this.connection.runWithTransaction('required', () => SQLModelQueryUtil.updateByQuery(this.connection, this, modelClass, item, query, this));
+    return this.connection.runWithTransaction('required', () =>
+      SQLModelQueryUtil.updateByQuery(this.connection, this, modelClass, item, query, this)
+    );
   }
 
   updatePartialByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
-    return this.connection.runWithTransaction('required', () => SQLModelQueryUtil.updatePartialByQuery(this.connection, this, modelClass, query, data));
+    return this.connection.runWithTransaction('required', () =>
+      SQLModelQueryUtil.updatePartialByQuery(this.connection, this, modelClass, query, data)
+    );
   }
 
   deleteByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
@@ -551,7 +571,12 @@ export class PostgresModelService
   }
 
   // Suggest Support
-  suggest<T extends ModelType>(modelClass: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+  suggest<T extends ModelType>(
+    modelClass: Class<T>,
+    field: ValidStringFields<T>,
+    prefix?: string,
+    query?: PageableModelQuery<T>
+  ): Promise<T[]> {
     return ModelQuerySuggestUtil.suggest(this, modelClass, field, prefix, query);
   }
 
@@ -563,11 +588,7 @@ export class PostgresModelService
   ): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(modelClass, query);
     const context = SQLModelUtil.getContext(this, modelClass);
-    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(
-      this,
-      context,
-      ModelQueryUtil.getWhereClause(modelClass, query?.where)
-    );
+    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(this, context, ModelQueryUtil.getWhereClause(modelClass, query?.where));
     const { sqlPath } = SQLQueryCompiler.resolvePath(this, context, String(field).split('.'));
 
     const conditions = [`${sqlPath} IS NOT NULL`];

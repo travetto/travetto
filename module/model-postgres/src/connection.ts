@@ -1,12 +1,12 @@
 import { type Pool, type PoolClient, default as pg } from 'pg';
 
-import { type AsyncContext } from '@travetto/context';
+import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { ExistsError } from '@travetto/model';
 import { SQLConnection } from '@travetto/model-sql';
 import { castTo, ShutdownManager } from '@travetto/runtime';
 
-import { PostgresModelConfig } from './config.ts';
+import type { PostgresModelConfig } from './config.ts';
 
 /**
  * PostgreSQL connection manager

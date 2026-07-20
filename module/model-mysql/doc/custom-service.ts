@@ -1,5 +1,5 @@
 import { InjectableFactory } from '@travetto/di';
-import { MysqlConnection, MysqlModelService } from '@travetto/model-mysql';
+import { type MysqlConnection, MysqlModelService } from '@travetto/model-mysql';
 
 export class Init {
   @InjectableFactory({ primary: true })

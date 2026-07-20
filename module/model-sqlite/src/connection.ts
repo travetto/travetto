@@ -4,13 +4,13 @@ import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
 
 import { createPool, type Pool } from 'generic-pool';
 
-import { type AsyncContext } from '@travetto/context';
+import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { ExistsError } from '@travetto/model';
 import { SQLConnection } from '@travetto/model-sql';
 import { castTo, Runtime, RuntimeError, ShutdownManager, Util } from '@travetto/runtime';
 
-import { SqliteModelConfig } from './config.ts';
+import type { SqliteModelConfig } from './config.ts';
 
 const RECOVERABLE_MESSAGE = /database( table| schema)? is (locked|busy)/;
 const isRecoverableError = (error: unknown): error is Error => error instanceof Error && RECOVERABLE_MESSAGE.test(error.message);
@@ -101,7 +101,7 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
 
     return this.#withRetries(async () => {
       console.debug('Executing SQLite query', { query, values });
-      const client = this.active ?? await this.acquire();
+      const client = this.active ?? (await this.acquire());
       try {
         const prepared = client.prepare(query);
         prepared.setReadBigInts(true);
