@@ -1,13 +1,15 @@
 import assert from 'node:assert';
 
+import { Model } from '@travetto/model';
+import { Registry } from '@travetto/registry';
 import { Schema } from '@travetto/schema';
-import { Suite, Test } from '@travetto/test';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import type { SQLDialect } from '../../src/dialect.ts';
 import { SQLQueryCompiler } from '../../src/query.ts';
 import { SQLModelUtil } from '../../src/util.ts';
 
-@Schema()
+@Model()
 class User {
   id: string;
   name: string;
@@ -18,7 +20,7 @@ class Nested {
   value: string;
 }
 
-@Schema()
+@Model()
 class WhereType {
   id: string;
   name: string;
@@ -78,6 +80,11 @@ const mockDialect: SQLDialect = {
 
 @Suite()
 export class SQLQueryCompilerTest {
+  @BeforeAll()
+  async setup() {
+    await Registry.init();
+  }
+
   @Test()
   async testCompileSimple() {
     const context = SQLModelUtil.getContext(mockDialect, User);

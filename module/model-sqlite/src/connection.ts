@@ -8,12 +8,24 @@ import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { ExistsError } from '@travetto/model';
 import { SQLConnection } from '@travetto/model-sql';
-import { castTo, Runtime, RuntimeError, ShutdownManager, Util } from '@travetto/runtime';
+import { castTo, JSONUtil, Runtime, RuntimeError, ShutdownManager, Util } from '@travetto/runtime';
 
 import type { SqliteModelConfig } from './config.ts';
 
 const RECOVERABLE_MESSAGE = /database( table| schema)? is (locked|busy)/;
 const isRecoverableError = (error: unknown): error is Error => error instanceof Error && RECOVERABLE_MESSAGE.test(error.message);
+
+const normalizeParameter = (val: unknown) => {
+  if (val === null) {
+    return val;
+  } else if (val instanceof Date) {
+    return val.toISOString();
+  } else if (typeof val === 'object') {
+    return JSONUtil.toUTF8(val);
+  } else {
+    return castTo<SQLInputValue>(val);
+  }
+};
 
 /**
  * SQLite Connection Manager.
@@ -68,7 +80,7 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
         const tgt = JSON.parse(String(target));
         const cand = JSON.parse(String(candidate));
 
-        const matches = (t: any, c: any): boolean => {
+        const matches = (t: unknown, c: unknown): boolean => {
           if (c === null) {
             return t === null;
           }
@@ -82,6 +94,7 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
               }
               return c.every(cv => t.some(tv => matches(tv, cv)));
             } else {
+              // @ts-expect-error
               return Object.keys(c).every(k => matches(t[k], c[k]));
             }
           }
@@ -141,27 +154,7 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
       query.trim().startsWith('EXISTS') ||
       query.includes('RETURNING');
 
-    const normalized = (values ?? []).map(val => {
-      if (val === undefined || val === null) {
-        return null;
-      }
-      if (typeof val === 'boolean') {
-        return val ? 1 : 0;
-      }
-      if (val instanceof Date) {
-        return val.toISOString();
-      }
-      if (typeof val === 'bigint') {
-        return val;
-      }
-      if (typeof val === 'object') {
-        if (val instanceof Uint8Array || val instanceof Buffer) {
-          return val;
-        }
-        return JSON.stringify(val);
-      }
-      return castTo<SQLInputValue>(val);
-    });
+    const normalized = (values ?? []).map(normalizeParameter);
 
     return this.#withRetries(async () => {
       console.debug('Executing SQLite query', { query, values });
