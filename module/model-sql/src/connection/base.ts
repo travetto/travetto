@@ -24,7 +24,7 @@ export abstract class Connection<C = unknown> {
 
   readonly context: AsyncContext;
 
-  #active = new AsyncContextValue<C>(this);
+  #active = new AsyncContextValue<C>(this, { failIfUnbound: { read: false, write: false } });
   #activeTx = new AsyncContextValue<boolean>(this);
 
   constructor(context: AsyncContext) {
