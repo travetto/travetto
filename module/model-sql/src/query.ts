@@ -3,8 +3,7 @@ import { ModelQueryUtil, type SortClause, type WhereClause } from '@travetto/mod
 import { castTo, JSONUtil, RuntimeError } from '@travetto/runtime';
 import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import type { SQLDialect } from './dialect.ts';
-import type { CompilationResult, JSONSqlPathMode, TableContext } from './types.ts';
+import type { JSONSqlPathMode, TableContext } from './types.ts';
 
 interface QueryClause {
   sql?: string;
@@ -37,13 +36,15 @@ export class SQLQueryCompiler {
    * Compiles a WhereClause into a parameterized SQL WHERE clause.
    */
   static compileWhere<T extends ModelType>(
-    dialect: SQLDialect,
     context: TableContext<T>,
     where?: WhereClause<T>,
     checkExpiry = true
-  ): CompilationResult {
+  ): {
+    whereSQL?: string;
+    parameters?: unknown[];
+  } {
     const resolvedWhere = ModelQueryUtil.getWhereClause(context.cls, where, checkExpiry);
-    const compiled = this.#compileClause(dialect, context, resolvedWhere);
+    const compiled = this.#compileClause(context, resolvedWhere);
     if (Object.entries(compiled.parameters ?? {}).length) {
       const parameters: unknown[] = [];
       const seen = new Map<string, string>();
@@ -51,7 +52,7 @@ export class SQLQueryCompiler {
         .sql!.replace(/%%([^%]{0,200})%%/g, key => {
           if (!seen.has(key)) {
             parameters.push(compiled.parameters![key]);
-            seen.set(key, dialect.getPlaceholder(parameters.length));
+            seen.set(key, context.dialect.getPlaceholder(parameters.length));
           }
           return seen.get(key)!;
         })
@@ -65,7 +66,7 @@ export class SQLQueryCompiler {
   /**
    * Compiles sorting clauses into SQL ORDER BY string.
    */
-  static compileSort<T extends ModelType>(dialect: SQLDialect, context: TableContext<T>, sort?: SortClause<T>[]): string {
+  static compileSort<T extends ModelType>(context: TableContext<T>, sort?: SortClause<T>[]): string {
     if (!sort || sort.length === 0) {
       return '';
     }
@@ -73,7 +74,7 @@ export class SQLQueryCompiler {
       const key = Object.keys(sortClause)[0];
       const direction = castTo<Record<string, 1 | -1>>(sortClause)[key];
       const path = key.split('.');
-      const { sqlPath } = this.resolvePath(dialect, context, path, 'orderBy');
+      const { sqlPath } = this.resolvePath(context, path, 'orderBy');
       return `${sqlPath} ${direction === -1 ? 'DESC' : 'ASC'}`;
     });
     return sortClauses.length ? `ORDER BY ${sortClauses.join(', ')}` : '';
@@ -83,12 +84,12 @@ export class SQLQueryCompiler {
    * Resolves a field path to a database SQL expression and retrieves its schema config.
    */
   static resolvePath<T extends ModelType>(
-    dialect: SQLDialect,
     context: TableContext<T>,
     path: string[],
     mode: JSONSqlPathMode
   ): { sqlPath: string; leafField?: SchemaFieldConfig } {
     const firstSegment = path[0];
+    const { dialect } = context;
 
     if (context.simpleFields.has(firstSegment)) {
       if (path.length > 1) {
@@ -133,23 +134,18 @@ export class SQLQueryCompiler {
   /**
    * Recursively compiles logical AND/OR/NOT clauses and simple field mappings
    */
-  static #compileClause<T extends ModelType>(
-    dialect: SQLDialect,
-    context: TableContext<T>,
-    clause: WhereClause<T>,
-    identPath: IdentPath = ''
-  ): QueryClause {
+  static #compileClause<T extends ModelType>(context: TableContext<T>, clause: WhereClause<T>, identPath: IdentPath = ''): QueryClause {
     if (!clause) {
       return {};
     }
     if (ModelQueryUtil.has$And(clause)) {
-      const compiled = clause.$and.map((item, i) => this.#compileClause(dialect, context, item, `${identPath}_${i}`)).filter(Boolean);
+      const compiled = clause.$and.map((item, i) => this.#compileClause(context, item, `${identPath}_${i}`)).filter(Boolean);
       return combineResults(compiled, 'AND');
     } else if (ModelQueryUtil.has$Or(clause)) {
-      const compiled = clause.$or.map((item, i) => this.#compileClause(dialect, context, item, `${identPath}_${i}`)).filter(Boolean);
+      const compiled = clause.$or.map((item, i) => this.#compileClause(context, item, `${identPath}_${i}`)).filter(Boolean);
       return combineResults(compiled, 'OR');
     } else if (ModelQueryUtil.has$Not(clause)) {
-      const compiled = this.#compileClause(dialect, context, clause.$not, identPath);
+      const compiled = this.#compileClause(context, clause.$not, identPath);
       return compiled
         ? {
             sql: `NOT (${compiled.sql})`,
@@ -157,7 +153,7 @@ export class SQLQueryCompiler {
           }
         : {};
     } else {
-      return this.#compileSimple(dialect, context, clause, [], identPath);
+      return this.#compileSimple(context, clause, [], identPath);
     }
   }
 
@@ -190,7 +186,6 @@ export class SQLQueryCompiler {
    * Compiles simple query object schemas recursively
    */
   static #compileSimple<T extends ModelType>(
-    dialect: SQLDialect,
     context: TableContext<T>,
     item: Record<string, unknown>,
     parentPath: string[] = [],
@@ -208,24 +203,24 @@ export class SQLQueryCompiler {
       const isPlainObject = DataUtil.isPlainObject(value);
       const firstKey = isPlainObject ? Object.keys(value)[0] : '';
 
-      const { sqlPath, leafField } = this.resolvePath(dialect, context, currentPath, 'read');
+      const { sqlPath, leafField } = this.resolvePath(context, currentPath, 'read');
       const nextIdentPath = `${identPath}__${idx}`;
 
       if (leafField?.array && SchemaRegistryIndex.has(leafField.type) && isPlainObject && !firstKey.startsWith('$')) {
         const template = this.#buildJsonTemplate(value as Record<string, unknown>);
         const ident = `%%${nextIdentPath}%%`;
         clauses.push({
-          sql: dialect.compileArrayContains(sqlPath, ident, true, leafField?.type),
+          sql: context.dialect.compileArrayContains(sqlPath, ident, true, leafField?.type),
           parameters: {
             [ident]: JSONUtil.toUTF8([template])
           }
         });
       } else if (isPlainObject && firstKey.startsWith('$')) {
-        clauses.push(this.#compileOperator(dialect, context, currentPath, value as Record<string, unknown>, nextIdentPath));
+        clauses.push(this.#compileOperator(context, currentPath, value as Record<string, unknown>, nextIdentPath));
       } else if (isPlainObject) {
-        clauses.push(this.#compileSimple(dialect, context, value as Record<string, unknown>, currentPath, nextIdentPath));
+        clauses.push(this.#compileSimple(context, value as Record<string, unknown>, currentPath, nextIdentPath));
       } else {
-        clauses.push(this.#compileOperator(dialect, context, currentPath, { $eq: value }, nextIdentPath));
+        clauses.push(this.#compileOperator(context, currentPath, { $eq: value }, nextIdentPath));
       }
     }
 
@@ -236,13 +231,13 @@ export class SQLQueryCompiler {
    * Compiles individual operators like $eq, $gt, $in, $regex etc.
    */
   static #compileOperator<T extends ModelType>(
-    dialect: SQLDialect,
     context: TableContext<T>,
     path: string[],
     operation: Record<string, unknown>,
     identPath: IdentPath = ''
   ): QueryClause {
-    const { sqlPath, leafField } = this.resolvePath(dialect, context, path, 'read');
+    const { dialect } = context;
+    const { sqlPath, leafField } = this.resolvePath(context, path, 'read');
     const clauses: QueryClause[] = [];
 
     let idx = 0;
@@ -328,7 +323,7 @@ export class SQLQueryCompiler {
         } else if (operator === '$exists') {
           const emptyArrayStr = JSONUtil.toUTF8([]);
           const isNull = `${sqlPath} IS NULL`;
-          const isEmpty = dialect.compileJsonEquality ? dialect.compileJsonEquality(sqlPath, ident) : `${sqlPath} = ${ident}`;
+          const isEmpty = dialect.compileJsonEquality?.(sqlPath, ident) ?? `${sqlPath} = ${ident}`;
           if (value) {
             // Check that it's not null and not empty array
             clause = {

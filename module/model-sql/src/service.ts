@@ -57,9 +57,8 @@ import { WorkPool } from '@travetto/worker';
 
 import type { SQLModelConfig } from './config.ts';
 import type { SQLConnection } from './connection.ts';
-import type { SQLDialect } from './dialect.ts';
 import { SQLQueryCompiler } from './query.ts';
-import type { JSONSqlPathMode, TableContext } from './types.ts';
+import type { JSONSqlPathMode, SQLDialect, TableContext } from './types.ts';
 import { SQLModelUtil } from './util.ts';
 
 /**
@@ -87,6 +86,23 @@ export abstract class BaseSQLModelService
 
   idSource = ModelCrudUtil.uuidSource();
   suggestLikeOperator = 'LIKE';
+
+  getContext<T extends ModelType>(modelClass: Class<T>): TableContext<T> {
+    let tableName = ModelRegistryIndex.getStoreName(modelClass);
+    if (this.config.namespace) {
+      tableName = `${this.config.namespace}_${tableName}`;
+    }
+
+    return { tableName, escapedTableName: this.escapeIdentifier(tableName), dialect: this, ...SQLModelUtil.getSchemaContext(modelClass) };
+  }
+
+  #whereClause<T extends ModelType>(
+    cls: Class<T>,
+    where?: WhereClause<T>,
+    checkExpiry?: boolean
+  ): { whereSQL?: string; parameters?: unknown[] } {
+    return SQLQueryCompiler.compileWhere(this.getContext(cls), ModelQueryUtil.getWhereClause(cls, where), checkExpiry);
+  }
 
   // SQLDialect contract
   escapeIdentifier(name: string): string {
@@ -132,7 +148,7 @@ export abstract class BaseSQLModelService
         return `${expression} ${isAscending ? 'ASC' : 'DESC'}`;
       });
 
-      return `CREATE ${indexConfig.unique ? 'UNIQUE ' : ''}INDEX ${this.escapeIdentifier(indexName)} ON ${this.escapeIdentifier(tableName)} (${indexFields.join(', ')});`;
+      return `CREATE ${indexConfig.unique ? 'UNIQUE ' : ''}INDEX ${this.escapeIdentifier(indexName)} ON ${context.escapedTableName} (${indexFields.join(', ')});`;
     } else if (isModelIndexedIndex(indexConfig)) {
       const allFields = [...indexConfig.keyTemplate, ...indexConfig.sortTemplate];
       const indexFields = allFields.map(({ path, value }) => {
@@ -141,7 +157,7 @@ export abstract class BaseSQLModelService
       });
 
       const isUnique = 'unique' in indexConfig && indexConfig.unique;
-      return `CREATE ${isUnique ? 'UNIQUE ' : ''}INDEX ${this.escapeIdentifier(indexName)} ON ${this.escapeIdentifier(tableName)} (${indexFields.join(', ')});`;
+      return `CREATE ${isUnique ? 'UNIQUE ' : ''}INDEX ${this.escapeIdentifier(indexName)} ON ${context.escapedTableName} (${indexFields.join(', ')});`;
     }
 
     throw new Error(`Unsupported index configuration for class ${modelClass.name}`);
@@ -155,8 +171,14 @@ export abstract class BaseSQLModelService
   abstract getRegexOperator(caseInsensitive: boolean): string;
   abstract formatRegex(source: string, caseInsensitive: boolean): string;
   abstract castColumn(sqlPath: string, type: Class): string;
-  getUpsertSQL(tableName: string, columns: string[], placeholders: string[], conflictTarget: string[], updates: string[]): string {
-    return `INSERT INTO ${this.escapeIdentifier(tableName)} (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) ON CONFLICT (${conflictTarget.join(', ')}) DO UPDATE SET ${updates.join(', ')} RETURNING *;`;
+  getUpsertSQL(
+    context: TableContext<ModelType>,
+    columns: string[],
+    placeholders: string[],
+    conflictTarget: string[],
+    updates: string[]
+  ): string {
+    return `INSERT INTO ${context.escapedTableName} (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) ON CONFLICT (${conflictTarget.join(', ')}) DO UPDATE SET ${updates.join(', ')} RETURNING *;`;
   }
 
   normalizeIndexDefinition(sql: string): string {
@@ -183,7 +205,7 @@ export abstract class BaseSQLModelService
   handleColumnTypeMismatch?(tableName: string, columnName: string, columnType: string, existingType: string): Promise<void>;
 
   async upsertTable(modelClass: Class<ModelType>): Promise<void> {
-    const context = SQLModelUtil.getContext(this, modelClass);
+    const context = this.getContext(modelClass);
     const tableExists = await this.getTableExists(context.tableName);
 
     if (!tableExists) {
@@ -202,7 +224,7 @@ export abstract class BaseSQLModelService
         columnDefinitions.push(`${this.escapeIdentifier(field.name)} ${this.complexColumnType}`);
       }
 
-      const createTableSQL = `CREATE TABLE ${this.escapeIdentifier(context.tableName)} (\n  ${columnDefinitions.join(',\n  ')}\n);`;
+      const createTableSQL = `CREATE TABLE ${context.escapedTableName} (\n  ${columnDefinitions.join(',\n  ')}\n);`;
       await this.connection.execute(createTableSQL);
 
       const indexes = ModelRegistryIndex.getIndices(modelClass) || [];
@@ -226,7 +248,7 @@ export abstract class BaseSQLModelService
           continue;
         }
         if (!existingColumns.has(columnName)) {
-          const addColumnSQL = `ALTER TABLE ${this.escapeIdentifier(context.tableName)} ADD COLUMN ${this.escapeIdentifier(columnName)} ${columnType};`;
+          const addColumnSQL = `ALTER TABLE ${context.escapedTableName} ADD COLUMN ${this.escapeIdentifier(columnName)} ${columnType};`;
           await this.connection.execute(addColumnSQL);
         } else {
           if (this.handleColumnTypeMismatch) {
@@ -240,7 +262,7 @@ export abstract class BaseSQLModelService
           continue;
         }
         if (!requestedFieldsMap.has(columnName)) {
-          const dropColumnSQL = `ALTER TABLE ${this.escapeIdentifier(context.tableName)} DROP COLUMN ${this.escapeIdentifier(columnName)};`;
+          const dropColumnSQL = `ALTER TABLE ${context.escapedTableName} DROP COLUMN ${this.escapeIdentifier(columnName)};`;
           await this.connection.execute(dropColumnSQL);
         }
       }
@@ -278,13 +300,13 @@ export abstract class BaseSQLModelService
   }
 
   async dropTable(modelClass: Class<ModelType>): Promise<void> {
-    const { tableName } = SQLModelUtil.getContext(this, modelClass);
-    await this.connection.execute(`DROP TABLE IF EXISTS ${this.escapeIdentifier(tableName)};`);
+    const { escapedTableName } = this.getContext(modelClass);
+    await this.connection.execute(`DROP TABLE IF EXISTS ${escapedTableName};`);
   }
 
   async truncateTable(modelClass: Class<ModelType>): Promise<void> {
-    const { tableName } = SQLModelUtil.getContext(this, modelClass);
-    await this.connection.execute(`TRUNCATE TABLE ${this.escapeIdentifier(tableName)};`);
+    const { escapedTableName } = this.getContext(modelClass);
+    await this.connection.execute(`TRUNCATE TABLE ${escapedTableName};`);
   }
 
   async initialize(): Promise<void> {
@@ -343,9 +365,9 @@ export abstract class BaseSQLModelService
   ): Promise<{ count: number; records: Record<string, unknown>[] }> {
     const preparedData = await ModelCrudUtil.prePartialUpdate(modelClass, data, view);
 
-    const context = SQLModelUtil.getContext(this, modelClass);
+    const context = this.getContext(modelClass);
     const { sets, values } = this.compilePartialUpdate(context, preparedData);
-    const { whereSQL, parameters = [] } = SQLQueryCompiler.compileWhere(this, context, ModelQueryUtil.getWhereClause(modelClass, where));
+    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);
 
     const conditions: string[] = [];
     if (whereSQL) {
@@ -356,12 +378,12 @@ export abstract class BaseSQLModelService
     }
 
     const useReturning = returning && this.returningSupport;
-    const sql = `UPDATE ${this.escapeIdentifier(context.tableName)} SET ${sets.join(', ')} ${conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''}${useReturning ? ' RETURNING *' : ''};`;
+    const sql = `UPDATE ${context.escapedTableName} SET ${sets.join(', ')} ${conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''}${useReturning ? ' RETURNING *' : ''};`;
 
     const result = await this.connection.execute<Record<string, unknown>>(sql, values);
 
     if (result.count > 0 && returning && !this.returningSupport) {
-      const selectSQL = `SELECT * FROM ${this.escapeIdentifier(context.tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
+      const selectSQL = `SELECT * FROM ${context.escapedTableName} ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
       const selectResult = await this.connection.execute<Record<string, unknown>>(selectSQL, parameters);
       return { count: result.count, records: selectResult.records };
     }
@@ -379,7 +401,7 @@ export abstract class BaseSQLModelService
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
 
-    const context = SQLModelUtil.getContext(this, modelClass);
+    const context = this.getContext(modelClass);
     const sets: string[] = [];
     const values: unknown[] = [];
 
@@ -398,7 +420,7 @@ export abstract class BaseSQLModelService
       values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
     }
 
-    const { whereSQL, parameters = [] } = SQLQueryCompiler.compileWhere(this, context, ModelQueryUtil.getWhereClause(modelClass, where));
+    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);
 
     const conditions: string[] = [];
     if (whereSQL) {
@@ -408,7 +430,7 @@ export abstract class BaseSQLModelService
       values.push(...parameters);
     }
 
-    const sql = `UPDATE ${this.escapeIdentifier(context.tableName)} SET ${sets.join(', ')} WHERE ${conditions.join(' AND ')}`;
+    const sql = `UPDATE ${context.escapedTableName} SET ${sets.join(', ')} WHERE ${conditions.join(' AND ')}`;
 
     const result = await this.connection.execute(sql, values);
     if (result.count === 0) {
@@ -429,7 +451,7 @@ export abstract class BaseSQLModelService
     ModelCrudUtil.ensureNotSubType(modelClass);
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
-    const context = SQLModelUtil.getContext(this, modelClass);
+    const context = this.getContext(modelClass);
 
     const columns: string[] = [];
     const values: unknown[] = [];
@@ -452,7 +474,7 @@ export abstract class BaseSQLModelService
     }
 
     const placeholders = columns.map((_, index) => this.getPlaceholder(index + 1));
-    const sql = this.getUpsertSQL(context.tableName, columns, placeholders, conflictTarget, updates);
+    const sql = this.getUpsertSQL(context, columns, placeholders, conflictTarget, updates);
 
     const result = await this.connection.execute<Record<string, unknown>>(sql, values);
     if (result.records.length > 0) {
@@ -464,13 +486,9 @@ export abstract class BaseSQLModelService
 
   // Crud Support
   async get<T extends ModelType>(modelClass: Class<T>, id: string): Promise<T> {
-    const context = SQLModelUtil.getContext(this, modelClass);
-    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(
-      this,
-      context,
-      ModelQueryUtil.getWhereClause(modelClass, castTo({ id }))
-    );
-    const sql = `SELECT * FROM ${this.escapeIdentifier(context.tableName)} WHERE ${whereSQL};`;
+    const context = this.getContext(modelClass);
+    const { whereSQL, parameters } = this.#whereClause(modelClass, castTo({ id }));
+    const sql = `SELECT * FROM ${context.escapedTableName} WHERE ${whereSQL};`;
 
     const result = await this.connection.execute<Record<string, unknown>>(sql, parameters);
 
@@ -484,7 +502,7 @@ export abstract class BaseSQLModelService
   async create<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>, modelSource?: ModelCrudProvider): Promise<T> {
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
-    const context = SQLModelUtil.getContext(this, modelClass);
+    const context = this.getContext(modelClass);
 
     const columns: string[] = [];
     const values: unknown[] = [];
@@ -502,7 +520,7 @@ export abstract class BaseSQLModelService
     }
 
     const placeholders = columns.map((_, index) => this.getPlaceholder(index + 1));
-    const sql = `INSERT INTO ${this.escapeIdentifier(context.tableName)} (${columns.join(', ')}) VALUES (${placeholders.join(', ')});`;
+    const sql = `INSERT INTO ${context.escapedTableName} (${columns.join(', ')}) VALUES (${placeholders.join(', ')});`;
 
     await this.connection.execute(sql, values);
     return preppedItem;
@@ -534,13 +552,9 @@ export abstract class BaseSQLModelService
 
   async delete<T extends ModelType>(modelClass: Class<T>, id: string): Promise<void> {
     ModelCrudUtil.ensureNotSubType(modelClass);
-    const context = SQLModelUtil.getContext(this, modelClass);
-    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(
-      this,
-      context,
-      ModelQueryUtil.getWhereClause(modelClass, castTo({ id }), false)
-    );
-    const sql = `DELETE FROM ${this.escapeIdentifier(context.tableName)} WHERE ${whereSQL};`;
+    const context = this.getContext(modelClass);
+    const { whereSQL, parameters } = this.#whereClause(modelClass, castTo({ id }), false);
+    const sql = `DELETE FROM ${context.escapedTableName} WHERE ${whereSQL};`;
 
     const result = await this.connection.execute(sql, parameters);
     if (result.count === 0) {
@@ -553,8 +567,8 @@ export abstract class BaseSQLModelService
   }
 
   async *listWithOffset<T extends ModelType>(modelClass: Class<T>, options?: ModelListOptions & { offset?: number }): AsyncIterable<T[]> {
-    const context = SQLModelUtil.getContext(this, modelClass);
-    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(this, context, ModelQueryUtil.getWhereClause(modelClass, undefined));
+    const context = this.getContext(modelClass);
+    const { whereSQL, parameters } = this.#whereClause(modelClass, undefined);
 
     const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
     const batchSize = Math.min(options?.batchSizeHint ?? 100, limit);
@@ -564,7 +578,7 @@ export abstract class BaseSQLModelService
 
     while (!options?.abort?.aborted && produced < limit) {
       const batchLimit = Math.min(batchSize, limit - produced);
-      const sql = `SELECT * FROM ${this.escapeIdentifier(context.tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''} LIMIT ${batchLimit} OFFSET ${offset};`;
+      const sql = `SELECT * FROM ${context.escapedTableName} ${whereSQL ? `WHERE ${whereSQL}` : ''} LIMIT ${batchLimit} OFFSET ${offset};`;
 
       const result = await this.connection.execute(sql, parameters);
       if (result.count === 0) {
@@ -677,9 +691,9 @@ export abstract class BaseSQLModelService
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate({ sort: true });
     const where: WhereClause<T> = castTo(computed.project({ sort: true, includeId: true }));
 
-    const context = SQLModelUtil.getContext(this, modelClass);
-    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(this, context, ModelQueryUtil.getWhereClause(modelClass, where));
-    const sql = `SELECT * FROM ${this.escapeIdentifier(context.tableName)} WHERE ${whereSQL};`;
+    const context = this.getContext(modelClass);
+    const { whereSQL, parameters } = this.#whereClause(modelClass, where);
+    const sql = `SELECT * FROM ${context.escapedTableName} WHERE ${whereSQL};`;
 
     const result = await this.connection.execute<Record<string, unknown>>(sql, parameters);
     this.validateIndexResult(modelClass, result, indexConfig, computed);
@@ -696,9 +710,9 @@ export abstract class BaseSQLModelService
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate({ sort: true });
     const where: WhereClause<T> = castTo(computed.project({ sort: true, includeId: true }));
 
-    const context = SQLModelUtil.getContext(this, modelClass);
-    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(this, context, ModelQueryUtil.getWhereClause(modelClass, where));
-    const sql = `DELETE FROM ${this.escapeIdentifier(context.tableName)} WHERE ${whereSQL};`;
+    const context = this.getContext(modelClass);
+    const { whereSQL, parameters } = this.#whereClause(modelClass, where);
+    const sql = `DELETE FROM ${context.escapedTableName} WHERE ${whereSQL};`;
 
     const result = await this.connection.execute(sql, parameters);
     this.validateIndexResult(modelClass, result, indexConfig, computed);
@@ -752,7 +766,7 @@ export abstract class BaseSQLModelService
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate();
     const where: WhereClause<T> = castTo(computed.project());
 
-    const context = SQLModelUtil.getContext(this, modelClass);
+    const context = this.getContext(modelClass);
 
     const sortClauses = indexConfig.sortTemplate.map(({ path, value }) => {
       const expression = this.compileIndexPath(context, path, 'orderBy');
@@ -766,11 +780,11 @@ export abstract class BaseSQLModelService
     let offset = options?.offset ?? 0;
     let produced = 0;
 
-    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(this, context, ModelQueryUtil.getWhereClause(modelClass, where));
+    const { whereSQL, parameters } = this.#whereClause(modelClass, where);
 
     while (!options?.abort?.aborted && produced < limit) {
       const batchLimit = Math.min(batchSize, limit - produced);
-      const sql = `SELECT * FROM ${this.escapeIdentifier(context.tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''} ${sortSQL} LIMIT ${batchLimit} OFFSET ${offset};`;
+      const sql = `SELECT * FROM ${context.escapedTableName} ${whereSQL ? `WHERE ${whereSQL}` : ''} ${sortSQL} LIMIT ${batchLimit} OFFSET ${offset};`;
 
       const result = await this.connection.execute(sql, parameters);
       if (result.count === 0) {
@@ -824,11 +838,11 @@ export abstract class BaseSQLModelService
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate();
     const where: WhereClause<T> = castTo(computed.project());
 
-    const context = SQLModelUtil.getContext(this, modelClass);
-    const { whereSQL, parameters = [] } = SQLQueryCompiler.compileWhere(this, context, ModelQueryUtil.getWhereClause(modelClass, where));
+    const context = this.getContext(modelClass);
+    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);
 
     const prefixFieldPath = indexConfig.sortTemplate[0].path;
-    const { sqlPath } = SQLQueryCompiler.resolvePath(this, context, prefixFieldPath, 'read');
+    const { sqlPath } = SQLQueryCompiler.resolvePath(context, prefixFieldPath, 'read');
 
     const placeholder = this.getPlaceholder(parameters.length + 1);
     parameters.push(`${prefix}%`);
@@ -839,7 +853,7 @@ export abstract class BaseSQLModelService
       conditions.push(whereSQL);
     }
 
-    const sql = `SELECT * FROM ${this.escapeIdentifier(context.tableName)} WHERE ${conditions.join(' AND ')} LIMIT ${options?.limit ?? 10};`;
+    const sql = `SELECT * FROM ${context.escapedTableName} WHERE ${conditions.join(' AND ')} LIMIT ${options?.limit ?? 10};`;
     const result = await this.connection.execute(sql, parameters);
 
     return this.loadMany(modelClass, result.records);
@@ -848,13 +862,9 @@ export abstract class BaseSQLModelService
   // Query Support
   async query<T extends ModelType>(modelClass: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(modelClass, query);
-    const context = SQLModelUtil.getContext(this, modelClass);
-    const { whereSQL, parameters = [] } = SQLQueryCompiler.compileWhere(
-      this,
-      context,
-      ModelQueryUtil.getWhereClause(modelClass, query.where)
-    );
-    const sortSQL = SQLQueryCompiler.compileSort(this, context, query.sort);
+    const context = this.getContext(modelClass);
+    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, query.where);
+    const sortSQL = SQLQueryCompiler.compileSort(context, query.sort);
 
     let pagination = '';
     if (query.limit !== undefined) {
@@ -864,7 +874,7 @@ export abstract class BaseSQLModelService
       pagination += ` OFFSET ${query.offset}`;
     }
 
-    const sql = `SELECT * FROM ${this.escapeIdentifier(context.tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''} ${sortSQL} ${pagination};`;
+    const sql = `SELECT * FROM ${context.escapedTableName} ${whereSQL ? `WHERE ${whereSQL}` : ''} ${sortSQL} ${pagination};`;
     const result = await this.connection.execute(sql, parameters);
 
     return this.loadMany(modelClass, result.records);
@@ -878,13 +888,9 @@ export abstract class BaseSQLModelService
 
   async queryCount<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
     await QueryVerifier.verify(modelClass, query);
-    const context = SQLModelUtil.getContext(this, modelClass);
-    const { whereSQL, parameters = [] } = SQLQueryCompiler.compileWhere(
-      this,
-      context,
-      ModelQueryUtil.getWhereClause(modelClass, query.where)
-    );
-    const sql = `SELECT COUNT(*) as "total" FROM ${this.escapeIdentifier(context.tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
+    const context = this.getContext(modelClass);
+    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, query.where);
+    const sql = `SELECT COUNT(*) as "total" FROM ${context.escapedTableName} ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
 
     const result = await this.connection.execute<{ total: string | number }>(sql, parameters);
     return Number(result.records[0]?.total ?? 0);
@@ -902,12 +908,8 @@ export abstract class BaseSQLModelService
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
 
-    const context = SQLModelUtil.getContext(this, modelClass);
-    const { whereSQL, parameters = [] } = SQLQueryCompiler.compileWhere(
-      this,
-      context,
-      ModelQueryUtil.getWhereClause(modelClass, query.where)
-    );
+    const context = this.getContext(modelClass);
+    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, query.where);
 
     const sets: string[] = [];
     const values: unknown[] = [];
@@ -937,7 +939,7 @@ export abstract class BaseSQLModelService
       values.push(...parameters);
     }
 
-    const sql = `UPDATE ${this.escapeIdentifier(context.tableName)} SET ${sets.join(', ')} WHERE ${conditions.join(' AND ')};`;
+    const sql = `UPDATE ${context.escapedTableName} SET ${sets.join(', ')} WHERE ${conditions.join(' AND ')};`;
 
     const result = await this.connection.execute(sql, values);
     if (result.count === 0) {
@@ -955,15 +957,10 @@ export abstract class BaseSQLModelService
 
   async deleteByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
     await QueryVerifier.verify(modelClass, query);
-    const context = SQLModelUtil.getContext(this, modelClass);
-    const { whereSQL, parameters = [] } = SQLQueryCompiler.compileWhere(
-      this,
-      context,
-      ModelQueryUtil.getWhereClause(modelClass, query.where, false),
-      false
-    );
+    const context = this.getContext(modelClass);
+    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, query.where, false);
 
-    const sql = `DELETE FROM ${this.escapeIdentifier(context.tableName)} ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
+    const sql = `DELETE FROM ${context.escapedTableName} ${whereSQL ? `WHERE ${whereSQL}` : ''};`;
 
     const result = await this.connection.execute(sql, parameters);
     return result.count;
@@ -999,9 +996,9 @@ export abstract class BaseSQLModelService
     query?: ModelQuery<T>
   ): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(modelClass, query);
-    const context = SQLModelUtil.getContext(this, modelClass);
-    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(this, context, ModelQueryUtil.getWhereClause(modelClass, query?.where));
-    const { sqlPath } = SQLQueryCompiler.resolvePath(this, context, String(field).split('.'), 'read');
+    const context = this.getContext(modelClass);
+    const { whereSQL, parameters } = this.#whereClause(modelClass, query?.where);
+    const { sqlPath } = SQLQueryCompiler.resolvePath(context, String(field).split('.'), 'read');
 
     const conditions = [`${sqlPath} IS NOT NULL`];
     if (whereSQL) {
@@ -1013,7 +1010,7 @@ export abstract class BaseSQLModelService
 
     const sql = `
       SELECT ${keySql} AS ${this.escapeIdentifier('key')}, ${countSql} AS ${this.escapeIdentifier('count')}
-      FROM ${this.escapeIdentifier(context.tableName)}
+      FROM ${context.escapedTableName}
       WHERE ${conditions.join(' AND ')}
       GROUP BY ${sqlPath}
       ORDER BY ${this.escapeIdentifier('count')} DESC;

@@ -1,9 +1,8 @@
-import { ModelRegistryIndex, type ModelType } from '@travetto/model';
+import { ModelRegistryIndex } from '@travetto/model';
 import { type Class, castTo, RuntimeError } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import type { SQLDialect } from './dialect.ts';
-import type { SchemaContext, TableContext } from './types.ts';
+import type { SchemaContext } from './types.ts';
 
 export class SQLModelUtil {
   static SCHEMA_CACHE = new Map<Class, SchemaContext<unknown>>();
@@ -41,14 +40,5 @@ export class SQLModelUtil {
     const context: SchemaContext<T> = { cls, simpleFields, complexFields, allFields: fields };
     this.SCHEMA_CACHE.set(cls, context);
     return context;
-  }
-
-  static getContext<T extends ModelType>(dialect: SQLDialect, modelClass: Class<T>): TableContext<T> {
-    let tableName = ModelRegistryIndex.getStoreName(modelClass);
-    if (dialect.config.namespace) {
-      tableName = `${dialect.config.namespace}_${tableName}`;
-    }
-
-    return { tableName, ...this.getSchemaContext(modelClass) };
   }
 }
