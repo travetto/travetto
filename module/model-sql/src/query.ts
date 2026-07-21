@@ -120,7 +120,7 @@ export class SQLQueryCompiler {
       currentField = subConfig?.fields[leafSegment];
     }
 
-    let compiledPath = dialect.compileIndexPath(context.tableName, context.simpleFields, path, mode);
+    let compiledPath = dialect.compileIndexPath(context, path, mode);
 
     // Apply type casting for JSON extract values
     if (currentField && !currentField.array) {

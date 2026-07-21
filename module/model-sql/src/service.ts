@@ -100,12 +100,12 @@ export abstract class BaseSQLModelService
   abstract getColumnType(fieldConfiguration: SchemaFieldConfig): string;
   abstract compileJsonIndexPath(columnName: string, jsonPath: string[], mode: JSONSqlPathMode): string;
 
-  compileIndexPath(tableName: string, simpleFields: Map<string, SchemaFieldConfig>, path: string[], mode: JSONSqlPathMode): string {
+  compileIndexPath(context: TableContext<ModelType>, path: string[], mode: JSONSqlPathMode): string {
     const firstSegment = path[0];
     const escapedFirst = this.escapeIdentifier(firstSegment);
-    if (simpleFields.has(firstSegment)) {
+    if (context.simpleFields.has(firstSegment)) {
       if (path.length > 1) {
-        throw new Error(`Cannot create nested index under simple column "${firstSegment}" in table "${tableName}"`);
+        throw new Error(`Cannot create nested index under simple column "${firstSegment}" in table "${context.tableName}"`);
       }
       return escapedFirst;
     } else {
@@ -117,7 +117,8 @@ export abstract class BaseSQLModelService
     }
   }
 
-  getCreateIndexSQL(modelClass: Class, indexConfig: IndexConfig, tableName: string, simpleFields: Map<string, SchemaFieldConfig>): string {
+  getCreateIndexSQL(context: TableContext<ModelType>, indexConfig: IndexConfig): string {
+    const { tableName, cls: modelClass } = context;
     const indexName = ['idx', tableName, indexConfig.name.toLowerCase().replaceAll('-', '_')].join('_');
 
     if (isModelQueryIndex(indexConfig)) {
@@ -127,7 +128,7 @@ export abstract class BaseSQLModelService
         const isAscending = typeof sortDirection === 'number' ? sortDirection === 1 : !sortDirection;
 
         const path = fieldKey.split('.');
-        const expression = this.compileIndexPath(tableName, simpleFields, path, 'createIndex');
+        const expression = this.compileIndexPath(context, path, 'createIndex');
         return `${expression} ${isAscending ? 'ASC' : 'DESC'}`;
       });
 
@@ -135,7 +136,7 @@ export abstract class BaseSQLModelService
     } else if (isModelIndexedIndex(indexConfig)) {
       const allFields = [...indexConfig.keyTemplate, ...indexConfig.sortTemplate];
       const indexFields = allFields.map(({ path, value }) => {
-        const expression = this.compileIndexPath(tableName, simpleFields, path, 'createIndex');
+        const expression = this.compileIndexPath(context, path, 'createIndex');
         return `${expression} ${value === -1 ? 'DESC' : 'ASC'}`;
       });
 
@@ -206,7 +207,7 @@ export abstract class BaseSQLModelService
 
       const indexes = ModelRegistryIndex.getIndices(modelClass) || [];
       for (const index of indexes) {
-        const createIndexSQL = this.getCreateIndexSQL(modelClass, index, context.tableName, context.simpleFields);
+        const createIndexSQL = this.getCreateIndexSQL(context, index);
         await this.connection.execute(createIndexSQL);
       }
     } else {
@@ -252,7 +253,7 @@ export abstract class BaseSQLModelService
         const indexName = ['idx', context.tableName, index.name.toLowerCase().replaceAll('-', '_')].join('_');
         requestedIndexesMap.set(indexName, index);
 
-        const newIndexSQL = this.getCreateIndexSQL(modelClass, index, context.tableName, context.simpleFields);
+        const newIndexSQL = this.getCreateIndexSQL(context, index);
         if (!existingIndexes.has(indexName)) {
           await this.connection.execute(newIndexSQL);
         } else {
@@ -754,7 +755,7 @@ export abstract class BaseSQLModelService
     const context = SQLModelUtil.getContext(this, modelClass);
 
     const sortClauses = indexConfig.sortTemplate.map(({ path, value }) => {
-      const expression = this.compileIndexPath(context.tableName, context.simpleFields, path, 'orderBy');
+      const expression = this.compileIndexPath(context, path, 'orderBy');
       return `${expression} ${value === -1 ? 'DESC' : 'ASC'}`;
     });
     const sortSQL = sortClauses.length ? `ORDER BY ${sortClauses.join(', ')}` : '';
