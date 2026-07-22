@@ -2,10 +2,6 @@ import type { ModelType } from '@travetto/model';
 import type { Class } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
-import type { SQLDialect } from './dialect.ts';
-
-export type { SQLDialect, TransactionStatements } from './dialect.ts';
-
 export type JSONSqlPathMode = 'orderBy' | 'createIndex' | 'read';
 
 export interface SchemaContext<T> {
@@ -19,5 +15,4 @@ export interface TableContext<T extends ModelType = ModelType> extends SchemaCon
   tableName: string;
   database: string;
   escapedTableName: string;
-  dialect: SQLDialect;
 }

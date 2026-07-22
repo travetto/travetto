@@ -1,4 +1,4 @@
-import { AbstractANSI99Dialect, type SQLConnection, type TableContext } from '@travetto/model-sql';
+import { AbstractANSI99Dialect, type TableContext } from '@travetto/model-sql';
 import { type Class, castTo } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -100,67 +100,72 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     return sqlPath;
   }
 
-  override shiftPlaceholders(sql: string, offset: number): string {
+  shiftPlaceholders(sql: string, offset: number): string {
     return sql.replaceAll(/[$](\d+)/g, (_, num) => `$${Number(num) + offset}`);
   }
 
-  async getTableExists(context: TableContext, connection: SQLConnection): Promise<boolean> {
-    const tableCheck = await connection.execute<{ exists: boolean }>(
-      `SELECT EXISTS (
+  getTableExistsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
+    return {
+      sql: `SELECT EXISTS (
         SELECT FROM pg_catalog.pg_class c
         JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
         WHERE c.relname = $1 AND c.relkind = 'r'
       );`,
-      [context.tableName]
-    );
-    return tableCheck.records[0]?.exists ?? false;
+      parameters: [context.tableName]
+    };
   }
 
-  async getExistingColumns(context: TableContext, connection: SQLConnection): Promise<Map<string, string>> {
-    const columnQuery = await connection.execute<{ name: string; type: string }>(
-      `SELECT a.attname AS name, pg_catalog.format_type(a.atttypid, a.atttypmod) AS type
+  parseTableExistsResult(records: unknown[]): boolean {
+    return castTo<{ exists: boolean }>(records[0])?.exists ?? false;
+  }
+
+  getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
+    return {
+      sql: `SELECT a.attname AS name, pg_catalog.format_type(a.atttypid, a.atttypmod) AS type
        FROM pg_catalog.pg_attribute a
        WHERE a.attrelid = $1::regclass AND a.attnum > 0 AND NOT a.attisdropped;`,
-      [context.tableName]
-    );
-    return new Map(columnQuery.records.map(record => [record.name, record.type.toUpperCase()]));
+      parameters: [context.tableName]
+    };
   }
 
-  override async handleColumnTypeMismatch(
-    context: TableContext,
-    columnName: string,
-    columnType: string,
-    existingType: string,
-    connection: SQLConnection
-  ): Promise<void> {
+  parseExistingColumns(records: unknown[]): Map<string, string> {
+    return new Map(castTo<{ name: string; type: string }[]>(records).map(record => [record.name, record.type.toUpperCase()]));
+  }
+
+  getAlterColumnTypeSQL(context: TableContext, columnName: string, columnType: string, existingType: string): string | undefined {
     const normalizedExisting = existingType.replace('CHARACTER VARYING', 'VARCHAR').replace('INTEGER', 'INT');
     const normalizedRequested = columnType.toUpperCase().replace('CHARACTER VARYING', 'VARCHAR').replace('INTEGER', 'INT');
 
     if (!normalizedExisting.startsWith(normalizedRequested) && !normalizedRequested.startsWith(normalizedExisting)) {
-      const alterColumnSQL = `ALTER TABLE ${context.escapedTableName} ALTER COLUMN ${this.escapeIdentifier(columnName)} TYPE ${columnType} USING (${this.escapeIdentifier(columnName)}::${columnType});`;
-      await connection.execute(alterColumnSQL);
+      return `ALTER TABLE ${context.escapedTableName} ALTER COLUMN ${this.escapeIdentifier(columnName)} TYPE ${columnType} USING (${this.escapeIdentifier(columnName)}::${columnType});`;
     }
+    return undefined;
   }
 
-  async getExistingIndexes(context: TableContext, connection: SQLConnection): Promise<Map<string, string>> {
-    const indexQuery = await connection.execute<{ indexname: string; indexdef: string }>(
-      `SELECT indexname, indexdef FROM pg_indexes WHERE tablename = $1;`,
-      [context.tableName]
-    );
+  getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
+    return {
+      sql: `SELECT indexname, indexdef FROM pg_indexes WHERE tablename = $1;`,
+      parameters: [context.tableName]
+    };
+  }
+
+  parseExistingIndexes(records: unknown[]): Map<string, string> {
     return new Map(
-      indexQuery.records.filter(record => !record.indexname.endsWith('_pkey')).map(record => [record.indexname, record.indexdef])
+      castTo<{ indexname: string; indexdef: string }[]>(records)
+        .filter(record => !record.indexname.endsWith('_pkey'))
+        .map(record => [record.indexname, record.indexdef])
     );
   }
 
-  async dropIndex(context: TableContext, indexName: string, connection: SQLConnection): Promise<void> {
-    await connection.execute(`DROP INDEX IF EXISTS ${this.escapeIdentifier(indexName)};`);
+  getDropIndexSQL(context: TableContext, indexName: string): string {
+    return `DROP INDEX IF EXISTS ${this.escapeIdentifier(indexName)};`;
   }
 
-  override async dropTable(context: TableContext, connection: SQLConnection): Promise<void> {
-    await connection.execute(`DROP TABLE IF EXISTS ${context.escapedTableName} CASCADE;`);
+  getDropTableSQL(context: TableContext): string {
+    return `DROP TABLE IF EXISTS ${context.escapedTableName} CASCADE;`;
   }
 
-  override async truncateTable(context: TableContext, connection: SQLConnection): Promise<void> {
-    await connection.execute(`TRUNCATE TABLE ${context.escapedTableName} CASCADE;`);
+  getTruncateTableSQL(context: TableContext): string {
+    return `TRUNCATE TABLE ${context.escapedTableName} CASCADE;`;
   }
 }

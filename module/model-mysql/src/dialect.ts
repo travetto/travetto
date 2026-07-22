@@ -1,4 +1,4 @@
-import { AbstractANSI99Dialect, type JSONSqlPathMode, type SQLConnection, type TableContext } from '@travetto/model-sql';
+import { AbstractANSI99Dialect, type JSONSqlPathMode, type TableContext } from '@travetto/model-sql';
 import { type Class, castTo } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -69,7 +69,7 @@ export class MysqlDialect extends AbstractANSI99Dialect {
     return isObject ? `JSON_CONTAINS(${sqlPath}, ${identifier})` : `JSON_CONTAINS(${sqlPath}, JSON_ARRAY(${identifier}))`;
   }
 
-  override compileJsonEquality(sqlPath: string, identifier: string): string {
+  compileJsonEquality(sqlPath: string, identifier: string): string {
     return `CAST(${sqlPath} AS JSON) = CAST(${identifier} AS JSON)`;
   }
 
@@ -103,31 +103,40 @@ export class MysqlDialect extends AbstractANSI99Dialect {
     return `INSERT INTO ${context.escapedTableName} (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) ON DUPLICATE KEY UPDATE ${mysqlUpdates.join(', ')};`;
   }
 
-  async getTableExists(context: TableContext, connection: SQLConnection): Promise<boolean> {
-    const tableCheck = await connection.execute<{ total: number }>(
-      `SELECT COUNT(*) as total FROM information_schema.tables WHERE table_schema = ? AND table_name = ?;`,
-      [context.database, context.tableName]
-    );
-    return Number(tableCheck.records[0]?.total ?? 0) > 0;
+  getTableExistsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
+    return {
+      sql: `SELECT COUNT(*) as total FROM information_schema.tables WHERE table_schema = ? AND table_name = ?;`,
+      parameters: [context.database, context.tableName]
+    };
   }
 
-  async getExistingColumns(context: TableContext, connection: SQLConnection): Promise<Map<string, string>> {
-    const columnQuery = await connection.execute<{ name: string; type: string }>(
-      `SELECT COLUMN_NAME as name, DATA_TYPE as type FROM information_schema.columns WHERE table_schema = ? AND table_name = ?;`,
-      [context.database, context.tableName]
-    );
-    return new Map(columnQuery.records.map(record => [record.name, record.type.toUpperCase()]));
+  parseTableExistsResult(records: unknown[]): boolean {
+    return Number(castTo<{ total: number }>(records[0])?.total ?? 0) > 0;
   }
 
-  async getExistingIndexes(context: TableContext, connection: SQLConnection): Promise<Map<string, string>> {
-    const indexQuery = await connection.execute<{ name: string }>(
-      `SELECT DISTINCT INDEX_NAME as name FROM information_schema.statistics WHERE table_schema = ? AND table_name = ? AND INDEX_NAME != 'PRIMARY';`,
-      [context.database, context.tableName]
-    );
-    return new Map(indexQuery.records.map(record => [record.name, '']));
+  getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
+    return {
+      sql: `SELECT COLUMN_NAME as name, DATA_TYPE as type FROM information_schema.columns WHERE table_schema = ? AND table_name = ?;`,
+      parameters: [context.database, context.tableName]
+    };
   }
 
-  async dropIndex(context: TableContext, indexName: string, connection: SQLConnection): Promise<void> {
-    await connection.execute(`DROP INDEX ${this.escapeIdentifier(indexName)} ON ${context.escapedTableName};`);
+  parseExistingColumns(records: unknown[]): Map<string, string> {
+    return new Map(castTo<{ name: string; type: string }[]>(records).map(record => [record.name, record.type.toUpperCase()]));
+  }
+
+  getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
+    return {
+      sql: `SELECT DISTINCT INDEX_NAME as name FROM information_schema.statistics WHERE table_schema = ? AND table_name = ? AND INDEX_NAME != 'PRIMARY';`,
+      parameters: [context.database, context.tableName]
+    };
+  }
+
+  parseExistingIndexes(records: unknown[]): Map<string, string> {
+    return new Map(castTo<{ name: string }[]>(records).map(record => [record.name, '']));
+  }
+
+  override getDropIndexSQL(context: TableContext, indexName: string): string {
+    return `DROP INDEX ${this.escapeIdentifier(indexName)} ON ${context.escapedTableName};`;
   }
 }

@@ -1,13 +1,13 @@
-import { AbstractANSI99Dialect, type SQLConnection, type TableContext, type TransactionStatements } from '@travetto/model-sql';
+import { AbstractANSI99Dialect, type TableContext, type TransactionStatements } from '@travetto/model-sql';
 import { type Class, castTo } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 export class SqliteDialect extends AbstractANSI99Dialect {
-  override returningSupport = true;
-  override complexColumnType = 'TEXT';
+  returningSupport = true;
+  complexColumnType = 'TEXT';
 
-  override transactionStatements: TransactionStatements = {
-    ...this.transactionStatements,
+  transactionStatements: TransactionStatements = {
+    ...AbstractANSI99Dialect.TRANSACTION_STATEMENTS,
     begin: 'BEGIN IMMEDIATE;'
   };
 
@@ -64,35 +64,47 @@ export class SqliteDialect extends AbstractANSI99Dialect {
     return sqlPath;
   }
 
-  async getTableExists(context: TableContext, connection: SQLConnection): Promise<boolean> {
-    const tableCheck = await connection.execute<{ name: string }>(`SELECT name FROM sqlite_master WHERE type='table' AND name=?;`, [
-      context.tableName
-    ]);
-    return tableCheck.count > 0;
+  getTableExistsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
+    return {
+      sql: `SELECT name FROM sqlite_master WHERE type='table' AND name=?;`,
+      parameters: [context.tableName]
+    };
   }
 
-  async getExistingColumns(context: TableContext, connection: SQLConnection): Promise<Map<string, string>> {
-    const columnQuery = await connection.execute<{ name: string; type: string }>(
-      `PRAGMA table_info('${this.escapeLiteral(context.tableName)}');`
-    );
-    return new Map(columnQuery.records.map(record => [record.name, record.type.toUpperCase()]));
+  parseTableExistsResult(records: unknown[]): boolean {
+    return records.length > 0;
   }
 
-  async getExistingIndexes(context: TableContext, connection: SQLConnection): Promise<Map<string, string>> {
-    const indexQuery = await connection.execute<{ name: string; sql: string }>(
-      `SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name=?;`,
-      [context.tableName]
-    );
+  getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
+    return {
+      sql: `PRAGMA table_info('${this.escapeLiteral(context.tableName)}');`
+    };
+  }
+
+  parseExistingColumns(records: unknown[]): Map<string, string> {
+    return new Map(castTo<{ name: string; type: string }[]>(records).map(record => [record.name, record.type.toUpperCase()]));
+  }
+
+  getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
+    return {
+      sql: `SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name=?;`,
+      parameters: [context.tableName]
+    };
+  }
+
+  parseExistingIndexes(records: unknown[]): Map<string, string> {
     return new Map(
-      indexQuery.records.filter(record => record.sql && !record.name.startsWith('sqlite_')).map(record => [record.name, record.sql])
+      castTo<{ name: string; sql: string }[]>(records)
+        .filter(record => record.sql && !record.name.startsWith('sqlite_'))
+        .map(record => [record.name, record.sql])
     );
   }
 
-  async dropIndex(context: TableContext, indexName: string, connection: SQLConnection): Promise<void> {
-    await connection.execute(`DROP INDEX IF EXISTS ${this.escapeIdentifier(indexName)};`);
+  getDropIndexSQL(context: TableContext, indexName: string): string {
+    return `DROP INDEX IF EXISTS ${this.escapeIdentifier(indexName)};`;
   }
 
-  override async truncateTable(context: TableContext, connection: SQLConnection): Promise<void> {
-    await connection.execute(`DELETE FROM ${context.escapedTableName};`);
+  getTruncateTableSQL(context: TableContext): string {
+    return `DELETE FROM ${context.escapedTableName};`;
   }
 }

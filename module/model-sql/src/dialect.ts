@@ -1,10 +1,9 @@
-import { type IndexConfig, ModelRegistryIndex } from '@travetto/model';
+import type { IndexConfig } from '@travetto/model';
 import { isModelIndexedIndex } from '@travetto/model-indexed';
 import { isModelQueryIndex } from '@travetto/model-query';
 import { type Class, castTo } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
-import type { SQLConnection } from './connection.ts';
 import type { JSONSqlPathMode, TableContext } from './types.ts';
 
 export interface TransactionStatements {
@@ -40,32 +39,25 @@ export interface SQLDialect {
   castColumn(sqlPath: string, type: Class): string;
   getUpsertSQL(context: TableContext, columns: string[], placeholders: string[], conflictTarget: string[], updates: string[]): string;
   shiftPlaceholders?(sql: string, offset: number): string;
+  normalizeIndexDefinition(sql: string): string;
 
-  getTableExists(context: TableContext, connection: SQLConnection): Promise<boolean>;
-  getExistingColumns(context: TableContext, connection: SQLConnection): Promise<Map<string, string>>;
-  getExistingIndexes(context: TableContext, connection: SQLConnection): Promise<Map<string, string>>;
-  dropIndex(context: TableContext, indexName: string, connection: SQLConnection): Promise<void>;
-  handleColumnTypeMismatch?(
-    context: TableContext,
-    columnName: string,
-    columnType: string,
-    existingType: string,
-    connection: SQLConnection
-  ): Promise<void>;
-  upsertTable(context: TableContext, connection: SQLConnection): Promise<void>;
-  dropTable(context: TableContext, connection: SQLConnection): Promise<void>;
-  truncateTable(context: TableContext, connection: SQLConnection): Promise<void>;
+  getTableExistsQuery(context: TableContext): { sql: string; parameters?: unknown[] };
+  parseTableExistsResult(records: unknown[]): boolean;
+  getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] };
+  parseExistingColumns(records: unknown[]): Map<string, string>;
+  getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] };
+  parseExistingIndexes(records: unknown[]): Map<string, string>;
+  getDropIndexSQL(context: TableContext, indexName: string): string;
+  getDropTableSQL(context: TableContext): string;
+  getTruncateTableSQL(context: TableContext): string;
+  getAlterColumnTypeSQL?(context: TableContext, columnName: string, columnType: string, existingType: string): string | undefined;
 }
 
 /**
  * Abstract ANSI SQL-99 Dialect base implementation
  */
 export abstract class AbstractANSI99Dialect implements SQLDialect {
-  returningSupport = false;
-  suggestLikeOperator = 'LIKE';
-  abstract complexColumnType: string;
-
-  transactionStatements: TransactionStatements = {
+  static TRANSACTION_STATEMENTS: TransactionStatements = {
     begin: 'BEGIN;',
     beginNested: 'SAVEPOINT $1;',
     isolate: 'SET TRANSACTION ISOLATION LEVEL READ COMMITTED;',
@@ -74,6 +66,12 @@ export abstract class AbstractANSI99Dialect implements SQLDialect {
     commit: 'COMMIT;',
     commitNested: 'RELEASE SAVEPOINT $1;'
   };
+
+  returningSupport = false;
+  suggestLikeOperator = 'LIKE';
+  abstract complexColumnType: string;
+
+  transactionStatements: TransactionStatements = AbstractANSI99Dialect.TRANSACTION_STATEMENTS;
 
   escapeIdentifier(name: string): string {
     return `"${name.replaceAll('"', '""')}"`;
@@ -160,112 +158,22 @@ export abstract class AbstractANSI99Dialect implements SQLDialect {
       .replaceAll(')', '');
   }
 
-  abstract getTableExists(context: TableContext, connection: SQLConnection): Promise<boolean>;
-  abstract getExistingColumns(context: TableContext, connection: SQLConnection): Promise<Map<string, string>>;
-  abstract getExistingIndexes(context: TableContext, connection: SQLConnection): Promise<Map<string, string>>;
-  abstract dropIndex(context: TableContext, indexName: string, connection: SQLConnection): Promise<void>;
+  abstract getTableExistsQuery(context: TableContext): { sql: string; parameters?: unknown[] };
+  abstract parseTableExistsResult(records: unknown[]): boolean;
+  abstract getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] };
+  abstract parseExistingColumns(records: unknown[]): Map<string, string>;
+  abstract getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] };
+  abstract parseExistingIndexes(records: unknown[]): Map<string, string>;
 
-  handleColumnTypeMismatch?(
-    context: TableContext,
-    columnName: string,
-    columnType: string,
-    existingType: string,
-    connection: SQLConnection
-  ): Promise<void>;
-
-  async upsertTable(context: TableContext, connection: SQLConnection): Promise<void> {
-    const tableExists = await this.getTableExists(context, connection);
-
-    if (!tableExists) {
-      const idType = this.getColumnType(castTo({ name: 'id', type: String }));
-      const columnDefinitions: string[] = [`${this.escapeIdentifier('id')} ${idType} PRIMARY KEY`];
-
-      for (const field of context.simpleFields.values()) {
-        if (field.name === 'id') {
-          continue;
-        }
-        const columnType = this.getColumnType(field);
-        columnDefinitions.push(`${this.escapeIdentifier(field.name)} ${columnType}`);
-      }
-
-      for (const field of context.complexFields.values()) {
-        columnDefinitions.push(`${this.escapeIdentifier(field.name)} ${this.complexColumnType}`);
-      }
-
-      const createTableSQL = `CREATE TABLE ${context.escapedTableName} (\n  ${columnDefinitions.join(',\n  ')}\n);`;
-      await connection.execute(createTableSQL);
-
-      const indexes = ModelRegistryIndex.getIndices(context.cls) || [];
-      for (const index of indexes) {
-        const createIndexSQL = this.getCreateIndexSQL(context, index);
-        await connection.execute(createIndexSQL);
-      }
-    } else {
-      const existingColumns = await this.getExistingColumns(context, connection);
-
-      const requestedFieldsMap = new Map<string, string>();
-      for (const field of context.simpleFields.values()) {
-        requestedFieldsMap.set(field.name, this.getColumnType(field));
-      }
-      for (const field of context.complexFields.values()) {
-        requestedFieldsMap.set(field.name, this.complexColumnType);
-      }
-
-      for (const [columnName, columnType] of requestedFieldsMap.entries()) {
-        if (columnName === 'id') {
-          continue;
-        }
-        if (!existingColumns.has(columnName)) {
-          const addColumnSQL = `ALTER TABLE ${context.escapedTableName} ADD COLUMN ${this.escapeIdentifier(columnName)} ${columnType};`;
-          await connection.execute(addColumnSQL);
-        } else if (this.handleColumnTypeMismatch) {
-          const existingType = existingColumns.get(columnName)!;
-          await this.handleColumnTypeMismatch(context, columnName, columnType, existingType, connection);
-        }
-      }
-
-      const existingIndexes = await this.getExistingIndexes(context, connection);
-      const modelIndexes = ModelRegistryIndex.getIndices(context.cls) || [];
-
-      const definedIndexes = new Map<string, IndexConfig>();
-      for (const indexConfig of modelIndexes) {
-        const indexName = ['idx', context.tableName, indexConfig.name.toLowerCase().replaceAll('-', '_')].join('_');
-        definedIndexes.set(indexName, indexConfig);
-      }
-
-      for (const [indexName, indexDefinition] of existingIndexes.entries()) {
-        if (!definedIndexes.has(indexName)) {
-          await this.dropIndex(context, indexName, connection);
-        } else {
-          const indexConfig = definedIndexes.get(indexName)!;
-          const expectedSQL = this.getCreateIndexSQL(context, indexConfig);
-
-          if (indexDefinition) {
-            const normalizedExisting = this.normalizeIndexDefinition(indexDefinition);
-            const normalizedExpected = this.normalizeIndexDefinition(expectedSQL);
-
-            if (normalizedExisting !== normalizedExpected) {
-              await this.dropIndex(context, indexName, connection);
-              await connection.execute(expectedSQL);
-            }
-          }
-        }
-      }
-
-      for (const [indexName, indexConfig] of definedIndexes.entries()) {
-        if (!existingIndexes.has(indexName)) {
-          const createIndexSQL = this.getCreateIndexSQL(context, indexConfig);
-          await connection.execute(createIndexSQL);
-        }
-      }
-    }
+  getDropIndexSQL(context: TableContext, indexName: string): string {
+    return `DROP INDEX ${this.escapeIdentifier(indexName)} ON ${context.escapedTableName};`;
   }
 
-  async dropTable(context: TableContext, connection: SQLConnection): Promise<void> {
-    await connection.execute(`DROP TABLE IF EXISTS ${context.escapedTableName};`);
+  getDropTableSQL(context: TableContext): string {
+    return `DROP TABLE IF EXISTS ${context.escapedTableName};`;
   }
 
-  async truncateTable(context: TableContext, connection: SQLConnection): Promise<void> {
-    await connection.execute(`TRUNCATE TABLE ${context.escapedTableName} CASCADE;`);
+  getTruncateTableSQL(context: TableContext): string {
+    return `TRUNCATE TABLE ${context.escapedTableName} CASCADE;`;
   }
 }
