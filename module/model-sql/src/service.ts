@@ -1,7 +1,6 @@
 import {
   type BulkOperation,
   type BulkResponse,
-  type IndexConfig,
   type ModelBulkSupport,
   ModelBulkUtil,
   type ModelCrudProvider,
@@ -19,7 +18,6 @@ import {
 import {
   type FullKeyedIndexBody,
   type FullKeyedIndexWithPartialBody,
-  isModelIndexedIndex,
   type KeyedIndexBody,
   type KeyedIndexSelection,
   ModelIndexedComputedIndex,
@@ -36,7 +34,6 @@ import {
   warnIfNonIndexedIndex
 } from '@travetto/model-indexed';
 import {
-  isModelQueryIndex,
   type ModelQuery,
   type ModelQueryCrudSupport,
   ModelQueryCrudUtil,
@@ -52,12 +49,11 @@ import {
   type WhereClause
 } from '@travetto/model-query';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
-import type { SchemaFieldConfig } from '@travetto/schema';
 import { WorkPool } from '@travetto/worker';
 
 import type { SQLConnection } from './connection.ts';
 import { SQLQueryCompiler } from './query.ts';
-import type { JSONSqlPathMode, SQLDialect, TableContext } from './types.ts';
+import type { SQLDialect, TableContext } from './types.ts';
 import { SQLModelUtil } from './util.ts';
 
 /**
@@ -75,15 +71,24 @@ export abstract class BaseSQLModelService
     ModelQuerySupport,
     ModelQueryCrudSupport,
     ModelQueryFacetSupport,
-    ModelQuerySuggestSupport,
-    SQLDialect
+    ModelQuerySuggestSupport
 {
   abstract readonly client: unknown;
   abstract connection: SQLConnection;
-  abstract returningSupport: boolean;
 
   idSource = ModelCrudUtil.uuidSource();
-  suggestLikeOperator = 'LIKE';
+
+  get dialect(): SQLDialect {
+    return this.connection.dialect;
+  }
+
+  get returningSupport(): boolean {
+    return this.dialect.returningSupport;
+  }
+
+  get suggestLikeOperator(): string {
+    return this.dialect.suggestLikeOperator ?? 'LIKE';
+  }
 
   getContext<T extends ModelType>(modelClass: Class<T>): TableContext<T> {
     let tableName = ModelRegistryIndex.getStoreName(modelClass);
@@ -96,8 +101,8 @@ export abstract class BaseSQLModelService
     return {
       tableName,
       database,
-      escapedTableName: this.escapeIdentifier(tableName),
-      dialect: this,
+      escapedTableName: this.dialect.escapeIdentifier(tableName),
+      dialect: this.dialect,
       ...SQLModelUtil.getSchemaContext(modelClass)
     };
   }
@@ -110,209 +115,11 @@ export abstract class BaseSQLModelService
     return SQLQueryCompiler.compileWhere(this.getContext(cls), ModelQueryUtil.getWhereClause(cls, where), checkExpiry);
   }
 
-  // SQLDialect contract
-  escapeIdentifier(name: string): string {
-    return `"${name.replaceAll('"', '""')}"`;
-  }
-
-  escapeLiteral(value: string): string {
-    return value.replaceAll("'", "''");
-  }
-
-  abstract getColumnType(fieldConfiguration: SchemaFieldConfig): string;
-  abstract compileJsonIndexPath(columnName: string, jsonPath: string[], mode: JSONSqlPathMode): string;
-
-  compileIndexPath(context: TableContext, path: string[], mode: JSONSqlPathMode): string {
-    const firstSegment = path[0];
-    const escapedFirst = this.escapeIdentifier(firstSegment);
-    if (context.simpleFields.has(firstSegment)) {
-      if (path.length > 1) {
-        throw new Error(`Cannot create nested index under simple column "${firstSegment}" in table "${context.tableName}"`);
-      }
-      return escapedFirst;
-    } else {
-      const nestedSegments = path.slice(1);
-      if (nestedSegments.length === 0) {
-        return escapedFirst;
-      }
-      return this.compileJsonIndexPath(escapedFirst, nestedSegments, mode);
-    }
-  }
-
-  getCreateIndexSQL(context: TableContext, indexConfig: IndexConfig): string {
-    const { tableName, cls: modelClass } = context;
-    const indexName = ['idx', tableName, indexConfig.name.toLowerCase().replaceAll('-', '_')].join('_');
-
-    if (isModelQueryIndex(indexConfig)) {
-      const indexFields = indexConfig.fields.map(field => {
-        const fieldKey = Object.keys(field)[0];
-        const sortDirection = castTo<Record<string, unknown>>(field)[fieldKey];
-        const isAscending = typeof sortDirection === 'number' ? sortDirection === 1 : !sortDirection;
-
-        const path = fieldKey.split('.');
-        const expression = this.compileIndexPath(context, path, 'createIndex');
-        return `${expression} ${isAscending ? 'ASC' : 'DESC'}`;
-      });
-
-      return `CREATE ${indexConfig.unique ? 'UNIQUE ' : ''}INDEX ${this.escapeIdentifier(indexName)} ON ${context.escapedTableName} (${indexFields.join(', ')});`;
-    } else if (isModelIndexedIndex(indexConfig)) {
-      const allFields = [...indexConfig.keyTemplate, ...indexConfig.sortTemplate];
-      const indexFields = allFields.map(({ path, value }) => {
-        const expression = this.compileIndexPath(context, path, 'createIndex');
-        return `${expression} ${value === -1 ? 'DESC' : 'ASC'}`;
-      });
-
-      const isUnique = 'unique' in indexConfig && indexConfig.unique;
-      return `CREATE ${isUnique ? 'UNIQUE ' : ''}INDEX ${this.escapeIdentifier(indexName)} ON ${context.escapedTableName} (${indexFields.join(', ')});`;
-    }
-
-    throw new Error(`Unsupported index configuration for class ${modelClass.name}`);
-  }
-
-  getPlaceholder(index: number): string {
-    return '?';
-  }
-
-  abstract compileArrayContains(sqlPath: string, ident: string, isObject: boolean, type?: Class): string;
-  abstract getRegexOperator(caseInsensitive: boolean): string;
-  abstract formatRegex(source: string, caseInsensitive: boolean): string;
-  abstract castColumn(sqlPath: string, type: Class): string;
-  getUpsertSQL(context: TableContext, columns: string[], placeholders: string[], conflictTarget: string[], updates: string[]): string {
-    return `INSERT INTO ${context.escapedTableName} (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) ON CONFLICT (${conflictTarget.join(', ')}) DO UPDATE SET ${updates.join(', ')} RETURNING *;`;
-  }
-
-  normalizeIndexDefinition(sql: string): string {
-    return sql
-      .toLowerCase()
-      .replaceAll('"', '')
-      .replaceAll("'", '')
-      .replaceAll(' ', '')
-      .replaceAll('asc', '')
-      .replaceAll('desc', '')
-      .replaceAll('btree', '')
-      .replaceAll('public.', '')
-      .replaceAll('::text', '')
-      .replaceAll('(', '')
-      .replaceAll(')', '');
-  }
-
-  abstract complexColumnType: string;
-  abstract getTableExists(context: TableContext): Promise<boolean>;
-  abstract getExistingColumns(context: TableContext): Promise<Map<string, string>>;
-  abstract getExistingIndexes(context: TableContext): Promise<Map<string, string>>;
-  abstract dropIndex(context: TableContext, indexName: string): Promise<void>;
-
-  handleColumnTypeMismatch?(context: TableContext, columnName: string, columnType: string, existingType: string): Promise<void>;
-
-  async upsertTable(context: TableContext): Promise<void> {
-    const tableExists = await this.getTableExists(context);
-
-    if (!tableExists) {
-      const idType = this.getColumnType(castTo({ name: 'id', type: String }));
-      const columnDefinitions: string[] = [`${this.escapeIdentifier('id')} ${idType} PRIMARY KEY`];
-
-      for (const field of context.simpleFields.values()) {
-        if (field.name === 'id') {
-          continue;
-        }
-        const columnType = this.getColumnType(field);
-        columnDefinitions.push(`${this.escapeIdentifier(field.name)} ${columnType}`);
-      }
-
-      for (const field of context.complexFields.values()) {
-        columnDefinitions.push(`${this.escapeIdentifier(field.name)} ${this.complexColumnType}`);
-      }
-
-      const createTableSQL = `CREATE TABLE ${context.escapedTableName} (\n  ${columnDefinitions.join(',\n  ')}\n);`;
-      await this.connection.execute(createTableSQL);
-
-      const indexes = ModelRegistryIndex.getIndices(context.cls) || [];
-      for (const index of indexes) {
-        const createIndexSQL = this.getCreateIndexSQL(context, index);
-        await this.connection.execute(createIndexSQL);
-      }
-    } else {
-      const existingColumns = await this.getExistingColumns(context);
-
-      const requestedFieldsMap = new Map<string, string>();
-      for (const field of context.simpleFields.values()) {
-        requestedFieldsMap.set(field.name, this.getColumnType(field));
-      }
-      for (const field of context.complexFields.values()) {
-        requestedFieldsMap.set(field.name, this.complexColumnType);
-      }
-
-      for (const [columnName, columnType] of requestedFieldsMap.entries()) {
-        if (columnName === 'id') {
-          continue;
-        }
-        if (!existingColumns.has(columnName)) {
-          const addColumnSQL = `ALTER TABLE ${context.escapedTableName} ADD COLUMN ${this.escapeIdentifier(columnName)} ${columnType};`;
-          await this.connection.execute(addColumnSQL);
-        } else {
-          if (this.handleColumnTypeMismatch) {
-            await this.handleColumnTypeMismatch(context, columnName, columnType, existingColumns.get(columnName)!);
-          }
-        }
-      }
-
-      for (const columnName of existingColumns.keys()) {
-        if (columnName === 'id') {
-          continue;
-        }
-        if (!requestedFieldsMap.has(columnName)) {
-          const dropColumnSQL = `ALTER TABLE ${context.escapedTableName} DROP COLUMN ${this.escapeIdentifier(columnName)};`;
-          await this.connection.execute(dropColumnSQL);
-        }
-      }
-
-      const existingIndexes = await this.getExistingIndexes(context);
-      const requestedIndexes = ModelRegistryIndex.getIndices(context.cls) || [];
-      const requestedIndexesMap = new Map<string, IndexConfig>();
-
-      for (const index of requestedIndexes) {
-        const indexName = ['idx', context.tableName, index.name.toLowerCase().replaceAll('-', '_')].join('_');
-        requestedIndexesMap.set(indexName, index);
-
-        const newIndexSQL = this.getCreateIndexSQL(context, index);
-        if (!existingIndexes.has(indexName)) {
-          await this.connection.execute(newIndexSQL);
-        } else {
-          if (this.normalizeIndexDefinition) {
-            const normalizedExisting = this.normalizeIndexDefinition(existingIndexes.get(indexName) ?? '');
-            const normalizedRequested = this.normalizeIndexDefinition(newIndexSQL);
-
-            if (normalizedExisting !== normalizedRequested) {
-              await this.dropIndex(context, indexName);
-              await this.connection.execute(newIndexSQL);
-            }
-          }
-        }
-      }
-
-      for (const indexName of existingIndexes.keys()) {
-        if (!requestedIndexesMap.has(indexName)) {
-          await this.dropIndex(context, indexName);
-        }
-      }
-    }
-  }
-
-  async dropTable(context: TableContext): Promise<void> {
-    await this.connection.execute(`DROP TABLE IF EXISTS ${context.escapedTableName};`);
-  }
-
-  async truncateTable(context: TableContext): Promise<void> {
-    await this.connection.execute(`TRUNCATE TABLE ${context.escapedTableName};`);
-  }
-
   async initialize(): Promise<void> {
     await this.connection.init();
     await this.createStorage();
     ModelExpiryUtil.registerCull(this);
   }
-
-  shiftPlaceholders?(sql: string, offset: number): string;
 
   // Record Deserialization Helpers
   async loadSingle<T extends ModelType>(modelClass: Class<T>, record: Record<string, unknown>): Promise<T> {
@@ -339,14 +146,14 @@ export abstract class BaseSQLModelService
     for (const [fieldName, val] of Object.entries(preparedData)) {
       const simpleField = context.simpleFields.get(fieldName);
       if (simpleField) {
-        sets.push(`${this.escapeIdentifier(fieldName)} = ${this.getPlaceholder(values.length + 1)}`);
+        sets.push(`${this.dialect.escapeIdentifier(fieldName)} = ${this.dialect.getPlaceholder(values.length + 1)}`);
         values.push(val === undefined || val === null ? null : val);
         continue;
       }
 
       const complexField = context.complexFields.get(fieldName);
       if (complexField) {
-        sets.push(`${this.escapeIdentifier(fieldName)} = ${this.getPlaceholder(values.length + 1)}`);
+        sets.push(`${this.dialect.escapeIdentifier(fieldName)} = ${this.dialect.getPlaceholder(values.length + 1)}`);
         values.push(val !== undefined && val !== null ? JSONUtil.toUTF8(val) : null);
       }
     }
@@ -369,7 +176,7 @@ export abstract class BaseSQLModelService
     const conditions: string[] = [];
     if (whereSQL) {
       const offset = values.length;
-      const shiftedWhereSQL = this.shiftPlaceholders ? this.shiftPlaceholders(whereSQL, offset) : whereSQL;
+      const shiftedWhereSQL = this.dialect.shiftPlaceholders ? this.dialect.shiftPlaceholders(whereSQL, offset) : whereSQL;
       conditions.push(shiftedWhereSQL);
       values.push(...parameters);
     }
@@ -406,13 +213,13 @@ export abstract class BaseSQLModelService
       if (field.name === 'id') {
         continue;
       }
-      sets.push(`${this.escapeIdentifier(field.name)} = ${this.getPlaceholder(values.length + 1)}`);
+      sets.push(`${this.dialect.escapeIdentifier(field.name)} = ${this.dialect.getPlaceholder(values.length + 1)}`);
       const val = rawItem[field.name];
       values.push(val === undefined || val === null ? null : val);
     }
 
     for (const field of context.complexFields.values()) {
-      sets.push(`${this.escapeIdentifier(field.name)} = ${this.getPlaceholder(values.length + 1)}`);
+      sets.push(`${this.dialect.escapeIdentifier(field.name)} = ${this.dialect.getPlaceholder(values.length + 1)}`);
       const value = rawItem[field.name];
       values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
     }
@@ -422,7 +229,7 @@ export abstract class BaseSQLModelService
     const conditions: string[] = [];
     if (whereSQL) {
       const offset = values.length;
-      const shiftedWhereSQL = this.shiftPlaceholders ? this.shiftPlaceholders(whereSQL, offset) : whereSQL;
+      const shiftedWhereSQL = this.dialect.shiftPlaceholders ? this.dialect.shiftPlaceholders(whereSQL, offset) : whereSQL;
       conditions.push(shiftedWhereSQL);
       values.push(...parameters);
     }
@@ -455,23 +262,23 @@ export abstract class BaseSQLModelService
     const updates: string[] = [];
 
     for (const field of context.simpleFields.values()) {
-      columns.push(this.escapeIdentifier(field.name));
+      columns.push(this.dialect.escapeIdentifier(field.name));
       const val = rawItem[field.name];
       values.push(val === undefined || val === null ? null : val);
       if (field.name !== 'id') {
-        updates.push(`${this.escapeIdentifier(field.name)} = EXCLUDED.${this.escapeIdentifier(field.name)}`);
+        updates.push(`${this.dialect.escapeIdentifier(field.name)} = EXCLUDED.${this.dialect.escapeIdentifier(field.name)}`);
       }
     }
 
     for (const field of context.complexFields.values()) {
-      columns.push(this.escapeIdentifier(field.name));
+      columns.push(this.dialect.escapeIdentifier(field.name));
       const value = rawItem[field.name];
       values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
-      updates.push(`${this.escapeIdentifier(field.name)} = EXCLUDED.${this.escapeIdentifier(field.name)}`);
+      updates.push(`${this.dialect.escapeIdentifier(field.name)} = EXCLUDED.${this.dialect.escapeIdentifier(field.name)}`);
     }
 
-    const placeholders = columns.map((_, index) => this.getPlaceholder(index + 1));
-    const sql = this.getUpsertSQL(context, columns, placeholders, conflictTarget, updates);
+    const placeholders = columns.map((_, index) => this.dialect.getPlaceholder(index + 1));
+    const sql = this.dialect.getUpsertSQL(context, columns, placeholders, conflictTarget, updates);
 
     const result = await this.connection.execute<Record<string, unknown>>(sql, values);
     if (result.records.length > 0) {
@@ -505,18 +312,18 @@ export abstract class BaseSQLModelService
     const values: unknown[] = [];
 
     for (const field of context.simpleFields.values()) {
-      columns.push(this.escapeIdentifier(field.name));
+      columns.push(this.dialect.escapeIdentifier(field.name));
       const val = rawItem[field.name];
       values.push(val === undefined || val === null ? null : val);
     }
 
     for (const field of context.complexFields.values()) {
-      columns.push(this.escapeIdentifier(field.name));
+      columns.push(this.dialect.escapeIdentifier(field.name));
       const value = rawItem[field.name];
       values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
     }
 
-    const placeholders = columns.map((_, index) => this.getPlaceholder(index + 1));
+    const placeholders = columns.map((_, index) => this.dialect.getPlaceholder(index + 1));
     const sql = `INSERT INTO ${context.escapedTableName} (${columns.join(', ')}) VALUES (${placeholders.join(', ')});`;
 
     await this.connection.execute(sql, values);
@@ -532,7 +339,7 @@ export abstract class BaseSQLModelService
   }
 
   async upsert<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>, modelSource?: ModelCrudProvider): Promise<T> {
-    return this.executeUpsert(modelClass, item, [this.escapeIdentifier('id')], modelSource);
+    return this.executeUpsert(modelClass, item, [this.dialect.escapeIdentifier('id')], modelSource);
   }
 
   async updatePartial<T extends ModelType>(modelClass: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
@@ -595,25 +402,25 @@ export abstract class BaseSQLModelService
       warnIfIndexedUniqueIndex(this, modelClass, ModelRegistryIndex.getIndices(modelClass));
       warnIfNonIndexedIndex(this, modelClass, ModelRegistryIndex.getIndices(modelClass));
       const context = this.getContext(modelClass);
-      await this.upsertTable(context);
+      await this.dialect.upsertTable(context, this.connection);
     }
   }
 
   async deleteStorage(): Promise<void> {
     for (const modelClass of ModelRegistryIndex.getClasses()) {
       const context = this.getContext(modelClass);
-      await this.dropTable(context);
+      await this.dialect.dropTable(context, this.connection);
     }
   }
 
   async deleteModel(modelClass: Class): Promise<void> {
     const context = this.getContext(modelClass);
-    await this.dropTable(context);
+    await this.dialect.dropTable(context, this.connection);
   }
 
   async upsertModel(modelClass: Class): Promise<void> {
     const context = this.getContext(modelClass);
-    await this.upsertTable(context);
+    await this.dialect.upsertTable(context, this.connection);
   }
 
   // Bulk Support
@@ -770,7 +577,7 @@ export abstract class BaseSQLModelService
     const context = this.getContext(modelClass);
 
     const sortClauses = indexConfig.sortTemplate.map(({ path, value }) => {
-      const expression = this.compileIndexPath(context, path, 'orderBy');
+      const expression = this.connection.dialect.compileIndexPath(context, path, 'orderBy');
       return `${expression} ${value === -1 ? 'DESC' : 'ASC'}`;
     });
     const sortSQL = sortClauses.length ? `ORDER BY ${sortClauses.join(', ')}` : '';
@@ -845,10 +652,10 @@ export abstract class BaseSQLModelService
     const prefixFieldPath = indexConfig.sortTemplate[0].path;
     const { sqlPath } = SQLQueryCompiler.resolvePath(context, prefixFieldPath, 'read');
 
-    const placeholder = this.getPlaceholder(parameters.length + 1);
+    const placeholder = this.dialect.getPlaceholder(parameters.length + 1);
     parameters.push(`${prefix}%`);
 
-    const likeOp = this.suggestLikeOperator ?? 'LIKE';
+    const likeOp = this.dialect.suggestLikeOperator ?? 'LIKE';
     const conditions = [`${sqlPath} ${likeOp} ${placeholder}`];
     if (whereSQL) {
       conditions.push(whereSQL);
@@ -919,23 +726,23 @@ export abstract class BaseSQLModelService
       if (field.name === 'id') {
         continue;
       }
-      sets.push(`${this.escapeIdentifier(field.name)} = ${this.getPlaceholder(values.length + 1)}`);
+      sets.push(`${this.connection.dialect.escapeIdentifier(field.name)} = ${this.connection.dialect.getPlaceholder(values.length + 1)}`);
       const val = rawItem[field.name];
       values.push(val === undefined || val === null ? null : val);
     }
 
     for (const field of context.complexFields.values()) {
-      sets.push(`${this.escapeIdentifier(field.name)} = ${this.getPlaceholder(values.length + 1)}`);
+      sets.push(`${this.connection.dialect.escapeIdentifier(field.name)} = ${this.connection.dialect.getPlaceholder(values.length + 1)}`);
       const value = rawItem[field.name];
       values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
     }
 
-    const conditions = [`${this.escapeIdentifier('id')} = ${this.getPlaceholder(values.length + 1)}`];
+    const conditions = [`${this.connection.dialect.escapeIdentifier('id')} = ${this.connection.dialect.getPlaceholder(values.length + 1)}`];
     values.push(preppedItem.id);
 
     if (whereSQL) {
       const offset = values.length;
-      const shiftedWhereSQL = this.shiftPlaceholders ? this.shiftPlaceholders(whereSQL, offset) : whereSQL;
+      const shiftedWhereSQL = this.dialect.shiftPlaceholders ? this.dialect.shiftPlaceholders(whereSQL, offset) : whereSQL;
       conditions.push(shiftedWhereSQL);
       values.push(...parameters);
     }
@@ -1006,15 +813,15 @@ export abstract class BaseSQLModelService
       conditions.push(whereSQL);
     }
 
-    const keySql = this.castColumn?.(sqlPath, String) ?? sqlPath;
-    const countSql = this.castColumn?.('COUNT(*)', Number) ?? 'COUNT(*)';
+    const keySql = this.dialect.castColumn?.(sqlPath, String) ?? sqlPath;
+    const countSql = this.dialect.castColumn?.('COUNT(*)', Number) ?? 'COUNT(*)';
 
     const sql = `
-      SELECT ${keySql} AS ${this.escapeIdentifier('key')}, ${countSql} AS ${this.escapeIdentifier('count')}
+      SELECT ${keySql} AS ${this.dialect.escapeIdentifier('key')}, ${countSql} AS ${this.dialect.escapeIdentifier('count')}
       FROM ${context.escapedTableName}
       WHERE ${conditions.join(' AND ')}
       GROUP BY ${sqlPath}
-      ORDER BY ${this.escapeIdentifier('count')} DESC;
+      ORDER BY ${this.dialect.escapeIdentifier('count')} DESC;
     `;
 
     const result = await this.connection.execute<{ key: string; count: string | number }>(sql, parameters);
