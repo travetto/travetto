@@ -7,6 +7,7 @@ export const service: ServiceDescriptor = {
   version,
   image: `mysql:${version}`,
   port: 3306,
+  args: ['--skip-name-resolve', '--innodb-flush-log-at-trx-commit=0', '--sync-binlog=0'],
   env: {
     MYSQL_RANDOM_ROOT_PASSWORD: '1',
     MYSQL_PASSWORD: 'travetto',

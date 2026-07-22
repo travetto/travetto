@@ -54,7 +54,7 @@ export class MysqlConnection extends SQLConnection<PoolConnection> {
       supportBigNumbers: true,
       timezone: '+00:00',
       typeCast: this.typeCast.bind(this),
-      ...(this.config.options || {})
+      ...this.config.options
     }).promise();
 
     ShutdownManager.signal.addEventListener('abort', () => this.pool.end());
