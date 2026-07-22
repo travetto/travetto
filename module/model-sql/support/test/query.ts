@@ -1,12 +1,14 @@
 import assert from 'node:assert';
 
-import { Model } from '@travetto/model';
+import { Model, type ModelType } from '@travetto/model';
 import { Registry } from '@travetto/registry';
+import type { Class } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
-import type { SQLDialect } from '../../src/dialect.ts';
+import { AbstractANSI99Dialect } from '../../src/dialect.ts';
 import { SQLQueryCompiler } from '../../src/query.ts';
+import type { TableContext } from '../../src/types.ts';
 import { SQLModelUtil } from '../../src/util.ts';
 
 @Model()
@@ -29,54 +31,66 @@ class WhereType {
   nestedObj: Nested;
 }
 
-const mockDialect: SQLDialect = {
-  config: { namespace: '' },
-  escapeIdentifier(name: string) {
-    return `"${name}"`;
-  },
-  escapeLiteral(value: string) {
-    return `'${value}'`;
-  },
+class MockDialect extends AbstractANSI99Dialect {
+  complexColumnType = 'TEXT';
+
   getColumnType() {
     return 'TEXT';
-  },
-  compileIndexPath(tableName, simpleFields, path) {
-    // Basic mock path resolution
-    const first = path[0];
-    const rest = path.slice(1);
-    if (rest.length === 0) {
-      return `"${first}"`;
-    }
-    return `"${first}"->'${rest.join("->'")}'`;
-  },
-  getCreateIndexSQL() {
-    return '';
-  },
-  getPlaceholder(index) {
+  }
+
+  compileJsonIndexPath(columnName: string, jsonPath: string[]): string {
+    return `${columnName}->'${jsonPath.join("->'")}'`;
+  }
+
+  override getPlaceholder(index: number) {
     return `$$${index}`;
-  },
-  compileArrayContains(sqlPath, ident) {
-    return `${sqlPath} CONTAINING ${ident}`;
-  },
-  getRegexOperator(caseInsensitive) {
+  }
+
+  compileArrayContains(sqlPath: string, identifier: string) {
+    return `${sqlPath} CONTAINING ${identifier}`;
+  }
+
+  getRegexOperator(caseInsensitive: boolean) {
     return caseInsensitive ? '~*' : '~';
-  },
-  formatRegex(source) {
+  }
+
+  formatRegex(source: string) {
     return source;
-  },
-  castColumn(sqlPath, type) {
+  }
+
+  castColumn(sqlPath: string, type: unknown) {
     if (type === Number) {
       return `CAST(${sqlPath} AS NUMERIC)`;
     }
     return sqlPath;
-  },
-  getUpsertSQL() {
-    return '';
-  },
-  async upsertTable() {},
-  async dropTable() {},
-  async truncateTable() {}
-};
+  }
+
+  async getTableExists(): Promise<boolean> {
+    return true;
+  }
+
+  async getExistingColumns(): Promise<Map<string, string>> {
+    return new Map();
+  }
+
+  async getExistingIndexes(): Promise<Map<string, string>> {
+    return new Map();
+  }
+
+  async dropIndex(): Promise<void> {}
+}
+
+const mockDialect = new MockDialect();
+
+function getMockContext<T extends ModelType>(cls: Class<T>): TableContext<T> {
+  return {
+    tableName: cls.name.toLowerCase(),
+    database: 'test',
+    escapedTableName: `"${cls.name.toLowerCase()}"`,
+    dialect: mockDialect,
+    ...SQLModelUtil.getSchemaContext(cls)
+  };
+}
 
 @Suite()
 export class SQLQueryCompilerTest {
@@ -87,16 +101,16 @@ export class SQLQueryCompilerTest {
 
   @Test()
   async testCompileSimple() {
-    const context = SQLModelUtil.getContext(mockDialect, User);
-    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(mockDialect, context, { name: 'john' });
+    const context = getMockContext(User);
+    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(context, { name: 'john' });
     assert(whereSQL === '"name" = $$1');
     assert.deepStrictEqual(parameters, ['john']);
   }
 
   @Test()
   async testCompileOperators() {
-    const context = SQLModelUtil.getContext(mockDialect, WhereType);
-    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(mockDialect, context, {
+    const context = getMockContext(WhereType);
+    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(context, {
       age: { $gt: 18, $lte: 100 }
     });
     assert(whereSQL === '("age" > $$1 AND "age" <= $$2)');
@@ -105,8 +119,8 @@ export class SQLQueryCompilerTest {
 
   @Test()
   async testCompileNested() {
-    const context = SQLModelUtil.getContext(mockDialect, WhereType);
-    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(mockDialect, context, {
+    const context = getMockContext(WhereType);
+    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(context, {
       nestedObj: { value: 'test' }
     });
     assert(whereSQL === '"nestedObj"->\'value\' = $$1');

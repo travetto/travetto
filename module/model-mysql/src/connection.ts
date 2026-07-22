@@ -8,6 +8,7 @@ import { SQLConnection } from '@travetto/model-sql';
 import { castTo, JSONUtil, ShutdownManager } from '@travetto/runtime';
 
 import type { MysqlModelConfig } from './config.ts';
+import { MysqlDialect } from './dialect.ts';
 
 function isSimplePacket(value: unknown): value is OkPacket | ResultSetHeader {
   return (
@@ -25,6 +26,7 @@ function isSimplePacket(value: unknown): value is OkPacket | ResultSetHeader {
  */
 @Injectable()
 export class MysqlConnection extends SQLConnection<PoolConnection> {
+  readonly dialect = new MysqlDialect();
   pool: Pool;
   readonly config: MysqlModelConfig;
 

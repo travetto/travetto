@@ -11,6 +11,7 @@ import { SQLConnection } from '@travetto/model-sql';
 import { castTo, JSONUtil, Runtime, RuntimeError, ShutdownManager, Util } from '@travetto/runtime';
 
 import type { SqliteModelConfig } from './config.ts';
+import { SqliteDialect } from './dialect.ts';
 
 const RECOVERABLE_MESSAGE = /database( table| schema)? is (locked|busy)/;
 const isRecoverableError = (error: unknown): error is Error => error instanceof Error && RECOVERABLE_MESSAGE.test(error.message);
@@ -33,6 +34,7 @@ const normalizeParameter = (val: unknown) => {
  */
 @Injectable()
 export class SqliteConnection extends SQLConnection<DatabaseSync> {
+  readonly dialect = new SqliteDialect();
   isolatedTransactions = false;
 
   #pool: Pool<DatabaseSync>;
@@ -121,8 +123,6 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
    * Initializes the pool and sets connection pragma configuration
    */
   async init(): Promise<void> {
-    this.transactionDialect = { ...this.transactionDialect, begin: 'BEGIN IMMEDIATE;' };
-
     await this.#create();
 
     this.#pool = createPool<DatabaseSync>(

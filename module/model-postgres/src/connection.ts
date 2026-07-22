@@ -7,12 +7,14 @@ import { SQLConnection } from '@travetto/model-sql';
 import { castTo, ShutdownManager } from '@travetto/runtime';
 
 import type { PostgresModelConfig } from './config.ts';
+import { PostgresDialect } from './dialect.ts';
 
 /**
  * PostgreSQL connection manager
  */
 @Injectable()
 export class PostgresConnection extends SQLConnection<PoolClient> {
+  readonly dialect = new PostgresDialect();
   pool: Pool;
   readonly config: PostgresModelConfig;
 

@@ -1,6 +1,8 @@
 import { type AsyncContext, AsyncContextValue } from '@travetto/context';
 import { type AsyncMethodDescriptor, castTo, Util } from '@travetto/runtime';
 
+import type { SQLDialect } from './dialect.ts';
+
 export type TransactionType = 'required' | 'isolated' | 'force';
 
 export interface ConnectionAware {
@@ -27,15 +29,7 @@ export abstract class SQLConnection<ConnectionClient = unknown> {
   isolatedTransactions = true;
   nestedTransactions = true;
 
-  transactionDialect = {
-    begin: 'BEGIN;',
-    beginNested: 'SAVEPOINT $1;',
-    isolate: 'SET TRANSACTION ISOLATION LEVEL READ COMMITTED;',
-    rollback: 'ROLLBACK;',
-    rollbackNested: 'ROLLBACK TO $1;',
-    commit: 'COMMIT;',
-    commitNested: 'RELEASE SAVEPOINT $1;'
-  };
+  abstract readonly dialect: SQLDialect;
 
   readonly context: AsyncContext;
 
@@ -148,16 +142,16 @@ export abstract class SQLConnection<ConnectionClient = unknown> {
       return this.runWithConnection(async () => {
         this.#activeTransaction.set(true);
         if (this.isolatedTransactions) {
-          await this.execute(this.transactionDialect.isolate);
+          await this.execute(this.dialect.transactionStatements.isolate);
         }
-        await this.execute(this.transactionDialect.begin);
+        await this.execute(this.dialect.transactionStatements.begin);
         try {
           const result = await operation();
-          await this.execute(this.transactionDialect.commit);
+          await this.execute(this.dialect.transactionStatements.commit);
           return result;
         } catch (error) {
           try {
-            await this.execute(this.transactionDialect.rollback);
+            await this.execute(this.dialect.transactionStatements.rollback);
           } catch {}
           throw error;
         } finally {
@@ -173,13 +167,13 @@ export abstract class SQLConnection<ConnectionClient = unknown> {
   async startTransaction(transactionId?: string): Promise<void> {
     if (transactionId) {
       if (this.nestedTransactions) {
-        await this.execute(this.transactionDialect.beginNested, [transactionId]);
+        await this.execute(this.dialect.transactionStatements.beginNested, [transactionId]);
       }
     } else {
       if (this.isolatedTransactions) {
-        await this.execute(this.transactionDialect.isolate);
+        await this.execute(this.dialect.transactionStatements.isolate);
       }
-      await this.execute(this.transactionDialect.begin);
+      await this.execute(this.dialect.transactionStatements.begin);
     }
   }
 
@@ -189,10 +183,10 @@ export abstract class SQLConnection<ConnectionClient = unknown> {
   async commitTransaction(transactionId?: string): Promise<void> {
     if (transactionId) {
       if (this.nestedTransactions) {
-        await this.execute(this.transactionDialect.commitNested, [transactionId]);
+        await this.execute(this.dialect.transactionStatements.commitNested, [transactionId]);
       }
     } else {
-      await this.execute(this.transactionDialect.commit);
+      await this.execute(this.dialect.transactionStatements.commit);
     }
   }
 
@@ -202,10 +196,10 @@ export abstract class SQLConnection<ConnectionClient = unknown> {
   async rollbackTransaction(transactionId?: string): Promise<void> {
     if (transactionId) {
       if (this.nestedTransactions) {
-        await this.execute(this.transactionDialect.rollbackNested, [transactionId]);
+        await this.execute(this.dialect.transactionStatements.rollbackNested, [transactionId]);
       }
     } else {
-      await this.execute(this.transactionDialect.rollback);
+      await this.execute(this.dialect.transactionStatements.rollback);
     }
   }
 }
