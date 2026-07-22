@@ -93,22 +93,6 @@ export abstract class BaseSQLModelService
     return this.dialect.suggestLikeOperator ?? 'LIKE';
   }
 
-  getContext<T extends ModelType>(modelClass: Class<T>): TableContext<T> {
-    let tableName = ModelRegistryIndex.getStoreName(modelClass);
-    if (this.connection.namespace) {
-      tableName = `${this.connection.namespace}_${tableName}`;
-    }
-
-    const database = this.connection.database;
-
-    return {
-      tableName,
-      database,
-      escapedTableName: this.dialect.escapeIdentifier(tableName),
-      ...SQLModelUtil.getSchemaContext(modelClass)
-    };
-  }
-
   #whereClause<T extends ModelType>(
     modelClass: Class<T>,
     where?: WhereClause<T>,
@@ -116,7 +100,7 @@ export abstract class BaseSQLModelService
   ): { whereSQL?: string; parameters?: unknown[] } {
     return SQLQueryCompiler.compileWhere(
       this.dialect,
-      this.getContext(modelClass),
+      this.connection.getContext(modelClass),
       ModelQueryUtil.getWhereClause(modelClass, where),
       checkExpiry
     );
@@ -165,7 +149,7 @@ export abstract class BaseSQLModelService
   ): Promise<{ count: number; records: Record<string, unknown>[] }> {
     const preparedData = await ModelCrudUtil.prePartialUpdate(modelClass, data, view);
 
-    const tableContext = this.getContext(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);
     const { sql, values } = SQLStatementBuilder.buildPartialUpdate(
       this.dialect,
@@ -197,7 +181,7 @@ export abstract class BaseSQLModelService
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
 
-    const tableContext = this.getContext(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);
     const { sql, values } = SQLStatementBuilder.buildUpdate(this.dialect, tableContext, rawItem, whereSQL, parameters);
 
@@ -220,7 +204,7 @@ export abstract class BaseSQLModelService
     ModelCrudUtil.ensureNotSubType(modelClass);
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
-    const tableContext = this.getContext(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
 
     const { sql, values } = SQLStatementBuilder.buildUpsert(this.dialect, tableContext, rawItem, conflictTarget);
 
@@ -234,7 +218,7 @@ export abstract class BaseSQLModelService
 
   // Crud Support
   async get<T extends ModelType>(modelClass: Class<T>, id: string): Promise<T> {
-    const tableContext = this.getContext(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, castTo({ id }));
     const sql = SQLStatementBuilder.buildSelect(tableContext, { whereSQL });
 
@@ -250,7 +234,7 @@ export abstract class BaseSQLModelService
   async create<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>, modelSource?: ModelCrudProvider): Promise<T> {
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
-    const tableContext = this.getContext(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
 
     const { sql, values } = SQLStatementBuilder.buildInsert(this.dialect, tableContext, rawItem);
 
@@ -284,7 +268,7 @@ export abstract class BaseSQLModelService
 
   async delete<T extends ModelType>(modelClass: Class<T>, id: string): Promise<void> {
     ModelCrudUtil.ensureNotSubType(modelClass);
-    const tableContext = this.getContext(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, castTo({ id }), false);
     const sql = SQLStatementBuilder.buildDelete(tableContext, whereSQL);
 
@@ -299,7 +283,7 @@ export abstract class BaseSQLModelService
   }
 
   async *listWithOffset<T extends ModelType>(modelClass: Class<T>, options?: ModelListOptions & { offset?: number }): AsyncIterable<T[]> {
-    const tableContext = this.getContext(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, undefined);
 
     const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
@@ -329,25 +313,25 @@ export abstract class BaseSQLModelService
     for (const modelClass of ModelRegistryIndex.getClasses()) {
       warnIfIndexedUniqueIndex(this, modelClass, ModelRegistryIndex.getIndices(modelClass));
       warnIfNonIndexedIndex(this, modelClass, ModelRegistryIndex.getIndices(modelClass));
-      const tableContext = this.getContext(modelClass);
+      const tableContext = this.connection.getContext(modelClass);
       await SQLSchemaMigrator.upsertTable(this.connection, this.dialect, tableContext);
     }
   }
 
   async deleteStorage(): Promise<void> {
     for (const modelClass of ModelRegistryIndex.getClasses()) {
-      const tableContext = this.getContext(modelClass);
+      const tableContext = this.connection.getContext(modelClass);
       await SQLSchemaMigrator.dropTable(this.connection, this.dialect, tableContext);
     }
   }
 
   async deleteModel(modelClass: Class): Promise<void> {
-    const tableContext = this.getContext(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
     await SQLSchemaMigrator.dropTable(this.connection, this.dialect, tableContext);
   }
 
   async upsertModel(modelClass: Class): Promise<void> {
-    const tableContext = this.getContext(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
     await SQLSchemaMigrator.upsertTable(this.connection, this.dialect, tableContext);
   }
 
@@ -427,7 +411,7 @@ export abstract class BaseSQLModelService
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate({ sort: true });
     const where: WhereClause<T> = castTo(computed.project({ sort: true, includeId: true }));
 
-    const tableContext = this.getContext(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, where);
     const sql = SQLStatementBuilder.buildSelect(tableContext, { whereSQL });
 
@@ -446,7 +430,7 @@ export abstract class BaseSQLModelService
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate({ sort: true });
     const where: WhereClause<T> = castTo(computed.project({ sort: true, includeId: true }));
 
-    const tableContext = this.getContext(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, where);
     const sql = SQLStatementBuilder.buildDelete(tableContext, whereSQL);
 
@@ -502,7 +486,7 @@ export abstract class BaseSQLModelService
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate();
     const where: WhereClause<T> = castTo(computed.project());
 
-    const tableContext = this.getContext(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
     const sortSQL = SQLStatementBuilder.buildIndexSort(this.dialect, tableContext, indexConfig);
 
     const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
@@ -569,7 +553,7 @@ export abstract class BaseSQLModelService
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate();
     const where: WhereClause<T> = castTo(computed.project());
 
-    const tableContext = this.getContext(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);
 
     const prefixFieldPath = indexConfig.sortTemplate[0].path;
@@ -593,7 +577,7 @@ export abstract class BaseSQLModelService
   // Query Support
   async query<T extends ModelType>(modelClass: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(modelClass, query);
-    const tableContext = this.getContext(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, query.where);
     const sortSQL = SQLQueryCompiler.compileSort(this.dialect, tableContext, query.sort);
 
@@ -616,7 +600,7 @@ export abstract class BaseSQLModelService
 
   async queryCount<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
     await QueryVerifier.verify(modelClass, query);
-    const tableContext = this.getContext(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, query.where);
     const sql = SQLStatementBuilder.buildCount(this.dialect, tableContext, whereSQL);
 
@@ -636,7 +620,7 @@ export abstract class BaseSQLModelService
     const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
 
-    const tableContext = this.getContext(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
     const combinedWhere: WhereClause<T> = castTo({
       $and: [{ id: preppedItem.id }, ...(query.where ? [query.where] : [])]
     });
@@ -660,7 +644,7 @@ export abstract class BaseSQLModelService
 
   async deleteByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
     await QueryVerifier.verify(modelClass, query);
-    const tableContext = this.getContext(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, query.where, false);
 
     const sql = SQLStatementBuilder.buildDelete(tableContext, whereSQL);
@@ -699,7 +683,7 @@ export abstract class BaseSQLModelService
     query?: ModelQuery<T>
   ): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(modelClass, query);
-    const tableContext = this.getContext(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, query?.where);
     const { sqlPath } = SQLQueryCompiler.resolvePath(this.dialect, tableContext, String(field).split('.'), 'read');
 

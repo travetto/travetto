@@ -87,7 +87,6 @@ function getMockContext<T extends ModelType>(cls: Class<T>): TableContext<T> {
     tableName: cls.name.toLowerCase(),
     database: 'test',
     escapedTableName: `"${cls.name.toLowerCase()}"`,
-    dialect: mockDialect,
     ...SQLModelUtil.getSchemaContext(cls)
   };
 }

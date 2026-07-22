@@ -14,11 +14,6 @@ export class SqliteModelConfig {
   namespace = '';
 
   /**
-   * Database name
-   */
-  database = 'app';
-
-  /**
    * Allow storage modifications (like table auto-creation and schema updates) at runtime
    */
   modifyStorage = !Runtime.production;

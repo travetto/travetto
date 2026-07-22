@@ -45,14 +45,6 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
     this.config = config;
   }
 
-  get namespace(): string {
-    return this.config.namespace;
-  }
-
-  get database(): string {
-    return this.config.database;
-  }
-
   async #withRetries<T>(operation: () => Promise<T>, retries = 10, delay = 300): Promise<T> {
     for (; retries > 1; retries -= 1) {
       try {

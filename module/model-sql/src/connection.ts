@@ -1,7 +1,10 @@
 import { type AsyncContext, AsyncContextValue } from '@travetto/context';
-import { type AsyncMethodDescriptor, castTo, Util } from '@travetto/runtime';
+import { ModelRegistryIndex, type ModelType } from '@travetto/model';
+import { type AsyncMethodDescriptor, type Class, castTo, Util } from '@travetto/runtime';
 
 import type { SQLDialect } from './dialect.ts';
+import type { TableContext } from './types.ts';
+import { SQLModelUtil } from './util.ts';
 
 export type TransactionType = 'required' | 'isolated' | 'force';
 
@@ -25,7 +28,10 @@ export function Transactional(mode: TransactionType = 'required') {
  * Base abstract connection manager for SQL Model services.
  * Uses @travetto/context to track active client connections and transaction state.
  */
-export abstract class SQLConnection<ConnectionClient = unknown> {
+export abstract class SQLConnection<
+  C = unknown,
+  F extends { namespace?: string; database?: string } = { namespace?: string; database?: string }
+> {
   isolatedTransactions = true;
   nestedTransactions = true;
 
@@ -33,17 +39,29 @@ export abstract class SQLConnection<ConnectionClient = unknown> {
 
   readonly context: AsyncContext;
 
-  #activeConnection = new AsyncContextValue<ConnectionClient>(this, { failIfUnbound: { read: false } });
+  #activeConnection = new AsyncContextValue<C>(this, { failIfUnbound: { read: false } });
   #activeTransaction = new AsyncContextValue<boolean>(this, { failIfUnbound: { read: false } });
 
   constructor(context: AsyncContext) {
     this.context = context;
   }
 
-  abstract namespace: string;
-  abstract database: string;
+  abstract config: F;
 
-  get active(): ConnectionClient | undefined {
+  getContext<T extends ModelType>(cls: Class<T>): TableContext<T> {
+    let tableName = ModelRegistryIndex.getStoreName(cls);
+    if (this.config.namespace) {
+      tableName = `${this.config.namespace}_${tableName}`;
+    }
+    return {
+      tableName,
+      database: this.config.database,
+      escapedTableName: this.dialect.escapeIdentifier(tableName),
+      ...SQLModelUtil.getSchemaContext(cls)
+    };
+  }
+
+  get active(): C | undefined {
     return this.#activeConnection.get();
   }
 
@@ -59,12 +77,12 @@ export abstract class SQLConnection<ConnectionClient = unknown> {
   /**
    * Acquires a client connection
    */
-  abstract acquire(): Promise<ConnectionClient>;
+  abstract acquire(): Promise<C>;
 
   /**
    * Releases a client connection
    */
-  abstract release(connection: ConnectionClient): void;
+  abstract release(connection: C): void;
 
   /**
    * Executes a SQL query
@@ -80,7 +98,7 @@ export abstract class SQLConnection<ConnectionClient = unknown> {
     }
 
     return this.context.run(async () => {
-      let connection: ConnectionClient | undefined;
+      let connection: C | undefined;
       try {
         connection = await this.acquire();
         this.#activeConnection.set(connection);
@@ -102,9 +120,9 @@ export abstract class SQLConnection<ConnectionClient = unknown> {
       return;
     }
 
-    const self = castTo<SQLConnection<ConnectionClient>>(this);
+    const self = castTo<SQLConnection<C>>(this);
     yield* this.context.iterate(async function* () {
-      let connection: ConnectionClient | undefined;
+      let connection: C | undefined;
       try {
         connection = await self.acquire();
         self.#activeConnection.set(connection);

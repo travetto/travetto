@@ -23,14 +23,6 @@ export class PostgresConnection extends SQLConnection<PoolClient> {
     this.config = config;
   }
 
-  get namespace(): string {
-    return this.config.namespace;
-  }
-
-  get database(): string {
-    return this.config.database;
-  }
-
   /**
    * Initializes the pool and creates the pgcrypto extension
    */
