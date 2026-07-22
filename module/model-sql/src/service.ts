@@ -637,13 +637,12 @@ export abstract class BaseSQLModelService
     const rawItem: Record<string, unknown> = castTo(preppedItem);
 
     const tableContext = this.getContext(modelClass);
-    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, query.where);
+    const combinedWhere: WhereClause<T> = castTo({
+      $and: [{ id: preppedItem.id }, ...(query.where ? [query.where] : [])]
+    });
+    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, combinedWhere);
 
-    const idCondition = `${this.connection.dialect.escapeIdentifier('id')} = ${this.connection.dialect.getPlaceholder(1)}`;
-    const combinedWhereSQL = whereSQL ? `${idCondition} AND (${whereSQL})` : idCondition;
-    const combinedParameters = [preppedItem.id, ...parameters];
-
-    const { sql, values } = SQLStatementBuilder.buildUpdate(this.dialect, tableContext, rawItem, combinedWhereSQL, combinedParameters);
+    const { sql, values } = SQLStatementBuilder.buildUpdate(this.dialect, tableContext, rawItem, whereSQL, parameters);
 
     const result = await this.connection.execute(sql, values);
     if (result.count === 0) {
