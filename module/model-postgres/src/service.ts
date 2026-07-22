@@ -1,8 +1,7 @@
 import type { default as pg } from 'pg';
 
 import { Injectable, PostConstruct } from '@travetto/di';
-import type { ModelType } from '@travetto/model';
-import { BaseSQLModelService, SQLModelUtil } from '@travetto/model-sql';
+import { BaseSQLModelService, type TableContext } from '@travetto/model-sql';
 import { type Class, castTo } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -130,60 +129,58 @@ export class PostgresModelService extends BaseSQLModelService {
     return sql.replaceAll(/[$](\d+)/g, (_, num) => `$${Number(num) + offset}`);
   }
 
-  async getTableExists(tableName: string): Promise<boolean> {
+  async getTableExists(context: TableContext): Promise<boolean> {
     const tableCheck = await this.connection.execute<{ exists: boolean }>(
       `SELECT EXISTS (
         SELECT FROM pg_catalog.pg_class c
         JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
         WHERE c.relname = $1 AND c.relkind = 'r'
       );`,
-      [tableName]
+      [context.tableName]
     );
     return tableCheck.records[0]?.exists ?? false;
   }
 
-  async getExistingColumns(tableName: string): Promise<Map<string, string>> {
+  async getExistingColumns(context: TableContext): Promise<Map<string, string>> {
     const columnQuery = await this.connection.execute<{ name: string; type: string }>(
       `SELECT a.attname AS name, pg_catalog.format_type(a.atttypid, a.atttypmod) AS type
        FROM pg_catalog.pg_attribute a
        WHERE a.attrelid = $1::regclass AND a.attnum > 0 AND NOT a.attisdropped;`,
-      [tableName]
+      [context.tableName]
     );
     return new Map(columnQuery.records.map(record => [record.name, record.type.toUpperCase()]));
   }
 
-  async handleColumnTypeMismatch(tableName: string, columnName: string, columnType: string, existingType: string): Promise<void> {
+  async handleColumnTypeMismatch(context: TableContext, columnName: string, columnType: string, existingType: string): Promise<void> {
     const normalizedExisting = existingType.replace('CHARACTER VARYING', 'VARCHAR').replace('INTEGER', 'INT');
     const normalizedRequested = columnType.toUpperCase().replace('CHARACTER VARYING', 'VARCHAR').replace('INTEGER', 'INT');
 
     if (!normalizedExisting.startsWith(normalizedRequested) && !normalizedRequested.startsWith(normalizedExisting)) {
-      const alterColumnSQL = `ALTER TABLE ${this.escapeIdentifier(tableName)} ALTER COLUMN ${this.escapeIdentifier(columnName)} TYPE ${columnType} USING (${this.escapeIdentifier(columnName)}::${columnType});`;
+      const alterColumnSQL = `ALTER TABLE ${context.escapedTableName} ALTER COLUMN ${this.escapeIdentifier(columnName)} TYPE ${columnType} USING (${this.escapeIdentifier(columnName)}::${columnType});`;
       await this.connection.execute(alterColumnSQL);
     }
   }
 
-  async getExistingIndexes(tableName: string): Promise<Map<string, string>> {
+  async getExistingIndexes(context: TableContext): Promise<Map<string, string>> {
     const indexQuery = await this.connection.execute<{ indexname: string; indexdef: string }>(
       `SELECT indexname, indexdef FROM pg_indexes WHERE tablename = $1;`,
-      [tableName]
+      [context.tableName]
     );
     return new Map(
       indexQuery.records.filter(record => !record.indexname.endsWith('_pkey')).map(record => [record.indexname, record.indexdef])
     );
   }
 
-  async dropIndex(tableName: string, indexName: string): Promise<void> {
+  async dropIndex(context: TableContext, indexName: string): Promise<void> {
     await this.connection.execute(`DROP INDEX IF EXISTS ${this.escapeIdentifier(indexName)};`);
   }
 
-  override async dropTable(modelClass: Class<ModelType>): Promise<void> {
-    const { tableName } = SQLModelUtil.getContext(this, modelClass);
-    await this.connection.execute(`DROP TABLE IF EXISTS ${this.escapeIdentifier(tableName)} CASCADE;`);
+  override async dropTable(context: TableContext): Promise<void> {
+    await this.connection.execute(`DROP TABLE IF EXISTS ${context.escapedTableName} CASCADE;`);
   }
 
-  async truncateTable(modelClass: Class<ModelType>): Promise<void> {
-    const { tableName } = SQLModelUtil.getContext(this, modelClass);
-    await this.connection.execute(`TRUNCATE TABLE ${this.escapeIdentifier(tableName)} CASCADE;`);
+  async truncateTable(context: TableContext): Promise<void> {
+    await this.connection.execute(`TRUNCATE TABLE ${context.escapedTableName} CASCADE;`);
   }
 
   @PostConstruct()

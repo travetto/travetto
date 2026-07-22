@@ -31,12 +31,12 @@ export interface SQLDialect {
   /**
    * Compiles an index path (e.g. ['parent', 'child', 'value']) into its SQL expression
    */
-  compileIndexPath(context: TableContext<ModelType>, path: string[], mode: JSONSqlPathMode): string;
+  compileIndexPath(context: TableContext, path: string[], mode: JSONSqlPathMode): string;
 
   /**
    * Generates the CREATE INDEX statement for a model index
    */
-  getCreateIndexSQL(context: TableContext<ModelType>, indexConfig: IndexConfig): string;
+  getCreateIndexSQL(context: TableContext, indexConfig: IndexConfig): string;
 
   /**
    * Generates parameter placeholder character based on index (e.g., $1, $2 for Postgres, ? for MySQL/SQLite)
@@ -71,13 +71,7 @@ export interface SQLDialect {
    * E.g., Postgres: INSERT INTO ... ON CONFLICT (id) DO UPDATE SET ...
    * MySQL: INSERT INTO ... ON DUPLICATE KEY UPDATE ...
    */
-  getUpsertSQL(
-    context: TableContext<ModelType>,
-    columns: string[],
-    placeholders: string[],
-    conflictTarget: string[],
-    updates: string[]
-  ): string;
+  getUpsertSQL(context: TableContext, columns: string[], placeholders: string[], conflictTarget: string[], updates: string[]): string;
 
   /**
    * Shifts placeholder numbers if needed (e.g., PostgreSQL shifting $1 to $3)
@@ -92,17 +86,17 @@ export interface SQLDialect {
   /**
    * Schema synchronization: creates table if it does not exist, alters columns, syncs indexes
    */
-  upsertTable(modelClass: Class<ModelType>): Promise<void>;
+  upsertTable(context: TableContext): Promise<void>;
 
   /**
    * Schema synchronization: drops the table
    */
-  dropTable(modelClass: Class<ModelType>): Promise<void>;
+  dropTable(context: TableContext): Promise<void>;
 
   /**
    * Truncates table cascade
    */
-  truncateTable(modelClass: Class<ModelType>): Promise<void>;
+  truncateTable(context: TableContext): Promise<void>;
 }
 
 export interface SchemaContext<T> {
@@ -112,7 +106,7 @@ export interface SchemaContext<T> {
   allFields: SchemaFieldConfig[];
 }
 
-export interface TableContext<T extends ModelType> extends SchemaContext<T> {
+export interface TableContext<T extends ModelType = ModelType> extends SchemaContext<T> {
   tableName: string;
   escapedTableName: string;
   dialect: SQLDialect;

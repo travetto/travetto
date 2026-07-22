@@ -116,7 +116,7 @@ export abstract class BaseSQLModelService
   abstract getColumnType(fieldConfiguration: SchemaFieldConfig): string;
   abstract compileJsonIndexPath(columnName: string, jsonPath: string[], mode: JSONSqlPathMode): string;
 
-  compileIndexPath(context: TableContext<ModelType>, path: string[], mode: JSONSqlPathMode): string {
+  compileIndexPath(context: TableContext, path: string[], mode: JSONSqlPathMode): string {
     const firstSegment = path[0];
     const escapedFirst = this.escapeIdentifier(firstSegment);
     if (context.simpleFields.has(firstSegment)) {
@@ -133,7 +133,7 @@ export abstract class BaseSQLModelService
     }
   }
 
-  getCreateIndexSQL(context: TableContext<ModelType>, indexConfig: IndexConfig): string {
+  getCreateIndexSQL(context: TableContext, indexConfig: IndexConfig): string {
     const { tableName, cls: modelClass } = context;
     const indexName = ['idx', tableName, indexConfig.name.toLowerCase().replaceAll('-', '_')].join('_');
 
@@ -171,13 +171,7 @@ export abstract class BaseSQLModelService
   abstract getRegexOperator(caseInsensitive: boolean): string;
   abstract formatRegex(source: string, caseInsensitive: boolean): string;
   abstract castColumn(sqlPath: string, type: Class): string;
-  getUpsertSQL(
-    context: TableContext<ModelType>,
-    columns: string[],
-    placeholders: string[],
-    conflictTarget: string[],
-    updates: string[]
-  ): string {
+  getUpsertSQL(context: TableContext, columns: string[], placeholders: string[], conflictTarget: string[], updates: string[]): string {
     return `INSERT INTO ${context.escapedTableName} (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) ON CONFLICT (${conflictTarget.join(', ')}) DO UPDATE SET ${updates.join(', ')} RETURNING *;`;
   }
 
@@ -197,16 +191,15 @@ export abstract class BaseSQLModelService
   }
 
   abstract complexColumnType: string;
-  abstract getTableExists(tableName: string): Promise<boolean>;
-  abstract getExistingColumns(tableName: string): Promise<Map<string, string>>;
-  abstract getExistingIndexes(tableName: string): Promise<Map<string, string>>;
-  abstract dropIndex(tableName: string, indexName: string): Promise<void>;
+  abstract getTableExists(context: TableContext): Promise<boolean>;
+  abstract getExistingColumns(context: TableContext): Promise<Map<string, string>>;
+  abstract getExistingIndexes(context: TableContext): Promise<Map<string, string>>;
+  abstract dropIndex(context: TableContext, indexName: string): Promise<void>;
 
-  handleColumnTypeMismatch?(tableName: string, columnName: string, columnType: string, existingType: string): Promise<void>;
+  handleColumnTypeMismatch?(context: TableContext, columnName: string, columnType: string, existingType: string): Promise<void>;
 
-  async upsertTable(modelClass: Class<ModelType>): Promise<void> {
-    const context = this.getContext(modelClass);
-    const tableExists = await this.getTableExists(context.tableName);
+  async upsertTable(context: TableContext): Promise<void> {
+    const tableExists = await this.getTableExists(context);
 
     if (!tableExists) {
       const idType = this.getColumnType(castTo({ name: 'id', type: String }));
@@ -227,13 +220,13 @@ export abstract class BaseSQLModelService
       const createTableSQL = `CREATE TABLE ${context.escapedTableName} (\n  ${columnDefinitions.join(',\n  ')}\n);`;
       await this.connection.execute(createTableSQL);
 
-      const indexes = ModelRegistryIndex.getIndices(modelClass) || [];
+      const indexes = ModelRegistryIndex.getIndices(context.cls) || [];
       for (const index of indexes) {
         const createIndexSQL = this.getCreateIndexSQL(context, index);
         await this.connection.execute(createIndexSQL);
       }
     } else {
-      const existingColumns = await this.getExistingColumns(context.tableName);
+      const existingColumns = await this.getExistingColumns(context);
 
       const requestedFieldsMap = new Map<string, string>();
       for (const field of context.simpleFields.values()) {
@@ -252,7 +245,7 @@ export abstract class BaseSQLModelService
           await this.connection.execute(addColumnSQL);
         } else {
           if (this.handleColumnTypeMismatch) {
-            await this.handleColumnTypeMismatch(context.tableName, columnName, columnType, existingColumns.get(columnName)!);
+            await this.handleColumnTypeMismatch(context, columnName, columnType, existingColumns.get(columnName)!);
           }
         }
       }
@@ -267,8 +260,8 @@ export abstract class BaseSQLModelService
         }
       }
 
-      const existingIndexes = await this.getExistingIndexes(context.tableName);
-      const requestedIndexes = ModelRegistryIndex.getIndices(modelClass) || [];
+      const existingIndexes = await this.getExistingIndexes(context);
+      const requestedIndexes = ModelRegistryIndex.getIndices(context.cls) || [];
       const requestedIndexesMap = new Map<string, IndexConfig>();
 
       for (const index of requestedIndexes) {
@@ -284,7 +277,7 @@ export abstract class BaseSQLModelService
             const normalizedRequested = this.normalizeIndexDefinition(newIndexSQL);
 
             if (normalizedExisting !== normalizedRequested) {
-              await this.dropIndex(context.tableName, indexName);
+              await this.dropIndex(context, indexName);
               await this.connection.execute(newIndexSQL);
             }
           }
@@ -293,20 +286,18 @@ export abstract class BaseSQLModelService
 
       for (const indexName of existingIndexes.keys()) {
         if (!requestedIndexesMap.has(indexName)) {
-          await this.dropIndex(context.tableName, indexName);
+          await this.dropIndex(context, indexName);
         }
       }
     }
   }
 
-  async dropTable(modelClass: Class<ModelType>): Promise<void> {
-    const { escapedTableName } = this.getContext(modelClass);
-    await this.connection.execute(`DROP TABLE IF EXISTS ${escapedTableName};`);
+  async dropTable(context: TableContext): Promise<void> {
+    await this.connection.execute(`DROP TABLE IF EXISTS ${context.escapedTableName};`);
   }
 
-  async truncateTable(modelClass: Class<ModelType>): Promise<void> {
-    const { escapedTableName } = this.getContext(modelClass);
-    await this.connection.execute(`TRUNCATE TABLE ${escapedTableName};`);
+  async truncateTable(context: TableContext): Promise<void> {
+    await this.connection.execute(`TRUNCATE TABLE ${context.escapedTableName};`);
   }
 
   async initialize(): Promise<void> {
@@ -597,22 +588,26 @@ export abstract class BaseSQLModelService
     for (const modelClass of ModelRegistryIndex.getClasses()) {
       warnIfIndexedUniqueIndex(this, modelClass, ModelRegistryIndex.getIndices(modelClass));
       warnIfNonIndexedIndex(this, modelClass, ModelRegistryIndex.getIndices(modelClass));
-      await this.upsertTable(modelClass);
+      const context = this.getContext(modelClass);
+      await this.upsertTable(context);
     }
   }
 
   async deleteStorage(): Promise<void> {
     for (const modelClass of ModelRegistryIndex.getClasses()) {
-      await this.dropTable(modelClass);
+      const context = this.getContext(modelClass);
+      await this.dropTable(context);
     }
   }
 
   async deleteModel(modelClass: Class): Promise<void> {
-    await this.dropTable(modelClass);
+    const context = this.getContext(modelClass);
+    await this.dropTable(context);
   }
 
   async upsertModel(modelClass: Class): Promise<void> {
-    await this.upsertTable(modelClass);
+    const context = this.getContext(modelClass);
+    await this.upsertTable(context);
   }
 
   // Bulk Support

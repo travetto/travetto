@@ -1,8 +1,7 @@
 import type { DatabaseSync } from 'node:sqlite';
 
 import { Injectable, PostConstruct } from '@travetto/di';
-import type { ModelType } from '@travetto/model';
-import { BaseSQLModelService, SQLModelUtil } from '@travetto/model-sql';
+import { BaseSQLModelService, type TableContext } from '@travetto/model-sql';
 import { type Class, castTo } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -84,37 +83,36 @@ export class SqliteModelService extends BaseSQLModelService {
     return sqlPath;
   }
 
-  async getTableExists(tableName: string): Promise<boolean> {
+  async getTableExists(context: TableContext): Promise<boolean> {
     const tableCheck = await this.connection.execute<{ name: string }>(`SELECT name FROM sqlite_master WHERE type='table' AND name=?;`, [
-      tableName
+      context.tableName
     ]);
     return tableCheck.count > 0;
   }
 
-  async getExistingColumns(tableName: string): Promise<Map<string, string>> {
+  async getExistingColumns(context: TableContext): Promise<Map<string, string>> {
     const columnQuery = await this.connection.execute<{ name: string; type: string }>(
-      `PRAGMA table_info('${tableName.replaceAll("'", "''")}');`
+      `PRAGMA table_info('${context.dialect.escapeLiteral(context.tableName)}');`
     );
     return new Map(columnQuery.records.map(record => [record.name, record.type.toUpperCase()]));
   }
 
-  async getExistingIndexes(tableName: string): Promise<Map<string, string>> {
+  async getExistingIndexes(context: TableContext): Promise<Map<string, string>> {
     const indexQuery = await this.connection.execute<{ name: string; sql: string }>(
       `SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name=?;`,
-      [tableName]
+      [context.tableName]
     );
     return new Map(
       indexQuery.records.filter(record => record.sql && !record.name.startsWith('sqlite_')).map(record => [record.name, record.sql])
     );
   }
 
-  async dropIndex(tableName: string, indexName: string): Promise<void> {
+  async dropIndex(context: TableContext, indexName: string): Promise<void> {
     await this.connection.execute(`DROP INDEX IF EXISTS ${this.escapeIdentifier(indexName)};`);
   }
 
-  async truncateTable(modelClass: Class<ModelType>): Promise<void> {
-    const { tableName } = SQLModelUtil.getContext(this, modelClass);
-    await this.connection.execute(`DELETE FROM ${this.escapeIdentifier(tableName)};`);
+  async truncateTable(context: TableContext): Promise<void> {
+    await this.connection.execute(`DELETE FROM ${context.escapedTableName};`);
   }
 
   @PostConstruct()

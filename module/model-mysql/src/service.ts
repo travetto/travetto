@@ -1,7 +1,7 @@
 import type { PoolConnection } from 'mysql2/promise';
 
 import { Injectable, PostConstruct } from '@travetto/di';
-import { BaseSQLModelService, type JSONSqlPathMode } from '@travetto/model-sql';
+import { BaseSQLModelService, type JSONSqlPathMode, type TableContext } from '@travetto/model-sql';
 import { type Class, castTo } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -116,37 +116,37 @@ export class MysqlModelService extends BaseSQLModelService {
     return sqlPath;
   }
 
-  getUpsertSQL(tableName: string, columns: string[], placeholders: string[], conflictTarget: string[], updates: string[]): string {
+  getUpsertSQL(context: TableContext, columns: string[], placeholders: string[], conflictTarget: string[], updates: string[]): string {
     const mysqlUpdates = updates.map(val => val.replace(/EXCLUDED\.(.*)/g, 'VALUES($1)'));
-    return `INSERT INTO ${this.escapeIdentifier(tableName)} (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) ON DUPLICATE KEY UPDATE ${mysqlUpdates.join(', ')};`;
+    return `INSERT INTO ${context.escapedTableName} (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) ON DUPLICATE KEY UPDATE ${mysqlUpdates.join(', ')};`;
   }
 
-  async getTableExists(tableName: string): Promise<boolean> {
+  async getTableExists(context: TableContext): Promise<boolean> {
     const tableCheck = await this.connection.execute<{ total: number }>(
       `SELECT COUNT(*) as total FROM information_schema.tables WHERE table_schema = ? AND table_name = ?;`,
-      [this.config.database, tableName]
+      [this.config.database, context.tableName]
     );
     return Number(tableCheck.records[0]?.total ?? 0) > 0;
   }
 
-  async getExistingColumns(tableName: string): Promise<Map<string, string>> {
+  async getExistingColumns(context: TableContext): Promise<Map<string, string>> {
     const columnQuery = await this.connection.execute<{ name: string; type: string }>(
       `SELECT COLUMN_NAME as name, DATA_TYPE as type FROM information_schema.columns WHERE table_schema = ? AND table_name = ?;`,
-      [this.config.database, tableName]
+      [this.config.database, context.tableName]
     );
     return new Map(columnQuery.records.map(record => [record.name, record.type.toUpperCase()]));
   }
 
-  async getExistingIndexes(tableName: string): Promise<Map<string, string>> {
+  async getExistingIndexes(context: TableContext): Promise<Map<string, string>> {
     const indexQuery = await this.connection.execute<{ name: string }>(
       `SELECT DISTINCT INDEX_NAME as name FROM information_schema.statistics WHERE table_schema = ? AND table_name = ? AND INDEX_NAME != 'PRIMARY';`,
-      [this.config.database, tableName]
+      [this.config.database, context.tableName]
     );
     return new Map(indexQuery.records.map(record => [record.name, '']));
   }
 
-  async dropIndex(tableName: string, indexName: string): Promise<void> {
-    await this.connection.execute(`DROP INDEX ${this.escapeIdentifier(indexName)} ON ${this.escapeIdentifier(tableName)};`);
+  async dropIndex(context: TableContext, indexName: string): Promise<void> {
+    await this.connection.execute(`DROP INDEX ${this.escapeIdentifier(indexName)} ON ${context.escapedTableName};`);
   }
 
   @PostConstruct()
