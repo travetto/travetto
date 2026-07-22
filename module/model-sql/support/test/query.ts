@@ -31,6 +31,7 @@ class WhereType {
   nestedObj: Nested;
 }
 
+// @ts-expect-error
 class MockDialect extends AbstractANSI99Dialect {
   complexColumnType = 'TEXT';
 
@@ -101,7 +102,7 @@ export class SQLQueryCompilerTest {
   @Test()
   async testCompileSimple() {
     const context = getMockContext(User);
-    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(context, { name: 'john' });
+    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(mockDialect, context, { name: 'john' });
     assert(whereSQL === '"name" = $$1');
     assert.deepStrictEqual(parameters, ['john']);
   }
@@ -109,7 +110,7 @@ export class SQLQueryCompilerTest {
   @Test()
   async testCompileOperators() {
     const context = getMockContext(WhereType);
-    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(context, {
+    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(mockDialect, context, {
       age: { $gt: 18, $lte: 100 }
     });
     assert(whereSQL === '("age" > $$1 AND "age" <= $$2)');
@@ -119,7 +120,7 @@ export class SQLQueryCompilerTest {
   @Test()
   async testCompileNested() {
     const context = getMockContext(WhereType);
-    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(context, {
+    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(mockDialect, context, {
       nestedObj: { value: 'test' }
     });
     assert(whereSQL === '"nestedObj"->\'value\' = $$1');
