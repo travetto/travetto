@@ -262,7 +262,7 @@ export abstract class AbstractANSI99Dialect implements SQLDialect {
   }
 
   async dropTable(context: TableContext, connection: SQLConnection): Promise<void> {
-    await connection.execute(`DROP TABLE IF EXISTS ${context.escapedTableName} CASCADE;`);
+    await connection.execute(`DROP TABLE IF EXISTS ${context.escapedTableName};`);
   }
 
   async truncateTable(context: TableContext, connection: SQLConnection): Promise<void> {
