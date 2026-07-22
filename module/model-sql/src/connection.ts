@@ -46,6 +46,9 @@ export abstract class SQLConnection<ConnectionClient = unknown> {
     this.context = context;
   }
 
+  abstract namespace: string;
+  abstract database: string;
+
   get active(): ConnectionClient | undefined {
     return this.#activeConnection.get();
   }

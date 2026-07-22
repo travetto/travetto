@@ -33,6 +33,14 @@ export class MysqlConnection extends SQLConnection<PoolConnection> {
     this.config = config;
   }
 
+  get namespace(): string {
+    return this.config.namespace;
+  }
+
+  get database(): string {
+    return this.config.database;
+  }
+
   /**
    * Initializes the mysql2 connection pool
    */

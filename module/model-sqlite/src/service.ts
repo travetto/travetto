@@ -25,10 +25,6 @@ export class SqliteModelService extends BaseSQLModelService {
     return this.connection.active!;
   }
 
-  get config() {
-    return this.connection.config;
-  }
-
   // Dialect hooks
   getColumnType(fieldConfiguration: SchemaFieldConfig): string {
     if (SchemaRegistryIndex.has(fieldConfiguration.type) || fieldConfiguration.array) {

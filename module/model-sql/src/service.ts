@@ -55,7 +55,6 @@ import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 import { WorkPool } from '@travetto/worker';
 
-import type { SQLModelConfig } from './config.ts';
 import type { SQLConnection } from './connection.ts';
 import { SQLQueryCompiler } from './query.ts';
 import type { JSONSqlPathMode, SQLDialect, TableContext } from './types.ts';
@@ -80,7 +79,6 @@ export abstract class BaseSQLModelService
     SQLDialect
 {
   abstract readonly client: unknown;
-  abstract readonly config: SQLModelConfig;
   abstract connection: SQLConnection;
   abstract returningSupport: boolean;
 
@@ -89,11 +87,19 @@ export abstract class BaseSQLModelService
 
   getContext<T extends ModelType>(modelClass: Class<T>): TableContext<T> {
     let tableName = ModelRegistryIndex.getStoreName(modelClass);
-    if (this.config.namespace) {
-      tableName = `${this.config.namespace}_${tableName}`;
+    if (this.connection.namespace) {
+      tableName = `${this.connection.namespace}_${tableName}`;
     }
 
-    return { tableName, escapedTableName: this.escapeIdentifier(tableName), dialect: this, ...SQLModelUtil.getSchemaContext(modelClass) };
+    const database = this.connection.database;
+
+    return {
+      tableName,
+      database,
+      escapedTableName: this.escapeIdentifier(tableName),
+      dialect: this,
+      ...SQLModelUtil.getSchemaContext(modelClass)
+    };
   }
 
   #whereClause<T extends ModelType>(

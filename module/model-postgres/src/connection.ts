@@ -21,6 +21,14 @@ export class PostgresConnection extends SQLConnection<PoolClient> {
     this.config = config;
   }
 
+  get namespace(): string {
+    return this.config.namespace;
+  }
+
+  get database(): string {
+    return this.config.database;
+  }
+
   /**
    * Initializes the pool and creates the pgcrypto extension
    */
@@ -34,7 +42,7 @@ export class PostgresConnection extends SQLConnection<PoolClient> {
       ...castTo({
         parseInputDatesAsUTC: true
       }),
-      ...(this.config.options || {})
+      ...this.config.options
     });
 
     try {

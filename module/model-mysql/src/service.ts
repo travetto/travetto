@@ -25,10 +25,6 @@ export class MysqlModelService extends BaseSQLModelService {
     return this.connection.active!;
   }
 
-  get config() {
-    return this.connection.config;
-  }
-
   // Dialect hooks
   override escapeIdentifier(name: string): string {
     return `\`${name.replaceAll('`', '``')}\``;
@@ -94,7 +90,7 @@ export class MysqlModelService extends BaseSQLModelService {
   }
 
   compileJsonEquality(sqlPath: string, ident: string): string {
-    return `${sqlPath} = CAST(${ident} AS JSON)`;
+    return `CAST(${sqlPath} AS JSON) = CAST(${ident} AS JSON)`;
   }
 
   getRegexOperator(caseInsensitive: boolean): string {
@@ -124,7 +120,7 @@ export class MysqlModelService extends BaseSQLModelService {
   async getTableExists(context: TableContext): Promise<boolean> {
     const tableCheck = await this.connection.execute<{ total: number }>(
       `SELECT COUNT(*) as total FROM information_schema.tables WHERE table_schema = ? AND table_name = ?;`,
-      [this.config.database, context.tableName]
+      [context.database, context.tableName]
     );
     return Number(tableCheck.records[0]?.total ?? 0) > 0;
   }
@@ -132,7 +128,7 @@ export class MysqlModelService extends BaseSQLModelService {
   async getExistingColumns(context: TableContext): Promise<Map<string, string>> {
     const columnQuery = await this.connection.execute<{ name: string; type: string }>(
       `SELECT COLUMN_NAME as name, DATA_TYPE as type FROM information_schema.columns WHERE table_schema = ? AND table_name = ?;`,
-      [this.config.database, context.tableName]
+      [context.database, context.tableName]
     );
     return new Map(columnQuery.records.map(record => [record.name, record.type.toUpperCase()]));
   }
@@ -140,7 +136,7 @@ export class MysqlModelService extends BaseSQLModelService {
   async getExistingIndexes(context: TableContext): Promise<Map<string, string>> {
     const indexQuery = await this.connection.execute<{ name: string }>(
       `SELECT DISTINCT INDEX_NAME as name FROM information_schema.statistics WHERE table_schema = ? AND table_name = ? AND INDEX_NAME != 'PRIMARY';`,
-      [this.config.database, context.tableName]
+      [context.database, context.tableName]
     );
     return new Map(indexQuery.records.map(record => [record.name, '']));
   }

@@ -43,6 +43,14 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
     this.config = config;
   }
 
+  get namespace(): string {
+    return this.config.namespace;
+  }
+
+  get database(): string {
+    return this.config.database;
+  }
+
   async #withRetries<T>(operation: () => Promise<T>, retries = 10, delay = 300): Promise<T> {
     for (; retries > 1; retries -= 1) {
       try {
@@ -59,7 +67,7 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
   }
 
   async #create(): Promise<DatabaseSync> {
-    const file = path.resolve(this.config.options.file ?? Runtime.toolPath('@', 'sqlite_db'));
+    const file = path.resolve(this.config.file ?? Runtime.toolPath('@', 'sqlite_db'));
     await fs.mkdir(path.dirname(file), { recursive: true });
     const db = new DatabaseSync(file, this.config.options);
     for (const q of ['PRAGMA foreign_keys = ON', 'PRAGMA journal_mode = WAL', 'PRAGMA synchronous = NORMAL']) {

@@ -9,11 +9,6 @@ export type JSONSqlPathMode = 'orderBy' | 'createIndex' | 'read';
  */
 export interface SQLDialect {
   /**
-   * The configuration containing connection information and namespace details
-   */
-  readonly config: { namespace: string };
-
-  /**
    * Escapes a database SQL identifier (like a table or column name)
    */
   escapeIdentifier(name: string): string;
@@ -108,6 +103,7 @@ export interface SchemaContext<T> {
 
 export interface TableContext<T extends ModelType = ModelType> extends SchemaContext<T> {
   tableName: string;
+  database: string;
   escapedTableName: string;
   dialect: SQLDialect;
 }

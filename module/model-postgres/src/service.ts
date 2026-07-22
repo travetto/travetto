@@ -26,10 +26,6 @@ export class PostgresModelService extends BaseSQLModelService {
     return this.connection.pool;
   }
 
-  get config() {
-    return this.connection.config;
-  }
-
   // Dialect hooks
   getColumnType(fieldConfiguration: SchemaFieldConfig): string {
     if (SchemaRegistryIndex.has(fieldConfiguration.type) || fieldConfiguration.array) {
