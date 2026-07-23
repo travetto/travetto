@@ -14,8 +14,9 @@ import { PostgresDialect } from './dialect.ts';
  */
 @Injectable()
 export class PostgresConnection extends SQLConnection<PoolClient> {
-  readonly dialect = new PostgresDialect();
   pool: Pool;
+
+  readonly dialect = new PostgresDialect();
   readonly config: PostgresModelConfig;
 
   constructor(context: AsyncContext, config: PostgresModelConfig) {

@@ -185,7 +185,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
   }
 
   getTruncateTableSQL(context: TableContext): string {
-    return `TRUNCATE TABLE ${this.escapeIdentifier(context.tableName)} CASCADE;`;
+    return `TRUNCATE TABLE ${this.escapeIdentifier(context.tableName)};`;
   }
 
   getAlterColumnTypeSQL?(context: TableContext, columnName: string, columnType: string, existingType: string): string | undefined;
@@ -583,10 +583,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     }
 
     const placeholders = columns.map((_, index) => this.getPlaceholder(index + 1));
-    const sql = `
-INSERT INTO ${this.escapeIdentifier(tableContext.tableName)} (${columns.join(', ')}) 
-VALUES (${placeholders.join(', ')});
-`;
+    const sql = `INSERT INTO ${this.escapeIdentifier(tableContext.tableName)} (${columns.join(', ')}) VALUES (${placeholders.join(', ')});`;
 
     return { sql, values };
   }
@@ -620,11 +617,7 @@ VALUES (${placeholders.join(', ')});
       values.push(...whereParameters);
     }
 
-    const sql = `
-UPDATE ${this.escapeIdentifier(tableContext.tableName)} 
-SET ${sets.join(', ')}
-${shiftedWhereSQL ? ` WHERE ${shiftedWhereSQL}` : ''}
-`;
+    const sql = `UPDATE ${this.escapeIdentifier(tableContext.tableName)} SET ${sets.join(', ')}${shiftedWhereSQL ? ` WHERE ${shiftedWhereSQL}` : ''};`;
     return { sql, values };
   }
 
@@ -668,12 +661,8 @@ ${shiftedWhereSQL ? ` WHERE ${shiftedWhereSQL}` : ''}
       values.push(...whereParameters);
     }
 
-    const sql = `
-UPDATE ${this.escapeIdentifier(tableContext.tableName)} 
-SET ${sets.join(', ')}
-${shiftedWhereSQL ? ` WHERE ${shiftedWhereSQL}` : ''}
-${returning && this.returningSupport ? ' RETURNING *' : ''};
-`;
+    const returningClause = returning && this.returningSupport ? ' RETURNING *' : '';
+    const sql = `UPDATE ${this.escapeIdentifier(tableContext.tableName)} SET ${sets.join(', ')}${shiftedWhereSQL ? ` WHERE ${shiftedWhereSQL}` : ''}${returningClause};`;
 
     return { sql, values };
   }
@@ -719,29 +708,21 @@ ${returning && this.returningSupport ? ' RETURNING *' : ''};
       columns?: string[];
     }
   ): string {
-    return `
-SELECT ${options?.columns?.length ? options.columns.join(', ') : '*'} 
-FROM ${this.escapeIdentifier(tableContext.tableName)}
-${options?.whereSQL ? ` WHERE ${options.whereSQL}` : ''}
-${options?.sortSQL ?? ''}
-${options?.limit !== undefined ? ` LIMIT ${options.limit}` : ''}
-${options?.offset !== undefined ? ` OFFSET ${options.offset}` : ''};`;
+    const selectedColumns = options?.columns && options.columns.length > 0 ? options.columns.join(', ') : '*';
+    const where = options?.whereSQL ? ` WHERE ${options.whereSQL}` : '';
+    const sort = options?.sortSQL ? ` ${options.sortSQL}` : '';
+    const limit = options?.limit !== undefined ? ` LIMIT ${options.limit}` : '';
+    const offset = options?.offset !== undefined ? ` OFFSET ${options.offset}` : '';
+
+    return `SELECT ${selectedColumns} FROM ${this.escapeIdentifier(tableContext.tableName)}${where}${sort}${limit}${offset};`;
   }
 
   buildDelete<T extends ModelType>(tableContext: TableContext<T>, whereSQL?: string): string {
-    return `
-DELETE FROM ${this.escapeIdentifier(tableContext.tableName)}
-${whereSQL ? ` WHERE ${whereSQL}` : ''};
-`;
+    return `DELETE FROM ${this.escapeIdentifier(tableContext.tableName)}${whereSQL ? ` WHERE ${whereSQL}` : ''};`;
   }
 
   buildCount<T extends ModelType>(tableContext: TableContext<T>, whereSQL?: string): string {
-    return `
-SELECT 
-  COUNT(*) as ${this.escapeIdentifier('total')} 
-FROM ${this.escapeIdentifier(tableContext.tableName)}
-${whereSQL ? ` WHERE ${whereSQL}` : ''};
-`;
+    return `SELECT COUNT(*) as ${this.escapeIdentifier('total')} FROM ${this.escapeIdentifier(tableContext.tableName)}${whereSQL ? ` WHERE ${whereSQL}` : ''};`;
   }
 
   buildIndexSort<T extends ModelType>(
@@ -758,15 +739,8 @@ ${whereSQL ? ` WHERE ${whereSQL}` : ''};
   buildFacet<T extends ModelType>(tableContext: TableContext<T>, sqlPath: string, whereSQL?: string): string {
     const keySql = this.castColumn?.(sqlPath, String) ?? sqlPath;
     const countSql = this.castColumn?.('COUNT(*)', Number) ?? 'COUNT(*)';
-    return `
-SELECT 
-  ${keySql} AS ${this.escapeIdentifier('key')}, 
-  ${countSql} AS ${this.escapeIdentifier('count')} 
-FROM ${this.escapeIdentifier(tableContext.tableName)} 
-WHERE 
-  ${sqlPath} IS NOT NULL
-  ${whereSQL ? ` AND ${whereSQL}` : ''}
-GROUP BY ${sqlPath} 
-ORDER BY ${this.escapeIdentifier('count')} DESC;`;
+    const where = whereSQL ? ` AND ${whereSQL}` : '';
+
+    return `SELECT ${keySql} AS ${this.escapeIdentifier('key')}, ${countSql} AS ${this.escapeIdentifier('count')} FROM ${this.escapeIdentifier(tableContext.tableName)} WHERE ${sqlPath} IS NOT NULL${where} GROUP BY ${sqlPath} ORDER BY ${this.escapeIdentifier('count')} DESC;`;
   }
 }
