@@ -106,11 +106,12 @@ export class PostgresDialect extends AbstractANSI99Dialect {
 
   getTableExistsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
     return {
-      sql: `SELECT EXISTS (
-        SELECT FROM pg_catalog.pg_class c
-        JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-        WHERE c.relname = $1 AND c.relkind = 'r'
-      );`,
+      sql: `
+SELECT EXISTS (
+  SELECT FROM pg_catalog.pg_class c
+  JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+  WHERE c.relname = $1 AND c.relkind = 'r'
+);`,
       parameters: [context.tableName]
     };
   }
@@ -121,9 +122,11 @@ export class PostgresDialect extends AbstractANSI99Dialect {
 
   getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
     return {
-      sql: `SELECT a.attname AS name, pg_catalog.format_type(a.atttypid, a.atttypmod) AS type
-       FROM pg_catalog.pg_attribute a
-       WHERE a.attrelid = $1::regclass AND a.attnum > 0 AND NOT a.attisdropped;`,
+      sql: `
+SELECT a.attname AS name, pg_catalog.format_type(a.atttypid, a.atttypmod) AS type
+FROM pg_catalog.pg_attribute a
+WHERE a.attrelid = $1::regclass AND a.attnum > 0 AND NOT a.attisdropped;
+`,
       parameters: [context.tableName]
     };
   }
@@ -137,7 +140,10 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     const normalizedRequested = columnType.toUpperCase().replace('CHARACTER VARYING', 'VARCHAR').replace('INTEGER', 'INT');
 
     if (!normalizedExisting.startsWith(normalizedRequested) && !normalizedRequested.startsWith(normalizedExisting)) {
-      return `ALTER TABLE ${context.escapedTableName} ALTER COLUMN ${this.escapeIdentifier(columnName)} TYPE ${columnType} USING (${this.escapeIdentifier(columnName)}::${columnType});`;
+      return `
+ALTER TABLE ${this.escapeIdentifier(context.tableName)} 
+ALTER COLUMN ${this.escapeIdentifier(columnName)} TYPE ${columnType} 
+USING (${this.escapeIdentifier(columnName)}::${columnType});`;
     }
     return undefined;
   }
@@ -162,10 +168,10 @@ export class PostgresDialect extends AbstractANSI99Dialect {
   }
 
   getDropTableSQL(context: TableContext): string {
-    return `DROP TABLE IF EXISTS ${context.escapedTableName} CASCADE;`;
+    return `DROP TABLE IF EXISTS ${this.escapeIdentifier(context.tableName)} CASCADE;`;
   }
 
   getTruncateTableSQL(context: TableContext): string {
-    return `TRUNCATE TABLE ${context.escapedTableName} CASCADE;`;
+    return `TRUNCATE TABLE ${this.escapeIdentifier(context.tableName)} CASCADE;`;
   }
 }

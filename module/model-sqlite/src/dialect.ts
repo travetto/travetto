@@ -66,7 +66,10 @@ export class SqliteDialect extends AbstractANSI99Dialect {
 
   getTableExistsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
     return {
-      sql: `SELECT name FROM sqlite_master WHERE type='table' AND name=?;`,
+      sql: `
+SELECT name 
+FROM sqlite_master 
+WHERE type='table' AND name=?;`,
       parameters: [context.tableName]
     };
   }
@@ -87,7 +90,11 @@ export class SqliteDialect extends AbstractANSI99Dialect {
 
   getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
     return {
-      sql: `SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name=?;`,
+      sql: `
+SELECT name, sql 
+FROM sqlite_master 
+WHERE type='index' AND tbl_name=?;
+`,
       parameters: [context.tableName]
     };
   }
@@ -105,6 +112,6 @@ export class SqliteDialect extends AbstractANSI99Dialect {
   }
 
   getTruncateTableSQL(context: TableContext): string {
-    return `DELETE FROM ${context.escapedTableName};`;
+    return `DELETE FROM ${this.escapeIdentifier(context.tableName)};`;
   }
 }

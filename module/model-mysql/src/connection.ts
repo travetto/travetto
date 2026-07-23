@@ -3,9 +3,9 @@ import type { OkPacket, Pool, PoolConnection, ResultSetHeader, TypeCastField } f
 
 import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
-import { ExistsError } from '@travetto/model';
-import { SQLConnection } from '@travetto/model-sql';
-import { castTo, JSONUtil, ShutdownManager } from '@travetto/runtime';
+import { ExistsError, type ModelType } from '@travetto/model';
+import { SQLConnection, type TableContext } from '@travetto/model-sql';
+import { type Class, castTo, JSONUtil, ShutdownManager } from '@travetto/runtime';
 
 import type { MysqlModelConfig } from './config.ts';
 import { MysqlDialect } from './dialect.ts';
@@ -52,6 +52,13 @@ export class MysqlConnection extends SQLConnection<PoolConnection> {
     }).promise();
 
     ShutdownManager.signal.addEventListener('abort', () => this.pool.end());
+  }
+
+  getContext<T extends ModelType>(modelClass: Class<T>): TableContext<T> {
+    return {
+      ...super.getContext(modelClass),
+      database: this.config.database
+    };
   }
 
   /**

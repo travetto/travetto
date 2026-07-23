@@ -13,4 +13,5 @@ export interface SchemaContext<T> {
 
 export interface TableContext<T extends ModelType = ModelType> extends SchemaContext<T> {
   tableName: string;
+  database?: string;
 }

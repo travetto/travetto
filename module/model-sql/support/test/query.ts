@@ -7,6 +7,7 @@ import { Schema } from '@travetto/schema';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { AbstractANSI99Dialect } from '../../src/dialect.ts';
+import { SQLModelSchemaUtil } from '../../src/schema.ts';
 import type { TableContext } from '../../src/types.ts';
 
 @Model()
@@ -82,7 +83,10 @@ class MockDialect extends AbstractANSI99Dialect {
 const mockDialect = new MockDialect();
 
 function getMockContext<T extends ModelType>(modelClass: Class<T>): TableContext<T> {
-  return mockDialect.getTableContext(modelClass, 'test');
+  return {
+    tableName: modelClass.name.toLowerCase(),
+    ...SQLModelSchemaUtil.getSchemaContext(modelClass)
+  };
 }
 
 @Suite()

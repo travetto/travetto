@@ -134,7 +134,11 @@ export abstract class AbstractANSI99Dialect {
       columnDefinitions.push(`${this.escapeIdentifier(field.name)} ${this.complexColumnType}`);
     }
 
-    return `CREATE TABLE ${this.escapeIdentifier(context.tableName)} (\n  ${columnDefinitions.join(',\n  ')}\n);`;
+    return `
+CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
+  ${columnDefinitions.join(',\n  ')}
+);
+`.trim();
   }
 
   getCreateTableIndexSQLs(context: TableContext): string[] {
@@ -579,7 +583,10 @@ export abstract class AbstractANSI99Dialect {
     }
 
     const placeholders = columns.map((_, index) => this.getPlaceholder(index + 1));
-    const sql = `INSERT INTO ${tableContext.tableName} (${columns.join(', ')}) VALUES (${placeholders.join(', ')});`;
+    const sql = `
+INSERT INTO ${this.escapeIdentifier(tableContext.tableName)} (${columns.join(', ')}) 
+VALUES (${placeholders.join(', ')});
+`;
 
     return { sql, values };
   }
@@ -608,15 +615,16 @@ export abstract class AbstractANSI99Dialect {
       values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
     }
 
-    const conditions: string[] = [];
+    const shiftedWhereSQL = whereSQL && this.shiftPlaceholders ? this.shiftPlaceholders(whereSQL, values.length) : whereSQL;
     if (whereSQL) {
-      const offset = values.length;
-      const shiftedWhereSQL = this.shiftPlaceholders?.(whereSQL, offset) ?? whereSQL;
-      conditions.push(shiftedWhereSQL);
       values.push(...whereParameters);
     }
 
-    const sql = `UPDATE ${tableContext.tableName} SET ${sets.join(', ')} WHERE ${conditions.join(' AND ')}`;
+    const sql = `
+UPDATE ${this.escapeIdentifier(tableContext.tableName)} 
+SET ${sets.join(', ')}
+${shiftedWhereSQL ? ` WHERE ${shiftedWhereSQL}` : ''}
+`;
     return { sql, values };
   }
 
@@ -655,16 +663,17 @@ export abstract class AbstractANSI99Dialect {
       }
     }
 
-    const conditions: string[] = [];
+    const shiftedWhereSQL = whereSQL && this.shiftPlaceholders ? this.shiftPlaceholders(whereSQL, values.length) : whereSQL;
     if (whereSQL) {
-      const offset = values.length;
-      const shiftedWhereSQL = this.shiftPlaceholders ? this.shiftPlaceholders(whereSQL, offset) : whereSQL;
-      conditions.push(shiftedWhereSQL);
       values.push(...whereParameters);
     }
 
-    const useReturning = returning && this.returningSupport;
-    const sql = `UPDATE ${tableContext.tableName} SET ${sets.join(', ')} ${conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''}${useReturning ? ' RETURNING *' : ''};`;
+    const sql = `
+UPDATE ${this.escapeIdentifier(tableContext.tableName)} 
+SET ${sets.join(', ')}
+${shiftedWhereSQL ? ` WHERE ${shiftedWhereSQL}` : ''}
+${returning && this.returningSupport ? ' RETURNING *' : ''};
+`;
 
     return { sql, values };
   }
@@ -710,40 +719,29 @@ export abstract class AbstractANSI99Dialect {
       columns?: string[];
     }
   ): string {
-    const selectedColumns = options?.columns && options.columns.length > 0 ? options.columns.join(', ') : '*';
-    let sql = `SELECT ${selectedColumns} FROM ${tableContext.tableName}`;
-
-    if (options?.whereSQL) {
-      sql += ` WHERE ${options.whereSQL}`;
-    }
-
-    if (options?.sortSQL) {
-      sql += ` ${options.sortSQL}`;
-    }
-
-    if (options?.limit !== undefined) {
-      sql += ` LIMIT ${options.limit}`;
-    }
-
-    if (options?.offset !== undefined) {
-      sql += ` OFFSET ${options.offset}`;
-    }
-
-    return `${sql};`;
+    return `
+SELECT ${options?.columns?.length ? options.columns.join(', ') : '*'} 
+FROM ${this.escapeIdentifier(tableContext.tableName)}
+${options?.whereSQL ? ` WHERE ${options.whereSQL}` : ''}
+${options?.sortSQL ?? ''}
+${options?.limit !== undefined ? ` LIMIT ${options.limit}` : ''}
+${options?.offset !== undefined ? ` OFFSET ${options.offset}` : ''};`;
   }
 
   buildDelete<T extends ModelType>(tableContext: TableContext<T>, whereSQL?: string): string {
-    if (whereSQL) {
-      return `DELETE FROM ${tableContext.tableName} WHERE ${whereSQL};`;
-    }
-    return `DELETE FROM ${tableContext.tableName};`;
+    return `
+DELETE FROM ${this.escapeIdentifier(tableContext.tableName)}
+${whereSQL ? ` WHERE ${whereSQL}` : ''};
+`;
   }
 
   buildCount<T extends ModelType>(tableContext: TableContext<T>, whereSQL?: string): string {
-    if (whereSQL) {
-      return `SELECT COUNT(*) as ${this.escapeIdentifier('total')} FROM ${tableContext.tableName} WHERE ${whereSQL};`;
-    }
-    return `SELECT COUNT(*) as ${this.escapeIdentifier('total')} FROM ${tableContext.tableName};`;
+    return `
+SELECT 
+  COUNT(*) as ${this.escapeIdentifier('total')} 
+FROM ${this.escapeIdentifier(tableContext.tableName)}
+${whereSQL ? ` WHERE ${whereSQL}` : ''};
+`;
   }
 
   buildIndexSort<T extends ModelType>(
@@ -758,14 +756,17 @@ export abstract class AbstractANSI99Dialect {
   }
 
   buildFacet<T extends ModelType>(tableContext: TableContext<T>, sqlPath: string, whereSQL?: string): string {
-    const conditions = [`${sqlPath} IS NOT NULL`];
-    if (whereSQL) {
-      conditions.push(whereSQL);
-    }
-
     const keySql = this.castColumn?.(sqlPath, String) ?? sqlPath;
     const countSql = this.castColumn?.('COUNT(*)', Number) ?? 'COUNT(*)';
-
-    return `SELECT ${keySql} AS ${this.escapeIdentifier('key')}, ${countSql} AS ${this.escapeIdentifier('count')} FROM ${tableContext.tableName} WHERE ${conditions.join(' AND ')} GROUP BY ${sqlPath} ORDER BY ${this.escapeIdentifier('count')} DESC;`;
+    return `
+SELECT 
+  ${keySql} AS ${this.escapeIdentifier('key')}, 
+  ${countSql} AS ${this.escapeIdentifier('count')} 
+FROM ${this.escapeIdentifier(tableContext.tableName)} 
+WHERE 
+  ${sqlPath} IS NOT NULL
+  ${whereSQL ? ` AND ${whereSQL}` : ''}
+GROUP BY ${sqlPath} 
+ORDER BY ${this.escapeIdentifier('count')} DESC;`;
   }
 }

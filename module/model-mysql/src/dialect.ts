@@ -100,12 +100,22 @@ export class MysqlDialect extends AbstractANSI99Dialect {
     updates: string[]
   ): string {
     const mysqlUpdates = updates.map(val => val.replace(/EXCLUDED\.(.*)/g, 'VALUES($1)'));
-    return `INSERT INTO ${context.escapedTableName} (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) ON DUPLICATE KEY UPDATE ${mysqlUpdates.join(', ')};`;
+    return `
+INSERT INTO 
+  ${this.escapeIdentifier(context.tableName)} (${columns.join(', ')}) 
+VALUES 
+  (${placeholders.join(', ')}) 
+ON DUPLICATE KEY UPDATE ${mysqlUpdates.join(', ')};`;
   }
 
   getTableExistsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
     return {
-      sql: `SELECT COUNT(*) as total FROM information_schema.tables WHERE table_schema = ? AND table_name = ?;`,
+      sql: `
+SELECT 
+  COUNT(*) as total 
+FROM information_schema.tables 
+WHERE table_schema = ? AND table_name = ?;
+`,
       parameters: [context.database, context.tableName]
     };
   }
@@ -116,7 +126,13 @@ export class MysqlDialect extends AbstractANSI99Dialect {
 
   getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
     return {
-      sql: `SELECT COLUMN_NAME as name, DATA_TYPE as type FROM information_schema.columns WHERE table_schema = ? AND table_name = ?;`,
+      sql: `
+SELECT 
+  COLUMN_NAME as name, 
+  DATA_TYPE as type 
+FROM information_schema.columns 
+WHERE table_schema = ? AND table_name = ?;
+`,
       parameters: [context.database, context.tableName]
     };
   }
@@ -127,7 +143,15 @@ export class MysqlDialect extends AbstractANSI99Dialect {
 
   getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
     return {
-      sql: `SELECT DISTINCT INDEX_NAME as name FROM information_schema.statistics WHERE table_schema = ? AND table_name = ? AND INDEX_NAME != 'PRIMARY';`,
+      sql: `
+SELECT DISTINCT 
+  INDEX_NAME as name 
+FROM information_schema.statistics 
+WHERE 
+  table_schema = ? 
+  AND table_name = ? 
+  AND INDEX_NAME != 'PRIMARY';
+`,
       parameters: [context.database, context.tableName]
     };
   }
@@ -137,6 +161,6 @@ export class MysqlDialect extends AbstractANSI99Dialect {
   }
 
   override getDropIndexSQL(context: TableContext, indexName: string): string {
-    return `DROP INDEX ${this.escapeIdentifier(indexName)} ON ${context.escapedTableName};`;
+    return `DROP INDEX ${this.escapeIdentifier(indexName)} ON ${this.escapeIdentifier(context.tableName)};`;
   }
 }
