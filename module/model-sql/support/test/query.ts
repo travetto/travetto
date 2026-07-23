@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Model, type ModelType } from '@travetto/model';
 import { Registry } from '@travetto/registry';
 import type { Class } from '@travetto/runtime';
-import { Schema } from '@travetto/schema';
+import { Schema, type SchemaFieldConfig } from '@travetto/schema';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { AbstractANSI99Dialect } from '../../src/dialect.ts';
@@ -33,6 +33,10 @@ class WhereType {
 // @ts-expect-error
 class MockDialect extends AbstractANSI99Dialect {
   complexColumnType = 'TEXT';
+
+  getComplexColumnType(field: SchemaFieldConfig): string {
+    return 'TEXT';
+  }
 
   getColumnType() {
     return 'TEXT';

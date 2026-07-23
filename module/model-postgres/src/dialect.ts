@@ -5,13 +5,23 @@ import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 export class PostgresDialect extends AbstractANSI99Dialect {
   override returningSupport = true;
   override suggestLikeOperator = 'ILIKE';
-  override complexColumnType = 'JSONB';
+
+  getComplexColumnType(field: SchemaFieldConfig): string {
+    if (field.array && !SchemaRegistryIndex.has(field.type)) {
+      const scalarType = this.getColumnType(field);
+      return `${scalarType}[]`;
+    }
+    return 'JSONB';
+  }
+
+  getComplexColumnValue(field: SchemaFieldConfig, value: unknown): unknown {
+    if (field.array && !SchemaRegistryIndex.has(field.type)) {
+      return value;
+    }
+    return super.getComplexColumnValue(field, value);
+  }
 
   getColumnType(fieldConfiguration: SchemaFieldConfig): string {
-    if (SchemaRegistryIndex.has(fieldConfiguration.type) || fieldConfiguration.array) {
-      return 'JSONB';
-    }
-
     if (fieldConfiguration.type === castTo(BigInt)) {
       return 'BIGINT';
     }
@@ -106,12 +116,11 @@ export class PostgresDialect extends AbstractANSI99Dialect {
 
   getTableExistsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
     return {
-      sql: `
-SELECT EXISTS (
-  SELECT FROM pg_catalog.pg_class c
-  JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-  WHERE c.relname = $1 AND c.relkind = 'r'
-);`,
+      sql: `SELECT EXISTS (
+        SELECT FROM pg_catalog.pg_class c
+        JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relname = $1 AND c.relkind = 'r'
+      );`,
       parameters: [context.tableName]
     };
   }
@@ -122,11 +131,9 @@ SELECT EXISTS (
 
   getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
     return {
-      sql: `
-SELECT a.attname AS name, pg_catalog.format_type(a.atttypid, a.atttypmod) AS type
-FROM pg_catalog.pg_attribute a
-WHERE a.attrelid = $1::regclass AND a.attnum > 0 AND NOT a.attisdropped;
-`,
+      sql: `SELECT a.attname AS name, pg_catalog.format_type(a.atttypid, a.atttypmod) AS type
+       FROM pg_catalog.pg_attribute a
+       WHERE a.attrelid = $1::regclass AND a.attnum > 0 AND NOT a.attisdropped;`,
       parameters: [context.tableName]
     };
   }
@@ -140,10 +147,7 @@ WHERE a.attrelid = $1::regclass AND a.attnum > 0 AND NOT a.attisdropped;
     const normalizedRequested = columnType.toUpperCase().replace('CHARACTER VARYING', 'VARCHAR').replace('INTEGER', 'INT');
 
     if (!normalizedExisting.startsWith(normalizedRequested) && !normalizedRequested.startsWith(normalizedExisting)) {
-      return `
-ALTER TABLE ${this.escapeIdentifier(context.tableName)} 
-ALTER COLUMN ${this.escapeIdentifier(columnName)} TYPE ${columnType} 
-USING (${this.escapeIdentifier(columnName)}::${columnType});`;
+      return `ALTER TABLE ${this.escapeIdentifier(context.tableName)} ALTER COLUMN ${this.escapeIdentifier(columnName)} TYPE ${columnType} USING (${this.escapeIdentifier(columnName)}::${columnType});`;
     }
     return undefined;
   }

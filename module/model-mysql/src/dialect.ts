@@ -1,20 +1,19 @@
 import { AbstractANSI99Dialect, type JSONSqlPathMode, type TableContext } from '@travetto/model-sql';
 import { type Class, castTo } from '@travetto/runtime';
-import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
+import type { SchemaFieldConfig } from '@travetto/schema';
 
 export class MysqlDialect extends AbstractANSI99Dialect {
   override returningSupport = false;
-  override complexColumnType = 'JSON';
 
   override escapeIdentifier(name: string): string {
     return `\`${name.replaceAll('`', '``')}\``;
   }
 
-  getColumnType(fieldConfiguration: SchemaFieldConfig): string {
-    if (SchemaRegistryIndex.has(fieldConfiguration.type) || fieldConfiguration.array) {
-      return 'JSON';
-    }
+  getComplexColumnType(field: SchemaFieldConfig): string {
+    return 'JSON';
+  }
 
+  getColumnType(fieldConfiguration: SchemaFieldConfig): string {
     if (fieldConfiguration.type === castTo(BigInt)) {
       return 'BIGINT';
     }

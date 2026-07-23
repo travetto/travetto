@@ -1,21 +1,19 @@
 import { AbstractANSI99Dialect, type TableContext, type TransactionStatements } from '@travetto/model-sql';
 import { type Class, castTo } from '@travetto/runtime';
-import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
+import type { SchemaFieldConfig } from '@travetto/schema';
 
 export class SqliteDialect extends AbstractANSI99Dialect {
   returningSupport = true;
-  complexColumnType = 'TEXT';
-
   transactionStatements: TransactionStatements = {
     ...AbstractANSI99Dialect.TRANSACTION_STATEMENTS,
     begin: 'BEGIN IMMEDIATE;'
   };
 
-  getColumnType(fieldConfiguration: SchemaFieldConfig): string {
-    if (SchemaRegistryIndex.has(fieldConfiguration.type) || fieldConfiguration.array) {
-      return 'TEXT';
-    }
+  getComplexColumnType(field: SchemaFieldConfig): string {
+    return 'TEXT';
+  }
 
+  getColumnType(fieldConfiguration: SchemaFieldConfig): string {
     if (fieldConfiguration.type === castTo(BigInt)) {
       return 'INTEGER';
     }

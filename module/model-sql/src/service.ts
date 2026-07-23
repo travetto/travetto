@@ -315,7 +315,7 @@ export abstract class BaseSQLModelService<C = unknown>
         requestedFieldsMap.set(field.name, this.dialect.getColumnType(field));
       }
       for (const field of tableContext.complexFields.values()) {
-        requestedFieldsMap.set(field.name, this.dialect.complexColumnType);
+        requestedFieldsMap.set(field.name, this.dialect.getComplexColumnType(field));
       }
 
       for (const [columnName, columnType] of requestedFieldsMap.entries()) {

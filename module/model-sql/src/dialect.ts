@@ -43,9 +43,12 @@ export abstract class AbstractANSI99Dialect {
 
   returningSupport = false;
   suggestLikeOperator = 'LIKE';
-  abstract complexColumnType: string;
-
   transactionStatements: TransactionStatements = AbstractANSI99Dialect.TRANSACTION_STATEMENTS;
+  abstract getComplexColumnType(field: SchemaFieldConfig): string;
+
+  getComplexColumnValue(field: SchemaFieldConfig, value: unknown): unknown {
+    return value === null || value === undefined ? null : JSONUtil.toUTF8(value);
+  }
 
   escapeIdentifier(name: string): string {
     return `"${name.replaceAll('"', '""')}"`;
@@ -74,9 +77,7 @@ export abstract class AbstractANSI99Dialect {
     const escapedFirst = this.escapeIdentifier(firstSegment);
     if (context.simpleFields.has(firstSegment)) {
       if (path.length > 1) {
-        throw new Error(
-          `Cannot create nested index under simple column "${firstSegment}" in table "${this.escapeIdentifier(context.tableName)}"`
-        );
+        throw new RuntimeError(`Cannot create nested index under column "${firstSegment}" in table "${context.tableName}"`);
       }
       return escapedFirst;
     } else {
@@ -115,7 +116,7 @@ export abstract class AbstractANSI99Dialect {
       return `CREATE ${isUnique ? 'UNIQUE ' : ''}INDEX ${this.escapeIdentifier(indexName)} ON ${this.escapeIdentifier(context.tableName)} (${indexFields.join(', ')});`;
     }
 
-    throw new Error(`Unsupported index configuration for class ${modelClass.name}`);
+    throw new RuntimeError(`Unsupported index configuration for class ${modelClass.name}`);
   }
 
   getCreateTableSQL(context: TableContext): string {
@@ -131,7 +132,7 @@ export abstract class AbstractANSI99Dialect {
     }
 
     for (const field of context.complexFields.values()) {
-      columnDefinitions.push(`${this.escapeIdentifier(field.name)} ${this.complexColumnType}`);
+      columnDefinitions.push(`${this.escapeIdentifier(field.name)} ${this.getComplexColumnType(field)}`);
     }
 
     return `
@@ -579,7 +580,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     for (const field of tableContext.complexFields.values()) {
       columns.push(this.escapeIdentifier(field.name));
       const value = rawItem[field.name];
-      values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
+      values.push(this.getComplexColumnValue(field, value));
     }
 
     const placeholders = columns.map((_, index) => this.getPlaceholder(index + 1));
@@ -609,7 +610,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     for (const field of tableContext.complexFields.values()) {
       sets.push(`${this.escapeIdentifier(field.name)} = ${this.getPlaceholder(values.length + 1)}`);
       const value = rawItem[field.name];
-      values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
+      values.push(this.getComplexColumnValue(field, value));
     }
 
     const shiftedWhereSQL = whereSQL && this.shiftPlaceholders ? this.shiftPlaceholders(whereSQL, values.length) : whereSQL;
@@ -652,7 +653,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
       const complexField = tableContext.complexFields.get(fieldName);
       if (complexField) {
         sets.push(`${this.escapeIdentifier(fieldName)} = ${this.getPlaceholder(values.length + 1)}`);
-        values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
+        values.push(this.getComplexColumnValue(complexField, value));
       }
     }
 
@@ -688,7 +689,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     for (const field of tableContext.complexFields.values()) {
       columns.push(this.escapeIdentifier(field.name));
       const value = rawItem[field.name];
-      values.push(value !== undefined && value !== null ? JSONUtil.toUTF8(value) : null);
+      values.push(this.getComplexColumnValue(field, value));
       updates.push(`${this.escapeIdentifier(field.name)} = EXCLUDED.${this.escapeIdentifier(field.name)}`);
     }
 
