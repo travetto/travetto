@@ -1,171 +1,195 @@
-import type { AsyncContext } from '@travetto/context';
-import { Injectable } from '@travetto/di';
-import type { IndexConfig, ModelType } from '@travetto/model';
-import type { WhereClause } from '@travetto/model-query';
-import { SQLDialect, type SQLModelConfig, SQLModelUtil, type SQLTableDescription, type VisitStack } from '@travetto/model-sql';
-import { type Class, castTo } from '@travetto/runtime';
+import { AbstractANSI99Dialect, type JSONSqlPathMode, type TableContext } from '@travetto/model-sql';
+import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
-import { MySQLConnection } from './connection.ts';
+export class MysqlDialect extends AbstractANSI99Dialect {
+  override returningSupport = false;
 
-/**
- * MYSQL Dialect for the SQL Model Source
- */
-@Injectable()
-export class MySQLDialect extends SQLDialect {
-  connection: MySQLConnection;
-  tablePostfix = 'COLLATE=utf8mb4_bin ENGINE=InnoDB';
+  override escapeIdentifier(name: string): string {
+    return `\`${name.replaceAll('`', '``')}\``;
+  }
 
-  constructor(context: AsyncContext, config: SQLModelConfig) {
-    super(config.namespace);
-    this.connection = new MySQLConnection(context, config);
+  getComplexColumnType(field: SchemaFieldConfig): string {
+    return 'JSON';
+  }
 
-    // Custom types
-    Object.assign(this.COLUMN_TYPES, {
-      TIMESTAMP: 'DATETIME(3)',
-      JSON: 'TEXT'
-    });
-
-    /**
-     * Set string length limit based on version
-     */
-    if (/^5[.][56]/.test(config.version)) {
-      this.DEFAULT_STRING_LENGTH = 191; // Mysql limitation with utf8 and keys
-    } else {
-      this.DEFAULT_STRING_LENGTH = 3072 / 4 - 1;
+  getColumnType(fieldConfiguration: SchemaFieldConfig): string {
+    if (fieldConfiguration.type === castTo(BigInt)) {
+      return 'BIGINT';
     }
 
-    if (/^5[.].*/.test(config.version)) {
-      // Customer operators
-      Object.assign(this.SQL_OPS, {
-        $regex: 'REGEXP BINARY',
-        $iregex: 'REGEXP'
-      });
+    if (fieldConfiguration.type === Number) {
+      if (fieldConfiguration.precision) {
+        const [digits, decimals] = fieldConfiguration.precision;
+        if (decimals) {
+          return `DECIMAL(${digits},${decimals})`;
+        }
+        if (digits < 5) {
+          return 'SMALLINT';
+        }
+        if (digits < 10) {
+          return 'INT';
+        }
+        return 'BIGINT';
+      }
+      return 'INT';
+    }
 
-      this.regexWordBoundary = '([[:<:]]|[[:>:]])';
-    } else {
-      // Customer operators
-      Object.assign(this.SQL_OPS, {
-        $regex: 'REGEXP'
-      });
-      // Double escape
-      this.regexWordBoundary = '\\\\b';
+    if (fieldConfiguration.type === Date) {
+      return 'DATETIME(6)';
+    }
+
+    if (fieldConfiguration.type === Boolean) {
+      return 'TINYINT(1)';
+    }
+
+    if (fieldConfiguration.type === String) {
+      if (fieldConfiguration.specifiers?.includes('text')) {
+        return 'TEXT';
+      }
+      return `VARCHAR(${fieldConfiguration.maxlength?.limit ?? 767})`;
+    }
+
+    return 'JSON';
+  }
+
+  compileJsonIndexPath(columnName: string, jsonPath: string[], mode: JSONSqlPathMode): string {
+    const result = `${columnName}->>'$.${jsonPath.join('.')}'`;
+    switch (mode) {
+      case 'createIndex':
+        return `(CAST(${result} as CHAR(255)) COLLATE utf8mb4_bin)`;
+      case 'orderBy':
+      case 'read':
+        return result;
     }
   }
 
-  /**
-   * Compute hash
-   */
-  hash(value: string): string {
-    return `SHA2('${value}', '256')`;
+  compileArrayAll(
+    sqlPath: string,
+    identifier: string,
+    value: unknown[],
+    field: SchemaFieldConfig,
+    topLevel?: boolean
+  ): { sql: string; formatted: unknown } {
+    return { sql: `JSON_CONTAINS(${sqlPath}, ${identifier})`, formatted: JSONUtil.toUTF8(value) };
   }
 
-  /**
-   * Get DROP INDEX sql
-   */
-  getDropIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig | string): string {
-    const constraint = typeof idx === 'string' ? idx : this.getIndexName(cls, idx);
-    return `DROP INDEX ${this.identifier(constraint)} ON ${this.table(SQLModelUtil.classToStack(cls))};`;
+  compileArrayEquals(
+    sqlPath: string,
+    identifier: string,
+    values: unknown,
+    field: SchemaFieldConfig,
+    topLevel?: boolean
+  ): { sql: string; formatted: unknown } {
+    return { sql: `JSON_CONTAINS(${sqlPath}, ${identifier})`, formatted: JSONUtil.toUTF8(values) };
   }
 
-  async describeTable(table: string): Promise<SQLTableDescription | undefined> {
-    const IGNORE_FIELDS = [this.pathField.name, this.parentPathField.name, this.idxField.name].map(field => `'${field}'`);
-    const [columns, foreignKeys, indices] = await Promise.all([
-      // 1. Columns
-      this.executeSQL<{ name: string; type: string; is_not_null: boolean }>(`
-      SELECT 
-        COLUMN_NAME AS name, 
-        COLUMN_TYPE AS type, 
-        IS_NULLABLE <> 'YES' AS is_not_null
-      FROM information_schema.COLUMNS 
-      WHERE TABLE_NAME = '${table}' 
-      AND TABLE_SCHEMA = DATABASE()
-      AND COLUMN_NAME NOT IN (${IGNORE_FIELDS.join(',')})
-      ORDER BY ORDINAL_POSITION
-    `),
+  compileArrayAny(
+    sqlPath: string,
+    identifier: string,
+    values: unknown[],
+    field: SchemaFieldConfig,
+    topLevel?: boolean
+  ): { sql: string; formatted: unknown } {
+    return { sql: `JSON_OVERLAPS(${sqlPath}, ${identifier})`, formatted: JSONUtil.toUTF8(values) };
+  }
 
-      // 2. Foreign Keys
-      this.executeSQL<{ name: string; from_column: string; to_column: string; to_table: string }>(`
-      SELECT 
-        CONSTRAINT_NAME AS name, 
-        COLUMN_NAME AS from_column, 
-        REFERENCED_COLUMN_NAME AS to_column, 
-        REFERENCED_TABLE_NAME AS to_table
-      FROM information_schema.KEY_COLUMN_USAGE 
-      WHERE TABLE_NAME = '${table}' 
-      AND TABLE_SCHEMA = DATABASE()
-      AND REFERENCED_TABLE_NAME IS NOT NULL
-    `),
+  compileArrayExists(sqlPath: string, identifier: string, field: SchemaFieldConfig, topLevel?: boolean): { sql: string } {
+    return { sql: `(${sqlPath} IS NOT NULL AND JSON_LENGTH(${sqlPath}) > 0)` };
+  }
 
-      // 3. Indices
-      this.executeSQL<{ name: string; is_unique: number; columns: string }>(`
-      SELECT 
-        stat.INDEX_NAME AS name, 
-        stat.NON_UNIQUE = 0 AS is_unique, 
-        GROUP_CONCAT(CONCAT(stat.COLUMN_NAME, ' ', stat.COLLATION, ' ') ORDER BY stat.SEQ_IN_INDEX) AS columns
-      FROM information_schema.STATISTICS stat
-      LEFT OUTER JOIN information_schema.TABLE_CONSTRAINTS AS tc
-        ON tc.CONSTRAINT_NAME = stat.INDEX_NAME
-        AND tc.TABLE_NAME = stat.TABLE_NAME
-        AND tc.TABLE_SCHEMA = stat.TABLE_SCHEMA
-      WHERE 
-        stat.TABLE_NAME = '${table}' 
-        AND stat.TABLE_SCHEMA = DATABASE()
-        AND (tc.CONSTRAINT_TYPE IS NULL OR tc.CONSTRAINT_TYPE = 'UNIQUE')
-        AND stat.COLUMN_NAME NOT IN (${IGNORE_FIELDS.join(',')})
-      GROUP BY stat.INDEX_NAME, stat.NON_UNIQUE
-    `)
-    ]);
+  compileJsonEquality(sqlPath: string, identifier: string): string {
+    return `CAST(${sqlPath} AS JSON) = CAST(${identifier} AS JSON)`;
+  }
 
-    if (!columns.count) {
-      return undefined;
+  getRegexOperator(caseInsensitive: boolean): string {
+    return caseInsensitive ? 'REGEXP' : 'COLLATE utf8mb4_bin REGEXP';
+  }
+
+  formatRegex(source: string, caseInsensitive: boolean): string {
+    return source;
+  }
+
+  castColumn(sqlPath: string, type: Class): string {
+    if (type === Number) {
+      return `CAST(${sqlPath} AS DECIMAL)`;
+    } else if (type === Boolean) {
+      return `CAST(${sqlPath} AS SIGNED)`;
+    } else if (type === Date) {
+      return `CAST(${sqlPath} AS DATETIME(6))`;
     }
+    return sqlPath;
+  }
 
+  override getUpsertSQL(
+    context: TableContext,
+    columns: string[],
+    placeholders: string[],
+    conflictTarget: string[],
+    updates: string[]
+  ): string {
+    const mysqlUpdates = updates.map(val => val.replace(/EXCLUDED\.(.*)/g, 'VALUES($1)'));
+    return `
+INSERT INTO 
+  ${this.escapeIdentifier(context.tableName)} (${columns.join(', ')}) 
+VALUES 
+  (${placeholders.join(', ')}) 
+ON DUPLICATE KEY UPDATE ${mysqlUpdates.join(', ')};`;
+  }
+
+  getTableExistsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
     return {
-      columns: columns.records.map(col => ({
-        ...col,
-        type: col.type.toUpperCase(),
-        is_not_null: !!col.is_not_null
-      })),
-      foreignKeys: foreignKeys.records,
-      indices: indices.records.map(idx => ({
-        name: idx.name,
-        is_unique: !!idx.is_unique,
-        columns: idx.columns
-          .split(',')
-          .map(column => column.split(' '))
-          .map(([name, desc]) => ({ name, desc: desc === 'D' }))
-      }))
+      sql: `
+SELECT 
+  COUNT(*) as total 
+FROM information_schema.tables 
+WHERE table_schema = ? AND table_name = ?;
+`,
+      parameters: [context.database, context.tableName]
     };
   }
 
-  /**
-   * Create table, adding in specific engine options
-   */
-  override getCreateTableSQL(stack: VisitStack[]): string {
-    return super.getCreateTableSQL(stack).replace(/;$/, ` ${this.tablePostfix};`);
+  parseTableExistsResult(records: unknown[]): boolean {
+    return Number(castTo<{ total: number }>(records[0])?.total ?? 0) > 0;
   }
 
-  /**
-   * Define column modification
-   */
-  getModifyColumnSQL(stack: VisitStack[]): string {
-    const field: SchemaFieldConfig = castTo(stack.at(-1));
-    return `ALTER TABLE ${this.parentTable(stack)} MODIFY COLUMN ${this.getColumnDefinition(field)};`;
+  getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
+    return {
+      sql: `
+SELECT 
+  COLUMN_NAME as name, 
+  DATA_TYPE as type 
+FROM information_schema.columns 
+WHERE table_schema = ? AND table_name = ?;
+`,
+      parameters: [context.database, context.tableName]
+    };
   }
 
-  /**
-   * Add root alias to delete clause
-   */
-  override getDeleteSQL(stack: VisitStack[], where?: WhereClause<unknown>): string {
-    const sql = super.getDeleteSQL(stack, where);
-    return sql.replace(/\bDELETE\b/g, `DELETE ${this.rootAlias}`);
+  parseExistingColumns(records: unknown[]): Map<string, string> {
+    return new Map(castTo<{ name: string; type: string }[]>(records).map(record => [record.name, record.type.toUpperCase()]));
   }
 
-  /**
-   * Suppress foreign key checks
-   */
-  override getTruncateAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
-    return ['SET FOREIGN_KEY_CHECKS = 0;', ...super.getTruncateAllTablesSQL(cls), 'SET FOREIGN_KEY_CHECKS = 1;'];
+  getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
+    return {
+      sql: `
+SELECT DISTINCT 
+  INDEX_NAME as name 
+FROM information_schema.statistics 
+WHERE 
+  table_schema = ? 
+  AND table_name = ? 
+  AND INDEX_NAME != 'PRIMARY';
+`,
+      parameters: [context.database, context.tableName]
+    };
+  }
+
+  parseExistingIndexes(records: unknown[]): Map<string, string> {
+    return new Map(castTo<{ name: string }[]>(records).map(record => [record.name, '']));
+  }
+
+  override getDropIndexSQL(context: TableContext, indexName: string): string {
+    return `DROP INDEX ${this.escapeIdentifier(indexName)} ON ${this.escapeIdentifier(context.tableName)};`;
   }
 }

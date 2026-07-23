@@ -1,106 +1,142 @@
 import assert from 'node:assert';
 
-import { castTo } from '@travetto/runtime';
+import { Model, type ModelType } from '@travetto/model';
+import { Registry } from '@travetto/registry';
+import type { Class } from '@travetto/runtime';
 import { Schema, type SchemaFieldConfig } from '@travetto/schema';
-import { Suite, Test } from '@travetto/test';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
-import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
+import { AbstractANSI99Dialect } from '../../src/dialect.ts';
+import { SQLModelSchemaUtil } from '../../src/schema.ts';
+import type { TableContext } from '../../src/types.ts';
 
-import type { SQLModelService } from '../../src/service.ts';
-import type { VisitStack } from '../../src/types.ts';
-
-@Schema()
+@Model()
 class User {
   id: string;
   name: string;
 }
 
 @Schema()
-class WhereTypeAB {
-  c: number;
+class Nested {
+  value: string;
 }
 
-@Schema()
-class WhereTypeA {
-  d: number;
-  b: WhereTypeAB;
-}
-
-@Schema()
-class WhereTypeD {
-  e: boolean;
-}
-
-@Schema()
-class WhereTypeG {
-  z: string[];
-}
-
-@Schema()
+@Model()
 class WhereType {
-  a: WhereTypeA[];
-  d: WhereTypeD;
-  g: WhereTypeG;
-  name: number;
+  id: string;
+  name: string;
   age: number;
+  nestedList: Nested[];
+  nestedObj: Nested;
+}
+
+// @ts-expect-error
+class MockDialect extends AbstractANSI99Dialect {
+  complexColumnType = 'TEXT';
+
+  getComplexColumnType(field: SchemaFieldConfig): string {
+    return 'TEXT';
+  }
+
+  getColumnType() {
+    return 'TEXT';
+  }
+
+  compileJsonIndexPath(columnName: string, jsonPath: string[]): string {
+    return `${columnName}->'${jsonPath.join("->'")}'`;
+  }
+
+  override getPlaceholder(index: number) {
+    return `$$${index}`;
+  }
+
+  compileArrayAll(sqlPath: string, identifier: string, value: unknown[]) {
+    return { sql: `${sqlPath} ALL ${identifier}`, formatted: value };
+  }
+
+  compileArrayEquals(sqlPath: string, identifier: string, values: unknown) {
+    return { sql: `${sqlPath} EQUALS ${identifier}`, formatted: values };
+  }
+
+  compileArrayAny(sqlPath: string, identifier: string, values: unknown[]) {
+    return { sql: `${sqlPath} ANY ${identifier}`, formatted: values };
+  }
+
+  compileArrayExists(sqlPath: string, identifier: string) {
+    return { sql: `${sqlPath} IS NOT NULL`, formatted: undefined };
+  }
+
+  getRegexOperator(caseInsensitive: boolean) {
+    return caseInsensitive ? '~*' : '~';
+  }
+
+  formatRegex(source: string) {
+    return source;
+  }
+
+  castColumn(sqlPath: string, type: unknown) {
+    if (type === Number) {
+      return `CAST(${sqlPath} AS NUMERIC)`;
+    }
+    return sqlPath;
+  }
+
+  async getTableExists(): Promise<boolean> {
+    return true;
+  }
+
+  async getExistingColumns(): Promise<Map<string, string>> {
+    return new Map();
+  }
+
+  async getExistingIndexes(): Promise<Map<string, string>> {
+    return new Map();
+  }
+
+  async dropIndex(): Promise<void> {}
+}
+
+const mockDialect = new MockDialect();
+
+function getMockContext<T extends ModelType>(modelClass: Class<T>): TableContext<T> {
+  return {
+    tableName: modelClass.name.toLowerCase(),
+    ...SQLModelSchemaUtil.getSchemaContext(modelClass)
+  };
 }
 
 @Suite()
-export abstract class BaseSQLTest extends BaseModelSuite<SQLModelService> {
-  get dialect() {
-    return this.service.then(s => s.client);
+export class SQLQueryCompilerTest {
+  @BeforeAll()
+  async setup() {
+    await Registry.init();
   }
 
   @Test()
-  async validateQuery() {
-    const qry = {
-      $and: [
-        { a: { b: { c: 5 } } },
-        { d: { e: true } },
-        {
-          $or: [{ name: 5 }, { age: 10 }]
-        },
-        { g: { z: { $in: ['a', 'b', 'c'] } } },
-        { a: { d: { $gt: 20 } } }
-      ]
-    };
-
-    const dct = await this.dialect;
-    dct.resolveName = (stack: VisitStack[]) => {
-      const field: SchemaFieldConfig = castTo(stack.at(-1));
-      const parent: SchemaFieldConfig = castTo(stack.at(-2));
-      return `${field.class ? field.class.name.toString() : parent.name.toString()}.${field.name.toString()}`;
-    };
-
-    const qryStr = dct.getWhereGroupingSQL(WhereType, qry);
-    assert(
-      qryStr ===
-        "(WhereTypeAB.c = 5 AND WhereTypeD.e = TRUE AND (WhereType.name = 5 OR WhereType.age = 10) AND z.z IN ('a','b','c') AND WhereTypeA.d > 20)"
-    );
+  async testCompileSimple() {
+    const context = getMockContext(User);
+    const { whereSQL, parameters } = mockDialect.compileWhere(context, { name: 'john' });
+    assert(whereSQL === '"name" = $$1');
+    assert.deepStrictEqual(parameters, ['john']);
   }
 
   @Test()
-  async testRegEx() {
-    const dct = await this.dialect;
-    dct.resolveName = (stack: VisitStack[]) => {
-      const field: SchemaFieldConfig = castTo(stack.at(-1));
-      return `${field.class?.name}.${field.name.toString()}`;
-    };
-
-    const out = dct.getWhereGroupingSQL(User, {
-      name: {
-        $regex: /google.$/
-      }
+  async testCompileOperators() {
+    const context = getMockContext(WhereType);
+    const { whereSQL, parameters } = mockDialect.compileWhere(context, {
+      age: { $gt: 18, $lte: 100 }
     });
+    assert(whereSQL === '("age" > $$1 AND "age" <= $$2)');
+    assert.deepStrictEqual(parameters, [18, 100]);
+  }
 
-    assert(out === `User.name ${dct.SQL_OPS.$regex} 'google.$'`);
-
-    const outBoundary = dct.getWhereGroupingSQL(User, {
-      name: {
-        $regex: /\bgoogle\b/
-      }
+  @Test()
+  async testCompileNested() {
+    const context = getMockContext(WhereType);
+    const { whereSQL, parameters } = mockDialect.compileWhere(context, {
+      nestedObj: { value: 'test' }
     });
-
-    assert(outBoundary === `User.name ${dct.SQL_OPS.$regex} '${dct.regexWordBoundary}google${dct.regexWordBoundary}'`);
+    assert(whereSQL === '"nestedObj"->\'value\' = $$1');
+    assert.deepStrictEqual(parameters, ['test']);
   }
 }

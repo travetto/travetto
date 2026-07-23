@@ -13,13 +13,17 @@ npm install @travetto/model-postgres
 yarn add @travetto/model-postgres
 ```
 
-This module provides a [Postgres](https://postgresql.org)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module. This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [SQL](https://en.wikipedia.org/wiki/SQL) databases. In development mode, the [SQLModelService](https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L69) will also modify the database schema in real time to minimize impact to development. 
+This module provides a [Postgres](https://postgresql.org)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module. This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [SQL](https://en.wikipedia.org/wiki/SQL) databases. In development mode, the [PostgresModelService](https://github.com/travetto/travetto/tree/main/module/model-postgres/src/service.ts#L12) will also modify the database schema in real time to minimize impact to development. 
 
-The schema generated will not generally map to existing tables as it is attempting to produce a document store like experience on top of a [SQL](https://en.wikipedia.org/wiki/SQL) database. Every table generated will have a `path_id` which determines it's location in the document hierarchy as well as sub tables will have a `parent_path_id` to associate records with the parent values. 
+The schema generated will not generally map to existing tables as it is attempting to produce a document store like experience on top of a [SQL](https://en.wikipedia.org/wiki/SQL) database. Every table generated maps to a model:
+   *  Simple scalar fields map directly to individual native PostgreSQL columns (e.g., `VARCHAR`, `INTEGER`, `TIMESTAMP`).
+   *  Simple scalar arrays (such as `string[]`, `number[]`, or `boolean[]`) map directly to PostgreSQL native array columns (e.g., `VARCHAR[]`, `INTEGER[]`).
+   *  Complex fields and arrays of sub-schema objects map to native `JSONB` columns.
 
 Supported features:
    *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L60)
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10)
+   *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10)
    *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L21)
    *  [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/crud.ts#L11)
    *  [Facet](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/facet.ts#L14)
@@ -30,61 +34,62 @@ Out of the box, by installing the module, everything should be wired up by defau
 
 **Code: Wiring up a custom Model Source**
 ```typescript
-import type { AsyncContext } from '@travetto/context';
 import { InjectableFactory } from '@travetto/di';
-import { PostgreSQLDialect } from '@travetto/model-postgres';
-import { type SQLModelConfig, SQLModelService } from '@travetto/model-sql';
+import { type PostgresConnection, PostgresModelService } from '@travetto/model-postgres';
 
 export class Init {
   @InjectableFactory({ primary: true })
-  static getModelService(ctx: AsyncContext, config: SQLModelConfig) {
-    return new SQLModelService(ctx, config, new PostgreSQLDialect(ctx, config));
+  static getModelService(connection: PostgresConnection) {
+    return new PostgresModelService(connection);
   }
 }
 ```
 
-where the [SQLModelConfig](https://github.com/travetto/travetto/tree/main/module/model-sql/src/config.ts#L8) is defined by:
+where the [PostgresModelConfig](https://github.com/travetto/travetto/tree/main/module/model-postgres/src/config.ts#L10) is defined by:
 
-**Code: Structure of SQLModelConfig**
+**Code: Structure of PostgresModelConfig**
 ```typescript
-@Config('model.sql')
-export class SQLModelConfig<T extends {} = {}> {
+@Config('model.postgres')
+export class PostgresModelConfig {
   /**
-   * Host to connect to
+   * Database host to connect to
    */
   host = '127.0.0.1';
+
   /**
-   * Default port
+   * Database port to connect to
    */
   port = 0;
+
   /**
-   * Username
+   * Database username
    */
   user = Runtime.production ? '' : 'travetto';
+
   /**
-   * Password
+   * Database password
    */
   password = Runtime.production ? '' : 'travetto';
+
   /**
-   * Table prefix
+   * Namespace/schema prefix for table names
    */
   namespace = '';
+
   /**
    * Database name
    */
   database = 'app';
+
   /**
-   * Allow storage modification at runtime
+   * Allow storage modifications (like table auto-creation and schema updates) at runtime
    */
-  modifyStorage?: boolean;
+  modifyStorage = !Runtime.production;
+
   /**
-   * Db version
+   * Client specific overrides
    */
-  version = '';
-  /**
-   * Raw client options
-   */
-  options: T = asFull({});
+  options?: PG.ClientConfig;
 }
 ```
 

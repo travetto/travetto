@@ -15,18 +15,42 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/model-sql</code></pre>
   </figure>
 
-The current SQL client support stands at:
-<ul> <li><a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-mysql" title="MySQL backing for the travetto model module, with real-time modeling support for SQL schemas.">MySQL Model Service</a> - MySQL 8.6+</li>
+This module provides the core SQL foundation for <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> datastores. The current SQL client implementations include:
+<ul> <li><a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-mysql" title="MySQL backing for the travetto model module, with real-time modeling support for SQL schemas.">MySQL Model Service</a> - MySQL 8.0+</li>
 <li><a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-postgres" title="PostgreSQL backing for the travetto model module, with real-time modeling support for SQL schemas.">PostgreSQL Model Service</a> - Postgres 14+</li>
-<li><a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-sqlite" title="SQLite backing for the travetto model module, with real-time modeling support for SQL schemas.">SQLite Model Service</a> - (bettersqlite 8.0+)</li>
-<li><code class="item input">SQL Server</code> - Currently unsupported</li>
-<li><code class="item input">Oracle</code> - Currently unsupported</li>
+<li><a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-sqlite" title="SQLite backing for the travetto model module, with real-time modeling support for SQL schemas.">SQLite Model Service</a> - SQLite (Node native <code class="item input">DatabaseSync</code>)</li>
 </ul>
 
 <p class="note"><strong>Note</strong> Wider client support will roll out as usage increases.</p>
 
-<h2 id="assumed-behavior">Assumed Behavior</h2>
+<h2 id="assumed-behavior-schema-design">Assumed Behavior & Schema Design</h2>
 
-The <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-sql" title="SQL backing for the travetto model module, with real-time modeling support for SQL schemas.">SQL Model Service</a> works quite a bit different than the average <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping">Object Relationship Mapping</a> in that it makes assertions about how data is stored in the database. The primary goal of the <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a> support is not to handle every scenario that a relational database can provide, but to integrate with the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> structure, while leverage relational datastores to the best of their abilities. <br><br>
-The primary difference is around unique identifiers, and how parent/child relationships are managed. In a normal database primary keys could be composite values between various fields. For example a unique identifier could be a combination of <code class="item input">date</code> + <code class="item input">orderNumber</code> + <code class="item input">customerNumber</code>. This is perfectly normal in a relational model, but <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-sql" title="SQL backing for the travetto model module, with real-time modeling support for SQL schemas.">SQL Model Service</a> assumes unique identifiers (<a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a>) as 32-character hexadecimal values. In addition to these unique values, the parent's identifier is required in all children values. This allows for some fairly optimized querying, updates, and deletions on changes. <br><br>
-What this translates to, is that the framework here dictates the final schema, and doesn't support adapting to existing relational data stores. In greenfield projects, this is not an issue, but will most likely preclude its use in adapting to existing relational data sets.
+The <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-sql" title="SQL backing for the travetto model module, with real-time modeling support for SQL schemas.">SQL Model Service</a> works quite a bit differently than the average <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping">Object Relationship Mapping</a> in that it makes assertions about how data is stored in the database. The primary goal of the <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a> support is not to handle every legacy relational database scenario, but to integrate with the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> structure while leveraging relational datastores to the best of their abilities. <br><br>
+The primary design maps each model class to a single table where simple fields (primitives, dates, enums) are mapped to individual columns, and complex fields (objects and arrays) are serialized and stored as native JSON document columns. Every table requires a primary key column (<code class="item field">id</code>), and indices are compiled directly to standard database columns or SQL functional expressions over JSON paths.<br><br>
+In development mode, storage modifications are applied dynamically in real time to match model definitions, minimizing manual database migrations.
+
+<h2 id="transactions">Transactions</h2>
+
+Transaction state is tracked seamlessly using <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/context" title="Async-aware state management, maintaining context across asynchronous calls.">Async Context</a>. Methods can be wrapped using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-sql/src/connection.ts#L18">Transactional</a> decorator to run operations within a managed transaction.<br><br>
+Supported transaction modes include:
+<ul> <li><code class="item field">required</code> - Joins an active transaction if one exists, or starts a new top-level transaction.</li>
+<li><code class="item field">isolated</code> - Begins a savepoint / nested transaction isolated from the surrounding context.</li>
+<li><code class="item field">force</code> - Always creates a separate savepoint for nested operations.</li>
+</ul>
+
+<h2 id="bulk-operations">Bulk Operations</h2>
+
+Bulk operations (<code class="item method">processBulk</code>) batch insert, delete, and update statements for high performance. Bulk updates utilize standard ANSI SQL <code class="item input">CASE ... WHEN</code> constructs to update multiple records in a single database query across all SQL engines.
+
+<h2 id="supported-features">Supported Features</h2>
+
+All SQL model service implementations derive from <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L67">BaseSQLModelService</a> and support:
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L60">Bulk</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10">CRUD</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10">Expiry</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L21">Indexed</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/types/crud.ts#L11">Query Crud</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/types/facet.ts#L14">Facet</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/types/suggest.ts#L12">Suggest</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/types/query.ts#L10">Query</a></li>
+</ul>

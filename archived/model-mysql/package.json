@@ -1,0 +1,52 @@
+{
+  "name": "@travetto/model-mysql",
+  "version": "8.0.0-alpha.25",
+  "type": "module",
+  "description": "MySQL backing for the travetto model module, with real-time modeling support for SQL schemas.",
+  "keywords": [
+    "sql",
+    "data-modeling",
+    "real-time",
+    "model",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "__index__.ts",
+    "src",
+    "support"
+  ],
+  "main": "__index__.ts",
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/model-mysql"
+  },
+  "dependencies": {
+    "@travetto/config": "^8.0.0-alpha.22",
+    "@travetto/context": "^8.0.0-alpha.20",
+    "@travetto/model": "^8.0.0-alpha.23",
+    "@travetto/model-query": "^8.0.0-alpha.24",
+    "@travetto/model-sql": "^8.0.0-alpha.25",
+    "mysql2": "^3.22.6"
+  },
+  "peerDependencies": {
+    "@travetto/cli": "^8.0.0-alpha.28"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/cli": {
+      "optional": true
+    }
+  },
+  "travetto": {
+    "displayName": "MySQL Model Service"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

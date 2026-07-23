@@ -1,32 +1,23 @@
-import type { AsyncContext } from '@travetto/context';
-import { InjectableFactory } from '@travetto/di';
-import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 import { Suite } from '@travetto/test';
 
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
 import { ModelIndexedSuite } from '@travetto/model-indexed/support/test/indexed.ts';
 import { ModelIndexedPolymorphismSuite } from '@travetto/model-indexed/support/test/polymorphism.ts';
 
-import { PostgreSQLDialect } from '../src/dialect.ts';
-
-class Config {
-  @InjectableFactory({ primary: true })
-  static getDialect(ctx: AsyncContext, config: SQLModelConfig) {
-    return new PostgreSQLDialect(ctx, config);
-  }
-}
+import { PostgresModelConfig } from '../src/config.ts';
+import { PostgresModelService } from '../src/service.ts';
 
 @WithSuiteContext()
 @Suite()
 class PostgreSQLIndexedSuite extends ModelIndexedSuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
-  supportsDeepIndexes = false;
+  serviceClass = PostgresModelService;
+  configClass = PostgresModelConfig;
+  supportsDeepIndexes = true;
 }
 
 @WithSuiteContext()
 @Suite()
 class PostgreSQLIndexedPolymorphicSuite extends ModelIndexedPolymorphismSuite {
-  serviceClass = SQLModelService;
-  configClass = SQLModelConfig;
+  serviceClass = PostgresModelService;
+  configClass = PostgresModelConfig;
 }

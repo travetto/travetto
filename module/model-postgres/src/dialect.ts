@@ -1,138 +1,221 @@
-import type { AsyncContext } from '@travetto/context';
-import { Injectable } from '@travetto/di';
-import type { ModelType } from '@travetto/model';
-import { SQLDialect, type SQLModelConfig, SQLModelUtil, type SQLTableDescription, type VisitStack } from '@travetto/model-sql';
-import { type Class, castTo } from '@travetto/runtime';
-import type { SchemaFieldConfig } from '@travetto/schema';
+import { AbstractANSI99Dialect, type TableContext } from '@travetto/model-sql';
+import { type Class, castTo, JSONUtil } from '@travetto/runtime';
+import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import { PostgreSQLConnection } from './connection.ts';
+export class PostgresDialect extends AbstractANSI99Dialect {
+  returningSupport = true;
+  suggestLikeOperator = 'ILIKE';
 
-/**
- * Postgresql Dialect for the SQL Model Source
- */
-@Injectable()
-export class PostgreSQLDialect extends SQLDialect {
-  connection: PostgreSQLConnection;
-
-  constructor(context: AsyncContext, config: SQLModelConfig) {
-    super(config.namespace);
-    this.connection = new PostgreSQLConnection(context, config);
-    this.ID_AFFIX = '"';
-
-    // Special operators
-    Object.assign(this.SQL_OPS, {
-      $regex: '~',
-      $iregex: '~*'
-    });
-
-    // Special types
-    Object.assign(this.COLUMN_TYPES, {
-      JSON: 'json',
-      TIMESTAMP: 'TIMESTAMP(6) WITH TIME ZONE'
-    });
-
-    // Word boundary
-    this.regexWordBoundary = '\\y';
+  getComplexColumnType(field: SchemaFieldConfig): string {
+    if (field.array && !SchemaRegistryIndex.has(field.type)) {
+      const scalarType = this.getColumnType(field);
+      return `${scalarType}[]`;
+    }
+    return 'JSONB';
   }
 
-  /**
-   * How to hash
-   */
-  hash(value: string): string {
-    return `encode(digest('${value}', 'sha1'), 'hex')`;
+  getComplexColumnValue(field: SchemaFieldConfig, value: unknown): unknown {
+    if (field.array && !SchemaRegistryIndex.has(field.type)) {
+      return value ?? null;
+    }
+    return super.getComplexColumnValue(field, value);
   }
 
-  async describeTable(table: string): Promise<SQLTableDescription | undefined> {
-    const IGNORE_FIELDS = [this.pathField.name, this.parentPathField.name, this.idxField.name].map(field => `'${field}'`);
-
-    // 1. Columns
-    const columns = await this.executeSQL<{ name: string; type: string; is_not_null: boolean }>(`
-      SELECT
-        a.attname AS name,
-        pg_catalog.format_type(a.atttypid, a.atttypmod) AS type,
-        a.attnotnull AS is_not_null
-      FROM pg_catalog.pg_attribute a
-      JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
-      JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-      LEFT JOIN
-        pg_catalog.pg_attrdef ad ON ad.adrelid = c.oid AND ad.adnum = a.attnum
-      WHERE
-        c.relname = '${table}'
-        AND a.attnum > 0
-        AND NOT a.attisdropped
-        AND a.attname NOT IN (${IGNORE_FIELDS.join(',')})
-      ORDER BY
-        a.attnum;
-    `);
-
-    if (!columns.count) {
-      return undefined;
+  getColumnType(fieldConfiguration: SchemaFieldConfig): string {
+    if (fieldConfiguration.type === castTo(BigInt)) {
+      return 'BIGINT';
     }
 
-    // 2. Foreign Keys
-    const foreignKeys = await this.executeSQL<{ name: string; from_column: string; to_column: string; to_table: string }>(`
-      SELECT
-        tc.constraint_name AS name, 
-        kcu.column_name AS from_column,
-        ccu.column_name AS to_column,
-        ccu.table_name AS to_table
-      FROM information_schema.table_constraints AS tc 
-      JOIN information_schema.key_column_usage AS kcu
-        ON tc.constraint_name = kcu.constraint_name
-      JOIN information_schema.constraint_column_usage AS ccu
-        ON ccu.constraint_name = tc.constraint_name
-      WHERE tc.constraint_type = 'FOREIGN KEY' 
-        AND tc.table_name = '${table}'
-    `);
+    if (fieldConfiguration.type === Number) {
+      if (fieldConfiguration.precision) {
+        const [digits, decimals] = fieldConfiguration.precision;
+        if (decimals) {
+          return `DECIMAL(${digits},${decimals})`;
+        }
+        if (digits < 5) {
+          return 'SMALLINT';
+        }
+        if (digits < 10) {
+          return 'INTEGER';
+        }
+        return 'BIGINT';
+      }
+      return 'INTEGER';
+    }
 
-    // 3. Indices
-    const indices = await this.executeSQL<{ name: string; is_unique: boolean; columns: string[] }>(`
-      SELECT
-        i.relname AS name,
-        ix.indisunique AS is_unique,
-        ARRAY_AGG(a.attname || ' '|| CAST((o.OPTION & 1) AS VARCHAR) ORDER BY array_position(ix.indkey, a.attnum)) AS columns
-      FROM pg_class t
-      JOIN pg_index ix ON t.oid = ix.indrelid
-      JOIN pg_class i ON i.oid = ix.indexrelid
-      CROSS JOIN LATERAL UNNEST(ix.indkey)    WITH ordinality AS c (colnum, ordinality)
-      LEFT  JOIN LATERAL UNNEST(ix.indoption) WITH ordinality AS o (OPTION, ordinality) ON c.ordinality = o.ordinality 
-      LEFT JOIN pg_catalog.pg_constraint co ON co.conindid = ix.indexrelid
-      JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = c.colnum 
-      WHERE t.relname = '${table}'
-        AND NOT ix.indisprimary
-        AND co.conindid IS NULL
-      GROUP BY i.relname, ix.indisunique
-    `);
+    if (fieldConfiguration.type === Date) {
+      return 'TIMESTAMP(6) WITH TIME ZONE';
+    }
 
+    if (fieldConfiguration.type === Boolean) {
+      return 'BOOLEAN';
+    }
+
+    if (fieldConfiguration.type === String) {
+      if (fieldConfiguration.specifiers?.includes('text')) {
+        return 'TEXT';
+      }
+      return `VARCHAR(${fieldConfiguration.maxlength?.limit ?? 1024})`;
+    }
+
+    return 'JSONB';
+  }
+
+  compileJsonIndexPath(columnName: string, jsonPath: string[]): string {
+    const jsonAccessor = jsonPath
+      .slice(0, -1)
+      .map(segment => `->'${this.escapeLiteral(segment)}'`)
+      .join('');
+    const leafSegment = jsonPath[jsonPath.length - 1];
+    return `((${columnName}${jsonAccessor}->>'${this.escapeLiteral(leafSegment)}'))`;
+  }
+
+  override getPlaceholder(index: number): string {
+    return `$${index}`;
+  }
+
+  compileArrayAll(
+    sqlPath: string,
+    identifier: string,
+    value: unknown[],
+    field: SchemaFieldConfig,
+    topLevel?: boolean
+  ): { sql: string; formatted: unknown } {
+    if (topLevel && !SchemaRegistryIndex.has(field.type)) {
+      return { sql: `${sqlPath} @> ${identifier}`, formatted: value };
+    }
+    const jsonbPath = topLevel ? sqlPath : `(${sqlPath})::jsonb`;
+    return { sql: `${jsonbPath} @> ${identifier}::jsonb`, formatted: JSONUtil.toUTF8(value) };
+  }
+
+  compileArrayEquals(
+    sqlPath: string,
+    identifier: string,
+    values: unknown,
+    field: SchemaFieldConfig,
+    topLevel?: boolean
+  ): { sql: string; formatted: unknown } {
+    if (topLevel && !SchemaRegistryIndex.has(field.type)) {
+      if (Array.isArray(values)) {
+        return { sql: `${sqlPath} @> ${identifier}`, formatted: values };
+      }
+      return { sql: `${identifier} = ANY(${sqlPath})`, formatted: values };
+    }
+    const jsonbPath = topLevel ? sqlPath : `(${sqlPath})::jsonb`;
+    const val = Array.isArray(values) ? values : [values];
+    return { sql: `${jsonbPath} @> ${identifier}::jsonb`, formatted: JSONUtil.toUTF8(val) };
+  }
+
+  compileArrayAny(
+    sqlPath: string,
+    identifier: string,
+    values: unknown[],
+    field: SchemaFieldConfig,
+    topLevel?: boolean
+  ): { sql: string; formatted: unknown } {
+    if (topLevel && !SchemaRegistryIndex.has(field.type)) {
+      return { sql: `${sqlPath} && ${identifier}`, formatted: values };
+    }
+    const jsonbPath = topLevel ? sqlPath : `(${sqlPath})::jsonb`;
+    const formatted = values.map(v => JSONUtil.toUTF8(Array.isArray(v) ? v : [v]));
+    return { sql: `${jsonbPath} @> ANY(${identifier}::jsonb[])`, formatted };
+  }
+
+  compileArrayExists(sqlPath: string, identifier: string, field: SchemaFieldConfig, topLevel?: boolean): { sql: string } {
+    if (topLevel && !SchemaRegistryIndex.has(field.type)) {
+      return { sql: `(${sqlPath} IS NOT NULL AND cardinality(${sqlPath}) > 0)` };
+    }
+    const jsonbPath = topLevel ? sqlPath : `(${sqlPath})::jsonb`;
+    return { sql: `(${sqlPath} IS NOT NULL AND ${jsonbPath} <> '[]'::jsonb)` };
+  }
+
+  getRegexOperator(caseInsensitive: boolean): string {
+    return caseInsensitive ? '~*' : '~';
+  }
+
+  formatRegex(source: string, caseInsensitive: boolean): string {
+    return source.replaceAll('\\b', '\\y');
+  }
+
+  castColumn(sqlPath: string, type: Class): string {
+    if (type === Number) {
+      return `(${sqlPath})::NUMERIC`;
+    } else if (type === Boolean) {
+      return `(${sqlPath})::BOOLEAN`;
+    } else if (type === Date) {
+      return `(${sqlPath})::TIMESTAMP WITH TIME ZONE`;
+    } else if (type === String) {
+      return `(${sqlPath})::text`;
+    }
+    return sqlPath;
+  }
+
+  shiftPlaceholders(sql: string, offset: number): string {
+    return sql.replaceAll(/[$](\d+)/g, (_, num) => `$${Number(num) + offset}`);
+  }
+
+  getTableExistsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
     return {
-      columns: columns.records.map(col => ({
-        ...col,
-        type: col.type.toUpperCase().replace('CHARACTER VARYING', 'VARCHAR').replace('INTEGER', 'INT'),
-        is_not_null: !!col.is_not_null
-      })),
-      foreignKeys: foreignKeys.records,
-      indices: indices.records.map(idx => ({
-        name: idx.name,
-        is_unique: idx.is_unique,
-        columns: idx.columns.map(column => column.split(' ')).map(([name, desc]) => ({ name, desc: desc === '1' }))
-      }))
+      sql: `SELECT EXISTS (
+        SELECT FROM pg_catalog.pg_class c
+        JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relname = $1 AND c.relkind = 'r'
+      );`,
+      parameters: [context.tableName]
     };
   }
 
-  /**
-   * Define column modification
-   */
-  getModifyColumnSQL(stack: VisitStack[]): string {
-    const field: SchemaFieldConfig = castTo(stack.at(-1));
-    const type = this.getColumnType(field);
-    const identifier = this.identifier(field.name);
-    return `ALTER TABLE ${this.parentTable(stack)} ALTER COLUMN ${identifier}  TYPE ${type} USING (${identifier}::${type});`;
+  parseTableExistsResult(records: unknown[]): boolean {
+    return castTo<{ exists: boolean }>(records[0])?.exists ?? false;
   }
 
-  /**
-   * Suppress foreign key checks
-   */
-  override getTruncateAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
-    return [`TRUNCATE ${this.table(SQLModelUtil.classToStack(cls))} CASCADE;`];
+  getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
+    return {
+      sql: `SELECT a.attname AS name, pg_catalog.format_type(a.atttypid, a.atttypmod) AS type
+       FROM pg_catalog.pg_attribute a
+       WHERE a.attrelid = $1::regclass AND a.attnum > 0 AND NOT a.attisdropped;`,
+      parameters: [context.tableName]
+    };
+  }
+
+  parseExistingColumns(records: unknown[]): Map<string, string> {
+    return new Map(castTo<{ name: string; type: string }[]>(records).map(record => [record.name, record.type.toUpperCase()]));
+  }
+
+  getAlterColumnTypeSQL(context: TableContext, columnName: string, columnType: string, existingType: string): string | undefined {
+    const normalizedExisting = existingType.replace('CHARACTER VARYING', 'VARCHAR').replace('INTEGER', 'INT');
+    const normalizedRequested = columnType.toUpperCase().replace('CHARACTER VARYING', 'VARCHAR').replace('INTEGER', 'INT');
+
+    if (!normalizedExisting.startsWith(normalizedRequested) && !normalizedRequested.startsWith(normalizedExisting)) {
+      return `ALTER TABLE ${this.escapeIdentifier(context.tableName)} ALTER COLUMN ${this.escapeIdentifier(columnName)} TYPE ${columnType} USING (${this.escapeIdentifier(columnName)}::${columnType});`;
+    }
+    return undefined;
+  }
+
+  getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
+    return {
+      sql: `SELECT indexname, indexdef FROM pg_indexes WHERE tablename = $1;`,
+      parameters: [context.tableName]
+    };
+  }
+
+  parseExistingIndexes(records: unknown[]): Map<string, string> {
+    return new Map(
+      castTo<{ indexname: string; indexdef: string }[]>(records)
+        .filter(record => !record.indexname.endsWith('_pkey'))
+        .map(record => [record.indexname, record.indexdef])
+    );
+  }
+
+  getDropIndexSQL(context: TableContext, indexName: string): string {
+    return `DROP INDEX IF EXISTS ${this.escapeIdentifier(indexName)};`;
+  }
+
+  getDropTableSQL(context: TableContext): string {
+    return `DROP TABLE IF EXISTS ${this.escapeIdentifier(context.tableName)} CASCADE;`;
+  }
+
+  getTruncateTableSQL(context: TableContext): string {
+    return `TRUNCATE TABLE ${this.escapeIdentifier(context.tableName)} CASCADE;`;
   }
 }

@@ -1,122 +1,146 @@
-import type { AsyncContext } from '@travetto/context';
-import { Injectable } from '@travetto/di';
-import type { WhereClause } from '@travetto/model-query';
-import { SQLDialect, type SQLModelConfig, type SQLTableDescription, type VisitStack } from '@travetto/model-sql';
-import { castTo } from '@travetto/runtime';
+import { AbstractANSI99Dialect, type TableContext, type TransactionStatements } from '@travetto/model-sql';
+import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
-import { SqliteConnection } from './connection.ts';
+export class SqliteDialect extends AbstractANSI99Dialect {
+  returningSupport = true;
+  transactionStatements: TransactionStatements = {
+    ...AbstractANSI99Dialect.TRANSACTION_STATEMENTS,
+    begin: 'BEGIN IMMEDIATE;'
+  };
 
-/**
- * Sqlite Dialect for the SQL Model Source
- */
-@Injectable()
-export class SqliteDialect extends SQLDialect {
-  connection: SqliteConnection;
-  config: SQLModelConfig;
-
-  constructor(context: AsyncContext, config: SQLModelConfig) {
-    super(config.namespace);
-    this.connection = new SqliteConnection(context, config);
-    this.config = config;
-
-    // Special operators
-    Object.assign(this.SQL_OPS, {
-      $regex: 'REGEXP',
-      $ilike: undefined
-    });
-
-    // Special types
-    Object.assign(this.COLUMN_TYPES, {
-      JSON: 'TEXT',
-      TIMESTAMP: 'INTEGER'
-    });
+  getComplexColumnType(field: SchemaFieldConfig): string {
+    return 'TEXT';
   }
 
-  override resolveDateValue(value: Date): string {
-    return `${value.getTime()}`;
+  getColumnType(fieldConfiguration: SchemaFieldConfig): string {
+    if (fieldConfiguration.type === castTo(BigInt)) {
+      return 'INTEGER';
+    }
+
+    if (fieldConfiguration.type === Number) {
+      return 'NUMERIC';
+    }
+
+    if (fieldConfiguration.type === Date) {
+      return 'TEXT';
+    }
+
+    if (fieldConfiguration.type === Boolean) {
+      return 'INTEGER';
+    }
+
+    if (fieldConfiguration.type === String) {
+      return 'TEXT';
+    }
+
+    return 'TEXT';
   }
 
-  /**
-   * How to hash
-   */
-  hash(value: string): string {
-    return `hex('${value}')`;
+  compileJsonIndexPath(columnName: string, jsonPath: string[]): string {
+    return `json_extract(${columnName}, '$.${jsonPath.join('.')}')`;
   }
 
-  async describeTable(table: string): Promise<SQLTableDescription | undefined> {
-    const IGNORE_FIELDS = [this.pathField.name, this.parentPathField.name, this.idxField.name].map(field => `'${field}'`);
-
-    const [columns, foreignKeys, indices] = await Promise.all([
-      this.executeSQL<{ name: string; type: string; is_not_null: 1 | 0 }>(`
-      SELECT 
-        name, 
-        type, 
-        ${this.identifier('notnull')} <> 0 AS is_not_null
-      FROM PRAGMA_TABLE_INFO('${table}')
-      WHERE name NOT IN (${IGNORE_FIELDS.join(',')})
-    `),
-      this.executeSQL<{ name: string; to_table: string; from_column: string; to_column: string }>(`
-      SELECT 
-        'fk_' || '${table}' || '_' || ${this.identifier('from')} AS name, 
-        ${this.identifier('from')} as from_column, 
-        ${this.identifier('to')} as to_column, 
-        ${this.identifier('table')} as to_table
-      FROM PRAGMA_FOREIGN_KEY_LIST('${table}')
-    `),
-      this.executeSQL<{ name: string; is_unique: boolean; columns: string }>(`
-      SELECT 
-        il.name as name, 
-        il.${this.identifier('unique')} = 1 as is_unique, 
-        GROUP_CONCAT(ii.seqno || ' ' || ii.name || ' ' || ii.desc) AS columns
-      FROM PRAGMA_INDEX_LIST('${table}') il
-      JOIN PRAGMA_INDEX_XINFO(il.name) ii
-      WHERE il.name NOT LIKE 'sqlite_%'
-      GROUP BY 1, 2
-    `)
-    ]);
-
+  compileArrayAll(sqlPath: string, identifier: string, value: unknown[]): { sql: string; formatted: unknown } {
     return {
-      columns: columns.records.map(col => ({
-        ...col,
-        is_not_null: !!col.is_not_null
-      })),
-      foreignKeys: foreignKeys.records,
-      indices: indices.records.map(idx => ({
-        name: idx.name,
-        is_unique: idx.is_unique,
-        columns: idx.columns
-          .split(',')
-          .map(col => col.split(' '))
-          .map(([order, name, desc]) => [+order, { name, desc: desc === '1' }] as const)
-          .sort((a, b) => a[0] - b[0])
-          .map(([, item]) => item)
-      }))
+      sql: `NOT EXISTS (SELECT 1 FROM json_each(${identifier}) AS req WHERE req.value NOT IN (SELECT value FROM json_each(${sqlPath})))`,
+      formatted: JSONUtil.toUTF8(value)
     };
   }
 
-  /**
-   * Define column modification
-   */
-  getModifyColumnSQL(stack: VisitStack[]): string {
-    const field: SchemaFieldConfig = castTo(stack.at(-1));
-    const type = this.getColumnType(field);
-    const identifier = this.identifier(field.name);
-    return `ALTER TABLE ${this.parentTable(stack)} ALTER COLUMN ${identifier} TYPE ${type} USING (${identifier}::${type});`;
+  compileArrayEquals(sqlPath: string, identifier: string, values: unknown): { sql: string; formatted: unknown } {
+    if (Array.isArray(values)) {
+      return {
+        sql: `NOT EXISTS (SELECT 1 FROM json_each(${identifier}) AS req WHERE req.value NOT IN (SELECT value FROM json_each(${sqlPath})))`,
+        formatted: JSONUtil.toUTF8(values)
+      };
+    }
+    if (typeof values === 'object' && values !== null) {
+      return {
+        sql: `EXISTS (SELECT 1 FROM json_each(${sqlPath}) AS elem WHERE NOT EXISTS (SELECT 1 FROM json_each(${identifier}) AS req WHERE json_extract(elem.value, '$.' || req.key) IS NOT req.value))`,
+        formatted: JSONUtil.toUTF8(values)
+      };
+    }
+    return {
+      sql: `EXISTS (SELECT 1 FROM json_each(${sqlPath}) WHERE json_each.value = ${identifier})`,
+      formatted: values
+    };
   }
 
-  /**
-   * Generate truncate SQL
-   */
-  override getTruncateTableSQL(stack: VisitStack[]): string {
-    return `DELETE FROM ${this.table(stack)};`;
+  compileArrayAny(sqlPath: string, identifier: string, values: unknown[]): { sql: string; formatted: unknown } {
+    return {
+      sql: `EXISTS (SELECT 1 FROM json_each(${sqlPath}) AS elem WHERE elem.value IN (SELECT value FROM json_each(${identifier})))`,
+      formatted: JSONUtil.toUTF8(values)
+    };
   }
 
-  override getDeleteSQL(stack: VisitStack[], where?: WhereClause<unknown>): string {
-    return super.getDeleteSQL(stack, where).replace(/_ROOT[.]?/g, '');
+  compileArrayExists(sqlPath: string): { sql: string } {
+    return { sql: `(${sqlPath} IS NOT NULL AND json_array_length(${sqlPath}) > 0)` };
   }
 
-  override getUpdateSQL(stack: VisitStack[], data: Record<string, unknown>, where?: WhereClause<unknown>): string {
-    return super.getUpdateSQL(stack, data, where).replace(/_ROOT[.]?/g, '');
+  getRegexOperator(caseInsensitive: boolean): string {
+    return 'REGEXP';
+  }
+
+  formatRegex(source: string, caseInsensitive: boolean): string {
+    return caseInsensitive ? `(?i)${source}` : source;
+  }
+
+  castColumn(sqlPath: string, type: Class): string {
+    if (type === Number) {
+      return `CAST(${sqlPath} AS NUMERIC)`;
+    }
+    return sqlPath;
+  }
+
+  getTableExistsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
+    return {
+      sql: `
+SELECT name 
+FROM sqlite_master 
+WHERE type='table' AND name=?;`,
+      parameters: [context.tableName]
+    };
+  }
+
+  parseTableExistsResult(records: unknown[]): boolean {
+    return records.length > 0;
+  }
+
+  getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
+    return {
+      sql: `PRAGMA table_info('${this.escapeLiteral(context.tableName)}');`
+    };
+  }
+
+  parseExistingColumns(records: unknown[]): Map<string, string> {
+    return new Map(castTo<{ name: string; type: string }[]>(records).map(record => [record.name, record.type.toUpperCase()]));
+  }
+
+  getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
+    return {
+      sql: `
+SELECT name, sql 
+FROM sqlite_master 
+WHERE type='index' AND tbl_name=?;
+`,
+      parameters: [context.tableName]
+    };
+  }
+
+  parseExistingIndexes(records: unknown[]): Map<string, string> {
+    return new Map(
+      castTo<{ name: string; sql: string }[]>(records)
+        .filter(record => record.sql && !record.name.startsWith('sqlite_'))
+        .map(record => [record.name, record.sql])
+    );
+  }
+
+  getDropIndexSQL(context: TableContext, indexName: string): string {
+    return `DROP INDEX IF EXISTS ${this.escapeIdentifier(indexName)};`;
+  }
+
+  getTruncateTableSQL(context: TableContext): string {
+    return `DELETE FROM ${this.escapeIdentifier(context.tableName)};`;
   }
 }

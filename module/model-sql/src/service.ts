@@ -1,19 +1,18 @@
-import type { AsyncContext } from '@travetto/context';
-import { Injectable, PostConstruct } from '@travetto/di';
+import { Injectable } from '@travetto/di';
 import {
   type BulkOperation,
   type BulkResponse,
-  ExistsError,
+  type IndexConfig,
   type ModelBulkSupport,
   ModelBulkUtil,
+  type ModelCrudProvider,
   type ModelCrudSupport,
   ModelCrudUtil,
+  type ModelExpirySupport,
   ModelExpiryUtil,
-  type ModelIdSource,
   type ModelListOptions,
   ModelRegistryIndex,
   type ModelStorageSupport,
-  ModelStorageUtil,
   type ModelType,
   NotFoundError,
   type OptionalId
@@ -32,7 +31,9 @@ import {
   type SingleItemIndex,
   type SortedIndex,
   type SortedIndexSelection,
-  type SortedIndexSelectionType
+  type SortedIndexSelectionType,
+  warnIfIndexedUniqueIndex,
+  warnIfNonIndexedIndex
 } from '@travetto/model-indexed';
 import {
   type ModelQuery,
@@ -47,478 +48,783 @@ import {
   type PageableModelQuery,
   QueryVerifier,
   type ValidStringFields,
-  type WhereClauseRaw
+  type WhereClause
 } from '@travetto/model-query';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
-import { DataUtil } from '@travetto/schema';
+import { WorkPool } from '@travetto/worker';
 
-import type { SQLModelConfig } from './config.ts';
-import type { Connection } from './connection/base.ts';
-import { Connected, ConnectedIterator, Transactional } from './connection/decorator.ts';
-import type { SQLDialect } from './dialect/base.ts';
-import type { InsertWrapper } from './internal/types.ts';
-import { TableManager } from './table-manager.ts';
-import { SQLModelUtil } from './util.ts';
+import type { SQLConnection } from './connection.ts';
+import type { AbstractANSI99Dialect } from './dialect.ts';
+import { SQLModelSchemaUtil } from './schema.ts';
+import type { TableContext } from './types.ts';
 
 /**
- * Core for SQL Model Source.  Should not have any direct queries,
- * but should offload all of that to the dialect, so it can be overridden
- * as needed.
+ * Base SQL Model Service.
+ * Implements CRUD, Query, Expiry, Bulk, Indexed, and Suggest operations
+ * by delegating to connection and dialect components.
  */
 @Injectable()
-export class SQLModelService
+export abstract class BaseSQLModelService<C = unknown>
   implements
     ModelCrudSupport,
     ModelStorageSupport,
     ModelBulkSupport,
+    ModelExpirySupport,
+    ModelIndexedSupport,
     ModelQuerySupport,
     ModelQueryCrudSupport,
     ModelQueryFacetSupport,
-    ModelIndexedSupport,
     ModelQuerySuggestSupport
 {
-  #manager: TableManager;
-  #context: AsyncContext;
-  #dialect: SQLDialect;
-  idSource: ModelIdSource;
+  abstract readonly client: C;
+  abstract connection: SQLConnection;
 
-  readonly config: SQLModelConfig;
+  idSource = ModelCrudUtil.uuidSource();
 
-  get client(): SQLDialect {
-    return this.#dialect;
+  get dialect(): AbstractANSI99Dialect {
+    return this.connection.dialect;
   }
 
-  constructor(context: AsyncContext, config: SQLModelConfig, dialect: SQLDialect) {
-    this.#context = context;
-    this.#dialect = dialect;
-    this.config = config;
+  #whereClause<T extends ModelType>(
+    modelClass: Class<T>,
+    where?: WhereClause<T>,
+    checkExpiry?: boolean
+  ): { whereSQL?: string; parameters?: unknown[] } {
+    return this.dialect.compileWhere(this.connection.getContext(modelClass), ModelQueryUtil.getWhereClause(modelClass, where), checkExpiry);
   }
 
-  /**
-   * Verify upserted ids for bulk operations
-   */
-  async #checkUpsertedIds<T extends ModelType>(
-    cls: Class<T>,
-    addedIds: Map<number, string>,
-    toCheck: Map<string, number>
-  ): Promise<Map<number, string>> {
-    // Get all upsert ids
-    const all = toCheck.size
-      ? (
-          await this.#exec<ModelType>(
-            this.#dialect.getSelectRowsByIdsSQL(SQLModelUtil.classToStack(cls), [...toCheck.keys()], [this.#dialect.idField])
-          )
-        ).records
-      : [];
-
-    const allIds = new Set(all.map(type => type.id));
-
-    for (const [id, idx] of toCheck.entries()) {
-      if (!allIds.has(id)) {
-        // If not found
-        addedIds.set(idx, id);
-      }
-    }
-
-    return addedIds;
-  }
-
-  #exec<T = unknown>(sql: string): Promise<{ records: T[]; count: number }> {
-    return this.#dialect.executeSQL<T>(sql);
-  }
-
-  async #deleteRaw<T extends ModelType>(cls: Class<T>, id: string, where?: WhereClauseRaw<T>, checkExpiry = true): Promise<void> {
-    castTo<WhereClauseRaw<ModelType>>((where ??= {})).id = id;
-
-    const count = await this.#dialect.deleteAndGetCount<ModelType>(cls, {
-      where: ModelQueryUtil.getWhereClause(cls, where, checkExpiry)
-    });
-    if (count === 0) {
-      throw new NotFoundError(cls, id);
-    }
-  }
-
-  async *#scanTable<T extends ModelType>(
-    cls: Class<T>,
-    buildQuery: () => PageableModelQuery<T>,
-    options?: ModelListOptions & ModelPageOptions<number>
-  ): AsyncIterable<{ items: T[]; nextOffset?: number }> {
-    const batchSize = options?.batchSizeHint ?? 100;
-    const maxCount = options?.limit ?? Number.MAX_SAFE_INTEGER;
-    let offset = options?.offset ?? 0;
-    let lastOffset = -1;
-    let produced = 0;
-    while (offset !== lastOffset && produced < maxCount && !options?.abort?.aborted) {
-      const limit = Math.min(batchSize, maxCount - produced);
-      lastOffset = offset;
-      const items = await this.query<T>(cls, {
-        ...buildQuery(),
-        limit,
-        offset
-      });
-      offset += items.length;
-      produced += items.length;
-      if (items.length) {
-        yield { items, nextOffset: items.length < limit ? undefined : offset };
-      }
-    }
-  }
-
-  @PostConstruct()
-  async initializeClient(): Promise<void> {
-    await this.#dialect.connection.init?.();
-    this.idSource = ModelCrudUtil.uuidSource(this.#dialect.ID_LENGTH);
-    this.#manager = new TableManager(this.#context, this.#dialect);
-    await ModelStorageUtil.storageInitialization(this);
+  async initialize(): Promise<void> {
+    await this.connection.init();
+    await this.createStorage();
     ModelExpiryUtil.registerCull(this);
   }
 
-  get connection(): Connection {
-    return this.#dialect.connection;
-  }
-
-  async exportModel<T extends ModelType>(cls: Class<T>): Promise<string> {
-    return (await this.#manager.exportTables(cls)).join('\n');
-  }
-
-  async upsertModel(cls: Class): Promise<void> {
-    await this.#manager.upsertTables(cls);
-  }
-
-  async deleteModel(cls: Class): Promise<void> {
-    await this.#manager.dropTables(cls);
-  }
-
-  async truncateModel(cls: Class): Promise<void> {
-    await this.#manager.truncateTables(cls);
-  }
-
-  async createStorage(): Promise<void> {}
-  async deleteStorage(): Promise<void> {}
-
-  @Transactional()
-  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    try {
-      for (const ins of this.#dialect.getAllInsertSQL(cls, prepped)) {
-        await this.#exec(ins);
-      }
-    } catch (error) {
-      if (error instanceof ExistsError) {
-        throw new ExistsError(cls, prepped.id);
-      } else {
-        throw error;
+  // Record Deserialization Helpers
+  async loadSingle<T extends ModelType>(modelClass: Class<T>, record: Record<string, unknown>): Promise<T> {
+    const schemaContext = SQLModelSchemaUtil.getSchemaContext(modelClass);
+    const resolvedRecord = { ...record };
+    for (const complexFieldName of schemaContext.complexFields.keys()) {
+      const value = resolvedRecord[complexFieldName];
+      if (typeof value === 'string') {
+        resolvedRecord[complexFieldName] = JSONUtil.fromUTF8(value);
       }
     }
-    return prepped;
+    return ModelCrudUtil.load(modelClass, resolvedRecord);
   }
 
-  @Transactional()
-  async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    await this.#deleteRaw(cls, item.id, {}, true);
-    return await this.create(cls, item);
+  async loadMany<T extends ModelType>(modelClass: Class<T>, records: unknown[]): Promise<T[]> {
+    return Promise.all(records.map(row => this.loadSingle(modelClass, castTo(row))));
   }
 
-  @Transactional()
-  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    try {
-      if (item.id) {
-        await this.#deleteRaw(cls, item.id, {}, false);
-      }
-    } catch (error) {
-      if (!(error instanceof NotFoundError)) {
-        throw error;
-      }
+  async executeUpdatePartial<T extends ModelType>(
+    modelClass: Class<T>,
+    where: WhereClause<T>,
+    data: Partial<T>,
+    returning: boolean,
+    view?: string
+  ): Promise<{ count: number; records: Record<string, unknown>[] }> {
+    const preparedData = await ModelCrudUtil.prePartialUpdate(modelClass, data, view);
+
+    const tableContext = this.connection.getContext(modelClass);
+    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);
+    const { sql, values } = this.dialect.buildPartialUpdate(tableContext, preparedData, whereSQL, parameters, returning);
+
+    const result = await this.connection.execute<Record<string, unknown>>(sql, values);
+
+    if (result.count > 0 && returning && !this.dialect.returningSupport) {
+      const selectSQL = this.dialect.buildSelect(tableContext, { whereSQL });
+      const selectResult = await this.connection.execute<Record<string, unknown>>(selectSQL, parameters);
+      return { count: result.count, records: selectResult.records };
     }
-    return await this.create(cls, item);
-  }
 
-  @Transactional()
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
-    const id = item.id;
-    const final = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, view);
-    return this.update(cls, final);
-  }
-
-  @Connected()
-  async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
-    const result = await this.query(cls, { where: castTo({ id }) });
-    if (result.length === 1) {
-      return await ModelCrudUtil.load(cls, result[0]);
-    }
-    throw new NotFoundError(cls, id);
-  }
-
-  @ConnectedIterator()
-  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
-    for await (const { items } of this.#scanTable(cls, () => ({}), options)) {
-      yield items;
-    }
-  }
-
-  @Transactional()
-  async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
-    await this.#deleteRaw(cls, id, {}, false);
-  }
-
-  @Transactional()
-  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse> {
-    const { insertedIds, upsertedIds, existingUpsertedIds } = await ModelBulkUtil.preStore(cls, operations, this);
-
-    const addedIds = new Map([...insertedIds.entries(), ...upsertedIds.entries()]);
-
-    await this.#checkUpsertedIds(cls, addedIds, new Map([...existingUpsertedIds.entries()].map(([key, value]) => [value, key])));
-
-    const get = <K extends keyof BulkOperation<T>>(key: K): Required<BulkOperation<T>>[K][] =>
-      operations.map(item => item[key]).filter((item): item is Required<BulkOperation<T>>[K] => !!item);
-
-    const getStatements = async (key: keyof BulkOperation<T>): Promise<InsertWrapper[]> =>
-      (await SQLModelUtil.getInserts(cls, get(key))).filter(wrapper => !!wrapper.records.length);
-
-    const deletes = [{ stack: SQLModelUtil.classToStack(cls), ids: get('delete').map(wrapper => wrapper.id) }].filter(
-      wrapper => !!wrapper.ids.length
-    );
-
-    const [inserts, upserts, updates] = await Promise.all([getStatements('insert'), getStatements('upsert'), getStatements('update')]);
-
-    const result = await this.#dialect.bulkProcess(deletes, inserts, upserts, updates);
-    result.insertedIds = addedIds;
     return result;
   }
 
-  // Expiry
-  @Transactional()
-  async deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number> {
-    return ModelQueryCrudUtil.deleteExpired(this, cls);
+  async executeUpdate<T extends ModelType>(
+    modelClass: Class<T>,
+    where: WhereClause<T>,
+    item: T,
+    modelSource?: ModelCrudProvider
+  ): Promise<T | undefined> {
+    ModelCrudUtil.ensureNotSubType(modelClass);
+    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
+    const rawItem: Record<string, unknown> = castTo(preppedItem);
+
+    const tableContext = this.connection.getContext(modelClass);
+    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);
+    const { sql, values } = this.dialect.buildUpdate(tableContext, rawItem, whereSQL, parameters);
+
+    const result = await this.connection.execute(sql, values);
+    if (result.count === 0) {
+      return undefined;
+    }
+    if (result.count > 1) {
+      throw new Error(`Multiple items found for update lookup ${modelClass.name}`);
+    }
+    return preppedItem;
   }
 
-  @Connected()
-  async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
-    await QueryVerifier.verify(cls, query);
-    const { records } = await this.#exec<T>(this.#dialect.getQuerySQL(cls, query, ModelQueryUtil.getWhereClause(cls, query.where)));
-    if (ModelRegistryIndex.has(cls)) {
-      await this.#dialect.fetchDependents(cls, records, query?.select);
+  async executeUpsert<T extends ModelType>(
+    modelClass: Class<T>,
+    item: OptionalId<T>,
+    conflictTarget: string[],
+    modelSource?: ModelCrudProvider
+  ): Promise<T> {
+    ModelCrudUtil.ensureNotSubType(modelClass);
+    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
+    const rawItem: Record<string, unknown> = castTo(preppedItem);
+    const tableContext = this.connection.getContext(modelClass);
+
+    const { sql, values } = this.dialect.buildUpsert(tableContext, rawItem, conflictTarget);
+
+    const result = await this.connection.execute<Record<string, unknown>>(sql, values);
+    if (result.records.length > 0) {
+      return this.loadSingle(modelClass, result.records[0]);
+    } else {
+      return this.get(modelClass, rawItem.id as string);
+    }
+  }
+
+  // Crud Support
+  async get<T extends ModelType>(modelClass: Class<T>, id: string): Promise<T> {
+    const tableContext = this.connection.getContext(modelClass);
+    const { whereSQL, parameters } = this.#whereClause(modelClass, castTo({ id }));
+    const sql = this.dialect.buildSelect(tableContext, { whereSQL });
+
+    const result = await this.connection.execute<Record<string, unknown>>(sql, parameters);
+
+    if (result.count === 0) {
+      throw new NotFoundError(modelClass, id);
     }
 
-    const cleaned = SQLModelUtil.cleanResults<T>(this.#dialect, records);
-    return await Promise.all(cleaned.map(item => ModelCrudUtil.load(cls, item)));
+    return this.loadSingle(modelClass, result.records[0]);
   }
 
-  @Connected()
-  async queryOne<T extends ModelType>(cls: Class<T>, builder: ModelQuery<T>, failOnMany = true): Promise<T> {
-    const results = await this.query<T>(cls, { ...builder, limit: failOnMany ? 2 : 1 });
-    return ModelQueryUtil.verifyGetSingleCounts<T>(cls, failOnMany, results, builder.where);
+  async create<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>, modelSource?: ModelCrudProvider): Promise<T> {
+    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
+    const rawItem: Record<string, unknown> = castTo(preppedItem);
+    const tableContext = this.connection.getContext(modelClass);
+
+    const { sql, values } = this.dialect.buildInsert(tableContext, rawItem);
+
+    await this.connection.execute(sql, values);
+    return preppedItem;
   }
 
-  @Connected()
-  async queryCount<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
-    await QueryVerifier.verify(cls, query);
-    return this.#dialect.getCountForQuery(cls, query);
+  async update<T extends ModelType>(modelClass: Class<T>, item: T, modelSource?: ModelCrudProvider): Promise<T> {
+    const preppedItem = await this.executeUpdate(modelClass, castTo({ id: item.id }), item, modelSource);
+    if (!preppedItem) {
+      throw new NotFoundError(modelClass, item.id);
+    }
+    return preppedItem;
   }
 
-  @Connected()
-  @Transactional()
-  async updateByQuery<T extends ModelType>(cls: Class<T>, item: T, query: ModelQuery<T>): Promise<T> {
-    await QueryVerifier.verify(cls, query);
-    const where = ModelQueryUtil.getWhereClause(cls, query.where);
-    where.id = item.id;
-    await this.#deleteRaw(cls, item.id, where, true);
-    return await this.create(cls, item);
+  async upsert<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>, modelSource?: ModelCrudProvider): Promise<T> {
+    return this.executeUpsert(modelClass, item, [this.dialect.escapeIdentifier('id')], modelSource);
   }
 
-  @Connected()
-  @Transactional()
-  async updatePartialByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
-    await QueryVerifier.verify(cls, query);
-    const item = await ModelCrudUtil.prePartialUpdate(cls, data);
-    const { count } = await this.#exec(
-      this.#dialect.getUpdateSQL(SQLModelUtil.classToStack(cls), item, ModelQueryUtil.getWhereClause(cls, query.where))
+  async updatePartial<T extends ModelType>(modelClass: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
+    ModelCrudUtil.ensureNotSubType(modelClass);
+
+    const result = await this.executeUpdatePartial(modelClass, castTo({ id: item.id }), item, true, view);
+
+    if (result.count === 0) {
+      throw new NotFoundError(modelClass, item.id);
+    }
+
+    return this.loadSingle(modelClass, result.records[0]);
+  }
+
+  async delete<T extends ModelType>(modelClass: Class<T>, id: string): Promise<void> {
+    ModelCrudUtil.ensureNotSubType(modelClass);
+    const tableContext = this.connection.getContext(modelClass);
+    const { whereSQL, parameters } = this.#whereClause(modelClass, castTo({ id }), false);
+    const sql = this.dialect.buildDelete(tableContext, whereSQL);
+
+    const result = await this.connection.execute(sql, parameters);
+    if (result.count === 0) {
+      throw new NotFoundError(modelClass, id);
+    }
+  }
+
+  async *list<T extends ModelType>(modelClass: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+    yield* this.listWithOffset(modelClass, options);
+  }
+
+  async *listWithOffset<T extends ModelType>(modelClass: Class<T>, options?: ModelListOptions & { offset?: number }): AsyncIterable<T[]> {
+    const tableContext = this.connection.getContext(modelClass);
+    const { whereSQL, parameters } = this.#whereClause(modelClass, undefined);
+
+    const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
+    const batchSize = Math.min(options?.batchSizeHint ?? 100, limit);
+
+    let offset = options?.offset ?? 0;
+    let produced = 0;
+
+    while (!options?.abort?.aborted && produced < limit) {
+      const batchLimit = Math.min(batchSize, limit - produced);
+      const sql = this.dialect.buildSelect(tableContext, { whereSQL, limit: batchLimit, offset });
+
+      const result = await this.connection.execute(sql, parameters);
+      if (result.count === 0) {
+        break;
+      }
+
+      const items = await this.loadMany(modelClass, result.records);
+      yield items;
+      produced += items.length;
+      offset += items.length;
+    }
+  }
+
+  async dropIndex<T extends ModelType>(tableContext: TableContext<T>, indexName: string): Promise<void> {
+    const sql = this.dialect.getDropIndexSQL(tableContext, indexName);
+    await this.connection.execute(sql);
+  }
+
+  async dropTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
+    const sql = this.dialect.getDropTableSQL(tableContext);
+    await this.connection.execute(sql);
+  }
+
+  async truncateTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
+    const sql = this.dialect.getTruncateTableSQL(tableContext);
+    await this.connection.execute(sql);
+  }
+
+  async upsertTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
+    // Storage & Migration Operations
+    const query = this.dialect.getTableExistsQuery(tableContext);
+    const result = await this.connection.execute(query.sql, query.parameters);
+    const tableExists = this.dialect.parseTableExistsResult(result.records);
+
+    if (!tableExists) {
+      const createTableSQL = this.dialect.getCreateTableSQL(tableContext);
+      await this.connection.execute(createTableSQL);
+
+      for (const createIndexSQL of this.dialect.getCreateTableIndexSQLs(tableContext)) {
+        await this.connection.execute(createIndexSQL);
+      }
+    } else {
+      const query = this.dialect.getExistingColumnsQuery(tableContext);
+      const result = await this.connection.execute(query.sql, query.parameters);
+      const existingColumns = this.dialect.parseExistingColumns(result.records);
+
+      const requestedFieldsMap = new Map<string, string>();
+      for (const field of tableContext.simpleFields.values()) {
+        requestedFieldsMap.set(field.name, this.dialect.getColumnType(field));
+      }
+      for (const field of tableContext.complexFields.values()) {
+        requestedFieldsMap.set(field.name, this.dialect.getComplexColumnType(field));
+      }
+
+      for (const [columnName, columnType] of requestedFieldsMap.entries()) {
+        if (columnName === 'id') {
+          continue;
+        }
+        if (!existingColumns.has(columnName)) {
+          const addColumnSQL = this.dialect.getAddColumnSQL(tableContext, columnName, columnType);
+          await this.connection.execute(addColumnSQL);
+        } else if (this.dialect.getAlterColumnTypeSQL) {
+          const existingType = existingColumns.get(columnName)!;
+          const alterColumnSQL = this.dialect.getAlterColumnTypeSQL(tableContext, columnName, columnType, existingType);
+          if (alterColumnSQL) {
+            await this.connection.execute(alterColumnSQL);
+          }
+        }
+      }
+
+      const indexQuery = this.dialect.getExistingIndexesQuery(tableContext);
+      const indexResult = await this.connection.execute(indexQuery.sql, indexQuery.parameters);
+      const existingIndexes = this.dialect.parseExistingIndexes(indexResult.records);
+
+      const modelIndexes = ModelRegistryIndex.getIndices(tableContext.cls) || [];
+
+      const definedIndexes = new Map<string, IndexConfig>();
+      for (const indexConfig of modelIndexes) {
+        const indexName = ['idx', tableContext.tableName, indexConfig.name.toLowerCase().replaceAll('-', '_')].join('_');
+        definedIndexes.set(indexName, indexConfig);
+      }
+
+      for (const [indexName, indexDefinition] of existingIndexes.entries()) {
+        if (!definedIndexes.has(indexName)) {
+          await this.dropIndex(tableContext, indexName);
+        } else {
+          const indexConfig = definedIndexes.get(indexName)!;
+          const expectedSQL = this.dialect.getCreateIndexSQL(tableContext, indexConfig);
+
+          if (indexDefinition) {
+            const normalizedExisting = this.dialect.normalizeIndexDefinition(indexDefinition);
+            const normalizedExpected = this.dialect.normalizeIndexDefinition(expectedSQL);
+
+            if (normalizedExisting !== normalizedExpected) {
+              await this.dropIndex(tableContext, indexName);
+              await this.connection.execute(expectedSQL);
+            }
+          }
+        }
+      }
+
+      for (const [indexName, indexConfig] of definedIndexes.entries()) {
+        if (!existingIndexes.has(indexName)) {
+          const createIndexSQL = this.dialect.getCreateIndexSQL(tableContext, indexConfig);
+          await this.connection.execute(createIndexSQL);
+        }
+      }
+    }
+  }
+
+  // Storage Support
+  async createStorage(): Promise<void> {
+    for (const modelClass of ModelRegistryIndex.getClasses()) {
+      warnIfIndexedUniqueIndex(this, modelClass, ModelRegistryIndex.getIndices(modelClass));
+      warnIfNonIndexedIndex(this, modelClass, ModelRegistryIndex.getIndices(modelClass));
+      const tableContext = this.connection.getContext(modelClass);
+      await this.upsertTable(tableContext);
+    }
+  }
+
+  async deleteStorage(): Promise<void> {
+    for (const modelClass of ModelRegistryIndex.getClasses()) {
+      const tableContext = this.connection.getContext(modelClass);
+      await this.dropTable(tableContext);
+    }
+  }
+
+  async deleteModel(modelClass: Class): Promise<void> {
+    const tableContext = this.connection.getContext(modelClass);
+    await this.dropTable(tableContext);
+  }
+
+  async upsertModel(modelClass: Class): Promise<void> {
+    const tableContext = this.connection.getContext(modelClass);
+    await this.upsertTable(tableContext);
+  }
+
+  async truncateModel<T extends ModelType>(modelClass: Class<T>): Promise<void> {
+    const tableContext = this.connection.getContext(modelClass);
+    await this.truncateTable(tableContext);
+  }
+
+  // Bulk Support
+  async processBulk<T extends ModelType>(modelClass: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse> {
+    const { insertedIds, upsertedIds, operations: preppedOperations } = await ModelBulkUtil.preStore(modelClass, operations, this);
+    const addedIdentifiers = new Map([...insertedIds.entries(), ...upsertedIds.entries()]);
+
+    const counts = {
+      update: 0,
+      insert: 0,
+      upsert: 0,
+      delete: 0,
+      error: 0
+    };
+    const errors: unknown[] = [];
+
+    // Process the inbound bulk request into groups: inserts, deletes, updates, and upserts
+    const inserts: OptionalId<T>[] = [];
+    const deletes: string[] = [];
+    const updates: T[] = [];
+    const upserts: { upsert?: OptionalId<T> }[] = [];
+
+    for (const operation of preppedOperations) {
+      if ('insert' in operation && operation.insert) {
+        inserts.push(operation.insert);
+      } else if ('delete' in operation && operation.delete) {
+        deletes.push(operation.delete.id);
+      } else if ('update' in operation && operation.update) {
+        updates.push(operation.update);
+      } else if ('upsert' in operation && operation.upsert) {
+        upserts.push(operation);
+      }
+    }
+
+    type SqlCommand = {
+      type: 'insert' | 'delete' | 'update' | 'upsert';
+      sql: string;
+      values: unknown[];
+      count: number;
+      identifier?: string;
+    };
+
+    const commands: SqlCommand[] = [];
+    const batchSize = 100;
+    const tableContext = this.connection.getContext(modelClass);
+
+    // Convert inserts into SQL statements with a fixed batch size
+    for (let index = 0; index < inserts.length; index += batchSize) {
+      const subBatch = inserts.slice(index, index + batchSize);
+      const rawItems: Record<string, unknown>[] = castTo(subBatch);
+      const { sql, values } = this.dialect.buildInsertAll(tableContext, rawItems);
+      commands.push({ type: 'insert', sql, values, count: subBatch.length });
+    }
+
+    // Convert deletes into SQL statements with a fixed batch size
+    for (let index = 0; index < deletes.length; index += batchSize) {
+      const subBatch = deletes.slice(index, index + batchSize);
+      const { whereSQL, parameters = [] } = this.#whereClause(modelClass, castTo({ id: { $in: subBatch } }), false);
+      const sql = this.dialect.buildDelete(tableContext, whereSQL);
+      commands.push({ type: 'delete', sql, values: parameters, count: subBatch.length });
+    }
+
+    // Convert updates into SQL statements with a fixed batch size
+    for (let index = 0; index < updates.length; index += batchSize) {
+      const subBatch = updates.slice(index, index + batchSize);
+      const rawItems: Record<string, unknown>[] = castTo(subBatch);
+      const { sql, values } = this.dialect.buildUpdateAll(tableContext, rawItems);
+      commands.push({ type: 'update', sql, values, count: subBatch.length });
+    }
+
+    // Generate upsert statements from other operations
+    for (const operation of upserts) {
+      const rawItem: Record<string, unknown> = castTo(operation.upsert);
+      const { sql, values } = this.dialect.buildUpsert(tableContext, rawItem, [this.dialect.escapeIdentifier('id')]);
+      commands.push({ type: 'upsert', sql, values, count: 1 });
+    }
+
+    // Run the final list of SQL commands through a workpool
+    await WorkPool.run(
+      async command => {
+        try {
+          const result = await this.connection.execute(command.sql, command.values);
+          if (command.type === 'update' && result.count === 0) {
+            counts.error++;
+            errors.push(new NotFoundError(modelClass, command.identifier!));
+          } else if (command.type === 'delete' && result.count < command.count) {
+            counts.delete += result.count;
+            const missingCount = command.count - result.count;
+            counts.error += missingCount;
+            errors.push(new NotFoundError(modelClass, `Bulk delete missed ${missingCount} record(s)`));
+          } else {
+            counts[command.type] += command.count;
+          }
+        } catch (error) {
+          counts.error += command.count;
+          errors.push(error);
+        }
+      },
+      commands,
+      { max: 8 }
     );
-    return count;
+
+    return {
+      errors,
+      insertedIds: addedIdentifiers,
+      counts
+    };
   }
 
-  @Connected()
-  @Transactional()
-  async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
-    await QueryVerifier.verify(cls, query);
-    const { count } = await this.#exec(
-      this.#dialect.getDeleteSQL(SQLModelUtil.classToStack(cls), ModelQueryUtil.getWhereClause(cls, query.where, false))
-    );
-    return count;
+  // Expiry Support
+  async deleteExpired<T extends ModelType>(modelClass: Class<T>): Promise<number> {
+    return ModelQueryCrudUtil.deleteExpired(this, modelClass);
   }
 
-  @Connected()
-  async suggestByQuery<T extends ModelType>(
-    cls: Class<T>,
-    field: ValidStringFields<T>,
-    prefix?: string,
-    query?: PageableModelQuery<T>
-  ): Promise<T[]> {
-    await QueryVerifier.verify(cls, query);
-    const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
-    const results = await this.query<T>(cls, resolvedQuery);
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (a, b) => b, query?.limit);
+  // Indexed Support
+  validateIndexResult<T extends ModelType>(
+    modelClass: Class<T>,
+    result: { count: number },
+    indexConfig: SingleItemIndex<T>,
+    computed: ModelIndexedComputedIndex<T>
+  ): void {
+    if (result.count === 0) {
+      throw new NotFoundError(`${modelClass.name} Index=${indexConfig}`, computed.getKey());
+    }
+    if (result.count > 1) {
+      throw new Error(`Multiple items found for index lookup ${modelClass.name} Index=${indexConfig}`);
+    }
   }
 
-  @Connected()
-  async suggestValuesByQuery<T extends ModelType>(
-    cls: Class<T>,
-    field: ValidStringFields<T>,
-    prefix?: string,
-    query?: PageableModelQuery<T>
-  ): Promise<string[]> {
-    await QueryVerifier.verify(cls, query);
-    const resolvedQuery = ModelQuerySuggestUtil.getSuggestFieldQuery(cls, field, prefix, query);
-    const results = await this.query(cls, resolvedQuery);
-
-    const modelTypeField: ValidStringFields<ModelType> = castTo(field);
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, modelTypeField, prefix, results, result => result, query?.limit);
-  }
-
-  @Connected()
-  async facetByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
-    await QueryVerifier.verify(cls, query);
-    const col = this.#dialect.identifier(field);
-    const ttl = this.#dialect.identifier('count');
-    const key = this.#dialect.identifier('key');
-    const sql = [`SELECT ${col} as ${key}, COUNT(${col}) as ${ttl}`, this.#dialect.getFromSQL(cls)];
-    sql.push(this.#dialect.getWhereSQL(cls, ModelQueryUtil.getWhereClause(cls, query?.where)));
-    sql.push(`GROUP BY ${col}`, `ORDER BY ${ttl} DESC`);
-
-    const results = await this.#exec<{ key: string; count: number }>(sql.join('\n'));
-    return results.records.map(result => {
-      result.count = DataUtil.coerceType(result.count, Number);
-      return result;
-    });
-  }
-
-  // Indexed support
-  @Connected()
   async getByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
-    cls: Class<T>,
-    idx: SingleItemIndex<T, K, S>,
+    modelClass: Class<T>,
+    indexConfig: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexBody<T, K, S>
   ): Promise<T> {
-    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
-    const results = await this.query(cls, castTo({ where: computed.project({ sort: true, includeId: true }) }));
-    if (results.length !== 1) {
-      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
-    }
-    return results[0];
+    ModelCrudUtil.ensureNotSubType(modelClass);
+    const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate({ sort: true });
+    const where: WhereClause<T> = castTo(computed.project({ sort: true, includeId: true }));
+
+    const tableContext = this.connection.getContext(modelClass);
+    const { whereSQL, parameters } = this.#whereClause(modelClass, where);
+    const sql = this.dialect.buildSelect(tableContext, { whereSQL });
+
+    const result = await this.connection.execute<Record<string, unknown>>(sql, parameters);
+    this.validateIndexResult(modelClass, result, indexConfig, computed);
+
+    return this.loadSingle(modelClass, result.records[0]);
   }
 
-  @Connected()
-  @Transactional()
   async deleteByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
-    cls: Class<T>,
-    idx: SingleItemIndex<T, K, S>,
+    modelClass: Class<T>,
+    indexConfig: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexBody<T, K, S>
   ): Promise<void> {
-    const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
-    const count = await this.deleteByQuery(cls, castTo({ where: computed.project({ sort: true, includeId: true }) }));
-    if (count === 0) {
-      throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
+    ModelCrudUtil.ensureNotSubType(modelClass);
+    const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate({ sort: true });
+    const where: WhereClause<T> = castTo(computed.project({ sort: true, includeId: true }));
+
+    const tableContext = this.connection.getContext(modelClass);
+    const { whereSQL, parameters } = this.#whereClause(modelClass, where);
+    const sql = this.dialect.buildDelete(tableContext, whereSQL);
+
+    const result = await this.connection.execute(sql, parameters);
+    this.validateIndexResult(modelClass, result, indexConfig, computed);
+  }
+
+  async upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    modelClass: Class<T>,
+    indexConfig: SingleItemIndex<T, K, S>,
+    body: OptionalId<T>
+  ): Promise<T> {
+    return ModelIndexedUtil.naiveUpsert(this, modelClass, indexConfig, body);
+  }
+
+  async updateByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    modelClass: Class<T>,
+    indexConfig: SingleItemIndex<T, K, S>,
+    body: T
+  ): Promise<T> {
+    const computed = ModelIndexedComputedIndex.get(indexConfig, castTo(body)).validate({ sort: true });
+    const where: WhereClause<T> = castTo(computed.project({ sort: true, includeId: true }));
+
+    const preppedItem = await this.executeUpdate(modelClass, where, body, this);
+    if (!preppedItem) {
+      throw new NotFoundError(`${modelClass.name} Index=${indexConfig}`, computed.getKey());
+    }
+    return preppedItem;
+  }
+
+  async updatePartialByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    modelClass: Class<T>,
+    indexConfig: SingleItemIndex<T, K, S>,
+    body: FullKeyedIndexWithPartialBody<T, K, S>
+  ): Promise<T> {
+    ModelCrudUtil.ensureNotSubType(modelClass);
+
+    const computed = ModelIndexedComputedIndex.get(indexConfig, castTo(body)).validate({ sort: true });
+    const where: WhereClause<T> = castTo(computed.project({ sort: true, includeId: true }));
+
+    const result = await this.executeUpdatePartial(modelClass, where, castTo(body), true);
+    this.validateIndexResult(modelClass, result, indexConfig, computed);
+
+    return this.loadSingle(modelClass, result.records[0]);
+  }
+
+  async *listByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    modelClass: Class<T>,
+    indexConfig: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    options?: ModelListOptions & { offset?: number }
+  ): AsyncIterable<T[]> {
+    const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate();
+    const where: WhereClause<T> = castTo(computed.project());
+
+    const tableContext = this.connection.getContext(modelClass);
+    const sortSQL = this.dialect.buildIndexSort(tableContext, indexConfig);
+
+    const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
+    const batchSize = Math.min(options?.batchSizeHint ?? 100, limit);
+
+    let offset = options?.offset ?? 0;
+    let produced = 0;
+
+    const { whereSQL, parameters } = this.#whereClause(modelClass, where);
+
+    while (!options?.abort?.aborted && produced < limit) {
+      const batchLimit = Math.min(batchSize, limit - produced);
+      const sql = this.dialect.buildSelect(tableContext, { whereSQL, sortSQL, limit: batchLimit, offset });
+
+      const result = await this.connection.execute(sql, parameters);
+      if (result.count === 0) {
+        break;
+      }
+
+      const items = await this.loadMany(modelClass, result.records);
+      yield items;
+      produced += items.length;
+      offset += items.length;
     }
   }
 
-  @Connected()
-  @Transactional()
-  upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
-    cls: Class<T>,
-    idx: SingleItemIndex<T, K, S>,
-    body: OptionalId<T>
-  ): Promise<T> {
-    return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
-  }
-
-  @Connected()
-  @Transactional()
-  updateByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
-    cls: Class<T>,
-    idx: SingleItemIndex<T, K, S>,
-    body: T
-  ): Promise<T> {
-    return ModelIndexedUtil.naiveUpdate(this, cls, idx, body);
-  }
-
-  @Connected()
-  @Transactional()
-  async updatePartialByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
-    cls: Class<T>,
-    idx: SingleItemIndex<T, K, S>,
-    body: FullKeyedIndexWithPartialBody<T, K, S>
-  ): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
-    return this.update(cls, item);
-  }
-
-  @Connected()
   async pageByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
-    cls: Class<T>,
-    idx: SortedIndex<T, K, S>,
+    modelClass: Class<T>,
+    indexConfig: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
     options?: ModelPageOptions
   ): Promise<ModelPageResult<T>> {
-    const computed = ModelIndexedComputedIndex.get(idx, body).validate();
-    const offset = options?.offset ? JSONUtil.fromBase64<number>(options.offset) : 0;
-
-    const baseQuery = castTo<ModelQuery<T>>({
-      where: computed.project(),
-      sort: idx.sortTemplate.map(part => ({ [part.path.join('.')]: part.value }))
-    });
+    const listOptions = {
+      limit: options?.limit,
+      offset: options?.offset ? Number(options.offset) : 0
+    };
 
     const items: T[] = [];
-    let nextOffset: number | undefined;
-    for await (const batch of this.#scanTable<T>(cls, () => baseQuery, { limit: 100, ...options, offset })) {
-      items.push(...batch.items);
-      nextOffset = batch.nextOffset;
+    let nextOffset = listOptions.offset ?? 0;
+
+    for await (const batch of this.listByIndex(modelClass, indexConfig, body, listOptions)) {
+      items.push(...batch);
+      nextOffset += batch.length;
     }
-    return { items, nextOffset: nextOffset ? JSONUtil.toBase64(nextOffset) : undefined };
+
+    return {
+      items,
+      nextOffset: items.length === options?.limit ? String(nextOffset) : undefined
+    };
   }
 
-  @ConnectedIterator()
-  async *listByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
-    cls: Class<T>,
-    idx: SortedIndex<T, K, S>,
-    body: KeyedIndexBody<T, K>,
-    options?: ModelListOptions
-  ): AsyncIterable<T[]> {
-    const computed = ModelIndexedComputedIndex.get(idx, body).validate();
-    const baseQuery = castTo<ModelQuery<T>>({
-      where: computed.project(),
-      sort: idx.sortTemplate.map(part => ({ [part.path.join('.')]: part.value }))
-    });
-    for await (const { items } of this.#scanTable<T>(cls, () => baseQuery, options)) {
-      yield items;
-    }
-  }
-
-  @Connected()
   async suggestByIndex<
     T extends ModelType,
     S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>,
     B extends SortedIndexSelectionType<T, S> & string
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]> {
-    const items: T[] = [];
-    const computed = ModelIndexedComputedIndex.get(idx, body).validate();
-    const nested: Record<string, unknown> = {};
-    let current = nested;
-    for (const key of idx.sortTemplate[0].path.slice(0, -1)) {
-      current = current[key] = {};
-    }
-    current[idx.sortTemplate[0].path.at(-1)!] = { $regex: ModelIndexedUtil.getSuggestRegex(prefix) };
+  >(
+    modelClass: Class<T>,
+    indexConfig: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    prefix: B,
+    options?: ModelIndexedSearchOptions
+  ): Promise<T[]> {
+    const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate();
+    const where: WhereClause<T> = castTo(computed.project());
 
-    const baseQuery = castTo<ModelQuery<T>>({
-      where: {
-        $and: [computed.project(), nested]
-      }
+    const tableContext = this.connection.getContext(modelClass);
+    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);
+
+    const prefixFieldPath = indexConfig.sortTemplate[0].path;
+    const { sqlPath } = this.dialect.resolvePath(tableContext, prefixFieldPath, 'read');
+
+    const placeholder = this.dialect.getPlaceholder(parameters.length + 1);
+    parameters.push(`${prefix}%`);
+
+    const likeOp = this.dialect.suggestLikeOperator ?? 'LIKE';
+    const conditions = [`${sqlPath} ${likeOp} ${placeholder}`];
+    if (whereSQL) {
+      conditions.push(whereSQL);
+    }
+
+    const sql = this.dialect.buildSelect(tableContext, { whereSQL: conditions.join(' AND '), limit: options?.limit ?? 10 });
+    const result = await this.connection.execute(sql, parameters);
+
+    return this.loadMany(modelClass, result.records);
+  }
+
+  // Query Support
+  async query<T extends ModelType>(modelClass: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
+    await QueryVerifier.verify(modelClass, query);
+    const tableContext = this.connection.getContext(modelClass);
+    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, query.where);
+    const sortSQL = this.dialect.compileSort(tableContext, query.sort);
+
+    const sql = this.dialect.buildSelect(tableContext, {
+      whereSQL,
+      sortSQL,
+      limit: query.limit,
+      offset: query.offset
     });
+    const result = await this.connection.execute(sql, parameters);
 
-    for await (const batch of this.#scanTable<T>(cls, () => baseQuery, { limit: 10, ...options })) {
-      items.push(...batch.items);
+    return this.loadMany(modelClass, result.records);
+  }
+
+  async queryOne<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>, failOnMany = true): Promise<T> {
+    const limit = failOnMany ? 2 : 1;
+    const items = await this.query<T>(modelClass, { ...query, limit });
+    return ModelQueryUtil.verifyGetSingleCounts<T>(modelClass, failOnMany, items, query.where);
+  }
+
+  async queryCount<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
+    await QueryVerifier.verify(modelClass, query);
+    const tableContext = this.connection.getContext(modelClass);
+    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, query.where);
+    const sql = this.dialect.buildCount(tableContext, whereSQL);
+
+    const result = await this.connection.execute<{ total: string | number }>(sql, parameters);
+    return Number(result.records[0]?.total ?? 0);
+  }
+
+  // Query Crud Support
+  async updateByQuery<T extends ModelType>(
+    modelClass: Class<T>,
+    item: T,
+    query: ModelQuery<T>,
+    modelSource?: ModelCrudProvider
+  ): Promise<T> {
+    await QueryVerifier.verify(modelClass, query);
+    ModelCrudUtil.ensureNotSubType(modelClass);
+    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
+    const rawItem: Record<string, unknown> = castTo(preppedItem);
+
+    const tableContext = this.connection.getContext(modelClass);
+    const combinedWhere: WhereClause<T> = castTo({
+      $and: [{ id: preppedItem.id }, ...(query.where ? [query.where] : [])]
+    });
+    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, combinedWhere);
+
+    const { sql, values } = this.dialect.buildUpdate(tableContext, rawItem, whereSQL, parameters);
+
+    const result = await this.connection.execute(sql, values);
+    if (result.count === 0) {
+      throw new NotFoundError(modelClass, `Query: ${JSONUtil.toUTF8(query.where)}`);
     }
 
-    return items;
+    return preppedItem;
+  }
+
+  async updatePartialByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
+    await QueryVerifier.verify(modelClass, query);
+    const result = await this.executeUpdatePartial(modelClass, query.where!, data, false);
+    return result.count;
+  }
+
+  async deleteByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
+    await QueryVerifier.verify(modelClass, query);
+    const tableContext = this.connection.getContext(modelClass);
+    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, query.where, false);
+
+    const sql = this.dialect.buildDelete(tableContext, whereSQL);
+
+    const result = await this.connection.execute(sql, parameters);
+    return result.count;
+  }
+
+  // Suggest Support
+  async suggestValuesByQuery<T extends ModelType>(
+    modelClass: Class<T>,
+    field: ValidStringFields<T>,
+    prefix?: string,
+    query?: PageableModelQuery<T>
+  ): Promise<string[]> {
+    const resolvedQuery = ModelQuerySuggestUtil.getSuggestFieldQuery<T>(modelClass, field, prefix, query);
+    const results = await this.query<T>(modelClass, resolvedQuery);
+    return ModelQuerySuggestUtil.combineSuggestResults<T, string>(modelClass, field, prefix, results, value => value, query?.limit);
+  }
+
+  async suggestByQuery<T extends ModelType>(
+    modelClass: Class<T>,
+    field: ValidStringFields<T>,
+    prefix?: string,
+    query?: PageableModelQuery<T>
+  ): Promise<T[]> {
+    const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(modelClass, field, prefix, query);
+    const results = await this.query<T>(modelClass, resolvedQuery);
+    return ModelQuerySuggestUtil.combineSuggestResults<T, T>(modelClass, field, prefix, results, (_, value) => value, query?.limit);
+  }
+
+  // Facet Support
+  async facetByQuery<T extends ModelType>(
+    modelClass: Class<T>,
+    field: ValidStringFields<T>,
+    query?: ModelQuery<T>
+  ): Promise<ModelQueryFacet[]> {
+    await QueryVerifier.verify(modelClass, query);
+    const tableContext = this.connection.getContext(modelClass);
+    const { whereSQL, parameters } = this.#whereClause(modelClass, query?.where);
+    const { sqlPath } = this.dialect.resolvePath(tableContext, String(field).split('.'), 'read');
+
+    const sql = this.dialect.buildFacet(tableContext, sqlPath, whereSQL);
+
+    const result = await this.connection.execute<{ key: string; count: string | number }>(sql, parameters);
+
+    return result.records.map(record => ({
+      key: record.key,
+      count: Number(record.count)
+    }));
   }
 }

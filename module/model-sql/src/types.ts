@@ -1,11 +1,17 @@
+import type { ModelType } from '@travetto/model';
 import type { Class } from '@travetto/runtime';
+import type { SchemaFieldConfig } from '@travetto/schema';
 
-export const TableSymbol = Symbol.for('@travetto/model-sql:table');
+export type JSONSqlPathMode = 'orderBy' | 'createIndex' | 'read';
 
-export type VisitStack = {
-  [TableSymbol]?: string;
-  array?: boolean;
-  type: Class;
-  name: string;
-  index?: number;
-};
+export interface SchemaContext<T> {
+  cls: Class<T>;
+  simpleFields: Map<string, SchemaFieldConfig>;
+  complexFields: Map<string, SchemaFieldConfig>;
+  allFields: SchemaFieldConfig[];
+}
+
+export interface TableContext<T extends ModelType = ModelType> extends SchemaContext<T> {
+  tableName: string;
+  database?: string;
+}

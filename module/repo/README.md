@@ -160,7 +160,6 @@ module/model-memory
 module/model-mongo
 module/model-mysql
 module/model-postgres
-module/model-postgres-json
 module/model-query
 module/model-query-language
 module/model-redis
@@ -253,7 +252,6 @@ global-test/model_auth-session <workspace-root>/global-test/model_auth-session
             module/model-mongo <workspace-root>/module/model-mongo
             module/model-mysql <workspace-root>/module/model-mysql
          module/model-postgres <workspace-root>/module/model-postgres
-    module/model-postgres-json <workspace-root>/module/model-postgres-json
             module/model-query <workspace-root>/module/model-query
    module/model-query-language <workspace-root>/module/model-query-language
             module/model-redis <workspace-root>/module/model-redis
