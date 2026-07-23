@@ -1,6 +1,7 @@
 import {
   type BulkOperation,
   type BulkResponse,
+  type IndexConfig,
   type ModelBulkSupport,
   ModelBulkUtil,
   type ModelCrudProvider,
@@ -51,20 +52,17 @@ import {
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
 
-import { SQLStatementBuilder } from './builder.ts';
 import type { SQLConnection } from './connection.ts';
-import type { SQLDialect } from './dialect.ts';
-import { SQLSchemaMigrator } from './migrator.ts';
-import { SQLQueryCompiler } from './query.ts';
+import type { AbstractANSI99Dialect } from './dialect.ts';
+import { SQLModelSchemaUtil } from './schema.ts';
 import type { TableContext } from './types.ts';
-import { SQLModelUtil } from './util.ts';
 
 /**
  * Base SQL Model Service.
  * Implements CRUD, Query, Expiry, Bulk, Indexed, and Suggest operations
- * by delegating to connection, dialect, migrator, and builder components.
+ * by delegating to connection and dialect components.
  */
-export abstract class BaseSQLModelService
+export abstract class BaseSQLModelService<C = unknown>
   implements
     ModelCrudSupport,
     ModelStorageSupport,
@@ -76,21 +74,13 @@ export abstract class BaseSQLModelService
     ModelQueryFacetSupport,
     ModelQuerySuggestSupport
 {
-  abstract readonly client: unknown;
+  abstract readonly client: C;
   abstract connection: SQLConnection;
 
   idSource = ModelCrudUtil.uuidSource();
 
-  get dialect(): SQLDialect {
+  get dialect(): AbstractANSI99Dialect {
     return this.connection.dialect;
-  }
-
-  get returningSupport(): boolean {
-    return this.dialect.returningSupport;
-  }
-
-  get suggestLikeOperator(): string {
-    return this.dialect.suggestLikeOperator ?? 'LIKE';
   }
 
   #whereClause<T extends ModelType>(
@@ -98,12 +88,7 @@ export abstract class BaseSQLModelService
     where?: WhereClause<T>,
     checkExpiry?: boolean
   ): { whereSQL?: string; parameters?: unknown[] } {
-    return SQLQueryCompiler.compileWhere(
-      this.dialect,
-      this.connection.getContext(modelClass),
-      ModelQueryUtil.getWhereClause(modelClass, where),
-      checkExpiry
-    );
+    return this.dialect.compileWhere(this.connection.getContext(modelClass), ModelQueryUtil.getWhereClause(modelClass, where), checkExpiry);
   }
 
   async initialize(): Promise<void> {
@@ -114,12 +99,12 @@ export abstract class BaseSQLModelService
 
   // Record Deserialization Helpers
   async loadSingle<T extends ModelType>(modelClass: Class<T>, record: Record<string, unknown>): Promise<T> {
-    const schemaContext = SQLModelUtil.getSchemaContext(modelClass);
+    const schemaContext = SQLModelSchemaUtil.getSchemaContext(modelClass);
     const resolvedRecord = { ...record };
     for (const complexFieldName of schemaContext.complexFields.keys()) {
       const value = resolvedRecord[complexFieldName];
       if (typeof value === 'string') {
-        resolvedRecord[complexFieldName] = JSON.parse(value);
+        resolvedRecord[complexFieldName] = JSONUtil.fromUTF8(value);
       }
     }
     return ModelCrudUtil.load(modelClass, resolvedRecord);
@@ -127,17 +112,6 @@ export abstract class BaseSQLModelService
 
   async loadMany<T extends ModelType>(modelClass: Class<T>, records: unknown[]): Promise<T[]> {
     return Promise.all(records.map(row => this.loadSingle(modelClass, castTo(row))));
-  }
-
-  // Update compilation helpers
-  compilePartialUpdate<T extends ModelType>(
-    tableContext: TableContext<T>,
-    preparedData: Partial<T>
-  ): { sets: string[]; values: unknown[] } {
-    const { sql, values } = SQLStatementBuilder.buildPartialUpdate(this.dialect, tableContext, preparedData);
-    const setMatch = sql.match(/SET (.*?)(\s+WHERE|$)/);
-    const sets = setMatch ? setMatch[1].split(', ') : [];
-    return { sets, values };
   }
 
   async executeUpdatePartial<T extends ModelType>(
@@ -151,19 +125,12 @@ export abstract class BaseSQLModelService
 
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);
-    const { sql, values } = SQLStatementBuilder.buildPartialUpdate(
-      this.dialect,
-      tableContext,
-      preparedData,
-      whereSQL,
-      parameters,
-      returning
-    );
+    const { sql, values } = this.dialect.buildPartialUpdate(tableContext, preparedData, whereSQL, parameters, returning);
 
     const result = await this.connection.execute<Record<string, unknown>>(sql, values);
 
-    if (result.count > 0 && returning && !this.returningSupport) {
-      const selectSQL = SQLStatementBuilder.buildSelect(tableContext, { whereSQL });
+    if (result.count > 0 && returning && !this.dialect.returningSupport) {
+      const selectSQL = this.dialect.buildSelect(tableContext, { whereSQL });
       const selectResult = await this.connection.execute<Record<string, unknown>>(selectSQL, parameters);
       return { count: result.count, records: selectResult.records };
     }
@@ -183,7 +150,7 @@ export abstract class BaseSQLModelService
 
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);
-    const { sql, values } = SQLStatementBuilder.buildUpdate(this.dialect, tableContext, rawItem, whereSQL, parameters);
+    const { sql, values } = this.dialect.buildUpdate(tableContext, rawItem, whereSQL, parameters);
 
     const result = await this.connection.execute(sql, values);
     if (result.count === 0) {
@@ -206,7 +173,7 @@ export abstract class BaseSQLModelService
     const rawItem: Record<string, unknown> = castTo(preppedItem);
     const tableContext = this.connection.getContext(modelClass);
 
-    const { sql, values } = SQLStatementBuilder.buildUpsert(this.dialect, tableContext, rawItem, conflictTarget);
+    const { sql, values } = this.dialect.buildUpsert(tableContext, rawItem, conflictTarget);
 
     const result = await this.connection.execute<Record<string, unknown>>(sql, values);
     if (result.records.length > 0) {
@@ -220,7 +187,7 @@ export abstract class BaseSQLModelService
   async get<T extends ModelType>(modelClass: Class<T>, id: string): Promise<T> {
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, castTo({ id }));
-    const sql = SQLStatementBuilder.buildSelect(tableContext, { whereSQL });
+    const sql = this.dialect.buildSelect(tableContext, { whereSQL });
 
     const result = await this.connection.execute<Record<string, unknown>>(sql, parameters);
 
@@ -236,7 +203,7 @@ export abstract class BaseSQLModelService
     const rawItem: Record<string, unknown> = castTo(preppedItem);
     const tableContext = this.connection.getContext(modelClass);
 
-    const { sql, values } = SQLStatementBuilder.buildInsert(this.dialect, tableContext, rawItem);
+    const { sql, values } = this.dialect.buildInsert(tableContext, rawItem);
 
     await this.connection.execute(sql, values);
     return preppedItem;
@@ -270,7 +237,7 @@ export abstract class BaseSQLModelService
     ModelCrudUtil.ensureNotSubType(modelClass);
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, castTo({ id }), false);
-    const sql = SQLStatementBuilder.buildDelete(tableContext, whereSQL);
+    const sql = this.dialect.buildDelete(tableContext, whereSQL);
 
     const result = await this.connection.execute(sql, parameters);
     if (result.count === 0) {
@@ -294,7 +261,7 @@ export abstract class BaseSQLModelService
 
     while (!options?.abort?.aborted && produced < limit) {
       const batchLimit = Math.min(batchSize, limit - produced);
-      const sql = SQLStatementBuilder.buildSelect(tableContext, { whereSQL, limit: batchLimit, offset });
+      const sql = this.dialect.buildSelect(tableContext, { whereSQL, limit: batchLimit, offset });
 
       const result = await this.connection.execute(sql, parameters);
       if (result.count === 0) {
@@ -308,31 +275,133 @@ export abstract class BaseSQLModelService
     }
   }
 
+  async dropIndex<T extends ModelType>(tableContext: TableContext<T>, indexName: string): Promise<void> {
+    const sql = this.dialect.getDropIndexSQL(tableContext, indexName);
+    await this.connection.execute(sql);
+  }
+
+  async dropTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
+    const sql = this.dialect.getDropTableSQL(tableContext);
+    await this.connection.execute(sql);
+  }
+
+  async truncateTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
+    const sql = this.dialect.getTruncateTableSQL(tableContext);
+    await this.connection.execute(sql);
+  }
+
+  async upsertTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
+    // Storage & Migration Operations
+    const query = this.dialect.getTableExistsQuery(tableContext);
+    const result = await this.connection.execute(query.sql, query.parameters);
+    const tableExists = this.dialect.parseTableExistsResult(result.records);
+
+    if (!tableExists) {
+      const createTableSQL = this.dialect.getCreateTableSQL(tableContext);
+      await this.connection.execute(createTableSQL);
+
+      for (const createIndexSQL of this.dialect.getCreateTableIndexSQLs(tableContext)) {
+        await this.connection.execute(createIndexSQL);
+      }
+    } else {
+      const query = this.dialect.getExistingColumnsQuery(tableContext);
+      const result = await this.connection.execute(query.sql, query.parameters);
+      const existingColumns = this.dialect.parseExistingColumns(result.records);
+
+      const requestedFieldsMap = new Map<string, string>();
+      for (const field of tableContext.simpleFields.values()) {
+        requestedFieldsMap.set(field.name, this.dialect.getColumnType(field));
+      }
+      for (const field of tableContext.complexFields.values()) {
+        requestedFieldsMap.set(field.name, this.dialect.complexColumnType);
+      }
+
+      for (const [columnName, columnType] of requestedFieldsMap.entries()) {
+        if (columnName === 'id') {
+          continue;
+        }
+        if (!existingColumns.has(columnName)) {
+          const addColumnSQL = this.dialect.getAddColumnSQL(tableContext, columnName, columnType);
+          await this.connection.execute(addColumnSQL);
+        } else if (this.dialect.getAlterColumnTypeSQL) {
+          const existingType = existingColumns.get(columnName)!;
+          const alterColumnSQL = this.dialect.getAlterColumnTypeSQL(tableContext, columnName, columnType, existingType);
+          if (alterColumnSQL) {
+            await this.connection.execute(alterColumnSQL);
+          }
+        }
+      }
+
+      const indexQuery = this.dialect.getExistingIndexesQuery(tableContext);
+      const indexResult = await this.connection.execute(indexQuery.sql, indexQuery.parameters);
+      const existingIndexes = this.dialect.parseExistingIndexes(indexResult.records);
+
+      const modelIndexes = ModelRegistryIndex.getIndices(tableContext.cls) || [];
+
+      const definedIndexes = new Map<string, IndexConfig>();
+      for (const indexConfig of modelIndexes) {
+        const indexName = ['idx', tableContext.tableName, indexConfig.name.toLowerCase().replaceAll('-', '_')].join('_');
+        definedIndexes.set(indexName, indexConfig);
+      }
+
+      for (const [indexName, indexDefinition] of existingIndexes.entries()) {
+        if (!definedIndexes.has(indexName)) {
+          await this.dropIndex(tableContext, indexName);
+        } else {
+          const indexConfig = definedIndexes.get(indexName)!;
+          const expectedSQL = this.dialect.getCreateIndexSQL(tableContext, indexConfig);
+
+          if (indexDefinition) {
+            const normalizedExisting = this.dialect.normalizeIndexDefinition(indexDefinition);
+            const normalizedExpected = this.dialect.normalizeIndexDefinition(expectedSQL);
+
+            if (normalizedExisting !== normalizedExpected) {
+              await this.dropIndex(tableContext, indexName);
+              await this.connection.execute(expectedSQL);
+            }
+          }
+        }
+      }
+
+      for (const [indexName, indexConfig] of definedIndexes.entries()) {
+        if (!existingIndexes.has(indexName)) {
+          const createIndexSQL = this.dialect.getCreateIndexSQL(tableContext, indexConfig);
+          await this.connection.execute(createIndexSQL);
+        }
+      }
+    }
+  }
+
   // Storage Support
   async createStorage(): Promise<void> {
     for (const modelClass of ModelRegistryIndex.getClasses()) {
       warnIfIndexedUniqueIndex(this, modelClass, ModelRegistryIndex.getIndices(modelClass));
       warnIfNonIndexedIndex(this, modelClass, ModelRegistryIndex.getIndices(modelClass));
       const tableContext = this.connection.getContext(modelClass);
-      await SQLSchemaMigrator.upsertTable(this.connection, this.dialect, tableContext);
+      await this.upsertTable(tableContext);
     }
   }
 
   async deleteStorage(): Promise<void> {
     for (const modelClass of ModelRegistryIndex.getClasses()) {
       const tableContext = this.connection.getContext(modelClass);
-      await SQLSchemaMigrator.dropTable(this.connection, this.dialect, tableContext);
+      await this.dropTable(tableContext);
     }
   }
 
   async deleteModel(modelClass: Class): Promise<void> {
     const tableContext = this.connection.getContext(modelClass);
-    await SQLSchemaMigrator.dropTable(this.connection, this.dialect, tableContext);
+    await this.dropTable(tableContext);
   }
 
   async upsertModel(modelClass: Class): Promise<void> {
     const tableContext = this.connection.getContext(modelClass);
-    await SQLSchemaMigrator.upsertTable(this.connection, this.dialect, tableContext);
+    await this.upsertTable(tableContext);
+  }
+
+  async truncateModel<T extends ModelType>(modelClass: Class<T>): Promise<void> {
+    const tableContext = this.connection.getContext(modelClass);
+    await this.truncateTable(tableContext);
   }
 
   // Bulk Support
@@ -413,7 +482,7 @@ export abstract class BaseSQLModelService
 
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, where);
-    const sql = SQLStatementBuilder.buildSelect(tableContext, { whereSQL });
+    const sql = this.dialect.buildSelect(tableContext, { whereSQL });
 
     const result = await this.connection.execute<Record<string, unknown>>(sql, parameters);
     this.validateIndexResult(modelClass, result, indexConfig, computed);
@@ -432,7 +501,7 @@ export abstract class BaseSQLModelService
 
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, where);
-    const sql = SQLStatementBuilder.buildDelete(tableContext, whereSQL);
+    const sql = this.dialect.buildDelete(tableContext, whereSQL);
 
     const result = await this.connection.execute(sql, parameters);
     this.validateIndexResult(modelClass, result, indexConfig, computed);
@@ -487,7 +556,7 @@ export abstract class BaseSQLModelService
     const where: WhereClause<T> = castTo(computed.project());
 
     const tableContext = this.connection.getContext(modelClass);
-    const sortSQL = SQLStatementBuilder.buildIndexSort(this.dialect, tableContext, indexConfig);
+    const sortSQL = this.dialect.buildIndexSort(tableContext, indexConfig);
 
     const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
     const batchSize = Math.min(options?.batchSizeHint ?? 100, limit);
@@ -499,7 +568,7 @@ export abstract class BaseSQLModelService
 
     while (!options?.abort?.aborted && produced < limit) {
       const batchLimit = Math.min(batchSize, limit - produced);
-      const sql = SQLStatementBuilder.buildSelect(tableContext, { whereSQL, sortSQL, limit: batchLimit, offset });
+      const sql = this.dialect.buildSelect(tableContext, { whereSQL, sortSQL, limit: batchLimit, offset });
 
       const result = await this.connection.execute(sql, parameters);
       if (result.count === 0) {
@@ -557,7 +626,7 @@ export abstract class BaseSQLModelService
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);
 
     const prefixFieldPath = indexConfig.sortTemplate[0].path;
-    const { sqlPath } = SQLQueryCompiler.resolvePath(this.dialect, tableContext, prefixFieldPath, 'read');
+    const { sqlPath } = this.dialect.resolvePath(tableContext, prefixFieldPath, 'read');
 
     const placeholder = this.dialect.getPlaceholder(parameters.length + 1);
     parameters.push(`${prefix}%`);
@@ -568,7 +637,7 @@ export abstract class BaseSQLModelService
       conditions.push(whereSQL);
     }
 
-    const sql = SQLStatementBuilder.buildSelect(tableContext, { whereSQL: conditions.join(' AND '), limit: options?.limit ?? 10 });
+    const sql = this.dialect.buildSelect(tableContext, { whereSQL: conditions.join(' AND '), limit: options?.limit ?? 10 });
     const result = await this.connection.execute(sql, parameters);
 
     return this.loadMany(modelClass, result.records);
@@ -579,9 +648,9 @@ export abstract class BaseSQLModelService
     await QueryVerifier.verify(modelClass, query);
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, query.where);
-    const sortSQL = SQLQueryCompiler.compileSort(this.dialect, tableContext, query.sort);
+    const sortSQL = this.dialect.compileSort(tableContext, query.sort);
 
-    const sql = SQLStatementBuilder.buildSelect(tableContext, {
+    const sql = this.dialect.buildSelect(tableContext, {
       whereSQL,
       sortSQL,
       limit: query.limit,
@@ -602,7 +671,7 @@ export abstract class BaseSQLModelService
     await QueryVerifier.verify(modelClass, query);
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, query.where);
-    const sql = SQLStatementBuilder.buildCount(this.dialect, tableContext, whereSQL);
+    const sql = this.dialect.buildCount(tableContext, whereSQL);
 
     const result = await this.connection.execute<{ total: string | number }>(sql, parameters);
     return Number(result.records[0]?.total ?? 0);
@@ -626,7 +695,7 @@ export abstract class BaseSQLModelService
     });
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, combinedWhere);
 
-    const { sql, values } = SQLStatementBuilder.buildUpdate(this.dialect, tableContext, rawItem, whereSQL, parameters);
+    const { sql, values } = this.dialect.buildUpdate(tableContext, rawItem, whereSQL, parameters);
 
     const result = await this.connection.execute(sql, values);
     if (result.count === 0) {
@@ -647,7 +716,7 @@ export abstract class BaseSQLModelService
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, query.where, false);
 
-    const sql = SQLStatementBuilder.buildDelete(tableContext, whereSQL);
+    const sql = this.dialect.buildDelete(tableContext, whereSQL);
 
     const result = await this.connection.execute(sql, parameters);
     return result.count;
@@ -685,9 +754,9 @@ export abstract class BaseSQLModelService
     await QueryVerifier.verify(modelClass, query);
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, query?.where);
-    const { sqlPath } = SQLQueryCompiler.resolvePath(this.dialect, tableContext, String(field).split('.'), 'read');
+    const { sqlPath } = this.dialect.resolvePath(tableContext, String(field).split('.'), 'read');
 
-    const sql = SQLStatementBuilder.buildFacet(this.dialect, tableContext, sqlPath, whereSQL);
+    const sql = this.dialect.buildFacet(tableContext, sqlPath, whereSQL);
 
     const result = await this.connection.execute<{ key: string; count: string | number }>(sql, parameters);
 

@@ -7,9 +7,7 @@ import { Schema } from '@travetto/schema';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { AbstractANSI99Dialect } from '../../src/dialect.ts';
-import { SQLQueryCompiler } from '../../src/query.ts';
 import type { TableContext } from '../../src/types.ts';
-import { SQLModelUtil } from '../../src/util.ts';
 
 @Model()
 class User {
@@ -83,13 +81,8 @@ class MockDialect extends AbstractANSI99Dialect {
 
 const mockDialect = new MockDialect();
 
-function getMockContext<T extends ModelType>(cls: Class<T>): TableContext<T> {
-  return {
-    tableName: cls.name.toLowerCase(),
-    database: 'test',
-    escapedTableName: `"${cls.name.toLowerCase()}"`,
-    ...SQLModelUtil.getSchemaContext(cls)
-  };
+function getMockContext<T extends ModelType>(modelClass: Class<T>): TableContext<T> {
+  return mockDialect.getTableContext(modelClass, 'test');
 }
 
 @Suite()
@@ -102,7 +95,7 @@ export class SQLQueryCompilerTest {
   @Test()
   async testCompileSimple() {
     const context = getMockContext(User);
-    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(mockDialect, context, { name: 'john' });
+    const { whereSQL, parameters } = mockDialect.compileWhere(context, { name: 'john' });
     assert(whereSQL === '"name" = $$1');
     assert.deepStrictEqual(parameters, ['john']);
   }
@@ -110,7 +103,7 @@ export class SQLQueryCompilerTest {
   @Test()
   async testCompileOperators() {
     const context = getMockContext(WhereType);
-    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(mockDialect, context, {
+    const { whereSQL, parameters } = mockDialect.compileWhere(context, {
       age: { $gt: 18, $lte: 100 }
     });
     assert(whereSQL === '("age" > $$1 AND "age" <= $$2)');
@@ -120,7 +113,7 @@ export class SQLQueryCompilerTest {
   @Test()
   async testCompileNested() {
     const context = getMockContext(WhereType);
-    const { whereSQL, parameters } = SQLQueryCompiler.compileWhere(mockDialect, context, {
+    const { whereSQL, parameters } = mockDialect.compileWhere(context, {
       nestedObj: { value: 'test' }
     });
     assert(whereSQL === '"nestedObj"->\'value\' = $$1');

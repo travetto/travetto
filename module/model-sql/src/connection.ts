@@ -2,9 +2,9 @@ import { type AsyncContext, AsyncContextValue } from '@travetto/context';
 import { ModelRegistryIndex, type ModelType } from '@travetto/model';
 import { type AsyncMethodDescriptor, type Class, castTo, Util } from '@travetto/runtime';
 
-import type { SQLDialect } from './dialect.ts';
+import type { AbstractANSI99Dialect } from './dialect.ts';
+import { SQLModelSchemaUtil } from './schema.ts';
 import type { TableContext } from './types.ts';
-import { SQLModelUtil } from './util.ts';
 
 export type TransactionType = 'required' | 'isolated' | 'force';
 
@@ -35,7 +35,7 @@ export abstract class SQLConnection<
   isolatedTransactions = true;
   nestedTransactions = true;
 
-  abstract readonly dialect: SQLDialect;
+  abstract readonly dialect: AbstractANSI99Dialect;
 
   readonly context: AsyncContext;
 
@@ -48,17 +48,12 @@ export abstract class SQLConnection<
 
   abstract config: F;
 
-  getContext<T extends ModelType>(cls: Class<T>): TableContext<T> {
-    let tableName = ModelRegistryIndex.getStoreName(cls);
+  getContext<T extends ModelType>(modelClass: Class<T>): TableContext<T> {
+    let tableName = ModelRegistryIndex.getStoreName(modelClass);
     if (this.config.namespace) {
       tableName = `${this.config.namespace}_${tableName}`;
     }
-    return {
-      tableName,
-      database: this.config.database,
-      escapedTableName: this.dialect.escapeIdentifier(tableName),
-      ...SQLModelUtil.getSchemaContext(cls)
-    };
+    return { tableName, ...SQLModelSchemaUtil.getSchemaContext(modelClass) };
   }
 
   get active(): C | undefined {
