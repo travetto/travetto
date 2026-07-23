@@ -1,5 +1,5 @@
 import { AbstractANSI99Dialect, type JSONSqlPathMode, type TableContext } from '@travetto/model-sql';
-import { type Class, castTo } from '@travetto/runtime';
+import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
 export class MysqlDialect extends AbstractANSI99Dialect {
@@ -64,8 +64,38 @@ export class MysqlDialect extends AbstractANSI99Dialect {
     }
   }
 
-  compileArrayContains(sqlPath: string, identifier: string, isObject: boolean, field: SchemaFieldConfig): string {
-    return isObject ? `JSON_CONTAINS(${sqlPath}, ${identifier})` : `JSON_CONTAINS(${sqlPath}, JSON_ARRAY(${identifier}))`;
+  compileArrayAll(
+    sqlPath: string,
+    identifier: string,
+    value: unknown[],
+    field: SchemaFieldConfig,
+    topLevel?: boolean
+  ): { sql: string; formatted: unknown } {
+    return { sql: `JSON_CONTAINS(${sqlPath}, ${identifier})`, formatted: JSONUtil.toUTF8(value) };
+  }
+
+  compileArrayEquals(
+    sqlPath: string,
+    identifier: string,
+    values: unknown,
+    field: SchemaFieldConfig,
+    topLevel?: boolean
+  ): { sql: string; formatted: unknown } {
+    return { sql: `JSON_CONTAINS(${sqlPath}, ${identifier})`, formatted: JSONUtil.toUTF8(values) };
+  }
+
+  compileArrayAny(
+    sqlPath: string,
+    identifier: string,
+    values: unknown[],
+    field: SchemaFieldConfig,
+    topLevel?: boolean
+  ): { sql: string; formatted: unknown } {
+    return { sql: `JSON_OVERLAPS(${sqlPath}, ${identifier})`, formatted: JSONUtil.toUTF8(values) };
+  }
+
+  compileArrayExists(sqlPath: string, identifier: string, field: SchemaFieldConfig, topLevel?: boolean): { sql: string } {
+    return { sql: `(${sqlPath} IS NOT NULL AND JSON_LENGTH(${sqlPath}) > 0)` };
   }
 
   compileJsonEquality(sqlPath: string, identifier: string): string {

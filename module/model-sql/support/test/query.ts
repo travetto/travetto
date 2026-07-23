@@ -50,8 +50,20 @@ class MockDialect extends AbstractANSI99Dialect {
     return `$$${index}`;
   }
 
-  compileArrayContains(sqlPath: string, identifier: string) {
-    return `${sqlPath} CONTAINING ${identifier}`;
+  compileArrayAll(sqlPath: string, identifier: string, value: unknown[]) {
+    return { sql: `${sqlPath} ALL ${identifier}`, formatted: value };
+  }
+
+  compileArrayEquals(sqlPath: string, identifier: string, values: unknown) {
+    return { sql: `${sqlPath} EQUALS ${identifier}`, formatted: values };
+  }
+
+  compileArrayAny(sqlPath: string, identifier: string, values: unknown[]) {
+    return { sql: `${sqlPath} ANY ${identifier}`, formatted: values };
+  }
+
+  compileArrayExists(sqlPath: string, identifier: string) {
+    return { sql: `${sqlPath} IS NOT NULL`, formatted: undefined };
   }
 
   getRegexOperator(caseInsensitive: boolean) {

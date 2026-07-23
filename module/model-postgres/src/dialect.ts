@@ -1,5 +1,5 @@
 import { AbstractANSI99Dialect, type TableContext } from '@travetto/model-sql';
-import { type Class, castTo } from '@travetto/runtime';
+import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 export class PostgresDialect extends AbstractANSI99Dialect {
@@ -74,23 +74,55 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     return `$${index}`;
   }
 
-  compileArrayContains(sqlPath: string, identifier: string, isObject: boolean, field: SchemaFieldConfig): string {
-    if (isObject) {
-      return `${sqlPath} @> ${identifier}::jsonb`;
+  compileArrayAll(
+    sqlPath: string,
+    identifier: string,
+    value: unknown[],
+    field: SchemaFieldConfig,
+    topLevel?: boolean
+  ): { sql: string; formatted: unknown } {
+    if (topLevel && !SchemaRegistryIndex.has(field.type)) {
+      return { sql: `${sqlPath} @> ${identifier}`, formatted: value };
     }
-    let cast = 'text';
-    switch (field.type) {
-      case Number:
-        cast = 'numeric';
-        break;
-      case Boolean:
-        cast = 'boolean';
-        break;
-      case Date:
-        cast = 'timestamp with time zone';
-        break;
+    return { sql: `${sqlPath} @> ${identifier}::jsonb`, formatted: JSONUtil.toUTF8(value) };
+  }
+
+  compileArrayEquals(
+    sqlPath: string,
+    identifier: string,
+    values: unknown,
+    field: SchemaFieldConfig,
+    topLevel?: boolean
+  ): { sql: string; formatted: unknown } {
+    if (topLevel && !SchemaRegistryIndex.has(field.type)) {
+      if (Array.isArray(values)) {
+        return { sql: `${sqlPath} @> ${identifier}`, formatted: values };
+      }
+      return { sql: `${identifier} = ANY(${sqlPath})`, formatted: values };
     }
-    return `${sqlPath} @> jsonb_build_array(${identifier}::${cast})`;
+    const val = Array.isArray(values) ? values : [values];
+    return { sql: `${sqlPath} @> ${identifier}::jsonb`, formatted: JSONUtil.toUTF8(val) };
+  }
+
+  compileArrayAny(
+    sqlPath: string,
+    identifier: string,
+    values: unknown[],
+    field: SchemaFieldConfig,
+    topLevel?: boolean
+  ): { sql: string; formatted: unknown } {
+    if (topLevel && !SchemaRegistryIndex.has(field.type)) {
+      return { sql: `${sqlPath} && ${identifier}`, formatted: values };
+    }
+    const formatted = values.map(v => JSONUtil.toUTF8(Array.isArray(v) ? v : [v]));
+    return { sql: `${sqlPath} @> ANY(${identifier}::jsonb[])`, formatted };
+  }
+
+  compileArrayExists(sqlPath: string, identifier: string, field: SchemaFieldConfig, topLevel?: boolean): { sql: string } {
+    if (topLevel && !SchemaRegistryIndex.has(field.type)) {
+      return { sql: `(${sqlPath} IS NOT NULL AND cardinality(${sqlPath}) > 0)` };
+    }
+    return { sql: `(${sqlPath} IS NOT NULL AND ${sqlPath} <> ${identifier}::jsonb)` };
   }
 
   getRegexOperator(caseInsensitive: boolean): string {
