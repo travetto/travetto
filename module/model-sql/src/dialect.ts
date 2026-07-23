@@ -535,23 +535,46 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
 
   // Statement Builders
   buildInsert<T extends ModelType>(tableContext: TableContext<T>, rawItem: Record<string, unknown>): { sql: string; values: unknown[] } {
-    const columns: string[] = [];
-    const values: unknown[] = [];
+    return this.buildInsertAll(tableContext, [rawItem]);
+  }
 
+  buildInsertAll<T extends ModelType>(
+    tableContext: TableContext<T>,
+    rawItems: Record<string, unknown>[]
+  ): { sql: string; values: unknown[] } {
+    if (rawItems.length === 0) {
+      return { sql: '', values: [] };
+    }
+
+    const columns: string[] = [];
     for (const field of tableContext.simpleFields.values()) {
       columns.push(this.escapeIdentifier(field.name));
-      const value = rawItem[field.name];
-      values.push(value === undefined || value === null ? null : value);
     }
-
     for (const field of tableContext.complexFields.values()) {
       columns.push(this.escapeIdentifier(field.name));
-      const value = rawItem[field.name];
-      values.push(this.getComplexColumnValue(field, value));
     }
 
-    const placeholders = columns.map((_, index) => this.getPlaceholder(index + 1));
-    const sql = `INSERT INTO ${this.escapeIdentifier(tableContext.tableName)} (${columns.join(', ')}) VALUES (${placeholders.join(', ')});`;
+    const values: unknown[] = [];
+    const valueTuples: string[] = [];
+
+    for (const rawItem of rawItems) {
+      const tuplePlaceholders: string[] = [];
+      for (const field of tableContext.simpleFields.values()) {
+        tuplePlaceholders.push(this.getPlaceholder(values.length + 1));
+        const value = rawItem[field.name];
+        values.push(value === undefined || value === null ? null : value);
+      }
+
+      for (const field of tableContext.complexFields.values()) {
+        tuplePlaceholders.push(this.getPlaceholder(values.length + 1));
+        const value = rawItem[field.name];
+        values.push(this.getComplexColumnValue(field, value));
+      }
+
+      valueTuples.push(`(${tuplePlaceholders.join(', ')})`);
+    }
+
+    const sql = `INSERT INTO ${this.escapeIdentifier(tableContext.tableName)} (${columns.join(', ')}) VALUES ${valueTuples.join(', ')};`;
 
     return { sql, values };
   }
