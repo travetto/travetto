@@ -13,14 +13,35 @@ npm install @travetto/model-sql
 yarn add @travetto/model-sql
 ```
 
-The current SQL client support stands at:
+This module provides the core SQL foundation for [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") datastores. The current SQL client implementations include:
    *  [MySQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-mysql#readme "MySQL backing for the travetto model module, with real-time modeling support for SQL schemas.") - MySQL 8.0+
    *  [PostgreSQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-postgres#readme "PostgreSQL backing for the travetto model module, with real-time modeling support for SQL schemas.") - Postgres 14+
-   *  [SQLite Model Service](https://github.com/travetto/travetto/tree/main/module/model-sqlite#readme "SQLite backing for the travetto model module, with real-time modeling support for SQL schemas.") - (Node Native SQLite)
+   *  [SQLite Model Service](https://github.com/travetto/travetto/tree/main/module/model-sqlite#readme "SQLite backing for the travetto model module, with real-time modeling support for SQL schemas.") - SQLite (Node native `DatabaseSync`)
 
 **Note**: Wider client support will roll out as usage increases.
 
-## Assumed Behavior
-The [SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") works quite a bit different than the average [Object Relationship Mapping](https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping) in that it makes assertions about how data is stored in the database. The primary goal of the [SQL](https://en.wikipedia.org/wiki/SQL) support is not to handle every scenario that a relational database can provide, but to integrate with the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") structure, while leveraging relational datastores to the best of their abilities. 
+## Assumed Behavior & Schema Design
+The [SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") works quite a bit differently than the average [Object Relationship Mapping](https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping) in that it makes assertions about how data is stored in the database. The primary goal of the [SQL](https://en.wikipedia.org/wiki/SQL) support is not to handle every legacy relational database scenario, but to integrate with the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") structure while leveraging relational datastores to the best of their abilities. 
 
-The primary design maps each model class to a single table where simple fields are mapped to individual columns, and complex fields (objects and arrays) are serialized and stored as native JSON document columns. Every table requires a primary key column, and indices are compiled directly to standard database columns or SQL functional expressions over JSON paths.
+The primary design maps each model class to a single table where simple fields (primitives, dates, enums) are mapped to individual columns, and complex fields (objects and arrays) are serialized and stored as native JSON document columns. Every table requires a primary key column (`id`), and indices are compiled directly to standard database columns or SQL functional expressions over JSON paths.
+
+In development mode, storage modifications are applied dynamically in real time to match model definitions, minimizing manual database migrations.
+
+## Transactions
+Transaction state is tracked seamlessly using [Async Context](https://github.com/travetto/travetto/tree/main/module/context#readme "Async-aware state management, maintaining context across asynchronous calls."). Methods can be wrapped using the [Transactional](https://github.com/travetto/travetto/tree/main/module/model-sql/src/connection.ts#L18) decorator to run operations within a managed transaction.
+
+Supported transaction modes include:
+   *  `required` - Joins an active transaction if one exists, or starts a new top-level transaction.
+   *  `isolated` - Begins a savepoint / nested transaction isolated from the surrounding context.
+   *  `force` - Always creates a separate savepoint for nested operations.
+
+## Supported Features
+All SQL model service implementations derive from [BaseSQLModelService](https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L67) and support:
+   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L60)
+   *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10)
+   *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10)
+   *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L21)
+   *  [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/crud.ts#L11)
+   *  [Facet](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/facet.ts#L14)
+   *  [Suggest](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/suggest.ts#L12)
+   *  [Query](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/query.ts#L10)

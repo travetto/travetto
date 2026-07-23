@@ -1,5 +1,6 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, d } from '@travetto/doc';
+import { BaseSQLModelService } from '@travetto/model-sql';
 
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
@@ -19,9 +20,9 @@ export const text = (
     fields/arrays mapped as native {d.input('JSON')} columns. <br />
     Supported features:
     <ul>
-      {...ModelTypes(MysqlModelService)}
-      {...ModelIndexedTypes(MysqlModelService)}
-      {...ModelQueryTypes(MysqlModelService)}
+      {...ModelTypes(BaseSQLModelService)}
+      {...ModelIndexedTypes(BaseSQLModelService)}
+      {...ModelQueryTypes(BaseSQLModelService)}
     </ul>
     <ModelCustomConfig config={MysqlModelConfig} />
   </>

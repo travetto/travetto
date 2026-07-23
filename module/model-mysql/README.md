@@ -13,11 +13,19 @@ npm install @travetto/model-mysql
 yarn add @travetto/model-mysql
 ```
 
-This module provides a [MySQL](https://www.mysql.com/)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module. This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [SQL](https://en.wikipedia.org/wiki/SQL) databases. In development mode, the [MysqlModelService](https://github.com/travetto/travetto/tree/main/module/model-mysql/src/service.ts#L14) will also modify the database schema in real time to minimize impact to development. 
+This module provides a [MySQL](https://www.mysql.com/)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module. This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [SQL](https://en.wikipedia.org/wiki/SQL) databases. In development mode, the [MysqlModelService](https://github.com/travetto/travetto/tree/main/module/model-mysql/src/service.ts#L12) will also modify the database schema in real time to minimize impact to development. 
 
 The schema generated will not generally map to existing tables as it is attempting to produce a document store like experience on top of a [SQL](https://en.wikipedia.org/wiki/SQL) database. Every table generated maps to a model, with simple fields mapped as individual columns and complex fields/arrays mapped as native `JSON` columns. 
 
 Supported features:
+   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L60)
+   *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10)
+   *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10)
+   *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L21)
+   *  [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/crud.ts#L11)
+   *  [Facet](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/facet.ts#L14)
+   *  [Suggest](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/suggest.ts#L12)
+   *  [Query](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/query.ts#L10)
 
 Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module.
 
@@ -34,11 +42,52 @@ export class Init {
 }
 ```
 
-where the [MysqlModelConfig](https://github.com/travetto/travetto/tree/main/module/model-mysql/src/config.ts#L8) is defined by:
+where the [MysqlModelConfig](https://github.com/travetto/travetto/tree/main/module/model-mysql/src/config.ts#L10) is defined by:
 
 **Code: Structure of MysqlModelConfig**
 ```typescript
+@Config('model.mysql')
+export class MysqlModelConfig {
+  /**
+   * Database host to connect to
+   */
+  host = '127.0.0.1';
 
+  /**
+   * Database port to connect to
+   */
+  port = 0;
+
+  /**
+   * Database username
+   */
+  user = Runtime.production ? '' : 'travetto';
+
+  /**
+   * Database password
+   */
+  password = Runtime.production ? '' : 'travetto';
+
+  /**
+   * Namespace/schema prefix for table names
+   */
+  namespace = '';
+
+  /**
+   * Database name
+   */
+  database = 'app';
+
+  /**
+   * Allow storage modifications (like table auto-creation and schema updates) at runtime
+   */
+  modifyStorage = !Runtime.production;
+
+  /**
+   * Extended client options
+   */
+  options?: PoolOptions;
+}
 ```
 
 Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) annotation, and so these values can be overridden using the standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support") resolution paths.

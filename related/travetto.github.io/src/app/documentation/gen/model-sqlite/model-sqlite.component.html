@@ -15,10 +15,18 @@
 <span class="token function">yarn</span> <span class="token function">add</span> &#64;travetto/model-sqlite</code></pre>
   </figure>
 
-This module provides a <a target="_blank" class="external-link" href="https://www.sqlite.org/">SQLite</a>-based implementation for the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> module. This source allows the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> module to read, write and query against <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a> databases. In development mode, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-sqlite/src/service.ts#L15">SqliteModelService</a> will also modify the database schema in real time to minimize impact to development. <br><br>
+This module provides a <a target="_blank" class="external-link" href="https://www.sqlite.org/">SQLite</a>-based implementation for the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> module. This source allows the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> module to read, write and query against <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a> databases. In development mode, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-sqlite/src/service.ts#L12">SqliteModelService</a> will also modify the database schema in real time to minimize impact to development. <br><br>
 The schema generated will not generally map to existing tables as it is attempting to produce a document store like experience on top of a <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a> database. Every table generated maps to a model, with simple fields mapped as individual columns and complex fields/arrays mapped as serialized <code class="item input">TEXT</code> columns. <br><br>
 Supported features:
-<ul></ul>
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L60">Bulk</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10">CRUD</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10">Expiry</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L21">Indexed</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/types/crud.ts#L11">Query Crud</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/types/facet.ts#L14">Facet</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/types/suggest.ts#L12">Suggest</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/types/query.ts#L10">Query</a></li>
+</ul>
 Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source or config, you can override and register it with the <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module.
 
   <figure class="code">
@@ -44,7 +52,28 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-sqlite/src/config.ts#L9">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"></code></pre>
+    <pre><code class="language-typescript"><span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Config</span></span><span class="token punctuation">(</span><span class="token string">'model.sqlite'</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SqliteModelConfig</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * Namespace/schema prefix for table names
+   */</span>
+  namespace <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
+
+  <span class="token comment">/**
+   * Allow storage modifications (like table auto-creation and schema updates) at runtime
+   */</span>
+  modifyStorage <span class="token operator">=</span> <span class="token operator">!</span>Runtime<span class="token punctuation">.</span>production<span class="token punctuation">;</span>
+
+  <span class="token comment">/**
+   * SQLite file location
+   */</span>
+  file<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+
+  <span class="token comment">/**
+   * Custom options
+   */</span>
+  options<span class="token operator">?</span><span class="token operator">:</span> DatabaseSyncOptions<span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 Additionally, you can see that the class is registered with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13">&#64;Config</a> annotation, and so these values can be overridden using the standard <a class="module-link" routerLink="/docs/config" title="Configuration support">Configuration</a> resolution paths.
