@@ -44,6 +44,10 @@ export const text = (
         <li>{d.field('force')} - Always creates a separate savepoint for nested operations.</li>
       </ul>
     </c.Section>
+    <c.Section title="Bulk Operations">
+      Bulk operations ({d.method('processBulk')}) batch insert, delete, and update statements for high performance. Bulk updates utilize
+      standard ANSI SQL {d.input('CASE ... WHEN')} constructs to update multiple records in a single database query across all SQL engines.
+    </c.Section>
     <c.Section title="Supported Features">
       All SQL model service implementations derive from {BaseSQLModelService} and support:
       <ul>

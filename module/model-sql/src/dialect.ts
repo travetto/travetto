@@ -579,6 +579,68 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     return { sql, values };
   }
 
+  buildUpdateAll<T extends ModelType>(
+    tableContext: TableContext<T>,
+    rawItems: Record<string, unknown>[]
+  ): { sql: string; values: unknown[] } {
+    if (rawItems.length === 0) {
+      return { sql: '', values: [] };
+    }
+
+    if (rawItems.length === 1) {
+      const { whereSQL, parameters = [] } = this.compileWhere(tableContext, castTo({ id: rawItems[0].id }));
+      return this.buildUpdate(tableContext, rawItems[0], whereSQL, parameters);
+    }
+
+    const simpleFieldsToUpdate = [...tableContext.simpleFields.values()].filter(field => field.name !== 'id');
+    const complexFieldsToUpdate = [...tableContext.complexFields.values()];
+
+    const setClauses: string[] = [];
+    const values: unknown[] = [];
+
+    const ids = rawItems.map(item => item.id);
+
+    for (const field of simpleFieldsToUpdate) {
+      const cases: string[] = [];
+      for (const rawItem of rawItems) {
+        const idPlaceholder = this.getPlaceholder(values.length + 1);
+        values.push(rawItem.id);
+        const valPlaceholder = this.getPlaceholder(values.length + 1);
+        const val = rawItem[field.name];
+        values.push(val === undefined || val === null ? null : val);
+        cases.push(`WHEN ${idPlaceholder} THEN ${valPlaceholder}`);
+      }
+      setClauses.push(`${this.escapeIdentifier(field.name)} = CASE ${this.escapeIdentifier('id')} ${cases.join(' ')} END`);
+    }
+
+    for (const field of complexFieldsToUpdate) {
+      const cases: string[] = [];
+      for (const rawItem of rawItems) {
+        const idPlaceholder = this.getPlaceholder(values.length + 1);
+        values.push(rawItem.id);
+        const valPlaceholder = this.getPlaceholder(values.length + 1);
+        const val = rawItem[field.name];
+        values.push(this.getComplexColumnValue(field, val));
+        cases.push(`WHEN ${idPlaceholder} THEN ${valPlaceholder}`);
+      }
+      setClauses.push(`${this.escapeIdentifier(field.name)} = CASE ${this.escapeIdentifier('id')} ${cases.join(' ')} END`);
+    }
+
+    if (setClauses.length === 0) {
+      setClauses.push(`${this.escapeIdentifier('id')} = ${this.escapeIdentifier('id')}`);
+    }
+
+    const whereIdPlaceholders = ids.map(idVal => {
+      values.push(idVal);
+      return this.getPlaceholder(values.length);
+    });
+
+    const tableName = this.escapeIdentifier(tableContext.tableName);
+    const sql = `UPDATE ${tableName} SET ${setClauses.join(', ')} WHERE ${this.escapeIdentifier('id')} IN (${whereIdPlaceholders.join(', ')});`;
+
+    return { sql, values };
+  }
+
   buildUpdate<T extends ModelType>(
     tableContext: TableContext<T>,
     rawItem: Record<string, unknown>,

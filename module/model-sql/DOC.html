@@ -38,6 +38,10 @@ Supported transaction modes include:
 <li><code class="item field">force</code> - Always creates a separate savepoint for nested operations.</li>
 </ul>
 
+<h2 id="bulk-operations">Bulk Operations</h2>
+
+Bulk operations (<code class="item method">processBulk</code>) batch insert, delete, and update statements for high performance. Bulk updates utilize standard ANSI SQL <code class="item input">CASE ... WHEN</code> constructs to update multiple records in a single database query across all SQL engines.
+
 <h2 id="supported-features">Supported Features</h2>
 
 All SQL model service implementations derive from <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L67">BaseSQLModelService</a> and support:

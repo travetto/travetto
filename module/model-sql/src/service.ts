@@ -420,18 +420,21 @@ export abstract class BaseSQLModelService<C = unknown>
     };
     const errors: unknown[] = [];
 
-    // Process the inbound bulk request into 3 groups: inserts, deletes, and other operations
+    // Process the inbound bulk request into groups: inserts, deletes, updates, and upserts
     const inserts: OptionalId<T>[] = [];
     const deletes: string[] = [];
-    const otherOperations: BulkOperation<T>[] = [];
+    const updates: T[] = [];
+    const upserts: { upsert?: OptionalId<T> }[] = [];
 
     for (const operation of preppedOperations) {
       if ('insert' in operation && operation.insert) {
         inserts.push(operation.insert);
       } else if ('delete' in operation && operation.delete) {
         deletes.push(operation.delete.id);
-      } else if (('update' in operation && operation.update) || ('upsert' in operation && operation.upsert)) {
-        otherOperations.push(operation);
+      } else if ('update' in operation && operation.update) {
+        updates.push(operation.update);
+      } else if ('upsert' in operation && operation.upsert) {
+        upserts.push(operation);
       }
     }
 
@@ -463,18 +466,19 @@ export abstract class BaseSQLModelService<C = unknown>
       commands.push({ type: 'delete', sql, values: parameters, count: subBatch.length });
     }
 
-    // Generate upsert/update statements from other operations
-    for (const operation of otherOperations) {
-      if ('update' in operation && operation.update) {
-        const rawItem: Record<string, unknown> = castTo(operation.update);
-        const { whereSQL, parameters = [] } = this.#whereClause(modelClass, castTo({ id: rawItem.id }));
-        const { sql, values } = this.dialect.buildUpdate(tableContext, rawItem, whereSQL, parameters);
-        commands.push({ type: 'update', sql, values, count: 1, identifier: rawItem.id as string });
-      } else if ('upsert' in operation && operation.upsert) {
-        const rawItem: Record<string, unknown> = castTo(operation.upsert);
-        const { sql, values } = this.dialect.buildUpsert(tableContext, rawItem, [this.dialect.escapeIdentifier('id')]);
-        commands.push({ type: 'upsert', sql, values, count: 1 });
-      }
+    // Convert updates into SQL statements with a fixed batch size
+    for (let index = 0; index < updates.length; index += batchSize) {
+      const subBatch = updates.slice(index, index + batchSize);
+      const rawItems: Record<string, unknown>[] = castTo(subBatch);
+      const { sql, values } = this.dialect.buildUpdateAll(tableContext, rawItems);
+      commands.push({ type: 'update', sql, values, count: subBatch.length });
+    }
+
+    // Generate upsert statements from other operations
+    for (const operation of upserts) {
+      const rawItem: Record<string, unknown> = castTo(operation.upsert);
+      const { sql, values } = this.dialect.buildUpsert(tableContext, rawItem, [this.dialect.escapeIdentifier('id')]);
+      commands.push({ type: 'upsert', sql, values, count: 1 });
     }
 
     // Run the final list of SQL commands through a workpool

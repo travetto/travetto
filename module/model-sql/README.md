@@ -35,6 +35,9 @@ Supported transaction modes include:
    *  `isolated` - Begins a savepoint / nested transaction isolated from the surrounding context.
    *  `force` - Always creates a separate savepoint for nested operations.
 
+## Bulk Operations
+Bulk operations (`processBulk`) batch insert, delete, and update statements for high performance. Bulk updates utilize standard ANSI SQL `CASE ... WHEN` constructs to update multiple records in a single database query across all SQL engines.
+
 ## Supported Features
 All SQL model service implementations derive from [BaseSQLModelService](https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L67) and support:
    *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L60)
