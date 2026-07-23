@@ -389,19 +389,14 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
       const isPlainObject = DataUtil.isPlainObject(value);
       const firstKey = isPlainObject ? Object.keys(value)[0] : '';
 
-      const { sqlPath, leafField } = this.resolvePath(tableContext, currentPath, 'read');
+      const { leafField } = this.resolvePath(tableContext, currentPath, 'read');
       const nextIdentificationPath = `${identificationPath}__${index}`;
 
-      if (leafField?.array && isPlainObject && !firstKey.startsWith('$')) {
-        const identifier = `%%${nextIdentificationPath}%%`;
-        const { sql, formatted } = this.compileArrayEquals(sqlPath, identifier, value, leafField, currentPath.length > 0);
-        clauses.push({
-          sql,
-          parameters: { [identifier]: formatted }
-        });
-      } else if (isPlainObject) {
+      if (isPlainObject) {
         if (firstKey.startsWith('$')) {
           clauses.push(this.#compileOperator(tableContext, currentPath, value as Record<string, unknown>, nextIdentificationPath));
+        } else if (leafField?.array) {
+          clauses.push(this.#compileOperator(tableContext, currentPath, { $eq: value }, nextIdentificationPath));
         } else {
           clauses.push(this.#compileSimple(tableContext, value as Record<string, unknown>, currentPath, nextIdentificationPath));
         }
@@ -439,14 +434,14 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
 
       if (leafField?.array) {
         if (operator === '$eq' || operator === '$ne') {
-          const { sql, formatted } = this.compileArrayEquals(sqlPath, identifier, value, leafField, path.length > 0);
+          const { sql, formatted } = this.compileArrayEquals(sqlPath, identifier, value, leafField, path.length === 1);
           const finalSql = operator === '$ne' ? `NOT(${sql})` : sql;
           clause = { parameters: { [identifier]: formatted }, sql: finalSql };
         } else if (operator === '$in' || operator === '$nin') {
           if (!Array.isArray(value) || value.length === 0) {
             clause = operator === '$in' ? { sql: '1=0' } : {};
           } else {
-            const { sql, formatted } = this.compileArrayAny(sqlPath, identifier, value, leafField, path.length > 0);
+            const { sql, formatted } = this.compileArrayAny(sqlPath, identifier, value, leafField, path.length === 1);
             const finalSql = operator === '$nin' ? `NOT(${sql})` : sql;
             clause = { sql: finalSql, parameters: { [identifier]: formatted } };
           }
@@ -454,12 +449,13 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
           if (!Array.isArray(value) || value.length === 0) {
             clause = { sql: '1=0' };
           } else {
-            const { sql, formatted } = this.compileArrayAll(sqlPath, identifier, value, leafField, path.length > 0);
+            const { sql, formatted } = this.compileArrayAll(sqlPath, identifier, value, leafField, path.length === 1);
             clause = { sql, parameters: { [identifier]: formatted } };
           }
         } else if (operator === '$exists') {
-          const { sql } = this.compileArrayExists(sqlPath, identifier, leafField, path.length > 0);
-          clause = { sql: value ? sql : `NOT (${sql})` };
+          const { sql } = this.compileArrayExists(sqlPath, identifier, leafField, path.length === 1);
+          const finalSql = !value ? `NOT(${sql})` : sql;
+          clause = { sql: finalSql };
         } else {
           throw new RuntimeError(`Operator "${operator}" is not supported for arrays`, { category: 'data' });
         }

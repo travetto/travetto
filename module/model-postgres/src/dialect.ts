@@ -1,4 +1,4 @@
-import { AbstractANSI99Dialect, type TableContext } from '@travetto/model-sql';
+import { AbstractANSI99Dialect, type JSONSqlPathMode, type TableContext } from '@travetto/model-sql';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -84,7 +84,8 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     if (topLevel && !SchemaRegistryIndex.has(field.type)) {
       return { sql: `${sqlPath} @> ${identifier}`, formatted: value };
     }
-    return { sql: `${sqlPath} @> ${identifier}::jsonb`, formatted: JSONUtil.toUTF8(value) };
+    const jsonbPath = topLevel ? sqlPath : `(${sqlPath})::jsonb`;
+    return { sql: `${jsonbPath} @> ${identifier}::jsonb`, formatted: JSONUtil.toUTF8(value) };
   }
 
   compileArrayEquals(
@@ -100,8 +101,9 @@ export class PostgresDialect extends AbstractANSI99Dialect {
       }
       return { sql: `${identifier} = ANY(${sqlPath})`, formatted: values };
     }
+    const jsonbPath = topLevel ? sqlPath : `(${sqlPath})::jsonb`;
     const val = Array.isArray(values) ? values : [values];
-    return { sql: `${sqlPath} @> ${identifier}::jsonb`, formatted: JSONUtil.toUTF8(val) };
+    return { sql: `${jsonbPath} @> ${identifier}::jsonb`, formatted: JSONUtil.toUTF8(val) };
   }
 
   compileArrayAny(
@@ -114,15 +116,17 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     if (topLevel && !SchemaRegistryIndex.has(field.type)) {
       return { sql: `${sqlPath} && ${identifier}`, formatted: values };
     }
+    const jsonbPath = topLevel ? sqlPath : `(${sqlPath})::jsonb`;
     const formatted = values.map(v => JSONUtil.toUTF8(Array.isArray(v) ? v : [v]));
-    return { sql: `${sqlPath} @> ANY(${identifier}::jsonb[])`, formatted };
+    return { sql: `${jsonbPath} @> ANY(${identifier}::jsonb[])`, formatted };
   }
 
   compileArrayExists(sqlPath: string, identifier: string, field: SchemaFieldConfig, topLevel?: boolean): { sql: string } {
     if (topLevel && !SchemaRegistryIndex.has(field.type)) {
       return { sql: `(${sqlPath} IS NOT NULL AND cardinality(${sqlPath}) > 0)` };
     }
-    return { sql: `(${sqlPath} IS NOT NULL AND ${sqlPath} <> ${identifier}::jsonb)` };
+    const jsonbPath = topLevel ? sqlPath : `(${sqlPath})::jsonb`;
+    return { sql: `(${sqlPath} IS NOT NULL AND ${jsonbPath} <> '[]'::jsonb)` };
   }
 
   getRegexOperator(caseInsensitive: boolean): string {
