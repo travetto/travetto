@@ -1,3 +1,4 @@
+import { Injectable } from '@travetto/di';
 import {
   type BulkOperation,
   type BulkResponse,
@@ -62,6 +63,7 @@ import type { TableContext } from './types.ts';
  * Implements CRUD, Query, Expiry, Bulk, Indexed, and Suggest operations
  * by delegating to connection and dialect components.
  */
+@Injectable()
 export abstract class BaseSQLModelService<C = unknown>
   implements
     ModelCrudSupport,

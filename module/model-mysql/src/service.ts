@@ -1,6 +1,7 @@
 import type { PoolConnection } from 'mysql2/promise';
 
 import { Injectable, PostConstruct } from '@travetto/di';
+import type { ModelCrudSupport } from '@travetto/model';
 import { BaseSQLModelService } from '@travetto/model-sql';
 
 import type { MysqlConnection } from './connection.ts';
