@@ -64,7 +64,34 @@ export abstract class AbstractANSI99Dialect {
 
   abstract getColumnType(fieldConfiguration: SchemaFieldConfig): string;
   abstract compileJsonIndexPath(columnName: string, jsonPath: string[], mode: JSONSqlPathMode): string;
-  abstract compileArrayContains(x: string, identifier: string, isObject: boolean, field: SchemaFieldConfig): string;
+  abstract compileArrayAll(
+    sqlPath: string,
+    identifier: string,
+    value: unknown[],
+    field: SchemaFieldConfig,
+    topLevel?: boolean
+  ): { sql: string; formatted: unknown };
+  abstract compileArrayEquals(
+    sqlPath: string,
+    identifier: string,
+    values: unknown,
+    field: SchemaFieldConfig,
+    topLevel?: boolean
+  ): { sql: string; formatted: unknown };
+  abstract compileArrayAny(
+    sqlPath: string,
+    identifier: string,
+    values: unknown[],
+    field: SchemaFieldConfig,
+    topLevel?: boolean
+  ): { sql: string; formatted: unknown };
+  abstract compileArrayExists(
+    sqlPath: string,
+    identifier: string,
+    field: SchemaFieldConfig,
+    topLevel?: boolean
+  ): { sql: string; formatted: unknown };
+
   abstract getRegexOperator(caseInsensitive: boolean): string;
   abstract formatRegex(source: string, caseInsensitive: boolean): string;
   abstract castColumn(sqlPath: string, type: Class): string;
@@ -367,22 +394,14 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
       const isPlainObject = DataUtil.isPlainObject(value);
       const firstKey = isPlainObject ? Object.keys(value)[0] : '';
 
-      const { sqlPath, leafField } = this.resolvePath(tableContext, currentPath, 'read');
       const nextIdentificationPath = `${identificationPath}__${index}`;
 
-      if (leafField?.array && SchemaRegistryIndex.has(leafField.type) && isPlainObject && !firstKey.startsWith('$')) {
-        const template = this.#buildJsonTemplate(value as Record<string, unknown>);
-        const identifier = `%%${nextIdentificationPath}%%`;
-        clauses.push({
-          sql: this.compileArrayContains(sqlPath, identifier, true, leafField),
-          parameters: {
-            [identifier]: JSONUtil.toUTF8([template])
-          }
-        });
-      } else if (isPlainObject && firstKey.startsWith('$')) {
-        clauses.push(this.#compileOperator(tableContext, currentPath, value as Record<string, unknown>, nextIdentificationPath));
-      } else if (isPlainObject) {
-        clauses.push(this.#compileSimple(tableContext, value as Record<string, unknown>, currentPath, nextIdentificationPath));
+      if (isPlainObject) {
+        if (firstKey.startsWith('$')) {
+          clauses.push(this.#compileOperator(tableContext, currentPath, value as Record<string, unknown>, nextIdentificationPath));
+        } else {
+          clauses.push(this.#compileSimple(tableContext, value as Record<string, unknown>, currentPath, nextIdentificationPath));
+        }
       } else {
         clauses.push(this.#compileOperator(tableContext, currentPath, { $eq: value }, nextIdentificationPath));
       }
@@ -416,79 +435,28 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
       let clause: QueryClause;
 
       if (leafField?.array) {
-        const isObject = typeof value === 'object' && value !== null;
-        if (operator === '$eq') {
-          const formatted = isObject ? JSONUtil.toUTF8(value) : value;
-          clause = {
-            parameters: { [identifier]: formatted },
-            sql: this.compileArrayContains(sqlPath, identifier, isObject, leafField)
-          };
-        } else if (operator === '$ne') {
-          const formatted = isObject ? JSONUtil.toUTF8(value) : value;
-          clause = {
-            parameters: { [identifier]: formatted },
-            sql: `NOT (${this.compileArrayContains(sqlPath, identifier, isObject, leafField)})`
-          };
-        } else if (operator === '$in') {
+        if (operator === '$eq' || operator === '$neq') {
+          const { sql, formatted } = this.compileArrayEquals(sqlPath, identifier, value, leafField, path.length > 0);
+          const finalSql = operator === '$neq' ? `NOT(${sql})` : sql;
+          clause = { parameters: { [identifier]: formatted }, sql: finalSql };
+        } else if (operator === '$in' || operator === '$nin') {
           if (!Array.isArray(value) || value.length === 0) {
-            clause = { sql: '1=0' };
+            clause = operator === '$in' ? { sql: '1=0' } : {};
           } else {
-            const choices = value.map((valueItem, itemIndex) => {
-              const innerIdentifier = `%%${nestedIdentificationPath}_${itemIndex}%%`;
-              const innerIsObject = typeof valueItem === 'object' && valueItem !== null;
-              const formattedVal = innerIsObject ? JSONUtil.toUTF8(valueItem) : valueItem;
-              return {
-                sql: this.compileArrayContains(sqlPath, innerIdentifier, innerIsObject, leafField),
-                parameters: { [innerIdentifier]: formattedVal }
-              };
-            });
-            clause = AbstractANSI99Dialect.#combineResults(choices, 'OR');
-          }
-        } else if (operator === '$nin') {
-          if (!Array.isArray(value) || value.length === 0) {
-            clause = {};
-          } else {
-            const choices = value.map((valueItem, itemIndex) => {
-              const innerIdentifier = `%%${nestedIdentificationPath}_${itemIndex}%%`;
-              const innerIsObject = typeof valueItem === 'object' && valueItem !== null;
-              const formattedVal = innerIsObject ? JSONUtil.toUTF8(valueItem) : valueItem;
-              return {
-                sql: `NOT (${this.compileArrayContains(sqlPath, innerIdentifier, innerIsObject, leafField)})`,
-                parameters: { [innerIdentifier]: formattedVal }
-              };
-            });
-            clause = AbstractANSI99Dialect.#combineResults(choices, 'AND');
+            const { sql, formatted } = this.compileArrayAny(sqlPath, identifier, value, leafField, path.length > 0);
+            const finalSql = operator === '$nin' ? `NOT(${sql})` : sql;
+            clause = { sql: finalSql, parameters: { [identifier]: formatted } };
           }
         } else if (operator === '$all') {
           if (!Array.isArray(value) || value.length === 0) {
             clause = { sql: '1=0' };
           } else {
-            const choices = value.map((valueItem, itemIndex) => {
-              const innerIdentifier = `%%${nestedIdentificationPath}_${itemIndex}%%`;
-              const innerIsObject = typeof valueItem === 'object' && valueItem !== null;
-              const formattedVal = innerIsObject ? JSONUtil.toUTF8(valueItem) : valueItem;
-              return {
-                sql: this.compileArrayContains(sqlPath, innerIdentifier, innerIsObject, leafField),
-                parameters: { [innerIdentifier]: formattedVal }
-              };
-            });
-            clause = AbstractANSI99Dialect.#combineResults(choices, 'AND');
+            const { sql, formatted } = this.compileArrayAll(sqlPath, identifier, value, leafField, path.length > 0);
+            clause = { sql, parameters: { [identifier]: formatted } };
           }
         } else if (operator === '$exists') {
-          const emptyArrayStr = JSONUtil.toUTF8([]);
-          const isNull = `${sqlPath} IS NULL`;
-          const isEmpty = this.compileJsonEquality?.(sqlPath, identifier) ?? `${sqlPath} = ${identifier}`;
-          if (value) {
-            clause = {
-              parameters: { [identifier]: emptyArrayStr },
-              sql: `NOT (${isNull} OR ${isEmpty})`
-            };
-          } else {
-            clause = {
-              parameters: { [identifier]: emptyArrayStr },
-              sql: `(${isNull} OR ${isEmpty})`
-            };
-          }
+          const { sql, formatted } = this.compileArrayExists(sqlPath, identifier, leafField, path.length > 0);
+          clause = { sql, parameters: { [identifier]: formatted } };
         } else {
           throw new RuntimeError(`Operator "${operator}" is not supported for arrays`, { category: 'data' });
         }

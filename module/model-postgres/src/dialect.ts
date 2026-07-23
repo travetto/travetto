@@ -3,8 +3,8 @@ import { type Class, castTo } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 export class PostgresDialect extends AbstractANSI99Dialect {
-  override returningSupport = true;
-  override suggestLikeOperator = 'ILIKE';
+  returningSupport = true;
+  suggestLikeOperator = 'ILIKE';
 
   getComplexColumnType(field: SchemaFieldConfig): string {
     if (field.array && !SchemaRegistryIndex.has(field.type)) {
@@ -16,7 +16,7 @@ export class PostgresDialect extends AbstractANSI99Dialect {
 
   getComplexColumnValue(field: SchemaFieldConfig, value: unknown): unknown {
     if (field.array && !SchemaRegistryIndex.has(field.type)) {
-      return value;
+      return value ?? null;
     }
     return super.getComplexColumnValue(field, value);
   }
