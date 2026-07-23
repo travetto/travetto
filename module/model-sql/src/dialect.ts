@@ -64,7 +64,7 @@ export abstract class AbstractANSI99Dialect {
 
   abstract getColumnType(fieldConfiguration: SchemaFieldConfig): string;
   abstract compileJsonIndexPath(columnName: string, jsonPath: string[], mode: JSONSqlPathMode): string;
-  abstract compileArrayContains(sqlPath: string, identifier: string, isObject: boolean, type?: Class): string;
+  abstract compileArrayContains(x: string, identifier: string, isObject: boolean, field: SchemaFieldConfig): string;
   abstract getRegexOperator(caseInsensitive: boolean): string;
   abstract formatRegex(source: string, caseInsensitive: boolean): string;
   abstract castColumn(sqlPath: string, type: Class): string;
@@ -374,7 +374,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
         const template = this.#buildJsonTemplate(value as Record<string, unknown>);
         const identifier = `%%${nextIdentificationPath}%%`;
         clauses.push({
-          sql: this.compileArrayContains(sqlPath, identifier, true, leafField?.type),
+          sql: this.compileArrayContains(sqlPath, identifier, true, leafField),
           parameters: {
             [identifier]: JSONUtil.toUTF8([template])
           }
@@ -421,13 +421,13 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
           const formatted = isObject ? JSONUtil.toUTF8(value) : value;
           clause = {
             parameters: { [identifier]: formatted },
-            sql: this.compileArrayContains(sqlPath, identifier, isObject, leafField?.type)
+            sql: this.compileArrayContains(sqlPath, identifier, isObject, leafField)
           };
         } else if (operator === '$ne') {
           const formatted = isObject ? JSONUtil.toUTF8(value) : value;
           clause = {
             parameters: { [identifier]: formatted },
-            sql: `NOT (${this.compileArrayContains(sqlPath, identifier, isObject, leafField?.type)})`
+            sql: `NOT (${this.compileArrayContains(sqlPath, identifier, isObject, leafField)})`
           };
         } else if (operator === '$in') {
           if (!Array.isArray(value) || value.length === 0) {
@@ -438,7 +438,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
               const innerIsObject = typeof valueItem === 'object' && valueItem !== null;
               const formattedVal = innerIsObject ? JSONUtil.toUTF8(valueItem) : valueItem;
               return {
-                sql: this.compileArrayContains(sqlPath, innerIdentifier, innerIsObject, leafField?.type),
+                sql: this.compileArrayContains(sqlPath, innerIdentifier, innerIsObject, leafField),
                 parameters: { [innerIdentifier]: formattedVal }
               };
             });
@@ -453,7 +453,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
               const innerIsObject = typeof valueItem === 'object' && valueItem !== null;
               const formattedVal = innerIsObject ? JSONUtil.toUTF8(valueItem) : valueItem;
               return {
-                sql: `NOT (${this.compileArrayContains(sqlPath, innerIdentifier, innerIsObject, leafField?.type)})`,
+                sql: `NOT (${this.compileArrayContains(sqlPath, innerIdentifier, innerIsObject, leafField)})`,
                 parameters: { [innerIdentifier]: formattedVal }
               };
             });
@@ -468,7 +468,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
               const innerIsObject = typeof valueItem === 'object' && valueItem !== null;
               const formattedVal = innerIsObject ? JSONUtil.toUTF8(valueItem) : valueItem;
               return {
-                sql: this.compileArrayContains(sqlPath, innerIdentifier, innerIsObject, leafField?.type),
+                sql: this.compileArrayContains(sqlPath, innerIdentifier, innerIsObject, leafField),
                 parameters: { [innerIdentifier]: formattedVal }
               };
             });

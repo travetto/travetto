@@ -41,7 +41,7 @@ export class SqliteDialect extends AbstractANSI99Dialect {
     return `json_extract(${columnName}, '$.${jsonPath.join('.')}')`;
   }
 
-  compileArrayContains(sqlPath: string, identifier: string, isObject: boolean, type?: Class): string {
+  compileArrayContains(sqlPath: string, identifier: string, isObject: boolean, field: SchemaFieldConfig): string {
     return isObject
       ? `json_contains(${sqlPath}, ${identifier})`
       : `EXISTS (SELECT 1 FROM json_each(${sqlPath}) WHERE json_each.value = ${identifier})`;

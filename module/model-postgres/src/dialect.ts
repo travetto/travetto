@@ -74,17 +74,21 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     return `$${index}`;
   }
 
-  compileArrayContains(sqlPath: string, identifier: string, isObject: boolean, type?: Class): string {
+  compileArrayContains(sqlPath: string, identifier: string, isObject: boolean, field: SchemaFieldConfig): string {
     if (isObject) {
       return `${sqlPath} @> ${identifier}::jsonb`;
     }
     let cast = 'text';
-    if (type === Number) {
-      cast = 'numeric';
-    } else if (type === Boolean) {
-      cast = 'boolean';
-    } else if (type === Date) {
-      cast = 'timestamp with time zone';
+    switch (field.type) {
+      case Number:
+        cast = 'numeric';
+        break;
+      case Boolean:
+        cast = 'boolean';
+        break;
+      case Date:
+        cast = 'timestamp with time zone';
+        break;
     }
     return `${sqlPath} @> jsonb_build_array(${identifier}::${cast})`;
   }

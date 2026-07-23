@@ -64,7 +64,7 @@ export class MysqlDialect extends AbstractANSI99Dialect {
     }
   }
 
-  compileArrayContains(sqlPath: string, identifier: string, isObject: boolean, type?: Class): string {
+  compileArrayContains(sqlPath: string, identifier: string, isObject: boolean, field: SchemaFieldConfig): string {
     return isObject ? `JSON_CONTAINS(${sqlPath}, ${identifier})` : `JSON_CONTAINS(${sqlPath}, JSON_ARRAY(${identifier}))`;
   }
 
