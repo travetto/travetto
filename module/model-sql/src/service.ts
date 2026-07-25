@@ -495,7 +495,7 @@ export abstract class BaseSQLModelService<C = unknown>
         try {
           const result = await this.connection.execute(command.sql, command.values);
           if (command.type === 'update' && result.count === 0) {
-            counts.error++;
+            counts.error += 1;
             errors.push(new NotFoundError(modelClass, command.identifier!));
           } else if (command.type === 'delete' && result.count < command.count) {
             counts.delete += result.count;

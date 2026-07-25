@@ -130,7 +130,7 @@ export class BindUtil {
       if (DataUtil.isPlainObject(value)) {
         Object.assign(out, this.flattenPaths(value, `${pre}.`));
       } else if (Array.isArray(value)) {
-        for (let i = 0; i < value.length; i++) {
+        for (let i = 0; i < value.length; i += 1) {
           const element = value[i];
           if (DataUtil.isPlainObject(element)) {
             Object.assign(out, this.flattenPaths(element, `${pre}[${i}].`));

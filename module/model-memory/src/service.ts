@@ -14,7 +14,8 @@ import {
   ModelStorageUtil,
   type ModelType,
   NotFoundError,
-  type OptionalId
+  type OptionalId,
+  UniqueError
 } from '@travetto/model';
 import {
   type AllIndexes,
@@ -151,7 +152,7 @@ export class MemoryModelService
           if (idx.unique) {
             const existing = this.#indices[idx.type].get(idxName)?.get(key);
             if (existing && existing.size > 0 && !existing.has(item.id)) {
-              throw new ExistsError(cls, key);
+              throw new UniqueError(cls, key);
             }
           }
           this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Set()).add(item.id);

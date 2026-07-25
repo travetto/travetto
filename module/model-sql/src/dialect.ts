@@ -5,7 +5,7 @@ import { isModelQueryIndex, ModelQueryUtil, type SortClause, type WhereClause } 
 import { type Class, castTo, JSONUtil, RuntimeError } from '@travetto/runtime';
 import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-import type { JSONSqlPathMode, SchemaContext, TableContext } from './types.ts';
+import type { JSONSqlPathMode, ResolvedPathContext, SchemaContext, TableContext } from './types.ts';
 
 export interface TransactionStatements {
   begin: string;
@@ -64,28 +64,10 @@ export abstract class AbstractANSI99Dialect {
 
   abstract getColumnType(fieldConfiguration: SchemaFieldConfig): string;
   abstract compileJsonIndexPath(columnName: string, jsonPath: string[], mode: JSONSqlPathMode): string;
-  abstract compileArrayAll(
-    sqlPath: string,
-    identifier: string,
-    value: unknown[],
-    field: SchemaFieldConfig,
-    topLevel?: boolean
-  ): { sql: string; formatted: unknown };
-  abstract compileArrayEquals(
-    sqlPath: string,
-    identifier: string,
-    values: unknown,
-    field: SchemaFieldConfig,
-    topLevel?: boolean
-  ): { sql: string; formatted: unknown };
-  abstract compileArrayAny(
-    sqlPath: string,
-    identifier: string,
-    values: unknown[],
-    field: SchemaFieldConfig,
-    topLevel?: boolean
-  ): { sql: string; formatted: unknown };
-  abstract compileArrayExists(sqlPath: string, identifier: string, field: SchemaFieldConfig, topLevel?: boolean): { sql: string };
+  abstract compileArrayAll(context: ResolvedPathContext, identifier: string, value: unknown[]): { sql: string; formatted: unknown };
+  abstract compileArrayEquals(context: ResolvedPathContext, identifier: string, values: unknown): { sql: string; formatted: unknown };
+  abstract compileArrayAny(context: ResolvedPathContext, identifier: string, values: unknown[]): { sql: string; formatted: unknown };
+  abstract compileArrayExists(context: ResolvedPathContext, identifier?: string): { sql: string };
 
   abstract getRegexOperator(caseInsensitive: boolean): string;
   abstract formatRegex(source: string, caseInsensitive: boolean): string;
@@ -94,12 +76,17 @@ export abstract class AbstractANSI99Dialect {
   compileJsonEquality?(sqlPath: string, identifier: string): string;
   shiftPlaceholders?(whereSQL: string, offset: number): string;
 
-  compileIndexPath(context: TableContext, path: string[], mode: JSONSqlPathMode): string {
+  buildSqlPath<T extends ModelType>(tableContext: TableContext<T>, path: string[], mode: JSONSqlPathMode): string {
     const firstSegment = path[0];
     const escapedFirst = this.escapeIdentifier(firstSegment);
-    if (context.simpleFields.has(firstSegment)) {
+    if (tableContext.simpleFields.has(firstSegment)) {
       if (path.length > 1) {
-        throw new RuntimeError(`Cannot create nested index under column "${firstSegment}" in table "${context.tableName}"`);
+        throw new RuntimeError(
+          `Cannot traverse nested properties under simple column "${firstSegment}" in table "${tableContext.tableName}"`,
+          {
+            category: 'data'
+          }
+        );
       }
       return escapedFirst;
     } else {
@@ -109,6 +96,10 @@ export abstract class AbstractANSI99Dialect {
       }
       return this.compileJsonIndexPath(escapedFirst, nestedSegments, mode);
     }
+  }
+
+  compileIndexPath(context: TableContext, path: string[], mode: JSONSqlPathMode): string {
+    return this.buildSqlPath(context, path, mode);
   }
 
   getCreateIndexSQL(context: TableContext, indexConfig: IndexConfig): string {
@@ -272,11 +263,14 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     return sortClauses.length ? `ORDER BY ${sortClauses.join(', ')}` : '';
   }
 
-  resolvePath<T extends ModelType>(
+  #resolveSchemaPath<T extends ModelType>(
     tableContext: TableContext<T>,
-    path: string[],
-    mode: JSONSqlPathMode
-  ): { sqlPath: string; leafField?: SchemaFieldConfig } {
+    path: string[]
+  ): {
+    leafField?: SchemaFieldConfig;
+    arrayField?: SchemaFieldConfig;
+    arraySegmentIndex?: number;
+  } {
     const firstSegment = path[0];
 
     if (tableContext.simpleFields.has(firstSegment)) {
@@ -288,34 +282,55 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
           }
         );
       }
-      const leafField = tableContext.simpleFields.get(firstSegment);
-      return { sqlPath: this.escapeIdentifier(firstSegment), leafField };
+      return { leafField: tableContext.simpleFields.get(firstSegment) };
     }
 
     let currentField: SchemaFieldConfig | undefined = tableContext.complexFields.get(firstSegment);
+    let arrayField: SchemaFieldConfig | undefined = currentField?.array ? currentField : undefined;
+    let arraySegmentIndex: number | undefined = currentField?.array ? 0 : undefined;
     let currentClass = currentField?.type;
-    const jsonPath = path.slice(1);
 
-    for (let index = 0; index < jsonPath.length - 1; index++) {
-      const segment = jsonPath[index];
+    for (let pathIndex = 1; pathIndex < path.length; pathIndex += 1) {
+      const segment = path[pathIndex];
       const subclassConfiguration = SchemaRegistryIndex.getOptional(currentClass!)?.get();
       currentField = subclassConfiguration?.fields[segment];
+      if (currentField?.array && !arrayField) {
+        arrayField = currentField;
+        arraySegmentIndex = pathIndex;
+      }
       currentClass = currentField?.type;
     }
 
-    if (jsonPath.length > 0) {
-      const leafSegment = jsonPath[jsonPath.length - 1];
-      const subclassConfiguration = SchemaRegistryIndex.getOptional(currentClass!)?.get();
-      currentField = subclassConfiguration?.fields[leafSegment];
+    return {
+      leafField: currentField,
+      arrayField,
+      arraySegmentIndex
+    };
+  }
+
+  resolvePath<T extends ModelType>(tableContext: TableContext<T>, path: string[], mode: JSONSqlPathMode): ResolvedPathContext {
+    const firstSegment = path[0];
+
+    if (tableContext.simpleFields.has(firstSegment)) {
+      const { leafField } = this.#resolveSchemaPath(tableContext, path);
+      return { sqlPath: this.buildSqlPath(tableContext, path, mode), leafField };
     }
 
-    let compiledPath = this.compileIndexPath(tableContext, path, mode);
+    const { leafField, arrayField, arraySegmentIndex } = this.#resolveSchemaPath(tableContext, path);
+    const sqlPath = this.buildSqlPath(tableContext, path, mode);
 
-    if (currentField && !currentField.array) {
-      compiledPath = this.castColumn(compiledPath, currentField.type);
-    }
+    const finalSqlPath = leafField && !leafField.array ? this.castColumn(sqlPath, leafField.type) : sqlPath;
 
-    return { sqlPath: compiledPath, leafField: currentField };
+    const arrayPath = arraySegmentIndex !== undefined ? path.slice(0, arraySegmentIndex + 1) : undefined;
+    const subPath = arraySegmentIndex !== undefined ? path.slice(arraySegmentIndex + 1) : undefined;
+
+    return {
+      sqlPath: finalSqlPath,
+      leafField,
+      arrayField,
+      arrayPath,
+      subPath
+    };
   }
 
   #compileClause<T extends ModelType>(
@@ -349,28 +364,6 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     }
   }
 
-  #buildJsonTemplate(queryObject: Record<string, unknown>): Record<string, unknown> {
-    const template: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(queryObject)) {
-      if (DataUtil.isPlainObject(value)) {
-        const firstKey = Object.keys(value)[0];
-        const valueObject = castTo<Record<string, unknown>>(value);
-        if (firstKey === '$eq') {
-          template[key] = valueObject.$eq;
-        } else if (valueObject.$eq !== undefined) {
-          template[key] = valueObject.$eq;
-        } else if (!firstKey.startsWith('$')) {
-          template[key] = this.#buildJsonTemplate(valueObject);
-        } else {
-          throw new RuntimeError(`Unsupported operator ${firstKey} in nested array query`, { category: 'data' });
-        }
-      } else {
-        template[key] = value;
-      }
-    }
-    return template;
-  }
-
   #compileSimple<T extends ModelType>(
     tableContext: TableContext<T>,
     item: Record<string, unknown>,
@@ -389,14 +382,11 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
       const isPlainObject = DataUtil.isPlainObject(value);
       const firstKey = isPlainObject ? Object.keys(value)[0] : '';
 
-      const { leafField } = this.resolvePath(tableContext, currentPath, 'read');
       const nextIdentificationPath = `${identificationPath}__${index}`;
 
       if (isPlainObject) {
         if (firstKey.startsWith('$')) {
           clauses.push(this.#compileOperator(tableContext, currentPath, value as Record<string, unknown>, nextIdentificationPath));
-        } else if (leafField?.array) {
-          clauses.push(this.#compileOperator(tableContext, currentPath, { $eq: value }, nextIdentificationPath));
         } else {
           clauses.push(this.#compileSimple(tableContext, value as Record<string, unknown>, currentPath, nextIdentificationPath));
         }
@@ -414,7 +404,9 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     operation: Record<string, unknown>,
     identificationPath: IdentificationPath = ''
   ): QueryClause {
-    const { sqlPath, leafField } = this.resolvePath(tableContext, path, 'read');
+    const resolvedContext = this.resolvePath(tableContext, path, 'read');
+    const { sqlPath, leafField, arrayField } = resolvedContext;
+    const effectiveArrayField = leafField?.array ? leafField : arrayField;
     const clauses: QueryClause[] = [];
 
     let index = 0;
@@ -432,16 +424,16 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
 
       let clause: QueryClause;
 
-      if (leafField?.array) {
+      if (effectiveArrayField) {
         if (operator === '$eq' || operator === '$ne') {
-          const { sql, formatted } = this.compileArrayEquals(sqlPath, identifier, value, leafField, path.length === 1);
+          const { sql, formatted } = this.compileArrayEquals(resolvedContext, identifier, value);
           const finalSql = operator === '$ne' ? `NOT(${sql})` : sql;
           clause = { parameters: { [identifier]: formatted }, sql: finalSql };
         } else if (operator === '$in' || operator === '$nin') {
           if (!Array.isArray(value) || value.length === 0) {
             clause = operator === '$in' ? { sql: '1=0' } : {};
           } else {
-            const { sql, formatted } = this.compileArrayAny(sqlPath, identifier, value, leafField, path.length === 1);
+            const { sql, formatted } = this.compileArrayAny(resolvedContext, identifier, value);
             const finalSql = operator === '$nin' ? `NOT(${sql})` : sql;
             clause = { sql: finalSql, parameters: { [identifier]: formatted } };
           }
@@ -449,11 +441,11 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
           if (!Array.isArray(value) || value.length === 0) {
             clause = { sql: '1=0' };
           } else {
-            const { sql, formatted } = this.compileArrayAll(sqlPath, identifier, value, leafField, path.length === 1);
+            const { sql, formatted } = this.compileArrayAll(resolvedContext, identifier, value);
             clause = { sql, parameters: { [identifier]: formatted } };
           }
         } else if (operator === '$exists') {
-          const { sql } = this.compileArrayExists(sqlPath, identifier, leafField, path.length === 1);
+          const { sql } = this.compileArrayExists(resolvedContext, identifier);
           const finalSql = !value ? `NOT(${sql})` : sql;
           clause = { sql: finalSql };
         } else {

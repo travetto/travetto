@@ -67,6 +67,22 @@ export class ElasticsearchQueryUtil {
   }
 
   /**
+   * Type guard to check if a query object contains a nested clause
+   */
+  static hasNestedClause(query: Record<string, unknown>): boolean {
+    if ('nested' in query) {
+      return true;
+    }
+    if ('bool' in query && DataUtil.isPlainObject(query.bool)) {
+      const boolQuery = query.bool as { must?: unknown[] };
+      if (Array.isArray(boolQuery.must)) {
+        return boolQuery.must.some(element => DataUtil.isPlainObject(element) && this.hasNestedClause(element as Record<string, unknown>));
+      }
+    }
+    return false;
+  }
+
+  /**
    * Extract specific term for a class, and a given field
    */
   static extractWhereTermQuery<T>(
@@ -93,18 +109,28 @@ export class ElasticsearchQueryUtil {
         const subKey = Object.keys(top)[0];
         if (!subKey.startsWith('$')) {
           const inner = this.extractWhereTermQuery(declaredType, top, config, `${subPath}.`);
-          items.push(declaredSchema.array ? { nested: { path: subPath, query: inner } } : inner);
+          items.push(!declaredSchema.array || this.hasNestedClause(inner) ? inner : { nested: { path: subPath, query: inner } });
         } else {
           const value = top[subKey];
 
           switch (subKey) {
             case '$all': {
               const values = Array.isArray(value) ? value : [value];
-              items.push({
-                bool: {
-                  must: values.map(term => ({ term: { [subPath]: term } }))
-                }
-              });
+              const terms = values.map(term => ({ term: { [subPath]: term } }));
+              if (path) {
+                const nestedPath = path.replace(/\.$/, '');
+                items.push({
+                  bool: {
+                    must: terms.map(query => ({ nested: { path: nestedPath, query } }))
+                  }
+                });
+              } else {
+                items.push({
+                  bool: {
+                    must: terms
+                  }
+                });
+              }
               break;
             }
             case '$in': {

@@ -99,3 +99,19 @@ export class BigIntModel {
   largeNumber: bigint;
   optionalBigInt?: bigint;
 }
+
+@Schema()
+export class Child {
+  name: string;
+}
+
+@Schema()
+export class Family {
+  children?: Child[];
+}
+
+@Model()
+export class PersonFamily implements ModelType {
+  id: string;
+  family?: Family;
+}

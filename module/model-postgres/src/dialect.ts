@@ -1,4 +1,4 @@
-import { AbstractANSI99Dialect, type TableContext } from '@travetto/model-sql';
+import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext } from '@travetto/model-sql';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -74,59 +74,93 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     return `$${index}`;
   }
 
-  compileArrayAll(
-    sqlPath: string,
-    identifier: string,
-    value: unknown[],
-    field: SchemaFieldConfig,
-    topLevel?: boolean
-  ): { sql: string; formatted: unknown } {
-    if (topLevel && !SchemaRegistryIndex.has(field.type)) {
-      return { sql: `${sqlPath} @> ${identifier}`, formatted: value };
+  #buildContainmentPayload(value: unknown, context?: ResolvedPathContext): unknown {
+    if (!context?.subPath || context.subPath.length === 0) {
+      return Array.isArray(value) ? value : [value];
     }
-    const jsonbPath = topLevel ? sqlPath : `(${sqlPath})::jsonb`;
-    return { sql: `${jsonbPath} @> ${identifier}::jsonb`, formatted: JSONUtil.toUTF8(value) };
-  }
 
-  compileArrayEquals(
-    sqlPath: string,
-    identifier: string,
-    values: unknown,
-    field: SchemaFieldConfig,
-    topLevel?: boolean
-  ): { sql: string; formatted: unknown } {
-    if (topLevel && !SchemaRegistryIndex.has(field.type)) {
-      if (Array.isArray(values)) {
-        return { sql: `${sqlPath} @> ${identifier}`, formatted: values };
+    let currentPayload: unknown;
+    if (Array.isArray(value)) {
+      currentPayload = value.map(item => {
+        let itemPayload: unknown = item;
+        for (let index = context.subPath!.length - 1; index >= 0; index--) {
+          itemPayload = { [context.subPath![index]]: itemPayload };
+        }
+        return itemPayload;
+      });
+    } else {
+      currentPayload = value;
+      for (let index = context.subPath.length - 1; index >= 0; index--) {
+        currentPayload = { [context.subPath[index]]: currentPayload };
       }
-      return { sql: `${identifier} = ANY(${sqlPath})`, formatted: values };
+      currentPayload = [currentPayload];
     }
-    const jsonbPath = topLevel ? sqlPath : `(${sqlPath})::jsonb`;
-    const val = Array.isArray(values) ? values : [values];
-    return { sql: `${jsonbPath} @> ${identifier}::jsonb`, formatted: JSONUtil.toUTF8(val) };
+
+    if (context.arrayPath && context.arrayPath.length > 1) {
+      for (let index = context.arrayPath.length - 1; index >= 1; index--) {
+        currentPayload = { [context.arrayPath[index]]: currentPayload };
+      }
+      return currentPayload;
+    }
+
+    return currentPayload;
   }
 
-  compileArrayAny(
-    sqlPath: string,
-    identifier: string,
-    values: unknown[],
-    field: SchemaFieldConfig,
-    topLevel?: boolean
-  ): { sql: string; formatted: unknown } {
-    if (topLevel && !SchemaRegistryIndex.has(field.type)) {
-      return { sql: `${sqlPath} && ${identifier}`, formatted: values };
-    }
-    const jsonbPath = topLevel ? sqlPath : `(${sqlPath})::jsonb`;
-    const formatted = values.map(v => JSONUtil.toUTF8(Array.isArray(v) ? v : [v]));
-    return { sql: `${jsonbPath} @> ANY(${identifier}::jsonb[])`, formatted };
+  #getPostgresArrayTarget(context: ResolvedPathContext): {
+    isNative: boolean;
+    sqlPath: string;
+    jsonbPath: string;
+    buildPayload: (val: unknown) => unknown;
+  } {
+    const arrayField = context.arrayField ?? context.leafField;
+    const isTopLevel = (context.arrayPath?.length ?? 1) === 1;
+    const hasSubPath = (context.subPath?.length ?? 0) > 0;
+    const isScalarArray = arrayField ? !SchemaRegistryIndex.has(arrayField.type) : true;
+    const isNative = isTopLevel && !hasSubPath && isScalarArray;
+
+    const targetPath =
+      hasSubPath && context.arrayPath && context.arrayPath.length > 0 ? this.escapeIdentifier(context.arrayPath[0]) : context.sqlPath;
+
+    const jsonbPath = isTopLevel && !hasSubPath ? targetPath : `(${targetPath})::jsonb`;
+    const buildPayload = (value: unknown): unknown => this.#buildContainmentPayload(value, context);
+
+    return { isNative, sqlPath: context.sqlPath, jsonbPath, buildPayload };
   }
 
-  compileArrayExists(sqlPath: string, identifier: string, field: SchemaFieldConfig, topLevel?: boolean): { sql: string } {
-    if (topLevel && !SchemaRegistryIndex.has(field.type)) {
-      return { sql: `(${sqlPath} IS NOT NULL AND cardinality(${sqlPath}) > 0)` };
+  compileArrayAll(context: ResolvedPathContext, identifier: string, value: unknown[]): { sql: string; formatted: unknown } {
+    const target = this.#getPostgresArrayTarget(context);
+    if (target.isNative) {
+      return { sql: `${target.sqlPath} @> ${identifier}`, formatted: value };
     }
-    const jsonbPath = topLevel ? sqlPath : `(${sqlPath})::jsonb`;
-    return { sql: `(${sqlPath} IS NOT NULL AND ${jsonbPath} <> '[]'::jsonb)` };
+    return { sql: `${target.jsonbPath} @> ${identifier}::jsonb`, formatted: JSONUtil.toUTF8(target.buildPayload(value)) };
+  }
+
+  compileArrayEquals(context: ResolvedPathContext, identifier: string, values: unknown): { sql: string; formatted: unknown } {
+    const target = this.#getPostgresArrayTarget(context);
+    if (target.isNative) {
+      if (Array.isArray(values)) {
+        return { sql: `${target.sqlPath} @> ${identifier}`, formatted: values };
+      }
+      return { sql: `${identifier} = ANY(${target.sqlPath})`, formatted: values };
+    }
+    return { sql: `${target.jsonbPath} @> ${identifier}::jsonb`, formatted: JSONUtil.toUTF8(target.buildPayload(values)) };
+  }
+
+  compileArrayAny(context: ResolvedPathContext, identifier: string, values: unknown[]): { sql: string; formatted: unknown } {
+    const target = this.#getPostgresArrayTarget(context);
+    if (target.isNative) {
+      return { sql: `${target.sqlPath} && ${identifier}`, formatted: values };
+    }
+    const formatted = values.map(v => JSONUtil.toUTF8(target.buildPayload(v)));
+    return { sql: `${target.jsonbPath} @> ANY(${identifier}::jsonb[])`, formatted };
+  }
+
+  compileArrayExists(context: ResolvedPathContext, identifier?: string): { sql: string } {
+    const target = this.#getPostgresArrayTarget(context);
+    if (target.isNative) {
+      return { sql: `(${target.sqlPath} IS NOT NULL AND cardinality(${target.sqlPath}) > 0)` };
+    }
+    return { sql: `(${target.jsonbPath} IS NOT NULL AND ${target.jsonbPath} <> '[]'::jsonb)` };
   }
 
   getRegexOperator(caseInsensitive: boolean): string {

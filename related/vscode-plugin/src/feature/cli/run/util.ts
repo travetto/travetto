@@ -67,7 +67,7 @@ export class CliRunUtil {
     const all = choice.args;
     const selected: string[] = [];
 
-    for (let i = 0; i < all.length; i++) {
+    for (let i = 0; i < all.length; i += 1) {
       const param = all[i]!;
       const result = await ParameterSelector.getParameter({
         param,

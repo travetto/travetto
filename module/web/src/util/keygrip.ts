@@ -47,7 +47,7 @@ export class KeyGrip {
     const key = await KeyGrip.getRandomHmacKey();
     const digestBytes = BinaryUtil.binaryArrayToUint8Array(await KeyGrip.hmac(digest, key));
 
-    for (let i = 0; i < this.#keys.length; i++) {
+    for (let i = 0; i < this.#keys.length; i += 1) {
       const signedBytes = BinaryUtil.binaryArrayToUint8Array(await KeyGrip.hmac(await this.sign(data, this.#keys[i]), key));
 
       if (signedBytes.byteLength === digestBytes.byteLength && timingSafeEqual(digestBytes, signedBytes)) {

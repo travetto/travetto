@@ -5,7 +5,7 @@ export class SystemUtil {
   static naiveHash(text: string): number {
     let hash = 5381;
 
-    for (let i = 0; i < text.length; i++) {
+    for (let i = 0; i < text.length; i += 1) {
       hash = (hash * 33) ^ text.charCodeAt(i);
     }
 

@@ -11,7 +11,7 @@ export class WorkSetTest {
     const comp = items.slice(0);
     const itr = new AsyncQueue();
 
-    for (let i = 0; i < items.length; i++) {
+    for (let i = 0; i < items.length; i += 1) {
       setTimeout(() => itr.add(items[i]), (i + 1) * 1000);
     }
     while (comp.length) {

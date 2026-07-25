@@ -429,7 +429,7 @@ export class ElasticsearchModelService
 
     type CountProperty = keyof (typeof out)['counts'];
 
-    for (let i = 0; i < result.items.length; i++) {
+    for (let i = 0; i < result.items.length; i += 1) {
       const item = result.items[i];
       const [key] = TypedObject.keys(item);
       const responseItem = item[key]!;

@@ -85,7 +85,7 @@ export class TapEmitter implements TestConsumerShape {
           const text = asrt.message ? `${asrt.text} (${this.#enhancer.failure(asrt.message)})` : asrt.text;
           const location = asrt.import ? `./${path.relative(process.cwd(), assertSourceFile)}` : '<unknown>';
           let subMessage = [
-            this.#enhancer.assertNumber(++subCount),
+            this.#enhancer.assertNumber((subCount += 1)),
             '-',
             this.#enhancer.assertDescription(text),
             StyleUtil.link(
@@ -109,7 +109,7 @@ export class TapEmitter implements TestConsumerShape {
       }
 
       // Track test result
-      let status = `${this.#enhancer.testNumber(++this.#count)} `;
+      let status = `${this.#enhancer.testNumber((this.#count += 1))} `;
       switch (test.status) {
         case 'passed':
           `${this.#enhancer.success('ok')} ${status}`;
