@@ -41,9 +41,9 @@ export class SqliteDialect extends AbstractANSI99Dialect {
     return `json_extract(${columnName}, '$.${jsonPath.join('.')}')`;
   }
 
-  #getSqliteArrayContext(sqlPath: string, context?: ResolvedPathContext): { jsonArrayExpr: string; valueExpr: string } {
-    if (!context?.arrayPath || context.arrayPath.length === 0) {
-      return { jsonArrayExpr: sqlPath, valueExpr: 'elem.value' };
+  #getSqliteArrayContext(context: ResolvedPathContext): { jsonArrayExpr: string; valueExpr: string } {
+    if (!context.arrayPath || context.arrayPath.length === 0) {
+      return { jsonArrayExpr: context.sqlPath, valueExpr: 'elem.value' };
     }
 
     const columnName = this.escapeIdentifier(context.arrayPath[0]);
@@ -56,30 +56,16 @@ export class SqliteDialect extends AbstractANSI99Dialect {
     return { jsonArrayExpr, valueExpr };
   }
 
-  compileArrayAll(
-    sqlPath: string,
-    identifier: string,
-    value: unknown[],
-    field?: SchemaFieldConfig,
-    topLevel?: boolean,
-    context?: ResolvedPathContext
-  ): { sql: string; formatted: unknown } {
-    const { jsonArrayExpr, valueExpr } = this.#getSqliteArrayContext(sqlPath, context);
+  compileArrayAll(context: ResolvedPathContext, identifier: string, value: unknown[]): { sql: string; formatted: unknown } {
+    const { jsonArrayExpr, valueExpr } = this.#getSqliteArrayContext(context);
     return {
       sql: `NOT EXISTS (SELECT 1 FROM json_each(${identifier}) AS req WHERE req.value NOT IN (SELECT ${valueExpr} FROM json_each(${jsonArrayExpr}) AS elem))`,
       formatted: JSONUtil.toUTF8(value)
     };
   }
 
-  compileArrayEquals(
-    sqlPath: string,
-    identifier: string,
-    values: unknown,
-    field?: SchemaFieldConfig,
-    topLevel?: boolean,
-    context?: ResolvedPathContext
-  ): { sql: string; formatted: unknown } {
-    const { jsonArrayExpr, valueExpr } = this.#getSqliteArrayContext(sqlPath, context);
+  compileArrayEquals(context: ResolvedPathContext, identifier: string, values: unknown): { sql: string; formatted: unknown } {
+    const { jsonArrayExpr, valueExpr } = this.#getSqliteArrayContext(context);
     if (Array.isArray(values)) {
       return {
         sql: `NOT EXISTS (SELECT 1 FROM json_each(${identifier}) AS req WHERE req.value NOT IN (SELECT ${valueExpr} FROM json_each(${jsonArrayExpr}) AS elem))`,
@@ -98,29 +84,16 @@ export class SqliteDialect extends AbstractANSI99Dialect {
     };
   }
 
-  compileArrayAny(
-    sqlPath: string,
-    identifier: string,
-    values: unknown[],
-    field?: SchemaFieldConfig,
-    topLevel?: boolean,
-    context?: ResolvedPathContext
-  ): { sql: string; formatted: unknown } {
-    const { jsonArrayExpr, valueExpr } = this.#getSqliteArrayContext(sqlPath, context);
+  compileArrayAny(context: ResolvedPathContext, identifier: string, values: unknown[]): { sql: string; formatted: unknown } {
+    const { jsonArrayExpr, valueExpr } = this.#getSqliteArrayContext(context);
     return {
       sql: `EXISTS (SELECT 1 FROM json_each(${jsonArrayExpr}) AS elem WHERE ${valueExpr} IN (SELECT value FROM json_each(${identifier})))`,
       formatted: JSONUtil.toUTF8(values)
     };
   }
 
-  compileArrayExists(
-    sqlPath: string,
-    identifier?: string,
-    field?: SchemaFieldConfig,
-    topLevel?: boolean,
-    context?: ResolvedPathContext
-  ): { sql: string } {
-    const { jsonArrayExpr } = this.#getSqliteArrayContext(sqlPath, context);
+  compileArrayExists(context: ResolvedPathContext, identifier?: string): { sql: string } {
+    const { jsonArrayExpr } = this.#getSqliteArrayContext(context);
     return { sql: `(${jsonArrayExpr} IS NOT NULL AND json_array_length(${jsonArrayExpr}) > 0)` };
   }
 

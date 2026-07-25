@@ -644,5 +644,57 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
       }
     });
     assert(eqResults.length === 1);
+
+    const neResults = await service.query(PersonFamily, {
+      where: {
+        family: {
+          children: {
+            name: {
+              $ne: 'five'
+            }
+          }
+        }
+      }
+    });
+    assert(neResults.length === 2);
+
+    const ninResults = await service.query(PersonFamily, {
+      where: {
+        family: {
+          children: {
+            name: {
+              $nin: ['one', 'two']
+            }
+          }
+        }
+      }
+    });
+    assert(ninResults.length === 2);
+
+    const allResults = await service.query(PersonFamily, {
+      where: {
+        family: {
+          children: {
+            name: {
+              $all: ['one', 'two']
+            }
+          }
+        }
+      }
+    });
+    assert(allResults.length === 1);
+
+    const existsResults = await service.query(PersonFamily, {
+      where: {
+        family: {
+          children: {
+            name: {
+              $exists: true
+            }
+          }
+        }
+      }
+    });
+    assert(existsResults.length === 3);
   }
 }

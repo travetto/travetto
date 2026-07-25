@@ -64,37 +64,10 @@ export abstract class AbstractANSI99Dialect {
 
   abstract getColumnType(fieldConfiguration: SchemaFieldConfig): string;
   abstract compileJsonIndexPath(columnName: string, jsonPath: string[], mode: JSONSqlPathMode): string;
-  abstract compileArrayAll(
-    sqlPath: string,
-    identifier: string,
-    value: unknown[],
-    field: SchemaFieldConfig,
-    topLevel?: boolean,
-    context?: ResolvedPathContext
-  ): { sql: string; formatted: unknown };
-  abstract compileArrayEquals(
-    sqlPath: string,
-    identifier: string,
-    values: unknown,
-    field: SchemaFieldConfig,
-    topLevel?: boolean,
-    context?: ResolvedPathContext
-  ): { sql: string; formatted: unknown };
-  abstract compileArrayAny(
-    sqlPath: string,
-    identifier: string,
-    values: unknown[],
-    field: SchemaFieldConfig,
-    topLevel?: boolean,
-    context?: ResolvedPathContext
-  ): { sql: string; formatted: unknown };
-  abstract compileArrayExists(
-    sqlPath: string,
-    identifier: string,
-    field: SchemaFieldConfig,
-    topLevel?: boolean,
-    context?: ResolvedPathContext
-  ): { sql: string };
+  abstract compileArrayAll(context: ResolvedPathContext, identifier: string, value: unknown[]): { sql: string; formatted: unknown };
+  abstract compileArrayEquals(context: ResolvedPathContext, identifier: string, values: unknown): { sql: string; formatted: unknown };
+  abstract compileArrayAny(context: ResolvedPathContext, identifier: string, values: unknown[]): { sql: string; formatted: unknown };
+  abstract compileArrayExists(context: ResolvedPathContext, identifier?: string): { sql: string };
 
   abstract getRegexOperator(caseInsensitive: boolean): string;
   abstract formatRegex(source: string, caseInsensitive: boolean): string;
@@ -300,29 +273,17 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     let currentField: SchemaFieldConfig | undefined = tableContext.complexFields.get(firstSegment);
     let arrayField: SchemaFieldConfig | undefined = currentField?.array ? currentField : undefined;
     let arrayIndex: number | undefined = currentField?.array ? 0 : undefined;
-
     let currentClass = currentField?.type;
-    const jsonPath = path.slice(1);
 
-    for (let index = 0; index < jsonPath.length - 1; index++) {
-      const segment = jsonPath[index];
+    for (let pathIndex = 1; pathIndex < path.length; pathIndex++) {
+      const segment = path[pathIndex];
       const subclassConfiguration = SchemaRegistryIndex.getOptional(currentClass!)?.get();
       currentField = subclassConfiguration?.fields[segment];
       if (currentField?.array && !arrayField) {
         arrayField = currentField;
-        arrayIndex = index + 1;
+        arrayIndex = pathIndex;
       }
       currentClass = currentField?.type;
-    }
-
-    if (jsonPath.length > 0) {
-      const leafSegment = jsonPath[jsonPath.length - 1];
-      const subclassConfiguration = SchemaRegistryIndex.getOptional(currentClass!)?.get();
-      currentField = subclassConfiguration?.fields[leafSegment];
-      if (currentField?.array && !arrayField) {
-        arrayField = currentField;
-        arrayIndex = path.length - 1;
-      }
     }
 
     let compiledPath = this.compileIndexPath(tableContext, path, mode);
@@ -372,28 +333,6 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     } else {
       return this.#compileSimple(tableContext, clause, [], identificationPath);
     }
-  }
-
-  #buildJsonTemplate(queryObject: Record<string, unknown>): Record<string, unknown> {
-    const template: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(queryObject)) {
-      if (DataUtil.isPlainObject(value)) {
-        const firstKey = Object.keys(value)[0];
-        const valueObject = castTo<Record<string, unknown>>(value);
-        if (firstKey === '$eq') {
-          template[key] = valueObject.$eq;
-        } else if (valueObject.$eq !== undefined) {
-          template[key] = valueObject.$eq;
-        } else if (!firstKey.startsWith('$')) {
-          template[key] = this.#buildJsonTemplate(valueObject);
-        } else {
-          throw new RuntimeError(`Unsupported operator ${firstKey} in nested array query`, { category: 'data' });
-        }
-      } else {
-        template[key] = value;
-      }
-    }
-    return template;
   }
 
   #compileSimple<T extends ModelType>(
@@ -457,16 +396,15 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
       let clause: QueryClause;
 
       if (effectiveArrayField) {
-        const topLevel = (resolvedContext.arrayPath?.length ?? path.length) === 1;
         if (operator === '$eq' || operator === '$ne') {
-          const { sql, formatted } = this.compileArrayEquals(sqlPath, identifier, value, effectiveArrayField, topLevel, resolvedContext);
+          const { sql, formatted } = this.compileArrayEquals(resolvedContext, identifier, value);
           const finalSql = operator === '$ne' ? `NOT(${sql})` : sql;
           clause = { parameters: { [identifier]: formatted }, sql: finalSql };
         } else if (operator === '$in' || operator === '$nin') {
           if (!Array.isArray(value) || value.length === 0) {
             clause = operator === '$in' ? { sql: '1=0' } : {};
           } else {
-            const { sql, formatted } = this.compileArrayAny(sqlPath, identifier, value, effectiveArrayField, topLevel, resolvedContext);
+            const { sql, formatted } = this.compileArrayAny(resolvedContext, identifier, value);
             const finalSql = operator === '$nin' ? `NOT(${sql})` : sql;
             clause = { sql: finalSql, parameters: { [identifier]: formatted } };
           }
@@ -474,11 +412,11 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
           if (!Array.isArray(value) || value.length === 0) {
             clause = { sql: '1=0' };
           } else {
-            const { sql, formatted } = this.compileArrayAll(sqlPath, identifier, value, effectiveArrayField, topLevel, resolvedContext);
+            const { sql, formatted } = this.compileArrayAll(resolvedContext, identifier, value);
             clause = { sql, parameters: { [identifier]: formatted } };
           }
         } else if (operator === '$exists') {
-          const { sql } = this.compileArrayExists(sqlPath, identifier, effectiveArrayField, topLevel, resolvedContext);
+          const { sql } = this.compileArrayExists(resolvedContext, identifier);
           const finalSql = !value ? `NOT(${sql})` : sql;
           clause = { sql: finalSql };
         } else {

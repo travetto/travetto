@@ -8,7 +8,7 @@ import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { AbstractANSI99Dialect } from '../../src/dialect.ts';
 import { SQLModelSchemaUtil } from '../../src/schema.ts';
-import type { TableContext } from '../../src/types.ts';
+import type { ResolvedPathContext, TableContext } from '../../src/types.ts';
 
 @Model()
 class User {
@@ -50,20 +50,20 @@ class MockDialect extends AbstractANSI99Dialect {
     return `$$${index}`;
   }
 
-  compileArrayAll(sqlPath: string, identifier: string, value: unknown[]) {
-    return { sql: `${sqlPath} ALL ${identifier}`, formatted: value };
+  compileArrayAll(context: ResolvedPathContext, identifier: string, value: unknown[]) {
+    return { sql: `${context.sqlPath} ALL ${identifier}`, formatted: value };
   }
 
-  compileArrayEquals(sqlPath: string, identifier: string, values: unknown) {
-    return { sql: `${sqlPath} EQUALS ${identifier}`, formatted: values };
+  compileArrayEquals(context: ResolvedPathContext, identifier: string, values: unknown) {
+    return { sql: `${context.sqlPath} EQUALS ${identifier}`, formatted: values };
   }
 
-  compileArrayAny(sqlPath: string, identifier: string, values: unknown[]) {
-    return { sql: `${sqlPath} ANY ${identifier}`, formatted: values };
+  compileArrayAny(context: ResolvedPathContext, identifier: string, values: unknown[]) {
+    return { sql: `${context.sqlPath} ANY ${identifier}`, formatted: values };
   }
 
-  compileArrayExists(sqlPath: string, identifier: string) {
-    return { sql: `${sqlPath} IS NOT NULL`, formatted: undefined };
+  compileArrayExists(context: ResolvedPathContext, identifier?: string) {
+    return { sql: `${context.sqlPath} IS NOT NULL`, formatted: undefined };
   }
 
   getRegexOperator(caseInsensitive: boolean) {
