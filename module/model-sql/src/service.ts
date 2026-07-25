@@ -15,7 +15,8 @@ import {
   type ModelStorageSupport,
   type ModelType,
   NotFoundError,
-  type OptionalId
+  type OptionalId,
+  UniqueError
 } from '@travetto/model';
 import {
   type FullKeyedIndexBody,
@@ -207,7 +208,14 @@ export abstract class BaseSQLModelService<C = unknown>
 
     const { sql, values } = this.dialect.buildInsert(tableContext, rawItem);
 
-    await this.connection.execute(sql, values);
+    try {
+      await this.connection.execute(sql, values);
+    } catch (error) {
+      if (error instanceof UniqueError && (error.details?.type === 'query' || error.details?.type === 'index')) {
+        throw new UniqueError(modelClass, (error.details.constraint as string) ?? 'unknown', error.details);
+      }
+      throw error;
+    }
     return preppedItem;
   }
 

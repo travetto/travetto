@@ -2,6 +2,7 @@ export * from './src/error/exists.ts';
 export * from './src/error/invalid-index.ts';
 export * from './src/error/invalid-sub-type.ts';
 export * from './src/error/not-found.ts';
+export * from './src/error/unique.ts';
 export * from './src/registry/decorator.ts';
 export * from './src/registry/registry-adapter.ts';
 export * from './src/registry/registry-index.ts';

@@ -45,7 +45,7 @@ type GeoField = {
 };
 
 export type PropWhereClause<T> = {
-  [P in keyof T]?: T[P] extends number | undefined
+  -readonly [P in keyof T]?: T[P] extends number | undefined
     ? General<number> | ScalarField<number> | ComparableField<number> | number
     : T[P] extends bigint | undefined
       ? General<bigint> | ScalarField<bigint> | ComparableField<bigint> | bigint

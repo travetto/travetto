@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { ExistsError, Model, type ModelCrudSupport, NotFoundError } from '@travetto/model';
+import { Model, type ModelCrudSupport, NotFoundError, UniqueError } from '@travetto/model';
 import { castTo } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
@@ -29,7 +29,7 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
   async testUnique() {
     const svc = await this.service;
     await svc.create(UniqueUser2, UniqueUser2.from({ name: 'bob' }));
-    await assert.rejects(() => svc.create(UniqueUser2, UniqueUser2.from({ name: 'bob' })), ExistsError);
+    await assert.rejects(() => svc.create(UniqueUser2, UniqueUser2.from({ name: 'bob' })), UniqueError);
   }
 
   @Test()

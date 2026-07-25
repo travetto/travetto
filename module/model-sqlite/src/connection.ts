@@ -6,7 +6,7 @@ import { createPool, type Pool } from 'generic-pool';
 
 import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
-import { ExistsError } from '@travetto/model';
+import { ExistsError, UniqueError } from '@travetto/model';
 import { SQLConnection } from '@travetto/model-sql';
 import { castTo, JSONUtil, Runtime, RuntimeError, ShutdownManager, Util } from '@travetto/runtime';
 
@@ -176,13 +176,19 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
         switch (code) {
           case 'ERR_SQLITE_ERROR': {
             if (message?.startsWith('UNIQUE')) {
-              throw new ExistsError('query', query);
+              const match = message.match(/UNIQUE constraint failed: (.*)/);
+              const key = match ? match[1] : 'query';
+              throw new UniqueError('query', key, { message, query });
             }
             break;
           }
-          case 'SQLITE_CONSTRAINT_PRIMARYKEY':
           case 'SQLITE_CONSTRAINT_UNIQUE':
-          case 'SQLITE_CONSTRAINT_INDEX':
+          case 'SQLITE_CONSTRAINT_INDEX': {
+            const match = message?.match(/UNIQUE constraint failed: (.*)/);
+            const key = match ? match[1] : 'query';
+            throw new UniqueError('query', key, { message, query });
+          }
+          case 'SQLITE_CONSTRAINT_PRIMARYKEY':
             throw new ExistsError('query', query);
         }
         if (/index.*?already exists/.test(message ?? '')) {

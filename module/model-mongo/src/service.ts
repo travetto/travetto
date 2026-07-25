@@ -31,7 +31,8 @@ import {
   ModelStorageUtil,
   type ModelType,
   NotFoundError,
-  type OptionalId
+  type OptionalId,
+  UniqueError
 } from '@travetto/model';
 import {
   type FullKeyedIndexBody,
@@ -85,7 +86,17 @@ type BlobRaw = GridFSFile & { metadata?: BinaryMetadata };
 
 type MongoTextSearch = RootFilterOperators<unknown>['$text'];
 
-const isDuplicateKeyError = (error: unknown): boolean => error instanceof MongoServerError && error.message.includes('duplicate key error');
+const handleDuplicateKeyError = (cls: Class, id: string, error: unknown): unknown => {
+  if (error instanceof MongoServerError && error.message.includes('duplicate key error')) {
+    if (error.message.includes('_id_') || (error.keyPattern && '_id' in error.keyPattern)) {
+      return new ExistsError(cls, id);
+    }
+    const match = error.message.match(/index: ([\w$]+)/);
+    const constraint = match ? match[1] : error.keyPattern ? Object.keys(error.keyPattern).join(',') : 'unique';
+    return new UniqueError(cls, constraint, { detail: error.message });
+  }
+  return error;
+};
 
 export const ModelBlobNamespace = '__blobs';
 
@@ -312,7 +323,7 @@ export class MongoModelService
       }
       return this.postUpdate(cleaned, id);
     } catch (error) {
-      throw isDuplicateKeyError(error) ? new ExistsError(cls, id) : error;
+      throw handleDuplicateKeyError(cls, id, error);
     }
   }
 
@@ -335,7 +346,7 @@ export class MongoModelService
     try {
       await store.updateOne(this.getIdFilter(cls, id, false), { $set: cleaned }, { upsert: true });
     } catch (error) {
-      throw isDuplicateKeyError(error) ? new ExistsError(cls, id) : error;
+      throw handleDuplicateKeyError(cls, id, error);
     }
     return this.postUpdate(cleaned, id);
   }
