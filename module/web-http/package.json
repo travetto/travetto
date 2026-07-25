@@ -1,6 +1,6 @@
 {
   "name": "@travetto/web-http",
-  "version": "8.0.0-alpha.25",
+  "version": "8.0.0-alpha.26",
   "type": "module",
   "description": "Web HTTP Server Support",
   "keywords": [
@@ -27,7 +27,7 @@
     "directory": "module/web-http"
   },
   "dependencies": {
-    "@travetto/web": "^8.0.0-alpha.24"
+    "@travetto/web": "^8.0.0-alpha.25"
   },
   "peerDependencies": {
     "@travetto/cli": "^8.0.0-alpha.29",

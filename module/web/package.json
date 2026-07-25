@@ -1,6 +1,6 @@
 {
   "name": "@travetto/web",
-  "version": "8.0.0-alpha.24",
+  "version": "8.0.0-alpha.25",
   "type": "module",
   "description": "Declarative support for creating Web Applications",
   "keywords": [
@@ -37,7 +37,7 @@
   "peerDependencies": {
     "@travetto/cli": "^8.0.0-alpha.29",
     "@travetto/test": "^8.0.0-alpha.22",
-    "@travetto/transformer": "^8.0.0-alpha.15"
+    "@travetto/transformer": "^8.0.0-alpha.16"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {

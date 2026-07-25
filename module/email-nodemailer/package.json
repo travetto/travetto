@@ -1,6 +1,6 @@
 {
   "name": "@travetto/email-nodemailer",
-  "version": "8.0.0-alpha.23",
+  "version": "8.0.0-alpha.24",
   "type": "module",
   "description": "Email transmission module.",
   "keywords": [
