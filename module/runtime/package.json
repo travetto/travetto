@@ -31,7 +31,7 @@
     "debug": "^4.4.3"
   },
   "peerDependencies": {
-    "@travetto/transformer": "^8.0.0-alpha.16",
+    "@travetto/transformer": "^8.0.0-alpha.17",
     "temporal-polyfill-lite": "^0.4.0"
   },
   "peerDependenciesMeta": {
