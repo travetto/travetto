@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { ExistsError, ModelBulkUtil, NotFoundError } from '@travetto/model';
+import { ModelBulkUtil, NotFoundError, UniqueError } from '@travetto/model';
 import { castTo, TimeUtil } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
@@ -77,7 +77,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
 
     await assert.rejects(
       () => service.create(UniqueUser, UniqueUser.from({ name: 'sam' })),
-      err => err instanceof ExistsError
+      err => err instanceof UniqueError
     );
 
     const found = await service.getByIndex(UniqueUser, userUniqueNameIndex, { name: 'sam' });

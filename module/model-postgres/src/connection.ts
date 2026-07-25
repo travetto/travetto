@@ -1,13 +1,17 @@
-import { type Pool, type PoolClient, default as pg } from 'pg';
+import { type DatabaseError, type Pool, type PoolClient, default as pg } from 'pg';
 
 import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
-import { ExistsError } from '@travetto/model';
+import { ExistsError, UniqueError } from '@travetto/model';
 import { SQLConnection } from '@travetto/model-sql';
 import { castTo, ShutdownManager } from '@travetto/runtime';
 
 import type { PostgresModelConfig } from './config.ts';
 import { PostgresDialect } from './dialect.ts';
+
+function isPgDatabaseError(error: unknown): error is DatabaseError {
+  return !!error && typeof error === 'object' && 'code' in error;
+}
 
 /**
  * PostgreSQL connection manager
@@ -86,15 +90,16 @@ export class PostgresConnection extends SQLConnection<PoolClient> {
       const records: Type[] = [...result.rows].map(row => ({ ...row }));
       return { count: result.rowCount ?? 0, records };
     } catch (error) {
-      const code = error && typeof error === 'object' && 'code' in error ? castTo<Record<string, unknown>>(error).code : undefined;
-      switch (code) {
-        case '42P07':
+      if (isPgDatabaseError(error)) {
+        if (error.code === '23505') {
+          const constraint = error.constraint ?? (error.detail ? 'index' : 'query');
+          const detail = error.detail ?? query;
+          throw new UniqueError('index', constraint, { detail, query });
+        } else if (error.code === '42P07') {
           throw new ExistsError('index', query);
-        case '23505':
-          throw new ExistsError('query', query);
-        default:
-          throw error;
+        }
       }
+      throw error;
     }
   }
 }
