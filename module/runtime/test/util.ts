@@ -118,7 +118,7 @@ export class UtilTest {
       'admin,user',
       (rule: string) => rule,
       (rule: string, input: string) => {
-        compareCallCount++;
+        compareCallCount += 1;
         return rule === input;
       },
       (input: string) => input // Cache key function

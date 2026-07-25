@@ -290,7 +290,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     let arraySegmentIndex: number | undefined = currentField?.array ? 0 : undefined;
     let currentClass = currentField?.type;
 
-    for (let pathIndex = 1; pathIndex < path.length; pathIndex++) {
+    for (let pathIndex = 1; pathIndex < path.length; pathIndex += 1) {
       const segment = path[pathIndex];
       const subclassConfiguration = SchemaRegistryIndex.getOptional(currentClass!)?.get();
       currentField = subclassConfiguration?.fields[segment];

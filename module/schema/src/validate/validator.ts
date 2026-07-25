@@ -94,12 +94,12 @@ export class SchemaValidator {
       }
       let errors: ValidationError[] = [];
       if (complex) {
-        for (let i = 0; i < value.length; i++) {
+        for (let i = 0; i < value.length; i += 1) {
           const subErrors = this.#validateFields(resolveFieldMap(type, value[i]), value[i], `${path}[${i}]`);
           errors = errors.concat(subErrors);
         }
       } else {
-        for (let i = 0; i < value.length; i++) {
+        for (let i = 0; i < value.length; i += 1) {
           const subErrors = this.#validateInput(input, value[i]);
           errors.push(...this.#prepareErrors(`${path}[${i}]`, subErrors));
         }

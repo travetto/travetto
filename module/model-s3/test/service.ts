@@ -45,7 +45,7 @@ class S3BlobSuite extends ModelBlobSuite {
   async largeFile() {
     const service: S3ModelService = castTo(await this.service);
     const buffer = BinaryUtil.binaryArrayToBuffer(BinaryUtil.makeBinaryArray(1.5 * service.config.chunkSize));
-    for (let i = 0; i < buffer.byteLength; i++) {
+    for (let i = 0; i < buffer.byteLength; i += 1) {
       buffer.writeUInt8(Math.trunc(Math.random() * 255), i);
     }
 

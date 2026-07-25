@@ -39,7 +39,7 @@ export class PropertiesConfigParser implements ConfigParser {
     const out: ConfigData = {};
     const lines = text.split(/\n/g);
 
-    for (let i = 0; i < lines.length; i++) {
+    for (let i = 0; i < lines.length; i += 1) {
       let line = lines[i];
       while (i < lines.length && line.endsWith('\\')) {
         line = `${line.replace(/[\\]$/, '')}${lines[(i += 1)].trimStart()}`;

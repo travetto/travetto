@@ -223,14 +223,14 @@ export abstract class CacheServiceSuite {
     const service = this.testService;
 
     // Prime cache
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 10; i += 1) {
       const start = Date.now();
       await service.getUser(`${i}`);
       assert(Date.now() - start >= 100);
     }
 
     // Read cache
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 10; i += 1) {
       const start = Date.now();
       await service.getUser(`${i}`);
       assert(Date.now() - start <= this.baseLatency + 100);
@@ -239,14 +239,14 @@ export abstract class CacheServiceSuite {
     await service.deleteAllUsers();
 
     // Prime cache
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 10; i += 1) {
       const start = Date.now();
       await service.getUser(`${i}`);
       assert(Date.now() - start >= 100);
     }
 
     // Read cache
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 10; i += 1) {
       const start = Date.now();
       await service.getUser(`${i}`);
       assert(Date.now() - start <= this.baseLatency + 100);

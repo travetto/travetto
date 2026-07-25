@@ -157,7 +157,7 @@ export class RepoExecUtil {
           [...active].sort().forEach((text, idx) => {
             activeItems.add({ idx, text });
           });
-          for (let j = active.size; j < workerCount; j++) {
+          for (let j = active.size; j < workerCount; j += 1) {
             activeItems.add({ idx: j, text: '' }); // Force update to remove item if needed
           }
 

@@ -66,7 +66,7 @@ export class SchemaFaker {
     const max = config.maxlength ? config.maxlength.limit : 10;
     const size = faker.number.int({ min, max });
     const out: unknown[] = [];
-    for (let i = 0; i < size; i++) {
+    for (let i = 0; i < size; i += 1) {
       out.push(this.#value(config, true));
     }
     return out;

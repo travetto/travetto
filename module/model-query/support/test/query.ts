@@ -263,8 +263,8 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
 
     const toAdd = [];
 
-    for (let i = 0; i < 5; i++) {
-      for (let j = 0; j < 5; j++) {
+    for (let i = 0; i < 5; i += 1) {
+      for (let j = 0; j < 5; j += 1) {
         toAdd.push(
           Location.from({
             point: [i, j]

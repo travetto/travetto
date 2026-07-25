@@ -21,7 +21,7 @@ export class WorkPoolTest {
         total: 5,
         onComplete: ({ output, input, success, progress }) => {
           completedInputs.push(input);
-          completeCount++;
+          completeCount += 1;
           assert.equal(output, input * 2);
           assert.equal(success, true);
           assert.equal(progress.completed, completeCount);
@@ -46,7 +46,7 @@ export class WorkPoolTest {
       isSuccess: output => output % 2 !== 0,
       onComplete: ({ output, success, progress }) => {
         if (!success) {
-          failedCount++;
+          failedCount += 1;
         }
         assert.equal(success, output % 2 !== 0);
         assert.equal(progress.failed, failedCount);

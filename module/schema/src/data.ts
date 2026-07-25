@@ -83,7 +83,7 @@ export class DataUtil {
         } else {
           const valueArray: unknown[] = castTo(value);
           const bArray = b;
-          for (let i = 0; i < bArray.length; i++) {
+          for (let i = 0; i < bArray.length; i += 1) {
             valueArray[i] = this.#deepAssignRaw(valueArray[i], bArray[i], mode);
           }
         }

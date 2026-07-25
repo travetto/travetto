@@ -265,7 +265,7 @@ export class MongoUtil {
     const overlap = [...pendingKeySet.intersection(existingKeySet)];
     changed ||= overlap.length !== pendingKeySet.size;
 
-    for (let i = 0; i < overlap.length && !changed; i++) {
+    for (let i = 0; i < overlap.length && !changed; i += 1) {
       changed ||= existingFields[overlap[i]] !== pendingKey[overlap[i]];
     }
 

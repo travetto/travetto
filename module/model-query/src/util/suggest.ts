@@ -86,7 +86,7 @@ export class ModelQuerySuggestUtil {
 
     for (const result of results) {
       let resultValue = result[castKey<T>(parts[0])];
-      for (let i = 1; i < parts.length; i++) {
+      for (let i = 1; i < parts.length; i += 1) {
         resultValue = resultValue[castKey(parts[i])];
       }
       if (Array.isArray(resultValue)) {
