@@ -69,14 +69,14 @@ export class ElasticsearchQueryUtil {
   /**
    * Type guard to check if a query object contains a nested clause
    */
-  static hasNestedClause(query: Record<string, unknown>): boolean {
-    if ('nested' in query) {
-      return true;
-    }
-    if ('bool' in query && DataUtil.isPlainObject(query.bool)) {
-      const boolQuery = query.bool as { must?: unknown[] };
-      if (Array.isArray(boolQuery.must)) {
-        return boolQuery.must.some(element => DataUtil.isPlainObject(element) && this.hasNestedClause(element as Record<string, unknown>));
+  static hasNestedClause(query: unknown): boolean {
+    if (DataUtil.isPlainObject(query)) {
+      if ('nested' in query) {
+        return true;
+      } else if ('bool' in query && DataUtil.isPlainObject(query.bool)) {
+        const boolQuery = query.bool as { must?: unknown[]; must_not?: unknown[]; should?: unknown[] };
+        const clauses = [...(boolQuery.must ?? []), ...(boolQuery.must_not ?? []), ...(boolQuery.should ?? [])];
+        return clauses.some(element => this.hasNestedClause(element));
       }
     }
     return false;
@@ -138,7 +138,17 @@ export class ElasticsearchQueryUtil {
               break;
             }
             case '$nin': {
-              items.push({ bool: { must_not: [subPathQuery(Array.isArray(value) ? value : [value])] } });
+              const values = Array.isArray(value) ? value : [value];
+              if (path) {
+                const nestedPath = path.replace(/\.$/, '');
+                items.push({
+                  bool: {
+                    must_not: [{ nested: { path: nestedPath, query: subPathQuery(values) } }]
+                  }
+                });
+              } else {
+                items.push({ bool: { must_not: [subPathQuery(values)] } });
+              }
               break;
             }
             case '$eq': {
@@ -146,7 +156,16 @@ export class ElasticsearchQueryUtil {
               break;
             }
             case '$ne': {
-              items.push({ bool: { must_not: [subPathQuery(value)] } });
+              if (path) {
+                const nestedPath = path.replace(/\.$/, '');
+                items.push({
+                  bool: {
+                    must_not: [{ nested: { path: nestedPath, query: subPathQuery(value) } }]
+                  }
+                });
+              } else {
+                items.push({ bool: { must_not: [subPathQuery(value)] } });
+              }
               break;
             }
             case '$exists': {
