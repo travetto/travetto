@@ -30,7 +30,7 @@
     "directory": "module/compiler"
   },
   "dependencies": {
-    "@parcel/watcher": "^2.5.6",
+    "@parcel/watcher": "^2.6.0",
     "@travetto/manifest": "^8.0.0-alpha.11",
     "@travetto/transformer": "^8.0.0-alpha.15"
   },
