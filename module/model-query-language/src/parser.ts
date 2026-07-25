@@ -145,7 +145,7 @@ export class QueryLanguageParser {
         default:
           top.push(token);
       }
-      token = tokens[++position];
+      token = tokens[(position += 1)];
     }
 
     this.condense(top, 'or');
