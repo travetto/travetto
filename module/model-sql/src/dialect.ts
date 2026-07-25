@@ -76,12 +76,17 @@ export abstract class AbstractANSI99Dialect {
   compileJsonEquality?(sqlPath: string, identifier: string): string;
   shiftPlaceholders?(whereSQL: string, offset: number): string;
 
-  compileIndexPath(context: TableContext, path: string[], mode: JSONSqlPathMode): string {
+  buildSqlPath<T extends ModelType>(tableContext: TableContext<T>, path: string[], mode: JSONSqlPathMode): string {
     const firstSegment = path[0];
     const escapedFirst = this.escapeIdentifier(firstSegment);
-    if (context.simpleFields.has(firstSegment)) {
+    if (tableContext.simpleFields.has(firstSegment)) {
       if (path.length > 1) {
-        throw new RuntimeError(`Cannot create nested index under column "${firstSegment}" in table "${context.tableName}"`);
+        throw new RuntimeError(
+          `Cannot traverse nested properties under simple column "${firstSegment}" in table "${tableContext.tableName}"`,
+          {
+            category: 'data'
+          }
+        );
       }
       return escapedFirst;
     } else {
@@ -91,6 +96,10 @@ export abstract class AbstractANSI99Dialect {
       }
       return this.compileJsonIndexPath(escapedFirst, nestedSegments, mode);
     }
+  }
+
+  compileIndexPath(context: TableContext, path: string[], mode: JSONSqlPathMode): string {
+    return this.buildSqlPath(context, path, mode);
   }
 
   getCreateIndexSQL(context: TableContext, indexConfig: IndexConfig): string {
@@ -254,7 +263,14 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     return sortClauses.length ? `ORDER BY ${sortClauses.join(', ')}` : '';
   }
 
-  resolvePath<T extends ModelType>(tableContext: TableContext<T>, path: string[], mode: JSONSqlPathMode): ResolvedPathContext {
+  #resolveSchemaPath<T extends ModelType>(
+    tableContext: TableContext<T>,
+    path: string[]
+  ): {
+    leafField?: SchemaFieldConfig;
+    arrayField?: SchemaFieldConfig;
+    arraySegmentIndex?: number;
+  } {
     const firstSegment = path[0];
 
     if (tableContext.simpleFields.has(firstSegment)) {
@@ -266,13 +282,12 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
           }
         );
       }
-      const leafField = tableContext.simpleFields.get(firstSegment);
-      return { sqlPath: this.escapeIdentifier(firstSegment), leafField };
+      return { leafField: tableContext.simpleFields.get(firstSegment) };
     }
 
     let currentField: SchemaFieldConfig | undefined = tableContext.complexFields.get(firstSegment);
     let arrayField: SchemaFieldConfig | undefined = currentField?.array ? currentField : undefined;
-    let arrayIndex: number | undefined = currentField?.array ? 0 : undefined;
+    let arraySegmentIndex: number | undefined = currentField?.array ? 0 : undefined;
     let currentClass = currentField?.type;
 
     for (let pathIndex = 1; pathIndex < path.length; pathIndex++) {
@@ -281,23 +296,37 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
       currentField = subclassConfiguration?.fields[segment];
       if (currentField?.array && !arrayField) {
         arrayField = currentField;
-        arrayIndex = pathIndex;
+        arraySegmentIndex = pathIndex;
       }
       currentClass = currentField?.type;
     }
 
-    let compiledPath = this.compileIndexPath(tableContext, path, mode);
+    return {
+      leafField: currentField,
+      arrayField,
+      arraySegmentIndex
+    };
+  }
 
-    if (currentField && !currentField.array) {
-      compiledPath = this.castColumn(compiledPath, currentField.type);
+  resolvePath<T extends ModelType>(tableContext: TableContext<T>, path: string[], mode: JSONSqlPathMode): ResolvedPathContext {
+    const firstSegment = path[0];
+
+    if (tableContext.simpleFields.has(firstSegment)) {
+      const { leafField } = this.#resolveSchemaPath(tableContext, path);
+      return { sqlPath: this.buildSqlPath(tableContext, path, mode), leafField };
     }
 
-    const arrayPath = arrayIndex !== undefined ? path.slice(0, arrayIndex + 1) : undefined;
-    const subPath = arrayIndex !== undefined ? path.slice(arrayIndex + 1) : undefined;
+    const { leafField, arrayField, arraySegmentIndex } = this.#resolveSchemaPath(tableContext, path);
+    const sqlPath = this.buildSqlPath(tableContext, path, mode);
+
+    const finalSqlPath = leafField && !leafField.array ? this.castColumn(sqlPath, leafField.type) : sqlPath;
+
+    const arrayPath = arraySegmentIndex !== undefined ? path.slice(0, arraySegmentIndex + 1) : undefined;
+    const subPath = arraySegmentIndex !== undefined ? path.slice(arraySegmentIndex + 1) : undefined;
 
     return {
-      sqlPath: compiledPath,
-      leafField: currentField,
+      sqlPath: finalSqlPath,
+      leafField,
       arrayField,
       arrayPath,
       subPath
