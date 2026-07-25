@@ -1,4 +1,4 @@
-import { AbstractANSI99Dialect, type TableContext } from '@travetto/model-sql';
+import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext } from '@travetto/model-sql';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -74,18 +74,46 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     return `$${index}`;
   }
 
+  #buildContainmentPayload(value: unknown, context?: ResolvedPathContext): unknown {
+    if (!context?.subPath || context.subPath.length === 0) {
+      return Array.isArray(value) ? value : [value];
+    }
+    let currentPayload: unknown = value;
+    for (let index = context.subPath.length - 1; index >= 0; index--) {
+      currentPayload = { [context.subPath[index]]: currentPayload };
+    }
+    currentPayload = [currentPayload];
+
+    if (context.arrayPath && context.arrayPath.length > 1) {
+      for (let index = context.arrayPath.length - 1; index >= 1; index--) {
+        currentPayload = { [context.arrayPath[index]]: currentPayload };
+      }
+    }
+    return currentPayload;
+  }
+
+  #getJsonbColumnPath(sqlPath: string, context?: ResolvedPathContext): string {
+    if (context?.subPath && context.subPath.length > 0 && context.arrayPath && context.arrayPath.length > 0) {
+      return this.escapeIdentifier(context.arrayPath[0]);
+    }
+    return sqlPath;
+  }
+
   compileArrayAll(
     sqlPath: string,
     identifier: string,
     value: unknown[],
     field: SchemaFieldConfig,
-    topLevel?: boolean
+    topLevel?: boolean,
+    context?: ResolvedPathContext
   ): { sql: string; formatted: unknown } {
-    if (topLevel && !SchemaRegistryIndex.has(field.type)) {
+    if (topLevel && !context?.subPath?.length && !SchemaRegistryIndex.has(field.type)) {
       return { sql: `${sqlPath} @> ${identifier}`, formatted: value };
     }
-    const jsonbPath = topLevel ? sqlPath : `(${sqlPath})::jsonb`;
-    return { sql: `${jsonbPath} @> ${identifier}::jsonb`, formatted: JSONUtil.toUTF8(value) };
+    const jsonbColumn = this.#getJsonbColumnPath(sqlPath, context);
+    const jsonbPath = topLevel && !context?.subPath?.length ? jsonbColumn : `(${jsonbColumn})::jsonb`;
+    const payload = this.#buildContainmentPayload(value, context);
+    return { sql: `${jsonbPath} @> ${identifier}::jsonb`, formatted: JSONUtil.toUTF8(payload) };
   }
 
   compileArrayEquals(
@@ -93,17 +121,19 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     identifier: string,
     values: unknown,
     field: SchemaFieldConfig,
-    topLevel?: boolean
+    topLevel?: boolean,
+    context?: ResolvedPathContext
   ): { sql: string; formatted: unknown } {
-    if (topLevel && !SchemaRegistryIndex.has(field.type)) {
+    if (topLevel && !context?.subPath?.length && !SchemaRegistryIndex.has(field.type)) {
       if (Array.isArray(values)) {
         return { sql: `${sqlPath} @> ${identifier}`, formatted: values };
       }
       return { sql: `${identifier} = ANY(${sqlPath})`, formatted: values };
     }
-    const jsonbPath = topLevel ? sqlPath : `(${sqlPath})::jsonb`;
-    const val = Array.isArray(values) ? values : [values];
-    return { sql: `${jsonbPath} @> ${identifier}::jsonb`, formatted: JSONUtil.toUTF8(val) };
+    const jsonbColumn = this.#getJsonbColumnPath(sqlPath, context);
+    const jsonbPath = topLevel && !context?.subPath?.length ? jsonbColumn : `(${jsonbColumn})::jsonb`;
+    const payload = this.#buildContainmentPayload(values, context);
+    return { sql: `${jsonbPath} @> ${identifier}::jsonb`, formatted: JSONUtil.toUTF8(payload) };
   }
 
   compileArrayAny(
@@ -111,22 +141,31 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     identifier: string,
     values: unknown[],
     field: SchemaFieldConfig,
-    topLevel?: boolean
+    topLevel?: boolean,
+    context?: ResolvedPathContext
   ): { sql: string; formatted: unknown } {
-    if (topLevel && !SchemaRegistryIndex.has(field.type)) {
+    if (topLevel && !context?.subPath?.length && !SchemaRegistryIndex.has(field.type)) {
       return { sql: `${sqlPath} && ${identifier}`, formatted: values };
     }
-    const jsonbPath = topLevel ? sqlPath : `(${sqlPath})::jsonb`;
-    const formatted = values.map(v => JSONUtil.toUTF8(Array.isArray(v) ? v : [v]));
+    const jsonbColumn = this.#getJsonbColumnPath(sqlPath, context);
+    const jsonbPath = topLevel && !context?.subPath?.length ? jsonbColumn : `(${jsonbColumn})::jsonb`;
+    const formatted = values.map(v => JSONUtil.toUTF8(this.#buildContainmentPayload(v, context)));
     return { sql: `${jsonbPath} @> ANY(${identifier}::jsonb[])`, formatted };
   }
 
-  compileArrayExists(sqlPath: string, identifier: string, field: SchemaFieldConfig, topLevel?: boolean): { sql: string } {
-    if (topLevel && !SchemaRegistryIndex.has(field.type)) {
+  compileArrayExists(
+    sqlPath: string,
+    identifier: string,
+    field: SchemaFieldConfig,
+    topLevel?: boolean,
+    context?: ResolvedPathContext
+  ): { sql: string } {
+    if (topLevel && !context?.subPath?.length && !SchemaRegistryIndex.has(field.type)) {
       return { sql: `(${sqlPath} IS NOT NULL AND cardinality(${sqlPath}) > 0)` };
     }
-    const jsonbPath = topLevel ? sqlPath : `(${sqlPath})::jsonb`;
-    return { sql: `(${sqlPath} IS NOT NULL AND ${jsonbPath} <> '[]'::jsonb)` };
+    const jsonbColumn = this.#getJsonbColumnPath(sqlPath, context);
+    const jsonbPath = topLevel && !context?.subPath?.length ? jsonbColumn : `(${jsonbColumn})::jsonb`;
+    return { sql: `(${jsonbColumn} IS NOT NULL AND ${jsonbPath} <> '[]'::jsonb)` };
   }
 
   getRegexOperator(caseInsensitive: boolean): string {

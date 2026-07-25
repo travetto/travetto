@@ -15,3 +15,11 @@ export interface TableContext<T extends ModelType = ModelType> extends SchemaCon
   tableName: string;
   database?: string;
 }
+
+export interface ResolvedPathContext {
+  sqlPath: string;
+  leafField?: SchemaFieldConfig;
+  arrayField?: SchemaFieldConfig;
+  arrayPath?: string[];
+  subPath?: string[];
+}

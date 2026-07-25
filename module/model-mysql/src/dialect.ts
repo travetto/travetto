@@ -1,4 +1,4 @@
-import { AbstractANSI99Dialect, type JSONSqlPathMode, type TableContext } from '@travetto/model-sql';
+import { AbstractANSI99Dialect, type JSONSqlPathMode, type ResolvedPathContext, type TableContext } from '@travetto/model-sql';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
@@ -64,14 +64,26 @@ export class MysqlDialect extends AbstractANSI99Dialect {
     }
   }
 
+  #getArraySqlPath(sqlPath: string, context?: ResolvedPathContext): string {
+    if (!context?.arrayPath || context.arrayPath.length === 0 || !context.subPath || context.subPath.length === 0) {
+      return sqlPath;
+    }
+    const columnName = this.escapeIdentifier(context.arrayPath[0]);
+    const arrayPathPart = context.arrayPath.length > 1 ? context.arrayPath.slice(1).join('.') : '';
+    const jsonPathExpr = arrayPathPart ? `$.${arrayPathPart}[*].${context.subPath.join('.')}` : `$[*].${context.subPath.join('.')}`;
+    return `JSON_EXTRACT(${columnName}, '${jsonPathExpr}')`;
+  }
+
   compileArrayAll(
     sqlPath: string,
     identifier: string,
     value: unknown[],
     field: SchemaFieldConfig,
-    topLevel?: boolean
+    topLevel?: boolean,
+    context?: ResolvedPathContext
   ): { sql: string; formatted: unknown } {
-    return { sql: `JSON_CONTAINS(${sqlPath}, ${identifier})`, formatted: JSONUtil.toUTF8(value) };
+    const targetSqlPath = this.#getArraySqlPath(sqlPath, context);
+    return { sql: `JSON_CONTAINS(${targetSqlPath}, ${identifier})`, formatted: JSONUtil.toUTF8(value) };
   }
 
   compileArrayEquals(
@@ -79,9 +91,12 @@ export class MysqlDialect extends AbstractANSI99Dialect {
     identifier: string,
     values: unknown,
     field: SchemaFieldConfig,
-    topLevel?: boolean
+    topLevel?: boolean,
+    context?: ResolvedPathContext
   ): { sql: string; formatted: unknown } {
-    return { sql: `JSON_CONTAINS(${sqlPath}, ${identifier})`, formatted: JSONUtil.toUTF8(values) };
+    const targetSqlPath = this.#getArraySqlPath(sqlPath, context);
+    const val = context?.subPath?.length && !Array.isArray(values) ? [values] : values;
+    return { sql: `JSON_CONTAINS(${targetSqlPath}, ${identifier})`, formatted: JSONUtil.toUTF8(val) };
   }
 
   compileArrayAny(
@@ -89,13 +104,22 @@ export class MysqlDialect extends AbstractANSI99Dialect {
     identifier: string,
     values: unknown[],
     field: SchemaFieldConfig,
-    topLevel?: boolean
+    topLevel?: boolean,
+    context?: ResolvedPathContext
   ): { sql: string; formatted: unknown } {
-    return { sql: `JSON_OVERLAPS(${sqlPath}, ${identifier})`, formatted: JSONUtil.toUTF8(values) };
+    const targetSqlPath = this.#getArraySqlPath(sqlPath, context);
+    return { sql: `JSON_OVERLAPS(${targetSqlPath}, ${identifier})`, formatted: JSONUtil.toUTF8(values) };
   }
 
-  compileArrayExists(sqlPath: string, identifier: string, field: SchemaFieldConfig, topLevel?: boolean): { sql: string } {
-    return { sql: `(${sqlPath} IS NOT NULL AND JSON_LENGTH(${sqlPath}) > 0)` };
+  compileArrayExists(
+    sqlPath: string,
+    identifier: string,
+    field: SchemaFieldConfig,
+    topLevel?: boolean,
+    context?: ResolvedPathContext
+  ): { sql: string } {
+    const targetSqlPath = this.#getArraySqlPath(sqlPath, context);
+    return { sql: `(${targetSqlPath} IS NOT NULL AND JSON_LENGTH(${targetSqlPath}) > 0)` };
   }
 
   compileJsonEquality(sqlPath: string, identifier: string): string {

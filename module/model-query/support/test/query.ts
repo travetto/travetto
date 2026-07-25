@@ -7,7 +7,7 @@ import { Suite, Test } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
 import type { ModelQuerySupport } from '../../src/types/query.ts';
-import { Aged, Location, Names, Note, Person, SimpleList, WithNestedLists, WithNestedNestedLists } from './model.ts';
+import { Aged, Location, Names, Note, Person, PersonFamily, SimpleList, WithNestedLists, WithNestedNestedLists } from './model.ts';
 
 @Suite()
 export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport & ModelCrudSupport> {
@@ -536,5 +536,113 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     });
 
     assert(total === 1);
+  }
+
+  @Test('Verify array of objects property queries')
+  async verifyArrayOfObjectsProperty() {
+    const service = await this.service;
+
+    await service.create(
+      Note,
+      Note.from({
+        entities: [
+          { id: '1', label: 'one' },
+          { id: '2', label: 'two' }
+        ]
+      })
+    );
+
+    await service.create(
+      Note,
+      Note.from({
+        entities: [
+          { id: '3', label: 'three' },
+          { id: '4', label: 'four' }
+        ]
+      })
+    );
+
+    await service.create(
+      Note,
+      Note.from({
+        entities: [{ id: '5', label: 'five' }]
+      })
+    );
+
+    const inResults = await service.query(Note, {
+      where: {
+        entities: {
+          label: {
+            $in: ['one', 'four', 'missing']
+          }
+        }
+      }
+    });
+    assert(inResults.length === 2);
+
+    const eqResults = await service.query(Note, {
+      where: {
+        entities: {
+          label: 'five'
+        }
+      }
+    });
+    assert(eqResults.length === 1);
+  }
+
+  @Test('Verify nested object array property queries')
+  async verifyNestedObjectArrayProperty() {
+    const service = await this.service;
+
+    await service.create(
+      PersonFamily,
+      PersonFamily.from({
+        family: {
+          children: [{ name: 'one' }, { name: 'two' }]
+        }
+      })
+    );
+
+    await service.create(
+      PersonFamily,
+      PersonFamily.from({
+        family: {
+          children: [{ name: 'three' }, { name: 'four' }]
+        }
+      })
+    );
+
+    await service.create(
+      PersonFamily,
+      PersonFamily.from({
+        family: {
+          children: [{ name: 'five' }]
+        }
+      })
+    );
+
+    const inResults = await service.query(PersonFamily, {
+      where: {
+        family: {
+          children: {
+            name: {
+              $in: ['one', 'two', 'three']
+            }
+          }
+        }
+      }
+    });
+    assert(inResults.length === 2);
+
+    const eqResults = await service.query(PersonFamily, {
+      where: {
+        family: {
+          children: {
+            name: 'five'
+          }
+        }
+      }
+    });
+    assert(eqResults.length === 1);
   }
 }
