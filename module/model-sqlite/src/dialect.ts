@@ -41,21 +41,18 @@ export class SqliteDialect extends AbstractANSI99Dialect {
     return `json_extract(${columnName}, '$.${jsonPath.join('.')}')`;
   }
 
-  #getSqliteArrayContext(context: ResolvedPathContext): { jsonArrayExpr: string } {
+  #getSqliteArrayExpression(context: ResolvedPathContext): string {
     if (!context.arrayPath || context.arrayPath.length === 0) {
-      return { jsonArrayExpr: context.sqlPath };
+      return context.sqlPath;
     }
 
     const columnName = this.escapeIdentifier(context.arrayPath[0]);
-    const jsonArrayExpr =
-      context.arrayPath.length > 1 ? `json_extract(${columnName}, '$.${context.arrayPath.slice(1).join('.')}')` : columnName;
-
-    return { jsonArrayExpr };
+    return context.arrayPath.length > 1 ? `json_extract(${columnName}, '$.${context.arrayPath.slice(1).join('.')}')` : columnName;
   }
 
-  #buildSubPathCondition(context: ResolvedPathContext, parentExpr: string, onLeaf: (leafExpr: string) => string): string {
+  #buildSubPathCondition(context: ResolvedPathContext, parentExpression: string, onLeaf: (leafExpression: string) => string): string {
     if (!context.subPath || context.subPath.length === 0) {
-      return onLeaf(parentExpr);
+      return onLeaf(parentExpression);
     }
 
     const arraySegmentIndices: number[] = [];
@@ -64,20 +61,20 @@ export class SqliteDialect extends AbstractANSI99Dialect {
     for (let index = 0; index < context.subPath.length; index++) {
       const segment = context.subPath[index];
       if (currentClass) {
-        const classConfig = SchemaRegistryIndex.getOptional(currentClass)?.get();
-        const fieldConfig = classConfig?.fields[segment];
-        if (fieldConfig) {
-          if (fieldConfig.array) {
+        const classConfiguration = SchemaRegistryIndex.getOptional(currentClass)?.get();
+        const fieldConfiguration = classConfiguration?.fields[segment];
+        if (fieldConfiguration) {
+          if (fieldConfiguration.array) {
             arraySegmentIndices.push(index);
           }
-          currentClass = fieldConfig.type;
+          currentClass = fieldConfiguration.type;
         }
       }
     }
 
     if (arraySegmentIndices.length === 0) {
-      const leafExpr = `json_extract(${parentExpr}, '$.${context.subPath.join('.')}')`;
-      return onLeaf(leafExpr);
+      const leafExpression = `json_extract(${parentExpression}, '$.${context.subPath.join('.')}')`;
+      return onLeaf(leafExpression);
     }
 
     const buildLevel = (levelIndex: number, currentParent: string): string => {
@@ -86,80 +83,84 @@ export class SqliteDialect extends AbstractANSI99Dialect {
       const arrayPath = context.subPath!.slice(startPathIndex, endPathIndex + 1).join('.');
       const alias = `ing_${levelIndex}`;
 
-      if (levelIndex === arraySegmentIndices.length - 1) {
-        const leafPath = context.subPath!.slice(endPathIndex + 1).join('.');
-        const leafExpr = leafPath ? `json_extract(${alias}.value, '$.${leafPath}')` : `${alias}.value`;
-        const innerCondition = onLeaf(leafExpr);
-        return `EXISTS (SELECT 1 FROM json_each(${currentParent}, '$.${arrayPath}') AS ${alias} WHERE ${innerCondition})`;
-      } else {
-        const innerCondition = buildLevel(levelIndex + 1, `${alias}.value`);
-        return `EXISTS (SELECT 1 FROM json_each(${currentParent}, '$.${arrayPath}') AS ${alias} WHERE ${innerCondition})`;
-      }
+      const innerCondition =
+        levelIndex === arraySegmentIndices.length - 1
+          ? (() => {
+              const leafPath = context.subPath!.slice(endPathIndex + 1).join('.');
+              const leafExpression = leafPath ? `json_extract(${alias}.value, '$.${leafPath}')` : `${alias}.value`;
+              return onLeaf(leafExpression);
+            })()
+          : buildLevel(levelIndex + 1, `${alias}.value`);
+
+      return `
+EXISTS (
+  SELECT 1 
+  FROM json_each(${currentParent}, '$.${arrayPath}') AS ${alias} 
+  WHERE ${innerCondition}
+)`;
     };
 
-    return buildLevel(0, parentExpr);
+    return buildLevel(0, parentExpression);
+  }
+
+  #buildArrayElementExists(context: ResolvedPathContext, onLeaf: (leafExpression: string) => string): string {
+    const jsonArrayExpression = this.#getSqliteArrayExpression(context);
+    const subPathCondition = this.#buildSubPathCondition(context, 'elem.value', onLeaf);
+    return `EXISTS (
+  SELECT 1 
+  FROM json_each(${jsonArrayExpression}) AS elem 
+  WHERE ${subPathCondition}
+)`;
   }
 
   compileArrayAll(context: ResolvedPathContext, identifier: string, value: unknown[]): { sql: string; formatted: unknown } {
-    const { jsonArrayExpr } = this.#getSqliteArrayContext(context);
-    const subCondition = this.#buildSubPathCondition(context, 'elem.value', leafExpr => `${leafExpr} = req.value`);
+    const elementExists = this.#buildArrayElementExists(context, leafExpression => `${leafExpression} = req.value`);
     return {
-      sql: `NOT EXISTS (SELECT 1 FROM json_each(${identifier}) AS req WHERE NOT EXISTS (SELECT 1 FROM json_each(${jsonArrayExpr}) AS elem WHERE ${subCondition}))`,
+      sql: `NOT EXISTS (
+  SELECT 1 
+  FROM json_each(${identifier}) AS req 
+  WHERE NOT ${elementExists}
+)`,
       formatted: JSONUtil.toUTF8(value)
     };
   }
 
   compileArrayEquals(context: ResolvedPathContext, identifier: string, values: unknown): { sql: string; formatted: unknown } {
-    const { jsonArrayExpr } = this.#getSqliteArrayContext(context);
-
     if (Array.isArray(values)) {
-      const subCondition = this.#buildSubPathCondition(
-        context,
-        'elem.value',
-        leafExpr => `${leafExpr} IN (SELECT value FROM json_each(${identifier}))`
-      );
       return {
-        sql: `EXISTS (SELECT 1 FROM json_each(${jsonArrayExpr}) AS elem WHERE ${subCondition})`,
+        sql: this.#buildArrayElementExists(context, leafExpression => `${leafExpression} IN (SELECT value FROM json_each(${identifier}))`),
         formatted: JSONUtil.toUTF8(values)
       };
     }
 
     if (typeof values === 'object' && values !== null) {
-      const subCondition = this.#buildSubPathCondition(
-        context,
-        'elem.value',
-        leafExpr =>
-          `NOT EXISTS (SELECT 1 FROM json_each(${identifier}) AS req WHERE json_extract(${leafExpr}, '$.' || req.key) IS NOT req.value)`
-      );
       return {
-        sql: `EXISTS (SELECT 1 FROM json_each(${jsonArrayExpr}) AS elem WHERE ${subCondition})`,
+        sql: this.#buildArrayElementExists(
+          context,
+          leafExpression => `
+NOT EXISTS (
+  SELECT 1 
+  FROM json_each(${identifier}) AS req 
+  WHERE json_extract(${leafExpression}, '$.' || req.key) IS NOT req.value
+)`
+        ),
         formatted: JSONUtil.toUTF8(values)
       };
     }
 
-    const subCondition = this.#buildSubPathCondition(context, 'elem.value', leafExpr => `${leafExpr} = ${identifier}`);
     return {
-      sql: `EXISTS (SELECT 1 FROM json_each(${jsonArrayExpr}) AS elem WHERE ${subCondition})`,
+      sql: this.#buildArrayElementExists(context, leafExpression => `${leafExpression} = ${identifier}`),
       formatted: values
     };
   }
 
   compileArrayAny(context: ResolvedPathContext, identifier: string, values: unknown[]): { sql: string; formatted: unknown } {
-    const { jsonArrayExpr } = this.#getSqliteArrayContext(context);
-    const subCondition = this.#buildSubPathCondition(
-      context,
-      'elem.value',
-      leafExpr => `${leafExpr} IN (SELECT value FROM json_each(${identifier}))`
-    );
-    return {
-      sql: `EXISTS (SELECT 1 FROM json_each(${jsonArrayExpr}) AS elem WHERE ${subCondition})`,
-      formatted: JSONUtil.toUTF8(values)
-    };
+    return this.compileArrayEquals(context, identifier, values);
   }
 
   compileArrayExists(context: ResolvedPathContext, identifier?: string): { sql: string } {
-    const { jsonArrayExpr } = this.#getSqliteArrayContext(context);
-    return { sql: `(${jsonArrayExpr} IS NOT NULL AND json_array_length(${jsonArrayExpr}) > 0)` };
+    const jsonArrayExpression = this.#getSqliteArrayExpression(context);
+    return { sql: `(${jsonArrayExpression} IS NOT NULL AND json_array_length(${jsonArrayExpression}) > 0)` };
   }
 
   getRegexOperator(caseInsensitive: boolean): string {

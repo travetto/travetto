@@ -74,8 +74,8 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     return `$${index}`;
   }
 
-  #buildContainmentPayload(value: unknown, context?: ResolvedPathContext): unknown {
-    if (!context?.subPath || context.subPath.length === 0) {
+  #buildContainmentPayload(value: unknown, context: ResolvedPathContext): unknown {
+    if (!context.subPath || context.subPath.length === 0) {
       return Array.isArray(value) ? value : [value];
     }
 
