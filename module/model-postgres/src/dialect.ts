@@ -79,21 +79,43 @@ export class PostgresDialect extends AbstractANSI99Dialect {
       return Array.isArray(value) ? value : [value];
     }
 
+    const isArraySegment = new Array<boolean>(context.subPath.length).fill(false);
+    let currentClass: Class | undefined = context.arrayField?.type;
+    for (let index = 0; index < context.subPath.length; index++) {
+      if (!currentClass) {
+        break;
+      }
+      const segment = context.subPath[index];
+      const classConfig = SchemaRegistryIndex.getOptional(currentClass)?.get();
+      const fieldConfig = classConfig?.fields[segment];
+      if (fieldConfig) {
+        if (fieldConfig.array) {
+          isArraySegment[index] = true;
+        }
+        currentClass = fieldConfig.type;
+      } else {
+        break;
+      }
+    }
+
+    const buildPayloadForValue = (item: unknown): unknown => {
+      let itemPayload: unknown = item;
+      for (let index = context.subPath!.length - 1; index >= 0; index--) {
+        const segment = context.subPath![index];
+        if (isArraySegment[index]) {
+          itemPayload = { [segment]: Array.isArray(itemPayload) ? itemPayload : [itemPayload] };
+        } else {
+          itemPayload = { [segment]: itemPayload };
+        }
+      }
+      return itemPayload;
+    };
+
     let currentPayload: unknown;
     if (Array.isArray(value)) {
-      currentPayload = value.map(item => {
-        let itemPayload: unknown = item;
-        for (let index = context.subPath!.length - 1; index >= 0; index--) {
-          itemPayload = { [context.subPath![index]]: itemPayload };
-        }
-        return itemPayload;
-      });
+      currentPayload = value.map(item => buildPayloadForValue(item));
     } else {
-      currentPayload = value;
-      for (let index = context.subPath.length - 1; index >= 0; index--) {
-        currentPayload = { [context.subPath[index]]: currentPayload };
-      }
-      currentPayload = [currentPayload];
+      currentPayload = [buildPayloadForValue(value)];
     }
 
     if (context.arrayPath && context.arrayPath.length > 1) {

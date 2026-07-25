@@ -115,3 +115,19 @@ export class PersonFamily implements ModelType {
   id: string;
   family?: Family;
 }
+
+@Schema()
+export class RecipeIngredient {
+  name: string;
+}
+
+@Schema()
+export class RecipeSection {
+  ingredients: RecipeIngredient[] = [];
+}
+
+@Model()
+export class Recipe implements ModelType {
+  id: string;
+  sections: RecipeSection[] = [];
+}

@@ -7,7 +7,7 @@ import { Suite, Test } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
 import type { ModelQuerySupport } from '../../src/types/query.ts';
-import { Aged, Location, Names, Note, Person, PersonFamily, SimpleList, WithNestedLists, WithNestedNestedLists } from './model.ts';
+import { Aged, Location, Names, Note, Person, PersonFamily, Recipe, SimpleList, WithNestedLists, WithNestedNestedLists } from './model.ts';
 
 @Suite()
 export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport & ModelCrudSupport> {
@@ -536,6 +536,77 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     });
 
     assert(total === 1);
+  }
+
+  @Test('Verify queries on nested arrays of schemas')
+  async verifyNestedArraySchemaQuery() {
+    const service = await this.service;
+
+    await service.create(
+      Recipe,
+      Recipe.from({
+        sections: [
+          {
+            ingredients: [{ name: 'garlic' }, { name: 'onion' }]
+          }
+        ]
+      })
+    );
+
+    await service.create(
+      Recipe,
+      Recipe.from({
+        sections: [
+          {
+            ingredients: [{ name: 'paprika' }, { name: 'salt' }]
+          }
+        ]
+      })
+    );
+
+    await service.create(
+      Recipe,
+      Recipe.from({
+        sections: [
+          {
+            ingredients: [{ name: 'garlic' }, { name: 'thyme' }]
+          }
+        ]
+      })
+    );
+
+    const matchSingle = await service.query(Recipe, {
+      where: {
+        sections: {
+          ingredients: {
+            name: 'garlic'
+          }
+        }
+      }
+    });
+    assert(matchSingle.length === 2);
+
+    const matchIn = await service.query(Recipe, {
+      where: {
+        sections: {
+          ingredients: {
+            name: { $in: ['onion', 'salt'] }
+          }
+        }
+      }
+    });
+    assert(matchIn.length === 2);
+
+    const matchNotEqual = await service.query(Recipe, {
+      where: {
+        sections: {
+          ingredients: {
+            name: { $ne: 'garlic' }
+          }
+        }
+      }
+    });
+    assert(matchNotEqual.length === 1);
   }
 
   @Test('Verify array of objects property queries')

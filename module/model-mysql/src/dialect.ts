@@ -1,6 +1,6 @@
 import { AbstractANSI99Dialect, type JSONSqlPathMode, type ResolvedPathContext, type TableContext } from '@travetto/model-sql';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
-import type { SchemaFieldConfig } from '@travetto/schema';
+import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 export class MysqlDialect extends AbstractANSI99Dialect {
   override returningSupport = false;
@@ -64,13 +64,36 @@ export class MysqlDialect extends AbstractANSI99Dialect {
     }
   }
 
+  #formatSubPath(context: ResolvedPathContext): string {
+    if (!context.subPath || context.subPath.length === 0) {
+      return '';
+    }
+    let currentClass: Class | undefined = context.arrayField?.type;
+    const parts: string[] = [];
+    for (let index = 0; index < context.subPath.length; index++) {
+      const segment = context.subPath[index];
+      if (currentClass) {
+        const classConfig = SchemaRegistryIndex.getOptional(currentClass)?.get();
+        const fieldConfig = classConfig?.fields[segment];
+        if (fieldConfig) {
+          parts.push(fieldConfig.array ? `${segment}[*]` : segment);
+          currentClass = fieldConfig.type;
+          continue;
+        }
+      }
+      parts.push(segment);
+    }
+    return parts.join('.');
+  }
+
   #getArraySqlPath(context: ResolvedPathContext): string {
     if (!context.arrayPath || context.arrayPath.length === 0 || !context.subPath || context.subPath.length === 0) {
       return context.sqlPath;
     }
     const columnName = this.escapeIdentifier(context.arrayPath[0]);
     const arrayPathPart = context.arrayPath.length > 1 ? context.arrayPath.slice(1).join('.') : '';
-    const jsonPathExpr = arrayPathPart ? `$.${arrayPathPart}[*].${context.subPath.join('.')}` : `$[*].${context.subPath.join('.')}`;
+    const formattedSubPath = this.#formatSubPath(context);
+    const jsonPathExpr = arrayPathPart ? `$.${arrayPathPart}[*].${formattedSubPath}` : `$[*].${formattedSubPath}`;
     return `JSON_EXTRACT(${columnName}, '${jsonPathExpr}')`;
   }
 
