@@ -163,6 +163,17 @@ NOT EXISTS (
     return { sql: `(${jsonArrayExpression} IS NOT NULL AND json_array_length(${jsonArrayExpression}) > 0)` };
   }
 
+  compileArrayRegex(context: ResolvedPathContext, identifier: string, value: RegExp | string): { sql: string; formatted: unknown } {
+    const regex = value instanceof RegExp ? value : new RegExp(String(value));
+    const caseInsensitive = regex.flags.includes('i');
+    const regexOp = this.getRegexOperator(caseInsensitive);
+    const regexSource = this.formatRegex(regex.source, caseInsensitive);
+    return {
+      sql: this.#buildArrayElementExists(context, leafExpression => `${leafExpression} ${regexOp} ${identifier}`),
+      formatted: regexSource
+    };
+  }
+
   getRegexOperator(caseInsensitive: boolean): string {
     return 'REGEXP';
   }

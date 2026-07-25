@@ -68,6 +68,7 @@ export abstract class AbstractANSI99Dialect {
   abstract compileArrayEquals(context: ResolvedPathContext, identifier: string, values: unknown): { sql: string; formatted: unknown };
   abstract compileArrayAny(context: ResolvedPathContext, identifier: string, values: unknown[]): { sql: string; formatted: unknown };
   abstract compileArrayExists(context: ResolvedPathContext, identifier?: string): { sql: string };
+  abstract compileArrayRegex(context: ResolvedPathContext, identifier: string, value: RegExp | string): { sql: string; formatted: unknown };
 
   abstract getRegexOperator(caseInsensitive: boolean): string;
   abstract formatRegex(source: string, caseInsensitive: boolean): string;
@@ -448,6 +449,9 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
           const { sql } = this.compileArrayExists(resolvedContext, identifier);
           const finalSql = !value ? `NOT(${sql})` : sql;
           clause = { sql: finalSql };
+        } else if (operator === '$regex') {
+          const { sql, formatted } = this.compileArrayRegex(resolvedContext, identifier, value as RegExp | string);
+          clause = { sql, parameters: { [identifier]: formatted } };
         } else {
           throw new RuntimeError(`Operator "${operator}" is not supported for arrays`, { category: 'data' });
         }

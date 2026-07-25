@@ -185,6 +185,31 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     return { sql: `(${target.jsonbPath} IS NOT NULL AND ${target.jsonbPath} <> '[]'::jsonb)` };
   }
 
+  compileArrayRegex(context: ResolvedPathContext, identifier: string, value: RegExp | string): { sql: string; formatted: unknown } {
+    const target = this.#getPostgresArrayTarget(context);
+    const regex = value instanceof RegExp ? value : new RegExp(String(value));
+    const caseInsensitive = regex.flags.includes('i');
+    const regexOp = this.getRegexOperator(caseInsensitive);
+    const regexSource = this.formatRegex(regex.source, caseInsensitive);
+
+    if (target.isNative) {
+      return {
+        sql: `EXISTS (SELECT 1 FROM unnest(${target.sqlPath}) AS elem WHERE elem ${regexOp} ${identifier})`,
+        formatted: regexSource
+      };
+    }
+
+    const subAccessor =
+      context.subPath && context.subPath.length > 0
+        ? `->${context.subPath.map(segment => `'${this.escapeLiteral(segment)}'`).join('->')}`
+        : '';
+
+    return {
+      sql: `EXISTS (SELECT 1 FROM jsonb_array_elements_text((${target.jsonbPath})${subAccessor}) AS elem WHERE elem ${regexOp} ${identifier})`,
+      formatted: regexSource
+    };
+  }
+
   getRegexOperator(caseInsensitive: boolean): string {
     return caseInsensitive ? '~*' : '~';
   }

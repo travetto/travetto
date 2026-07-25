@@ -118,6 +118,19 @@ export class MysqlDialect extends AbstractANSI99Dialect {
     return { sql: `(${targetSqlPath} IS NOT NULL AND JSON_LENGTH(${targetSqlPath}) > 0)` };
   }
 
+  compileArrayRegex(context: ResolvedPathContext, identifier: string, value: RegExp | string): { sql: string; formatted: unknown } {
+    const targetSqlPath = this.#getArraySqlPath(context);
+    const regex = value instanceof RegExp ? value : new RegExp(String(value));
+    const caseInsensitive = regex.flags.includes('i');
+    const regexOp = this.getRegexOperator(caseInsensitive);
+    const regexSource = this.formatRegex(regex.source, caseInsensitive);
+
+    return {
+      sql: `EXISTS (SELECT 1 FROM JSON_TABLE(${targetSqlPath}, '$[*]' COLUMNS (val VARCHAR(255) PATH '$')) AS jt WHERE jt.val ${regexOp} ${identifier})`,
+      formatted: regexSource
+    };
+  }
+
   compileJsonEquality(sqlPath: string, identifier: string): string {
     return `CAST(${sqlPath} AS JSON) = CAST(${identifier} AS JSON)`;
   }
