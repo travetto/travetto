@@ -46,7 +46,7 @@ export class FileConfigSource implements ConfigSource {
         for (const file of files) {
           if (this.#parser.matches(file) && path.basename(file, path.extname(file)) === profile) {
             const full = path.resolve(folder, file);
-            const configPriority = (i += 1);
+            const configPriority = i++;
             configs.push(
               this.#parser.parse(full).then(data => ({
                 data,

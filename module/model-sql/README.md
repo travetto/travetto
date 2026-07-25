@@ -39,7 +39,7 @@ Supported transaction modes include:
 Bulk operations (`processBulk`) batch insert, delete, and update statements for high performance. Bulk updates utilize standard ANSI SQL `CASE ... WHEN` constructs to update multiple records in a single database query across all SQL engines.
 
 ## Supported Features
-All SQL model service implementations derive from [BaseSQLModelService](https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L67) and support:
+All SQL model service implementations derive from [BaseSQLModelService](https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L68) and support:
    *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L60)
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10)
    *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10)
