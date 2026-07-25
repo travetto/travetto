@@ -66,6 +66,10 @@ class MockDialect extends AbstractANSI99Dialect {
     return { sql: `${context.sqlPath} IS NOT NULL`, formatted: undefined };
   }
 
+  compileArrayRegex(context: ResolvedPathContext, identifier: string, value: RegExp | string) {
+    return { sql: `${context.sqlPath} REGEX ${identifier}`, formatted: value };
+  }
+
   getRegexOperator(caseInsensitive: boolean) {
     return caseInsensitive ? '~*' : '~';
   }
