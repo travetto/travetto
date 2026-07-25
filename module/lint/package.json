@@ -1,6 +1,6 @@
 {
   "name": "@travetto/lint",
-  "version": "8.0.0-alpha.22",
+  "version": "8.0.0-alpha.23",
   "type": "module",
   "description": "Linting and Formatting integration for Travetto",
   "keywords": [
@@ -26,11 +26,11 @@
     "directory": "module/lint"
   },
   "dependencies": {
-    "@travetto/runtime": "^8.0.0-alpha.21",
+    "@travetto/runtime": "^8.0.0-alpha.22",
     "@biomejs/biome": "^2.5.5"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.29"
+    "@travetto/cli": "^8.0.0-alpha.30"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
