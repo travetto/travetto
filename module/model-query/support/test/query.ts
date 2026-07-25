@@ -399,28 +399,13 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   @Test()
   async verifyArrayEmptyVsNot() {
     const service = await this.service;
-    await service.create(WithNestedLists, {
-      tags: ['a', 'b']
-    });
-
-    await service.create(WithNestedLists, {
-      names: ['c', 'd']
-    });
-
-    await service.create(WithNestedLists, {
-      names: ['c', 'd'],
-      tags: ['e', 'f']
-    });
-
-    await service.create(WithNestedLists, {
-      names: ['g', 'h'],
-      tags: []
-    });
-
-    await service.create(WithNestedLists, {
-      names: [],
-      tags: []
-    });
+    await this.saveAll(WithNestedLists, [
+      WithNestedLists.from({ tags: ['a', 'b'] }),
+      WithNestedLists.from({ names: ['c', 'd'] }),
+      WithNestedLists.from({ names: ['c', 'd'], tags: ['e', 'f'] }),
+      WithNestedLists.from({ names: ['g', 'h'], tags: [] }),
+      WithNestedLists.from({ names: [], tags: [] })
+    ]);
 
     let total = await service.queryCount(WithNestedLists, {
       where: {
@@ -428,6 +413,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
       }
     });
     assert(total === 3);
+
     total = await service.queryCount(WithNestedLists, {
       where: {
         names: { $exists: false }
@@ -463,35 +449,20 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
         names: { $exists: true }
       }
     });
-
     assert(total === 1);
   }
 
   @Test()
   async verifyNestedArrayEmptyVsNot() {
     const service = await this.service;
-    await service.create(WithNestedNestedLists, {
-      tags: ['a', 'b']
-    });
 
-    await service.create(WithNestedNestedLists, {
-      sub: { names: ['c', 'd'] }
-    });
-
-    await service.create(WithNestedNestedLists, {
-      sub: { names: ['c', 'd'] },
-      tags: ['e', 'f']
-    });
-
-    await service.create(WithNestedNestedLists, {
-      sub: { names: ['g', 'h'] },
-      tags: []
-    });
-
-    await service.create(WithNestedNestedLists, {
-      sub: {},
-      tags: []
-    });
+    await this.saveAll(WithNestedNestedLists, [
+      WithNestedNestedLists.from({ tags: ['a', 'b'] }),
+      WithNestedNestedLists.from({ sub: { names: ['c', 'd'] } }),
+      WithNestedNestedLists.from({ sub: { names: ['c', 'd'] }, tags: ['e', 'f'] }),
+      WithNestedNestedLists.from({ sub: { names: ['g', 'h'] }, tags: [] }),
+      WithNestedNestedLists.from({ sub: {}, tags: [] })
+    ]);
 
     let total = await service.queryCount(WithNestedNestedLists, {
       where: {
@@ -499,6 +470,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
       }
     });
     assert(total === 3);
+
     total = await service.queryCount(WithNestedNestedLists, {
       where: {
         sub: { names: { $exists: false } }
@@ -542,68 +514,35 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   async verifyNestedArraySchemaQuery() {
     const service = await this.service;
 
-    await service.create(
-      Recipe,
+    await this.saveAll(Recipe, [
       Recipe.from({
-        sections: [
-          {
-            ingredients: [{ name: 'garlic' }, { name: 'onion' }]
-          }
-        ]
-      })
-    );
-
-    await service.create(
-      Recipe,
+        sections: [{ ingredients: [{ name: 'garlic' }, { name: 'onion' }] }]
+      }),
       Recipe.from({
-        sections: [
-          {
-            ingredients: [{ name: 'paprika' }, { name: 'salt' }]
-          }
-        ]
-      })
-    );
-
-    await service.create(
-      Recipe,
+        sections: [{ ingredients: [{ name: 'paprika' }, { name: 'salt' }] }]
+      }),
       Recipe.from({
-        sections: [
-          {
-            ingredients: [{ name: 'garlic' }, { name: 'thyme' }]
-          }
-        ]
+        sections: [{ ingredients: [{ name: 'garlic' }, { name: 'thyme' }] }]
       })
-    );
+    ]);
 
     const matchSingle = await service.query(Recipe, {
       where: {
-        sections: {
-          ingredients: {
-            name: 'garlic'
-          }
-        }
+        sections: { ingredients: { name: 'garlic' } }
       }
     });
     assert(matchSingle.length === 2);
 
     const matchIn = await service.query(Recipe, {
       where: {
-        sections: {
-          ingredients: {
-            name: { $in: ['onion', 'salt'] }
-          }
-        }
+        sections: { ingredients: { name: { $in: ['onion', 'salt'] } } }
       }
     });
     assert(matchIn.length === 2);
 
     const matchNotEqual = await service.query(Recipe, {
       where: {
-        sections: {
-          ingredients: {
-            name: { $ne: 'garlic' }
-          }
-        }
+        sections: { ingredients: { name: { $ne: 'garlic' } } }
       }
     });
     assert(matchNotEqual.length === 1);
@@ -613,32 +552,23 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   async verifyArrayOfObjectsProperty() {
     const service = await this.service;
 
-    await service.create(
-      Note,
+    await this.saveAll(Note, [
       Note.from({
         entities: [
           { id: '1', label: 'one' },
           { id: '2', label: 'two' }
         ]
-      })
-    );
-
-    await service.create(
-      Note,
+      }),
       Note.from({
         entities: [
           { id: '3', label: 'three' },
           { id: '4', label: 'four' }
         ]
-      })
-    );
-
-    await service.create(
-      Note,
+      }),
       Note.from({
         entities: [{ id: '5', label: 'five' }]
       })
-    );
+    ]);
 
     const inResults = await service.query(Note, {
       where: {
@@ -665,32 +595,17 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   async verifyNestedObjectArrayProperty() {
     const service = await this.service;
 
-    await service.create(
-      PersonFamily,
+    await this.saveAll(PersonFamily, [
       PersonFamily.from({
-        family: {
-          children: [{ name: 'one' }, { name: 'two' }]
-        }
-      })
-    );
-
-    await service.create(
-      PersonFamily,
+        family: { children: [{ name: 'one' }, { name: 'two' }] }
+      }),
       PersonFamily.from({
-        family: {
-          children: [{ name: 'three' }, { name: 'four' }]
-        }
-      })
-    );
-
-    await service.create(
-      PersonFamily,
+        family: { children: [{ name: 'three' }, { name: 'four' }] }
+      }),
       PersonFamily.from({
-        family: {
-          children: [{ name: 'five' }]
-        }
+        family: { children: [{ name: 'five' }] }
       })
-    );
+    ]);
 
     const inResults = await service.query(PersonFamily, {
       where: {
