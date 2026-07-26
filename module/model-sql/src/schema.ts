@@ -19,7 +19,7 @@ export class SQLModelSchemaUtil {
       throw new RuntimeError('Cannot store unregistered models', { category: 'data' });
     }
 
-    const fields = Object.values(registryConfig.fields).map(field => ({ ...field }));
+    const fields = Object.values(registryConfig.fields);
 
     const hasModel = ModelRegistryIndex.has(modelClass);
     if (hasModel && registryConfig.discriminatedBase) {
@@ -29,7 +29,7 @@ export class SQLModelSchemaUtil {
         for (const field of TypedObject.values(subclassConfig.fields)) {
           if (!fieldMap.has(field.name)) {
             fieldMap.add(field.name);
-            fields.push({ ...field });
+            fields.push(field);
           }
         }
       }
