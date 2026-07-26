@@ -48,11 +48,11 @@ export class MysqlDialectSuite extends BaseSQLDialectSuite {
   @Test()
   async testMysqlCreateIndex() {
     const tableContext = getTableContext(ParentModel);
-    const mysqlCreateIndexSql = this.dialect.getCreateIndexSQL(tableContext, {
+    const mysqlCreateIndexSql = this.dialect.getCreateIndexSQL<ParentModel>(tableContext, {
       type: 'query',
       name: 'child_age',
       class: ParentModel,
-      fields: [{ 'child.age': 1 }]
+      fields: [{ child: { age: 1 } }]
     });
     assert(mysqlCreateIndexSql.includes("(CAST(`child`->>'$.age' AS DECIMAL))"));
   }

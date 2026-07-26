@@ -1,7 +1,7 @@
 import type { IndexConfig, ModelType } from '@travetto/model';
 import { ModelRegistryIndex } from '@travetto/model';
 import { isModelIndexedIndex } from '@travetto/model-indexed';
-import { isModelQueryIndex, ModelQueryUtil, type SortClause, type WhereClause } from '@travetto/model-query';
+import { isModelQueryIndex, ModelQueryUtil, type QueryIndexConfig, type SortClause, type WhereClause } from '@travetto/model-query';
 import { type Class, castTo, JSONUtil, RuntimeError } from '@travetto/runtime';
 import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -24,6 +24,26 @@ interface QueryClause {
 }
 
 type IdentificationPath = string;
+
+function extractQueryIndexPathAndDirection(indexField: Record<string, unknown>): { path: string[]; sortDirection: 1 | -1 | true } {
+  const path: string[] = [];
+  let current: unknown = indexField;
+  while (typeof current === 'object' && current !== null) {
+    const keys = Object.keys(current);
+    if (keys.length === 0) {
+      break;
+    }
+    const key = keys[0];
+    if (key.includes('.')) {
+      path.push(...key.split('.'));
+    } else {
+      path.push(key);
+    }
+    current = castTo<Record<string, unknown>>(current)[key];
+  }
+  const sortDirection = castTo<1 | -1 | true>(current ?? 1);
+  return { path, sortDirection };
+}
 
 /**
  * Abstract ANSI SQL-99 Dialect base implementation.
@@ -108,17 +128,15 @@ export abstract class AbstractANSI99Dialect {
     return this.resolvePath(context, path, mode).sqlPath;
   }
 
-  getCreateIndexSQL(context: TableContext, indexConfig: IndexConfig): string {
+  getCreateIndexSQL<T extends ModelType>(context: TableContext, indexConfig: IndexConfig | QueryIndexConfig<T>): string {
     const { tableName, cls: modelClass } = context;
     const indexName = ['idx', tableName, indexConfig.name.toLowerCase().replaceAll('-', '_')].join('_');
 
     if (isModelQueryIndex(indexConfig)) {
       const indexFields = indexConfig.fields.map(field => {
-        const fieldKey = Object.keys(field)[0];
-        const sortDirection = castTo<Record<string, unknown>>(field)[fieldKey];
+        const { path, sortDirection } = extractQueryIndexPathAndDirection(castTo(field));
         const isAscending = typeof sortDirection === 'number' ? sortDirection === 1 : !sortDirection;
 
-        const path = fieldKey.split('.');
         const expression = this.compileIndexPath(context, path, 'createIndex');
         const formattedExpression = path.length > 1 ? `(${expression})` : expression;
         return `${formattedExpression} ${isAscending ? 'ASC' : 'DESC'}`;
