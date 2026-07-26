@@ -12,7 +12,7 @@ export type IndexField<T extends ModelType> = IndexClauseRaw<RetainPrimitiveFiel
 /**
  * Index options
  */
-export interface QueryIndexConfig<T extends ModelType> extends IndexConfig<'query'> {
+export interface QueryIndexConfig<T extends ModelType> extends IndexConfig<'query', T> {
   /**
    * Fields and sort order
    */

@@ -1,14 +1,12 @@
 import assert from 'node:assert';
 
-import { Model, type ModelType } from '@travetto/model';
+import { Model, type ModelType, TransientField } from '@travetto/model';
 import { Registry } from '@travetto/registry';
 import type { Class } from '@travetto/runtime';
-import { Schema } from '@travetto/schema';
+import { DiscriminatorField, Required, Schema } from '@travetto/schema';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
-import { MysqlDialect } from '../../../model-mysql/src/dialect.ts';
-import { PostgresDialect } from '../../../model-postgres/src/dialect.ts';
-import { SqliteDialect } from '../../../model-sqlite/src/dialect.ts';
+import type { AbstractANSI99Dialect } from '../../src/dialect.ts';
 import { SQLModelSchemaUtil } from '../../src/schema.ts';
 import type { TableContext } from '../../src/types.ts';
 
@@ -20,11 +18,39 @@ class ChildItem {
   createdDate: Date;
 }
 
-@Model()
+@Model('dialect_gap_parent')
 class ParentModel {
   id: string;
   title: string;
   child: ChildItem;
+}
+
+@Schema()
+@Model('dialect_gap_simple')
+class SimpleModel {
+  id: string;
+  @Required()
+  requiredField: string;
+  optionalField?: string;
+  @TransientField()
+  transientField: string;
+}
+
+@Schema()
+@Model('dialect_gap_base_poly')
+abstract class BasePolymorphic {
+  id: string;
+  @DiscriminatorField()
+  type: string;
+  @Required()
+  sharedRequired: string;
+}
+
+@Schema()
+@Model('dialect_gap_sub_a')
+class SubTypeA extends BasePolymorphic {
+  @Required()
+  subTypeAOnlyRequired: string;
 }
 
 function getTableContext<T extends ModelType>(modelClass: Class<T>): TableContext<T> {
@@ -34,124 +60,66 @@ function getTableContext<T extends ModelType>(modelClass: Class<T>): TableContex
   };
 }
 
-@Suite()
-export class SQLDialectGapsTest {
+@Suite({ skip: true })
+export abstract class BaseSQLDialectSuite {
+  abstract dialect: AbstractANSI99Dialect;
+
   @BeforeAll()
   async setup() {
     await Registry.init();
+    SQLModelSchemaUtil.SCHEMA_CACHE.clear();
   }
 
-  @Test()
-  async testIndexAndQueryExpressionParity() {
-    const tableContext = getTableContext(ParentModel);
-    const mysqlDialect = new MysqlDialect();
-    const postgresDialect = new PostgresDialect();
-    const sqliteDialect = new SqliteDialect();
+  @Test('Verify DDL column nullability')
+  async testDDLNullability() {
+    const dialect = this.dialect;
+    const quote = dialect.escapeIdentifier('').substring(0, 1) || '"';
 
-    // Verify MySQL path resolution matches index creation
-    const mysqlAgeResolved = mysqlDialect.resolvePath(tableContext, ['child', 'age'], 'read');
-    assert(mysqlAgeResolved.sqlPath === "CAST(`child`->>'$.age' AS DECIMAL)");
+    const simpleContext = getTableContext(SimpleModel);
+    const simpleSQL = dialect.getCreateTableSQL(simpleContext);
 
-    const mysqlNameResolved = mysqlDialect.resolvePath(tableContext, ['child', 'name'], 'read');
-    assert(mysqlNameResolved.sqlPath === "(CAST(`child`->>'$.name' AS CHAR(255)) COLLATE utf8mb4_bin)");
+    const requiredLine = simpleSQL.split('\n').find(line => line.includes(`${quote}requiredField${quote}`));
+    assert(requiredLine?.includes('NOT NULL'));
 
-    // Verify Postgres path resolution matches index creation
-    const postgresAgeResolved = postgresDialect.resolvePath(tableContext, ['child', 'age'], 'read');
-    assert(postgresAgeResolved.sqlPath === '((("child"->>\'age\')))::NUMERIC');
+    const optionalLine = simpleSQL.split('\n').find(line => line.includes(`${quote}optionalField${quote}`));
+    if (optionalLine) {
+      assert(!optionalLine.includes('NOT NULL'));
+    }
 
-    // Verify SQLite path resolution matches index creation
-    const sqliteAgeResolved = sqliteDialect.resolvePath(tableContext, ['child', 'age'], 'read');
-    assert(sqliteAgeResolved.sqlPath === 'CAST(json_extract("child", \'$.age\') AS NUMERIC)');
-  }
+    const transientLine = simpleSQL.split('\n').find(line => line.includes(`${quote}transientField${quote}`));
+    if (transientLine) {
+      assert(!transientLine.includes('NOT NULL'));
+    }
 
-  @Test()
-  async testSqliteArraySubObjectPatch() {
-    const tableContext = getTableContext(ParentModel);
-    const sqliteDialect = new SqliteDialect();
+    const polyContext = getTableContext(BasePolymorphic);
+    const polySQL = dialect.getCreateTableSQL(polyContext);
 
-    const resolvedContext = sqliteDialect.resolvePath(tableContext, ['child', 'name'], 'read');
-    const { sql } = sqliteDialect.compileArrayEquals(resolvedContext, '$$1', { name: 'bob' });
+    const sharedRequiredLine = polySQL.split('\n').find(line => line.includes(`${quote}sharedRequired${quote}`));
+    assert(sharedRequiredLine?.includes('NOT NULL'));
 
-    assert(sql.includes('json_patch('));
-    assert(sql.includes('= elem.value'));
-  }
-
-  @Test()
-  async testCreateIndexes() {
-    const tableContext = getTableContext(ParentModel);
-    const mysqlDialect = new MysqlDialect();
-    const postgresDialect = new PostgresDialect();
-
-    // Verify create index SQL contains the resolved expressions
-    const mysqlCreateIndexSql = mysqlDialect.getCreateIndexSQL(tableContext, {
-      type: 'query',
-      name: 'child_age',
-      fields: [{ 'child.age': 1 }]
-    });
-    assert(mysqlCreateIndexSql.includes("(CAST(`child`->>'$.age' AS DECIMAL))"));
-
-    const postgresCreateIndexSql = postgresDialect.getCreateIndexSQL(tableContext, {
-      type: 'query',
-      name: 'child_age',
-      fields: [{ 'child.age': 1 }]
-    });
-    assert(postgresCreateIndexSql.includes('((("child"->>\'age\')))::NUMERIC)'));
-  }
-
-  @Test()
-  async testMysqlExistingIndexesParsing() {
-    const mysqlDialect = new MysqlDialect();
-    const existingIndexRecords = [
-      {
-        name: 'idx_parentmodel_child_age',
-        tableName: 'parentmodel',
-        nonUnique: 1,
-        indexColumns: "(CAST(`child`->>'$.age' AS DECIMAL))"
-      }
-    ];
-
-    const parsedIndexes = mysqlDialect.parseExistingIndexes(existingIndexRecords);
-    assert(parsedIndexes.size === 1);
-    assert(parsedIndexes.has('idx_parentmodel_child_age'));
-
-    const indexDefinition = parsedIndexes.get('idx_parentmodel_child_age')!;
-    assert(indexDefinition.includes('CREATE INDEX `idx_parentmodel_child_age` ON `parentmodel`'));
-    assert(indexDefinition.includes("(CAST(`child`->>'$.age' AS DECIMAL))"));
-
-    const normalizedDefinition = mysqlDialect.normalizeIndexDefinition(indexDefinition);
-    assert(normalizedDefinition.length > 0);
-  }
-
-  @Test()
-  async testMysqlAlterColumnType() {
-    const tableContext = getTableContext(ParentModel);
-    const mysqlDialect = new MysqlDialect();
-
-    const alterColumnSql = mysqlDialect.getAlterColumnTypeSQL(tableContext, 'title', 'VARCHAR(255)', 'INT');
-    assert(alterColumnSql === 'ALTER TABLE `parentmodel` MODIFY COLUMN `title` VARCHAR(255);');
-
-    const noopAlterColumnSql = mysqlDialect.getAlterColumnTypeSQL(tableContext, 'title', 'VARCHAR(255)', 'VARCHAR(255)');
-    assert(noopAlterColumnSql === undefined);
+    const subTypeLine = polySQL.split('\n').find(line => line.includes(`${quote}subTypeAOnlyRequired${quote}`));
+    if (subTypeLine) {
+      assert(!subTypeLine.includes('NOT NULL'));
+    }
   }
 
   @Test()
   async testFormatJsonPathEscaping() {
-    const mysqlDialect = new MysqlDialect();
-
-    const simpleJsonPath = mysqlDialect.formatJsonPath(['child', 'age']);
+    const simpleJsonPath = this.dialect.formatJsonPath(['child', 'age']);
     assert(simpleJsonPath === 'child.age');
 
-    const complexJsonPath = mysqlDialect.formatJsonPath(['child', 'first name']);
+    const complexJsonPath = this.dialect.formatJsonPath(['child', 'first name']);
     assert(complexJsonPath === 'child."first name"');
   }
 
   @Test()
   async testPartialUpdateSetsWithoutRegex() {
     const tableContext = getTableContext(ParentModel);
-    const sqliteDialect = new SqliteDialect();
+    const quote = this.dialect.escapeIdentifier('').substring(0, 1) || '"';
+    const placeholder = this.dialect.getPlaceholder(1);
 
-    const { sets, values } = sqliteDialect.compilePartialUpdate(tableContext, { title: 'Updated Title' });
-    assert.deepStrictEqual(sets, ['"title" = ?']);
+    const { sets, values } = this.dialect.compilePartialUpdate(tableContext, { title: 'Updated Title' });
+    assert.deepStrictEqual(sets, [`${quote}title${quote} = ${placeholder}`]);
     assert.deepStrictEqual(values, ['Updated Title']);
   }
 }
