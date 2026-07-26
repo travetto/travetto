@@ -129,6 +129,12 @@ function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T)
       break;
     }
     default: {
+      for (const [key, field] of Object.entries(base.fields)) {
+        const parentField = parent.fields[key];
+        if (parentField?.required?.active && field.required?.active === false) {
+          throw new RuntimeError(`Cannot widen required field '${key}' to optional in sub-class ${base.class.name}`);
+        }
+      }
       base.fields = { ...parent.fields, ...base.fields };
     }
   }

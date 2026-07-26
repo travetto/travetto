@@ -22,6 +22,14 @@ export class SQLModelSchemaUtil {
     const fields = Object.values(registryConfig.fields).map(field => ({ ...field }));
 
     const hasModel = ModelRegistryIndex.has(modelClass);
+    const transientFields = hasModel ? new Set(ModelRegistryIndex.getConfig(modelClass).transientFields ?? []) : new Set<string>();
+
+    for (const field of fields) {
+      if (transientFields.has(field.name) || field.accessor) {
+        field.required = { active: false };
+      }
+    }
+
     if (hasModel && registryConfig.discriminatedBase) {
       const fieldMap = new Set(fields.map(field => field.name));
       for (const subclass of SchemaRegistryIndex.getDiscriminatedClasses(modelClass)) {
