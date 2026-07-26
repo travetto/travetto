@@ -5,6 +5,7 @@ import { isModelQueryIndex, ModelQueryUtil, type SortClause, type WhereClause } 
 import { type Class, castTo, JSONUtil, RuntimeError } from '@travetto/runtime';
 import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
+import { SQLModelSchemaUtil } from './schema.ts';
 import type { JSONSqlPathMode, ResolvedPathContext, SchemaContext, TableContext } from './types.ts';
 
 export interface TransactionStatements {
@@ -148,13 +149,13 @@ export abstract class AbstractANSI99Dialect {
         continue;
       }
       const columnType = this.getColumnType(field);
-      const isNotNullClause = field.required?.active !== false ? ' NOT NULL' : '';
+      const isNotNullClause = SQLModelSchemaUtil.isColumnNotNull(context, field.name) ? ' NOT NULL' : '';
       columnDefinitions.push(`${this.escapeIdentifier(field.name)} ${columnType}${isNotNullClause}`);
     }
 
     for (const field of context.complexFields.values()) {
       const columnType = this.getComplexColumnType(field);
-      const isNotNullClause = field.required?.active !== false ? ' NOT NULL' : '';
+      const isNotNullClause = SQLModelSchemaUtil.isColumnNotNull(context, field.name) ? ' NOT NULL' : '';
       columnDefinitions.push(`${this.escapeIdentifier(field.name)} ${columnType}${isNotNullClause}`);
     }
 

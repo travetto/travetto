@@ -22,14 +22,6 @@ export class SQLModelSchemaUtil {
     const fields = Object.values(registryConfig.fields).map(field => ({ ...field }));
 
     const hasModel = ModelRegistryIndex.has(modelClass);
-    const transientFields = hasModel ? new Set(ModelRegistryIndex.getConfig(modelClass).transientFields ?? []) : new Set<string>();
-
-    for (const field of fields) {
-      if (transientFields.has(field.name) || field.accessor) {
-        field.required = { active: false };
-      }
-    }
-
     if (hasModel && registryConfig.discriminatedBase) {
       const fieldMap = new Set(fields.map(field => field.name));
       for (const subclass of SchemaRegistryIndex.getDiscriminatedClasses(modelClass)) {
@@ -37,7 +29,7 @@ export class SQLModelSchemaUtil {
         for (const field of TypedObject.values(subclassConfig.fields)) {
           if (!fieldMap.has(field.name)) {
             fieldMap.add(field.name);
-            fields.push({ ...field, required: { active: false } });
+            fields.push({ ...field });
           }
         }
       }
@@ -50,5 +42,20 @@ export class SQLModelSchemaUtil {
     const context: SchemaContext<T> = { cls: modelClass, simpleFields, complexFields, allFields: fields };
     this.SCHEMA_CACHE.set(modelClass, context);
     return context;
+  }
+
+  static isColumnNotNull<T>(context: SchemaContext<T>, fieldName: string): boolean {
+    const schemaConfig = SchemaRegistryIndex.getOptional(context.cls)?.get();
+    const fieldConfig = schemaConfig?.fields[fieldName];
+    if (!fieldConfig || fieldConfig.required?.active === false || fieldConfig.accessor) {
+      return false;
+    }
+    if (ModelRegistryIndex.has(context.cls)) {
+      const modelConfig = ModelRegistryIndex.getConfig(context.cls);
+      if (modelConfig.transientFields?.includes(fieldName)) {
+        return false;
+      }
+    }
+    return true;
   }
 }
