@@ -56,14 +56,19 @@
 * **Nested Array Property Queries**: Query engine now supports querying nested array properties across all SQL dialects (`f0e93e4505`).
 * **Array Field Regex Support**: Added regex matching capabilities on array fields (`7536c46767`).
 
+### First-Class Indexing & Searching Mechanics (`@travetto/model-indexed`)
+* **First-Class Citizen Refactor**: Extracted index definitions and operations into a standalone `ModelIndexSupport` contract (`cba2ae0432`), allowing stores without full ad-hoc query support (DynamoDB, Firestore, Redis, Memory) to expose structured secondary indexes.
+* **Index-Based Mutate Operations**: Introduced `updateByIndex()` and `updateByPartialIndex()` to update entities directly via index keys without requiring prior primary key lookups (`9b40fe5a87`).
+* **Pagination & Prefix Queries**: Added `pageByIndex()`, `pageByIndexWithFilter()`, and native prefix query matching across indexed attributes (`9b40fe5a87`, `35a85b245d`).
+* **Batched Index Iteration**: Reworked `listByIndex()` to yield batched arrays with `batchSizeHint` and `limit`, plus `AbortSignal` cancellation support (`b626e69b23`, `914f85a2e7`).
+* **Bidirectional Indexes**: Added native support for bi-directional index search lookups and ID checks (`9b40fe5a87`, `914f85a2e7`).
+
 ### Firestore & Elasticsearch Enhancements
 * **Firestore (`@travetto/model-firestore`)**: Added schema export CLI tool for composite index creation (`4e919411e6`, `ab8ad81f6c`) and optimized bulk delete operations (`49b0b76bca`).
 * **Elasticsearch (`@travetto/model-elasticsearch`)**: Fixed schema detection and query resolution behaviors (`3a59fd6167`, `c11ae98b06`).
 
-### Query Engine & Indexing
+### Query Engine Enhancements
 * **Dotted Path Property Access**: Query engine now natively supports nested dotted property paths (`4c3d9c2643`).
-* **First-Class Index Support**: Refactored index definition and lookup into first-class Citizens (`cba2ae0432`, `9b40fe5a87`).
-* **Indexed Model Queries (`@travetto/model-indexed`)**: Added support for prefix queries, ID checks, and full scans (`35a85b245d`, `914f85a2e7`).
 
 ---
 
