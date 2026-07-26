@@ -1,6 +1,6 @@
 import { AbstractANSI99Dialect, type JSONSqlPathMode, type ResolvedPathContext, type TableContext } from '@travetto/model-sql';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
-import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
+import type { SchemaFieldConfig } from '@travetto/schema';
 
 export class MysqlDialect extends AbstractANSI99Dialect {
   override returningSupport = false;
@@ -54,36 +54,15 @@ export class MysqlDialect extends AbstractANSI99Dialect {
   }
 
   compileJsonIndexPath(columnName: string, jsonPath: string[], mode: JSONSqlPathMode): string {
-    const result = `${columnName}->>'$.${jsonPath.join('.')}'`;
-    switch (mode) {
-      case 'createIndex':
-        return `(CAST(${result} as CHAR(255)) COLLATE utf8mb4_bin)`;
-      case 'orderBy':
-      case 'read':
-        return result;
-    }
+    return `${columnName}->>'$.${this.formatJsonPath(jsonPath)}'`;
   }
 
   #formatSubPath(context: ResolvedPathContext): string {
     if (!context.subPath || context.subPath.length === 0) {
       return '';
     }
-    let currentClass: Class | undefined = context.arrayField?.type;
-    const parts: string[] = [];
-    for (let index = 0; index < context.subPath.length; index++) {
-      const segment = context.subPath[index];
-      if (currentClass) {
-        const classConfig = SchemaRegistryIndex.getOptional(currentClass)?.get();
-        const fieldConfig = classConfig?.fields[segment];
-        if (fieldConfig) {
-          parts.push(fieldConfig.array ? `${segment}[*]` : segment);
-          currentClass = fieldConfig.type;
-          continue;
-        }
-      }
-      parts.push(segment);
-    }
-    return parts.join('.');
+    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField?.type, context.subPath);
+    return subPathMetadata.map(({ segment, isArray }) => (isArray ? `${segment}[*]` : segment)).join('.');
   }
 
   #getArraySqlPath(context: ResolvedPathContext): string {
@@ -150,6 +129,8 @@ export class MysqlDialect extends AbstractANSI99Dialect {
       return `CAST(${sqlPath} AS SIGNED)`;
     } else if (type === Date) {
       return `CAST(${sqlPath} AS DATETIME(6))`;
+    } else if (type === String) {
+      return `(CAST(${sqlPath} AS CHAR(255)) COLLATE utf8mb4_bin)`;
     }
     return sqlPath;
   }
@@ -161,13 +142,8 @@ export class MysqlDialect extends AbstractANSI99Dialect {
     conflictTarget: string[],
     updates: string[]
   ): string {
-    const mysqlUpdates = updates.map(val => val.replace(/EXCLUDED\.(.*)/g, 'VALUES($1)'));
-    return `
-INSERT INTO 
-  ${this.escapeIdentifier(context.tableName)} (${columns.join(', ')}) 
-VALUES 
-  (${placeholders.join(', ')}) 
-ON DUPLICATE KEY UPDATE ${mysqlUpdates.join(', ')};`;
+    const mysqlUpdateStatements = updates.map(statement => statement.replaceAll(/EXCLUDED\.(.*)/g, 'new_row.$1'));
+    return `INSERT INTO ${this.escapeIdentifier(context.tableName)} (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) AS new_row ON DUPLICATE KEY UPDATE ${mysqlUpdateStatements.join(', ')};`;
   }
 
   getTableExistsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
@@ -191,7 +167,7 @@ WHERE table_schema = ? AND table_name = ?;
       sql: `
 SELECT 
   COLUMN_NAME as name, 
-  DATA_TYPE as type 
+  COLUMN_TYPE as type 
 FROM information_schema.columns 
 WHERE table_schema = ? AND table_name = ?;
 `,
@@ -206,23 +182,47 @@ WHERE table_schema = ? AND table_name = ?;
   getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
     return {
       sql: `
-SELECT DISTINCT 
-  INDEX_NAME as name 
+SELECT 
+  INDEX_NAME as name,
+  TABLE_NAME as tableName,
+  NON_UNIQUE as nonUnique,
+  GROUP_CONCAT(COALESCE(EXPRESSION, COLUMN_NAME) ORDER BY SEQ_IN_INDEX SEPARATOR ', ') as indexColumns
 FROM information_schema.statistics 
 WHERE 
   table_schema = ? 
   AND table_name = ? 
-  AND INDEX_NAME != 'PRIMARY';
+  AND INDEX_NAME != 'PRIMARY'
+GROUP BY INDEX_NAME, TABLE_NAME, NON_UNIQUE;
 `,
       parameters: [context.database, context.tableName]
     };
   }
 
   parseExistingIndexes(records: unknown[]): Map<string, string> {
-    return new Map(castTo<{ name: string }[]>(records).map(record => [record.name, '']));
+    return new Map(
+      castTo<{ name: string; tableName: string; nonUnique: number; indexColumns: string }[]>(records).map(record => {
+        const isUnique = Number(record.nonUnique) === 0;
+        const indexDefinition = `CREATE ${isUnique ? 'UNIQUE ' : ''}INDEX ${this.escapeIdentifier(record.name)} ON ${this.escapeIdentifier(record.tableName)} (${record.indexColumns});`;
+        return [record.name, indexDefinition];
+      })
+    );
   }
 
   override getDropIndexSQL(context: TableContext, indexName: string): string {
     return `DROP INDEX ${this.escapeIdentifier(indexName)} ON ${this.escapeIdentifier(context.tableName)};`;
+  }
+
+  override getTruncateTableSQL(context: TableContext): string {
+    return `TRUNCATE TABLE ${this.escapeIdentifier(context.tableName)};`;
+  }
+
+  override getAlterColumnTypeSQL(context: TableContext, columnName: string, columnType: string, existingType: string): string | undefined {
+    const normalizedExisting = existingType.replaceAll('CHARACTER VARYING', 'VARCHAR').replaceAll('INTEGER', 'INT');
+    const normalizedRequested = columnType.toUpperCase().replaceAll('CHARACTER VARYING', 'VARCHAR').replaceAll('INTEGER', 'INT');
+
+    if (!normalizedExisting.startsWith(normalizedRequested) && !normalizedRequested.startsWith(normalizedExisting)) {
+      return `ALTER TABLE ${this.escapeIdentifier(context.tableName)} MODIFY COLUMN ${this.escapeIdentifier(columnName)} ${columnType};`;
+    }
+    return undefined;
   }
 }
