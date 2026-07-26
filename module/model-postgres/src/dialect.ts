@@ -74,29 +74,23 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     return `$${index}`;
   }
 
+  override getUpsertSQL(
+    context: TableContext,
+    columns: string[],
+    placeholders: string[],
+    conflictTarget: string[],
+    updates: string[]
+  ): string {
+    return `INSERT INTO ${this.escapeIdentifier(context.tableName)} (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) ON CONFLICT (${conflictTarget.join(', ')}) DO UPDATE SET ${updates.join(', ')} RETURNING *;`;
+  }
+
   #buildContainmentPayload(value: unknown, context: ResolvedPathContext): unknown {
     if (!context.subPath || context.subPath.length === 0) {
       return Array.isArray(value) ? value : [value];
     }
 
-    const isArraySegment = new Array<boolean>(context.subPath.length).fill(false);
-    let currentClass: Class | undefined = context.arrayField?.type;
-    for (let index = 0; index < context.subPath.length; index++) {
-      if (!currentClass) {
-        break;
-      }
-      const segment = context.subPath[index];
-      const classConfig = SchemaRegistryIndex.getOptional(currentClass)?.get();
-      const fieldConfig = classConfig?.fields[segment];
-      if (fieldConfig) {
-        if (fieldConfig.array) {
-          isArraySegment[index] = true;
-        }
-        currentClass = fieldConfig.type;
-      } else {
-        break;
-      }
-    }
+    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField?.type, context.subPath);
+    const isArraySegment = subPathMetadata.map(item => item.isArray);
 
     const buildPayloadForValue = (item: unknown): unknown => {
       let itemPayload: unknown = item;

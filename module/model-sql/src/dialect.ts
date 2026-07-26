@@ -99,8 +99,12 @@ export abstract class AbstractANSI99Dialect {
     }
   }
 
+  formatJsonPath(jsonPath: string[]): string {
+    return jsonPath.map(segment => `"${segment.replaceAll('"', '\\"')}"`).join('.');
+  }
+
   compileIndexPath(context: TableContext, path: string[], mode: JSONSqlPathMode): string {
-    return this.buildSqlPath(context, path, mode);
+    return this.resolvePath(context, path, mode).sqlPath;
   }
 
   getCreateIndexSQL(context: TableContext, indexConfig: IndexConfig): string {
@@ -165,15 +169,20 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     return `ALTER TABLE ${this.escapeIdentifier(context.tableName)} ADD COLUMN ${this.escapeIdentifier(columnName)} ${columnType};`;
   }
 
-  getUpsertSQL(context: TableContext, columns: string[], placeholders: string[], conflictTarget: string[], updates: string[]): string {
-    return `INSERT INTO ${this.escapeIdentifier(context.tableName)} (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) ON CONFLICT (${conflictTarget.join(', ')}) DO UPDATE SET ${updates.join(', ')} RETURNING *;`;
-  }
+  abstract getUpsertSQL(
+    context: TableContext,
+    columns: string[],
+    placeholders: string[],
+    conflictTarget: string[],
+    updates: string[]
+  ): string;
 
   normalizeIndexDefinition(sql: string): string {
     return sql
       .toLowerCase()
       .replaceAll('"', '')
       .replaceAll("'", '')
+      .replaceAll('`', '')
       .replaceAll(' ', '')
       .replaceAll('asc', '')
       .replaceAll('desc', '')
@@ -190,17 +199,11 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
   abstract parseExistingColumns(records: unknown[]): Map<string, string>;
   abstract getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] };
   abstract parseExistingIndexes(records: unknown[]): Map<string, string>;
-
-  getDropIndexSQL(context: TableContext, indexName: string): string {
-    return `DROP INDEX ${this.escapeIdentifier(indexName)} ON ${this.escapeIdentifier(context.tableName)};`;
-  }
+  abstract getDropIndexSQL(context: TableContext, indexName: string): string;
+  abstract getTruncateTableSQL(context: TableContext): string;
 
   getDropTableSQL(context: TableContext): string {
     return `DROP TABLE IF EXISTS ${this.escapeIdentifier(context.tableName)};`;
-  }
-
-  getTruncateTableSQL(context: TableContext): string {
-    return `TRUNCATE TABLE ${this.escapeIdentifier(context.tableName)};`;
   }
 
   getAlterColumnTypeSQL?(context: TableContext, columnName: string, columnType: string, existingType: string): string | undefined;
@@ -307,6 +310,28 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
       arrayField,
       arraySegmentIndex
     };
+  }
+
+  getSchemaSubPathMetadata(
+    initialClass: Class | undefined,
+    subPath: string[]
+  ): Array<{ segment: string; fieldConfig?: SchemaFieldConfig; isArray: boolean; fieldClass?: Class }> {
+    let currentClass = initialClass;
+    return subPath.map(segment => {
+      let fieldConfig: SchemaFieldConfig | undefined;
+      let isArray = false;
+      if (currentClass) {
+        const classConfiguration = SchemaRegistryIndex.getOptional(currentClass)?.get();
+        fieldConfig = classConfiguration?.fields[segment];
+        if (fieldConfig) {
+          isArray = !!fieldConfig.array;
+          currentClass = fieldConfig.type;
+        } else {
+          currentClass = undefined;
+        }
+      }
+      return { segment, fieldConfig, isArray, fieldClass: currentClass };
+    });
   }
 
   resolvePath<T extends ModelType>(tableContext: TableContext<T>, path: string[], mode: JSONSqlPathMode): ResolvedPathContext {
@@ -670,23 +695,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     return { sql, values };
   }
 
-  compilePartialUpdate<T extends ModelType>(
-    tableContext: TableContext<T>,
-    preparedData: Partial<T>
-  ): { sets: string[]; values: unknown[] } {
-    const { sql, values } = this.buildPartialUpdate(tableContext, preparedData);
-    const setMatch = sql.match(/SET (.*?)(\s+WHERE|$)/);
-    const sets = setMatch ? setMatch[1].split(', ') : [];
-    return { sets, values };
-  }
-
-  buildPartialUpdate<T extends ModelType>(
-    tableContext: TableContext<T>,
-    preparedData: Partial<T>,
-    whereSQL?: string,
-    whereParameters: unknown[] = [],
-    returning = false
-  ): { sql: string; values: unknown[] } {
+  #buildUpdateSets<T extends ModelType>(tableContext: TableContext<T>, preparedData: Partial<T>): { sets: string[]; values: unknown[] } {
     const sets: string[] = [];
     const values: unknown[] = [];
 
@@ -704,6 +713,25 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
         values.push(this.getComplexColumnValue(complexField, value));
       }
     }
+
+    return { sets, values };
+  }
+
+  compilePartialUpdate<T extends ModelType>(
+    tableContext: TableContext<T>,
+    preparedData: Partial<T>
+  ): { sets: string[]; values: unknown[] } {
+    return this.#buildUpdateSets(tableContext, preparedData);
+  }
+
+  buildPartialUpdate<T extends ModelType>(
+    tableContext: TableContext<T>,
+    preparedData: Partial<T>,
+    whereSQL?: string,
+    whereParameters: unknown[] = [],
+    returning = false
+  ): { sql: string; values: unknown[] } {
+    const { sets, values } = this.#buildUpdateSets(tableContext, preparedData);
 
     const shiftedWhereSQL = whereSQL && this.shiftPlaceholders ? this.shiftPlaceholders(whereSQL, values.length) : whereSQL;
     if (whereSQL) {

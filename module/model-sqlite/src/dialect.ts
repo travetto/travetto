@@ -1,6 +1,6 @@
 import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext, type TransactionStatements } from '@travetto/model-sql';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
-import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
+import type { SchemaFieldConfig } from '@travetto/schema';
 
 export class SqliteDialect extends AbstractANSI99Dialect {
   returningSupport = true;
@@ -8,6 +8,16 @@ export class SqliteDialect extends AbstractANSI99Dialect {
     ...AbstractANSI99Dialect.TRANSACTION_STATEMENTS,
     begin: 'BEGIN IMMEDIATE;'
   };
+
+  override getUpsertSQL(
+    context: TableContext,
+    columns: string[],
+    placeholders: string[],
+    conflictTarget: string[],
+    updates: string[]
+  ): string {
+    return `INSERT INTO ${this.escapeIdentifier(context.tableName)} (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) ON CONFLICT (${conflictTarget.join(', ')}) DO UPDATE SET ${updates.join(', ')} RETURNING *;`;
+  }
 
   getComplexColumnType(field: SchemaFieldConfig): string {
     return 'TEXT';
@@ -38,7 +48,7 @@ export class SqliteDialect extends AbstractANSI99Dialect {
   }
 
   compileJsonIndexPath(columnName: string, jsonPath: string[]): string {
-    return `json_extract(${columnName}, '$.${jsonPath.join('.')}')`;
+    return `json_extract(${columnName}, '$.${this.formatJsonPath(jsonPath)}')`;
   }
 
   #getSqliteArrayExpression(context: ResolvedPathContext): string {
@@ -55,22 +65,10 @@ export class SqliteDialect extends AbstractANSI99Dialect {
       return onLeaf(parentExpression);
     }
 
-    const arraySegmentIndices: number[] = [];
-    let currentClass: Class | undefined = context.arrayField?.type;
-
-    for (let index = 0; index < context.subPath.length; index++) {
-      const segment = context.subPath[index];
-      if (currentClass) {
-        const classConfiguration = SchemaRegistryIndex.getOptional(currentClass)?.get();
-        const fieldConfiguration = classConfiguration?.fields[segment];
-        if (fieldConfiguration) {
-          if (fieldConfiguration.array) {
-            arraySegmentIndices.push(index);
-          }
-          currentClass = fieldConfiguration.type;
-        }
-      }
-    }
+    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField?.type, context.subPath);
+    const arraySegmentIndices = subPathMetadata
+      .map((metadataItem, metadataIndex) => (metadataItem.isArray ? metadataIndex : -1))
+      .filter(itemIndex => itemIndex !== -1);
 
     if (arraySegmentIndices.length === 0) {
       const leafExpression = `json_extract(${parentExpression}, '$.${context.subPath.join('.')}')`;
@@ -135,15 +133,7 @@ EXISTS (
 
     if (typeof values === 'object' && values !== null) {
       return {
-        sql: this.#buildArrayElementExists(
-          context,
-          leafExpression => `
-NOT EXISTS (
-  SELECT 1 
-  FROM json_each(${identifier}) AS req 
-  WHERE json_extract(${leafExpression}, '$.' || req.key) IS NOT req.value
-)`
-        ),
+        sql: this.#buildArrayElementExists(context, leafExpression => `json_patch(${leafExpression}, ${identifier}) = ${leafExpression}`),
         formatted: JSONUtil.toUTF8(values)
       };
     }
