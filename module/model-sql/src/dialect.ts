@@ -148,11 +148,14 @@ export abstract class AbstractANSI99Dialect {
         continue;
       }
       const columnType = this.getColumnType(field);
-      columnDefinitions.push(`${this.escapeIdentifier(field.name)} ${columnType}`);
+      const isNotNullClause = field.required?.active !== false ? ' NOT NULL' : '';
+      columnDefinitions.push(`${this.escapeIdentifier(field.name)} ${columnType}${isNotNullClause}`);
     }
 
     for (const field of context.complexFields.values()) {
-      columnDefinitions.push(`${this.escapeIdentifier(field.name)} ${this.getComplexColumnType(field)}`);
+      const columnType = this.getComplexColumnType(field);
+      const isNotNullClause = field.required?.active !== false ? ' NOT NULL' : '';
+      columnDefinitions.push(`${this.escapeIdentifier(field.name)} ${columnType}${isNotNullClause}`);
     }
 
     return `
