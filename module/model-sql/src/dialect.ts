@@ -128,7 +128,7 @@ export abstract class AbstractANSI99Dialect {
     return this.resolvePath(context, path, mode).sqlPath;
   }
 
-  getCreateIndexSQL<T extends ModelType>(context: TableContext, indexConfig: IndexConfig | QueryIndexConfig<T>): string {
+  getCreateIndexSQL<T extends ModelType>(context: TableContext, indexConfig: IndexConfig<string, T> | QueryIndexConfig<T>): string {
     const { tableName, cls: modelClass } = context;
     const indexName = ['idx', tableName, indexConfig.name.toLowerCase().replaceAll('-', '_')].join('_');
 

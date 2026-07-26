@@ -40,7 +40,7 @@ export class PostgresDialectSuite extends BaseSQLDialectSuite {
       type: 'query',
       name: 'child_age',
       class: ParentModel,
-      fields: [{ 'child.age': 1 }]
+      fields: [{ child: { age: 1 } }]
     });
     assert(postgresCreateIndexSql.includes('((("child"->>\'age\')))::NUMERIC)'));
   }
