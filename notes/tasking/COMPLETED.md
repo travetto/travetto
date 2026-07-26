@@ -279,3 +279,14 @@ Rework compiler setup to no longer need the pre-compilation process and leverage
 * Drop decorators for explicit registration
 * This is the last of the non-compatible syntax for loading with type erasure
 
+
+## Migrate Away from Buffer/Readable
+- UInt8Array, and ArrayBuffer exist as cross-platform components that should suffice 
+- This will help cleanup general noise around node specific implementations
+- Should we do the same for Readable Streams?
+
+## Enhance scaffold
+   * Support monorepo
+
+## Model
+- [?] Look for SQL query optimization opportunities
