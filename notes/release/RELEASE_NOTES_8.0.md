@@ -23,11 +23,12 @@
 
 * **SQL Architecture Overhaul (Single-Table JSON Primitives)**: Moved `@travetto/model-sql` and dialect providers (`@travetto/model-mysql`, `@travetto/model-postgres`, `@travetto/model-sqlite`) away from multi-table schema generation and foreign-key joins (`21ad7c5c4c`). SQL backends now store entire model objects as self-contained JSON documents within single tables per model type. Legacy multi-table implementations have been moved to `archived/model-*`.
 * **`AppError` Renamed to `RuntimeError`**: `AppError` in `@travetto/runtime` has been renamed to `RuntimeError` (`2da522f741`). Update all error instantiations and `instanceof` checks accordingly.
-* **`ExistsError` Renamed to `UniqueError`**: In `@travetto/model`, unique constraint violation exceptions now throw `UniqueError` instead of `ExistsError` (`f17adba1ef`).
+* **`ExistsError` Replaced by `UniqueError`**: In `@travetto/model`, unique constraint violation exceptions now throw `UniqueError` instead of `ExistsError` (`f17adba1ef`).
 * **Model Listing API Returns Batches**: `ModelCrudSupport.list()` and `ModelIndexSupport.listByIndex()` now return async batch iterators instead of single-item streams (`b626e69b23`). Added `batchSizeHint` and `limit` options, as well as `AbortSignal` cancellation support.
 * **`@travetto/model-sqlite` Native Driver Migration**: Removed external `better-sqlite3` native C++ dependency in favor of Node's built-in `node:sqlite` module (`54644411a3`).
 * **`@travetto/model-s3` Configuration Update**: `hostName` configuration option has been renamed to `publicBaseUrl` with added support for custom localhost endpoints (`99ee3f32d2`).
-* **ESLint Replaced by Biome**: `@travetto/lint` migrated its linting and formatting engine from ESLint to Biome (`628a5fe76f`).
+* **`@travetto/eslint` Deprecated in Favor of `@travetto/lint`**: `@travetto/eslint` has been deprecated (`628a5fe76f`). All linting and formatting functionality has been migrated to `@travetto/lint` powered by Biome.
+* **ESLint Replaced by Biome**: `@travetto/lint` replaces ESLint with Biome for static analysis and code formatting (`628a5fe76f`).
 
 ---
 
@@ -51,7 +52,7 @@
 * **Multi-Dialect JSON Support**: Native JSON functions/queries were implemented across MySQL, PostgreSQL, and SQLite (`@travetto/model-mysql`, `@travetto/model-postgres`, `@travetto/model-sqlite`).
 * **Archived Legacy Relational Engine**: The previous multi-table relational implementations were moved to `archived/model-sql`, `archived/model-mysql`, `archived/model-postgres`, and `archived/model-sqlite`.
 
-### SQL Query Engine Features
+#### SQL Query Engine Features
 * **Nested Array Property Queries**: Query engine now supports querying nested array properties across all SQL dialects (`f0e93e4505`).
 * **Array Field Regex Support**: Added regex matching capabilities on array fields (`7536c46767`).
 
@@ -66,14 +67,6 @@
 
 ---
 
-## CLI & Tooling (`@travetto/cli`)
-
-* **CLI Architecture Overhaul**: Streamlined CLI execution pipeline and command registration (`27d12cc476`, `c07849e955`, `6efdd36836`).
-* **JSDoc & `CliHelp` Integration**: Migrated module CLI documentation to `CliHelp` and improved help message formatting (`b74fb73bf9`, `009ae2d870`).
-* **Fixes & Enhancements**: Improved short flag parsing (`fc4195ff16`), default run target handling (`7365b2a4a8`), and BigInt support in schema export (`f5e8f44e1a`).
-
----
-
 ## Linting & Code Quality (`@travetto/lint`)
 
 * **Biome Engine Migration**: Replaced ESLint with Biome for faster formatting and linting (`628a5fe76f`, `2a998b26f1`).
@@ -85,15 +78,6 @@
 
 * **Guidance Workflows & Snippets**: Added LLM guidance workflows, snippets, and project bootstrap integration (`02e523e83a`).
 * **Auto-generated Prompt Files**: Automatically builds and injects `.agents/AGENTS.md` and `.cursorrules` during project bootstrapping (`0bf19fc21c`).
-
----
-
-## Web & RPC (`@travetto/web`, `@travetto/web-rpc`)
-
-* **Parent Controller Path Parameters**: Controller routing now allows path parameters defined on parent class controllers (`280d8a19b3`).
-* **Web RPC Redirect Support**: Added native support for HTTP redirects directly from RPC controller methods (`9b989f6efd`, `a170eb7ea8`).
-* **Empty Body Handling**: Client RPC generator now gracefully handles empty body HTTP responses (`654ae8f6fe`).
-* **Expanded HTTP Method Support**: Updated RPC controller mapping to support additional HTTP request methods by default (`a332317d63`).
 
 ---
 
