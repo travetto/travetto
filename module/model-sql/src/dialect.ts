@@ -100,7 +100,7 @@ export abstract class AbstractANSI99Dialect {
   }
 
   formatJsonPath(jsonPath: string[]): string {
-    return jsonPath.map(segment => `"${segment.replaceAll('"', '\\"')}"`).join('.');
+    return jsonPath.map(segment => (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(segment) ? segment : `"${segment.replaceAll('"', '\\"')}"`)).join('.');
   }
 
   compileIndexPath(context: TableContext, path: string[], mode: JSONSqlPathMode): string {
@@ -119,7 +119,8 @@ export abstract class AbstractANSI99Dialect {
 
         const path = fieldKey.split('.');
         const expression = this.compileIndexPath(context, path, 'createIndex');
-        return `${expression} ${isAscending ? 'ASC' : 'DESC'}`;
+        const formattedExpression = path.length > 1 ? `(${expression})` : expression;
+        return `${formattedExpression} ${isAscending ? 'ASC' : 'DESC'}`;
       });
 
       return `CREATE ${indexConfig.unique ? 'UNIQUE ' : ''}INDEX ${this.escapeIdentifier(indexName)} ON ${this.escapeIdentifier(context.tableName)} (${indexFields.join(', ')});`;
@@ -127,7 +128,8 @@ export abstract class AbstractANSI99Dialect {
       const allFields = [...indexConfig.keyTemplate, ...indexConfig.sortTemplate];
       const indexFields = allFields.map(({ path, value }) => {
         const expression = this.compileIndexPath(context, path, 'createIndex');
-        return `${expression} ${value === -1 ? 'DESC' : 'ASC'}`;
+        const formattedExpression = path.length > 1 ? `(${expression})` : expression;
+        return `${formattedExpression} ${value === -1 ? 'DESC' : 'ASC'}`;
       });
 
       const isUnique = 'unique' in indexConfig && indexConfig.unique;
