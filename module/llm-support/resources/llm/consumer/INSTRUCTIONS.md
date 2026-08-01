@@ -29,6 +29,12 @@ Do not recommend excluded operations unless explicitly requested:
 - Optimize for composability; recommendations should combine cleanly without hidden coupling.
 - Default to safe behavior (plan-first, dry-run-first, minimal scope changes) and require explicit opt-in for destructive actions.
 - Favor deterministic outputs so repeated runs with the same inputs produce equivalent guidance.
+- Sourced framework code rule: Reference code exposed to LLMs from framework modules MUST originate from sample usage files in `doc/` directories, never from `src/` or internal files.
+- Minimal Decorator Usage Rule: Rely on compile-time AST reflection and framework defaults rather than redundant decorator duplication:
+  - Omit `@Required()` on non-optional TypeScript properties (`prop: string`).
+  - Omit `@PathParam()` / `@QueryParam()` when argument names match route/query parameters.
+  - Omit `@Body()` on `@Post()`, `@Put()`, or `@Patch()` endpoint parameters taking schema DTOs.
+  - Prefer standard JSDoc comments (`/** ... */`) over `@Description()` for schema and endpoint descriptions.
 
 ## Best Practices
 - Schema-first boundaries: define input/output contracts with schema classes at ownership boundaries.

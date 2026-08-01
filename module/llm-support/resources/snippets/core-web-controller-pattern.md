@@ -2,7 +2,7 @@
 {
   "sourceId": "core-web-controller-pattern",
   "repositoryId": "travetto",
-  "filePath": "module/web/support/test/suite/controller.ts",
+  "filePath": "module/web/doc/simple-controller.ts",
   "capabilityTags": ["web", "controller", "route", "decorators"],
   "operationIds": ["create-web-route"],
   "applicability": ["framework-native"],
@@ -15,7 +15,7 @@
 
 # core-web-controller-pattern
 
-- Source: `module/web/support/test/suite/controller.ts`
+- Source: `module/web/doc/simple-controller.ts`
 - Capability tags: web, controller, route, decorators
 - Applicability: framework-native
 - Notes:

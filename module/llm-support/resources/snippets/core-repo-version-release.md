@@ -3,11 +3,11 @@
   "sourceId": "core-repo-version-release",
   "repositoryId": "travetto",
   "filePath": "module/repo/support/cli.repo_version.ts",
-  "capabilityTags": ["repo", "version", "release", "monorepo"],
+  "capabilityTags": ["repo", "version", "release", "monorepo", "cli"],
   "operationIds": ["repo-version-release"],
   "applicability": ["framework-native"],
   "notes": [
-    "Automate monorepo version updates using repo:version with explicit release inputs."
+    "Execute monorepo versioning manually using trv repo:version CLI command."
   ]
 }
 -->

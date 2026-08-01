@@ -2,7 +2,7 @@
 {
   "sourceId": "core-work-pool-pattern",
   "repositoryId": "travetto",
-  "filePath": "module/worker/src/pool.ts",
+  "filePath": "module/worker/doc/pool.ts",
   "capabilityTags": ["worker", "async", "workpool"],
   "operationIds": ["email-send-flow"],
   "applicability": ["framework-native"],
@@ -15,7 +15,7 @@
 
 # core-work-pool-pattern
 
-- Source: `module/worker/src/pool.ts`
+- Source: `module/worker/doc/pool.ts`
 - Capability tags: worker, async, workpool
 - Applicability: framework-native
 - Notes:

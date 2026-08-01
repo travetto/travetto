@@ -216,15 +216,15 @@ export const WORKFLOWS: WorkflowGuidance[] = [
   },
   {
     id: 'repo-version-release',
-    title: 'Add repo version release flow',
-    intent: 'Automate monorepo versioning with change-aware release mode and optional tagging.',
+    title: 'Monorepo version release flow via CLI',
+    intent: 'Version monorepo packages manually using the trv repo:version CLI tool with change-aware mode and semver levels.',
     recommendedModules: ['@travetto/repo'],
     optionalModules: ['@travetto/registry', '@travetto/pack'],
     commandDiscoveryRule:
-      'Validate repo:version and repo:publish command signatures with npx trv cli:schema before suggesting release automation.',
+      'Validate repo:version and repo:publish command signatures with npx trv cli:schema before recommending CLI flags.',
     verification: [
-      'Ensure release mode and semver level are explicit and reviewed in CI inputs.',
-      'Ensure release commits and tags align with repository policy.'
+      'Run npx trv repo:version <level> [prefix] with appropriate --mode (changed/all/direct).',
+      'Verify updated package.json versions and generated release commits/tags.'
     ]
   },
   {

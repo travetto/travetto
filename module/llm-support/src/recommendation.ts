@@ -215,8 +215,8 @@ const OPERATIONS: LlmOperation[] = [
   {
     id: 'repo-version-release',
     category: 'workflow',
-    title: 'Add repo version release flow',
-    summary: 'Generate monorepo versioning workflow using repo:version.',
+    title: 'Monorepo version release via CLI',
+    summary: 'Manual monorepo versioning and publishing using trv repo:version CLI.',
     requiredModules: ['@travetto/repo'],
     optionalModules: ['@travetto/pack', '@travetto/registry']
   },

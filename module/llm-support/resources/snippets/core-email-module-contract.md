@@ -2,7 +2,7 @@
 {
   "sourceId": "core-email-module-contract",
   "repositoryId": "travetto",
-  "filePath": "module/email/src/types.ts",
+  "filePath": "module/email/doc/send.ts",
   "capabilityTags": ["email", "template", "contract"],
   "operationIds": ["email-create-template", "email-context-schema"],
   "applicability": ["framework-native"],
@@ -14,7 +14,7 @@
 
 # core-email-module-contract
 
-- Source: `module/email/src/types.ts`
+- Source: `module/email/doc/send.ts`
 - Capability tags: email, template, contract
 - Applicability: framework-native
 - Notes:

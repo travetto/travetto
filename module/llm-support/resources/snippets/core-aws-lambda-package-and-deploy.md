@@ -2,7 +2,7 @@
 {
   "sourceId": "core-aws-lambda-package-and-deploy",
   "repositoryId": "travetto",
-  "filePath": "module/web-aws-lambda/src",
+  "filePath": "module/llm-support/resources/snippets/code/aws-lambda-package-and-deploy.yml.tpl",
   "capabilityTags": ["aws", "lambda", "packaging", "deploy"],
   "operationIds": ["aws-lambda-package-and-deploy"],
   "applicability": ["framework-native"],
@@ -14,7 +14,7 @@
 
 # core-aws-lambda-package-and-deploy
 
-- Source: `module/web-aws-lambda/src`
+- Source: `module/llm-support/resources/snippets/code/aws-lambda-package-and-deploy.yml.tpl`
 - Capability tags: aws, lambda, packaging, deploy
 - Applicability: framework-native
 - Notes:

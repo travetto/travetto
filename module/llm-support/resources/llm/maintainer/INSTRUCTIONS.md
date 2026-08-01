@@ -8,6 +8,8 @@ This module owns LLM-oriented generation guidance for Travetto.
 - Track excluded operations in `src/recommendation.ts`.
 - Keep install/workflow guidance focused on direct generation workflows.
 - Avoid provider-specific integrations in this phase.
+- Framework Code Exposure Rule: Any code exposed to the LLM that is found within the Travetto framework MUST be exposed under a `doc/` folder (sample usage code), NEVER from `src/` or internal implementation files.
+- Minimal Decorator Usage Rule: Rely on Travetto's AST reflection and sensible defaults to infer metadata rather than explicitly duplicating clear information. Omit `@Required` for non-optional properties, `@PathParam` / `@QueryParam` when parameter names match, `@Body` on POST/PUT DTO parameters, and prefer JSDoc comments over `@Description`.
 
 ## Framework Principles
 - Treat llm-support as framework guidance infrastructure, not app-specific scaffolding.

@@ -2,7 +2,7 @@
 {
   "sourceId": "core-pack-docker-release",
   "repositoryId": "travetto",
-  "filePath": "module/pack/src",
+  "filePath": "module/llm-support/resources/snippets/code/pack-docker-release.yml.tpl",
   "capabilityTags": ["docker", "pack", "release", "ci"],
   "operationIds": ["pack-docker-release"],
   "applicability": ["framework-native"],
@@ -14,7 +14,7 @@
 
 # core-pack-docker-release
 
-- Source: `module/pack/src`
+- Source: `module/llm-support/resources/snippets/code/pack-docker-release.yml.tpl`
 - Capability tags: docker, pack, release, ci
 - Applicability: framework-native
 - Notes:
