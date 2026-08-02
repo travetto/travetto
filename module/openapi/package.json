@@ -1,6 +1,6 @@
 {
   "name": "@travetto/openapi",
-  "version": "8.0.0-alpha.27",
+  "version": "8.0.0-alpha.28",
   "type": "module",
   "description": "OpenAPI integration support for the Travetto framework",
   "keywords": [
@@ -29,7 +29,7 @@
   "dependencies": {
     "@travetto/config": "^8.0.0-alpha.25",
     "@travetto/schema": "^8.0.0-alpha.25",
-    "@travetto/web": "^8.0.0-alpha.27",
+    "@travetto/web": "^8.0.0-alpha.28",
     "openapi3-ts": "^4.6.0",
     "yaml": "^2.9.0"
   },

@@ -1,6 +1,6 @@
 {
   "name": "@travetto/test",
-  "version": "8.0.0-alpha.23",
+  "version": "8.0.0-alpha.24",
   "type": "module",
   "description": "Declarative test framework",
   "keywords": [
@@ -31,7 +31,7 @@
     "@travetto/registry": "^8.0.0-alpha.22",
     "@travetto/runtime": "^8.0.0-alpha.22",
     "@travetto/terminal": "^8.0.0-alpha.22",
-    "@travetto/worker": "^8.0.0-alpha.22",
+    "@travetto/worker": "^8.0.0-alpha.23",
     "yaml": "^2.9.0"
   },
   "peerDependencies": {
