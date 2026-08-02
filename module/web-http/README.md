@@ -341,7 +341,7 @@ static buildHandler(dispatcher: WebDispatcher): (request: HttpRequest, response:
     return async (request: HttpRequest, response: HttpResponse): Promise<void> => {
       const webRequest = this.toWebRequest(request);
       const webResponse = await dispatcher.dispatch({ request: webRequest });
-      this.respondToServerResponse(webResponse, response);
+      await this.respondToServerResponse(webResponse, response);
     };
   }
 ```

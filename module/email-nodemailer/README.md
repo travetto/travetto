@@ -30,14 +30,27 @@ class Config {
 
 **Code: smtp to send all messages via the smtp operation**
 ```typescript
+import { Config } from '@travetto/config';
 import { InjectableFactory } from '@travetto/di';
 import { NodemailerTransport } from '@travetto/email-nodemailer';
 
-class Config {
+@Config('email.nodemailer')
+export class NodemailerSmtpConfig {
+  host: string = 'smtp.sendgrid.net';
+  port: number = 587;
+  secure: boolean = false;
+  username?: string = 'apikey';
+  password?: string;
+}
+
+export class NodemailerTransportFactory {
   @InjectableFactory()
-  static getTransport() {
+  static createSmtpTransport(config: NodemailerSmtpConfig): NodemailerTransport {
     return new NodemailerTransport({
-      service: 'smtp'
+      host: config.host,
+      port: config.port,
+      secure: config.secure,
+      auth: config.password ? { user: config.username, pass: config.password } : undefined
     });
   }
 }

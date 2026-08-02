@@ -116,11 +116,72 @@ Additionally, the module is predicated upon <a class="module-link" routerLink="/
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/simple-controller.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/web'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RuntimeError <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/runtime'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Email<span class="token punctuation">,</span> Min<span class="token punctuation">,</span> Schema <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/schema'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Delete<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> Post <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/web'</span><span class="token punctuation">;</span>
 
-<span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
-<span class="token keyword">class</span> <span class="token class-name">SimpleController</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token comment">// endpoints</span>
+<span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Schema</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CreateUserDto</span> <span class="token punctuation">{{'{'}}</span>
+  username<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+
+  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Email</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  email<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span>
+
+<span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Schema</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">UserResponseDto</span> <span class="token punctuation">{{'{'}}</span>
+  id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  username<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  email<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  createdAt<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span>
+
+<span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/api/users'</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">UserController</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * Search users by query
+   */</span>
+  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/'</span><span class="token punctuation">)</span>
+  <span class="token keyword">async</span> <span class="token function">searchUsers</span><span class="token punctuation">(</span>query<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Min</span></span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span> limit<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">=</span> <span class="token number">20</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>UserResponseDto<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token comment">/**
+   * Retrieve a user by identifier
+   */</span>
+  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/:id'</span><span class="token punctuation">)</span>
+  <span class="token keyword">async</span> <span class="token function">getUserById</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>UserResponseDto<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>id <span class="token operator">||</span> id <span class="token operator">===</span> <span class="token string">'0'</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">RuntimeError</span><span class="token punctuation">(</span><span class="token string">'User not found'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> category<span class="token operator">:</span> <span class="token string">'notfound'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span>
+      id<span class="token punctuation">,</span>
+      username<span class="token operator">:</span> <span class="token string">'john_doe'</span><span class="token punctuation">,</span>
+      email<span class="token operator">:</span> <span class="token string">'john&#64;example.com'</span><span class="token punctuation">,</span>
+      createdAt<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toISOString</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token comment">/**
+   * Create a new user account
+   */</span>
+  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Post</span></span><span class="token punctuation">(</span><span class="token string">'/'</span><span class="token punctuation">)</span>
+  <span class="token keyword">async</span> <span class="token function">createUser</span><span class="token punctuation">(</span>body<span class="token operator">:</span> CreateUserDto<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>UserResponseDto<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span>
+      id<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">usr_</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>Date<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+      username<span class="token operator">:</span> body<span class="token punctuation">.</span>username<span class="token punctuation">,</span>
+      email<span class="token operator">:</span> body<span class="token punctuation">.</span>email<span class="token punctuation">,</span>
+      createdAt<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toISOString</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token comment">/**
+   * Delete user account by identifier
+   */</span>
+  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Delete</span></span><span class="token punctuation">(</span><span class="token string">'/:id'</span><span class="token punctuation">)</span>
+  <span class="token keyword">async</span> <span class="token function">deleteUser</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token punctuation">{{'{'}}</span> deleted<span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token punctuation">{{'}'}}</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span> deleted<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
