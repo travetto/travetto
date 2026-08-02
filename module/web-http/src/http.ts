@@ -32,7 +32,7 @@ export class WebHttpUtil {
     return async (request: HttpRequest, response: HttpResponse): Promise<void> => {
       const webRequest = this.toWebRequest(request);
       const webResponse = await dispatcher.dispatch({ request: webRequest });
-      this.respondToServerResponse(webResponse, response);
+      await this.respondToServerResponse(webResponse, response);
     };
   }
 
@@ -130,9 +130,13 @@ export class WebHttpUtil {
     response.statusCode = WebCommonUtil.getStatusCode(binaryResponse);
 
     if (binaryResponse.body) {
-      await BinaryUtil.pipeline(binaryResponse.body, response);
+      try {
+        await BinaryUtil.pipeline(binaryResponse.body, response);
+      } catch (error) {
+        console.error('Failed to send response', { error });
+      }
     }
-    if (!response.closed) {
+    if (!response.closed && !response.destroyed) {
       response.end();
     }
   }
