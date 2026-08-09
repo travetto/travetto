@@ -509,7 +509,10 @@ These files must be valid, compilable TypeScript and serve as both documentation
 ## Development Workflow
 
 ```bash
-# Start compiler in watch mode
+# Check if compiler is running
+trvc info
+
+# Start compiler in watch mode (if not running)
 trvc start
 
 # Run all tests
@@ -530,6 +533,20 @@ trv service start
 # Clean build output
 trvc clean
 ```
+
+### Compiler Status Verification
+
+To check whether the compiler server is running, execute `trvc info` (or `npx trvc info`):
+
+```bash
+trvc info
+```
+
+- **Compiler Running**: Returns a JSON object containing compiler server details with a `state` field representing its current status:
+  - `state` values (`CompilerStateType`): `'startup'`, `'init'`, `'compile-start'`, `'compile-end'`, `'watch-start'`, `'watch-end'`, `'reset'`, `'closed'`.
+  - **No build commands are necessary** while the compiler is running.
+  - **`trvc clean` is allowed** and will automatically restart the compiler once the clean operation completes.
+- **Compiler Not Running**: Returns an empty response (`undefined`).
 
 ## Registry Initialization
 

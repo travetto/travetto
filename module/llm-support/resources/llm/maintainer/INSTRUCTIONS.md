@@ -10,6 +10,7 @@ This module owns LLM-oriented generation guidance for Travetto.
 - Avoid provider-specific integrations in this phase.
 - Framework Code Exposure Rule: Any code exposed to the LLM that is found within the Travetto framework MUST be exposed under a `doc/` folder (sample usage code), NEVER from `src/` or internal implementation files.
 - Minimal Decorator Usage Rule: Rely on Travetto's AST reflection and sensible defaults to infer metadata rather than explicitly duplicating clear information. Omit `@Required` for non-optional properties, `@PathParam` / `@QueryParam` when parameter names match, `@Body` on POST/PUT DTO parameters, and prefer JSDoc comments over `@Description`.
+- Compiler State Verification Rule: Use `npx trvc info` to check compiler server status. Active compiler servers return a JSON object with a `state` field (such as `'watch-start'`, `'compile-end'`, `'init'`). If running, no build commands are needed. Executing `npx trvc clean` is allowed and will restart the compiler upon completion. Inactive servers return empty output.
 
 ## Framework Principles
 - Treat llm-support as framework guidance infrastructure, not app-specific scaffolding.
