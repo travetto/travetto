@@ -170,6 +170,62 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     assert(idNin.length === 2);
   }
 
+  @Test('Verify list intersection queries')
+  async testListIntersection() {
+    const service = await this.service;
+
+    await this.saveAll(SimpleList, [
+      SimpleList.from({
+        names: ['apple', 'banana']
+      }),
+      SimpleList.from({
+        names: ['banana', 'cherry']
+      }),
+      SimpleList.from({
+        names: ['cherry', 'date']
+      }),
+      SimpleList.from({
+        names: ['elderberry']
+      })
+    ]);
+
+    const singleMatch = await service.query(SimpleList, {
+      where: {
+        names: {
+          $in: ['apple']
+        }
+      }
+    });
+    assert(singleMatch.length === 1);
+
+    const intersectionMatch = await service.query(SimpleList, {
+      where: {
+        names: {
+          $in: ['banana', 'cherry']
+        }
+      }
+    });
+    assert(intersectionMatch.length === 3);
+
+    const disjointIntersectionMatch = await service.query(SimpleList, {
+      where: {
+        names: {
+          $in: ['apple', 'date']
+        }
+      }
+    });
+    assert(disjointIntersectionMatch.length === 2);
+
+    const noIntersectionMatch = await service.query(SimpleList, {
+      where: {
+        names: {
+          $in: ['fig', 'grape']
+        }
+      }
+    });
+    assert(noIntersectionMatch.length === 0);
+  }
+
   @Test('verify all operators')
   async testArrayAll() {
     const service = await this.service;
