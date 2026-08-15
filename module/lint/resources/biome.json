@@ -82,6 +82,7 @@
         }
       },
       "complexity": {
+        "noUselessSwitchCase": "off",
         "useArrowFunction": "off",
         "noStaticOnlyClass": "off",
         "noThisInStatic": "off",
@@ -123,8 +124,7 @@
       "linter": {
         "rules": {
           "complexity": {
-            "noUselessConstructor": "off",
-            "noUselessSwitchCase": "off"
+            "noUselessConstructor": "off"
           },
           "correctness": {
             "noUnusedVariables": "off",
