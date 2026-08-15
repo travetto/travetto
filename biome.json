@@ -1,6 +1,6 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
-  "extends": ["./node_modules/@travetto/lint/resources/biome.jsonc"],
+  "$schema": "https://biomejs.dev/schemas/2.5.8/schema.json",
+  "extends": ["./node_modules/@travetto/lint/resources/biome.json"],
   "files": {
     "includes": [
       "!**/out",

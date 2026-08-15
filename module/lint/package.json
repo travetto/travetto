@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@travetto/runtime": "^8.0.0-alpha.22",
-    "@biomejs/biome": "^2.5.5"
+    "@biomejs/biome": "^2.5.8"
   },
   "peerDependencies": {
     "@travetto/cli": "^8.0.0-alpha.31"

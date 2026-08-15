@@ -1,24 +1,25 @@
 import fs from 'node:fs/promises';
 
 import { CliCommand, type CliCommandShape } from '@travetto/cli';
-import { Runtime } from '@travetto/runtime';
+import { FileLoader, JSONUtil, Runtime } from '@travetto/runtime';
 
 /**
  * Generate the workspace Biome configuration entry file.
  *
- * This bootstraps `biome.jsonc` to extend the framework-provided rules configuration.
+ * This bootstraps `biome.json` to extend the framework-provided rules configuration.
  */
 @CliCommand({})
 export class LintRegisterCommand implements CliCommandShape {
   async main(): Promise<void> {
-    const content = `{
-  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
-  "extends": ["./node_modules/@travetto/lint/resources/biome.jsonc"]
-}
-`;
-    const output = Runtime.workspaceRelative('biome.jsonc');
+    const resource = new FileLoader([Runtime.modulePath('@travetto/lint#resources')]);
+    const config: { $schema: string } = JSONUtil.fromUTF8(await resource.readUTF8('biome.json'));
+    const content = {
+      $schema: config.$schema,
+      extends: ['./node_modules/@travetto/lint/resources/biome.json']
+    };
+    const output = Runtime.workspaceRelative('biome.json');
     if (!(await fs.stat(output, { throwIfNoEntry: false }))) {
-      await fs.writeFile(output, content);
+      await fs.writeFile(output, JSONUtil.toUTF8Pretty(content));
       console.log(`Wrote lint config to ${output}`);
     } else {
       console.log(`Lint config already present ${output}`);
