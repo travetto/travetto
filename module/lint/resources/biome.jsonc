@@ -123,7 +123,8 @@
       "linter": {
         "rules": {
           "complexity": {
-            "noUselessConstructor": "off"
+            "noUselessConstructor": "off",
+            "noUselessSwitchCase": "off"
           },
           "correctness": {
             "noUnusedVariables": "off",
