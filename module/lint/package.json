@@ -30,8 +30,7 @@
   "dependencies": {
     "@travetto/runtime": "^8.0.0-alpha.22",
     "oxlint": "^1.79.0",
-    "oxfmt": "^0.64.0",
-    "cspell": "^10.1.0"
+    "oxfmt": "^0.64.0"
   },
   "peerDependencies": {
     "@travetto/cli": "^8.0.0-alpha.31"

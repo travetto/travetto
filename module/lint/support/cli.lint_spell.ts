@@ -33,8 +33,8 @@ export class LintSpellCommand implements CliCommandShape {
     const targetPaths = paths.length > 0 ? paths : ['.'];
     const result = await ExecUtil.getResult(
       spawn(
-        process.argv0,
-        [Runtime.workspaceRelative('node_modules', '.bin', 'cspell'), 'lint', ...targetPaths, ...(state?.unknown ?? [])],
+        'npx',
+        ['cspell', 'lint', ...targetPaths, ...(state?.unknown ?? [])],
         {
           stdio: 'inherit'
         }
