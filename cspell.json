@@ -1,5 +1,30 @@
 {
   "import": [
     "@travetto/lint/resources/cspell.json"
+  ],
+  "words": [
+    "ABCDEFGHJIJKLMNOPQRSTUVWXYZ",
+    "addgroup",
+    "adduser",
+    "asar",
+    "bgcolor",
+    "bmbo",
+    "contenttype",
+    "dbconfig",
+    "estypes",
+    "fnames",
+    "jsxs",
+    "letmein",
+    "olivegreen",
+    "optoken",
+    "pgcrypto",
+    "preid",
+    "premajor",
+    "preminor",
+    "prepatch",
+    "reinit",
+    "subsubtitle",
+    "xcopy",
+    "xpack"
   ]
 }
