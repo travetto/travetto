@@ -2,9 +2,9 @@
 import { c, d } from '@travetto/doc';
 import { BaseSQLModelService } from '@travetto/model-sql';
 
-import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
 import { ModelQueryTypes } from '@travetto/model-query/support/doc.support.ts';
+import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 
 import { SqliteModelConfig } from './src/config.ts';
 import { SqliteModelService } from './src/service.ts';

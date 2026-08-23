@@ -12,6 +12,20 @@ export const baseOxfmtConfig: OxfmtConfig = {
   arrowParens: 'avoid',
   bracketSameLine: false,
   bracketSpacing: true,
+  sortImports: {
+    newlinesBetween: true,
+    customGroups: [
+      {
+        groupName: 'travetto-package',
+        elementNamePattern: ['@travetto/*']
+      },
+      {
+        groupName: 'travetto-subpath',
+        elementNamePattern: ['@travetto/**/*.ts', '@travetto/**']
+      }
+    ],
+    groups: ['builtin', 'external', 'travetto-package', 'travetto-subpath', ['parent', 'sibling', 'index']]
+  },
   ignorePatterns: [
     '**/node_modules/**',
     '**/.trv/**',

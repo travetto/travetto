@@ -8,8 +8,8 @@ import { describeFunction, Env, ExecUtil, JSONUtil, Runtime, RuntimeIndex, TimeU
 import { WorkPool } from '@travetto/worker';
 
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
-import { RunnableTestConsumer } from '../consumer/types/runnable.ts';
 import type { TestConsumerShape } from '../consumer/types.ts';
+import { RunnableTestConsumer } from '../consumer/types/runnable.ts';
 import type { TestRemoveEvent } from '../model/event.ts';
 import type { TestConfig, TestDiffInput, TestGlobInput, TestRun, TestRunInput } from '../model/test.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';

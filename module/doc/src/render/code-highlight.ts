@@ -1,5 +1,4 @@
 import { default as prismJs } from 'prismjs';
-
 import 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace.js';
 import 'prismjs/components/prism-typescript.js';
 import 'prismjs/components/prism-javascript.js';

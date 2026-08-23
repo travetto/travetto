@@ -1,4 +1,4 @@
-import { oxfmtConfig } from '@travetto/lint/support/oxfmt.ts';
+import { oxfmtConfig } from './module/lint/support/oxfmt.ts';
 
 export default oxfmtConfig({
   ignorePatterns: [

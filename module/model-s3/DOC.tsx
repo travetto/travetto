@@ -1,8 +1,8 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, d } from '@travetto/doc';
 
-import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
+import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 
 import { S3ModelConfig } from './src/config.ts';
 import { S3ModelService } from './src/service.ts';

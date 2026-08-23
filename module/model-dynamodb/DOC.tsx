@@ -1,8 +1,8 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, d } from '@travetto/doc';
 
-import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
+import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 
 import { DynamoDBModelConfig } from './src/config.ts';
 import { DynamoDBModelService } from './src/service.ts';

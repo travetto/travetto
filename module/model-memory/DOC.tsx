@@ -2,8 +2,8 @@
 import { c, d } from '@travetto/doc';
 import { MemoryModelService } from '@travetto/model-memory';
 
-import { ModelTypes } from '@travetto/model/support/doc.support.ts';
 import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
+import { ModelTypes } from '@travetto/model/support/doc.support.ts';
 
 export const text = (
   <>
