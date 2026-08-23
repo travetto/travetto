@@ -9,9 +9,7 @@ export class RegistryIndexStore<A extends RegistryAdapter<{}> = RegistryAdapter<
   // Core data
   #adapters = new Map<Class, A>();
   #idToCls = new Map<string, Class>();
-  #adapterCls: new (
-    cls: Class
-  ) => A;
+  #adapterCls: new (cls: Class) => A;
   #finalized = new Map<Class, boolean>();
 
   constructor(adapterCls: new (cls: Class) => A) {

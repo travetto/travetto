@@ -1,9 +1,9 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, d } from '@travetto/doc';
 
-import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
 import { ModelQueryTypes } from '@travetto/model-query/support/doc.support.ts';
+import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 
 import { ElasticsearchModelConfig } from './src/config.ts';
 import { ElasticsearchModelService } from './src/service.ts';
@@ -16,11 +16,9 @@ export const text = (
     {ElasticsearchModelService} will also modify the {d.library('Elasticsearch')} schema in real time to minimize impact to development.{' '}
     <br />
     Supported features:
-    <ul>
-      {...ModelTypes(ElasticsearchModelService)}
-      {...ModelIndexedTypes(ElasticsearchModelService)}
-      {...ModelQueryTypes(ElasticsearchModelService)}
-    </ul>
+    <ul>{...ModelTypes(ElasticsearchModelService)}
+    {...ModelIndexedTypes(ElasticsearchModelService)}
+    {...ModelQueryTypes(ElasticsearchModelService)}</ul>
     <ModelCustomConfig config={ElasticsearchModelConfig} />
   </>
 );

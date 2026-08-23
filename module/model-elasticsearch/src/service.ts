@@ -744,7 +744,7 @@ export class ElasticsearchModelService
 
     const search: estypes.SearchRequest = {
       query: resolvedSearch.query ?? { match_all: {} },
-      aggs: { [field]: { terms: { field, size: 100 } } },
+      aggregations: { [field]: { terms: { field, size: 100 } } },
       size: 0
     };
 

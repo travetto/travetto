@@ -1,6 +1,6 @@
 ---
 database:
   host: localhost
-  creds:
+  credentials:
     user: test
     password: test

@@ -5,7 +5,7 @@ export class DBConfig {
   host: string;
   @EnvVar('DATABASE_PORT')
   port: number;
-  creds: {
+  credentials: {
     user: string;
     password: string;
   };

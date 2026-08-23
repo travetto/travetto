@@ -33,9 +33,10 @@ export class ConnectRequest implements Pick<IncomingMessage, 'url' | 'headers'> 
   }
 }
 
-export class ConnectResponse
-  implements Pick<ServerResponse, 'getHeader' | 'getHeaderNames' | 'getHeaders' | 'hasHeader' | 'headersSent' | 'write' | 'flushHeaders'>
-{
+export class ConnectResponse implements Pick<
+  ServerResponse,
+  'getHeader' | 'getHeaderNames' | 'getHeaders' | 'hasHeader' | 'headersSent' | 'write' | 'flushHeaders'
+> {
   /**
    * Get a connect server response given a framework response
    */

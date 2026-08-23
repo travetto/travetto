@@ -1,8 +1,8 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, d } from '@travetto/doc';
 
-import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
+import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 
 import { DynamoDBModelConfig } from './src/config.ts';
 import { DynamoDBModelService } from './src/service.ts';
@@ -15,10 +15,8 @@ export const text = (
     nothing is needed to handle schema updates in real time. Indices on the other hand are more complicated, and will not be retroactively
     computed for new values. <br />
     Supported features:
-    <ul>
-      {...ModelTypes(DynamoDBModelService)}
-      {...ModelIndexedTypes(DynamoDBModelService)}
-    </ul>
+    <ul>{...ModelTypes(DynamoDBModelService)}
+    {...ModelIndexedTypes(DynamoDBModelService)}</ul>
     <ModelCustomConfig config={DynamoDBModelConfig} />
   </>
 );

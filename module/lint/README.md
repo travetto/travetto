@@ -13,7 +13,7 @@ npm install @travetto/lint
 yarn add @travetto/lint
 ```
 
-[Biome](https://biomejs.dev/) is the tool used for linting, formatting, and organizing imports in [Typescript](https://typescriptlang.org) and [Javascript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) code. This module provides a unified CLI interface and standard linting patterns. In a new project, the first thing that will need to be done, post installation, is to create the Biome configuration file.
+[Oxlint](https://oxc.rs/docs/guide/usage/linter.html) and [Oxfmt](https://oxc.rs/docs/guide/usage/formatter.html) are the tools used for linting, formatting, and style checks in [Typescript](https://typescriptlang.org) and [Javascript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) code. This module provides a unified CLI interface and standard linting and formatting patterns. In a new project, the first thing that will need to be done, post installation, is to register the configuration files.
 
 ## CLI - lint:register
 
@@ -24,64 +24,65 @@ $ trv lint:register --help
 Usage: lint:register [options]
 
 Description:
-  Generate the workspace Biome configuration entry file.
+  Generate the workspace oxlint and oxfmt configuration entry files.
 
-  This bootstraps `biome.jsonc` to extend the framework-provided rules configuration.
+  This bootstraps `oxlint.config.ts` and `oxfmt.config.ts` to extend the framework-provided rules and formatting configuration.
 
 Options:
   --help  display help for command
 ```
 
-When registration completes, this is the file the linter will use, and any other tooling (e.g. IDEs).
+When registration completes, this bootstraps the configuration files the linter and formatter will use, as well as editor tooling (e.g. IDEs).
 
-**Code: Sample configuration**
-```json
-{
-  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
-  "extends": ["./node_modules/@travetto/lint/resources/biome.jsonc"],
-  "files": {
-    "includes": [
-      "!**/out",
-      "!**/ui",
-      "!**/api-client",
-      "!**/*.d.ts",
-      "!**/fixtures",
-      "!**/resources",
-      "!**/DOC.html",
-      "!**/README.md",
-      "!**/.vscode",
-      "!archived",
-      "!related/travetto.github.io"
-    ]
-  }
-}
-```
-
-## CLI - lint
-Once registered, using the linter is as simple as invoking it via the cli:
+## CLI - lint:check
+Linting is performed via the check command:
 
 **Terminal: Running the Linter**
 ```bash
-npx trv lint
+npx trv lint:check
 ```
 
-Or pointing your IDE to reference the registered configuration file.
-
-**Terminal: Help for lint**
+**Terminal: Help for lint:check**
 ```bash
-$ trv lint --help
+$ trv lint:check --help
 
-Usage: lint [options]
+Usage: lint:check [options]
 
 Description:
-  Run Biome linter/formatter for the workspace or changed files.
+  Run oxlint linter for the workspace or changed files.
 
-  Supports incremental mode (`changed`/`since`) and forwards format/fix
-  options to the underlying biome invocation.
+  Supports incremental mode (`changed`/`since`) and forwards fix
+  options to the underlying oxlint invocation.
 
 Options:
   -c, --changed         Only check changed modules (default: false)
   -s, --since <string>  Since a specific git commit
-  -f, --fix             Should we attempt to fix/write formatting changes?
+  -f, --fix             Should we attempt to auto-fix lint errors? (default: false)
+  --help                display help for command
+```
+
+## CLI - lint:format
+Formatting is performed via the format command:
+
+**Terminal: Running the Formatter**
+```bash
+npx trv lint:format
+```
+
+**Terminal: Help for lint:format**
+```bash
+$ trv lint:format --help
+
+Usage: lint:format [options]
+
+Description:
+  Run oxfmt formatter for the workspace or changed files.
+
+  Formats files in place by default. Use `--check` for read-only verification.
+
+Options:
+  --changed             Only format changed modules (default: false)
+  -s, --since <string>  Since a specific git commit
+  -c, --check           Report formatting violations without writing changes (default: false)
   --help                display help for command
 ```

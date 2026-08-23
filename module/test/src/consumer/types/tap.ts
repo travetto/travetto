@@ -80,29 +80,29 @@ export class TapEmitter implements TestConsumerShape {
       // Handle each assertion
       if (test.assertions.length) {
         let subCount = 0;
-        for (const asrt of test.assertions) {
-          const assertSourceFile = RuntimeIndex.getFromImport(asrt.import)!.sourceFile;
-          const text = asrt.message ? `${asrt.text} (${this.#enhancer.failure(asrt.message)})` : asrt.text;
-          const location = asrt.import ? `./${path.relative(process.cwd(), assertSourceFile)}` : '<unknown>';
+        for (const assertion of test.assertions) {
+          const assertSourceFile = RuntimeIndex.getFromImport(assertion.import)!.sourceFile;
+          const text = assertion.message ? `${assertion.text} (${this.#enhancer.failure(assertion.message)})` : assertion.text;
+          const location = assertion.import ? `./${path.relative(process.cwd(), assertSourceFile)}` : '<unknown>';
           let subMessage = [
             this.#enhancer.assertNumber((subCount += 1)),
             '-',
             this.#enhancer.assertDescription(text),
             StyleUtil.link(
-              `${this.#enhancer.assertFile(location)}:${this.#enhancer.assertLine(asrt.line)}`,
-              `file://${assertSourceFile}#${asrt.line}`
+              `${this.#enhancer.assertFile(location)}:${this.#enhancer.assertLine(assertion.line)}`,
+              `file://${assertSourceFile}#${assertion.line}`
             )
           ].join(' ');
 
-          if (asrt.error) {
+          if (assertion.error) {
             subMessage = `${this.#enhancer.failure('not ok')} ${subMessage}`;
           } else {
             subMessage = `${this.#enhancer.success('ok')} ${subMessage}`;
           }
           this.log(`    ${subMessage}`);
 
-          if (asrt.message && asrt.message.length > 100) {
-            this.logMeta({ message: asrt.message.replace(/\\n/g, '\n') });
+          if (assertion.message && assertion.message.length > 100) {
+            this.logMeta({ message: assertion.message.replace(/\\n/g, '\n') });
           }
         }
         this.log(`    ${this.#enhancer.assertNumber(1)}..${this.#enhancer.assertNumber(subCount)}`);

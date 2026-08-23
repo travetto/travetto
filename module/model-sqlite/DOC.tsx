@@ -2,9 +2,9 @@
 import { c, d } from '@travetto/doc';
 import { BaseSQLModelService } from '@travetto/model-sql';
 
-import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
 import { ModelQueryTypes } from '@travetto/model-query/support/doc.support.ts';
+import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 
 import { SqliteModelConfig } from './src/config.ts';
 import { SqliteModelService } from './src/service.ts';
@@ -19,11 +19,9 @@ export const text = (
     a {d.library('SQL')} database. Every table generated maps to a model, with simple fields mapped as individual columns and complex
     fields/arrays mapped as serialized {d.input('TEXT')} columns. <br />
     Supported features:
-    <ul>
-      {...ModelTypes(BaseSQLModelService)}
-      {...ModelIndexedTypes(BaseSQLModelService)}
-      {...ModelQueryTypes(BaseSQLModelService)}
-    </ul>
+    <ul>{...ModelTypes(BaseSQLModelService)}
+    {...ModelIndexedTypes(BaseSQLModelService)}
+    {...ModelQueryTypes(BaseSQLModelService)}</ul>
     <ModelCustomConfig config={SqliteModelConfig} />
   </>
 );

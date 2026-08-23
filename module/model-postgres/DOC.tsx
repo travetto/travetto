@@ -2,9 +2,9 @@
 import { c, d } from '@travetto/doc';
 import { BaseSQLModelService } from '@travetto/model-sql';
 
-import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
 import { ModelQueryTypes } from '@travetto/model-query/support/doc.support.ts';
+import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 
 import { PostgresModelConfig } from './src/config.ts';
 import { PostgresModelService } from './src/service.ts';
@@ -29,11 +29,9 @@ export const text = (
       <li>Complex fields and arrays of sub-schema objects map to native {d.input('JSONB')} columns.</li>
     </ul>
     Supported features:
-    <ul>
-      {...ModelTypes(BaseSQLModelService)}
-      {...ModelIndexedTypes(BaseSQLModelService)}
-      {...ModelQueryTypes(BaseSQLModelService)}
-    </ul>
+    <ul>{...ModelTypes(BaseSQLModelService)}
+    {...ModelIndexedTypes(BaseSQLModelService)}
+    {...ModelQueryTypes(BaseSQLModelService)}</ul>
     <ModelCustomConfig config={PostgresModelConfig} />
   </>
 );

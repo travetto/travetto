@@ -1,9 +1,9 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, d } from '@travetto/doc';
 
-import { ModelTypes } from '@travetto/model/support/doc.support.ts';
 import { ModelIndexedTypes } from '@travetto/model-indexed/support/doc.support.ts';
 import { ModelQueryTypes } from '@travetto/model-query/support/doc.support.ts';
+import { ModelTypes } from '@travetto/model/support/doc.support.ts';
 
 import { Transactional } from './src/connection.ts';
 import { BaseSQLModelService } from './src/service.ts';
@@ -50,11 +50,9 @@ export const text = (
     </c.Section>
     <c.Section title="Supported Features">
       All SQL model service implementations derive from {BaseSQLModelService} and support:
-      <ul>
-        {...ModelTypes(BaseSQLModelService)}
-        {...ModelIndexedTypes(BaseSQLModelService)}
-        {...ModelQueryTypes(BaseSQLModelService)}
-      </ul>
+      <ul>{...ModelTypes(BaseSQLModelService)}
+      {...ModelIndexedTypes(BaseSQLModelService)}
+      {...ModelQueryTypes(BaseSQLModelService)}</ul>
     </c.Section>
   </>
 );

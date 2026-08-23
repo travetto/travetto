@@ -1,7 +1,7 @@
 import { Suite } from '@travetto/test';
 
-import { SchemaWebServerSuite } from '@travetto/web/support/test/suite/schema.ts';
 import { LocalAwsLambdaWebDispatcher } from '@travetto/web-aws-lambda/support/test/dispatcher.ts';
+import { SchemaWebServerSuite } from '@travetto/web/support/test/suite/schema.ts';
 
 @Suite()
 class AwsLambdaSchemaTest extends SchemaWebServerSuite {
