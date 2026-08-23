@@ -2,6 +2,14 @@
   "import": [
     "@travetto/lint/resources/cspell.json"
   ],
+  "ignorePaths": [
+    "*.svg",
+    "**/gen/**/*.html",
+    "**/DOC.html",
+    "**/README.md",
+    "**/*.generated.*",
+    "**/*.tpl"
+  ],
   "words": [
     "ABCDEFGHJIJKLMNOPQRSTUVWXYZ",
     "addgroup",
