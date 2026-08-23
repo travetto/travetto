@@ -31,7 +31,8 @@ Commands:
   firestore:indexes     Generate the Firestore composite indexes JSON for all registered models.
   lint:check            Run oxlint linter for the workspace or changed files.
   lint:format           Run oxfmt formatter for the workspace or changed files.
-  lint:register         Generate the workspace oxlint and oxfmt configuration entry files.
+  lint:register         Generate the workspace oxlint, oxfmt, and cspell configuration entry files.
+  lint:spell            Run cspell spell checker for the workspace or changed files.
   llm:support:execute   Execute llm-support operations with dry-run by default.
   llm:support:inline    Inline and compile reference snippets for llm-support packaging.
   llm:support:mcp       Minimal MCP stdio server for llm-support tools.
@@ -618,6 +619,8 @@ The services are defined as plain typescript files within the framework and can 
 import type { ServiceDescriptor } from '@travetto/cli';
 
 const version = process.env.MONGO_VERSION || '8.3';
+
+/* cspell:words orbstack pthread rseq glibc TUNABLES */
 
 export const service: ServiceDescriptor = {
   name: 'mongodb',

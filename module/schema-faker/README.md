@@ -41,7 +41,7 @@ static #namesToType = {
       [/^email(addr(ress)?)?$/, faker.internet.email],
       [/^(tele)?phone(num|number)?$/, faker.phone.number],
       [/^((postal|zip)code)|zip$/, faker.location.zipCode],
-      [/f(irst)?name/, faker.person.firstName],
+      [/name|fname|firstName/i, faker.person.firstName],
       [/l(ast)?name/, faker.person.lastName],
       [/^ip(add(ress)?)?$/, faker.internet.ip],
       [/^ip(add(ress)?)?(v?)6$/, faker.internet.ipv6],
@@ -62,8 +62,8 @@ static #namesToType = {
     ]),
     date: new Map([
       [/dob|birth/, (): Date => faker.date.past({ years: 60 })],
-      [/creat(e|ion)/, this.#between.bind(null, -200, -100)],
-      [/(update|modif(y|ied))/, this.#between.bind(null, -100, -50)]
+      [/create|creation/, this.#between.bind(null, -200, -100)],
+      [/(update|modify|modified)/, this.#between.bind(null, -100, -50)]
     ])
   };
 ```

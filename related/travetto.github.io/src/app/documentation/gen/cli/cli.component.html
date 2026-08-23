@@ -35,7 +35,8 @@ Commands:
   firestore:indexes     Generate the Firestore composite indexes JSON <span class="token keyword">for</span> all registered models.
   lint:check            Run oxlint linter <span class="token keyword">for</span> the workspace or changed files.
   lint:format           Run oxfmt formatter <span class="token keyword">for</span> the workspace or changed files.
-  lint:register         Generate the workspace oxlint and oxfmt configuration entry files.
+  lint:register         Generate the workspace oxlint, oxfmt, and cspell configuration entry files.
+  lint:spell            Run cspell spell checker <span class="token keyword">for</span> the workspace or changed files.
   llm:support:execute   Execute llm-support operations with dry-run by default.
   llm:support:inline    Inline and compile reference snippets <span class="token keyword">for</span> llm-support packaging.
   llm:support:mcp       Minimal MCP stdio server <span class="token keyword">for</span> llm-support tools.
@@ -714,6 +715,8 @@ The services are defined as plain typescript files within the framework and can 
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> ServiceDescriptor <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/cli'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">const</span> version <span class="token operator">=</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">MONGO_VERSION</span> <span class="token operator">||</span> <span class="token string">'8.3'</span><span class="token punctuation">;</span>
+
+<span class="token comment">/* cspell:words orbstack pthread rseq glibc TUNABLES */</span>
 
 <span class="token keyword">export</span> <span class="token keyword">const</span> service<span class="token operator">:</span> ServiceDescriptor <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
   name<span class="token operator">:</span> <span class="token string">'mongodb'</span><span class="token punctuation">,</span>

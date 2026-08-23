@@ -160,7 +160,7 @@ class Validation {
   @Test('Regex Array')
   async regexArray() {
     const obj = StringMatches.from({
-      names: ['abc', 'ac', 'abbc']      
+      names: ['abc', 'ac', 'abbc']
     });
 
     await SchemaValidator.validate(StringMatches, obj);

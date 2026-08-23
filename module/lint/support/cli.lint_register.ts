@@ -4,9 +4,9 @@ import { CliCommand, type CliCommandShape } from '@travetto/cli';
 import { Runtime } from '@travetto/runtime';
 
 /**
- * Generate the workspace oxlint and oxfmt configuration entry files.
+ * Generate the workspace oxlint, oxfmt, and cspell configuration entry files.
  *
- * This bootstraps `oxlint.config.ts` and `oxfmt.config.ts` to extend the framework-provided rules and formatting configuration.
+ * This bootstraps `oxlint.config.ts`, `oxfmt.config.ts`, and `cspell.config.ts` to extend the framework-provided rules and formatting configuration.
  */
 @CliCommand({})
 export class LintRegisterCommand implements CliCommandShape {
@@ -35,6 +35,20 @@ export default oxfmtConfig();
       console.log(`Wrote format config to ${oxfmtOutput}`);
     } else {
       console.log(`Format config already present ${oxfmtOutput}`);
+    }
+
+    // Bootstrap cspell configuration
+    const cspellOutput = Runtime.workspaceRelative('cspell.config.ts');
+    const cspellJsonOutput = Runtime.workspaceRelative('cspell.json');
+    if (!(await fs.stat(cspellOutput, { throwIfNoEntry: false })) && !(await fs.stat(cspellJsonOutput, { throwIfNoEntry: false }))) {
+      const cspellContent = `import { cspellConfig } from '@travetto/lint';
+
+export default cspellConfig();
+`;
+      await fs.writeFile(cspellOutput, cspellContent);
+      console.log(`Wrote cspell config to ${cspellOutput}`);
+    } else {
+      console.log(`CSpell config already present`);
     }
   }
 }

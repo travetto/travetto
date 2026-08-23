@@ -15,7 +15,7 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/lint</code></pre>
   </figure>
 
-<a target="_blank" class="external-link" href="https://oxc.rs/docs/guide/usage/linter.html">Oxlint</a> and <a target="_blank" class="external-link" href="https://oxc.rs/docs/guide/usage/formatter.html">Oxfmt</a> are the tools used for linting, formatting, and style checks in <a target="_blank" class="external-link" href="https://typescriptlang.org">Typescript</a> and <a target="_blank" class="external-link" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">Javascript</a> code. This module provides a unified CLI interface and standard linting and formatting patterns. In a new project, the first thing that will need to be done, post installation, is to register the configuration files.
+<a target="_blank" class="external-link" href="https://oxc.rs/docs/guide/usage/linter.html">Oxlint</a>, <a target="_blank" class="external-link" href="https://oxc.rs/docs/guide/usage/formatter.html">Oxfmt</a>, and <a target="_blank" class="external-link" href="https://cspell.org">CSpell</a> are the tools used for linting, formatting, and spell checking in <a target="_blank" class="external-link" href="https://typescriptlang.org">Typescript</a> and <a target="_blank" class="external-link" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">Javascript</a> code. This module provides a unified CLI interface and standard linting, formatting, and spell checking configurations. In a new project, the first thing that will need to be done, post installation, is to register the configuration files.
 <h2 id="cli-lint-register">CLI - lint:register</h2>
 
   <figure class="terminal">
@@ -27,15 +27,15 @@
 Usage: lint:register <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 Description:
-  Generate the workspace oxlint and oxfmt configuration entry files.
+  Generate the workspace oxlint, oxfmt, and cspell configuration entry files.
 
-  This bootstraps <span class="token variable"><span class="token variable">`</span>oxlint.config.ts<span class="token variable">`</span></span> and <span class="token variable"><span class="token variable">`</span>oxfmt.config.ts<span class="token variable">`</span></span> to extend the framework-provided rules and formatting configuration.
+  This bootstraps <span class="token variable"><span class="token variable">`</span>oxlint.config.ts<span class="token variable">`</span></span>, <span class="token variable"><span class="token variable">`</span>oxfmt.config.ts<span class="token variable">`</span></span>, and <span class="token variable"><span class="token variable">`</span>cspell.config.ts<span class="token variable">`</span></span> to extend the framework-provided rules and formatting configuration.
 
 Options:
   <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
-When registration completes, this bootstraps the configuration files the linter and formatter will use, as well as editor tooling (e.g. IDEs).
+When registration completes, this bootstraps the configuration files the linter, formatter, and spell checker will use, as well as editor tooling (e.g. IDEs).
 <h2 id="cli-lint-check">CLI - lint:check</h2>
 
 Linting is performed via the check command:
@@ -96,5 +96,36 @@ Options:
   <span class="token parameter variable">--changed</span>             Only <span class="token function">format</span> changed modules <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   -s, <span class="token parameter variable">--since</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Since a specific <span class="token function">git</span> commit
   -c, <span class="token parameter variable">--check</span>           Report formatting violations without writing changes <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
+  <span class="token parameter variable">--help</span>                display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  </figure>
+
+<h2 id="cli-lint-spell">CLI - lint:spell</h2>
+
+Spell checking is performed via the spell command:
+
+  <figure class="terminal">
+    <figcaption class="terminal">Running the Spell Checker
+
+</figcaption>
+    <pre><code class="language-bash">npx trv lint:spell</code></pre>
+  </figure>
+
+  <figure class="terminal">
+    <figcaption class="terminal">Showing help for lint:spell
+
+</figcaption>
+    <pre><code class="language-bash">$ trv lint:spell <span class="token parameter variable">--help</span>
+
+Usage: lint:spell <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Description:
+  Run cspell spell checker <span class="token keyword">for</span> the workspace or changed files.
+
+  Supports incremental mode <span class="token punctuation">(</span><span class="token variable"><span class="token variable">`</span>changed<span class="token variable">`</span></span>/<span class="token variable"><span class="token variable">`</span>since<span class="token variable">`</span></span><span class="token punctuation">)</span> and forwards options
+  to the underlying cspell invocation.
+
+Options:
+  -c, <span class="token parameter variable">--changed</span>         Only check changed modules <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
+  -s, <span class="token parameter variable">--since</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Since a specific <span class="token function">git</span> commit
   <span class="token parameter variable">--help</span>                display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
