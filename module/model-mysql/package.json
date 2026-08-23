@@ -33,7 +33,7 @@
     "@travetto/model": "^8.0.0-alpha.26",
     "@travetto/model-query": "^8.0.0-alpha.29",
     "@travetto/model-sql": "^8.0.0-alpha.32",
-    "mysql2": "^3.23.1"
+    "mysql2": "^3.23.4"
   },
   "peerDependencies": {
     "@travetto/cli": "^8.0.0-alpha.31"

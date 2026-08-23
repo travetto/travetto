@@ -17,7 +17,7 @@
     "test": "trv test -f tap-summary",
     "lint": "trv lint:check",
     "format": "trv lint:format",
-    "reinit-deps": "find . -name 'node_modules' -type d | grep -v -E '(github[.]io|vscode-plugin|[.]trv)' | xargs rm -rf; rm package-lock.json; npm i",
+    "reinit-deps": "find . -name 'node_modules' -type d | grep -v -E '(github[.]io|vscode-plugin|[.]trv)' | xargs rm -rf; rm -f package-lock.json; npm i",
     "vscode:package": "cd related/vscode-plugin; npm run package",
     "version": "trv repo:version",
     "preversion": "trv doc:angular"
@@ -47,11 +47,12 @@
     "@travetto/repo": "^8.0.0-alpha.6",
     "@types/node-forge": "^1.3.14",
     "node-forge": "^1.4.0",
-    "rollup-plugin-visualizer": "^7.0.1",
+    "rollup-plugin-visualizer": "^7.1.1",
     "temporal-polyfill-lite": "^0.4.2"
   },
   "version": "0.0.0",
   "allowScripts": {
+    "@travetto/monorepo": true,
     "@parcel/watcher": true,
     "protobufjs": true,
     "fsevents@2.3.3": true

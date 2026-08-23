@@ -26,10 +26,10 @@
     "directory": "module/web-upload"
   },
   "dependencies": {
-    "@fastify/busboy": "^3.2.0",
+    "@fastify/busboy": "^3.2.2",
     "@travetto/config": "^8.0.0-alpha.25",
     "@travetto/web": "^8.0.0-alpha.28",
-    "file-type": "^22.0.1",
+    "file-type": "^22.0.2",
     "mime": "^4.1.0"
   },
   "peerDependencies": {
