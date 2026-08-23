@@ -26,7 +26,7 @@ Usage: lint:register [options]
 Description:
   Generate the workspace oxlint, oxfmt, and cspell configuration entry files.
 
-  This bootstraps `oxlint.config.ts`, `oxfmt.config.ts`, and `cspell.config.ts` to extend the framework-provided rules and formatting configuration.
+  This bootstraps `oxlint.config.ts`, `oxfmt.config.ts`, and `cspell.json` to extend the framework-provided rules and formatting configuration.
 
 Options:
   --help  display help for command

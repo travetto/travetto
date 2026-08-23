@@ -1,0 +1,5 @@
+{
+  "import": [
+    "@travetto/lint/resources/cspell.json"
+  ]
+}
