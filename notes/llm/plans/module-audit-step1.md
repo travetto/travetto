@@ -74,4 +74,4 @@ Baseline inventory for every module under /Users/arcsine/Code/travetto/module.
 1. Documentation structure is universal across module/*, so the docs audit is primarily a quality and freshness review.
 2. The most significant variance is in testing surfaces, especially modules with no direct tests and no support/test/.
 3. Several model/auth modules rely on shared suites rather than local direct tests, which should be treated as covered but needing deeper classification later.
-4. A smaller set of tooling and infrastructure modules have authored docs but no example directories and no visible test surface, which makes them likely step 4 and step 5 hotspots.
+4. A smaller set of tooling and infrastructure modules have authored docs but no example directories and no visible test surface, which makes them likely step 4 and step 5 hot spots.

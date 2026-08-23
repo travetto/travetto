@@ -84,7 +84,7 @@ loop Transpile
     Compiler->Transformer: Collect transformers for transpiling
     Compiler->Source: Transpile File
     alt On Error and watching
-        Compiler->Source: Stub out file contents for lazy laod
+        Compiler->Source: Stub out file contents for lazy load
     end
     alt File changed and is a watched file
         Compiler->Compiler: Mark for reloading

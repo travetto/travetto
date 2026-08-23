@@ -4,10 +4,10 @@ import { NodemailerTransport } from '@travetto/email-nodemailer';
 
 @Config('email.nodemailer')
 export class NodemailerSmtpConfig {
-  host: string = 'smtp.sendgrid.net';
+  host: string = 'smtp.send-grid.net';
   port: number = 587;
   secure: boolean = false;
-  username?: string = 'apikey';
+  username?: string = 'api-key';
   password?: string;
 }
 

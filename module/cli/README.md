@@ -29,8 +29,9 @@ Commands:
   email:editor          Start the email template editor service for interactive preview and testing.
   email:test            Render and send a template file to a target recipient for quick validation.
   firestore:indexes     Generate the Firestore composite indexes JSON for all registered models.
-  lint                  Run Biome linter/formatter for the workspace or changed files.
-  lint:register         Generate the workspace Biome configuration entry file.
+  lint:check            Run oxlint linter for the workspace or changed files.
+  lint:format           Run oxfmt formatter for the workspace or changed files.
+  lint:register         Generate the workspace oxlint and oxfmt configuration entry files.
   llm:support:execute   Execute llm-support operations with dry-run by default.
   llm:support:inline    Inline and compile reference snippets for llm-support packaging.
   llm:support:mcp       Minimal MCP stdio server for llm-support tools.
@@ -582,12 +583,12 @@ Options:
 Available Services
 --------------------
  * dynamodb@3.3.0
- * elasticsearch@9.2.8
+ * elasticsearch@9.5.2
  * firestore@latest
  * mongodb@8.3
- * mysql@9.6
- * postgresql@18.3
- * redis@8.4
+ * mysql@9.7
+ * postgresql@18.6
+ * redis@8.10
  * s3@4.12.4
 ```
 
@@ -600,12 +601,12 @@ $ trv service status
 Service          Version    Status
 -------------------------------------------------
 dynamodb           3.3.0    Running 93af422e793a
-elasticsearch      9.2.8    Running ed76ee063d13
+elasticsearch      9.5.2    Running ed76ee063d13
 firestore         latest    Running feec2e5e95b4
 mongodb              8.3    Running 5513eba6734e
-mysql                9.6    Running 307bc66d442a
-postgresql          18.3    Running e78291e71040
-redis                8.4    Running 77ba279b4e30
+mysql                9.7    Running 307bc66d442a
+postgresql          18.6    Running e78291e71040
+redis               8.10    Running 77ba279b4e30
 s3                4.12.4    Running fdacfc55b9e3
 ```
 

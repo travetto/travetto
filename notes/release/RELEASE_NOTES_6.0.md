@@ -9,7 +9,7 @@
 * The auth session has migrated from being the owner various contracts to the arbiter of auth state
    * AuthService/AuthContext now represent the authentication information, regardless of rest patterns
 #### Jwt is gone
-   * This is now integrated into auth-rest by default using njwt
+   * This is now integrated into auth-rest by default using nJwt
 #### Auth-rest-jwt is gone
    * This is now integrated into auth-rest by default
 #### Rest-session is moved to auth-session

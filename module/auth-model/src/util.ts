@@ -10,10 +10,10 @@ export class AuthModelUtil {
    * @param value Value to hash
    * @param salt The salt value
    * @param iterations Number of iterations on hashing
-   * @param keylen Length of hash
+   * @param keyLength Length of hash
    * @param digest Digest method
    */
-  static async generateHash(value: string, salt: string, iterations = 25000, keylen = 256, digest = 'SHA-256'): Promise<string> {
+  static async generateHash(value: string, salt: string, iterations = 25000, keyLength = 256, digest = 'SHA-256'): Promise<string> {
     const hashKey = await crypto.subtle.importKey(
       'raw',
       BinaryUtil.binaryArrayToBuffer(CodecUtil.fromUTF8String(value)),
@@ -30,10 +30,10 @@ export class AuthModelUtil {
         iterations
       },
       hashKey,
-      keylen * 8
+      keyLength * 8
     );
 
-    return BinaryUtil.binaryArrayToUint8Array(result).toHex().substring(0, keylen);
+    return BinaryUtil.binaryArrayToUint8Array(result).toHex().substring(0, keyLength);
   }
 
   /**

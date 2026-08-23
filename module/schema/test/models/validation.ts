@@ -1,5 +1,5 @@
 import type { TimeUnit } from '@travetto/runtime';
-import { CommonRegex, Discriminated, Float, Match, Max, Min, MinLength, Required, Schema, Url, Validator, View } from '@travetto/schema';
+import { CommonRegex, Discriminated, Float, Match, Max, Min, MinLength, Required, Schema, SubType, Url, Validator, View } from '@travetto/schema';
 
 @Schema()
 @Validator((o: CustomValidated) => {
@@ -33,26 +33,29 @@ export class DateTestSchema {
   date: Date;
 }
 
-@Schema()
+@Schema({})
 @Discriminated('type')
-export class Aaaaz {
+@SubType('A')
+export class ParentClassA {
   type?: string;
   a: boolean;
 }
 
 @Schema()
-export class Bbbbz extends Aaaaz {
+@SubType('B')
+export class SubClassB extends ParentClassA {
   b: number;
 }
 
 @Schema()
-export class Ccccz extends Bbbbz {
+@SubType('C')
+export class SubClassC extends SubClassB {
   c: string;
 }
 
 @Schema()
 export class AllAs {
-  all: Aaaaz[];
+  all: ParentClassA[];
 }
 
 @Schema()

@@ -9,7 +9,7 @@
     * No longer manually compiling
     * Leveraging node's hooks to strip types for all ts files on load
     * Reworked all our entry points to utilize this
-    * Transformers were updated to align with type stripping (byebye decorators)
+    * Transformers were updated to align with type stripping (bye bye decorators)
     * Manifest writing is now the domain of the compiler
     * No longer pass in a delta to the compiler, the compiler will produce its own delta    
     * Moved most of the compiler code under the src folder

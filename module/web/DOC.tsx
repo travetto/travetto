@@ -240,7 +240,7 @@ export const text = (
 
         <c.SubSubSection title={EtagInterceptor.name}>
           {EtagInterceptor} by default, will tag all cacheable HTTP responses, when the response value/length is known. Streams, and other
-          async data sources do not have a pre-defined length, and so are ineligible for etagging.
+          async data sources do not have a pre-defined length, and so are ineligible for "Etag"ing.
           <c.Code title="ETag Config" src={EtagConfig} />
         </c.SubSubSection>
 

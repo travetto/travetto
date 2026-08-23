@@ -171,10 +171,10 @@ export class AuthModelUtil {
    * @param value Value to hash
    * @param salt The salt value
    * @param iterations Number of iterations on hashing
-   * @param keylen Length of hash
+   * @param keyLength Length of hash
    * @param digest Digest method
    */
-  static async generateHash(value: string, salt: string, iterations = 25000, keylen = 256, digest = 'SHA-256'): Promise<string>;
+  static async generateHash(value: string, salt: string, iterations = 25000, keyLength = 256, digest = 'SHA-256'): Promise<string>;
   /**
    * Generate a salted password, with the ability to validate the password
    *

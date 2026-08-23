@@ -43,7 +43,7 @@ A more complete example setup would look like:
 ---
 database:
   host: localhost
-  creds:
+  credentials:
     user: test
     password: test
 ```
@@ -53,7 +53,7 @@ database:
 {
   "database": {
     "host": "prod-host-db",
-    "creds": {
+    "credentials": {
       "user": "admin-user"
     }
   }
@@ -98,7 +98,11 @@ Config {
     { priority: 999, source: 'memory://override' }
   ],
   active: {
-    DBConfig: { host: 'prod-host-db', port: 2000, creds: { user: 'admin-user' } }
+    DBConfig: {
+      host: 'prod-host-db',
+      port: 2000,
+      credentials: { user: 'admin-user' }
+    }
   }
 }
 ```
@@ -196,7 +200,7 @@ export class DBConfig {
   host: string;
   @EnvVar('DATABASE_PORT')
   port: number;
-  creds: {
+  credentials: {
     user: string;
     password: string;
   };
@@ -265,7 +269,11 @@ Config {
     { priority: 999, source: 'memory://override' }
   ],
   active: {
-    DBConfig: { host: 'prod-host-db', port: 200, creds: { user: 'admin-user' } }
+    DBConfig: {
+      host: 'prod-host-db',
+      port: 200,
+      credentials: { user: 'admin-user' }
+    }
   }
 }
 ```

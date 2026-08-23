@@ -8,7 +8,7 @@ The `MetadataRegistry` is a core utility for managing and querying metadata acro
 Registers all "schema" classes used for binding type information for classes, methods, and properties.
 
 ### 2. Dependency Injection
-Tracks service lifecycles, scopes, and dependencies for runtime resolution.
+Tracks service lifecycle, scopes, and dependencies for runtime resolution.
 
 ### 3. Web Controller Registration
 Enables dynamic route discovery and request handling.

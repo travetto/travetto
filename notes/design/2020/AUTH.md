@@ -10,7 +10,7 @@
 
 ## Core Modules
 * Auth -
-  * responsible for maintaining the authcontext
+  * responsible for maintaining the auth context
   * Responsible for resolving principal from an identity
 * Auth-Passport 
   * Integration of passport as an identity provider

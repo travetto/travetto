@@ -17,7 +17,7 @@ Eviction should be able to be time-based for how long something should be allowe
 Serialization needs to account for complex structures, and should be able to rely upon `JSON.stringify` for storage.  There is potentiality for detecting return types and allowing for recreating the objects that were persisted.  Streamed data should be stored in a format that is amenable for streaming as well.
 
 ## Errors
-Error states should be cacheable as well, if desired.  These need to be evictable, but can prove useful for situations where the resources it takes to verify something is missing are expensive.
+Error states should be cacheable as well, if desired.  These need to support eviction, but can prove useful for situations where the resources it takes to verify something is missing are expensive.
 
 ## Stores
 * Disk   - Core

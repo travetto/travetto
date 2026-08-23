@@ -51,7 +51,7 @@ export class DraftController {
 }
 ```
 
-This controller is a basic example of an invokable endpoint.
+This controller is a basic example of an invocable endpoint.
 
 **Config: resources/application.yml**
 ```yaml

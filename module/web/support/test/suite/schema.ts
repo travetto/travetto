@@ -295,13 +295,13 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   }
 
   @Test()
-  async verifyCustomSerializeable() {
+  async verifyCustomSerializable() {
     const responseType = getEndpointResponse('/customSerialize', 'GET');
     assert(responseType === User);
   }
 
   @Test()
-  async verifyCustomSerializeable2() {
+  async verifyCustomSerializable2() {
     const responseType = getEndpointResponse('/customSerialize2', 'GET');
     assert(responseType === User);
   }

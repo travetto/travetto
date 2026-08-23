@@ -98,9 +98,9 @@ class CompressInterceptorSuite {
       () =>
         this.compress({
           size: 50000,
-          requestHeaders: { 'Accept-Encoding': 'gloop' }
+          requestHeaders: { 'Accept-Encoding': 'nonsense' }
         }),
-      /gloop is not supported/
+      /nonsense is not supported/
     );
   }
 

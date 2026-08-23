@@ -85,7 +85,7 @@ export async function invoke(...input: string[]): Promise<unknown> {
       return CommonUtil.writeStdout(2, info);
     }
     case 'event': {
-      if (!EventUtil.isComplilerEventType(args[0])) {
+      if (!EventUtil.isCompilerEventType(args[0])) {
         throw new Error(`Unknown event type: ${args[0]}`);
       }
       for await (const event of client.fetchEvents(args[0])) {

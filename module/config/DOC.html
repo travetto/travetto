@@ -50,7 +50,7 @@ A more complete example setup would look like:
     <pre><code class="language-yaml"><span class="token punctuation">---</span>
 <span class="token key atrule">database</span><span class="token punctuation">:</span>
   <span class="token key atrule">host</span><span class="token punctuation">:</span> localhost
-  <span class="token key atrule">creds</span><span class="token punctuation">:</span>
+  <span class="token key atrule">credentials</span><span class="token punctuation">:</span>
     <span class="token key atrule">user</span><span class="token punctuation">:</span> test
     <span class="token key atrule">password</span><span class="token punctuation">:</span> test</code></pre>
   </figure>
@@ -63,7 +63,7 @@ A more complete example setup would look like:
     <pre><code class="language-json"><span class="token punctuation">{{'{'}}</span>
   <span class="token property">"database"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token property">"host"</span><span class="token operator">:</span> <span class="token string">"prod-host-db"</span><span class="token punctuation">,</span>
-    <span class="token property">"creds"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token property">"credentials"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token property">"user"</span><span class="token operator">:</span> <span class="token string">"admin-user"</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -113,7 +113,11 @@ Config <span class="token punctuation">{{'{'}}</span>
     <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">]</span>,
   active: <span class="token punctuation">{{'{'}}</span>
-    DBConfig: <span class="token punctuation">{{'{'}}</span> host: <span class="token string">'prod-host-db'</span>, port: <span class="token number">2000</span>, creds: <span class="token punctuation">{{'{'}}</span> user: <span class="token string">'admin-user'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>
+    DBConfig: <span class="token punctuation">{{'{'}}</span>
+      host: <span class="token string">'prod-host-db'</span>,
+      port: <span class="token number">2000</span>,
+      credentials: <span class="token punctuation">{{'{'}}</span> user: <span class="token string">'admin-user'</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
@@ -226,7 +230,7 @@ The decorator takes in a namespace, of what part of the resolved configuration y
   host<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">EnvVar</span></span><span class="token punctuation">(</span><span class="token string">'DATABASE_PORT'</span><span class="token punctuation">)</span>
   port<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
-  creds<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+  credentials<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
     user<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
     password<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
@@ -298,7 +302,11 @@ Config <span class="token punctuation">{{'{'}}</span>
     <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">]</span>,
   active: <span class="token punctuation">{{'{'}}</span>
-    DBConfig: <span class="token punctuation">{{'{'}}</span> host: <span class="token string">'prod-host-db'</span>, port: <span class="token number">200</span>, creds: <span class="token punctuation">{{'{'}}</span> user: <span class="token string">'admin-user'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>
+    DBConfig: <span class="token punctuation">{{'{'}}</span>
+      host: <span class="token string">'prod-host-db'</span>,
+      port: <span class="token number">200</span>,
+      credentials: <span class="token punctuation">{{'{'}}</span> user: <span class="token string">'admin-user'</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>

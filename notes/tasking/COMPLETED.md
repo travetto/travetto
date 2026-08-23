@@ -250,7 +250,7 @@ Platform Support
   - [x] Expose transpilation errors
 - [x]  Win32 Platform Issues
   - [x] Path issues
-    - [x] Cache functionalityfiles
+    - [x] Cache functionality files
     - [x] Bulk require
     - [x] Bulk read
     - [x] Stack traces

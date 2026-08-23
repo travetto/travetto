@@ -178,7 +178,7 @@ export class CompilerServer {
     let close = false;
     switch (action) {
       case 'event': {
-        if (EventUtil.isComplilerEventType(subAction)) {
+        if (EventUtil.isCompilerEventType(subAction)) {
           this.#addListener(subAction, response);
         }
         return;

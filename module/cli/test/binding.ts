@@ -20,7 +20,7 @@ class Entity {
    * My color
    *
    * @alias -l
-   * @alias env.COLOREO
+   * @alias env.COLOR_EO
    */
   color?: 'green' | 'blue';
 
@@ -85,7 +85,7 @@ class SchemaBindingSuite {
     CliCommandSchemaUtil.bindInput(entity, await get('--age', '20', '-g', 'red'));
     assert(Number.isNaN(entity.age));
 
-    process.env.COLOREO = '100';
+    process.env.COLOR_EO = '100';
     CliCommandSchemaUtil.bindInput(entity, await get('--color'));
     assert(entity.color === undefined);
 
@@ -101,7 +101,7 @@ class SchemaBindingSuite {
     assert(color.description === 'My color');
     assert(color.required?.active === false);
     assert(color.type === String);
-    assert(color.aliases?.includes('env.COLOREO'));
+    assert(color.aliases?.includes('env.COLOR_EO'));
     assert(color.aliases?.includes('-l'));
     assert(color.aliases?.includes('--color'));
     assert.deepStrictEqual(color.enum?.values?.toSorted(), ['blue', 'green']);
@@ -158,12 +158,12 @@ class SchemaBindingSuite {
     assert(state.all.length === 1);
     assert(state.all[0].type === 'arg');
 
-    process.env.COLOREO = 'green';
+    process.env.COLOR_EO = 'green';
 
     state = await get('george');
     assert(state.all.length === 2);
     assert(state.all[0].type === 'flag');
-    assert(state.all[0].input === 'env.COLOREO');
+    assert(state.all[0].input === 'env.COLOR_EO');
     assert(state.all[1].type === 'arg');
   }
 
