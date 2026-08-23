@@ -116,18 +116,14 @@ export class EmailCompileUtil {
    */
   static async inlineCss(html: string, css: string): Promise<string> {
     // Inline css
-    const { default: inlineCss } = await import('inline-css');
-    return inlineCss(
-      // Style needs to be in head to preserve media queries
-      html.replace('</head>', `<style>${css}</style></head>`),
-      {
-        url: 'https://app.dev',
-        preserveMediaQueries: true,
-        removeStyleTags: true,
-        removeLinkTags: true,
-        applyStyleTags: true
-      }
-    );
+    const { inline } = await import('@css-inline/css-inline');
+    return inline(html, {
+      extraCss: css,
+      keepAtRules: true,
+      keepStyleTags: false,
+      keepLinkTags: false,
+      loadRemoteStylesheets: false
+    });
   }
 
   /**
