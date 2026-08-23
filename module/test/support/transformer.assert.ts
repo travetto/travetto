@@ -142,12 +142,12 @@ export class AssertTransformer {
    */
   static initState(state: TransformerState & AssertState): void {
     if (!state[AssertSymbol]) {
-      const asrt = state.importFile('@travetto/test/src/assert/check.ts').identifier;
+      const assertion = state.importFile('@travetto/test/src/assert/check.ts').identifier;
       state[AssertSymbol] = {
-        assert: asrt,
-        assertCheck: CoreUtil.createAccess(state.factory, asrt, ASSERT_UTIL, 'check'),
-        checkThrow: CoreUtil.createAccess(state.factory, asrt, ASSERT_UTIL, 'checkThrow'),
-        checkThrowAsync: CoreUtil.createAccess(state.factory, asrt, ASSERT_UTIL, 'checkThrowAsync')
+        assert: assertion,
+        assertCheck: CoreUtil.createAccess(state.factory, assertion, ASSERT_UTIL, 'check'),
+        checkThrow: CoreUtil.createAccess(state.factory, assertion, ASSERT_UTIL, 'checkThrow'),
+        checkThrowAsync: CoreUtil.createAccess(state.factory, assertion, ASSERT_UTIL, 'checkThrowAsync')
       };
     }
   }

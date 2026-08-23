@@ -16,11 +16,9 @@ export const text = (
     {ElasticsearchModelService} will also modify the {d.library('Elasticsearch')} schema in real time to minimize impact to development.{' '}
     <br />
     Supported features:
-    <ul>
-      {...ModelTypes(ElasticsearchModelService)}
-      {...ModelIndexedTypes(ElasticsearchModelService)}
-      {...ModelQueryTypes(ElasticsearchModelService)}
-    </ul>
+    <ul>{...ModelTypes(ElasticsearchModelService)}
+    {...ModelIndexedTypes(ElasticsearchModelService)}
+    {...ModelQueryTypes(ElasticsearchModelService)}</ul>
     <ModelCustomConfig config={ElasticsearchModelConfig} />
   </>
 );

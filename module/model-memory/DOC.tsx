@@ -9,9 +9,7 @@ export const text = (
   <>
     <c.StdHeader />
     This module provides a memory-based implementation for the {d.module('Model')}. Supported features:
-    <ul>
-      {...ModelTypes(MemoryModelService)}
-      {...ModelIndexedTypes(MemoryModelService)}
-    </ul>
+    <ul>{...ModelTypes(MemoryModelService)}
+    {...ModelIndexedTypes(MemoryModelService)}</ul>
   </>
 );

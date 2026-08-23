@@ -29,11 +29,9 @@ export const text = (
       <li>Complex fields and arrays of sub-schema objects map to native {d.input('JSONB')} columns.</li>
     </ul>
     Supported features:
-    <ul>
-      {...ModelTypes(BaseSQLModelService)}
-      {...ModelIndexedTypes(BaseSQLModelService)}
-      {...ModelQueryTypes(BaseSQLModelService)}
-    </ul>
+    <ul>{...ModelTypes(BaseSQLModelService)}
+    {...ModelIndexedTypes(BaseSQLModelService)}
+    {...ModelQueryTypes(BaseSQLModelService)}</ul>
     <ModelCustomConfig config={PostgresModelConfig} />
   </>
 );

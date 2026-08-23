@@ -16,11 +16,9 @@ export const text = (
     {d.module('Model')} module to read, write and query against {d.library('MongoDB')}.. Given the dynamic nature of {d.library('MongoDB')},
     during development when models are modified, nothing needs to be done to adapt to the latest schema. <br />
     Supported features:
-    <ul>
-      {...ModelTypes(MongoModelService)}
-      {...ModelIndexedTypes(MongoModelService)}
-      {...ModelQueryTypes(MongoModelService)}
-    </ul>
+    <ul>{...ModelTypes(MongoModelService)}
+    {...ModelIndexedTypes(MongoModelService)}
+    {...ModelQueryTypes(MongoModelService)}</ul>
     <ModelCustomConfig config={MongoModelConfig} />
     The SSL file options in {d.input('clientOptions')} will automatically be resolved to files when given a path. This path can be a
     resource path (will attempt to lookup using {RuntimeResources}) or just a standard file path.

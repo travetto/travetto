@@ -19,11 +19,9 @@ export const text = (
     a {d.library('SQL')} database. Every table generated maps to a model, with simple fields mapped as individual columns and complex
     fields/arrays mapped as serialized {d.input('TEXT')} columns. <br />
     Supported features:
-    <ul>
-      {...ModelTypes(BaseSQLModelService)}
-      {...ModelIndexedTypes(BaseSQLModelService)}
-      {...ModelQueryTypes(BaseSQLModelService)}
-    </ul>
+    <ul>{...ModelTypes(BaseSQLModelService)}
+    {...ModelIndexedTypes(BaseSQLModelService)}
+    {...ModelQueryTypes(BaseSQLModelService)}</ul>
     <ModelCustomConfig config={SqliteModelConfig} />
   </>
 );

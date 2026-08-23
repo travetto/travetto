@@ -50,11 +50,9 @@ export const text = (
     </c.Section>
     <c.Section title="Supported Features">
       All SQL model service implementations derive from {BaseSQLModelService} and support:
-      <ul>
-        {...ModelTypes(BaseSQLModelService)}
-        {...ModelIndexedTypes(BaseSQLModelService)}
-        {...ModelQueryTypes(BaseSQLModelService)}
-      </ul>
+      <ul>{...ModelTypes(BaseSQLModelService)}
+      {...ModelIndexedTypes(BaseSQLModelService)}
+      {...ModelQueryTypes(BaseSQLModelService)}</ul>
     </c.Section>
   </>
 );

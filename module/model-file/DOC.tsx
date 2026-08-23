@@ -9,9 +9,7 @@ export const text = (
   <>
     <c.StdHeader />
     This module provides an file-based implementation for the {d.module('Model')}. Supported features:
-    <ul>
-      {...ModelTypes(FileModelService)}
-      {...ModelIndexedTypes(FileModelService)}
-    </ul>
+    <ul>{...ModelTypes(FileModelService)}
+    {...ModelIndexedTypes(FileModelService)}</ul>
   </>
 );

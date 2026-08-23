@@ -123,7 +123,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     const batchSize = options?.batchSizeHint ?? 100;
     const maxCount = options?.limit ?? Number.MAX_SAFE_INTEGER;
     let produced = 0;
-    for (; !options?.abort?.aborted && produced < maxCount; ) {
+    for (; !options?.abort?.aborted && produced < maxCount;) {
       const items = await this.client.listObjects({
         Bucket: this.config.bucket,
         Prefix: cls ? this.#resolveKey(cls) : this.config.namespace,

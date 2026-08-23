@@ -26,15 +26,15 @@ class $AssertCapture {
 
     // Emit and collect, every assertion as it occurs
     const handler = (a: CapturedAssertion): void => {
-      const asrt: Assertion = {
+      const assertion: Assertion = {
         ...a,
         import: a.import ?? a.module!.join('/'),
         classId: test.classId,
         methodName: test.methodName
       };
-      assertions.push(asrt);
+      assertions.push(assertion);
       if (listener) {
-        listener(asrt);
+        listener(assertion);
       }
     };
 

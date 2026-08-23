@@ -15,10 +15,8 @@ export const text = (
     nothing is needed to handle schema updates in real time. Indices on the other hand are more complicated, and will not be retroactively
     computed for new values. <br />
     Supported features:
-    <ul>
-      {...ModelTypes(DynamoDBModelService)}
-      {...ModelIndexedTypes(DynamoDBModelService)}
-    </ul>
+    <ul>{...ModelTypes(DynamoDBModelService)}
+    {...ModelIndexedTypes(DynamoDBModelService)}</ul>
     <ModelCustomConfig config={DynamoDBModelConfig} />
   </>
 );

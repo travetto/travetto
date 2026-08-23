@@ -179,9 +179,8 @@ export const text = (
             {BodyInterceptor}, {CookieInterceptor}{' '}
           </li>
           <li>
-            response - Prepares outbound response - {CompressInterceptor}, {CorsInterceptor}, {EtagInterceptor}, {
-              CacheControlInterceptor
-            }{' '}
+            response - Prepares outbound response - {CompressInterceptor}, {CorsInterceptor}, {EtagInterceptor},{' '}
+            {CacheControlInterceptor}{' '}
           </li>
           <li>
             application - Lives outside of the general request/response behavior, {d.module('AuthWeb')} uses this for login and logout

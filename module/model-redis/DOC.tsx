@@ -13,10 +13,8 @@ export const text = (
     This module provides an {d.library('Redis')}-based implementation for the {d.module('Model')}. This source allows the{' '}
     {d.module('Model')} module to read, write and query against {d.library('Redis')}. <br />
     Supported features:
-    <ul>
-      {...ModelTypes(RedisModelService)}
-      {...ModelIndexedTypes(RedisModelService)}
-    </ul>
+    <ul>{...ModelTypes(RedisModelService)}
+    {...ModelIndexedTypes(RedisModelService)}</ul>
     <ModelCustomConfig config={RedisModelConfig} />
   </>
 );

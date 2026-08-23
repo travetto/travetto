@@ -133,11 +133,11 @@ export class MongoModelConfig {
         .filter((pair): pair is [string, string | number | boolean] => ['string', 'number', 'boolean'].includes(typeof pair[1]))
         .map(([k, v]) => [k, `${v}`])
     ).toString();
-    let creds = '';
+    let credentials = '';
     if (this.username) {
-      creds = `${[this.username, this.password].filter(part => !!part).join(':')}@`;
+      credentials = `${[this.username, this.password].filter(part => !!part).join(':')}@`;
     }
-    const url = `mongodb${this.srvRecord ? '+srv' : ''}://${creds}${hosts}/${this.namespace}?${optionString}`;
+    const url = `mongodb${this.srvRecord ? '+srv' : ''}://${credentials}${hosts}/${this.namespace}?${optionString}`;
     return url;
   }
 }

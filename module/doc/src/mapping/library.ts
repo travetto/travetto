@@ -7,7 +7,8 @@ export const LIBRARIES = {
   Npm: { title: 'Npm', href: 'https://docs.npmjs.com/downloading-and-installing-node-js-and-npm' },
   Yarn: { title: 'Yarn', href: 'https://yarnpkg.com' },
   Pnpm: { title: 'Pnpm', href: 'https://pnpm.io/' },
-  Biome: { title: 'Biome', href: 'https://biomejs.dev/' },
+  Oxlint: { title: 'Oxlint', href: 'https://oxc.rs/docs/guide/usage/linter.html' },
+  Oxfmt: { title: 'Oxfmt', href: 'https://oxc.rs/docs/guide/usage/formatter.html' },
   Rollup: { title: 'Rollup', href: 'https://rollupjs.org/' },
   TSConfig: { title: 'TS Config', href: 'https://www.typescriptlang.org/docs/handbook/tsconfig-json.html' },
 
@@ -80,7 +81,6 @@ export const LIBRARIES = {
 
   // JWT
   JWT: { title: 'JWT', href: 'https://jwt.io/' },
-  NJWT: { title: 'njwt', href: 'https://github.com/jwtk/njwt' },
 
   // Email
   NodeMailer: { title: 'nodemailer', href: 'https://nodemailer.com/about/' },
@@ -90,8 +90,6 @@ export const LIBRARIES = {
 
   // Image
   ImageMagick: { title: 'ImageMagick', href: 'https://imagemagick.org/index.php' },
-  PngQuant: { title: 'pngquant', href: 'https://pngquant.org/' },
-  JpegOptim: { title: 'Jpegoptim', href: 'https://github.com/tjko/jpegoptim' },
   Sharp: { title: 'sharp', href: 'https://sharp.pixelplumbing.com/' },
 
   // Dbs
