@@ -82,7 +82,7 @@
 ## LLM Guidance & Integration (`@travetto/llm-support`)
 
 * **Guidance Workflows & Snippets**: Added LLM guidance workflows, snippets, and project bootstrap integration (`02e523e83a`).
-* **Auto-generated Prompt Files**: Automatically builds and injects `.agents/AGENTS.md` and `.cursorrules` during project bootstrapping (`0bf19fc21c`).
+* **Auto-generated Prompt Files**: Automatically builds and injects `.agents/AGENTS.md` during project bootstrapping (`0bf19fc21c`).
 
 ---
 

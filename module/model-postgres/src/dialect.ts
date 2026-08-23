@@ -2,6 +2,8 @@ import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext } fr
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
+/* cspell:words ILIKE regclass indexdef tablename pkey */
+
 export class PostgresDialect extends AbstractANSI99Dialect {
   returningSupport = true;
   suggestLikeOperator = 'ILIKE';
@@ -230,7 +232,6 @@ export class PostgresDialect extends AbstractANSI99Dialect {
   }
 
   getTableExistsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
-    /* cspell:disable */
     return {
       sql: `SELECT EXISTS (
         SELECT FROM pg_catalog.pg_class c
@@ -239,7 +240,6 @@ export class PostgresDialect extends AbstractANSI99Dialect {
       );`,
       parameters: [context.tableName]
     };
-    /* cspell:enable */
   }
 
   parseTableExistsResult(records: unknown[]): boolean {
@@ -247,14 +247,12 @@ export class PostgresDialect extends AbstractANSI99Dialect {
   }
 
   getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
-    /* cspell:disable */
     return {
       sql: `SELECT a.attname AS name, pg_catalog.format_type(a.atttypid, a.atttypmod) AS type
        FROM pg_catalog.pg_attribute a
        WHERE a.attrelid = $1::regclass AND a.attnum > 0 AND NOT a.attisdropped;`,
       parameters: [context.tableName]
     };
-    /* cspell:enable */
   }
 
   parseExistingColumns(records: unknown[]): Map<string, string> {
@@ -272,22 +270,18 @@ export class PostgresDialect extends AbstractANSI99Dialect {
   }
 
   getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
-    /* cspell:disable */
     return {
       sql: `SELECT indexname, indexdef FROM pg_indexes WHERE tablename = $1;`,
       parameters: [context.tableName]
     };
-    /* cspell:enable */
   }
 
   parseExistingIndexes(records: unknown[]): Map<string, string> {
-    /* cspell:disable */
     return new Map(
       castTo<{ indexname: string; indexdef: string }[]>(records)
         .filter(record => !record.indexname.endsWith('_pkey'))
         .map(record => [record.indexname, record.indexdef])
     );
-    /* cspell:enable */
   }
 
   getDropIndexSQL(context: TableContext, indexName: string): string {

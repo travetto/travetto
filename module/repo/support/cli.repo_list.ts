@@ -6,7 +6,7 @@ const write = (line: string): Promise<void> => new Promise(resolve => process.st
 /**
  * List workspace modules and their relationships.
  *
- * Output can be emitted as plain list, graphviz digraph, or JSON dependency
+ * Output can be emitted as plain list, Graphviz digraph, or JSON dependency
  * graph suitable for automation.
  */
 @CliCommand()

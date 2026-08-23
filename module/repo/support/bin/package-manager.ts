@@ -9,6 +9,8 @@ import { TerminalUtil } from '@travetto/terminal';
 
 export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease' | 'premajor' | 'preminor' | 'prepatch';
 
+/* cspell:words EOTP EPUBLISHCONFLICT ENEEDAUTH */
+
 /**
  * Utilities for working with package managers
  */
@@ -57,7 +59,6 @@ export class PackageManager {
    */
   static classifyPublishError(result: ExecutionResult): string {
     const errorText = ExecUtil.toString(result, 'any');
-
     if (/EOTP|one-time password|two-factor|OTP/i.test(errorText)) {
       return 'Two-factor authentication (OTP) failed or was missing.';
     }

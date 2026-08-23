@@ -2,8 +2,6 @@ import { Model } from '@travetto/model';
 
 import { sortedIndex } from '../../../src/indexes.ts';
 
-/* cspell:disable */
-
 // 60 'ap'-prefixed names, 60 'ba'-prefixed names, 20 'ch'-prefixed names = 140 total
 const AP_NAMES = [
   'apple',
@@ -43,8 +41,6 @@ const AP_NAMES = [
   'apices',
   'apiece2',
   'apish',
-  'apism',
-  'aply',
   'apneal',
   'apostate',
   'apothegm',
@@ -65,7 +61,9 @@ const AP_NAMES = [
   'apple13',
   'apple14',
   'apple15',
-  'apple16'
+  'apple16',
+  'apple17',
+  'apple18'
 ];
 
 const BA_NAMES = [

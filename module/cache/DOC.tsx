@@ -106,7 +106,7 @@ export const text = (
     </c.Section>
     <c.Section title="Extending the Cache Service">
       By design, the {CacheService} relies solely on the {d.module('Model')} module. Specifically on the {Links.Expiry}. This combines basic
-      support for CRUD as well as knowledge of how to manage expirable content. Any model service that honors these contracts is a valid
+      support for CRUD as well as knowledge of how to manage content that expires. Any model service that honors these contracts is a valid
       candidate to power the {CacheService}. The {CacheService} is expecting the model service to be registered using the{' '}
       {CacheModelSymbol.description!}:
       <c.Code title="Registering a Custom Model Source" src="doc/custom.ts" />
