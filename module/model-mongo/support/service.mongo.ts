@@ -2,6 +2,8 @@ import type { ServiceDescriptor } from '@travetto/cli';
 
 const version = process.env.MONGO_VERSION || '8.3';
 
+/* cspell:words orbstack pthread rseq glibc TUNABLES */
+
 export const service: ServiceDescriptor = {
   name: 'mongodb',
   version,

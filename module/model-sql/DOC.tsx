@@ -40,8 +40,8 @@ export const text = (
       Supported transaction modes include:
       <ul>
         <li>{d.field('required')} - Joins an active transaction if one exists, or starts a new top-level transaction.</li>
-        <li>{d.field('isolated')} - Begins a savepoint / nested transaction isolated from the surrounding context.</li>
-        <li>{d.field('force')} - Always creates a separate savepoint for nested operations.</li>
+        <li>{d.field('isolated')} - Begins a SAVEPOINT / nested transaction isolated from the surrounding context.</li>
+        <li>{d.field('force')} - Always creates a separate SAVEPOINT for nested operations.</li>
       </ul>
     </c.Section>
     <c.Section title="Bulk Operations">

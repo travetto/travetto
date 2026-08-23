@@ -79,8 +79,8 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
     // Register custom json_contains function for JSON containment checks
     db.function('json_contains', (target, candidate) => {
       try {
-        const tgt = JSON.parse(String(target));
-        const cand = JSON.parse(String(candidate));
+        const targetRaw = JSON.parse(String(target));
+        const candidateRaw = JSON.parse(String(candidate));
 
         const matches = (t: unknown, c: unknown): boolean => {
           if (c === null) {
@@ -103,7 +103,7 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
           return t === c;
         };
 
-        return matches(tgt, cand) ? 1 : 0;
+        return matches(targetRaw, candidateRaw) ? 1 : 0;
       } catch {
         return 0;
       }

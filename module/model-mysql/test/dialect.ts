@@ -11,6 +11,8 @@ import { BaseSQLDialectSuite } from '@travetto/model-sql/support/test/dialect.ts
 
 import { MysqlDialect } from '../src/dialect.ts';
 
+/* cspell:words parentmodel */
+
 @Schema()
 class ChildItem {
   name: string;

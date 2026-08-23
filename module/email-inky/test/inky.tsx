@@ -13,7 +13,7 @@ class InkyTest {
   async testInline() {
     const input = (
       <Container>
-        This is a link to <a href="#test">ZURB.com</a>.
+        This is a link to <a href="#test">blurb.com</a>.
       </Container>
     );
     const expected = (
@@ -21,7 +21,7 @@ class InkyTest {
         <tbody>
           <tr>
             <td>
-              This is a link to <a href="#test">ZURB.com</a>.
+              This is a link to <a href="#test">blurb.com</a>.
             </td>
           </tr>
         </tbody>
@@ -35,7 +35,7 @@ class InkyTest {
   async testSpecial() {
     const input = (
       <Container>
-        This is a link tö <a href="#test">ZURB.com</a>.
+        This is a link tö <a href="#test">blurb.com</a>.
       </Container>
     );
     const expected = (
@@ -43,7 +43,7 @@ class InkyTest {
         <tbody>
           <tr>
             <td>
-              This is a link tö <a href="#test">ZURB.com</a>.
+              This is a link tö <a href="#test">blurb.com</a>.
             </td>
           </tr>
         </tbody>

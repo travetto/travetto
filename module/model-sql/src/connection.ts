@@ -175,7 +175,7 @@ export abstract class SQLConnection<
   }
 
   /**
-   * Starts a transaction or savepoint
+   * Starts a transaction or SAVEPOINT
    */
   async startTransaction(transactionId?: string): Promise<void> {
     if (transactionId) {
@@ -191,7 +191,7 @@ export abstract class SQLConnection<
   }
 
   /**
-   * Commits the transaction or release savepoint
+   * Commits the transaction or release SAVEPOINT
    */
   async commitTransaction(transactionId?: string): Promise<void> {
     if (transactionId) {
@@ -204,7 +204,7 @@ export abstract class SQLConnection<
   }
 
   /**
-   * Rolls back the transaction or savepoint
+   * Rolls back the transaction or SAVEPOINT
    */
   async rollbackTransaction(transactionId?: string): Promise<void> {
     if (transactionId) {

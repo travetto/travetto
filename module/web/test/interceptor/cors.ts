@@ -54,7 +54,7 @@ class CorsInterceptorSuite {
     const interceptor = new CorsInterceptor();
     interceptor.config = CorsConfig.from({
       methods: ['GET', 'PATCH'],
-      origins: ['google.com', 'boogle.com'],
+      origins: ['google.com', 'google-fake.com'],
       headers: ['Content-Type', 'Accept'],
       credentials: true
     });
@@ -88,7 +88,7 @@ class CorsInterceptorSuite {
     const interceptor = new CorsInterceptor();
     interceptor.config = CorsConfig.from({
       methods: ['GET', 'PATCH'],
-      origins: ['google.com', 'boogle.com'],
+      origins: ['google.com', 'google-fake.com'],
       headers: ['Content-Type', 'Accept'],
       credentials: true
     });

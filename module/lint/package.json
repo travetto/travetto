@@ -8,7 +8,8 @@
     "travetto",
     "typescript",
     "oxlint",
-    "oxfmt"
+    "oxfmt",
+    "cspell"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",

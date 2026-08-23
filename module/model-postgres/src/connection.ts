@@ -75,7 +75,7 @@ export class PostgresConnection extends SQLConnection<PoolClient> {
   async execute<Type = unknown>(query: string, values?: unknown[]): Promise<{ count: number; records: Type[] }> {
     console.debug('Executing PostgreSQL query', { query, values });
 
-    // Handle dynamically built savepoint names that cannot be parameterized in Postgres
+    // Handle dynamically built SAVEPOINT names that cannot be parameterized in Postgres
     if (query.includes('SAVEPOINT') || query.includes('ROLLBACK TO') || query.includes('RELEASE SAVEPOINT')) {
       if (values && values.length > 0) {
         query = query.replace('$1', `"${values[0]}"`);

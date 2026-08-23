@@ -9,6 +9,7 @@ export const LIBRARIES = {
   Pnpm: { title: 'Pnpm', href: 'https://pnpm.io/' },
   Oxlint: { title: 'Oxlint', href: 'https://oxc.rs/docs/guide/usage/linter.html' },
   Oxfmt: { title: 'Oxfmt', href: 'https://oxc.rs/docs/guide/usage/formatter.html' },
+  CSpell: { title: 'CSpell', href: 'https://cspell.org' },
   Rollup: { title: 'Rollup', href: 'https://rollupjs.org/' },
   TSConfig: { title: 'TS Config', href: 'https://www.typescriptlang.org/docs/handbook/tsconfig-json.html' },
 

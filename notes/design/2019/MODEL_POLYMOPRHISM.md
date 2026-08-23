@@ -1,6 +1,6 @@
 # Polymorphism and model operations.
 
-The model framework supports at most one level of polylmorphism, multiple levels will be rejected by the `ModelRegistry`. 
+The model framework supports at most one level of polymorphism, multiple levels will be rejected by the `ModelRegistry`. 
 All operations will be against the base store as defined by the model definition (whatever it inherits from). Ids cannot be
 unique across types, but are unique to the base type (this is the way).  All endpoints that return entities, will be converted/
 cast on return appropriately.  If requesting a specific class (create, update, delete, upsert, bulk, etc.), on that population should be affected and returned.  When using an endpoint that affects/returns multiple records (list, query, updateByQuery, deleteByQuery, etc), you can either pass a base class or a sub class depending on your needs.
@@ -21,7 +21,7 @@ With respect to interfaces:
 - [*] list                 - Only return models of the matching type
 
 ## ModelBulkSupport
-- [@] processBulk   - Enforce the bulk operation aganist all type.  
+- [@] processBulk   - Enforce the bulk operation against all type.  
   - create/upsert - Same as `upsert` in `ModelCrudSupport`
   - delete        - Same as `delete` in `ModelBasicSupport`
   - update        - Same as `update` in `ModelCrudSupport`
@@ -42,4 +42,4 @@ With respect to interfaces:
 
 ## ModelQueryCrudSupport
 - [*] updateByQuery - Query should be limited to enforcing specific type
-- [*] delteByQuery  - Same as `updateByQuery`
+- [*] deleteByQuery  - Same as `updateByQuery`

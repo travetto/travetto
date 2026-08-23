@@ -191,10 +191,10 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
    * @param value Value to hash
    * @param salt The salt value
    * @param iterations Number of iterations on hashing
-   * @param keylen Length of hash
+   * @param keyLength Length of hash
    * @param digest Digest method
    */</span>
-  <span class="token keyword">static</span> <span class="token keyword">async</span> <span class="token function">generateHash</span><span class="token punctuation">(</span>value<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> salt<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> iterations <span class="token operator">=</span> <span class="token number">25000</span><span class="token punctuation">,</span> keylen <span class="token operator">=</span> <span class="token number">256</span><span class="token punctuation">,</span> digest <span class="token operator">=</span> <span class="token string">'SHA-256'</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token keyword">async</span> <span class="token function">generateHash</span><span class="token punctuation">(</span>value<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> salt<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> iterations <span class="token operator">=</span> <span class="token number">25000</span><span class="token punctuation">,</span> keyLength <span class="token operator">=</span> <span class="token number">256</span><span class="token punctuation">,</span> digest <span class="token operator">=</span> <span class="token string">'SHA-256'</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Generate a salted password, with the ability to validate the password
    *

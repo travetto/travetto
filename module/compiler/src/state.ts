@@ -30,7 +30,7 @@ export class CompilerState implements CompilerHost {
   #sourceDirectory = new Map<string, string>();
   #sourceToEntry = new Map<string, CompileStateEntry>();
   #outputToEntry = new Map<string, CompileStateEntry>();
-  #tscOutputFileToOuptut = new Map<string, string>();
+  #tscOutputFileToOutput = new Map<string, string>();
 
   #sourceContents = new Map<string, string | undefined>();
   #sourceFileObjects = new Map<string, SourceFile>();
@@ -198,7 +198,7 @@ export class CompilerState implements CompilerHost {
       case 'package-json': {
         const text = this.readFile(sourceFile)!;
         const finalText = CompilerUtil.rewritePackageJSON(this.#manifest, text);
-        const location = this.#tscOutputFileToOuptut.get(output) ?? output;
+        const location = this.#tscOutputFileToOutput.get(output) ?? output;
         this.#writeFile(location, finalText);
         this.#writeExternalTypings(location, finalText);
         break;
@@ -277,14 +277,14 @@ export class CompilerState implements CompilerHost {
     this.#sourceToEntry.set(sourceFile, entry);
     this.#sourceDirectory.set(sourceFolder, sourceFolder);
 
-    this.#tscOutputFileToOuptut.set(tscOutputFile, outputFile);
-    this.#tscOutputFileToOuptut.set(`${tscOutputFile}.map`, `${outputFile}.map`);
+    this.#tscOutputFileToOutput.set(tscOutputFile, outputFile);
+    this.#tscOutputFileToOutput.set(`${tscOutputFile}.map`, `${outputFile}.map`);
 
     if (!isTypings) {
       const srcBase = `${ManifestModuleUtil.withoutSourceExtension(tscOutputFile)}${ManifestModuleUtil.TYPINGS_EXT}`;
       const outBase = `${ManifestModuleUtil.withoutSourceExtension(outputFile)}${ManifestModuleUtil.TYPINGS_EXT}`;
-      this.#tscOutputFileToOuptut.set(`${srcBase}.map`, `${outBase}.map`);
-      this.#tscOutputFileToOuptut.set(srcBase, outBase);
+      this.#tscOutputFileToOutput.set(`${srcBase}.map`, `${outBase}.map`);
+      this.#tscOutputFileToOutput.set(srcBase, outBase);
     }
 
     return entry;
@@ -319,10 +319,10 @@ export class CompilerState implements CompilerHost {
     this.#sourceFiles.delete(sourceFile);
 
     const tscOutputDts = `${ManifestModuleUtil.withoutSourceExtension(entry.tscOutputFile)}${ManifestModuleUtil.TYPINGS_EXT}`;
-    this.#tscOutputFileToOuptut.delete(entry.tscOutputFile);
-    this.#tscOutputFileToOuptut.delete(`${entry.tscOutputFile}.map`);
-    this.#tscOutputFileToOuptut.delete(tscOutputDts);
-    this.#tscOutputFileToOuptut.delete(`${tscOutputDts}.map`);
+    this.#tscOutputFileToOutput.delete(entry.tscOutputFile);
+    this.#tscOutputFileToOutput.delete(`${entry.tscOutputFile}.map`);
+    this.#tscOutputFileToOutput.delete(tscOutputDts);
+    this.#tscOutputFileToOutput.delete(`${tscOutputDts}.map`);
   }
 
   getAllFiles(): string[] {
@@ -361,7 +361,7 @@ export class CompilerState implements CompilerHost {
     // JSX runtime shenanigans
     text = text.replace(/support\/jsx-runtime"/g, 'support/jsx-runtime.js"');
 
-    const location = this.#tscOutputFileToOuptut.get(outputFile) ?? outputFile;
+    const location = this.#tscOutputFileToOutput.get(outputFile) ?? outputFile;
 
     if (ManifestModuleUtil.TYPINGS_WITH_MAP_EXT_REGEX.test(outputFile)) {
       this.#writeExternalTypings(location, text, bom);

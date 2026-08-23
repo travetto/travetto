@@ -602,7 +602,7 @@ export class CompressConfig {
 ```
 
 #### EtagInterceptor
-[EtagInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/etag.ts#L41) by default, will tag all cacheable HTTP responses, when the response value/length is known. Streams, and other async data sources do not have a pre-defined length, and so are ineligible for etagging.
+[EtagInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/etag.ts#L41) by default, will tag all cacheable HTTP responses, when the response value/length is known. Streams, and other async data sources do not have a pre-defined length, and so are ineligible for "Etag"ing.
 
 **Code: ETag Config**
 ```typescript

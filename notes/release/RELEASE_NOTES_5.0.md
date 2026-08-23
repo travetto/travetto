@@ -18,14 +18,14 @@
 * Focused on being a layer between os and travetto
 * Defer to node implementations where possible (object util, stream util)
 * Moved data util to schema
-* Now owns all the core transformers, manifest doesnt
+* Now owns all the core transformers, manifest doesn't
    * Path should now be used as a standard import (swapped out at build time)
 * Reworked how we store file ids, and access them
    * No longer depending on manifest for registering classes
 * ResourceLoader is gone, only File Loader
 
 ### Compiler
-* Fixed bug that killed all userland processes
+* Fixed bug that killed all user-land processes
 
 ### VSCode / Tooling Overhaul
 * Fewer open calls to travetto cli

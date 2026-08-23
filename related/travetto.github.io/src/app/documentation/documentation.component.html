@@ -12,9 +12,9 @@
         }
         @if (page.subs) {
         <ul [class.toggled]="active[page.path]">
-          @for(subp of page.subs; track $index) {
-          <li [ngClass]="{active:hasFragment(subp.path)}">
-            <a [routerLink]="['/', 'docs', subp.path]">{{subp.title}}</a>
+          @for(subPage of page.subs; track $index) {
+          <li [ngClass]="{active:hasFragment(subPage.path)}">
+            <a [routerLink]="['/', 'docs', subPage.path]">{{subPage.title}}</a>
           </li>
           }
         </ul>

@@ -74,8 +74,7 @@ class LlmSupportExecuteTest {
       'resources/application.yml',
       'src/service/home.ts',
       'src/web/home.ts',
-      '.agents/AGENTS.md',
-      '.cursorrules'
+      '.agents/AGENTS.md'
     ]);
 
     const pkgRaw: {
@@ -115,8 +114,7 @@ class LlmSupportExecuteTest {
       'packages/app/resources/application.yml',
       'packages/app/src/service/home.ts',
       'packages/app/src/web/home.ts',
-      '.agents/AGENTS.md',
-      '.cursorrules'
+      '.agents/AGENTS.md'
     ]);
 
     const rootPkgRaw: {
@@ -161,8 +159,7 @@ class LlmSupportExecuteTest {
       'package.json',
       'packages/api/package.json',
       'packages/api/resources/application.yml',
-      '.agents/AGENTS.md',
-      '.cursorrules'
+      '.agents/AGENTS.md'
     ]);
 
     const rootPkgRaw: {

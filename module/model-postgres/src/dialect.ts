@@ -2,6 +2,8 @@ import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext } fr
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
+/* cspell:words ILIKE regclass indexdef tablename pkey */
+
 export class PostgresDialect extends AbstractANSI99Dialect {
   returningSupport = true;
   suggestLikeOperator = 'ILIKE';

@@ -90,9 +90,9 @@ export class S3ModelConfig {
     }
 
     if (!this.accessKeyId && !this.secretAccessKey) {
-      const creds = await fromIni({ profile: this.profile })();
-      this.accessKeyId = creds.accessKeyId;
-      this.secretAccessKey = creds.secretAccessKey;
+      const credentials = await fromIni({ profile: this.profile })();
+      this.accessKeyId = credentials.accessKeyId;
+      this.secretAccessKey = credentials.secretAccessKey;
     }
 
     this.config = {

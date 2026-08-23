@@ -7,15 +7,15 @@ import { BeforeAll, ShouldThrow, Suite, Test } from '@travetto/test';
 
 import { Accessors } from './models/binding.ts';
 import {
-  Aaaaz,
+  ParentClassA,
   Address,
   AllAs,
-  Bbbbz,
+  SubClassB,
   BigIntArrayMinMaxSchema,
   BigIntOptionalSchema,
   BigIntRangeSchema,
   BigIntSchema,
-  Ccccz,
+  SubClassC,
   CustomValidated,
   DateTestSchema,
   Grade,
@@ -160,7 +160,7 @@ class Validation {
   @Test('Regex Array')
   async regexArray() {
     const obj = StringMatches.from({
-      names: ['abc', 'ac', 'abbbc']
+      names: ['abc', 'ac', 'abbc']
     });
 
     await SchemaValidator.validate(StringMatches, obj);
@@ -232,7 +232,7 @@ class Validation {
 
   @Test()
   async verifyMultipleNested() {
-    const fields = SchemaRegistryIndex.get(Ccccz).getFields();
+    const fields = SchemaRegistryIndex.get(SubClassC).getFields();
     assert('c' in fields);
     assert('b' in fields);
     assert('a' in fields);
@@ -243,15 +243,15 @@ class Validation {
     const item = AllAs.from({
       all: [
         {
-          type: 'bbbbz',
+          type: 'B',
           a: true
         },
         {
-          type: 'ccccz',
+          type: 'C',
           a: false
         },
         {
-          type: 'aaaaz',
+          type: 'A',
           a: false
         }
       ]
@@ -259,9 +259,9 @@ class Validation {
 
     assert(item.all);
     assert(item.all.length === 3);
-    assert(item.all[0] instanceof Bbbbz);
-    assert(item.all[1] instanceof Ccccz);
-    assert(item.all[2] instanceof Aaaaz);
+    assert(item.all[0] instanceof SubClassB);
+    assert(item.all[1] instanceof SubClassC);
+    assert(item.all[2] instanceof ParentClassA);
 
     await assert.rejects(() => SchemaValidator.validate(AllAs, item));
 
@@ -355,15 +355,15 @@ class Validation {
     const item = {
       all: [
         {
-          type: 'bbbbz',
+          type: 'B',
           a: true
         },
         {
-          type: 'ccccz',
+          type: 'C',
           a: false
         },
         {
-          type: 'aaaaz',
+          type: 'B',
           a: false
         }
       ]

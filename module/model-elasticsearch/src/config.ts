@@ -26,7 +26,7 @@ export class ElasticsearchModelConfig {
    */
   namespace = 'app';
   /**
-   * Allow storage modifification
+   * Allow storage modification
    */
   modifyStorage?: boolean;
   /**

@@ -34,8 +34,8 @@ In development mode, storage modifications are applied dynamically in real time 
 Transaction state is tracked seamlessly using <a class="module-link" routerLink="/docs/context" title="Async-aware state management, maintaining context across asynchronous calls.">Async Context</a>. Methods can be wrapped using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-sql/src/connection.ts#L18">Transactional</a> decorator to run operations within a managed transaction.<br><br>
 Supported transaction modes include:
 <ul> <li><code class="item field">required</code> - Joins an active transaction if one exists, or starts a new top-level transaction.</li>
-<li><code class="item field">isolated</code> - Begins a savepoint / nested transaction isolated from the surrounding context.</li>
-<li><code class="item field">force</code> - Always creates a separate savepoint for nested operations.</li>
+<li><code class="item field">isolated</code> - Begins a SAVEPOINT / nested transaction isolated from the surrounding context.</li>
+<li><code class="item field">force</code> - Always creates a separate SAVEPOINT for nested operations.</li>
 </ul>
 
 <h2 id="bulk-operations">Bulk Operations</h2>

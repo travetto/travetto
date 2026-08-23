@@ -74,7 +74,7 @@ Travetto 8.0 stays at the cutting edge of the Node.js and TypeScript ecosystems:
 
 To support modern AI-assisted development, `@travetto/llm-support` now natively embeds guidance workflows directly into the project lifecycle.
 
-During project bootstrapping (`npx @travetto/scaffold`), Travetto automatically generates `.agents/AGENTS.md` and `.cursorrules` tailor-made for your project structure. This provides AI coding assistants (such as Antigravity, Cursor, and Copilot) with exact framework conventions, routing rules, and decorator context out of the box.
+During project bootstrapping (`npx @travetto/scaffold`), Travetto automatically generates `.agents/AGENTS.md` tailor-made for your project structure. This provides AI coding assistants (such as Antigravity, Cursor, and Copilot) with exact framework conventions, routing rules, and decorator context out of the box.
 
 ---
 

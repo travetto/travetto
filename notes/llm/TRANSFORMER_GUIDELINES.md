@@ -21,9 +21,9 @@ Transformers are **not** runtime code. They execute during the compilation phase
 3. **Initialization**: The manager creates a `VisitorFactory` with the collected transformers and a `TypeChecker`.
 4. **Execution**: For each source file, the visitor walks the AST. At each node, it:
    - Determines the node type (`class`, `method`, `property`, `call`, `file`, etc.)
-   - Runs `before` phase handlers (both untargeted and decorator-targeted)
+   - Runs `before` phase handlers (both global and decorator-targeted)
    - Recursively visits child nodes
-   - Runs `after` phase handlers (both untargeted and decorator-targeted)
+   - Runs `after` phase handlers (both global and decorator-targeted)
 5. **Finalization**: Added statements are inserted, imports are resolved, and the modified source file is emitted.
 
 ### Key Classes
@@ -150,9 +150,9 @@ static {
 }
 ```
 
-### Targeting: Untargeted vs Decorator-Targeted
+### Targeting: Global vs Decorator-Targeted
 
-**Untargeted handlers** (no `target` parameter) run on **every** node of the specified type. They are registered under the `__all__` key internally. Examples:
+**Global handlers** (no `target` parameter) run on **every** node of the specified type. They are registered under the `__all__` key internally. Examples:
 - `console.log` rewriting (runs on every `call` expression)
 - Dynamic import normalization (runs on every `call` expression)
 - File-level transformations (runs on every `file`)

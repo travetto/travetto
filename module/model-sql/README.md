@@ -32,8 +32,8 @@ Transaction state is tracked seamlessly using [Async Context](https://github.com
 
 Supported transaction modes include:
    *  `required` - Joins an active transaction if one exists, or starts a new top-level transaction.
-   *  `isolated` - Begins a savepoint / nested transaction isolated from the surrounding context.
-   *  `force` - Always creates a separate savepoint for nested operations.
+   *  `isolated` - Begins a SAVEPOINT / nested transaction isolated from the surrounding context.
+   *  `force` - Always creates a separate SAVEPOINT for nested operations.
 
 ## Bulk Operations
 Bulk operations (`processBulk`) batch insert, delete, and update statements for high performance. Bulk updates utilize standard ANSI SQL `CASE ... WHEN` constructs to update multiple records in a single database query across all SQL engines.

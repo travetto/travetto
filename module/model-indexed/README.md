@@ -253,7 +253,13 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
     S extends SortedIndexSelection<T>,
     K extends KeyedIndexSelection<T>,
     B extends SortedIndexSelectionType<T, S> & string
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]>;
+  >(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    prefix: B,
+    options?: ModelIndexedSearchOptions
+  ): Promise<T[]>;
 }
 ```
 

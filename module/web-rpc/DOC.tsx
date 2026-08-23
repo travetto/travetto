@@ -19,7 +19,7 @@ export const text = async () => {
         <c.CliHelpExecution commandClass={CliWebRpcCommand} />
         <c.SubSection title="Example">
           <c.Code title="Example Controller" src="./doc-exec/src/controller.ts" />
-          This controller is a basic example of an invokable endpoint.
+          This controller is a basic example of an invocable endpoint.
           <c.Config title="resources/application.yml" src="./doc-exec/resources/application.yml" />
           The configuration, while not necessary, makes it easy to consistently configure and generate the appropriate client.
           <c.Terminal

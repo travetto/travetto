@@ -74,7 +74,7 @@ Usage: repo:publish [options]
 Description:
   Publish unpublished workspace modules to the package registry.
 
-  The command performs a publishability scan first, then publishes candidates.
+  The command performs a staleness scan first, then publishes candidates.
   Dry-run mode is enabled by default.
 
 Options:
@@ -107,7 +107,7 @@ Usage: repo:list [options]
 Description:
   List workspace modules and their relationships.
 
-  Output can be emitted as plain list, graphviz digraph, or JSON dependency
+  Output can be emitted as plain list, Graphviz digraph, or JSON dependency
   graph suitable for automation.
 
 Options:

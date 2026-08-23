@@ -53,7 +53,7 @@
    * No longer takes responsibility for calling process.spawn
    * Expects a process to be provided, and will work with it after the fact
    * No longer defaulting options (env, stdio, cwd, etc), and is completely in the hands of the caller
-* Shutdown was converted into gracefulshutdown and is aimed at supporting the expected flow.  No longer interjecting into explicit kills and the complexity that brought.
+* Shutdown was converted into graceful shutdown and is aimed at supporting the expected flow.  No longer interjecting into explicit kills and the complexity that brought.
 * Startup minimizes the information needed to run, and streamlined console/debug relationship.  
 
 ### Pack

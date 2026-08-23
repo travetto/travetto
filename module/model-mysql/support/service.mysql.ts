@@ -2,6 +2,8 @@ import type { ServiceDescriptor } from '@travetto/cli';
 
 const version = process.env.MYSQL_VERSION || '9.7';
 
+/* cspell:words innodb binlog */
+
 export const service: ServiceDescriptor = {
   name: 'mysql',
   version,

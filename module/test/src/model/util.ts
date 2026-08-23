@@ -88,7 +88,7 @@ export class TestModelUtil {
       status: 'errored',
       errored: 1,
       tests: {
-        impport: asFull<TestResult>({
+        import: asFull<TestResult>({
           ...common,
           status: 'errored',
           assertions: [
