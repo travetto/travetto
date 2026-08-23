@@ -64,7 +64,7 @@ export class MysqlDialectSuite extends BaseSQLDialectSuite {
     const existingIndexRecords = [
       {
         name: 'idx_parentmodel_child_age',
-        tableName: 'parentModel',
+        tableName: 'parentmodel',
         nonUnique: 1,
         indexColumns: "(CAST(`child`->>'$.age' AS DECIMAL))"
       }
@@ -75,7 +75,7 @@ export class MysqlDialectSuite extends BaseSQLDialectSuite {
     assert(parsedIndexes.has('idx_parentmodel_child_age'));
 
     const indexDefinition = parsedIndexes.get('idx_parentmodel_child_age')!;
-    assert(indexDefinition.includes('CREATE INDEX `idx_parentmodel_child_age` ON `parentModel`'));
+    assert(indexDefinition.includes('CREATE INDEX `idx_parentmodel_child_age` ON `parentmodel`'));
     assert(indexDefinition.includes("(CAST(`child`->>'$.age' AS DECIMAL))"));
 
     const normalizedDefinition = this.dialect.normalizeIndexDefinition(indexDefinition);
