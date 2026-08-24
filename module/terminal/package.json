@@ -1,6 +1,6 @@
 {
   "name": "@travetto/terminal",
-  "version": "8.0.0-alpha.22",
+  "version": "8.0.0-alpha.23",
   "type": "module",
   "description": "General terminal support",
   "keywords": [
@@ -25,7 +25,7 @@
     "directory": "module/terminal"
   },
   "dependencies": {
-    "@travetto/runtime": "^8.0.0-alpha.22",
+    "@travetto/runtime": "^8.0.0-alpha.23",
     "chalk": "^6.0.0"
   },
   "travetto": {
