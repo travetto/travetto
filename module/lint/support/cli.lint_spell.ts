@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 
 import { CliCommand, type CliCommandShape, CliModuleUtil, CliParseUtil } from '@travetto/cli';
-import { Env, ExecUtil, Runtime } from '@travetto/runtime';
+import { Env, ExecUtil } from '@travetto/runtime';
 
 /**
  * Run cspell spell checker for the workspace or changed files.
@@ -17,6 +17,9 @@ export class LintSpellCommand implements CliCommandShape {
   /** Since a specific git commit */
   since?: string;
 
+  /** Output format as JSON */
+  json = false;
+
   finalize(): void {
     Env.DEBUG.set(false);
   }
@@ -25,14 +28,18 @@ export class LintSpellCommand implements CliCommandShape {
     const paths = await CliModuleUtil.findChangedPaths({ changed: this.changed, since: this.since, logError: true });
 
     if ((this.changed || this.since) && paths.length === 0) {
-      console.log('No changed files found to check.');
+      if (!this.json) {
+        console.log('No changed files found to check.');
+      }
       return;
     }
+
+    const reporterFlags = this.json ? ['--reporter', '@cspell/cspell-json-reporter'] : ['--no-progress', '--no-summary'];
 
     const state = CliParseUtil.getState(this);
     const targetPaths = paths.length > 0 ? paths : ['.'];
     const result = await ExecUtil.getResult(
-      spawn('npx', ['cspell', 'lint', ...targetPaths, ...(state?.unknown ?? [])], {
+      spawn('npx', ['cspell', 'lint', ...reporterFlags, ...targetPaths, ...(state?.unknown ?? [])], {
         stdio: 'inherit'
       }),
       { catch: true }
