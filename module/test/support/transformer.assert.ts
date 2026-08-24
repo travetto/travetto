@@ -18,9 +18,9 @@ export const DEEP_EQUALS_MAPPING: Record<string, string> = {
 };
 
 /**
- * Typescript optoken to assert methods
+ * Typescript op token to assert methods
  */
-export const OPTOKEN_ASSERT = {
+export const OP_TOKEN_ASSERT = {
   InKeyword: 'in',
   EqualsEqualsToken: 'equal',
   ExclamationEqualsToken: 'notEqual',
@@ -46,7 +46,7 @@ const METHODS: Record<string, Function[]> = {
   test: [RegExp]
 };
 
-const OP_TOKEN_TO_NAME = new Map<number, keyof typeof OPTOKEN_ASSERT>();
+const OP_TOKEN_TO_NAME = new Map<number, keyof typeof OP_TOKEN_ASSERT>();
 
 const AssertSymbol = Symbol();
 const IsTestSymbol = Symbol();
@@ -96,21 +96,21 @@ export class AssertTransformer {
   }
 
   /**
-   * Resolves optoken to syntax kind.  Relies on `ts`
+   * Resolves op token to syntax kind.  Relies on `ts`
    */
   static lookupOpToken(key: number): string | undefined {
     if (OP_TOKEN_TO_NAME.size === 0) {
       Object.keys(ts.SyntaxKind)
         .filter(kind => !/^\d+$/.test(kind))
-        .filter((kind): kind is keyof typeof OPTOKEN_ASSERT => !/^(Last|First)/.test(kind))
+        .filter((kind): kind is keyof typeof OP_TOKEN_ASSERT => !/^(Last|First)/.test(kind))
         .forEach(kind => {
           OP_TOKEN_TO_NAME.set(ts.SyntaxKind[kind], kind);
         });
     }
 
     const name = OP_TOKEN_TO_NAME.get(key)!;
-    if (name in OPTOKEN_ASSERT) {
-      return OPTOKEN_ASSERT[name];
+    if (name in OP_TOKEN_ASSERT) {
+      return OP_TOKEN_ASSERT[name];
     } else {
       return;
     }

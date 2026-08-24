@@ -14,7 +14,7 @@ import type {
   CompilerStateType
 } from '@travetto/compiler/src/types.ts';
 
-import { Activatible } from '../../../core/activation.ts';
+import { ActivateOn } from '../../../core/activation.ts';
 import { Log } from '../../../core/log.ts';
 import { Workspace } from '../../../core/workspace.ts';
 import { BaseFeature } from '../../base.ts';
@@ -28,7 +28,7 @@ const SUB_LOG_REGEX = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(.\d{3})?Z?\s+(inf
 /**
  * Workspace Compilation Support
  */
-@Activatible({ module: '@travetto/compiler', command: 'trvc', priority: 1, alwaysActivate: true })
+@ActivateOn({ module: '@travetto/compiler', command: 'trvc', priority: 1, alwaysActivate: true })
 export class CompilerWatchFeature extends BaseFeature {
   #status = vscode.window.createStatusBarItem('travetto.build', vscode.StatusBarAlignment.Left, 1000);
   #log = new Log('travetto.compiler');

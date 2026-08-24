@@ -32,13 +32,9 @@ export class LintSpellCommand implements CliCommandShape {
     const state = CliParseUtil.getState(this);
     const targetPaths = paths.length > 0 ? paths : ['.'];
     const result = await ExecUtil.getResult(
-      spawn(
-        'npx',
-        ['cspell', 'lint', ...targetPaths, ...(state?.unknown ?? [])],
-        {
-          stdio: 'inherit'
-        }
-      ),
+      spawn('npx', ['cspell', 'lint', ...targetPaths, ...(state?.unknown ?? [])], {
+        stdio: 'inherit'
+      }),
       { catch: true }
     );
 

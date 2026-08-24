@@ -16,7 +16,7 @@ export class LoginTestController {
       {
         name: 'local',
         authenticate(req, options) {
-          if ('letmein' in req.query) {
+          if ('let_me_in' in req.query) {
             return {};
           } else {
             throw new Error(`Unknown user ${req.query}`);

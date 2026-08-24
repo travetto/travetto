@@ -105,8 +105,8 @@ export abstract class StandardWebServerSuite extends BaseWebSuite {
   }
 
   @Test()
-  async testRenderable() {
-    const response = await this.request({ context: { httpMethod: 'GET', path: '/test/renderable' } });
+  async testResponseString() {
+    const response = await this.request({ context: { httpMethod: 'GET', path: '/test/responseString' } });
     assert(response.body === 'hello');
   }
 

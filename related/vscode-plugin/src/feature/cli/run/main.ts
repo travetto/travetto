@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 import { JSONUtil } from '@travetto/runtime';
 
-import { Activatible } from '../../../core/activation.ts';
+import { ActivateOn } from '../../../core/activation.ts';
 import { RunUtil } from '../../../core/run.ts';
 import { ActionStorage } from '../../../core/storage.ts';
 import type { EnvDict, TargetEvent } from '../../../core/types.ts';
@@ -14,7 +14,7 @@ import { CliRunUtil } from './util.ts';
 type Recent = { mode: 'recent'; count: number };
 type All = { mode: 'all' };
 
-@Activatible({ module: '@travetto/cli', command: 'run' })
+@ActivateOn({ module: '@travetto/cli', command: 'run' })
 export class CliRunFeature extends BaseFeature {
   #storage: ActionStorage<RunChoice>;
 

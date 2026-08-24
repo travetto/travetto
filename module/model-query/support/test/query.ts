@@ -66,7 +66,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     const results = await service.query(Person, { where: { name: { $regex: /\bomb.*/i } } });
     assert(results.length === 4);
 
-    const results2 = await service.query(Person, { where: { name: { $regex: /\bmbo.*/i } } });
+    const results2 = await service.query(Person, { where: { name: { $regex: /\b.?mbo.*/i } } });
     assert(results2.length === 0);
 
     const results3 = await service.query(Person, { where: { name: { $regex: /\bomb.*/ } } });

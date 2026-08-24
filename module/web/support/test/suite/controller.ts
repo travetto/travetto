@@ -64,9 +64,9 @@ export class TestController {
     return CodecUtil.fromUTF8String('hello');
   }
 
-  @Get('/renderable')
+  @Get('/responseString')
   @Produces('text/plain')
-  getRenderable(): WebResponse<string> {
+  getResponseString(): WebResponse<string> {
     return new WebResponse({ body: 'hello' });
   }
 

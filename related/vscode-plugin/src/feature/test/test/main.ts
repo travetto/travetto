@@ -8,7 +8,7 @@ import type { IndexedModule, ManifestModule } from '@travetto/manifest';
 import { CodecUtil, Env } from '@travetto/runtime';
 import type { TestWatchEvent } from '@travetto/test';
 
-import { Activatible } from '../../../core/activation.ts';
+import { ActivateOn } from '../../../core/activation.ts';
 import { RunUtil } from '../../../core/run.ts';
 import { Workspace } from '../../../core/workspace.ts';
 import { BaseFeature } from '../../base.ts';
@@ -17,7 +17,7 @@ import { WorkspaceResultsManager } from './workspace.ts';
 /**
  * Test Runner Feature
  */
-@Activatible({ module: '@travetto/test', command: 'test' })
+@ActivateOn({ module: '@travetto/test', command: 'test' })
 class TestRunnerFeature extends BaseFeature {
   #server: ChildProcess | undefined;
   #consumer: WorkspaceResultsManager;

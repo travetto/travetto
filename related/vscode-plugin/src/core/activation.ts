@@ -74,7 +74,7 @@ class $ActivationManager {
 
 export const ActivationManager = new $ActivationManager();
 
-export function Activatible(config: ActivationTargetConfig) {
+export function ActivateOn(config: ActivationTargetConfig) {
   return (cls: ActivationFactory): void => {
     ActivationManager.add(cls, config);
   };

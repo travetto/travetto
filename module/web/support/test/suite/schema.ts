@@ -85,8 +85,8 @@ class SchemaAPI {
     return new SimpleUser();
   }
 
-  @Get('/renderable/:age')
-  async renderable(age: number) {
+  @Get('/responseString/:age')
+  async responseString(age: number) {
     return WebResponse.redirect('google.com');
   }
 
@@ -289,8 +289,8 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   }
 
   @Test()
-  async verifyRenderable() {
-    const responseType = getEndpointResponse('/renderable/:age', 'GET');
+  async verifyResponseString() {
+    const responseType = getEndpointResponse('/responseString/:age', 'GET');
     assert(responseType === undefined);
   }
 

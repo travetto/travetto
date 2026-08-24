@@ -1,3 +1,4 @@
+<!-- cspell:words transactionality -->
 # Backlogged Requests
 
 ## Refine Development Restart

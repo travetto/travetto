@@ -2,11 +2,11 @@ import * as vscode from 'vscode';
 
 import { Env } from '@travetto/runtime';
 
-import { Activatible } from '../../../core/activation.ts';
+import { ActivateOn } from '../../../core/activation.ts';
 import { RunUtil } from '../../../core/run.ts';
 import { BaseFeature } from '../../base.ts';
 
-@Activatible({ module: '@travetto/terminal', command: 'terminal', alwaysActivate: true })
+@ActivateOn({ module: '@travetto/terminal', command: 'terminal', alwaysActivate: true })
 export class TerminalThemeFeature extends BaseFeature {
   darkBackground(): boolean {
     switch (vscode.window.activeColorTheme.kind) {

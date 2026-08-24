@@ -22,7 +22,7 @@ function hasEscapedName(node: ts.Node): node is ts.Node & { name: { escapedText:
   return !!node && 'name' in node && typeof node.name === 'object' && !!node.name && 'escapedText' in node.name && !!node.name.escapedText;
 }
 
-function isRedefinableDeclaration(node: ts.Node): node is ts.InterfaceDeclaration | ts.ClassDeclaration | ts.FunctionDeclaration {
+function canRedeclare(node: ts.Node): node is ts.InterfaceDeclaration | ts.ClassDeclaration | ts.FunctionDeclaration {
   return ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node);
 }
 
@@ -353,7 +353,7 @@ export class TransformerState implements State {
         // if in same file suffix with location
         let child: ts.Node = tgt;
         while (child && !ts.isSourceFile(child)) {
-          if (isRedefinableDeclaration(child) || ts.isMethodDeclaration(child) || ts.isParameter(child)) {
+          if (canRedeclare(child) || ts.isMethodDeclaration(child) || ts.isParameter(child)) {
             if (child.name) {
               unique.push(child.name.getText());
             }

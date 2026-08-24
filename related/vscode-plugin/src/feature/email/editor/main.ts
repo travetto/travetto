@@ -7,7 +7,7 @@ import { CodecUtil } from '@travetto/runtime';
 
 import type { EditorResponse } from '@travetto/email-compiler/support/bin/types.ts';
 
-import { Activatible } from '../../../core/activation.ts';
+import { ActivateOn } from '../../../core/activation.ts';
 import { Workspace } from '../../../core/workspace.ts';
 import { BaseFeature } from '../../base.ts';
 
@@ -17,7 +17,7 @@ const isTemplate = (file?: string): boolean => /[.]email[.]tsx$/.test(file ?? ''
 /**
  * Email Template Feature
  */
-@Activatible({ module: '@travetto/email-compiler', command: 'editor' })
+@ActivateOn({ module: '@travetto/email-compiler', command: 'editor' })
 export class EmailCompilerFeature extends BaseFeature {
   #server: ChildProcess | undefined;
   #format?: 'text' | 'html';
