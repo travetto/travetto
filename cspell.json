@@ -3,6 +3,7 @@
     "@travetto/lint/resources/cspell.json"
   ],
   "ignorePaths": [
+    "archived/**",
     "*.svg",
     "**/gen/**/*.html",
     "**/DOC.html",
@@ -24,6 +25,7 @@
     "jsxs",
     "letmein",
     "olivegreen",
+    "oxlint",
     "optoken",
     "pgcrypto",
     "preid",
