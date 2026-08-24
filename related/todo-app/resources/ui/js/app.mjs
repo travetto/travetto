@@ -53,7 +53,7 @@ Vue.component('app', {
     }
   },
   template: `
-  <section class="todoapp">
+  <section class="todo-app">
     <header class="header">
       <h1>Todo</h1>
       <input class="new-todo" autofocus autocomplete="off" placeholder="What needs to be done?" v-model="creating" @keyup.enter="create(creating)">

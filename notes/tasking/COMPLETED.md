@@ -1,3 +1,5 @@
+<!-- cspell:words upath stuckness -->
+
 Completed Tasks
 ==============
 

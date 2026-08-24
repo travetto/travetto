@@ -4,20 +4,20 @@
   ],
   "ignorePaths": [
     "archived/**",
-    "*.svg",
     "**/gen/**/*.html",
     "**/DOC.html",
     "**/README.md",
     "**/*.generated.*",
-    "**/*.tpl"
+    "**/*.tpl",
+    "**/*.svg"
   ],
   "words": [
     "ABCDEFGHJIJKLMNOPQRSTUVWXYZ",
     "addgroup",
     "adduser",
     "asar",
-    "bgcolor",
     "bmbo",
+    "embracinglife",
     "contenttype",
     "dbconfig",
     "estypes",

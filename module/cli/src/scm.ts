@@ -38,6 +38,7 @@ export class CliScmUtil {
    * @returns
    */
   static async findLastRelease(): Promise<string | undefined> {
+    // cspell:words oneline
     const result = await ExecUtil.getResult(spawn('git', ['log', '--pretty=oneline'], { cwd: Runtime.workspace.path }));
     return result.stdout
       .split(/\n/)

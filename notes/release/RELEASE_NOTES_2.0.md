@@ -1,5 +1,7 @@
 # Travetto 2.0 Release Notes
 
+<~- cspell:words nodesh direnv -->
+
 > Release 2.0.0: 2021-02-01 -- Model Rewrite
 
 ### Major and Breaking Changes 

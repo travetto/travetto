@@ -468,6 +468,7 @@ li {
             color: hsl(40, 90%, 60%);
           }
 
+          /* cspell:words atrule */
           &.atrule,
           &.attr-value,
           &.keyword {
