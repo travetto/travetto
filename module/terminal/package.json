@@ -1,6 +1,6 @@
 {
   "name": "@travetto/terminal",
-  "version": "8.0.0-alpha.23",
+  "version": "8.0.0-alpha.24",
   "private": false,
   "description": "General terminal support",
   "keywords": [
@@ -29,7 +29,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/runtime": "^8.0.0-alpha.23",
+    "@travetto/runtime": "^8.0.0-alpha.24",
     "chalk": "^6.0.0"
   },
   "travetto": {

@@ -1,6 +1,6 @@
 {
   "name": "@travetto/email-inky",
-  "version": "8.0.0-alpha.29",
+  "version": "8.0.0-alpha.30",
   "description": "Email Inky templating module",
   "keywords": [
     "email",
@@ -31,14 +31,14 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/config": "^8.0.0-alpha.26",
-    "@travetto/di": "^8.0.0-alpha.23",
-    "@travetto/email": "^8.0.0-alpha.27",
-    "@travetto/runtime": "^8.0.0-alpha.23",
+    "@travetto/config": "^8.0.0-alpha.27",
+    "@travetto/di": "^8.0.0-alpha.24",
+    "@travetto/email": "^8.0.0-alpha.28",
+    "@travetto/runtime": "^8.0.0-alpha.24",
     "foundation-emails": "^2.5.1"
   },
   "devDependencies": {
-    "@travetto/email-compiler": "^8.0.0-alpha.29"
+    "@travetto/email-compiler": "^8.0.0-alpha.30"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

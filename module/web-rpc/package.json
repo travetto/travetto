@@ -1,6 +1,6 @@
 {
   "name": "@travetto/web-rpc",
-  "version": "8.0.0-alpha.33",
+  "version": "8.0.0-alpha.34",
   "description": "RPC support for a Web Application",
   "keywords": [
     "client",
@@ -30,9 +30,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/config": "^8.0.0-alpha.26",
-    "@travetto/schema": "^8.0.0-alpha.26",
-    "@travetto/web": "^8.0.0-alpha.29"
+    "@travetto/config": "^8.0.0-alpha.27",
+    "@travetto/schema": "^8.0.0-alpha.27",
+    "@travetto/web": "^8.0.0-alpha.30"
   },
   "travetto": {
     "displayName": "Web RPC Support"

@@ -1,6 +1,6 @@
 {
   "name": "@travetto/pack",
-  "version": "8.0.0-alpha.26",
+  "version": "8.0.0-alpha.27",
   "description": "Code packing utilities",
   "keywords": [
     "docker",
@@ -33,12 +33,12 @@
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^1.0.0",
-    "@travetto/runtime": "^8.0.0-alpha.23",
-    "@travetto/terminal": "^8.0.0-alpha.23",
+    "@travetto/runtime": "^8.0.0-alpha.24",
+    "@travetto/terminal": "^8.0.0-alpha.24",
     "rollup": "^4.62.5"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.32"
+    "@travetto/cli": "^8.0.0-alpha.33"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

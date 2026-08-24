@@ -1,6 +1,6 @@
 {
   "name": "@travetto/email-nodemailer",
-  "version": "8.0.0-alpha.28",
+  "version": "8.0.0-alpha.29",
   "description": "Email transmission module.",
   "keywords": [
     "email",
@@ -28,7 +28,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/email": "^8.0.0-alpha.27",
+    "@travetto/email": "^8.0.0-alpha.28",
     "@types/nodemailer": "^8.0.1",
     "nodemailer": "^9.0.5"
   },

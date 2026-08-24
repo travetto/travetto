@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-dynamodb",
-  "version": "8.0.0-alpha.30",
+  "version": "8.0.0-alpha.31",
   "description": "DynamoDB backing for the travetto model module.",
   "keywords": [
     "dynamodb",
@@ -30,12 +30,12 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1116.0",
-    "@travetto/config": "^8.0.0-alpha.26",
-    "@travetto/model": "^8.0.0-alpha.27",
-    "@travetto/model-indexed": "^8.0.0-alpha.29"
+    "@travetto/config": "^8.0.0-alpha.27",
+    "@travetto/model": "^8.0.0-alpha.28",
+    "@travetto/model-indexed": "^8.0.0-alpha.30"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.32"
+    "@travetto/cli": "^8.0.0-alpha.33"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
