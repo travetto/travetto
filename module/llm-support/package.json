@@ -1,23 +1,22 @@
 {
   "name": "@travetto/llm-support",
   "version": "8.0.0-alpha.34",
-  "type": "module",
   "description": "Task-oriented synthesized LLM guidance for Travetto modules.",
   "keywords": [
-    "travetto",
-    "llm",
     "docs",
-    "guidance"
+    "guidance",
+    "llm",
+    "travetto"
   ],
-  "main": "__index__.ts",
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
   },
-  "scripts": {
-    "prepack": "trv llm:support:inline"
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/llm-support"
   },
   "files": [
     "__index__.ts",
@@ -25,14 +24,18 @@
     "support",
     "resources"
   ],
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/llm-support"
+  "type": "module",
+  "main": "__index__.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prepack": "trv llm:support:inline"
   },
   "dependencies": {
+    "@travetto/cli": "^8.0.0-alpha.32",
     "@travetto/runtime": "^8.0.0-alpha.23",
-    "@travetto/schema": "^8.0.0-alpha.26",
-    "@travetto/cli": "^8.0.0-alpha.32"
+    "@travetto/schema": "^8.0.0-alpha.26"
   },
   "devDependencies": {
     "@travetto/test": "^8.0.0-alpha.25"
@@ -43,8 +46,5 @@
     "roles": [
       "build"
     ]
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

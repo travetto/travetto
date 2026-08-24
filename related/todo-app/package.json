@@ -1,7 +1,7 @@
 {
   "name": "@travetto/todo-app",
   "version": "0.0.0",
-  "type": "module",
+  "private": true,
   "description": "",
   "keywords": [
     "travetto",
@@ -10,12 +10,16 @@
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
   },
   "repository": {
     "url": "git+https://github.com/travetto/travetto.git",
     "directory": "related/todo-app"
+  },
+  "type": "module",
+  "publishConfig": {
+    "access": "restricted"
   },
   "scripts": {
     "test": "trv test",
@@ -47,9 +51,5 @@
   },
   "travetto": {
     "displayName": "Todo Application"
-  },
-  "private": true,
-  "publishConfig": {
-    "access": "restricted"
   }
 }

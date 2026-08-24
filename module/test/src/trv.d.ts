@@ -1,4 +1,4 @@
-import { TimeSpan } from '@travetto/runtime';
+import type { TimeSpan } from '@travetto/runtime';
 
 declare module '@travetto/runtime' {
   interface EnvData {

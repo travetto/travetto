@@ -1,29 +1,32 @@
 {
   "name": "@travetto/model-redis",
   "version": "8.0.0-alpha.29",
-  "type": "module",
   "description": "Redis backing for the travetto model module.",
   "keywords": [
-    "typescript",
-    "travetto",
     "model",
-    "redis"
+    "redis",
+    "travetto",
+    "typescript"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/model-redis"
   },
   "files": [
     "__index__.ts",
     "src",
     "support"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/model-redis"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@redis/client": "^6.2.1",
@@ -41,8 +44,5 @@
   },
   "travetto": {
     "displayName": "Redis Model Support"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

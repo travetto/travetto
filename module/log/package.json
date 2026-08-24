@@ -1,27 +1,30 @@
 {
   "name": "@travetto/log",
   "version": "8.0.0-alpha.26",
-  "type": "module",
   "description": "Logging framework that integrates at the console.log level.",
   "keywords": [
-    "typescript",
+    "logging",
     "travetto",
-    "logging"
+    "typescript"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/log"
   },
   "files": [
     "__index__.ts",
     "src"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/log"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/config": "^8.0.0-alpha.26",
@@ -30,8 +33,5 @@
   },
   "travetto": {
     "displayName": "Logging"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

@@ -1,29 +1,33 @@
 {
   "name": "@travetto/auth-web-session",
   "version": "8.0.0-alpha.30",
-  "type": "module",
+  "private": false,
   "description": "Web authentication session integration support for the Travetto framework",
   "keywords": [
     "authentication",
     "session",
-    "web",
     "travetto",
-    "typescript"
+    "typescript",
+    "web"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/auth-web-session"
   },
   "files": [
     "__index__.ts",
     "src"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/auth-web-session"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/auth": "^8.0.0-alpha.23",
@@ -34,9 +38,5 @@
   },
   "travetto": {
     "displayName": "Web Auth Session"
-  },
-  "private": false,
-  "publishConfig": {
-    "access": "public"
   }
 }

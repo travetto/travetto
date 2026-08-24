@@ -1,26 +1,29 @@
 {
   "name": "@travetto/repo",
   "version": "8.0.0-alpha.28",
-  "type": "module",
   "description": "Monorepo utilities",
   "keywords": [
+    "monorepo",
     "travetto",
-    "typescript",
-    "monorepo"
+    "typescript"
   ],
-  "main": "__index__.ts",
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/repo"
   },
   "files": [
     "support"
   ],
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/repo"
+  "type": "module",
+  "main": "__index__.ts",
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/worker": "^8.0.0-alpha.24"
@@ -35,8 +38,5 @@
   },
   "travetto": {
     "displayName": "Repo"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

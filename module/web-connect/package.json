@@ -1,28 +1,31 @@
 {
   "name": "@travetto/web-connect",
   "version": "8.0.0-alpha.29",
-  "type": "module",
   "description": "Web integration for Connect-Like Resources",
   "keywords": [
-    "web",
     "connect",
     "travetto",
-    "typescript"
+    "typescript",
+    "web"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/web-connect"
   },
   "files": [
     "__index__.ts",
     "src"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/web-connect"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/web": "^8.0.0-alpha.29"
@@ -41,8 +44,5 @@
   },
   "travetto": {
     "displayName": "Web Connect Support"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

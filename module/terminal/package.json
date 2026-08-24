@@ -1,28 +1,32 @@
 {
   "name": "@travetto/terminal",
   "version": "8.0.0-alpha.23",
-  "type": "module",
+  "private": false,
   "description": "General terminal support",
   "keywords": [
-    "terminal",
     "ansi256",
+    "terminal",
     "travetto",
     "typescript"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/terminal"
   },
   "files": [
     "__index__.ts",
     "src"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/terminal"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/runtime": "^8.0.0-alpha.23",
@@ -30,9 +34,5 @@
   },
   "travetto": {
     "displayName": "Terminal"
-  },
-  "private": false,
-  "publishConfig": {
-    "access": "public"
   }
 }

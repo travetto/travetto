@@ -1,31 +1,34 @@
 {
   "name": "@travetto/test",
   "version": "8.0.0-alpha.25",
-  "type": "module",
   "description": "Declarative test framework",
   "keywords": [
-    "unit-testing",
+    "ast-transformations",
+    "decorators",
     "testing",
     "travetto",
     "typescript",
-    "decorators",
-    "ast-transformations"
+    "unit-testing"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/test"
   },
   "files": [
     "__index__.ts",
     "src",
     "support"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/test"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/registry": "^8.0.0-alpha.23",
@@ -52,8 +55,5 @@
     "roles": [
       "test"
     ]
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

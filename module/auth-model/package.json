@@ -1,7 +1,7 @@
 {
   "name": "@travetto/auth-model",
   "version": "8.0.0-alpha.27",
-  "type": "module",
+  "private": false,
   "description": "Authentication model support for the Travetto framework",
   "keywords": [
     "authentication",
@@ -12,18 +12,22 @@
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/auth-model"
   },
   "files": [
     "__index__.ts",
     "src",
     "support"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/auth-model"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/auth": "^8.0.0-alpha.23",
@@ -39,9 +43,5 @@
   },
   "travetto": {
     "displayName": "Authentication Model"
-  },
-  "private": false,
-  "publishConfig": {
-    "access": "public"
   }
 }

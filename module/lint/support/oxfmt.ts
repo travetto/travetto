@@ -26,25 +26,7 @@ export const baseOxfmtConfig: OxfmtConfig = {
     ],
     groups: ['builtin', 'external', 'travetto-package', 'travetto-subpath', ['parent', 'sibling', 'index']]
   },
-  ignorePatterns: [
-    '**/node_modules/**',
-    '**/.trv/**',
-    '**/out/**',
-    '**/ui/**',
-    '**/api-client/**',
-    '**/*.d.ts',
-    '**/*.md',
-    '**/*.html',
-    '**/*.yml',
-    '**/*.yaml',
-    '**/package.json',
-    '**/package-lock.json',
-    '**/fixtures/**',
-    '**/resources/**',
-    '**/DOC.html',
-    '**/README.md',
-    '**/.vscode/**'
-  ]
+  ignorePatterns: ['**/fixtures/**', '**/resources/**']
 };
 
 export function oxfmtConfig(overrides: Partial<OxfmtConfig> = {}): OxfmtConfig {

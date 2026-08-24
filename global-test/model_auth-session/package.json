@@ -1,7 +1,8 @@
 {
   "name": "@travetto-test/model_auth-session",
-  "type": "module",
   "version": "0.0.0",
+  "private": true,
+  "type": "module",
   "dependencies": {
     "@travetto/auth-session": "^8.0.0-alpha.27",
     "@travetto/model-dynamodb": "^8.0.0-alpha.30",
@@ -14,6 +15,5 @@
     "@travetto/model-s3": "^8.0.0-alpha.29",
     "@travetto/model-sqlite": "^8.0.0-alpha.33"
   },
-  "travetto": {},
-  "private": true
+  "travetto": {}
 }

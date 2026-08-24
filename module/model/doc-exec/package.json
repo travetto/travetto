@@ -2,10 +2,10 @@
   "name": "@travetto-doc/model",
   "type": "module",
   "dependencies": {
+    "@travetto/cli": "^8.0.0-alpha.0",
     "@travetto/model": "^8.0.0-alpha.0",
     "@travetto/model-mysql": "^8.0.0-alpha.0",
-    "@travetto/registry": "^8.0.0-alpha.0",
-    "@travetto/cli": "^8.0.0-alpha.0"
+    "@travetto/registry": "^8.0.0-alpha.0"
   },
   "devDependencies": {
     "@travetto/compiler": "^8.0.0-alpha.0"

@@ -1,29 +1,32 @@
 {
   "name": "@travetto/web-aws-lambda",
   "version": "8.0.0-alpha.30",
-  "type": "module",
   "description": "Web APIs entry point support for AWS Lambdas.",
   "keywords": [
-    "web",
     "aws-lambda",
     "travetto",
-    "typescript"
+    "typescript",
+    "web"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/web-aws-lambda"
   },
   "files": [
     "__index__.ts",
     "src",
     "support"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/web-aws-lambda"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/web": "^8.0.0-alpha.29",
@@ -47,8 +50,5 @@
   },
   "travetto": {
     "displayName": "Web AWS Lambda"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

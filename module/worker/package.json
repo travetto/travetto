@@ -1,11 +1,10 @@
 {
   "name": "@travetto/worker",
   "version": "8.0.0-alpha.24",
-  "type": "module",
   "description": "Process management utilities, with a focus on inter-process communication",
   "keywords": [
-    "exec",
     "child-process",
+    "exec",
     "ipc",
     "travetto",
     "typescript"
@@ -13,17 +12,21 @@
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/worker"
   },
   "files": [
     "__index__.ts",
     "src"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/worker"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/runtime": "^8.0.0-alpha.23",
@@ -31,8 +34,5 @@
   },
   "travetto": {
     "displayName": "Worker"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

@@ -1,29 +1,32 @@
 {
   "name": "@travetto/schema-faker",
   "version": "8.0.0-alpha.26",
-  "type": "module",
   "description": "Data generation for schema-registered objects.",
   "keywords": [
+    "decorators",
     "faker",
     "schema",
-    "typescript",
     "travetto",
-    "decorators"
+    "typescript"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/schema-faker"
   },
   "files": [
     "__index__.ts",
     "src"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/schema-faker"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@faker-js/faker": "^10.6.0",
@@ -31,8 +34,5 @@
   },
   "travetto": {
     "displayName": "Schema Faker"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

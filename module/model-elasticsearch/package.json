@@ -1,31 +1,34 @@
 {
   "name": "@travetto/model-elasticsearch",
   "version": "8.0.0-alpha.31",
-  "type": "module",
   "description": "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.",
   "keywords": [
-    "elasticsearch",
     "data-modeling",
-    "real-time",
+    "elasticsearch",
     "model",
+    "real-time",
     "travetto",
     "typescript"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/model-elasticsearch"
   },
   "files": [
     "__index__.ts",
     "support",
     "src"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/model-elasticsearch"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@elastic/elasticsearch": "^9.5.0",
@@ -44,8 +47,5 @@
   },
   "travetto": {
     "displayName": "Elasticsearch Model Source"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

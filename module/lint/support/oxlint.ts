@@ -47,19 +47,7 @@ export const baseOxlintConfig: OxlintConfig = {
       }
     }
   ],
-  ignorePatterns: [
-    '**/node_modules/**',
-    '**/.trv/**',
-    '**/out/**',
-    '**/ui/**',
-    '**/api-client/**',
-    '**/*.d.ts',
-    '**/fixtures/**',
-    '**/resources/**',
-    '**/DOC.html',
-    '**/README.md',
-    '**/.vscode/**'
-  ]
+  ignorePatterns: ['**/fixtures/**', '**/resources/**']
 };
 
 export function oxlintConfig(overrides: Partial<OxlintConfig> = {}): OxlintConfig {

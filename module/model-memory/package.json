@@ -1,29 +1,32 @@
 {
   "name": "@travetto/model-memory",
   "version": "8.0.0-alpha.29",
-  "type": "module",
   "description": "Memory backing for the travetto model module.",
   "keywords": [
     "datastore",
     "memory",
     "schema",
-    "typescript",
-    "travetto"
+    "travetto",
+    "typescript"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/model-memory"
   },
   "files": [
     "__index__.ts",
     "src"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/model-memory"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/config": "^8.0.0-alpha.26",
@@ -46,8 +49,5 @@
   },
   "travetto": {
     "displayName": "Memory Model Support"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

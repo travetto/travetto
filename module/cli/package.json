@@ -1,7 +1,6 @@
 {
   "name": "@travetto/cli",
   "version": "8.0.0-alpha.32",
-  "type": "module",
   "description": "CLI infrastructure for Travetto framework",
   "keywords": [
     "cli",
@@ -11,8 +10,15 @@
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/cli"
+  },
+  "bin": {
+    "trv": "bin/trv.js"
   },
   "files": [
     "__index__.ts",
@@ -20,13 +26,10 @@
     "src",
     "support"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "bin": {
-    "trv": "bin/trv.js"
-  },
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/cli"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/schema": "^8.0.0-alpha.26",
@@ -35,8 +38,5 @@
   "travetto": {
     "displayName": "Command Line Interface",
     "workspaceInclude": true
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

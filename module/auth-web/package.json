@@ -1,30 +1,34 @@
 {
   "name": "@travetto/auth-web",
   "version": "8.0.0-alpha.29",
-  "type": "module",
+  "private": false,
   "description": "Web authentication integration support for the Travetto framework",
   "keywords": [
     "authentication",
-    "web",
-    "travetto",
     "decorators",
-    "typescript"
+    "travetto",
+    "typescript",
+    "web"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/auth-web"
   },
   "files": [
     "__index__.ts",
     "src",
     "support"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/auth-web"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/auth": "^8.0.0-alpha.23",
@@ -42,9 +46,5 @@
   },
   "travetto": {
     "displayName": "Web Auth"
-  },
-  "private": false,
-  "publishConfig": {
-    "access": "public"
   }
 }

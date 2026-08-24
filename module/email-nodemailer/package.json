@@ -1,7 +1,6 @@
 {
   "name": "@travetto/email-nodemailer",
   "version": "8.0.0-alpha.28",
-  "type": "module",
   "description": "Email transmission module.",
   "keywords": [
     "email",
@@ -12,17 +11,21 @@
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/email-nodemailer"
   },
   "files": [
     "__index__.ts",
     "src"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/email-nodemailer"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/email": "^8.0.0-alpha.27",
@@ -34,8 +37,5 @@
   },
   "travetto": {
     "displayName": "Email Nodemailer Support"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

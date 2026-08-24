@@ -1,13 +1,13 @@
 {
   "name": "@travetto-test/model_web-upload",
-  "type": "module",
   "version": "0.0.0",
+  "private": true,
+  "type": "module",
   "dependencies": {
     "@travetto/model": "^8.0.0-alpha.27",
     "@travetto/web-aws-lambda": "^8.0.0-alpha.30",
     "@travetto/web-http": "^8.0.0-alpha.30",
     "@travetto/web-upload": "^8.0.0-alpha.29"
   },
-  "travetto": {},
-  "private": true
+  "travetto": {}
 }

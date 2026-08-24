@@ -1,7 +1,6 @@
 {
   "name": "@travetto/auth-session",
   "version": "8.0.0-alpha.27",
-  "type": "module",
   "description": "Session provider for the travetto auth module.",
   "keywords": [
     "auth",
@@ -12,18 +11,22 @@
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/auth-session"
   },
   "files": [
     "__index__.ts",
     "src",
     "support"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/auth-session"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/auth": "^8.0.0-alpha.23",
@@ -40,8 +43,5 @@
   },
   "travetto": {
     "displayName": "Auth Session"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

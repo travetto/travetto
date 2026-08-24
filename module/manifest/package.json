@@ -1,43 +1,43 @@
 {
   "name": "@travetto/manifest",
   "version": "8.0.0-alpha.12",
-  "type": "module",
   "description": "Support for project indexing, manifesting, along with file watching",
   "keywords": [
-    "path",
-    "package",
     "manifest",
+    "package",
+    "path",
     "travetto",
     "typescript"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/manifest"
   },
   "files": [
     "__index__.ts",
     "src"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "engines": {
-    "node": ">=25.7.0"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@types/node": "^26.2.0"
   },
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/manifest"
+  "engines": {
+    "node": ">=25.7.0"
   },
   "travetto": {
     "displayName": "Manifest",
     "doc": {
       "baseUrl": "https://github.com/travetto/travetto/tree/main"
     }
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

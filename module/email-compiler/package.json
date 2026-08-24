@@ -1,7 +1,6 @@
 {
   "name": "@travetto/email-compiler",
   "version": "8.0.0-alpha.29",
-  "type": "module",
   "description": "Email compiling module",
   "keywords": [
     "email",
@@ -12,8 +11,12 @@
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/email-compiler"
   },
   "files": [
     "__index__.ts",
@@ -21,10 +24,10 @@
     "!resources",
     "support"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/email-compiler"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@css-inline/css-inline": "^0.21.1",
@@ -51,8 +54,5 @@
     "roles": [
       "build"
     ]
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

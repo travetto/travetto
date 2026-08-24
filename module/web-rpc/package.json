@@ -1,30 +1,33 @@
 {
   "name": "@travetto/web-rpc",
   "version": "8.0.0-alpha.33",
-  "type": "module",
   "description": "RPC support for a Web Application",
   "keywords": [
-    "web",
-    "rpc",
     "client",
+    "rpc",
     "travetto",
-    "typescript"
+    "typescript",
+    "web"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/web-rpc"
   },
   "files": [
     "__index__.ts",
     "src",
     "support"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/web-rpc"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/config": "^8.0.0-alpha.26",
@@ -33,8 +36,5 @@
   },
   "travetto": {
     "displayName": "Web RPC Support"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

@@ -1,30 +1,33 @@
 {
   "name": "@travetto/context",
   "version": "8.0.0-alpha.23",
-  "type": "module",
   "description": "Async-aware state management, maintaining context across asynchronous calls.",
   "keywords": [
     "async-hooks",
-    "decorators",
     "async-local-storage",
+    "decorators",
     "travetto",
     "typescript"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/context"
   },
   "files": [
     "__index__.ts",
     "src",
     "support"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/context"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/di": "^8.0.0-alpha.23"
@@ -39,8 +42,5 @@
   },
   "travetto": {
     "displayName": "Async Context"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

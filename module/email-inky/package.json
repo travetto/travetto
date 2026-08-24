@@ -1,7 +1,6 @@
 {
   "name": "@travetto/email-inky",
   "version": "8.0.0-alpha.29",
-  "type": "module",
   "description": "Email Inky templating module",
   "keywords": [
     "email",
@@ -13,8 +12,12 @@
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/email-inky"
   },
   "files": [
     "__index__.ts",
@@ -22,10 +25,10 @@
     "resources/email/inky.wrapper.html",
     "src"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/email-inky"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/config": "^8.0.0-alpha.26",
@@ -44,8 +47,5 @@
   },
   "travetto": {
     "displayName": "Email Inky Templates"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

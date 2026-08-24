@@ -1,7 +1,7 @@
 {
   "name": "@travetto/compiler",
   "version": "8.0.0-alpha.25",
-  "type": "module",
+  "private": false,
   "description": "The compiler infrastructure for the Travetto framework",
   "keywords": [
     "compiler",
@@ -11,8 +11,15 @@
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/compiler"
+  },
+  "bin": {
+    "trvc": "bin/trvc.js"
   },
   "files": [
     "__index__.ts",
@@ -21,13 +28,10 @@
     "support",
     "tsconfig.trv.json"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "bin": {
-    "trvc": "bin/trvc.js"
-  },
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/compiler"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@parcel/watcher": "^2.6.0",
@@ -47,9 +51,5 @@
     "roles": [
       "compile"
     ]
-  },
-  "private": false,
-  "publishConfig": {
-    "access": "public"
   }
 }

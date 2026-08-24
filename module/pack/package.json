@@ -1,29 +1,32 @@
 {
   "name": "@travetto/pack",
   "version": "8.0.0-alpha.26",
-  "type": "module",
   "description": "Code packing utilities",
   "keywords": [
-    "travetto",
-    "typescript",
+    "docker",
     "packing",
-    "docker"
+    "travetto",
+    "typescript"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
   },
-  "main": "__index__.ts",
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/pack"
+  },
   "files": [
     "__index__.ts",
     "src",
     "support"
   ],
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/pack"
+  "type": "module",
+  "main": "__index__.ts",
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@rollup/plugin-commonjs": "^29.0.3",
@@ -47,8 +50,5 @@
     "roles": [
       "build"
     ]
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

@@ -1,29 +1,33 @@
 {
   "name": "@travetto/auth-web-passport",
   "version": "8.0.0-alpha.29",
+  "private": false,
   "description": "Web authentication integration support for the Travetto framework",
   "keywords": [
     "authentication",
-    "web",
+    "decorators",
     "passport",
     "travetto",
-    "decorators",
-    "typescript"
+    "typescript",
+    "web"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/auth-web-passport"
   },
   "files": [
     "__index__.ts",
     "src"
   ],
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/auth-web-passport"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/auth": "^8.0.0-alpha.23",
@@ -40,9 +44,5 @@
   },
   "travetto": {
     "displayName": "Web Auth Passport"
-  },
-  "private": false,
-  "publishConfig": {
-    "access": "public"
   }
 }

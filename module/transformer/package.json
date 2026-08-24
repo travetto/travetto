@@ -1,28 +1,31 @@
 {
   "name": "@travetto/transformer",
   "version": "8.0.0-alpha.18",
-  "type": "module",
   "description": "Functionality for AST transformations, with transformer registration, and general utils",
   "keywords": [
-    "typescript",
     "ast-transformations",
-    "travetto"
+    "travetto",
+    "typescript"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/transformer"
   },
   "files": [
     "__index__.ts",
     "src",
     "support"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/transformer"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/manifest": "^8.0.0-alpha.12",
@@ -34,8 +37,5 @@
     "roles": [
       "compile"
     ]
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

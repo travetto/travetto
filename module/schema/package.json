@@ -1,31 +1,34 @@
 {
   "name": "@travetto/schema",
   "version": "8.0.0-alpha.26",
-  "type": "module",
   "description": "Data type registry for runtime validation, reflection and binding.",
   "keywords": [
-    "schema",
     "ast-transformations",
-    "validation",
-    "typescript",
+    "decorators",
+    "schema",
     "travetto",
-    "decorators"
+    "typescript",
+    "validation"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/schema"
   },
   "files": [
     "__index__.ts",
     "src",
     "support"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/schema"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/registry": "^8.0.0-alpha.23"
@@ -40,8 +43,5 @@
   },
   "travetto": {
     "displayName": "Schema"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

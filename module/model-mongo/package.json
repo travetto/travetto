@@ -1,29 +1,32 @@
 {
   "name": "@travetto/model-mongo",
   "version": "8.0.0-alpha.31",
-  "type": "module",
   "description": "Mongo backing for the travetto model module.",
   "keywords": [
+    "database",
     "mongo",
     "travetto",
-    "database",
     "typescript"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/model-mongo"
   },
   "files": [
     "__index__.ts",
     "src",
     "support"
   ],
+  "type": "module",
   "main": "__index__.ts",
-  "repository": {
-    "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/model-mongo"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@travetto/config": "^8.0.0-alpha.26",
@@ -42,8 +45,5 @@
   },
   "travetto": {
     "displayName": "MongoDB Model Support"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }
