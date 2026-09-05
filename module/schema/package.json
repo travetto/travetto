@@ -1,6 +1,6 @@
 {
   "name": "@travetto/schema",
-  "version": "8.0.0",
+  "version": "8.0.1",
   "description": "Data type registry for runtime validation, reflection and binding.",
   "keywords": [
     "ast-transformations",
@@ -31,10 +31,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/registry": "^8.0.0"
+    "@travetto/registry": "^8.0.1"
   },
   "peerDependencies": {
-    "@travetto/transformer": "^8.0.0"
+    "@travetto/transformer": "^8.0.1"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {

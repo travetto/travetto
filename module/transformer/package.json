@@ -1,6 +1,6 @@
 {
   "name": "@travetto/transformer",
-  "version": "8.0.0",
+  "version": "8.0.1",
   "description": "Functionality for AST transformations, with transformer registration, and general utils",
   "keywords": [
     "ast-transformations",
@@ -28,7 +28,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/manifest": "^8.0.0",
+    "@travetto/manifest": "^8.0.1",
     "tslib": "^2.8.1",
     "typescript": "^6.0.3"
   },

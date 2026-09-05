@@ -1,6 +1,6 @@
 {
   "name": "@travetto/web",
-  "version": "8.0.0",
+  "version": "8.0.1",
   "description": "Declarative support for creating Web Applications",
   "keywords": [
     "decorators",
@@ -29,18 +29,18 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/config": "^8.0.0",
-    "@travetto/context": "^8.0.0",
-    "@travetto/di": "^8.0.0",
-    "@travetto/registry": "^8.0.0",
-    "@travetto/runtime": "^8.0.0",
-    "@travetto/schema": "^8.0.0",
+    "@travetto/config": "^8.0.1",
+    "@travetto/context": "^8.0.1",
+    "@travetto/di": "^8.0.1",
+    "@travetto/registry": "^8.0.1",
+    "@travetto/runtime": "^8.0.1",
+    "@travetto/schema": "^8.0.1",
     "find-my-way": "^9.9.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0",
-    "@travetto/test": "^8.0.0",
-    "@travetto/transformer": "^8.0.0"
+    "@travetto/cli": "^8.0.1",
+    "@travetto/test": "^8.0.1",
+    "@travetto/transformer": "^8.0.1"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {

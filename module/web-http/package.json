@@ -1,6 +1,6 @@
 {
   "name": "@travetto/web-http",
-  "version": "8.0.0",
+  "version": "8.0.1",
   "description": "Web HTTP Server Support",
   "keywords": [
     "http",
@@ -30,11 +30,11 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/web": "^8.0.0"
+    "@travetto/web": "^8.0.1"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0",
-    "@travetto/test": "^8.0.0"
+    "@travetto/cli": "^8.0.1",
+    "@travetto/test": "^8.0.1"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
