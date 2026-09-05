@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "@travetto/compiler": "^8.0.0",
+    "@travetto/cli": "^8.0.0",
     "@travetto/doc": "^8.0.0",
     "@travetto/email-compiler": "^8.0.0",
     "@travetto/lint": "^8.0.0",
