@@ -49,32 +49,28 @@ export class S3ModelConfig {
       this.bucket ??= 'app';
     }
 
-    if (!this.publicBaseUrl) {
-      if (this.endpoint?.includes('localhost')) {
-        this.publicBaseUrl = this.endpoint;
-      } else {
-        this.publicBaseUrl = `https://${this.bucket}.s3.amazonaws.com`;
-      }
-    }
-
     if (!this.accessKeyId && !this.secretAccessKey) {
       const credentials = await fromIni({ profile: this.profile })();
       this.accessKeyId = credentials.accessKeyId;
       this.secretAccessKey = credentials.secretAccessKey;
     }
 
+    const hostname = this.endpoint && URL.canParse(this.endpoint) ? new URL(this.endpoint).hostname : '';
+    const isAws = !this.endpoint || hostname === 'amazonaws.com' || hostname.endsWith('.amazonaws.com');
+
     this.config = {
       ...(this.config ?? {}),
       region: this.region,
-      endpoint: this.endpoint,
+      endpoint: this.endpoint || undefined,
+      forcePathStyle: this.config?.forcePathStyle ?? !isAws,
       credentials: {
         accessKeyId: this.accessKeyId,
         secretAccessKey: this.secretAccessKey
       }
     };
 
-    if (!Runtime.production && this.endpoint.includes('localhost')) {
-      this.config.forcePathStyle ??= true;
+    if (!this.publicBaseUrl) {
+      this.publicBaseUrl = isAws ? `https://${this.bucket}.s3.amazonaws.com` : `${this.endpoint.replace(/\/+$/, '')}/${this.bucket}`;
     }
   }
 }
