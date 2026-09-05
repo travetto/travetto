@@ -16,9 +16,7 @@ export class S3ModelConfig {
   @Required(false)
   bucket: string; // S3 bucket
   @Required(false)
-  endpoint?: string; // Endpoint url
-  @Required(false)
-  forcePathStyle?: boolean; // Use path-style URLs
+  endpoint: string; // Endpoint url
 
   @EnvVar('AWS_ACCESS_KEY_ID')
   accessKeyId: string = '';
@@ -42,7 +40,7 @@ export class S3ModelConfig {
   publicBaseUrl: string;
 
   /**
-   * Produces the s3 config from the provided details, post construction
+   * Produces the s3 config from the provide details, post construction
    */
   @PostConstruct()
   async finalizeConfig(): Promise<void> {
@@ -51,46 +49,27 @@ export class S3ModelConfig {
       this.bucket ??= 'app';
     }
 
-    if (!this.endpoint) {
-      this.endpoint = undefined;
-    }
-
-    this.forcePathStyle ??= Boolean(this.endpoint);
-
-    if (this.publicBaseUrl) {
-      this.publicBaseUrl = this.publicBaseUrl.replace(/\/+$/, '');
-    } else if (this.forcePathStyle && this.endpoint) {
-      this.publicBaseUrl = `${this.endpoint.replace(/\/+$/, '')}/${this.bucket}`;
-    } else {
-      this.publicBaseUrl = `https://${this.bucket}.s3.amazonaws.com`;
-    }
-
     if (!this.accessKeyId && !this.secretAccessKey) {
-      try {
-        const credentials = await fromIni({ profile: this.profile })();
-        this.accessKeyId = credentials.accessKeyId;
-        this.secretAccessKey = credentials.secretAccessKey;
-      } catch {
-        if (!Runtime.production) {
-          this.accessKeyId = 'dummy';
-          this.secretAccessKey = 'dummy';
-        }
-      }
+      const credentials = await fromIni({ profile: this.profile })();
+      this.accessKeyId = credentials.accessKeyId;
+      this.secretAccessKey = credentials.secretAccessKey;
     }
+
+    const isAws = !this.endpoint || this.endpoint.includes('amazonaws.com');
 
     this.config = {
       ...(this.config ?? {}),
       region: this.region,
-      endpoint: this.endpoint,
-      forcePathStyle: this.forcePathStyle,
-      ...(this.accessKeyId && this.secretAccessKey
-        ? {
-            credentials: {
-              accessKeyId: this.accessKeyId,
-              secretAccessKey: this.secretAccessKey
-            }
-          }
-        : {})
+      endpoint: this.endpoint || undefined,
+      forcePathStyle: this.config?.forcePathStyle ?? !isAws,
+      credentials: {
+        accessKeyId: this.accessKeyId,
+        secretAccessKey: this.secretAccessKey
+      }
     };
+
+    if (!this.publicBaseUrl) {
+      this.publicBaseUrl = isAws ? `https://${this.bucket}.s3.amazonaws.com` : `${this.endpoint.replace(/\/+$/, '')}/${this.bucket}`;
+    }
   }
 }
