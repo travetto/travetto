@@ -1,6 +1,6 @@
 {
   "name": "@travetto/repo",
-  "version": "8.0.0-alpha.29",
+  "version": "8.0.0",
   "description": "Monorepo utilities",
   "keywords": [
     "monorepo",
@@ -26,10 +26,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/worker": "^8.0.0-alpha.25"
+    "@travetto/worker": "^8.0.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.33"
+    "@travetto/cli": "^8.0.0"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

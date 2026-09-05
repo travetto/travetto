@@ -1,6 +1,6 @@
 {
   "name": "@travetto/auth",
-  "version": "8.0.0-alpha.24",
+  "version": "8.0.0",
   "private": false,
   "description": "Authentication support for the Travetto framework",
   "keywords": [
@@ -28,7 +28,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/context": "^8.0.0-alpha.24"
+    "@travetto/context": "^8.0.0"
   },
   "travetto": {
     "displayName": "Authentication"

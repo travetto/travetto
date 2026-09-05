@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-redis",
-  "version": "8.0.0-alpha.30",
+  "version": "8.0.0",
   "description": "Redis backing for the travetto model module.",
   "keywords": [
     "model",
@@ -30,12 +30,12 @@
   },
   "dependencies": {
     "@redis/client": "^6.2.1",
-    "@travetto/config": "^8.0.0-alpha.27",
-    "@travetto/model": "^8.0.0-alpha.28",
-    "@travetto/model-indexed": "^8.0.0-alpha.30"
+    "@travetto/config": "^8.0.0",
+    "@travetto/model": "^8.0.0",
+    "@travetto/model-indexed": "^8.0.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.33"
+    "@travetto/cli": "^8.0.0"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

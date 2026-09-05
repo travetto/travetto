@@ -1,6 +1,6 @@
 {
   "name": "@travetto/openapi",
-  "version": "8.0.0-alpha.30",
+  "version": "8.0.0",
   "description": "OpenAPI integration support for the Travetto framework",
   "keywords": [
     "decorators",
@@ -30,14 +30,14 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/config": "^8.0.0-alpha.27",
-    "@travetto/schema": "^8.0.0-alpha.27",
-    "@travetto/web": "^8.0.0-alpha.30",
+    "@travetto/config": "^8.0.0",
+    "@travetto/schema": "^8.0.0",
+    "@travetto/web": "^8.0.0",
     "openapi3-ts": "^4.6.1",
     "yaml": "^2.9.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.0-alpha.33"
+    "@travetto/cli": "^8.0.0"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
