@@ -110,5 +110,6 @@ Description:
 Options:
   -c, --changed         Only check changed modules (default: false)
   -s, --since <string>  Since a specific git commit
+  -j, --json            Output format as JSON (default: false)
   --help                display help for command
 ```

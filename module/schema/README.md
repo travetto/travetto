@@ -47,19 +47,16 @@ From this schema, the registry would have the following information:
 ```yaml
 User:
   fields:
-    -
-      name: name
+    - name: name
       type": string
       required: true
-    -
-      name: age
+    - name: age
       type: number
       required: true
-    -
-      name: favoriteFood
+    - name: favoriteFood
       type: string
       required: false
-      allowedValues: ["pizza", "burrito", "salad" ]
+      allowedValues: ['pizza', 'burrito', 'salad']
 ```
 
 ### Fields

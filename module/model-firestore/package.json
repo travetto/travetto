@@ -29,7 +29,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@google-cloud/firestore": "^9.0.0",
+    "@google-cloud/firestore": "^9.0.1",
     "@travetto/config": "^8.0.0",
     "@travetto/model": "^8.0.0",
     "@travetto/model-indexed": "^8.0.0",

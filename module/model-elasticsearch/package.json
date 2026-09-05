@@ -31,7 +31,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "^9.5.0",
+    "@elastic/elasticsearch": "^9.5.1",
     "@travetto/config": "^8.0.0",
     "@travetto/model": "^8.0.0",
     "@travetto/model-indexed": "^8.0.0",

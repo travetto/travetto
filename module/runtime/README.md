@@ -83,35 +83,35 @@ The functionality we support for testing and retrieving environment information 
 **Code: Base Known Environment Flags**
 ```typescript
 interface EnvData {
-    /** 
+    /**
      * The node environment we are running in
      * @default development
      */
     NODE_ENV: 'development' | 'production';
-    /** 
+    /**
      * Outputs all console.debug messages, defaults to off
      */
     DEBUG: boolean | string;
-    /** 
+    /**
      * The role we are running as, allows access to additional files from the manifest during runtime.
      */
     TRV_ROLE: Role;
-    /** 
+    /**
      * The folders to use for resource lookup
      */
     TRV_RESOURCES: string[];
-    /** 
+    /**
      * Resource path overrides
      * @private
      */
     TRV_RESOURCE_OVERRIDES: Record<string, string>;
-    /** 
-     * The max time to wait for shutdown to finish after initial SIGINT, 
+    /**
+     * The max time to wait for shutdown to finish after initial SIGINT,
      * @default 2s
      */
     TRV_SHUTDOWN_WAIT: TimeSpan | number;
     /**
-     * The desired runtime module 
+     * The desired runtime module
      */
     TRV_MODULE: string;
     /**

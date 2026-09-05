@@ -31,7 +31,7 @@
     "@travetto/runtime": "^8.0.0",
     "@types/markdown-it": "^14.2.0",
     "@types/prismjs": "^1.26.6",
-    "markdown-it": "^15.0.0",
+    "markdown-it": "^15.0.1",
     "prismjs": "^1.30.0"
   },
   "peerDependencies": {

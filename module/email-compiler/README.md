@@ -40,7 +40,7 @@ When referencing an image from the `resources` folder in a template, e.g.
 
 **Code: Sample Image Reference**
 ```html
-<img src="/email/logo.png" alt="logo">
+<img src="/email/logo.png" alt="logo" />
 ```
 
 The image will be extracted out and embedded in the email as a multi part message. This allows for compression and optimization of images as well as externalizing resources that may not be immediately public. The currently supported set of image types are:

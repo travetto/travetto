@@ -35,19 +35,19 @@
     "postinstall": "rm -rf node_modules/@travetto && ln -sf ../../../../node_modules/.bin/trv node_modules/.bin/trv && ln -sf ../../../../node_modules/.bin/trvc node_modules/.bin/trvc"
   },
   "devDependencies": {
-    "@travetto/compiler": "^8.0.0-alpha.24",
-    "@travetto/doc": "^8.0.0-alpha.22",
-    "@travetto/email-compiler": "^8.0.0-alpha.28",
-    "@travetto/lint": "^8.0.0-alpha.20",
-    "@travetto/log": "^8.0.0-alpha.25",
-    "@travetto/pack": "^8.0.0-alpha.25",
-    "@travetto/test": "^8.0.0-alpha.24",
+    "@travetto/compiler": "^8.0.0",
+    "@travetto/doc": "^8.0.0",
+    "@travetto/email-compiler": "^8.0.0",
+    "@travetto/lint": "^8.0.0",
+    "@travetto/log": "^8.0.0",
+    "@travetto/pack": "^8.0.0",
+    "@travetto/test": "^8.0.0",
     "@types/node": "^26.2.0",
     "@types/vscode": "^1.134.0"
   },
   "dependencies": {
-    "@travetto/registry": "^8.0.0-alpha.22",
-    "@travetto/runtime": "^8.0.0-alpha.22"
+    "@travetto/registry": "^8.0.0",
+    "@travetto/runtime": "^8.0.0"
   },
   "travetto": {
     "displayName": "Travetto Plugin",

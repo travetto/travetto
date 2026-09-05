@@ -28,33 +28,33 @@ Transformers are **not** runtime code. They execute during the compilation phase
 
 ### Key Classes
 
-| Class | Purpose |
-|---|---|
+| Class                | Purpose                                                         |
+| -------------------- | --------------------------------------------------------------- |
 | `TransformerManager` | Loads transformer files from manifest, creates `VisitorFactory` |
-| `VisitorFactory` | Combines all transformers into a single-pass AST visitor |
-| `TransformerState` | Per-file state providing the full API for transformations |
-| `ImportManager` | Tracks and manages imports within a source file |
-| `SimpleResolver` | Resolves TypeScript types to the framework's `AnyType` system |
+| `VisitorFactory`     | Combines all transformers into a single-pass AST visitor        |
+| `TransformerState`   | Per-file state providing the full API for transformations       |
+| `ImportManager`      | Tracks and manages imports within a source file                 |
+| `SimpleResolver`     | Resolves TypeScript types to the framework's `AnyType` system   |
 
 ### Node Types
 
 The visitor recognizes these AST node types (the `TransformerType` union):
 
-| Type | TypeScript Node |
-|---|---|
-| `class` | `ts.ClassDeclaration` |
-| `method` | `ts.MethodDeclaration` (non-static) |
-| `static-method` | `ts.MethodDeclaration` (static) |
-| `property` | `ts.PropertyDeclaration` |
-| `getter` | `ts.GetAccessorDeclaration` |
-| `setter` | `ts.SetAccessorDeclaration` |
-| `constructor` | `ts.ConstructorDeclaration` |
-| `parameter` | `ts.ParameterDeclaration` |
-| `call` | `ts.CallExpression` |
-| `function` | `ts.FunctionDeclaration` / `ts.FunctionExpression` |
-| `file` | `ts.SourceFile` |
-| `interface` | `ts.InterfaceDeclaration` |
-| `type` | `ts.TypeAliasDeclaration` |
+| Type            | TypeScript Node                                    |
+| --------------- | -------------------------------------------------- |
+| `class`         | `ts.ClassDeclaration`                              |
+| `method`        | `ts.MethodDeclaration` (non-static)                |
+| `static-method` | `ts.MethodDeclaration` (static)                    |
+| `property`      | `ts.PropertyDeclaration`                           |
+| `getter`        | `ts.GetAccessorDeclaration`                        |
+| `setter`        | `ts.SetAccessorDeclaration`                        |
+| `constructor`   | `ts.ConstructorDeclaration`                        |
+| `parameter`     | `ts.ParameterDeclaration`                          |
+| `call`          | `ts.CallExpression`                                |
+| `function`      | `ts.FunctionDeclaration` / `ts.FunctionExpression` |
+| `file`          | `ts.SourceFile`                                    |
+| `interface`     | `ts.InterfaceDeclaration`                          |
+| `type`          | `ts.TypeAliasDeclaration`                          |
 
 ---
 
@@ -69,16 +69,16 @@ The visitor recognizes these AST node types (the `TransformerType` union):
 
 ### Examples in the Codebase
 
-| File | Module | Purpose |
-|---|---|---|
-| `support/transformer.function-metadata.ts` | `@travetto/runtime` | Registers class/function metadata (hash, line ranges) |
-| `support/transformer.concrete-type.ts` | `@travetto/runtime` | Resolves `toConcrete<T>()` calls and `@concrete` interfaces |
-| `support/transformer.console-log.ts` | `@travetto/runtime` | Rewrites `console.*` calls to framework logging with source location |
-| `support/transformer.debug-method.ts` | `@travetto/runtime` | Injects conditional `debugger` statements into `@DebugBreak` methods |
-| `support/transformer.dynamic-import.ts` | `@travetto/runtime` | Normalizes dynamic `import()` module specifiers |
+| File                                         | Module              | Purpose                                                                 |
+| -------------------------------------------- | ------------------- | ----------------------------------------------------------------------- |
+| `support/transformer.function-metadata.ts`   | `@travetto/runtime` | Registers class/function metadata (hash, line ranges)                   |
+| `support/transformer.concrete-type.ts`       | `@travetto/runtime` | Resolves `toConcrete<T>()` calls and `@concrete` interfaces             |
+| `support/transformer.console-log.ts`         | `@travetto/runtime` | Rewrites `console.*` calls to framework logging with source location    |
+| `support/transformer.debug-method.ts`        | `@travetto/runtime` | Injects conditional `debugger` statements into `@DebugBreak` methods    |
+| `support/transformer.dynamic-import.ts`      | `@travetto/runtime` | Normalizes dynamic `import()` module specifiers                         |
 | `support/transformer.rewrite-path-import.ts` | `@travetto/runtime` | Rewrites `node:path`/`path` imports to `@travetto/manifest/src/path.ts` |
-| `support/transformer.schema.ts` | `@travetto/schema` | Processes `@Schema` classes — registers fields, types, methods |
-| `support/transformer.assert.ts` | `@travetto/test` | Instruments `assert()` calls in test methods for rich error reporting |
+| `support/transformer.schema.ts`              | `@travetto/schema`  | Processes `@Schema` classes — registers fields, types, methods          |
+| `support/transformer.assert.ts`              | `@travetto/test`    | Instruments `assert()` calls in test methods for rich error reporting   |
 
 ---
 
@@ -87,6 +87,7 @@ The visitor recognizes these AST node types (the `TransformerType` union):
 ### Basic Structure
 
 Every transformer is a class with:
+
 1. A `static {}` block that calls `TransformerHandler()` to register handler methods.
 2. Static handler methods that receive `TransformerState` and a `ts.Node`, and return the (possibly modified) node.
 
@@ -95,7 +96,6 @@ import type ts from 'typescript';
 import { type TransformerState, TransformerHandler } from '@travetto/transformer';
 
 export class MyTransformer {
-
   static {
     // Register handlers: (class, method, phase, nodeType, targets?)
     TransformerHandler(this, this.handleClass, 'before', 'class');
@@ -120,13 +120,13 @@ export class MyTransformer {
 TransformerHandler(cls, fn, phase, type, target?)
 ```
 
-| Parameter | Type | Description |
-|---|---|---|
-| `cls` | class | The transformer class (always `this` in `static {}`) |
-| `fn` | `Function` | The static handler method to invoke |
-| `phase` | `'before' \| 'after'` | Whether to run before or after child visit |
-| `type` | `TransformerType` | Which AST node type triggers this handler |
-| `target` | `string[]` (optional) | Decorator names to target (see Targeting below) |
+| Parameter | Type                  | Description                                          |
+| --------- | --------------------- | ---------------------------------------------------- |
+| `cls`     | class                 | The transformer class (always `this` in `static {}`) |
+| `fn`      | `Function`            | The static handler method to invoke                  |
+| `phase`   | `'before' \| 'after'` | Whether to run before or after child visit           |
+| `type`    | `TransformerType`     | Which AST node type triggers this handler            |
+| `target`  | `string[]` (optional) | Decorator names to target (see Targeting below)      |
 
 ### Phases: Before vs After
 
@@ -153,11 +153,13 @@ static {
 ### Targeting: Global vs Decorator-Targeted
 
 **Global handlers** (no `target` parameter) run on **every** node of the specified type. They are registered under the `__all__` key internally. Examples:
+
 - `console.log` rewriting (runs on every `call` expression)
 - Dynamic import normalization (runs on every `call` expression)
 - File-level transformations (runs on every `file`)
 
 **Decorator-targeted handlers** (with `target` parameter) only run on nodes decorated with specific decorators. The target strings are matched against the decorator's `@augments` JSDoc tags. Examples:
+
 - `TransformerHandler(this, this.startSchema, 'before', 'class', ['Schema'])` — only runs on classes with decorators that have `@augments \`@travetto/schema:Schema\`` in their JSDoc.
 - `TransformerHandler(this, this.debugOnEntry, 'before', 'method', ['DebugBreak'])` — only runs on methods with `@DebugBreak`-augmented decorators.
 
@@ -200,69 +202,69 @@ The `TransformerState` object is the primary interface for transformer implement
 
 ### Properties
 
-| Property | Type | Description |
-|---|---|---|
-| `source` | `ts.SourceFile` | The current source file being transformed |
-| `factory` | `ts.NodeFactory` | TypeScript's node factory for creating AST nodes |
-| `importName` | `string` | The module import path of the current file (e.g., `@travetto/schema/src/decorator/schema.ts`) |
-| `file` | `string` | Physical file path |
-| `added` | `Map<number, ts.Statement[]>` | Statements queued for insertion |
+| Property     | Type                          | Description                                                                                   |
+| ------------ | ----------------------------- | --------------------------------------------------------------------------------------------- |
+| `source`     | `ts.SourceFile`               | The current source file being transformed                                                     |
+| `factory`    | `ts.NodeFactory`              | TypeScript's node factory for creating AST nodes                                              |
+| `importName` | `string`                      | The module import path of the current file (e.g., `@travetto/schema/src/decorator/schema.ts`) |
+| `file`       | `string`                      | Physical file path                                                                            |
+| `added`      | `Map<number, ts.Statement[]>` | Statements queued for insertion                                                               |
 
 ### Creating Nodes
 
-| Method | Description |
-|---|---|
-| `fromLiteral(value)` | Convert a JS literal (string, number, boolean, object, array, RegExp, null, undefined) to a `ts.Node` |
-| `extendObjectLiteral(source, ...rest)` | Merge object literals together |
-| `createAccess(first, second, ...items)` | Create property access chains (e.g., `obj.prop.sub`) |
-| `createStaticField(name, value)` | Create a static property declaration |
-| `createIdentifier(name)` | Create a `ts.Identifier` |
-| `createDecorator(location, name, ...args)` | Create a decorator expression (also imports the decorator) |
+| Method                                     | Description                                                                                           |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `fromLiteral(value)`                       | Convert a JS literal (string, number, boolean, object, array, RegExp, null, undefined) to a `ts.Node` |
+| `extendObjectLiteral(source, ...rest)`     | Merge object literals together                                                                        |
+| `createAccess(first, second, ...items)`    | Create property access chains (e.g., `obj.prop.sub`)                                                  |
+| `createStaticField(name, value)`           | Create a static property declaration                                                                  |
+| `createIdentifier(name)`                   | Create a `ts.Identifier`                                                                              |
+| `createDecorator(location, name, ...args)` | Create a decorator expression (also imports the decorator)                                            |
 
 ### Import Management
 
-| Method | Description |
-|---|---|
-| `importFile(path)` | Import a file and get its `Import` reference (with `.identifier`) |
-| `getOrImport(type)` | Get an identifier for a resolved type, importing if needed |
-| `importDecorator(location, name)` | Import a decorator function |
-| `normalizeModuleSpecifier(specifier)` | Rewrite a module specifier to its canonical form |
-| `getModuleIdentifier()` | Get the current file's module identifier (for metadata) |
+| Method                                | Description                                                       |
+| ------------------------------------- | ----------------------------------------------------------------- |
+| `importFile(path)`                    | Import a file and get its `Import` reference (with `.identifier`) |
+| `getOrImport(type)`                   | Get an identifier for a resolved type, importing if needed        |
+| `importDecorator(location, name)`     | Import a decorator function                                       |
+| `normalizeModuleSpecifier(specifier)` | Rewrite a module specifier to its canonical form                  |
+| `getModuleIdentifier()`               | Get the current file's module identifier (for metadata)           |
 
 ### Type Resolution
 
-| Method | Description |
-|---|---|
-| `resolveType(node)` | Resolve a `ts.Node` to an `AnyType` |
-| `resolveReturnType(node)` | Resolve the return type of a method |
-| `getConcreteType(node)` | Get the concrete runtime type expression for a type parameter |
-| `getApparentTypeOfField(node)` | Get the apparent type of a field |
+| Method                         | Description                                                   |
+| ------------------------------ | ------------------------------------------------------------- |
+| `resolveType(node)`            | Resolve a `ts.Node` to an `AnyType`                           |
+| `resolveReturnType(node)`      | Resolve the return type of a method                           |
+| `getConcreteType(node)`        | Get the concrete runtime type expression for a type parameter |
+| `getApparentTypeOfField(node)` | Get the apparent type of a field                              |
 
 ### Statement Management
 
-| Method | Description |
-|---|---|
+| Method                               | Description                                                                                                                                          |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `addStatements(statements, before?)` | Queue statements for insertion into the file. If `before` is a node, inserts before that node's top-level statement. If omitted, appends at the end. |
-| `finalize(source)` | Finalize imports and return the modified source file |
+| `finalize(source)`                   | Finalize imports and return the modified source file                                                                                                 |
 
 ### Decorator Inspection
 
-| Method | Description |
-|---|---|
-| `getDecoratorList(node)` | Get all `DecoratorMeta` for a node |
-| `findDecorator(input, node, name, module?)` | Find a specific decorator on a node by name and optional module path |
-| `getDecoratorMeta(decorator)` | Read full metadata from a decorator (identifier, file, module, targets, options) |
+| Method                                      | Description                                                                      |
+| ------------------------------------------- | -------------------------------------------------------------------------------- |
+| `getDecoratorList(node)`                    | Get all `DecoratorMeta` for a node                                               |
+| `findDecorator(input, node, name, module?)` | Find a specific decorator on a node by name and optional module path             |
+| `getDecoratorMeta(decorator)`               | Read full metadata from a decorator (identifier, file, module, targets, options) |
 
 ### Node Inspection
 
-| Method | Description |
-|---|---|
-| `getDeclarations(node)` | Get all declarations for a node's type |
-| `findMethodByName(cls, name)` | Find a method declaration by name in a class |
-| `buildClassId(node)` | Build a unique class identifier string |
-| `generateUniqueIdentifier(node, type, suffix?)` | Generate a unique identifier for synthetic nodes |
-| `registerIdentifier(id)` | Register a synthetic identifier, returns `[identifier, alreadyExists]` |
-| `readDocTag(type, name)` | Read JSDoc tags from a type |
+| Method                                          | Description                                                            |
+| ----------------------------------------------- | ---------------------------------------------------------------------- |
+| `getDeclarations(node)`                         | Get all declarations for a node's type                                 |
+| `findMethodByName(cls, name)`                   | Find a method declaration by name in a class                           |
+| `buildClassId(node)`                            | Build a unique class identifier string                                 |
+| `generateUniqueIdentifier(node, type, suffix?)` | Generate a unique identifier for synthetic nodes                       |
+| `registerIdentifier(id)`                        | Register a synthetic identifier, returns `[identifier, alreadyExists]` |
+| `readDocTag(type, name)`                        | Read JSDoc tags from a type                                            |
 
 ---
 
@@ -272,20 +274,21 @@ The transformer module includes a type resolution system that converts TypeScrip
 
 ### AnyType Variants
 
-| Key | Type | Description |
-|---|---|---|
-| `managed` | `ManagedType` | A class/type importable from the project (has `importName`) |
-| `shape` | `ShapeType` | A structurally-defined type (interface with `fieldTypes`) |
-| `literal` | `LiteralType` | A literal type with a constructor reference (`String`, `Number`, `Array`, etc.) |
-| `template` | `TemplateType` | A template literal type |
-| `composition` | `CompositionType` | A union or intersection type (has `subTypes`) |
-| `tuple` | `TupleType` | A tuple type (has `subTypes`) |
-| `mapped` | `MappedType` | A mapped type (Omit, Pick, Partial, Required) |
-| `pointer` | `PointerType` | A recursive reference (prevents infinite loops) |
-| `foreign` | `ForeignType` | A type outside the framework's management |
-| `unknown` | `UnknownType` | An unknown or any type |
+| Key           | Type              | Description                                                                     |
+| ------------- | ----------------- | ------------------------------------------------------------------------------- |
+| `managed`     | `ManagedType`     | A class/type importable from the project (has `importName`)                     |
+| `shape`       | `ShapeType`       | A structurally-defined type (interface with `fieldTypes`)                       |
+| `literal`     | `LiteralType`     | A literal type with a constructor reference (`String`, `Number`, `Array`, etc.) |
+| `template`    | `TemplateType`    | A template literal type                                                         |
+| `composition` | `CompositionType` | A union or intersection type (has `subTypes`)                                   |
+| `tuple`       | `TupleType`       | A tuple type (has `subTypes`)                                                   |
+| `mapped`      | `MappedType`      | A mapped type (Omit, Pick, Partial, Required)                                   |
+| `pointer`     | `PointerType`     | A recursive reference (prevents infinite loops)                                 |
+| `foreign`     | `ForeignType`     | A type outside the framework's management                                       |
+| `unknown`     | `UnknownType`     | An unknown or any type                                                          |
 
 Each type variant can carry:
+
 - `name`: Display name
 - `comment`: JSDoc description
 - `undefinable`: Whether the type can be undefined
@@ -311,13 +314,14 @@ export class MyTransformer {
   }
 
   static onClass(state: TransformerState & MyState, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    state[MySymbol] = { /* collected data */ };
+    state[MySymbol] = {/* collected data */};
     return node;
   }
 }
 ```
 
 This pattern is used extensively:
+
 - `ConsoleLogTransformer` tracks a `scope` stack for nested class/method/function names
 - `RegisterTransformer` accumulates class and method metadata hashes
 - `AssertTransformer` tracks whether the current method is inside a test
@@ -383,10 +387,11 @@ const params = DecoratorUtil.getArguments(existing) ?? [];
 
 return state.factory.updateClassDeclaration(
   node,
-  DecoratorUtil.spliceDecorators(node, existing, [
-    state.createDecorator(SCHEMA_IMPORT, 'Schema', ...params)
-  ]),
-  node.name, node.typeParameters, node.heritageClauses, node.members
+  DecoratorUtil.spliceDecorators(node, existing, [state.createDecorator(SCHEMA_IMPORT, 'Schema', ...params)]),
+  node.name,
+  node.typeParameters,
+  node.heritageClauses,
+  node.members
 );
 ```
 
@@ -439,14 +444,14 @@ static rewriteImport(state: TransformerState, node: ts.SourceFile): ts.SourceFil
 
 The transformer module provides several utility classes importable from `@travetto/transformer`:
 
-| Utility | Key Methods |
-|---|---|
-| `CoreUtil` | `createAccess`, `createDecorator`, `createStaticField`, `isAbstract`, `getRangeOf`, `firstArgument` |
-| `DeclarationUtil` | `isPublic`, `isStatic`, `isConstantDeclaration`, `getDeclarations`, `getAccessorPair` |
-| `DecoratorUtil` | `getDecoratorIdentifier`, `spliceDecorators`, `getPrimaryArgument`, `getArguments` |
-| `DocUtil` | `describeDocs`, `readDocTag`, `hasDocTag`, `readAugments`, `getDocComment` |
-| `LiteralUtil` | `fromLiteral`, `toLiteral`, `extendObjectLiteral`, `isLiteralType`, `templateLiteralToRegex` |
-| `SystemUtil` | `naiveHash`, `naiveHashString` |
+| Utility           | Key Methods                                                                                         |
+| ----------------- | --------------------------------------------------------------------------------------------------- |
+| `CoreUtil`        | `createAccess`, `createDecorator`, `createStaticField`, `isAbstract`, `getRangeOf`, `firstArgument` |
+| `DeclarationUtil` | `isPublic`, `isStatic`, `isConstantDeclaration`, `getDeclarations`, `getAccessorPair`               |
+| `DecoratorUtil`   | `getDecoratorIdentifier`, `spliceDecorators`, `getPrimaryArgument`, `getArguments`                  |
+| `DocUtil`         | `describeDocs`, `readDocTag`, `hasDocTag`, `readAugments`, `getDocComment`                          |
+| `LiteralUtil`     | `fromLiteral`, `toLiteral`, `extendObjectLiteral`, `isLiteralType`, `templateLiteralToRegex`        |
+| `SystemUtil`      | `naiveHash`, `naiveHashString`                                                                      |
 
 ---
 
@@ -457,7 +462,7 @@ Modules that provide transformers must declare `@travetto/transformer` as a **pe
 ```json
 {
   "peerDependencies": {
-    "@travetto/transformer": "^8.0.0-alpha.4"
+    "@travetto/transformer": "^8.0.0"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {

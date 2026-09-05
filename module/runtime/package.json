@@ -36,7 +36,7 @@
   },
   "peerDependencies": {
     "@travetto/transformer": "^8.0.0",
-    "temporal-polyfill-lite": "^0.4.0"
+    "temporal-polyfill-lite": "^0.4.3"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {

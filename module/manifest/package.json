@@ -29,7 +29,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@types/node": "^26.2.0"
+    "@types/node": "^26.4.1"
   },
   "engines": {
     "node": ">=25.7.0"

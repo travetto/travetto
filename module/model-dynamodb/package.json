@@ -29,7 +29,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.1116.0",
+    "@aws-sdk/client-dynamodb": "^3.1127.0",
     "@travetto/config": "^8.0.0",
     "@travetto/model": "^8.0.0",
     "@travetto/model-indexed": "^8.0.0"
