@@ -87,7 +87,8 @@ export class S3ModelConfig {
       this.secretAccessKey = credentials.secretAccessKey;
     }
 
-    const isAws = !this.endpoint || this.endpoint.includes('amazonaws.com');
+    const hostname = this.endpoint && URL.canParse(this.endpoint) ? new URL(this.endpoint).hostname : '';
+    const isAws = !this.endpoint || hostname === 'amazonaws.com' || hostname.endsWith('.amazonaws.com');
 
     this.config = {
       ...(this.config ?? {}),
@@ -101,9 +102,7 @@ export class S3ModelConfig {
     };
 
     if (!this.publicBaseUrl) {
-      this.publicBaseUrl = isAws
-        ? `https://${this.bucket}.s3.amazonaws.com`
-        : `${this.endpoint.replace(/\/+$/, '')}/${this.bucket}`;
+      this.publicBaseUrl = isAws ? `https://${this.bucket}.s3.amazonaws.com` : `${this.endpoint.replace(/\/+$/, '')}/${this.bucket}`;
     }
   }
 }
