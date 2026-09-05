@@ -459,12 +459,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   async getBlobReadUrl(location: string, expiresIn: TimeSpan | false = '1h'): Promise<string> {
     if (expiresIn === false) {
       const key = this.#basicKey(location);
-      const baseUrl = this.config.publicBaseUrl;
-      if (this.config.config.forcePathStyle) {
-        return `${baseUrl}/${this.config.bucket}/${key}`;
-      } else {
-        return `${baseUrl}/${key}`;
-      }
+      return `${this.config.publicBaseUrl}/${key}`;
     }
     return await getSignedUrl(this.client, new GetObjectCommand(this.#queryBlob(location)), {
       expiresIn: TimeUtil.duration(expiresIn, 's')

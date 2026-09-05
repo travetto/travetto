@@ -16,7 +16,9 @@ export class S3ModelConfig {
   @Required(false)
   bucket: string; // S3 bucket
   @Required(false)
-  endpoint: string; // Endpoint url
+  endpoint?: string; // Endpoint url
+  @Required(false)
+  forcePathStyle?: boolean; // Use path-style URLs
 
   @EnvVar('AWS_ACCESS_KEY_ID')
   accessKeyId: string = '';
@@ -40,7 +42,7 @@ export class S3ModelConfig {
   publicBaseUrl: string;
 
   /**
-   * Produces the s3 config from the provide details, post construction
+   * Produces the s3 config from the provided details, post construction
    */
   @PostConstruct()
   async finalizeConfig(): Promise<void> {
@@ -49,32 +51,46 @@ export class S3ModelConfig {
       this.bucket ??= 'app';
     }
 
-    if (!this.publicBaseUrl) {
-      if (this.endpoint?.includes('localhost')) {
-        this.publicBaseUrl = this.endpoint;
-      } else {
-        this.publicBaseUrl = `https://${this.bucket}.s3.amazonaws.com`;
-      }
+    if (!this.endpoint) {
+      this.endpoint = undefined;
+    }
+
+    this.forcePathStyle ??= Boolean(this.endpoint);
+
+    if (this.publicBaseUrl) {
+      this.publicBaseUrl = this.publicBaseUrl.replace(/\/+$/, '');
+    } else if (this.forcePathStyle && this.endpoint) {
+      this.publicBaseUrl = `${this.endpoint.replace(/\/+$/, '')}/${this.bucket}`;
+    } else {
+      this.publicBaseUrl = `https://${this.bucket}.s3.amazonaws.com`;
     }
 
     if (!this.accessKeyId && !this.secretAccessKey) {
-      const credentials = await fromIni({ profile: this.profile })();
-      this.accessKeyId = credentials.accessKeyId;
-      this.secretAccessKey = credentials.secretAccessKey;
+      try {
+        const credentials = await fromIni({ profile: this.profile })();
+        this.accessKeyId = credentials.accessKeyId;
+        this.secretAccessKey = credentials.secretAccessKey;
+      } catch {
+        if (!Runtime.production) {
+          this.accessKeyId = 'dummy';
+          this.secretAccessKey = 'dummy';
+        }
+      }
     }
 
     this.config = {
       ...(this.config ?? {}),
       region: this.region,
       endpoint: this.endpoint,
-      credentials: {
-        accessKeyId: this.accessKeyId,
-        secretAccessKey: this.secretAccessKey
-      }
+      forcePathStyle: this.forcePathStyle,
+      ...(this.accessKeyId && this.secretAccessKey
+        ? {
+            credentials: {
+              accessKeyId: this.accessKeyId,
+              secretAccessKey: this.secretAccessKey
+            }
+          }
+        : {})
     };
-
-    if (!Runtime.production && this.endpoint.includes('localhost')) {
-      this.config.forcePathStyle ??= true;
-    }
   }
 }
