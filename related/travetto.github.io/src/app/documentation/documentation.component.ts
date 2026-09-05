@@ -1,5 +1,5 @@
-import { Component, ViewEncapsulation } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { Router, NavigationEnd, RouterLinkActive, RouterLink, RouterOutlet } from '@angular/router';
 
 import { PAGES } from './pages';
@@ -12,16 +12,13 @@ import { PAGES } from './pages';
   imports: [RouterLinkActive, RouterLink, NgClass, RouterOutlet]
 })
 export class DocumentationComponent {
-  pages: typeof PAGES = [
-    { path: 'overview', title: 'Overview', subs: undefined } as const,
-    ...PAGES
-  ];
+  pages: typeof PAGES = [{ path: 'overview', title: 'Overview', subs: undefined! } as const, ...PAGES];
   url = '';
 
-  active = {};
+  active: Record<string, boolean> = {};
 
   constructor(router: Router) {
-    router.events.subscribe((event) => {
+    router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.url = event.url;
       }

@@ -1,22 +1,22 @@
 <div class="documentation">
   <div class="modules">
     @for (page of pages; track $index) {
-    <div [class]="page.cls">
-      @if (page.loadComponent) {
-      <a [routerLink]="['/', 'docs', page.path]" [innerHtml]="page.title"></a>
-      } @else {
-      <div class="title" [innerHtml]="page.title"></div>
-      }
-      @if (page.subs && page.subs.length) {
-      <ul>
-        @for (sub of page.subs; track $index) {
-        <li class="sub">
-          <a [routerLink]="['/', 'docs', sub.path]" [innerHtml]="sub.title"></a>
-        </li>
+      <div [class]="page.cls">
+        @if (page.loadComponent) {
+          <a [routerLink]="['/', 'docs', page.path]" [innerHtml]="page.title"></a>
+        } @else {
+          <div class="title" [innerHtml]="page.title"></div>
         }
-      </ul>
-      }
-    </div>
+        @if (page.subs && page.subs.length) {
+          <ul>
+            @for (sub of page.subs; track $index) {
+              <li class="sub">
+                <a [routerLink]="['/', 'docs', sub.path]" [innerHtml]="sub.title"></a>
+              </li>
+            }
+          </ul>
+        }
+      </div>
     }
   </div>
 </div>

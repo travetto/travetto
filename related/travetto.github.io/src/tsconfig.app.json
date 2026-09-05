@@ -1,8 +1,6 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../out-tsc/app",
-    "baseUrl": "./",
     "module": "es2022",
     "types": []
   },
@@ -17,6 +15,6 @@
         "optionalChainNotNullable": "suppress"
       }
     },
-    "strictTemplates": false
+    "strictTemplates": true
   }
 }

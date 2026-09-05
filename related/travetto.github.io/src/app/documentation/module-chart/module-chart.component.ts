@@ -12,7 +12,7 @@ const CLASS_MAPPING = {
   'model-query': 'mid-third group group-core',
   web: 'right-third group group-core',
   core: 'full group group-system-2',
-  foundation: 'full group group-system',
+  foundation: 'full group group-system'
 };
 
 @Component({
@@ -22,13 +22,12 @@ const CLASS_MAPPING = {
   styleUrls: ['./module-chart.component.css', './module-chart.layout.css']
 })
 export class ModuleChartComponent {
-
   _pages = PAGES.map(page => ({
     ...page,
-    cls: `${page.path} ${CLASS_MAPPING[page.path] ?? ''}`
+    cls: `${page.path} ${CLASS_MAPPING[page.path as keyof typeof CLASS_MAPPING] ?? ''}`
   }));
 
-  get pages(): typeof PAGES {
+  get pages(): typeof this._pages {
     return this._pages;
   }
 }

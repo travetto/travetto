@@ -1,7 +1,6 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "esModuleInterop": true,
     "declaration": false,
@@ -12,7 +11,6 @@
       "node_modules/@types"
     ],
     "module": "es2022",
-    "baseUrl": "./",
     "useDefineForClassFields": false
   }
 }
