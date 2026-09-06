@@ -12,7 +12,7 @@
     "@travetto/model-mysql": "^8.0.1",
     "@travetto/model-postgres": "^8.0.1",
     "@travetto/model-redis": "^8.0.1",
-    "@travetto/model-s3": "^8.0.1",
+    "@travetto/model-s3": "^8.0.2",
     "@travetto/model-sqlite": "^8.0.1"
   },
   "travetto": {}
