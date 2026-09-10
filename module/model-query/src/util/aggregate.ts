@@ -23,7 +23,7 @@ export class ModelQueryAggregateUtil {
     field: F,
     rawValue: unknown
   ): AggregateResultType<T, Op, F> {
-    const leafFieldType = SchemaRegistryIndex.getFieldConfig(modelClass, field)!.type;
+    const leafFieldType = SchemaRegistryIndex.getNestedFieldConfig(modelClass, field)!.type;
     return castTo(DataUtil.coerceType(rawValue, leafFieldType, false) ?? undefined);
   }
 }

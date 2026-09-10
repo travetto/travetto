@@ -22,8 +22,8 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.store.get(cls).getDiscriminatedConfig();
   }
 
-  static getFieldConfig(cls: Class, field: string | string[]): SchemaFieldConfig | undefined {
-    return this.#instance.getFieldConfig(cls, field);
+  static getNestedFieldConfig(cls: Class, field: string | string[]): SchemaFieldConfig | undefined {
+    return this.#instance.getNestedFieldConfig(cls, field);
   }
 
   static has(cls: Class): boolean {
@@ -98,7 +98,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
    * @param cls The root class
    * @param field The field path (either dotted string or array of segments)
    */
-  getFieldConfig(cls: Class, field: string | string[]): SchemaFieldConfig | undefined {
+  getNestedFieldConfig(cls: Class, field: string | string[]): SchemaFieldConfig | undefined {
     if (!this.store.has(cls)) {
       return undefined;
     }

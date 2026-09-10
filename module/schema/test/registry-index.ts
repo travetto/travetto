@@ -20,66 +20,66 @@ class SchemaRegistryIndexTests {
 
   @Test('Verify root-level field config resolution')
   testRootField() {
-    const nameConfiguration = SchemaRegistryIndex.getFieldConfig(Person, 'name');
+    const nameConfiguration = SchemaRegistryIndex.getNestedFieldConfig(Person, 'name');
     assert(nameConfiguration !== undefined);
     assert(nameConfiguration.type === String);
 
-    const ageConfiguration = SchemaRegistryIndex.getFieldConfig(Person, 'age');
+    const ageConfiguration = SchemaRegistryIndex.getNestedFieldConfig(Person, 'age');
     assert(ageConfiguration !== undefined);
     assert(ageConfiguration.type === Number);
 
-    const dateOfBirthConfiguration = SchemaRegistryIndex.getFieldConfig(Person, 'dob');
+    const dateOfBirthConfiguration = SchemaRegistryIndex.getNestedFieldConfig(Person, 'dob');
     assert(dateOfBirthConfiguration !== undefined);
     assert(dateOfBirthConfiguration.type === Date);
   }
 
   @Test('Verify nested dotted field config resolution')
   testNestedField() {
-    const streetConfiguration = SchemaRegistryIndex.getFieldConfig(Person, 'address.street1');
+    const streetConfiguration = SchemaRegistryIndex.getNestedFieldConfig(Person, 'address.street1');
     assert(streetConfiguration !== undefined);
     assert(streetConfiguration.type === String);
     assert(streetConfiguration.required?.active === true);
 
-    const street2Configuration = SchemaRegistryIndex.getFieldConfig(Person, 'address.street2');
+    const street2Configuration = SchemaRegistryIndex.getNestedFieldConfig(Person, 'address.street2');
     assert(street2Configuration !== undefined);
     assert(street2Configuration.type === String);
   }
 
   @Test('Verify array of segments field config resolution')
   testSegmentArrayField() {
-    const streetConfiguration = SchemaRegistryIndex.getFieldConfig(Person, ['address', 'street1']);
+    const streetConfiguration = SchemaRegistryIndex.getNestedFieldConfig(Person, ['address', 'street1']);
     assert(streetConfiguration !== undefined);
     assert(streetConfiguration.type === String);
   }
 
   @Test('Verify nested field within array of sub-schemas')
   testArraySubSchemaField() {
-    const countListConfiguration = SchemaRegistryIndex.getFieldConfig(Person, 'counts');
+    const countListConfiguration = SchemaRegistryIndex.getNestedFieldConfig(Person, 'counts');
     assert(countListConfiguration !== undefined);
     assert(countListConfiguration.type === Count);
     assert(countListConfiguration.array === true);
 
-    const countValueConfiguration = SchemaRegistryIndex.getFieldConfig(Person, 'counts.value');
+    const countValueConfiguration = SchemaRegistryIndex.getNestedFieldConfig(Person, 'counts.value');
     assert(countValueConfiguration !== undefined);
     assert(countValueConfiguration.type === Number);
   }
 
   @Test('Verify inherited field resolution in subclasses')
   testInheritedField() {
-    const unitConfiguration = SchemaRegistryIndex.getFieldConfig(SuperAddress, 'unit');
+    const unitConfiguration = SchemaRegistryIndex.getNestedFieldConfig(SuperAddress, 'unit');
     assert(unitConfiguration !== undefined);
     assert(unitConfiguration.type === String);
 
-    const inheritedStreetConfiguration = SchemaRegistryIndex.getFieldConfig(SuperAddress, 'street1');
+    const inheritedStreetConfiguration = SchemaRegistryIndex.getNestedFieldConfig(SuperAddress, 'street1');
     assert(inheritedStreetConfiguration !== undefined);
     assert(inheritedStreetConfiguration.type === String);
   }
 
   @Test('Verify caching returns identical reference')
   testCaching() {
-    const firstCall = SchemaRegistryIndex.getFieldConfig(Person, 'address.street1');
-    const secondCall = SchemaRegistryIndex.getFieldConfig(Person, 'address.street1');
-    const thirdCallViaArray = SchemaRegistryIndex.getFieldConfig(Person, ['address', 'street1']);
+    const firstCall = SchemaRegistryIndex.getNestedFieldConfig(Person, 'address.street1');
+    const secondCall = SchemaRegistryIndex.getNestedFieldConfig(Person, 'address.street1');
+    const thirdCallViaArray = SchemaRegistryIndex.getNestedFieldConfig(Person, ['address', 'street1']);
 
     assert(firstCall !== undefined);
     assert(firstCall === secondCall);
@@ -88,14 +88,14 @@ class SchemaRegistryIndexTests {
 
   @Test('Verify non-existent fields return undefined')
   testNonExistentField() {
-    assert(SchemaRegistryIndex.getFieldConfig(Person, 'nonExistent') === undefined);
-    assert(SchemaRegistryIndex.getFieldConfig(Person, 'address.nonExistent') === undefined);
-    assert(SchemaRegistryIndex.getFieldConfig(Person, 'address.street1.invalidChild') === undefined);
-    assert(SchemaRegistryIndex.getFieldConfig(Address, 'nonExistent') === undefined);
+    assert(SchemaRegistryIndex.getNestedFieldConfig(Person, 'nonExistent') === undefined);
+    assert(SchemaRegistryIndex.getNestedFieldConfig(Person, 'address.nonExistent') === undefined);
+    assert(SchemaRegistryIndex.getNestedFieldConfig(Person, 'address.street1.invalidChild') === undefined);
+    assert(SchemaRegistryIndex.getNestedFieldConfig(Address, 'nonExistent') === undefined);
   }
 
   @Test('Verify unregistered class returns undefined')
   testUnregisteredClass() {
-    assert(SchemaRegistryIndex.getFieldConfig(UnregisteredClass, 'name') === undefined);
+    assert(SchemaRegistryIndex.getNestedFieldConfig(UnregisteredClass, 'name') === undefined);
   }
 }
