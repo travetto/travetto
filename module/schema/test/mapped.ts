@@ -1,14 +1,14 @@
 import assert from 'node:assert';
 
 import { Registry } from '@travetto/registry';
-import { Method, Schema, SchemaRegistryIndex } from '@travetto/schema';
+import { Max, Method, Min, Schema, SchemaRegistryIndex } from '@travetto/schema';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 @Schema()
 class Base {
   id: string;
   name: string;
-  age?: number;
+  @Max(110) @Min(1) age?: number;
 }
 
 type Picked = Pick<Base, 'name' | 'age'>;
@@ -53,6 +53,8 @@ class MappedTypeSuite {
     assert(pickedConfig.getFields().name);
     assert(pickedConfig.getFields().age);
     assert(!pickedConfig.getFields().id);
+    assert(pickedConfig.getFields().age.min?.limit === 1);
+    assert(pickedConfig.getFields().age.max?.limit === 110);
 
     const omitted = config.getFields().omitted;
     assert(omitted);
