@@ -36,7 +36,12 @@ import {
   type SortedIndexSelectionType
 } from '@travetto/model-indexed';
 import {
+  type AggregateNumericOperation,
+  type AggregateOperation,
+  type AggregateResultType,
   type ModelQuery,
+  type ModelQueryAggregateSupport,
+  ModelQueryAggregateUtil,
   type ModelQueryCrudSupport,
   ModelQueryCrudUtil,
   type ModelQueryFacet,
@@ -48,6 +53,8 @@ import {
   type PageableModelQuery,
   type Query,
   QueryVerifier,
+  type ValidComparableFields,
+  type ValidNumericFields,
   type ValidStringFields,
   type WhereClause
 } from '@travetto/model-query';
@@ -79,6 +86,7 @@ export class ElasticsearchModelService
     ModelBulkSupport,
     ModelExpirySupport,
     ModelQuerySupport,
+    ModelQueryAggregateSupport,
     ModelQueryCrudSupport,
     ModelQuerySuggestSupport,
     ModelQueryFacetSupport
@@ -754,5 +762,28 @@ export class ElasticsearchModelService
     );
     const out = Array.isArray(buckets) ? buckets.map(b => ({ key: b.key!.toString(), count: b.doc_count })) : [];
     return out;
+  }
+
+  // Aggregate
+  async aggregateFieldByQuery<
+    T extends ModelType,
+    Op extends AggregateOperation,
+    F extends (Op extends AggregateNumericOperation ? ValidNumericFields<T> : ValidComparableFields<T>)
+  >(modelClass: Class<T>, operation: Op, field: F, query?: ModelQuery<T>): Promise<AggregateResultType<T, Op, F>> {
+    await QueryVerifier.verify(modelClass, query);
+
+    const fieldString = String(field);
+    const search = ElasticsearchQueryUtil.getAggregateSearchObject(modelClass, operation, fieldString, query, this.config.schemaConfig);
+
+    const result = await this.execSearch(modelClass, search);
+    const totalCount = typeof result.hits.total === 'number' ? result.hits.total : (result.hits.total?.value ?? 0);
+    if (totalCount === 0) {
+      return castTo(undefined);
+    }
+
+    const aggregateResult = result.aggregations?.aggregate_value as { value?: number | null; value_as_string?: string } | undefined;
+    const rawValue = aggregateResult?.value_as_string ?? aggregateResult?.value;
+
+    return ModelQueryAggregateUtil.resolveResult(modelClass, operation, field, rawValue);
   }
 }

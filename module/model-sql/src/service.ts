@@ -37,7 +37,12 @@ import {
   warnIfNonIndexedIndex
 } from '@travetto/model-indexed';
 import {
+  type AggregateNumericOperation,
+  type AggregateOperation,
+  type AggregateResultType,
   type ModelQuery,
+  type ModelQueryAggregateSupport,
+  ModelQueryAggregateUtil,
   type ModelQueryCrudSupport,
   ModelQueryCrudUtil,
   type ModelQueryFacet,
@@ -48,6 +53,8 @@ import {
   ModelQueryUtil,
   type PageableModelQuery,
   QueryVerifier,
+  type ValidComparableFields,
+  type ValidNumericFields,
   type ValidStringFields,
   type WhereClause
 } from '@travetto/model-query';
@@ -73,6 +80,7 @@ export abstract class BaseSQLModelService<C = unknown>
     ModelExpirySupport,
     ModelIndexedSupport,
     ModelQuerySupport,
+    ModelQueryAggregateSupport,
     ModelQueryCrudSupport,
     ModelQueryFacetSupport,
     ModelQuerySuggestSupport
@@ -834,5 +842,24 @@ export abstract class BaseSQLModelService<C = unknown>
       key: record.key,
       count: Number(record.count)
     }));
+  }
+
+  // Aggregate Support
+  async aggregateFieldByQuery<
+    T extends ModelType,
+    Op extends AggregateOperation,
+    F extends (Op extends AggregateNumericOperation ? ValidNumericFields<T> : ValidComparableFields<T>)
+  >(modelClass: Class<T>, operation: Op, field: F, query?: ModelQuery<T>): Promise<AggregateResultType<T, Op, F>> {
+    await QueryVerifier.verify(modelClass, query);
+    const tableContext = this.connection.getContext(modelClass);
+    const { whereSQL, parameters } = this.#whereClause(modelClass, query?.where);
+    const { sqlPath } = this.dialect.resolvePath(tableContext, String(field).split('.'), 'read');
+
+    const sql = this.dialect.buildAggregate(tableContext, operation, sqlPath, whereSQL);
+
+    const result = await this.connection.execute<{ value: unknown }>(sql, parameters);
+    const rawValue = result.records[0]?.value;
+
+    return ModelQueryAggregateUtil.resolveResult(modelClass, operation, field, rawValue);
   }
 }

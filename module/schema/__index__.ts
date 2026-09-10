@@ -13,6 +13,7 @@ export * from './src/service/registry-index.ts';
 export * from './src/service/types.ts';
 export * from './src/type-config.ts';
 export * from './src/types.ts';
+export * from './src/util.ts';
 export * from './src/validate/error.ts';
 export * from './src/validate/messages.ts';
 export * from './src/validate/regex.ts';

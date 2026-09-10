@@ -1,6 +1,12 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, d } from '@travetto/doc';
-import type { ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport, ModelQuerySupport } from '@travetto/model-query';
+import type {
+  ModelQueryAggregateSupport,
+  ModelQueryCrudSupport,
+  ModelQueryFacetSupport,
+  ModelQuerySuggestSupport,
+  ModelQuerySupport
+} from '@travetto/model-query';
 import { toConcrete } from '@travetto/runtime';
 
 import { Links } from './support/doc.support.ts';
@@ -32,6 +38,11 @@ export const text = (
         functionalities.
         <c.Code title="Query Suggest" src={toConcrete<ModelQuerySuggestSupport>()} />
       </c.SubSection>
+      <c.SubSection title="Aggregate">
+        This contract provides the ability to run strongly-typed field-level aggregations (such as sum, avg, min, and max) on models with
+        optional query filtering.
+        <c.Code title="Query Aggregate" src={toConcrete<ModelQueryAggregateSupport>()} />
+      </c.SubSection>
     </c.Section>
     <c.Section title="Implementations">
       <table>
@@ -41,11 +52,13 @@ export const text = (
             <td>Query</td>
             <td>QueryCrud</td>
             <td>QueryFacet</td>
+            <td>QueryAggregate</td>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>{d.module('ModelElasticsearch')}</td>
+            <td>X</td>
             <td>X</td>
             <td>X</td>
             <td>X</td>
@@ -55,9 +68,11 @@ export const text = (
             <td>X'</td>
             <td>X'</td>
             <td>X'</td>
+            <td>X'</td>
           </tr>
           <tr>
             <td>{d.module('ModelSql')}</td>
+            <td>X'</td>
             <td>X'</td>
             <td>X'</td>
             <td>X'</td>

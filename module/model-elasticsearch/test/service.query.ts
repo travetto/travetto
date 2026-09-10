@@ -1,6 +1,7 @@
 import { ElasticsearchModelConfig, ElasticsearchModelService } from '@travetto/model-elasticsearch';
 import { Suite } from '@travetto/test';
 
+import { ModelQueryAggregateSuite } from '@travetto/model-query/support/test/aggregate.ts';
 import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
 import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.ts';
 import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
@@ -17,6 +18,12 @@ class ElasticsearchQueryCrudSuite extends ModelQueryCrudSuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
   supportsUniqueIndexes = false;
+}
+
+@Suite()
+class ElasticsearchQueryAggregateSuite extends ModelQueryAggregateSuite {
+  serviceClass = ElasticsearchModelService;
+  configClass = ElasticsearchModelConfig;
 }
 
 @Suite()

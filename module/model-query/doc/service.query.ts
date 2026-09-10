@@ -1,8 +1,14 @@
 import { Config } from '@travetto/config';
 import { Injectable } from '@travetto/di';
-import type { ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport } from '@travetto/model-query';
+import type {
+  ModelQueryAggregateSupport,
+  ModelQueryCrudSupport,
+  ModelQueryFacetSupport,
+  ModelQuerySuggestSupport
+} from '@travetto/model-query';
 import { Suite } from '@travetto/test';
 
+import { ModelQueryAggregateSuite } from '@travetto/model-query/support/test/aggregate.ts';
 import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
 import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.ts';
 import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism.ts';
@@ -15,10 +21,18 @@ import { QueryModelService } from './query-service.ts';
 class CustomModelConfig {}
 
 @Injectable()
-class CustomModelService extends QueryModelService implements ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport {}
+class CustomModelService
+  extends QueryModelService
+  implements ModelQueryAggregateSupport, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport {}
 
 @Suite()
 class CustomQuerySuite extends ModelQuerySuite {
+  serviceClass = CustomModelService;
+  configClass = CustomModelConfig;
+}
+
+@Suite()
+class CustomQueryAggregateSuite extends ModelQueryAggregateSuite {
   serviceClass = CustomModelService;
   configClass = CustomModelConfig;
 }

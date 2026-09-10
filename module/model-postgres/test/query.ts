@@ -3,6 +3,7 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
+import { ModelQueryAggregateSuite } from '@travetto/model-query/support/test/aggregate.ts';
 import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
 import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.ts';
 import { WithNestedLists } from '@travetto/model-query/support/test/model.ts';
@@ -85,6 +86,13 @@ class PostgreSQLQuerySuite extends ModelQuerySuite {
     });
     assert(existsTags === 3);
   }
+}
+
+@WithSuiteContext()
+@Suite()
+class PostgreSQLQueryAggregateSuite extends ModelQueryAggregateSuite {
+  serviceClass = PostgresModelService;
+  configClass = PostgresModelConfig;
 }
 
 @WithSuiteContext()
