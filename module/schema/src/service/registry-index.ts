@@ -22,6 +22,10 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.store.get(cls).getDiscriminatedConfig();
   }
 
+  static getFieldConfig(cls: Class, field: string | string[]): SchemaFieldConfig | undefined {
+    return this.#instance.getFieldConfig(cls, field);
+  }
+
   static has(cls: Class): boolean {
     return this.#instance.store.has(cls);
   }
@@ -61,6 +65,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
   store = new RegistryIndexStore(SchemaRegistryAdapter);
   #baseSchema = new Map<Class, Class>();
   #byDiscriminatedTypes = new Map<Class, Map<string, Class>>();
+  #fieldConfigs = new Map<Class, Map<string, SchemaFieldConfig | undefined>>();
 
   /** @private */ constructor(source: unknown) {
     Registry.validateConstructor(source);
@@ -82,9 +87,37 @@ export class SchemaRegistryIndex implements RegistryIndex {
   beforeChangeSetComplete(): void {
     // Rebuild indices after every "process" batch
     this.#byDiscriminatedTypes.clear();
+    this.#fieldConfigs.clear();
     for (const cls of this.store.getClasses()) {
       this.#registerDiscriminatedTypes(cls);
     }
+  }
+
+  /**
+   * Resolve a dotted field path to the specific leaf SchemaFieldConfig
+   * @param cls The root class
+   * @param field The field path (either dotted string or array of segments)
+   */
+  getFieldConfig(cls: Class, field: string | string[]): SchemaFieldConfig | undefined {
+    if (!this.store.has(cls)) {
+      return undefined;
+    }
+    const pathKey = Array.isArray(field) ? field.join('.') : String(field);
+    return this.#fieldConfigs.getOrInsert(cls, new Map()).getOrInsertComputed(pathKey, () => {
+      const segments = Array.isArray(field) ? field : String(field).split('.');
+      let currentClass: Class | undefined = cls;
+      let fieldConfiguration: SchemaFieldConfig | undefined;
+
+      for (const segment of segments) {
+        if (!currentClass || !this.store.has(currentClass)) {
+          return undefined;
+        }
+        fieldConfiguration = this.getClassConfig(currentClass).fields[segment];
+        currentClass = fieldConfiguration?.type;
+      }
+
+      return fieldConfiguration;
+    });
   }
 
   getClassConfig(cls: Class): SchemaClassConfig {

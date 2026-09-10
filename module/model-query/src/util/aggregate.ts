@@ -1,6 +1,6 @@
 import type { ModelType } from '@travetto/model';
 import { castTo, type Class, hasFunction } from '@travetto/runtime';
-import { DataUtil, SchemaUtil } from '@travetto/schema';
+import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { AggregateOperation, AggregateResultType, ModelQueryAggregateSupport } from '../types/aggregate.ts';
 
@@ -23,7 +23,7 @@ export class ModelQueryAggregateUtil {
     field: F,
     rawValue: unknown
   ): AggregateResultType<T, Op, F> {
-    const leafFieldType = SchemaUtil.getFieldConfig(modelClass, field)!.type;
+    const leafFieldType = SchemaRegistryIndex.getFieldConfig(modelClass, field)!.type;
     return castTo(DataUtil.coerceType(rawValue, leafFieldType, false) ?? undefined);
   }
 }
