@@ -127,12 +127,38 @@ export interface ModelQuerySuggestSupport extends ModelQuerySupport {
 }
 ```
 
+### Aggregate
+This contract provides the ability to run strongly-typed field-level aggregations (such as sum, avg, min, and max) on models with optional query filtering.
+
+**Code: Query Aggregate**
+```typescript
+export interface ModelQueryAggregateSupport extends ModelQuerySupport {
+  /**
+   * Run an aggregation on a field
+   * @param modelClass The model class to aggregate
+   * @param operation The operation to perform ('sum', 'avg', 'min', 'max')
+   * @param field The field to aggregate on
+   * @param query Additional query filtering
+   */
+  aggregateFieldByQuery<
+    T extends ModelType,
+    Op extends AggregateOperation,
+    F extends (Op extends AggregateNumericOperation ? ValidNumericFields<T> : ValidComparableFields<T>)
+  >(
+    modelClass: Class<T>,
+    operation: Op,
+    field: F,
+    query?: ModelQuery<T>
+  ): Promise<AggregateResultType<T, Op, F>>;
+}
+```
+
 ## Implementations
-|Service|Query|QueryCrud|QueryFacet|
-|-------|-----|---------|----------|
-|[Elasticsearch Model Source](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.")|X|X|X|
-|[MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module.")|X'|X'|X'|
-|[SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X'|X'|X'|
+|Service|Query|QueryCrud|QueryFacet|QueryAggregate|
+|-------|-----|---------|----------|--------------|
+|[Elasticsearch Model Source](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.")|X|X|X|X|
+|[MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module.")|X'|X'|X'|X'|
+|[SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X'|X'|X'|X'|
 
 ## Querying
 One of the complexities of abstracting multiple storage mechanisms, is providing a consistent query language. The query language the module uses is a derivation of [mongodb](https://mongodb.com)'s query language, with some restrictions, additions, and caveats. Additionally, given the nature of typescript, all queries are statically typed, and will catch type errors at compile time.
@@ -227,9 +253,15 @@ In addition to the provided contracts, the module also provides common utilities
 ```typescript
 import { Config } from '@travetto/config';
 import { Injectable } from '@travetto/di';
-import type { ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport } from '@travetto/model-query';
+import type {
+  ModelQueryAggregateSupport,
+  ModelQueryCrudSupport,
+  ModelQueryFacetSupport,
+  ModelQuerySuggestSupport
+} from '@travetto/model-query';
 import { Suite } from '@travetto/test';
 
+import { ModelQueryAggregateSuite } from '@travetto/model-query/support/test/aggregate.ts';
 import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
 import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.ts';
 import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism.ts';
@@ -242,10 +274,18 @@ import { QueryModelService } from './query-service.ts';
 class CustomModelConfig {}
 
 @Injectable()
-class CustomModelService extends QueryModelService implements ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport {}
+class CustomModelService
+  extends QueryModelService
+  implements ModelQueryAggregateSupport, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport {}
 
 @Suite()
 class CustomQuerySuite extends ModelQuerySuite {
+  serviceClass = CustomModelService;
+  configClass = CustomModelConfig;
+}
+
+@Suite()
+class CustomQueryAggregateSuite extends ModelQueryAggregateSuite {
   serviceClass = CustomModelService;
   configClass = CustomModelConfig;
 }
