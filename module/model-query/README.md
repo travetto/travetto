@@ -149,7 +149,7 @@ export interface ModelQueryAggregateSupport extends ModelQuerySupport {
     operation: Op,
     field: F,
     query?: ModelQuery<T>
-  ): Promise<AggregateResultType<T, Op, F>>;
+  ): Promise<AggregateResultType<T, F>>;
 }
 ```
 

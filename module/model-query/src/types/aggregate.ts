@@ -19,7 +19,7 @@ export type PathType<T, Path extends string> = Path extends `${infer Head}.${inf
       : NonNullable<T[Path]>
     : never;
 
-export type AggregateResultType<T, Op extends AggregateOperation, F extends string> = [PathType<T, F>] extends [never]
+export type AggregateResultType<T, F extends string> = [PathType<T, F>] extends [never]
   ? number | Date | bigint | undefined
   : PathType<T, F> | undefined;
 
@@ -44,5 +44,5 @@ export interface ModelQueryAggregateSupport extends ModelQuerySupport {
     operation: Op,
     field: F,
     query?: ModelQuery<T>
-  ): Promise<AggregateResultType<T, Op, F>>;
+  ): Promise<AggregateResultType<T, F>>;
 }

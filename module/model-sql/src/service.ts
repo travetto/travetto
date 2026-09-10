@@ -849,7 +849,7 @@ export abstract class BaseSQLModelService<C = unknown>
     T extends ModelType,
     Op extends AggregateOperation,
     F extends (Op extends AggregateNumericOperation ? ValidNumericFields<T> : ValidComparableFields<T>)
-  >(modelClass: Class<T>, operation: Op, field: F, query?: ModelQuery<T>): Promise<AggregateResultType<T, Op, F>> {
+  >(modelClass: Class<T>, operation: Op, field: F, query?: ModelQuery<T>): Promise<AggregateResultType<T, F>> {
     await QueryVerifier.verify(modelClass, query);
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, query?.where);

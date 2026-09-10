@@ -750,7 +750,7 @@ export class MongoModelService
     T extends ModelType,
     Op extends AggregateOperation,
     F extends (Op extends AggregateNumericOperation ? ValidNumericFields<T> : ValidComparableFields<T>)
-  >(modelClass: Class<T>, operation: Op, field: F, query?: ModelQuery<T>): Promise<AggregateResultType<T, Op, F>> {
+  >(modelClass: Class<T>, operation: Op, field: F, query?: ModelQuery<T>): Promise<AggregateResultType<T, F>> {
     await QueryVerifier.verify(modelClass, query);
 
     const collection = await this.getStore(modelClass);
