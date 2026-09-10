@@ -44,9 +44,11 @@ class DataUtilTests {
     assert(DataUtil.coerceType('0n', BigInt) === 0n);
     assert(DataUtil.coerceType(0n, BigInt) === 0n);
     assert(DataUtil.coerceType('-1', BigInt) === -1n);
-    assert(DataUtil.coerceType('20', BigInt) === 20n);
-    assert.throws(() => DataUtil.coerceType('20.333', BigInt) === 20n);
+    assert(DataUtil.coerceType('20.333', BigInt) === 20n);
+    assert(DataUtil.coerceType('200.0000000000000000', BigInt) === 200n);
     assert(DataUtil.coerceType(true, BigInt) === 1n);
+    assert.throws(() => DataUtil.coerceType('invalid', BigInt));
+    assert(DataUtil.coerceType('invalid', BigInt, false) === undefined);
   }
 
   @Test()
