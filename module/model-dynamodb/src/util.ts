@@ -77,18 +77,7 @@ export class DynamoDBUtil {
 
       switch (idx.type) {
         case 'indexed:sorted': {
-          const path = idx.sortTemplate[0].path;
-          let fieldType = cls;
-          for (const field of path) {
-            if (SchemaRegistryIndex.has(fieldType)) {
-              const schema = SchemaRegistryIndex.getConfig(fieldType);
-              if (field in schema.fields) {
-                fieldType = schema.fields[field].type;
-              }
-            } else {
-              break;
-            }
-          }
+          const fieldType = SchemaRegistryIndex.getNestedFieldConfig(cls, idx.sortTemplate[0].path)?.type ?? cls;
 
           keys.push({ AttributeName: keyIndexAttribute, KeyType: 'HASH' });
           keys.push({ AttributeName: sortIndexAttribute, KeyType: 'RANGE' });

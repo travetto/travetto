@@ -51,7 +51,12 @@ import {
   type SortedIndexSelectionType
 } from '@travetto/model-indexed';
 import {
+  type AggregateNumericOperation,
+  type AggregateOperation,
+  type AggregateResultType,
   type ModelQuery,
+  type ModelQueryAggregateSupport,
+  ModelQueryAggregateUtil,
   type ModelQueryCrudSupport,
   ModelQueryCrudUtil,
   type ModelQueryFacet,
@@ -62,6 +67,8 @@ import {
   ModelQueryUtil,
   type PageableModelQuery,
   QueryVerifier,
+  type ValidComparableFields,
+  type ValidNumericFields,
   type ValidStringFields,
   type WhereClause
 } from '@travetto/model-query';
@@ -75,6 +82,7 @@ import {
   type Class,
   castTo,
   JSONUtil,
+  RuntimeError,
   ShutdownManager,
   TypedObject
 } from '@travetto/runtime';
@@ -112,6 +120,7 @@ export class MongoModelService
     ModelBlobSupport,
     ModelIndexedSupport,
     ModelQuerySupport,
+    ModelQueryAggregateSupport,
     ModelQueryCrudSupport,
     ModelQueryFacetSupport,
     ModelQuerySuggestSupport,
@@ -727,6 +736,53 @@ export class MongoModelService
         count: item.count
       }))
       .toSorted((a, b) => b.count - a.count);
+  }
+
+  static readonly AGGREGATE_OPERATION_MAPPING: Record<AggregateOperation, '$sum' | '$avg' | '$min' | '$max'> = {
+    sum: '$sum',
+    avg: '$avg',
+    min: '$min',
+    max: '$max'
+  };
+
+  // Aggregate
+  async aggregateFieldByQuery<
+    T extends ModelType,
+    Op extends AggregateOperation,
+    F extends (Op extends AggregateNumericOperation ? ValidNumericFields<T> : ValidComparableFields<T>)
+  >(modelClass: Class<T>, operation: Op, field: F, query?: ModelQuery<T>): Promise<AggregateResultType<T, F>> {
+    await QueryVerifier.verify(modelClass, query);
+
+    const collection = await this.getStore(modelClass);
+
+    const where = ModelQueryUtil.getWhereClause(modelClass, query?.where);
+    let queryObject: Record<string, unknown> = { [field]: { $exists: true, $ne: null } };
+
+    if (where) {
+      queryObject = { $and: [queryObject, MongoUtil.extractWhereFilter(modelClass, where)] };
+    }
+
+    const aggregateOperator = MongoModelService.AGGREGATE_OPERATION_MAPPING[operation];
+    if (!aggregateOperator) {
+      throw new RuntimeError(`Unsupported aggregate operation: ${operation}`);
+    }
+
+    const aggregations: object[] = [
+      { $match: queryObject },
+      {
+        $group: {
+          _id: null,
+          value: {
+            [aggregateOperator]: `$${String(field)}`
+          }
+        }
+      }
+    ];
+
+    const result = await collection.aggregate<{ _id: null; value: unknown }>(aggregations).toArray();
+    const rawValue = result.length ? result[0].value : undefined;
+
+    return ModelQueryAggregateUtil.resolveResult(modelClass, operation, field, rawValue);
   }
 
   // Suggest

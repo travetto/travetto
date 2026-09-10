@@ -6,6 +6,7 @@ import { castTo } from '@travetto/runtime';
 import { LongText } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
+import { ModelQueryAggregateSuite } from '@travetto/model-query/support/test/aggregate.ts';
 import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
 import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.ts';
 import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism.ts';
@@ -82,6 +83,12 @@ class MongoQuerySuite extends ModelQuerySuite {
 
 @Suite()
 class MongoQueryCrudSuite extends ModelQueryCrudSuite {
+  serviceClass = MongoModelService;
+  configClass = MongoModelConfig;
+}
+
+@Suite()
+class MongoQueryAggregateSuite extends ModelQueryAggregateSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }

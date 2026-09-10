@@ -7,10 +7,12 @@ import { Suite, Test } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 import { Doctor, Engineer, Firefighter, Worker } from '@travetto/model/support/test/polymorphism.ts';
 
+import type { ModelQueryAggregateSupport } from '../../src/types/aggregate.ts';
 import type { ModelQueryCrudSupport } from '../../src/types/crud.ts';
 import type { ModelQueryFacetSupport } from '../../src/types/facet.ts';
 import type { ModelQuerySupport } from '../../src/types/query.ts';
 import type { ModelQuerySuggestSupport } from '../../src/types/suggest.ts';
+import { ModelQueryAggregateUtil } from '../../src/util/aggregate.ts';
 import { ModelQueryCrudUtil } from '../../src/util/crud.ts';
 import { ModelQueryFacetUtil } from '../../src/util/facet.ts';
 import { ModelQuerySuggestUtil } from '../../src/util/suggest.ts';
@@ -108,5 +110,25 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
     assert((await svc.facetByQuery(Worker, 'name')).length === 4);
     const docFacet = await svc.facetByQuery(Doctor, 'specialty');
     assert.deepStrictEqual(docFacet, [{ count: 2, key: 'eyes' }]);
+  }
+
+  @Test({ skip: ModelQueryPolymorphismSuite.ifNot(ModelQueryAggregateUtil.isSupported) })
+  async testAggregateQuery() {
+    const service: ModelQueryAggregateSupport & ModelQuerySupport = castTo(await this.service);
+    const [doctorOne, doctorTwo, firefighterOne, firefighterTwo] = [
+      Doctor.from({ name: 'bob', specialty: 'eyes' }),
+      Doctor.from({ name: 'nob', specialty: 'eyes' }),
+      Firefighter.from({ name: 'rob', firehouse: 20 }),
+      Firefighter.from({ name: 'fob', firehouse: 30 })
+    ];
+
+    await this.saveAll(Worker, [doctorOne, doctorTwo, firefighterOne, firefighterTwo]);
+    assert((await this.getSize(Worker)) === 4);
+
+    const sumFirehouse = await service.aggregateFieldByQuery(Firefighter, 'sum', 'firehouse');
+    assert(sumFirehouse === 50);
+
+    const averageFirehouse = await service.aggregateFieldByQuery(Firefighter, 'avg', 'firehouse');
+    assert(averageFirehouse === 25);
   }
 }

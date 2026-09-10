@@ -6,6 +6,8 @@ export type QueryPrimitiveArray = QueryPrimitive[];
 export type DistanceUnit = 'mi' | 'm' | 'km' | 'ft' | 'rad';
 export type RetainQueryPrimitiveFields<T> = Pick<T, ValidFields<T, QueryPrimitive>>;
 export type ValidStringFields<T> = KeyPaths<T, String | string | string[] | String[] | undefined>;
+export type ValidNumericFields<T> = KeyPaths<T, number | bigint | Number | undefined>;
+export type ValidComparableFields<T> = KeyPaths<T, number | bigint | Number | Date | undefined>;
 
 type General<T> = {
   $eq?: T;

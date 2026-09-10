@@ -1,7 +1,14 @@
 import type { IndexConfig, ModelType } from '@travetto/model';
 import { ModelRegistryIndex } from '@travetto/model';
 import { isModelIndexedIndex } from '@travetto/model-indexed';
-import { isModelQueryIndex, ModelQueryUtil, type QueryIndexConfig, type SortClause, type WhereClause } from '@travetto/model-query';
+import {
+  type AggregateOperation,
+  isModelQueryIndex,
+  ModelQueryUtil,
+  type QueryIndexConfig,
+  type SortClause,
+  type WhereClause
+} from '@travetto/model-query';
 import { type Class, castTo, JSONUtil, RuntimeError } from '@travetto/runtime';
 import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -843,5 +850,28 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     const where = whereSQL ? ` AND ${whereSQL}` : '';
 
     return `SELECT ${keySql} AS ${this.escapeIdentifier('key')}, ${countSql} AS ${this.escapeIdentifier('count')} FROM ${this.escapeIdentifier(tableContext.tableName)} WHERE ${sqlPath} IS NOT NULL${where} GROUP BY ${sqlPath} ORDER BY ${this.escapeIdentifier('count')} DESC;`;
+  }
+
+  static readonly AGGREGATE_OPERATION_MAPPING: Record<AggregateOperation, string> = {
+    sum: 'SUM',
+    avg: 'AVG',
+    min: 'MIN',
+    max: 'MAX'
+  };
+
+  buildAggregate<T extends ModelType>(
+    tableContext: TableContext<T>,
+    operation: AggregateOperation,
+    sqlPath: string,
+    whereSQL?: string
+  ): string {
+    const aggregateFunction = AbstractANSI99Dialect.AGGREGATE_OPERATION_MAPPING[operation];
+    if (!aggregateFunction) {
+      throw new RuntimeError(`Unsupported aggregate operation: ${operation}`);
+    }
+    const aggregateSql = `${aggregateFunction}(${sqlPath})`;
+    const where = whereSQL ? ` WHERE ${whereSQL}` : '';
+
+    return `SELECT ${aggregateSql} AS ${this.escapeIdentifier('value')} FROM ${this.escapeIdentifier(tableContext.tableName)}${where};`;
   }
 }

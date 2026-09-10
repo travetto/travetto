@@ -2,6 +2,7 @@
 import { DocFileUtil, type DocJSXElement, type DocJSXElementByFn, d } from '@travetto/doc';
 import { castKey, Runtime, toConcrete } from '@travetto/runtime';
 
+import type { ModelQueryAggregateSupport } from '../src/types/aggregate.ts';
 import type { ModelQueryCrudSupport } from '../src/types/crud.ts';
 import type { ModelQueryFacetSupport } from '../src/types/facet.ts';
 import type { ModelQuerySupport } from '../src/types/query.ts';
@@ -11,6 +12,7 @@ const toLink = (title: string, target: Function): DocJSXElementByFn<'CodeLink'> 
   d.codeLink(title, Runtime.getSourceFile(target), new RegExp(`\\binterface\\s+${target.name}`));
 
 export const Links = {
+  QueryAggregate: toLink('Aggregate', toConcrete<ModelQueryAggregateSupport>()),
   QueryCrud: toLink('Query Crud', toConcrete<ModelQueryCrudSupport>()),
   QueryFacet: toLink('Facet', toConcrete<ModelQueryFacetSupport>()),
   QuerySuggest: toLink('Suggest', toConcrete<ModelQuerySuggestSupport>()),
@@ -21,7 +23,7 @@ export const ModelQueryTypes = (fn: Function): DocJSXElement[] => {
   const { content } = DocFileUtil.readSource(fn);
   const found: DocJSXElementByFn<'CodeLink'>[] = [];
   const seen = new Set<string>();
-  for (const [, key] of content.matchAll(/Model(Query(Suggest|Facet|Crud)?)Support/g)) {
+  for (const [, key] of content.matchAll(/Model(Query(Aggregate|Suggest|Facet|Crud)?)Support/g)) {
     if (!seen.has(key) && key in Links) {
       seen.add(key);
       const link = Links[castKey(key)];

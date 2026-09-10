@@ -1,6 +1,7 @@
 import { Suite } from '@travetto/test';
 
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
+import { ModelQueryAggregateSuite } from '@travetto/model-query/support/test/aggregate.ts';
 import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
 import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.ts';
 import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism.ts';
@@ -16,6 +17,13 @@ class MySQLQuerySuite extends ModelQuerySuite {
   serviceClass = MysqlModelService;
   configClass = MysqlModelConfig;
   supportsGeo = false;
+}
+
+@WithSuiteContext()
+@Suite()
+class MySQLQueryAggregateSuite extends ModelQueryAggregateSuite {
+  serviceClass = MysqlModelService;
+  configClass = MysqlModelConfig;
 }
 
 @WithSuiteContext()

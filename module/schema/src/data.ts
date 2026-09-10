@@ -195,7 +195,7 @@ export class DataUtil {
           return input;
         }
         try {
-          return BigInt(typeof input === 'boolean' || typeof input === 'number' ? input : `${input}`.replace(/n$/i, ''));
+          return BigInt(typeof input === 'boolean' || typeof input === 'number' ? input : `${input}`.replace(/n$/i, '').split('.')[0]);
         } catch {
           if (strict) {
             throw new Error(`Invalid numeric value: ${input}`);

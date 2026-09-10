@@ -1,6 +1,7 @@
 import { Suite } from '@travetto/test';
 
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
+import { ModelQueryAggregateSuite } from '@travetto/model-query/support/test/aggregate.ts';
 import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
 import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.ts';
 import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism.ts';
@@ -16,6 +17,13 @@ class SqliteQuerySuite extends ModelQuerySuite {
   serviceClass = SqliteModelService;
   configClass = SqliteModelConfig;
   supportsGeo = false;
+}
+
+@WithSuiteContext()
+@Suite()
+class SqliteQueryAggregateSuite extends ModelQueryAggregateSuite {
+  serviceClass = SqliteModelService;
+  configClass = SqliteModelConfig;
 }
 
 @WithSuiteContext()
