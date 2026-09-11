@@ -1,6 +1,6 @@
 {
   "name": "@travetto/log",
-  "version": "8.0.1",
+  "version": "8.0.2",
   "description": "Logging framework that integrates at the console.log level.",
   "keywords": [
     "logging",
@@ -27,7 +27,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/config": "^8.0.1",
+    "@travetto/config": "^8.0.2",
     "@travetto/di": "^8.0.1",
     "@travetto/terminal": "^8.0.1"
   },

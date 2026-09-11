@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-indexed",
-  "version": "8.0.1",
+  "version": "8.0.2",
   "description": "Basic indexing support for model sources that support it.",
   "keywords": [
     "datastore",
@@ -29,12 +29,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/model": "^8.0.1",
+    "@travetto/model": "^8.0.2",
     "@travetto/registry": "^8.0.1",
-    "@travetto/schema": "^8.0.1"
+    "@travetto/schema": "^8.0.2"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.1",
+    "@travetto/cli": "^8.0.2",
     "@travetto/test": "^8.0.1"
   },
   "peerDependenciesMeta": {

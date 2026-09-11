@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-query-language",
-  "version": "8.0.1",
+  "version": "8.0.2",
   "description": "Datastore query language.",
   "keywords": [
     "datastore",
@@ -30,9 +30,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/model": "^8.0.1",
-    "@travetto/model-query": "^8.0.1",
-    "@travetto/schema": "^8.0.1"
+    "@travetto/model": "^8.0.2",
+    "@travetto/model-query": "^8.0.2",
+    "@travetto/schema": "^8.0.2"
   },
   "peerDependencies": {
     "@travetto/test": "^8.0.1"

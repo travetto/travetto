@@ -1,6 +1,6 @@
 {
   "name": "@travetto/cli",
-  "version": "8.0.1",
+  "version": "8.0.2",
   "description": "CLI infrastructure for Travetto framework",
   "keywords": [
     "cli",
@@ -32,7 +32,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/schema": "^8.0.1",
+    "@travetto/schema": "^8.0.2",
     "@travetto/terminal": "^8.0.1"
   },
   "travetto": {

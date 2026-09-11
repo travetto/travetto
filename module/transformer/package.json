@@ -1,6 +1,6 @@
 {
   "name": "@travetto/transformer",
-  "version": "8.0.1",
+  "version": "8.0.2",
   "description": "Functionality for AST transformations, with transformer registration, and general utils",
   "keywords": [
     "ast-transformations",
