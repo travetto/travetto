@@ -33,6 +33,24 @@ const getMappedFields = (type: ts.Type): string[] | undefined => {
   }
 };
 
+const hasComplexSubType = (type: ts.UnionOrIntersectionType): boolean => {
+  if (type.types.filter(x => (x.getFlags() & (ts.TypeFlags.Undefined | ts.TypeFlags.Null)) === 0).length === 1) {
+    return false;
+  }
+
+  for (const sub of type.types) {
+    if (
+      sub.isClassOrInterface() ||
+      (sub.isUnionOrIntersection() && hasComplexSubType(sub)) ||
+      sub.getFlags() & ts.TypeFlags.Object ||
+      sub.getFlags() & ts.TypeFlags.NonPrimitive
+    ) {
+      return true;
+    }
+  }
+  return false;
+};
+
 /**
  * List of global types that can be parameterized
  */
@@ -87,7 +105,11 @@ type Category = Exclude<AnyType['key'], 'pointer'> | 'concrete';
 /**
  * Type categorizer, input for builder
  */
-export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { category: Category; type: ts.Type } {
+export function TypeCategorize(
+  resolver: TransformResolver,
+  type: ts.Type,
+  context: { importName: string }
+): { category: Category; type: ts.Type } {
   const flags = type.getFlags();
   const objectFlags = DeclarationUtil.getObjectFlags(type) ?? 0;
 
@@ -113,6 +135,9 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
     // Tuple type?
     return { category: 'tuple', type };
   } else if (type.isUnionOrIntersection()) {
+    if (hasComplexSubType(type)) {
+      return { category: 'shape', type };
+    }
     return { category: 'composition', type };
   } else if (objectFlags & ts.ObjectFlags.Anonymous) {
     try {

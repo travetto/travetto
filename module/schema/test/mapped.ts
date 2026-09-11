@@ -16,12 +16,15 @@ type Omitted = Omit<Base, 'id'>;
 type Part = Partial<Base>;
 type Req = Required<Base>;
 
+type Mixed = Pick<Base, 'name'> & Pick<Base, 'age'>;
+
 @Schema()
 class Container {
   picked: Picked;
   omitted: Omitted;
   part: Part;
   req: Req;
+  mixed: Mixed;
 
   @Method()
   process(p: Picked, o: Omitted) {
@@ -109,5 +112,17 @@ class MappedTypeSuite {
     assert(r);
     const rConfig = SchemaRegistryIndex.get(r.type);
     assert(rConfig.getFields().age.required?.active);
+  }
+
+  @Test()
+  async testComplexMappedChainsAreFlattened() {
+    const field = SchemaRegistryIndex.getNestedFieldConfig(Container, 'mixed');
+    assert(field);
+
+    const mixed = SchemaRegistryIndex.get(field.type);
+    assert(mixed);
+    assert(mixed.getField('age'));
+    assert(mixed.getField('name'));
+    assert(!mixed.getField('id'));
   }
 }

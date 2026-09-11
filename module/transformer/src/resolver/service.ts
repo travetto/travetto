@@ -88,7 +88,7 @@ export class SimpleResolver implements TransformResolver {
   getAllTypeArguments(ref: ts.Type): [templateName: string, type: ts.Type][] {
     const types = this.#tsChecker.getTypeArguments(transformCast(ref));
     let names: string[] | undefined;
-    if (ref.symbol.declarations?.[0]) {
+    if (ref.symbol?.declarations?.[0]) {
       const first = ref.symbol.declarations[0];
       if (ts.isClassLike(first) || ts.isInterfaceDeclaration(first) || ts.isTypeAliasDeclaration(first)) {
         names = first.typeParameters?.map(tp => tp.name.getText()) ?? [];
@@ -135,7 +135,7 @@ export class SimpleResolver implements TransformResolver {
         throw new Error(`Object structure too nested: ${'getText' in node ? node.getText() : ''}`);
       }
 
-      const { category, type } = TypeCategorize(this, resType);
+      const { category, type } = TypeCategorize(this, resType, { importName });
       // TODO: Figure out how to get this legitimately
       const typeArguments: ts.Type[] =
         'resolvedTypeArguments' in resType && resType.resolvedTypeArguments ? transformCast(resType.resolvedTypeArguments) : [];
