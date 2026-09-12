@@ -6,11 +6,12 @@ import { Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
+import type { ModelQueryAggregateSupport } from '../../__index__.ts';
 import type { ModelQuerySupport } from '../../src/types/query.ts';
 import { Aged, Location, Names, Note, Person, PersonFamily, Recipe, SimpleList, WithNestedLists, WithNestedNestedLists } from './model.ts';
 
 @Suite()
-export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport & ModelCrudSupport> {
+export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport & ModelQueryAggregateSupport & ModelCrudSupport> {
   supportsGeo = true;
 
   @Test()
@@ -38,7 +39,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     const one2 = await svc.queryOne(Person, { where: { id: { $eq: people[0].id } } });
     assert(one2.id === people[0].id);
 
-    const none = await svc.queryCount(Person, { where: { id: { $ne: people[0].id } } });
+    const none = await svc.countByQuery(Person, { where: { id: { $ne: people[0].id } } });
     assert(none === 3);
 
     const noneIds = await svc.query(Person, { where: { id: { $ne: people[0].id } } });
@@ -331,7 +332,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
 
     await this.saveAll(Location, toAdd);
 
-    assert((await svc.queryCount(Location, {})) === 25);
+    assert((await svc.countByQuery(Location, {})) === 25);
 
     const result = await svc.query(Location, {
       limit: 100,
@@ -382,7 +383,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
       })
     );
 
-    const out = await service.queryCount(Note, {
+    const out = await service.countByQuery(Note, {
       where: {
         entities: {
           id
@@ -413,7 +414,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
       )
     );
 
-    const simple = await service.queryCount(Aged, {
+    const simple = await service.countByQuery(Aged, {
       where: {
         createdAt: {
           $gt: new Date()
@@ -422,7 +423,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     });
     assert(simple === 5);
 
-    const simple2 = await service.queryCount(Aged, {
+    const simple2 = await service.countByQuery(Aged, {
       where: {
         createdAt: {
           $gt: '-1d'
@@ -431,7 +432,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     });
     assert(simple2 === 6);
 
-    const simple3 = await service.queryCount(Aged, {
+    const simple3 = await service.countByQuery(Aged, {
       where: {
         createdAt: {
           $gt: '-1296m', // -1.9d
@@ -441,7 +442,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     });
     assert(simple3 === 3);
 
-    const simple4 = await service.queryCount(Aged, {
+    const simple4 = await service.countByQuery(Aged, {
       where: {
         createdAt: {
           $gt: TimeUtil.fromNow('-144m'), // -0.1d
@@ -463,35 +464,35 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
       WithNestedLists.from({ names: [], tags: [] })
     ]);
 
-    let total = await service.queryCount(WithNestedLists, {
+    let total = await service.countByQuery(WithNestedLists, {
       where: {
         names: { $exists: true }
       }
     });
     assert(total === 3);
 
-    total = await service.queryCount(WithNestedLists, {
+    total = await service.countByQuery(WithNestedLists, {
       where: {
         names: { $exists: false }
       }
     });
     assert(total === 2);
 
-    total = await service.queryCount(WithNestedLists, {
+    total = await service.countByQuery(WithNestedLists, {
       where: {
         tags: { $exists: false }
       }
     });
     assert(total === 3);
 
-    total = await service.queryCount(WithNestedLists, {
+    total = await service.countByQuery(WithNestedLists, {
       where: {
         tags: { $exists: true }
       }
     });
     assert(total === 2);
 
-    total = await service.queryCount(WithNestedLists, {
+    total = await service.countByQuery(WithNestedLists, {
       where: {
         tags: { $exists: false },
         names: { $exists: false }
@@ -499,7 +500,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     });
     assert(total === 1);
 
-    total = await service.queryCount(WithNestedLists, {
+    total = await service.countByQuery(WithNestedLists, {
       where: {
         tags: { $exists: true },
         names: { $exists: true }
@@ -520,35 +521,35 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
       WithNestedNestedLists.from({ sub: {}, tags: [] })
     ]);
 
-    let total = await service.queryCount(WithNestedNestedLists, {
+    let total = await service.countByQuery(WithNestedNestedLists, {
       where: {
         sub: { names: { $exists: true } }
       }
     });
     assert(total === 3);
 
-    total = await service.queryCount(WithNestedNestedLists, {
+    total = await service.countByQuery(WithNestedNestedLists, {
       where: {
         sub: { names: { $exists: false } }
       }
     });
     assert(total === 2);
 
-    total = await service.queryCount(WithNestedNestedLists, {
+    total = await service.countByQuery(WithNestedNestedLists, {
       where: {
         tags: { $exists: false }
       }
     });
     assert(total === 3);
 
-    total = await service.queryCount(WithNestedNestedLists, {
+    total = await service.countByQuery(WithNestedNestedLists, {
       where: {
         tags: { $exists: true }
       }
     });
     assert(total === 2);
 
-    total = await service.queryCount(WithNestedNestedLists, {
+    total = await service.countByQuery(WithNestedNestedLists, {
       where: {
         tags: { $exists: false },
         sub: { names: { $exists: false } }
@@ -556,7 +557,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     });
     assert(total === 1);
 
-    total = await service.queryCount(WithNestedNestedLists, {
+    total = await service.countByQuery(WithNestedNestedLists, {
       where: {
         tags: { $exists: true },
         sub: { names: { $exists: true } }

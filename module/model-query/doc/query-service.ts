@@ -47,7 +47,7 @@ export class QueryModelService
   async queryOne<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany?: boolean | undefined): Promise<T> {
     return asFull({});
   }
-  async queryCount<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
+  async countByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     return 0;
   }
   async updateByQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T> {

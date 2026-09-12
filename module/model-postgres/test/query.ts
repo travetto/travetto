@@ -79,7 +79,7 @@ class PostgreSQLQuerySuite extends ModelQuerySuite {
     assert(eqGreen.length === 1);
 
     // $exists test
-    const existsTags = await service.queryCount(WithNestedLists, {
+    const existsTags = await service.countByQuery(WithNestedLists, {
       where: {
         tags: { $exists: true }
       }

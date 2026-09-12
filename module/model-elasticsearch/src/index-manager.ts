@@ -87,9 +87,9 @@ export class IndexManager implements ModelStorageSupport {
 
   async deleteModel(cls: Class<ModelType>): Promise<void> {
     const { index } = this.getIdentity(cls);
-    const aliasedIndices = await this.#client.indices.getAlias();
+    const aliasedIndices = await this.#client.indices.getAlias({ name: index });
 
-    const toDelete = Object.keys(aliasedIndices[index]?.aliases ?? {}).filter(item => index in (aliasedIndices[item]?.aliases ?? {}));
+    const toDelete = Object.keys(aliasedIndices);
 
     console.debug('Deleting Model', { index, toDelete });
     await Promise.all(toDelete.map(target => this.#client.indices.delete({ index: target })));
@@ -144,8 +144,8 @@ export class IndexManager implements ModelStorageSupport {
 
   async deleteStorage(): Promise<void> {
     console.debug('Deleting storage', { idx: this.getNamespacedIndex('*') });
-    // await this.#client.indices.delete({
-    //   index: this.getNamespacedIndex('*')
-    // });
+    await this.#client.indices.delete({
+      index: this.getNamespacedIndex('*')
+    });
   }
 }

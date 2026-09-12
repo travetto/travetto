@@ -1,12 +1,13 @@
 import assert from 'node:assert';
 
-import { Model, type ModelCrudSupport, NotFoundError, UniqueError } from '@travetto/model';
-import { castTo } from '@travetto/runtime';
+import { Model, type ModelCrudSupport, type ModelType, NotFoundError, UniqueError } from '@travetto/model';
+import { castTo, type Class } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
-import { QueryIndex } from '../../__index__.ts';
+import type { WhereClause } from '../../__index__.ts';
+import { QueryIndex } from '../../src/model/indexes.ts';
 import type { ModelQueryCrudSupport } from '../../src/types/crud.ts';
 import { Address, BigIntModel, Person, Todo } from './model.ts';
 
@@ -24,6 +25,11 @@ class UniqueUser2 {
 @Suite()
 export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudSupport & ModelCrudSupport> {
   supportsUniqueIndexes = true;
+
+  async countByQuery<T extends ModelType>(cls: Class<T>, query: WhereClause<T>): Promise<number> {
+    const svc = await this.service;
+    return svc.query(cls, { where: query, limit: 10000 }).then(v => v.length);
+  }
 
   @Test({ skip: self => !castTo<ModelQueryCrudSuite>(self).supportsUniqueIndexes })
   async testUnique() {
@@ -147,13 +153,13 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
 
     assert(c === 2);
 
-    assert((await svc.queryCount(Person, {})) === 3);
+    assert((await this.countByQuery(Person, {})) === 3);
 
     const c2 = await svc.deleteByQuery(Person, { where: { age: { $lte: 3 } } });
 
     assert(c2 === 3);
 
-    assert((await svc.queryCount(Person, {})) === 0);
+    assert((await this.countByQuery(Person, {})) === 0);
   }
 
   @Test()
@@ -177,7 +183,7 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
 
     assert(count === 5);
 
-    assert((await svc.queryCount(Person, { where: { gender: 'm' } })) === 5);
+    assert((await this.countByQuery(Person, { gender: 'm' })) === 5);
 
     const c = await svc.updatePartialByQuery(Person, { where: { age: { $gt: 3 } } }, { gender: 'f' });
 
@@ -185,14 +191,14 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
 
     assert(c === 2);
 
-    assert((await svc.queryCount(Person, { where: { gender: 'm' } })) === 3);
+    assert((await this.countByQuery(Person, { gender: 'm' })) === 3);
 
     const c2 = await svc.updatePartialByQuery(Person, { where: { gender: 'm' } }, { gender: 'f' });
 
     assert(c2 === 3);
 
-    assert((await svc.queryCount(Person, { where: { gender: 'f' } })) === 5);
-    assert((await svc.queryCount(Person, { where: { gender: 'm' } })) === 0);
+    assert((await this.countByQuery(Person, { gender: 'f' })) === 5);
+    assert((await this.countByQuery(Person, { gender: 'm' })) === 0);
   }
 
   @Test()
@@ -237,7 +243,7 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
     assert(withOptional.every(x => x.optionalBigInt !== undefined));
 
     // Test count with bigint condition
-    const countResult = await svc.queryCount(BigIntModel, { where: { largeNumber: { $gte: 1000n } } });
+    const countResult = await this.countByQuery(BigIntModel, { largeNumber: { $gte: 1000n } });
     assert(countResult === 2);
   }
 
@@ -285,7 +291,7 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
     assert(deleted === 2);
 
     // Verify deletions
-    const remaining = await svc.queryCount(BigIntModel, {});
+    const remaining = await this.countByQuery(BigIntModel, {});
     assert(remaining === 3);
 
     const all = await svc.query(BigIntModel, {});
