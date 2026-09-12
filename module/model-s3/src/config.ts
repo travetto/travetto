@@ -59,6 +59,8 @@ export class S3ModelConfig {
     const isAws = !this.endpoint || hostname === 'amazonaws.com' || hostname.endsWith('.amazonaws.com');
 
     this.config = {
+      responseChecksumValidation: 'WHEN_REQUIRED',
+      requestChecksumCalculation: 'WHEN_REQUIRED',
       ...(this.config ?? {}),
       region: this.region,
       endpoint: this.endpoint || undefined,

@@ -41,6 +41,11 @@ class S3BlobSuite extends ModelBlobSuite {
   serviceClass = S3ModelService;
   configClass = S3ModelConfig;
 
+  @Test()
+  async entryPoint() {
+    await super.partialStream();
+  }
+
   @Test({ timeout: 15000 })
   async largeFile() {
     const service: S3ModelService = castTo(await this.service);
