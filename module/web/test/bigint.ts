@@ -326,7 +326,7 @@ class BigIntWebTest extends BaseWebSuite {
     const response1 = await this.request<{ message: string }>(
       {
         context: { httpMethod: 'POST', path: '/test/bigint/model' },
-        body: { id: '123.45', value: '1n', name: 'test' }
+        body: { id: '1ne10', value: '1n', name: 'test' }
       },
       false
     );
