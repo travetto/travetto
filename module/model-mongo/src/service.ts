@@ -51,9 +51,7 @@ import {
   type SortedIndexSelectionType
 } from '@travetto/model-indexed';
 import {
-  type AggregateNumericOperation,
-  type AggregateOperation,
-  type AggregateResultType,
+  type FieldAggregateResult,
   type ModelQuery,
   type ModelQueryAggregateSupport,
   ModelQueryAggregateUtil,
@@ -86,6 +84,7 @@ import {
   ShutdownManager,
   TypedObject
 } from '@travetto/runtime';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { MongoModelConfig } from './config.ts';
 import { MongoUtil, type WithId } from './internal/util.ts';
@@ -738,51 +737,51 @@ export class MongoModelService
       .toSorted((a, b) => b.count - a.count);
   }
 
-  static readonly AGGREGATE_OPERATION_MAPPING: Record<AggregateOperation, '$sum' | '$avg' | '$min' | '$max'> = {
-    sum: '$sum',
-    avg: '$avg',
-    min: '$min',
-    max: '$max'
-  };
-
   // Aggregate
-  async aggregateFieldByQuery<
-    T extends ModelType,
-    Op extends AggregateOperation,
-    F extends (Op extends AggregateNumericOperation ? ValidNumericFields<T> : ValidComparableFields<T>)
-  >(modelClass: Class<T>, operation: Op, field: F, query?: ModelQuery<T>): Promise<AggregateResultType<T, F>> {
-    await QueryVerifier.verify(modelClass, query);
+  async aggregateFieldByQuery<T extends ModelType, F extends ValidComparableFields<T>>(
+    cls: Class<T>,
+    field: F,
+    query?: ModelQuery<T>
+  ): Promise<FieldAggregateResult<T, F>> {
+    await QueryVerifier.verify(cls, query);
 
-    const collection = await this.getStore(modelClass);
+    const collection = await this.getStore(cls);
 
-    const where = ModelQueryUtil.getWhereClause(modelClass, query?.where);
+    const where = ModelQueryUtil.getWhereClause(cls, query?.where);
     let queryObject: Record<string, unknown> = { [field]: { $exists: true, $ne: null } };
 
     if (where) {
-      queryObject = { $and: [queryObject, MongoUtil.extractWhereFilter(modelClass, where)] };
+      queryObject = { $and: [queryObject, MongoUtil.extractWhereFilter(cls, where)] };
     }
 
-    const aggregateOperator = MongoModelService.AGGREGATE_OPERATION_MAPPING[operation];
-    if (!aggregateOperator) {
-      throw new RuntimeError(`Unsupported aggregate operation: ${operation}`);
+    const isDate = SchemaRegistryIndex.getNestedFieldConfig(cls, field)!.type === Date;
+
+    const groupFields: Record<string, unknown> = {
+      _id: null,
+      count: { $sum: 1 },
+      min: { $min: `$${String(field)}` },
+      max: { $max: `$${String(field)}` }
+    };
+    if (!isDate) {
+      groupFields.avg = { $avg: `$${String(field)}` };
+      groupFields.sum = { $sum: `$${String(field)}` };
     }
 
-    const aggregations: object[] = [
-      { $match: queryObject },
-      {
-        $group: {
-          _id: null,
-          value: {
-            [aggregateOperator]: `$${String(field)}`
-          }
-        }
-      }
-    ];
+    const aggregations: object[] = [{ $match: queryObject }, { $group: groupFields }];
 
-    const result = await collection.aggregate<{ _id: null; value: unknown }>(aggregations).toArray();
-    const rawValue = result.length ? result[0].value : undefined;
+    const result = await collection
+      .aggregate<{
+        _id: null;
+        count?: number;
+        min?: unknown;
+        max?: unknown;
+        avg?: unknown;
+        sum?: unknown;
+      }>(aggregations)
+      .toArray();
 
-    return ModelQueryAggregateUtil.resolveResult(modelClass, operation, field, rawValue);
+    const row = result.length ? result[0] : { count: 0 };
+    return ModelQueryAggregateUtil.resolveAggregate(cls, field, row);
   }
 
   // Suggest

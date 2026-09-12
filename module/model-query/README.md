@@ -128,28 +128,24 @@ export interface ModelQuerySuggestSupport extends ModelQuerySupport {
 ```
 
 ### Aggregate
-This contract provides the ability to run strongly-typed field-level aggregations (such as sum, avg, min, and max) on models with optional query filtering.
+This contract provides the ability to run strongly-typed field-level statistics (such as min, max, count, avg, and sum) on models with optional query filtering.
 
 **Code: Query Aggregate**
 ```typescript
 export interface ModelQueryAggregateSupport extends ModelQuerySupport {
   /**
-   * Run an aggregation on a field
+   * Run an aggregation on a comparable field.
+   * For numeric fields (number/bigint), returns count, min, max, avg, and sum.
+   * For date fields, returns count, min, and max.
    * @param modelClass The model class to aggregate
-   * @param operation The operation to perform ('sum', 'avg', 'min', 'max')
    * @param field The field to aggregate on
    * @param query Additional query filtering
    */
-  aggregateFieldByQuery<
-    T extends ModelType,
-    Op extends AggregateOperation,
-    F extends (Op extends AggregateNumericOperation ? ValidNumericFields<T> : ValidComparableFields<T>)
-  >(
+  aggregateFieldByQuery<T extends ModelType, F extends ValidComparableFields<T>>(
     modelClass: Class<T>,
-    operation: Op,
     field: F,
     query?: ModelQuery<T>
-  ): Promise<AggregateResultType<T, F>>;
+  ): Promise<FieldAggregateResult<T, F>>;
 }
 ```
 

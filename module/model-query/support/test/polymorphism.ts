@@ -125,10 +125,11 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
     await this.saveAll(Worker, [doctorOne, doctorTwo, firefighterOne, firefighterTwo]);
     assert((await this.getSize(Worker)) === 4);
 
-    const sumFirehouse = await service.aggregateFieldByQuery(Firefighter, 'sum', 'firehouse');
-    assert(sumFirehouse === 50);
-
-    const averageFirehouse = await service.aggregateFieldByQuery(Firefighter, 'avg', 'firehouse');
-    assert(averageFirehouse === 25);
+    const aggregate = await service.aggregateFieldByQuery(Firefighter, 'firehouse');
+    assert(aggregate.count === 2);
+    assert(aggregate.min === 20);
+    assert(aggregate.max === 30);
+    assert(aggregate.avg === 25);
+    assert(aggregate.sum === 50);
   }
 }

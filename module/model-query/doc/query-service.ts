@@ -1,8 +1,6 @@
 import { ModelCrudUtil, type ModelType, type OptionalId } from '@travetto/model';
 import type {
-  AggregateNumericOperation,
-  AggregateOperation,
-  AggregateResultType,
+  FieldAggregateResult,
   ModelQuery,
   ModelQueryAggregateSupport,
   ModelQueryCrudSupport,
@@ -10,7 +8,6 @@ import type {
   ModelQuerySuggestSupport,
   PageableModelQuery,
   ValidComparableFields,
-  ValidNumericFields,
   ValidStringFields
 } from '@travetto/model-query';
 import { asFull, type Class, castTo } from '@travetto/runtime';
@@ -59,12 +56,12 @@ export class QueryModelService
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     return 0;
   }
-  async aggregateFieldByQuery<
-    T extends ModelType,
-    Op extends AggregateOperation,
-    F extends (Op extends AggregateNumericOperation ? ValidNumericFields<T> : ValidComparableFields<T>)
-  >(modelClass: Class<T>, operation: Op, field: F, query?: ModelQuery<T>): Promise<AggregateResultType<T, F>> {
-    return castTo(undefined);
+  async aggregateFieldByQuery<T extends ModelType, F extends ValidComparableFields<T>>(
+    modelClass: Class<T>,
+    field: F,
+    query?: ModelQuery<T>
+  ): Promise<FieldAggregateResult<T, F>> {
+    return castTo({ count: 0 });
   }
   async facetByQuery<T extends ModelType>(
     cls: Class<T>,

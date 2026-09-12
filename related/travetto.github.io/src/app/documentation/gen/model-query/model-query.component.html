@@ -146,31 +146,27 @@ Additionally, this same pattern avails it self in a set of suggestion methods th
 
 <h3 id="aggregate">Aggregate</h3>
 
-This contract provides the ability to run strongly-typed field-level aggregations (such as sum, avg, min, and max) on models with optional query filtering.
+This contract provides the ability to run strongly-typed field-level statistics (such as min, max, count, avg, and sum) on models with optional query filtering.
 
   <figure class="code">
     <figcaption class="code">Query Aggregate
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/types/aggregate.ts#L30">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/types/aggregate.ts#L43">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelQueryAggregateSupport</span> <span class="token keyword">extends</span> <span class="token class-name">ModelQuerySupport</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
-   * Run an aggregation on a field
+   * Run an aggregation on a comparable field.
+   * For numeric fields (number/bigint), returns count, min, max, avg, and sum.
+   * For date fields, returns count, min, and max.
    * &#64;param modelClass The model class to aggregate
-   * &#64;param operation The operation to perform ('sum', 'avg', 'min', 'max')
    * &#64;param field The field to aggregate on
    * &#64;param query Additional query filtering
    */</span>
-  <span class="token generic-function"><span class="token function">aggregateFieldByQuery</span><span class="token generic class-name"><span class="token operator">&lt;</span>
-    <span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token punctuation">,</span>
-    Op <span class="token keyword">extends</span> AggregateOperation<span class="token punctuation">,</span>
-    <span class="token constant">F</span> <span class="token keyword">extends</span> <span class="token punctuation">(</span>Op <span class="token keyword">extends</span> AggregateNumericOperation <span class="token operator">?</span> ValidNumericFields<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span> <span class="token operator">:</span> ValidComparableFields<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span>
-  <span class="token operator">></span></span></span><span class="token punctuation">(</span>
+  <span class="token generic-function"><span class="token function">aggregateFieldByQuery</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token punctuation">,</span> <span class="token constant">F</span> <span class="token keyword">extends</span> ValidComparableFields<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">>></span></span></span><span class="token punctuation">(</span>
     modelClass<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span>
-    operation<span class="token operator">:</span> Op<span class="token punctuation">,</span>
     field<span class="token operator">:</span> <span class="token constant">F</span><span class="token punctuation">,</span>
     query<span class="token operator">?</span><span class="token operator">:</span> ModelQuery<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span>
-  <span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>AggregateResultType<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token punctuation">,</span> <span class="token constant">F</span><span class="token operator">>></span><span class="token punctuation">;</span>
+  <span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>FieldAggregateResult<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token punctuation">,</span> <span class="token constant">F</span><span class="token operator">>></span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 

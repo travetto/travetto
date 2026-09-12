@@ -39,8 +39,8 @@ export const text = (
         <c.Code title="Query Suggest" src={toConcrete<ModelQuerySuggestSupport>()} />
       </c.SubSection>
       <c.SubSection title="Aggregate">
-        This contract provides the ability to run strongly-typed field-level aggregations (such as sum, avg, min, and max) on models with
-        optional query filtering.
+        This contract provides the ability to run strongly-typed field-level statistics (such as min, max, count, avg, and sum) on models
+        with optional query filtering.
         <c.Code title="Query Aggregate" src={toConcrete<ModelQueryAggregateSupport>()} />
       </c.SubSection>
     </c.Section>

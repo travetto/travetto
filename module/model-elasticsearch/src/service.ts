@@ -36,9 +36,7 @@ import {
   type SortedIndexSelectionType
 } from '@travetto/model-indexed';
 import {
-  type AggregateNumericOperation,
-  type AggregateOperation,
-  type AggregateResultType,
+  type FieldAggregateResult,
   type ModelQuery,
   type ModelQueryAggregateSupport,
   ModelQueryAggregateUtil,
@@ -765,25 +763,33 @@ export class ElasticsearchModelService
   }
 
   // Aggregate
-  async aggregateFieldByQuery<
-    T extends ModelType,
-    Op extends AggregateOperation,
-    F extends (Op extends AggregateNumericOperation ? ValidNumericFields<T> : ValidComparableFields<T>)
-  >(modelClass: Class<T>, operation: Op, field: F, query?: ModelQuery<T>): Promise<AggregateResultType<T, F>> {
+  async aggregateFieldByQuery<T extends ModelType, F extends ValidComparableFields<T>>(
+    modelClass: Class<T>,
+    field: F,
+    query?: ModelQuery<T>
+  ): Promise<FieldAggregateResult<T, F>> {
     await QueryVerifier.verify(modelClass, query);
 
     const fieldString = String(field);
-    const search = ElasticsearchQueryUtil.getAggregateSearchObject(modelClass, operation, fieldString, query, this.config.schemaConfig);
+    const search = ElasticsearchQueryUtil.getFieldAggregateSearchObject(modelClass, fieldString, query, this.config.schemaConfig);
 
     const result = await this.execSearch(modelClass, search);
-    const totalCount = typeof result.hits.total === 'number' ? result.hits.total : (result.hits.total?.value ?? 0);
-    if (totalCount === 0) {
-      return castTo(undefined);
-    }
+    const statsResult = result.aggregations?.field_aggregate as
+      | {
+          count?: number;
+          min?: number | null;
+          max?: number | null;
+          avg?: number | null;
+          sum?: number | null;
+        }
+      | undefined;
 
-    const aggregateResult = result.aggregations?.aggregate_value as { value?: number | null; value_as_string?: string } | undefined;
-    const rawValue = aggregateResult?.value_as_string ?? aggregateResult?.value;
-
-    return ModelQueryAggregateUtil.resolveResult(modelClass, operation, field, rawValue);
+    return ModelQueryAggregateUtil.resolveAggregate(modelClass, field, {
+      count: statsResult?.count ?? 0,
+      min: statsResult?.min ?? undefined,
+      max: statsResult?.max ?? undefined,
+      avg: statsResult?.avg ?? undefined,
+      sum: statsResult?.sum ?? undefined
+    });
   }
 }

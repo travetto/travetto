@@ -1,14 +1,7 @@
 import type { IndexConfig, ModelType } from '@travetto/model';
 import { ModelRegistryIndex } from '@travetto/model';
 import { isModelIndexedIndex } from '@travetto/model-indexed';
-import {
-  type AggregateOperation,
-  isModelQueryIndex,
-  ModelQueryUtil,
-  type QueryIndexConfig,
-  type SortClause,
-  type WhereClause
-} from '@travetto/model-query';
+import { isModelQueryIndex, ModelQueryUtil, type QueryIndexConfig, type SortClause, type WhereClause } from '@travetto/model-query';
 import { type Class, castTo, JSONUtil, RuntimeError } from '@travetto/runtime';
 import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -852,26 +845,14 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     return `SELECT ${keySql} AS ${this.escapeIdentifier('key')}, ${countSql} AS ${this.escapeIdentifier('count')} FROM ${this.escapeIdentifier(tableContext.tableName)} WHERE ${sqlPath} IS NOT NULL${where} GROUP BY ${sqlPath} ORDER BY ${this.escapeIdentifier('count')} DESC;`;
   }
 
-  static readonly AGGREGATE_OPERATION_MAPPING: Record<AggregateOperation, string> = {
-    sum: 'SUM',
-    avg: 'AVG',
-    min: 'MIN',
-    max: 'MAX'
-  };
-
-  buildAggregate<T extends ModelType>(
-    tableContext: TableContext<T>,
-    operation: AggregateOperation,
-    sqlPath: string,
-    whereSQL?: string
-  ): string {
-    const aggregateFunction = AbstractANSI99Dialect.AGGREGATE_OPERATION_MAPPING[operation];
-    if (!aggregateFunction) {
-      throw new RuntimeError(`Unsupported aggregate operation: ${operation}`);
-    }
-    const aggregateSql = `${aggregateFunction}(${sqlPath})`;
+  buildFieldAggregate<T extends ModelType>(tableContext: TableContext<T>, sqlPath: string, isDate: boolean, whereSQL?: string): string {
     const where = whereSQL ? ` WHERE ${whereSQL}` : '';
-
-    return `SELECT ${aggregateSql} AS ${this.escapeIdentifier('value')} FROM ${this.escapeIdentifier(tableContext.tableName)}${where};`;
+    const fields = [
+      `COUNT(${sqlPath}) AS ${this.escapeIdentifier('count')}`,
+      `MIN(${sqlPath}) AS ${this.escapeIdentifier('min')}`,
+      `MAX(${sqlPath}) AS ${this.escapeIdentifier('max')}`,
+      ...(!isDate ? [`AVG(${sqlPath}) AS ${this.escapeIdentifier('avg')}`, `SUM(${sqlPath}) AS ${this.escapeIdentifier('sum')}`] : [])
+    ];
+    return `SELECT ${fields.join(', ')} FROM ${this.escapeIdentifier(tableContext.tableName)}${where};`;
   }
 }

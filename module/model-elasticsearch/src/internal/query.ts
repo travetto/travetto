@@ -2,14 +2,7 @@ import type * as estypes from '@elastic/elasticsearch/api/types';
 
 import { ModelRegistryIndex, type ModelType } from '@travetto/model';
 import type { SortedIndex } from '@travetto/model-indexed';
-import {
-  type AggregateOperation,
-  ModelQueryUtil,
-  type Query,
-  type SelectClause,
-  type SortClause,
-  type WhereClause
-} from '@travetto/model-query';
+import { ModelQueryUtil, type Query, type SelectClause, type SortClause, type WhereClause } from '@travetto/model-query';
 import { type Any, type Class, castTo, RuntimeError, TypedObject } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -342,34 +335,22 @@ export class ElasticsearchQueryUtil {
     return search;
   }
 
-  static readonly AGGREGATE_OPERATION_MAPPING: Record<AggregateOperation, 'sum' | 'avg' | 'min' | 'max'> = {
-    sum: 'sum',
-    avg: 'avg',
-    min: 'min',
-    max: 'max'
-  };
-
   /**
-   * Build Elasticsearch aggregate search request
+   * Build Elasticsearch field aggregate search request
    */
-  static getAggregateSearchObject<T extends ModelType>(
+  static getFieldAggregateSearchObject<T extends ModelType>(
     modelClass: Class<T>,
-    operation: AggregateOperation,
     field: string,
     query?: Query<T>,
     configuration?: EsSchemaConfig
   ): estypes.SearchRequest {
     const resolvedSearch = this.getSearchObject(modelClass, query ?? {}, configuration);
-    const aggregateOperation = this.AGGREGATE_OPERATION_MAPPING[operation];
-    if (!aggregateOperation) {
-      throw new RuntimeError(`Unsupported aggregate operation: ${operation}`);
-    }
 
     return {
       query: resolvedSearch.query ?? { match_all: {} },
       aggregations: {
-        aggregate_value: {
-          [aggregateOperation]: { field }
+        field_aggregate: {
+          stats: { field }
         }
       },
       size: 0

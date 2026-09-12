@@ -10,57 +10,8 @@ import { Aged, BigIntModel, Person } from './model.ts';
 
 @Suite()
 export abstract class ModelQueryAggregateSuite extends BaseModelSuite<ModelQueryAggregateSupport & ModelCrudSupport> {
-  @Test('verify basic aggregations')
-  async testAggregate() {
-    const people = [
-      Person.from({ name: 'Bob', age: 20, gender: 'm', address: { street1: '1st St' } }),
-      Person.from({ name: 'Alice', age: 30, gender: 'f', address: { street1: '2nd St' } }),
-      Person.from({ name: 'Charlie', age: 40, gender: 'm', address: { street1: '3rd St' } }),
-      Person.from({ name: 'Dana', age: 50, gender: 'f', address: { street1: '4th St' } })
-    ];
-
-    const service = await this.service;
-    const saved = await this.saveAll(Person, people);
-    assert(saved === 4);
-
-    const sumResult = await service.aggregateFieldByQuery(Person, 'sum', 'age');
-    assert(sumResult === 140);
-
-    const averageResult = await service.aggregateFieldByQuery(Person, 'avg', 'age');
-    assert(averageResult === 35);
-
-    const minimumResult = await service.aggregateFieldByQuery(Person, 'min', 'age');
-    assert(minimumResult === 20);
-
-    const maximumResult = await service.aggregateFieldByQuery(Person, 'max', 'age');
-    assert(maximumResult === 50);
-
-    // Filtered aggregations
-    const filteredSumResult = await service.aggregateFieldByQuery(Person, 'sum', 'age', {
-      where: {
-        age: { $gte: 30 }
-      }
-    });
-    assert(filteredSumResult === 120);
-
-    const filteredAverageResult = await service.aggregateFieldByQuery(Person, 'avg', 'age', {
-      where: {
-        gender: 'f'
-      }
-    });
-    assert(filteredAverageResult === 40);
-
-    // No matches
-    const noMatchResult = await service.aggregateFieldByQuery(Person, 'sum', 'age', {
-      where: {
-        age: { $gt: 1000 }
-      }
-    });
-    assert(noMatchResult === undefined);
-  }
-
-  @Test('verify date aggregations')
-  async testDateAggregate() {
+  @Test('verify date field aggregate')
+  async testDateFieldAggregate() {
     const service = await this.service;
 
     const firstDate = new Date(2020, 0, 1);
@@ -73,17 +24,59 @@ export abstract class ModelQueryAggregateSuite extends BaseModelSuite<ModelQuery
       Aged.from({ createdAt: thirdDate })
     ]);
 
-    const minimumDateResult = await service.aggregateFieldByQuery(Aged, 'min', 'createdAt');
-    assert(minimumDateResult instanceof Date);
-    assert(minimumDateResult.getTime() === firstDate.getTime());
-
-    const maximumDateResult = await service.aggregateFieldByQuery(Aged, 'max', 'createdAt');
-    assert(maximumDateResult instanceof Date);
-    assert(maximumDateResult.getTime() === thirdDate.getTime());
+    const aggregate = await service.aggregateFieldByQuery(Aged, 'createdAt');
+    assert(aggregate.count === 3);
+    assert(aggregate.min instanceof Date);
+    assert(aggregate.min.getTime() === firstDate.getTime());
+    assert(aggregate.max instanceof Date);
+    assert(aggregate.max.getTime() === thirdDate.getTime());
   }
 
-  @Test('verify bigint aggregations')
-  async testBigIntAggregate() {
+  @Test('verify field aggregate')
+  async testFieldAggregate() {
+    const people = [
+      Person.from({ name: 'Bob', age: 20, gender: 'm', address: { street1: '1st St' } }),
+      Person.from({ name: 'Alice', age: 30, gender: 'f', address: { street1: '2nd St' } }),
+      Person.from({ name: 'Charlie', age: 40, gender: 'm', address: { street1: '3rd St' } }),
+      Person.from({ name: 'Dana', age: 50, gender: 'f', address: { street1: '4th St' } })
+    ];
+
+    const service = await this.service;
+    const saved = await this.saveAll(Person, people);
+    assert(saved === 4);
+
+    const aggregate = await service.aggregateFieldByQuery(Person, 'age');
+    assert(aggregate.count === 4);
+    assert(aggregate.min === 20);
+    assert(aggregate.max === 50);
+    assert(aggregate.avg === 35);
+    assert(aggregate.sum === 140);
+
+    const filteredAggregate = await service.aggregateFieldByQuery(Person, 'age', {
+      where: {
+        age: { $gte: 30 }
+      }
+    });
+    assert(filteredAggregate.count === 3);
+    assert(filteredAggregate.min === 30);
+    assert(filteredAggregate.max === 50);
+    assert(filteredAggregate.avg === 40);
+    assert(filteredAggregate.sum === 120);
+
+    const emptyAggregate = await service.aggregateFieldByQuery(Person, 'age', {
+      where: {
+        age: { $gt: 1000 }
+      }
+    });
+    assert(emptyAggregate.count === 0);
+    assert(emptyAggregate.min === undefined);
+    assert(emptyAggregate.max === undefined);
+    assert(emptyAggregate.avg === undefined);
+    assert(emptyAggregate.sum === undefined);
+  }
+
+  @Test('verify bigint field aggregate')
+  async testBigIntFieldAggregate() {
     const service = await this.service;
 
     await this.saveAll(BigIntModel, [
@@ -92,16 +85,11 @@ export abstract class ModelQueryAggregateSuite extends BaseModelSuite<ModelQuery
       BigIntModel.from({ largeNumber: 300n })
     ]);
 
-    const sumResult = await service.aggregateFieldByQuery(BigIntModel, 'sum', 'largeNumber');
-    assert(sumResult === 600n);
-
-    const minimumResult = await service.aggregateFieldByQuery(BigIntModel, 'min', 'largeNumber');
-    assert(minimumResult === 100n);
-
-    const maximumResult = await service.aggregateFieldByQuery(BigIntModel, 'max', 'largeNumber');
-    assert(maximumResult === 300n);
-
-    const averageResult = await service.aggregateFieldByQuery(BigIntModel, 'avg', 'largeNumber');
-    assert(averageResult === 200n);
+    const aggregate = await service.aggregateFieldByQuery(BigIntModel, 'largeNumber');
+    assert(aggregate.count === 3);
+    assert(aggregate.min === 100n);
+    assert(aggregate.max === 300n);
+    assert(aggregate.avg === 200n);
+    assert(aggregate.sum === 600n);
   }
 }
