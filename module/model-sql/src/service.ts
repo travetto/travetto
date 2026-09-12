@@ -739,10 +739,20 @@ export abstract class BaseSQLModelService<C = unknown>
     return this.loadMany(modelClass, result.records);
   }
 
-  async queryOne<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>, failOnMany = true): Promise<T> {
+  async getByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>, failOnMany = true): Promise<T> {
     const limit = failOnMany ? 2 : 1;
     const items = await this.query<T>(modelClass, { ...query, limit });
     return ModelQueryUtil.verifyGetSingleCounts<T>(modelClass, failOnMany, items, query.where);
+  }
+
+  async countByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
+    await QueryVerifier.verify(modelClass, query);
+    const tableContext = this.connection.getContext(modelClass);
+    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, query.where);
+    const sql = this.dialect.buildCount(tableContext, whereSQL);
+
+    const result = await this.connection.execute<{ total: string | number }>(sql, parameters);
+    return Number(result.records[0]?.total ?? 0);
   }
 
   // Query Crud Support
@@ -851,15 +861,5 @@ export abstract class BaseSQLModelService<C = unknown>
     const rawValue = result.records[0]?.value;
 
     return ModelQueryAggregateUtil.resolveResult(modelClass, operation, field, rawValue);
-  }
-
-  async countByQuery<T extends ModelType>(modelClass: Class<T>, query: ModelQuery<T>): Promise<number> {
-    await QueryVerifier.verify(modelClass, query);
-    const tableContext = this.connection.getContext(modelClass);
-    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, query.where);
-    const sql = this.dialect.buildCount(tableContext, whereSQL);
-
-    const result = await this.connection.execute<{ total: string | number }>(sql, parameters);
-    return Number(result.records[0]?.total ?? 0);
   }
 }

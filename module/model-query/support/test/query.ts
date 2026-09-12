@@ -6,12 +6,11 @@ import { Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
-import type { ModelQueryAggregateSupport } from '../../__index__.ts';
 import type { ModelQuerySupport } from '../../src/types/query.ts';
 import { Aged, Location, Names, Note, Person, PersonFamily, Recipe, SimpleList, WithNestedLists, WithNestedNestedLists } from './model.ts';
 
 @Suite()
-export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport & ModelQueryAggregateSupport & ModelCrudSupport> {
+export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport & ModelCrudSupport> {
   supportsGeo = true;
 
   @Test()
@@ -33,10 +32,10 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
 
     await this.saveAll(Person, people);
 
-    const one = await svc.queryOne(Person, { where: { id: people[0].id } });
+    const one = await svc.getByQuery(Person, { where: { id: people[0].id } });
     assert(one.id === people[0].id);
 
-    const one2 = await svc.queryOne(Person, { where: { id: { $eq: people[0].id } } });
+    const one2 = await svc.getByQuery(Person, { where: { id: { $eq: people[0].id } } });
     assert(one2.id === people[0].id);
 
     const none = await svc.countByQuery(Person, { where: { id: { $ne: people[0].id } } });
@@ -92,11 +91,11 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
       )
     );
 
-    await assert.rejects(() => service.queryOne(Person, { where: { gender: 'm' } }), /Invalid number of results/);
-    await assert.rejects(() => service.queryOne(Person, { where: { gender: 'z' } }), NotFoundError);
-    await assert.rejects(() => service.queryOne(Person, { where: { gender: 'z' } }), /No results found for query/);
-    await assert.rejects(() => service.queryOne(Person, { where: { id: 'orange' } }), NotFoundError);
-    await assert.rejects(() => service.queryOne(Person, { where: { id: 'orange' } }), /orange/);
+    await assert.rejects(() => service.getByQuery(Person, { where: { gender: 'm' } }), /Invalid number of results/);
+    await assert.rejects(() => service.getByQuery(Person, { where: { gender: 'z' } }), NotFoundError);
+    await assert.rejects(() => service.getByQuery(Person, { where: { gender: 'z' } }), /No results found for query/);
+    await assert.rejects(() => service.getByQuery(Person, { where: { id: 'orange' } }), NotFoundError);
+    await assert.rejects(() => service.getByQuery(Person, { where: { id: 'orange' } }), /orange/);
   }
 
   @Test('Verify array $in queries work properly')

@@ -44,7 +44,7 @@ export class QueryModelService
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     return [];
   }
-  async queryOne<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany?: boolean | undefined): Promise<T> {
+  async getByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany?: boolean | undefined): Promise<T> {
     return asFull({});
   }
   async countByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {

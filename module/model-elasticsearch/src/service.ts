@@ -623,9 +623,17 @@ export class ElasticsearchModelService
     );
   }
 
-  async queryOne<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany: boolean = true): Promise<T> {
+  async getByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany: boolean = true): Promise<T> {
     const result = await this.query<T>(cls, { ...query, limit: failOnMany ? 2 : 1 });
     return ModelQueryUtil.verifyGetSingleCounts<T>(cls, failOnMany, result, query.where);
+  }
+
+  async countByQuery<T extends ModelType>(cls: Class<T>, query: Query<T>): Promise<number> {
+    await QueryVerifier.verify(cls, query);
+
+    const search = ElasticsearchQueryUtil.getSearchObject(cls, { ...query, limit: 0 }, this.config.schemaConfig);
+    const result: number | { value: number } = (await this.execSearch(cls, search)).hits.total || { value: 0 };
+    return typeof result !== 'number' ? result.value : result;
   }
 
   // Query Crud
@@ -777,13 +785,5 @@ export class ElasticsearchModelService
     const rawValue = aggregateResult?.value_as_string ?? aggregateResult?.value;
 
     return ModelQueryAggregateUtil.resolveResult(modelClass, operation, field, rawValue);
-  }
-
-  async countByQuery<T extends ModelType>(cls: Class<T>, query: Query<T>): Promise<number> {
-    await QueryVerifier.verify(cls, query);
-
-    const search = ElasticsearchQueryUtil.getSearchObject(cls, { ...query, limit: 0 }, this.config.schemaConfig);
-    const result: number | { value: number } = (await this.execSearch(cls, search)).hits.total || { value: 0 };
-    return typeof result !== 'number' ? result.value : result;
   }
 }

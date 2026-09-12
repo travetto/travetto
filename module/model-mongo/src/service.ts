@@ -641,9 +641,17 @@ export class MongoModelService
     return await Promise.all(items.map(item => this.postLoad(cls, item)));
   }
 
-  async queryOne<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany = true): Promise<T> {
+  async getByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany = true): Promise<T> {
     const results = await this.query<T>(cls, { ...query, limit: failOnMany ? 2 : 1 });
     return ModelQueryUtil.verifyGetSingleCounts<T>(cls, failOnMany, results, query.where);
+  }
+
+  async countByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
+    await QueryVerifier.verify(cls, query);
+
+    const col = await this.getStore(cls);
+    const filter = MongoUtil.extractWhereFilter(cls, query.where);
+    return col.countDocuments(filter);
   }
 
   // Query Crud
@@ -775,14 +783,6 @@ export class MongoModelService
     const rawValue = result.length ? result[0].value : undefined;
 
     return ModelQueryAggregateUtil.resolveResult(modelClass, operation, field, rawValue);
-  }
-
-  async countByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
-    await QueryVerifier.verify(cls, query);
-
-    const col = await this.getStore(cls);
-    const filter = MongoUtil.extractWhereFilter(cls, query.where);
-    return col.countDocuments(filter);
   }
 
   // Suggest
