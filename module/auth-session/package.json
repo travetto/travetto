@@ -1,6 +1,6 @@
 {
   "name": "@travetto/auth-session",
-  "version": "8.0.2",
+  "version": "8.0.3",
   "description": "Session provider for the travetto auth module.",
   "keywords": [
     "auth",
@@ -30,11 +30,11 @@
   },
   "dependencies": {
     "@travetto/auth": "^8.0.1",
-    "@travetto/config": "^8.0.2",
-    "@travetto/model": "^8.0.2"
+    "@travetto/config": "^8.0.3",
+    "@travetto/model": "^8.0.3"
   },
   "peerDependencies": {
-    "@travetto/test": "^8.0.1"
+    "@travetto/test": "^8.0.2"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {

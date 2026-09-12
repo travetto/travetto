@@ -33,7 +33,7 @@
     "@travetto/di": "^8.0.1"
   },
   "peerDependencies": {
-    "@travetto/test": "^8.0.1"
+    "@travetto/test": "^8.0.2"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {

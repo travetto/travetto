@@ -1,6 +1,6 @@
 {
   "name": "@travetto/config",
-  "version": "8.0.2",
+  "version": "8.0.3",
   "description": "Configuration support",
   "keywords": [
     "configuration",

@@ -1,6 +1,6 @@
 {
   "name": "@travetto/openapi",
-  "version": "8.0.2",
+  "version": "8.0.3",
   "description": "OpenAPI integration support for the Travetto framework",
   "keywords": [
     "decorators",
@@ -30,9 +30,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/config": "^8.0.2",
+    "@travetto/config": "^8.0.3",
     "@travetto/schema": "^8.0.2",
-    "@travetto/web": "^8.0.2",
+    "@travetto/web": "^8.0.3",
     "openapi3-ts": "^4.6.1",
     "yaml": "^2.9.1"
   },
