@@ -141,7 +141,7 @@ export interface ModelQueryAggregateSupport extends ModelQuerySupport {
    * @param field The field to aggregate on
    * @param query Additional query filtering
    */
-  aggregateFieldByQuery<T extends ModelType, F extends ValidComparableFields<T>>(
+  aggregateFieldByQuery<T extends ModelType, const F extends ValidComparableFields<T>>(
     modelClass: Class<T>,
     field: F,
     query?: ModelQuery<T>

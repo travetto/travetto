@@ -1,12 +1,12 @@
 import assert from 'node:assert';
 
-import type { ModelCrudSupport } from '@travetto/model';
+import type { ModelCrudSupport, ModelType } from '@travetto/model';
 import { Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
-import type { ModelQueryAggregateSupport } from '../../src/types/aggregate.ts';
-import { Aged, BigIntModel, Person } from './model.ts';
+import type { DateFieldAggregateResult, ModelQueryAggregateSupport, NumberFieldAggregateResult } from '../../src/types/aggregate.ts';
+import { Aged, BigIntModel, MultiFieldModel, Person } from './model.ts';
 
 @Suite()
 export abstract class ModelQueryAggregateSuite extends BaseModelSuite<ModelQueryAggregateSupport & ModelCrudSupport> {
@@ -30,6 +30,27 @@ export abstract class ModelQueryAggregateSuite extends BaseModelSuite<ModelQuery
     assert(aggregate.min.getTime() === firstDate.getTime());
     assert(aggregate.max instanceof Date);
     assert(aggregate.max.getTime() === thirdDate.getTime());
+  }
+
+  @Test('verify model with multiple field types aggregate')
+  async testMultiFieldModelAggregate() {
+    const service = await this.service;
+    const now = new Date();
+    await this.saveAll(MultiFieldModel, [
+      MultiFieldModel.from({ createdAt: now, score: 10 }),
+      MultiFieldModel.from({ createdAt: now, score: 20 })
+    ]);
+
+    const dateStats = await service.aggregateFieldByQuery(MultiFieldModel, 'createdAt');
+    const dateCheck: DateFieldAggregateResult = dateStats;
+    assert(dateCheck.count === 2);
+    assert(dateCheck.min instanceof Date);
+
+    const numberStats = await service.aggregateFieldByQuery(MultiFieldModel, 'score');
+    const numberCheck: NumberFieldAggregateResult = numberStats;
+    assert(numberCheck.count === 2);
+    assert(numberCheck.min === 10);
+    assert(numberCheck.avg === 15);
   }
 
   @Test('verify field aggregate')

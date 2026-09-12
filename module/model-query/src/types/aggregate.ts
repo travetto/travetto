@@ -41,12 +41,13 @@ export type BigIntFieldAggregateResult = {
   sum?: bigint;
 };
 
-export type FieldAggregateResult<T, F extends string> =
-  NonNullable<PathType<T, F>> extends Date
+export type FieldAggregateResult<T, F extends string> = F extends any
+  ? NonNullable<PathType<T, F>> extends Date
     ? DateFieldAggregateResult
     : NonNullable<PathType<T, F>> extends bigint
       ? BigIntFieldAggregateResult
-      : NumberFieldAggregateResult;
+      : NumberFieldAggregateResult
+  : never;
 
 /**
  * The contract for a model service with aggregate support
@@ -61,7 +62,7 @@ export interface ModelQueryAggregateSupport extends ModelQuerySupport {
    * @param field The field to aggregate on
    * @param query Additional query filtering
    */
-  aggregateFieldByQuery<T extends ModelType, F extends ValidComparableFields<T>>(
+  aggregateFieldByQuery<T extends ModelType, const F extends ValidComparableFields<T>>(
     modelClass: Class<T>,
     field: F,
     query?: ModelQuery<T>

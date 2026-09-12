@@ -17,14 +17,14 @@ export class ModelQueryAggregateUtil {
    * @param field The field being aggregated
    * @param rawValues The raw result values from the datastore
    */
-  static resolveAggregate<T extends ModelType, F extends ValidComparableFields<T>>(
+  static resolveAggregate<T extends ModelType, const F extends ValidComparableFields<T>>(
     modelClass: Class<T>,
     field: F,
     rawValues: Partial<Record<keyof NumberFieldAggregateResult, unknown>>
   ): FieldAggregateResult<T, F> {
     const count = Number(rawValues.count ?? 0);
     if (count === 0) {
-      return { count: 0 };
+      return castTo({ count: 0 });
     }
     const leafFieldType = SchemaRegistryIndex.getNestedFieldConfig(modelClass, field)!.type;
 

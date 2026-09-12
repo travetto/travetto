@@ -56,7 +56,7 @@ export class QueryModelService
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     return 0;
   }
-  async aggregateFieldByQuery<T extends ModelType, F extends ValidComparableFields<T>>(
+  async aggregateFieldByQuery<T extends ModelType, const F extends ValidComparableFields<T>>(
     modelClass: Class<T>,
     field: F,
     query?: ModelQuery<T>

@@ -75,6 +75,13 @@ export class Aged {
 }
 
 @Model()
+export class MultiFieldModel {
+  id: string;
+  createdAt: Date;
+  score: number;
+}
+
+@Model()
 export class WithNestedLists {
   id: string;
   tags?: string[] = [];

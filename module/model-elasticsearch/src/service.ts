@@ -763,7 +763,7 @@ export class ElasticsearchModelService
   }
 
   // Aggregate
-  async aggregateFieldByQuery<T extends ModelType, F extends ValidComparableFields<T>>(
+  async aggregateFieldByQuery<T extends ModelType, const F extends ValidComparableFields<T>>(
     modelClass: Class<T>,
     field: F,
     query?: ModelQuery<T>

@@ -737,7 +737,7 @@ export class MongoModelService
   }
 
   // Aggregate
-  async aggregateFieldByQuery<T extends ModelType, F extends ValidComparableFields<T>>(
+  async aggregateFieldByQuery<T extends ModelType, const F extends ValidComparableFields<T>>(
     cls: Class<T>,
     field: F,
     query?: ModelQuery<T>
