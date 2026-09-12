@@ -49,7 +49,8 @@ export class CodecTest {
   async keyRotation() {
     this.interceptor.config.keyMap.orange = {
       id: 'orange',
-      key: 'green'
+      key: 'green',
+      binaryKey: new TextEncoder().encode('green')
     };
 
     const token = await this.codec.create(

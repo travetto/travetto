@@ -1,7 +1,7 @@
-import type { Jwt, SupportedAlgorithms, Verifier } from 'njwt';
+import { errors, jwtVerify, SignJWT } from 'jose';
 
 import { type AuthContext, AuthenticationError, type AuthToken, type Principal } from '@travetto/auth';
-import { Inject, Injectable, PostConstruct } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
 import { castTo, RuntimeError, TimeUtil } from '@travetto/runtime';
 import { CookieJar, type WebAsyncContext, type WebRequest, type WebResponse } from '@travetto/web';
 
@@ -22,31 +22,25 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   @Inject()
   webAsyncContext: WebAsyncContext;
 
-  #verifier: Verifier;
-  #algorithm: SupportedAlgorithms = 'HS256';
-
-  @PostConstruct()
-  async finalizeVerifier(): Promise<void> {
-    // Weird issue with their ES module support
-    const {
-      default: { createVerifier }
-    } = await import('njwt');
-    this.#verifier = createVerifier()
-      .setSigningAlgorithm(this.#algorithm)
-      .withKeyResolver((keyId, callback) => {
-        const entry = this.config.keyMap[keyId];
-        return callback(entry ? null : new AuthenticationError('Invalid'), entry.key);
-      });
-  }
-
   async verify(token: string): Promise<Principal> {
     try {
-      const jwt: Jwt & { body: { core: Principal } } = await new Promise((resolve, reject) =>
-        this.#verifier.verify(token, (error, verified) => (error ? reject(error) : resolve(castTo(verified))))
+      const { payload } = await jwtVerify<{ core: Principal }>(
+        token,
+        async protectedHeader => {
+          const keyIdentifier = protectedHeader.kid ?? 'default';
+          const entry = this.config.keyMap[keyIdentifier];
+          if (!entry) {
+            throw new AuthenticationError('Invalid signing key', { category: 'permissions' });
+          }
+          return entry.binaryKey;
+        },
+        {
+          algorithms: [this.config.algorithm]
+        }
       );
-      return jwt.body.core;
+      return payload.core;
     } catch (error) {
-      if (error instanceof Error && error.name.startsWith('Jwt')) {
+      if (error instanceof errors.JOSEError) {
         throw new AuthenticationError(error.message, { category: 'permissions' });
       }
       throw error;
@@ -71,21 +65,23 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     if (!entry) {
       throw new RuntimeError('Requested unknown key for signing');
     }
-    // Weird issue with their ES module support
-    const {
-      default: { create }
-    } = await import('njwt');
-    const jwt = create({}, '-')
-      .setExpiration(value.expiresAt!)
-      .setIssuedAt(TimeUtil.duration((value.issuedAt ?? new Date()).getTime(), 's'))
-      .setClaim('core', castTo({ ...value }))
-      .setIssuer(value.issuer!)
-      .setJti(value.sessionId!)
+    const signer = new SignJWT({ core: value })
+      .setIssuedAt(value.issuedAt ?? new Date())
+
       .setSubject(value.id)
-      .setHeader('kid', entry.id)
-      .setSigningKey(entry.key)
-      .setSigningAlgorithm(this.#algorithm);
-    return jwt.toString();
+      .setProtectedHeader({ alg: this.config.algorithm, kid: entry.id });
+
+    if (value.sessionId) {
+      signer.setJti(value.sessionId);
+    }
+    if (value.expiresAt) {
+      signer.setExpirationTime(value.expiresAt);
+    }
+    if (value.issuer) {
+      signer.setIssuer(value.issuer);
+    }
+
+    return await signer.sign(entry.binaryKey);
   }
 
   async encode(response: WebResponse, data: Principal | undefined): Promise<WebResponse> {

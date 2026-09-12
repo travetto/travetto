@@ -423,7 +423,8 @@ npx trv web:http
         mode: 'cookie',
         header: 'Authorization',
         cookie: 'trv_auth',
-        headerPrefix: 'Token'
+        headerPrefix: 'Token',
+        algorithm: 'HS256'
       },
       WebAuthLoginConfig: { applies: false },
       WebAuthLogoutConfig: { applies: false },

@@ -3,7 +3,11 @@ import { PostConstruct } from '@travetto/di';
 import { BinaryMetadataUtil, Runtime, RuntimeError } from '@travetto/runtime';
 import { Ignore, Secret } from '@travetto/schema';
 
-type KeyEntry = { key: string; id: string };
+export type WebAuthKeyEntry = {
+  key: string;
+  id: string;
+  binaryKey: Uint8Array;
+};
 
 @Config('web.auth')
 export class WebAuthConfig {
@@ -12,11 +16,12 @@ export class WebAuthConfig {
   header: string = 'Authorization';
   cookie: string = 'trv_auth';
   headerPrefix: string = 'Token';
+  algorithm: string = 'HS256';
 
   @Secret()
   signingKey?: string | string[];
   @Ignore()
-  keyMap: Record<string, KeyEntry> & { default?: KeyEntry } = {};
+  keyMap: Record<string, WebAuthKeyEntry> & { default?: WebAuthKeyEntry } = {};
 
   @PostConstruct()
   finalize(): void {
@@ -27,7 +32,12 @@ export class WebAuthConfig {
     }
     this.signingKey ??= 'dummy';
 
-    const all = [this.signingKey].flat().map(key => ({ key, id: BinaryMetadataUtil.hash(key, { length: 8 }) }));
+    const textEncoder = new TextEncoder();
+    const all = [this.signingKey].flat().map(key => ({
+      key,
+      id: BinaryMetadataUtil.hash(key, { length: 8 }),
+      binaryKey: textEncoder.encode(key)
+    }));
     this.keyMap = Object.fromEntries(all.map(entry => [entry.id, entry]));
     this.keyMap.default = all[0];
   }
