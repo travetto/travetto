@@ -48,11 +48,11 @@ import {
   ModelQuerySuggestUtil,
   type ModelQuerySupport,
   ModelQueryUtil,
+  type NumberFieldAggregateResult,
   type PageableModelQuery,
   type Query,
   QueryVerifier,
   type ValidComparableFields,
-  type ValidNumericFields,
   type ValidStringFields,
   type WhereClause
 } from '@travetto/model-query';
@@ -770,26 +770,11 @@ export class ElasticsearchModelService
   ): Promise<FieldAggregateResult<T, F>> {
     await QueryVerifier.verify(modelClass, query);
 
-    const fieldString = String(field);
-    const search = ElasticsearchQueryUtil.getFieldAggregateSearchObject(modelClass, fieldString, query, this.config.schemaConfig);
+    const search = ElasticsearchQueryUtil.getFieldAggregateSearchObject(modelClass, field, query, this.config.schemaConfig);
 
     const result = await this.execSearch(modelClass, search);
-    const statsResult = result.aggregations?.field_aggregate as
-      | {
-          count?: number;
-          min?: number | null;
-          max?: number | null;
-          avg?: number | null;
-          sum?: number | null;
-        }
-      | undefined;
+    const statsResult = result.aggregations?.field_aggregate as NumberFieldAggregateResult | undefined;
 
-    return ModelQueryAggregateUtil.resolveAggregate(modelClass, field, {
-      count: statsResult?.count ?? 0,
-      min: statsResult?.min ?? undefined,
-      max: statsResult?.max ?? undefined,
-      avg: statsResult?.avg ?? undefined,
-      sum: statsResult?.sum ?? undefined
-    });
+    return ModelQueryAggregateUtil.resolveAggregate(modelClass, field, statsResult ?? {});
   }
 }

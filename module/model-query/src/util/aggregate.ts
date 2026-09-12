@@ -3,7 +3,7 @@ import { castTo, type Class, hasFunction } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ValidComparableFields } from '../model/where-clause.ts';
-import type { AggregateResultType, FieldAggregateResult, ModelQueryAggregateSupport } from '../types/aggregate.ts';
+import type { FieldAggregateResult, ModelQueryAggregateSupport, NumberFieldAggregateResult } from '../types/aggregate.ts';
 
 export class ModelQueryAggregateUtil {
   /**
@@ -20,29 +20,28 @@ export class ModelQueryAggregateUtil {
   static resolveAggregate<T extends ModelType, F extends ValidComparableFields<T>>(
     modelClass: Class<T>,
     field: F,
-    rawValues: { count?: unknown; min?: unknown; max?: unknown; avg?: unknown; sum?: unknown }
+    rawValues: Partial<Record<keyof NumberFieldAggregateResult, unknown>>
   ): FieldAggregateResult<T, F> {
     const count = Number(rawValues.count ?? 0);
     if (count === 0) {
-      return castTo({ count: 0 });
+      return { count: 0 };
     }
     const leafFieldType = SchemaRegistryIndex.getNestedFieldConfig(modelClass, field)!.type;
-    const coerce = (value: unknown): AggregateResultType<T, F> => castTo(DataUtil.coerceType(value, leafFieldType, false) ?? undefined);
 
     if (leafFieldType === Date) {
       return castTo({
         count,
-        min: coerce(rawValues.min),
-        max: coerce(rawValues.max)
+        min: DataUtil.coerceType(rawValues.min, leafFieldType, true),
+        max: DataUtil.coerceType(rawValues.max, leafFieldType, true)
       });
     }
 
     return castTo({
       count,
-      min: coerce(rawValues.min),
-      max: coerce(rawValues.max),
-      avg: coerce(rawValues.avg),
-      sum: coerce(rawValues.sum)
+      min: DataUtil.coerceType(rawValues.min, leafFieldType, true),
+      max: DataUtil.coerceType(rawValues.max, leafFieldType, true),
+      avg: DataUtil.coerceType(rawValues.avg, leafFieldType, true),
+      sum: DataUtil.coerceType(rawValues.sum, leafFieldType, true)
     });
   }
 }

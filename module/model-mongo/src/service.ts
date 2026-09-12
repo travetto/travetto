@@ -63,10 +63,10 @@ import {
   ModelQuerySuggestUtil,
   type ModelQuerySupport,
   ModelQueryUtil,
+  type NumberFieldAggregateResult,
   type PageableModelQuery,
   QueryVerifier,
   type ValidComparableFields,
-  type ValidNumericFields,
   type ValidStringFields,
   type WhereClause
 } from '@travetto/model-query';
@@ -80,7 +80,6 @@ import {
   type Class,
   castTo,
   JSONUtil,
-  RuntimeError,
   ShutdownManager,
   TypedObject
 } from '@travetto/runtime';
@@ -769,16 +768,7 @@ export class MongoModelService
 
     const aggregations: object[] = [{ $match: queryObject }, { $group: groupFields }];
 
-    const result = await collection
-      .aggregate<{
-        _id: null;
-        count?: number;
-        min?: unknown;
-        max?: unknown;
-        avg?: unknown;
-        sum?: unknown;
-      }>(aggregations)
-      .toArray();
+    const result = await collection.aggregate<NumberFieldAggregateResult>(aggregations).toArray();
 
     const row = result.length ? result[0] : { count: 0 };
     return ModelQueryAggregateUtil.resolveAggregate(cls, field, row);

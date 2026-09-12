@@ -16,7 +16,7 @@ export type PathType<T, Path extends string> = Path extends `${infer Head}.${inf
     : never;
 
 export type AggregateResultType<T, F extends string> = [PathType<T, F>] extends [never]
-  ? number | Date | bigint | undefined
+  ? number | bigint | undefined
   : PathType<T, F> | undefined;
 
 export type DateFieldAggregateResult = {
@@ -25,16 +25,28 @@ export type DateFieldAggregateResult = {
   max?: Date;
 };
 
-export type NumericFieldAggregateResult<T, F extends string> = {
+export type NumberFieldAggregateResult = {
   count: number;
-  min?: AggregateResultType<T, F>;
-  max?: AggregateResultType<T, F>;
-  avg?: AggregateResultType<T, F>;
-  sum?: AggregateResultType<T, F>;
+  min?: number;
+  max?: number;
+  avg?: number;
+  sum?: number;
+};
+
+export type BigIntFieldAggregateResult = {
+  count: number;
+  min?: bigint;
+  max?: bigint;
+  avg?: bigint;
+  sum?: bigint;
 };
 
 export type FieldAggregateResult<T, F extends string> =
-  NonNullable<PathType<T, F>> extends Date ? DateFieldAggregateResult : NumericFieldAggregateResult<T, F>;
+  NonNullable<PathType<T, F>> extends Date
+    ? DateFieldAggregateResult
+    : NonNullable<PathType<T, F>> extends bigint
+      ? BigIntFieldAggregateResult
+      : NumberFieldAggregateResult;
 
 /**
  * The contract for a model service with aggregate support
