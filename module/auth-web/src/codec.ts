@@ -67,7 +67,6 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     }
     const signer = new SignJWT({ core: value })
       .setIssuedAt(value.issuedAt ?? new Date())
-
       .setSubject(value.id)
       .setProtectedHeader({ alg: this.config.algorithm, kid: entry.id });
 
