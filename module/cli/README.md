@@ -583,14 +583,14 @@ Options:
 
 Available Services
 --------------------
- * dynamodb@3.3.0
- * elasticsearch@9.5.2
+ * dynamodb@3.3.1
+ * elasticsearch@9.5.3
  * firestore@latest
  * mongodb@8.3
- * mysql@9.7
+ * mysql@26.7
  * postgresql@18.6
  * redis@8.10
- * s3@4.12.4
+ * s3@5.2.2
 ```
 
 A sample of all services available to the entire framework:
@@ -601,14 +601,14 @@ $ trv service status
 
 Service          Version    Status
 -------------------------------------------------
-dynamodb           3.3.0    Running 93af422e793a
-elasticsearch      9.5.2    Running ed76ee063d13
+dynamodb           3.3.1    Running 93af422e793a
+elasticsearch      9.5.3    Running ed76ee063d13
 firestore         latest    Running feec2e5e95b4
 mongodb              8.3    Running 5513eba6734e
-mysql                9.7    Running 307bc66d442a
+mysql               26.7    Running 307bc66d442a
 postgresql          18.6    Running e78291e71040
 redis               8.10    Running 77ba279b4e30
-s3                4.12.4    Running fdacfc55b9e3
+s3                 5.2.2    Running fdacfc55b9e3
 ```
 
 ### Defining new Services

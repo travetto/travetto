@@ -1,6 +1,6 @@
 import type { ServiceDescriptor } from '@travetto/cli';
 
-const version = '9.5.2';
+const version = '9.5.3';
 
 const port = 9200;
 

@@ -1,6 +1,6 @@
 import type { ServiceDescriptor } from '@travetto/cli';
 
-const version = process.env.MYSQL_VERSION || '9.7';
+const version = process.env.MYSQL_VERSION || '26.7';
 
 /* cspell:words innodb binlog */
 
