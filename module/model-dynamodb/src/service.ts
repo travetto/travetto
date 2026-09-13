@@ -53,7 +53,7 @@ const getKey = <T extends ModelType>(computed: ModelIndexedComputedIndex<T>): At
 const getSort = <T extends ModelType>(computed: ModelIndexedComputedIndex<T>): AttributeValue => DynamoDBUtil.toValue(computed.getSort());
 
 function isNotFoundError(error: unknown): boolean {
-  return error instanceof Error && (error.name === 'ResourceNotFoundException' || error.name === 'ResourceInUseException');
+  return error instanceof Error && error.name === 'ResourceNotFoundException';
 }
 
 /**
@@ -363,11 +363,18 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async deleteModel(cls: Class<ModelType>): Promise<void> {
     const table = this.#resolveTable(cls);
-    const verify = await ModelStorageUtil.runAndIgnoreNotFound(() => this.client.describeTable({ TableName: table }), isNotFoundError);
-    if (verify?.Table) {
-      if (verify.Table.TableStatus !== 'DELETING') {
-        await ModelStorageUtil.runAndIgnoreNotFound(() => this.client.deleteTable({ TableName: table }), isNotFoundError);
+    let isDeletingOrDeleted = false;
+    try {
+      await this.client.deleteTable({ TableName: table });
+      isDeletingOrDeleted = true;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'ResourceInUseException') {
+        isDeletingOrDeleted = true;
+      } else if (!isNotFoundError(error)) {
+        throw error;
       }
+    }
+    if (isDeletingOrDeleted) {
       await this.#waitForTableNotExists(table);
     }
   }

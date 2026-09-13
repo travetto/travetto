@@ -60,11 +60,11 @@ class ModelSuiteHandler<T extends { configClass: Class<ConfigType>; serviceClass
   async afterAll(instance: T) {
     const service = await DependencyRegistryIndex.getInstance<T>(instance.serviceClass, this.qualifier);
     if (ModelStorageUtil.isSupported(service)) {
-      for (const model of ModelRegistryIndex.getClasses()) {
-        if (model === SchemaRegistryIndex.getBaseClass(model)) {
-          await service.deleteModel(model);
-        }
-      }
+      await Promise.all(
+        ModelRegistryIndex.getClasses()
+          .filter(model => model === SchemaRegistryIndex.getBaseClass(model))
+          .map(model => service.deleteModel(model))
+      );
       await service.deleteStorage();
     }
   }
