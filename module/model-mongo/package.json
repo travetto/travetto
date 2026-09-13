@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-mongo",
-  "version": "8.0.5",
+  "version": "8.0.6",
   "description": "Mongo backing for the travetto model module.",
   "keywords": [
     "database",
@@ -30,9 +30,9 @@
   },
   "dependencies": {
     "@travetto/config": "^8.0.3",
-    "@travetto/model": "^8.0.3",
-    "@travetto/model-indexed": "^8.0.3",
-    "@travetto/model-query": "^8.0.5",
+    "@travetto/model": "^8.0.4",
+    "@travetto/model-indexed": "^8.0.4",
+    "@travetto/model-query": "^8.0.6",
     "mongodb": "^7.6.0"
   },
   "peerDependencies": {
