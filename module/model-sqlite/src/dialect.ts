@@ -229,4 +229,8 @@ WHERE type='index' AND tbl_name=?;
   getTruncateTableSQL(context: TableContext): string {
     return `DELETE FROM ${this.escapeIdentifier(context.tableName)};`;
   }
+
+  isTableNotFoundError(error: unknown): boolean {
+    return error instanceof Error && /no such table/i.test(error.message);
+  }
 }

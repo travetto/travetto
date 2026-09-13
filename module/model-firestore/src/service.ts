@@ -149,7 +149,14 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   async deleteStorage(): Promise<void> {}
 
   async deleteModel<T extends ModelType>(cls: Class<T>): Promise<void> {
-    await this.client.recursiveDelete(this.#getCollection(cls));
+    try {
+      await this.client.recursiveDelete(this.#getCollection(cls));
+    } catch (error) {
+      if (error instanceof Error && (error.message.includes('NOT_FOUND') || (error as { code?: number }).code === 5)) {
+        return;
+      }
+      throw error;
+    }
   }
 
   // Crud

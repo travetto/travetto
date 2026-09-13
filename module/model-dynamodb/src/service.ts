@@ -344,8 +344,15 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async deleteModel(cls: Class<ModelType>): Promise<void> {
     const table = this.#resolveTable(cls);
     const { Table: verify } = await this.client.describeTable({ TableName: table }).catch(() => ({ Table: undefined }));
-    if (verify) {
-      await this.client.deleteTable({ TableName: table });
+    if (verify && verify.TableStatus !== 'DELETING') {
+      try {
+        await this.client.deleteTable({ TableName: table });
+      } catch (error) {
+        if (error instanceof Error && (error.name === 'ResourceNotFoundException' || error.name === 'ResourceInUseException')) {
+          return;
+        }
+        throw error;
+      }
     }
   }
 
@@ -355,11 +362,13 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async deleteStorage(): Promise<void> {
     for (const model of ModelRegistryIndex.getClasses()) {
-      await this.client
-        .deleteTable({
+      try {
+        await this.client.deleteTable({
           TableName: this.#resolveTable(model)
-        })
-        .catch(() => {});
+        });
+      } catch {
+        // Ignore if not found
+      }
     }
   }
 

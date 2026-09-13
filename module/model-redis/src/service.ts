@@ -389,7 +389,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
   }
 
-  async truncateModel<T extends ModelType>(model: Class<T>): Promise<void> {
+  async deleteModel<T extends ModelType>(model: Class<T>): Promise<void> {
     for await (const { ids } of this.#streamValues('scan', { match: `${this.#resolveKey(model)}:*` }, { limit: Number.MAX_SAFE_INTEGER })) {
       if (ids.length) {
         await this.client.del(ids);

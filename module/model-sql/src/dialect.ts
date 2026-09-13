@@ -225,6 +225,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
   abstract parseExistingIndexes(records: unknown[]): Map<string, string>;
   abstract getDropIndexSQL(context: TableContext, indexName: string): string;
   abstract getTruncateTableSQL(context: TableContext): string;
+  abstract isTableNotFoundError(error: unknown): boolean;
 
   getDropTableSQL(context: TableContext): string {
     return `DROP TABLE IF EXISTS ${this.escapeIdentifier(context.tableName)};`;

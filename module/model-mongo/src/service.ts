@@ -256,7 +256,11 @@ export class MongoModelService
   async createStorage(): Promise<void> {}
 
   async deleteStorage(): Promise<void> {
-    await this.#db.dropDatabase();
+    try {
+      await this.#db.dropDatabase();
+    } catch {
+      // Ignore if not found
+    }
   }
 
   async upsertModel(cls: Class): Promise<void> {
@@ -286,6 +290,14 @@ export class MongoModelService
         console.debug('Creating index', { indices: name });
         await col.createIndex(...idx);
       }
+    }
+  }
+
+  async deleteModel<T extends ModelType>(cls: Class<T>): Promise<void> {
+    try {
+      await this.#db.collection(ModelRegistryIndex.getStoreName(cls)).drop();
+    } catch (error) {
+      // If not found?
     }
   }
 

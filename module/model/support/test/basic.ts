@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Model, type ModelCrudSupport, ModelCrudUtil, NotFoundError, TransientField } from '@travetto/model';
+import { Model, type ModelCrudSupport, ModelCrudUtil, ModelStorageUtil, NotFoundError, TransientField } from '@travetto/model';
 import { Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from './base.ts';
@@ -23,6 +23,11 @@ class Person {
   name: string;
   age: number;
   gender: 'm' | 'f';
+}
+
+@Model('basic_person_temp')
+class TempPerson {
+  id: string;
 }
 
 @Suite()
@@ -99,5 +104,34 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
     const prepared = await ModelCrudUtil.prePersist(ComputedPerson, instance, 'all');
     assert(prepared.nameUpper === undefined);
     assert(prepared.ignoredField === undefined);
+  }
+
+  @Test('deleteModel should not fail when underlying storage item is not found')
+  async testDeleteModelNotExists() {
+    const service = await this.service;
+    if (ModelStorageUtil.isSupported(service)) {
+      await service.deleteModel(TempPerson);
+      // Run it again now that the storage item is definitely deleted/not found
+      await service.deleteModel(TempPerson);
+      if (service.upsertModel) {
+        await service.upsertModel(TempPerson);
+      }
+    }
+  }
+
+  @Test('deleteStorage should not fail when underlying storage is not found')
+  async testDeleteStorageNotExists() {
+    const service = await this.service;
+    if (ModelStorageUtil.isSupported(service)) {
+      await service.deleteStorage();
+      // Run it again now that storage has been deleted
+      await service.deleteStorage();
+      await service.createStorage();
+      if (service.upsertModel) {
+        for (const modelClass of [Person, ComputedPerson, TempPerson]) {
+          await service.upsertModel(modelClass);
+        }
+      }
+    }
   }
 }

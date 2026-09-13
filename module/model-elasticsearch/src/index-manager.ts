@@ -87,12 +87,36 @@ export class IndexManager implements ModelStorageSupport {
 
   async deleteModel(cls: Class<ModelType>): Promise<void> {
     const { index } = this.getIdentity(cls);
-    const aliasedIndices = await this.#client.indices.getAlias({ name: index });
+    let aliasedIndices: Record<string, unknown> | undefined;
+    try {
+      aliasedIndices = await this.#client.indices.getAlias({ name: index });
+    } catch {
+      aliasedIndices = undefined;
+    }
 
-    const toDelete = Object.keys(aliasedIndices);
+    const toDelete = Object.keys(aliasedIndices ?? {});
+    if (toDelete.length === 0) {
+      try {
+        if (await this.#client.indices.exists({ index })) {
+          toDelete.push(index);
+        }
+      } catch {
+        // Ignore if not found
+      }
+    }
 
-    console.debug('Deleting Model', { index, toDelete });
-    await Promise.all(toDelete.map(target => this.#client.indices.delete({ index: target })));
+    if (toDelete.length > 0) {
+      console.debug('Deleting Model', { index, toDelete });
+      await Promise.all(
+        toDelete.map(async target => {
+          try {
+            await this.#client.indices.delete({ index: target });
+          } catch {
+            // Ignore if not found
+          }
+        })
+      );
+    }
   }
 
   /**
@@ -144,8 +168,13 @@ export class IndexManager implements ModelStorageSupport {
 
   async deleteStorage(): Promise<void> {
     console.debug('Deleting storage', { idx: this.getNamespacedIndex('*') });
-    await this.#client.indices.delete({
-      index: this.getNamespacedIndex('*')
-    });
+    try {
+      await this.#client.indices.delete({
+        index: this.getNamespacedIndex('*'),
+        ignore_unavailable: true
+      });
+    } catch {
+      // Ignore if not found
+    }
   }
 }

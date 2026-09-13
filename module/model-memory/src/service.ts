@@ -421,8 +421,14 @@ export class MemoryModelService
     }
   }
 
-  async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {
-    this.#getStore(cls).clear();
+  async deleteModel<T extends ModelType>(cls: Class<T>): Promise<void> {
+    const key = ModelRegistryIndex.getStoreName(cls);
+    this.#store.delete(key);
+    for (const index of ModelRegistryIndex.getIndices(cls)) {
+      if (isModelIndexedIndex(index)) {
+        this.#indices[index.type].delete(indexName(cls, index));
+      }
+    }
   }
 
   async truncateBlob(): Promise<void> {

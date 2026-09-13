@@ -43,10 +43,17 @@ This module owns LLM-oriented generation guidance for Travetto.
   - If there is concern about uninitialized dependencies in scripts or tests, ensure `await Registry.init()` is called first so that all dependencies and services are properly initialized.
 - **Model Query Handling**:
   - When building query filters or aggregations in model services, compose compound clauses (such as `$and`, field existence, or type constraints) directly via `ModelQueryUtil.getWhereClause(cls, ...)` rather than manually stitching backend-specific query filter objects.
+- **Model Storage Lifecycle (`deleteModel`, `deleteStorage`, `truncateModel`)**:
+  - `deleteModel` and `deleteStorage` are required methods on `ModelStorageSupport`. Both must be idempotent and must not throw if the underlying storage/model item is not found or already deleted.
+  - Keep `deleteModel` (structure/DDL destruction) and `truncateModel` (record/data purge) as distinct responsibilities; do not combine them into a single method with mode flags.
+  - When truncating a model where the provider does not have a native `truncateModel` implementation, fallback to `deleteModel`.
+- **Code Maintenance & Intentional Deletions**:
+  - Never restore or re-add code that was removed unless explicitly requested or approved by the user.
 - **Code Style & Safety**:
   - Prefer declarative object definitions with inline conditional spreading (`...(condition ? { ... } : {})`) over creating mutable objects and appending properties via `if` statements.
   - Use optional chaining (`?.`) instead of non-null assertions (`!`) on schema and registry lookups (e.g., `SchemaRegistryIndex.getNestedFieldConfig(...)`).
   - Avoid redundant `String(...)` conversions inside template literals (e.g., use `` `$${field}` `` instead of `` `$${String(field)}` ``).
+  - Avoid inline `.catch` invocations on promises unless strictly necessary (e.g., an unawaited promise). Prefer standard `try / catch` blocks instead.
 
 ## Catalog Evolution
 When adding operations:

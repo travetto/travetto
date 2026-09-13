@@ -225,4 +225,14 @@ GROUP BY INDEX_NAME, TABLE_NAME, NON_UNIQUE;
     }
     return undefined;
   }
+
+  isTableNotFoundError(error: unknown): boolean {
+    return (
+      (typeof error === 'object' &&
+        error !== null &&
+        (('errno' in error && (error.errno === 1051 || error.errno === 1146)) ||
+          ('code' in error && (error.code === 'ER_BAD_TABLE_ERROR' || error.code === 'ER_NO_SUCH_TABLE')))) ||
+      (error instanceof Error && (/unknown table/i.test(error.message) || /doesn't exist/i.test(error.message)))
+    );
+  }
 }

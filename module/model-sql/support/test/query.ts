@@ -98,6 +98,10 @@ class MockDialect extends AbstractANSI99Dialect {
   }
 
   async dropIndex(): Promise<void> {}
+
+  isTableNotFoundError(error: unknown): boolean {
+    return false;
+  }
 }
 
 const mockDialect = new MockDialect();
