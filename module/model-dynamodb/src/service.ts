@@ -356,6 +356,10 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     }
   }
 
+  /**
+   * Remove a model
+   * @param cls
+   */
   async deleteModel(cls: Class<ModelType>): Promise<void> {
     const table = this.#resolveTable(cls);
     await ModelStorageUtil.runAndIgnoreNotFound(async () => {
