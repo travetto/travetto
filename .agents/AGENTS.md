@@ -7,3 +7,6 @@ This repository maintains its coding standards and agent instructions in the can
 
 - **Application Consumer Instructions** (for consumer application workflows, generators, and end-user project usage):
   [`module/llm-support/resources/llm/consumer/INSTRUCTIONS.md`](file:///Users/arcsine/Code/travetto/module/llm-support/resources/llm/consumer/INSTRUCTIONS.md)
+
+## Continuous Feedback Rule
+When the user provides feedback, corrections, or workflow preferences, agents must update the maintainer guidelines ([`module/llm-support/resources/llm/maintainer/INSTRUCTIONS.md`](file:///Users/arcsine/Code/travetto/module/llm-support/resources/llm/maintainer/INSTRUCTIONS.md)), and if appropriate, also update the consumer instructions ([`module/llm-support/resources/llm/consumer/INSTRUCTIONS.md`](file:///Users/arcsine/Code/travetto/module/llm-support/resources/llm/consumer/INSTRUCTIONS.md)).

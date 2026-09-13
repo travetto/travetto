@@ -25,6 +25,7 @@ This module owns LLM-oriented generation guidance for Travetto.
 - Prefer additive evolution of guidance catalogs and workflows over mutation of existing semantics.
 - Ensure every new capability has at least one integrity test (metadata shape, discoverability, or execution coverage).
 - Keep documentation synchronized with behavior changes in the same change set.
+- Continuous Feedback Integration: When receiving feedback, corrections, or workflow preferences, update the maintainer `INSTRUCTIONS.md` (and consumer `INSTRUCTIONS.md` if relevant) to codify the guidance for future agent sessions.
 
 ## Compatibility And Change Discipline
 - Breaking contract changes require an explicit compatibility note and migration guidance.
