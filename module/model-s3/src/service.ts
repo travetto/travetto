@@ -508,14 +508,12 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async deleteStorage(): Promise<void> {
-    await ModelStorageUtil.runAndIgnoreNotFound(async () => {
-      if (this.config.namespace) {
-        for await (const items of this.#iterateBucket()) {
-          await this.#deleteKeys(items);
-        }
-      } else {
-        await this.client.deleteBucket({ Bucket: this.config.bucket });
+    if (this.config.namespace) {
+      for await (const items of this.#iterateBucket()) {
+        await this.#deleteKeys(items);
       }
-    }, isNotFoundError);
+    } else {
+      await ModelStorageUtil.runAndIgnoreNotFound(() => this.client.deleteBucket({ Bucket: this.config.bucket }), isNotFoundError);
+    }
   }
 }
