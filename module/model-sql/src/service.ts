@@ -13,6 +13,7 @@ import {
   type ModelListOptions,
   ModelRegistryIndex,
   type ModelStorageSupport,
+  ModelStorageUtil,
   type ModelType,
   NotFoundError,
   type OptionalId,
@@ -298,15 +299,10 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async dropTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
-    try {
-      const sql = this.dialect.getDropTableSQL(tableContext);
-      await this.connection.execute(sql);
-    } catch (error) {
-      if (this.dialect.isTableNotFoundError(error)) {
-        return;
-      }
-      throw error;
-    }
+    await ModelStorageUtil.runAndIgnoreNotFound(
+      () => this.connection.execute(this.dialect.getDropTableSQL(tableContext)),
+      error => this.dialect.isTableNotFoundError(error)
+    );
   }
 
   async truncateTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {

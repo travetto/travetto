@@ -343,26 +343,9 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async deleteModel(modelClass: Class<ModelType>): Promise<void> {
     const tableName = this.#resolveTable(modelClass);
-    let verify: { TableStatus?: string } | undefined;
-    try {
-      const response = await this.client.describeTable({ TableName: tableName });
-      verify = response.Table;
-    } catch (error) {
-      if (isNotFoundError(error)) {
-        verify = undefined;
-      } else {
-        throw error;
-      }
-    }
-    if (verify && verify.TableStatus !== 'DELETING') {
-      try {
-        await this.client.deleteTable({ TableName: tableName });
-      } catch (error) {
-        if (isNotFoundError(error)) {
-          return;
-        }
-        throw error;
-      }
+    const verify = await ModelStorageUtil.runAndIgnoreNotFound(() => this.client.describeTable({ TableName: tableName }), isNotFoundError);
+    if (verify?.Table && verify.Table.TableStatus !== 'DELETING') {
+      await ModelStorageUtil.runAndIgnoreNotFound(() => this.client.deleteTable({ TableName: tableName }), isNotFoundError);
     }
   }
 
@@ -398,16 +381,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async deleteStorage(): Promise<void> {
     for (const model of ModelRegistryIndex.getClasses()) {
-      try {
-        await this.client.deleteTable({
-          TableName: this.#resolveTable(model)
-        });
-      } catch (error) {
-        if (isNotFoundError(error)) {
-          continue;
-        }
-        throw error;
-      }
+      await ModelStorageUtil.runAndIgnoreNotFound(() => this.client.deleteTable({ TableName: this.#resolveTable(model) }), isNotFoundError);
     }
   }
 

@@ -1,7 +1,7 @@
 import { errors, type Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/api/types';
 
-import { ModelRegistryIndex, type ModelStorageSupport, type ModelType } from '@travetto/model';
+import { ModelRegistryIndex, type ModelStorageSupport, ModelStorageUtil, type ModelType } from '@travetto/model';
 import { warnIfIndexedUniqueIndex } from '@travetto/model-indexed';
 import { type Class, JSONUtil } from '@travetto/runtime';
 
@@ -98,40 +98,23 @@ export class IndexManager implements ModelStorageSupport {
 
   async deleteModel(modelClass: Class<ModelType>): Promise<void> {
     const { index } = this.getIdentity(modelClass);
-    let aliasedIndices: Record<string, unknown> | undefined;
-    try {
-      aliasedIndices = await this.#client.indices.getAlias({ name: index });
-    } catch (error) {
-      if (isNotFoundError(error)) {
-        aliasedIndices = undefined;
-      } else {
-        throw error;
-      }
-    }
+    const aliasedIndices = await ModelStorageUtil.runAndIgnoreNotFound(
+      () => this.#client.indices.getAlias({ name: index }),
+      isNotFoundError
+    );
 
     const toDelete = Object.keys(aliasedIndices ?? {});
     if (toDelete.length === 0) {
-      try {
-        if (await this.#client.indices.exists({ index })) {
-          toDelete.push(index);
-        }
-      } catch (error) {
-        if (!isNotFoundError(error)) {
-          throw error;
-        }
+      const exists = await ModelStorageUtil.runAndIgnoreNotFound(() => this.#client.indices.exists({ index }), isNotFoundError);
+      if (exists) {
+        toDelete.push(index);
       }
     }
 
     if (toDelete.length > 0) {
       console.debug('Deleting Model', { index, toDelete });
       for (const target of toDelete) {
-        try {
-          await this.#client.indices.delete({ index: target });
-        } catch (error) {
-          if (!isNotFoundError(error)) {
-            throw error;
-          }
-        }
+        await ModelStorageUtil.runAndIgnoreNotFound(() => this.#client.indices.delete({ index: target }), isNotFoundError);
       }
     }
   }
@@ -141,14 +124,7 @@ export class IndexManager implements ModelStorageSupport {
    */
   async upsertModel(modelClass: Class<ModelType>): Promise<void> {
     const { index } = this.getIdentity(modelClass);
-    let resolvedAlias;
-    try {
-      resolvedAlias = await this.#client.indices.getMapping({ index });
-    } catch (error) {
-      if (!isNotFoundError(error)) {
-        throw error;
-      }
-    }
+    const resolvedAlias = await ModelStorageUtil.runAndIgnoreNotFound(() => this.#client.indices.getMapping({ index }), isNotFoundError);
 
     warnIfIndexedUniqueIndex(this, modelClass, ModelRegistryIndex.getIndices(modelClass));
 
@@ -192,17 +168,14 @@ export class IndexManager implements ModelStorageSupport {
 
   async deleteStorage(): Promise<void> {
     console.debug('Deleting storage', { idx: this.getNamespacedIndex('*') });
-    try {
-      await this.#client.indices.delete({
-        index: this.getNamespacedIndex('*'),
-        ignore_unavailable: true
-      });
-    } catch (error) {
-      if (isNotFoundError(error)) {
-        return;
-      }
-      throw error;
-    }
+    await ModelStorageUtil.runAndIgnoreNotFound(
+      () =>
+        this.#client.indices.delete({
+          index: this.getNamespacedIndex('*'),
+          ignore_unavailable: true
+        }),
+      isNotFoundError
+    );
   }
 
   async truncateModel(modelClass: Class<ModelType>): Promise<void> {

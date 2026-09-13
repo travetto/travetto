@@ -7,6 +7,7 @@ import {
   type ModelListOptions,
   ModelRegistryIndex,
   type ModelStorageSupport,
+  ModelStorageUtil,
   type ModelType,
   NotFoundError,
   type OptionalId
@@ -157,14 +158,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async deleteModel<T extends ModelType>(modelClass: Class<T>): Promise<void> {
-    try {
-      await this.truncateModel(modelClass);
-    } catch (error) {
-      if (isNotFoundError(error)) {
-        return;
-      }
-      throw error;
-    }
+    await ModelStorageUtil.runAndIgnoreNotFound(() => this.truncateModel(modelClass), isNotFoundError);
   }
 
   // Crud

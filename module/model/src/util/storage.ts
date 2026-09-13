@@ -46,4 +46,21 @@ export class ModelStorageUtil {
       }
     }
   }
+
+  /**
+   * Runs a storage operation and ignores errors matching the not-found predicate
+   */
+  static async runAndIgnoreNotFound<T = unknown>(
+    operation: () => Promise<T>,
+    notFoundPredicate: (error: unknown) => boolean
+  ): Promise<T | undefined> {
+    try {
+      return await operation();
+    } catch (error) {
+      if (notFoundPredicate(error)) {
+        return undefined;
+      }
+      throw error;
+    }
+  }
 }

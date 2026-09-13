@@ -496,14 +496,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async deleteModel<T extends ModelType>(modelClass: Class<T>): Promise<void> {
-    try {
-      await this.truncateModel(modelClass);
-    } catch (error) {
-      if (isNotFoundError(error)) {
-        return;
-      }
-      throw error;
-    }
+    await ModelStorageUtil.runAndIgnoreNotFound(() => this.truncateModel(modelClass), isNotFoundError);
   }
 
   async createStorage(): Promise<void> {
@@ -516,25 +509,13 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async deleteStorage(): Promise<void> {
     if (this.config.namespace) {
-      try {
+      await ModelStorageUtil.runAndIgnoreNotFound(async () => {
         for await (const items of this.#iterateBucket()) {
           await this.#deleteKeys(items);
         }
-      } catch (error) {
-        if (isNotFoundError(error)) {
-          return;
-        }
-        throw error;
-      }
+      }, isNotFoundError);
     } else {
-      try {
-        await this.client.deleteBucket({ Bucket: this.config.bucket });
-      } catch (error) {
-        if (isNotFoundError(error)) {
-          return;
-        }
-        throw error;
-      }
+      await ModelStorageUtil.runAndIgnoreNotFound(() => this.client.deleteBucket({ Bucket: this.config.bucket }), isNotFoundError);
     }
   }
 }
