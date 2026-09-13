@@ -746,27 +746,26 @@ export class MongoModelService
 
     const collection = await this.getStore(cls);
 
-    const where = ModelQueryUtil.getWhereClause(cls, query?.where);
-    let queryObject: Record<string, unknown> = { [field]: { $exists: true, $ne: null } };
+    const where = ModelQueryUtil.getWhereClause(cls, {
+      $and: [query?.where ?? {}, { [field]: { $exists: true } }]
+    });
 
-    if (where) {
-      queryObject = { $and: [queryObject, MongoUtil.extractWhereFilter(cls, where)] };
-    }
-
-    const isDate = SchemaRegistryIndex.getNestedFieldConfig(cls, field)!.type === Date;
+    const isDate = SchemaRegistryIndex.getNestedFieldConfig(cls, field)?.type === Date;
 
     const groupFields: Record<string, unknown> = {
       _id: null,
       count: { $sum: 1 },
-      min: { $min: `$${String(field)}` },
-      max: { $max: `$${String(field)}` }
+      min: { $min: `$${field}` },
+      max: { $max: `$${field}` },
+      ...(isDate
+        ? {}
+        : {
+            avg: { $avg: `$${field}` },
+            sum: { $sum: `$${field}` }
+          })
     };
-    if (!isDate) {
-      groupFields.avg = { $avg: `$${String(field)}` };
-      groupFields.sum = { $sum: `$${String(field)}` };
-    }
 
-    const aggregations: object[] = [{ $match: queryObject }, { $group: groupFields }];
+    const aggregations: object[] = [{ $match: MongoUtil.extractWhereFilter(cls, where) }, { $group: groupFields }];
 
     const result = await collection.aggregate<NumberFieldAggregateResult>(aggregations).toArray();
 
