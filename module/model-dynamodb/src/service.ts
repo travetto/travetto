@@ -1,3 +1,5 @@
+import timers from 'node:timers/promises';
+
 import {
   type AttributeValue,
   DynamoDB,
@@ -49,6 +51,10 @@ const EXPIRES_ATTRIBUTE = 'expires_at__';
 const getKey = <T extends ModelType>(computed: ModelIndexedComputedIndex<T>): AttributeValue =>
   DynamoDBUtil.toValue(computed.getKey() || 'NULL');
 const getSort = <T extends ModelType>(computed: ModelIndexedComputedIndex<T>): AttributeValue => DynamoDBUtil.toValue(computed.getSort());
+
+function isNotFoundError(error: unknown): boolean {
+  return error instanceof Error && error.name === 'ResourceNotFoundException';
+}
 
 /**
  * A model service backed by DynamoDB
@@ -289,6 +295,19 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   // Storage
+  async #waitForTableNotExists(table: string): Promise<void> {
+    for (let attempt = 0; attempt < 300; attempt += 1) {
+      const describeResponse = await ModelStorageUtil.runAndIgnoreNotFound(
+        () => this.client.describeTable({ TableName: table }),
+        isNotFoundError
+      );
+      if (!describeResponse?.Table) {
+        return;
+      }
+      await timers.setTimeout(100);
+    }
+    throw new Error(`Timed out waiting for table ${table} to be deleted`);
+  }
 
   /**
    * Add a new model
@@ -299,8 +318,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     const idx = DynamoDBUtil.computeIndexConfig(cls);
 
     const [currentTable, currentTTL] = await Promise.all([
-      this.client.describeTable({ TableName: table }).catch(() => undefined),
-      this.client.describeTimeToLive({ TableName: table }).catch(() => ({ TimeToLiveDescription: undefined }))
+      ModelStorageUtil.runAndIgnoreNotFound(() => this.client.describeTable({ TableName: table }), isNotFoundError),
+      ModelStorageUtil.runAndIgnoreNotFound(() => this.client.describeTimeToLive({ TableName: table }), isNotFoundError)
     ]);
 
     if (!currentTable) {
@@ -328,7 +347,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     }
 
     const ttlRequired = ModelRegistryIndex.getConfig(cls).expiresAt !== undefined;
-    const ttlEnabled = currentTTL.TimeToLiveDescription?.TimeToLiveStatus === 'ENABLED';
+    const ttlEnabled = currentTTL?.TimeToLiveDescription?.TimeToLiveStatus === 'ENABLED';
     if (ttlEnabled !== ttlRequired) {
       await this.client.updateTimeToLive({
         TableName: table,
@@ -343,10 +362,36 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
    */
   async deleteModel(cls: Class<ModelType>): Promise<void> {
     const table = this.#resolveTable(cls);
-    const { Table: verify } = await this.client.describeTable({ TableName: table }).catch(() => ({ Table: undefined }));
-    if (verify) {
+    await ModelStorageUtil.runAndIgnoreNotFound(async () => {
       await this.client.deleteTable({ TableName: table });
-    }
+      await this.#waitForTableNotExists(table);
+    }, isNotFoundError);
+  }
+
+  async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {
+    const table = this.#resolveTable(cls);
+    let startKey: Record<string, AttributeValue> | undefined;
+    do {
+      const scanResult = await this.client.scan({
+        TableName: table,
+        ProjectionExpression: 'id',
+        ExclusiveStartKey: startKey,
+        Limit: 25
+      });
+      startKey = scanResult.LastEvaluatedKey;
+      const items = scanResult.Items ?? [];
+      if (items.length > 0) {
+        await this.client.batchWriteItem({
+          RequestItems: {
+            [table]: items.map(item => ({
+              DeleteRequest: {
+                Key: { id: item.id }
+              }
+            }))
+          }
+        });
+      }
+    } while (startKey);
   }
 
   async createStorage(): Promise<void> {

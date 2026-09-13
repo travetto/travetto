@@ -43,10 +43,21 @@ This module owns LLM-oriented generation guidance for Travetto.
   - If there is concern about uninitialized dependencies in scripts or tests, ensure `await Registry.init()` is called first so that all dependencies and services are properly initialized.
 - **Model Query Handling**:
   - When building query filters or aggregations in model services, compose compound clauses (such as `$and`, field existence, or type constraints) directly via `ModelQueryUtil.getWhereClause(cls, ...)` rather than manually stitching backend-specific query filter objects.
+- **Model Storage Lifecycle (`deleteModel`, `deleteStorage`, `truncateModel`, `truncateBlob`)**:
+  - `deleteModel`, `deleteStorage`, and `truncateModel` are required methods on `ModelStorageSupport`.
+  - `deleteModel` and `deleteStorage` must be idempotent and must not throw if the underlying storage/model item is not found or already deleted. Error handling must specifically check for not-found error conditions (e.g., 404, `NoSuchBucket`, `ResourceNotFoundException`, `isTableNotFoundError`) rather than indiscriminately catching and swallowing all errors. Prefer `ModelStorageUtil.runAndIgnoreNotFound(operation, notFoundPredicate)` for clean, boilerplate-free handling.
+  - Truncate operations (`truncateModel`, `truncateBlob`) must never swallow not-found errors; only delete operations (`deleteModel`, `deleteStorage`) may swallow not-found errors.
+  - Keep `deleteModel` (structure/DDL destruction) and `truncateModel` (record/data purge) as distinct responsibilities; `truncateModel` must purge records without dropping or altering the underlying schema, table, or storage container. In SQL (and structured datastores), truncating a non-existent table must throw an error.
+  - Runtime services (such as `CacheService.purge()`) that clear data must invoke `truncateModel`, never `deleteModel`.
+- **Code Maintenance & Intentional Deletions**:
+  - Never restore or re-add code that was removed unless explicitly requested or approved by the user.
+- **PR Scope & Minimal Churn**:
+  - Do not touch, reformat, or rename existing code (including expanding abbreviated identifiers or variables) when it is not material to the PR. Keep changes tightly focused on the requested functionality or bug fix.
 - **Code Style & Safety**:
   - Prefer declarative object definitions with inline conditional spreading (`...(condition ? { ... } : {})`) over creating mutable objects and appending properties via `if` statements.
   - Use optional chaining (`?.`) instead of non-null assertions (`!`) on schema and registry lookups (e.g., `SchemaRegistryIndex.getNestedFieldConfig(...)`).
   - Avoid redundant `String(...)` conversions inside template literals (e.g., use `` `$${field}` `` instead of `` `$${String(field)}` ``).
+  - Avoid inline `.catch` invocations on promises unless strictly necessary (e.g., an unawaited promise). Prefer standard `try / catch` blocks instead.
 
 ## Catalog Evolution
 When adding operations:

@@ -295,4 +295,11 @@ export class PostgresDialect extends AbstractANSI99Dialect {
   getTruncateTableSQL(context: TableContext): string {
     return `TRUNCATE TABLE ${this.escapeIdentifier(context.tableName)} CASCADE;`;
   }
+
+  isTableNotFoundError(error: unknown): boolean {
+    return (
+      (typeof error === 'object' && error !== null && 'code' in error && error.code === '42P01') ||
+      (error instanceof Error && /does not exist/i.test(error.message))
+    );
+  }
 }

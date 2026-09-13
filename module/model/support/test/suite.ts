@@ -53,26 +53,18 @@ class ModelSuiteHandler<T extends { configClass: Class<ConfigType>; serviceClass
         await service.truncateBlob();
       }
 
-      if (service.truncateModel) {
-        await Promise.all(models.map(model => service.truncateModel!(model)));
-      } else if (service.deleteModel) {
-        await Promise.all(models.map(model => service.deleteModel!(model)));
-      } else {
-        await service.deleteStorage(); // Purge it all
-      }
+      await Promise.all(models.map(model => service.truncateModel(model)));
     }
   }
 
   async afterAll(instance: T) {
     const service = await DependencyRegistryIndex.getInstance<T>(instance.serviceClass, this.qualifier);
     if (ModelStorageUtil.isSupported(service)) {
-      if (service.deleteModel) {
-        for (const model of ModelRegistryIndex.getClasses()) {
-          if (model === SchemaRegistryIndex.getBaseClass(model)) {
-            await service.deleteModel(model);
-          }
-        }
-      }
+      await Promise.all(
+        ModelRegistryIndex.getClasses()
+          .filter(model => model === SchemaRegistryIndex.getBaseClass(model))
+          .map(model => service.deleteModel(model))
+      );
       await service.deleteStorage();
     }
   }

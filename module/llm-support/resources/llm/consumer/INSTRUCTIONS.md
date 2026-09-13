@@ -29,6 +29,7 @@ Do not recommend excluded operations unless explicitly requested:
 - Keep module boundaries clear: routing, service logic, persistence, and transport concerns should remain separable.
 - Optimize for composability; recommendations should combine cleanly without hidden coupling.
 - Default to safe behavior (plan-first, dry-run-first, minimal scope changes) and require explicit opt-in for destructive actions.
+- Scope Discipline: Do not touch, reformat, or rename existing code when it is not material to the task at hand.
 - Favor deterministic outputs so repeated runs with the same inputs produce equivalent guidance.
 - Sourced framework code rule: Reference code exposed to LLMs from framework modules MUST originate from sample usage files in `doc/` directories, never from `src/` or internal files.
 - Minimal Decorator Usage Rule: Rely on compile-time AST reflection and framework defaults rather than redundant decorator duplication:
@@ -43,6 +44,7 @@ Do not recommend excluded operations unless explicitly requested:
   - Prefer declarative object definitions with inline conditional spreading (`...(condition ? { ... } : {})`) over mutable property assignment.
   - Use optional chaining (`?.`) instead of non-null assertions (`!`) on registry and schema lookups.
   - Avoid redundant `String(...)` conversions inside template literals.
+  - Avoid inline `.catch` invocations on promises unless strictly necessary (e.g., an unawaited promise). Prefer standard `try / catch` blocks instead.
 
 ## Best Practices
 - Schema-first boundaries: define input/output contracts with schema classes at ownership boundaries.

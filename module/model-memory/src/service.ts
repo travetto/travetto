@@ -421,8 +421,23 @@ export class MemoryModelService
     }
   }
 
+  async deleteModel<T extends ModelType>(cls: Class<T>): Promise<void> {
+    const key = ModelRegistryIndex.getStoreName(cls);
+    this.#store.delete(key);
+    for (const index of ModelRegistryIndex.getIndices(cls)) {
+      if (isModelIndexedIndex(index)) {
+        this.#indices[index.type].delete(indexName(cls, index));
+      }
+    }
+  }
+
   async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {
     this.#getStore(cls).clear();
+    for (const index of ModelRegistryIndex.getIndices(cls)) {
+      if (isModelIndexedIndex(index)) {
+        this.#indices[index.type].get(indexName(cls, index))?.clear();
+      }
+    }
   }
 
   async truncateBlob(): Promise<void> {

@@ -7,6 +7,7 @@ import {
   type ModelListOptions,
   ModelRegistryIndex,
   type ModelStorageSupport,
+  ModelStorageUtil,
   type ModelType,
   NotFoundError,
   type OptionalId
@@ -36,6 +37,10 @@ import type { FirestoreModelConfig } from './config.ts';
 const clone = JSONUtil.clone;
 const setMissingValues = <T>(input: T, missingValue: unknown): T =>
   JSONUtil.clone(input, { replacer: (_, value) => value ?? null, reviver: (_, value) => value ?? missingValue });
+
+function isNotFoundError(error: unknown): boolean {
+  return error instanceof Error && (error.message.includes('NOT_FOUND') || (error as { code?: number }).code === 5);
+}
 
 /**
  * A model service backed by Firestore
@@ -148,8 +153,12 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
   async deleteStorage(): Promise<void> {}
 
-  async deleteModel<T extends ModelType>(cls: Class<T>): Promise<void> {
+  async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {
     await this.client.recursiveDelete(this.#getCollection(cls));
+  }
+
+  async deleteModel<T extends ModelType>(cls: Class<T>): Promise<void> {
+    await ModelStorageUtil.runAndIgnoreNotFound(() => this.truncateModel(cls), isNotFoundError);
   }
 
   // Crud

@@ -104,6 +104,13 @@ const handleDuplicateKeyError = (cls: Class, id: string, error: unknown): unknow
   return error;
 };
 
+function isNotFoundError(error: unknown): error is MongoServerError {
+  return (
+    (error instanceof MongoServerError && (error.code === 26 || error.codeName === 'NamespaceNotFound')) ||
+    (error instanceof Error && /ns not found/i.test(error.message))
+  );
+}
+
 export const ModelBlobNamespace = '__blobs';
 
 /**
@@ -256,13 +263,15 @@ export class MongoModelService
   async createStorage(): Promise<void> {}
 
   async deleteStorage(): Promise<void> {
-    await this.#db.dropDatabase();
+    await ModelStorageUtil.runAndIgnoreNotFound(() => this.#db.dropDatabase(), isNotFoundError);
   }
 
   async upsertModel(cls: Class): Promise<void> {
     const col = await this.getStore(cls);
     const indices = [...ModelRegistryIndex.getIndices(cls).map(idx => MongoUtil.getIndex(cls, idx)), ...MongoUtil.getExtraIndices(cls)];
-    const existingIndices = (await col.indexes().catch(() => [])).filter(idx => idx.name !== '_id_');
+    const existingIndices = ((await ModelStorageUtil.runAndIgnoreNotFound(() => col.indexes(), isNotFoundError)) ?? []).filter(
+      idx => idx.name !== '_id_'
+    );
 
     const pendingMap = Object.fromEntries(indices.map(pair => [pair[1].name!, pair]));
     const existingMap = Object.fromEntries(existingIndices.map(idx => [idx.name!, idx.key]));
@@ -289,13 +298,17 @@ export class MongoModelService
     }
   }
 
+  async deleteModel<T extends ModelType>(cls: Class<T>): Promise<void> {
+    await ModelStorageUtil.runAndIgnoreNotFound(() => this.#db.collection(ModelRegistryIndex.getStoreName(cls)).drop(), isNotFoundError);
+  }
+
   async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {
     const col = await this.getStore(cls);
     await col.deleteMany({});
   }
 
   async truncateBlob(): Promise<void> {
-    await this.#bucket.drop().catch(() => {});
+    await this.#bucket.drop();
   }
 
   /**

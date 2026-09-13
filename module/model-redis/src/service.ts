@@ -397,6 +397,10 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
   }
 
+  async deleteModel<T extends ModelType>(model: Class<T>): Promise<void> {
+    await this.truncateModel(model);
+  }
+
   // Indexed
 
   async getByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
