@@ -410,7 +410,13 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async deleteStorage(): Promise<void> {
-    await Promise.all(ModelRegistryIndex.getClasses().map(cls => this.deleteModel(cls)));
+    for (const model of ModelRegistryIndex.getClasses()) {
+      await this.client
+        .deleteTable({
+          TableName: this.#resolveTable(model)
+        })
+        .catch(() => {});
+    }
   }
 
   // Crud
