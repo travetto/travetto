@@ -36,6 +36,13 @@ Do not recommend excluded operations unless explicitly requested:
   - Omit `@PathParam()` / `@QueryParam()` when argument names match route/query parameters.
   - Omit `@Body()` on `@Post()`, `@Put()`, or `@Patch()` endpoint parameters taking schema DTOs.
   - Prefer standard JSDoc comments (`/** ... */`) over `@Description()` for schema and endpoint descriptions.
+- Visibility & Encapsulation: Do not use TS visibility modifiers (`private`, `protected`, or `public`). Use standard ECMAScript public by default and `#private` fields/methods when private accessibility is needed.
+- Model Query Handling: When building query filters or aggregations, compose compound clauses via `ModelQueryUtil.getWhereClause(cls, ...)` rather than manually building backend-specific query filter objects.
+- Dependency Injection: Avoid defensive null checks on `@Inject()` dependencies. In test setups or scripts, ensure `await Registry.init()` is executed prior to accessing services.
+- Code Style & Safety:
+  - Prefer declarative object definitions with inline conditional spreading (`...(condition ? { ... } : {})`) over mutable property assignment.
+  - Use optional chaining (`?.`) instead of non-null assertions (`!`) on registry and schema lookups.
+  - Avoid redundant `String(...)` conversions inside template literals.
 
 ## Best Practices
 - Schema-first boundaries: define input/output contracts with schema classes at ownership boundaries.

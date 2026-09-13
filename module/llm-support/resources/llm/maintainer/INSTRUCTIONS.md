@@ -32,6 +32,21 @@ This module owns LLM-oriented generation guidance for Travetto.
 - Excluded operations must remain visible in policy/tests, even when omitted from default recommendations.
 - Guidance should remain monorepo-aware and avoid assumptions that only apply to single-package apps.
 
+## Framework Coding Guidelines
+- **Visibility Modifiers**: Do not use TS visibility modifiers (`private`, `protected`, or `public`). Use ECMAScript standard public by default and `#private` fields/methods when private accessibility is needed.
+- **Generated Files**: `openapi.yml` (and other OpenAPI definition outputs) are generated automatically. Do not manually edit, inspect, or track changes in them directly as they will be regenerated.
+- **Barrel Exports**: Always check and update `__index__.ts` files when adding or removing files to ensure barrel exports are correct.
+- **TypeScript Compilation**: Never invoke `tsc` directly in shell commands. The Travetto compiler (`trv`) wraps TypeScript compilation.
+- **Dependency Injection and Registry Initialization**:
+  - Do not use defensive null checks (e.g., `if (this.source)`) on injected dependencies (`@Inject()`).
+  - If there is concern about uninitialized dependencies in scripts or tests, ensure `await Registry.init()` is called first so that all dependencies and services are properly initialized.
+- **Model Query Handling**:
+  - When building query filters or aggregations in model services, compose compound clauses (such as `$and`, field existence, or type constraints) directly via `ModelQueryUtil.getWhereClause(cls, ...)` rather than manually stitching backend-specific query filter objects.
+- **Code Style & Safety**:
+  - Prefer declarative object definitions with inline conditional spreading (`...(condition ? { ... } : {})`) over creating mutable objects and appending properties via `if` statements.
+  - Use optional chaining (`?.`) instead of non-null assertions (`!`) on schema and registry lookups (e.g., `SchemaRegistryIndex.getNestedFieldConfig(...)`).
+  - Avoid redundant `String(...)` conversions inside template literals (e.g., use `` `$${field}` `` instead of `` `$${String(field)}` ``).
+
 ## Catalog Evolution
 When adding operations:
 1. Add type-safe operation metadata.
