@@ -45,6 +45,13 @@ function isMetadataBearer(value: unknown): value is MetadataBearer {
   return !!value && typeof value === 'object' && '$metadata' in value;
 }
 
+function isNotFoundError(error: unknown): error is Error | MetadataBearer {
+  return (
+    (isMetadataBearer(error) && error.$metadata.httpStatusCode === 404) ||
+    (error instanceof Error && (error.name === 'NoSuchBucket' || error.name === 'NotFound' || error.name === 'NoSuchKey'))
+  );
+}
+
 function hasLowerContentType<T>(value: T): value is T & { contenttype?: string } {
   return value !== undefined && value !== null && Object.hasOwn(value, 'contenttype');
 }
@@ -248,10 +255,8 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       }
       return true;
     } catch (error) {
-      if (isMetadataBearer(error)) {
-        if (error.$metadata.httpStatusCode === 404) {
-          return false;
-        }
+      if (isNotFoundError(error)) {
+        return false;
       }
       throw error;
     }
@@ -277,7 +282,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       }
       throw new NotFoundError(cls, id);
     } catch (error) {
-      if (isMetadataBearer(error) && error.$metadata.httpStatusCode === 404) {
+      if (isNotFoundError(error)) {
         throw new NotFoundError(cls, id);
       }
       throw error;
@@ -415,7 +420,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     try {
       return await this.client.headObject(query);
     } catch (error) {
-      if (isMetadataBearer(error) && error.$metadata.httpStatusCode === 404) {
+      if (isNotFoundError(error)) {
         throw new NotFoundError('Blob', location);
       }
       throw error;
@@ -511,10 +516,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       try {
         await this.client.deleteBucket({ Bucket: this.config.bucket });
       } catch (error) {
-        if (
-          (isMetadataBearer(error) && error.$metadata.httpStatusCode === 404) ||
-          (error instanceof Error && (error.name === 'NoSuchBucket' || error.name === 'NotFound'))
-        ) {
+        if (isNotFoundError(error)) {
           return;
         }
         throw error;
