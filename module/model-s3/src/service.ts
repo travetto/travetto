@@ -510,8 +510,14 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     } else {
       try {
         await this.client.deleteBucket({ Bucket: this.config.bucket });
-      } catch {
-        // Ignore if not found
+      } catch (error) {
+        if (
+          (isMetadataBearer(error) && error.$metadata.httpStatusCode === 404) ||
+          (error instanceof Error && (error.name === 'NoSuchBucket' || error.name === 'NotFound'))
+        ) {
+          return;
+        }
+        throw error;
       }
     }
   }
