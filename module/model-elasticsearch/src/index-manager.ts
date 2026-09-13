@@ -182,7 +182,9 @@ export class IndexManager implements ModelStorageSupport {
     const { index } = this.getIdentity(modelClass);
     await this.#client.deleteByQuery({
       index,
-      query: { match_all: {} }
+      query: { match_all: {} },
+      conflicts: 'proceed',
+      refresh: true
     });
   }
 }

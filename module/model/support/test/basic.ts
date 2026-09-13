@@ -1,6 +1,15 @@
 import assert from 'node:assert';
 
-import { Model, type ModelCrudSupport, ModelCrudUtil, ModelStorageUtil, NotFoundError, TransientField } from '@travetto/model';
+import {
+  Model,
+  type ModelCrudSupport,
+  ModelCrudUtil,
+  ModelRegistryIndex,
+  ModelStorageUtil,
+  NotFoundError,
+  TransientField
+} from '@travetto/model';
+import { SchemaRegistryIndex } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from './base.ts';
@@ -128,7 +137,7 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
       await service.deleteStorage();
       await service.createStorage();
       if (service.upsertModel) {
-        for (const modelClass of [Person, ComputedPerson, TempPerson]) {
+        for (const modelClass of ModelRegistryIndex.getClasses().filter(model => model === SchemaRegistryIndex.getBaseClass(model))) {
           await service.upsertModel(modelClass);
         }
       }
