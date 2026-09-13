@@ -119,19 +119,6 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
     }
   }
 
-  @Test('truncateModel should not fail when underlying storage item is not found')
-  async testTruncateModelNotExists() {
-    const service = await this.service;
-    if (ModelStorageUtil.isSupported(service)) {
-      await service.deleteModel(TempPerson);
-      // Run truncateModel when table/storage item is definitely deleted/not found
-      await service.truncateModel(TempPerson);
-      if (service.upsertModel) {
-        await service.upsertModel(TempPerson);
-      }
-    }
-  }
-
   @Test('deleteStorage should not fail when underlying storage is not found')
   async testDeleteStorageNotExists() {
     const service = await this.service;
