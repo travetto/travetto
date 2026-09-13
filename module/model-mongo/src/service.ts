@@ -104,6 +104,13 @@ const handleDuplicateKeyError = (cls: Class, id: string, error: unknown): unknow
   return error;
 };
 
+function isNotFoundError(error: unknown): error is MongoServerError {
+  return (
+    (error instanceof MongoServerError && (error.code === 26 || error.codeName === 'NamespaceNotFound')) ||
+    (error instanceof Error && /ns not found/i.test(error.message))
+  );
+}
+
 export const ModelBlobNamespace = '__blobs';
 
 /**
@@ -258,20 +265,31 @@ export class MongoModelService
   async deleteStorage(): Promise<void> {
     try {
       await this.#db.dropDatabase();
-    } catch {
-      // Ignore if not found
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        return;
+      }
+      throw error;
     }
   }
 
   async upsertModel(cls: Class): Promise<void> {
     const col = await this.getStore(cls);
     const indices = [...ModelRegistryIndex.getIndices(cls).map(idx => MongoUtil.getIndex(cls, idx)), ...MongoUtil.getExtraIndices(cls)];
-    const existingIndices = (await col.indexes().catch(() => [])).filter(idx => idx.name !== '_id_');
+    let existingIndices: Awaited<ReturnType<typeof col.indexes>> = [];
+    try {
+      existingIndices = await col.indexes();
+    } catch (error) {
+      if (!isNotFoundError(error)) {
+        throw error;
+      }
+    }
+    const filteredIndices = existingIndices.filter(idx => idx.name !== '_id_');
 
     const pendingMap = Object.fromEntries(indices.map(pair => [pair[1].name!, pair]));
-    const existingMap = Object.fromEntries(existingIndices.map(idx => [idx.name!, idx.key]));
+    const existingMap = Object.fromEntries(filteredIndices.map(idx => [idx.name!, idx.key]));
 
-    for (const idx of existingIndices) {
+    for (const idx of filteredIndices) {
       if (!idx.name) {
         continue;
       }
@@ -297,7 +315,10 @@ export class MongoModelService
     try {
       await this.#db.collection(ModelRegistryIndex.getStoreName(cls)).drop();
     } catch (error) {
-      // If not found?
+      if (isNotFoundError(error)) {
+        return;
+      }
+      throw error;
     }
   }
 
@@ -307,7 +328,14 @@ export class MongoModelService
   }
 
   async truncateBlob(): Promise<void> {
-    await this.#bucket.drop().catch(() => {});
+    try {
+      await this.#bucket.drop();
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        return;
+      }
+      throw error;
+    }
   }
 
   /**
