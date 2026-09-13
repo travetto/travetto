@@ -177,4 +177,17 @@ export class IndexManager implements ModelStorageSupport {
       // Ignore if not found
     }
   }
+
+  async truncateModel(modelClass: Class<ModelType>): Promise<void> {
+    const { index } = this.getIdentity(modelClass);
+    try {
+      await this.#client.deleteByQuery({
+        index,
+        query: { match_all: {} },
+        ignore_unavailable: true
+      });
+    } catch {
+      // Ignore if not found
+    }
+  }
 }

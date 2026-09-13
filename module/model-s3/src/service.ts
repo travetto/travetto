@@ -484,10 +484,14 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   // Storage
-  async deleteModel<T extends ModelType>(model: Class<T>): Promise<void> {
-    for await (const items of this.#iterateBucket(model)) {
+  async truncateModel<T extends ModelType>(modelClass: Class<T>): Promise<void> {
+    for await (const items of this.#iterateBucket(modelClass)) {
       await this.#deleteKeys(items);
     }
+  }
+
+  async deleteModel<T extends ModelType>(modelClass: Class<T>): Promise<void> {
+    await this.truncateModel(modelClass);
   }
 
   async createStorage(): Promise<void> {

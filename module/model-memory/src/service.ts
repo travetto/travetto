@@ -431,6 +431,15 @@ export class MemoryModelService
     }
   }
 
+  async truncateModel<T extends ModelType>(modelClass: Class<T>): Promise<void> {
+    this.#getStore(modelClass).clear();
+    for (const index of ModelRegistryIndex.getIndices(modelClass)) {
+      if (isModelIndexedIndex(index)) {
+        this.#indices[index.type].get(indexName(modelClass, index))?.clear();
+      }
+    }
+  }
+
   async truncateBlob(): Promise<void> {
     this.#getStore(ModelBlobNamespace).clear();
     this.#getStore(ModelBlobMetaNamespace).clear();

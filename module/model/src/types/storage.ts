@@ -42,7 +42,7 @@ export interface ModelStorageSupport {
   /**
    * Removes all data from a model, but leaving the structure in place
    */
-  truncateModel?<T extends ModelType>(cls: Class<T>): Promise<void>;
+  truncateModel<T extends ModelType>(cls: Class<T>): Promise<void>;
   /**
    * Truncate blob storage data
    */

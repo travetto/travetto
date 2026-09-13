@@ -310,8 +310,15 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async truncateTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
-    const sql = this.dialect.getTruncateTableSQL(tableContext);
-    await this.connection.execute(sql);
+    try {
+      const sql = this.dialect.getTruncateTableSQL(tableContext);
+      await this.connection.execute(sql);
+    } catch (error) {
+      if (this.dialect.isTableNotFoundError(error)) {
+        return;
+      }
+      throw error;
+    }
   }
 
   async upsertTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {

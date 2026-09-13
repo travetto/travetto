@@ -124,11 +124,7 @@ export class CacheService {
    */
   async purge(): Promise<void> {
     if (ModelStorageUtil.isSupported(this.#modelService)) {
-      if (this.#modelService.truncateModel) {
-        await this.#modelService.truncateModel(CacheRecord);
-      } else {
-        await this.#modelService.deleteModel(CacheRecord);
-      }
+      await this.#modelService.truncateModel(CacheRecord);
     } else {
       console.warn(`${this.#modelService.constructor.name} does not support truncating the data set`);
     }

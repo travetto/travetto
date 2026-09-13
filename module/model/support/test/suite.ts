@@ -53,11 +53,7 @@ class ModelSuiteHandler<T extends { configClass: Class<ConfigType>; serviceClass
         await service.truncateBlob();
       }
 
-      if (service.truncateModel) {
-        await Promise.all(models.map(model => service.truncateModel!(model)));
-      } else {
-        await Promise.all(models.map(model => service.deleteModel(model)));
-      }
+      await Promise.all(models.map(model => service.truncateModel(model)));
     }
   }
 

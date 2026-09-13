@@ -337,22 +337,57 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     }
   }
 
-  /**
-   * Remove a model
-   * @param cls
-   */
-  async deleteModel(cls: Class<ModelType>): Promise<void> {
-    const table = this.#resolveTable(cls);
-    const { Table: verify } = await this.client.describeTable({ TableName: table }).catch(() => ({ Table: undefined }));
+  async deleteModel(modelClass: Class<ModelType>): Promise<void> {
+    const tableName = this.#resolveTable(modelClass);
+    let verify: { TableStatus?: string } | undefined;
+    try {
+      const response = await this.client.describeTable({ TableName: tableName });
+      verify = response.Table;
+    } catch {
+      // Table does not exist
+    }
     if (verify && verify.TableStatus !== 'DELETING') {
       try {
-        await this.client.deleteTable({ TableName: table });
+        await this.client.deleteTable({ TableName: tableName });
       } catch (error) {
         if (error instanceof Error && (error.name === 'ResourceNotFoundException' || error.name === 'ResourceInUseException')) {
           return;
         }
         throw error;
       }
+    }
+  }
+
+  async truncateModel<T extends ModelType>(modelClass: Class<T>): Promise<void> {
+    const tableName = this.#resolveTable(modelClass);
+    let startKey: Record<string, AttributeValue> | undefined;
+    try {
+      do {
+        const scanResult = await this.client.scan({
+          TableName: tableName,
+          ProjectionExpression: 'id',
+          ExclusiveStartKey: startKey,
+          Limit: 25
+        });
+        startKey = scanResult.LastEvaluatedKey;
+        const items = scanResult.Items ?? [];
+        if (items.length > 0) {
+          await this.client.batchWriteItem({
+            RequestItems: {
+              [tableName]: items.map(item => ({
+                DeleteRequest: {
+                  Key: { id: item.id }
+                }
+              }))
+            }
+          });
+        }
+      } while (startKey);
+    } catch (error) {
+      if (error instanceof Error && error.name === 'ResourceNotFoundException') {
+        return;
+      }
+      throw error;
     }
   }
 
