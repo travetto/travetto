@@ -295,11 +295,6 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   // Storage
-
-  /**
-   * Add a new model
-   * @param cls
-   */
   async #waitForTableNotExists(table: string): Promise<void> {
     for (let attempt = 0; attempt < 300; attempt += 1) {
       const describeResponse = await ModelStorageUtil.runAndIgnoreNotFound(
