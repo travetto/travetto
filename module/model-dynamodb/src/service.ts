@@ -317,15 +317,10 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     const table = this.#resolveTable(cls);
     const idx = DynamoDBUtil.computeIndexConfig(cls);
 
-    let [currentTable, currentTTL] = await Promise.all([
+    const [currentTable, currentTTL] = await Promise.all([
       ModelStorageUtil.runAndIgnoreNotFound(() => this.client.describeTable({ TableName: table }), isNotFoundError),
       ModelStorageUtil.runAndIgnoreNotFound(() => this.client.describeTimeToLive({ TableName: table }), isNotFoundError)
     ]);
-
-    if (currentTable?.Table?.TableStatus === 'DELETING') {
-      await this.#waitForTableNotExists(table);
-      currentTable = undefined;
-    }
 
     if (!currentTable) {
       console.debug('Creating Table', { table, idx });
@@ -363,20 +358,10 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async deleteModel(cls: Class<ModelType>): Promise<void> {
     const table = this.#resolveTable(cls);
-    let isDeletingOrDeleted = false;
-    try {
+    await ModelStorageUtil.runAndIgnoreNotFound(async () => {
       await this.client.deleteTable({ TableName: table });
-      isDeletingOrDeleted = true;
-    } catch (error) {
-      if (error instanceof Error && error.name === 'ResourceInUseException') {
-        isDeletingOrDeleted = true;
-      } else if (!isNotFoundError(error)) {
-        throw error;
-      }
-    }
-    if (isDeletingOrDeleted) {
       await this.#waitForTableNotExists(table);
-    }
+    }, isNotFoundError);
   }
 
   async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {
