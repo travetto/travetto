@@ -328,14 +328,7 @@ export class MongoModelService
   }
 
   async truncateBlob(): Promise<void> {
-    try {
-      await this.#bucket.drop();
-    } catch (error) {
-      if (isNotFoundError(error)) {
-        return;
-      }
-      throw error;
-    }
+    await this.#bucket.drop();
   }
 
   /**

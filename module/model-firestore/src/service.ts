@@ -37,6 +37,10 @@ const clone = JSONUtil.clone;
 const setMissingValues = <T>(input: T, missingValue: unknown): T =>
   JSONUtil.clone(input, { replacer: (_, value) => value ?? null, reviver: (_, value) => value ?? missingValue });
 
+function isNotFoundError(error: unknown): boolean {
+  return error instanceof Error && (error.message.includes('NOT_FOUND') || (error as { code?: number }).code === 5);
+}
+
 /**
  * A model service backed by Firestore
  */
@@ -149,18 +153,18 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   async deleteStorage(): Promise<void> {}
 
   async truncateModel<T extends ModelType>(modelClass: Class<T>): Promise<void> {
+    await this.client.recursiveDelete(this.#getCollection(modelClass));
+  }
+
+  async deleteModel<T extends ModelType>(modelClass: Class<T>): Promise<void> {
     try {
-      await this.client.recursiveDelete(this.#getCollection(modelClass));
+      await this.truncateModel(modelClass);
     } catch (error) {
-      if (error instanceof Error && (error.message.includes('NOT_FOUND') || (error as { code?: number }).code === 5)) {
+      if (isNotFoundError(error)) {
         return;
       }
       throw error;
     }
-  }
-
-  async deleteModel<T extends ModelType>(modelClass: Class<T>): Promise<void> {
-    await this.truncateModel(modelClass);
   }
 
   // Crud

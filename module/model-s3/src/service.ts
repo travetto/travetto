@@ -496,7 +496,14 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async deleteModel<T extends ModelType>(modelClass: Class<T>): Promise<void> {
-    await this.truncateModel(modelClass);
+    try {
+      await this.truncateModel(modelClass);
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        return;
+      }
+      throw error;
+    }
   }
 
   async createStorage(): Promise<void> {
@@ -509,8 +516,15 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async deleteStorage(): Promise<void> {
     if (this.config.namespace) {
-      for await (const items of this.#iterateBucket()) {
-        await this.#deleteKeys(items);
+      try {
+        for await (const items of this.#iterateBucket()) {
+          await this.#deleteKeys(items);
+        }
+      } catch (error) {
+        if (isNotFoundError(error)) {
+          return;
+        }
+        throw error;
       }
     } else {
       try {

@@ -50,6 +50,10 @@ const getKey = <T extends ModelType>(computed: ModelIndexedComputedIndex<T>): At
   DynamoDBUtil.toValue(computed.getKey() || 'NULL');
 const getSort = <T extends ModelType>(computed: ModelIndexedComputedIndex<T>): AttributeValue => DynamoDBUtil.toValue(computed.getSort());
 
+function isNotFoundError(error: unknown): boolean {
+  return error instanceof Error && (error.name === 'ResourceNotFoundException' || error.name === 'ResourceInUseException');
+}
+
 /**
  * A model service backed by DynamoDB
  */
@@ -343,14 +347,18 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     try {
       const response = await this.client.describeTable({ TableName: tableName });
       verify = response.Table;
-    } catch {
-      // Table does not exist
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        verify = undefined;
+      } else {
+        throw error;
+      }
     }
     if (verify && verify.TableStatus !== 'DELETING') {
       try {
         await this.client.deleteTable({ TableName: tableName });
       } catch (error) {
-        if (error instanceof Error && (error.name === 'ResourceNotFoundException' || error.name === 'ResourceInUseException')) {
+        if (isNotFoundError(error)) {
           return;
         }
         throw error;
@@ -361,34 +369,27 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async truncateModel<T extends ModelType>(modelClass: Class<T>): Promise<void> {
     const tableName = this.#resolveTable(modelClass);
     let startKey: Record<string, AttributeValue> | undefined;
-    try {
-      do {
-        const scanResult = await this.client.scan({
-          TableName: tableName,
-          ProjectionExpression: 'id',
-          ExclusiveStartKey: startKey,
-          Limit: 25
+    do {
+      const scanResult = await this.client.scan({
+        TableName: tableName,
+        ProjectionExpression: 'id',
+        ExclusiveStartKey: startKey,
+        Limit: 25
+      });
+      startKey = scanResult.LastEvaluatedKey;
+      const items = scanResult.Items ?? [];
+      if (items.length > 0) {
+        await this.client.batchWriteItem({
+          RequestItems: {
+            [tableName]: items.map(item => ({
+              DeleteRequest: {
+                Key: { id: item.id }
+              }
+            }))
+          }
         });
-        startKey = scanResult.LastEvaluatedKey;
-        const items = scanResult.Items ?? [];
-        if (items.length > 0) {
-          await this.client.batchWriteItem({
-            RequestItems: {
-              [tableName]: items.map(item => ({
-                DeleteRequest: {
-                  Key: { id: item.id }
-                }
-              }))
-            }
-          });
-        }
-      } while (startKey);
-    } catch (error) {
-      if (error instanceof Error && error.name === 'ResourceNotFoundException') {
-        return;
       }
-      throw error;
-    }
+    } while (startKey);
   }
 
   async createStorage(): Promise<void> {
@@ -401,8 +402,11 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         await this.client.deleteTable({
           TableName: this.#resolveTable(model)
         });
-      } catch {
-        // Ignore if not found
+      } catch (error) {
+        if (isNotFoundError(error)) {
+          continue;
+        }
+        throw error;
       }
     }
   }

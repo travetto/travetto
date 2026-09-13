@@ -1,4 +1,4 @@
-import type { Client } from '@elastic/elasticsearch';
+import { errors, type Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/api/types';
 
 import { ModelRegistryIndex, type ModelStorageSupport, type ModelType } from '@travetto/model';
@@ -7,6 +7,17 @@ import { type Class, JSONUtil } from '@travetto/runtime';
 
 import type { ElasticsearchModelConfig } from './config.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
+
+function isNotFoundError(error: unknown): boolean {
+  return (
+    error instanceof errors.ResponseError &&
+    (error.statusCode === 404 ||
+      (typeof error.body === 'object' &&
+        error.body !== null &&
+        'error' in error.body &&
+        (error.body as { error?: { type?: string } }).error?.type === 'index_not_found_exception'))
+  );
+}
 
 /**
  * Manager for elasticsearch indices and schemas
@@ -85,13 +96,17 @@ export class IndexManager implements ModelStorageSupport {
     })}'`;
   }
 
-  async deleteModel(cls: Class<ModelType>): Promise<void> {
-    const { index } = this.getIdentity(cls);
+  async deleteModel(modelClass: Class<ModelType>): Promise<void> {
+    const { index } = this.getIdentity(modelClass);
     let aliasedIndices: Record<string, unknown> | undefined;
     try {
       aliasedIndices = await this.#client.indices.getAlias({ name: index });
-    } catch {
-      aliasedIndices = undefined;
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        aliasedIndices = undefined;
+      } else {
+        throw error;
+      }
     }
 
     const toDelete = Object.keys(aliasedIndices ?? {});
@@ -100,43 +115,52 @@ export class IndexManager implements ModelStorageSupport {
         if (await this.#client.indices.exists({ index })) {
           toDelete.push(index);
         }
-      } catch {
-        // Ignore if not found
+      } catch (error) {
+        if (!isNotFoundError(error)) {
+          throw error;
+        }
       }
     }
 
     if (toDelete.length > 0) {
       console.debug('Deleting Model', { index, toDelete });
-      await Promise.all(
-        toDelete.map(async target => {
-          try {
-            await this.#client.indices.delete({ index: target });
-          } catch {
-            // Ignore if not found
+      for (const target of toDelete) {
+        try {
+          await this.#client.indices.delete({ index: target });
+        } catch (error) {
+          if (!isNotFoundError(error)) {
+            throw error;
           }
-        })
-      );
+        }
+      }
     }
   }
 
   /**
    * Create or update schema as necessary
    */
-  async upsertModel(cls: Class<ModelType>): Promise<void> {
-    const { index } = this.getIdentity(cls);
-    const resolvedAlias = await this.#client.indices.getMapping({ index }).catch(() => undefined);
+  async upsertModel(modelClass: Class<ModelType>): Promise<void> {
+    const { index } = this.getIdentity(modelClass);
+    let resolvedAlias;
+    try {
+      resolvedAlias = await this.#client.indices.getMapping({ index });
+    } catch (error) {
+      if (!isNotFoundError(error)) {
+        throw error;
+      }
+    }
 
-    warnIfIndexedUniqueIndex(this, cls, ModelRegistryIndex.getIndices(cls));
+    warnIfIndexedUniqueIndex(this, modelClass, ModelRegistryIndex.getIndices(modelClass));
 
     if (resolvedAlias) {
       const [currentIndex] = Object.keys(resolvedAlias ?? {});
-      const pendingMapping = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
+      const pendingMapping = ElasticsearchSchemaUtil.generateSchemaMapping(modelClass, this.config.schemaConfig);
       const changedFields = ElasticsearchSchemaUtil.getChangedFields(resolvedAlias[currentIndex].mappings, pendingMapping);
 
       if (changedFields.length) {
         // If any fields changed, reindex
         console.debug('Updated Model', { index, currentIndex, changedFields });
-        const pendingIndex = await this.createIndex(cls, false);
+        const pendingIndex = await this.createIndex(modelClass, false);
 
         const reindexBody: estypes.ReindexRequest = {
           source: { index: currentIndex },
@@ -158,7 +182,7 @@ export class IndexManager implements ModelStorageSupport {
     } else {
       // Create if non-existent
       console.debug('Creating Model', { index });
-      await this.createIndex(cls);
+      await this.createIndex(modelClass);
     }
   }
 
@@ -173,21 +197,19 @@ export class IndexManager implements ModelStorageSupport {
         index: this.getNamespacedIndex('*'),
         ignore_unavailable: true
       });
-    } catch {
-      // Ignore if not found
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        return;
+      }
+      throw error;
     }
   }
 
   async truncateModel(modelClass: Class<ModelType>): Promise<void> {
     const { index } = this.getIdentity(modelClass);
-    try {
-      await this.#client.deleteByQuery({
-        index,
-        query: { match_all: {} },
-        ignore_unavailable: true
-      });
-    } catch {
-      // Ignore if not found
-    }
+    await this.#client.deleteByQuery({
+      index,
+      query: { match_all: {} }
+    });
   }
 }

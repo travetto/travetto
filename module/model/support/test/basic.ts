@@ -26,7 +26,7 @@ class Person {
 }
 
 @Model('basic_person_temp')
-class TempPerson {
+export class TempPerson {
   id: string;
 }
 
