@@ -97,26 +97,20 @@ export class IndexManager implements ModelStorageSupport {
   }
 
   async deleteModel(cls: Class<ModelType>): Promise<void> {
-    const { index } = this.getIdentity(cls);
-    const aliasedIndices = await ModelStorageUtil.runAndIgnoreNotFound(
-      () => this.#client.indices.getAlias({ name: index }),
-      isNotFoundError
-    );
+    await ModelStorageUtil.runAndIgnoreNotFound(async () => {
+      const { index } = this.getIdentity(cls);
+      const aliasedIndices = await this.#client.indices.getAlias({ name: index });
 
-    const toDelete = Object.keys(aliasedIndices ?? {});
-    if (toDelete.length === 0) {
-      const exists = await ModelStorageUtil.runAndIgnoreNotFound(() => this.#client.indices.exists({ index }), isNotFoundError);
-      if (exists) {
+      const toDelete = Object.keys(aliasedIndices ?? {});
+      if (toDelete.length === 0 && (await this.#client.indices.exists({ index }))) {
         toDelete.push(index);
       }
-    }
 
-    if (toDelete.length > 0) {
-      console.debug('Deleting Model', { index, toDelete });
-      for (const target of toDelete) {
-        await ModelStorageUtil.runAndIgnoreNotFound(() => this.#client.indices.delete({ index: target }), isNotFoundError);
+      if (toDelete.length > 0) {
+        console.debug('Deleting Model', { index, toDelete });
+        await Promise.all(toDelete.map(target => this.#client.indices.delete({ index: target })));
       }
-    }
+    }, isNotFoundError);
   }
 
   /**
