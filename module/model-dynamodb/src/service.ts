@@ -300,10 +300,10 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
    * Add a new model
    * @param cls
    */
-  async #waitForTableNotExists(tableName: string): Promise<void> {
+  async #waitForTableNotExists(table: string): Promise<void> {
     for (let attempt = 0; attempt < 300; attempt += 1) {
       const describeResponse = await ModelStorageUtil.runAndIgnoreNotFound(
-        () => this.client.describeTable({ TableName: tableName }),
+        () => this.client.describeTable({ TableName: table }),
         isNotFoundError
       );
       if (!describeResponse?.Table) {
@@ -311,78 +311,78 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       }
       await timers.setTimeout(100);
     }
-    throw new Error(`Timed out waiting for table ${tableName} to be deleted`);
+    throw new Error(`Timed out waiting for table ${table} to be deleted`);
   }
 
   /**
    * Add a new model
-   * @param modelClass
+   * @param cls
    */
-  async upsertModel(modelClass: Class<ModelType>): Promise<void> {
-    const tableName = this.#resolveTable(modelClass);
-    const indexConfig = DynamoDBUtil.computeIndexConfig(modelClass);
+  async upsertModel(cls: Class<ModelType>): Promise<void> {
+    const table = this.#resolveTable(cls);
+    const idx = DynamoDBUtil.computeIndexConfig(cls);
 
-    let [currentTable, currentTimeToLive] = await Promise.all([
-      ModelStorageUtil.runAndIgnoreNotFound(() => this.client.describeTable({ TableName: tableName }), isNotFoundError),
-      ModelStorageUtil.runAndIgnoreNotFound(() => this.client.describeTimeToLive({ TableName: tableName }), isNotFoundError)
+    let [currentTable, currentTTL] = await Promise.all([
+      ModelStorageUtil.runAndIgnoreNotFound(() => this.client.describeTable({ TableName: table }), isNotFoundError),
+      ModelStorageUtil.runAndIgnoreNotFound(() => this.client.describeTimeToLive({ TableName: table }), isNotFoundError)
     ]);
 
     if (currentTable?.Table?.TableStatus === 'DELETING') {
-      await this.#waitForTableNotExists(tableName);
+      await this.#waitForTableNotExists(table);
       currentTable = undefined;
     }
 
     if (!currentTable) {
-      console.debug('Creating Table', { tableName, indexConfig });
+      console.debug('Creating Table', { table, idx });
       await this.client.createTable({
-        TableName: tableName,
+        TableName: table,
         KeySchema: [{ KeyType: 'HASH', AttributeName: 'id' }],
         BillingMode: 'PAY_PER_REQUEST',
-        AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }, ...indexConfig.attributes],
-        GlobalSecondaryIndexes: indexConfig.indices
+        AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }, ...idx.attributes],
+        GlobalSecondaryIndexes: idx.indices
       });
     } else {
-      const indexUpdates = DynamoDBUtil.findChangedGlobalIndexes(currentTable.Table?.GlobalSecondaryIndexes, indexConfig.indices);
-      const changedAttributes = DynamoDBUtil.findChangedAttributes(currentTable.Table?.AttributeDefinitions, indexConfig.attributes);
+      const indexUpdates = DynamoDBUtil.findChangedGlobalIndexes(currentTable.Table?.GlobalSecondaryIndexes, idx.indices);
+      const changedAttributes = DynamoDBUtil.findChangedAttributes(currentTable.Table?.AttributeDefinitions, idx.attributes);
 
-      console.debug('Updating Table', { tableName, indexConfig, current: currentTable.Table, indexUpdates, changedAttributes });
+      console.debug('Updating Table', { table, idx, current: currentTable.Table, indexUpdates, changedAttributes });
 
       if (changedAttributes.length || indexUpdates?.length) {
         await this.client.updateTable({
-          TableName: tableName,
-          AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }, ...indexConfig.attributes],
+          TableName: table,
+          AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }, ...idx.attributes],
           GlobalSecondaryIndexUpdates: indexUpdates
         });
       }
     }
 
-    const timeToLiveRequired = ModelRegistryIndex.getConfig(modelClass).expiresAt !== undefined;
-    const timeToLiveEnabled = currentTimeToLive?.TimeToLiveDescription?.TimeToLiveStatus === 'ENABLED';
-    if (timeToLiveEnabled !== timeToLiveRequired) {
+    const ttlRequired = ModelRegistryIndex.getConfig(cls).expiresAt !== undefined;
+    const ttlEnabled = currentTTL?.TimeToLiveDescription?.TimeToLiveStatus === 'ENABLED';
+    if (ttlEnabled !== ttlRequired) {
       await this.client.updateTimeToLive({
-        TableName: tableName,
-        TimeToLiveSpecification: { AttributeName: timeToLiveRequired ? EXPIRES_ATTRIBUTE : undefined, Enabled: timeToLiveRequired }
+        TableName: table,
+        TimeToLiveSpecification: { AttributeName: ttlRequired ? EXPIRES_ATTRIBUTE : undefined, Enabled: ttlRequired }
       });
     }
   }
 
-  async deleteModel(modelClass: Class<ModelType>): Promise<void> {
-    const tableName = this.#resolveTable(modelClass);
-    const verify = await ModelStorageUtil.runAndIgnoreNotFound(() => this.client.describeTable({ TableName: tableName }), isNotFoundError);
+  async deleteModel(cls: Class<ModelType>): Promise<void> {
+    const table = this.#resolveTable(cls);
+    const verify = await ModelStorageUtil.runAndIgnoreNotFound(() => this.client.describeTable({ TableName: table }), isNotFoundError);
     if (verify?.Table) {
       if (verify.Table.TableStatus !== 'DELETING') {
-        await ModelStorageUtil.runAndIgnoreNotFound(() => this.client.deleteTable({ TableName: tableName }), isNotFoundError);
+        await ModelStorageUtil.runAndIgnoreNotFound(() => this.client.deleteTable({ TableName: table }), isNotFoundError);
       }
-      await this.#waitForTableNotExists(tableName);
+      await this.#waitForTableNotExists(table);
     }
   }
 
-  async truncateModel<T extends ModelType>(modelClass: Class<T>): Promise<void> {
-    const tableName = this.#resolveTable(modelClass);
+  async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {
+    const table = this.#resolveTable(cls);
     let startKey: Record<string, AttributeValue> | undefined;
     do {
       const scanResult = await this.client.scan({
-        TableName: tableName,
+        TableName: table,
         ProjectionExpression: 'id',
         ExclusiveStartKey: startKey,
         Limit: 25
@@ -392,7 +392,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       if (items.length > 0) {
         await this.client.batchWriteItem({
           RequestItems: {
-            [tableName]: items.map(item => ({
+            [table]: items.map(item => ({
               DeleteRequest: {
                 Key: { id: item.id }
               }
@@ -408,7 +408,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async deleteStorage(): Promise<void> {
-    await Promise.all(ModelRegistryIndex.getClasses().map(modelClass => this.deleteModel(modelClass)));
+    await Promise.all(ModelRegistryIndex.getClasses().map(cls => this.deleteModel(cls)));
   }
 
   // Crud

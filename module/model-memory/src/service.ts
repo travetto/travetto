@@ -431,11 +431,11 @@ export class MemoryModelService
     }
   }
 
-  async truncateModel<T extends ModelType>(modelClass: Class<T>): Promise<void> {
-    this.#getStore(modelClass).clear();
-    for (const index of ModelRegistryIndex.getIndices(modelClass)) {
+  async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {
+    this.#getStore(cls).clear();
+    for (const index of ModelRegistryIndex.getIndices(cls)) {
       if (isModelIndexedIndex(index)) {
-        this.#indices[index.type].get(indexName(modelClass, index))?.clear();
+        this.#indices[index.type].get(indexName(cls, index))?.clear();
       }
     }
   }

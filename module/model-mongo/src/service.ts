@@ -269,13 +269,14 @@ export class MongoModelService
   async upsertModel(cls: Class): Promise<void> {
     const col = await this.getStore(cls);
     const indices = [...ModelRegistryIndex.getIndices(cls).map(idx => MongoUtil.getIndex(cls, idx)), ...MongoUtil.getExtraIndices(cls)];
-    const existingIndices = (await ModelStorageUtil.runAndIgnoreNotFound(() => col.indexes(), isNotFoundError)) ?? [];
-    const filteredIndices = existingIndices.filter(idx => idx.name !== '_id_');
+    const existingIndices = ((await ModelStorageUtil.runAndIgnoreNotFound(() => col.indexes(), isNotFoundError)) ?? []).filter(
+      idx => idx.name !== '_id_'
+    );
 
     const pendingMap = Object.fromEntries(indices.map(pair => [pair[1].name!, pair]));
-    const existingMap = Object.fromEntries(filteredIndices.map(idx => [idx.name!, idx.key]));
+    const existingMap = Object.fromEntries(existingIndices.map(idx => [idx.name!, idx.key]));
 
-    for (const idx of filteredIndices) {
+    for (const idx of existingIndices) {
       if (!idx.name) {
         continue;
       }
@@ -297,11 +298,8 @@ export class MongoModelService
     }
   }
 
-  async deleteModel<T extends ModelType>(modelClass: Class<T>): Promise<void> {
-    await ModelStorageUtil.runAndIgnoreNotFound(
-      () => this.#db.collection(ModelRegistryIndex.getStoreName(modelClass)).drop(),
-      isNotFoundError
-    );
+  async deleteModel<T extends ModelType>(cls: Class<T>): Promise<void> {
+    await ModelStorageUtil.runAndIgnoreNotFound(() => this.#db.collection(ModelRegistryIndex.getStoreName(cls)).drop(), isNotFoundError);
   }
 
   async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {

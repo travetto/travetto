@@ -96,8 +96,8 @@ export class IndexManager implements ModelStorageSupport {
     })}'`;
   }
 
-  async deleteModel(modelClass: Class<ModelType>): Promise<void> {
-    const { index } = this.getIdentity(modelClass);
+  async deleteModel(cls: Class<ModelType>): Promise<void> {
+    const { index } = this.getIdentity(cls);
     const aliasedIndices = await ModelStorageUtil.runAndIgnoreNotFound(
       () => this.#client.indices.getAlias({ name: index }),
       isNotFoundError
@@ -122,21 +122,21 @@ export class IndexManager implements ModelStorageSupport {
   /**
    * Create or update schema as necessary
    */
-  async upsertModel(modelClass: Class<ModelType>): Promise<void> {
-    const { index } = this.getIdentity(modelClass);
+  async upsertModel(cls: Class<ModelType>): Promise<void> {
+    const { index } = this.getIdentity(cls);
     const resolvedAlias = await ModelStorageUtil.runAndIgnoreNotFound(() => this.#client.indices.getMapping({ index }), isNotFoundError);
 
-    warnIfIndexedUniqueIndex(this, modelClass, ModelRegistryIndex.getIndices(modelClass));
+    warnIfIndexedUniqueIndex(this, cls, ModelRegistryIndex.getIndices(cls));
 
     if (resolvedAlias) {
       const [currentIndex] = Object.keys(resolvedAlias ?? {});
-      const pendingMapping = ElasticsearchSchemaUtil.generateSchemaMapping(modelClass, this.config.schemaConfig);
+      const pendingMapping = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
       const changedFields = ElasticsearchSchemaUtil.getChangedFields(resolvedAlias[currentIndex].mappings, pendingMapping);
 
       if (changedFields.length) {
         // If any fields changed, reindex
         console.debug('Updated Model', { index, currentIndex, changedFields });
-        const pendingIndex = await this.createIndex(modelClass, false);
+        const pendingIndex = await this.createIndex(cls, false);
 
         const reindexBody: estypes.ReindexRequest = {
           source: { index: currentIndex },
@@ -158,7 +158,7 @@ export class IndexManager implements ModelStorageSupport {
     } else {
       // Create if non-existent
       console.debug('Creating Model', { index });
-      await this.createIndex(modelClass);
+      await this.createIndex(cls);
     }
   }
 
@@ -178,8 +178,8 @@ export class IndexManager implements ModelStorageSupport {
     );
   }
 
-  async truncateModel(modelClass: Class<ModelType>): Promise<void> {
-    const { index } = this.getIdentity(modelClass);
+  async truncateModel(cls: Class<ModelType>): Promise<void> {
+    const { index } = this.getIdentity(cls);
     await this.#client.deleteByQuery({
       index,
       query: { match_all: {} },

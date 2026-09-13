@@ -51,6 +51,8 @@ This module owns LLM-oriented generation guidance for Travetto.
   - Runtime services (such as `CacheService.purge()`) that clear data must invoke `truncateModel`, never `deleteModel`.
 - **Code Maintenance & Intentional Deletions**:
   - Never restore or re-add code that was removed unless explicitly requested or approved by the user.
+- **PR Scope & Minimal Churn**:
+  - Do not touch, reformat, or rename existing code (including expanding abbreviated identifiers or variables) when it is not material to the PR. Keep changes tightly focused on the requested functionality or bug fix.
 - **Code Style & Safety**:
   - Prefer declarative object definitions with inline conditional spreading (`...(condition ? { ... } : {})`) over creating mutable objects and appending properties via `if` statements.
   - Use optional chaining (`?.`) instead of non-null assertions (`!`) on schema and registry lookups (e.g., `SchemaRegistryIndex.getNestedFieldConfig(...)`).

@@ -266,11 +266,11 @@ export class ElasticsearchModelService
   exportModel(cls: Class): Promise<string> {
     return this.manager.exportModel(cls);
   }
-  deleteModel(modelClass: Class): Promise<void> {
-    return this.manager.deleteModel(modelClass);
+  deleteModel(cls: Class): Promise<void> {
+    return this.manager.deleteModel(cls);
   }
-  truncateModel(modelClass: Class): Promise<void> {
-    return this.manager.truncateModel(modelClass);
+  truncateModel(cls: Class): Promise<void> {
+    return this.manager.truncateModel(cls);
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
