@@ -108,7 +108,7 @@ export interface ModelQuerySuggestSupport extends ModelQuerySupport {
     cls: Class<T>,
     field: ValidStringFields<T>,
     prefix?: string,
-    query?: PageableModelQuery<T>
+    query?: SuggestModelQuery<T>
   ): Promise<T[]>;
   /**
    * Suggest distinct values for a given cls and a given field
@@ -122,7 +122,7 @@ export interface ModelQuerySuggestSupport extends ModelQuerySupport {
     cls: Class<T>,
     field: ValidStringFields<T>,
     prefix?: string,
-    query?: PageableModelQuery<T>
+    query?: SuggestModelQuery<T>
   ): Promise<string[]>;
 }
 ```

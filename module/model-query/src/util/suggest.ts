@@ -2,7 +2,7 @@ import { ModelRegistryIndex, type ModelType } from '@travetto/model';
 import { type Class, castKey, castTo, hasFunction } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import type { PageableModelQuery, Query } from '../model/query.ts';
+import type { Query, SuggestModelQuery } from '../model/query.ts';
 import type { ValidStringFields, WhereClauseRaw } from '../model/where-clause.ts';
 import type { ModelQuerySuggestSupport } from '../types/suggest.ts';
 
@@ -18,19 +18,25 @@ export class ModelQuerySuggestUtil {
   /**
    * Build regex for suggesting
    */
-  static getSuggestRegex(prefix?: string): RegExp {
-    return prefix ? new RegExp(`\\b${prefix}.*`, 'i') : /./;
+  static getSuggestRegex(prefix?: string, caseInsensitive = true): RegExp {
+    return prefix ? new RegExp(`\\b${prefix}.*`, caseInsensitive ? 'i' : undefined) : /./;
   }
 
   /**
    * Build suggest query on top of query language
    */
-  static getSuggestQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: Query<T>): Query<T> {
+  static getSuggestQuery<T extends ModelType>(
+    cls: Class<T>,
+    field: ValidStringFields<T>,
+    prefix?: string,
+    query?: SuggestModelQuery<T>
+  ): Query<T> {
     const limit = query?.limit ?? 10;
+    const caseInsensitive = query?.caseInsensitive ?? true;
     const clauses: WhereClauseRaw<ModelType>[] = [];
     if (prefix) {
       const parts = `${field}`.split('.');
-      let o: WhereClauseRaw<ModelType> = { [parts.at(-1)!]: { $regex: this.getSuggestRegex(prefix) } };
+      let o: WhereClauseRaw<ModelType> = { [parts.at(-1)!]: { $regex: this.getSuggestRegex(prefix, caseInsensitive) } };
       for (let i = parts.length - 2; i >= 0; i -= 1) {
         o = { [parts[i]]: o };
       }
@@ -77,9 +83,11 @@ export class ModelQuerySuggestUtil {
     prefix: string = '',
     results: T[],
     transform: (value: string, entity: T) => U,
-    limit?: number
+    query?: SuggestModelQuery<T>
   ): U[] {
-    const pattern = this.getSuggestRegex(prefix);
+    const limit = query?.limit ?? 10;
+    const caseInsensitive = query?.caseInsensitive ?? true;
+    const pattern = this.getSuggestRegex(prefix, caseInsensitive);
 
     const out: ([string, U] | readonly [string, U])[] = [];
     const parts = `${field}`.split('.');
@@ -109,7 +117,7 @@ export class ModelQuerySuggestUtil {
     cls: Class<T>,
     field: ValidStringFields<T>,
     prefix?: string,
-    query?: PageableModelQuery<T>
+    query?: SuggestModelQuery<T>
   ): Query<T> {
     return this.getSuggestQuery<T>(cls, castTo(field), prefix, query);
   }

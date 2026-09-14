@@ -68,6 +68,45 @@ export abstract class ModelQuerySuggestSuite extends BaseModelSuite<ModelQuerySu
     assert(suggested.length === 1);
   }
 
+  @Test('Verify case insensitivity option')
+  async testCaseSensitivity() {
+    const service = await this.service;
+
+    await this.#loadPeople();
+
+    // Default is case-insensitive
+    let suggested = await service.suggestValuesByQuery(Person, 'name', 'bo');
+    assert(suggested.length === 2);
+
+    // Explicitly case-insensitive
+    suggested = await service.suggestValuesByQuery(Person, 'name', 'bo', { caseInsensitive: true });
+    assert(suggested.length === 2);
+
+    // Case-sensitive mismatch
+    suggested = await service.suggestValuesByQuery(Person, 'name', 'bo', { caseInsensitive: false });
+    assert(suggested.length === 0);
+
+    // Case-sensitive match
+    suggested = await service.suggestValuesByQuery(Person, 'name', 'Bo', { caseInsensitive: false });
+    assert(suggested.length === 2);
+    assert(suggested[0] === 'Bo');
+    assert(suggested[1] === 'Bob');
+
+    // Case-sensitive entities mismatch
+    let suggestedEntities = await service.suggestByQuery(Person, 'name', 'bo', { caseInsensitive: false });
+    assert(suggestedEntities.length === 0);
+
+    // Case-sensitive entities match
+    suggestedEntities = await service.suggestByQuery(Person, 'name', 'Bo', { caseInsensitive: false });
+    assert(suggestedEntities.length === 2);
+    assert(suggestedEntities[0].name === 'Bo');
+    assert(suggestedEntities[1].name === 'Bob');
+
+    // Case-insensitive entities match
+    suggestedEntities = await service.suggestByQuery(Person, 'name', 'bo', { caseInsensitive: true });
+    assert(suggestedEntities.length === 2);
+  }
+
   @Test('Verify suggested entities')
   async verifyEntities() {
     const service = await this.service;
@@ -98,6 +137,14 @@ export abstract class ModelQuerySuggestSuite extends BaseModelSuite<ModelQuerySu
     assert(suggestedEntities.length === 1);
     assert(suggestedEntities[0] instanceof WithNestedLists);
     assert(suggestedEntities[0].tags?.includes('apple'));
+
+    // Case-sensitive mismatch on array
+    const caseSensitiveValues = await service.suggestValuesByQuery(WithNestedLists, 'tags', 'AP', { caseInsensitive: false });
+    assert(caseSensitiveValues.length === 0);
+
+    // Case-insensitive match on array
+    const caseInsensitiveValues = await service.suggestValuesByQuery(WithNestedLists, 'tags', 'AP', { caseInsensitive: true });
+    assert(caseInsensitiveValues.length === 2);
   }
 
   @Test('Verify suggestion on nested string arrays')

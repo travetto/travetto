@@ -1,7 +1,7 @@
 import type { ModelType } from '@travetto/model';
 import type { Class } from '@travetto/runtime';
 
-import type { PageableModelQuery } from '../model/query.ts';
+import type { SuggestModelQuery } from '../model/query.ts';
 import type { ValidStringFields } from '../model/where-clause.ts';
 import type { ModelQuerySupport } from './query.ts';
 
@@ -22,7 +22,7 @@ export interface ModelQuerySuggestSupport extends ModelQuerySupport {
     cls: Class<T>,
     field: ValidStringFields<T>,
     prefix?: string,
-    query?: PageableModelQuery<T>
+    query?: SuggestModelQuery<T>
   ): Promise<T[]>;
   /**
    * Suggest distinct values for a given cls and a given field
@@ -36,6 +36,6 @@ export interface ModelQuerySuggestSupport extends ModelQuerySupport {
     cls: Class<T>,
     field: ValidStringFields<T>,
     prefix?: string,
-    query?: PageableModelQuery<T>
+    query?: SuggestModelQuery<T>
   ): Promise<string[]>;
 }
