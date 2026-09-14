@@ -125,7 +125,7 @@ Additionally, this same pattern avails it self in a set of suggestion methods th
     cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span>
     field<span class="token operator">:</span> ValidStringFields<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span>
     prefix<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span>
-    query<span class="token operator">?</span><span class="token operator">:</span> PageableModelQuery<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span>
+    query<span class="token operator">?</span><span class="token operator">:</span> SuggestModelQuery<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span>
   <span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Suggest distinct values for a given cls and a given field
@@ -139,7 +139,7 @@ Additionally, this same pattern avails it self in a set of suggestion methods th
     cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span>
     field<span class="token operator">:</span> ValidStringFields<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span>
     prefix<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span>
-    query<span class="token operator">?</span><span class="token operator">:</span> PageableModelQuery<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span>
+    query<span class="token operator">?</span><span class="token operator">:</span> SuggestModelQuery<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span>
   <span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>

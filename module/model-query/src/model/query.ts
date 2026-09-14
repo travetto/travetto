@@ -38,6 +38,12 @@ export type Query<T> = QueryRaw<RetainQueryPrimitiveFields<T>>;
  */
 export type PageableModelQuery<T> = PageableModelQueryRaw<RetainQueryPrimitiveFields<T>>;
 /**
+ * Query with support for pagination and suggestion options
+ */
+export type SuggestModelQuery<T> = PageableModelQuery<T> & {
+  caseInsensitive?: boolean;
+};
+/**
  * Standard query options (limit, offset)
  */
 export type QueryOptions<T> = QueryOptionsRaw<RetainQueryPrimitiveFields<T>>;

@@ -52,6 +52,7 @@ import {
   type PageableModelQuery,
   type Query,
   QueryVerifier,
+  type SuggestModelQuery,
   type ValidComparableFields,
   type ValidStringFields,
   type WhereClause
@@ -713,7 +714,7 @@ export class ElasticsearchModelService
     cls: Class<T>,
     field: ValidStringFields<T>,
     prefix?: string,
-    query?: PageableModelQuery<T>
+    query?: SuggestModelQuery<T>
   ): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
 
@@ -721,14 +722,14 @@ export class ElasticsearchModelService
     const search = ElasticsearchQueryUtil.getSearchObject(cls, resolvedQuery);
     const result = await this.execSearch(cls, search);
     const all = await Promise.all(result.hits.hits.map(hit => this.#postLoad(cls, hit)));
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, (_, value) => value, query?.limit);
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, (_, value) => value, query);
   }
 
   async suggestValuesByQuery<T extends ModelType>(
     cls: Class<T>,
     field: ValidStringFields<T>,
     prefix?: string,
-    query?: PageableModelQuery<T>
+    query?: SuggestModelQuery<T>
   ): Promise<string[]> {
     await QueryVerifier.verify(cls, query);
 
@@ -739,7 +740,7 @@ export class ElasticsearchModelService
     const search = ElasticsearchQueryUtil.getSearchObject(cls, resolvedQuery);
     const result = await this.execSearch(cls, search);
     const all = result.hits.hits.map(hit => castTo<T>(field === 'id' ? { id: hit._id } : hit._source));
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, item => item, query?.limit);
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, item => item, query);
   }
 
   // Facet

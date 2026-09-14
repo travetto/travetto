@@ -52,6 +52,7 @@ import {
   ModelQueryUtil,
   type PageableModelQuery,
   QueryVerifier,
+  type SuggestModelQuery,
   type ValidComparableFields,
   type ValidNumericFields,
   type ValidStringFields,
@@ -807,22 +808,22 @@ export abstract class BaseSQLModelService<C = unknown>
     modelClass: Class<T>,
     field: ValidStringFields<T>,
     prefix?: string,
-    query?: PageableModelQuery<T>
+    query?: SuggestModelQuery<T>
   ): Promise<string[]> {
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestFieldQuery<T>(modelClass, field, prefix, query);
     const results = await this.query<T>(modelClass, resolvedQuery);
-    return ModelQuerySuggestUtil.combineSuggestResults<T, string>(modelClass, field, prefix, results, value => value, query?.limit);
+    return ModelQuerySuggestUtil.combineSuggestResults<T, string>(modelClass, field, prefix, results, value => value, query);
   }
 
   async suggestByQuery<T extends ModelType>(
     modelClass: Class<T>,
     field: ValidStringFields<T>,
     prefix?: string,
-    query?: PageableModelQuery<T>
+    query?: SuggestModelQuery<T>
   ): Promise<T[]> {
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(modelClass, field, prefix, query);
     const results = await this.query<T>(modelClass, resolvedQuery);
-    return ModelQuerySuggestUtil.combineSuggestResults<T, T>(modelClass, field, prefix, results, (_, value) => value, query?.limit);
+    return ModelQuerySuggestUtil.combineSuggestResults<T, T>(modelClass, field, prefix, results, (_, value) => value, query);
   }
 
   // Facet Support

@@ -7,6 +7,7 @@ import type {
   ModelQueryFacetSupport,
   ModelQuerySuggestSupport,
   PageableModelQuery,
+  SuggestModelQuery,
   ValidComparableFields,
   ValidStringFields
 } from '@travetto/model-query';
@@ -74,7 +75,7 @@ export class QueryModelService
     cls: Class<T>,
     field: ValidStringFields<T>,
     prefix?: string | undefined,
-    query?: PageableModelQuery<T> | undefined
+    query?: SuggestModelQuery<T> | undefined
   ): Promise<T[]> {
     return [];
   }
@@ -82,7 +83,7 @@ export class QueryModelService
     cls: Class<T>,
     field: ValidStringFields<T>,
     prefix?: string | undefined,
-    query?: PageableModelQuery<T> | undefined
+    query?: SuggestModelQuery<T> | undefined
   ): Promise<string[]> {
     return [];
   }

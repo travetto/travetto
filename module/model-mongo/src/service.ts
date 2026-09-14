@@ -66,6 +66,7 @@ import {
   type NumberFieldAggregateResult,
   type PageableModelQuery,
   QueryVerifier,
+  type SuggestModelQuery,
   type ValidComparableFields,
   type ValidStringFields,
   type WhereClause
@@ -791,24 +792,24 @@ export class MongoModelService
     cls: Class<T>,
     field: ValidStringFields<T>,
     prefix?: string,
-    query?: PageableModelQuery<T>
+    query?: SuggestModelQuery<T>
   ): Promise<string[]> {
     await QueryVerifier.verify(cls, query);
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestFieldQuery<T>(cls, field, prefix, query);
     const results = await this.query<T>(cls, resolvedQuery);
-    return ModelQuerySuggestUtil.combineSuggestResults<T, string>(cls, field, prefix, results, a => a, query?.limit);
+    return ModelQuerySuggestUtil.combineSuggestResults<T, string>(cls, field, prefix, results, a => a, query);
   }
 
   async suggestByQuery<T extends ModelType>(
     cls: Class<T>,
     field: ValidStringFields<T>,
     prefix?: string,
-    query?: PageableModelQuery<T>
+    query?: SuggestModelQuery<T>
   ): Promise<T[]> {
     await QueryVerifier.verify(cls, query);
     const resolvedQuery = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
     const results = await this.query<T>(cls, resolvedQuery);
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (_, b) => b, query?.limit);
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (_, b) => b, query);
   }
 
   // Other
