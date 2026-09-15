@@ -186,12 +186,16 @@ export class ElasticsearchQueryUtil {
             }
             case '$regex': {
               const pattern = DataUtil.toRegex(castTo(value));
+              const withCase = (value: string) => ({
+                value,
+                case_insensitive: pattern.flags.includes('i')
+              });
               if (pattern.source.startsWith('^')) {
                 // We have a prefix query
                 if (/^\^[A-Za-z0-9_-]+/.test(pattern.source)) {
-                  items.push({ prefix: { [subPath]: pattern.source.substring(1) } });
+                  items.push({ prefix: { [subPath]: withCase(pattern.source.substring(1)) } });
                 } else {
-                  items.push({ regexp: { [subPath]: pattern.source.substring(1) } });
+                  items.push({ regexp: { [subPath]: withCase(pattern.source.substring(1)) } });
                 }
               } else if (pattern.source.startsWith('\\b') && pattern.source.endsWith('.*')) {
                 const queryText = pattern.source.substring(2, pattern.source.length - 2);
@@ -204,10 +208,10 @@ export class ElasticsearchQueryUtil {
                     }
                   });
                 } else {
-                  items.push({ prefix: { [subPath]: queryText } });
+                  items.push({ prefix: { [subPath]: withCase(queryText) } });
                 }
               } else {
-                items.push({ regexp: { [subPath]: pattern.source.replaceAll('\\b', '') } });
+                items.push({ regexp: { [subPath]: withCase(pattern.source.replaceAll('\\b', '')) } });
               }
               break;
             }
