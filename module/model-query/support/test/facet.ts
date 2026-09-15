@@ -107,5 +107,12 @@ export abstract class ModelQueryFacetSuite extends BaseModelSuite<ModelQueryFace
     const nestedFacets = await service.facetByQuery(WithNestedNestedLists, 'sub.names');
     assert(nestedFacets.length === 3);
     assert(nestedFacets[0].key === 'alex' && nestedFacets[0].count === 2);
+
+    const limitedNestedFacets = await service.facetByQuery(WithNestedNestedLists, 'sub.names', { limit: 1 });
+    assert(limitedNestedFacets.length === 1);
+    assert(limitedNestedFacets[0].key === 'alex' && limitedNestedFacets[0].count === 2);
+
+    const offsetNestedFacets = await service.facetByQuery(WithNestedNestedLists, 'sub.names', { limit: 2, offset: 1 });
+    assert(offsetNestedFacets.length === 2);
   }
 }
