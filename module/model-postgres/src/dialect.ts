@@ -228,6 +228,37 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     return sqlPath;
   }
 
+  #getPostgresArraySource(context: ResolvedPathContext): { tableSource: string; valueExpression: string } {
+    const target = this.#getPostgresArrayTarget(context);
+    if (target.isNative) {
+      return {
+        tableSource: `unnest(${target.sqlPath}) AS element`,
+        valueExpression: 'element'
+      };
+    }
+
+    const columnName = this.escapeIdentifier(context.arrayPath?.[0] ?? context.sqlPath);
+    const pathSegments = (context.arrayPath?.slice(1) ?? []).map(segment => `->'${this.escapeLiteral(segment)}'`).join('');
+    const jsonbArrayExpression = `${columnName}${pathSegments}`;
+
+    if (context.subPath && context.subPath.length > 0) {
+      const subPathSegments = context.subPath
+        .slice(0, -1)
+        .map(segment => `->'${this.escapeLiteral(segment)}'`)
+        .join('');
+      const leafSegment = context.subPath[context.subPath.length - 1];
+      return {
+        tableSource: `jsonb_array_elements(${jsonbArrayExpression}) AS element`,
+        valueExpression: `(element${subPathSegments}->>'${this.escapeLiteral(leafSegment)}')`
+      };
+    }
+
+    return {
+      tableSource: `jsonb_array_elements_text(${jsonbArrayExpression}) AS element`,
+      valueExpression: 'element'
+    };
+  }
+
   buildArrayFacet<T extends ModelType>(
     tableContext: TableContext<T>,
     resolvedContext: ResolvedPathContext,
@@ -235,63 +266,21 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     limit?: number,
     offset?: number
   ): string {
-    const target = this.#getPostgresArrayTarget(resolvedContext);
+    const { tableSource, valueExpression } = this.#getPostgresArraySource(resolvedContext);
     const countClause = this.castColumn?.('COUNT(*)', Number) ?? 'COUNT(*)';
     const optionalWhere = whereSQL ? `AND ${whereSQL}` : '';
     const optionalLimit = limit !== undefined ? `LIMIT ${limit}` : '';
     const optionalOffset = offset !== undefined ? `OFFSET ${offset}` : '';
 
-    if (target.isNative) {
-      const keyClause = this.castColumn('element', String);
-      return `
-SELECT ${keyClause} AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')}
-FROM ${this.escapeIdentifier(tableContext.tableName)}, unnest(${target.sqlPath}) AS element
-WHERE element IS NOT NULL
-${optionalWhere}
-GROUP BY element
-ORDER BY ${this.escapeIdentifier('count')} DESC
-${optionalLimit}
-${optionalOffset};`;
-    }
-
-    const columnName = this.escapeIdentifier(resolvedContext.arrayPath?.[0] ?? resolvedContext.sqlPath);
-    const pathSegments =
-      resolvedContext.arrayPath && resolvedContext.arrayPath.length > 1
-        ? resolvedContext.arrayPath
-            .slice(1)
-            .map(segment => `->'${this.escapeLiteral(segment)}'`)
-            .join('')
-        : '';
-    const jsonbArrayExpression = `${columnName}${pathSegments}`;
-
-    if (resolvedContext.subPath && resolvedContext.subPath.length > 0) {
-      const subPathSegments = resolvedContext.subPath
-        .slice(0, -1)
-        .map(segment => `->'${this.escapeLiteral(segment)}'`)
-        .join('');
-      const leafSegment = resolvedContext.subPath[resolvedContext.subPath.length - 1];
-      const valueExpression = `(element${subPathSegments}->>'${this.escapeLiteral(leafSegment)}')`;
-
-      return `
+    return `
 SELECT ${valueExpression} AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')}
-FROM ${this.escapeIdentifier(tableContext.tableName)}, jsonb_array_elements(${jsonbArrayExpression}) AS element
+FROM ${this.escapeIdentifier(tableContext.tableName)}, ${tableSource}
 WHERE ${valueExpression} IS NOT NULL
 ${optionalWhere}
 GROUP BY ${valueExpression}
 ORDER BY ${this.escapeIdentifier('count')} DESC
 ${optionalLimit}
 ${optionalOffset};`;
-    } else {
-      return `
-SELECT element AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')}
-FROM ${this.escapeIdentifier(tableContext.tableName)}, jsonb_array_elements_text(${jsonbArrayExpression}) AS element
-WHERE element IS NOT NULL
-${optionalWhere}
-GROUP BY element
-ORDER BY ${this.escapeIdentifier('count')} DESC
-${optionalLimit}
-${optionalOffset};`;
-    }
   }
 
   shiftPlaceholders(sql: string, offset: number): string {
