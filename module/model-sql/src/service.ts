@@ -836,9 +836,9 @@ export abstract class BaseSQLModelService<C = unknown>
     await QueryVerifier.verify(modelClass, query);
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, query?.where);
-    const { sqlPath } = this.dialect.resolvePath(tableContext, String(field).split('.'), 'read');
+    const resolvedContext = this.dialect.resolvePath(tableContext, String(field).split('.'), 'read');
 
-    const sql = this.dialect.buildFacet(tableContext, sqlPath, whereSQL, query?.limit, query?.offset);
+    const sql = this.dialect.buildFacet(tableContext, resolvedContext, whereSQL, query?.limit, query?.offset);
 
     const result = await this.connection.execute<{ key: string; count: string | number }>(sql, parameters);
 

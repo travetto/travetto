@@ -186,28 +186,29 @@ export class ElasticsearchQueryUtil {
             }
             case '$regex': {
               const pattern = DataUtil.toRegex(castTo(value));
+              const case_insensitive = pattern.flags.includes('i');
+              const withCase = (value: string) => ({ value, case_insensitive });
               if (pattern.source.startsWith('^')) {
                 // We have a prefix query
                 if (/^\^[A-Za-z0-9_-]+/.test(pattern.source)) {
-                  items.push({ prefix: { [subPath]: pattern.source.substring(1) } });
+                  items.push({ prefix: { [subPath]: withCase(pattern.source.substring(1)) } });
                 } else {
-                  items.push({ regexp: { [subPath]: pattern.source.substring(1) } });
+                  items.push({ regexp: { [subPath]: withCase(pattern.source.substring(1)) } });
                 }
               } else if (pattern.source.startsWith('\\b') && pattern.source.endsWith('.*')) {
                 const queryText = pattern.source.substring(2, pattern.source.length - 2);
                 if (declaredSchema.specifiers?.includes('text')) {
-                  const textField =
-                    !pattern.flags.includes('i') && config && config.caseSensitive ? `${subPath}.text_cs` : `${subPath}.text`;
+                  const textField = !case_insensitive && config?.caseSensitive ? `${subPath}.text_cs` : `${subPath}.text`;
                   items.push({
                     match_phrase_prefix: {
                       [textField]: queryText
                     }
                   });
                 } else {
-                  items.push({ prefix: { [subPath]: queryText } });
+                  items.push({ prefix: { [subPath]: withCase(queryText) } });
                 }
               } else {
-                items.push({ regexp: { [subPath]: pattern.source.replaceAll('\\b', '') } });
+                items.push({ regexp: { [subPath]: withCase(pattern.source.replaceAll('\\b', '')) } });
               }
               break;
             }

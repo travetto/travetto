@@ -730,8 +730,19 @@ export class MongoModelService
       queryObject = { $and: [queryObject, MongoUtil.extractWhereFilter(cls, query.where)] };
     }
 
+    const unwinds: object[] = [];
+    const segments = String(field).split('.');
+    for (let index = 1; index <= segments.length; index++) {
+      const subPath = segments.slice(0, index);
+      const fieldConfiguration = SchemaRegistryIndex.getNestedFieldConfig(cls, subPath);
+      if (fieldConfiguration?.array) {
+        unwinds.push({ $unwind: `$${subPath.join('.')}` });
+      }
+    }
+
     const aggregations: object[] = [
       { $match: queryObject },
+      ...unwinds,
       {
         $group: {
           _id: `$${field}`,

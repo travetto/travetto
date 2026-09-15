@@ -58,7 +58,7 @@ function isBool(o: unknown): o is { bool: { must: [MustType]; must_not: unknown;
   return DataUtil.isPlainObject(o) && 'bool' in o;
 }
 
-function isRegexp(o: unknown): o is { regexp: { name: string } } {
+function isRegexp(o: unknown): o is { regexp: { name: { value: string; case_insensitive: boolean } } } {
   return DataUtil.isPlainObject(o) && 'regexp' in o;
 }
 
@@ -132,9 +132,23 @@ export class QueryTest {
 
     assert(isRegexp(out));
 
-    if (isRegexp(out)) {
-      assert(typeof out.regexp.name === 'string');
-      assert(out.regexp.name === 'google.$');
-    }
+    assert(isRegexp(out));
+    assert(out.regexp.name.value === 'google.$');
+    assert(out.regexp.name.case_insensitive === false);
+  }
+
+  @Test()
+  async testRegExCaseInsensitive() {
+    const out = ElasticsearchQueryUtil.extractWhereQuery(User, {
+      name: {
+        $regex: '/google.$/i'
+      }
+    });
+
+    assert(isRegexp(out));
+
+    assert(isRegexp(out));
+    assert(out.regexp.name.value === 'google.$');
+    assert(out.regexp.name.case_insensitive === true);
   }
 }

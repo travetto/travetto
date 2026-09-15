@@ -6,7 +6,7 @@ import { Suite, Test } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
 import type { ModelQueryFacetSupport } from '../../src/types/facet.ts';
-import { Person } from './model.ts';
+import { Person, WithNestedLists, WithNestedNestedLists } from './model.ts';
 
 const pick = <T>(arr: T[] | readonly T[]): T => arr[Math.trunc(Math.random() * arr.length)]!;
 
@@ -33,12 +33,12 @@ export abstract class ModelQueryFacetSuite extends BaseModelSuite<ModelQueryFace
         })
       );
 
-    const svc = await this.service;
+    const service = await this.service;
     const saved = await this.saveAll(Person, people);
 
     assert(saved === 50);
 
-    const results = await svc.facetByQuery(Person, 'gender');
+    const results = await service.facetByQuery(Person, 'gender');
 
     assert(results.length === 2);
     assert(results[0].count >= results[1].count);
@@ -59,20 +59,53 @@ export abstract class ModelQueryFacetSuite extends BaseModelSuite<ModelQueryFace
       names[el.name!] = (names[el.name!] || 0) + 1;
     }
 
-    const nameFacet = await svc.facetByQuery(Person, 'name');
+    const nameFacet = await service.facetByQuery(Person, 'name');
     assert(Object.keys(names).length === nameFacet.length);
 
-    const limitedResults = await svc.facetByQuery(Person, 'gender', { limit: 1 });
+    const limitedResults = await service.facetByQuery(Person, 'gender', { limit: 1 });
     assert(limitedResults.length === 1);
     assert(limitedResults[0].count === Math.max(genders.m, genders.f));
 
-    const offsetGender = await svc.facetByQuery(Person, 'gender', { limit: 1, offset: 1 });
+    const offsetGender = await service.facetByQuery(Person, 'gender', { limit: 1, offset: 1 });
     assert(offsetGender.length === 1);
     assert(offsetGender[0].count === Math.min(genders.m, genders.f));
     assert(offsetGender[0].key !== limitedResults[0].key);
 
-    const topNames = await svc.facetByQuery(Person, 'name', { limit: 5 });
+    const topNames = await service.facetByQuery(Person, 'name', { limit: 5 });
     assert(topNames.length === Math.min(5, Object.keys(names).length));
     assert(topNames[0].count >= (topNames[1]?.count ?? 0));
+  }
+
+  @Test('verify string array faceting')
+  async testFacetStringArray() {
+    const service = await this.service;
+    await this.saveAll(WithNestedLists, [
+      WithNestedLists.from({ tags: ['apple', 'banana', 'apricot'] }),
+      WithNestedLists.from({ tags: ['apple', 'blueberry'] }),
+      WithNestedLists.from({ tags: ['apple', 'banana'] })
+    ]);
+
+    const tagFacets = await service.facetByQuery(WithNestedLists, 'tags');
+    assert(tagFacets.length === 4);
+    assert(tagFacets[0].key === 'apple' && tagFacets[0].count === 3);
+    assert(tagFacets[1].key === 'banana' && tagFacets[1].count === 2);
+
+    const limitedFacets = await service.facetByQuery(WithNestedLists, 'tags', { limit: 2 });
+    assert(limitedFacets.length === 2);
+    assert(limitedFacets[0].key === 'apple' && limitedFacets[0].count === 3);
+    assert(limitedFacets[1].key === 'banana' && limitedFacets[1].count === 2);
+
+    const offsetFacets = await service.facetByQuery(WithNestedLists, 'tags', { limit: 2, offset: 1 });
+    assert(offsetFacets.length === 2);
+    assert(offsetFacets[0].key === 'banana' && offsetFacets[0].count === 2);
+
+    await this.saveAll(WithNestedNestedLists, [
+      WithNestedNestedLists.from({ sub: { names: ['alex', 'amber'] } }),
+      WithNestedNestedLists.from({ sub: { names: ['alex', 'avocado'] } })
+    ]);
+
+    const nestedFacets = await service.facetByQuery(WithNestedNestedLists, 'sub.names');
+    assert(nestedFacets.length === 3);
+    assert(nestedFacets[0].key === 'alex' && nestedFacets[0].count === 2);
   }
 }

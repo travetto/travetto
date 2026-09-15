@@ -1,3 +1,4 @@
+import type { ModelType } from '@travetto/model';
 import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext, type TransactionStatements } from '@travetto/model-sql';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
@@ -177,6 +178,32 @@ EXISTS (
       return `CAST(${sqlPath} AS NUMERIC)`;
     }
     return sqlPath;
+  }
+
+  buildArrayFacet<T extends ModelType>(
+    tableContext: TableContext<T>,
+    resolvedContext: ResolvedPathContext,
+    whereSQL?: string,
+    limit?: number,
+    offset?: number
+  ): string {
+    const jsonArrayExpression = this.#getSqliteArrayExpression(resolvedContext);
+    const valueExpression =
+      resolvedContext.subPath && resolvedContext.subPath.length > 0
+        ? `json_extract(element.value, '$.${resolvedContext.subPath.join('.')}')`
+        : 'element.value';
+
+    const countClause = this.castColumn?.('COUNT(*)', Number) ?? 'COUNT(*)';
+
+    return `
+SELECT ${valueExpression} AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')}
+FROM ${this.escapeIdentifier(tableContext.tableName)}, json_each(${jsonArrayExpression}) AS element
+WHERE ${valueExpression} IS NOT NULL
+${whereSQL ? `AND ${whereSQL}` : ''}
+GROUP BY ${valueExpression}
+ORDER BY ${this.escapeIdentifier('count')} DESC
+${limit !== undefined ? `LIMIT ${limit}` : ''}
+${offset !== undefined ? `OFFSET ${offset}` : ''};`;
   }
 
   getTableExistsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {

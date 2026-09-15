@@ -99,7 +99,7 @@ export class ModelQuerySuggestUtil {
       }
       if (Array.isArray(resultValue)) {
         out.push(...resultValue.filter(item => pattern.test(item)).map((item: string) => [item, transform(item, result)] as const));
-      } else if (typeof resultValue === 'string') {
+      } else if (typeof resultValue === 'string' && pattern.test(resultValue)) {
         out.push([resultValue, transform(resultValue, result)]);
       }
     }

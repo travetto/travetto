@@ -1,3 +1,4 @@
+import type { ModelType } from '@travetto/model';
 import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext } from '@travetto/model-sql';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
@@ -225,6 +226,58 @@ export class PostgresDialect extends AbstractANSI99Dialect {
       return `(${sqlPath})::text`;
     }
     return sqlPath;
+  }
+
+  #getPostgresArraySource(context: ResolvedPathContext): { tableSource: string; valueExpression: string } {
+    const target = this.#getPostgresArrayTarget(context);
+    if (target.isNative) {
+      return {
+        tableSource: `unnest(${target.sqlPath}) AS element`,
+        valueExpression: 'element'
+      };
+    }
+
+    const columnName = this.escapeIdentifier(context.arrayPath?.[0] ?? context.sqlPath);
+    const pathSegments = (context.arrayPath?.slice(1) ?? []).map(segment => `->'${this.escapeLiteral(segment)}'`).join('');
+    const jsonbArrayExpression = `${columnName}${pathSegments}`;
+
+    if (context.subPath && context.subPath.length > 0) {
+      const subPathSegments = context.subPath
+        .slice(0, -1)
+        .map(segment => `->'${this.escapeLiteral(segment)}'`)
+        .join('');
+      const leafSegment = context.subPath[context.subPath.length - 1];
+      return {
+        tableSource: `jsonb_array_elements(${jsonbArrayExpression}) AS element`,
+        valueExpression: `(element${subPathSegments}->>'${this.escapeLiteral(leafSegment)}')`
+      };
+    }
+
+    return {
+      tableSource: `jsonb_array_elements_text(${jsonbArrayExpression}) AS element`,
+      valueExpression: 'element'
+    };
+  }
+
+  buildArrayFacet<T extends ModelType>(
+    tableContext: TableContext<T>,
+    resolvedContext: ResolvedPathContext,
+    whereSQL?: string,
+    limit?: number,
+    offset?: number
+  ): string {
+    const { tableSource, valueExpression } = this.#getPostgresArraySource(resolvedContext);
+    const countClause = this.castColumn?.('COUNT(*)', Number) ?? 'COUNT(*)';
+
+    return `
+SELECT ${valueExpression} AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')}
+FROM ${this.escapeIdentifier(tableContext.tableName)}, ${tableSource}
+WHERE ${valueExpression} IS NOT NULL
+${whereSQL ? `AND ${whereSQL}` : ''}
+GROUP BY ${valueExpression}
+ORDER BY ${this.escapeIdentifier('count')} DESC
+${limit !== undefined ? `LIMIT ${limit}` : ''}
+${offset !== undefined ? `OFFSET ${offset}` : ''};`;
   }
 
   shiftPlaceholders(sql: string, offset: number): string {
