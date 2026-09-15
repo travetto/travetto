@@ -838,12 +838,20 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     return sortClauses.length ? `ORDER BY ${sortClauses.join(', ')}` : '';
   }
 
-  buildFacet<T extends ModelType>(tableContext: TableContext<T>, sqlPath: string, whereSQL?: string): string {
+  buildFacet<T extends ModelType>(
+    tableContext: TableContext<T>,
+    sqlPath: string,
+    whereSQL?: string,
+    limit?: number,
+    offset?: number
+  ): string {
     const keySql = this.castColumn?.(sqlPath, String) ?? sqlPath;
     const countSql = this.castColumn?.('COUNT(*)', Number) ?? 'COUNT(*)';
     const where = whereSQL ? ` AND ${whereSQL}` : '';
+    const limitSql = limit !== undefined ? ` LIMIT ${limit}` : '';
+    const offsetSql = offset !== undefined ? ` OFFSET ${offset}` : '';
 
-    return `SELECT ${keySql} AS ${this.escapeIdentifier('key')}, ${countSql} AS ${this.escapeIdentifier('count')} FROM ${this.escapeIdentifier(tableContext.tableName)} WHERE ${sqlPath} IS NOT NULL${where} GROUP BY ${sqlPath} ORDER BY ${this.escapeIdentifier('count')} DESC;`;
+    return `SELECT ${keySql} AS ${this.escapeIdentifier('key')}, ${countSql} AS ${this.escapeIdentifier('count')} FROM ${this.escapeIdentifier(tableContext.tableName)} WHERE ${sqlPath} IS NOT NULL${where} GROUP BY ${sqlPath} ORDER BY ${this.escapeIdentifier('count')} DESC${limitSql}${offsetSql};`;
   }
 
   buildFieldAggregate<T extends ModelType>(tableContext: TableContext<T>, sqlPath: string, isDate: boolean, whereSQL?: string): string {

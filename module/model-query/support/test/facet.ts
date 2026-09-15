@@ -61,5 +61,18 @@ export abstract class ModelQueryFacetSuite extends BaseModelSuite<ModelQueryFace
 
     const nameFacet = await svc.facetByQuery(Person, 'name');
     assert(Object.keys(names).length === nameFacet.length);
+
+    const limitedResults = await svc.facetByQuery(Person, 'gender', { limit: 1 });
+    assert(limitedResults.length === 1);
+    assert(limitedResults[0].count === Math.max(genders.m, genders.f));
+
+    const offsetGender = await svc.facetByQuery(Person, 'gender', { limit: 1, offset: 1 });
+    assert(offsetGender.length === 1);
+    assert(offsetGender[0].count === Math.min(genders.m, genders.f));
+    assert(offsetGender[0].key !== limitedResults[0].key);
+
+    const topNames = await svc.facetByQuery(Person, 'name', { limit: 5 });
+    assert(topNames.length === Math.min(5, Object.keys(names).length));
+    assert(topNames[0].count >= (topNames[1]?.count ?? 0));
   }
 }

@@ -43,6 +43,7 @@ import {
   type ModelQueryCrudSupport,
   ModelQueryCrudUtil,
   type ModelQueryFacet,
+  type FacetModelQuery,
   type ModelQueryFacetSupport,
   type ModelQuerySuggestSupport,
   ModelQuerySuggestUtil,
@@ -744,14 +745,21 @@ export class ElasticsearchModelService
   }
 
   // Facet
-  async facetByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
+  async facetByQuery<T extends ModelType>(
+    cls: Class<T>,
+    field: ValidStringFields<T>,
+    query?: FacetModelQuery<T>
+  ): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(cls, query);
 
     const resolvedSearch = ElasticsearchQueryUtil.getSearchObject(cls, query ?? {}, this.config.schemaConfig);
+    const offset = query?.offset ?? 0;
+    const limit = query?.limit ?? 100;
+    const size = offset + limit;
 
     const search: estypes.SearchRequest = {
       query: resolvedSearch.query ?? { match_all: {} },
-      aggregations: { [field]: { terms: { field, size: 100 } } },
+      aggregations: { [field]: { terms: { field, size } } },
       size: 0
     };
 
@@ -759,7 +767,7 @@ export class ElasticsearchModelService
     const { buckets } = castTo<estypes.AggregationsStringTermsAggregate>(
       'buckets' in result.aggregations![field] ? result.aggregations![field] : { buckets: [] }
     );
-    const out = Array.isArray(buckets) ? buckets.map(b => ({ key: b.key!.toString(), count: b.doc_count })) : [];
+    const out = Array.isArray(buckets) ? buckets.slice(offset, size).map(b => ({ key: b.key!.toString(), count: b.doc_count })) : [];
     return out;
   }
 

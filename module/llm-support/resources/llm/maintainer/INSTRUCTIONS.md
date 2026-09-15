@@ -44,6 +44,7 @@ This module owns LLM-oriented generation guidance for Travetto.
   - If there is concern about uninitialized dependencies in scripts or tests, ensure `await Registry.init()` is called first so that all dependencies and services are properly initialized.
 - **Model Query Handling**:
   - When building query filters or aggregations in model services, compose compound clauses (such as `$and`, field existence, or type constraints) directly via `ModelQueryUtil.getWhereClause(cls, ...)` rather than manually stitching backend-specific query filter objects.
+  - For query types with selective pagination (such as faceting), only include relevant pagination fields (e.g., `limit` and `offset`) on `ModelQuery` rather than inheriting inapplicable options (e.g., `sort`) from `PageableModelQuery`.
 - **Model Storage Lifecycle (`deleteModel`, `deleteStorage`, `truncateModel`, `truncateBlob`)**:
   - `deleteModel`, `deleteStorage`, and `truncateModel` are required methods on `ModelStorageSupport`.
   - `deleteModel` and `deleteStorage` must be idempotent and must not throw if the underlying storage/model item is not found or already deleted. Error handling must specifically check for not-found error conditions (e.g., 404, `NoSuchBucket`, `ResourceNotFoundException`, `isTableNotFoundError`) rather than indiscriminately catching and swallowing all errors. Prefer `ModelStorageUtil.runAndIgnoreNotFound(operation, notFoundPredicate)` for clean, boilerplate-free handling.

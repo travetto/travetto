@@ -58,6 +58,7 @@ import {
   type ModelQueryCrudSupport,
   ModelQueryCrudUtil,
   type ModelQueryFacet,
+  type FacetModelQuery,
   type ModelQueryFacetSupport,
   type ModelQuerySuggestSupport,
   ModelQuerySuggestUtil,
@@ -714,13 +715,14 @@ export class MongoModelService
   }
 
   // Facet
-  async facetByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
+  async facetByQuery<T extends ModelType>(
+    cls: Class<T>,
+    field: ValidStringFields<T>,
+    query?: FacetModelQuery<T>
+  ): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(cls, query);
 
     const col = await this.getStore(cls);
-    if (query) {
-      await QueryVerifier.verify(cls, query);
-    }
 
     let queryObject: Record<string, unknown> = { [field]: { $exists: true } };
 
@@ -737,17 +739,22 @@ export class MongoModelService
             $sum: 1
           }
         }
-      }
+      },
+      {
+        $sort: {
+          count: -1
+        }
+      },
+      ...(query?.offset !== undefined ? [{ $skip: query.offset }] : []),
+      ...(query?.limit !== undefined ? [{ $limit: query.limit }] : [])
     ];
 
     const result = await col.aggregate<{ _id: ObjectId; count: number }>(aggregations).toArray();
 
-    return result
-      .map(item => ({
-        key: MongoUtil.idToString(item._id),
-        count: item.count
-      }))
-      .toSorted((a, b) => b.count - a.count);
+    return result.map(item => ({
+      key: MongoUtil.idToString(item._id),
+      count: item.count
+    }));
   }
 
   // Aggregate
