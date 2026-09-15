@@ -268,19 +268,16 @@ export class PostgresDialect extends AbstractANSI99Dialect {
   ): string {
     const { tableSource, valueExpression } = this.#getPostgresArraySource(resolvedContext);
     const countClause = this.castColumn?.('COUNT(*)', Number) ?? 'COUNT(*)';
-    const optionalWhere = whereSQL ? `AND ${whereSQL}` : '';
-    const optionalLimit = limit !== undefined ? `LIMIT ${limit}` : '';
-    const optionalOffset = offset !== undefined ? `OFFSET ${offset}` : '';
 
     return `
 SELECT ${valueExpression} AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')}
 FROM ${this.escapeIdentifier(tableContext.tableName)}, ${tableSource}
 WHERE ${valueExpression} IS NOT NULL
-${optionalWhere}
+${whereSQL ? `AND ${whereSQL}` : ''}
 GROUP BY ${valueExpression}
 ORDER BY ${this.escapeIdentifier('count')} DESC
-${optionalLimit}
-${optionalOffset};`;
+${limit !== undefined ? `LIMIT ${limit}` : ''}
+${offset !== undefined ? `OFFSET ${offset}` : ''};`;
   }
 
   shiftPlaceholders(sql: string, offset: number): string {

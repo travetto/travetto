@@ -152,19 +152,16 @@ export class MysqlDialect extends AbstractANSI99Dialect {
       resolvedContext.subPath && resolvedContext.subPath.length > 0 ? `$.${this.formatJsonPath(resolvedContext.subPath)}` : '$';
 
     const countClause = this.castColumn?.('COUNT(*)', Number) ?? 'COUNT(*)';
-    const optionalWhere = whereSQL ? `AND ${whereSQL}` : '';
-    const optionalLimit = limit !== undefined ? `LIMIT ${limit}` : '';
-    const optionalOffset = offset !== undefined ? `OFFSET ${offset}` : '';
 
     return `
 SELECT jsonTable.value AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')}
 FROM ${this.escapeIdentifier(tableContext.tableName)}, JSON_TABLE(${columnName}, '${arrayPathPart}' COLUMNS (value VARCHAR(1024) PATH '${elementPath}')) AS jsonTable
 WHERE jsonTable.value IS NOT NULL
-${optionalWhere}
+${whereSQL ? `AND ${whereSQL}` : ''}
 GROUP BY jsonTable.value
 ORDER BY ${this.escapeIdentifier('count')} DESC
-${optionalLimit}
-${optionalOffset};`;
+${limit !== undefined ? `LIMIT ${limit}` : ''}
+${offset !== undefined ? `OFFSET ${offset}` : ''};`;
   }
 
   override getUpsertSQL(

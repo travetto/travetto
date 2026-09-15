@@ -853,19 +853,16 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     const sqlPath = resolvedContext.sqlPath;
     const keyClause = this.castColumn?.(sqlPath, String) ?? sqlPath;
     const countClause = this.castColumn?.('COUNT(*)', Number) ?? 'COUNT(*)';
-    const optionalWhere = whereSQL ? `AND ${whereSQL}` : '';
-    const optionalLimit = limit !== undefined ? `LIMIT ${limit}` : '';
-    const optionalOffset = offset !== undefined ? `OFFSET ${offset}` : '';
 
     return `
 SELECT ${keyClause} AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')}
 FROM ${this.escapeIdentifier(tableContext.tableName)}
 WHERE ${sqlPath} IS NOT NULL
-${optionalWhere}
+${whereSQL ? `AND ${whereSQL}` : ''}
 GROUP BY ${sqlPath}
 ORDER BY ${this.escapeIdentifier('count')} DESC
-${optionalLimit}
-${optionalOffset};`;
+${limit !== undefined ? `LIMIT ${limit}` : ''}
+${offset !== undefined ? `OFFSET ${offset}` : ''};`;
   }
 
   abstract buildArrayFacet<T extends ModelType>(
