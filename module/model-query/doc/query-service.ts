@@ -1,5 +1,6 @@
 import { ModelCrudUtil, type ModelType, type OptionalId } from '@travetto/model';
 import type {
+  FacetModelQuery,
   FieldAggregateResult,
   ModelQuery,
   ModelQueryAggregateSupport,
@@ -67,7 +68,7 @@ export class QueryModelService
   async facetByQuery<T extends ModelType>(
     cls: Class<T>,
     field: ValidStringFields<T>,
-    query?: ModelQuery<T> | undefined
+    query?: FacetModelQuery<T>
   ): Promise<{ key: string; count: number }[]> {
     return [];
   }

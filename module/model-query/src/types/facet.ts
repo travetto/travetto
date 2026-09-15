@@ -1,7 +1,7 @@
 import type { ModelType } from '@travetto/model';
 import type { Class } from '@travetto/runtime';
 
-import type { ModelQuery } from '../model/query.ts';
+import type { FacetModelQuery } from '../model/query.ts';
 import type { ValidStringFields } from '../model/where-clause.ts';
 import type { ModelQuerySupport } from './query.ts';
 
@@ -18,5 +18,5 @@ export interface ModelQueryFacetSupport extends ModelQuerySupport {
    * @param field The field to facet on
    * @param query Additional query filtering
    */
-  facetByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]>;
+  facetByQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: FacetModelQuery<T>): Promise<ModelQueryFacet[]>;
 }

@@ -45,6 +45,7 @@ import {
   type ModelQueryCrudSupport,
   ModelQueryCrudUtil,
   type ModelQueryFacet,
+  type FacetModelQuery,
   type ModelQueryFacetSupport,
   type ModelQuerySuggestSupport,
   ModelQuerySuggestUtil,
@@ -830,14 +831,14 @@ export abstract class BaseSQLModelService<C = unknown>
   async facetByQuery<T extends ModelType>(
     modelClass: Class<T>,
     field: ValidStringFields<T>,
-    query?: ModelQuery<T>
+    query?: FacetModelQuery<T>
   ): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(modelClass, query);
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, query?.where);
     const { sqlPath } = this.dialect.resolvePath(tableContext, String(field).split('.'), 'read');
 
-    const sql = this.dialect.buildFacet(tableContext, sqlPath, whereSQL);
+    const sql = this.dialect.buildFacet(tableContext, sqlPath, whereSQL, query?.limit, query?.offset);
 
     const result = await this.connection.execute<{ key: string; count: string | number }>(sql, parameters);
 

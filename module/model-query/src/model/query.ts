@@ -44,6 +44,13 @@ export type SuggestModelQuery<T> = PageableModelQuery<T> & {
   caseInsensitive?: boolean;
 };
 /**
+ * Query with support for faceting options
+ */
+export type FacetModelQuery<T> = ModelQuery<T> & {
+  limit?: number;
+  offset?: number;
+};
+/**
  * Standard query options (limit, offset)
  */
 export type QueryOptions<T> = QueryOptionsRaw<RetainQueryPrimitiveFields<T>>;
