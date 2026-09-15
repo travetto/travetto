@@ -237,13 +237,21 @@ export class PostgresDialect extends AbstractANSI99Dialect {
   ): string {
     const target = this.#getPostgresArrayTarget(resolvedContext);
     const countClause = this.castColumn?.('COUNT(*)', Number) ?? 'COUNT(*)';
-    const whereClause = whereSQL ? ` AND ${whereSQL}` : '';
-    const limitClause = limit !== undefined ? ` LIMIT ${limit}` : '';
-    const offsetClause = offset !== undefined ? ` OFFSET ${offset}` : '';
+    const optionalWhere = whereSQL ? `AND ${whereSQL}` : '';
+    const optionalLimit = limit !== undefined ? `LIMIT ${limit}` : '';
+    const optionalOffset = offset !== undefined ? `OFFSET ${offset}` : '';
 
     if (target.isNative) {
       const keyClause = this.castColumn('element', String);
-      return `SELECT ${keyClause} AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')} FROM ${this.escapeIdentifier(tableContext.tableName)}, unnest(${target.sqlPath}) AS element WHERE element IS NOT NULL${whereClause} GROUP BY element ORDER BY ${this.escapeIdentifier('count')} DESC${limitClause}${offsetClause};`;
+      return `
+SELECT ${keyClause} AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')}
+FROM ${this.escapeIdentifier(tableContext.tableName)}, unnest(${target.sqlPath}) AS element
+WHERE element IS NOT NULL
+${optionalWhere}
+GROUP BY element
+ORDER BY ${this.escapeIdentifier('count')} DESC
+${optionalLimit}
+${optionalOffset};`;
     }
 
     const columnName = this.escapeIdentifier(resolvedContext.arrayPath?.[0] ?? resolvedContext.sqlPath);
@@ -264,9 +272,25 @@ export class PostgresDialect extends AbstractANSI99Dialect {
       const leafSegment = resolvedContext.subPath[resolvedContext.subPath.length - 1];
       const valueExpression = `(element${subPathSegments}->>'${this.escapeLiteral(leafSegment)}')`;
 
-      return `SELECT ${valueExpression} AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')} FROM ${this.escapeIdentifier(tableContext.tableName)}, jsonb_array_elements(${jsonbArrayExpression}) AS element WHERE ${valueExpression} IS NOT NULL${whereClause} GROUP BY ${valueExpression} ORDER BY ${this.escapeIdentifier('count')} DESC${limitClause}${offsetClause};`;
+      return `
+SELECT ${valueExpression} AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')}
+FROM ${this.escapeIdentifier(tableContext.tableName)}, jsonb_array_elements(${jsonbArrayExpression}) AS element
+WHERE ${valueExpression} IS NOT NULL
+${optionalWhere}
+GROUP BY ${valueExpression}
+ORDER BY ${this.escapeIdentifier('count')} DESC
+${optionalLimit}
+${optionalOffset};`;
     } else {
-      return `SELECT element AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')} FROM ${this.escapeIdentifier(tableContext.tableName)}, jsonb_array_elements_text(${jsonbArrayExpression}) AS element WHERE element IS NOT NULL${whereClause} GROUP BY element ORDER BY ${this.escapeIdentifier('count')} DESC${limitClause}${offsetClause};`;
+      return `
+SELECT element AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')}
+FROM ${this.escapeIdentifier(tableContext.tableName)}, jsonb_array_elements_text(${jsonbArrayExpression}) AS element
+WHERE element IS NOT NULL
+${optionalWhere}
+GROUP BY element
+ORDER BY ${this.escapeIdentifier('count')} DESC
+${optionalLimit}
+${optionalOffset};`;
     }
   }
 

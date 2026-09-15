@@ -152,11 +152,19 @@ export class MysqlDialect extends AbstractANSI99Dialect {
       resolvedContext.subPath && resolvedContext.subPath.length > 0 ? `$.${this.formatJsonPath(resolvedContext.subPath)}` : '$';
 
     const countClause = this.castColumn?.('COUNT(*)', Number) ?? 'COUNT(*)';
-    const whereClause = whereSQL ? ` AND ${whereSQL}` : '';
-    const limitClause = limit !== undefined ? ` LIMIT ${limit}` : '';
-    const offsetClause = offset !== undefined ? ` OFFSET ${offset}` : '';
+    const optionalWhere = whereSQL ? `AND ${whereSQL}` : '';
+    const optionalLimit = limit !== undefined ? `LIMIT ${limit}` : '';
+    const optionalOffset = offset !== undefined ? `OFFSET ${offset}` : '';
 
-    return `SELECT jsonTable.value AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')} FROM ${this.escapeIdentifier(tableContext.tableName)}, JSON_TABLE(${columnName}, '${arrayPathPart}' COLUMNS (value VARCHAR(1024) PATH '${elementPath}')) AS jsonTable WHERE jsonTable.value IS NOT NULL${whereClause} GROUP BY jsonTable.value ORDER BY ${this.escapeIdentifier('count')} DESC${limitClause}${offsetClause};`;
+    return `
+SELECT jsonTable.value AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')}
+FROM ${this.escapeIdentifier(tableContext.tableName)}, JSON_TABLE(${columnName}, '${arrayPathPart}' COLUMNS (value VARCHAR(1024) PATH '${elementPath}')) AS jsonTable
+WHERE jsonTable.value IS NOT NULL
+${optionalWhere}
+GROUP BY jsonTable.value
+ORDER BY ${this.escapeIdentifier('count')} DESC
+${optionalLimit}
+${optionalOffset};`;
   }
 
   override getUpsertSQL(

@@ -811,20 +811,33 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     }
   ): string {
     const selectedColumns = options?.columns && options.columns.length > 0 ? options.columns.join(', ') : '*';
-    const where = options?.whereSQL ? ` WHERE ${options.whereSQL}` : '';
-    const sort = options?.sortSQL ? ` ${options.sortSQL}` : '';
-    const limit = options?.limit !== undefined ? ` LIMIT ${options.limit}` : '';
-    const offset = options?.offset !== undefined ? ` OFFSET ${options.offset}` : '';
+    const optionalWhere = options?.whereSQL ? `WHERE ${options.whereSQL}` : '';
+    const optionalSort = options?.sortSQL ?? '';
+    const optionalLimit = options?.limit !== undefined ? `LIMIT ${options.limit}` : '';
+    const optionalOffset = options?.offset !== undefined ? `OFFSET ${options.offset}` : '';
 
-    return `SELECT ${selectedColumns} FROM ${this.escapeIdentifier(tableContext.tableName)}${where}${sort}${limit}${offset};`;
+    return `
+SELECT ${selectedColumns}
+FROM ${this.escapeIdentifier(tableContext.tableName)}
+${optionalWhere}
+${optionalSort}
+${optionalLimit}
+${optionalOffset};`;
   }
 
   buildDelete<T extends ModelType>(tableContext: TableContext<T>, whereSQL?: string): string {
-    return `DELETE FROM ${this.escapeIdentifier(tableContext.tableName)}${whereSQL ? ` WHERE ${whereSQL}` : ''};`;
+    const optionalWhere = whereSQL ? `WHERE ${whereSQL}` : '';
+    return `
+DELETE FROM ${this.escapeIdentifier(tableContext.tableName)}
+${optionalWhere};`;
   }
 
   buildCount<T extends ModelType>(tableContext: TableContext<T>, whereSQL?: string): string {
-    return `SELECT COUNT(*) as ${this.escapeIdentifier('total')} FROM ${this.escapeIdentifier(tableContext.tableName)}${whereSQL ? ` WHERE ${whereSQL}` : ''};`;
+    const optionalWhere = whereSQL ? `WHERE ${whereSQL}` : '';
+    return `
+SELECT COUNT(*) as ${this.escapeIdentifier('total')}
+FROM ${this.escapeIdentifier(tableContext.tableName)}
+${optionalWhere};`;
   }
 
   buildIndexSort<T extends ModelType>(
@@ -853,11 +866,19 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     const sqlPath = resolvedContext.sqlPath;
     const keyClause = this.castColumn?.(sqlPath, String) ?? sqlPath;
     const countClause = this.castColumn?.('COUNT(*)', Number) ?? 'COUNT(*)';
-    const whereClause = whereSQL ? ` AND ${whereSQL}` : '';
-    const limitClause = limit !== undefined ? ` LIMIT ${limit}` : '';
-    const offsetClause = offset !== undefined ? ` OFFSET ${offset}` : '';
+    const optionalWhere = whereSQL ? `AND ${whereSQL}` : '';
+    const optionalLimit = limit !== undefined ? `LIMIT ${limit}` : '';
+    const optionalOffset = offset !== undefined ? `OFFSET ${offset}` : '';
 
-    return `SELECT ${keyClause} AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')} FROM ${this.escapeIdentifier(tableContext.tableName)} WHERE ${sqlPath} IS NOT NULL${whereClause} GROUP BY ${sqlPath} ORDER BY ${this.escapeIdentifier('count')} DESC${limitClause}${offsetClause};`;
+    return `
+SELECT ${keyClause} AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')}
+FROM ${this.escapeIdentifier(tableContext.tableName)}
+WHERE ${sqlPath} IS NOT NULL
+${optionalWhere}
+GROUP BY ${sqlPath}
+ORDER BY ${this.escapeIdentifier('count')} DESC
+${optionalLimit}
+${optionalOffset};`;
   }
 
   abstract buildArrayFacet<T extends ModelType>(
