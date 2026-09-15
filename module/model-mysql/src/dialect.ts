@@ -1,3 +1,4 @@
+import type { ModelType } from '@travetto/model';
 import { AbstractANSI99Dialect, type JSONSqlPathMode, type ResolvedPathContext, type TableContext } from '@travetto/model-sql';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
@@ -133,6 +134,29 @@ export class MysqlDialect extends AbstractANSI99Dialect {
       return `(CAST(${sqlPath} AS CHAR(255)) COLLATE utf8mb4_bin)`;
     }
     return sqlPath;
+  }
+
+  override buildArrayFacet<T extends ModelType>(
+    tableContext: TableContext<T>,
+    resolvedContext: ResolvedPathContext,
+    whereSQL?: string,
+    limit?: number,
+    offset?: number
+  ): string {
+    const columnName = this.escapeIdentifier(resolvedContext.arrayPath?.[0] ?? resolvedContext.sqlPath);
+    const arrayPathPart =
+      resolvedContext.arrayPath && resolvedContext.arrayPath.length > 1
+        ? `$.${this.formatJsonPath(resolvedContext.arrayPath.slice(1))}[*]`
+        : '$[*]';
+    const elementPath =
+      resolvedContext.subPath && resolvedContext.subPath.length > 0 ? `$.${this.formatJsonPath(resolvedContext.subPath)}` : '$';
+
+    const countClause = this.castColumn?.('COUNT(*)', Number) ?? 'COUNT(*)';
+    const whereClause = whereSQL ? ` AND ${whereSQL}` : '';
+    const limitClause = limit !== undefined ? ` LIMIT ${limit}` : '';
+    const offsetClause = offset !== undefined ? ` OFFSET ${offset}` : '';
+
+    return `SELECT jsonTable.value AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')} FROM ${this.escapeIdentifier(tableContext.tableName)}, JSON_TABLE(${columnName}, '${arrayPathPart}' COLUMNS (value VARCHAR(1024) PATH '${elementPath}')) AS jsonTable WHERE jsonTable.value IS NOT NULL${whereClause} GROUP BY jsonTable.value ORDER BY ${this.escapeIdentifier('count')} DESC${limitClause}${offsetClause};`;
   }
 
   override getUpsertSQL(

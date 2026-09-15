@@ -1,3 +1,4 @@
+import type { ModelType } from '@travetto/model';
 import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext } from '@travetto/model-sql';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
@@ -225,6 +226,48 @@ export class PostgresDialect extends AbstractANSI99Dialect {
       return `(${sqlPath})::text`;
     }
     return sqlPath;
+  }
+
+  override buildArrayFacet<T extends ModelType>(
+    tableContext: TableContext<T>,
+    resolvedContext: ResolvedPathContext,
+    whereSQL?: string,
+    limit?: number,
+    offset?: number
+  ): string {
+    const target = this.#getPostgresArrayTarget(resolvedContext);
+    const countClause = this.castColumn?.('COUNT(*)', Number) ?? 'COUNT(*)';
+    const whereClause = whereSQL ? ` AND ${whereSQL}` : '';
+    const limitClause = limit !== undefined ? ` LIMIT ${limit}` : '';
+    const offsetClause = offset !== undefined ? ` OFFSET ${offset}` : '';
+
+    if (target.isNative) {
+      const keyClause = this.castColumn('element', String);
+      return `SELECT ${keyClause} AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')} FROM ${this.escapeIdentifier(tableContext.tableName)}, unnest(${target.sqlPath}) AS element WHERE element IS NOT NULL${whereClause} GROUP BY element ORDER BY ${this.escapeIdentifier('count')} DESC${limitClause}${offsetClause};`;
+    }
+
+    const columnName = this.escapeIdentifier(resolvedContext.arrayPath?.[0] ?? resolvedContext.sqlPath);
+    const pathSegments =
+      resolvedContext.arrayPath && resolvedContext.arrayPath.length > 1
+        ? resolvedContext.arrayPath
+            .slice(1)
+            .map(segment => `->'${this.escapeLiteral(segment)}'`)
+            .join('')
+        : '';
+    const jsonbArrayExpression = `${columnName}${pathSegments}`;
+
+    if (resolvedContext.subPath && resolvedContext.subPath.length > 0) {
+      const subPathSegments = resolvedContext.subPath
+        .slice(0, -1)
+        .map(segment => `->'${this.escapeLiteral(segment)}'`)
+        .join('');
+      const leafSegment = resolvedContext.subPath[resolvedContext.subPath.length - 1];
+      const valueExpression = `(element${subPathSegments}->>'${this.escapeLiteral(leafSegment)}')`;
+
+      return `SELECT ${valueExpression} AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')} FROM ${this.escapeIdentifier(tableContext.tableName)}, jsonb_array_elements(${jsonbArrayExpression}) AS element WHERE ${valueExpression} IS NOT NULL${whereClause} GROUP BY ${valueExpression} ORDER BY ${this.escapeIdentifier('count')} DESC${limitClause}${offsetClause};`;
+    } else {
+      return `SELECT element AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')} FROM ${this.escapeIdentifier(tableContext.tableName)}, jsonb_array_elements_text(${jsonbArrayExpression}) AS element WHERE element IS NOT NULL${whereClause} GROUP BY element ORDER BY ${this.escapeIdentifier('count')} DESC${limitClause}${offsetClause};`;
+    }
   }
 
   shiftPlaceholders(sql: string, offset: number): string {

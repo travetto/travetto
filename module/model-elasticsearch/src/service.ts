@@ -767,7 +767,9 @@ export class ElasticsearchModelService
     const { buckets } = castTo<estypes.AggregationsStringTermsAggregate>(
       'buckets' in result.aggregations![field] ? result.aggregations![field] : { buckets: [] }
     );
-    const out = Array.isArray(buckets) ? buckets.slice(offset, size).map(b => ({ key: b.key!.toString(), count: b.doc_count })) : [];
+    const out = Array.isArray(buckets)
+      ? buckets.slice(offset, size).map(bucket => ({ key: bucket.key!.toString(), count: bucket.doc_count }))
+      : [];
     return out;
   }
 

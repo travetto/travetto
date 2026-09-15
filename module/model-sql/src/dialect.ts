@@ -840,18 +840,34 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
 
   buildFacet<T extends ModelType>(
     tableContext: TableContext<T>,
-    sqlPath: string,
+    resolvedContext: ResolvedPathContext,
     whereSQL?: string,
     limit?: number,
     offset?: number
   ): string {
-    const keySql = this.castColumn?.(sqlPath, String) ?? sqlPath;
-    const countSql = this.castColumn?.('COUNT(*)', Number) ?? 'COUNT(*)';
-    const where = whereSQL ? ` AND ${whereSQL}` : '';
-    const limitSql = limit !== undefined ? ` LIMIT ${limit}` : '';
-    const offsetSql = offset !== undefined ? ` OFFSET ${offset}` : '';
+    const isArray = Boolean(resolvedContext.leafField?.array || resolvedContext.arrayField);
+    if (isArray) {
+      return this.buildArrayFacet(tableContext, resolvedContext, whereSQL, limit, offset);
+    }
 
-    return `SELECT ${keySql} AS ${this.escapeIdentifier('key')}, ${countSql} AS ${this.escapeIdentifier('count')} FROM ${this.escapeIdentifier(tableContext.tableName)} WHERE ${sqlPath} IS NOT NULL${where} GROUP BY ${sqlPath} ORDER BY ${this.escapeIdentifier('count')} DESC${limitSql}${offsetSql};`;
+    const sqlPath = resolvedContext.sqlPath;
+    const keyClause = this.castColumn?.(sqlPath, String) ?? sqlPath;
+    const countClause = this.castColumn?.('COUNT(*)', Number) ?? 'COUNT(*)';
+    const whereClause = whereSQL ? ` AND ${whereSQL}` : '';
+    const limitClause = limit !== undefined ? ` LIMIT ${limit}` : '';
+    const offsetClause = offset !== undefined ? ` OFFSET ${offset}` : '';
+
+    return `SELECT ${keyClause} AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')} FROM ${this.escapeIdentifier(tableContext.tableName)} WHERE ${sqlPath} IS NOT NULL${whereClause} GROUP BY ${sqlPath} ORDER BY ${this.escapeIdentifier('count')} DESC${limitClause}${offsetClause};`;
+  }
+
+  buildArrayFacet<T extends ModelType>(
+    tableContext: TableContext<T>,
+    resolvedContext: ResolvedPathContext,
+    whereSQL?: string,
+    limit?: number,
+    offset?: number
+  ): string {
+    throw new RuntimeError('Array faceting is not supported for this dialect', { category: 'data' });
   }
 
   buildFieldAggregate<T extends ModelType>(tableContext: TableContext<T>, sqlPath: string, isDate: boolean, whereSQL?: string): string {
