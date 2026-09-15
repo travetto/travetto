@@ -811,33 +811,20 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     }
   ): string {
     const selectedColumns = options?.columns && options.columns.length > 0 ? options.columns.join(', ') : '*';
-    const optionalWhere = options?.whereSQL ? `WHERE ${options.whereSQL}` : '';
-    const optionalSort = options?.sortSQL ?? '';
-    const optionalLimit = options?.limit !== undefined ? `LIMIT ${options.limit}` : '';
-    const optionalOffset = options?.offset !== undefined ? `OFFSET ${options.offset}` : '';
+    const where = options?.whereSQL ? ` WHERE ${options.whereSQL}` : '';
+    const sort = options?.sortSQL ? ` ${options.sortSQL}` : '';
+    const limit = options?.limit !== undefined ? ` LIMIT ${options.limit}` : '';
+    const offset = options?.offset !== undefined ? ` OFFSET ${options.offset}` : '';
 
-    return `
-SELECT ${selectedColumns}
-FROM ${this.escapeIdentifier(tableContext.tableName)}
-${optionalWhere}
-${optionalSort}
-${optionalLimit}
-${optionalOffset};`;
+    return `SELECT ${selectedColumns} FROM ${this.escapeIdentifier(tableContext.tableName)}${where}${sort}${limit}${offset};`;
   }
 
   buildDelete<T extends ModelType>(tableContext: TableContext<T>, whereSQL?: string): string {
-    const optionalWhere = whereSQL ? `WHERE ${whereSQL}` : '';
-    return `
-DELETE FROM ${this.escapeIdentifier(tableContext.tableName)}
-${optionalWhere};`;
+    return `DELETE FROM ${this.escapeIdentifier(tableContext.tableName)}${whereSQL ? ` WHERE ${whereSQL}` : ''};`;
   }
 
   buildCount<T extends ModelType>(tableContext: TableContext<T>, whereSQL?: string): string {
-    const optionalWhere = whereSQL ? `WHERE ${whereSQL}` : '';
-    return `
-SELECT COUNT(*) as ${this.escapeIdentifier('total')}
-FROM ${this.escapeIdentifier(tableContext.tableName)}
-${optionalWhere};`;
+    return `SELECT COUNT(*) as ${this.escapeIdentifier('total')} FROM ${this.escapeIdentifier(tableContext.tableName)}${whereSQL ? ` WHERE ${whereSQL}` : ''};`;
   }
 
   buildIndexSort<T extends ModelType>(
