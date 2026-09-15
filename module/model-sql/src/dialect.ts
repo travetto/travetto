@@ -860,15 +860,13 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     return `SELECT ${keyClause} AS ${this.escapeIdentifier('key')}, ${countClause} AS ${this.escapeIdentifier('count')} FROM ${this.escapeIdentifier(tableContext.tableName)} WHERE ${sqlPath} IS NOT NULL${whereClause} GROUP BY ${sqlPath} ORDER BY ${this.escapeIdentifier('count')} DESC${limitClause}${offsetClause};`;
   }
 
-  buildArrayFacet<T extends ModelType>(
+  abstract buildArrayFacet<T extends ModelType>(
     tableContext: TableContext<T>,
     resolvedContext: ResolvedPathContext,
     whereSQL?: string,
     limit?: number,
     offset?: number
-  ): string {
-    throw new RuntimeError('Array faceting is not supported for this dialect', { category: 'data' });
-  }
+  ): string;
 
   buildFieldAggregate<T extends ModelType>(tableContext: TableContext<T>, sqlPath: string, isDate: boolean, whereSQL?: string): string {
     const where = whereSQL ? ` WHERE ${whereSQL}` : '';
