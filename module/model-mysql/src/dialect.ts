@@ -136,7 +136,7 @@ export class MysqlDialect extends AbstractANSI99Dialect {
     return sqlPath;
   }
 
-  override buildArrayFacet<T extends ModelType>(
+  buildArrayFacet<T extends ModelType>(
     tableContext: TableContext<T>,
     resolvedContext: ResolvedPathContext,
     whereSQL?: string,

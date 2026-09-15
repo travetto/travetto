@@ -35,6 +35,7 @@ This module owns LLM-oriented generation guidance for Travetto.
 
 ## Framework Coding Guidelines
 - **Visibility Modifiers**: Do not use TS visibility modifiers (`private`, `protected`, or `public`). Use ECMAScript standard public by default and `#private` fields/methods when private accessibility is needed.
+- **Override Keyword**: Do not use TypeScript's `override` keyword on class methods or properties.
 - **Generated Files**: `openapi.yml` (and other OpenAPI definition outputs) are generated automatically. Do not manually edit, inspect, or track changes in them directly as they will be regenerated.
 - **Documentation Generation**: When modifying documentation or running doc generation, execute `npx trv doc:angular` instead of `npx trv doc`, as it produces both the module docs and the website documentation (`related/travetto.github.io`).
 - **Barrel Exports**: Always check and update `__index__.ts` files when adding or removing files to ensure barrel exports are correct.
