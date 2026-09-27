@@ -97,7 +97,7 @@ async notReadyYet() { }
 async requiresGC() { }
 
 @Test()
-@SkipIfNot(SomeUtil.isSupported)
+@SkipIfNot((instance: MySuite) => instance.supportsFeature)
 async conditionalTest() { }
 
 @Test({ shouldThrow: ValidationResultError })
@@ -342,21 +342,15 @@ Tests can be conditionally skipped based on runtime capabilities:
 @SkipIfNot(() => global.gc)
 async ensureCulled() { }
 
-// Skip if the service doesn't support the feature
+// Skip if the suite doesn't support the feature
 @Test()
-@SkipIfNot(ModelBlobUtil.isWriteUrlSupported)
-async testSignedUrls() { }
+@SkipIfNot((instance: MySuite) => instance.supportsFeature)
+async testFeature() { }
 
 // Skip unconditionally
 @Test()
 @SkipIf(() => true)
 async notImplementedYet() { }
-```
-
-Capability checks (created via `hasFunction`) can be passed directly to `@SkipIfNot` / `@SkipIf`:
-
-```ts
-@SkipIfNot(ModelBlobUtil.isWriteUrlSupported)
 ```
 
 ### Pattern 7: Cross-Module Integration Tests (global-test)

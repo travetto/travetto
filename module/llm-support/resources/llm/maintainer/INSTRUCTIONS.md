@@ -67,7 +67,6 @@ This module owns LLM-oriented generation guidance for Travetto.
 - **Test Skipping**:
   - Use `@SkipIf(predicate)` and `@SkipIfNot(predicate)` decorators from `@travetto/test` on test methods or suites to conditionally skip execution.
   - Skip predicates must be functions that receive the suite instance: `(instance: T) => boolean | Promise<boolean>`. Static boolean values are not supported.
-  - Common capability guards created with `hasFunction` (e.g. `ModelBlobUtil.isWriteUrlSupported`) can be passed directly to `@SkipIfNot`.
 
 ## Catalog Evolution
 When adding operations:

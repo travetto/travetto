@@ -75,17 +75,11 @@ class SkippedNotSuite {
   }
 }
 
-class MockServiceWithFeature {
-  feature() {}
-}
-
-class MockServiceWithoutFeature {}
-
 const hasFeature = hasFunction<{ feature(): void }>('feature');
 
 @Suite()
-class ServiceClassSuiteWithFeature {
-  serviceClass = MockServiceWithFeature;
+class SuiteWithFeature {
+  feature() {}
 
   @Test()
   @SkipIfNot(hasFeature)
@@ -95,9 +89,7 @@ class ServiceClassSuiteWithFeature {
 }
 
 @Suite()
-class ServiceClassSuiteWithoutFeature {
-  serviceClass = MockServiceWithoutFeature;
-
+class SuiteWithoutFeature {
   @Test()
   @SkipIfNot(hasFeature)
   shouldBeSkipped() {
