@@ -8,7 +8,6 @@ import { ModelSuite } from './suite.ts';
 
 @ModelSuite()
 export abstract class BaseModelSuite<T> {
-
   serviceClass: Class<T>;
   configClass: Class;
 

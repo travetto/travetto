@@ -30,12 +30,10 @@ export const text = (
         Test execution can be customized using additional decorators on individual test methods or suites:
         <ul>
           <li>
-            {SkipIf} allows conditionally skipping tests or suites. It accepts a predicate function that
-            receives the suite instance and returns a boolean (or a Promise resolving to a boolean).
+            {SkipIf} allows conditionally skipping tests or suites. It accepts a predicate function that receives the suite instance and
+            returns a boolean (or a Promise resolving to a boolean).
           </li>
-          <li>
-            {SkipUnless} allows conditionally skipping tests or suites unless a predicate function resolves to true.
-          </li>
+          <li>{SkipUnless} allows conditionally skipping tests or suites unless a predicate function resolves to true.</li>
           <li>{Timeout} specifies a custom execution timeout in milliseconds for the test.</li>
           <li>{ShouldThrow} asserts that the test must throw an expected error, failing if no error is thrown.</li>
         </ul>
