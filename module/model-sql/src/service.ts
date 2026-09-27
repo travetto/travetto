@@ -297,12 +297,10 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async dropTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
-    for (const sql of this.dialect.getDropTableSQLs(tableContext)) {
-      await ModelStorageUtil.runAndIgnoreNotFound(
-        () => this.connection.execute(sql),
-        error => this.dialect.isTableNotFoundError(error)
-      );
-    }
+    await ModelStorageUtil.runAndIgnoreNotFound(
+      () => this.connection.execute(this.dialect.getDropTableSQLs(tableContext).join(';')),
+      error => this.dialect.isTableNotFoundError(error)
+    );
   }
 
   async dropTables(tableContexts: TableContext[]): Promise<void> {
@@ -317,9 +315,7 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async truncateTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
-    for (const sql of this.dialect.getTruncateTableSQLs(tableContext)) {
-      await this.connection.execute(sql);
-    }
+    await this.connection.execute(this.dialect.getTruncateTableSQLs(tableContext).join(';'));
   }
 
   async upsertTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
