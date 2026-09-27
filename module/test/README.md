@@ -56,7 +56,7 @@ class SimpleTest {
 Test execution can be customized using additional decorators on individual test methods or suites:
    *  [@SkipIf](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/common.ts#L11) allows conditionally skipping tests or suites. It accepts a predicate function that receives the suite instance and returns a boolean (or a Promise resolving to a boolean).
    *  [@SkipUnless](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/common.ts#L27) allows conditionally skipping tests or suites unless a predicate function resolves to true.
-   *  [@Timeout](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L59) specifies a custom execution timeout in milliseconds for the test.
+   *  [@Timeout](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L58) specifies a custom execution timeout in milliseconds for the test.
    *  [@ShouldThrow](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L46) asserts that the test must throw an expected error, failing if no error is thrown.
 
 **Code: Configured Test Execution**
@@ -262,6 +262,21 @@ To run the tests you can either call the [Command Line Interface](https://github
 **Terminal: Help for test**
 ```bash
 $ trv test --help
+
+Usage: test [options] [first:string] [globs...:string]
+
+Description:
+  Execute the test framework for targeted files, suites, or methods.
+
+  Supports glob-based discovery, import-based targeting, tag filtering, and
+  configurable output consumers for local and CI workflows.
+
+Options:
+  -f, --format <string>          Output format for test results (default: "tap")
+  -c, --concurrency <number>     Number of tests to run concurrently (default: 9)
+  -t, --tags <string>            Tags to target or exclude when using globs
+  -o, --format-options <string>  Format options
+  --help                         display help for command
 ```
 
 The regexes are the patterns of tests you want to run, and all tests must be found under the `test/` folder.

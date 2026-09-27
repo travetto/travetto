@@ -80,8 +80,8 @@ export class WebResponse<B = unknown> extends BaseWebMessage<B, WebResponseConte
    * @param location Location to redirect to
    * @param statusCode Status code
    */
-  static redirect(location: string, statusCode = 302): WebResponse<undefined> {
-    return new WebResponse({ context: { httpStatusCode: statusCode }, headers: { Location: location } });
+  static redirect(location: string | URL, statusCode = 302): WebResponse<undefined> {
+    return new WebResponse({ context: { httpStatusCode: statusCode }, headers: { Location: location.toString() } });
   }
 }
 ```

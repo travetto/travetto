@@ -244,20 +244,15 @@ To enforce that these contracts are honored, the module provides shared test sui
 **Code: Memory Service Test Configuration**
 ```typescript
 import { DependencyRegistryIndex } from '@travetto/di';
-import { type Class, castTo, classConstruct, RuntimeError } from '@travetto/runtime';
+import { type Class, castTo, RuntimeError } from '@travetto/runtime';
 
 import type { ModelType } from '../../src/types/model.ts';
 import { ModelBulkUtil } from '../../src/util/bulk.ts';
 import { ModelCrudUtil } from '../../src/util/crud.ts';
 import { ModelSuite } from './suite.ts';
 
-type ServiceClass = { serviceClass: { new (): unknown } };
-
 @ModelSuite()
 export abstract class BaseModelSuite<T> {
-  static ifNot(pred: (svc: unknown) => boolean): (x: unknown) => Promise<boolean> {
-    return async (x: unknown) => !pred(classConstruct(castTo<ServiceClass>(x).serviceClass));
-  }
 
   serviceClass: Class<T>;
   configClass: Class;
