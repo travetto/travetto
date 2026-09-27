@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { hasFunction } from '@travetto/runtime';
-import { SkipIf, SkipIfNot, Suite, Test } from '@travetto/test';
+import { SkipIf, SkipUnless, Suite, Test } from '@travetto/test';
 
 @Suite()
 class SkipMethodSuite {
@@ -33,26 +33,26 @@ class SkipMethodSuite {
   }
 
   @Test()
-  @SkipIfNot((instance: SkipMethodSuite) => instance.shouldNotSkip)
-  skippedNotSync() {
+  @SkipUnless((instance: SkipMethodSuite) => instance.shouldNotSkip)
+  skippedUnlessSync() {
     assert(false);
   }
 
   @Test()
-  @SkipIfNot(async (instance: SkipMethodSuite) => instance.shouldNotSkip)
-  async skippedNotAsync() {
+  @SkipUnless(async (instance: SkipMethodSuite) => instance.shouldNotSkip)
+  async skippedUnlessAsync() {
     assert(false);
   }
 
   @Test()
-  @SkipIfNot((instance: SkipMethodSuite) => instance.shouldSkip)
-  notSkippedNotSync() {
+  @SkipUnless((instance: SkipMethodSuite) => instance.shouldSkip)
+  notSkippedUnlessSync() {
     assert(true);
   }
 
   @Test()
-  @SkipIfNot(async (instance: SkipMethodSuite) => instance.shouldSkip)
-  async notSkippedNotAsync() {
+  @SkipUnless(async (instance: SkipMethodSuite) => instance.shouldSkip)
+  async notSkippedUnlessAsync() {
     assert(true);
   }
 }
@@ -67,8 +67,8 @@ class SkippedSuite {
 }
 
 @Suite()
-@SkipIfNot(() => false)
-class SkippedNotSuite {
+@SkipUnless(() => false)
+class SkippedUnlessSuite {
   @Test()
   testShouldNotRun() {
     assert(false);
@@ -82,7 +82,7 @@ class SuiteWithFeature {
   feature() {}
 
   @Test()
-  @SkipIfNot(hasFeature)
+  @SkipUnless(hasFeature)
   shouldRun() {
     assert(true);
   }
@@ -91,7 +91,7 @@ class SuiteWithFeature {
 @Suite()
 class SuiteWithoutFeature {
   @Test()
-  @SkipIfNot(hasFeature)
+  @SkipUnless(hasFeature)
   shouldBeSkipped() {
     assert(false);
   }

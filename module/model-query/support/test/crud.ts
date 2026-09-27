@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Model, type ModelCrudSupport, type ModelType, NotFoundError, UniqueError } from '@travetto/model';
 import { type Class } from '@travetto/runtime';
-import { SkipIfNot, Suite, Test } from '@travetto/test';
+import { SkipUnless, Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
@@ -32,7 +32,7 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
   }
 
   @Test()
-  @SkipIfNot((self: ModelQueryCrudSuite) => self.supportsUniqueIndexes)
+  @SkipUnless((self: ModelQueryCrudSuite) => self.supportsUniqueIndexes)
   async testUnique() {
     const svc = await this.service;
     await svc.create(UniqueUser2, UniqueUser2.from({ name: 'bob' }));

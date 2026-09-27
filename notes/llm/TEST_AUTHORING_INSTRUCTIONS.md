@@ -93,11 +93,11 @@ async longRunningTest() { }
 async notReadyYet() { }
 
 @Test()
-@SkipIfNot(() => global.gc)
+@SkipUnless(() => global.gc)
 async requiresGC() { }
 
 @Test()
-@SkipIfNot((instance: MySuite) => instance.supportsFeature)
+@SkipUnless((instance: MySuite) => instance.supportsFeature)
 async conditionalTest() { }
 
 @Test({ shouldThrow: ValidationResultError })
@@ -339,12 +339,12 @@ Tests can be conditionally skipped based on runtime capabilities:
 ```ts
 // Skip if GC is not exposed
 @Test()
-@SkipIfNot(() => global.gc)
+@SkipUnless(() => global.gc)
 async ensureCulled() { }
 
 // Skip if the suite doesn't support the feature
 @Test()
-@SkipIfNot((instance: MySuite) => instance.supportsFeature)
+@SkipUnless((instance: MySuite) => instance.supportsFeature)
 async testFeature() { }
 
 // Skip unconditionally

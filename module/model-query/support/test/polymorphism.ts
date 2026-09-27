@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { type ModelCrudSupport, NotFoundError } from '@travetto/model';
 import { castTo } from '@travetto/runtime';
-import { SkipIfNot, Suite, Test } from '@travetto/test';
+import { SkipUnless, Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 import { Doctor, Engineer, Firefighter, Worker } from '@travetto/model/support/test/polymorphism.ts';
@@ -45,7 +45,7 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
   }
 
   @Test()
-  @SkipIfNot(ModelQueryCrudUtil.isSupported)
+  @SkipUnless(ModelQueryCrudUtil.isSupported)
   async testCrudQuery() {
     const svc: ModelQueryCrudSupport & ModelQuerySupport = castTo(await this.service);
     const [doc, doc2, fire, eng] = [
@@ -72,7 +72,7 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
   }
 
   @Test()
-  @SkipIfNot(ModelQuerySuggestUtil.isSupported)
+  @SkipUnless(ModelQuerySuggestUtil.isSupported)
   async testSuggestQuery() {
     const svc: ModelQuerySuggestSupport & ModelQuerySupport = castTo(await this.service);
     const [doc, doc2, fire, eng] = [
@@ -97,7 +97,7 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
   }
 
   @Test()
-  @SkipIfNot(ModelQueryFacetUtil.isSupported)
+  @SkipUnless(ModelQueryFacetUtil.isSupported)
   async testFacetQuery() {
     const svc: ModelQueryFacetSupport & ModelQuerySupport = castTo(await this.service);
     const [doc, doc2, fire, eng] = [
@@ -116,7 +116,7 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
   }
 
   @Test()
-  @SkipIfNot(ModelQueryAggregateUtil.isSupported)
+  @SkipUnless(ModelQueryAggregateUtil.isSupported)
   async testAggregateQuery() {
     const service: ModelQueryAggregateSupport & ModelQuerySupport = castTo(await this.service);
     const [doctorOne, doctorTwo, firefighterOne, firefighterTwo] = [

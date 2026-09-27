@@ -62,7 +62,7 @@ A simple example would be:
 
 Test execution can be customized using additional decorators on individual test methods or suites:
 <ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/common.ts#L11">@SkipIf</a> allows conditionally skipping tests or suites. It accepts a predicate function that receives the suite instance and returns a boolean (or a Promise resolving to a boolean).</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/common.ts#L27">@SkipIfNot</a> allows conditionally skipping tests or suites with an inverted predicate function.</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/common.ts#L27">@SkipUnless</a> allows conditionally skipping tests or suites unless a predicate function resolves to true.</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L59">@Timeout</a> specifies a custom execution timeout in milliseconds for the test.</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L46">@ShouldThrow</a> asserts that the test must throw an expected error, failing if no error is thrown.</li>
 </ul>
@@ -74,7 +74,7 @@ Test execution can be customized using additional decorators on individual test 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> assert <span class="token keyword">from</span> <span class="token string">'node:assert'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ShouldThrow<span class="token punctuation">,</span> SkipIf<span class="token punctuation">,</span> SkipIfNot<span class="token punctuation">,</span> Suite<span class="token punctuation">,</span> Test<span class="token punctuation">,</span> Timeout <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/test'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ShouldThrow<span class="token punctuation">,</span> SkipIf<span class="token punctuation">,</span> SkipUnless<span class="token punctuation">,</span> Suite<span class="token punctuation">,</span> Test<span class="token punctuation">,</span> Timeout <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/test'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Suite</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">ConfiguredSuite</span> <span class="token punctuation">{{'{'}}</span>
@@ -87,7 +87,7 @@ Test execution can be customized using additional decorators on individual test 
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Test</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">SkipIfNot</span></span><span class="token punctuation">(</span><span class="token punctuation">(</span>instance<span class="token operator">:</span> ConfiguredSuite<span class="token punctuation">)</span> <span class="token operator">=></span> instance<span class="token punctuation">.</span>supportsFeature<span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">SkipUnless</span></span><span class="token punctuation">(</span><span class="token punctuation">(</span>instance<span class="token operator">:</span> ConfiguredSuite<span class="token punctuation">)</span> <span class="token operator">=></span> instance<span class="token punctuation">.</span>supportsFeature<span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">skippedViaPredicate</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token function">assert</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>

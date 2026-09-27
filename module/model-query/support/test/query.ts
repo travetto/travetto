@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { type ModelCrudSupport, NotFoundError } from '@travetto/model';
 import { TimeUtil } from '@travetto/runtime';
-import { SkipIfNot, Suite, Test } from '@travetto/test';
+import { SkipUnless, Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
@@ -310,7 +310,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   }
 
   @Test('Test within')
-  @SkipIfNot((instance: ModelQuerySuite) => instance.supportsGeo)
+  @SkipUnless((instance: ModelQuerySuite) => instance.supportsGeo)
   async testWithin() {
     const svc = await this.service;
 

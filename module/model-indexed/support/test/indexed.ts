@@ -3,7 +3,7 @@ import timers from 'node:timers/promises';
 
 import { ModelBulkUtil, NotFoundError, UniqueError } from '@travetto/model';
 import { castTo, TimeUtil } from '@travetto/runtime';
-import { SkipIfNot, Suite, Test } from '@travetto/test';
+import { SkipUnless, Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
@@ -70,7 +70,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   }
 
   @Test()
-  @SkipIfNot((self: ModelIndexedSuite) => self.supportsUniqueIndexes)
+  @SkipUnless((self: ModelIndexedSuite) => self.supportsUniqueIndexes)
   async writeRejectsDuplicateUniqueIndex() {
     const service = await this.service;
 
@@ -210,7 +210,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   }
 
   @Test()
-  @SkipIfNot((self: ModelIndexedSuite) => self.supportsDeepIndexes)
+  @SkipUnless((self: ModelIndexedSuite) => self.supportsDeepIndexes)
   async queryDeepList() {
     const service = await this.service;
 
@@ -228,7 +228,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   }
 
   @Test()
-  @SkipIfNot((self: ModelIndexedSuite) => self.supportsDeepIndexes)
+  @SkipUnless((self: ModelIndexedSuite) => self.supportsDeepIndexes)
   async queryComplexDateList() {
     const service = await this.service;
 

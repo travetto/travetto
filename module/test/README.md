@@ -55,7 +55,7 @@ class SimpleTest {
 ### Test Configuration
 Test execution can be customized using additional decorators on individual test methods or suites:
    *  [@SkipIf](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/common.ts#L11) allows conditionally skipping tests or suites. It accepts a predicate function that receives the suite instance and returns a boolean (or a Promise resolving to a boolean).
-   *  [@SkipIfNot](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/common.ts#L27) allows conditionally skipping tests or suites with an inverted predicate function.
+   *  [@SkipUnless](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/common.ts#L27) allows conditionally skipping tests or suites unless a predicate function resolves to true.
    *  [@Timeout](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L59) specifies a custom execution timeout in milliseconds for the test.
    *  [@ShouldThrow](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L46) asserts that the test must throw an expected error, failing if no error is thrown.
 
@@ -63,7 +63,7 @@ Test execution can be customized using additional decorators on individual test 
 ```typescript
 import assert from 'node:assert';
 
-import { ShouldThrow, SkipIf, SkipIfNot, Suite, Test, Timeout } from '@travetto/test';
+import { ShouldThrow, SkipIf, SkipUnless, Suite, Test, Timeout } from '@travetto/test';
 
 @Suite()
 class ConfiguredSuite {
@@ -76,7 +76,7 @@ class ConfiguredSuite {
   }
 
   @Test()
-  @SkipIfNot((instance: ConfiguredSuite) => instance.supportsFeature)
+  @SkipUnless((instance: ConfiguredSuite) => instance.supportsFeature)
   async skippedViaPredicate() {
     assert(true);
   }

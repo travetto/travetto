@@ -20,10 +20,10 @@ export function SkipIf<T = unknown>(predicate: SkipPredicate<T>): ClassDecorator
 }
 
 /**
- * Marks a test or suite if it should be skipped when the predicate resolves to false
+ * Marks a test or suite if it should be skipped unless the predicate resolves to true
  * @param predicate The skip configuration predicate that will run with the suite instance
  * @kind decorator
  */
-export function SkipIfNot<T = unknown>(predicate: SkipPredicate<T>): ClassDecorator & MethodDecorator {
+export function SkipUnless<T = unknown>(predicate: SkipPredicate<T>): ClassDecorator & MethodDecorator {
   return SkipIf<T>(async (instance: T) => !(await predicate(instance)));
 }

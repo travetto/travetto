@@ -2,7 +2,7 @@
 import { c, d } from '@travetto/doc';
 import { RuntimeIndex } from '@travetto/runtime';
 
-import { SkipIf, SkipIfNot } from './src/decorator/common.ts';
+import { SkipIf, SkipUnless } from './src/decorator/common.ts';
 import { Suite } from './src/decorator/suite.ts';
 import { ShouldThrow, Test, Timeout } from './src/decorator/test.ts';
 import { TestCommand } from './support/cli.test.ts';
@@ -34,7 +34,7 @@ export const text = (
             receives the suite instance and returns a boolean (or a Promise resolving to a boolean).
           </li>
           <li>
-            {SkipIfNot} allows conditionally skipping tests or suites with an inverted predicate function.
+            {SkipUnless} allows conditionally skipping tests or suites unless a predicate function resolves to true.
           </li>
           <li>{Timeout} specifies a custom execution timeout in milliseconds for the test.</li>
           <li>{ShouldThrow} asserts that the test must throw an expected error, failing if no error is thrown.</li>
