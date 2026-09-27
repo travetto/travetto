@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Model, NotFoundError, SubTypeNotSupportedError } from '@travetto/model';
 import { Discriminated } from '@travetto/schema';
-import { Suite, Test } from '@travetto/test';
+import { SkipTest, Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
@@ -41,7 +41,8 @@ export class IndexedEngineer extends IndexedWorker {
 
 @Suite()
 export abstract class ModelIndexedPolymorphismSuite extends BaseModelSuite<ModelIndexedSupport> {
-  @Test('Polymorphic index', { skip: BaseModelSuite.ifNot(ModelIndexedUtil.isSupported) })
+  @Test('Polymorphic index')
+  @SkipTest(BaseModelSuite.ifNot(ModelIndexedUtil.isSupported))
   async polymorphicIndexGet() {
     const service = await this.service;
     const now = 30;
@@ -71,7 +72,8 @@ export abstract class ModelIndexedPolymorphismSuite extends BaseModelSuite<Model
     }
   }
 
-  @Test('Polymorphic index', { skip: BaseModelSuite.ifNot(ModelIndexedUtil.isSupported) })
+  @Test('Polymorphic index')
+  @SkipTest(BaseModelSuite.ifNot(ModelIndexedUtil.isSupported))
   async polymorphicIndexDelete() {
     const service = await this.service;
     const now = 30;

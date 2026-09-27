@@ -300,7 +300,6 @@ class Validation {
     await assert.doesNotReject(() => SchemaValidator.validatePartial(Address, addr));
   }
 
-  // @Test({ skip: false })
   async badValidate() {
     const addr = Address.from({
       city: 'city',

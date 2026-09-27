@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { type ModelCrudSupport, NotFoundError } from '@travetto/model';
 import { castTo } from '@travetto/runtime';
-import { Suite, Test } from '@travetto/test';
+import { SkipTest, Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 import { Doctor, Engineer, Firefighter, Worker } from '@travetto/model/support/test/polymorphism.ts';
@@ -44,7 +44,8 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
     await assert.rejects(() => svc.getByQuery(Firefighter, { where: { name: 'bob' } }), NotFoundError);
   }
 
-  @Test({ skip: ModelQueryPolymorphismSuite.ifNot(ModelQueryCrudUtil.isSupported) })
+  @Test()
+  @SkipTest(ModelQueryPolymorphismSuite.ifNot(ModelQueryCrudUtil.isSupported))
   async testCrudQuery() {
     const svc: ModelQueryCrudSupport & ModelQuerySupport = castTo(await this.service);
     const [doc, doc2, fire, eng] = [
@@ -70,7 +71,8 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
     assert((await this.getSize(Firefighter)) === 0);
   }
 
-  @Test({ skip: ModelQueryPolymorphismSuite.ifNot(ModelQuerySuggestUtil.isSupported) })
+  @Test()
+  @SkipTest(ModelQueryPolymorphismSuite.ifNot(ModelQuerySuggestUtil.isSupported))
   async testSuggestQuery() {
     const svc: ModelQuerySuggestSupport & ModelQuerySupport = castTo(await this.service);
     const [doc, doc2, fire, eng] = [
@@ -94,7 +96,8 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
     assert((await svc.suggestValuesByQuery(Firefighter, 'name', 'r'))[0] === 'rob');
   }
 
-  @Test({ skip: ModelQueryPolymorphismSuite.ifNot(ModelQueryFacetUtil.isSupported) })
+  @Test()
+  @SkipTest(ModelQueryPolymorphismSuite.ifNot(ModelQueryFacetUtil.isSupported))
   async testFacetQuery() {
     const svc: ModelQueryFacetSupport & ModelQuerySupport = castTo(await this.service);
     const [doc, doc2, fire, eng] = [
@@ -112,7 +115,8 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
     assert.deepStrictEqual(docFacet, [{ count: 2, key: 'eyes' }]);
   }
 
-  @Test({ skip: ModelQueryPolymorphismSuite.ifNot(ModelQueryAggregateUtil.isSupported) })
+  @Test()
+  @SkipTest(ModelQueryPolymorphismSuite.ifNot(ModelQueryAggregateUtil.isSupported))
   async testAggregateQuery() {
     const service: ModelQueryAggregateSupport & ModelQuerySupport = castTo(await this.service);
     const [doctorOne, doctorTwo, firefighterOne, firefighterTwo] = [

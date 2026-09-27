@@ -21,7 +21,7 @@ This module provides unit testing functionality that integrates with the framewo
 **Note**: All tests should be under the `**/*` folders. The pattern for tests is defined as as a standard glob using [Node](https://nodejs.org)'s built in globbing support.
 
 ## Definition
-A test suite is a collection of individual tests. All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L13) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L25) decorator. All tests intrinsically support `async`/`await`. 
+A test suite is a collection of individual tests. All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L13) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L26) decorator. All tests intrinsically support `async`/`await`. 
 
 A simple example would be:
 
@@ -48,6 +48,48 @@ class SimpleTest {
   test2() {
     const text = this.#complexService.getText();
     assert(/abc/.test(text));
+  }
+}
+```
+
+### Test Configuration
+Test execution can be customized using additional decorators on individual test methods:
+   *  [@SkipTest](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L59) allows conditionally or unconditionally skipping tests. It accepts a static boolean or a predicate function that receives the suite instance and returns a boolean (or a Promise resolving to a boolean).
+   *  [@Timeout](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L71) specifies a custom execution timeout in milliseconds for the test.
+   *  [@ShouldThrow](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L47) asserts that the test must throw an expected error, failing if no error is thrown.
+
+**Code: Configured Test Execution**
+```typescript
+import assert from 'node:assert';
+
+import { ShouldThrow, SkipTest, Suite, Test, Timeout } from '@travetto/test';
+
+@Suite()
+class ConfiguredSuite {
+  supportsFeature = false;
+
+  @Test()
+  @SkipTest(true)
+  async skippedDirectly() {
+    assert(false);
+  }
+
+  @Test()
+  @SkipTest((instance: ConfiguredSuite) => !instance.supportsFeature)
+  async skippedViaPredicate() {
+    assert(true);
+  }
+
+  @Test()
+  @Timeout(1000)
+  async timedOperation() {
+    assert(1 === 1);
+  }
+
+  @Test()
+  @ShouldThrow(Error)
+  async mustThrow() {
+    throw new Error('Expected failure');
   }
 }
 ```
