@@ -42,4 +42,21 @@ export class SqliteDialectSuite extends BaseSQLDialectSuite {
     assert(sql.includes('json_patch('));
     assert(sql.includes('= elem.value'));
   }
+
+  @Test()
+  async testSqliteDropTables() {
+    const tableContext = getTableContext(ParentModel);
+    const singleTableSQL = this.dialect.getDropTableSQL(tableContext);
+    assert(singleTableSQL === 'DROP TABLE IF EXISTS "parentmodel";');
+
+    const otherTableContext = { ...tableContext, tableName: 'other_model' };
+    const multipleTablesSQL = this.dialect.getDropTablesSQL([tableContext, otherTableContext]);
+    assert(multipleTablesSQL === 'DROP TABLE IF EXISTS "parentmodel";\nDROP TABLE IF EXISTS "other_model";');
+
+    const dedupedSQL = this.dialect.getDropTablesSQL([tableContext, tableContext, otherTableContext]);
+    assert(dedupedSQL === 'DROP TABLE IF EXISTS "parentmodel";\nDROP TABLE IF EXISTS "other_model";');
+
+    const emptySQL = this.dialect.getDropTablesSQL([]);
+    assert(emptySQL === '');
+  }
 }

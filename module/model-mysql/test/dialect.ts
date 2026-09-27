@@ -91,4 +91,21 @@ export class MysqlDialectSuite extends BaseSQLDialectSuite {
     const noopAlterColumnSql = this.dialect.getAlterColumnTypeSQL(tableContext, 'title', 'VARCHAR(255)', 'VARCHAR(255)');
     assert(noopAlterColumnSql === undefined);
   }
+
+  @Test()
+  async testMysqlDropTables() {
+    const tableContext = getTableContext(ParentModel);
+    const singleTableSQL = this.dialect.getDropTablesSQL([tableContext]);
+    assert(singleTableSQL === 'DROP TABLE IF EXISTS `parentmodel`;');
+
+    const otherTableContext = { ...tableContext, tableName: 'other_model' };
+    const multipleTablesSQL = this.dialect.getDropTablesSQL([tableContext, otherTableContext]);
+    assert(multipleTablesSQL === 'DROP TABLE IF EXISTS `parentmodel`, `other_model`;');
+
+    const dedupedSQL = this.dialect.getDropTablesSQL([tableContext, tableContext, otherTableContext]);
+    assert(dedupedSQL === 'DROP TABLE IF EXISTS `parentmodel`, `other_model`;');
+
+    const emptySQL = this.dialect.getDropTablesSQL([]);
+    assert(emptySQL === '');
+  }
 }

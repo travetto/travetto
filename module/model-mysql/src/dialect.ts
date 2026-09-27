@@ -241,6 +241,11 @@ GROUP BY INDEX_NAME, TABLE_NAME, NON_UNIQUE;
     return `DROP INDEX ${this.escapeIdentifier(indexName)} ON ${this.escapeIdentifier(context.tableName)};`;
   }
 
+  getDropTablesSQL(tableContexts: TableContext[]): string {
+    const tableNames = [...new Set(tableContexts.map(context => this.escapeIdentifier(context.tableName)))];
+    return tableNames.length > 0 ? `DROP TABLE IF EXISTS ${tableNames.join(', ')};` : '';
+  }
+
   override getTruncateTableSQL(context: TableContext): string {
     return `TRUNCATE TABLE ${this.escapeIdentifier(context.tableName)};`;
   }

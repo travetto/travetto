@@ -307,6 +307,17 @@ export abstract class BaseSQLModelService<C = unknown>
     );
   }
 
+  async dropTables(tableContexts: TableContext[]): Promise<void> {
+    if (tableContexts.length === 0) {
+      return;
+    }
+    const sql = this.dialect.getDropTablesSQL(tableContexts);
+    await ModelStorageUtil.runAndIgnoreNotFound(
+      () => this.connection.execute(sql),
+      error => this.dialect.isTableNotFoundError(error)
+    );
+  }
+
   async truncateTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
     const sql = this.dialect.getTruncateTableSQL(tableContext);
     await this.connection.execute(sql);
@@ -405,10 +416,8 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async deleteStorage(): Promise<void> {
-    for (const modelClass of ModelRegistryIndex.getClasses()) {
-      const tableContext = this.connection.getContext(modelClass);
-      await this.dropTable(tableContext);
-    }
+    const tableContexts = ModelRegistryIndex.getClasses().map(modelClass => this.connection.getContext(modelClass));
+    await this.dropTables(tableContexts);
   }
 
   async deleteModel(modelClass: Class): Promise<void> {
