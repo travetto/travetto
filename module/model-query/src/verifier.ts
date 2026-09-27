@@ -16,9 +16,9 @@ interface State {
 }
 
 interface ProcessingHandler {
-  preMember?(state: State, value: unknown): boolean;
+  onOperator?(state: State, key: string, value: unknown): boolean | undefined;
   onSimpleType(state: State, type: SimpleType, value: unknown, isArray: boolean): void;
-  onComplexType?(state: State, cls: Class, value: unknown, isArray: boolean): boolean | undefined;
+  onComplexType?(state: State, targetClass: Class, value: unknown, isArray: boolean): boolean | undefined;
 }
 
 // const TOP_LEVEL_OPS = new Set(['$and', '$or', '$not']);
@@ -54,10 +54,6 @@ export class QueryVerifier {
       return;
     }
 
-    if (handler.preMember?.(state, clause)) {
-      return;
-    }
-
     for (const [key, value] of Object.entries(clause)) {
       // Validate value is correct, and key is valid
       if (value === undefined || value === null) {
@@ -65,7 +61,7 @@ export class QueryVerifier {
         continue;
       }
 
-      if (handler.preMember?.(state, value)) {
+      if (handler.onOperator?.(state, key, value)) {
         continue;
       }
 
@@ -83,12 +79,12 @@ export class QueryVerifier {
         handler.onSimpleType(state.extend(key), type, value, field.array ?? false);
       } else {
         // Otherwise recurse
-        const subCls = field.type;
+        const subClass = field.type;
         const subValue = value;
-        if (handler.onComplexType?.(state, subCls, subValue, field.array ?? false)) {
+        if (handler.onComplexType?.(state.extend(key), subClass, subValue, field.array ?? false)) {
           continue;
         }
-        this.processGenericClause(state.extend(key), subCls, subValue, handler);
+        this.processGenericClause(state.extend(key), subClass, subValue, handler);
       }
     }
   }
@@ -152,6 +148,10 @@ export class QueryVerifier {
             return;
           }
         }
+      } else if (key === '$text') {
+        if (typeof keyValue !== 'string' && (!DataUtil.isPlainObject(keyValue) || typeof keyValue.query !== 'string')) {
+          state.log('$text requires a string or an object with a query string');
+        }
       } else if (!(key in allowed)) {
         state.log(`Operation ${key}, not allowed for field of type ${declaredType}`);
       } else {
@@ -167,42 +167,38 @@ export class QueryVerifier {
   /**
    * Process where clause
    */
-  static processWhereClause<T>(st: State, cls: Class<T>, passed: object): void {
-    this.processGenericClause(st, cls, passed, {
-      preMember: (state: State, value: Record<string, unknown>) => {
-        const keys = Object.keys(value);
-        const firstKey = keys[0];
-
-        if (!firstKey) {
-          return false;
-        }
-
-        const sub = value[firstKey];
-        // Verify boolean clauses
-        if (firstKey === '$and' || firstKey === '$or') {
-          if (!Array.isArray(sub)) {
-            state.log(`${firstKey} requires the value to be an array`);
+  static processWhereClause<T>(state: State, cls: Class<T>, passed: object): void {
+    this.processGenericClause(state, cls, passed, {
+      onOperator: (subState, key, value) => {
+        if (key === '$and' || key === '$or') {
+          if (!Array.isArray(value)) {
+            subState.log(`${key} requires the value to be an array`);
           } else {
-            // Iterate
-            for (const item of sub) {
-              this.processWhereClause(state, cls, item);
+            for (const item of value) {
+              this.processWhereClause(subState, cls, item);
             }
-            return true;
           }
-        } else if (firstKey === '$not') {
-          if (DataUtil.isPlainObject(sub)) {
-            this.processWhereClause(state, cls, sub);
-            return true;
+          return true;
+        } else if (key === '$not') {
+          if (DataUtil.isPlainObject(value)) {
+            this.processWhereClause(subState, cls, value);
           } else {
-            state.log(`${firstKey} requires the value to be an object`);
+            subState.log('$not requires the value to be an object');
           }
+          return true;
         }
         return false;
       },
-      onSimpleType: (state: State, type: SimpleType, value: unknown, isArray: boolean) => {
-        this.checkOperatorClause(state, type, value, TypeUtil.OPERATORS[type], isArray);
+      onSimpleType: (subState: State, type: SimpleType, value: unknown, isArray: boolean) => {
+        this.checkOperatorClause(subState, type, value, TypeUtil.OPERATORS[type], isArray);
       },
-      onComplexType: (state: State, subCls: Class<T>, subValue: T, isArray: boolean): boolean => false
+      onComplexType: (subState: State, subClass: Class, subValue: unknown): boolean => {
+        if (DataUtil.isPlainObject(subValue)) {
+          this.processWhereClause(subState, subClass, subValue);
+          return true;
+        }
+        return false;
+      }
     });
   }
 
@@ -216,13 +212,22 @@ export class QueryVerifier {
   /**
    * Handle sort clause
    */
-  static processSortClause<T>(st: State, cls: Class<T>, passed: object): void {
-    this.processGenericClause(st, cls, passed, {
-      onSimpleType: (state, type, value) => {
+  static processSortClause<T>(state: State, cls: Class<T>, passed: object): void {
+    this.processGenericClause(state, cls, passed, {
+      onOperator: (subState, key, value) => {
+        if (key === '$score') {
+          if (value !== 1 && value !== -1) {
+            subState.log(`Only -1 and 1 are allowed for $score sorting, not ${JSONUtil.toUTF8(value)}`);
+          }
+          return true;
+        }
+        return false;
+      },
+      onSimpleType: (subState, type, value) => {
         if (value === 1 || value === -1 || typeof value === 'boolean') {
           return;
         }
-        state.log(`Only true, false -1, and 1 are allowed for sorting, not ${JSONUtil.toUTF8(value)}`);
+        subState.log(`Only true, false -1, and 1 are allowed for sorting, not ${JSONUtil.toUTF8(value)}`);
       }
     });
   }
@@ -230,8 +235,8 @@ export class QueryVerifier {
   /**
    * Handle select clause
    */
-  static processSelectClause<T>(st: State, cls: Class<T>, passed: object): void {
-    this.processGenericClause(st, cls, passed, {
+  static processSelectClause<T>(state: State, cls: Class<T>, passed: object): void {
+    this.processGenericClause(state, cls, passed, {
       onSimpleType: (state, type, value) => {
         const actual = TypeUtil.getActualType(value);
         if (actual === 'number' || actual === 'boolean') {

@@ -194,6 +194,12 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
 ### String Fields
 
    *  `field: { $regex: RegExp | string; }` checks the field against the regular expression
+   *  `field: { $text: string | { query: string; language?: string } }` checks the field against a full-text search query with optional language
+
+### Sorting & Relevance Ranking
+Queries support sorting by field values as well as full-text search relevance:
+   *  `field: 1 | -1` sorts ascending (1) or descending (-1) by field value
+   *  `$score: -1 | 1` sorts by full-text search relevance score
 
 ### Geo Point Fields
 

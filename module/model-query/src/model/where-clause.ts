@@ -37,7 +37,17 @@ type ArrayField<T> =
   | T
   | T[];
 
-type StringField = { $regex?: RegExp | string };
+export type TextSearchClause =
+  | string
+  | {
+      query: string;
+      language?: string;
+    };
+
+type StringField = {
+  $regex?: RegExp | string;
+  $text?: TextSearchClause;
+};
 
 type GeoField = {
   $geoWithin?: Point[];

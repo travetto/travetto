@@ -1,7 +1,8 @@
 import type { DatabaseSync } from 'node:sqlite';
 
 import { Injectable, PostConstruct } from '@travetto/di';
-import { BaseSQLModelService } from '@travetto/model-sql';
+import type { ModelType } from '@travetto/model';
+import { BaseSQLModelService, type TableContext } from '@travetto/model-sql';
 
 import type { SqliteConnection } from './connection.ts';
 
@@ -22,7 +23,14 @@ export class SqliteModelService extends BaseSQLModelService {
   }
 
   @PostConstruct()
-  override async initialize(): Promise<void> {
+  async initialize(): Promise<void> {
     await super.initialize();
+  }
+
+  async upsertTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
+    await super.upsertTable(tableContext);
+    for (const sql of this.dialect.getCreateTextSearchIndexSQLs(tableContext)) {
+      await this.connection.execute(sql);
+    }
   }
 }

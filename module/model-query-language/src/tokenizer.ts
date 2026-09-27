@@ -14,7 +14,8 @@ const GREATER_THAN = 0x3e,
   MODULO = 0x25,
   TILDE = 0x7e,
   AND = 0x26,
-  OR = 0x7c;
+  OR = 0x7c,
+  AT_SIGN = 0x40;
 const SPACE = 0x20,
   TAB = 0x09;
 const DBL_QUOTE = 0x22,
@@ -186,6 +187,7 @@ export class QueryLanguageTokenizer {
         case TILDE:
         case AND:
         case OR:
+        case AT_SIGN:
           this.#flush(state, 'operator');
           break;
         // Handle whitespace

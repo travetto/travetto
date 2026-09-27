@@ -2,7 +2,14 @@ import type * as estypes from '@elastic/elasticsearch/api/types';
 
 import { ModelRegistryIndex, type ModelType } from '@travetto/model';
 import type { SortedIndex } from '@travetto/model-indexed';
-import { ModelQueryUtil, type Query, type SelectClause, type SortClause, type WhereClause } from '@travetto/model-query';
+import {
+  ModelQueryUtil,
+  type Query,
+  type SelectClause,
+  type SortClause,
+  type TextSearchClause,
+  type WhereClause
+} from '@travetto/model-query';
 import { type Any, type Class, castTo, RuntimeError, TypedObject } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -57,6 +64,9 @@ export class ElasticsearchQueryUtil {
         const item = this.extractSimple(option);
         const key = Object.keys(item)[0];
         const value: boolean | -1 | 1 = castTo(item[key]);
+        if (key === '$score') {
+          return { _score: { order: value === 1 || value === true ? 'asc' : 'desc' } };
+        }
         return { [key]: { order: value === 1 || value === true ? 'asc' : 'desc' } };
       });
     } else {
@@ -95,6 +105,27 @@ export class ElasticsearchQueryUtil {
     const fields = SchemaRegistryIndex.get(cls).getFields();
 
     for (const property of TypedObject.keys(item)) {
+      if (property === '$text') {
+        const clause: TextSearchClause = castTo(item[property]);
+        const textQuery = typeof clause === 'string' ? clause : clause.query;
+        const textFields: string[] = [];
+        for (const [fieldName, fieldConfig] of Object.entries(fields)) {
+          if (fieldConfig.type === String && fieldConfig.specifiers?.includes('text')) {
+            textFields.push(`${path}${fieldName}.text`);
+          }
+        }
+        if (textFields.length > 0) {
+          items.push({
+            simple_query_string: {
+              query: textQuery,
+              fields: textFields,
+              default_operator: 'and'
+            }
+          });
+        }
+        continue;
+      }
+
       const top = item[property];
       const declaredSchema = fields[property];
       const declaredType = declaredSchema.type;
@@ -229,6 +260,18 @@ export class ElasticsearchQueryUtil {
                 geo_distance: {
                   distance: `${dist}${unit}`,
                   [subPath]: top.$near
+                }
+              });
+              break;
+            }
+            case '$text': {
+              const textClause: TextSearchClause = castTo(value);
+              const textQuery = typeof textClause === 'string' ? textClause : textClause.query;
+              items.push({
+                simple_query_string: {
+                  query: textQuery,
+                  fields: [`${subPath}.text`],
+                  default_operator: 'and'
                 }
               });
               break;

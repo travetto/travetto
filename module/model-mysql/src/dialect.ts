@@ -1,11 +1,16 @@
 import type { ModelType } from '@travetto/model';
-import { AbstractANSI99Dialect, type JSONSqlPathMode, type ResolvedPathContext, type TableContext } from '@travetto/model-sql';
+import type { TextSearchClause } from '@travetto/model-query';
+import {
+  AbstractANSI99Dialect,
+  type JSONSqlPathMode,
+  type ResolvedPathContext,
+  type TableContext,
+  type TextSearchState
+} from '@travetto/model-sql';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
-import type { SchemaFieldConfig } from '@travetto/schema';
+import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 export class MysqlDialect extends AbstractANSI99Dialect {
-  override returningSupport = false;
-
   override escapeIdentifier(name: string): string {
     return `\`${name.replaceAll('`', '``')}\``;
   }
@@ -221,6 +226,7 @@ WHERE
   table_schema = ? 
   AND table_name = ? 
   AND INDEX_NAME != 'PRIMARY'
+  AND INDEX_NAME NOT LIKE '%_fts%'
 GROUP BY INDEX_NAME, TABLE_NAME, NON_UNIQUE;
 `,
       parameters: [context.database, context.tableName]
@@ -237,7 +243,7 @@ GROUP BY INDEX_NAME, TABLE_NAME, NON_UNIQUE;
     );
   }
 
-  override getDropIndexSQL(context: TableContext, indexName: string): string {
+  getDropIndexSQL(context: TableContext, indexName: string): string {
     return `DROP INDEX ${this.escapeIdentifier(indexName)} ON ${this.escapeIdentifier(context.tableName)};`;
   }
 
@@ -246,11 +252,11 @@ GROUP BY INDEX_NAME, TABLE_NAME, NON_UNIQUE;
     return tableNames.length > 0 ? `DROP TABLE IF EXISTS ${tableNames.join(', ')};` : '';
   }
 
-  override getTruncateTableSQL(context: TableContext): string {
+  getTruncateTableSQL(context: TableContext): string {
     return `TRUNCATE TABLE ${this.escapeIdentifier(context.tableName)};`;
   }
 
-  override getAlterColumnTypeSQL(context: TableContext, columnName: string, columnType: string, existingType: string): string | undefined {
+  getAlterColumnTypeSQL(context: TableContext, columnName: string, columnType: string, existingType: string): string | undefined {
     const normalizedExisting = existingType.replaceAll('CHARACTER VARYING', 'VARCHAR').replaceAll('INTEGER', 'INT');
     const normalizedRequested = columnType.toUpperCase().replaceAll('CHARACTER VARYING', 'VARCHAR').replaceAll('INTEGER', 'INT');
 
@@ -268,5 +274,71 @@ GROUP BY INDEX_NAME, TABLE_NAME, NON_UNIQUE;
           ('code' in error && (error.code === 'ER_BAD_TABLE_ERROR' || error.code === 'ER_NO_SUCH_TABLE')))) ||
       (error instanceof Error && (/unknown table/i.test(error.message) || /doesn't exist/i.test(error.message)))
     );
+  }
+
+  getCreateTextSearchIndexSQLs<T extends ModelType>(tableContext: TableContext<T>): string[] {
+    const textFields = this.getTextSearchFields(tableContext);
+    if (textFields.length === 0) {
+      return [];
+    }
+    const statements: string[] = [];
+    const columns = textFields.map(field => this.escapeIdentifier(field.name)).join(', ');
+    const indexName = `idx_${tableContext.tableName}_fts`;
+    statements.push(
+      `CREATE FULLTEXT INDEX ${this.escapeIdentifier(indexName)} ON ${this.escapeIdentifier(tableContext.tableName)} (${columns});`
+    );
+    if (textFields.length > 1) {
+      for (const field of textFields) {
+        const singleIndexName = `idx_${tableContext.tableName}_fts_${field.name}`;
+        statements.push(
+          `CREATE FULLTEXT INDEX ${this.escapeIdentifier(singleIndexName)} ON ${this.escapeIdentifier(tableContext.tableName)} (${this.escapeIdentifier(field.name)});`
+        );
+      }
+    }
+    return statements;
+  }
+
+  compileTextWhereClause<T extends ModelType>(
+    tableContext: TableContext<T>,
+    clause: TextSearchClause,
+    identificationPath: string,
+    fieldPath?: string[]
+  ): { sql: string; parameters: Record<string, unknown> } {
+    let columns: string;
+
+    if (fieldPath && fieldPath.length > 0) {
+      const resolvedContext = this.resolvePath(tableContext, fieldPath, 'read');
+      columns = resolvedContext.sqlPath;
+    } else {
+      const textFields = this.getTextSearchFields(tableContext);
+      columns = textFields.map(field => this.escapeIdentifier(field.name)).join(', ');
+    }
+    const textQuery = typeof clause === 'string' ? clause : clause.query;
+    const identifier = `%%${identificationPath}%%`;
+
+    return {
+      sql: `MATCH(${columns}) AGAINST(${identifier} IN BOOLEAN MODE)`,
+      parameters: { [identifier]: textQuery }
+    };
+  }
+
+  compileTextScoreSort<T extends ModelType>(tableContext: TableContext<T>, direction: 1 | -1, textSearches?: TextSearchState[]): string {
+    if (!textSearches || textSearches.length === 0) {
+      return '';
+    }
+    const scoreExpressions = textSearches.map(entry => {
+      let columns: string;
+      if (entry.fieldPath && entry.fieldPath.length > 0) {
+        const resolvedContext = this.resolvePath(tableContext, entry.fieldPath, 'read');
+        columns = resolvedContext.sqlPath;
+      } else {
+        const textFields = this.getTextSearchFields(tableContext);
+        columns = textFields.map(field => this.escapeIdentifier(field.name)).join(', ');
+      }
+      const escaped = this.escapeLiteral(entry.query);
+      return `MATCH(${columns}) AGAINST('${escaped}' IN BOOLEAN MODE)`;
+    });
+    const combined = scoreExpressions.length > 1 ? `(${scoreExpressions.join(' + ')})` : scoreExpressions[0];
+    return `${combined} ${direction === -1 ? 'DESC' : 'ASC'}`;
   }
 }

@@ -20,6 +20,7 @@ export const text = (
         <li>
           {d.input('~')} - Matches regular expression, supports the {d.input('i')} flag to trigger case insensitive searches
         </li>
+        <li>{d.input('@@')} - Full-text search match against indexed text fields</li>
         <li>
           {d.input('!')}, {d.input('not')} - Negates a clause
         </li>
@@ -46,6 +47,13 @@ export const text = (
         When querying with regular expressions, patterns can be specified as {d.input("'strings'")} or as {d.input('/patterns/')}. The
         latter allows for the case insensitive modifier: {d.input('/pattern/i')}. Supporting the insensitive flag is up to the underlying
         model implementation.
+      </c.SubSection>
+      <c.SubSection title="Full-Text Search">
+        When querying indexed text fields, the {d.input('@@')} operator performs full-text matching against the target field using the
+        underlying engine's full-text search capabilities. Exact phrases can be specified with quotes (
+        {d.input('title @@ \'"Relational Database"\'')}), and exclusions can be specified with a minus prefix (
+        {d.input("title @@ 'database -oracle'")}). Multi-field searches can be expressed using boolean disjunction:
+        <c.Code title="Multi-field text search query" src="title @@ 'PostgreSQL' or content @@ 'PostgreSQL'" language="sql" />
       </c.SubSection>
     </c.Section>
   </>

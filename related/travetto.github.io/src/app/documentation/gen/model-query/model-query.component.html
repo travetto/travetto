@@ -243,6 +243,14 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
 <h3 id="string-fields">String Fields</h3>
 
 <ul> <li><code class="item input">field: {{'{'}} $regex: RegExp | string; {{'}'}}</code> checks the field against the regular expression</li>
+<li><code class="item input">field: {{'{'}} $text: string | {{'{'}} query: string; language?: string {{'}'}} {{'}'}}</code> checks the field against a full-text search query with optional language</li>
+</ul>
+
+<h3 id="sorting-relevance-ranking">Sorting & Relevance Ranking</h3>
+
+Queries support sorting by field values as well as full-text search relevance:
+<ul> <li><code class="item input">field: 1 | -1</code> sorts ascending (1) or descending (-1) by field value</li>
+<li><code class="item input">$score: -1 | 1</code> sorts by full-text search relevance score</li>
 </ul>
 
 <h3 id="geo-point-fields">Geo Point Fields</h3>

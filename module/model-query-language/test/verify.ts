@@ -104,19 +104,103 @@ export class VerifyTest {
   }
 
   @Test()
+  async verifyQueryText() {
+    const test = <T extends ModelType>(cls: Class<T>) => {
+      const query: Query<T> = {
+        where: QueryLanguageParser.parseToQuery("email @@ 'bob'")
+      };
+      QueryVerifier.verify(cls, query);
+    };
+
+    assert.doesNotThrow(() => test(ModelUser));
+    assert.doesNotThrow(() => test(User));
+  }
+
+  @Test()
   async verifyArrayOperationsWithEmpty() {
-    for (const op of ['$in', '$nin', '$all', '$elemMatch']) {
+    for (const operator of ['$in', '$nin', '$all', '$elemMatch']) {
       await assert.rejects(
         async () =>
           QueryVerifier.verify(User, {
             where: {
               email: {
-                [op]: []
+                [operator]: []
               }
             }
           }),
         /Validation Error/i
       );
     }
+  }
+
+  @Test()
+  async verifyWhereSiblingProperties() {
+    assert.doesNotThrow(() =>
+      QueryVerifier.verify(User, {
+        where: castTo({
+          $and: [{ id: '5' }],
+          email: 'test@example.com'
+        })
+      })
+    );
+
+    await assert.rejects(
+      async () =>
+        QueryVerifier.verify(User, {
+          where: castTo({
+            $and: [{ id: '5' }],
+            unknownProperty: 'test'
+          })
+        }),
+      /Validation Error/i
+    );
+  }
+
+  @Test()
+  async verifyNestedBooleanClauses() {
+    assert.doesNotThrow(() =>
+      QueryVerifier.verify(User, {
+        where: castTo({
+          preferences: {
+            $or: [{ language: 'en' }, { language: 'es' }]
+          }
+        })
+      })
+    );
+
+    await assert.rejects(
+      async () =>
+        QueryVerifier.verify(User, {
+          where: castTo({
+            preferences: {
+              $or: [{ unknownLanguageField: 'en' }]
+            }
+          })
+        }),
+      /Validation Error/i
+    );
+  }
+
+  @Test()
+  async verifySortScore() {
+    const errorList: string[] = [];
+    const state = {
+      path: 'sort',
+      collect: (_path: string, message: string) => errorList.push(message),
+      log: (message: string) => errorList.push(message),
+      extend: (_subPath: string) => state
+    };
+
+    QueryVerifier.processSortClause(state, User, { $score: -1 });
+    assert.deepStrictEqual(errorList, []);
+
+    QueryVerifier.processSortClause(state, User, { $score: 1 });
+    assert.deepStrictEqual(errorList, []);
+
+    QueryVerifier.processSortClause(state, User, { email: 1 });
+    assert.deepStrictEqual(errorList, []);
+
+    QueryVerifier.processSortClause(state, User, { $score: 2 });
+    assert.ok(errorList.length > 0);
   }
 }

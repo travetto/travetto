@@ -80,6 +80,7 @@ export const OPERATOR_TRANSLATION: Record<string, string> = {
   '!=': '$ne',
   '==': '$eq',
   '~': '$regex',
+  '@@': '$text',
   '!': '$not',
   in: '$in',
   'not-in': '$nin'

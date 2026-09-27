@@ -43,6 +43,12 @@ export class QueryStringTest {
       { type: 'operator', value: '~' },
       { type: 'literal', value: /b.c.d/ }
     ]);
+
+    assert.deepStrictEqual(QueryLanguageTokenizer.tokenize("title @@ 'PostgreSQL'"), [
+      { type: 'identifier', value: 'title' },
+      { type: 'operator', value: '@@' },
+      { type: 'literal', value: 'PostgreSQL' }
+    ]);
   }
 
   @Test('Parser')
@@ -181,5 +187,46 @@ export class QueryStringTest {
       'createdAt > -7d AND deleteAt > 0d'
     );
     assert.deepStrictEqual(parsed, { $and: [{ createdAt: { $gt: '-7d' } }, { deleteAt: { $gt: '0d' } }] });
+  }
+
+  @Test('Parse Field Text Search')
+  async parseFieldTextSearch() {
+    const parsedSimple = QueryLanguageParser.parseToQuery("title @@ 'PostgreSQL'");
+    assert.deepStrictEqual(parsedSimple, { title: { $text: 'PostgreSQL' } });
+
+    const parsedNested = QueryLanguageParser.parseToQuery("user.bio @@ 'architect'");
+    assert.deepStrictEqual(parsedNested, { user: { bio: { $text: 'architect' } } });
+  }
+
+  @Test('Parse Multi-Field Text Search')
+  async parseMultiFieldTextSearch() {
+    const parsed = QueryLanguageParser.parseToQuery("title @@ 'database' or body @@ 'database'");
+    assert.deepStrictEqual(parsed, {
+      $or: [{ title: { $text: 'database' } }, { body: { $text: 'database' } }]
+    });
+  }
+
+  @Test('Parse Combined Text Search')
+  async parseCombinedTextSearch() {
+    const parsed = QueryLanguageParser.parseToQuery("title @@ 'database' and price < 100");
+    assert.deepStrictEqual(parsed, {
+      $and: [{ title: { $text: 'database' } }, { price: { $lt: 100 } }]
+    });
+  }
+
+  @Test('Parse Exact Phrase and Exclusion Text Search')
+  async parseExactPhraseAndExclusionTextSearch() {
+    const parsed = QueryLanguageParser.parseToQuery('title @@ \'"relational database" -oracle\'');
+    assert.deepStrictEqual(parsed, {
+      title: { $text: '"relational database" -oracle' }
+    });
+  }
+
+  @Test('Parse Negated Text Search')
+  async parseNegatedTextSearch() {
+    const parsed = QueryLanguageParser.parseToQuery("not (title @@ 'draft')");
+    assert.deepStrictEqual(parsed, {
+      $not: { title: { $text: 'draft' } }
+    });
   }
 }
