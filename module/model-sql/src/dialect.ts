@@ -231,6 +231,11 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     return `DROP TABLE IF EXISTS ${this.escapeIdentifier(context.tableName)};`;
   }
 
+  getDropTablesSQL(tableContexts: TableContext[]): string {
+    const tableNames = [...new Set(tableContexts.map(context => this.escapeIdentifier(context.tableName)))];
+    return tableNames.map(tableName => `DROP TABLE IF EXISTS ${tableName};`).join('\n');
+  }
+
   getAlterColumnTypeSQL?(context: TableContext, columnName: string, columnType: string, existingType: string): string | undefined;
 
   // Query Compilation

@@ -160,6 +160,10 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
       console.debug('Executing SQLite query', { query, values });
       const client = this.active ?? (await this.acquire());
       try {
+        if (query.includes(';\n')) {
+          client.exec(query);
+          return { count: 0, records: [] };
+        }
         const prepared = client.prepare(query);
         prepared.setReadBigInts(true);
         if (isSelect) {

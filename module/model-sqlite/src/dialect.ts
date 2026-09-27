@@ -253,6 +253,11 @@ WHERE type='index' AND tbl_name=?;
     return `DROP INDEX IF EXISTS ${this.escapeIdentifier(indexName)};`;
   }
 
+  getDropTablesSQL(tableContexts: TableContext[]): string {
+    const tableNames = [...new Set(tableContexts.map(context => this.escapeIdentifier(context.tableName)))];
+    return tableNames.map(tableName => `DROP TABLE IF EXISTS ${tableName};`).join('\n');
+  }
+
   getTruncateTableSQL(context: TableContext): string {
     return `DELETE FROM ${this.escapeIdentifier(context.tableName)};`;
   }

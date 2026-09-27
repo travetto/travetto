@@ -345,6 +345,11 @@ ${offset !== undefined ? `OFFSET ${offset}` : ''};`;
     return `DROP TABLE IF EXISTS ${this.escapeIdentifier(context.tableName)} CASCADE;`;
   }
 
+  getDropTablesSQL(tableContexts: TableContext[]): string {
+    const tableNames = [...new Set(tableContexts.map(context => this.escapeIdentifier(context.tableName)))];
+    return tableNames.length > 0 ? `DROP TABLE IF EXISTS ${tableNames.join(', ')} CASCADE;` : '';
+  }
+
   getTruncateTableSQL(context: TableContext): string {
     return `TRUNCATE TABLE ${this.escapeIdentifier(context.tableName)} CASCADE;`;
   }
