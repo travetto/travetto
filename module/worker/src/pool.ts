@@ -19,8 +19,8 @@ import {
  * Work pool support
  */
 export class WorkPool {
-  static MAX_SIZE = os.availableParallelism();
-  static DEFAULT_SIZE = Math.max(Math.trunc(WorkPool.MAX_SIZE * 0.75), 4);
+  static MAX_SIZE = os.availableParallelism() * 2;
+  static DEFAULT_SIZE = Math.max(Math.trunc((WorkPool.MAX_SIZE / 2) * 0.75), 4);
 
   static #shouldTrace(): boolean {
     return (Env.DEBUG.value ?? '').includes('@travetto/worker');

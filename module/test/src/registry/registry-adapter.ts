@@ -71,13 +71,17 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
         class: this.#cls,
         classId: this.#cls.Ⲑid,
         tags: [],
-        skip: isAbstract ? () => true : undefined,
         import: Runtime.getImport(this.#cls),
         lineStart: lines?.[0],
         lineEnd: lines?.[1],
         sourceHash: hash,
         tests: {},
-        phaseHandlers: []
+        phaseHandlers: [],
+        ...(isAbstract
+          ? {
+              skip: instance => !!describeFunction(instance.constructor).abstract
+            }
+          : {})
       });
     }
     combineClasses(this.#config, ...data);

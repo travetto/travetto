@@ -60,7 +60,7 @@ function getTableContext<T extends ModelType>(modelClass: Class<T>): TableContex
   };
 }
 
-@Suite({ skip: true })
+@Suite()
 export abstract class BaseSQLDialectSuite {
   abstract dialect: AbstractANSI99Dialect;
 

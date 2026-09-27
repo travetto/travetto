@@ -96,3 +96,19 @@ class SuiteWithoutFeature {
     assert(false);
   }
 }
+
+@Suite()
+abstract class AbstractBaseSuite {
+  @Test()
+  inheritedTest() {
+    assert(true);
+  }
+}
+
+@Suite()
+class ConcreteChildSuite extends AbstractBaseSuite {
+  @Test()
+  childTest() {
+    assert(true);
+  }
+}
