@@ -133,6 +133,17 @@ export const text = (
       <c.SubSection title="String Fields">
         <ul>
           <li>{d.input('field: { $regex: RegExp | string; }')} checks the field against the regular expression</li>
+          <li>
+            {d.input('field: { $text: string | { query: string; language?: string } }')} checks the field against a full-text search query
+            with optional language
+          </li>
+        </ul>
+      </c.SubSection>
+      <c.SubSection title="Sorting & Relevance Ranking">
+        Queries support sorting by field values as well as full-text search relevance:
+        <ul>
+          <li>{d.input('field: 1 | -1')} sorts ascending (1) or descending (-1) by field value</li>
+          <li>{d.input('$score: -1 | 1')} sorts by full-text search relevance score</li>
         </ul>
       </c.SubSection>
       <c.SubSection title="Geo Point Fields">

@@ -1,5 +1,12 @@
 import type { ModelType } from '@travetto/model';
-import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext, type TransactionStatements } from '@travetto/model-sql';
+import type { TextSearchClause } from '@travetto/model-query';
+import {
+  AbstractANSI99Dialect,
+  type ResolvedPathContext,
+  type TableContext,
+  type TextSearchState,
+  type TransactionStatements
+} from '@travetto/model-sql';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
@@ -253,11 +260,122 @@ WHERE type='index' AND tbl_name=?;
     return `DROP INDEX IF EXISTS ${this.escapeIdentifier(indexName)};`;
   }
 
+  getDropTablesSQL(tableContexts: TableContext[]): string {
+    const tableNames: string[] = [];
+    for (const context of tableContexts) {
+      tableNames.push(this.escapeIdentifier(context.tableName));
+      const textFields = this.getTextSearchFields(context);
+      if (textFields.length > 0) {
+        tableNames.push(this.escapeIdentifier(`${context.tableName}_fts`));
+      }
+    }
+    const uniqueTableNames = [...new Set(tableNames)];
+    if (uniqueTableNames.length === 0) {
+      return '';
+    }
+    const statements = uniqueTableNames.map(tableName => `DROP TABLE IF EXISTS ${tableName};`);
+    return statements.length > 1 ? `-- exec\n${statements.join('\n')}` : statements[0];
+  }
+
   getTruncateTableSQL(context: TableContext): string {
     return `DELETE FROM ${this.escapeIdentifier(context.tableName)};`;
   }
 
+  getTruncateTableSQLs<T extends ModelType>(tableContext: TableContext<T>): string[] {
+    const textFields = this.getTextSearchFields(tableContext);
+    if (textFields.length === 0) {
+      return super.getTruncateTableSQLs(tableContext);
+    }
+    const ftsTableName = `${tableContext.tableName}_fts`;
+    return [
+      ...super.getTruncateTableSQLs(tableContext),
+      `INSERT INTO ${this.escapeIdentifier(ftsTableName)}(${this.escapeIdentifier(ftsTableName)}) VALUES ('rebuild');`
+    ];
+  }
+
   isTableNotFoundError(error: unknown): boolean {
     return error instanceof Error && /no such table/i.test(error.message);
+  }
+
+  getCreateTextSearchIndexSQLs<T extends ModelType>(tableContext: TableContext<T>): string[] {
+    const textFields = this.getTextSearchFields(tableContext);
+    if (textFields.length === 0) {
+      return [];
+    }
+    const columns = textFields.map(field => this.escapeIdentifier(field.name)).join(', ');
+    const ftsTableName = `${tableContext.tableName}_fts`;
+    const tableName = tableContext.tableName;
+    const oldColumns = textFields.map(field => `old.${this.escapeIdentifier(field.name)}`).join(', ');
+    const newColumns = textFields.map(field => `new.${this.escapeIdentifier(field.name)}`).join(', ');
+
+    return [
+      `CREATE VIRTUAL TABLE IF NOT EXISTS ${this.escapeIdentifier(ftsTableName)} USING fts5(${columns}, content=${this.escapeIdentifier(tableName)}, content_rowid=${this.escapeIdentifier('rowid')}, tokenize='porter unicode61');`,
+      `CREATE TRIGGER IF NOT EXISTS ${this.escapeIdentifier(`trg_${ftsTableName}_ai`)} AFTER INSERT ON ${this.escapeIdentifier(tableName)} BEGIN INSERT INTO ${this.escapeIdentifier(ftsTableName)}(${this.escapeIdentifier('rowid')}, ${columns}) VALUES (new.${this.escapeIdentifier('rowid')}, ${newColumns}); END;`,
+      `CREATE TRIGGER IF NOT EXISTS ${this.escapeIdentifier(`trg_${ftsTableName}_ad`)} AFTER DELETE ON ${this.escapeIdentifier(tableName)} BEGIN INSERT INTO ${this.escapeIdentifier(ftsTableName)}(${this.escapeIdentifier(ftsTableName)}, ${this.escapeIdentifier('rowid')}, ${columns}) VALUES ('delete', old.${this.escapeIdentifier('rowid')}, ${oldColumns}); END;`,
+      `CREATE TRIGGER IF NOT EXISTS ${this.escapeIdentifier(`trg_${ftsTableName}_au`)} AFTER UPDATE ON ${this.escapeIdentifier(tableName)} BEGIN INSERT INTO ${this.escapeIdentifier(ftsTableName)}(${this.escapeIdentifier(ftsTableName)}, ${this.escapeIdentifier('rowid')}, ${columns}) VALUES ('delete', old.${this.escapeIdentifier('rowid')}, ${oldColumns}); INSERT INTO ${this.escapeIdentifier(ftsTableName)}(${this.escapeIdentifier('rowid')}, ${columns}) VALUES (new.${this.escapeIdentifier('rowid')}, ${newColumns}); END;`,
+      `INSERT INTO ${this.escapeIdentifier(ftsTableName)}(${this.escapeIdentifier(ftsTableName)}) VALUES ('rebuild');`
+    ];
+  }
+
+  getDropTableSQLs<T extends ModelType>(tableContext: TableContext<T>): string[] {
+    const textFields = this.getTextSearchFields(tableContext);
+    if (textFields.length === 0) {
+      return super.getDropTableSQLs(tableContext);
+    }
+    const ftsTableName = `${tableContext.tableName}_fts`;
+    return [
+      `DROP TRIGGER IF EXISTS ${this.escapeIdentifier(`trg_${ftsTableName}_ai`)};`,
+      `DROP TRIGGER IF EXISTS ${this.escapeIdentifier(`trg_${ftsTableName}_ad`)};`,
+      `DROP TRIGGER IF EXISTS ${this.escapeIdentifier(`trg_${ftsTableName}_au`)};`,
+      `DROP TABLE IF EXISTS ${this.escapeIdentifier(ftsTableName)};`,
+      ...super.getDropTableSQLs(tableContext)
+    ];
+  }
+
+  compileTextWhereClause<T extends ModelType>(
+    tableContext: TableContext<T>,
+    clause: TextSearchClause,
+    identificationPath: string,
+    fieldPath?: string[]
+  ): { sql: string; parameters: Record<string, unknown> } {
+    const rawQuery = typeof clause === 'string' ? clause : clause.query;
+    const identifier = `%%${identificationPath}%%`;
+
+    // SQLite FTS5 uses 'NOT' instead of '-' for term and phrase exclusion
+    let textQuery = rawQuery
+      .replaceAll(/(?:^|\s)-(?:"([^"]+)"|(\w+))/g, (match, phrase, word) => (phrase ? ` NOT "${phrase}"` : ` NOT ${word}`))
+      .trim();
+    if (fieldPath && fieldPath.length > 0) {
+      const fieldName = fieldPath.at(-1)!;
+      textQuery = `${this.escapeIdentifier(fieldName)}: (${textQuery})`;
+    }
+
+    const ftsTableName = `${tableContext.tableName}_fts`;
+
+    return {
+      sql: `${this.escapeIdentifier(tableContext.tableName)}."rowid" IN (SELECT "rowid" FROM ${this.escapeIdentifier(ftsTableName)} WHERE ${this.escapeIdentifier(ftsTableName)} MATCH ${identifier})`,
+      parameters: { [identifier]: textQuery }
+    };
+  }
+
+  compileTextScoreSort<T extends ModelType>(tableContext: TableContext<T>, direction: 1 | -1, textSearches?: TextSearchState[]): string {
+    const textFields = this.getTextSearchFields(tableContext);
+    if (textFields.length === 0 || !textSearches || textSearches.length === 0) {
+      return '';
+    }
+    const ftsTableName = `${tableContext.tableName}_fts`;
+    const queries = textSearches.map(entry => {
+      let textQuery = entry.query
+        .replaceAll(/(?:^|\s)-(?:"([^"]+)"|(\w+))/g, (match, phrase, word) => (phrase ? ` NOT "${phrase}"` : ` NOT ${word}`))
+        .trim();
+      if (entry.fieldPath && entry.fieldPath.length > 0) {
+        const fieldName = entry.fieldPath.at(-1)!;
+        textQuery = `${this.escapeIdentifier(fieldName)}: (${textQuery})`;
+      }
+      return textQuery;
+    });
+    const matchClause =
+      queries.length > 0 ? ` AND ${this.escapeIdentifier(ftsTableName)} MATCH '${this.escapeLiteral(queries.join(' OR '))}'` : '';
+    return `(SELECT bm25(${this.escapeIdentifier(ftsTableName)}) FROM ${this.escapeIdentifier(ftsTableName)} WHERE ${this.escapeIdentifier(ftsTableName)}."rowid" = ${this.escapeIdentifier(tableContext.tableName)}."rowid"${matchClause}) ${direction === -1 ? 'ASC' : 'DESC'}`;
   }
 }

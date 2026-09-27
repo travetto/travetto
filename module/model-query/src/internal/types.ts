@@ -6,7 +6,7 @@ const st = (value: string | string[], isArray: boolean = false): Set<string> =>
 
 const basic = (types: Set<string>): Record<string, Set<string>> => ({ $ne: types, $eq: types, $exists: st('boolean') });
 const scalar = (types: Set<string>): Record<string, Set<string>> => ({ $in: types, $nin: types });
-const str = (): Record<string, Set<string>> => ({ $regex: st(['RegExp', 'string']) });
+const str = (): Record<string, Set<string>> => ({ $regex: st(['RegExp', 'string']), $text: st('string') });
 const comp = (types: Set<string>): Record<string, Set<string>> => ({ $lt: types, $lte: types, $gt: types, $gte: types });
 const geo = (type: string): Record<string, Set<string>> => ({
   $near: st(type),

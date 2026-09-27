@@ -1,7 +1,14 @@
 import type { IndexConfig, ModelType } from '@travetto/model';
 import { ModelRegistryIndex } from '@travetto/model';
 import { isModelIndexedIndex } from '@travetto/model-indexed';
-import { isModelQueryIndex, ModelQueryUtil, type QueryIndexConfig, type SortClause, type WhereClause } from '@travetto/model-query';
+import {
+  isModelQueryIndex,
+  ModelQueryUtil,
+  type QueryIndexConfig,
+  type SortClause,
+  type TextSearchClause,
+  type WhereClause
+} from '@travetto/model-query';
 import { type Class, castTo, JSONUtil, RuntimeError } from '@travetto/runtime';
 import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -16,6 +23,18 @@ export interface TransactionStatements {
   rollbackNested: string;
   commit: string;
   commitNested: string;
+}
+
+export interface TextSearchState {
+  query: string;
+  fieldPath?: string[];
+  language?: string;
+}
+
+export interface CompiledWhere {
+  whereSQL?: string;
+  parameters?: unknown[];
+  textSearches?: TextSearchState[];
 }
 
 interface QueryClause {
@@ -82,6 +101,26 @@ export abstract class AbstractANSI99Dialect {
   getPlaceholder(index: number): string {
     return '?';
   }
+
+  getTextSearchFields<T extends ModelType>(tableContext: TableContext<T>): SchemaFieldConfig[] {
+    const fields = SchemaRegistryIndex.getOptional(tableContext.cls)?.get()?.fields ?? {};
+    return Object.values(fields).filter(field => field.specifiers?.includes('text'));
+  }
+
+  abstract getCreateTextSearchIndexSQLs<T extends ModelType>(tableContext: TableContext<T>): string[];
+
+  abstract compileTextWhereClause<T extends ModelType>(
+    tableContext: TableContext<T>,
+    clause: TextSearchClause,
+    identificationPath: string,
+    fieldPath?: string[]
+  ): QueryClause;
+
+  abstract compileTextScoreSort<T extends ModelType>(
+    tableContext: TableContext<T>,
+    direction: 1 | -1,
+    textSearches?: TextSearchState[]
+  ): string;
 
   abstract getColumnType(fieldConfiguration: SchemaFieldConfig): string;
   abstract compileJsonIndexPath(columnName: string, jsonPath: string[], mode: JSONSqlPathMode): string;
@@ -186,7 +225,9 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
 
   getCreateTableIndexSQLs(context: TableContext): string[] {
     const indexes = ModelRegistryIndex.getIndices(context.cls) || [];
-    return indexes.map(indexConfig => this.getCreateIndexSQL(context, indexConfig));
+    const indexSQLs = indexes.map(indexConfig => this.getCreateIndexSQL(context, indexConfig));
+    indexSQLs.push(...this.getCreateTextSearchIndexSQLs(context));
+    return indexSQLs;
   }
 
   getAddColumnSQL(context: TableContext, columnName: string, columnType: string): string {
@@ -224,11 +265,25 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
   abstract getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] };
   abstract parseExistingIndexes(records: unknown[]): Map<string, string>;
   abstract getDropIndexSQL(context: TableContext, indexName: string): string;
+
   abstract getTruncateTableSQL(context: TableContext): string;
+
+  getTruncateTableSQLs(context: TableContext): string[] {
+    return [this.getTruncateTableSQL(context)];
+  }
   abstract isTableNotFoundError(error: unknown): boolean;
 
   getDropTableSQL(context: TableContext): string {
     return `DROP TABLE IF EXISTS ${this.escapeIdentifier(context.tableName)};`;
+  }
+
+  getDropTablesSQL(tableContexts: TableContext[]): string {
+    const tableNames = [...new Set(tableContexts.map(context => this.escapeIdentifier(context.tableName)))];
+    return tableNames.map(tableName => `DROP TABLE IF EXISTS ${tableName};`).join('\n');
+  }
+
+  getDropTableSQLs(context: TableContext): string[] {
+    return [this.getDropTableSQL(context)];
   }
 
   getAlterColumnTypeSQL?(context: TableContext, columnName: string, columnType: string, existingType: string): string | undefined;
@@ -250,16 +305,10 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     }
   }
 
-  compileWhere<T extends ModelType>(
-    tableContext: TableContext<T>,
-    where?: WhereClause<T>,
-    checkExpiry = true
-  ): {
-    whereSQL?: string;
-    parameters?: unknown[];
-  } {
+  compileWhere<T extends ModelType>(tableContext: TableContext<T>, where?: WhereClause<T>, checkExpiry = true): CompiledWhere {
+    const textSearches: TextSearchState[] = [];
     const resolvedWhere = ModelQueryUtil.getWhereClause(tableContext.cls, where, checkExpiry);
-    const compiled = this.#compileClause(tableContext, resolvedWhere);
+    const compiled = this.#compileClause(tableContext, resolvedWhere, '', textSearches);
     if (Object.entries(compiled.parameters ?? {}).length) {
       const parameters: unknown[] = [];
       const seen = new Map<string, string>();
@@ -272,23 +321,28 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
           return seen.get(key)!;
         })
         .trim();
-      return { whereSQL: sql, parameters };
+      return { whereSQL: sql, parameters, textSearches };
     } else {
-      return { whereSQL: compiled.sql?.trim() };
+      return { whereSQL: compiled.sql?.trim(), textSearches };
     }
   }
 
-  compileSort<T extends ModelType>(tableContext: TableContext<T>, sort?: SortClause<T>[]): string {
+  compileSort<T extends ModelType>(tableContext: TableContext<T>, sort?: SortClause<T>[], textSearches?: TextSearchState[]): string {
     if (!sort || sort.length === 0) {
       return '';
     }
-    const sortClauses = sort.map(sortClause => {
-      const key = Object.keys(sortClause)[0];
-      const direction = castTo<Record<string, 1 | -1>>(sortClause)[key];
-      const path = key.split('.');
-      const { sqlPath } = this.resolvePath(tableContext, path, 'orderBy');
-      return `${sqlPath} ${direction === -1 ? 'DESC' : 'ASC'}`;
-    });
+    const sortClauses = sort
+      .map(sortClause => {
+        const key = Object.keys(sortClause)[0];
+        const direction = castTo<Record<string, 1 | -1>>(sortClause)[key];
+        if (key === '$score') {
+          return this.compileTextScoreSort(tableContext, direction, textSearches);
+        }
+        const path = key.split('.');
+        const { sqlPath } = this.resolvePath(tableContext, path, 'orderBy');
+        return `${sqlPath} ${direction === -1 ? 'DESC' : 'ASC'}`;
+      })
+      .filter(Boolean);
     return sortClauses.length ? `ORDER BY ${sortClauses.join(', ')}` : '';
   }
 
@@ -387,23 +441,24 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
   #compileClause<T extends ModelType>(
     tableContext: TableContext<T>,
     clause: WhereClause<T>,
-    identificationPath: IdentificationPath = ''
+    identificationPath: IdentificationPath = '',
+    textSearches: TextSearchState[] = []
   ): QueryClause {
     if (!clause) {
       return {};
     }
     if (ModelQueryUtil.has$And(clause)) {
       const compiled = clause.$and
-        .map((item, index) => this.#compileClause(tableContext, item, `${identificationPath}_${index}`))
+        .map((item, index) => this.#compileClause(tableContext, item, `${identificationPath}_${index}`, textSearches))
         .filter(Boolean);
       return AbstractANSI99Dialect.#combineResults(compiled, 'AND');
     } else if (ModelQueryUtil.has$Or(clause)) {
       const compiled = clause.$or
-        .map((item, index) => this.#compileClause(tableContext, item, `${identificationPath}_${index}`))
+        .map((item, index) => this.#compileClause(tableContext, item, `${identificationPath}_${index}`, textSearches))
         .filter(Boolean);
       return AbstractANSI99Dialect.#combineResults(compiled, 'OR');
     } else if (ModelQueryUtil.has$Not(clause)) {
-      const compiled = this.#compileClause(tableContext, clause.$not, identificationPath);
+      const compiled = this.#compileClause(tableContext, clause.$not, identificationPath, textSearches);
       return compiled
         ? {
             sql: `NOT (${compiled.sql})`,
@@ -411,7 +466,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
           }
         : {};
     } else {
-      return this.#compileSimple(tableContext, clause, [], identificationPath);
+      return this.#compileSimple(tableContext, clause, [], identificationPath, textSearches);
     }
   }
 
@@ -419,7 +474,8 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     tableContext: TableContext<T>,
     item: Record<string, unknown>,
     parentPath: string[] = [],
-    identificationPath: IdentificationPath = ''
+    identificationPath: IdentificationPath = '',
+    textSearches: TextSearchState[] = []
   ): QueryClause {
     if (!item) {
       return {};
@@ -437,12 +493,16 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
 
       if (isPlainObject) {
         if (firstKey.startsWith('$')) {
-          clauses.push(this.#compileOperator(tableContext, currentPath, value as Record<string, unknown>, nextIdentificationPath));
+          clauses.push(
+            this.#compileOperator(tableContext, currentPath, value as Record<string, unknown>, nextIdentificationPath, textSearches)
+          );
         } else {
-          clauses.push(this.#compileSimple(tableContext, value as Record<string, unknown>, currentPath, nextIdentificationPath));
+          clauses.push(
+            this.#compileSimple(tableContext, value as Record<string, unknown>, currentPath, nextIdentificationPath, textSearches)
+          );
         }
       } else {
-        clauses.push(this.#compileOperator(tableContext, currentPath, { $eq: value }, nextIdentificationPath));
+        clauses.push(this.#compileOperator(tableContext, currentPath, { $eq: value }, nextIdentificationPath, textSearches));
       }
     }
 
@@ -453,7 +513,8 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     tableContext: TableContext<T>,
     path: string[],
     operation: Record<string, unknown>,
-    identificationPath: IdentificationPath = ''
+    identificationPath: IdentificationPath = '',
+    textSearches: TextSearchState[] = []
   ): QueryClause {
     const resolvedContext = this.resolvePath(tableContext, path, 'read');
     const { sqlPath, leafField, arrayField } = resolvedContext;
@@ -567,6 +628,14 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
             parameters: { [identifier]: regexSource },
             sql: `${sqlPath} ${regexOp} ${identifier}`
           };
+        } else if (operator === '$text') {
+          const textClause = value as TextSearchClause;
+          textSearches.push({
+            query: typeof textClause === 'string' ? textClause : textClause.query,
+            fieldPath: path,
+            language: typeof textClause === 'object' && textClause.language ? textClause.language : 'english'
+          });
+          clause = this.compileTextWhereClause(tableContext, textClause, `${identificationPath}_text`, path);
         } else {
           throw new RuntimeError(`Operator "${operator}" is not supported for scalar columns`, { category: 'data' });
         }

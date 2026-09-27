@@ -44,4 +44,21 @@ export class PostgresDialectSuite extends BaseSQLDialectSuite {
     });
     assert(postgresCreateIndexSql.includes('((("child"->>\'age\')))::NUMERIC)'));
   }
+
+  @Test()
+  async testPostgresDropTables() {
+    const tableContext = getTableContext(ParentModel);
+    const singleTableSQL = this.dialect.getDropTableSQL(tableContext);
+    assert(singleTableSQL === 'DROP TABLE IF EXISTS "parentmodel" CASCADE;');
+
+    const otherTableContext = { ...tableContext, tableName: 'other_model' };
+    const multipleTablesSQL = this.dialect.getDropTablesSQL([tableContext, otherTableContext]);
+    assert(multipleTablesSQL === 'DROP TABLE IF EXISTS "parentmodel", "other_model" CASCADE;');
+
+    const dedupedSQL = this.dialect.getDropTablesSQL([tableContext, tableContext, otherTableContext]);
+    assert(dedupedSQL === 'DROP TABLE IF EXISTS "parentmodel", "other_model" CASCADE;');
+
+    const emptySQL = this.dialect.getDropTablesSQL([]);
+    assert(emptySQL === '');
+  }
 }

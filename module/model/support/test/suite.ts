@@ -5,7 +5,6 @@ import { SchemaRegistryIndex } from '@travetto/schema';
 import { type SuitePhaseHandler, SuiteRegistryIndex, TestFixtures } from '@travetto/test';
 
 import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
-import { ModelBlobUtil } from '../../src/util/blob.ts';
 import { ModelStorageUtil } from '../../src/util/storage.ts';
 
 type ConfigType = { autoCreate?: boolean; namespace?: string };
@@ -28,31 +27,29 @@ class ModelSuiteHandler<T extends { configClass: Class<ConfigType>; serviceClass
 
     // We manually create
     config.autoCreate = false;
+
+    const service = await DependencyRegistryIndex.getInstance<T>(instance.serviceClass, this.qualifier);
+    if (ModelStorageUtil.isSupported(service)) {
+      await service.createStorage();
+    }
   }
 
   async beforeEach(instance: T) {
     const service = await DependencyRegistryIndex.getInstance<T>(instance.serviceClass, this.qualifier);
     if (ModelStorageUtil.isSupported(service)) {
-      await service.createStorage();
-      if (service.upsertModel) {
-        await Promise.all(
-          ModelRegistryIndex.getClasses()
-            .filter(cls => cls === SchemaRegistryIndex.getBaseClass(cls))
-            .map(modelCls => service.upsertModel!(modelCls))
-        );
-      }
+      await Promise.all(
+        ModelRegistryIndex.getClasses()
+          .filter(cls => cls === SchemaRegistryIndex.getBaseClass(cls))
+          .map(modelCls => service.upsertModel?.(modelCls))
+      );
     }
   }
 
   async afterEach(instance: T) {
     const service = await DependencyRegistryIndex.getInstance<T>(instance.serviceClass, this.qualifier);
     if (ModelStorageUtil.isSupported(service)) {
+      await service.truncateBlob?.();
       const models = ModelRegistryIndex.getClasses().filter(model => model === SchemaRegistryIndex.getBaseClass(model));
-
-      if (ModelBlobUtil.isSupported(service) && service.truncateBlob) {
-        await service.truncateBlob();
-      }
-
       await Promise.all(models.map(model => service.truncateModel(model)));
     }
   }
@@ -60,11 +57,6 @@ class ModelSuiteHandler<T extends { configClass: Class<ConfigType>; serviceClass
   async afterAll(instance: T) {
     const service = await DependencyRegistryIndex.getInstance<T>(instance.serviceClass, this.qualifier);
     if (ModelStorageUtil.isSupported(service)) {
-      await Promise.all(
-        ModelRegistryIndex.getClasses()
-          .filter(model => model === SchemaRegistryIndex.getBaseClass(model))
-          .map(model => service.deleteModel(model))
-      );
       await service.deleteStorage();
     }
   }

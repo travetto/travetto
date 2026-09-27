@@ -21,6 +21,7 @@ This module provides a textual query language for the [Data Model Querying](http
    *  `>`, `>=` - Greater than, and greater than or equal to
    *  `!=`, `==` - Not equal to, and equal to
    *  `~` - Matches regular expression, supports the `i` flag to trigger case insensitive searches
+   *  `@@` - Full-text search match against indexed text fields
    *  `!`, `not` - Negates a clause
    *  `in`, `not-in` - Supports checking if a field is in a list of literal values
    *  `and`, `&&` - Intersection of clauses
@@ -42,3 +43,11 @@ user.role in ['admin', 'root'] && (user.address.state == 'VA' || user.address.ci
 
 ### Regular Expression
 When querying with regular expressions, patterns can be specified as `'strings'` or as `/patterns/`. The latter allows for the case insensitive modifier: `/pattern/i`. Supporting the insensitive flag is up to the underlying model implementation.
+
+### Full-Text Search
+When querying indexed text fields, the `@@` operator performs full-text matching against the target field using the underlying engine's full-text search capabilities. Exact phrases can be specified with quotes (`title @@ '"Relational Database"'`), and exclusions can be specified with a minus prefix (`title @@ 'database -oracle'`). Multi-field searches can be expressed using boolean disjunction:
+
+**Code: Multi-field text search query**
+```sql
+title @@ 'PostgreSQL' or content @@ 'PostgreSQL'
+```

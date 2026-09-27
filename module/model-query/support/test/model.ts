@@ -1,5 +1,5 @@
 import { Model, type ModelType } from '@travetto/model';
-import { type Point, Precision, Schema, Text } from '@travetto/schema';
+import { LongText, type Point, Precision, Schema, Text } from '@travetto/schema';
 
 @Schema()
 export class Address {
@@ -137,4 +137,12 @@ export class RecipeSection {
 export class Recipe implements ModelType {
   id: string;
   sections: RecipeSection[] = [];
+}
+
+@Model('query-article')
+export class Article implements ModelType {
+  id: string;
+  @Text() title: string;
+  @LongText() content: string;
+  status: 'draft' | 'published';
 }

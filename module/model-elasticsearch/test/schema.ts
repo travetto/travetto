@@ -67,14 +67,14 @@ class SchemaSuite {
         type: { type: 'keyword' },
         createdDate: { type: 'date', format: 'date_optional_time' },
         updatedDate: { type: 'date', format: 'date_optional_time' },
-        name: { type: 'keyword', fields: { text: { type: 'text' } } },
+        name: { type: 'keyword', fields: { text: { type: 'text', analyzer: 'english' } } },
         age: { type: 'integer' },
         gender: { type: 'keyword' },
         address: {
           type: 'object',
           properties: {
-            street1: { type: 'keyword', fields: { text: { type: 'text' } } },
-            street2: { type: 'keyword', fields: { text: { type: 'text' } } }
+            street1: { type: 'keyword', fields: { text: { type: 'text', analyzer: 'english' } } },
+            street2: { type: 'keyword', fields: { text: { type: 'text', analyzer: 'english' } } }
           },
           dynamic: false
         }
@@ -89,8 +89,8 @@ class SchemaSuite {
         addresses: {
           type: 'nested',
           properties: {
-            street1: { type: 'keyword', fields: { text: { type: 'text' } } },
-            street2: { type: 'keyword', fields: { text: { type: 'text' } } }
+            street1: { type: 'keyword', fields: { text: { type: 'text', analyzer: 'english' } } },
+            street2: { type: 'keyword', fields: { text: { type: 'text', analyzer: 'english' } } }
           },
           dynamic: false
         },

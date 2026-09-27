@@ -64,7 +64,7 @@ import { SchemaRegistryIndex } from '@travetto/schema';
 import { WorkPool } from '@travetto/worker';
 
 import type { SQLConnection } from './connection.ts';
-import type { AbstractANSI99Dialect } from './dialect.ts';
+import type { AbstractANSI99Dialect, CompiledWhere } from './dialect.ts';
 import { SQLModelSchemaUtil } from './schema.ts';
 import type { TableContext } from './types.ts';
 
@@ -96,11 +96,7 @@ export abstract class BaseSQLModelService<C = unknown>
     return this.connection.dialect;
   }
 
-  #whereClause<T extends ModelType>(
-    modelClass: Class<T>,
-    where?: WhereClause<T>,
-    checkExpiry?: boolean
-  ): { whereSQL?: string; parameters?: unknown[] } {
+  #whereClause<T extends ModelType>(modelClass: Class<T>, where?: WhereClause<T>, checkExpiry?: boolean): CompiledWhere {
     return this.dialect.compileWhere(this.connection.getContext(modelClass), ModelQueryUtil.getWhereClause(modelClass, where), checkExpiry);
   }
 
@@ -301,14 +297,28 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async dropTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
+    const statements = this.dialect.getDropTableSQLs(tableContext);
+    const sql = statements.length > 1 ? `-- exec\n${statements.join('\n')}` : statements[0];
     await ModelStorageUtil.runAndIgnoreNotFound(
-      () => this.connection.execute(this.dialect.getDropTableSQL(tableContext)),
+      () => this.connection.execute(sql),
+      error => this.dialect.isTableNotFoundError(error)
+    );
+  }
+
+  async dropTables(tableContexts: TableContext[]): Promise<void> {
+    if (tableContexts.length === 0) {
+      return;
+    }
+    const sql = this.dialect.getDropTablesSQL(tableContexts);
+    await ModelStorageUtil.runAndIgnoreNotFound(
+      () => this.connection.execute(sql),
       error => this.dialect.isTableNotFoundError(error)
     );
   }
 
   async truncateTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
-    const sql = this.dialect.getTruncateTableSQL(tableContext);
+    const statements = this.dialect.getTruncateTableSQLs(tableContext);
+    const sql = statements.length > 1 ? `-- exec\n${statements.join('\n')}` : statements[0];
     await this.connection.execute(sql);
   }
 
@@ -405,10 +415,8 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async deleteStorage(): Promise<void> {
-    for (const modelClass of ModelRegistryIndex.getClasses()) {
-      const tableContext = this.connection.getContext(modelClass);
-      await this.dropTable(tableContext);
-    }
+    const tableContexts = ModelRegistryIndex.getClasses().map(modelClass => this.connection.getContext(modelClass));
+    await this.dropTables(tableContexts);
   }
 
   async deleteModel(modelClass: Class): Promise<void> {
@@ -729,8 +737,8 @@ export abstract class BaseSQLModelService<C = unknown>
   async query<T extends ModelType>(modelClass: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     await QueryVerifier.verify(modelClass, query);
     const tableContext = this.connection.getContext(modelClass);
-    const { whereSQL, parameters = [] } = this.#whereClause(modelClass, query.where);
-    const sortSQL = this.dialect.compileSort(tableContext, query.sort);
+    const { whereSQL, parameters = [], textSearches = [] } = this.#whereClause(modelClass, query.where);
+    const sortSQL = this.dialect.compileSort(tableContext, query.sort, textSearches);
 
     const sql = this.dialect.buildSelect(tableContext, {
       whereSQL,

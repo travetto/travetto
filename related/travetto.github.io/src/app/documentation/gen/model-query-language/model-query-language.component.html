@@ -22,6 +22,7 @@ This module provides a textual query language for the <a class="module-link" rou
 <li><code class="item input">&gt;</code>, <code class="item input">&gt;=</code> - Greater than, and greater than or equal to</li>
 <li><code class="item input">!=</code>, <code class="item input">==</code> - Not equal to, and equal to</li>
 <li><code class="item input">~</code> - Matches regular expression, supports the <code class="item input">i</code> flag to trigger case insensitive searches</li>
+<li><code class="item input">&#64;&#64;</code> - Full-text search match against indexed text fields</li>
 <li><code class="item input">!</code>, <code class="item input">not</code> - Negates a clause</li>
 <li><code class="item input">in</code>, <code class="item input">not-in</code> - Supports checking if a field is in a list of literal values</li>
 <li><code class="item input">and</code>, <code class="item input">&amp;&amp;</code> - Intersection of clauses</li>
@@ -48,3 +49,14 @@ A more complex query would look like:
 <h3 id="regular-expression">Regular Expression</h3>
 
 When querying with regular expressions, patterns can be specified as <code class="item input">'strings'</code> or as <code class="item input">/patterns/</code>. The latter allows for the case insensitive modifier: <code class="item input">/pattern/i</code>. Supporting the insensitive flag is up to the underlying model implementation.
+
+<h3 id="full-text-search">Full-Text Search</h3>
+
+When querying indexed text fields, the <code class="item input">&#64;&#64;</code> operator performs full-text matching against the target field using the underlying engine's full-text search capabilities. Exact phrases can be specified with quotes (<code class="item input">title &#64;&#64; '"Relational Database"'</code>), and exclusions can be specified with a minus prefix (<code class="item input">title &#64;&#64; 'database -oracle'</code>). Multi-field searches can be expressed using boolean disjunction:
+
+  <figure class="code">
+    <figcaption class="code">Multi-field text search query
+
+</figcaption>
+    <pre><code class="language-sql">title &#64;&#64; <span class="token string">'PostgreSQL'</span> <span class="token operator">or</span> content &#64;&#64; <span class="token string">'PostgreSQL'</span></code></pre>
+  </figure>

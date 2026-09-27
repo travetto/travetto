@@ -1,13 +1,13 @@
 import type { ModelType } from '@travetto/model';
-import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext } from '@travetto/model-sql';
+import type { TextSearchClause } from '@travetto/model-query';
+import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext, type TextSearchState } from '@travetto/model-sql';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
-/* cspell:words ILIKE regclass indexdef tablename pkey */
+/* cspell:words ILIKE regclass indexdef tablename pkey tsvector tsquery */
 
 export class PostgresDialect extends AbstractANSI99Dialect {
   returningSupport = true;
-  suggestLikeOperator = 'ILIKE';
 
   getComplexColumnType(field: SchemaFieldConfig): string {
     if (field.array && !SchemaRegistryIndex.has(field.type)) {
@@ -332,7 +332,7 @@ ${offset !== undefined ? `OFFSET ${offset}` : ''};`;
   parseExistingIndexes(records: unknown[]): Map<string, string> {
     return new Map(
       castTo<{ indexname: string; indexdef: string }[]>(records)
-        .filter(record => !record.indexname.endsWith('_pkey'))
+        .filter(record => !record.indexname.endsWith('_pkey') && !record.indexname.endsWith('_fts'))
         .map(record => [record.indexname, record.indexdef])
     );
   }
@@ -345,6 +345,11 @@ ${offset !== undefined ? `OFFSET ${offset}` : ''};`;
     return `DROP TABLE IF EXISTS ${this.escapeIdentifier(context.tableName)} CASCADE;`;
   }
 
+  getDropTablesSQL(tableContexts: TableContext[]): string {
+    const tableNames = [...new Set(tableContexts.map(context => this.escapeIdentifier(context.tableName)))];
+    return tableNames.length > 0 ? `DROP TABLE IF EXISTS ${tableNames.join(', ')} CASCADE;` : '';
+  }
+
   getTruncateTableSQL(context: TableContext): string {
     return `TRUNCATE TABLE ${this.escapeIdentifier(context.tableName)} CASCADE;`;
   }
@@ -354,5 +359,84 @@ ${offset !== undefined ? `OFFSET ${offset}` : ''};`;
       (typeof error === 'object' && error !== null && 'code' in error && error.code === '42P01') ||
       (error instanceof Error && /does not exist/i.test(error.message))
     );
+  }
+
+  #getTextVectorExpression<T extends ModelType>(tableContext: TableContext<T>, language = 'english'): string | undefined {
+    const textFields = this.getTextSearchFields(tableContext);
+    if (textFields.length === 0) {
+      return undefined;
+    }
+    const parts = textFields.map(
+      field => `to_tsvector('${this.escapeLiteral(language)}', coalesce(${this.escapeIdentifier(field.name)}, ''))`
+    );
+    return parts.join(' || ');
+  }
+
+  getCreateTableSQL(context: TableContext): string {
+    const baseSQL = super.getCreateTableSQL(context);
+    const expression = this.#getTextVectorExpression(context);
+    if (!expression) {
+      return baseSQL;
+    }
+    const closingIndex = baseSQL.lastIndexOf(');');
+    return `${baseSQL.substring(0, closingIndex)},\n  ${this.escapeIdentifier('_text_vector')} tsvector GENERATED ALWAYS AS (${expression}) STORED\n);`;
+  }
+
+  getCreateTextSearchIndexSQLs<T extends ModelType>(tableContext: TableContext<T>): string[] {
+    const expression = this.#getTextVectorExpression(tableContext);
+    if (!expression) {
+      return [];
+    }
+    const indexName = `idx_${tableContext.tableName}_fts`;
+    return [
+      `CREATE INDEX IF NOT EXISTS ${this.escapeIdentifier(indexName)} ON ${this.escapeIdentifier(tableContext.tableName)} USING GIN (${this.escapeIdentifier('_text_vector')});`
+    ];
+  }
+
+  compileTextWhereClause<T extends ModelType>(
+    tableContext: TableContext<T>,
+    clause: TextSearchClause,
+    identificationPath: string,
+    fieldPath?: string[]
+  ): { sql: string; parameters: Record<string, unknown> } {
+    const textQuery = typeof clause === 'string' ? clause : clause.query;
+    const language = typeof clause === 'object' && clause.language ? clause.language : 'english';
+    const identifier = `%%${identificationPath}%%`;
+
+    if (fieldPath && fieldPath.length > 0) {
+      const resolvedContext = this.resolvePath(tableContext, fieldPath, 'read');
+      const targetVector = `to_tsvector('${this.escapeLiteral(language)}', coalesce(${resolvedContext.sqlPath}, ''))`;
+      return {
+        sql: `${targetVector} @@ websearch_to_tsquery('${this.escapeLiteral(language)}', ${identifier})`,
+        parameters: { [identifier]: textQuery }
+      };
+    }
+
+    const defaultVector = this.escapeIdentifier('_text_vector');
+
+    return {
+      sql: `${defaultVector} @@ websearch_to_tsquery('${this.escapeLiteral(language)}', ${identifier})`,
+      parameters: { [identifier]: textQuery }
+    };
+  }
+
+  compileTextScoreSort<T extends ModelType>(tableContext: TableContext<T>, direction: 1 | -1, textSearches?: TextSearchState[]): string {
+    if (!textSearches || textSearches.length === 0) {
+      return '';
+    }
+    const scoreExpressions = textSearches.map(entry => {
+      let targetVector: string;
+      const language = entry.language ?? 'english';
+      if (entry.fieldPath && entry.fieldPath.length > 0) {
+        const resolvedContext = this.resolvePath(tableContext, entry.fieldPath, 'read');
+        targetVector = `to_tsvector('${this.escapeLiteral(language)}', coalesce(${resolvedContext.sqlPath}, ''))`;
+      } else {
+        targetVector = this.escapeIdentifier('_text_vector');
+      }
+      const escapedQuery = this.escapeLiteral(entry.query);
+      return `ts_rank(${targetVector}, websearch_to_tsquery('${this.escapeLiteral(language)}', '${escapedQuery}'))`;
+    });
+    const combined = scoreExpressions.length > 1 ? `(${scoreExpressions.join(' + ')})` : scoreExpressions[0];
+    return `${combined} ${direction === -1 ? 'DESC' : 'ASC'}`;
   }
 }

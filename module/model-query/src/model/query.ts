@@ -8,9 +8,15 @@ type GroupClauseRaw<T> = {
   [P in keyof T]?: T[P] extends object ? GroupClauseRaw<RetainQueryPrimitiveFields<T[P]>> : 1 | 0 | boolean;
 };
 
-type SortClauseRaw<T> = {
-  [P in keyof T]?: T[P] extends object ? SortClauseRaw<RetainQueryPrimitiveFields<T[P]>> : 1 | -1;
+type FieldSortClauseRaw<T> = {
+  [P in keyof T]?: T[P] extends object ? FieldSortClauseRaw<RetainQueryPrimitiveFields<T[P]>> : 1 | -1;
 };
+
+export type ScoreSortClause = {
+  $score: 1 | -1;
+};
+
+type SortClauseRaw<T> = FieldSortClauseRaw<T> | ScoreSortClause;
 
 type QueryOptionsRaw<T> = {
   sort?: SortClauseRaw<T>[];
@@ -58,6 +64,10 @@ export type QueryOptions<T> = QueryOptionsRaw<RetainQueryPrimitiveFields<T>>;
  * Select clause
  */
 export type SelectClause<T> = SelectClauseRaw<RetainQueryPrimitiveFields<T>>;
+/**
+ * Field sort clause
+ */
+export type FieldSortClause<T> = FieldSortClauseRaw<RetainQueryPrimitiveFields<T>>;
 /**
  * Sort clause
  */

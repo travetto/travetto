@@ -42,6 +42,18 @@ class MockDialect extends AbstractANSI99Dialect {
     return 'TEXT';
   }
 
+  getCreateTextSearchIndexSQLs() {
+    return [];
+  }
+
+  compileTextWhereClause() {
+    return { sql: '', parameters: {} };
+  }
+
+  compileTextScoreSort() {
+    return '';
+  }
+
   compileJsonIndexPath(columnName: string, jsonPath: string[]): string {
     return `${columnName}->'${jsonPath.join("->'")}'`;
   }

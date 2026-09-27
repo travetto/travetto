@@ -126,7 +126,7 @@ export class ElasticsearchSchemaUtil {
         if (config.specifiers?.includes('text')) {
           text = {
             fields: {
-              text: { type: 'text' }
+              text: { type: 'text', analyzer: 'english' }
             }
           };
           if (esSchema?.caseSensitive) {
