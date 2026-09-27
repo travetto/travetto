@@ -1,10 +1,11 @@
 import { ElasticsearchModelConfig, ElasticsearchModelService } from '@travetto/model-elasticsearch';
 import { Suite } from '@travetto/test';
 
-import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
+import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
 
 @Suite()
-class ElasticsearchQuerySuite extends ModelQuerySuite {
+class ElasticsearchQueryCrudSuite extends ModelQueryCrudSuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
+  supportsUniqueIndexes = false;
 }

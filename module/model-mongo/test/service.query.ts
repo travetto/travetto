@@ -6,12 +6,7 @@ import { castTo } from '@travetto/runtime';
 import { LongText } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
-import { ModelQueryAggregateSuite } from '@travetto/model-query/support/test/aggregate.ts';
-import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
-import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.ts';
-import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism.ts';
 import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
-import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest.ts';
 
 @Model()
 class TextModel {
@@ -41,7 +36,6 @@ class MongoQuerySuite extends ModelQuerySuite {
       assert(all.length === 2);
     }
     const one = await svc.queryText(TextModel, '"roger dodger" -dodger2');
-    console.log(one);
     assert(one.length === 1);
 
     const all2 = await svc.queryText(TextModel, 'roger dodger');
@@ -79,34 +73,4 @@ class MongoQuerySuite extends ModelQuerySuite {
     const all8 = await svc.queryText(TextModel, 'run from bear -ferocious');
     assert(all8.length === 2);
   }
-}
-
-@Suite()
-class MongoQueryCrudSuite extends ModelQueryCrudSuite {
-  serviceClass = MongoModelService;
-  configClass = MongoModelConfig;
-}
-
-@Suite()
-class MongoQueryAggregateSuite extends ModelQueryAggregateSuite {
-  serviceClass = MongoModelService;
-  configClass = MongoModelConfig;
-}
-
-@Suite()
-class MongoQueryFacetSuite extends ModelQueryFacetSuite {
-  serviceClass = MongoModelService;
-  configClass = MongoModelConfig;
-}
-
-@Suite()
-class MongoQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
-  serviceClass = MongoModelService;
-  configClass = MongoModelConfig;
-}
-
-@Suite()
-class MongoQuerySuggestSuite extends ModelQuerySuggestSuite {
-  serviceClass = MongoModelService;
-  configClass = MongoModelConfig;
 }

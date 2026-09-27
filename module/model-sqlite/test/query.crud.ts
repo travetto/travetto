@@ -1,15 +1,14 @@
 import { Suite } from '@travetto/test';
 
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
-import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
+import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
 
 import { SqliteModelConfig } from '../src/config.ts';
 import { SqliteModelService } from '../src/service.ts';
 
 @WithSuiteContext()
 @Suite()
-class SqliteQuerySuite extends ModelQuerySuite {
+class SqliteQueryCrudSuite extends ModelQueryCrudSuite {
   serviceClass = SqliteModelService;
   configClass = SqliteModelConfig;
-  supportsGeo = false;
 }

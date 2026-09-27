@@ -1,15 +1,14 @@
 import { Suite } from '@travetto/test';
 
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
-import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
+import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
 
 import { MysqlModelConfig } from '../src/config.ts';
 import { MysqlModelService } from '../src/service.ts';
 
 @WithSuiteContext()
 @Suite()
-class MySQLQuerySuite extends ModelQuerySuite {
+class MySQLQueryCrudSuite extends ModelQueryCrudSuite {
   serviceClass = MysqlModelService;
   configClass = MysqlModelConfig;
-  supportsGeo = false;
 }
