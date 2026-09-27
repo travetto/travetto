@@ -434,6 +434,6 @@ class LlmSupportExecuteTest {
     assert(merged.scripts?.lint === 'eslint .');
     assert(merged.scripts?.['lint:register'] === 'trv lint:register');
     assert(merged.devDependencies?.typescript === '^5.0.0');
-    assert(Boolean(merged.devDependencies?.['@travetto/lint']));
+    assert(!!merged.devDependencies?.['@travetto/lint']);
   }
 }

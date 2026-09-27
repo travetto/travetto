@@ -845,7 +845,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     limit?: number,
     offset?: number
   ): string {
-    const isArray = Boolean(resolvedContext.leafField?.array || resolvedContext.arrayField);
+    const isArray = resolvedContext.leafField?.array || !!resolvedContext.arrayField;
     if (isArray) {
       return this.buildArrayFacet(tableContext, resolvedContext, whereSQL, limit, offset);
     }
