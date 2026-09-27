@@ -127,7 +127,7 @@ export class TapSummaryEmitter implements TestConsumerShape {
       const tests = this.#timings.getOrInsert('test', new Map<string, Result>());
       tests.set(`${event.test.classId}/${event.test.methodName}`, {
         key: `${event.test.classId}/${event.test.methodName}`,
-        duration: test.duration,
+        duration: test.selfDuration,
         tests: 1
       });
     } else if (event.type === 'suite' && event.phase === 'after') {
