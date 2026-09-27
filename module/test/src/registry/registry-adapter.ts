@@ -126,7 +126,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
   getMethod(method: string): TestConfig {
     const test = this.#config.tests[method];
     if (!test) {
-      throw new RuntimeError(`Test not registered: ${String(method)} on ${this.#cls.name}`);
+      throw new RuntimeError(`Test not registered: ${method} on ${this.#cls.name}`);
     }
     return test;
   }

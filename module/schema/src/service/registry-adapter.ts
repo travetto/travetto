@@ -342,7 +342,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   getMethod(method: string): SchemaMethodConfig {
     const methodConfig = this.#config.methods[method];
     if (!methodConfig) {
-      throw new RuntimeError(`Unknown method ${String(method)} on class ${this.#cls.Ⲑid}`);
+      throw new RuntimeError(`Unknown method ${method} on class ${this.#cls.Ⲑid}`);
     }
     return methodConfig;
   }
