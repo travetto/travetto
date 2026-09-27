@@ -50,7 +50,6 @@ export function ShouldThrow(state: ThrowableError): MethodDecorator {
   };
 }
 
-
 /**
  * Sets the full timeout window for a given test
  * @param ms Max time to wait
