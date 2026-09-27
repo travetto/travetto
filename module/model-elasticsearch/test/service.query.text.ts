@@ -7,5 +7,4 @@ import { ModelQueryTextSuite } from '@travetto/model-query/support/test/text.ts'
 class ElasticsearchQueryTextSuite extends ModelQueryTextSuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
-  supportsStemming = false;
 }
