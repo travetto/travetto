@@ -292,3 +292,8 @@ Rework compiler setup to no longer need the pre-compilation process and leverage
 
 ## Model
 - [?] Look for SQL query optimization opportunities
+
+
+## New Text Search Module, build upon Model
+- [X] Created unified full text support for sql + elasticsearch
+  - Mongo will be added when it grows up
