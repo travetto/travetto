@@ -34,7 +34,7 @@
     "@travetto/auth": "^8.0.1",
     "@travetto/config": "^8.0.3",
     "@travetto/web": "^8.0.3",
-    "jose": "^6.2.0"
+    "jose": "^6.2.12"
   },
   "peerDependencies": {
     "@travetto/test": "^8.0.2"
