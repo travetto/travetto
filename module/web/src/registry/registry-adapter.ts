@@ -157,7 +157,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
   getEndpointConfig(method: string): EndpointConfig {
     const endpoint = this.#endpoints.get(method);
     if (!endpoint) {
-      throw new RuntimeError(`Endpoint not registered: ${String(method)} on ${this.#cls.name}`);
+      throw new RuntimeError(`Endpoint not registered: ${method} on ${this.#cls.name}`);
     }
     return endpoint;
   }

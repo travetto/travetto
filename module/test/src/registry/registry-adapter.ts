@@ -71,7 +71,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
         class: this.#cls,
         classId: this.#cls.Ⲑid,
         tags: [],
-        skip: isAbstract,
+        skip: isAbstract ? () => true : undefined,
         import: Runtime.getImport(this.#cls),
         lineStart: lines?.[0],
         lineEnd: lines?.[1],
@@ -92,7 +92,6 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
       const config = asFull<TestConfig>({
         class: this.#cls,
         tags: [],
-        skip: false,
         declarationImport: Runtime.getImport(this.#cls),
         import: Runtime.getImport(this.#cls),
         lineStart: lines?.[0],
@@ -127,7 +126,7 @@ export class SuiteRegistryAdapter implements RegistryAdapter<SuiteConfig> {
   getMethod(method: string): TestConfig {
     const test = this.#config.tests[method];
     if (!test) {
-      throw new RuntimeError(`Test not registered: ${String(method)} on ${this.#cls.name}`);
+      throw new RuntimeError(`Test not registered: ${method} on ${this.#cls.name}`);
     }
     return test;
   }

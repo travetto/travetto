@@ -102,9 +102,9 @@ export class SchemaRegistryIndex implements RegistryIndex {
     if (!this.store.has(cls)) {
       return undefined;
     }
-    const pathKey = Array.isArray(field) ? field.join('.') : String(field);
+    const pathKey = Array.isArray(field) ? field.join('.') : field;
     return this.#fieldConfigs.getOrInsert(cls, new Map()).getOrInsertComputed(pathKey, () => {
-      const segments = Array.isArray(field) ? field : String(field).split('.');
+      const segments = Array.isArray(field) ? field : field.split('.');
       let currentClass: Class | undefined = cls;
       let fieldConfiguration: SchemaFieldConfig | undefined;
 

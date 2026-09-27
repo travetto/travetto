@@ -52,6 +52,49 @@ class SimpleTest {
 }
 ```
 
+### Test Configuration
+Test execution can be customized using additional decorators on individual test methods or suites:
+   *  [@SkipIf](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/common.ts#L11) allows conditionally skipping tests or suites. It accepts a predicate function that receives the suite instance and returns a boolean (or a Promise resolving to a boolean).
+   *  [@SkipUnless](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/common.ts#L27) allows conditionally skipping tests or suites unless a predicate function resolves to true.
+   *  [@Timeout](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L58) specifies a custom execution timeout in milliseconds for the test.
+   *  [@ShouldThrow](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L46) asserts that the test must throw an expected error, failing if no error is thrown.
+
+**Code: Configured Test Execution**
+```typescript
+import assert from 'node:assert';
+
+import { ShouldThrow, SkipIf, SkipUnless, Suite, Test, Timeout } from '@travetto/test';
+
+@Suite()
+class ConfiguredSuite {
+  supportsFeature = false;
+
+  @Test()
+  @SkipIf(() => true)
+  async skippedDirectly() {
+    assert(false);
+  }
+
+  @Test()
+  @SkipUnless((instance: ConfiguredSuite) => instance.supportsFeature)
+  async skippedViaPredicate() {
+    assert(true);
+  }
+
+  @Test()
+  @Timeout(1000)
+  async timedOperation() {
+    assert(1 === 1);
+  }
+
+  @Test()
+  @ShouldThrow(Error)
+  async mustThrow() {
+    throw new Error('Expected failure');
+  }
+}
+```
+
 ## Assertions
 A common aspect of the tests themselves are the assertions that are made. [Node](https://nodejs.org) provides a built-in [assert](https://nodejs.org/api/assert.html) library. The framework uses AST transformations to modify the assertions to provide integration with the test module, and to provide a much higher level of detail in the failed assertions. For example:
 

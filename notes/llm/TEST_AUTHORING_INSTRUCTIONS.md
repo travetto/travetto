@@ -88,13 +88,16 @@ The `@Test()` decorator accepts a config object with additional options:
 @Test({ timeout: 15000 })
 async longRunningTest() { }
 
-@Test({ skip: true })
+@Test()
+@SkipIf(() => true)
 async notReadyYet() { }
 
-@Test({ skip: () => !global.gc })
+@Test()
+@SkipUnless(() => global.gc)
 async requiresGC() { }
 
-@Test({ skip: BaseModelSuite.ifNot(SomeUtil.isSupported) })
+@Test()
+@SkipUnless((instance: MySuite) => instance.supportsFeature)
 async conditionalTest() { }
 
 @Test({ shouldThrow: ValidationResultError })
@@ -335,24 +338,19 @@ Tests can be conditionally skipped based on runtime capabilities:
 
 ```ts
 // Skip if GC is not exposed
-@Test({ skip: () => !global.gc })
+@Test()
+@SkipUnless(() => global.gc)
 async ensureCulled() { }
 
-// Skip if the service doesn't support the feature
-@Test({ skip: BaseModelSuite.ifNot(ModelBlobUtil.isWriteUrlSupported) })
-async testSignedUrls() { }
+// Skip if the suite doesn't support the feature
+@Test()
+@SkipUnless((instance: MySuite) => instance.supportsFeature)
+async testFeature() { }
 
-// Static skip
-@Test({ skip: true })
+// Skip unconditionally
+@Test()
+@SkipIf(() => true)
 async notImplementedYet() { }
-```
-
-The `BaseModelSuite.ifNot()` helper creates skip predicates from capability checks:
-
-```ts
-static ifNot(pred: (svc: unknown) => boolean): (x: unknown) => Promise<boolean> {
-  return async (x: unknown) => !pred(classConstruct(castTo<ServiceClass>(x).serviceClass));
-}
 ```
 
 ### Pattern 7: Cross-Module Integration Tests (global-test)

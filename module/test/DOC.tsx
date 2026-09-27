@@ -2,8 +2,9 @@
 import { c, d } from '@travetto/doc';
 import { RuntimeIndex } from '@travetto/runtime';
 
+import { SkipIf, SkipUnless } from './src/decorator/common.ts';
 import { Suite } from './src/decorator/suite.ts';
-import { Test } from './src/decorator/test.ts';
+import { ShouldThrow, Test, Timeout } from './src/decorator/test.ts';
 import { TestCommand } from './support/cli.test.ts';
 
 export const text = (
@@ -25,6 +26,19 @@ export const text = (
       on the suite class, using the {Test} decorator. All tests intrinsically support {d.input('async')}/{d.input('await')}. <br />A simple
       example would be:
       <c.Code title="Example Test Suite" src="doc/example.ts" />
+      <c.SubSection title="Test Configuration">
+        Test execution can be customized using additional decorators on individual test methods or suites:
+        <ul>
+          <li>
+            {SkipIf} allows conditionally skipping tests or suites. It accepts a predicate function that receives the suite instance and
+            returns a boolean (or a Promise resolving to a boolean).
+          </li>
+          <li>{SkipUnless} allows conditionally skipping tests or suites unless a predicate function resolves to true.</li>
+          <li>{Timeout} specifies a custom execution timeout in milliseconds for the test.</li>
+          <li>{ShouldThrow} asserts that the test must throw an expected error, failing if no error is thrown.</li>
+        </ul>
+        <c.Code title="Configured Test Execution" src="doc/configuration.ts" />
+      </c.SubSection>
     </c.Section>
     <c.Section title="Assertions">
       A common aspect of the tests themselves are the assertions that are made. {d.library('Node')} provides a built-in{' '}

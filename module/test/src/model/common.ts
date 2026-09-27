@@ -1,5 +1,7 @@
+import type { Any } from '@travetto/runtime';
+
 /** Configuration of a skip */
-export type Skip = boolean | ((instance: unknown) => boolean | Promise<boolean>);
+export type Skip<T = Any> = (instance: T) => boolean | Promise<boolean>;
 
 /**
  * Core Suite definition

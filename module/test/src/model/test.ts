@@ -34,7 +34,7 @@ export interface TestConfig extends TestCore {
   /**
    * Should it be skipped
    */
-  skip: Skip;
+  skip?: Skip;
   /**
    * Override the timeout duration
    */

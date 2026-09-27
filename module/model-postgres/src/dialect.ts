@@ -184,7 +184,7 @@ export class PostgresDialect extends AbstractANSI99Dialect {
 
   compileArrayRegex(context: ResolvedPathContext, identifier: string, value: RegExp | string): { sql: string; formatted: unknown } {
     const target = this.#getPostgresArrayTarget(context);
-    const regex = value instanceof RegExp ? value : new RegExp(String(value));
+    const regex = value instanceof RegExp ? value : new RegExp(value);
     const caseInsensitive = regex.flags.includes('i');
     const regexOp = this.getRegexOperator(caseInsensitive);
     const regexSource = this.formatRegex(regex.source, caseInsensitive);

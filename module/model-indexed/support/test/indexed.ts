@@ -3,7 +3,7 @@ import timers from 'node:timers/promises';
 
 import { ModelBulkUtil, NotFoundError, UniqueError } from '@travetto/model';
 import { castTo, TimeUtil } from '@travetto/runtime';
-import { Suite, Test } from '@travetto/test';
+import { SkipUnless, Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
@@ -69,7 +69,8 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     assert(found2.name === 'bob2');
   }
 
-  @Test({ skip: self => !castTo<ModelIndexedSuite>(self).supportsUniqueIndexes })
+  @Test()
+  @SkipUnless((self: ModelIndexedSuite) => self.supportsUniqueIndexes)
   async writeRejectsDuplicateUniqueIndex() {
     const service = await this.service;
 
@@ -208,7 +209,8 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await assert.rejects(() => service.getByIndex(User3, userAgeNoKeyIndex, {}), IndexedFieldError);
   }
 
-  @Test({ skip: self => !castTo<ModelIndexedSuite>(self).supportsDeepIndexes })
+  @Test()
+  @SkipUnless((self: ModelIndexedSuite) => self.supportsDeepIndexes)
   async queryDeepList() {
     const service = await this.service;
 
@@ -225,7 +227,8 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await assert.rejects(() => service.pageByIndex(User4, childAgeIndex, {}), IndexedFieldError);
   }
 
-  @Test({ skip: self => !castTo<ModelIndexedSuite>(self).supportsDeepIndexes })
+  @Test()
+  @SkipUnless((self: ModelIndexedSuite) => self.supportsDeepIndexes)
   async queryComplexDateList() {
     const service = await this.service;
 

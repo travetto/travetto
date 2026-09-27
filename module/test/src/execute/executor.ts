@@ -46,8 +46,8 @@ export class TestExecutor {
   /**
    * Determining if we should skip
    */
-  async #shouldSkip(config: TestConfig | SuiteConfig, inst: unknown): Promise<boolean | undefined> {
-    if (typeof config.skip === 'function' ? await config.skip(inst) : config.skip) {
+  async #shouldSkip(config: TestConfig | SuiteConfig, instance: unknown): Promise<boolean | undefined> {
+    if (await config.skip?.(instance)) {
       return true;
     }
   }

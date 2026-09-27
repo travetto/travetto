@@ -18,7 +18,7 @@ export interface SuiteConfig extends SuiteCore {
   /**
    * Should this be skipped
    */
-  skip: Skip;
+  skip?: Skip;
   /**
    * Tests to run
    */
