@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 
 import { Model } from '@travetto/model';
+import { castTo } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
@@ -26,7 +27,7 @@ class SqliteBasicSuite extends ModelBasicSuite {
 
   @Test('truncateModel should fail when underlying table does not exist')
   async testTruncateModelNotExists() {
-    const service = await this.service;
+    const service = castTo<SqliteModelService>(await this.service);
     await service.deleteModel(SqliteTempPerson);
     // deleteModel should be idempotent and not throw when table does not exist
     await service.deleteModel(SqliteTempPerson);

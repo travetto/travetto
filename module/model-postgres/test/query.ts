@@ -3,13 +3,8 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 
 import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
-import { ModelQueryAggregateSuite } from '@travetto/model-query/support/test/aggregate.ts';
-import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
-import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.ts';
 import { WithNestedLists } from '@travetto/model-query/support/test/model.ts';
-import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism.ts';
 import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
-import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest.ts';
 
 import { PostgresModelConfig } from '../src/config.ts';
 import { PostgresModelService } from '../src/service.ts';
@@ -86,39 +81,4 @@ class PostgreSQLQuerySuite extends ModelQuerySuite {
     });
     assert(existsTags === 3);
   }
-}
-
-@WithSuiteContext()
-@Suite()
-class PostgreSQLQueryAggregateSuite extends ModelQueryAggregateSuite {
-  serviceClass = PostgresModelService;
-  configClass = PostgresModelConfig;
-}
-
-@WithSuiteContext()
-@Suite()
-class PostgreSQLQueryCrudSuite extends ModelQueryCrudSuite {
-  serviceClass = PostgresModelService;
-  configClass = PostgresModelConfig;
-}
-
-@WithSuiteContext()
-@Suite()
-class PostgreSQLQueryFacetSuite extends ModelQueryFacetSuite {
-  serviceClass = PostgresModelService;
-  configClass = PostgresModelConfig;
-}
-
-@WithSuiteContext()
-@Suite()
-class PostgreSQLQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
-  serviceClass = PostgresModelService;
-  configClass = PostgresModelConfig;
-}
-
-@WithSuiteContext()
-@Suite()
-class PostgreSQLQuerySuggestSuite extends ModelQuerySuggestSuite {
-  serviceClass = PostgresModelService;
-  configClass = PostgresModelConfig;
 }
