@@ -1,19 +1,19 @@
 import assert from 'node:assert';
 
-import { ShouldThrow, SkipTest, Suite, Test, Timeout } from '@travetto/test';
+import { ShouldThrow, SkipIf, SkipIfNot, Suite, Test, Timeout } from '@travetto/test';
 
 @Suite()
 class ConfiguredSuite {
   supportsFeature = false;
 
   @Test()
-  @SkipTest(true)
+  @SkipIf(() => true)
   async skippedDirectly() {
     assert(false);
   }
 
   @Test()
-  @SkipTest((instance: ConfiguredSuite) => !instance.supportsFeature)
+  @SkipIfNot((instance: ConfiguredSuite) => instance.supportsFeature)
   async skippedViaPredicate() {
     assert(true);
   }

@@ -25,7 +25,7 @@ This module provides unit testing functionality that integrates with the framewo
 
 <h2 id="definition">Definition</h2>
 
-A test suite is a collection of individual tests. All test suites are classes with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L13">@Suite</a> decorator. Tests are defined as methods on the suite class, using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L26">@Test</a> decorator. All tests intrinsically support <code class="item input">async</code>/<code class="item input">await</code>. <br><br>
+A test suite is a collection of individual tests. All test suites are classes with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L13">@Suite</a> decorator. Tests are defined as methods on the suite class, using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L25">@Test</a> decorator. All tests intrinsically support <code class="item input">async</code>/<code class="item input">await</code>. <br><br>
 A simple example would be:
 
   <figure class="code">
@@ -60,10 +60,11 @@ A simple example would be:
 
 <h3 id="test-configuration">Test Configuration</h3>
 
-Test execution can be customized using additional decorators on individual test methods:
-<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L59">@SkipTest</a> allows conditionally or unconditionally skipping tests. It accepts a static boolean or a predicate function that receives the suite instance and returns a boolean (or a Promise resolving to a boolean).</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L71">@Timeout</a> specifies a custom execution timeout in milliseconds for the test.</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L47">@ShouldThrow</a> asserts that the test must throw an expected error, failing if no error is thrown.</li>
+Test execution can be customized using additional decorators on individual test methods or suites:
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/common.ts#L11">@SkipIf</a> allows conditionally skipping tests or suites. It accepts a predicate function that receives the suite instance and returns a boolean (or a Promise resolving to a boolean).</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/common.ts#L27">@SkipIfNot</a> allows conditionally skipping tests or suites with an inverted predicate function.</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L59">@Timeout</a> specifies a custom execution timeout in milliseconds for the test.</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L46">@ShouldThrow</a> asserts that the test must throw an expected error, failing if no error is thrown.</li>
 </ul>
 
   <figure class="code">
@@ -73,20 +74,20 @@ Test execution can be customized using additional decorators on individual test 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> assert <span class="token keyword">from</span> <span class="token string">'node:assert'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ShouldThrow<span class="token punctuation">,</span> SkipTest<span class="token punctuation">,</span> Suite<span class="token punctuation">,</span> Test<span class="token punctuation">,</span> Timeout <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/test'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ShouldThrow<span class="token punctuation">,</span> SkipIf<span class="token punctuation">,</span> SkipIfNot<span class="token punctuation">,</span> Suite<span class="token punctuation">,</span> Test<span class="token punctuation">,</span> Timeout <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/test'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Suite</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">ConfiguredSuite</span> <span class="token punctuation">{{'{'}}</span>
   supportsFeature <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
 
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Test</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">SkipTest</span></span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">SkipIf</span></span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token boolean">true</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">skippedDirectly</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token function">assert</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Test</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">SkipTest</span></span><span class="token punctuation">(</span><span class="token punctuation">(</span>instance<span class="token operator">:</span> ConfiguredSuite<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token operator">!</span>instance<span class="token punctuation">.</span>supportsFeature<span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">SkipIfNot</span></span><span class="token punctuation">(</span><span class="token punctuation">(</span>instance<span class="token operator">:</span> ConfiguredSuite<span class="token punctuation">)</span> <span class="token operator">=></span> instance<span class="token punctuation">.</span>supportsFeature<span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">skippedViaPredicate</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token function">assert</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -294,22 +295,7 @@ To run the tests you can either call the <a class="module-link" href="https://gi
     <figcaption class="terminal">Showing help for test
 
 </figcaption>
-    <pre><code class="language-bash">$ trv <span class="token builtin class-name">test</span> <span class="token parameter variable">--help</span>
-
-Usage: <span class="token builtin class-name">test</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>first:string<span class="token punctuation">]</span> <span class="token punctuation">[</span>globs<span class="token punctuation">..</span>.:string<span class="token punctuation">]</span>
-
-Description:
-  Execute the <span class="token builtin class-name">test</span> framework <span class="token keyword">for</span> targeted files, suites, or methods.
-
-  Supports glob-based discovery, import-based targeting, tag filtering, and
-  configurable output consumers <span class="token keyword">for</span> <span class="token builtin class-name">local</span> and CI workflows.
-
-Options:
-  -f, <span class="token parameter variable">--format</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>          Output <span class="token function">format</span> <span class="token keyword">for</span> <span class="token builtin class-name">test</span> results <span class="token punctuation">(</span>default: <span class="token string">"tap"</span><span class="token punctuation">)</span>
-  -c, <span class="token parameter variable">--concurrency</span> <span class="token operator">&lt;</span>number<span class="token operator">></span>     Number of tests to run concurrently <span class="token punctuation">(</span>default: <span class="token number">9</span><span class="token punctuation">)</span>
-  -t, <span class="token parameter variable">--tags</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>            Tags to target or exclude when using globs
-  -o, --format-options <span class="token operator">&lt;</span>string<span class="token operator">></span>  Format options
-  <span class="token parameter variable">--help</span>                         display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+    <pre><code class="language-bash">$ trv <span class="token builtin class-name">test</span> <span class="token parameter variable">--help</span></code></pre>
   </figure>
 
 The regexes are the patterns of tests you want to run, and all tests must be found under the <code class="item path">test/</code> folder.

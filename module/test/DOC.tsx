@@ -2,8 +2,9 @@
 import { c, d } from '@travetto/doc';
 import { RuntimeIndex } from '@travetto/runtime';
 
+import { SkipIf, SkipIfNot } from './src/decorator/common.ts';
 import { Suite } from './src/decorator/suite.ts';
-import { ShouldThrow, SkipTest, Test, Timeout } from './src/decorator/test.ts';
+import { ShouldThrow, Test, Timeout } from './src/decorator/test.ts';
 import { TestCommand } from './support/cli.test.ts';
 
 export const text = (
@@ -26,11 +27,14 @@ export const text = (
       example would be:
       <c.Code title="Example Test Suite" src="doc/example.ts" />
       <c.SubSection title="Test Configuration">
-        Test execution can be customized using additional decorators on individual test methods:
+        Test execution can be customized using additional decorators on individual test methods or suites:
         <ul>
           <li>
-            {SkipTest} allows conditionally or unconditionally skipping tests. It accepts a static boolean or a predicate function that
+            {SkipIf} allows conditionally skipping tests or suites. It accepts a predicate function that
             receives the suite instance and returns a boolean (or a Promise resolving to a boolean).
+          </li>
+          <li>
+            {SkipIfNot} allows conditionally skipping tests or suites with an inverted predicate function.
           </li>
           <li>{Timeout} specifies a custom execution timeout in milliseconds for the test.</li>
           <li>{ShouldThrow} asserts that the test must throw an expected error, failing if no error is thrown.</li>

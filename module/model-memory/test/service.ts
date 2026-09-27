@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 import { TimeUtil } from '@travetto/runtime';
-import { SkipTest, Suite, Test } from '@travetto/test';
+import { SkipIfNot, Suite, Test } from '@travetto/test';
 
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
 import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
@@ -36,7 +36,7 @@ class MemoryExpirySuite extends ModelExpirySuite {
   configClass = MemoryModelConfig;
 
   @Test()
-  @SkipTest(() => !global.gc)
+  @SkipIfNot(() => Boolean(global.gc))
   async ensureCulled() {
     const service = await this.service;
 

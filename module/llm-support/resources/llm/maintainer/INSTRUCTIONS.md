@@ -64,6 +64,10 @@ This module owns LLM-oriented generation guidance for Travetto.
   - Avoid redundant `String(...)` conversions inside template literals (e.g., use `` `$${field}` `` instead of `` `$${String(field)}` ``).
   - Avoid inline `.catch` invocations on promises unless strictly necessary (e.g., an unawaited promise). Prefer standard `try / catch` blocks instead.
   - Avoid creating redundant type aliases or duplicate types (e.g., introducing a short alias alongside a canonical descriptive type). Expose a single canonical descriptive type name.
+- **Test Skipping**:
+  - Use `@SkipIf(predicate)` and `@SkipIfNot(predicate)` decorators from `@travetto/test` on test methods or suites to conditionally skip execution.
+  - Skip predicates must be functions that receive the suite instance: `(instance: T) => boolean | Promise<boolean>`. Static boolean values are not supported.
+  - Common capability guards created with `hasFunction` (e.g. `ModelBlobUtil.isWriteUrlSupported`) can be passed directly to `@SkipIfNot`.
 
 ## Catalog Evolution
 When adding operations:

@@ -1,6 +1,5 @@
 import { type ClassInstance, getClass } from '@travetto/runtime';
 
-import type { Skip } from '../model/common.ts';
 import type { TestConfig, ThrowableError } from '../model/test.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 
@@ -51,17 +50,6 @@ export function ShouldThrow(state: ThrowableError): MethodDecorator {
   };
 }
 
-/**
- * Marks a method if it should be skipped or not
- * @param skip The skip configuration, either a boolean or a function that will run with the suite instance
- * @kind decorator
- */
-export function SkipTest(skip: Skip): MethodDecorator {
-  return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor) => {
-    SuiteRegistryIndex.getForRegister(getClass(instance)).registerTest(property, descriptor.value, { skip });
-    return descriptor;
-  };
-}
 
 /**
  * Sets the full timeout window for a given test

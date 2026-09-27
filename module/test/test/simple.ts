@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { AfterAll, AfterEach, BeforeAll, BeforeEach, ShouldThrow, SkipTest, Suite, Test, TestExecutionError } from '@travetto/test';
+import { AfterAll, AfterEach, BeforeAll, BeforeEach, ShouldThrow, SkipIf, Suite, Test, TestExecutionError } from '@travetto/test';
 
 let a: unknown = 0;
 a = 1;
@@ -151,7 +151,7 @@ class Simple {
 
   @Test({ timeout: 50 })
   @ShouldThrow(TestExecutionError)
-  @SkipTest(true)
+  @SkipIf(() => true)
   async testUnhandledPromise() {
     await timers.setTimeout(500);
   }

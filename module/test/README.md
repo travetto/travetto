@@ -21,7 +21,7 @@ This module provides unit testing functionality that integrates with the framewo
 **Note**: All tests should be under the `**/*` folders. The pattern for tests is defined as as a standard glob using [Node](https://nodejs.org)'s built in globbing support.
 
 ## Definition
-A test suite is a collection of individual tests. All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L13) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L26) decorator. All tests intrinsically support `async`/`await`. 
+A test suite is a collection of individual tests. All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L13) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L25) decorator. All tests intrinsically support `async`/`await`. 
 
 A simple example would be:
 
@@ -53,29 +53,30 @@ class SimpleTest {
 ```
 
 ### Test Configuration
-Test execution can be customized using additional decorators on individual test methods:
-   *  [@SkipTest](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L59) allows conditionally or unconditionally skipping tests. It accepts a static boolean or a predicate function that receives the suite instance and returns a boolean (or a Promise resolving to a boolean).
-   *  [@Timeout](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L71) specifies a custom execution timeout in milliseconds for the test.
-   *  [@ShouldThrow](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L47) asserts that the test must throw an expected error, failing if no error is thrown.
+Test execution can be customized using additional decorators on individual test methods or suites:
+   *  [@SkipIf](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/common.ts#L11) allows conditionally skipping tests or suites. It accepts a predicate function that receives the suite instance and returns a boolean (or a Promise resolving to a boolean).
+   *  [@SkipIfNot](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/common.ts#L27) allows conditionally skipping tests or suites with an inverted predicate function.
+   *  [@Timeout](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L59) specifies a custom execution timeout in milliseconds for the test.
+   *  [@ShouldThrow](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L46) asserts that the test must throw an expected error, failing if no error is thrown.
 
 **Code: Configured Test Execution**
 ```typescript
 import assert from 'node:assert';
 
-import { ShouldThrow, SkipTest, Suite, Test, Timeout } from '@travetto/test';
+import { ShouldThrow, SkipIf, SkipIfNot, Suite, Test, Timeout } from '@travetto/test';
 
 @Suite()
 class ConfiguredSuite {
   supportsFeature = false;
 
   @Test()
-  @SkipTest(true)
+  @SkipIf(() => true)
   async skippedDirectly() {
     assert(false);
   }
 
   @Test()
-  @SkipTest((instance: ConfiguredSuite) => !instance.supportsFeature)
+  @SkipIfNot((instance: ConfiguredSuite) => instance.supportsFeature)
   async skippedViaPredicate() {
     assert(true);
   }
@@ -261,21 +262,6 @@ To run the tests you can either call the [Command Line Interface](https://github
 **Terminal: Help for test**
 ```bash
 $ trv test --help
-
-Usage: test [options] [first:string] [globs...:string]
-
-Description:
-  Execute the test framework for targeted files, suites, or methods.
-
-  Supports glob-based discovery, import-based targeting, tag filtering, and
-  configurable output consumers for local and CI workflows.
-
-Options:
-  -f, --format <string>          Output format for test results (default: "tap")
-  -c, --concurrency <number>     Number of tests to run concurrently (default: 9)
-  -t, --tags <string>            Tags to target or exclude when using globs
-  -o, --format-options <string>  Format options
-  --help                         display help for command
 ```
 
 The regexes are the patterns of tests you want to run, and all tests must be found under the `test/` folder.

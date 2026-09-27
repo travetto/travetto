@@ -2,6 +2,7 @@ import type {} from './src/trv.d.ts';
 
 export * from './src/consumer/registry-index.ts';
 export * from './src/consumer/types.ts';
+export * from './src/decorator/common.ts';
 export * from './src/decorator/suite.ts';
 export * from './src/decorator/test.ts';
 export * from './src/fixture.ts';

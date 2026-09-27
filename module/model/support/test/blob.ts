@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { BinaryMetadataUtil, BinaryUtil, Util } from '@travetto/runtime';
-import { SkipTest, Suite, Test, TestFixtures } from '@travetto/test';
+import { SkipIfNot, Suite, Test, TestFixtures } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
@@ -151,7 +151,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
   }
 
   @Test()
-  @SkipTest(ModelBlobSuite.ifNot(ModelBlobUtil.isWriteUrlSupported))
+  @SkipIfNot(ModelBlobUtil.isWriteUrlSupported)
   async signedUrl() {
     const service = await this.service;
 

@@ -69,8 +69,7 @@ export class SuiteRegistryIndex implements RegistryIndex {
       const line = parseInt(clsId, 10);
       const suites = this.getValidClasses()
         .filter(cls => Runtime.getImport(cls) === imp)
-        .map(cls => this.getConfig(cls))
-        .filter(config => !config.skip);
+        .map(cls => this.getConfig(cls));
       const suite = suites.find(config => line >= config.lineStart && line <= config.lineEnd);
 
       if (suite) {
