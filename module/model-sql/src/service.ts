@@ -297,8 +297,10 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async dropTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
+    const statements = this.dialect.getDropTableSQLs(tableContext);
+    const sql = statements.length > 1 ? `-- exec\n${statements.join('\n')}` : statements[0];
     await ModelStorageUtil.runAndIgnoreNotFound(
-      () => this.connection.execute(this.dialect.getDropTableSQLs(tableContext).join(';')),
+      () => this.connection.execute(sql),
       error => this.dialect.isTableNotFoundError(error)
     );
   }
@@ -315,7 +317,9 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async truncateTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
-    await this.connection.execute(this.dialect.getTruncateTableSQLs(tableContext).join(';'));
+    const statements = this.dialect.getTruncateTableSQLs(tableContext);
+    const sql = statements.length > 1 ? `-- exec\n${statements.join('\n')}` : statements[0];
+    await this.connection.execute(sql);
   }
 
   async upsertTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {

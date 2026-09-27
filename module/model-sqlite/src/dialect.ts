@@ -261,8 +261,20 @@ WHERE type='index' AND tbl_name=?;
   }
 
   getDropTablesSQL(tableContexts: TableContext[]): string {
-    const tableNames = [...new Set(tableContexts.map(context => this.escapeIdentifier(context.tableName)))];
-    return tableNames.map(tableName => `DROP TABLE IF EXISTS ${tableName};`).join('\n');
+    const tableNames: string[] = [];
+    for (const context of tableContexts) {
+      tableNames.push(this.escapeIdentifier(context.tableName));
+      const textFields = this.getTextSearchFields(context);
+      if (textFields.length > 0) {
+        tableNames.push(this.escapeIdentifier(`${context.tableName}_fts`));
+      }
+    }
+    const uniqueTableNames = [...new Set(tableNames)];
+    if (uniqueTableNames.length === 0) {
+      return '';
+    }
+    const statements = uniqueTableNames.map(tableName => `DROP TABLE IF EXISTS ${tableName};`);
+    return statements.length > 1 ? `-- exec\n${statements.join('\n')}` : statements[0];
   }
 
   getTruncateTableSQL(context: TableContext): string {
