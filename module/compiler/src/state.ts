@@ -14,7 +14,7 @@ import type { TransformerManager } from '@travetto/transformer';
 
 import { CommonUtil } from './common.ts';
 import { tsProxy as ts, tsProxyInit } from './ts-proxy.ts';
-import type { CompileStateEntry } from './types.ts';
+import type { CompileStateEntry, CompilerDiagnosticItem } from './types.ts';
 import { CompilerUtil } from './util.ts';
 
 const TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'support', 'src', '$package']);
@@ -24,6 +24,7 @@ export class CompilerState implements CompilerHost {
     return new CompilerState().init(idx);
   }
 
+  #failures = new Map<string, number>();
   #outputPath: string;
   #typingsPath: string;
   #sourceFiles = new Set<string>();
@@ -188,7 +189,7 @@ export class CompilerState implements CompilerHost {
     return this.#program;
   }
 
-  async compileSourceFile(sourceFile: string, needsNewProgram = false): Promise<string[] | undefined> {
+  async compileSourceFile(sourceFile: string, needsNewProgram = false): Promise<CompilerDiagnosticItem[] | undefined> {
     const output = this.#sourceToEntry.get(sourceFile)?.outputFile;
     if (!output) {
       return;
@@ -201,11 +202,13 @@ export class CompilerState implements CompilerHost {
         const location = this.#tscOutputFileToOutput.get(output) ?? output;
         this.#writeFile(location, finalText);
         this.#writeExternalTypings(location, finalText);
+        this.#failures.delete(sourceFile);
         break;
       }
       case 'js':
       case 'typings':
         this.writeFile(output, this.readFile(sourceFile)!);
+        this.#failures.delete(sourceFile);
         break;
       case 'ts': {
         const program = await this.getProgram(needsNewProgram);
@@ -217,33 +220,54 @@ export class CompilerState implements CompilerHost {
           false,
           this.#transformerManager.get()
         );
-        return [
+        const diagnostics: CompilerDiagnosticItem[] = [];
+        const rawDiagnostics = [
           ...program.getSemanticDiagnostics(tsSourceFile),
           ...program.getSyntacticDiagnostics(tsSourceFile),
           ...program.getDeclarationDiagnostics(tsSourceFile)
-        ]
-          .filter(d => d.category === ts.DiagnosticCategory.Error)
-          .map(diag => {
-            let message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
-            if (
-              message.includes("is not under 'rootDir'") ||
-              message.includes("does not exist on type 'EnvDataCombinedType'") ||
-              message.startsWith('Could not find a declaration file for module') ||
-              message.startsWith("Cannot find module '@travetto") ||
-              message.startsWith("This JSX tag requires the module path '@travetto") ||
-              message.startsWith("JSX element implicitly has type 'any'")
-            ) {
-              return '';
-            }
-            if (diag.file) {
-              const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
-              message = `${line + 1}:${character + 1} -- ${message}`;
-            }
-            return message;
-          })
-          .filter(Boolean);
+        ].filter(diagnostic => diagnostic.category === ts.DiagnosticCategory.Error);
+
+        for (const diagnostic of rawDiagnostics) {
+          const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+          if (
+            message.includes("is not under 'rootDir'") ||
+            message.includes("does not exist on type 'EnvDataCombinedType'") ||
+            message.startsWith('Could not find a declaration file for module') ||
+            message.startsWith("Cannot find module '@travetto") ||
+            message.startsWith("This JSX tag requires the module path '@travetto") ||
+            message.startsWith("JSX element implicitly has type 'any'")
+          ) {
+            continue;
+          }
+          let line = 1;
+          let column = 1;
+          if (diagnostic.file && diagnostic.start !== undefined) {
+            const position = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
+            line = position.line + 1;
+            column = position.character + 1;
+          }
+          diagnostics.push({ line, column, message });
+        }
+        if (diagnostics.length) {
+          this.#failures.set(sourceFile, diagnostics.length);
+        } else {
+          this.#failures.delete(sourceFile);
+        }
+        return diagnostics;
       }
     }
+  }
+
+  hasErrors(sourceFile?: string): boolean {
+    return sourceFile ? this.#failures.has(sourceFile) : this.#failures.size > 0;
+  }
+
+  getAllErrors(): [file: string, count: number][] {
+    return [...this.#failures.entries()];
+  }
+
+  get failureCount(): number {
+    return this.#failures.size;
   }
 
   getBySource(sourceFile: string): CompileStateEntry | undefined {
@@ -306,23 +330,38 @@ export class CompilerState implements CompilerHost {
     return changed;
   }
 
-  removeSource(sourceFile: string): void {
-    const entry = this.#sourceToEntry.get(sourceFile)!;
-    if (entry.outputFile) {
-      this.#outputToEntry.delete(entry.outputFile);
-    }
+  /**
+   * Remove a source file from compiler tracking and delete its related output files from disk
+   */
+  removeSource(sourceFile: string): boolean {
+    this.#failures.delete(sourceFile);
+    const entry = this.#sourceToEntry.get(sourceFile);
 
     this.#sourceFileObjects.delete(sourceFile);
     this.#sourceContents.delete(sourceFile);
     this.#sourceHashes.delete(sourceFile);
     this.#sourceToEntry.delete(sourceFile);
     this.#sourceFiles.delete(sourceFile);
+    this.#outputToEntry.delete(entry?.outputFile ?? undefined!);
+
+    if (!entry) {
+      return false;
+    }
 
     const tscOutputDts = `${ManifestModuleUtil.withoutSourceExtension(entry.tscOutputFile)}${ManifestModuleUtil.TYPINGS_EXT}`;
-    this.#tscOutputFileToOutput.delete(entry.tscOutputFile);
-    this.#tscOutputFileToOutput.delete(`${entry.tscOutputFile}.map`);
-    this.#tscOutputFileToOutput.delete(tscOutputDts);
-    this.#tscOutputFileToOutput.delete(`${tscOutputDts}.map`);
+    const inputs = [entry.tscOutputFile, `${entry.tscOutputFile}.map`, tscOutputDts, `${tscOutputDts}.map`];
+    let deleted = false;
+
+    for (const input of inputs) {
+      const output = this.#tscOutputFileToOutput.get(input);
+      if (output) {
+        deleted = true;
+        fs.rmSync(output, { force: true });
+      }
+      this.#tscOutputFileToOutput.delete(input);
+    }
+
+    return deleted;
   }
 
   getAllFiles(): string[] {
