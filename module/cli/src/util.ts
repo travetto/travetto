@@ -33,14 +33,20 @@ export class CliUtil {
     ShutdownManager.disableInterrupt();
 
     let child: ChildProcess | undefined;
-    await WatchUtil.watchCompilerEvents('file', () => ShutdownManager.shutdownChild(child!, { reason: 'restart', mode: 'exit' }));
+    const stop = (reason: 'restart' | 'quit') => () => ShutdownManager.shutdownWithChild(child, { reason, mode: 'exit' });
+    await WatchUtil.watchCompilerEvents('file', stop('restart'));
+    await WatchUtil.watchCompilerLogs();
 
-    process.on('SIGINT', () => ShutdownManager.shutdownChild(child!, { mode: 'exit' })).on('message', message => child?.send?.(message!));
+    process
+      .on('message', message => child?.send?.(message!))
+      .on('SIGINT', stop('quit'))
+      .on('SIGTERM', stop('quit'));
 
     const env = { ...process.env, ...Env.TRV_RESTART_TARGET.export(true) };
 
     await WatchUtil.runWithRetry(
       async () => {
+        await WatchUtil.pauseUntilWatchReady(ShutdownManager.signal);
         child = spawn(process.argv0, process.argv.slice(1), { env, stdio: ['pipe', 1, 2, 'ipc'] });
         const { code } = await ExecUtil.getResult(child, { catch: true });
         return ShutdownManager.reasonForExitCode(code);
@@ -49,11 +55,6 @@ export class CliUtil {
         maxRetries: 5,
         onRetry: async (state, config) => {
           const duration = WatchUtil.computeRestartDelay(state, config);
-          console.error('[cli-restart] Restarting subprocess due to change...', {
-            waiting: duration,
-            iteration: state.iteration,
-            errorIterations: state.errorIterations || undefined
-          });
           await Util.nonBlockingTimeout(duration);
         }
       }

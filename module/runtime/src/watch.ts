@@ -1,4 +1,4 @@
-import type { CompilerEventPayload, CompilerEventType } from '@travetto/compiler';
+import type { CompilerClient, CompilerEventPayload, CompilerEventType, CompilerLogEvent } from '@travetto/compiler';
 
 import { RuntimeError } from './error.ts';
 import { RuntimeIndex } from './manifest-index.ts';
@@ -18,6 +18,11 @@ type RetryRunConfig = {
   maxRetryWindow: number;
   signal?: AbortSignal;
   onRetry: (state: RetryRunState, config: RetryRunConfig) => unknown | Promise<unknown>;
+};
+
+export type CompilerWatchOptions = Partial<RetryRunConfig> & {
+  waitForReady?: boolean;
+  onInitial?: (client: CompilerClient) => unknown | Promise<unknown>;
 };
 
 /**
@@ -78,32 +83,38 @@ export class WatchUtil {
     }
   }
 
-  /**  Watch compiler events  */
-  static async watchCompilerEvents<K extends CompilerEventType, T extends CompilerEventPayload<K>>(
-    type: K,
-    onChange: (input: T) => unknown,
-    filter?: (input: T) => boolean,
-    options?: Partial<RetryRunConfig>
-  ): Promise<void> {
-    const { CompilerClient } = await import('@travetto/compiler/src/server/client.ts');
-    const client = new CompilerClient(RuntimeIndex.manifest, {
+  static async #getCompilerClient(): Promise<CompilerClient> {
+    const { CompilerClient: ClientClass } = await import('@travetto/compiler/src/server/client.ts');
+    return new ClientClass(RuntimeIndex.manifest, {
       debug: (...args: unknown[]): void => console.debug(...args),
       info: (...args: unknown[]): void => console.info(...args),
       warn: (...args: unknown[]): void => console.warn(...args),
       error: (...args: unknown[]): void => console.error(...args)
     });
+  }
+
+  /**  Watch compiler events  */
+  static async watchCompilerEvents<K extends CompilerEventType, T extends CompilerEventPayload<K>>(
+    type: K,
+    onChange: (input: T) => unknown,
+    filter?: (input: T) => boolean,
+    options?: CompilerWatchOptions
+  ): Promise<void> {
+    const client = await this.#getCompilerClient();
 
     // pre-check
     if (!(await client.isWatching())) {
-      // If we get here, without a watch
       throw new RuntimeError('Compile Server is not running');
     }
 
+    await options?.onInitial?.(client);
+
     void this.runWithRetry(async ({ signal }) => {
-      await client.waitForState(['watch-start'], undefined, signal);
+      if (options?.waitForReady ?? true) {
+        await client.waitForState(['watch-start'], undefined, signal);
+      }
 
       if (!(await client.isWatching())) {
-        // If we get here, without a watch
         return 'error';
       } else {
         for await (const event of client.fetchEvents(type, { signal, enforceIteration: true })) {
@@ -114,5 +125,41 @@ export class WatchUtil {
         return 'restart';
       }
     }, options);
+  }
+
+  /** Stream and render compiler logs */
+  static async watchCompilerLogs(filter?: (event: CompilerLogEvent) => boolean, options?: CompilerWatchOptions): Promise<void> {
+    const { Log } = await import('@travetto/compiler/src/log.ts');
+    await this.watchCompilerEvents('log', event => Log.render(event), filter, {
+      waitForReady: false,
+      onInitial: async client => {
+        const info = await client.info();
+        const messages = [...(info?.messages?.reset ?? []), ...(info?.messages?.error ?? []), ...(info?.messages?.failure ?? [])];
+        for (const message of messages) {
+          if (!filter || filter(message)) {
+            Log.render(message);
+          }
+        }
+      },
+      ...options
+    });
+  }
+
+  /**
+   * Wait for compiler to be watch-ready, pausing if in a failed compilation state
+   */
+  static async pauseUntilWatchReady(signal?: AbortSignal): Promise<void> {
+    const client = await this.#getCompilerClient();
+    if (!(await client.waitForWatchReady(signal))) {
+      if (signal?.aborted) {
+        return;
+      }
+      console.error('[compiler-watch] Compilation failed. Pausing until errors are resolved...');
+      await client.waitForState(['watch-start'], undefined, signal);
+      if (signal?.aborted) {
+        return;
+      }
+      console.error('[compiler-watch] Compilation resolved. Resuming...');
+    }
   }
 }
