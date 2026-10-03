@@ -7,7 +7,7 @@ import { CommonUtil } from './common.ts';
 import { EventUtil } from './event.ts';
 import { IpcLogger } from './log.ts';
 import { CompilerState } from './state.ts';
-import { type CompileEmitEvent, CompilerReset } from './types.ts';
+import { type CompileEmitEvent, type CompilerEvent, CompilerReset, type CompilerWatchEvent } from './types.ts';
 import { CompilerWatcher } from './watch.ts';
 
 const log = new IpcLogger({ level: 'debug' });
@@ -21,10 +21,17 @@ export class Compiler {
    */
   static async main(): Promise<void> {
     const ctx = ManifestUtil.getWorkspaceContext(getManifestContext());
-    const manifest = await ManifestUtil.buildManifest(ctx);
-    const delta = await ManifestDeltaUtil.produceDelta(manifest);
-    const state = await CompilerState.get(new ManifestIndex(manifest));
-    await new Compiler(state, delta, process.env.TRV_COMPILER_WATCH === 'true').run();
+
+    try {
+      const manifest = await ManifestUtil.buildManifest(ctx);
+      const delta = await ManifestDeltaUtil.produceDelta(manifest);
+      const state = await CompilerState.get(new ManifestIndex(manifest));
+      await new Compiler(state, delta, process.env.TRV_COMPILER_WATCH === 'true').run();
+    } catch (error) {
+      log.error('Fatal initialization error in compiler', error, { phase: 'error' });
+      EventUtil.sendEvent('state', { workspace: ctx.workspace.path, state: 'compile-failed' });
+      process.exitCode = 1;
+    }
   }
 
   #state: CompilerState;
@@ -45,6 +52,11 @@ export class Compiler {
     process.once('disconnect', () => this.#shutdown('manual')).on('message', event => event === 'shutdown' && this.#shutdown('manual'));
   }
 
+  #sendEvent<E extends CompilerEvent>(type: E['type'], payload: E['payload']): void {
+    payload.workspace = this.#state.manifest.workspace.path;
+    EventUtil.sendEvent(type, payload);
+  }
+
   #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset', errorMessage?: string): void {
     if (this.#shuttingDown) {
       return;
@@ -60,13 +72,12 @@ export class Compiler {
       case 'error': {
         process.exitCode = 1;
         if (errorMessage) {
-          log.error('Shutting down due to failure', errorMessage);
+          log.error('Shutting down due to failure', errorMessage, { phase: 'error' });
         }
         break;
       }
       case 'reset': {
-        log.info('Reset due to', errorMessage);
-        EventUtil.sendEvent('state', { state: 'reset' });
+        this.#sendEvent('state', { state: 'reset' });
         process.exitCode = 0;
         break;
       }
@@ -113,26 +124,68 @@ export class Compiler {
 
     for (const file of files) {
       const start = Date.now();
-      const errors = await this.#state.compileSourceFile(file);
+      const diagnostics = await this.#state.compileSourceFile(file);
       const duration = Date.now() - start;
       const nodeModSeparator = 'node_modules/';
       const nodeModIdx = file.lastIndexOf(nodeModSeparator);
       const imp = nodeModIdx >= 0 ? file.substring(nodeModIdx + nodeModSeparator.length) : file;
-      yield { file: imp, i: (i += 1), errors, total: files.length, duration };
+      if (diagnostics?.length) {
+        for (const diagnostic of diagnostics) {
+          log.error(`ERROR ${imp}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], { phase: 'error' });
+        }
+        // Touch file to ensure recompilation later
+        if (await fs.stat(file, { throwIfNoEntry: false })) {
+          await fs.utimes(file, new Date(), new Date());
+        }
+      }
+      yield { file: imp, sourceFile: file, i: (i += 1), total: files.length, duration };
       if (Date.now() - lastSent > 50) {
         // Limit to 1 every 50ms
         lastSent = Date.now();
-        EventUtil.sendEvent('progress', { total: files.length, idx: i, message: imp, operation: 'compile' });
+        this.#sendEvent('progress', { total: files.length, idx: i, message: imp, operation: 'compile' });
       }
       if (this.#shutdownSignal.aborted) {
         break;
       }
     }
-    EventUtil.sendEvent('progress', { total: files.length, idx: files.length, message: 'Complete', operation: 'compile', complete: true });
+    this.#sendEvent('progress', { total: files.length, idx: files.length, message: 'Complete', operation: 'compile', complete: true });
 
     await CommonUtil.queueMacroTask();
 
     log.debug(`Compiled ${i} files`);
+  }
+
+  async #onWatchEvent(event: CompilerWatchEvent): Promise<void> {
+    const isDelete = event.action === 'delete';
+    if (isDelete) {
+      if (this.#state.removeSource(event.entry.sourceFile)) {
+        log.info(`Removed ${event.entry.sourceFile}, ${event.entry.outputFile}`);
+      }
+    }
+
+    const diagnostics = isDelete ? [] : ((await this.#state.compileSourceFile(event.entry.sourceFile, true)) ?? []);
+
+    if (diagnostics.length) {
+      log.error('Compilation failed', `${event.entry.sourceFile}: ${diagnostics.length} errors found`, { phase: 'failure' });
+      for (const diagnostic of diagnostics) {
+        log.error(`ERROR ${event.file}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], { phase: 'error' });
+      }
+    } else if (!isDelete) {
+      log.info(`Compiled ${event.entry.sourceFile} on ${event.action}`);
+    }
+
+    this.#sendEvent('state', { state: this.#state.hasErrors() ? 'compile-failed' : 'watch-start' });
+
+    if (!diagnostics.length) {
+      this.#sendEvent('change', {
+        action: event.action,
+        time: Date.now(),
+        file: event.file,
+        import: event.entry.import,
+        output: event.entry.outputFile!,
+        module: event.entry.module.name
+      });
+    }
   }
 
   /**
@@ -141,39 +194,41 @@ export class Compiler {
   async run(): Promise<void> {
     log.debug('Compilation started');
 
-    EventUtil.sendEvent('state', { state: 'init', extra: { processId: process.pid } });
-
-    const failures = new Map<string, number>();
+    this.#sendEvent('state', { state: 'init', extra: { processId: process.pid } });
 
     log.debug(`Compiler loaded: ${this.#deltaEvents.length} files changed`);
 
-    EventUtil.sendEvent('state', { state: 'compile-start' });
+    this.#sendEvent('state', { state: 'compile-start' });
+
+    const deleteEvents = this.#deltaEvents.filter(event => event.type === 'delete');
+    const createOrUpdateEvents = this.#deltaEvents.filter(event => event.type !== 'delete');
+
+    if (deleteEvents.length) {
+      for (const deleteEvent of deleteEvents) {
+        if (this.#state.removeSource(deleteEvent.sourceFile)) {
+          log.info(`Purging deleted output ${deleteEvent.sourceFile}`);
+        }
+      }
+    }
 
     const metrics: CompileEmitEvent[] = [];
-    const isCompilerChanged = this.#deltaEvents.some(event => this.#state.isCompilerFile(event.sourceFile));
-    const changedFiles = isCompilerChanged ? this.#state.getAllFiles() : this.#deltaEvents.map(event => event.sourceFile);
+    const isCompilerChanged = createOrUpdateEvents.some(event => this.#state.isCompilerFile(event.sourceFile));
+    const changedFiles = isCompilerChanged ? this.#state.getAllFiles() : createOrUpdateEvents.map(event => event.sourceFile);
 
     if (changedFiles.length) {
       for await (const event of this.emit(changedFiles)) {
-        if (event.errors?.length) {
-          failures.set(event.file, event.errors.length);
-          for (const error of event.errors) {
-            log.error(`ERROR ${event.file}:${error}`);
-          }
-          // Touch file to ensure recompilation later
-          if (await fs.stat(event.file, { throwIfNoEntry: false })) {
-            await fs.utimes(event.file, new Date(), new Date());
-          }
-        }
         metrics.push(event);
       }
       if (this.#shutdownSignal.aborted) {
         log.debug('Compilation aborted');
-      } else if (failures.size) {
-        const sortedFailures = [...failures.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+      } else if (this.#state.hasErrors()) {
+        const sortedFailures = this.#state.getAllErrors().sort((a, b) => a[0].localeCompare(b[0]));
         log.error(
           'Compilation failed',
-          ['', sortedFailures.flatMap(([file, count]) => `- ${file}: ${count} errors found`)].flat(3).join('\n')
+          ['', sortedFailures.flatMap(([file, count]) => `- ${file}: ${count} errors found`)].flat(3).join('\n'),
+          {
+            phase: 'failure'
+          }
         );
       } else {
         log.debug('Compilation succeeded');
@@ -184,14 +239,19 @@ export class Compiler {
       await ManifestUtil.writeManifest(manifest);
       await ManifestUtil.writeDependentManifests(manifest);
 
-      if (!this.#watch && failures.size) {
-        return this.#shutdown('error');
+      if (this.#watch) {
+        if (this.#state.hasErrors()) {
+          this.#sendEvent('state', { state: 'compile-failed' });
+        } else {
+          this.#state.manifestIndex.reinitForModule(this.#state.manifest.main.name); // Reload
+        }
+      } else if (this.#state.hasErrors()) {
+        this.#sendEvent('state', { state: 'compile-failed' });
+        return this.#shutdown('error', `Compilation failed with ${this.#state.failureCount} errors`);
       }
-
-      this.#state.manifestIndex.reinitForModule(this.#state.manifest.main.name); // Reload
     }
 
-    EventUtil.sendEvent('state', { state: 'compile-end' });
+    this.#sendEvent('state', { state: this.#state.hasErrors() ? 'compile-failed' : 'compile-end' });
 
     if (process.env.TRV_BUILD === 'debug' && metrics.length) {
       this.logStatistics(metrics);
@@ -203,38 +263,12 @@ export class Compiler {
 
       log.info('Watch is ready');
 
-      EventUtil.sendEvent('state', { state: 'watch-start' });
+      this.#sendEvent('state', { state: this.#state.hasErrors() ? 'compile-failed' : 'watch-start' });
       try {
         for await (const event of new CompilerWatcher(this.#state, this.#shutdownSignal)) {
-          if (event.action !== 'delete') {
-            const errors = await this.#state.compileSourceFile(event.entry.sourceFile, true);
-            if (errors?.length) {
-              log.error('Compilation failed', `${event.entry.sourceFile}: ${errors.length} errors found`);
-              for (const error of errors) {
-                log.error(`ERROR ${event.file}:${error}`);
-              }
-            } else {
-              log.info(`Compiled ${event.entry.sourceFile} on ${event.action}`);
-            }
-          } else {
-            if (event.entry.outputFile) {
-              // Remove output
-              log.info(`Removed ${event.entry.sourceFile}, ${event.entry.outputFile}`);
-              await fs.rm(event.entry.outputFile, { force: true }); // Ensure output is deleted
-            }
-          }
-
-          // Send change events
-          EventUtil.sendEvent('change', {
-            action: event.action,
-            time: Date.now(),
-            file: event.file,
-            import: event.entry.import,
-            output: event.entry.outputFile!,
-            module: event.entry.module.name
-          });
+          await this.#onWatchEvent(event);
         }
-        EventUtil.sendEvent('state', { state: 'watch-end' });
+        this.#sendEvent('state', { state: 'watch-end' });
       } catch (error) {
         if (error instanceof Error) {
           this.#shutdown(error instanceof CompilerReset ? 'reset' : 'error', error.message);
