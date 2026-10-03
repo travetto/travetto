@@ -1,5 +1,4 @@
 import { setMaxListeners } from 'node:events';
-import fs from 'node:fs/promises';
 import http from 'node:http';
 
 import type { ManifestContext } from '@travetto/manifest';
@@ -7,11 +6,14 @@ import type { ManifestContext } from '@travetto/manifest';
 import { CommonUtil } from '../common.ts';
 import { EventUtil } from '../event.ts';
 import { Log } from '../log.ts';
-import type { CompilerEvent, CompilerEventType, CompilerProgressEvent, CompilerServerInfo } from '../types.ts';
+import type { CompilerEvent, CompilerEventType, CompilerLogEvent, CompilerProgressEvent, CompilerServerInfo } from '../types.ts';
+import { CompilerUtil } from '../util.ts';
 import { CompilerClient } from './client.ts';
 import { ProcessHandle } from './process-handle.ts';
 
 const log = Log.scoped('server');
+const RESET_KILL_TIMEOUT_MILLISECONDS = 3000;
+const IDLE_TIMEOUT_MILLISECONDS = 1000 * 60 * 2; // 2 minutes
 
 /**
  * Compiler Server Class
@@ -22,6 +24,7 @@ export class CompilerServer {
   #listenersAll = new Set<http.ServerResponse>();
   #listeners: Partial<Record<CompilerEventType, Record<string, http.ServerResponse>>> = {};
   #shutdown = new AbortController();
+  #idleTimeoutId?: NodeJS.Timeout;
   info: CompilerServerInfo;
   #client: CompilerClient;
   #url: string;
@@ -42,7 +45,8 @@ export class CompilerServer {
       serverProcessId: process.pid,
       compilerProcessId: -1,
       path: ctx.workspace.path,
-      url: this.#url
+      url: this.#url,
+      messages: {}
     };
 
     this.#server = http.createServer(
@@ -55,6 +59,10 @@ export class CompilerServer {
     );
 
     setMaxListeners(1000, this.signal);
+
+    if (watching) {
+      this.#startIdleTimeout();
+    }
   }
 
   get signal(): AbortSignal {
@@ -78,7 +86,7 @@ export class CompilerServer {
             const info = await this.#client.info();
             resolve(info && !info.watching && this.watching ? 'retry' : 'running');
           } else {
-            log.warn('Failed in running server', error);
+            log.warn('Failed in running server', [error]);
             reject(error);
           }
         })
@@ -103,7 +111,28 @@ export class CompilerServer {
     return output;
   }
 
+  #startIdleTimeout(): void {
+    if (!this.watching) {
+      return;
+    }
+    if (this.#listenersAll.size === 0 && !this.#idleTimeoutId) {
+      log.info('No active listeners, starting idle shutdown timer', `${IDLE_TIMEOUT_MILLISECONDS / 1000}s`);
+      this.#idleTimeoutId = setTimeout(() => {
+        log.info('Idle shutdown timer expired with no listeners, closing server');
+        this.close();
+      }, IDLE_TIMEOUT_MILLISECONDS).unref();
+    }
+  }
+
+  #clearIdleTimeout(): void {
+    if (this.#idleTimeoutId) {
+      clearTimeout(this.#idleTimeoutId);
+      this.#idleTimeoutId = undefined;
+    }
+  }
+
   #addListener(type: CompilerEventType, response: http.ServerResponse): void {
+    this.#clearIdleTimeout();
     response.writeHead(200);
     const id = `id_${Date.now()}_${Math.random()}`.replace('.', '1');
     (this.#listeners[type] ??= {})[id] = response;
@@ -118,6 +147,9 @@ export class CompilerServer {
     response.on('close', () => {
       delete this.#listeners[type]?.[id];
       this.#listenersAll.delete(response);
+      if (this.#listenersAll.size === 0) {
+        this.#startIdleTimeout();
+      }
     });
   }
 
@@ -158,11 +190,8 @@ export class CompilerServer {
   }
 
   async #clean(): Promise<{ clean: boolean }> {
-    await Promise.all(
-      [this.#ctx.build.outputFolder, this.#ctx.build.typesFolder].map(folder =>
-        fs.rm(CommonUtil.resolveWorkspace(this.#ctx, folder), { recursive: true, force: true })
-      )
-    );
+    this.info.messages = {};
+    await CompilerUtil.clearCaches(this.#ctx, true);
     return { clean: true };
   }
 
@@ -213,27 +242,40 @@ export class CompilerServer {
 
       if (event.type === 'state') {
         this.info.state = event.payload.state;
-        if (
-          event.payload.state === 'init' &&
-          event.payload.extra &&
-          'processId' in event.payload.extra &&
-          typeof event.payload.extra.processId === 'number'
-        ) {
-          if (this.info.watching && !this.info.compilerProcessId) {
-            // Ensure we are killing in watch mode on first set
-            await this.#handle.compiler.kill();
+        if (event.payload.state === 'init' || event.payload.state === 'compile-start') {
+          delete this.info.messages?.error;
+          if (EventUtil.hasProcessId(event.payload)) {
+            if (this.info.watching && !this.info.compilerProcessId) {
+              // Ensure we are killing in watch mode on first set
+              await this.#handle.compiler.kill();
+            }
+            this.info.compilerProcessId = event.payload.extra.processId;
+            await this.#handle.compiler.writePidFile(this.info.compilerProcessId);
           }
-          this.info.compilerProcessId = event.payload.extra.processId;
-          await this.#handle.compiler.writePidFile(this.info.compilerProcessId);
+        } else if (event.payload.state === 'watch-start') {
+          this.info.messages = {};
         }
         log.info(`State changed: ${this.info.state}`);
       } else if (event.type === 'log') {
+        const messages = (this.info.messages ??= {});
+        switch (event.payload.phase) {
+          case 'failure':
+          case 'reset':
+            messages[event.payload.phase] = [event.payload];
+            break;
+          case 'error':
+            (messages.error ??= []).push(event.payload);
+            break;
+        }
         if (!this.#suppressLogs) {
           log.render(event.payload);
         }
       }
       if (this.isResetEvent(event)) {
-        await this.#disconnectActive();
+        log.info('Reset event received, awaiting compiler target cleanup');
+        this.info.compilerProcessId = 0;
+        await this.#handle.compiler.ensureKilled(RESET_KILL_TIMEOUT_MILLISECONDS);
+        await CompilerUtil.clearCaches();
       }
     }
 
@@ -248,6 +290,8 @@ export class CompilerServer {
    */
   async close(): Promise<void> {
     log.info('Closing down server');
+
+    this.#clearIdleTimeout();
 
     // If we are in a place where progress exists
     if (this.info.state === 'compile-start') {

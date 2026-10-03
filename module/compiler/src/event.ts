@@ -1,4 +1,4 @@
-import type { CompilerEvent, CompilerEventPayload, CompilerEventType } from './types.ts';
+import type { CompilerEvent, CompilerEventType, CompilerStateEvent } from './types.ts';
 
 const VALID_EVENT_TYPES = new Set<CompilerEventType>(['change', 'log', 'progress', 'state', 'all', 'file']);
 
@@ -12,7 +12,11 @@ export class EventUtil {
     typeof value.type === 'string' &&
     EventUtil.isCompilerEventType(value.type);
 
-  static sendEvent<K extends CompilerEventType, T extends CompilerEventPayload<K>>(type: K, payload: T): void {
-    process.connected && process.send!({ type, payload }, undefined, undefined, () => {});
+  static hasProcessId(payload: CompilerStateEvent): payload is CompilerStateEvent & { extra: { processId: number } } {
+    return typeof payload.extra?.processId === 'number';
+  }
+
+  static sendEvent<E extends CompilerEvent>(type: E['type'], payload: E['payload']): void {
+    process.connected && process.send?.({ type, payload }, undefined, undefined, () => {});
   }
 }
