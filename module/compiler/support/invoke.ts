@@ -6,6 +6,7 @@ import { EventUtil } from '../src/event.ts';
 import { Log } from '../src/log.ts';
 import { CompilerClient } from '../src/server/client.ts';
 import { CompilerManager } from '../src/server/manager.ts';
+import { CompilerUtil } from '../src/util.ts';
 
 const hasColor = (process.stdout.isTTY && /^(0)*$/.test(process.env.NO_COLOR ?? '')) || /1\d*/.test(process.env.FORCE_COLOR ?? '');
 const color =
@@ -15,7 +16,8 @@ const color =
 const STYLE = { error: color(91), title: color(36), main: color(92), command: color(35), arg: color(37), description: color(33) };
 
 const COMMANDS = {
-  start: { description: 'Run the compiler in watch mode' },
+  server: { description: 'Run the compiler in watch mode directly' },
+  start: { description: 'Ensure the compiler is running in watch mode' },
   stop: { description: 'Stop the compiler if running' },
   restart: { description: 'Restart the compiler in watch mode' },
   build: { description: 'Ensure the project is built and upto date' },
@@ -71,15 +73,19 @@ export async function invoke(...input: string[]): Promise<unknown> {
   const client = new CompilerClient(ctx, Log.scoped('client'));
 
   Log.initLevel('error');
-  Log.root = ctx.workspace.path;
+  Log.workspace = ctx.workspace.path;
 
   switch (command) {
-    case 'start':
+    case 'server':
       return CompilerManager.compile(ctx, client, { watch: true });
+    case 'start':
+      return CompilerManager.startDaemon(ctx, client);
     case 'build':
       return CompilerManager.compile(ctx, client, { watch: false });
-    case 'restart':
-      return CompilerManager.compile(ctx, client, { watch: true, forceRestart: true });
+    case 'restart': {
+      await client.stop();
+      return invoke('start');
+    }
     case 'info': {
       const info = await client.info();
       return CommonUtil.writeStdout(2, info);
@@ -108,7 +114,9 @@ export async function invoke(...input: string[]): Promise<unknown> {
       break;
     }
     case 'clean': {
-      await client.clean(true);
+      if (!(await client.clean())) {
+        await CompilerUtil.clearCaches(ctx, true);
+      }
       console.log(`Clean triggered ${ctx.workspace.path}`);
       break;
     }
@@ -122,7 +130,7 @@ export async function invoke(...input: string[]): Promise<unknown> {
     }
     case 'exec': {
       await CompilerManager.compileIfNecessary(ctx, client);
-      Log.initLevel('none');
+      Log.disabled = true;
       process.env.TRV_MANIFEST = CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.main.name); // Setup for running
       const importTarget = CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', args[0]).replace(/\.ts$/, '.js');
       process.argv = [process.argv0, importTarget, ...args.slice(1)];

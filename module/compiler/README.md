@@ -25,7 +25,8 @@ Beyond the [Typescript](https://typescriptlang.org) compiler functionality, the 
 The compiler cli, [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js) is the entry point for compilation-related operations. It has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time. Within the framework, regardless of mono-repo or not, the compilation always targets the entire project. With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. 
 
 The compiler cli supports the following operations:
-   *  `start` - Run the compiler in watch mode
+   *  `server` - Run the compiler in watch mode directly
+   *  `start` - Ensure the compiler is running in watch mode
    *  `stop` - Stop the compiler if running
    *  `restart` - Restart the compiler in watch mode
    *  `build` - Ensure the project is built and upto date
