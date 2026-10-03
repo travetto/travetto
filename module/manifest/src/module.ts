@@ -44,6 +44,13 @@ export class ManifestModuleUtil {
 
   static #scanCache: Record<string, string[]> = {};
 
+  /**
+   * Clear scan cache
+   */
+  static clearScanCache(): void {
+    this.#scanCache = {};
+  }
+
   static #getNewest(stat: { mtimeMs: number; ctimeMs: number }): number {
     return Math.max(stat.mtimeMs, stat.ctimeMs);
   }
