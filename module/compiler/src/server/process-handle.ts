@@ -72,7 +72,7 @@ export class ProcessHandle {
       this.#log.debug('Force Killing', processId);
       process.kill(processId); // Force kill
     } catch {}
-    this.#log.debug('Did Kill', this.#file, !!processId);
+    this.#log.debug('Did Kill', [this.#file, !!processId]);
     return true;
   }
 }

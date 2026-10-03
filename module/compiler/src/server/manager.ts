@@ -6,11 +6,13 @@ import { CommonUtil } from '../common.ts';
 import { EventUtil } from '../event.ts';
 import { Log } from '../log.ts';
 import { AsyncQueue } from '../queue.ts';
-import type { CompilerEvent, CompilerLogLevel } from '../types.ts';
+import type { CompilerEvent, CompilerLogLevel, CompilerServerInfo } from '../types.ts';
 import type { CompilerClient } from './client.ts';
 import { CompilerServer } from './server.ts';
 
 const log = Log.scoped('compiler-exec');
+const STARTUP_TIMEOUT_MILLISECONDS = 10000;
+const STARTUP_POLL_INTERVAL_MILLISECONDS = 100;
 
 /**
  * Running the compiler
@@ -57,6 +59,42 @@ export class CompilerManager {
     log.debug('Finished');
   }
 
+  /** Spawn the compiler server as a detached background daemon */
+  static async #spawnProcess(ctx: ManifestContext, client: CompilerClient): Promise<boolean> {
+    log.info('Spawning compiler daemon in background');
+    const subProcess = spawn(process.argv0, ['-e', 'import("@travetto/compiler/bin/trvc.js")', 'trvc', 'server'], {
+      env: {
+        ...process.env,
+        TRV_COMPILER_WATCH: 'true'
+      },
+      detached: true,
+      stdio: 'ignore'
+    });
+    subProcess.unref();
+
+    const startTime = Date.now();
+    while (Date.now() - startTime < STARTUP_TIMEOUT_MILLISECONDS) {
+      await CommonUtil.blockingTimeout(STARTUP_POLL_INTERVAL_MILLISECONDS);
+      const info = await client.info();
+      if (info && info.state !== 'startup') {
+        log.info('Compiler daemon is running', info.serverProcessId);
+        return true;
+      }
+    }
+    throw new Error(`Failed to start compiler daemon within ${STARTUP_TIMEOUT_MILLISECONDS / 1000} seconds`);
+  }
+
+  static #failWithBuildErrors(info?: CompilerServerInfo): never {
+    for (const message of info?.messages?.error ?? []) {
+      Log.render(message);
+    }
+    for (const message of info?.messages?.failure ?? []) {
+      Log.render(message);
+    }
+    process.exitCode = 1;
+    throw new Error('Compilation failed with build errors');
+  }
+
   /** Main entry point for compilation */
   static async compile(
     ctx: ManifestContext,
@@ -77,19 +115,73 @@ export class CompilerManager {
       log.debug('Start Server');
       await server.processEvents(signal => this.#runTarget(ctx, watch, signal));
       log.debug('End Server');
+      if (server.info.state === 'compile-failed') {
+        this.#failWithBuildErrors(server.info);
+      }
     } else {
       log.info('Server already running, waiting for initial compile to complete');
       const controller = new AbortController();
       Log.consumeProgressEvents(() => client.fetchEvents('progress', { until: event => !!event.complete, signal: controller.signal }));
-      await client.waitForState(['compile-end', 'watch-start'], 'Successfully built');
+      const finalState = await client.waitForState(['compile-end', 'watch-start', 'compile-failed'], 'Successfully built');
       controller.abort();
+      if (finalState === 'compile-failed') {
+        this.#failWithBuildErrors(await client.info());
+      }
     }
+  }
+
+  /** Start the compiler daemon if not running, and wait until ready or failed */
+  static async startDaemon(
+    ctx: ManifestContext,
+    client: CompilerClient,
+    readyMessage?: string,
+    quiet = false
+  ): Promise<{ state: 'already-running' | 'started' | 'compile-failed'; info?: CompilerServerInfo }> {
+    const existingInfo = await client.info();
+    if (existingInfo && existingInfo.state !== 'closed' && existingInfo.state !== 'startup') {
+      const processId = existingInfo.serverProcessId;
+      if (!quiet) {
+        console.log(`Server already running ${ctx.workspace.path}: ${client.url} (PID: ${processId})`);
+      }
+      return { state: existingInfo.state === 'compile-failed' ? 'compile-failed' : 'already-running', info: existingInfo };
+    }
+
+    await this.#spawnProcess(ctx, client);
+    const finalState = await client.waitForState(['watch-start', 'compile-failed'], readyMessage);
+    const updatedInfo = await client.info();
+    const processId = updatedInfo?.serverProcessId;
+
+    if (finalState === 'compile-failed') {
+      console.error(`Compiler server started with build errors (PID: ${processId})`);
+      process.exitCode = 1;
+    } else if (!quiet) {
+      console.log(`Compiler server started ${ctx.workspace.path}: ${client.url} (PID: ${processId})`);
+    }
+
+    return {
+      state: finalState === 'compile-failed' ? 'compile-failed' : 'started',
+      info: updatedInfo
+    };
   }
 
   /** Compile only if necessary */
   static async compileIfNecessary(ctx: ManifestContext, client: CompilerClient): Promise<void> {
-    if (!(await client.isWatching())) {
-      // Short circuit if we can
+    if (await client.isWatching()) {
+      if (!(await client.waitForWatchReady())) {
+        this.#failWithBuildErrors(await client.info());
+      }
+      return;
+    }
+
+    const canAutoCompile = (process.stdout.isTTY || process.env.TRV_AUTO_COMPILE === '1') && process.env.TRV_AUTO_COMPILE !== '0';
+
+    if (canAutoCompile) {
+      log.info('Compiler not running, auto-starting watch daemon');
+      const result = await this.startDaemon(ctx, client, 'Compiler daemon ready', true);
+      if (result.state === 'compile-failed') {
+        this.#failWithBuildErrors(result.info);
+      }
+    } else {
       await this.compile(ctx, client, { watch: false, logLevel: 'error' });
     }
   }

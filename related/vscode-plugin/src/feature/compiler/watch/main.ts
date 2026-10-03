@@ -78,6 +78,7 @@ export class CompilerWatchFeature extends BaseFeature {
       stdio: ['pipe', starting ? 'ignore' : 'pipe', 'pipe'],
       env: {
         PATH: process.env.PATH,
+        TRV_AUTO_COMPILE: '1',
         ...Env.TRV_QUIET.export(true),
         ...(debug ? Env.TRV_BUILD.export('debug') : {})
       }
@@ -121,6 +122,10 @@ export class CompilerWatchFeature extends BaseFeature {
           const subProcess = this.run('event', ['all'], controller.signal);
           await CodecUtil.readLines(subProcess.stdout!, line => {
             const { type, payload }: CompilerEvent = JSONUtil.fromUTF8(line);
+            if (typeof payload === 'object' && payload && 'workspace' in payload && payload.workspace !== Workspace.path) {
+              this.#log.debug('Ignoring compiler event for other workspace', payload.workspace);
+              return;
+            }
             switch (type) {
               case 'log':
                 this.#ongLogEvent(payload);
@@ -157,6 +162,8 @@ export class CompilerWatchFeature extends BaseFeature {
 
     this.#log.info('Compiler state changed', state);
     let status: string | undefined;
+    const tooltip: string | undefined = 'Travetto Compiler (Click to view logs)';
+    let backgroundColor: vscode.ThemeColor | undefined;
     switch (state) {
       case 'reset':
         status = '$(flame) Restarting';
@@ -171,11 +178,17 @@ export class CompilerWatchFeature extends BaseFeature {
       case 'watch-start':
         status = '$(pass-filled) Ready';
         break;
+      case 'compile-failed':
+        status = '$(error) Failed';
+        backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
+        break;
       case 'closed':
         status = '$(debug-pause) Disconnected';
         break;
     }
     this.#status.text = status ?? this.#status.text;
+    this.#status.tooltip = tooltip;
+    this.#status.backgroundColor = backgroundColor;
     Workspace.compilerState = state;
   }
 
@@ -256,9 +269,6 @@ export class CompilerWatchFeature extends BaseFeature {
 
   async deactivate(): Promise<void> {
     this.#shuttingDown = true;
-    if (this.#started) {
-      this.run('stop');
-    }
     this.#stateController?.abort();
   }
 }

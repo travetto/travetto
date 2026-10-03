@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import http, { Agent } from 'node:http';
 import rl from 'node:readline/promises';
 import timers from 'node:timers/promises';
@@ -73,26 +72,16 @@ export class CompilerClient {
   }
 
   async isWatching(): Promise<boolean> {
-    return (await this.info())?.state === 'watch-start';
+    const info = await this.info();
+    return info?.watching === true && info.state !== 'closed' && info.state !== 'startup';
   }
 
   /** Clean the server */
-  async clean(forceOnFailure?: boolean): Promise<boolean> {
-    const result = await this.#fetch('/clean', { timeout: 300 }).then(
+  async clean(): Promise<boolean> {
+    return this.#fetch('/clean', { timeout: 300 }).then(
       response => response.ok,
       () => false
     );
-    if (!result && forceOnFailure) {
-      this.#log.warn('Clean request failed, forcing cleanup');
-      try {
-        await Promise.all(
-          [this.#ctx.build.outputFolder, this.#ctx.build.typesFolder].map(file =>
-            fs.rm(CommonUtil.resolveWorkspace(this.#ctx, file), { force: true, recursive: true })
-          )
-        );
-      } catch {}
-    }
-    return result;
   }
 
   /** Stop server and wait for shutdown */
@@ -179,15 +168,35 @@ export class CompilerClient {
   }
 
   /** Wait for one of N states to be achieved */
-  async waitForState(states: CompilerStateType[], message?: string, signal?: AbortSignal): Promise<void> {
+  async waitForState(states: CompilerStateType[], message?: string, signal?: AbortSignal): Promise<CompilerStateType> {
     const set = new Set(states);
     // Loop until
     this.#log.debug(`Waiting for states, ${states.join(', ')}`);
-    for await (const _ of this.fetchEvents('state', { signal, until: event => set.has(event.state) })) {
+    let finalState: CompilerStateType = 'closed';
+    for await (const event of this.fetchEvents('state', { signal, until: event => set.has(event.state) })) {
+      finalState = event.state;
     }
     this.#log.debug(`Found state, one of ${states.join(', ')} `);
     if (message) {
       this.#log.info(message);
     }
+    return finalState;
+  }
+
+  /**
+   * Wait for compiler watch to settle, and return true if in clean 'watch-start' state
+   */
+  async waitForWatchReady(signal?: AbortSignal): Promise<boolean> {
+    const info = await this.info();
+    if (!info || !info.watching || info.state === 'closed') {
+      return false;
+    }
+
+    let state: CompilerStateType = info.state;
+    if (state === 'startup' || state === 'init' || state === 'compile-start') {
+      state = await this.waitForState(['watch-start', 'compile-failed'], undefined, signal);
+    }
+
+    return state === 'watch-start';
   }
 }
