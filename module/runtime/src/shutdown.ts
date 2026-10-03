@@ -5,14 +5,14 @@ import { TimeUtil } from './time.ts';
 import { Util } from './util.ts';
 
 const MAPPING = [
-  ['restart', 200],
-  ['error', 1],
-  ['quit', 0]
+  ['restart', [200]],
+  ['error', [1]],
+  ['quit', [0, 130, 143]]
 ] as const;
 export type ShutdownReason = (typeof MAPPING)[number][0];
 
-const REASON_TO_CODE = new Map<ShutdownReason, number>(MAPPING);
-const CODE_TO_REASON = new Map<number, ShutdownReason>(MAPPING.map(([k, v]) => [v, k]));
+const REASON_TO_CODE = new Map<ShutdownReason, readonly number[]>(MAPPING);
+const CODE_TO_REASON = new Map<number, ShutdownReason>(MAPPING.flatMap(([k, codes]) => codes.map(code => [code, k])));
 
 type Handler = (event: Event) => unknown;
 type ShutdownEvent = { reason?: ShutdownReason; mode?: 'exit' | 'interrupt' };
@@ -69,8 +69,11 @@ export class ShutdownManager {
   }
 
   /** Trigger a watch signal signal to a subprocess */
-  static async shutdownChild(subprocess: ChildProcess, config?: ShutdownEvent): Promise<void> {
+  static async shutdownWithChild(subprocess?: ChildProcess, config?: ShutdownEvent): Promise<void> {
     subprocess?.send?.({ type: 'shutdown', ...config });
+    if (config?.reason === 'quit') {
+      await this.shutdown(config);
+    }
   }
 
   /**
@@ -90,7 +93,7 @@ export class ShutdownManager {
       process.stdout.write('\n');
     }
 
-    process.exitCode ??= REASON_TO_CODE.get(reason);
+    process.exitCode ??= REASON_TO_CODE.get(reason)?.[0];
 
     const timeout = TimeUtil.duration(Env.TRV_SHUTDOWN_WAIT.value ?? 2000, 'ms');
     const context = { reason, mode, pid: process.pid, timeout, pending: this.#registered.size };
