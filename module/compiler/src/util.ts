@@ -1,4 +1,6 @@
-import { ManifestModuleUtil, type ManifestRoot, type Package } from '@travetto/manifest';
+import fs from 'node:fs/promises';
+
+import { type ManifestContext, ManifestModuleUtil, type ManifestRoot, type Package, PackageUtil, path } from '@travetto/manifest';
 
 /**
  * Standard utilities for compiler
@@ -43,5 +45,20 @@ export class CompilerUtil {
     }
 
     return Math.abs(hash);
+  }
+
+  /**
+   * Clear package and module scan caches, with optional deletion of compiler output data
+   */
+  static async clearCaches(context?: ManifestContext, deleteOutput = false): Promise<void> {
+    if (context && deleteOutput) {
+      await Promise.all(
+        [context.build.outputFolder, context.build.typesFolder].map(folder =>
+          fs.rm(path.resolve(context.workspace.path, folder), { recursive: true, force: true })
+        )
+      );
+    }
+    PackageUtil.clearCache();
+    ManifestModuleUtil.clearScanCache();
   }
 }

@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 
 import { ManifestFileUtil } from './file.ts';
@@ -86,12 +86,26 @@ export class PackageUtil {
   }
 
   /**
+   * Clear all package caches
+   */
+  static clearCache(): void {
+    this.#resolvers = {};
+    this.#cache = {};
+    this.#workspaces = {};
+  }
+
+  /**
    * Find workspace values from rootPath
    */
   static async resolveWorkspaces(ctx: ManifestContext): Promise<PackageWorkspaceEntry[]> {
     const rootPath = ctx.workspace.path;
     const cache = path.resolve(rootPath, ctx.build.outputFolder, 'workspaces.json');
     try {
+      const cacheStats = statSync(cache);
+      const packageStats = statSync(path.resolve(rootPath, 'package.json'));
+      if (packageStats.mtimeMs > cacheStats.mtimeMs) {
+        throw new Error('Cache expired');
+      }
       return (this.#workspaces[rootPath] ??= ManifestFileUtil.readAsJsonSync(cache));
     } catch {
       let args: string[];
