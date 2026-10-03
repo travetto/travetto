@@ -1,5 +1,8 @@
+import { execFile } from 'node:child_process';
+import { Socket } from 'node:dgram';
 import { watch } from 'node:fs';
 import fs from 'node:fs/promises';
+import { promisify } from 'node:util';
 
 import { ManifestFileUtil, ManifestModuleUtil, ManifestUtil, PACKAGE_MANAGERS, PackageUtil, path } from '@travetto/manifest';
 
@@ -10,6 +13,7 @@ import type { CompilerState } from './state.ts';
 import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from './types.ts';
 
 const log = new IpcLogger({ level: 'debug' });
+const executeFile = promisify(execFile);
 
 type CompilerWatchEventCandidate = Omit<CompilerWatchEvent, 'entry'> & { entry?: CompileStateEntry };
 
@@ -104,7 +108,7 @@ export class CompilerWatcher {
       for (const { moduleFile, action, entry } of events) {
         ManifestUtil.updateManifest(moduleManifest, entry.module.name, moduleFile, action);
       }
-      log.debug('Updating manifest', { module: moduleName, events: events.length });
+      log.debug('Updating manifest', [{ module: moduleName, events: events.length }]);
       await ManifestUtil.writeManifest(moduleManifest);
     }
 
@@ -133,10 +137,6 @@ export class CompilerWatcher {
         try {
           if (error) {
             throw error instanceof Error ? error : new Error(`${error}`);
-          } else if (events.length > 25) {
-            throw new CompilerReset(`Large influx of file changes: ${events.length}`);
-          } else if (events.some(event => packageFiles.has(path.toPosix(event.path)))) {
-            throw new CompilerReset('Package information changed');
           }
 
           // One event per file set
@@ -145,11 +145,29 @@ export class CompilerWatcher {
             .filter(event => this.#isValidFile(event.file));
 
           if (filesChanged.length) {
-            EventUtil.sendEvent('file', { time: Date.now(), files: filesChanged });
+            EventUtil.sendEvent('file', { workspace: this.#state.manifest.workspace.path, time: Date.now(), files: filesChanged });
           }
 
-          if (filesChanged.some(item => this.#state.isCompilerFile(item.file))) {
-            throw new CompilerReset('Compiler has changed, restarting');
+          if (events.length > 25) {
+            log.info('Large influx of file changes, restarting', events.length, { phase: 'reset' });
+            throw new CompilerReset();
+          }
+
+          const changedPackageFiles = events
+            .map(event => path.toPosix(event.path))
+            .filter(file => packageFiles.has(file))
+            .map(file => path.relative(this.#root, file));
+          if (changedPackageFiles.length) {
+            log.info('Package information changed, restarting', changedPackageFiles, { phase: 'reset' });
+            throw new CompilerReset();
+          }
+
+          const changedCompilerFiles = filesChanged
+            .filter(item => this.#state.isCompilerFile(item.file))
+            .map(item => path.relative(this.#root, item.file));
+          if (changedCompilerFiles.length) {
+            log.info('Compiler source changed, restarting', [changedCompilerFiles], { phase: 'reset' });
+            throw new CompilerReset();
           }
 
           const items = filesChanged.map(event => this.#toCandidateEvent(event)).filter(event => this.#isValidEvent(event));
@@ -161,8 +179,8 @@ export class CompilerWatcher {
           try {
             await this.#updateManifestWithEvents(items);
           } catch (manifestError) {
-            log.info('Restarting due to manifest rebuild failure', manifestError);
-            throw new CompilerReset(`Manifest rebuild failure: ${manifestError} `);
+            log.info('Restarting due to manifest rebuild failure', manifestError, { phase: 'reset' });
+            throw new CompilerReset();
           }
 
           for (const item of items) {
@@ -172,7 +190,8 @@ export class CompilerWatcher {
           let error: Error;
           if (out instanceof Error) {
             if (out.message.includes('Events were dropped by the FSEvents client.')) {
-              error = new CompilerReset('FSEvents failure, requires restart');
+              log.info('FSEvents failure, requires restart', [], { phase: 'reset' });
+              error = new CompilerReset();
             } else {
               error = out;
             }
@@ -207,7 +226,8 @@ export class CompilerWatcher {
       const full = path.resolve(toolRootFolder, file);
       const stat = await fs.stat(full, { throwIfNoEntry: false });
       if (toolFolders.has(full) && !stat) {
-        this.#queue.throw(new CompilerReset(`Tooling folder removal ${full}`));
+        log.info('Tooling folder removed, restarting', path.relative(this.#root, full), { phase: 'reset' });
+        this.#queue.throw(new CompilerReset());
       }
     });
     this.#cleanup.tool = (): void => listener.close();
@@ -237,21 +257,63 @@ export class CompilerWatcher {
     this.#cleanup.canary = (): void => clearInterval(canaryId);
   }
 
+  async #getGitHeadRef(): Promise<string | undefined> {
+    return executeFile('git', ['rev-parse', 'HEAD', '--symbolic-full-name', 'HEAD'], { cwd: this.#root }).then(
+      ({ stdout }) => stdout.trim(),
+      () => undefined
+    );
+  }
+
+  async #getGitDirectories(): Promise<[gitDirectory: string, commonDirectory: string] | undefined> {
+    return await executeFile('git', ['rev-parse', '--git-dir', '--git-common-dir'], { cwd: this.#root }).then(
+      ({ stdout }) =>
+        stdout
+          .trim()
+          .split('\n')
+          .map(directory => path.resolve(this.#root, directory)) as [string, string],
+      () => undefined
+    );
+  }
+
   async #listenGitChanges(): Promise<void> {
-    const gitFolder = path.resolve(this.#root, '.git');
-    if (!(await fs.stat(gitFolder, { throwIfNoEntry: false }))) {
+    const directories = await this.#getGitDirectories();
+    if (!directories) {
       return;
     }
-    log.debug('Starting git canary');
-    const listener = watch(gitFolder, { encoding: 'utf8' }, async (event, file) => {
-      if (!file) {
-        return;
+    const [gitDirectory, commonDirectory] = directories;
+
+    log.debug('Starting git canary in', gitDirectory);
+    let currentHead = await this.#getGitHeadRef();
+    let isChecking: Promise<void> | undefined;
+
+    const checkChange = async (): Promise<void> => {
+      try {
+        const nextHead = await this.#getGitHeadRef();
+        if (nextHead && currentHead && nextHead !== currentHead) {
+          log.info('Git branch or commit change detected, restarting', { from: currentHead, to: nextHead }, { phase: 'reset' });
+          currentHead = nextHead;
+          this.#queue.throw(new CompilerReset());
+        }
+      } finally {
+        isChecking = undefined;
       }
-      if (file === 'HEAD') {
-        this.#queue.throw(new CompilerReset('Git branch change detected'));
+    };
+
+    const watchers: { close(): void }[] = [];
+    const targets = [
+      { folder: gitDirectory, filter: (file?: string | null): boolean => !file || /^(HEAD|packed-refs|refs)/.test(file) },
+      { folder: path.resolve(commonDirectory, 'refs', 'heads'), filter: (): boolean => true }
+    ];
+
+    for (const { folder, filter } of targets) {
+      if (await fs.stat(folder, { throwIfNoEntry: false })) {
+        watchers.push(watch(folder, { encoding: 'utf8' }, (_, file) => filter(file) && (isChecking ??= checkChange())));
       }
-    });
-    this.#cleanup.git = (): void => listener.close();
+    }
+
+    this.#cleanup.git = (): void => {
+      watchers.forEach(watcher => watcher.close());
+    };
   }
 
   [Symbol.asyncIterator](): AsyncIterator<CompilerWatchEvent> {
