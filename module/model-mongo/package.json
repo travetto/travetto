@@ -33,7 +33,7 @@
     "@travetto/model": "^8.0.4",
     "@travetto/model-indexed": "^8.0.4",
     "@travetto/model-query": "^8.0.8",
-    "mongodb": "^7.6.0"
+    "mongodb": "^7.7.0"
   },
   "peerDependencies": {
     "@travetto/cli": "^8.0.2"
