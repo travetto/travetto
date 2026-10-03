@@ -262,8 +262,20 @@ export class CompilerWatchFeature extends BaseFeature {
     await Util.nonBlockingTimeout(1000); // Add buffer
     this.run('start');
 
-    for (const operation of ['start', 'stop', 'restart', 'clean'] as const) {
+    for (const operation of ['start', 'stop', 'clean'] as const) {
       this.register(operation, () => this.run(operation));
+    }
+    this.register('restart', () => this.#restartCompiler());
+  }
+
+  async #restartCompiler(): Promise<void> {
+    const subProcess = this.run('restart');
+    await ExecUtil.getResult(subProcess, { catch: true });
+    try {
+      this.#log.info('Restarting TypeScript language server');
+      await vscode.commands.executeCommand('typescript.restartTsServer');
+    } catch (error) {
+      this.#log.error('Failed to restart TypeScript language server', error);
     }
   }
 
