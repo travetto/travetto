@@ -15,11 +15,7 @@ type Transport = TransportType | json.Options | smtp.Options | ses.Options | sen
  * Nodemailer transport, takes in a transport factory as the input
  */
 export class NodemailerTransport implements MailTransport {
-  #transport: Transporter<
-    SentEmail & {
-      rejected?: unknown[];
-    }
-  >;
+  #transport: Transporter<smtp.SentMessageInfo>;
 
   /**
    * Enforce attachment content is a buffer or stream, converting from string or binary array if needed
@@ -68,7 +64,17 @@ export class NodemailerTransport implements MailTransport {
   async send<S extends SentEmail = SentEmail>(mail: EmailOptions): Promise<S> {
     const forced = this.#enforceAttachmentContent(this.#forceContentToAlternative(mail));
 
-    const response = await this.#transport.sendMail(forced);
+    const response = await this.#transport.sendMail({
+      ...forced,
+      attachments: forced.attachments?.map(item => ({
+        ...item,
+        path: item.path?.toString()
+      })),
+      alternatives: forced.alternatives?.map(item => ({
+        ...item,
+        path: item.path?.toString()
+      }))
+    });
 
     if (response.rejected?.length) {
       console.error('Unable to send emails', { recipientCount: response.rejected?.length });

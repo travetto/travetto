@@ -1,7 +1,7 @@
 import { DependencyRegistryIndex, Injectable } from '@travetto/di';
 import { type EmailOptions, MailService, type MailTransport } from '@travetto/email';
 import { Registry } from '@travetto/registry';
-import { toConcrete } from '@travetto/runtime';
+import { castTo, toConcrete } from '@travetto/runtime';
 
 import { EditorConfig } from './config.ts';
 
@@ -60,9 +60,8 @@ export class EditorSendService {
       if (this.ethereal) {
         const { getTestMessageUrl } = await import('nodemailer');
         const { default: _smtp } = await import('nodemailer/lib/smtp-transport/index');
-        type SendMessage = Parameters<Parameters<(typeof _smtp)['prototype']['send']>[1]>[1];
-        const info = await service.send<SendMessage>(message);
-        const url = getTestMessageUrl(info);
+        const info = await service.send(message);
+        const url = getTestMessageUrl(castTo(info));
         console.log('Sent email', { to, url });
         return { url };
       } else {

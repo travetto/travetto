@@ -55,7 +55,7 @@ export interface EmailOptions<B extends BinaryType = BinaryType> {
   cc?: EmailIdentityList;
   bcc?: EmailIdentityList;
   replyTo?: EmailIdentity;
-  inReplyTo?: EmailIdentity;
+  inReplyTo?: string;
   references?: string | string[];
   headers?: Record<string, string | string[]>;
   attachments?: EmailAttachment<B>[];
