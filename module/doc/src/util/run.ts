@@ -52,6 +52,9 @@ export class DocRunUtil {
    */
   static cleanRunOutput(text: string, config: RunConfig): string {
     const rootPath = this.workingDirectory(config);
+    if (Runtime.workspace.repoPath) {
+      text = text.replaceAll(Runtime.workspace.repoPath, '<workspace-root>');
+    }
     text = util
       .stripVTControlCharacters(text.trim())
       .replaceAll(rootPath, '.')

@@ -10,6 +10,8 @@ export type ManifestContext = {
     mono?: boolean;
     /** The package manager of the workspace */
     manager: NodePackageManager;
+    /** Repository root path, if different from workspace path (e.g. isolated sub-packages) */
+    repoPath?: string;
   };
   build: {
     /** URL for the compiler server */

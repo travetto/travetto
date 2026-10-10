@@ -322,7 +322,8 @@ export class ManifestIndex {
   }
 
   /** Resolve a package command tied to workspace */
-  resolvePackageCommand(cmd: string): string {
-    return path.resolve(this.manifest.workspace.path, 'node_modules', '.bin', cmd);
+  resolvePackageCommand(command: string): string {
+    const rootPath = this.manifest.workspace.repoPath ?? this.manifest.workspace.path;
+    return path.resolve(rootPath, 'node_modules', '.bin', command);
   }
 }

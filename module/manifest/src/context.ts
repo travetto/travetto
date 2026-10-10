@@ -66,12 +66,24 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
       ? readPackage(resolve(`${moduleName}/package.json`))
       : (findPackage(root, pkg => !!pkg) ?? workspace);
 
+  let repoPath: string | undefined;
+  if (workspace.travetto?.build?.isolated) {
+    try {
+      const parentPackage = findPackage(
+        path.dirname(workspace.path),
+        pkg => !!pkg?.workspaces || existsSync(path.resolve(pkg?.path ?? '', '.git'))
+      );
+      repoPath = parentPackage.path;
+    } catch {}
+  }
+
   return {
     workspace: {
       name: workspace.name ?? 'untitled',
       path: workspace.path,
       mono: !!workspace.workspaces,
-      manager: PACKAGE_MANAGERS.find(item => existsSync(path.resolve(workspace.path, item.lock)))?.type ?? 'npm'
+      manager: PACKAGE_MANAGERS.find(item => existsSync(path.resolve(workspace.path, item.lock)))?.type ?? 'npm',
+      repoPath
     },
     build: {
       compilerUrl: build.compilerUrl ?? `http://localhost:${toPort(wsPrefix)}`,
