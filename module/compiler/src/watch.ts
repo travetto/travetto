@@ -1,5 +1,4 @@
 import { execFile } from 'node:child_process';
-import { Socket } from 'node:dgram';
 import { watch } from 'node:fs';
 import fs from 'node:fs/promises';
 import { promisify } from 'node:util';
@@ -80,6 +79,8 @@ export class CompilerWatcher {
       return false;
     } else if (relativeFile.startsWith('.')) {
       return false;
+    } else if (!ManifestModuleUtil.isSourceType(file)) {
+      return false;
     }
     return true;
   }
@@ -91,8 +92,6 @@ export class CompilerWatcher {
     } else if (event.action === 'update' && !this.#state.checkIfSourceChanged(event.entry.sourceFile)) {
       const relativeFile = event.file.replace(`${this.#root}/`, '');
       log.debug(`Skipping update, as contents unchanged ${relativeFile}`);
-      return false;
-    } else if (!ManifestModuleUtil.isSourceType(event.file)) {
       return false;
     }
     return true;
@@ -148,26 +147,19 @@ export class CompilerWatcher {
             EventUtil.sendEvent('file', { workspace: this.#state.manifest.workspace.path, time: Date.now(), files: filesChanged });
           }
 
-          if (events.length > 25) {
-            log.info('Large influx of file changes, restarting', events.length, { phase: 'reset' });
-            throw new CompilerReset();
-          }
-
           const changedPackageFiles = events
             .map(event => path.toPosix(event.path))
             .filter(file => packageFiles.has(file))
             .map(file => path.relative(this.#root, file));
           if (changedPackageFiles.length) {
-            log.info('Package information changed, restarting', changedPackageFiles, { phase: 'reset' });
-            throw new CompilerReset();
+            throw new CompilerReset('Package information changed', changedPackageFiles);
           }
 
           const changedCompilerFiles = filesChanged
             .filter(item => this.#state.isCompilerFile(item.file))
             .map(item => path.relative(this.#root, item.file));
           if (changedCompilerFiles.length) {
-            log.info('Compiler source changed, restarting', [changedCompilerFiles], { phase: 'reset' });
-            throw new CompilerReset();
+            throw new CompilerReset('Compiler source changed', changedCompilerFiles);
           }
 
           const items = filesChanged.map(event => this.#toCandidateEvent(event)).filter(event => this.#isValidEvent(event));
@@ -179,26 +171,22 @@ export class CompilerWatcher {
           try {
             await this.#updateManifestWithEvents(items);
           } catch (manifestError) {
-            log.info('Restarting due to manifest rebuild failure', manifestError, { phase: 'reset' });
-            throw new CompilerReset();
+            throw new CompilerReset('Manifest rebuild failure');
           }
 
           for (const item of items) {
             this.#queue.add(item);
           }
         } catch (out) {
-          let error: Error;
           if (out instanceof Error) {
             if (out.message.includes('Events were dropped by the FSEvents client.')) {
-              log.info('FSEvents failure, requires restart', [], { phase: 'reset' });
-              error = new CompilerReset();
+              this.#queue.throw(new CompilerReset('FSEvents failure'));
             } else {
-              error = out;
+              this.#queue.throw(out);
             }
           } else {
-            error = new Error(`${out}`);
+            this.#queue.throw(new Error(`${out}`));
           }
-          return this.#queue.throw(error);
         }
       },
       { ignore }
@@ -226,8 +214,7 @@ export class CompilerWatcher {
       const full = path.resolve(toolRootFolder, file);
       const stat = await fs.stat(full, { throwIfNoEntry: false });
       if (toolFolders.has(full) && !stat) {
-        log.info('Tooling folder removed, restarting', path.relative(this.#root, full), { phase: 'reset' });
-        this.#queue.throw(new CompilerReset());
+        this.#queue.throw(new CompilerReset('Tooling folder removed', [path.relative(this.#root, full)]));
       }
     });
     this.#cleanup.tool = (): void => listener.close();
@@ -290,9 +277,8 @@ export class CompilerWatcher {
       try {
         const nextHead = await this.#getGitHeadRef();
         if (nextHead && currentHead && nextHead !== currentHead) {
-          log.info('Git branch or commit change detected, restarting', { from: currentHead, to: nextHead }, { phase: 'reset' });
           currentHead = nextHead;
-          this.#queue.throw(new CompilerReset());
+          this.#queue.throw(new CompilerReset(`Git branch or commit change detected: ${currentHead}=>${nextHead}`));
         }
       } finally {
         isChecking = undefined;

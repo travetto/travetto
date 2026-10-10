@@ -82,4 +82,10 @@ export type CompilerServerInfo = {
   messages?: Partial<Record<CompilerLogPhase, CompilerLogEvent[]>>;
 };
 
-export class CompilerReset extends Error {}
+export class CompilerReset extends Error {
+  files?: string[];
+  constructor(message: string, files?: string[], extra?: ErrorOptions) {
+    super(message, extra);
+    this.files = files;
+  }
+}

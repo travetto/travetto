@@ -271,6 +271,9 @@ export class Compiler {
         this.#sendEvent('state', { state: 'watch-end' });
       } catch (error) {
         if (error instanceof Error) {
+          if (error instanceof CompilerReset) {
+            log.error(`Restarting due to: ${error.message}`, error.files, { scope: 'reset' });
+          }
           this.#shutdown(error instanceof CompilerReset ? 'reset' : 'error', error.message);
         }
       }

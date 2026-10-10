@@ -60,7 +60,8 @@ Initialized {
       name: '@travetto-doc/web-http',
       path: './doc-exec',
       mono: false,
-      manager: 'npm'
+      manager: 'npm',
+      repoPath: '<workspace-root>'
     }
   },
   runtime: {
@@ -229,7 +230,8 @@ Initialized {
       name: '@travetto-doc/web-http',
       path: './doc-exec',
       mono: false,
-      manager: 'npm'
+      manager: 'npm',
+      repoPath: '<workspace-root>'
     }
   },
   runtime: {
