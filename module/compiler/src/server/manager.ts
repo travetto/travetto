@@ -84,13 +84,14 @@ export class CompilerManager {
     throw new Error(`Failed to start compiler daemon within ${STARTUP_TIMEOUT_MILLISECONDS / 1000} seconds`);
   }
 
-  static #failWithBuildErrors(info?: CompilerServerInfo): never {
+  static async #failWithBuildErrors(info?: CompilerServerInfo): Promise<never> {
     for (const message of info?.messages?.error ?? []) {
       Log.render(message);
     }
     for (const message of info?.messages?.failure ?? []) {
       Log.render(message);
     }
+    await CommonUtil.blockingTimeout(50);
     process.exitCode = 1;
     throw new Error('Compilation failed with build errors');
   }
@@ -116,7 +117,7 @@ export class CompilerManager {
       await server.processEvents(signal => this.#runTarget(ctx, watch, signal));
       log.debug('End Server');
       if (server.info.state === 'compile-failed') {
-        this.#failWithBuildErrors(server.info);
+        await this.#failWithBuildErrors(server.info);
       }
     } else {
       log.info('Server already running, waiting for initial compile to complete');
@@ -125,7 +126,7 @@ export class CompilerManager {
       const finalState = await client.waitForState(['compile-end', 'watch-start', 'compile-failed'], 'Successfully built');
       controller.abort();
       if (finalState === 'compile-failed') {
-        this.#failWithBuildErrors(await client.info());
+        await this.#failWithBuildErrors(await client.info());
       }
     }
   }
@@ -168,7 +169,7 @@ export class CompilerManager {
   static async compileIfNecessary(ctx: ManifestContext, client: CompilerClient): Promise<void> {
     if (await client.isWatching()) {
       if (!(await client.waitForWatchReady())) {
-        this.#failWithBuildErrors(await client.info());
+        await this.#failWithBuildErrors(await client.info());
       }
       return;
     }
@@ -179,7 +180,7 @@ export class CompilerManager {
       log.info('Compiler not running, auto-starting watch daemon');
       const result = await this.startDaemon(ctx, client, 'Compiler daemon ready', true);
       if (result.state === 'compile-failed') {
-        this.#failWithBuildErrors(result.info);
+        await this.#failWithBuildErrors(result.info);
       }
     } else {
       await this.compile(ctx, client, { watch: false, logLevel: 'error' });
