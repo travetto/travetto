@@ -1,11 +1,10 @@
 import { Config, EnvVar } from '@travetto/config';
 import { PostConstruct } from '@travetto/di';
-import { Runtime, RuntimeError, RuntimeResources } from '@travetto/runtime';
+import { RuntimeError, RuntimeResources } from '@travetto/runtime';
 import { Ignore, Secret } from '@travetto/schema';
 import { NetUtil } from '@travetto/web';
 
-import { WebTlsUtil } from './tls.ts';
-import type { WebSecureKeyPair } from './types.ts';
+import type { WebSecureCert } from './types.ts';
 
 /**
  * Web HTTP configuration
@@ -40,7 +39,7 @@ export class WebHttpConfig {
    * TLS Keys
    */
   @Secret()
-  tlsKeys?: WebSecureKeyPair;
+  tlsKeys?: WebSecureCert;
 
   @Ignore()
   fetchUrl: string;
@@ -54,17 +53,19 @@ export class WebHttpConfig {
     if (!this.tls) {
       // Clear out keys if tls is not set
       this.tlsKeys = undefined;
-    } else if (!this.tlsKeys) {
-      if (Runtime.production) {
-        throw new RuntimeError('Default tls keys are only valid for development use, please specify a config value at web.tls.keys');
-      }
-      this.tlsKeys = await WebTlsUtil.generateKeyPair();
-    } else {
+    } else if (this.tlsKeys) {
       if (this.tlsKeys.key.length < 100) {
         // We have files or resources
         this.tlsKeys.key = await RuntimeResources.readUTF8(this.tlsKeys.key);
         this.tlsKeys.cert = await RuntimeResources.readUTF8(this.tlsKeys.cert);
       }
+    } else {
+      throw new RuntimeError(
+        'TLS requested, but no keys provided.  Please specify a config value at web.tls.keys or web.tlsKeys, or run `npx trv web:tls-dev` to generate a local cert.',
+        {
+          category: 'notfound'
+        }
+      );
     }
 
     this.fetchUrl = `${this.tls ? 'https' : 'http'}://${this.bindAddress}:${this.port}`;

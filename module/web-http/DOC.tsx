@@ -8,6 +8,7 @@ import { WebHttpConfig } from './src/config.ts';
 import { NodeWebHttpServer } from './src/node.ts';
 import type { WebHttpServer } from './src/types.ts';
 import { WebHttpCommand } from './support/cli.web_http.ts';
+import { CliWebTlsDev } from './support/cli.web_tls-dev.ts';
 
 const WebServerContract = toConcrete<WebHttpServer>();
 
@@ -59,17 +60,13 @@ export const text = (
       </ul>
     </c.Section>
     <c.Section title="TLS Support">
-      Additionally the framework supports TLS out of the box, by allowing you to specify your public and private keys for the cert. In dev
-      mode, the framework will also automatically generate a self-signed cert if:
-      <ul>
-        <li>TLS support is configured</li>
-        <li>{d.library('NodeForge')} is installed</li>
-        <li>Not running in production</li>
-        <li>No keys provided</li>
-      </ul>
-      This is useful for local development where you implicitly trust the cert. <br />
+      Additionally the framework supports TLS out of the box, by allowing you to specify your public and private keys for the cert.
       TLS support can be enabled by setting {d.input('web.http.tls: true')} in your config. The key/cert can be specified as string directly
-      in the config file/environment variables. The key/cert can also be specified as a path to be picked up by {RuntimeResources}.
+      in the config file/environment variables, or as a path to be picked up by {RuntimeResources}.
     </c.Section>
+    <c.CliHelpSection commandClass={CliWebTlsDev}>
+      To facilitate local development, this command will generate a self-signed certificate and private key using {d.library('OpenSSL')}:
+      <c.CliHelpExecution commandClass={CliWebTlsDev} />
+    </c.CliHelpSection>
   </>
 );

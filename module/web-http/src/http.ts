@@ -7,7 +7,7 @@ import { TLSSocket } from 'node:tls';
 import { type BinaryType, BinaryUtil, castTo, ShutdownManager } from '@travetto/runtime';
 import { WebBodyUtil, WebCommonUtil, type WebDispatcher, WebRequest, WebResponse } from '@travetto/web';
 
-import type { WebSecureKeyPair, WebServerHandle } from './types.ts';
+import type { WebSecureCert, WebServerHandle } from './types.ts';
 
 type HttpServer = http.Server | http2.Http2Server;
 type HttpResponse = http.ServerResponse | http2.Http2ServerResponse;
@@ -18,7 +18,7 @@ type WebHttpServerConfig = {
   httpVersion?: '1.1' | '2';
   port: number;
   bindAddress: string;
-  tlsKeys?: WebSecureKeyPair;
+  tlsKeys?: WebSecureCert;
   dispatcher: WebDispatcher;
   signal?: AbortSignal;
 };

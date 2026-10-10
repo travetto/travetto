@@ -65,7 +65,6 @@ export const LIBRARIES = {
 
   // Utils
   Lodash: { title: 'lodash', href: 'https://lodash.com' },
-  NodeForge: { title: 'node-forge', href: 'https://www.npmjs.com/package/node-forge' },
   Docker: { title: 'docker', href: 'https://www.docker.com/community-edition' },
   Debug: { title: 'debug', href: 'https://www.npmjs.com/package/debug' },
   OpenAPIGenerator: { title: 'OpenAPI client generation tools', href: 'https://github.com/OpenAPITools/openapi-generator' },
@@ -79,6 +78,7 @@ export const LIBRARIES = {
   ParcelWatcher: { title: '@parcel/watcher', href: 'https://www.npmjs.com/package/@parcel/watcher' },
   Preact: { title: 'preact', href: 'https://preactjs.com' },
   NodeYaml: { title: 'yaml', href: 'https://github.com/eemeli/yaml' },
+  OpenSSL: { title: 'OpenSSL', href: 'https://docs.openssl.org/master/man1/' },
 
   // JWT
   JWT: { title: 'JWT', href: 'https://jwt.io/' },
