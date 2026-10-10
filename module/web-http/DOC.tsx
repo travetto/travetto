@@ -60,9 +60,9 @@ export const text = (
       </ul>
     </c.Section>
     <c.Section title="TLS Support">
-      Additionally the framework supports TLS out of the box, by allowing you to specify your public and private keys for the cert.
-      TLS support can be enabled by setting {d.input('web.http.tls: true')} in your config. The key/cert can be specified as string directly
-      in the config file/environment variables, or as a path to be picked up by {RuntimeResources}.
+      Additionally the framework supports TLS out of the box, by allowing you to specify your public and private keys for the cert. TLS
+      support can be enabled by setting {d.input('web.http.tls: true')} in your config. The key/cert can be specified as string directly in
+      the config file/environment variables, or as a path to be picked up by {RuntimeResources}.
     </c.Section>
     <c.CliHelpSection commandClass={CliWebTlsDev}>
       To facilitate local development, this command will generate a self-signed certificate and private key using {d.library('OpenSSL')}:

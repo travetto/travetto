@@ -51,6 +51,9 @@ export class Logger implements LogConfig, LogShape {
   }
 
   valid(event: CompilerLogEvent): boolean {
+    if (this.disabled && event.level !== 'error') {
+      return false;
+    }
     return LEVEL_TO_PRIORITY[this.level ?? this.parent?.level ?? 'debug'] <= LEVEL_TO_PRIORITY[event.level];
   }
 
@@ -100,6 +103,9 @@ class $RootLogger extends Logger {
   initLevel(defaultLevel: CompilerLogLevel): void {
     const value = process.env.TRV_BUILD ?? undefined;
     switch (value) {
+      case 'none':
+        this.disabled = true;
+        break;
       case 'debug':
       case 'warn':
       case 'error':

@@ -145,7 +145,7 @@ export class WebHttpConfig {
    * TLS Keys
    */
   @Secret()
-  tlsKeys?: WebSecureKeyPair;
+  tlsKeys?: WebSecureCert;
 
   @Ignore()
   fetchUrl: string;
@@ -159,17 +159,19 @@ export class WebHttpConfig {
     if (!this.tls) {
       // Clear out keys if tls is not set
       this.tlsKeys = undefined;
-    } else if (!this.tlsKeys) {
-      if (Runtime.production) {
-        throw new RuntimeError('Default tls keys are only valid for development use, please specify a config value at web.tls.keys');
-      }
-      this.tlsKeys = await WebTlsUtil.generateKeyPair();
-    } else {
+    } else if (this.tlsKeys) {
       if (this.tlsKeys.key.length < 100) {
         // We have files or resources
         this.tlsKeys.key = await RuntimeResources.readUTF8(this.tlsKeys.key);
         this.tlsKeys.cert = await RuntimeResources.readUTF8(this.tlsKeys.cert);
       }
+    } else {
+      throw new RuntimeError(
+        'TLS requested, but no keys provided.  Please specify a config value at web.tls.keys or web.tlsKeys, or run `npx trv web:tls-dev` to generate a local cert.',
+        {
+          category: 'notfound'
+        }
+      );
     }
 
     this.fetchUrl = `${this.tls ? 'https' : 'http'}://${this.bindAddress}:${this.port}`;
@@ -352,12 +354,25 @@ we can see the structure for integrating the server behavior with the [Web API](
    *  Receiving the [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3) and sending that back over the primitive response.
 
 ## TLS Support
-Additionally the framework supports TLS out of the box, by allowing you to specify your public and private keys for the cert. In dev mode, the framework will also automatically generate a self-signed cert if:
-   *  TLS support is configured
-   *  [node-forge](https://www.npmjs.com/package/node-forge) is installed
-   *  Not running in production
-   *  No keys provided
+Additionally the framework supports TLS out of the box, by allowing you to specify your public and private keys for the cert. TLS support can be enabled by setting `web.http.tls: true` in your config. The key/cert can be specified as string directly in the config file/environment variables, or as a path to be picked up by [RuntimeResources](https://github.com/travetto/travetto/tree/main/module/runtime/src/resources.ts#L8).
 
-This is useful for local development where you implicitly trust the cert. 
+## CLI - web:tls-dev
+To facilitate local development, this command will generate a self-signed certificate and private key using [OpenSSL](https://docs.openssl.org/master/man1/):
 
-TLS support can be enabled by setting `web.http.tls: true` in your config. The key/cert can be specified as string directly in the config file/environment variables. The key/cert can also be specified as a path to be picked up by [RuntimeResources](https://github.com/travetto/travetto/tree/main/module/runtime/src/resources.ts#L8).
+**Terminal: Help for web:tls-dev**
+```bash
+$ trv web:tls-dev --help
+
+Usage: web:tls-dev [options]
+
+Description:
+  Generate a self-signed TLS certificate and private key for local development.
+
+  Uses OpenSSL to create localhost certificate and key files in the workspace
+  resources directory for local HTTPS development.
+
+Options:
+  -k, --key-file <string>    (default: "resources/localhost-key.pem")
+  -c, --cert-file <string>   (default: "resources/localhost-cert.pem")
+  --help                    display help for command
+```

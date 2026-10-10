@@ -122,7 +122,7 @@ Listening on port <span class="token punctuation">{{'{'}}</span> port: <span cla
 
   <figure class="code">
     <figcaption class="code">Standard Web Http Config
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-http/src/config.ts#L14">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-http/src/config.ts#L13">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">WebHttpConfig</span> <span class="token punctuation">{{'{'}}</span>
@@ -154,7 +154,7 @@ Listening on port <span class="token punctuation">{{'{'}}</span> port: <span cla
    * TLS Keys
    */</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Secret</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  tlsKeys<span class="token operator">?</span><span class="token operator">:</span> WebSecureKeyPair<span class="token punctuation">;</span>
+  tlsKeys<span class="token operator">?</span><span class="token operator">:</span> WebSecureCert<span class="token punctuation">;</span>
 
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Ignore</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   fetchUrl<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
@@ -168,17 +168,19 @@ Listening on port <span class="token punctuation">{{'{'}}</span> port: <span cla
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>tls<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token comment">// Clear out keys if tls is not set</span>
       <span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys <span class="token operator">=</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
-    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">if</span> <span class="token punctuation">(</span>Runtime<span class="token punctuation">.</span>production<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">RuntimeError</span><span class="token punctuation">(</span><span class="token string">'Default tls keys are only valid for development use, please specify a config value at web.tls.keys'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-      <span class="token punctuation">{{'}'}}</span>
-      <span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys <span class="token operator">=</span> <span class="token keyword">await</span> WebTlsUtil<span class="token punctuation">.</span><span class="token function">generateKeyPair</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">.</span>key<span class="token punctuation">.</span>length <span class="token operator">&lt;</span> <span class="token number">100</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
         <span class="token comment">// We have files or resources</span>
         <span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">.</span>key <span class="token operator">=</span> <span class="token keyword">await</span> RuntimeResources<span class="token punctuation">.</span><span class="token function">readUTF8</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">.</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">.</span>cert <span class="token operator">=</span> <span class="token keyword">await</span> RuntimeResources<span class="token punctuation">.</span><span class="token function">readUTF8</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>tlsKeys<span class="token punctuation">.</span>cert<span class="token punctuation">)</span><span class="token punctuation">;</span>
       <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">RuntimeError</span><span class="token punctuation">(</span>
+        <span class="token string">'TLS requested, but no keys provided.  Please specify a config value at web.tls.keys or web.tlsKeys, or run `npx trv web:tls-dev` to generate a local cert.'</span><span class="token punctuation">,</span>
+        <span class="token punctuation">{{'{'}}</span>
+          category<span class="token operator">:</span> <span class="token string">'notfound'</span>
+        <span class="token punctuation">{{'}'}}</span>
+      <span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
 
     <span class="token keyword">this</span><span class="token punctuation">.</span>fetchUrl <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>tls <span class="token operator">?</span> <span class="token string">'https'</span> <span class="token operator">:</span> <span class="token string">'http'</span><span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">://</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>bindAddress<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>port<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
@@ -379,11 +381,28 @@ we can see the structure for integrating the server behavior with the <a class="
 
 <h2 id="tls-support">TLS Support</h2>
 
-Additionally the framework supports TLS out of the box, by allowing you to specify your public and private keys for the cert. In dev mode, the framework will also automatically generate a self-signed cert if:
-<ul> <li>TLS support is configured</li>
-<li><a target="_blank" class="external-link" href="https://www.npmjs.com/package/node-forge">node-forge</a> is installed</li>
-<li>Not running in production</li>
-<li>No keys provided</li>
-</ul>
-This is useful for local development where you implicitly trust the cert. <br><br>
-TLS support can be enabled by setting <code class="item input">web.http.tls: true</code> in your config. The key/cert can be specified as string directly in the config file/environment variables. The key/cert can also be specified as a path to be picked up by <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/resources.ts#L8">RuntimeResources</a>.
+Additionally the framework supports TLS out of the box, by allowing you to specify your public and private keys for the cert. TLS support can be enabled by setting <code class="item input">web.http.tls: true</code> in your config. The key/cert can be specified as string directly in the config file/environment variables, or as a path to be picked up by <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/resources.ts#L8">RuntimeResources</a>.
+
+<h2 id="cli-web-tls-dev">CLI - web:tls-dev</h2>
+
+To facilitate local development, this command will generate a self-signed certificate and private key using <a target="_blank" class="external-link" href="https://docs.openssl.org/master/man1/">OpenSSL</a>:
+
+  <figure class="terminal">
+    <figcaption class="terminal">Showing help for web:tls-dev
+
+</figcaption>
+    <pre><code class="language-bash">$ trv web:tls-dev <span class="token parameter variable">--help</span>
+
+Usage: web:tls-dev <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Description:
+  Generate a self-signed TLS certificate and private key <span class="token keyword">for</span> <span class="token builtin class-name">local</span> development.
+
+  Uses OpenSSL to create localhost certificate and key files <span class="token keyword">in</span> the workspace
+  resources directory <span class="token keyword">for</span> <span class="token builtin class-name">local</span> HTTPS development.
+
+Options:
+  -k, --key-file <span class="token operator">&lt;</span>string<span class="token operator">></span>    <span class="token punctuation">(</span>default: <span class="token string">"resources/localhost-key.pem"</span><span class="token punctuation">)</span>
+  -c, --cert-file <span class="token operator">&lt;</span>string<span class="token operator">></span>   <span class="token punctuation">(</span>default: <span class="token string">"resources/localhost-cert.pem"</span><span class="token punctuation">)</span>
+  <span class="token parameter variable">--help</span>                    display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  </figure>

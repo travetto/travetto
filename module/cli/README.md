@@ -58,6 +58,7 @@ Commands:
   test:watch            Start the test watcher for continuous test execution.
   web:http              Start the configured web HTTP server for a module.
   web:rpc-client        Generate web-rpc client artifacts from a specified provider or leveraging local config.
+  web:tls-dev           Generate a self-signed TLS certificate and private key for local development.
 ```
 
 This listing is from the [Travetto](https://travetto.dev) monorepo, and represents the majority of tools that can be invoked from the command line. 
