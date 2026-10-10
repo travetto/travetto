@@ -65,7 +65,7 @@ export class DocAngularCommand {
         module => {
           const subProcess = ExecUtil.spawnPackageCommand('trv', ['doc'], {
             timeout: 20000,
-            cwd: module.sourceFolder,
+            cwd: module.sourcePath,
             env: {
               ...process.env,
               ...Env.TRV_MODULE.export(module.name),

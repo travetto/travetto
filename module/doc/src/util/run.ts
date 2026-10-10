@@ -81,10 +81,10 @@ export class DocRunUtil {
   static async run(cmd: string, args: string[], config: RunConfig = {}): Promise<string> {
     let final: string;
     try {
-      const spawnCmd = config.spawn ?? spawn;
-      const subProcess = spawnCmd(cmd, args, {
+      const spawnCommand = config.spawn ?? (cmd === 'trv' || cmd === 'trvc' ? ExecUtil.spawnPackageCommand.bind(ExecUtil) : spawn);
+      const subProcess = spawnCommand(cmd, args, {
         ...config,
-        cwd: config.workingDirectory ?? this.workingDirectory(config),
+        cwd: config.workingDirectory ? path.resolve(this.workingDirectory(config), config.workingDirectory) : this.workingDirectory(config),
         env: {
           ...process.env,
           ...Env.DEBUG.export(false),
@@ -99,7 +99,7 @@ export class DocRunUtil {
 
       const result = await ExecUtil.getResult(subProcess, { catch: true });
       if (!result.valid) {
-        throw new Error(result.stderr);
+        throw new Error(result.message || result.stderr || 'Execution failed');
       }
       final = util.stripVTControlCharacters(result.stdout).trim() || util.stripVTControlCharacters(result.stderr).trim();
     } catch (error) {
