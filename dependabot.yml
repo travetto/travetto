@@ -1,0 +1,11 @@
+version: 2
+updates:
+  - package-ecosystem: 'npm'
+    directory: '/' # Scans your root directory
+    directories:
+      - '**/*' # If you use globstar to find nested subdirectories recursively
+    exclude-paths:
+      - 'archived/**'
+      - 'related/travetto.github.io/**'
+    schedule:
+      - interval: 'weekly'
