@@ -22,7 +22,7 @@ export class Logger implements LogConfig, LogShape {
 
   /** Rewrite text line, tracking cleanup as necessary */
   static rewriteLine(text: string): Promise<void> | void {
-    if ((!text && !this.#linePartial) || !process.stdout.isTTY || isQuiet()) {
+    if ((!text && !this.#linePartial) || !process.stdout.isTTY) {
       return;
     }
     if (this.#linePartial === undefined) {
@@ -104,7 +104,7 @@ class $RootLogger extends Logger {
   /** Get if we should log progress */
   get logProgress(): boolean {
     if (this.#logProgress === undefined) {
-      this.#logProgress = process.stdout.isTTY && !isQuiet() && !this.disabled;
+      this.#logProgress = process.stdout.isTTY && !this.disabled;
     }
     return this.#logProgress;
   }
