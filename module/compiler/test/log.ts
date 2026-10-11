@@ -27,10 +27,10 @@ class CompilerLogTests {
       assert.strictEqual(ipcLoggerStrictTrue.valid({ level: 'debug', message: 'test' }), true);
 
       process.env.TRV_BUILD = 'none';
-      const disabledIpcLogger = new IpcLogger({ level: 'debug' });
-      assert.strictEqual(disabledIpcLogger.disabled, true);
-      assert.strictEqual(disabledIpcLogger.valid({ level: 'debug', message: 'test' }), false);
-      assert.strictEqual(disabledIpcLogger.valid({ level: 'error', message: 'test' }), true);
+      const ipcLoggerNone = new IpcLogger({ level: 'debug' });
+      assert.strictEqual(ipcLoggerNone.disabled, false);
+      assert.strictEqual(ipcLoggerNone.valid({ level: 'debug', message: 'test' }), true);
+      assert.strictEqual(ipcLoggerNone.valid({ level: 'error', message: 'test' }), true);
     } finally {
       if (originalQuiet !== undefined) {
         process.env.TRV_QUIET = originalQuiet;

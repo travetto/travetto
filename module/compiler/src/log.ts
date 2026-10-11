@@ -173,9 +173,8 @@ class $RootLogger extends Logger {
 export const Log = new $RootLogger();
 
 export class IpcLogger extends Logger {
-  constructor(config: LogConfig = {}) {
-    super(config);
-    this.disabled = process.env.TRV_BUILD === 'none';
+  get disabled(): boolean {
+    return false;
   }
 
   render(event: CompilerLogEvent): void {
