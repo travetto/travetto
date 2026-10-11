@@ -93,6 +93,11 @@ export class Logger implements LogConfig, LogShape {
 class $RootLogger extends Logger {
   #logProgress?: boolean;
 
+  /** Get if we should log progress */
+  get logProgress(): boolean {
+    return (this.#logProgress ??= process.stdout.isTTY && !this.disabled);
+  }
+
   constructor() {
     const env = process.env.TRV_BUILD;
     const level = env === 'debug' || env === 'info' || env === 'warn' || env === 'error' ? env : 'debug';
@@ -115,11 +120,6 @@ class $RootLogger extends Logger {
     } else {
       return operation(logger);
     }
-  }
-
-  /** Get if we should log progress */
-  get logProgress(): boolean {
-    return (this.#logProgress ??= process.stdout.isTTY && !this.disabled);
   }
 
   /** Write progress event, if active */
