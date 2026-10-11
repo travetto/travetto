@@ -163,7 +163,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     const idNin = await svc.query(SimpleList, {
       where: {
         id: {
-          $nin: ['a', 'b']
+          $nin: [svc.idSource.create(), svc.idSource.create()]
         }
       }
     });

@@ -55,6 +55,9 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     }
 
     if (fieldConfiguration.type === String) {
+      if (fieldConfiguration.specifiers?.includes('uuid')) {
+        return 'UUID';
+      }
       if (fieldConfiguration.specifiers?.includes('text')) {
         return 'TEXT';
       }

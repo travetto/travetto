@@ -32,6 +32,8 @@ export class PostgresConnection extends SQLConnection<PoolClient> {
    * Initializes the pool and creates the pgcrypto extension
    */
   async init(): Promise<void> {
+    pg.types.setTypeParser(2950, (value: string) => value.replaceAll('-', ''));
+
     this.pool = new pg.Pool({
       user: this.config.user,
       password: this.config.password,
@@ -97,6 +99,10 @@ export class PostgresConnection extends SQLConnection<PoolClient> {
           throw new UniqueError('index', constraint, { detail, query });
         } else if (error.code === '42P07') {
           throw new ExistsError('index', query);
+        } else if (error.code === '22P02') {
+          if (!/^\s*INSERT/i.test(query)) {
+            return { count: 0, records: [] };
+          }
         }
       }
       throw error;

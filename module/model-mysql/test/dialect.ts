@@ -4,7 +4,7 @@ import { Model, type ModelType } from '@travetto/model';
 import type { TableContext } from '@travetto/model-sql';
 import { SQLModelSchemaUtil } from '@travetto/model-sql';
 import type { Class } from '@travetto/runtime';
-import { Schema } from '@travetto/schema';
+import { Schema, Uuid } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
 import { BaseSQLDialectSuite } from '@travetto/model-sql/support/test/dialect.ts';
@@ -24,6 +24,12 @@ class ParentModel {
   id: string;
   title: string;
   child: ChildItem;
+}
+
+@Model('mysql_gap_uuid')
+class UuidModel {
+  @Uuid()
+  id: string;
 }
 
 function getTableContext<T extends ModelType>(modelClass: Class<T>): TableContext<T> {
@@ -107,5 +113,12 @@ export class MysqlDialectSuite extends BaseSQLDialectSuite {
 
     const emptySQL = this.dialect.getDropTablesSQL([]);
     assert(emptySQL === '');
+  }
+
+  @Test('Verify MySQL UUID column generation')
+  async testMysqlUuidColumn() {
+    const tableContext = getTableContext(UuidModel);
+    const createTableSql = this.dialect.getCreateTableSQL(tableContext);
+    assert(createTableSql.includes('`id` CHAR(32) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY'));
   }
 }

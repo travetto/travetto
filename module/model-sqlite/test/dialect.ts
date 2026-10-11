@@ -59,4 +59,11 @@ export class SqliteDialectSuite extends BaseSQLDialectSuite {
     const emptySQL = this.dialect.getDropTablesSQL([]);
     assert(emptySQL === '');
   }
+
+  @Test('Verify SQLite UUID column generation')
+  async testSqliteUuidColumn() {
+    const tableContext = getTableContext(ParentModel);
+    const createTableSql = this.dialect.getCreateTableSQL(tableContext);
+    assert(createTableSql.includes('"id" TEXT PRIMARY KEY'));
+  }
 }

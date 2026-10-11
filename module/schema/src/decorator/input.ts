@@ -241,6 +241,16 @@ export function Specifier(...specifiers: string[]): PropType<unknown> {
 }
 
 /**
+ * Mark a string property as a UUID
+ * @param message The message to show when the constraint fails
+ * @augments `@travetto/schema:Input`
+ * @kind decorator
+ */
+export function Uuid(message?: string): PropType<StringType> {
+  return input({ specifiers: ['uuid'], match: { regex: CommonRegex.uuid, message } });
+}
+
+/**
  * Sets the discriminator field via a property decorator
  * @augments `@travetto/schema:Input`
  * @kind decorator
