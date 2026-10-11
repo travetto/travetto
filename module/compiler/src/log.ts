@@ -104,7 +104,7 @@ class $RootLogger extends Logger {
   /** Get if we should log progress */
   get logProgress(): boolean {
     if (this.#logProgress === undefined) {
-      this.#logProgress = process.stdout.isTTY && !this.disabled;
+      this.#logProgress = !!process.env.PS1 && process.stdout.isTTY && !this.disabled;
     }
     return this.#logProgress;
   }
