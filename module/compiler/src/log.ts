@@ -49,7 +49,7 @@ export class Logger implements LogConfig, LogShape {
   #disabled?: boolean;
 
   get disabled(): boolean {
-    return this.#disabled ?? this.parent?.disabled ?? ((isQuiet() && !process.env.TRV_BUILD) || process.env.TRV_BUILD === 'none');
+    return this.#disabled ?? this.parent?.disabled ?? false;
   }
 
   set disabled(value: boolean | undefined) {
@@ -100,6 +100,14 @@ export class Logger implements LogConfig, LogShape {
 
 class $RootLogger extends Logger {
   #logProgress?: boolean;
+
+  override get disabled(): boolean {
+    return super.disabled || (isQuiet() && !process.env.TRV_BUILD) || process.env.TRV_BUILD === 'none';
+  }
+
+  override set disabled(value: boolean | undefined) {
+    super.disabled = value;
+  }
 
   /** Get if we should log progress */
   get logProgress(): boolean {
@@ -174,10 +182,6 @@ class $RootLogger extends Logger {
 export const Log = new $RootLogger();
 
 export class IpcLogger extends Logger {
-  get disabled(): boolean {
-    return false;
-  }
-
   render(event: CompilerLogEvent): void {
     if (!this.valid(event)) {
       return;
