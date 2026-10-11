@@ -108,4 +108,11 @@ export class MysqlDialectSuite extends BaseSQLDialectSuite {
     const emptySQL = this.dialect.getDropTablesSQL([]);
     assert(emptySQL === '');
   }
+
+  @Test('Verify MySQL UUID column generation')
+  async testMysqlUuidColumn() {
+    const tableContext = getTableContext(ParentModel);
+    const createTableSql = this.dialect.getCreateTableSQL(tableContext);
+    assert(createTableSql.includes('`id` CHAR(32) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY'));
+  }
 }

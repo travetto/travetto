@@ -61,4 +61,11 @@ export class PostgresDialectSuite extends BaseSQLDialectSuite {
     const emptySQL = this.dialect.getDropTablesSQL([]);
     assert(emptySQL === '');
   }
+
+  @Test('Verify Postgres UUID column generation')
+  async testPostgresUuidColumn() {
+    const tableContext = getTableContext(ParentModel);
+    const createTableSql = this.dialect.getCreateTableSQL(tableContext);
+    assert(createTableSql.includes('"id" UUID PRIMARY KEY'));
+  }
 }

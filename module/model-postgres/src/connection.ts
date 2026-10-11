@@ -32,6 +32,8 @@ export class PostgresConnection extends SQLConnection<PoolClient> {
    * Initializes the pool and creates the pgcrypto extension
    */
   async init(): Promise<void> {
+    pg.types.setTypeParser(2950, (value: string) => value.replaceAll('-', ''));
+
     this.pool = new pg.Pool({
       user: this.config.user,
       password: this.config.password,

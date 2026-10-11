@@ -241,6 +241,15 @@ export function Specifier(...specifiers: string[]): PropType<unknown> {
 }
 
 /**
+ * Mark a string property as a UUID
+ * @augments `@travetto/schema:Input`
+ * @kind decorator
+ */
+export function Uuid(): PropType<StringType> {
+  return Specifier('uuid');
+}
+
+/**
  * Sets the discriminator field via a property decorator
  * @augments `@travetto/schema:Input`
  * @kind decorator

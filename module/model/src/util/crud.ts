@@ -29,7 +29,9 @@ export class ModelCrudUtil {
    */
   static uuidSource(length: number = 32): ModelIdSource {
     const create = (): string => Util.uuid(length);
-    const valid = (id: string): boolean => id.length === length && /^[0-9a-f]+$/i.test(id);
+    const valid = (id: string): boolean =>
+      (id.length === length && /^[0-9a-f]+$/i.test(id)) ||
+      (length === 32 && id.length === 36 && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id));
     return { create, valid };
   }
 

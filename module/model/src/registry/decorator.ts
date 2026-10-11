@@ -18,7 +18,7 @@ export function Model(config: Partial<ModelConfig<ModelType>> | string = {}) {
     }
     ModelRegistryIndex.getForRegister(cls).register(config);
     if (SchemaRegistryIndex.getForRegister(cls).get().fields.id) {
-      SchemaRegistryIndex.getForRegister(cls).registerField('id', { required: { active: false } });
+      SchemaRegistryIndex.getForRegister(cls).registerField('id', { required: { active: false }, specifiers: ['uuid'] });
     }
     return cls;
   };

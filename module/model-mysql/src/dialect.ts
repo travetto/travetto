@@ -50,6 +50,9 @@ export class MysqlDialect extends AbstractANSI99Dialect {
     }
 
     if (fieldConfiguration.type === String) {
+      if (fieldConfiguration.name === 'id' || fieldConfiguration.specifiers?.includes('uuid')) {
+        return 'CHAR(32) CHARACTER SET ascii COLLATE ascii_bin';
+      }
       if (fieldConfiguration.specifiers?.includes('text')) {
         return 'TEXT';
       }
