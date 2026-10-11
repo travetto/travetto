@@ -47,7 +47,7 @@ export class QueryVerifier {
    * Handle generic clauses
    */
   static processGenericClause<T>(state: State, cls: Class<T>, clause: object, handler: ProcessingHandler): void {
-    const view = SchemaRegistryIndex.getConfig(cls).fields;
+    const fields = SchemaRegistryIndex.getConfig(cls).fields;
 
     if (clause === undefined || clause === null) {
       state.log('Value cannot be undefined or null');
@@ -65,13 +65,13 @@ export class QueryVerifier {
         continue;
       }
 
-      if (!(key in view)) {
+      if (!(key in fields)) {
         state.log(`Unknown member ${key} of ${cls.name}`);
         continue;
       }
 
       // Find field
-      const field = view[key];
+      const field = fields[key];
       const type = TypeUtil.getDeclaredType(field);
 
       // If a simple operation

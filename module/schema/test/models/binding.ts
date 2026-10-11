@@ -1,4 +1,4 @@
-import { Alias, Discriminated, Field, Float, Integer, Required, Schema, Url, View } from '@travetto/schema';
+import { Alias, Discriminated, Field, Float, Integer, Required, Schema, Url } from '@travetto/schema';
 
 import { Address } from './address.ts';
 
@@ -24,7 +24,6 @@ export class Count {
 }
 
 @Schema()
-@View('test', { with: ['address', 'counts'] })
 export class Person {
   name: string;
 

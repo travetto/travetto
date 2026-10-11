@@ -2,7 +2,7 @@ import { type Class, castTo, type DeepPartial } from '@travetto/runtime';
 
 import { BindUtil } from '../bind-util.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
-import type { SchemaClassConfig, ViewFieldsConfig } from '../service/types.ts';
+import type { SchemaClassConfig } from '../service/types.ts';
 import type { ValidatorFn } from '../validate/types.ts';
 
 /**
@@ -18,8 +18,8 @@ type ValidStringField<T> = { [K in Extract<keyof T, string>]: T[K] extends strin
  */
 export function Schema(config?: Partial<Pick<SchemaClassConfig, 'validators' | 'methods'>>) {
   return <T, U extends Class<T>>(cls: U): void => {
-    cls.from ??= function <V>(this: Class<V>, data: DeepPartial<V>, view?: string): V {
-      return BindUtil.bindSchema(this, data, { view });
+    cls.from ??= function <V>(this: Class<V>, data: DeepPartial<V>): V {
+      return BindUtil.bindSchema(this, data);
     };
     SchemaRegistryIndex.getForRegister(cls).registerClass(config);
   };
@@ -36,18 +36,6 @@ export const Validator =
   (cls: Class<T>): void => {
     SchemaRegistryIndex.getForRegister(cls).register({ validators: [castTo(fn)] });
   };
-
-/**
- * Register a specific view for a class
- * @param name The name of the view
- * @param fields The specific fields to add as part of a view
- * @kind decorator
- */
-export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
-  return (cls: Class<Partial<T>>): void => {
-    SchemaRegistryIndex.getForRegister(cls).register({ views: { [name]: fields } });
-  };
-}
 
 /**
  * Register a class as a discriminated class, by a specific type

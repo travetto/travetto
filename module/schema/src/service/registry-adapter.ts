@@ -95,7 +95,6 @@ function getConstructorConfig<T extends SchemaClassConfig>(base: Partial<T>, par
 
 function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T): T {
   safeAssign(base, {
-    ...(base.views ? { views: { ...parent.views, ...base.views } } : {}),
     ...(base.validators ? { validators: [...parent.validators, ...base.validators] } : {}),
     ...(base.metadata ? { metadata: { ...parent.metadata, ...base.metadata } } : {}),
     interfaces: [...parent.interfaces, ...base.interfaces],
@@ -145,7 +144,6 @@ function combineClasses<T extends SchemaClassConfig>(base: T, configs: Partial<T
   for (const config of configs) {
     Object.assign(base, {
       ...config,
-      ...(config.views ? { views: { ...base.views, ...config.views } } : {}),
       ...(config.validators ? { validators: [...base.validators, ...config.validators] } : {}),
       ...combineCore(base, config),
       interfaces: [...base.interfaces, ...(config.interfaces ?? [])],
@@ -159,7 +157,6 @@ function combineClasses<T extends SchemaClassConfig>(base: T, configs: Partial<T
 export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig> {
   #cls: Class;
   #config: SchemaClassConfig;
-  #views: Map<string, SchemaFieldMap> = new Map();
   #accessorDescriptors: Map<string, PropertyDescriptor> = new Map();
 
   constructor(cls: Class) {
@@ -170,7 +167,6 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     const config = (this.#config ??= {
       methods: {},
       class: this.#cls,
-      views: {},
       validators: [],
       interfaces: [],
       fields: {}
@@ -273,25 +269,6 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
       };
     }
 
-    // Compute views on install
-    for (const view of Object.keys(config.views)) {
-      const fields = config.views[view];
-      const withoutSet = 'without' in fields ? new Set<string>(fields.without) : undefined;
-      const fieldList = withoutSet
-        ? Object.keys(config.fields).filter(field => !withoutSet.has(field))
-        : 'with' in fields
-          ? fields.with
-          : [];
-
-      this.#views.set(
-        view,
-        fieldList.reduce<SchemaFieldMap>((map, value) => {
-          map[value] = config.fields[value];
-          return map;
-        }, {})
-      );
-    }
-
     config.methods[CONSTRUCTOR_PROPERTY] = getConstructorConfig(config, parent);
 
     for (const method of Object.values(config.methods)) {
@@ -351,14 +328,8 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return this.getMethod(method).returnType!.type;
   }
 
-  getFields(view?: string): SchemaFieldMap {
-    if (!view) {
-      return this.#config.fields;
-    }
-    if (!this.#views.has(view)) {
-      throw new RuntimeError(`Unknown view ${view} for class ${this.#cls.Ⲑid}`);
-    }
-    return this.#views.get(view)!;
+  getFields(): SchemaFieldMap {
+    return this.#config.fields;
   }
 
   /**

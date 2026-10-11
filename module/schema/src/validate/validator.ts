@@ -220,7 +220,7 @@ export class SchemaValidator {
   /**
    * Validate the class level validations
    */
-  static async #validateClassLevel<T>(cls: Class<T>, item: T, view?: string): Promise<ValidationError[]> {
+  static async #validateClassLevel<T>(cls: Class<T>, item: T): Promise<ValidationError[]> {
     if (!SchemaRegistryIndex.has(cls)) {
       return [];
     }
@@ -231,7 +231,7 @@ export class SchemaValidator {
     // Handle class level validators
     for (const fn of classConfig.validators) {
       try {
-        const error = await fn(item, view);
+        const error = await fn(item);
         if (error) {
           if (Array.isArray(error)) {
             errors.push(...error);
@@ -254,18 +254,17 @@ export class SchemaValidator {
    * Validate an object against it's constructor's schema
    * @param cls The class to validate the objects against
    * @param item The object to validate
-   * @param view The optional view to limit the scope to
    */
-  static async validate<T>(cls: Class<T>, item: T, view?: string): Promise<T> {
+  static async validate<T>(cls: Class<T>, item: T): Promise<T> {
     if (isClassInstance(item) && !(item instanceof cls || cls.Ⲑid === item.constructor.Ⲑid)) {
       throw new TypeMismatchError(cls.name, item.constructor.name);
     }
     cls = SchemaRegistryIndex.resolveInstanceType(cls, item);
 
-    const fields = SchemaRegistryIndex.get(cls).getFields(view);
+    const fields = SchemaRegistryIndex.get(cls).getFields();
 
     // Validate using standard behaviors
-    const errors = [...this.#validateFields(fields, item, ''), ...(await this.#validateClassLevel(cls, item, view))];
+    const errors = [...this.#validateFields(fields, item, ''), ...(await this.#validateClassLevel(cls, item))];
     if (errors.length) {
       throw new ValidationResultError(errors);
     }
@@ -277,10 +276,9 @@ export class SchemaValidator {
    * Validate an entire array of values
    * @param cls The class to validate the objects against
    * @param items The values to validate
-   * @param view The view to limit by
    */
-  static async validateAll<T>(cls: Class<T>, items: T[], view?: string): Promise<T[]> {
-    return await Promise.all<T>((items ?? []).map(item => this.validate(cls, item, view)));
+  static async validateAll<T>(cls: Class<T>, items: T[]): Promise<T[]> {
+    return await Promise.all<T>((items ?? []).map(item => this.validate(cls, item)));
   }
 
   /**
@@ -288,11 +286,10 @@ export class SchemaValidator {
    *
    * @param cls The class to validate against
    * @param item The value to validate
-   * @param view The view to limit by
    */
-  static async validatePartial<T>(cls: Class<T>, item: T, view?: string): Promise<T> {
+  static async validatePartial<T>(cls: Class<T>, item: T): Promise<T> {
     try {
-      await this.validate(cls, item, view);
+      await this.validate(cls, item);
     } catch (error) {
       if (error instanceof ValidationResultError) {
         // Don't check required fields

@@ -90,7 +90,6 @@ export interface ModelCrudSupport extends ModelBasicSupport {
   /**
    * Create or update an item
    * @param item The document to upsert
-   * @param view The schema view to validate against
    */
   upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T>;
 
@@ -102,10 +101,9 @@ export interface ModelCrudSupport extends ModelBasicSupport {
    *
    * @param id The document identifier to update
    * @param item The document to partially update.
-   * @param view The schema view to validate against
    * @throws {NotFoundError} When an item is not found
    */
-  updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T>;
+  updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }): Promise<T>;
 
   /**
    * List all items of a collection, results returned in batches of items.

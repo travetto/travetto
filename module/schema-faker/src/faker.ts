@@ -190,10 +190,9 @@ export class SchemaFaker {
   /**
    * Generate a new instance of a class
    * @param cls The class to get an instance of
-   * @param view The view to define specifically
    */
-  static generate<T>(cls: Class<T>, view?: string): T {
-    const fields = SchemaRegistryIndex.get(cls).getFields(view);
+  static generate<T>(cls: Class<T>): T {
+    const fields = SchemaRegistryIndex.get(cls).getFields();
     const out: Record<string, unknown> = {};
 
     for (const [name, fieldConfig] of Object.entries(fields)) {
@@ -207,6 +206,6 @@ export class SchemaFaker {
       out[name] = this.#value(fieldConfig);
     }
 
-    return BindUtil.bindSchema(cls, out, { view });
+    return BindUtil.bindSchema(cls, out);
   }
 }

@@ -221,7 +221,7 @@ export class ModelCrudUtil {
   /**
    * Ensure everything is correct for a partial update
    */
-  static async prePartialUpdate<T extends ModelType>(cls: Class<T>, item: Partial<T>, view?: string): Promise<Partial<T>> {
+  static async prePartialUpdate<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<Partial<T>> {
     if (!DataUtil.isPlainObject(item)) {
       throw new RuntimeError(`A partial update requires a plain object, not an instance of ${castTo<Function>(item).constructor.name}`, {
         category: 'data'
@@ -235,15 +235,15 @@ export class ModelCrudUtil {
       delete item.id;
     }
     const result = await this.prePersist(cls, castTo(item), 'partial');
-    await SchemaValidator.validatePartial(cls, item, view);
+    await SchemaValidator.validatePartial(cls, item);
     return result;
   }
 
   /**
    * Ensure everything is correct for a partial update
    */
-  static async naivePartialUpdate<T extends ModelType>(cls: Class<T>, get: () => Promise<T>, item: Partial<T>, view?: string): Promise<T> {
-    const prepared = await this.prePartialUpdate(cls, item, view);
+  static async naivePartialUpdate<T extends ModelType>(cls: Class<T>, get: () => Promise<T>, item: Partial<T>): Promise<T> {
+    const prepared = await this.prePartialUpdate(cls, item);
     const full = await get();
     return cls.from(castTo({ ...full, ...prepared }));
   }

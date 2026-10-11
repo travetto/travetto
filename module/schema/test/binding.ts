@@ -41,28 +41,6 @@ class DataBinding {
     assert(person.counts.length === 2);
     assert(person.counts[0] instanceof Count);
     assert(person.counts[0].value === 20.55555);
-
-    const viewPerson = Person.from(
-      {
-        name: 'Test',
-        address: {
-          street1: '1234 Fun',
-          street2: 'Unit 20'
-        },
-        counts: [
-          { area: 'A', value: 20 },
-          { area: 'B', value: 30 }
-        ]
-      },
-      'test'
-    );
-
-    assert(viewPerson.address instanceof Address);
-    assert(viewPerson.address.street1 === '1234 Fun');
-    assert(viewPerson.address.street2 === 'Unit 20');
-    assert(viewPerson.counts.length === 2);
-    assert(viewPerson.counts[0] instanceof Count);
-    assert(viewPerson.counts[0].value === 20);
   }
 
   @Test('Validate Object')

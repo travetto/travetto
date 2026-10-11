@@ -1,19 +1,5 @@
 import type { TimeUnit } from '@travetto/runtime';
-import {
-  CommonRegex,
-  Discriminated,
-  Float,
-  Match,
-  Max,
-  Min,
-  MinLength,
-  Required,
-  Schema,
-  SubType,
-  Url,
-  Validator,
-  View
-} from '@travetto/schema';
+import { CommonRegex, Discriminated, Float, Match, Max, Min, MinLength, Required, Schema, SubType, Url, Validator } from '@travetto/schema';
 
 @Schema()
 @Validator((o: CustomValidated) => {
@@ -113,14 +99,6 @@ export class Address {
 
 @Schema()
 export class Nested {
-  name: string;
-  address: Address;
-}
-
-@Schema()
-@View('profile', { with: ['name', 'address'] })
-export class ViewSpecific {
-  id: string;
   name: string;
   address: Address;
 }

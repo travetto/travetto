@@ -127,10 +127,9 @@ export abstract class BaseSQLModelService<C = unknown>
     modelClass: Class<T>,
     where: WhereClause<T>,
     data: Partial<T>,
-    returning: boolean,
-    view?: string
+    returning: boolean
   ): Promise<{ count: number; records: Record<string, unknown>[] }> {
-    const preparedData = await ModelCrudUtil.prePartialUpdate(modelClass, data, view);
+    const preparedData = await ModelCrudUtil.prePartialUpdate(modelClass, data);
 
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);
@@ -237,10 +236,10 @@ export abstract class BaseSQLModelService<C = unknown>
     return this.executeUpsert(modelClass, item, [this.dialect.escapeIdentifier('id')], modelSource);
   }
 
-  async updatePartial<T extends ModelType>(modelClass: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
+  async updatePartial<T extends ModelType>(modelClass: Class<T>, item: Partial<T> & Pick<T, 'id'>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(modelClass);
 
-    const result = await this.executeUpdatePartial(modelClass, castTo({ id: item.id }), item, true, view);
+    const result = await this.executeUpdatePartial(modelClass, castTo({ id: item.id }), item, true);
 
     if (result.count === 0) {
       throw new NotFoundError(modelClass, item.id);

@@ -373,10 +373,10 @@ export class MongoModelService
     return this.postUpdate(cleaned, id);
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & Pick<T, 'id'>): Promise<T> {
     const store = await this.getStore(cls);
 
-    const final = await ModelCrudUtil.prePartialUpdate(cls, item, view);
+    const final = await ModelCrudUtil.prePartialUpdate(cls, item);
     const simple = MongoUtil.extractSimple(cls, final, undefined, false);
 
     const operation: Partial<T> = castTo(

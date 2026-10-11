@@ -312,9 +312,9 @@ export class MemoryModelService
     return await this.#persist(cls, prepped, 'write');
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & Pick<T, 'id'>): Promise<T> {
     const id = item.id;
-    const clean = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, view);
+    const clean = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
     return await this.#persist(cls, clean, 'write');
   }
 

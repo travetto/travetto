@@ -2,11 +2,10 @@ import { asFull, type Class, castKey, castTo, classConstruct, TypedObject } from
 
 import { DataUtil } from './data.ts';
 import { SchemaRegistryIndex } from './service/registry-index.ts';
-import type { SchemaFieldMap, SchemaInputConfig, SchemaParameterConfig } from './service/types.ts';
+import type { SchemaInputConfig, SchemaParameterConfig } from './service/types.ts';
 import { SchemaTypeUtil } from './type-config.ts';
 
 type BindConfig = {
-  view?: string;
   filterInput?: (input: SchemaInputConfig) => boolean;
   filterValue?: (value: unknown, input: SchemaInputConfig) => boolean;
 };
@@ -146,7 +145,7 @@ export class BindUtil {
   }
 
   /**
-   * Bind data to the schema for a class, with an optional view
+   * Bind data to the schema for a class
    * @param cls The schema class to bind against
    * @param data The provided data to bind
    * @param config The bind configuration
@@ -189,9 +188,6 @@ export class BindUtil {
    * @param config The bind configuration
    */
   static bindSchemaToObject<T>(cls: Class<T>, input: T, data?: object, config: BindConfig = {}): T {
-    const view = config.view; // Does not convey
-    delete config.view;
-
     if (data && isInstance<T>(data)) {
       const adapter = SchemaRegistryIndex.get(cls);
       const schemaConfig = adapter.get();
@@ -202,13 +198,7 @@ export class BindUtil {
           input[key] = data[key];
         }
       } else {
-        let schema: SchemaFieldMap = schemaConfig.fields;
-        if (view) {
-          schema = adapter.getFields(view);
-          if (!schema) {
-            throw new Error(`View not found: ${view}`);
-          }
-        }
+        const schema = schemaConfig.fields;
 
         for (const [schemaFieldName, field] of Object.entries(schema)) {
           let inboundField: string | undefined;
@@ -283,18 +273,16 @@ export class BindUtil {
       return value;
     }
     const complex = SchemaRegistryIndex.has(config.type);
-    const bindConfig: BindConfig | undefined =
-      complex && 'view' in config && typeof config.view === 'string' ? { view: config.view } : undefined;
     if (config.array) {
       const subValue = !Array.isArray(value) ? [value] : value;
       if (complex) {
-        value = subValue.map(item => this.bindSchema(config.type, item, bindConfig));
+        value = subValue.map(item => this.bindSchema(config.type, item));
       } else {
         value = subValue.map(item => DataUtil.coerceType(item, config.type, false));
       }
     } else {
       if (complex) {
-        value = this.bindSchema(config.type, value, bindConfig);
+        value = this.bindSchema(config.type, value);
       } else {
         value = DataUtil.coerceType(value, config.type, false);
       }

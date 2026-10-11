@@ -96,10 +96,6 @@ export interface SchemaFieldMap {
  */
 export interface SchemaClassConfig extends SchemaCoreConfig {
   /**
-   * List of all views
-   */
-  views: Record<string, ViewFieldsConfig<Any>>;
-  /**
    * Field configurations
    */
   fields: SchemaFieldMap;
@@ -141,10 +137,6 @@ export interface SchemaClassConfig extends SchemaCoreConfig {
  * Shared base type for all input-related fields
  */
 export interface SchemaInputConfig extends SchemaCoreConfig, SchemaBasicType {
-  /**
-   * Key name for validation when dealing with complex types
-   */
-  view?: string;
   /**
    * List of aliases
    */
@@ -234,5 +226,3 @@ export interface SchemaFieldConfig extends SchemaInputConfig {
    */
   accessor?: boolean;
 }
-
-export type ViewFieldsConfig<T> = { with: Extract<keyof T, string>[] } | { without: Extract<keyof T, string>[] };

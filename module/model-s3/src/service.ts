@@ -328,10 +328,10 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     return this.store(cls, item);
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & Pick<T, 'id'>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
-    const prepped = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, view);
+    const prepped = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
     return this.store<T>(cls, prepped, false);
   }
 

@@ -444,10 +444,10 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     return prepped;
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & Pick<T, 'id'>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
-    const itemAsT = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, view);
+    const itemAsT = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
     await this.#putItem(cls, id, itemAsT, 'update');
     return itemAsT;
   }

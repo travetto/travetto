@@ -30,7 +30,7 @@ class User {
 }
 
 @Suite()
-class ViewsTest {
+class InterfacesTest {
   @BeforeAll()
   ready() {
     return Registry.init();

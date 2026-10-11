@@ -7,8 +7,7 @@ declare global {
      *
      * NOTE: Only applies to Schema-based classes, will throw a runtime error otherwise
      * @param data The data to bind
-     * @param view The optional view to limit the bind to
      */
-    from<T>(this: Class<T>, data: DeepPartial<T>, view?: string): T;
+    from<T>(this: Class<T>, data: DeepPartial<T>): T;
   }
 }

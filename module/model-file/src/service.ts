@@ -188,10 +188,10 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     return prepped;
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & Pick<T, 'id'>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
-    const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, view);
+    const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
     const file = await this.#resolveName(cls, '.json', full.id);
     await fs.writeFile(file, BinaryUtil.binaryArrayToUint8Array(JSONUtil.toBinaryArray(full)));
     return full;

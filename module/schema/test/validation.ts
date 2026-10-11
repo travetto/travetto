@@ -28,8 +28,7 @@ import {
   RangeSchema,
   Response,
   StringMatches,
-  TemplateLit,
-  ViewSpecific
+  TemplateLit
 } from './models/validation.ts';
 
 function findError(errors: ValidationError[], path: string, message: string) {
@@ -138,23 +137,6 @@ class Validation {
       assert(err.details.errors[0].kind === 'custom');
       assert(err.details.errors[0].message === 'age1 + age2 cannot be even');
     }
-  }
-
-  @Test('Nested view')
-  async validateViewsNested() {
-    const obj = ViewSpecific.from(
-      {
-        name: 'bob',
-        address: {
-          street1: '5',
-          zip: 200,
-          postal: '55555'
-        }
-      },
-      'profile'
-    );
-
-    await SchemaValidator.validate(ViewSpecific, obj, 'profile');
   }
 
   @Test('Regex Array')
