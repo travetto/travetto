@@ -36,7 +36,7 @@ export class CompilerServer {
     this.#client = new CompilerClient(ctx, Log.scoped('server.client'));
     this.#url = this.#client.url;
     this.#handle = { server: new ProcessHandle(ctx, 'server'), compiler: new ProcessHandle(ctx, 'compiler') };
-    this.#suppressLogs = suppressLogs ?? /^(1|true|on|yes)$/i.test(process.env.TRV_QUIET ?? '');
+    this.#suppressLogs = suppressLogs ?? (/^(1|true|on|yes)$/i.test(process.env.TRV_QUIET ?? '') && !process.env.TRV_BUILD);
 
     this.info = {
       state: 'startup',

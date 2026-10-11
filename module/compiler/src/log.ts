@@ -15,12 +15,14 @@ const ESC = '\x1b[';
 
 const fromInput = (config?: LogParamInput) => (!config ? {} : Array.isArray(config) ? { args: config } : { args: [config] });
 
+const isQuiet = (): boolean => /^(1|true|on|yes)$/i.test(process.env.TRV_QUIET ?? '');
+
 export class Logger implements LogConfig, LogShape {
   static #linePartial: boolean | undefined;
 
   /** Rewrite text line, tracking cleanup as necessary */
   static rewriteLine(text: string): Promise<void> | void {
-    if ((!text && !this.#linePartial) || !process.stdout.isTTY) {
+    if ((!text && !this.#linePartial) || !process.stdout.isTTY || isQuiet()) {
       return;
     }
     if (this.#linePartial === undefined) {
@@ -44,7 +46,7 @@ export class Logger implements LogConfig, LogShape {
   workspace: string = process.cwd();
   scope?: string;
   parent?: Logger;
-  disabled = process.env.TRV_QUIET === 'true' || process.env.TRV_BUILD === 'none';
+  disabled = process.env.TRV_BUILD === 'none';
 
   constructor(config: LogConfig = {}) {
     Object.assign(this, config);
@@ -60,6 +62,9 @@ export class Logger implements LogConfig, LogShape {
   /** Log event with filtering by level */
   render(event: CompilerLogEvent): void {
     if (!this.valid(event)) {
+      return;
+    }
+    if (isQuiet() && event.level !== 'error' && !process.env.TRV_BUILD) {
       return;
     }
     const params = [event.message, ...(event.args ?? [])].map(arg =>
@@ -94,7 +99,7 @@ class $RootLogger extends Logger {
   /** Get if we should log progress */
   get logProgress(): boolean {
     if (this.#logProgress === undefined) {
-      this.#logProgress = !!process.env.PS1 && process.stdout.isTTY && !this.disabled;
+      this.#logProgress = process.stdout.isTTY && !isQuiet() && !this.disabled;
     }
     return this.#logProgress;
   }
@@ -111,6 +116,7 @@ class $RootLogger extends Logger {
       case 'error':
       case 'info':
         this.level = value;
+        this.disabled = false;
         break;
       case undefined:
         this.level = defaultLevel;
