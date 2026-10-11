@@ -103,7 +103,7 @@ export interface ModelCrudSupport extends ModelBasicSupport {
    * @param item The document to partially update.
    * @throws {NotFoundError} When an item is not found
    */
-  updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }): Promise<T>;
+  updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T>;
 
   /**
    * List all items of a collection, results returned in batches of items.
