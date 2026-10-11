@@ -568,7 +568,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
           throw new RuntimeError(`Operator "${operator}" is not supported for arrays`, { category: 'data' });
         }
       } else {
-        const isUuid = leafField && (leafField.name === 'id' || leafField.specifiers?.includes('uuid'));
+        const isUuid = leafField?.specifiers?.includes('uuid');
         const isValidUuid = (candidateValue: unknown): boolean =>
           typeof candidateValue === 'string' && /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(candidateValue);
 
