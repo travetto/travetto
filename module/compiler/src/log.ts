@@ -5,6 +5,7 @@ const SCOPE_MAX = 15;
 
 type LogConfig = Partial<CompilerLogEvent> & {
   parent?: Logger;
+  disabled?: boolean;
 };
 
 type LogParamInput = unknown | unknown[];
@@ -42,29 +43,15 @@ export class Logger implements LogConfig, LogShape {
     process.stdout.write(`${ESC}!p${ESC}?25h`);
   }
 
-  #level?: CompilerLogLevel;
+  level: CompilerLogLevel;
+  disabled: boolean;
   workspace: string = process.cwd();
   scope?: string;
   parent?: Logger;
-  #disabled?: boolean;
-
-  get level(): CompilerLogLevel {
-    return this.#level ?? this.parent?.level ?? 'debug';
-  }
-
-  set level(value: CompilerLogLevel | undefined) {
-    this.#level = value;
-  }
-
-  get disabled(): boolean {
-    return this.#disabled ?? this.parent?.disabled ?? false;
-  }
-
-  set disabled(value: boolean | undefined) {
-    this.#disabled = value;
-  }
 
   constructor(config: LogConfig = {}) {
+    this.level = config.level ?? config.parent?.level ?? 'debug';
+    this.disabled = config.disabled ?? config.parent?.disabled ?? false;
     Object.assign(this, config);
   }
 
@@ -92,6 +79,22 @@ export class Logger implements LogConfig, LogShape {
     console[event.level]!(...params);
   }
 
+  /** Produce a scoped logger */
+  scoped(name: string): Logger {
+    return new Logger({ parent: this, scope: name });
+  }
+
+  /** Scope and provide a callback pattern for access to a logger */
+  wrap<T = unknown>(scope: string, operation: (log: Logger) => Promise<T>, basic = true): Promise<T> {
+    const logger = this.scoped(scope);
+    if (basic) {
+      logger.debug('Started');
+      return operation(logger).finally(() => logger.debug('Completed'));
+    } else {
+      return operation(logger);
+    }
+  }
+
   info(message: string, params?: LogParamInput, override?: LogConfig): void {
     this.render({ ...fromInput(params), ...override, level: 'info', message });
   }
@@ -109,24 +112,11 @@ export class Logger implements LogConfig, LogShape {
 class $RootLogger extends Logger {
   #logProgress?: boolean;
 
-  get level(): CompilerLogLevel {
+  constructor() {
     const env = process.env.TRV_BUILD;
-    if (env === 'debug' || env === 'info' || env === 'warn' || env === 'error') {
-      return env;
-    }
-    return super.level;
-  }
-
-  set level(value: CompilerLogLevel | undefined) {
-    super.level = value;
-  }
-
-  get disabled(): boolean {
-    return super.disabled || (isQuiet() && !process.env.TRV_BUILD) || process.env.TRV_BUILD === 'none';
-  }
-
-  set disabled(value: boolean | undefined) {
-    super.disabled = value;
+    const level = env === 'debug' || env === 'info' || env === 'warn' || env === 'error' ? env : 'debug';
+    const disabled = (isQuiet() && !process.env.TRV_BUILD) || process.env.TRV_BUILD === 'none';
+    super({ level, disabled });
   }
 
   /** Get if we should log progress */
@@ -135,23 +125,6 @@ class $RootLogger extends Logger {
       this.#logProgress = !!process.env.PS1 && process.stdout.isTTY && !this.disabled;
     }
     return this.#logProgress;
-  }
-
-  /** Produce a scoped logger */
-  scoped<T extends Logger>(this: T, name: string): T {
-    const cons = this.constructor as new (config: LogConfig) => T;
-    return new cons({ parent: this, scope: name });
-  }
-
-  /** Scope and provide a callback pattern for access to a logger */
-  wrap<T = unknown>(scope: string, operation: (log: Logger) => Promise<T>, basic = true): Promise<T> {
-    const logger = this.scoped(scope);
-    if (basic) {
-      logger.debug('Started');
-      return operation(logger).finally(() => logger.debug('Completed'));
-    } else {
-      return operation(logger);
-    }
   }
 
   /** Write progress event, if active */

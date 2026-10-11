@@ -71,6 +71,7 @@ class CompilerLogTests {
 
       try {
         Log.level = 'info';
+        Log.disabled = true; // explicitly quiet for test
         const logger = Log.scoped('test');
         logger.info('suppressed info message');
         assert.strictEqual(captured.length, 0);
@@ -79,8 +80,8 @@ class CompilerLogTests {
         assert.strictEqual(captured.length, 1);
         assert(captured[0].includes('visible error message'));
 
-        // When TRV_BUILD is explicitly provided, output is allowed despite TRV_QUIET
-        process.env.TRV_BUILD = 'info';
+        // When disabled is false, output is allowed
+        logger.disabled = false;
         logger.info('visible info message');
         assert.strictEqual(captured.length, 2);
         assert(captured[1].includes('visible info message'));
@@ -101,6 +102,7 @@ class CompilerLogTests {
         delete process.env.TRV_BUILD;
       }
       Log.level = 'info';
+      Log.disabled = false;
     }
   }
 
@@ -122,8 +124,17 @@ class CompilerLogTests {
     assert.strictEqual(Log.disabled, true);
     assert.strictEqual(Log.level, 'error');
 
-    // Reset
-    Log.level = undefined;
-    Log.disabled = undefined;
+    // Scoped loggers copy values from parent at creation time
+    const scopedLogger = Log.scoped('scoped-test');
+    assert.strictEqual(scopedLogger.level, 'error');
+    assert.strictEqual(scopedLogger.disabled, true);
+
+    // Updating parent does not retroactively change child
+    Log.level = 'info';
+    Log.disabled = false;
+    assert.strictEqual(scopedLogger.level, 'error');
+    assert.strictEqual(scopedLogger.disabled, true);
+    assert.strictEqual(Log.level, 'info');
+    assert.strictEqual(Log.disabled, false);
   }
 }
