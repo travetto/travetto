@@ -42,11 +42,19 @@ export class Logger implements LogConfig, LogShape {
     process.stdout.write(`${ESC}!p${ESC}?25h`);
   }
 
-  level?: CompilerLogLevel;
+  #level?: CompilerLogLevel;
   workspace: string = process.cwd();
   scope?: string;
   parent?: Logger;
   #disabled?: boolean;
+
+  get level(): CompilerLogLevel {
+    return this.#level ?? this.parent?.level ?? 'debug';
+  }
+
+  set level(value: CompilerLogLevel | undefined) {
+    this.#level = value;
+  }
 
   get disabled(): boolean {
     return this.#disabled ?? this.parent?.disabled ?? false;
@@ -64,7 +72,7 @@ export class Logger implements LogConfig, LogShape {
     if (this.disabled && event.level !== 'error') {
       return false;
     }
-    return LEVEL_TO_PRIORITY[this.level ?? this.parent?.level ?? 'debug'] <= LEVEL_TO_PRIORITY[event.level];
+    return LEVEL_TO_PRIORITY[this.level] <= LEVEL_TO_PRIORITY[event.level];
   }
 
   /** Log event with filtering by level */
@@ -101,11 +109,23 @@ export class Logger implements LogConfig, LogShape {
 class $RootLogger extends Logger {
   #logProgress?: boolean;
 
-  override get disabled(): boolean {
+  get level(): CompilerLogLevel {
+    const env = process.env.TRV_BUILD;
+    if (env === 'debug' || env === 'info' || env === 'warn' || env === 'error') {
+      return env;
+    }
+    return super.level;
+  }
+
+  set level(value: CompilerLogLevel | undefined) {
+    super.level = value;
+  }
+
+  get disabled(): boolean {
     return super.disabled || (isQuiet() && !process.env.TRV_BUILD) || process.env.TRV_BUILD === 'none';
   }
 
-  override set disabled(value: boolean | undefined) {
+  set disabled(value: boolean | undefined) {
     super.disabled = value;
   }
 
@@ -115,27 +135,6 @@ class $RootLogger extends Logger {
       this.#logProgress = !!process.env.PS1 && process.stdout.isTTY && !this.disabled;
     }
     return this.#logProgress;
-  }
-
-  /** Set level for operation */
-  initLevel(defaultLevel: CompilerLogLevel): void {
-    const value = process.env.TRV_BUILD ?? undefined;
-    switch (value) {
-      case 'none':
-        this.disabled = true;
-        break;
-      case 'debug':
-      case 'warn':
-      case 'error':
-      case 'info':
-        this.level = value;
-        this.disabled = false;
-        break;
-      case undefined:
-        this.level = defaultLevel;
-        this.disabled = isQuiet();
-        break;
-    }
   }
 
   /** Produce a scoped logger */

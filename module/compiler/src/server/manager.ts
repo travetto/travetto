@@ -102,7 +102,7 @@ export class CompilerManager {
     client: CompilerClient,
     config: { watch?: boolean; logLevel?: CompilerLogLevel; forceRestart?: boolean }
   ): Promise<void> {
-    Log.initLevel(config.logLevel ?? 'info');
+    Log.level = config.logLevel ?? 'info';
     const watch = !!config.watch;
 
     if (config.forceRestart && (await client.stop())) {

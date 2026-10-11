@@ -70,7 +70,7 @@ class CompilerLogTests {
       };
 
       try {
-        Log.initLevel('info');
+        Log.level = 'info';
         const logger = Log.scoped('test');
         logger.info('suppressed info message');
         assert.strictEqual(captured.length, 0);
@@ -81,7 +81,6 @@ class CompilerLogTests {
 
         // When TRV_BUILD is explicitly provided, output is allowed despite TRV_QUIET
         process.env.TRV_BUILD = 'info';
-        Log.initLevel('info');
         logger.info('visible info message');
         assert.strictEqual(captured.length, 2);
         assert(captured[1].includes('visible info message'));
@@ -101,7 +100,30 @@ class CompilerLogTests {
       } else {
         delete process.env.TRV_BUILD;
       }
-      Log.initLevel('info');
+      Log.level = 'info';
     }
+  }
+
+  @Test()
+  async verifyLevelAndDisabledDecoupled() {
+    Log.level = 'debug';
+    assert.strictEqual(Log.level, 'debug');
+
+    Log.disabled = false;
+    assert.strictEqual(Log.disabled, false);
+
+    // Changing level should not affect disabled
+    Log.level = 'error';
+    assert.strictEqual(Log.level, 'error');
+    assert.strictEqual(Log.disabled, false);
+
+    // Changing disabled should not affect level
+    Log.disabled = true;
+    assert.strictEqual(Log.disabled, true);
+    assert.strictEqual(Log.level, 'error');
+
+    // Reset
+    Log.level = undefined;
+    Log.disabled = undefined;
   }
 }
