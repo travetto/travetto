@@ -101,8 +101,9 @@ class $RootLogger extends Logger {
   }
 
   /** Produce a scoped logger */
-  scoped(name: string): Logger {
-    return new Logger({ parent: this, scope: name });
+  scoped<T extends Logger>(this: T, name: string): T {
+    const cons = this.constructor as new (config: LogConfig) => T;
+    return new cons({ parent: this, scope: name });
   }
 
   /** Scope and provide a callback pattern for access to a logger */
