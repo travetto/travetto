@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { IpcLogger, Logger } from '../src/log.ts';
+import { IpcLogger, Log, Logger } from '../src/log.ts';
 
 @Suite()
 class CompilerLogTests {
@@ -70,7 +70,8 @@ class CompilerLogTests {
       };
 
       try {
-        const logger = new Logger({ level: 'info' });
+        Log.initLevel('info');
+        const logger = Log.scoped('test');
         logger.info('suppressed info message');
         assert.strictEqual(captured.length, 0);
 
@@ -79,11 +80,11 @@ class CompilerLogTests {
         assert(captured[0].includes('visible error message'));
 
         // When TRV_BUILD is explicitly provided, output is allowed despite TRV_QUIET
-        process.env.TRV_BUILD = 'debug';
-        logger.level = 'debug';
-        logger.debug('visible debug message');
+        process.env.TRV_BUILD = 'info';
+        Log.initLevel('info');
+        logger.info('visible info message');
         assert.strictEqual(captured.length, 2);
-        assert(captured[1].includes('visible debug message'));
+        assert(captured[1].includes('visible info message'));
       } finally {
         console.info = originalConsoleInfo;
         console.debug = originalConsoleDebug;
@@ -100,6 +101,7 @@ class CompilerLogTests {
       } else {
         delete process.env.TRV_BUILD;
       }
+      Log.initLevel('info');
     }
   }
 }

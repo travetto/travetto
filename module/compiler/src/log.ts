@@ -46,7 +46,15 @@ export class Logger implements LogConfig, LogShape {
   workspace: string = process.cwd();
   scope?: string;
   parent?: Logger;
-  disabled = process.env.TRV_BUILD === 'none';
+  #disabled?: boolean;
+
+  get disabled(): boolean {
+    return this.#disabled ?? this.parent?.disabled ?? ((isQuiet() && !process.env.TRV_BUILD) || process.env.TRV_BUILD === 'none');
+  }
+
+  set disabled(value: boolean | undefined) {
+    this.#disabled = value;
+  }
 
   constructor(config: LogConfig = {}) {
     Object.assign(this, config);
@@ -62,9 +70,6 @@ export class Logger implements LogConfig, LogShape {
   /** Log event with filtering by level */
   render(event: CompilerLogEvent): void {
     if (!this.valid(event)) {
-      return;
-    }
-    if (isQuiet() && event.level !== 'error' && !process.env.TRV_BUILD) {
       return;
     }
     const params = [event.message, ...(event.args ?? [])].map(arg =>
@@ -120,14 +125,14 @@ class $RootLogger extends Logger {
         break;
       case undefined:
         this.level = defaultLevel;
+        this.disabled = isQuiet();
         break;
     }
   }
 
   /** Produce a scoped logger */
-  scoped<T extends Logger>(this: T, name: string): T {
-    const cons = this.constructor as new (config: LogConfig) => T;
-    return new cons({ parent: this, scope: name });
+  scoped(name: string): Logger {
+    return new Logger({ parent: this, scope: name });
   }
 
   /** Scope and provide a callback pattern for access to a logger */
@@ -168,14 +173,18 @@ class $RootLogger extends Logger {
 export const Log = new $RootLogger();
 
 export class IpcLogger extends Logger {
+  constructor(config: LogConfig = {}) {
+    super(config);
+    this.disabled = process.env.TRV_BUILD === 'none';
+  }
+
   render(event: CompilerLogEvent): void {
     if (!this.valid(event)) {
       return;
     }
     if (process.connected && process.send) {
       process.send({ type: 'log', payload: { scope: this.scope, ...event } });
-    }
-    if (!process.connected) {
+    } else {
       super.render(event);
     }
   }
