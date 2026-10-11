@@ -124,14 +124,16 @@ class CompilerLogTests {
     assert.strictEqual(Log.disabled, true);
     assert.strictEqual(Log.level, 'error');
 
-    // Scoped loggers copy values from parent at creation time
+    // Scoped loggers copy values from parent at creation time and preserve scope
     const scopedLogger = Log.scoped('scoped-test');
+    assert.strictEqual(scopedLogger.scope, 'scoped-test');
     assert.strictEqual(scopedLogger.level, 'error');
     assert.strictEqual(scopedLogger.disabled, true);
 
     // Updating parent does not retroactively change child
     Log.level = 'info';
     Log.disabled = false;
+    assert.strictEqual(scopedLogger.scope, 'scoped-test');
     assert.strictEqual(scopedLogger.level, 'error');
     assert.strictEqual(scopedLogger.disabled, true);
     assert.strictEqual(Log.level, 'info');

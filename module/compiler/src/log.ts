@@ -56,7 +56,10 @@ export class Logger implements LogConfig, LogShape {
   }
 
   valid(event: CompilerLogEvent): boolean {
-    return !this.disabled && LEVEL_TO_PRIORITY[this.level] <= LEVEL_TO_PRIORITY[event.level];
+    if (this.disabled && event.level !== 'error') {
+      return false;
+    }
+    return LEVEL_TO_PRIORITY[this.level] <= LEVEL_TO_PRIORITY[event.level];
   }
 
   /** Log event with filtering by level */
@@ -98,11 +101,17 @@ class $RootLogger extends Logger {
     return (this.#logProgress ??= process.stdout.isTTY && !this.disabled);
   }
 
-  constructor() {
+  constructor(config: LogConfig = {}) {
     const build = process.env.TRV_BUILD;
-    const level = build === 'debug' || build === 'info' || build === 'warn' || build === 'error' ? build : 'debug';
-    const disabled = (/^(1|true|on|yes)$/i.test(process.env.TRV_QUIET ?? '') && !build) || build === 'none';
-    super({ level, disabled });
+    const level =
+      config.level ??
+      config.parent?.level ??
+      (build === 'debug' || build === 'info' || build === 'warn' || build === 'error' ? build : undefined);
+    const disabled =
+      config.disabled ??
+      config.parent?.disabled ??
+      ((/^(1|true|on|yes)$/i.test(process.env.TRV_QUIET ?? '') && !build) || build === 'none');
+    super({ ...config, ...(level !== undefined ? { level } : {}), ...(disabled !== undefined ? { disabled } : {}) });
   }
 
   /** Produce a scoped logger */
