@@ -28,7 +28,8 @@ export const text = (
       The primary design maps each model class to a single table where simple fields (primitives, dates, enums) are mapped to individual
       columns, and complex fields (objects and arrays) are serialized and stored as native JSON document columns. Every table requires a
       primary key column ({d.field('id')}), and indices are compiled directly to standard database columns or SQL functional expressions
-      over JSON paths.
+      over JSON paths. Columns bearing the {d.input('uuid')} specifier (including the default {d.field('id')}) are mapped to compact,
+      index-optimized types (e.g. 16-byte native {d.input('UUID')} in PostgreSQL, or {d.input('CHAR(32)')} ASCII binary collation in MySQL).
       <br />
       In development mode, storage modifications are applied dynamically in real time to match model definitions, minimizing manual database
       migrations.

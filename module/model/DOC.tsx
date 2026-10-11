@@ -97,10 +97,11 @@ export const text = (
       Models are declared via the {Model} decorator, which allows the system to know that this is a class that is compatible with the
       module. The only requirement for a model is the {ModelTypeContract}
       <c.Code src={ModelTypeContract} />
-      The {d.field('id')} is the only required field for a model, as this is a hard requirement on naming and type. This may make using
-      existing data models impossible if types other than strings are required. Additionally, the {d.field('type')} field, is intended to
-      record the base model type, but can be remapped. This is important to support polymorphism, not only in {d.module('Model')}, but also
-      in {d.module('Schema')}.
+      The {d.field('id')} is the only required field for a model, as this is a hard requirement on naming and type. By default, the {Model}{' '}
+      decorator registers {d.field('id')} with the {d.input('uuid')} specifier and validation pattern (32-character hexadecimal), allowing
+      underlying storage providers to optimize column and index representations. This may make using existing data models impossible if
+      types other than strings are required. Additionally, the {d.field('type')} field, is intended to record the base model type, but can
+      be remapped. This is important to support polymorphism, not only in {d.module('Model')}, but also in {d.module('Schema')}.
     </c.Section>
     <c.Section title="Implementations">
       <ModelImplementations />

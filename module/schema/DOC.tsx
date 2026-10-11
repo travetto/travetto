@@ -71,7 +71,10 @@ export const text = (
           <li>{Email} ensures string field matches basic email regex</li>
           <li>{Telephone} ensures string field matches basic telephone regex</li>
           <li>{Url} ensures string field matches basic url regex</li>
-          <li>{Uuid} marks a field as a UUID, enabling optimized binary/native storage in supported backends</li>
+          <li>
+            {Uuid} marks a field as a 32-character hexadecimal UUID, enforcing format validation and enabling optimized binary/native
+            storage in supported backends
+          </li>
           <li>{Ignore} exclude from auto schema registration</li>
           <li>{Integer} ensures number passed in is only a whole number</li>
           <li>{Float} ensures number passed in allows fractional values</li>
