@@ -17,7 +17,8 @@ import {
   type ModelStorageSupport,
   type ModelType,
   NotFoundError,
-  type OptionalId
+  type OptionalId,
+  type PartialWithId
 } from '@travetto/model';
 import {
   type BinaryMetadata,
@@ -188,7 +189,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     return prepped;
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & Pick<T, 'id'>): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
     const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);

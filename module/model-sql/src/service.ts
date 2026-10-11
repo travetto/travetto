@@ -17,6 +17,7 @@ import {
   type ModelType,
   NotFoundError,
   type OptionalId,
+  type PartialWithId,
   UniqueError
 } from '@travetto/model';
 import {
@@ -146,14 +147,9 @@ export abstract class BaseSQLModelService<C = unknown>
     return result;
   }
 
-  async executeUpdate<T extends ModelType>(
-    modelClass: Class<T>,
-    where: WhereClause<T>,
-    item: T,
-    modelSource?: ModelCrudProvider
-  ): Promise<T | undefined> {
+  async executeUpdate<T extends ModelType>(modelClass: Class<T>, where: WhereClause<T>, item: T): Promise<T | undefined> {
     ModelCrudUtil.ensureNotSubType(modelClass);
-    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
+    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
     const rawItem: Record<string, unknown> = castTo(preppedItem);
 
     const tableContext = this.connection.getContext(modelClass);
@@ -224,19 +220,19 @@ export abstract class BaseSQLModelService<C = unknown>
     return preppedItem;
   }
 
-  async update<T extends ModelType>(modelClass: Class<T>, item: T, modelSource?: ModelCrudProvider): Promise<T> {
-    const preppedItem = await this.executeUpdate(modelClass, castTo({ id: item.id }), item, modelSource);
+  async update<T extends ModelType>(modelClass: Class<T>, item: T): Promise<T> {
+    const preppedItem = await this.executeUpdate(modelClass, castTo({ id: item.id }), item);
     if (!preppedItem) {
       throw new NotFoundError(modelClass, item.id);
     }
     return preppedItem;
   }
 
-  async upsert<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>, modelSource?: ModelCrudProvider): Promise<T> {
-    return this.executeUpsert(modelClass, item, [this.dialect.escapeIdentifier('id')], modelSource);
+  async upsert<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>): Promise<T> {
+    return this.executeUpsert(modelClass, item, [this.dialect.escapeIdentifier('id')]);
   }
 
-  async updatePartial<T extends ModelType>(modelClass: Class<T>, item: Partial<T> & Pick<T, 'id'>): Promise<T> {
+  async updatePartial<T extends ModelType>(modelClass: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(modelClass);
 
     const result = await this.executeUpdatePartial(modelClass, castTo({ id: item.id }), item, true);
@@ -612,7 +608,7 @@ export abstract class BaseSQLModelService<C = unknown>
     const computed = ModelIndexedComputedIndex.get(indexConfig, castTo(body)).validate({ sort: true });
     const where: WhereClause<T> = castTo(computed.project({ sort: true, includeId: true }));
 
-    const preppedItem = await this.executeUpdate(modelClass, where, body, this);
+    const preppedItem = await this.executeUpdate(modelClass, where, body);
     if (!preppedItem) {
       throw new NotFoundError(`${modelClass.name} Index=${indexConfig}`, computed.getKey());
     }

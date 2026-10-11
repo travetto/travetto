@@ -22,7 +22,8 @@ import {
   ModelStorageUtil,
   type ModelType,
   NotFoundError,
-  type OptionalId
+  type OptionalId,
+  type PartialWithId
 } from '@travetto/model';
 import {
   type FullKeyedIndexBody,
@@ -444,7 +445,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     return prepped;
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & Pick<T, 'id'>): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
     const itemAsT = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);

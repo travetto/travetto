@@ -17,7 +17,8 @@ import {
   ModelStorageUtil,
   type ModelType,
   NotFoundError,
-  type OptionalId
+  type OptionalId,
+  type PartialWithId
 } from '@travetto/model';
 import {
   type FullKeyedIndexBody,
@@ -357,7 +358,7 @@ export class ElasticsearchModelService
     return this.postUpdate(item, id);
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, data: Partial<T> & Pick<T, 'id'>): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, data: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
     const id = data.id;

@@ -32,6 +32,7 @@ import {
   type ModelType,
   NotFoundError,
   type OptionalId,
+  type PartialWithId,
   UniqueError
 } from '@travetto/model';
 import {
@@ -373,7 +374,7 @@ export class MongoModelService
     return this.postUpdate(cleaned, id);
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & Pick<T, 'id'>): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     const store = await this.getStore(cls);
 
     const final = await ModelCrudUtil.prePartialUpdate(cls, item);
@@ -478,7 +479,7 @@ export class MongoModelService
       return out;
     }
 
-    const store = await this.getStore<Partial<T> & ModelType>(cls);
+    const store = await this.getStore<PartialWithId<T>>(cls);
     const bulk = store.initializeUnorderedBulkOp({ writeConcern: { w: 1 } });
     const { upsertedIds, insertedIds } = await ModelBulkUtil.preStore(cls, operations, this);
 

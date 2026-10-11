@@ -15,6 +15,7 @@ import {
   type ModelType,
   NotFoundError,
   type OptionalId,
+  type PartialWithId,
   UniqueError
 } from '@travetto/model';
 import {
@@ -312,7 +313,7 @@ export class MemoryModelService
     return await this.#persist(cls, prepped, 'write');
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & Pick<T, 'id'>): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     const id = item.id;
     const clean = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
     return await this.#persist(cls, clean, 'write');

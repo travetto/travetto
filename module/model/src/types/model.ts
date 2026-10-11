@@ -17,6 +17,7 @@ export interface ModelType {
 }
 
 export type OptionalId<T extends ModelType> = Omit<T, 'id'> & { id?: string };
+export type PartialWithId<T extends ModelType> = Partial<T> & Pick<T, 'id'>;
 
 /**
  * Options for listing items
