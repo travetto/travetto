@@ -11,6 +11,7 @@ import {
   Schema,
   SubType,
   Url,
+  Uuid,
   Validator,
   View
 } from '@travetto/schema';
@@ -182,4 +183,10 @@ export class NumberArrayMinMaxSchema {
 export class BigIntArrayMinMaxSchema {
   @Min(0n)
   values: bigint[];
+}
+
+@Schema()
+export class UuidSchema {
+  @Uuid()
+  value: string;
 }
