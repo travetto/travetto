@@ -16,7 +16,7 @@ yarn add @travetto/model-postgres
 This module provides a [Postgres](https://postgresql.org)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module. This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [SQL](https://en.wikipedia.org/wiki/SQL) databases. In development mode, the [PostgresModelService](https://github.com/travetto/travetto/tree/main/module/model-postgres/src/service.ts#L12) will also modify the database schema in real time to minimize impact to development. 
 
 The schema generated will not generally map to existing tables as it is attempting to produce a document store like experience on top of a [SQL](https://en.wikipedia.org/wiki/SQL) database. Every table generated maps to a model:
-   *  Simple scalar fields map directly to individual native PostgreSQL columns (e.g., `VARCHAR`, `INTEGER`, `TIMESTAMP`).
+   *  Simple scalar fields map directly to individual native PostgreSQL columns (e.g., `VARCHAR`, `INTEGER`, `TIMESTAMP`, `UUID`).
    *  Simple scalar arrays (such as `string[]`, `number[]`, or `boolean[]`) map directly to PostgreSQL native array columns (e.g., `VARCHAR[]`, `INTEGER[]`).
    *  Complex fields and arrays of sub-schema objects map to native `JSONB` columns.
 

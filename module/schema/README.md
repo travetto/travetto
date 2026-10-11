@@ -72,6 +72,7 @@ This schema provides a powerful base for data binding and validation at runtime.
    *  [@Email](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L162) ensures string field matches basic email regex
    *  [@Telephone](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L172) ensures string field matches basic telephone regex
    *  [@Url](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L182) ensures string field matches basic url regex
+   *  [@Uuid](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L248) marks a field as a UUID, enabling optimized binary/native storage in supported backends
    *  [@Ignore](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/common.ts#L41) exclude from auto schema registration
    *  [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L202) ensures number passed in is only a whole number
    *  [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L211) ensures number passed in allows fractional values
@@ -82,7 +83,7 @@ This schema provides a powerful base for data binding and validation at runtime.
    *  [@Writeonly](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L35) defines a that field should not be exported in serialization, but that it can be bound to
    *  [@Secret](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L54) marks a field as being sensitive. This is used by certain logging activities to ensure sensitive information is not logged out.
    *  [@Specifier](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L239) attributes additional specifiers to a field, allowing for more specification beyond just the field's type.
-   *  [@DiscriminatorField](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L248) allows for promoting a given field as the owner of the sub type discriminator.
+   *  [@DiscriminatorField](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L257) allows for promoting a given field as the owner of the sub type discriminator.
 
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated. 
 
