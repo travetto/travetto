@@ -568,15 +568,9 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
           throw new RuntimeError(`Operator "${operator}" is not supported for arrays`, { category: 'data' });
         }
       } else {
-        const isUuid = leafField?.specifiers?.includes('uuid');
-        const isValidUuid = (candidateValue: unknown): boolean =>
-          typeof candidateValue === 'string' && /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(candidateValue);
-
         if (operator === '$eq') {
           if (value === null || value === undefined) {
             clause = { sql: `${sqlPath} IS NULL` };
-          } else if (isUuid && !isValidUuid(value)) {
-            clause = { sql: '1=0' };
           } else {
             clause = {
               sql: `${sqlPath} = ${identifier}`,
@@ -585,8 +579,6 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
           }
         } else if (operator === '$ne') {
           if (value === null || value === undefined) {
-            clause = { sql: `${sqlPath} IS NOT NULL` };
-          } else if (isUuid && !isValidUuid(value)) {
             clause = { sql: `${sqlPath} IS NOT NULL` };
           } else {
             clause = {
@@ -604,37 +596,27 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
           if (!Array.isArray(value) || value.length === 0) {
             clause = { sql: '1=0' };
           } else {
-            const filteredValue = isUuid ? value.filter(isValidUuid) : value;
-            if (filteredValue.length === 0) {
-              clause = { sql: '1=0' };
-            } else {
-              const choices = filteredValue.map((valueItem, itemIndex) => {
-                const innerIdentifier = `%%${nestedIdentificationPath}_${itemIndex}%%`;
-                return [innerIdentifier, valueItem];
-              });
-              clause = {
-                sql: `${sqlPath} IN (${choices.map(choice => choice[0]).join(', ')})`,
-                parameters: Object.fromEntries(choices)
-              };
-            }
+            const choices = value.map((valueItem, itemIndex) => {
+              const innerIdentifier = `%%${nestedIdentificationPath}_${itemIndex}%%`;
+              return [innerIdentifier, valueItem];
+            });
+            clause = {
+              sql: `${sqlPath} IN (${choices.map(choice => choice[0]).join(', ')})`,
+              parameters: Object.fromEntries(choices)
+            };
           }
         } else if (operator === '$nin') {
           if (!Array.isArray(value) || value.length === 0) {
             clause = {};
           } else {
-            const filteredValue = isUuid ? value.filter(isValidUuid) : value;
-            if (filteredValue.length === 0) {
-              clause = {};
-            } else {
-              const choices = filteredValue.map((valueItem, itemIndex) => {
-                const innerIdentifier = `%%${nestedIdentificationPath}_${itemIndex}%%`;
-                return [innerIdentifier, valueItem];
-              });
-              clause = {
-                sql: `${sqlPath} NOT IN (${choices.map(choice => choice[0]).join(', ')})`,
-                parameters: Object.fromEntries(choices)
-              };
-            }
+            const choices = value.map((valueItem, itemIndex) => {
+              const innerIdentifier = `%%${nestedIdentificationPath}_${itemIndex}%%`;
+              return [innerIdentifier, valueItem];
+            });
+            clause = {
+              sql: `${sqlPath} NOT IN (${choices.map(choice => choice[0]).join(', ')})`,
+              parameters: Object.fromEntries(choices)
+            };
           }
         } else if (operator === '$exists') {
           clause = { sql: value ? `${sqlPath} IS NOT NULL` : `${sqlPath} IS NULL` };
