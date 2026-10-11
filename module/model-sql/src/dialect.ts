@@ -198,7 +198,7 @@ export abstract class AbstractANSI99Dialect {
   }
 
   getCreateTableSQL(context: TableContext): string {
-    const idField = context.simpleFields.get('id') ?? castTo<SchemaFieldConfig>({ name: 'id', type: String, specifiers: ['uuid'] });
+    const idField = context.simpleFields.get('id') ?? castTo<SchemaFieldConfig>({ name: 'id', type: String });
     const idType = this.getColumnType(idField);
     const columnDefinitions: string[] = [`${this.escapeIdentifier('id')} ${idType} PRIMARY KEY`];
 
