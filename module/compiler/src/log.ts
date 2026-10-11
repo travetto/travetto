@@ -76,22 +76,6 @@ export class Logger implements LogConfig, LogShape {
     console[event.level]!(...params);
   }
 
-  /** Produce a scoped logger */
-  scoped(name: string): Logger {
-    return new Logger({ parent: this, scope: name });
-  }
-
-  /** Scope and provide a callback pattern for access to a logger */
-  wrap<T = unknown>(scope: string, operation: (log: Logger) => Promise<T>, basic = true): Promise<T> {
-    const logger = this.scoped(scope);
-    if (basic) {
-      logger.debug('Started');
-      return operation(logger).finally(() => logger.debug('Completed'));
-    } else {
-      return operation(logger);
-    }
-  }
-
   info(message: string, params?: LogParamInput, override?: LogConfig): void {
     this.render({ ...fromInput(params), ...override, level: 'info', message });
   }
@@ -114,6 +98,22 @@ class $RootLogger extends Logger {
     const level = env === 'debug' || env === 'info' || env === 'warn' || env === 'error' ? env : 'debug';
     const disabled = (/^(1|true|on|yes)$/i.test(process.env.TRV_QUIET ?? '') && !process.env.TRV_BUILD) || process.env.TRV_BUILD === 'none';
     super({ level, disabled });
+  }
+
+  /** Produce a scoped logger */
+  scoped(name: string): Logger {
+    return new Logger({ parent: this, scope: name });
+  }
+
+  /** Scope and provide a callback pattern for access to a logger */
+  wrap<T = unknown>(scope: string, operation: (log: Logger) => Promise<T>, basic = true): Promise<T> {
+    const logger = this.scoped(scope);
+    if (basic) {
+      logger.debug('Started');
+      return operation(logger).finally(() => logger.debug('Completed'));
+    } else {
+      return operation(logger);
+    }
   }
 
   /** Get if we should log progress */
