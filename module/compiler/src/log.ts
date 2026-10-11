@@ -99,9 +99,9 @@ class $RootLogger extends Logger {
   }
 
   constructor() {
-    const env = process.env.TRV_BUILD;
-    const level = env === 'debug' || env === 'info' || env === 'warn' || env === 'error' ? env : 'debug';
-    const disabled = (/^(1|true|on|yes)$/i.test(process.env.TRV_QUIET ?? '') && !process.env.TRV_BUILD) || process.env.TRV_BUILD === 'none';
+    const build = process.env.TRV_BUILD;
+    const level = build === 'debug' || build === 'info' || build === 'warn' || build === 'error' ? build : 'debug';
+    const disabled = (/^(1|true|on|yes)$/i.test(process.env.TRV_QUIET ?? '') && !build) || build === 'none';
     super({ level, disabled });
   }
 
@@ -109,17 +109,6 @@ class $RootLogger extends Logger {
   scoped<T extends Logger>(this: T, name: string): T {
     const cons = this.constructor as new (config: LogConfig) => T;
     return new cons({ parent: this, scope: name });
-  }
-
-  /** Scope and provide a callback pattern for access to a logger */
-  wrap<T = unknown>(scope: string, operation: (log: Logger) => Promise<T>, basic = true): Promise<T> {
-    const logger = this.scoped(scope);
-    if (basic) {
-      logger.debug('Started');
-      return operation(logger).finally(() => logger.debug('Completed'));
-    } else {
-      return operation(logger);
-    }
   }
 
   /** Write progress event, if active */
