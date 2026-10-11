@@ -16,8 +16,6 @@ const ESC = '\x1b[';
 
 const fromInput = (config?: LogParamInput) => (!config ? {} : Array.isArray(config) ? { args: config } : { args: [config] });
 
-const isQuiet = (): boolean => /^(1|true|on|yes)$/i.test(process.env.TRV_QUIET ?? '');
-
 export class Logger implements LogConfig, LogShape {
   static #linePartial: boolean | undefined;
 
@@ -50,16 +48,15 @@ export class Logger implements LogConfig, LogShape {
   parent?: Logger;
 
   constructor(config: LogConfig = {}) {
-    this.level = config.level ?? config.parent?.level ?? 'debug';
-    this.disabled = config.disabled ?? config.parent?.disabled ?? false;
-    Object.assign(this, config);
+    Object.assign(this, {
+      level: config.parent?.level ?? 'debug',
+      disabled: config.parent?.disabled ?? false,
+      ...config
+    });
   }
 
   valid(event: CompilerLogEvent): boolean {
-    if (this.disabled && event.level !== 'error') {
-      return false;
-    }
-    return LEVEL_TO_PRIORITY[this.level] <= LEVEL_TO_PRIORITY[event.level];
+    return !this.disabled && LEVEL_TO_PRIORITY[this.level] <= LEVEL_TO_PRIORITY[event.level];
   }
 
   /** Log event with filtering by level */
@@ -115,16 +112,13 @@ class $RootLogger extends Logger {
   constructor() {
     const env = process.env.TRV_BUILD;
     const level = env === 'debug' || env === 'info' || env === 'warn' || env === 'error' ? env : 'debug';
-    const disabled = (isQuiet() && !process.env.TRV_BUILD) || process.env.TRV_BUILD === 'none';
+    const disabled = (/^(1|true|on|yes)$/i.test(process.env.TRV_QUIET ?? '') && !process.env.TRV_BUILD) || process.env.TRV_BUILD === 'none';
     super({ level, disabled });
   }
 
   /** Get if we should log progress */
   get logProgress(): boolean {
-    if (this.#logProgress === undefined) {
-      this.#logProgress = !!process.env.PS1 && process.stdout.isTTY && !this.disabled;
-    }
-    return this.#logProgress;
+    return (this.#logProgress ??= process.stdout.isTTY && !this.disabled);
   }
 
   /** Write progress event, if active */
