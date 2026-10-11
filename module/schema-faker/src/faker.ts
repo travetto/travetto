@@ -192,11 +192,13 @@ export class SchemaFaker {
    * @param cls The class to get an instance of
    */
   static generate<T>(cls: Class<T>): T {
-    const fields = SchemaRegistryIndex.get(cls).getFields();
+    const schema = SchemaRegistryIndex.get(cls);
+    const fields = schema.getFields();
+    const subTypeField = schema.getDiscriminatedConfig()?.discriminatedField;
     const out: Record<string, unknown> = {};
 
     for (const [name, fieldConfig] of Object.entries(fields)) {
-      if (name === 'type' || name === 'id') {
+      if (name === subTypeField || name === 'id') {
         // Do not set primary fields
         continue;
       }
