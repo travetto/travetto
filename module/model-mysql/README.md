@@ -13,7 +13,7 @@ npm install @travetto/model-mysql
 yarn add @travetto/model-mysql
 ```
 
-This module provides a [MySQL](https://www.mysql.com/)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module. This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [SQL](https://en.wikipedia.org/wiki/SQL) databases. In development mode, the [MysqlModelService](https://github.com/travetto/travetto/tree/main/module/model-mysql/src/service.ts#L12) will also modify the database schema in real time to minimize impact to development. 
+This module provides a [MySQL](https://www.mysql.com/)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module. This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [SQL](https://en.wikipedia.org/wiki/SQL) databases. In development mode, the [MysqlModelService](https://github.com/travetto/travetto/tree/main/module/model-mysql/src/service.ts#L14) will also modify the database schema in real time to minimize impact to development. 
 
 The schema generated will not generally map to existing tables as it is attempting to produce a document store like experience on top of a [SQL](https://en.wikipedia.org/wiki/SQL) database. Every table generated maps to a model, with simple fields mapped as individual columns and complex fields/arrays mapped as native `JSON` columns. 
 
@@ -82,7 +82,7 @@ export class MysqlModelConfig {
   /**
    * Allow storage modifications (like table auto-creation and schema updates) at runtime
    */
-  modifyStorage = !Runtime.production;
+  modifyStorage?: boolean;
 
   /**
    * Extended client options

@@ -41,7 +41,7 @@ where the [DynamoDBModelConfig](https://github.com/travetto/travetto/tree/main/m
 ```typescript
 @Config('model.dynamodb')
 export class DynamoDBModelConfig {
-  client: dynamodb.DynamoDBClientConfig = {
+  client: DynamoDBClientConfig = {
     endpoint: undefined
   };
   modifyStorage?: boolean;

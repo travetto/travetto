@@ -43,7 +43,7 @@ where the [RedisModelConfig](https://github.com/travetto/travetto/tree/main/modu
 ```typescript
 @Config('model.redis')
 export class RedisModelConfig {
-  client: redis.RedisClientOptions = {};
+  client: RedisClientOptions = {};
   namespace?: string;
   modifyStorage?: boolean;
 }

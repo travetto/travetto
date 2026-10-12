@@ -16,7 +16,7 @@ yarn add @travetto/web-http
 This module provides basic for running [http](https://nodejs.org/api/http.html). [https](https://nodejs.org/api/https.html) and [http2](https://nodejs.org/api/http2.html) servers, along with support for tls key generation during development.
 
 ## CLI - web:http
-By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L20) for [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http/src/types.ts#L19) that will follow default behaviors, and spin up the server.
+By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L30) for [WebHttpServer](https://github.com/travetto/travetto/tree/main/module/web-http/src/types.ts#L19) that will follow default behaviors, and spin up the server.
 
 **Terminal: Help for web:http**
 ```bash
@@ -181,7 +181,7 @@ export class WebHttpConfig {
 ```
 
 ### Creating a Custom CLI Entry Point
-To customize a Web server, you may need to construct an entry point using the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L20) decorator. This could look like:
+To customize a Web server, you may need to construct an entry point using the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L30) decorator. This could look like:
 
 **Code: Application entry point for Web Applications**
 ```typescript
@@ -195,11 +195,9 @@ import './config-override.ts';
 
 @CliCommand({ runTarget: true })
 export class SampleApp {
-  preMain(): void {
-    Env.NODE_ENV.set('production');
-  }
-
   async main() {
+    Env.NODE_ENV.set('production');
+
     console.log('CUSTOM STARTUP');
     await Registry.init();
     const config = await DependencyRegistryIndex.getInstance(WebHttpConfig);
@@ -235,7 +233,7 @@ Initialized {
     }
   },
   runtime: {
-    production: false,
+    production: true,
     role: 'std',
     debug: false,
     resourcePaths: [

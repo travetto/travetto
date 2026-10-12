@@ -318,8 +318,8 @@ TypeError: Cannot redefine property: toJSON
     at async ModelExportCommand.help (./support/base-command.ts:38:5)
     at async HelpUtil.getExtendedHelpMessage (<workspace-root>/module/cli/src/help.ts:121:30)
     at async HelpUtil.renderCommandHelp (<workspace-root>/module/cli/src/help.ts:170:11)
-    at async ExecutionManager.getExecutionCommand (<workspace-root>/module/cli/src/execute.ts:49:22)
-    at async ExecutionManager.run (<workspace-root>/module/cli/src/execute.ts:67:23)
+    at async ExecutionManager.getExecutionCommand (<workspace-root>/module/cli/src/execute.ts:48:22)
+    at async ExecutionManager.run (<workspace-root>/module/cli/src/execute.ts:66:23)
 
 TypeError: Cannot redefine property: toJSON
     at Object.defineProperty (<anonymous>)
@@ -331,8 +331,8 @@ TypeError: Cannot redefine property: toJSON
     at async ModelExportCommand.help (./support/base-command.ts:38:5)
     at async HelpUtil.getExtendedHelpMessage (<workspace-root>/module/cli/src/help.ts:121:30)
     at async HelpUtil.renderCommandHelp (<workspace-root>/module/cli/src/help.ts:170:11)
-    at async ExecutionManager.getExecutionCommand (<workspace-root>/module/cli/src/execute.ts:49:22)
-    at async ExecutionManager.run (<workspace-root>/module/cli/src/execute.ts:67:23)
+    at async ExecutionManager.getExecutionCommand (<workspace-root>/module/cli/src/execute.ts:48:22)
+    at async ExecutionManager.run (<workspace-root>/module/cli/src/execute.ts:66:23)
 ```
 
 ## CLI - model:install
@@ -352,8 +352,8 @@ TypeError: Cannot redefine property: toJSON
     at async ModelInstallCommand.help (./support/base-command.ts:38:5)
     at async HelpUtil.getExtendedHelpMessage (<workspace-root>/module/cli/src/help.ts:121:30)
     at async HelpUtil.renderCommandHelp (<workspace-root>/module/cli/src/help.ts:170:11)
-    at async ExecutionManager.getExecutionCommand (<workspace-root>/module/cli/src/execute.ts:49:22)
-    at async ExecutionManager.run (<workspace-root>/module/cli/src/execute.ts:67:23)
+    at async ExecutionManager.getExecutionCommand (<workspace-root>/module/cli/src/execute.ts:48:22)
+    at async ExecutionManager.run (<workspace-root>/module/cli/src/execute.ts:66:23)
 
 TypeError: Cannot redefine property: toJSON
     at Object.defineProperty (<anonymous>)
@@ -365,6 +365,6 @@ TypeError: Cannot redefine property: toJSON
     at async ModelInstallCommand.help (./support/base-command.ts:38:5)
     at async HelpUtil.getExtendedHelpMessage (<workspace-root>/module/cli/src/help.ts:121:30)
     at async HelpUtil.renderCommandHelp (<workspace-root>/module/cli/src/help.ts:170:11)
-    at async ExecutionManager.getExecutionCommand (<workspace-root>/module/cli/src/execute.ts:49:22)
-    at async ExecutionManager.run (<workspace-root>/module/cli/src/execute.ts:67:23)
+    at async ExecutionManager.getExecutionCommand (<workspace-root>/module/cli/src/execute.ts:48:22)
+    at async ExecutionManager.run (<workspace-root>/module/cli/src/execute.ts:66:23)
 ```

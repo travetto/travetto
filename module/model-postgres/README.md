@@ -85,12 +85,12 @@ export class PostgresModelConfig {
   /**
    * Allow storage modifications (like table auto-creation and schema updates) at runtime
    */
-  modifyStorage = !Runtime.production;
+  modifyStorage?: boolean;
 
   /**
    * Client specific overrides
    */
-  options?: PG.ClientConfig;
+  options?: ClientConfig;
 }
 ```
 

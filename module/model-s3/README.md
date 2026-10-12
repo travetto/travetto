@@ -58,7 +58,7 @@ export class S3ModelConfig {
   profile?: string;
 
   @Required(false)
-  config: s3.S3ClientConfig; // Additional s3 config
+  config: S3ClientConfig; // Additional s3 config
 
   chunkSize = 5 * 2 ** 20; // Chunk size in bytes
 

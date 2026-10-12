@@ -63,7 +63,7 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
   <span class="token comment">/**
    * Allow storage modifications (like table auto-creation and schema updates) at runtime
    */</span>
-  modifyStorage <span class="token operator">=</span> <span class="token operator">!</span>Runtime<span class="token punctuation">.</span>production<span class="token punctuation">;</span>
+  modifyStorage<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
    * SQLite file location
