@@ -121,21 +121,25 @@ export class CompilerWatchFeature extends BaseFeature {
           this.#log.info('Connected', state);
           const subProcess = this.run('event', ['all'], controller.signal);
           await CodecUtil.readLines(subProcess.stdout!, line => {
-            const { type, payload }: CompilerEvent = JSONUtil.fromUTF8(line);
-            if (typeof payload === 'object' && payload && 'workspace' in payload && payload.workspace !== Workspace.path) {
-              this.#log.debug('Ignoring compiler event for other workspace', payload.workspace);
-              return;
-            }
-            switch (type) {
-              case 'log':
-                this.#ongLogEvent(payload);
-                break;
-              case 'state':
-                this.#onStateEvent(payload);
-                break;
-              case 'progress':
-                this.#onProgressEvent(payload, controller.signal);
-                break;
+            try {
+              const { type, payload }: CompilerEvent = JSONUtil.fromUTF8(line);
+              if (typeof payload === 'object' && payload && 'workspace' in payload && payload.workspace !== Workspace.path) {
+                this.#log.debug('Ignoring compiler event for other workspace', payload.workspace);
+                return;
+              }
+              switch (type) {
+                case 'log':
+                  this.#ongLogEvent(payload);
+                  break;
+                case 'state':
+                  this.#onStateEvent(payload);
+                  break;
+                case 'progress':
+                  this.#onProgressEvent(payload, controller.signal);
+                  break;
+              }
+            } catch (err) {
+              throw new Error(`${err}:\n\t${line}`);
             }
           });
         }

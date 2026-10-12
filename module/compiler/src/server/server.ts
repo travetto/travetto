@@ -6,7 +6,7 @@ import type { ManifestContext } from '@travetto/manifest';
 import { CommonUtil } from '../common.ts';
 import { EventUtil } from '../event.ts';
 import { Log } from '../log.ts';
-import type { CompilerEvent, CompilerEventType, CompilerLogEvent, CompilerProgressEvent, CompilerServerInfo } from '../types.ts';
+import type { CompilerEvent, CompilerEventType, CompilerProgressEvent, CompilerServerInfo } from '../types.ts';
 import { CompilerUtil } from '../util.ts';
 import { CompilerClient } from './client.ts';
 import { ProcessHandle } from './process-handle.ts';

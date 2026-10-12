@@ -2,6 +2,7 @@ export * from './src/common.ts';
 export * from './src/compiler.ts';
 export * from './src/event.ts';
 export * from './src/log.ts';
+export * from './src/ipc-log.ts';
 export * from './src/server/client.ts';
 export * from './src/server/manager.ts';
 export * from './src/server/process-handle.ts';

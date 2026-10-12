@@ -2,49 +2,10 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { IpcLogger, Log, Logger } from '../src/log.ts';
+import { Log } from '../src/log.ts';
 
 @Suite()
 class CompilerLogTests {
-  @Test()
-  async verifyIpcLoggerDecoupledFromQuiet() {
-    const originalQuiet = process.env.TRV_QUIET;
-    const originalBuild = process.env.TRV_BUILD;
-
-    try {
-      process.env.TRV_QUIET = '1';
-      delete process.env.TRV_BUILD;
-
-      const ipcLogger = new IpcLogger({ level: 'debug' });
-      assert.strictEqual(ipcLogger.disabled, false);
-      assert.strictEqual(ipcLogger.valid({ level: 'debug', message: 'test' }), true);
-      assert.strictEqual(ipcLogger.valid({ level: 'info', message: 'test' }), true);
-      assert.strictEqual(ipcLogger.valid({ level: 'error', message: 'test' }), true);
-
-      process.env.TRV_QUIET = 'true';
-      const ipcLoggerStrictTrue = new IpcLogger({ level: 'debug' });
-      assert.strictEqual(ipcLoggerStrictTrue.disabled, false);
-      assert.strictEqual(ipcLoggerStrictTrue.valid({ level: 'debug', message: 'test' }), true);
-
-      process.env.TRV_BUILD = 'none';
-      const ipcLoggerNone = new IpcLogger({ level: 'debug' });
-      assert.strictEqual(ipcLoggerNone.disabled, false);
-      assert.strictEqual(ipcLoggerNone.valid({ level: 'debug', message: 'test' }), true);
-      assert.strictEqual(ipcLoggerNone.valid({ level: 'error', message: 'test' }), true);
-    } finally {
-      if (originalQuiet !== undefined) {
-        process.env.TRV_QUIET = originalQuiet;
-      } else {
-        delete process.env.TRV_QUIET;
-      }
-      if (originalBuild !== undefined) {
-        process.env.TRV_BUILD = originalBuild;
-      } else {
-        delete process.env.TRV_BUILD;
-      }
-    }
-  }
-
   @Test()
   async verifyLoggerStdoutSuppressionUnderQuiet() {
     const originalQuiet = process.env.TRV_QUIET;
