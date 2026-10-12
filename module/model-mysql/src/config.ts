@@ -41,7 +41,7 @@ export class MysqlModelConfig {
   /**
    * Allow storage modifications (like table auto-creation and schema updates) at runtime
    */
-  modifyStorage = !Runtime.production;
+  modifyStorage?: boolean;
 
   /**
    * Extended client options

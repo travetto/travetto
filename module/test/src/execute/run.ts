@@ -229,11 +229,15 @@ export class RunUtil {
     if (runs.length === 1) {
       await new TestExecutor(consumer).execute(runs[0], true);
     } else {
-      await WorkPool.run(run => buildStandardTestManager(consumer, run), runs, {
-        idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),
-        min: 1,
-        max: consumerConfig.concurrency
-      });
+      await WorkPool.run(
+        run => buildStandardTestManager(consumer, run),
+        runs.toSorted(() => (Math.random() < 0.5 ? -1 : 1)),
+        {
+          idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),
+          min: 1,
+          max: consumerConfig.concurrency
+        }
+      );
     }
 
     return consumer.summarizeAsBoolean();

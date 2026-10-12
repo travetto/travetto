@@ -16,7 +16,7 @@ export class SqliteModelConfig {
   /**
    * Allow storage modifications (like table auto-creation and schema updates) at runtime
    */
-  modifyStorage = !Runtime.production;
+  modifyStorage?: boolean;
 
   /**
    * SQLite file location

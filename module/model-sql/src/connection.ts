@@ -24,14 +24,13 @@ export function Transactional(mode: TransactionType = 'required') {
   };
 }
 
+type SQLConfiguration = { namespace?: string; database?: string; modifyStorage?: boolean };
+
 /**
  * Base abstract connection manager for SQL Model services.
  * Uses @travetto/context to track active client connections and transaction state.
  */
-export abstract class SQLConnection<
-  C = unknown,
-  F extends { namespace?: string; database?: string } = { namespace?: string; database?: string }
-> {
+export abstract class SQLConnection<C = unknown, F extends SQLConfiguration = SQLConfiguration> {
   isolatedTransactions = true;
   nestedTransactions = true;
 

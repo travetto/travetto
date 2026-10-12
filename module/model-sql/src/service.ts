@@ -56,11 +56,10 @@ import {
   QueryVerifier,
   type SuggestModelQuery,
   type ValidComparableFields,
-  type ValidNumericFields,
   type ValidStringFields,
   type WhereClause
 } from '@travetto/model-query';
-import { type Class, castTo, JSONUtil } from '@travetto/runtime';
+import { type Class, castTo, JSONUtil, Runtime } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 import { WorkPool } from '@travetto/worker';
 
@@ -286,6 +285,8 @@ export abstract class BaseSQLModelService<C = unknown>
     }
   }
 
+  // Storage & Migration Operations
+
   async dropIndex<T extends ModelType>(tableContext: TableContext<T>, indexName: string): Promise<void> {
     const sql = this.dialect.getDropIndexSQL(tableContext, indexName);
     await this.connection.execute(sql);
@@ -317,85 +318,94 @@ export abstract class BaseSQLModelService<C = unknown>
     await this.connection.execute(sql);
   }
 
-  async upsertTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
-    // Storage & Migration Operations
-    const query = this.dialect.getTableExistsQuery(tableContext);
+  async createTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
+    const createTableSQL = this.dialect.getCreateTableSQL(tableContext);
+    await this.connection.execute(createTableSQL);
+
+    for (const createIndexSQL of this.dialect.getCreateTableIndexSQLs(tableContext)) {
+      await this.connection.execute(createIndexSQL);
+    }
+  }
+
+  async updateTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
+    const query = this.dialect.getExistingColumnsQuery(tableContext);
     const result = await this.connection.execute(query.sql, query.parameters);
-    const tableExists = this.dialect.parseTableExistsResult(result.records);
+    const existingColumns = this.dialect.parseExistingColumns(result.records);
 
-    if (!tableExists) {
-      const createTableSQL = this.dialect.getCreateTableSQL(tableContext);
-      await this.connection.execute(createTableSQL);
+    const requestedFieldsMap = new Map<string, string>();
+    for (const field of tableContext.simpleFields.values()) {
+      requestedFieldsMap.set(field.name, this.dialect.getColumnType(field));
+    }
+    for (const field of tableContext.complexFields.values()) {
+      requestedFieldsMap.set(field.name, this.dialect.getComplexColumnType(field));
+    }
 
-      for (const createIndexSQL of this.dialect.getCreateTableIndexSQLs(tableContext)) {
+    for (const [columnName, columnType] of requestedFieldsMap.entries()) {
+      if (columnName === 'id') {
+        continue;
+      }
+      if (!existingColumns.has(columnName)) {
+        const addColumnSQL = this.dialect.getAddColumnSQL(tableContext, columnName, columnType);
+        await this.connection.execute(addColumnSQL);
+      } else if (this.dialect.getAlterColumnTypeSQL) {
+        const existingType = existingColumns.get(columnName)!;
+        const alterColumnSQL = this.dialect.getAlterColumnTypeSQL(tableContext, columnName, columnType, existingType);
+        if (alterColumnSQL) {
+          await this.connection.execute(alterColumnSQL);
+        }
+      }
+    }
+
+    const indexQuery = this.dialect.getExistingIndexesQuery(tableContext);
+    const indexResult = await this.connection.execute(indexQuery.sql, indexQuery.parameters);
+    const existingIndexes = this.dialect.parseExistingIndexes(indexResult.records);
+
+    const modelIndexes = ModelRegistryIndex.getIndices(tableContext.cls) || [];
+
+    const definedIndexes = new Map<string, IndexConfig>();
+    for (const indexConfig of modelIndexes) {
+      const indexName = ['idx', tableContext.tableName, indexConfig.name.toLowerCase().replaceAll('-', '_')].join('_');
+      definedIndexes.set(indexName, indexConfig);
+    }
+
+    for (const [indexName, indexDefinition] of existingIndexes.entries()) {
+      if (!definedIndexes.has(indexName)) {
+        await this.dropIndex(tableContext, indexName);
+      } else {
+        const indexConfig = definedIndexes.get(indexName)!;
+        const expectedSQL = this.dialect.getCreateIndexSQL(tableContext, indexConfig);
+
+        if (indexDefinition) {
+          const normalizedExisting = this.dialect.normalizeIndexDefinition(indexDefinition);
+          const normalizedExpected = this.dialect.normalizeIndexDefinition(expectedSQL);
+
+          if (normalizedExisting !== normalizedExpected) {
+            await this.dropIndex(tableContext, indexName);
+            await this.connection.execute(expectedSQL);
+          }
+        }
+      }
+    }
+
+    for (const [indexName, indexConfig] of definedIndexes.entries()) {
+      if (!existingIndexes.has(indexName)) {
+        const createIndexSQL = this.dialect.getCreateIndexSQL(tableContext, indexConfig);
         await this.connection.execute(createIndexSQL);
       }
+    }
+  }
+
+  async doesTableExist<T extends ModelType>(tableContext: TableContext<T>): Promise<boolean> {
+    const query = this.dialect.getTableExistsQuery(tableContext);
+    const result = await this.connection.execute(query.sql, query.parameters);
+    return this.dialect.parseTableExistsResult(result.records);
+  }
+
+  async upsertTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
+    if (!(await this.doesTableExist(tableContext))) {
+      await this.createTable(tableContext);
     } else {
-      const query = this.dialect.getExistingColumnsQuery(tableContext);
-      const result = await this.connection.execute(query.sql, query.parameters);
-      const existingColumns = this.dialect.parseExistingColumns(result.records);
-
-      const requestedFieldsMap = new Map<string, string>();
-      for (const field of tableContext.simpleFields.values()) {
-        requestedFieldsMap.set(field.name, this.dialect.getColumnType(field));
-      }
-      for (const field of tableContext.complexFields.values()) {
-        requestedFieldsMap.set(field.name, this.dialect.getComplexColumnType(field));
-      }
-
-      for (const [columnName, columnType] of requestedFieldsMap.entries()) {
-        if (columnName === 'id') {
-          continue;
-        }
-        if (!existingColumns.has(columnName)) {
-          const addColumnSQL = this.dialect.getAddColumnSQL(tableContext, columnName, columnType);
-          await this.connection.execute(addColumnSQL);
-        } else if (this.dialect.getAlterColumnTypeSQL) {
-          const existingType = existingColumns.get(columnName)!;
-          const alterColumnSQL = this.dialect.getAlterColumnTypeSQL(tableContext, columnName, columnType, existingType);
-          if (alterColumnSQL) {
-            await this.connection.execute(alterColumnSQL);
-          }
-        }
-      }
-
-      const indexQuery = this.dialect.getExistingIndexesQuery(tableContext);
-      const indexResult = await this.connection.execute(indexQuery.sql, indexQuery.parameters);
-      const existingIndexes = this.dialect.parseExistingIndexes(indexResult.records);
-
-      const modelIndexes = ModelRegistryIndex.getIndices(tableContext.cls) || [];
-
-      const definedIndexes = new Map<string, IndexConfig>();
-      for (const indexConfig of modelIndexes) {
-        const indexName = ['idx', tableContext.tableName, indexConfig.name.toLowerCase().replaceAll('-', '_')].join('_');
-        definedIndexes.set(indexName, indexConfig);
-      }
-
-      for (const [indexName, indexDefinition] of existingIndexes.entries()) {
-        if (!definedIndexes.has(indexName)) {
-          await this.dropIndex(tableContext, indexName);
-        } else {
-          const indexConfig = definedIndexes.get(indexName)!;
-          const expectedSQL = this.dialect.getCreateIndexSQL(tableContext, indexConfig);
-
-          if (indexDefinition) {
-            const normalizedExisting = this.dialect.normalizeIndexDefinition(indexDefinition);
-            const normalizedExpected = this.dialect.normalizeIndexDefinition(expectedSQL);
-
-            if (normalizedExisting !== normalizedExpected) {
-              await this.dropIndex(tableContext, indexName);
-              await this.connection.execute(expectedSQL);
-            }
-          }
-        }
-      }
-
-      for (const [indexName, indexConfig] of definedIndexes.entries()) {
-        if (!existingIndexes.has(indexName)) {
-          const createIndexSQL = this.dialect.getCreateIndexSQL(tableContext, indexConfig);
-          await this.connection.execute(createIndexSQL);
-        }
-      }
+      await this.updateTable(tableContext);
     }
   }
 

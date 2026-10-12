@@ -122,7 +122,11 @@ export class IndexManager implements ModelStorageSupport {
 
     warnIfIndexedUniqueIndex(this, cls, ModelRegistryIndex.getIndices(cls));
 
-    if (resolvedAlias) {
+    if (!resolvedAlias) {
+      // Create if non-existent
+      console.debug('Creating Model', { index });
+      await this.createIndex(cls);
+    } else {
       const [currentIndex] = Object.keys(resolvedAlias ?? {});
       const pendingMapping = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
       const changedFields = ElasticsearchSchemaUtil.getChangedFields(resolvedAlias[currentIndex].mappings, pendingMapping);
@@ -149,10 +153,6 @@ export class IndexManager implements ModelStorageSupport {
         const toDelete = Object.keys(resolvedAlias).filter(item => item !== pendingIndex);
         await Promise.all(toDelete.map(alias => this.#client.indices.delete({ index: alias })));
       }
-    } else {
-      // Create if non-existent
-      console.debug('Creating Model', { index });
-      await this.createIndex(cls);
     }
   }
 

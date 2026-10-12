@@ -8,7 +8,10 @@ import type { EsSchemaConfig } from './types.ts';
 const PointConcrete = toConcrete<Point>();
 
 const isMappingType = (input: MappingProperty): input is MappingTypeMapping & MappingProperty =>
-  !!input && !!input.type && (input.type === 'object' || input.type === 'nested');
+  !!input &&
+  (('properties' in input && typeof input.properties === 'object' && !!input.properties) ||
+    input.type === 'object' ||
+    input.type === 'nested');
 
 /**
  * Utils for ES Schema management
@@ -164,9 +167,12 @@ export class ElasticsearchSchemaUtil {
       const path = prefix ? `${prefix}.${key}` : key;
       const currentProperty = currentProperties[key];
       const neededProperty = neededProperties[key];
+      if (typeof currentProperty === 'object' && !!currentProperty && 'properties' in currentProperty && !currentProperty.type) {
+        currentProperty.type = 'object';
+      }
 
       if (isMappingType(currentProperty) && isMappingType(neededProperty)) {
-        if (currentProperty.type !== neededProperty.type) {
+        if ((currentProperty.type ?? 'object') !== (neededProperty.type ?? 'object')) {
           changed.push(path);
         } else {
           changed.push(
@@ -178,8 +184,10 @@ export class ElasticsearchSchemaUtil {
           );
         }
       } else if (isMappingType(currentProperty) || isMappingType(neededProperty)) {
+        console.error('Mismatched types', { path, currentProperty, neededProperty });
         changed.push(path);
       } else if (!currentProperty || !neededProperty || currentProperty.type !== neededProperty.type) {
+        console.error('Mismatched types', { path, currentProperty, neededProperty });
         changed.push(path);
       }
     }

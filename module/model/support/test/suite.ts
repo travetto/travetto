@@ -1,13 +1,13 @@
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry } from '@travetto/registry';
-import type { Class } from '@travetto/runtime';
+import { Util, type Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 import { type SuitePhaseHandler, SuiteRegistryIndex, TestFixtures } from '@travetto/test';
 
 import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
 import { ModelStorageUtil } from '../../src/util/storage.ts';
 
-type ConfigType = { autoCreate?: boolean; namespace?: string };
+type ConfigType = { autoCreate?: boolean; namespace?: string; modifyStorage?: boolean };
 
 class ModelSuiteHandler<T extends { configClass: Class<ConfigType>; serviceClass: Class }> implements SuitePhaseHandler<T> {
   qualifier?: symbol;
@@ -22,7 +22,7 @@ class ModelSuiteHandler<T extends { configClass: Class<ConfigType>; serviceClass
 
     const config = await DependencyRegistryIndex.getInstance<ConfigType>(instance.configClass);
     if ('namespace' in config) {
-      config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
+      config.namespace = `test_${Util.uuid(12)}`;
     }
 
     // We manually create
@@ -50,7 +50,11 @@ class ModelSuiteHandler<T extends { configClass: Class<ConfigType>; serviceClass
     if (ModelStorageUtil.isSupported(service)) {
       await service.truncateBlob?.();
       const models = ModelRegistryIndex.getClasses().filter(model => model === SchemaRegistryIndex.getBaseClass(model));
-      await Promise.all(models.map(model => service.truncateModel(model)));
+      if ('truncateModels' in service && typeof service.truncateModels === 'function') {
+        await service.truncateModels(models);
+      } else {
+        await Promise.all(models.map(model => service.truncateModel(model)));
+      }
     }
   }
 
