@@ -1,4 +1,4 @@
-import passport from 'passport';
+import { type Strategy, type AuthenticateOptions, use as usePassport, authenticate as authenticatePassport } from 'passport';
 
 import type { Authenticator, AuthenticatorState, Principal } from '@travetto/auth';
 import type { WebFilterContext } from '@travetto/web';
@@ -14,9 +14,9 @@ type PassportUser = Express.User & { _raw?: unknown; _json?: unknown; source?: u
  */
 export class PassportAuthenticator<V extends PassportUser = PassportUser> implements Authenticator<object, WebFilterContext> {
   #strategyName: string;
-  #strategy: passport.Strategy;
+  #strategy: Strategy;
   #toPrincipal: (user: V, issuer?: string) => SimplePrincipal;
-  #passportOptions: (ctx: WebFilterContext) => passport.AuthenticateOptions;
+  #passportOptions: (ctx: WebFilterContext) => AuthenticateOptions;
   session = false;
 
   /**
@@ -29,15 +29,15 @@ export class PassportAuthenticator<V extends PassportUser = PassportUser> implem
    */
   constructor(
     strategyName: string,
-    strategy: passport.Strategy,
+    strategy: Strategy,
     toPrincipal: (user: V) => SimplePrincipal,
-    options: passport.AuthenticateOptions | ((ctx: WebFilterContext) => passport.AuthenticateOptions) = {}
+    options: AuthenticateOptions | ((ctx: WebFilterContext) => AuthenticateOptions) = {}
   ) {
     this.#strategyName = strategyName;
     this.#strategy = strategy;
     this.#toPrincipal = toPrincipal;
-    this.#passportOptions = typeof options === 'function' ? options : (): Partial<passport.AuthenticateOptions> => options;
-    passport.use(this.#strategyName, this.#strategy);
+    this.#passportOptions = typeof options === 'function' ? options : (): Partial<AuthenticateOptions> => options;
+    usePassport(this.#strategyName, this.#strategy);
   }
 
   /**
@@ -61,7 +61,7 @@ export class PassportAuthenticator<V extends PassportUser = PassportUser> implem
     };
 
     const user = await WebConnectUtil.invoke<V>(ctx, (request, response, next) =>
-      passport.authenticate(this.#strategyName, options, next)(request, response)
+      authenticatePassport(this.#strategyName, options, next)(request, response)
     );
 
     if (user) {

@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import type * as estypes from '@elastic/elasticsearch/api/types';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/api/types';
 
 import { Model } from '@travetto/model';
 import { Registry } from '@travetto/registry';
@@ -116,7 +116,7 @@ class SchemaSuite {
 
   @Test('should detect type changes in root fields')
   async testRootTypeChange() {
-    const current: estypes.MappingTypeMapping = {
+    const current: MappingTypeMapping = {
       properties: {
         id: { type: 'keyword' },
         age: { type: 'integer' },
@@ -125,7 +125,7 @@ class SchemaSuite {
       dynamic: false
     };
 
-    const needed: estypes.MappingTypeMapping = {
+    const needed: MappingTypeMapping = {
       properties: {
         id: { type: 'keyword' },
         age: { type: 'long' }, // Changed from integer to long
@@ -140,7 +140,7 @@ class SchemaSuite {
 
   @Test('should detect added fields')
   async testAddedFields() {
-    const current: estypes.MappingTypeMapping = {
+    const current: MappingTypeMapping = {
       properties: {
         id: { type: 'keyword' },
         name: { type: 'keyword' }
@@ -148,7 +148,7 @@ class SchemaSuite {
       dynamic: false
     };
 
-    const needed: estypes.MappingTypeMapping = {
+    const needed: MappingTypeMapping = {
       properties: {
         id: { type: 'keyword' },
         name: { type: 'keyword' },
@@ -166,7 +166,7 @@ class SchemaSuite {
 
   @Test('should detect removed fields')
   async testRemovedFields() {
-    const current: estypes.MappingTypeMapping = {
+    const current: MappingTypeMapping = {
       properties: {
         id: { type: 'keyword' },
         name: { type: 'keyword' },
@@ -176,7 +176,7 @@ class SchemaSuite {
       dynamic: false
     };
 
-    const needed: estypes.MappingTypeMapping = {
+    const needed: MappingTypeMapping = {
       properties: {
         id: { type: 'keyword' },
         name: { type: 'keyword' }
@@ -192,7 +192,7 @@ class SchemaSuite {
 
   @Test('should return empty array when schemas match')
   async testNoChanges() {
-    const current: estypes.MappingTypeMapping = {
+    const current: MappingTypeMapping = {
       properties: {
         id: { type: 'keyword' },
         name: { type: 'keyword' },
@@ -201,7 +201,7 @@ class SchemaSuite {
       dynamic: false
     };
 
-    const needed: estypes.MappingTypeMapping = {
+    const needed: MappingTypeMapping = {
       properties: {
         id: { type: 'keyword' },
         name: { type: 'keyword' },
@@ -216,7 +216,7 @@ class SchemaSuite {
 
   @Test('should detect nested object type changes')
   async testNestedTypeChange() {
-    const current: estypes.MappingTypeMapping = {
+    const current: MappingTypeMapping = {
       properties: {
         id: { type: 'keyword' },
         address: {
@@ -227,7 +227,7 @@ class SchemaSuite {
       dynamic: false
     };
 
-    const needed: estypes.MappingTypeMapping = {
+    const needed: MappingTypeMapping = {
       properties: {
         id: { type: 'keyword' },
         address: {
@@ -244,7 +244,7 @@ class SchemaSuite {
 
   @Test('should detect changes in nested object properties with correct path')
   async testNestedPropertyChanges() {
-    const current: estypes.MappingTypeMapping = {
+    const current: MappingTypeMapping = {
       properties: {
         id: { type: 'keyword' },
         address: {
@@ -259,7 +259,7 @@ class SchemaSuite {
       dynamic: false
     };
 
-    const needed: estypes.MappingTypeMapping = {
+    const needed: MappingTypeMapping = {
       properties: {
         id: { type: 'keyword' },
         address: {
@@ -280,7 +280,7 @@ class SchemaSuite {
 
   @Test('should handle mixed root and nested changes')
   async testMixedChanges() {
-    const current: estypes.MappingTypeMapping = {
+    const current: MappingTypeMapping = {
       properties: {
         id: { type: 'keyword' },
         name: { type: 'keyword' },
@@ -294,7 +294,7 @@ class SchemaSuite {
       dynamic: false
     };
 
-    const needed: estypes.MappingTypeMapping = {
+    const needed: MappingTypeMapping = {
       properties: {
         id: { type: 'text' }, // Root change
         name: { type: 'keyword' },
@@ -314,9 +314,9 @@ class SchemaSuite {
 
   @Test('should handle missing properties in current')
   async testMissingCurrentProperties() {
-    const current: estypes.MappingTypeMapping = { dynamic: false };
+    const current: MappingTypeMapping = { dynamic: false };
 
-    const needed: estypes.MappingTypeMapping = {
+    const needed: MappingTypeMapping = {
       properties: {
         id: { type: 'keyword' },
         name: { type: 'keyword' }
@@ -330,7 +330,7 @@ class SchemaSuite {
 
   @Test('should handle missing properties in needed')
   async testMissingNeededProperties() {
-    const current: estypes.MappingTypeMapping = {
+    const current: MappingTypeMapping = {
       properties: {
         id: { type: 'keyword' },
         name: { type: 'keyword' }
@@ -338,7 +338,7 @@ class SchemaSuite {
       dynamic: false
     };
 
-    const needed: estypes.MappingTypeMapping = { dynamic: false };
+    const needed: MappingTypeMapping = { dynamic: false };
 
     const changed = ElasticsearchSchemaUtil.getChangedFields(current, needed);
     assert.deepStrictEqual(changed, ['id', 'name']);
@@ -346,12 +346,12 @@ class SchemaSuite {
 
   @Test('should handle nested object without properties in current')
   async testNestedWithoutPropertiesInCurrent() {
-    const current: estypes.MappingTypeMapping = {
+    const current: MappingTypeMapping = {
       properties: { address: { type: 'object' } },
       dynamic: false
     };
 
-    const needed: estypes.MappingTypeMapping = {
+    const needed: MappingTypeMapping = {
       properties: {
         address: {
           type: 'object',

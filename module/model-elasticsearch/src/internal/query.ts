@@ -1,4 +1,4 @@
-import type * as estypes from '@elastic/elasticsearch/api/types';
+import type { Sort, SortOptions, QueryDslQueryContainer, DeleteByQueryRequest, SearchRequest } from '@elastic/elasticsearch/api/types';
 
 import { ModelRegistryIndex, type ModelType } from '@travetto/model';
 import type { SortedIndex } from '@travetto/model-indexed';
@@ -58,9 +58,9 @@ export class ElasticsearchQueryUtil {
   /**
    * Build sort mechanism
    */
-  static getSort<T extends ModelType>(sort: SortClause<T>[] | SortedIndex<T, Any, Any>): estypes.Sort {
+  static getSort<T extends ModelType>(sort: SortClause<T>[] | SortedIndex<T, Any, Any>): Sort {
     if (Array.isArray(sort)) {
-      return sort.map<estypes.SortOptions>(option => {
+      return sort.map<SortOptions>(option => {
         const item = this.extractSimple(option);
         const key = Object.keys(item)[0];
         const value: boolean | -1 | 1 = castTo(item[key]);
@@ -70,7 +70,7 @@ export class ElasticsearchQueryUtil {
         return { [key]: { order: value === 1 || value === true ? 'asc' : 'desc' } };
       });
     } else {
-      return sort.sortTemplate.map<estypes.SortOptions>(field => ({
+      return sort.sortTemplate.map<SortOptions>(field => ({
         [field.path.join('.')]: { order: field.value === 1 ? 'asc' : 'desc' }
       }));
     }
@@ -310,12 +310,8 @@ export class ElasticsearchQueryUtil {
    * @param cls
    * @param search
    */
-  static getSearchQuery<T extends ModelType>(
-    cls: Class<T>,
-    search: Record<string, unknown>,
-    checkExpiry = true
-  ): estypes.QueryDslQueryContainer {
-    const clauses: estypes.QueryDslQueryContainer[] = [];
+  static getSearchQuery<T extends ModelType>(cls: Class<T>, search: Record<string, unknown>, checkExpiry = true): QueryDslQueryContainer {
+    const clauses: QueryDslQueryContainer[] = [];
     if (search && Object.keys(search).length) {
       clauses.push(search);
     }
@@ -347,8 +343,8 @@ export class ElasticsearchQueryUtil {
     query: Query<T>,
     config?: EsSchemaConfig,
     checkExpiry = true
-  ): estypes.SearchRequest & Omit<estypes.DeleteByQueryRequest, 'index' | 'sort'> {
-    const search: estypes.SearchRequest & Omit<estypes.DeleteByQueryRequest, 'index' | 'sort'> = {
+  ): SearchRequest & Omit<DeleteByQueryRequest, 'index' | 'sort'> {
+    const search: SearchRequest & Omit<DeleteByQueryRequest, 'index' | 'sort'> = {
       query: this.getSearchQuery(cls, this.extractWhereQuery(cls, query.where ?? {}, config), checkExpiry)
     };
 
@@ -387,7 +383,7 @@ export class ElasticsearchQueryUtil {
     field: string,
     query?: Query<T>,
     configuration?: EsSchemaConfig
-  ): estypes.SearchRequest {
+  ): SearchRequest {
     const resolvedSearch = this.getSearchObject(modelClass, query ?? {}, configuration);
 
     return {

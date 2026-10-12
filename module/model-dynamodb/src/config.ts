@@ -1,4 +1,4 @@
-import type dynamodb from '@aws-sdk/client-dynamodb';
+import type { DynamoDBClientConfig } from '@aws-sdk/client-dynamodb';
 
 import { Config } from '@travetto/config';
 import { PostConstruct } from '@travetto/di';
@@ -6,7 +6,7 @@ import { Runtime } from '@travetto/runtime';
 
 @Config('model.dynamodb')
 export class DynamoDBModelConfig {
-  client: dynamodb.DynamoDBClientConfig = {
+  client: DynamoDBClientConfig = {
     endpoint: undefined
   };
   modifyStorage?: boolean;

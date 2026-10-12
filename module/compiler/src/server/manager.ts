@@ -127,7 +127,7 @@ export class CompilerManager {
         // Don't wait
         CompilerUtil.consumeAsyncIterable(
           client.fetchEvents('progress', { until: event => !!event.complete, signal: controller!.signal }),
-          Log.onProgressEvent
+          Log.onProgressEvent.bind(Log)
         );
       }
       const finalState = await client.waitForState(['compile-end', 'watch-start', 'compile-failed'], 'Successfully built');

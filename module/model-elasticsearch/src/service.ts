@@ -1,5 +1,12 @@
 import { Client, errors, Serializer } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/api/types';
+import type {
+  SearchRequest,
+  SortResults,
+  GetGetResult,
+  SearchHit,
+  SearchResponse,
+  AggregationsStringTermsAggregate
+} from '@elastic/elasticsearch/api/types';
 
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
@@ -104,7 +111,7 @@ export class ElasticsearchModelService
   /**
    * Convert _id to id
    */
-  async #postLoad<T extends ModelType>(cls: Class<T>, input: estypes.SearchHit<T> | estypes.GetGetResult<T>): Promise<T> {
+  async #postLoad<T extends ModelType>(cls: Class<T>, input: SearchHit<T> | GetGetResult<T>): Promise<T> {
     let item = {
       ...(input._id ? { id: input._id } : {}),
       ...input._source!
@@ -127,13 +134,13 @@ export class ElasticsearchModelService
 
   async *#scrollCollection<T extends ModelType>(
     cls: Class<T>,
-    buildSearch: (offset?: estypes.SortResults) => estypes.SearchRequest,
-    options?: ModelPageOptions<estypes.SortResults> & ModelListOptions
-  ): AsyncIterable<{ items: T[]; nextOffset?: estypes.SortResults | undefined }> {
+    buildSearch: (offset?: SortResults) => SearchRequest,
+    options?: ModelPageOptions<SortResults> & ModelListOptions
+  ): AsyncIterable<{ items: T[]; nextOffset?: SortResults | undefined }> {
     const limit = options?.limit ?? Number.MAX_SAFE_INTEGER;
     const batchSize = Math.min(limit, options?.batchSizeHint ?? 100);
 
-    let search: estypes.SearchResponse<T> = await this.execSearch<T>(cls, {
+    let search: SearchResponse<T> = await this.execSearch<T>(cls, {
       size: batchSize,
       ...buildSearch(options?.offset)
     });
@@ -170,11 +177,11 @@ export class ElasticsearchModelService
     cls: Class<T>,
     idx: SortedIndex<T>,
     body: KeyedIndexBody<T>,
-    options?: ModelPageOptions<estypes.SortResults> & ModelListOptions,
+    options?: ModelPageOptions<SortResults> & ModelListOptions,
     transformWhere?: (where: WhereClause<T>) => WhereClause<T>
   ): AsyncIterable<{
     items: T[];
-    nextOffset?: estypes.SortResults | undefined;
+    nextOffset?: SortResults | undefined;
   }> {
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
     let whereClause: WhereClause<T> = castTo(computed.project());
@@ -217,7 +224,7 @@ export class ElasticsearchModelService
   /**
    * Directly run the search
    */
-  async execSearch<T extends ModelType>(cls: Class<T>, search: estypes.SearchRequest): Promise<estypes.SearchResponse<T>> {
+  async execSearch<T extends ModelType>(cls: Class<T>, search: SearchRequest): Promise<SearchResponse<T>> {
     let query = search.query;
     if (query && Object.keys(query).length === 0) {
       query = undefined;
@@ -562,9 +569,9 @@ export class ElasticsearchModelService
     body: KeyedIndexBody<T, K>,
     options?: ModelPageOptions
   ): Promise<ModelPageResult<T>> {
-    const offset = options?.offset ? JSONUtil.fromBase64<estypes.SortResults>(options.offset) : undefined;
+    const offset = options?.offset ? JSONUtil.fromBase64<SortResults>(options.offset) : undefined;
     const items: T[] = [];
-    let lastNextOffset: estypes.SortResults | undefined;
+    let lastNextOffset: SortResults | undefined;
     for await (const { items: fetched, nextOffset } of this.#scrollIndex(cls, idx, body, { limit: 100, ...options, offset })) {
       lastNextOffset = nextOffset;
       items.push(...fetched);
@@ -758,14 +765,14 @@ export class ElasticsearchModelService
     const limit = query?.limit ?? 100;
     const size = offset + limit;
 
-    const search: estypes.SearchRequest = {
+    const search: SearchRequest = {
       query: resolvedSearch.query ?? { match_all: {} },
       aggregations: { [field]: { terms: { field, size } } },
       size: 0
     };
 
     const result = await this.execSearch(cls, search);
-    const { buckets } = castTo<estypes.AggregationsStringTermsAggregate>(
+    const { buckets } = castTo<AggregationsStringTermsAggregate>(
       'buckets' in result.aggregations![field] ? result.aggregations![field] : { buckets: [] }
     );
     const out = Array.isArray(buckets)

@@ -1,4 +1,4 @@
-import cp from 'child_process';
+import { spawn } from 'node:child_process';
 
 import { CliCommand } from '@travetto/cli';
 import { ExecUtil, Runtime } from '@travetto/runtime';
@@ -15,7 +15,7 @@ export class CliWebTlsDev {
   certFile = 'resources/localhost-cert.pem';
 
   async main() {
-    const sslProc = cp.spawn(
+    const sslProc = spawn(
       'openssl',
       [
         'req',

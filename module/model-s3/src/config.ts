@@ -1,4 +1,4 @@
-import type s3 from '@aws-sdk/client-s3';
+import type { S3ClientConfig } from '@aws-sdk/client-s3';
 import { fromIni } from '@aws-sdk/credential-provider-ini';
 
 import { Config, EnvVar } from '@travetto/config';
@@ -26,7 +26,7 @@ export class S3ModelConfig {
   profile?: string;
 
   @Required(false)
-  config: s3.S3ClientConfig; // Additional s3 config
+  config: S3ClientConfig; // Additional s3 config
 
   chunkSize = 5 * 2 ** 20; // Chunk size in bytes
 

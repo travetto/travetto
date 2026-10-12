@@ -1,4 +1,4 @@
-import type PG from 'pg';
+import type { ClientConfig } from 'pg';
 
 import { Config } from '@travetto/config';
 import { Runtime } from '@travetto/runtime';
@@ -46,5 +46,5 @@ export class PostgresModelConfig {
   /**
    * Client specific overrides
    */
-  options?: PG.ClientConfig;
+  options?: ClientConfig;
 }

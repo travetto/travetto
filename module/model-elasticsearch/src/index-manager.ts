@@ -1,5 +1,5 @@
 import { errors, type Client } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/api/types';
+import type { ReindexRequest } from '@elastic/elasticsearch/api/types';
 
 import { ModelRegistryIndex, type ModelStorageSupport, ModelStorageUtil, type ModelType } from '@travetto/model';
 import { warnIfIndexedUniqueIndex } from '@travetto/model-indexed';
@@ -132,7 +132,7 @@ export class IndexManager implements ModelStorageSupport {
         console.debug('Updated Model', { index, currentIndex, changedFields });
         const pendingIndex = await this.createIndex(cls, false);
 
-        const reindexBody: estypes.ReindexRequest = {
+        const reindexBody: ReindexRequest = {
           source: { index: currentIndex },
           dest: { index: pendingIndex },
           script: {

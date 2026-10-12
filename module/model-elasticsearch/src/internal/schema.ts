@@ -1,4 +1,4 @@
-import type * as estypes from '@elastic/elasticsearch/api/types';
+import type { MappingProperty, Script, MappingTypeMapping } from '@elastic/elasticsearch/api/types';
 
 import { type Class, castTo, toConcrete } from '@travetto/runtime';
 import { DataUtil, type Point, SchemaRegistryIndex } from '@travetto/schema';
@@ -7,7 +7,7 @@ import type { EsSchemaConfig } from './types.ts';
 
 const PointConcrete = toConcrete<Point>();
 
-const isMappingType = (input: estypes.MappingProperty): input is estypes.MappingTypeMapping & estypes.MappingProperty =>
+const isMappingType = (input: MappingProperty): input is MappingTypeMapping & MappingProperty =>
   !!input && !!input.type && (input.type === 'object' || input.type === 'nested');
 
 /**
@@ -17,8 +17,8 @@ export class ElasticsearchSchemaUtil {
   /**
    * Build the update script for a given object
    */
-  static generateUpdateScript(item: Record<string, unknown>): estypes.Script {
-    const out: estypes.Script = {
+  static generateUpdateScript(item: Record<string, unknown>): Script {
+    const out: Script = {
       lang: 'painless',
       source: `
  for (entry in params.body.entrySet()) {
@@ -44,7 +44,7 @@ export class ElasticsearchSchemaUtil {
    * @param item
    * @returns
    */
-  static generateReplaceScript(item: Record<string, unknown>): estypes.Script {
+  static generateReplaceScript(item: Record<string, unknown>): Script {
     return {
       lang: 'painless',
       source: 'ctx._source.clear(); ctx._source.putAll(params.body)',
@@ -55,7 +55,7 @@ export class ElasticsearchSchemaUtil {
   /**
    * Build one or more mappings depending on the polymorphic state
    */
-  static generateSchemaMapping(cls: Class, config?: EsSchemaConfig): estypes.MappingTypeMapping {
+  static generateSchemaMapping(cls: Class, config?: EsSchemaConfig): MappingTypeMapping {
     return SchemaRegistryIndex.getConfig(cls).discriminatedBase
       ? this.generateAllMapping(cls, config)
       : this.generateSingleMapping(cls, config);
@@ -64,9 +64,9 @@ export class ElasticsearchSchemaUtil {
   /**
    * Generate all mappings
    */
-  static generateAllMapping(cls: Class, config?: EsSchemaConfig): estypes.MappingTypeMapping {
+  static generateAllMapping(cls: Class, config?: EsSchemaConfig): MappingTypeMapping {
     const allTypes = SchemaRegistryIndex.getDiscriminatedClasses(cls);
-    return allTypes.reduce<estypes.MappingTypeMapping>(
+    return allTypes.reduce<MappingTypeMapping>(
       (mapping, schemaCls) => {
         DataUtil.deepAssign(mapping, this.generateSingleMapping(schemaCls, config));
         return mapping;
@@ -78,10 +78,10 @@ export class ElasticsearchSchemaUtil {
   /**
    * Build a mapping for a given class
    */
-  static generateSingleMapping<T>(cls: Class<T>, esSchema?: EsSchemaConfig): estypes.MappingTypeMapping {
+  static generateSingleMapping<T>(cls: Class<T>, esSchema?: EsSchemaConfig): MappingTypeMapping {
     const fields = SchemaRegistryIndex.get(cls).getFields();
 
-    const properties: Record<string, estypes.MappingProperty> = {};
+    const properties: Record<string, MappingProperty> = {};
 
     for (const [field, config] of Object.entries(fields)) {
       if (config.type === PointConcrete) {
@@ -154,7 +154,7 @@ export class ElasticsearchSchemaUtil {
   /**
    * Gets list of all changed fields between two mappings
    */
-  static getChangedFields(current: estypes.MappingTypeMapping, needed: estypes.MappingTypeMapping, prefix = ''): string[] {
+  static getChangedFields(current: MappingTypeMapping, needed: MappingTypeMapping, prefix = ''): string[] {
     const currentProperties = current.properties ?? {};
     const neededProperties = needed.properties ?? {};
     const allKeys = new Set([...Object.keys(currentProperties), ...Object.keys(neededProperties)]);

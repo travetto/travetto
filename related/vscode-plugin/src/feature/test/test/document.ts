@@ -1,4 +1,4 @@
-import type * as vscode from 'vscode';
+import type vscode from 'vscode';
 
 import { TypedObject } from '@travetto/runtime';
 import type {

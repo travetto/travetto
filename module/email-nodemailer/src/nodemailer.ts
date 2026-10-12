@@ -1,21 +1,21 @@
 import type { Readable } from 'node:stream';
 
 import { createTransport, type Transporter, type Transport as TransportType } from 'nodemailer';
-import type json from 'nodemailer/lib/json-transport';
-import type sendmail from 'nodemailer/lib/sendmail-transport';
-import type ses from 'nodemailer/lib/ses-transport';
-import type smtp from 'nodemailer/lib/smtp-transport';
+import type { Options as JSONOptions } from 'nodemailer/lib/json-transport';
+import type { Options as SendmailOptions } from 'nodemailer/lib/sendmail-transport';
+import type { Options as SESOptions } from 'nodemailer/lib/ses-transport';
+import type { Options as SMTPOptions, SentMessageInfo as SMTPSentMessageInfo } from 'nodemailer/lib/smtp-transport';
 
 import type { EmailOptions, MailTransport, SentEmail } from '@travetto/email';
 import { BinaryUtil, CodecUtil, castTo } from '@travetto/runtime';
 
-type Transport = TransportType | json.Options | smtp.Options | ses.Options | sendmail.Options;
+type Transport = TransportType | JSONOptions | SMTPOptions | SESOptions | SendmailOptions;
 
 /**
  * Nodemailer transport, takes in a transport factory as the input
  */
 export class NodemailerTransport implements MailTransport {
-  #transport: Transporter<smtp.SentMessageInfo>;
+  #transport: Transporter<SMTPSentMessageInfo>;
 
   /**
    * Enforce attachment content is a buffer or stream, converting from string or binary array if needed

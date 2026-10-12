@@ -1,10 +1,10 @@
-import type redis from '@redis/client';
+import type { RedisClientOptions } from '@redis/client';
 
 import { Config } from '@travetto/config';
 
 @Config('model.redis')
 export class RedisModelConfig {
-  client: redis.RedisClientOptions = {};
+  client: RedisClientOptions = {};
   namespace?: string;
   modifyStorage?: boolean;
 }
