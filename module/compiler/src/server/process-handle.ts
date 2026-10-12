@@ -4,11 +4,11 @@ import path from 'node:path';
 import type { ManifestContext } from '@travetto/manifest';
 
 import { CommonUtil } from '../common.ts';
-import { Log, type Logger } from '../log.ts';
+import { Log, type LogShape } from '../log.ts';
 
 export class ProcessHandle {
   #file: string;
-  #log: Logger;
+  #log: LogShape;
 
   constructor(ctx: ManifestContext, name: string) {
     this.#file = CommonUtil.resolveWorkspace(ctx, ctx.build.toolFolder, `${name}.pid`);

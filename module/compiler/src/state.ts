@@ -195,6 +195,8 @@ export class CompilerState implements CompilerHost {
       return;
     }
 
+    this.#failures.delete(sourceFile);
+
     switch (ManifestModuleUtil.getFileType(sourceFile)) {
       case 'package-json': {
         const text = this.readFile(sourceFile)!;
@@ -202,13 +204,11 @@ export class CompilerState implements CompilerHost {
         const location = this.#tscOutputFileToOutput.get(output) ?? output;
         this.#writeFile(location, finalText);
         this.#writeExternalTypings(location, finalText);
-        this.#failures.delete(sourceFile);
         break;
       }
       case 'js':
       case 'typings':
         this.writeFile(output, this.readFile(sourceFile)!);
-        this.#failures.delete(sourceFile);
         break;
       case 'ts': {
         const program = await this.getProgram(needsNewProgram);
@@ -250,8 +250,6 @@ export class CompilerState implements CompilerHost {
         }
         if (diagnostics.length) {
           this.#failures.set(sourceFile, diagnostics.length);
-        } else {
-          this.#failures.delete(sourceFile);
         }
         return diagnostics;
       }

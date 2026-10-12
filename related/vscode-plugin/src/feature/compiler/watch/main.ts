@@ -121,7 +121,14 @@ export class CompilerWatchFeature extends BaseFeature {
           this.#log.info('Connected', state);
           const subProcess = this.run('event', ['all'], controller.signal);
           await CodecUtil.readLines(subProcess.stdout!, line => {
-            const { type, payload }: CompilerEvent = JSONUtil.fromUTF8(line);
+            let event: CompilerEvent;
+            try {
+              event = JSONUtil.fromUTF8(line);
+            } catch (error) {
+              this.#log.error('Unable to process input as JSON', line);
+              throw error;
+            }
+            const { type, payload } = event;
             if (typeof payload === 'object' && payload && 'workspace' in payload && payload.workspace !== Workspace.path) {
               this.#log.debug('Ignoring compiler event for other workspace', payload.workspace);
               return;

@@ -6,7 +6,7 @@ import type { ManifestContext } from '@travetto/manifest';
 import { CommonUtil } from '../common.ts';
 import { EventUtil } from '../event.ts';
 import { Log } from '../log.ts';
-import type { CompilerEvent, CompilerEventType, CompilerLogEvent, CompilerProgressEvent, CompilerServerInfo } from '../types.ts';
+import type { CompilerEvent, CompilerEventType, CompilerProgressEvent, CompilerServerInfo } from '../types.ts';
 import { CompilerUtil } from '../util.ts';
 import { CompilerClient } from './client.ts';
 import { ProcessHandle } from './process-handle.ts';
@@ -29,14 +29,12 @@ export class CompilerServer {
   #client: CompilerClient;
   #url: string;
   #handle: Record<'compiler' | 'server', ProcessHandle>;
-  #suppressLogs: boolean;
 
-  constructor(ctx: ManifestContext, watching: boolean, suppressLogs?: boolean) {
+  constructor(ctx: ManifestContext, watching: boolean) {
     this.#ctx = ctx;
     this.#client = new CompilerClient(ctx, Log.scoped('server.client'));
     this.#url = this.#client.url;
     this.#handle = { server: new ProcessHandle(ctx, 'server'), compiler: new ProcessHandle(ctx, 'compiler') };
-    this.#suppressLogs = suppressLogs ?? /^(1|true|on|yes)$/i.test(process.env.TRV_QUIET ?? '');
 
     this.info = {
       state: 'startup',
@@ -267,9 +265,7 @@ export class CompilerServer {
             (messages.error ??= []).push(event.payload);
             break;
         }
-        if (!this.#suppressLogs) {
-          log.render(event.payload);
-        }
+        log.render(event.payload);
       }
       if (this.isResetEvent(event)) {
         log.info('Reset event received, awaiting compiler target cleanup');
