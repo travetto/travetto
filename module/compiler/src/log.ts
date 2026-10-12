@@ -2,17 +2,14 @@ import type { CompilerLogEvent, CompilerLogLevel, CompilerProgressEvent, Compile
 
 const LEVEL_TO_PRIORITY: Record<CompilerLogLevel, number> = { debug: 1, info: 2, warn: 3, error: 4 };
 const SCOPE_MAX = 15;
-const ESC = '\x1b[';
 
 export type LogParamInput = unknown | unknown[];
 
-export type CompilerLogConfig = {
-  level?: CompilerLogLevel;
-  scope?: string;
-  parent?: CompilerLogConfig;
-  disabled?: boolean;
-  phase?: CompilerLogPhase;
+export type CompilerLogConfig = Partial<CompilerLogEvent> & {
+  parent?: Logger;
 };
+
+const ESC = '\x1b[';
 
 export const fromCompilerLogParamInput = (config?: LogParamInput) =>
   !config ? {} : Array.isArray(config) ? { args: config } : { args: [config] };
