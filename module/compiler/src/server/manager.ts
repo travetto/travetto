@@ -6,7 +6,7 @@ import { CommonUtil } from '../common.ts';
 import { EventUtil } from '../event.ts';
 import { Log } from '../log.ts';
 import { AsyncQueue } from '../queue.ts';
-import type { CompilerEvent, CompilerLogLevel, CompilerServerInfo } from '../types.ts';
+import type { CompilerEvent, CompilerServerInfo } from '../types.ts';
 import { CompilerUtil } from '../util.ts';
 import type { CompilerClient } from './client.ts';
 import { CompilerServer } from './server.ts';
@@ -98,12 +98,7 @@ export class CompilerManager {
   }
 
   /** Main entry point for compilation */
-  static async compile(
-    ctx: ManifestContext,
-    client: CompilerClient,
-    config: { watch?: boolean; logLevel?: CompilerLogLevel; forceRestart?: boolean }
-  ): Promise<void> {
-    Log.level = config.logLevel ?? 'info';
+  static async compile(ctx: ManifestContext, client: CompilerClient, config: { watch?: boolean; forceRestart?: boolean }): Promise<void> {
     const watch = !!config.watch;
 
     if (config.forceRestart && (await client.stop())) {
@@ -190,7 +185,8 @@ export class CompilerManager {
         await this.#failWithBuildErrors(result.info);
       }
     } else {
-      await this.compile(ctx, client, { watch: false, logLevel: 'error' });
+      Log.level = 'error';
+      await this.compile(ctx, client, { watch: false });
     }
   }
 }

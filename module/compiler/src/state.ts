@@ -274,10 +274,12 @@ export class CompilerState implements CompilerHost {
 
   isCompilerFile(file: string): boolean {
     const entry = this.getBySource(file);
+    const type = ManifestModuleUtil.getFolderKey(file);
     return (
-      (entry?.moduleFile && ManifestModuleUtil.getFileRole(entry.moduleFile) === 'compile') ||
-      entry?.module.roles.includes('compile') ||
-      false
+      (type === 'src' || type === 'support') &&
+      ((entry?.moduleFile && ManifestModuleUtil.getFileRole(entry.moduleFile) === 'compile') ||
+        entry?.module.roles.includes('compile') ||
+        false)
     );
   }
 

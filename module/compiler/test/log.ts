@@ -95,8 +95,8 @@ class CompilerLogTests {
     Log.level = 'info';
     Log.disabled = false;
     assert.strictEqual(scopedLogger.scope, 'scoped-test');
-    assert.strictEqual(scopedLogger.level, 'error');
-    assert.strictEqual(scopedLogger.disabled, true);
+    assert.strictEqual(scopedLogger.level, 'info');
+    assert.strictEqual(scopedLogger.disabled, false);
     assert.strictEqual(Log.level, 'info');
     assert.strictEqual(Log.disabled, false);
   }

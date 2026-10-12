@@ -72,7 +72,6 @@ export async function invoke(...input: string[]): Promise<unknown> {
   const ctx = getManifestContext();
   const client = new CompilerClient(ctx, Log.scoped('client'));
 
-  Log.level = 'error';
   Log.workspace = ctx.workspace.path;
 
   switch (command) {

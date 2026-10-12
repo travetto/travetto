@@ -32,13 +32,12 @@ class Logger extends CompilerLogger {
   scope?: string;
   parent?: Logger;
 
-  constructor(config: { level?: CompilerLogLevel; scope?: string } = {}, parent?: Logger) {
+  constructor(config: { level?: CompilerLogLevel; scope?: string; disabled?: boolean } = {}, parent?: Logger) {
     super();
-    const build = process.env.TRV_BUILD;
     this.parent = parent;
-    this.#level ??= config.level ?? (build === 'debug' || build === 'info' || build === 'warn' || build === 'error' ? build : undefined);
-    this.#disabled ??= (/^(1|true|on|yes)$/i.test(process.env.TRV_QUIET ?? '') && !build) || build === 'none';
-    this.scope ??= config.scope;
+    this.scope = config.scope;
+    this.#level = config.level;
+    this.#disabled = config.disabled;
   }
 
   get disabled(): boolean {
@@ -59,7 +58,7 @@ class Logger extends CompilerLogger {
 
   /** Get if we should log progress */
   get logProgress(): boolean {
-    return (this.#logProgress ??= process.stdout.isTTY && !this.disabled);
+    return process.stdout.isTTY && !this.disabled;
   }
 
   /** Produce a scoped logger */
@@ -97,7 +96,11 @@ class Logger extends CompilerLogger {
   }
 }
 
-export const Log = new Logger();
+const build = process.env.TRV_BUILD;
+export const Log = new Logger({
+  level: build === 'debug' || build === 'info' || build === 'warn' || build === 'error' ? build : 'debug',
+  disabled: (/^(1|true|on|yes)$/i.test(process.env.TRV_QUIET ?? '') && !build) || build === 'none'
+});
 
 class IpcLogger extends CompilerLogger {
   render(event: CompilerLogEvent): void {
