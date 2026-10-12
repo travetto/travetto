@@ -1,4 +1,4 @@
-import { type Strategy, type AuthenticateOptions, use as usePassport, authenticate as authenticatePassport } from 'passport';
+import passport, { type Strategy, type AuthenticateOptions } from 'passport';
 
 import type { Authenticator, AuthenticatorState, Principal } from '@travetto/auth';
 import type { WebFilterContext } from '@travetto/web';
@@ -37,7 +37,7 @@ export class PassportAuthenticator<V extends PassportUser = PassportUser> implem
     this.#strategy = strategy;
     this.#toPrincipal = toPrincipal;
     this.#passportOptions = typeof options === 'function' ? options : (): Partial<AuthenticateOptions> => options;
-    usePassport(this.#strategyName, this.#strategy);
+    passport.use(this.#strategyName, this.#strategy);
   }
 
   /**
@@ -61,7 +61,7 @@ export class PassportAuthenticator<V extends PassportUser = PassportUser> implem
     };
 
     const user = await WebConnectUtil.invoke<V>(ctx, (request, response, next) =>
-      authenticatePassport(this.#strategyName, options, next)(request, response)
+      passport.authenticate(this.#strategyName, options, next)(request, response)
     );
 
     if (user) {

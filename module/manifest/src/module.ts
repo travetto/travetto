@@ -170,7 +170,7 @@ export class ManifestModuleUtil {
         return 'support/fixtures';
       } else if (moduleFile.startsWith('support/resources/')) {
         return 'support/resources';
-      } else if (/^support\/transformer[./]/.test(moduleFile)) {
+      } else if (moduleFile.startsWith('support/transformer.')) {
         return '$transformer';
       }
       const key = moduleFile.substring(0, folderLocation);

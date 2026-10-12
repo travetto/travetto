@@ -245,7 +245,7 @@ export class CompilerWatcher {
 
   async #getGitHeadRef(): Promise<string | undefined> {
     return executeFile('git', ['rev-parse', 'HEAD', '--symbolic-full-name', 'HEAD'], { cwd: this.#root }).then(
-      ({ stdout }) => stdout.trim(),
+      ({ stdout }) => stdout.trim().replace('\n', '$'),
       () => undefined
     );
   }
