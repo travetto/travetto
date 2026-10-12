@@ -5,8 +5,7 @@ import timers from 'node:timers/promises';
 import type { ManifestContext } from '@travetto/manifest';
 
 import { CommonUtil } from '../common.ts';
-import type { LogShape } from '../log.ts';
-import type { CompilerEventPayload, CompilerEventType, CompilerServerInfo, CompilerStateType } from '../types.ts';
+import type { CompilerEventPayload, CompilerEventType, CompilerServerInfo, CompilerStateType, CompilerLoggerShape } from '../types.ts';
 import { ProcessHandle } from './process-handle.ts';
 
 type FetchEventsConfig<T> = {
@@ -26,11 +25,11 @@ const streamAgent = new Agent({
  */
 export class CompilerClient {
   #url: string;
-  #log: LogShape;
+  #log: CompilerLoggerShape;
   #handle: Record<'compiler' | 'server', ProcessHandle>;
   #ctx: ManifestContext;
 
-  constructor(ctx: ManifestContext, log: LogShape) {
+  constructor(ctx: ManifestContext, log: CompilerLoggerShape) {
     this.#ctx = ctx;
     this.#url = ctx.build.compilerUrl.replace('localhost', '127.0.0.1');
     this.#log = log;

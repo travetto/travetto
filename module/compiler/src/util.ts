@@ -61,4 +61,13 @@ export class CompilerUtil {
     PackageUtil.clearCache();
     ManifestModuleUtil.clearScanCache();
   }
+
+  /**
+   * Consume all items of an async iterable. The caller is responsible for handling cancellation.
+   */
+  static async consumeAsyncIterable<T>(input: AsyncIterable<T>, handler: (item: T) => unknown): Promise<void> {
+    for await (const event of input) {
+      handler(event);
+    }
+  }
 }

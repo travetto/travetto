@@ -89,3 +89,25 @@ export class CompilerReset extends Error {
     this.files = files;
   }
 }
+
+const toInput = (config?: unknown) => (!config ? {} : Array.isArray(config) ? { args: config } : { args: [config] });
+
+export abstract class CompilerLogger {
+  /** Log event with filtering by level */
+  abstract render(event: CompilerLogEvent): void;
+
+  info(message: string, params?: unknown, override?: Partial<CompilerLogEvent>): void {
+    this.render({ ...toInput(params), ...override, level: 'info', message });
+  }
+  debug(message: string, params?: unknown, override?: Partial<CompilerLogEvent>): void {
+    this.render({ ...toInput(params), ...override, level: 'debug', message });
+  }
+  warn(message: string, params?: unknown, override?: Partial<CompilerLogEvent>): void {
+    this.render({ ...toInput(params), ...override, level: 'warn', message });
+  }
+  error(message: string, params?: unknown, override?: Partial<CompilerLogEvent>): void {
+    this.render({ ...toInput(params), ...override, level: 'error', message });
+  }
+}
+
+export type CompilerLoggerShape = Omit<CompilerLogger, 'render'>;

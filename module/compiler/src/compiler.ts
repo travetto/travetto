@@ -5,7 +5,7 @@ import { type DeltaEvent, getManifestContext, ManifestDeltaUtil, ManifestIndex, 
 
 import { CommonUtil } from './common.ts';
 import { EventUtil } from './event.ts';
-import { IpcLog as log } from './ipc-log.ts';
+import { IpcLog as log } from './log.ts';
 import { CompilerState } from './state.ts';
 import { type CompileEmitEvent, type CompilerEvent, CompilerReset, type CompilerWatchEvent } from './types.ts';
 import { CompilerWatcher } from './watch.ts';

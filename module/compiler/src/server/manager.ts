@@ -7,6 +7,7 @@ import { EventUtil } from '../event.ts';
 import { Log } from '../log.ts';
 import { AsyncQueue } from '../queue.ts';
 import type { CompilerEvent, CompilerLogLevel, CompilerServerInfo } from '../types.ts';
+import { CompilerUtil } from '../util.ts';
 import type { CompilerClient } from './client.ts';
 import { CompilerServer } from './server.ts';
 
@@ -122,7 +123,13 @@ export class CompilerManager {
     } else {
       log.info('Server already running, waiting for initial compile to complete');
       const controller = new AbortController();
-      Log.consumeProgressEvents(() => client.fetchEvents('progress', { until: event => !!event.complete, signal: controller.signal }));
+      if (Log.logProgress) {
+        // Don't wait
+        CompilerUtil.consumeAsyncIterable(
+          client.fetchEvents('progress', { until: event => !!event.complete, signal: controller!.signal }),
+          Log.onProgressEvent
+        );
+      }
       const finalState = await client.waitForState(['compile-end', 'watch-start', 'compile-failed'], 'Successfully built');
       controller.abort();
       if (finalState === 'compile-failed') {

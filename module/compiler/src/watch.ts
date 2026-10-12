@@ -6,7 +6,7 @@ import { promisify } from 'node:util';
 import { ManifestFileUtil, ManifestModuleUtil, ManifestUtil, PACKAGE_MANAGERS, PackageUtil, path } from '@travetto/manifest';
 
 import { EventUtil } from './event.ts';
-import { IpcLog as log } from './ipc-log.ts';
+import { IpcLog as log } from './log.ts';
 import { AsyncQueue } from './queue.ts';
 import type { CompilerState } from './state.ts';
 import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from './types.ts';

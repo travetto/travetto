@@ -1,20 +1,9 @@
-import type { CompilerLogEvent, CompilerLogLevel, CompilerProgressEvent } from './types.ts';
+import { CompilerLogger, type CompilerLogEvent, type CompilerLogLevel, type CompilerProgressEvent } from './types.ts';
 
 const LEVEL_TO_PRIORITY: Record<CompilerLogLevel, number> = { debug: 1, info: 2, warn: 3, error: 4 };
 const SCOPE_MAX = 15;
 
-export type CompilerLogConfig = Partial<CompilerLogEvent> & {
-  parent?: Logger;
-};
-
-export type LogParamInput = unknown | unknown[];
-
-const ESC = '\x1b[';
-
-export const fromCompilerLogParamInput = (config?: LogParamInput) =>
-  !config ? {} : Array.isArray(config) ? { args: config } : { args: [config] };
-
-class Logger {
+class Logger extends CompilerLogger {
   static #linePartial: boolean | undefined;
 
   /** Rewrite text line, tracking cleanup as necessary */
@@ -24,19 +13,15 @@ class Logger {
     }
     if (this.#linePartial === undefined) {
       // First time
-      process.stdout.write(`${ESC}?25l`); // Hide cursor
-      process.on('exit', () => this.reset());
+      process.stdout.write(`\x1b[?25l`); // Hide cursor
+      process.on('exit', () => process.stdout.write(`\x1b[!p\x1b[?25h`)); // Restore cursor
     }
     // Move to 1st position, and clear after text
-    const done = process.stdout.write(`${ESC}1G${text}${ESC}0K`);
+    const done = process.stdout.write(`\x1b[1G${text}\x1b[0K`);
     this.#linePartial = !!text;
     if (!done) {
       return new Promise<void>(resolve => process.stdout.once('drain', resolve));
     }
-  }
-
-  static reset(): void {
-    process.stdout.write(`${ESC}!p${ESC}?25h`);
   }
 
   #level?: CompilerLogLevel;
@@ -47,9 +32,11 @@ class Logger {
   scope?: string;
   parent?: Logger;
 
-  constructor(config: CompilerLogConfig = {}) {
+  constructor(config: { level?: CompilerLogLevel; scope?: string } = {}, parent?: Logger) {
+    super();
     const build = process.env.TRV_BUILD;
-    this.#level ??= build === 'debug' || build === 'info' || build === 'warn' || build === 'error' ? build : undefined;
+    this.parent = parent;
+    this.#level ??= config.level ?? (build === 'debug' || build === 'info' || build === 'warn' || build === 'error' ? build : undefined);
     this.#disabled ??= (/^(1|true|on|yes)$/i.test(process.env.TRV_QUIET ?? '') && !build) || build === 'none';
     this.scope ??= config.scope;
   }
@@ -77,7 +64,7 @@ class Logger {
 
   /** Produce a scoped logger */
   scoped(name: string): Logger {
-    return new Logger({ parent: this, scope: name });
+    return new Logger({ scope: name }, this);
   }
 
   /** Write progress event, if active */
@@ -92,27 +79,9 @@ class Logger {
     return Logger.rewriteLine(text);
   }
 
-  /** Write all progress events if active */
-  async consumeProgressEvents(input: () => AsyncIterable<CompilerProgressEvent>): Promise<void> {
-    if (!this.logProgress) {
-      return;
-    }
-    for await (const event of input()) {
-      this.onProgressEvent(event);
-    }
-    Logger.reset();
-  }
-
-  valid(event: CompilerLogEvent): boolean {
-    if (this.disabled && event.level !== 'error') {
-      return false;
-    }
-    return LEVEL_TO_PRIORITY[this.level] <= LEVEL_TO_PRIORITY[event.level];
-  }
-
   /** Log event with filtering by level */
   render(event: CompilerLogEvent): void {
-    if (!this.valid(event)) {
+    if ((this.disabled && event.level !== 'error') || LEVEL_TO_PRIORITY[this.level] > LEVEL_TO_PRIORITY[event.level]) {
       return;
     }
     const params = [event.message, ...(event.args ?? [])].map(arg =>
@@ -126,21 +95,18 @@ class Logger {
     Logger.rewriteLine(''); // Clear out progress line, if active
     console[event.level]!(...params);
   }
+}
 
-  info(message: string, params?: LogParamInput, override?: CompilerLogConfig): void {
-    this.render({ ...fromCompilerLogParamInput(params), ...override, level: 'info', message });
-  }
-  debug(message: string, params?: LogParamInput, override?: CompilerLogConfig): void {
-    this.render({ ...fromCompilerLogParamInput(params), ...override, level: 'debug', message });
-  }
-  warn(message: string, params?: LogParamInput, override?: CompilerLogConfig): void {
-    this.render({ ...fromCompilerLogParamInput(params), ...override, level: 'warn', message });
-  }
-  error(message: string, params?: LogParamInput, override?: CompilerLogConfig): void {
-    this.render({ ...fromCompilerLogParamInput(params), ...override, level: 'error', message });
+export const Log = new Logger();
+
+class IpcLogger extends CompilerLogger {
+  render(event: CompilerLogEvent): void {
+    if (process.connected && process.send) {
+      process.send({ type: 'log', payload: event });
+    } else {
+      Log.render(event);
+    }
   }
 }
 
-export type LogShape = Pick<Logger, CompilerLogLevel>;
-
-export const Log = new Logger();
+export const IpcLog = new IpcLogger();
