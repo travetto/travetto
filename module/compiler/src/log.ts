@@ -3,11 +3,11 @@ import type { CompilerLogEvent, CompilerLogLevel, CompilerProgressEvent } from '
 const LEVEL_TO_PRIORITY: Record<CompilerLogLevel, number> = { debug: 1, info: 2, warn: 3, error: 4 };
 const SCOPE_MAX = 15;
 
-export type LogParamInput = unknown | unknown[];
-
 export type CompilerLogConfig = Partial<CompilerLogEvent> & {
   parent?: Logger;
 };
+
+export type LogParamInput = unknown | unknown[];
 
 const ESC = '\x1b[';
 
