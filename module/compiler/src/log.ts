@@ -41,18 +41,33 @@ export class Logger implements LogConfig, LogShape {
     process.stdout.write(`${ESC}!p${ESC}?25h`);
   }
 
-  level: CompilerLogLevel;
-  disabled: boolean;
+  #level?: CompilerLogLevel;
+  #disabled?: boolean;
+
   workspace: string = process.cwd();
   scope?: string;
   parent?: Logger;
 
-  constructor(config: LogConfig = {}) {
-    Object.assign(this, {
-      level: config.parent?.level ?? 'debug',
-      disabled: config.parent?.disabled ?? false,
-      ...config
-    });
+  constructor(config: Pick<LogConfig, 'disabled' | 'level' | 'scope'> = {}) {
+    this.#level ??= config.level;
+    this.#disabled ??= config.disabled;
+    this.scope ??= config.scope;
+  }
+
+  get disabled(): boolean {
+    return this.#disabled ?? this.parent?.disabled ?? false;
+  }
+
+  set disabled(value: boolean) {
+    this.#disabled = value;
+  }
+
+  get level(): CompilerLogLevel {
+    return this.#level ?? this.parent?.level ?? 'debug';
+  }
+
+  set level(value: CompilerLogLevel) {
+    this.#level = value;
   }
 
   valid(event: CompilerLogEvent): boolean {

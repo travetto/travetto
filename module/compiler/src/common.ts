@@ -5,6 +5,8 @@ import { type ManifestContext, path } from '@travetto/manifest';
 
 import { Log } from './log.ts';
 
+const log = Log.scoped('event-stream');
+
 export class CommonUtil {
   /**
    * Restartable Event Stream
@@ -14,7 +16,6 @@ export class CommonUtil {
     parent: AbortSignal,
     shouldRestart: (item: T) => boolean
   ): AsyncIterable<T> {
-    const log = Log.scoped('event-stream');
     outer: while (!parent.aborted) {
       const controller = new AbortController();
       setMaxListeners(1000, controller.signal);
