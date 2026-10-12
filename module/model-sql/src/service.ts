@@ -56,11 +56,10 @@ import {
   QueryVerifier,
   type SuggestModelQuery,
   type ValidComparableFields,
-  type ValidNumericFields,
   type ValidStringFields,
   type WhereClause
 } from '@travetto/model-query';
-import { type Class, castTo, JSONUtil } from '@travetto/runtime';
+import { type Class, castTo, JSONUtil, Runtime } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 import { WorkPool } from '@travetto/worker';
 
@@ -330,6 +329,8 @@ export abstract class BaseSQLModelService<C = unknown>
       for (const createIndexSQL of this.dialect.getCreateTableIndexSQLs(tableContext)) {
         await this.connection.execute(createIndexSQL);
       }
+    } else if (Runtime.role === 'test') {
+      // Don't modify on tests
     } else {
       const query = this.dialect.getExistingColumnsQuery(tableContext);
       const result = await this.connection.execute(query.sql, query.parameters);

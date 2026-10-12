@@ -42,7 +42,7 @@ import {
   type SortedIndexSelection,
   type SortedIndexSelectionType
 } from '@travetto/model-indexed';
-import { type Class, castTo, JSONUtil, ShutdownManager, TimeUtil } from '@travetto/runtime';
+import { type Class, castTo, JSONUtil, Runtime, ShutdownManager, TimeUtil } from '@travetto/runtime';
 
 import type { DynamoDBModelConfig } from './config.ts';
 import { DynamoDBUtil } from './util.ts';
@@ -332,6 +332,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }, ...idx.attributes],
         GlobalSecondaryIndexes: idx.indices
       });
+    } else if (Runtime.role === 'test') {
+      // Don't modify on tests
     } else {
       const indexUpdates = DynamoDBUtil.findChangedGlobalIndexes(currentTable.Table?.GlobalSecondaryIndexes, idx.indices);
       const changedAttributes = DynamoDBUtil.findChangedAttributes(currentTable.Table?.AttributeDefinitions, idx.attributes);

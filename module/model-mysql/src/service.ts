@@ -1,7 +1,9 @@
 import type { PoolConnection } from 'mysql2/promise';
 
 import { Injectable, PostConstruct } from '@travetto/di';
-import { BaseSQLModelService } from '@travetto/model-sql';
+import type { ModelType } from '@travetto/model';
+import { BaseSQLModelService, type TableContext } from '@travetto/model-sql';
+import { Env } from '@travetto/runtime';
 
 import type { MysqlConnection } from './connection.ts';
 
@@ -24,5 +26,13 @@ export class MysqlModelService extends BaseSQLModelService {
   @PostConstruct()
   override async initialize(): Promise<void> {
     await super.initialize();
+  }
+
+  async truncateTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
+    if (Env.TRV_ROLE.value === 'test') {
+      await this.deleteByQuery(tableContext.cls, {});
+    } else {
+      await super.truncateTable(tableContext);
+    }
   }
 }

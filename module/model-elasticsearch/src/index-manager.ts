@@ -4,6 +4,7 @@ import type { ReindexRequest } from '@elastic/elasticsearch/api/types';
 import { ModelRegistryIndex, type ModelStorageSupport, ModelStorageUtil, type ModelType } from '@travetto/model';
 import { warnIfIndexedUniqueIndex } from '@travetto/model-indexed';
 import { type Class, JSONUtil } from '@travetto/runtime';
+import { Runtime } from '@travetto/runtime';
 
 import type { ElasticsearchModelConfig } from './config.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
@@ -122,7 +123,13 @@ export class IndexManager implements ModelStorageSupport {
 
     warnIfIndexedUniqueIndex(this, cls, ModelRegistryIndex.getIndices(cls));
 
-    if (resolvedAlias) {
+    if (!resolvedAlias) {
+      // Create if non-existent
+      console.debug('Creating Model', { index });
+      await this.createIndex(cls);
+    } else if (Runtime.role === 'test') {
+      // Don't modify on tests
+    } else {
       const [currentIndex] = Object.keys(resolvedAlias ?? {});
       const pendingMapping = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
       const changedFields = ElasticsearchSchemaUtil.getChangedFields(resolvedAlias[currentIndex].mappings, pendingMapping);
@@ -149,10 +156,6 @@ export class IndexManager implements ModelStorageSupport {
         const toDelete = Object.keys(resolvedAlias).filter(item => item !== pendingIndex);
         await Promise.all(toDelete.map(alias => this.#client.indices.delete({ index: alias })));
       }
-    } else {
-      // Create if non-existent
-      console.debug('Creating Model', { index });
-      await this.createIndex(cls);
     }
   }
 
