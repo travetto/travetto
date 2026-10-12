@@ -8,11 +8,9 @@ import './config-override.ts';
 
 @CliCommand({ runTarget: true })
 export class SampleApp {
-  preMain(): void {
-    Env.NODE_ENV.set('production');
-  }
-
   async main() {
+    Env.NODE_ENV.set('production');
+
     console.log('CUSTOM STARTUP');
     await Registry.init();
     const config = await DependencyRegistryIndex.getInstance(WebHttpConfig);

@@ -25,13 +25,11 @@ export class TestDiffCommand {
    */
   formatOptions?: string[];
 
-  preMain(): void {
+  async main(importOrFile: string, diff: string): Promise<void> {
     Env.TRV_ROLE.set('test');
     Env.TRV_LOG_PLAIN.set(true);
     Env.TRV_LOG_TIME.clear();
-  }
 
-  async main(importOrFile: string, diff: string): Promise<void> {
     const diffSource = await fs.readFile(diff).then(JSONUtil.fromBinaryArray<TestDiffSource>);
     const importPath = RuntimeIndex.getFromImportOrSource(importOrFile)!.import;
 

@@ -20,7 +20,6 @@ export class ExecutionManager {
 
     // Wait 50ms to allow stdout to flush on shutdown
     ShutdownManager.signal.addEventListener('abort', () => Util.blockingTimeout(50));
-    ConsoleManager.debug(Runtime.debug);
     await instance.main(...args);
   }
 

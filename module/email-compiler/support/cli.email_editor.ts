@@ -16,11 +16,8 @@ export class EmailEditorCommand {
   @CliProfilesFlag()
   profile: string[];
 
-  preMain(): void {
-    Env.TRV_ROLE.set('build');
-  }
-
   async main(): Promise<void> {
+    Env.TRV_ROLE.set('build');
     await Registry.init();
     const service = await DependencyRegistryIndex.getInstance(EditorService);
     await service.listen();

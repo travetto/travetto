@@ -6,7 +6,7 @@ import { IsPrivate } from '@travetto/schema';
 import { RunUtil } from '../src/execute/run.ts';
 import { SuiteRegistryIndex } from '../src/registry/registry-index.ts';
 
-@CliCommand()
+@CliCommand({ supportDebug: false })
 @IsPrivate()
 /**
  * Produce a deterministic digest of discovered test identifiers.
@@ -18,12 +18,9 @@ export class TestDigestCommand {
   /** Output mode for digest emission. */
   output: 'json' | 'text' = 'text';
 
-  preMain(): void {
-    Env.TRV_ROLE.set('test');
-    Env.DEBUG.set(false);
-  }
-
   async main(globs: string[] = ['**/*']) {
+    Env.TRV_ROLE.set('test');
+
     // Load all tests
     for await (const imp of RunUtil.getTestImports(globs)) {
       try {

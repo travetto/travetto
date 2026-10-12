@@ -22,13 +22,11 @@ export class TestDirectCommand {
    */
   formatOptions?: string[];
 
-  preMain(): void {
+  main(importOrFile: string, clsId?: string, methodsNames: string[] = []): Promise<void> {
     Env.TRV_ROLE.set('test');
     Env.TRV_LOG_PLAIN.set(true);
     Env.TRV_LOG_TIME.clear();
-  }
 
-  main(importOrFile: string, clsId?: string, methodsNames: string[] = []): Promise<void> {
     // Resolve to import
     const importPath = RuntimeIndex.getFromImportOrSource(importOrFile)!.import;
 

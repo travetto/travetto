@@ -16,11 +16,9 @@ export class TestWatcherCommand {
 
   mode: 'all' | 'change' = 'all';
 
-  preMain(): void {
-    Env.TRV_ROLE.set('test');
-  }
-
   async main(): Promise<void> {
+    Env.TRV_ROLE.set('test');
+
     try {
       const { TestWatcher } = await import('../src/execute/watcher.ts');
       await TestWatcher.watch(this.format, this.mode === 'all');

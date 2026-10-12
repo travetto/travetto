@@ -11,7 +11,7 @@ const page = (file: string): string => path.resolve('related/travetto.github.io/
 /**
  * Generate documentation into the angular webapp under related/travetto.github.io
  */
-@CliCommand()
+@CliCommand({ supportDebug: false })
 export class DocAngularCommand {
   static async prepareAngularHtml(module: IndexedModule): Promise<void> {
     const moduleName = module.name.endsWith('mono-repo') ? 'overview' : module.name.split('/')[1];
@@ -39,10 +39,6 @@ export class DocAngularCommand {
         console.error(`${module.name}: ${error.message}`);
       }
     }
-  }
-
-  preMain(): void {
-    Env.DEBUG.set(false);
   }
 
   async main(target?: string): Promise<void> {

@@ -1,4 +1,14 @@
-import { type Class, type ClassInstance, castTo, describeFunction, Env, getClass, Runtime, RuntimeIndex } from '@travetto/runtime';
+import {
+  type Class,
+  type ClassInstance,
+  castTo,
+  ConsoleManager,
+  describeFunction,
+  Env,
+  getClass,
+  Runtime,
+  RuntimeIndex
+} from '@travetto/runtime';
 import { SchemaRegistryIndex, type ValidationError } from '@travetto/schema';
 
 import { CliModuleUtil } from '../module.ts';
@@ -7,7 +17,7 @@ import type { CliCommandShape } from '../types.ts';
 import { CliUtil } from '../util.ts';
 import { CliCommandRegistryIndex } from './registry-index.ts';
 
-type CliCommandConfigOptions = { runTarget?: boolean };
+type CliCommandConfigOptions = { runTarget?: boolean; supportDebug?: false };
 type CliFlagOptions = { full?: string; short?: string; envVars?: string[] };
 
 /**
@@ -21,6 +31,9 @@ export function CliCommand(config: CliCommandConfigOptions = {}) {
   return function <T extends CliCommandShape>(target: Class<T>): void {
     if (target.Ⲑid && !describeFunction(target)?.abstract) {
       CliCommandRegistryIndex.getForRegister(target).register(config);
+      if (config.supportDebug !== false) {
+        CliCommandRegistryIndex.registerPreMain(target, 10000, () => ConsoleManager.debug(Runtime.debug));
+      }
     }
   };
 }
