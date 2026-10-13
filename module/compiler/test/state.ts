@@ -57,4 +57,16 @@ class CompilerStateTests {
     const nonExistentRemoved = await state.removeSource(path.resolve('/test/app/src/beta.ts'));
     assert(nonExistentRemoved === false);
   }
+
+  @Test()
+  async verifyFailedFilesAndHashReset() {
+    const baseManifest = this.#createManifest();
+    const state = await CompilerState.get(new ManifestIndex(baseManifest));
+    const alphaSource = path.resolve('/test/app/src/alpha.ts');
+
+    assert.deepStrictEqual(state.getFailedFiles(), []);
+
+    state.resetSourceHash(alphaSource);
+    assert.deepStrictEqual(state.getFailedFiles(), []);
+  }
 }

@@ -301,6 +301,14 @@ export class CompilerWatcher {
     };
   }
 
+  add(file: string): void {
+    const candidate = this.#toCandidateEvent({ action: 'update', file });
+    if (this.#isValidEvent(candidate)) {
+      this.#state.resetSourceHash(file);
+      this.#queue.add(candidate);
+    }
+  }
+
   [Symbol.asyncIterator](): AsyncIterator<CompilerWatchEvent> {
     if (!this.#cleanup.workspace) {
       this.#listenWorkspace();

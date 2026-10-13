@@ -38,6 +38,7 @@ export class Compiler {
   #shutdownSignal: AbortSignal;
   #shuttingDown = false;
   #deltaEvents: DeltaEvent[];
+  #watcher: CompilerWatcher;
 
   constructor(state: CompilerState, deltaEvents: DeltaEvent[], watch?: boolean) {
     this.#state = state;
@@ -46,6 +47,7 @@ export class Compiler {
 
     this.#shutdownController = new AbortController();
     this.#shutdownSignal = this.#shutdownController.signal;
+    this.#watcher = new CompilerWatcher(this.#state, this.#shutdownSignal);
     setMaxListeners(1000, this.#shutdownSignal);
     process.once('disconnect', () => this.#shutdown('manual')).on('message', event => event === 'shutdown' && this.#shutdown('manual'));
   }
@@ -172,6 +174,14 @@ export class Compiler {
       log.info(`Compiled ${event.entry.sourceFile} on ${event.action}`);
     }
 
+    if (!diagnostics.length && this.#state.hasErrors()) {
+      for (const failedFile of this.#state.getFailedFiles()) {
+        if (failedFile !== event.entry.sourceFile) {
+          this.#watcher.add(failedFile);
+        }
+      }
+    }
+
     this.#sendEvent('state', { state: this.#state.hasErrors() ? 'compile-failed' : 'watch-start' });
 
     if (!diagnostics.length) {
@@ -263,7 +273,7 @@ export class Compiler {
 
       this.#sendEvent('state', { state: this.#state.hasErrors() ? 'compile-failed' : 'watch-start' });
       try {
-        for await (const event of new CompilerWatcher(this.#state, this.#shutdownSignal)) {
+        for await (const event of this.#watcher) {
           await this.#onWatchEvent(event);
         }
         this.#sendEvent('state', { state: 'watch-end' });

@@ -264,6 +264,10 @@ export class CompilerState implements CompilerHost {
     return [...this.#failures.entries()];
   }
 
+  getFailedFiles(): string[] {
+    return [...this.#failures.keys()];
+  }
+
   get failureCount(): number {
     return this.#failures.size;
   }
@@ -328,6 +332,10 @@ export class CompilerState implements CompilerHost {
       this.#sourceFileObjects.delete(sourceFile);
     }
     return changed;
+  }
+
+  resetSourceHash(sourceFile: string): void {
+    this.#sourceHashes.delete(sourceFile);
   }
 
   /**
@@ -415,7 +423,10 @@ export class CompilerState implements CompilerHost {
     return contents;
   }
 
-  getSourceFile(sourceFile: string, language: ScriptTarget): SourceFile {
+  getSourceFile(sourceFile: string, language: ScriptTarget, onError?: unknown, shouldCreateNewSourceFile?: boolean): SourceFile {
+    if (shouldCreateNewSourceFile) {
+      this.#sourceFileObjects.delete(sourceFile);
+    }
     return this.#sourceFileObjects.getOrInsertComputed(sourceFile, () => {
       const content = this.readFile(sourceFile)!;
       return ts.createSourceFile(sourceFile, content ?? '', language);
