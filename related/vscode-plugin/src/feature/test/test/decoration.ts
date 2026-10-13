@@ -31,6 +31,7 @@ type DecorationConfig = {
  */
 export const Style: {
   COLORS: Record<TestStatus, vscode.ThemeColor>;
+  DEFAULT_COLORS: Record<vscode.ColorThemeKind, Record<string, string>>;
   IMAGE: Partial<vscode.DecorationRenderOptions>;
   ASSERT: Partial<vscode.DecorationRenderOptions>;
 } = {
@@ -40,6 +41,32 @@ export const Style: {
     errored: new vscode.ThemeColor('editorGutter.deletedBackground'),
     passed: new vscode.ThemeColor('editorGutter.addedBackground'),
     unknown: new vscode.ThemeColor('editor.inactiveSelectionBackground')
+  },
+  DEFAULT_COLORS: {
+    [vscode.ColorThemeKind.Light]: {
+      'editorGutter.modifiedBackground': '#2090D3',
+      'editorGutter.deletedBackground': '#E51400',
+      'editorGutter.addedBackground': '#48985D',
+      'editor.inactiveSelectionBackground': '#E5EBF1'
+    },
+    [vscode.ColorThemeKind.Dark]: {
+      'editorGutter.modifiedBackground': '#1B81A8',
+      'editorGutter.deletedBackground': '#F14C4C',
+      'editorGutter.addedBackground': '#487E02',
+      'editor.inactiveSelectionBackground': '#3A3D41'
+    },
+    [vscode.ColorThemeKind.HighContrast]: {
+      'editorGutter.modifiedBackground': '#1B81A8',
+      'editorGutter.deletedBackground': '#F48771',
+      'editorGutter.addedBackground': '#487E02',
+      'editor.inactiveSelectionBackground': '#3A3D41'
+    },
+    [vscode.ColorThemeKind.HighContrastLight]: {
+      'editorGutter.modifiedBackground': '#2090D3',
+      'editorGutter.deletedBackground': '#B5200D',
+      'editorGutter.addedBackground': '#48985D',
+      'editor.inactiveSelectionBackground': '#E5EBF1'
+    }
   },
   IMAGE: {
     isWholeLine: false,
@@ -152,10 +179,7 @@ export class Decorations {
    * Build or get cached image uri
    */
   static getImageUri(state: TestStatus, size: ImageSize): vscode.Uri {
-    const color = ThemeUtil.getTokenColor(
-      Style.COLORS[state].id,
-      Object.values(Style.COLORS).map(x => x.id)
-    );
+    const color = ThemeUtil.getTokenColor(Style.COLORS[state].id, Style.DEFAULT_COLORS);
     const key = `${color}-${size}`;
     if (!this.#imageUris[key]) {
       const relativeSize = size === 'small' ? 40 : 60;

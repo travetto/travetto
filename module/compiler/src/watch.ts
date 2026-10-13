@@ -223,6 +223,7 @@ export class CompilerWatcher {
     await this.#cleanup.canary?.();
     const full = path.resolve(this.#root, this.#watchCanary);
     await ManifestFileUtil.bufferedFileWrite(full, '');
+    const reset = () => fs.utimes(full, new Date(), new Date());
 
     log.debug('Starting workspace canary');
     const canaryId = setInterval(async () => {
@@ -231,12 +232,13 @@ export class CompilerWatcher {
         log.error('Restarting canary due to extra long delay');
         this.#lastWorkspaceModified = Date.now(); // Reset
       } else if (delta > this.#watchCanaryFrequency * 2) {
+        await reset();
         this.#queue.throw(new CompilerReset(`Workspace watch stopped responding ${delta}s ago`));
       } else if (delta > this.#watchCanaryFrequency) {
         log.error('Restarting parcel due to inactivity');
         await this.#listenWorkspace();
       } else {
-        await fs.utimes(full, new Date(), new Date());
+        await reset();
       }
     }, this.#watchCanaryFrequency * 1000);
 

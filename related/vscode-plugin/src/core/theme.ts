@@ -22,7 +22,7 @@ type ThemeRef = { path: string; label: string; id: string };
 
 export class ThemeUtil {
   static #rawThemes = new Map<string, { tokens: Map<string, string>; includes: string[] }>();
-  static #computedThemes = new Map<string, Map<string, string>>();
+  static #computedThemes = new Map<string, Map<string, string>[]>();
 
   static resolveThemePath(themeId: string): string | undefined {
     for (const extension of vscode.extensions.all) {
@@ -68,34 +68,30 @@ export class ThemeUtil {
     return { tokens, includes };
   }
 
-  static resolveTheme(themeName: string, fallbackThemeName: string, allowedKeys: Set<string>): Map<string, string> {
-    const themePaths: string[] = [fallbackThemeName, themeName]
-      .map(theme => this.resolveThemePath(theme))
-      .filter((file?: string): file is string => !!file);
+  static resolveTheme(themeName: string, defaults: Record<string, string>): Map<string, string>[] {
+    const themePaths: string[] = [themeName].map(theme => this.resolveThemePath(theme)).filter((file?: string): file is string => !!file);
 
     const seen = new Set<string>();
-    const toLoad: [string, string][] = [];
-    log.info('Resolving theme', themeName, fallbackThemeName);
+    const toLoad: Map<string, string>[] = [];
+    log.info('Resolving theme', themeName);
 
     while (themePaths.length > 0) {
       const themePath = themePaths.pop()!;
       if (seen.has(themePath)) continue;
       seen.add(themePath);
       log.info('Visiting', themeName, themePath.split('extensions/')[1]);
-      const loaded = this.#rawThemes.getOrInsertComputed(themePath, () => this.loadTheme(themePath, allowedKeys));
-      toLoad.push(...loaded.tokens.entries());
+      const loaded = this.#rawThemes.getOrInsertComputed(themePath, () => this.loadTheme(themePath, new Set(Object.keys(defaults))));
+      toLoad.push(loaded.tokens);
       themePaths.push(...loaded.includes);
     }
-    return new Map(toLoad.toReversed());
+    toLoad.push(new Map(Object.entries(defaults)));
+    return toLoad;
   }
 
-  static getTokenColor(token: string, allowedKeys: string[]): string | undefined {
+  static getTokenColor(token: string, defaults: Record<vscode.ColorThemeKind, Record<string, string>>): string | undefined {
     const themeKind = vscode.window.activeColorTheme.kind;
     const activeTheme = vscode.workspace.getConfiguration('workbench').get<string>('colorTheme')!;
-    return this.#computedThemes
-      .getOrInsertComputed(activeTheme, () =>
-        this.resolveTheme(activeTheme, themeKind === vscode.ColorThemeKind.Dark ? 'Dark 2026' : 'Light 2026', new Set(allowedKeys))
-      )
-      .get(token);
+    const list = this.#computedThemes.getOrInsertComputed(activeTheme, () => this.resolveTheme(activeTheme, defaults[themeKind]));
+    return list.reduce((a, map) => a ?? map.get(token), undefined! as string);
   }
 }
