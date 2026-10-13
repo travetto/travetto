@@ -226,16 +226,29 @@ export class DocumentResultsManager {
   /**
    * Refresh all results
    */
-  refresh(): void {
+  refresh(rebuildDecorations = false): void {
     if (!this.#editor) {
       return;
     }
+    if (rebuildDecorations) {
+      this.dispose();
+    }
     for (const suite of Object.values(this.#results.suite)) {
       if (suite.decoration && suite.status) {
+        if (rebuildDecorations) {
+          suite.styles = this.#genStyles('suite');
+        }
         this.#setStyle(suite.styles[suite.status], [suite.decoration]);
       }
     }
     for (const test of Object.values(this.#results.test)) {
+      if (test.decoration && rebuildDecorations) {
+        test.styles = this.#genStyles('test');
+        test.assertStyles = this.#genStyles('assertion');
+      }
+      if (test.logDecorations && rebuildDecorations) {
+        test.logStyle = Decorations.buildAssertStyle('unknown');
+      }
       this.#refreshTest(test);
     }
   }

@@ -235,6 +235,7 @@ class TestRunnerFeature extends BaseFeature {
     vscode.workspace.onDidCloseTextDocument(document => this.onCloseTextDocument(document), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(editor => this.onChangedActiveEditor(editor), null, context.subscriptions);
     vscode.workspace.onDidRenameFiles(event => this.renameFiles(event.files), null, context.subscriptions);
+    vscode.window.onDidChangeActiveColorTheme(() => this.#consumer.refreshAll(true), null, context.subscriptions);
 
     context.subscriptions.push(
       vscode.languages.registerCodeLensProvider(

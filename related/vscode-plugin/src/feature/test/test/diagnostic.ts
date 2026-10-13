@@ -12,6 +12,17 @@ export const testDiagnostics = vscode.languages.createDiagnosticCollection('Trav
  * Manages global diagnostic error messages
  */
 export class DiagnosticManager {
+  static build(test: TestResult, message: string, line: number): vscode.Diagnostic {
+    const clsName = test.classId.split(/[^a-z-/]+/i).at(-1);
+    const item = new vscode.Diagnostic(
+      new vscode.Range(new vscode.Position(line - 1, 0), new vscode.Position(line - 1, 1000)),
+      `${clsName}.${test.methodName} - ${message}`,
+      vscode.DiagnosticSeverity.Error
+    );
+    item.source = '@travetto/test';
+    return item;
+  }
+
   #status: vscode.StatusBarItem;
   #tracked = new Map<string, Map<string, Map<string, TestResult>>>();
   #window: typeof vscode.window;
@@ -23,24 +34,13 @@ export class DiagnosticManager {
   }
 
   #buildTestDiagnostics(file: string, test: TestResult): vscode.Diagnostic[] {
-    const clsName = test.classId.split(/[^a-z-/]+/i).at(-1);
     const results: vscode.Diagnostic[] = [];
-
-    const addError = (message: string, line: number) => {
-      const item = new vscode.Diagnostic(
-        new vscode.Range(new vscode.Position(line - 1, 0), new vscode.Position(line - 1, 1000)),
-        `${clsName}.${test.methodName} - ${message}`,
-        vscode.DiagnosticSeverity.Error
-      );
-      item.source = '@travetto/test';
-      results.push(item);
-    };
 
     for (const assertion of test.assertions) {
       if (!assertion.error) {
         continue;
       }
-      addError(Decorations.buildErrorHover(assertion).bodyFirst, assertion.line);
+      results.push(DiagnosticManager.build(test, Decorations.buildErrorHover(assertion).bodyFirst, assertion.line));
     }
 
     if (test.assertions.length === 0) {
@@ -49,7 +49,7 @@ export class DiagnosticManager {
         Workspace.resolveManifestIndexFileFromFile(file);
         const { outputFile } = Workspace.workspaceIndex.getFromSource(file) ?? {};
         if (outputFile && firstLine && (!firstLine.startsWith('Cannot find module') || !firstLine.includes(outputFile))) {
-          addError(firstLine, test.lineStart);
+          results.push(DiagnosticManager.build(test, firstLine, test.lineStart));
         }
       }
     }

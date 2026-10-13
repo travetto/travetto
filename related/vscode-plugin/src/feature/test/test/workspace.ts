@@ -4,6 +4,7 @@ import type { TestWatchEvent } from '@travetto/test';
 
 import type { Log } from '../../../core/log.ts';
 import { Workspace } from '../../../core/workspace.ts';
+import { Decorations } from './decoration.ts';
 import { DiagnosticManager } from './diagnostic.ts';
 import { DocumentResultsManager } from './document.ts';
 
@@ -20,6 +21,13 @@ export class WorkspaceResultsManager {
   constructor(log: Log, window: typeof vscode.window) {
     this.#log = log;
     this.#diagnostics = new DiagnosticManager(window);
+  }
+
+  refreshAll(rebuildDecorations = false) {
+    this.#log.info('Refreshing all', { rebuildDecorations });
+    for (const document of this.#results.values()) {
+      document.refresh(rebuildDecorations);
+    }
   }
 
   openDocument(document: vscode.TextDocument) {
