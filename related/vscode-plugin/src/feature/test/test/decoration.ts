@@ -30,16 +30,16 @@ type DecorationConfig = {
  * Various styles
  */
 export const Style: {
-  COLORS: Record<TestStatus, vscode.ThemeColor>;
+  COLORS: Record<TestStatus, [vscode.ThemeColor, string]>;
   IMAGE: Partial<vscode.DecorationRenderOptions>;
   ASSERT: Partial<vscode.DecorationRenderOptions>;
 } = {
   COLORS: {
-    skipped: new vscode.ThemeColor('editorGutter.modifiedBackground'),
-    failed: new vscode.ThemeColor('editorGutter.deletedBackground'),
-    errored: new vscode.ThemeColor('editorGutter.deletedBackground'),
-    passed: new vscode.ThemeColor('editorGutter.addedBackground'),
-    unknown: new vscode.ThemeColor('editor.inactiveSelectionBackground')
+    skipped: [new vscode.ThemeColor('editorGutter.modifiedBackground'), '#ccc'],
+    failed: [new vscode.ThemeColor('editorGutter.deletedBackground'), '#c00'],
+    errored: [new vscode.ThemeColor('editorGutter.deletedBackground'), '#c00'],
+    passed: [new vscode.ThemeColor('editorGutter.addedBackground'), '#0a0'],
+    unknown: [new vscode.ThemeColor('editor.inactiveSelectionBackground'), '#888']
   },
   IMAGE: {
     isWholeLine: false,
@@ -140,7 +140,7 @@ export class Decorations {
    * @param state
    */
   static buildAssertStyle(state: TestStatus): vscode.TextEditorDecorationType {
-    const color = Style.COLORS[state];
+    const [color] = Style.COLORS[state];
     return vscode.window.createTextEditorDecorationType({
       ...Style.ASSERT,
       borderColor: color,
@@ -154,7 +154,8 @@ export class Decorations {
   static getImageUri(state: TestStatus, size: ImageSize): vscode.Uri {
     const key = `${state}-${size}`;
     if (!this.#imageUris[key]) {
-      const color = ThemeUtil.getTokenColor(Style.COLORS[state].id);
+      const [token, defaultColor] = Style.COLORS[state];
+      const color = ThemeUtil.getTokenColor(token.id) ?? defaultColor;
       const relativeSize = size === 'small' ? 40 : 60;
       const offset = (100 - relativeSize) / 2;
       const gutterWidth = 16;
