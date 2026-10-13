@@ -1,6 +1,6 @@
 import type { PoolConnection } from 'mysql2/promise';
 
-import { Injectable, PostConstruct } from '@travetto/di';
+import { Injectable } from '@travetto/di';
 import type { ModelType } from '@travetto/model';
 import { BaseSQLModelService, type TableContext } from '@travetto/model-sql';
 import { Env } from '@travetto/runtime';
@@ -21,11 +21,6 @@ export class MysqlModelService extends BaseSQLModelService {
 
   get client(): PoolConnection {
     return this.connection.active!;
-  }
-
-  @PostConstruct()
-  override async initialize(): Promise<void> {
-    await super.initialize();
   }
 
   async truncateTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {

@@ -1,6 +1,6 @@
 import type { default as pg } from 'pg';
 
-import { Injectable, PostConstruct } from '@travetto/di';
+import { Injectable } from '@travetto/di';
 import { BaseSQLModelService } from '@travetto/model-sql';
 
 import type { PostgresConnection } from './connection.ts';
@@ -19,10 +19,5 @@ export class PostgresModelService extends BaseSQLModelService {
 
   get client(): pg.Pool {
     return this.connection.pool;
-  }
-
-  @PostConstruct()
-  override async initialize(): Promise<void> {
-    await super.initialize();
   }
 }

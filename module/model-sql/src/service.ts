@@ -1,4 +1,4 @@
-import { Injectable } from '@travetto/di';
+import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type BulkOperation,
   type BulkResponse,
@@ -100,6 +100,7 @@ export abstract class BaseSQLModelService<C = unknown>
     return this.dialect.compileWhere(this.connection.getContext(modelClass), ModelQueryUtil.getWhereClause(modelClass, where), checkExpiry);
   }
 
+  @PostConstruct()
   async initialize(): Promise<void> {
     await this.connection.init();
     await this.createStorage();

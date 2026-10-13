@@ -1,6 +1,6 @@
 import type { DatabaseSync } from 'node:sqlite';
 
-import { Injectable, PostConstruct } from '@travetto/di';
+import { Injectable } from '@travetto/di';
 import type { ModelType } from '@travetto/model';
 import { BaseSQLModelService, type TableContext } from '@travetto/model-sql';
 
@@ -20,11 +20,6 @@ export class SqliteModelService extends BaseSQLModelService {
 
   get client(): DatabaseSync {
     return this.connection.active!;
-  }
-
-  @PostConstruct()
-  async initialize(): Promise<void> {
-    await super.initialize();
   }
 
   async upsertTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
