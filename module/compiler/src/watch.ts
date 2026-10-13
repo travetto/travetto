@@ -12,6 +12,10 @@ import type { CompilerState } from './state.ts';
 import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from './types.ts';
 
 const executeFile = promisify(execFile);
+const fromLines = <K extends string[]>(output: string, ...keys: K): Record<K[number], string> => {
+  const lines = output.trim().split('\n');
+  return Object.entries(keys.map((key, idx) => [key, lines[idx].trim()])) as Record<K[number], string>;
+};
 
 type CompilerWatchEventCandidate = Omit<CompilerWatchEvent, 'entry'> & { entry?: CompileStateEntry };
 
@@ -244,20 +248,16 @@ export class CompilerWatcher {
     this.#cleanup.canary = (): void => clearInterval(canaryId);
   }
 
-  async #getGitHeadRef(): Promise<string | undefined> {
+  async #getGitHeadRef(): Promise<{ hash: string; ref: string } | undefined> {
     return executeFile('git', ['rev-parse', 'HEAD', '--symbolic-full-name', 'HEAD'], { cwd: this.#root }).then(
-      ({ stdout }) => stdout.trim().replace('\n', '$'),
+      ({ stdout }) => fromLines(stdout, 'hash', 'ref'),
       () => undefined
     );
   }
 
-  async #getGitDirectories(): Promise<[gitDirectory: string, commonDirectory: string] | undefined> {
+  async #getGitDirectories(): Promise<{ gitDirectory: string; commonDirectory: string } | undefined> {
     return await executeFile('git', ['rev-parse', '--git-dir', '--git-common-dir'], { cwd: this.#root }).then(
-      ({ stdout }) =>
-        stdout
-          .trim()
-          .split('\n')
-          .map(directory => path.resolve(this.#root, directory)) as [string, string],
+      ({ stdout }) => fromLines(stdout, 'gitDirectory', 'commonDirectory'),
       () => undefined
     );
   }
@@ -267,7 +267,7 @@ export class CompilerWatcher {
     if (!directories) {
       return;
     }
-    const [gitDirectory, commonDirectory] = directories;
+    const { gitDirectory, commonDirectory } = directories;
 
     log.debug('Starting git canary in', gitDirectory);
     let currentHead = await this.#getGitHeadRef();
@@ -276,9 +276,9 @@ export class CompilerWatcher {
     const checkChange = async (): Promise<void> => {
       try {
         const nextHead = await this.#getGitHeadRef();
-        if (nextHead && currentHead && nextHead !== currentHead) {
+        if (nextHead && currentHead && nextHead.hash !== currentHead.hash) {
           currentHead = nextHead;
-          this.#queue.throw(new CompilerReset(`Git branch or commit change detected: ${currentHead}=>${nextHead}`));
+          this.#queue.throw(new CompilerReset(`Git branch or commit change detected: ${currentHead.hash}=>${nextHead.hash}`));
         }
       } finally {
         isChecking = undefined;
@@ -287,8 +287,11 @@ export class CompilerWatcher {
 
     const watchers: { close(): void }[] = [];
     const targets = [
-      { folder: gitDirectory, filter: (file?: string | null): boolean => !file || /^(HEAD|packed-refs|refs)/.test(file) },
-      { folder: path.resolve(commonDirectory, 'refs', 'heads'), filter: (): boolean => true }
+      {
+        folder: path.resolve(this.#root, gitDirectory),
+        filter: (file?: string | null): boolean => !file || /^(HEAD|packed-refs|refs)/.test(file)
+      },
+      { folder: path.resolve(this.#root, commonDirectory, 'refs', 'heads'), filter: (): boolean => true }
     ];
 
     for (const { folder, filter } of targets) {
