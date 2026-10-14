@@ -13,11 +13,14 @@ import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from '
 
 const executeFile = promisify(execFile);
 const fromLines = <K extends string[]>(output: string, ...keys: K): Record<K[number], string> | undefined => {
-  const lines = output.trim().split('\s*\n\s*').filter(Boolean);
+  const lines = output
+    .split('\n')
+    .map(x => x.trim())
+    .filter(Boolean);
   if (!lines.length) {
     return;
   }
-  return Object.entries(keys.map((key, idx) => [key, lines[idx]])) as Record<K[number], string>;
+  return Object.fromEntries(keys.map((key, idx) => [key, lines[idx]])) as Record<K[number], string>;
 };
 
 type CompilerWatchEventCandidate = Omit<CompilerWatchEvent, 'entry'> & { entry?: CompileStateEntry };
