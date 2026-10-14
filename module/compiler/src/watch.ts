@@ -12,9 +12,12 @@ import type { CompilerState } from './state.ts';
 import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from './types.ts';
 
 const executeFile = promisify(execFile);
-const fromLines = <K extends string[]>(output: string, ...keys: K): Record<K[number], string> => {
-  const lines = output.trim().split('\n');
-  return Object.entries(keys.map((key, idx) => [key, lines[idx].trim()])) as Record<K[number], string>;
+const fromLines = <K extends string[]>(output: string, ...keys: K): Record<K[number], string> | undefined => {
+  const lines = output.trim().split('\s*\n\s*').filter(Boolean);
+  if (!lines.length) {
+    return;
+  }
+  return Object.entries(keys.map((key, idx) => [key, lines[idx]])) as Record<K[number], string>;
 };
 
 type CompilerWatchEventCandidate = Omit<CompilerWatchEvent, 'entry'> & { entry?: CompileStateEntry };
