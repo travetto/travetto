@@ -6,7 +6,7 @@ export type ModelIdGenerator = () => string;
 /**
  * Simple model interface
  */
-export type ModelType = object;
+export type ModelType = {};
 
 /**
  * Options for listing items

@@ -8,8 +8,7 @@ import type {
   KeyedIndexSelection,
   SingleItemIndex,
   SortedIndex,
-  SortedIndexSelection,
-  SortedIndexSelectionType
+  SortedIndexSelection
 } from './indexes.ts';
 import type { ModelIndexedSearchOptions, ModelPageOptions, ModelPageResult } from './list.ts';
 
@@ -124,16 +123,11 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param prefix The prefix to use for suggesting entities
    * @param options The configuration for pagination
    */
-  suggestByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>,
-    B extends SortedIndexSelectionType<T, S> & string
-  >(
+  suggestByIndex<T extends ModelType, S extends SortedIndexSelection<T>, K extends KeyedIndexSelection<T>>(
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    prefix: B,
+    prefix: string,
     options?: ModelIndexedSearchOptions
   ): Promise<T[]>;
 }

@@ -25,7 +25,6 @@ import {
   type SingleItemIndex,
   type SortedIndex,
   type SortedIndexSelection,
-  type SortedIndexSelectionType,
   warnIfIndexedUniqueIndex,
   warnIfNonIndexedIndex
 } from '@travetto/model-indexed';
@@ -169,7 +168,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     throw new NotFoundError(cls, id);
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
+  async create<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
     const [id, prepped] = await ModelCrudUtil.preStore(cls, item);
     await this.#getCollection(cls).doc(id).create(clone<DocumentData>(prepped));
     return prepped;
@@ -182,7 +181,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return prepped;
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
+  async upsert<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const [id, prepped] = await ModelCrudUtil.preStore(cls, item);
     await this.#getCollection(cls).doc(id).set(clone<DocumentData>(prepped));
@@ -239,7 +238,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     cls: Class<T>,
     idx: SingleItemIndex<T, K, S>,
-    body: T
+    body: Partial<T>
   ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
@@ -292,12 +291,13 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     }
   }
 
-  async suggestByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>,
-    B extends SortedIndexSelectionType<T, S> & string
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]> {
+  async suggestByIndex<T extends ModelType, S extends SortedIndexSelection<T>, K extends KeyedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    prefix: string,
+    options?: ModelIndexedSearchOptions
+  ): Promise<T[]> {
     const results: T[] = [];
 
     const field = idx.sortTemplate[0].path.join('.');

@@ -1,8 +1,6 @@
 import type { IndexConfig, ModelType } from '@travetto/model';
 import type { Any, DeepPartial, IntrinsicType } from '@travetto/runtime';
 
-type SortScalar = string | number | Date;
-
 type TypeProjection<T, V, B = IntrinsicType> = {
   [P in keyof T]?: T[P] extends B | undefined
     ? V | undefined
@@ -10,16 +8,6 @@ type TypeProjection<T, V, B = IntrinsicType> = {
       ? (TypeProjection<T[P][number], V, B> | null | undefined)[]
       : TypeProjection<T[P], V, B>;
 };
-
-export type SortedIndexSelectionType<T, S> = T extends SortScalar
-  ? T
-  : T extends Any[]
-    ? SortedIndexSelectionType<T[number], S>
-    : S extends object
-      ? T extends object
-        ? { [K in keyof S]: K extends keyof T ? SortedIndexSelectionType<T[K], S[K]> : never }[keyof S]
-        : never
-      : never;
 
 export type KeyedIndexSelection<T extends ModelType> = TypeProjection<T, true>;
 export type SortedIndexSelection<T extends ModelType> = TypeProjection<T, 1 | -1>;
