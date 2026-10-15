@@ -28,7 +28,7 @@ export type DeepPartial<T> = {
 };
 
 export type ValidFields<T, I> = {
-  [K in keyof T]: K extends string ? (T[K] extends Primitive | I | undefined ? K : T[K] extends Function | undefined ? never : K) : never;
+  [K in keyof T]: T[K] extends Primitive | I | undefined ? K : T[K] extends Function | undefined ? never : K;
 }[keyof T];
 
 export type RetainIntrinsicFields<T> = Pick<T, ValidFields<T, IntrinsicType>>;
@@ -41,13 +41,13 @@ type KeyPathsInner<T, PrimitiveType = IntrinsicType | IntrinsicType[], PREFIX ex
         : never
       : T[K] extends Any[]
         ? KeyPathsInner<T[K][number], PrimitiveType, `${K}${SEP}`, SEP>
-        : KeyPathsInner<T[K], PrimitiveType, `${K}${SEP}`, SEP>
+        : T[K] extends object
+          ? KeyPathsInner<T[K], PrimitiveType, `${K}${SEP}`, SEP>
+          : never
     : never;
 }[keyof T];
 
-export type KeyPaths<T, PrimitiveType = IntrinsicType | IntrinsicType[]> = [keyof T] extends [never]
-  ? string
-  : KeyPathsInner<Required<T>, PrimitiveType>;
+export type KeyPaths<T, PrimitiveType = IntrinsicType | IntrinsicType[]> = KeyPathsInner<Required<T>, PrimitiveType>;
 
 export const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T & string>(value: T): K[];
