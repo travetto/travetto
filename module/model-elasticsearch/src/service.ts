@@ -246,7 +246,7 @@ export class ElasticsearchModelService
     const id = idSource.getOptionalValue(item);
     if (id) {
       if (!this.config.storeId) {
-        idSource.deleteValue(castTo(item));
+        idSource.deleteValue(item);
       }
       return id;
     }

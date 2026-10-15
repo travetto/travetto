@@ -218,7 +218,7 @@ export class MongoModelService
       const ref: typeof item & { _id?: Binary | string } = item;
       ref._id = MongoUtil.uuid(id);
       if (!this.config.storeId) {
-        idSource.deleteValue(castTo(item));
+        idSource.deleteValue(item);
       }
       return id;
     }
