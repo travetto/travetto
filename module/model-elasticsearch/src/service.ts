@@ -316,7 +316,7 @@ export class ElasticsearchModelService
       ...this.manager.getIdentity(cls),
       id,
       refresh: true,
-      body: castTo<T & { id: never }>(clean)
+      body: clean
     });
 
     return this.postUpdate(cls, clean, id);
@@ -339,7 +339,7 @@ export class ElasticsearchModelService
       id,
       op_type: 'index',
       refresh: true,
-      body: castTo<T & { id: never }>(item)
+      body: item
     });
 
     return this.postUpdate(cls, item, id);
@@ -366,7 +366,7 @@ export class ElasticsearchModelService
     ModelCrudUtil.ensureNotSubType(cls);
 
     const id = ModelRegistryIndex.getIdSource(cls).getValue(data);
-    const item = castTo<typeof data>(await ModelCrudUtil.prePartialUpdate(cls, data));
+    const item = await ModelCrudUtil.prePartialUpdate(cls, data);
     const script = ElasticsearchSchemaUtil.generateUpdateScript(item);
 
     try {
@@ -412,10 +412,10 @@ export class ElasticsearchModelService
         toRun.push({ delete: { ...identity, _id: ModelRegistryIndex.getIdSource(cls).getOptionalValue(operation.delete)! } });
       } else if (operation.insert) {
         const id = this.preUpdate(cls, operation.insert);
-        toRun.push({ create: { ...identity, _id: id } }, castTo(operation.insert));
+        toRun.push({ create: { ...identity, _id: id } }, operation.insert);
       } else if (operation.upsert) {
         const id = this.preUpdate(cls, operation.upsert);
-        toRun.push({ index: { ...identity, _id: id } }, castTo(operation.upsert));
+        toRun.push({ index: { ...identity, _id: id } }, operation.upsert);
       } else if (operation.update) {
         const id = this.preUpdate(cls, operation.update);
         toRun.push({ update: { ...identity, _id: id } }, { doc: operation.update });
@@ -556,7 +556,7 @@ export class ElasticsearchModelService
     idx: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
     return this.update(cls, item);
   }
 
@@ -652,9 +652,12 @@ export class ElasticsearchModelService
     const [id, item] = await ModelCrudUtil.preStore(cls, data);
     this.preUpdate(cls, item);
 
-    const where = ModelQueryUtil.getWhereClause(cls, query.where);
+    let where = ModelQueryUtil.getWhereClause(cls, query.where);
     if (id) {
-      Object.assign(castTo<Record<string, unknown>>(where), ModelRegistryIndex.getIdSource(cls).getWhereClause(id));
+      where = {
+        ...where,
+        ...ModelRegistryIndex.getIdSource(cls).getWhereClause(id)
+      };
     }
     query.where = where;
 
@@ -672,7 +675,7 @@ export class ElasticsearchModelService
         refresh: true,
         query: search.query,
         max_docs: 1,
-        script: ElasticsearchSchemaUtil.generateReplaceScript(castTo(copy))
+        script: ElasticsearchSchemaUtil.generateReplaceScript(copy)
       });
 
       if (result.version_conflicts || result.updated === undefined || result.updated === 0) {
@@ -748,7 +751,8 @@ export class ElasticsearchModelService
     });
     const search = ElasticsearchQueryUtil.getSearchObject(cls, resolvedQuery);
     const result = await this.execSearch(cls, search);
-    const all = result.hits.hits.map(hit => castTo<T>(field === 'id' ? { id: hit._id } : hit._source));
+    const idSource = ModelRegistryIndex.getIdSource(cls);
+    const all = result.hits.hits.map(hit => castTo<T>(field === idSource.field ? { [idSource.field]: hit._id } : hit._source));
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, item => item, query);
   }
 

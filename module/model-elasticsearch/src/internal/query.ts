@@ -39,12 +39,12 @@ export class ElasticsearchQueryUtil {
   /**
    * Build include/exclude from the select clause
    */
-  static getSelect<T>(clause: SelectClause<T>): [string[], string[]] {
+  static getSelect<T>(clause: SelectClause<T>, idField: string): [string[], string[]] {
     const simp = this.extractSimple(clause);
     const include: string[] = [];
     const exclude: string[] = [];
     for (const key of Object.keys(simp)) {
-      const translatedKey = key === 'id' ? '_id' : key;
+      const translatedKey = key === idField ? '_id' : key;
       const value: 1 | 0 | boolean = castTo(simp[key]);
       if (value === 0 || value === false) {
         exclude.push(translatedKey);
@@ -95,7 +95,7 @@ export class ElasticsearchQueryUtil {
   /**
    * Extract specific term for a class, and a given field
    */
-  static extractWhereTermQuery<T>(
+  static extractWhereTermQuery<T extends ModelType>(
     cls: Class<T>,
     item: Record<string, unknown>,
     config?: EsSchemaConfig,
@@ -103,6 +103,7 @@ export class ElasticsearchQueryUtil {
   ): Record<string, unknown> {
     const items = [];
     const fields = SchemaRegistryIndex.get(cls).getFields();
+    const idField = ModelRegistryIndex.has(cls) ? ModelRegistryIndex.getIdSource(cls).field : undefined;
 
     for (const property of TypedObject.keys(item)) {
       if (property === '$text') {
@@ -129,10 +130,10 @@ export class ElasticsearchQueryUtil {
       const top = item[property];
       const declaredSchema = fields[property];
       const declaredType = declaredSchema.type;
-      const subPath = declaredType === String ? (property === 'id' && !path ? '_id' : `${path}${property}`) : `${path}${property}`;
+      const subPath = declaredType === String ? (property === idField && !path ? '_id' : `${path}${property}`) : `${path}${property}`;
 
       const subPathQuery = (value: unknown): {} =>
-        property === 'id' && !path
+        property === idField && !path
           ? { ids: { values: Array.isArray(value) ? value : [value] } }
           : { [Array.isArray(value) ? 'terms' : 'term']: { [subPath]: value } };
 
@@ -293,7 +294,7 @@ export class ElasticsearchQueryUtil {
   /**
    * Build query from the where clause
    */
-  static extractWhereQuery<T>(cls: Class<T>, clause: WhereClause<T>, config?: EsSchemaConfig): Record<string, unknown> {
+  static extractWhereQuery<T extends ModelType>(cls: Class<T>, clause: WhereClause<T>, config?: EsSchemaConfig): Record<string, unknown> {
     if (ModelQueryUtil.has$And(clause)) {
       return { bool: { must: clause.$and.map(item => this.extractWhereQuery<T>(cls, item, config)) } };
     } else if (ModelQueryUtil.has$Or(clause)) {
@@ -349,9 +350,10 @@ export class ElasticsearchQueryUtil {
     };
 
     const sort = query.sort;
+    const idField = ModelRegistryIndex.getIdSource(cls).field;
 
     if (query.select) {
-      const [inc, exc] = this.getSelect(query.select);
+      const [inc, exc] = this.getSelect(query.select, idField);
       if (inc.length) {
         search._source_includes = inc;
       }
