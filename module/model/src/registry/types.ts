@@ -1,6 +1,6 @@
 import type { Class } from '@travetto/runtime';
 
-import type { ModelType } from '../types/model.ts';
+import type { ModelIdGenerator, ModelType } from '../types/model.ts';
 
 export type DataHandler<T = unknown> = (inst: T) => Promise<T | void> | T | void;
 
@@ -25,6 +25,20 @@ export type IndexConfig<V extends string = string, T extends ModelType = ModelTy
 };
 
 /**
+ * Model identifier configuration
+ */
+export type ModelIdConfig<T extends ModelType = ModelType> = {
+  /**
+   * Identifier field name
+   */
+  field: [keyof T] extends [never] ? string : Extract<keyof T, string>;
+  /**
+   * Identifier generator function, or false for manual natural keys
+   */
+  generator?: ModelIdGenerator | false;
+};
+
+/**
  * Model config
  */
 export class ModelConfig<T extends ModelType = ModelType> {
@@ -36,6 +50,10 @@ export class ModelConfig<T extends ModelType = ModelType> {
    * Store name
    */
   store: string;
+  /**
+   * Identifier configuration
+   */
+  id?: ModelIdConfig<T>;
   /**
    * Indices
    */

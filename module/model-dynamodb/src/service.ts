@@ -21,9 +21,7 @@ import {
   type ModelStorageSupport,
   ModelStorageUtil,
   type ModelType,
-  NotFoundError,
-  type OptionalId,
-  type PartialWithId
+  NotFoundError
 } from '@travetto/model';
 import {
   type FullKeyedIndexBody,
@@ -62,7 +60,6 @@ function isNotFoundError(error: unknown): boolean {
  */
 @Injectable()
 export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
-  idSource = ModelCrudUtil.uuidSource();
   client: DynamoDB;
   config: DynamoDBModelConfig;
 
@@ -226,7 +223,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           TableName: this.#resolveTable(cls),
           ConditionExpression: 'attribute_not_exists(body)',
           Item: {
-            id: DynamoDBUtil.toValue(item.id),
+            id: DynamoDBUtil.toValue(id),
             body: DynamoDBUtil.toValue(JSONUtil.toUTF8(item)),
             ...(expiry !== undefined ? { [EXPIRES_ATTRIBUTE]: DynamoDBUtil.toValue(expiry) } : {}),
             ...indices
@@ -422,32 +419,33 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     throw new NotFoundError(cls, id);
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#putItem(cls, prepped.id, prepped, 'create');
+  async create<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+    const [id, prepped] = await ModelCrudUtil.preStore(cls, item);
+    await this.#putItem(cls, id, prepped, 'create');
     return prepped;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    item = await ModelCrudUtil.preStore(cls, item, this);
+    const [id, prepped] = await ModelCrudUtil.preStore(cls, item);
+    item = prepped;
     if (ModelRegistryIndex.getConfig(cls).expiresAt) {
-      await this.get(cls, item.id);
+      await this.get(cls, id);
     }
-    await this.#putItem(cls, item.id, item, 'update');
+    await this.#putItem(cls, id, item, 'update');
     return item;
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
+  async upsert<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#putItem(cls, prepped.id, prepped, 'upsert');
+    const [id, prepped] = await ModelCrudUtil.preStore(cls, item);
+    await this.#putItem(cls, id, prepped, 'upsert');
     return prepped;
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const id = item.id;
+    const id = ModelRegistryIndex.getIdSource(cls).getValue(item);
     const itemAsT = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
     await this.#putItem(cls, id, itemAsT, 'update');
     return itemAsT;
@@ -505,7 +503,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     cls: Class<T>,
     idx: SingleItemIndex<T, K, S>,
-    body: OptionalId<T>
+    body: T
   ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
@@ -547,7 +545,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       nextOffset = JSONUtil.toBase64({
         [keyIndexAttribute]: getKey(computed),
         [sortIndexAttribute]: getSort(computed),
-        id: DynamoDBUtil.toValue(last.id)
+        id: DynamoDBUtil.toValue(ModelRegistryIndex.getIdSource(cls).getOptionalValue(last))
       });
     }
 

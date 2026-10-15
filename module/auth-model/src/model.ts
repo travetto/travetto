@@ -1,5 +1,5 @@
 import { AuthenticationError, type Authenticator, type Authorizer, type Principal } from '@travetto/auth';
-import { type ModelCrudSupport, type ModelType, NotFoundError, type OptionalId } from '@travetto/model';
+import { type ModelCrudSupport, type ModelType, NotFoundError } from '@travetto/model';
 import { type Class, castTo, TimeUtil, Util } from '@travetto/runtime';
 
 import { AuthModelUtil } from './util.ts';
@@ -31,7 +31,7 @@ export interface RegisteredPrincipal extends Principal {
   password?: string;
 }
 
-type ToPrincipal<T extends ModelType> = (item: OptionalId<T>) => RegisteredPrincipal;
+type ToPrincipal<T extends ModelType> = (item: Partial<T>) => RegisteredPrincipal;
 type FromPrincipal<T extends ModelType> = (item: Partial<RegisteredPrincipal>) => Partial<T>;
 
 /**
@@ -95,7 +95,7 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
    * Register a user
    * @param user The user to register
    */
-  async register(user: OptionalId<T>): Promise<T> {
+  async register(user: Partial<T>): Promise<T> {
     const identity = this.toPrincipal(user);
 
     try {

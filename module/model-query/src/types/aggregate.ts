@@ -41,13 +41,15 @@ export type BigIntFieldAggregateResult = {
   sum?: bigint;
 };
 
-export type FieldAggregateResult<T, F extends string> = F extends any
-  ? NonNullable<PathType<T, F>> extends Date
-    ? DateFieldAggregateResult
-    : NonNullable<PathType<T, F>> extends bigint
-      ? BigIntFieldAggregateResult
-      : NumberFieldAggregateResult
-  : never;
+export type FieldAggregateResult<T, F extends string> = object extends T
+  ? NumberFieldAggregateResult
+  : F extends any
+    ? NonNullable<PathType<T, F>> extends Date
+      ? DateFieldAggregateResult
+      : NonNullable<PathType<T, F>> extends bigint
+        ? BigIntFieldAggregateResult
+        : NumberFieldAggregateResult
+    : never;
 
 /**
  * The contract for a model service with aggregate support

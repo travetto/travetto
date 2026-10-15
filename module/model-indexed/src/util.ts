@@ -1,4 +1,4 @@
-import { type ModelCrudSupport, type ModelType, NotFoundError, type OptionalId } from '@travetto/model';
+import { type ModelCrudSupport, ModelRegistryIndex, type ModelType, NotFoundError } from '@travetto/model';
 import { type Class, castTo, hasFunction } from '@travetto/runtime';
 
 import type { KeyedIndexSelection, SingleItemIndex, SortedIndexSelection } from './types/indexes.ts';
@@ -24,7 +24,7 @@ export class ModelIndexedUtil {
     service: ModelIndexedSupport & ModelCrudSupport,
     cls: Class<T>,
     idx: SingleItemIndex<T, K, S>,
-    body: OptionalId<T>
+    body: Partial<T>
   ): Promise<T> {
     try {
       return await this.naiveUpdate(service, cls, idx, body);
@@ -48,10 +48,11 @@ export class ModelIndexedUtil {
     service: ModelIndexedSupport & ModelCrudSupport,
     cls: Class<T>,
     idx: SingleItemIndex<T, K, S>,
-    body: OptionalId<T>
+    body: Partial<T>
   ): Promise<T> {
-    const { id } = await service.getByIndex(cls, idx, castTo(body));
-    body.id = id;
+    const idSource = ModelRegistryIndex.getIdSource(cls);
+    const id = idSource.getValue(await service.getByIndex(cls, idx, castTo(body)));
+    idSource.setValue(castTo(body), id);
     return await service.update(cls, castTo(body));
   }
 

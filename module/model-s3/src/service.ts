@@ -18,9 +18,7 @@ import {
   type ModelStorageSupport,
   ModelStorageUtil,
   type ModelType,
-  NotFoundError,
-  type OptionalId,
-  type PartialWithId
+  NotFoundError
 } from '@travetto/model';
 import {
   asFull,
@@ -67,7 +65,6 @@ type S3Metadata = Pick<
  */
 @Injectable()
 export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, ModelStorageSupport, ModelExpirySupport {
-  idSource = ModelCrudUtil.uuidSource();
   client: S3;
   config: S3ModelConfig;
 
@@ -290,14 +287,17 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     }
   }
 
-  async store<T extends ModelType>(cls: Class<T>, item: OptionalId<T>, preStore = true): Promise<T> {
+  async store<T extends ModelType>(cls: Class<T>, item: Partial<T>, preStore = true): Promise<T> {
     let prepped: T = castTo(item);
+    let id: string;
     if (preStore) {
-      prepped = await ModelCrudUtil.preStore(cls, item, this);
+      [id, prepped] = await ModelCrudUtil.preStore(cls, item);
+    } else {
+      id = ModelRegistryIndex.getIdSource(cls).getValue(prepped);
     }
     const content = JSONUtil.toBinaryArray(prepped);
     await this.client.putObject(
-      this.#query(cls, prepped.id, {
+      this.#query(cls, id, {
         Body: BinaryUtil.binaryArrayToUint8Array(content),
         ContentType: 'application/json',
         ContentLength: content.byteLength,
@@ -307,10 +307,11 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     return prepped;
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    if (item.id) {
-      if (await this.head(cls, item.id)) {
-        throw new ExistsError(cls, item.id);
+  async create<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+    const id = ModelRegistryIndex.getIdSource(cls).getOptionalValue(item);
+    if (id) {
+      if (await this.head(cls, id)) {
+        throw new ExistsError(cls, id);
       }
     }
     return this.store(cls, item);
@@ -318,20 +319,21 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    if (!(await this.head(cls, item.id))) {
-      throw new NotFoundError(cls, item.id);
+    const id = ModelRegistryIndex.getIdSource(cls).getValue(item);
+    if (!(await this.head(cls, id))) {
+      throw new NotFoundError(cls, id);
     }
     return this.store(cls, item);
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
+  async upsert<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     return this.store(cls, item);
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const id = item.id;
+    const id = ModelRegistryIndex.getIdSource(cls).getValue(item);
     const prepped = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
     return this.store<T>(cls, prepped, false);
   }

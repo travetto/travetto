@@ -1,4 +1,4 @@
-import type { ModelBasicSupport, ModelListOptions, ModelType, OptionalId } from '@travetto/model';
+import type { ModelBasicSupport, ModelListOptions, ModelType } from '@travetto/model';
 import type { Class } from '@travetto/runtime';
 
 import type {
@@ -52,7 +52,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     cls: Class<T>,
     idx: SingleItemIndex<T, K, S>,
-    body: OptionalId<T>
+    body: Partial<T>
   ): Promise<T>;
 
   /**

@@ -9,7 +9,7 @@ import {
   type TextSearchClause,
   type WhereClause
 } from '@travetto/model-query';
-import { type Class, castTo, JSONUtil, RuntimeError } from '@travetto/runtime';
+import { type Class, castKey, castTo, JSONUtil, RuntimeError } from '@travetto/runtime';
 import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { SQLModelSchemaUtil } from './schema.ts';
@@ -198,11 +198,13 @@ export abstract class AbstractANSI99Dialect {
   }
 
   getCreateTableSQL(context: TableContext): string {
-    const idType = this.getColumnType(castTo({ name: 'id', type: String }));
-    const columnDefinitions: string[] = [`${this.escapeIdentifier('id')} ${idType} PRIMARY KEY`];
+    const idFieldName = ModelRegistryIndex.getIdSource(context.cls).field;
+    const idFieldConfig = context.simpleFields.get(idFieldName)!;
+    const idType = this.getColumnType(idFieldConfig);
+    const columnDefinitions: string[] = [`${this.escapeIdentifier(idFieldName)} ${idType} PRIMARY KEY`];
 
     for (const field of context.simpleFields.values()) {
-      if (field.name === 'id') {
+      if (field.name === idFieldName) {
         continue;
       }
       const columnType = this.getColumnType(field);
@@ -211,6 +213,9 @@ export abstract class AbstractANSI99Dialect {
     }
 
     for (const field of context.complexFields.values()) {
+      if (field.name === idFieldName) {
+        continue;
+      }
       const columnType = this.getComplexColumnType(field);
       const isNotNullClause = SQLModelSchemaUtil.isColumnNotNull(context, field.name) ? ' NOT NULL' : '';
       columnDefinitions.push(`${this.escapeIdentifier(field.name)} ${columnType}${isNotNullClause}`);
@@ -702,47 +707,50 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
       return { sql: '', values: [] };
     }
 
+    const idSource = ModelRegistryIndex.getIdSource(tableContext.cls);
+    const idFieldName = idSource.field;
+
     if (rawItems.length === 1) {
-      const { whereSQL, parameters = [] } = this.compileWhere(tableContext, castTo({ id: rawItems[0].id }));
+      const { whereSQL, parameters = [] } = this.compileWhere(tableContext, idSource.getWhereClause(rawItems[0]));
       return this.buildUpdate(tableContext, rawItems[0], whereSQL, parameters);
     }
 
-    const simpleFieldsToUpdate = [...tableContext.simpleFields.values()].filter(field => field.name !== 'id');
-    const complexFieldsToUpdate = [...tableContext.complexFields.values()];
+    const simpleFieldsToUpdate = [...tableContext.simpleFields.values()].filter(field => field.name !== idFieldName);
+    const complexFieldsToUpdate = [...tableContext.complexFields.values()].filter(field => field.name !== idFieldName);
 
     const setClauses: string[] = [];
     const values: unknown[] = [];
 
-    const ids = rawItems.map(item => item.id);
+    const ids = rawItems.map(item => item[castKey(idFieldName)]);
 
     for (const field of simpleFieldsToUpdate) {
       const cases: string[] = [];
       for (const rawItem of rawItems) {
         const idPlaceholder = this.getPlaceholder(values.length + 1);
-        values.push(rawItem.id);
+        values.push(rawItem[castKey(idFieldName)]);
         const valPlaceholder = this.getPlaceholder(values.length + 1);
         const val = rawItem[field.name];
         values.push(val === undefined || val === null ? null : val);
         cases.push(`WHEN ${idPlaceholder} THEN ${valPlaceholder}`);
       }
-      setClauses.push(`${this.escapeIdentifier(field.name)} = CASE ${this.escapeIdentifier('id')} ${cases.join(' ')} END`);
+      setClauses.push(`${this.escapeIdentifier(field.name)} = CASE ${this.escapeIdentifier(idFieldName)} ${cases.join(' ')} END`);
     }
 
     for (const field of complexFieldsToUpdate) {
       const cases: string[] = [];
       for (const rawItem of rawItems) {
         const idPlaceholder = this.getPlaceholder(values.length + 1);
-        values.push(rawItem.id);
+        values.push(rawItem[idFieldName]);
         const valPlaceholder = this.getPlaceholder(values.length + 1);
         const val = rawItem[field.name];
         values.push(this.getComplexColumnValue(field, val));
         cases.push(`WHEN ${idPlaceholder} THEN ${valPlaceholder}`);
       }
-      setClauses.push(`${this.escapeIdentifier(field.name)} = CASE ${this.escapeIdentifier('id')} ${cases.join(' ')} END`);
+      setClauses.push(`${this.escapeIdentifier(field.name)} = CASE ${this.escapeIdentifier(idFieldName)} ${cases.join(' ')} END`);
     }
 
     if (setClauses.length === 0) {
-      setClauses.push(`${this.escapeIdentifier('id')} = ${this.escapeIdentifier('id')}`);
+      setClauses.push(`${this.escapeIdentifier(idFieldName)} = ${this.escapeIdentifier(idFieldName)}`);
     }
 
     const whereIdPlaceholders = ids.map(idVal => {
@@ -751,7 +759,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     });
 
     const tableName = this.escapeIdentifier(tableContext.tableName);
-    const sql = `UPDATE ${tableName} SET ${setClauses.join(', ')} WHERE ${this.escapeIdentifier('id')} IN (${whereIdPlaceholders.join(', ')});`;
+    const sql = `UPDATE ${tableName} SET ${setClauses.join(', ')} WHERE ${this.escapeIdentifier(idFieldName)} IN (${whereIdPlaceholders.join(', ')});`;
 
     return { sql, values };
   }
@@ -762,11 +770,12 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     whereSQL?: string,
     whereParameters: unknown[] = []
   ): { sql: string; values: unknown[] } {
+    const idFieldName = ModelRegistryIndex.getIdSource(tableContext.cls).field;
     const sets: string[] = [];
     const values: unknown[] = [];
 
     for (const field of tableContext.simpleFields.values()) {
-      if (field.name === 'id') {
+      if (field.name === idFieldName) {
         continue;
       }
       sets.push(`${this.escapeIdentifier(field.name)} = ${this.getPlaceholder(values.length + 1)}`);
@@ -775,6 +784,9 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     }
 
     for (const field of tableContext.complexFields.values()) {
+      if (field.name === idFieldName) {
+        continue;
+      }
       sets.push(`${this.escapeIdentifier(field.name)} = ${this.getPlaceholder(values.length + 1)}`);
       const value = rawItem[field.name];
       values.push(this.getComplexColumnValue(field, value));
@@ -843,6 +855,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     rawItem: Record<string, unknown>,
     conflictTarget: string[]
   ): { sql: string; values: unknown[] } {
+    const idFieldName = ModelRegistryIndex.getIdSource(tableContext.cls).field;
     const columns: string[] = [];
     const values: unknown[] = [];
     const updates: string[] = [];
@@ -851,7 +864,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
       columns.push(this.escapeIdentifier(field.name));
       const value = rawItem[field.name];
       values.push(value === undefined || value === null ? null : value);
-      if (field.name !== 'id') {
+      if (field.name !== idFieldName) {
         updates.push(`${this.escapeIdentifier(field.name)} = EXCLUDED.${this.escapeIdentifier(field.name)}`);
       }
     }
@@ -860,7 +873,9 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
       columns.push(this.escapeIdentifier(field.name));
       const value = rawItem[field.name];
       values.push(this.getComplexColumnValue(field, value));
-      updates.push(`${this.escapeIdentifier(field.name)} = EXCLUDED.${this.escapeIdentifier(field.name)}`);
+      if (field.name !== idFieldName) {
+        updates.push(`${this.escapeIdentifier(field.name)} = EXCLUDED.${this.escapeIdentifier(field.name)}`);
+      }
     }
 
     const placeholders = columns.map((_, index) => this.getPlaceholder(index + 1));

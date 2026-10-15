@@ -8,6 +8,7 @@ function combineClasses(target: ModelConfig, sources: Partial<ModelConfig>[]): M
   for (const source of sources) {
     Object.assign(target, source, {
       indices: { ...(target.indices || {}), ...(source.indices || {}) },
+      ...(source.id ? { id: { ...(target.id || {}), ...source.id } } : {}),
       postLoad: [...(target.postLoad || []), ...(source.postLoad || [])],
       prePersist: [...(target.prePersist || []), ...(source.prePersist || [])],
       transientFields: [...(target.transientFields || []), ...(source.transientFields || [])]
@@ -48,6 +49,10 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
 
       if (parentSchema?.discriminatedField && parent.store) {
         config.store = parent.store;
+      }
+
+      if (parent.id && !config.id) {
+        config.id = { ...parent.id };
       }
 
       config.postLoad = [...(parent.postLoad ?? []), ...(config.postLoad ?? [])];

@@ -2,12 +2,12 @@ import { type Class, RuntimeError } from '@travetto/runtime';
 import type { ValidationError, ValidationResultError } from '@travetto/schema';
 
 import type { ModelCrudSupport } from './crud.ts';
-import type { ModelType, OptionalId } from './model.ts';
+import type { ModelType } from './model.ts';
 
 /**
  * Bulk operation. Each operation has a single action and payload
  */
-export type BulkOperation<T extends ModelType> = { delete?: T } & { insert?: OptionalId<T> } & { update?: T } & { upsert?: OptionalId<T> };
+export type BulkOperation<T extends ModelType> = { delete?: T } & { insert?: Partial<T> } & { update?: T } & { upsert?: Partial<T> };
 
 /**
  * Bulk response provides a summary of all the operations

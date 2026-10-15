@@ -1,8 +1,9 @@
 import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
-import { type Class, castTo, RuntimeError } from '@travetto/runtime';
+import { type Any, type Class, castTo, RuntimeError } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelType } from '../types/model.ts';
+import { ModelIdSource } from './model-id.ts';
 import { ModelRegistryAdapter } from './registry-adapter.ts';
 import type { IndexConfig, ModelConfig } from './types.ts';
 
@@ -34,6 +35,10 @@ export class ModelRegistryIndex implements RegistryIndex {
 
   static getExpiryFieldName<T extends ModelType>(cls: Class<T>): keyof T {
     return this.#instance.getExpiryFieldName(cls);
+  }
+
+  static getIdSource<T extends ModelType>(cls: Class<T>): ModelIdSource<T> {
+    return this.#instance.getIdSource(cls);
   }
 
   static getClasses(): Class[] {
@@ -74,6 +79,13 @@ export class ModelRegistryIndex implements RegistryIndex {
         details: { classes: [...classes].toSorted() }
       });
     }
+
+    const idField = this.getIdSource(cls).field;
+    if (!(idField in schema.fields)) {
+      throw new RuntimeError(
+        `Model ${cls.name} does not define an id field. Expected '${String(idField)}' to be declared, or use @Id to designate an id field.`
+      );
+    }
   }
 
   getConfig(cls: Class): ModelConfig<ModelType> {
@@ -85,6 +97,16 @@ export class ModelRegistryIndex implements RegistryIndex {
    */
   getStoreName(cls: Class): string {
     return this.store.get(cls).get().store;
+  }
+
+  #idCache = new Map<string, ModelIdSource<Any>>();
+
+  /**
+   * Get identifier handler for a model class
+   */
+  getIdSource<T extends ModelType>(cls: Class<T>): ModelIdSource<T> {
+    const modelId = this.#idCache.getOrInsertComputed(cls.Ⲑid, () => new ModelIdSource(cls, this.getConfig(cls).id));
+    return castTo(modelId);
   }
 
   /**

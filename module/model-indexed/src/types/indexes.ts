@@ -8,18 +8,26 @@ type TypeProjection<T, V, B = IntrinsicType> = {
     ? V | undefined
     : T[P] extends Any[]
       ? (TypeProjection<T[P][number], V, B> | null | undefined)[]
-      : TypeProjection<T[P], V, B>;
+      : T[P] extends object
+        ? object extends T[P]
+          ? never
+          : TypeProjection<T[P], V, B>
+        : V | undefined;
 };
 
-export type SortedIndexSelectionType<T, S> = T extends SortScalar
-  ? T
-  : T extends Any[]
-    ? SortedIndexSelectionType<T[number], S>
-    : S extends object
-      ? T extends object
-        ? { [K in keyof S]: K extends keyof T ? SortedIndexSelectionType<T[K], S[K]> : never }[keyof S]
-        : never
-      : never;
+export type SortedIndexSelectionType<T, S> = object extends T
+  ? never
+  : object extends S
+    ? never
+    : T extends SortScalar
+      ? T
+      : T extends Any[]
+        ? SortedIndexSelectionType<T[number], S>
+        : S extends object
+          ? T extends object
+            ? { [K in keyof S]: K extends keyof T ? SortedIndexSelectionType<T[K], S[K]> : never }[keyof S]
+            : never
+          : never;
 
 export type KeyedIndexSelection<T extends ModelType> = TypeProjection<T, true>;
 export type SortedIndexSelection<T extends ModelType> = TypeProjection<T, 1 | -1>;
@@ -30,7 +38,11 @@ export type KeyedIndexBody<T, K = Any> = {
       ? T[P]
       : T[P] extends Any[] | null | undefined
         ? T[P]
-        : KeyedIndexBody<T[P], NonNullable<K[P]>>
+        : T[P] extends object
+          ? object extends T[P]
+            ? never
+            : KeyedIndexBody<T[P], NonNullable<K[P]>>
+          : T[P]
     : never;
 };
 
@@ -44,13 +56,16 @@ export type KeyedIndexWithPartialBody<T, K> = {
       ? T[P]
       : T[P] extends Any[] | null | undefined
         ? T[P]
-        : // Recurse for nested objects
-          KeyedIndexWithPartialBody<T[P], NonNullable<K[P]>>
+        : T[P] extends object
+          ? object extends T[P]
+            ? never
+            : KeyedIndexWithPartialBody<T[P], NonNullable<K[P]>>
+          : T[P]
     : never;
-} & DeepPartial<Omit<T, keyof K>>; // 2. All other fields in T (not in K) become OPTIONAL
+} & DeepPartial<Omit<T, keyof K>>;
 
-export type FullKeyedIndexBody<T, K, S> = KeyedIndexBody<Omit<T, 'id'>, Merge<K, S>> & { id?: string };
-export type FullKeyedIndexWithPartialBody<T, K, S> = KeyedIndexWithPartialBody<Omit<T, 'id'>, Merge<K, S>> & { id?: string };
+export type FullKeyedIndexBody<T, K, S> = KeyedIndexBody<T, Merge<K, S>> & { id?: string };
+export type FullKeyedIndexWithPartialBody<T, K, S> = KeyedIndexWithPartialBody<T, Merge<K, S>> & { id?: string };
 
 export type TemplateValue = 1 | -1 | true;
 export type TemplatePart<T extends TemplateValue = TemplateValue> = { path: string[]; value: T; part: 'key' | 'sort' };

@@ -1,7 +1,7 @@
-import { type Class, castTo, getClass } from '@travetto/runtime';
+import { type Class, castTo, getClass, Util } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import type { ModelType } from '../types/model.ts';
+import type { ModelIdGenerator, ModelType } from '../types/model.ts';
 import { ModelRegistryIndex } from './registry-index.ts';
 import type { DataHandler, ModelConfig, PrePersistScope } from './types.ts';
 
@@ -16,11 +16,41 @@ export function Model(config: Partial<ModelConfig<ModelType>> | string = {}) {
     if (typeof config === 'string') {
       config = { store: config };
     }
-    ModelRegistryIndex.getForRegister(cls).register(config);
-    if (SchemaRegistryIndex.getForRegister(cls).get().fields.id) {
-      SchemaRegistryIndex.getForRegister(cls).registerField('id', { required: { active: false } });
+    const adapter = ModelRegistryIndex.getForRegister(cls);
+    adapter.register(config);
+
+    const registered = adapter.get();
+    const idField = registered.id?.field ?? (SchemaRegistryIndex.getForRegister(cls).get().fields.id ? 'id' : undefined);
+    if (idField) {
+      if (!registered.id) {
+        adapter.register({ id: { field: idField, generator: (): string => Util.uuid(32) } });
+      }
+      if (adapter.get().id?.generator !== false) {
+        SchemaRegistryIndex.getForRegister(cls).registerField(castTo(idField), { required: { active: false } });
+      }
     }
     return cls;
+  };
+}
+
+/**
+ * Model field decorator for denoting the primary identifier field and generation behavior
+ * @augments `@travetto/schema:Field`
+ * @kind decorator
+ */
+export function Id(generator?: ModelIdGenerator | false) {
+  return function <K extends string, C extends Partial<Record<K, unknown>>>(instance: C, property: K): void {
+    const cls = getClass(instance);
+    const isAuto = generator !== false;
+    ModelRegistryIndex.getForRegister(cls).register({
+      id: {
+        field: property,
+        generator: generator ?? ((): string => Util.uuid(32))
+      }
+    });
+    if (isAuto) {
+      SchemaRegistryIndex.getForRegister(cls).registerField(property, { required: { active: false } });
+    }
   };
 }
 

@@ -1,11 +1,36 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Model, type ModelCrudSupport, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
-import { Precision, Required, Schema, Text } from '@travetto/schema';
+import { Id, Model, type ModelCrudSupport, ModelRegistryIndex, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
+import { Match, Precision, Required, Schema, Text, ValidationResultError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from './base.ts';
+
+@Model()
+class CustomIdModel {
+  @Id()
+  customId: string;
+  name: string;
+}
+
+let skuSequence = 0;
+
+@Model()
+class SkuModel {
+  @Id(() => `SKU-${++skuSequence}`)
+  @Match(/^SKU-\d+$/)
+  sku: string;
+  title: string;
+}
+
+@Model()
+class BookModel {
+  @Id(false)
+  @Match(/^(?:978|979)-\d+$/)
+  isbn: string;
+  title: string;
+}
 
 @Schema()
 class Address {
@@ -83,7 +108,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     const people = [1, 2, 3, 8].map(x =>
       Person.from({
-        id: service.idSource.create(),
+        id: ModelRegistryIndex.getIdSource(Person).create(),
         name: 'Bob',
         age: 20 + x,
         gender: 'm',
@@ -101,7 +126,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(single.age === 23);
 
     await assert.rejects(async () => {
-      await service.get(Person, service.idSource.create());
+      await service.get(Person, ModelRegistryIndex.getIdSource(Person).create());
     }, NotFoundError);
   }
 
@@ -257,7 +282,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     const people = [1, 2, 3].map(x =>
       Person.from({
-        id: service.idSource.create(),
+        id: ModelRegistryIndex.getIdSource(Person).create(),
         name: 'Bob',
         age: 20 + x,
         gender: 'm',
@@ -286,7 +311,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
         service.upsert(
           Person,
           Person.from({
-            id: service.idSource.create(),
+            id: ModelRegistryIndex.getIdSource(Person).create(),
             name: 'Bob',
             age: 20 + x,
             gender: 'm',
@@ -436,5 +461,86 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     const final = await service.get(BigIntModel, created.id);
     assert.strictEqual(final.largeNumber, 18014398509481982n);
     assert(!final.optionalBigInt);
+  }
+
+  @Test('Verify custom id field name with default UUID generation')
+  async testCustomIdField() {
+    const service = await this.service;
+    const created = await service.create(CustomIdModel, CustomIdModel.from({ name: 'custom-id-test' }));
+
+    assert(created.customId);
+    assert.strictEqual(created.name, 'custom-id-test');
+
+    const retrieved = await service.get(CustomIdModel, created.customId);
+    assert.strictEqual(retrieved.customId, created.customId);
+    assert.strictEqual(retrieved.name, 'custom-id-test');
+
+    const updated = await service.updatePartial(CustomIdModel, {
+      customId: created.customId,
+      name: 'updated-custom-id-test'
+    });
+    assert.strictEqual(updated.name, 'updated-custom-id-test');
+
+    const retrievedUpdated = await service.get(CustomIdModel, created.customId);
+    assert.strictEqual(retrievedUpdated.name, 'updated-custom-id-test');
+
+    await service.delete(CustomIdModel, created.customId);
+    await assert.rejects(() => service.get(CustomIdModel, created.customId), NotFoundError);
+
+    // Fails on update without id
+    await assert.rejects(() => service.update(CustomIdModel, CustomIdModel.from({ name: 'no-id' })), ValidationResultError);
+
+    // Fails on updatePartial without id
+    await assert.rejects(() => service.updatePartial(CustomIdModel, { name: 'no-id' }), ValidationResultError);
+  }
+
+  @Test('Verify custom id generator function and match validation')
+  async testCustomIdGenerator() {
+    const service = await this.service;
+    const created = await service.create(SkuModel, SkuModel.from({ title: 'Item 1' }));
+
+    assert(created.sku);
+    assert(/^SKU-\d+$/.test(created.sku));
+    assert.strictEqual(created.title, 'Item 1');
+
+    const retrieved = await service.get(SkuModel, created.sku);
+    assert.strictEqual(retrieved.sku, created.sku);
+    assert.strictEqual(retrieved.title, 'Item 1');
+
+    await service.delete(SkuModel, created.sku);
+    await assert.rejects(() => service.get(SkuModel, created.sku), NotFoundError);
+  }
+
+  @Test('Verify natural key with @Id(false) and @Match validation')
+  async testNaturalKeyId() {
+    const service = await this.service;
+
+    // Fails when id is missing
+    await assert.rejects(() => service.create(BookModel, BookModel.from({ title: 'No ISBN' })), ValidationResultError);
+
+    // Fails when id violates regex
+    await assert.rejects(
+      () => service.create(BookModel, BookModel.from({ isbn: '123-bad-isbn', title: 'Invalid ISBN' })),
+      ValidationResultError
+    );
+
+    // Succeeds when valid
+    const created = await service.create(BookModel, BookModel.from({ isbn: '978-1234567890', title: 'Good Book' }));
+
+    assert.strictEqual(created.isbn, '978-1234567890');
+    assert.strictEqual(created.title, 'Good Book');
+
+    const retrieved = await service.get(BookModel, created.isbn);
+    assert.strictEqual(retrieved.isbn, '978-1234567890');
+    assert.strictEqual(retrieved.title, 'Good Book');
+
+    const updated = await service.updatePartial(BookModel, {
+      isbn: '978-1234567890',
+      title: 'Great Book'
+    });
+    assert.strictEqual(updated.title, 'Great Book');
+
+    await service.delete(BookModel, '978-1234567890');
+    await assert.rejects(() => service.get(BookModel, '978-1234567890'), NotFoundError);
   }
 }

@@ -7,13 +7,9 @@ import { NotFoundError } from '../error/not-found.ts';
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
 import type { DataHandler, PrePersistScope } from '../registry/types.ts';
 import type { ModelCrudSupport } from '../types/crud.ts';
-import type { ModelIdSource, ModelType, OptionalId } from '../types/model.ts';
+import type { ModelType } from '../types/model.ts';
 
 type ModelLoadInput = string | BinaryArray | object;
-
-export type ModelCrudProvider = {
-  idSource: ModelIdSource;
-};
 
 /**
  * Crud utilities
@@ -23,15 +19,6 @@ export class ModelCrudUtil {
    * Type guard for determining if service supports crud operations
    */
   static isSupported = hasFunction<ModelCrudSupport>('upsert');
-
-  /**
-   * Build a uuid generator
-   */
-  static uuidSource(length: number = 32): ModelIdSource {
-    const create = (): string => Util.uuid(length);
-    const valid = (id: string): boolean => id.length === length && /^[0-9a-f]+$/i.test(id);
-    return { create, valid };
-  }
 
   static async filterOutNotFound<T extends ModelType>(actions: Promise<T>[] | undefined): Promise<T[]> {
     if (!actions) {
@@ -66,10 +53,11 @@ export class ModelCrudUtil {
     const result = SchemaRegistryIndex.getBaseClass(cls).from(resolvedInput);
 
     if (!(result instanceof cls || result.constructor.Ⲑid === cls.Ⲑid)) {
+      const id = ModelRegistryIndex.getIdSource(cls).getOptionalValue(result);
       if (onTypeMismatch === 'notfound') {
-        throw new NotFoundError(cls, result.id);
+        throw new NotFoundError(cls, id ?? 'unknown');
       } else {
-        throw new ExistsError(cls, result.id);
+        throw new ExistsError(cls, id ?? 'unknown');
       }
     }
 
@@ -84,12 +72,15 @@ export class ModelCrudUtil {
    */
   static async preStore<T extends ModelType>(
     cls: Class<T>,
-    item: Partial<OptionalId<T>>,
-    provider: ModelCrudProvider,
+    item: Partial<T>,
     scope: PrePersistScope = 'all'
-  ): Promise<T> {
-    if (!item.id) {
-      item.id = provider.idSource.create();
+  ): Promise<[id: string, item: T]> {
+    const idSource = ModelRegistryIndex.getIdSource(cls);
+
+    let currentId = idSource.getOptionalValue(item);
+    if (!currentId && idSource.generator) {
+      currentId = idSource.generator();
+      idSource.setValue(item, currentId);
     }
 
     if (DataUtil.isPlainObject(item)) {
@@ -109,14 +100,14 @@ export class ModelCrudUtil {
       }
     }
 
-    if (!provider.idSource.valid(item.id!)) {
-      errors.push({ kind: 'invalid', path: 'id', value: item.id!, type: 'string', message: `${item.id!} is an invalid value for \`id\`` });
+    if (!currentId && !idSource.generator) {
+      errors.push({ kind: 'required', path: castTo(idSource.field), type: 'string', message: `${String(idSource.field)} is required` });
     }
 
     if (errors.length) {
       throw new ValidationResultError(errors);
     }
-    return castTo(item);
+    return [currentId!, castTo(item)];
   }
 
   /**
@@ -227,13 +218,16 @@ export class ModelCrudUtil {
         category: 'data'
       });
     }
+    const idSource = ModelRegistryIndex.getIdSource(cls);
+    const id = idSource.getOptionalValue(item);
     const keys = Object.keys(item);
-    if ((keys.length === 1 && item.id) || keys.length === 0) {
+    if ((keys.length === 1 && id) || keys.length === 0) {
       throw new RuntimeError('No fields to update');
     } else {
       item = { ...item };
-      delete item.id;
+      idSource.deleteValue(item);
     }
+
     const result = await this.prePersist(cls, castTo(item), 'partial');
     await SchemaValidator.validatePartial(cls, item);
     return result;

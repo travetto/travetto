@@ -4,6 +4,7 @@ export * from './src/error/invalid-sub-type.ts';
 export * from './src/error/not-found.ts';
 export * from './src/error/unique.ts';
 export * from './src/registry/decorator.ts';
+export * from './src/registry/model-id.ts';
 export * from './src/registry/registry-adapter.ts';
 export * from './src/registry/registry-index.ts';
 export * from './src/registry/types.ts';

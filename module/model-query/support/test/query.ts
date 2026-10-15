@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { type ModelCrudSupport, NotFoundError } from '@travetto/model';
+import { type ModelCrudSupport, ModelRegistryIndex, NotFoundError } from '@travetto/model';
 import { TimeUtil } from '@travetto/runtime';
 import { SkipUnless, Suite, Test } from '@travetto/test';
 
@@ -19,7 +19,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
 
     const people = [1, 2, 3, 8].map(x =>
       Person.from({
-        id: svc.idSource.create(),
+        id: ModelRegistryIndex.getIdSource(Person).create(),
         name: 'Bob Omber',
         age: 20 + x,
         gender: 'm',
@@ -286,7 +286,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
 
     const people = [1, 2, 3, 8].map(x =>
       Person.from({
-        id: service.idSource.create(),
+        id: ModelRegistryIndex.getIdSource(Person).create(),
         name: 'Bob',
         age: 20 + x,
         gender: 'm',
@@ -364,7 +364,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   async verifyNestedQuery() {
     const service = await this.service;
 
-    const id = service.idSource.create();
+    const id = ModelRegistryIndex.getIdSource(Note).create();
 
     await service.create(
       Note,

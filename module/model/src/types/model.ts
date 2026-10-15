@@ -1,23 +1,12 @@
 /**
- * Model Id Source
+ * Model Id Generator function
  */
-export type ModelIdSource = { create: () => string; valid: (id: string) => boolean };
+export type ModelIdGenerator = () => string;
 
 /**
  * Simple model interface
- * @concrete
  */
-export interface ModelType {
-  /**
-   * Unique identifier.
-   *
-   * If not provided, will be computed on create
-   */
-  id: string;
-}
-
-export type OptionalId<T extends ModelType> = Omit<T, 'id'> & { id?: string };
-export type PartialWithId<T extends ModelType> = Partial<T> & Pick<T, 'id'>;
+export type ModelType = object;
 
 /**
  * Options for listing items
