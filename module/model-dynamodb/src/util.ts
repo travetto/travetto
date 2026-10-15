@@ -180,6 +180,7 @@ export class DynamoDBUtil {
     } else {
       return item;
     }
-    throw new NotFoundError(cls, item.id);
+    const config = ModelRegistryIndex.getIdSource(cls);
+    throw new NotFoundError(cls, config.getValue(item));
   }
 }

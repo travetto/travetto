@@ -5,17 +5,11 @@ import { Suite, Test } from '@travetto/test';
 
 import { Id, Model } from '../src/registry/decorator.ts';
 import { ModelRegistryIndex } from '../src/registry/registry-index.ts';
+import { CustomIdModel } from '../support/test/crud.ts';
 
 @Model()
 class DefaultModel {
   id: string;
-  name: string;
-}
-
-@Model()
-class CustomIdModel {
-  @Id()
-  code: string;
   name: string;
 }
 
@@ -68,13 +62,13 @@ class ModelIdSourceSuite {
   async testCustomIdField(): Promise<void> {
     await Registry.init();
     const source = ModelRegistryIndex.getIdSource(CustomIdModel);
-    assert(source.field === 'code');
+    assert(source.field === 'customId');
 
-    const item: CustomIdModel = { code: 'code-1', name: 'Item' };
+    const item: CustomIdModel = { customId: 'code-1', name: 'Item' };
     assert(source.getValue(item) === 'code-1');
 
     const whereClause = source.getWhereClause('code-99');
-    assert.deepStrictEqual(whereClause, { code: 'code-99' });
+    assert.deepStrictEqual(whereClause, { customId: 'code-99' });
   }
 
   @Test('Verify custom generator')

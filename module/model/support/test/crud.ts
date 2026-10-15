@@ -8,7 +8,7 @@ import { Suite, Test } from '@travetto/test';
 import { BaseModelSuite } from './base.ts';
 
 @Model()
-class CustomIdModel {
+export class CustomIdModel {
   @Id()
   customId: string;
   name: string;
@@ -17,7 +17,7 @@ class CustomIdModel {
 let skuSequence = 0;
 
 @Model()
-class SkuModel {
+export class SkuModel {
   @Id(() => `SKU-${++skuSequence}`)
   @Match(/^SKU-\d+$/)
   sku: string;
@@ -25,7 +25,7 @@ class SkuModel {
 }
 
 @Model()
-class BookModel {
+export class BookModel {
   @Id(false)
   @Match(/^(?:978|979)-\d+$/)
   isbn: string;
