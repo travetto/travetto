@@ -95,7 +95,7 @@ export class ElasticsearchQueryUtil {
   /**
    * Extract specific term for a class, and a given field
    */
-  static extractWhereTermQuery<T extends ModelType>(
+  static extractWhereTermQuery<T>(
     cls: Class<T>,
     item: Record<string, unknown>,
     config?: EsSchemaConfig,
@@ -103,7 +103,7 @@ export class ElasticsearchQueryUtil {
   ): Record<string, unknown> {
     const items = [];
     const fields = SchemaRegistryIndex.get(cls).getFields();
-    const idField = ModelRegistryIndex.has(cls) ? ModelRegistryIndex.getIdSource(cls).field : undefined;
+    const idField = ModelRegistryIndex.has(cls) ? ModelRegistryIndex.getIdSource(cls as Class<ModelType>).field : undefined;
 
     for (const property of TypedObject.keys(item)) {
       if (property === '$text') {
@@ -133,7 +133,7 @@ export class ElasticsearchQueryUtil {
       const subPath = declaredType === String ? (property === idField && !path ? '_id' : `${path}${property}`) : `${path}${property}`;
 
       const subPathQuery = (value: unknown): {} =>
-        property === idField && !path
+        subPath === '_id'
           ? { ids: { values: Array.isArray(value) ? value : [value] } }
           : { [Array.isArray(value) ? 'terms' : 'term']: { [subPath]: value } };
 
