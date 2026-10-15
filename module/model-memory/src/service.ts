@@ -14,6 +14,8 @@ import {
   ModelStorageUtil,
   type ModelType,
   NotFoundError,
+  type OptionalId,
+  type PartialWithId,
   UniqueError
 } from '@travetto/model';
 import {
@@ -290,7 +292,7 @@ export class MemoryModelService
     throw new NotFoundError(cls, id);
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const [id, prepped] = await ModelCrudUtil.preStore(cls, item);
     this.#find(cls, id, 'exists');
     return await this.#persist(cls, prepped, 'write');
@@ -302,7 +304,7 @@ export class MemoryModelService
     return await this.upsert(cls, item);
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const store = this.#getStore(cls);
     const id = ModelRegistryIndex.getIdSource(cls).getOptionalValue(item);
     if (id && store.has(id)) {
@@ -312,7 +314,7 @@ export class MemoryModelService
     return await this.#persist(cls, prepped, 'write');
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     const id = ModelRegistryIndex.getIdSource(cls).getValue(item);
     const clean = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
     return await this.#persist(cls, clean, 'write');
@@ -464,7 +466,7 @@ export class MemoryModelService
   upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     cls: Class<T>,
     idx: SingleItemIndex<T, K, S>,
-    body: Partial<T>
+    body: OptionalId<T>
   ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }

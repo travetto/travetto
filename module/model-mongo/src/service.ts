@@ -31,6 +31,8 @@ import {
   ModelStorageUtil,
   type ModelType,
   NotFoundError,
+  type OptionalId,
+  type PartialWithId,
   UniqueError
 } from '@travetto/model';
 import {
@@ -211,11 +213,11 @@ export class MongoModelService
     return item;
   }
 
-  preUpdate<T extends ModelType>(cls: Class<T>, item: Partial<T>): string | undefined {
+  preUpdate<T extends ModelType>(cls: Class<T>, item: unknown): string | undefined {
     const idSource = ModelRegistryIndex.getIdSource(cls);
     const id = idSource.getOptionalValue(item);
     if (id) {
-      const ref: typeof item & { _id?: Binary | string } = item;
+      const ref: { _id?: Binary | string } = castTo(item);
       ref._id = MongoUtil.uuid(id);
       if (!this.config.storeId) {
         idSource.deleteValue(item);
@@ -330,8 +332,8 @@ export class MongoModelService
     throw new NotFoundError(cls, id);
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
-    const [, cleaned] = await ModelCrudUtil.preStore<WithId<T, Binary | string>>(cls, item);
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
+    const [, cleaned] = await ModelCrudUtil.preStore(cls, item);
     const id = this.preUpdate(cls, cleaned)!;
 
     const store = await this.getStore(cls);
@@ -358,8 +360,8 @@ export class MongoModelService
     return this.postUpdate(cls, item, id);
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
-    const [, cleaned] = await ModelCrudUtil.preStore<WithId<T, Binary | string>>(cls, item);
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
+    const [, cleaned] = await ModelCrudUtil.preStore(cls, item);
     const id = this.preUpdate(cls, cleaned)!;
     const store = await this.getStore(cls);
 
@@ -371,7 +373,7 @@ export class MongoModelService
     return this.postUpdate(cls, castTo(cleaned), id);
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     const store = await this.getStore(cls);
 
     const final = await ModelCrudUtil.prePartialUpdate(cls, item);
@@ -507,7 +509,7 @@ export class MongoModelService
     for (const operation of operations) {
       const core = operation.insert ?? operation.upsert ?? operation.update;
       if (core) {
-        this.postUpdate(cls, asFull(core));
+        this.postUpdate(cls, castTo(core));
       }
     }
 
@@ -574,7 +576,7 @@ export class MongoModelService
   upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     cls: Class<T>,
     idx: SingleItemIndex<T, K, S>,
-    body: Partial<T>
+    body: OptionalId<T>
   ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }

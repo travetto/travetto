@@ -12,7 +12,9 @@ import {
   type ModelStorageSupport,
   ModelStorageUtil,
   type ModelType,
-  NotFoundError
+  NotFoundError,
+  type OptionalId,
+  type PartialWithId
 } from '@travetto/model';
 import {
   type FullKeyedIndexBody,
@@ -321,7 +323,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     throw new NotFoundError(cls, id);
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const id = ModelRegistryIndex.getIdSource(cls).getOptionalValue(item);
     if (id) {
       await this.has(cls, id, 'exists');
@@ -338,14 +340,14 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     return this.upsert(cls, item);
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const [, prepped] = await ModelCrudUtil.preStore(cls, item);
     await this.#store(cls, prepped, 'write');
     return prepped;
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const id = ModelRegistryIndex.getIdSource(cls).getValue(item);
     const updated = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
@@ -425,7 +427,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     cls: Class<T>,
     idx: SingleItemIndex<T, K, S>,
-    body: Partial<T>
+    body: OptionalId<T>
   ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }

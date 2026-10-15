@@ -9,7 +9,9 @@ import {
   type ModelStorageSupport,
   ModelStorageUtil,
   type ModelType,
-  NotFoundError
+  NotFoundError,
+  type OptionalId,
+  type PartialWithId
 } from '@travetto/model';
 import {
   type FullKeyedIndexBody,
@@ -168,7 +170,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     throw new NotFoundError(cls, id);
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const [id, prepped] = await ModelCrudUtil.preStore(cls, item);
     await this.#getCollection(cls).doc(id).create(clone<DocumentData>(prepped));
     return prepped;
@@ -181,14 +183,14 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return prepped;
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const [id, prepped] = await ModelCrudUtil.preStore(cls, item);
     await this.#getCollection(cls).doc(id).set(clone<DocumentData>(prepped));
     return prepped;
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const id = ModelRegistryIndex.getIdSource(cls).getValue(item);
     const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
@@ -238,7 +240,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     cls: Class<T>,
     idx: SingleItemIndex<T, K, S>,
-    body: Partial<T>
+    body: OptionalId<T>
   ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }

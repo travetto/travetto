@@ -18,7 +18,9 @@ import {
   type ModelStorageSupport,
   ModelStorageUtil,
   type ModelType,
-  NotFoundError
+  NotFoundError,
+  type OptionalId,
+  type PartialWithId
 } from '@travetto/model';
 import {
   asFull,
@@ -287,7 +289,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     }
   }
 
-  async store<T extends ModelType>(cls: Class<T>, item: Partial<T>, preStore = true): Promise<T> {
+  async store<T extends ModelType>(cls: Class<T>, item: OptionalId<T>, preStore = true): Promise<T> {
     let prepped: T = castTo(item);
     let id: string;
     if (preStore) {
@@ -307,7 +309,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     return prepped;
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const id = ModelRegistryIndex.getIdSource(cls).getOptionalValue(item);
     if (id) {
       if (await this.head(cls, id)) {
@@ -326,12 +328,12 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     return this.store(cls, item);
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     return this.store(cls, item);
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const id = ModelRegistryIndex.getIdSource(cls).getValue(item);
     const prepped = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);

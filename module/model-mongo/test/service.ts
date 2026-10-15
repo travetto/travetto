@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Model, ModelRegistryIndex } from '@travetto/model';
+import { Model, type ModelId, ModelRegistryIndex } from '@travetto/model';
 import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
 import { QueryIndex } from '@travetto/model-query';
 import { Suite, Test } from '@travetto/test';
@@ -19,7 +19,7 @@ import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphis
   unique: true
 })
 class UniqueUser {
-  id: string;
+  id: ModelId;
   name: string;
 }
 

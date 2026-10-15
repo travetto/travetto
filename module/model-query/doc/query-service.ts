@@ -1,4 +1,4 @@
-import type { ModelType } from '@travetto/model';
+import type { ModelType, OptionalId, PartialWithId } from '@travetto/model';
 import type {
   FacetModelQuery,
   FieldAggregateResult,
@@ -27,16 +27,16 @@ export class QueryModelService
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     return asFull({});
   }
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     return asFull({});
   }
-  async upsert<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     return asFull({});
   }
   async *list<T extends ModelType>(cls: Class<T>): AsyncIterable<T[]> {
     yield* [];
   }
-  async create<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     return asFull({});
   }
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {

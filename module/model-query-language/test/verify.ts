@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Model, type ModelType } from '@travetto/model';
+import { Model, type ModelId, type ModelType } from '@travetto/model';
 import { type ModelQuery, type Query, QueryVerifier } from '@travetto/model-query';
 import { QueryLanguageParser } from '@travetto/model-query-language';
 import { Registry } from '@travetto/registry';
@@ -16,14 +16,14 @@ class Preferences {
 
 @Model('users')
 class User {
-  id: string;
+  id: ModelId;
   email: string;
   preferences: Preferences;
 }
 
 @Model()
 class ModelUser {
-  id: string;
+  id: ModelId;
   email: string;
 }
 

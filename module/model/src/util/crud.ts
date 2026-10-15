@@ -7,7 +7,7 @@ import { NotFoundError } from '../error/not-found.ts';
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
 import type { DataHandler, PrePersistScope } from '../registry/types.ts';
 import type { ModelCrudSupport } from '../types/crud.ts';
-import type { ModelType } from '../types/model.ts';
+import type { ModelType, OptionalId, PartialWithId } from '../types/model.ts';
 
 type ModelLoadInput = string | BinaryArray | object;
 
@@ -72,7 +72,7 @@ export class ModelCrudUtil {
    */
   static async preStore<T extends ModelType>(
     cls: Class<T>,
-    item: Partial<T>,
+    item: OptionalId<T>,
     scope: PrePersistScope = 'all'
   ): Promise<[id: string, item: T]> {
     const idSource = ModelRegistryIndex.getIdSource(cls);
@@ -89,7 +89,7 @@ export class ModelCrudUtil {
 
     SchemaRegistryIndex.get(cls).ensureInstanceTypeField(item);
 
-    item = await this.prePersist(cls, item, scope);
+    item = await this.prePersist(cls, castTo(item), scope);
 
     let errors: ValidationError[] = [];
     try {
@@ -212,7 +212,7 @@ export class ModelCrudUtil {
   /**
    * Ensure everything is correct for a partial update
    */
-  static async prePartialUpdate<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<Partial<T>> {
+  static async prePartialUpdate<T extends ModelType>(cls: Class<T>, item: Partial<T> | PartialWithId<T>): Promise<Partial<T>> {
     if (!DataUtil.isPlainObject(item)) {
       throw new RuntimeError(`A partial update requires a plain object, not an instance of ${castTo<Function>(item).constructor.name}`, {
         category: 'data'
@@ -229,14 +229,14 @@ export class ModelCrudUtil {
     }
 
     const result = await this.prePersist(cls, castTo(item), 'partial');
-    await SchemaValidator.validatePartial(cls, item);
+    await SchemaValidator.validatePartial(cls, castTo(item));
     return result;
   }
 
   /**
    * Ensure everything is correct for a partial update
    */
-  static async naivePartialUpdate<T extends ModelType>(cls: Class<T>, get: () => Promise<T>, item: Partial<T>): Promise<T> {
+  static async naivePartialUpdate<T extends ModelType>(cls: Class<T>, get: () => Promise<T>, item: PartialWithId<T>): Promise<T> {
     const prepared = await this.prePartialUpdate(cls, item);
     const full = await get();
     return cls.from(castTo({ ...full, ...prepared }));

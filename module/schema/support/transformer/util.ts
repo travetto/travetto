@@ -233,6 +233,24 @@ class ${uniqueId} extends ${type.mappedClassName} {
       attrs.aliases = aliases.map(alias => alias.comment).filter(alias => !!alias);
     }
 
+    const typeSpecifiers = typeExpr.original ? DocUtil.readDocTag(typeExpr.original, 'specifier') : [];
+    const nodeSpecifiers = tags
+      .filter(tag => tag.tagName.getText() === 'specifier')
+      .map(tag =>
+        typeof tag.comment === 'string' ? tag.comment : Array.isArray(tag.comment) ? tag.comment.map(part => part.text).join('') : ''
+      )
+      .filter(specifier => !!specifier);
+    if (typeExpr.original && 'aliasSymbol' in typeExpr.original && typeExpr.original.aliasSymbol?.name === 'ModelId') {
+      typeSpecifiers.push('modelId');
+    }
+    const specifiers = [...new Set([...typeSpecifiers, ...nodeSpecifiers])];
+    if (specifiers.length) {
+      attrs.specifiers = specifiers;
+      if (specifiers.includes('modelId')) {
+        attrs.required = { active: false };
+      }
+    }
+
     const params: ts.Expression[] = [];
 
     const existing =

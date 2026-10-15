@@ -65,18 +65,18 @@ export class ModelIdSource<T extends ModelType = Any> {
   /**
    * Set the identifier on an item
    */
-  setValue(item: Partial<T>, id: string): void {
+  setValue(item: unknown, id: string): void {
     if (item && typeof item === 'object') {
-      item[castKey<T>(this.field)] = castTo(id);
+      castTo<Record<string, unknown>>(item)[String(this.field)] = id;
     }
   }
 
   /**
    * Delete the identifier on an item
    */
-  deleteValue(item: Partial<T>): void {
+  deleteValue(item: unknown): void {
     if (item && typeof item === 'object') {
-      delete item[castKey(this.field)];
+      delete castTo<Record<string, unknown>>(item)[String(this.field)];
     }
   }
 

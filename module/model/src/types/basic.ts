@@ -1,6 +1,6 @@
 import type { Class } from '@travetto/runtime';
 
-import type { ModelType } from './model.ts';
+import type { ModelType, OptionalId } from './model.ts';
 
 /**
  * Interface for basic data interface
@@ -24,7 +24,7 @@ export interface ModelBasicSupport<C = unknown> {
    * @param item The document to create
    * @throws {ExistsError} When an item with the provided id already exists
    */
-  create<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T>;
+  create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T>;
 
   /**
    * Delete an item

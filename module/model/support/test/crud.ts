@@ -1,7 +1,8 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Id, Model, type ModelCrudSupport, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
+import { Id, Model, type ModelCrudSupport, type ModelId, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
+import { castTo } from '@travetto/runtime';
 import { Match, Precision, Required, Schema, Text, ValidationResultError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
@@ -10,7 +11,7 @@ import { BaseModelSuite } from './base.ts';
 @Model()
 export class CustomIdModel {
   @Id()
-  customId: string;
+  customId: ModelId;
   name: string;
 }
 
@@ -20,7 +21,7 @@ let skuSequence = 0;
 export class SkuModel {
   @Id(() => `SKU-${++skuSequence}`)
   @Match(/^SKU-\d+$/)
-  sku: string;
+  sku: ModelId;
   title: string;
 }
 
@@ -28,7 +29,7 @@ export class SkuModel {
 export class BookModel {
   @Id(false)
   @Match(/^(?:978|979)-\d+$/)
-  isbn: string;
+  isbn: ModelId;
   title: string;
 }
 
@@ -40,7 +41,7 @@ class Address {
 
 @Model('crud-person')
 class Person {
-  id: string;
+  id: ModelId;
   @Text() name: string;
   @Precision(3, 0)
   age: number;
@@ -50,7 +51,7 @@ class Person {
 
 @Model()
 class Simple {
-  id: string;
+  id: ModelId;
   name: string;
 }
 
@@ -61,7 +62,7 @@ class SimpleItem {
 
 @Model()
 class SimpleList {
-  id: string;
+  id: ModelId;
   names: string[];
   simples?: SimpleItem[];
 }
@@ -71,14 +72,14 @@ class SimpleList {
   item.name = `${item.name}-suffix`;
 })
 class User2 {
-  id: string;
+  id: ModelId;
   address?: Address;
   name: string;
 }
 
 @Model()
 class Dated {
-  id: string;
+  id: ModelId;
 
   value?: string;
 
@@ -93,7 +94,7 @@ class Dated {
 
 @Model()
 class BigIntModel {
-  id: string;
+  id: ModelId;
   largeNumber: bigint;
   optionalBigInt?: bigint;
 }
@@ -491,7 +492,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     await assert.rejects(() => service.update(CustomIdModel, CustomIdModel.from({ name: 'no-id' })), ValidationResultError);
 
     // Fails on updatePartial without id
-    await assert.rejects(() => service.updatePartial(CustomIdModel, { name: 'no-id' }), ValidationResultError);
+    await assert.rejects(() => service.updatePartial(CustomIdModel, castTo({ name: 'no-id' })), ValidationResultError);
   }
 
   @Test('Verify custom id generator function and match validation')

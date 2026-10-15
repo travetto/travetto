@@ -1,4 +1,4 @@
-import { ExpiresAt, Model } from '@travetto/model';
+import { ExpiresAt, Model, type ModelId } from '@travetto/model';
 import { Text } from '@travetto/schema';
 
 /**
@@ -8,7 +8,7 @@ export const SessionModelSymbol = Symbol.for('@travetto/auth-session:model');
 
 @Model({ autoCreate: 'production' })
 export class SessionEntry {
-  id: string;
+  id: ModelId;
   @Text()
   data: string;
   @ExpiresAt()

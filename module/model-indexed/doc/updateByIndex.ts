@@ -1,9 +1,9 @@
-import { Model } from '@travetto/model';
+import { Model, type ModelId } from '@travetto/model';
 import { keyedIndex, type ModelIndexedSupport } from '@travetto/model-indexed';
 
 @Model()
 export class User {
-  id: string;
+  id: ModelId;
   name: string;
   email: string;
   age: number;

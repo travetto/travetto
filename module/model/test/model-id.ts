@@ -6,25 +6,32 @@ import { Suite, Test } from '@travetto/test';
 import { NotFoundError } from '../src/error/not-found.ts';
 import { Id, Model } from '../src/registry/decorator.ts';
 import { ModelRegistryIndex } from '../src/registry/registry-index.ts';
+import type { ModelId, OptionalId, PartialWithId } from '../src/types/model.ts';
 import { CustomIdModel } from '../support/test/crud.ts';
 
 @Model()
 class DefaultModel {
-  id: string;
+  id: ModelId;
   name: string;
 }
 
 @Model()
 class CustomGeneratorModel {
   @Id((): string => 'custom-id-value')
-  identifier: string;
+  identifier: ModelId;
   name: string;
 }
 
 @Model()
 class NaturalKeyModel {
   @Id(false)
-  isbn: string;
+  isbn: ModelId;
+  title: string;
+}
+
+@Model()
+class AutoDiscoveredIdModel {
+  isbn: ModelId;
   title: string;
 }
 
@@ -105,5 +112,27 @@ class ModelIdSourceSuite {
     const errorFromEmpty = source.getNotFoundError({});
     assert(errorFromEmpty instanceof NotFoundError);
     assert(errorFromEmpty.message.includes('unknown'));
+  }
+
+  @Test('Verify auto-discovered ModelId field')
+  async testAutoDiscoveredId(): Promise<void> {
+    await Registry.init();
+    const source = ModelRegistryIndex.getIdSource(AutoDiscoveredIdModel);
+    assert(source.field === 'isbn');
+    assert(source.generator !== undefined);
+    const generated = source.create();
+    assert(typeof generated === 'string');
+    assert(generated.length === 32);
+  }
+
+  @Test('Verify OptionalId and PartialWithId type behavior')
+  async testOptionalIdTypes(): Promise<void> {
+    const opt: OptionalId<AutoDiscoveredIdModel> = { title: 'Dune' };
+    assert(opt.title === 'Dune');
+    const optWithId: OptionalId<AutoDiscoveredIdModel> = { isbn: '978-0441013593', title: 'Dune' };
+    assert(optWithId.isbn === '978-0441013593');
+
+    const part: PartialWithId<AutoDiscoveredIdModel> = { isbn: '978-0441013593' };
+    assert(part.isbn === '978-0441013593');
   }
 }

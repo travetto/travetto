@@ -23,7 +23,9 @@ import {
   type ModelStorageSupport,
   ModelStorageUtil,
   type ModelType,
-  NotFoundError
+  NotFoundError,
+  type OptionalId,
+  type PartialWithId
 } from '@travetto/model';
 import {
   type FullKeyedIndexBody,
@@ -241,7 +243,7 @@ export class ElasticsearchModelService
     }
   }
 
-  preUpdate<T extends ModelType>(cls: Class<T>, item: Partial<T>): string | undefined {
+  preUpdate<T extends ModelType>(cls: Class<T>, item: unknown): string | undefined {
     const idSource = ModelRegistryIndex.getIdSource(cls);
     const id = idSource.getOptionalValue(item);
     if (id) {
@@ -308,7 +310,7 @@ export class ElasticsearchModelService
     }
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<T> {
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const [, clean] = await ModelCrudUtil.preStore(cls, item);
     const id = this.preUpdate(cls, clean)!;
 
@@ -345,7 +347,7 @@ export class ElasticsearchModelService
     return this.postUpdate(cls, item, id);
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, input: Partial<T>): Promise<T> {
+  async upsert<T extends ModelType>(cls: Class<T>, input: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
     const [, item] = await ModelCrudUtil.preStore(cls, input);
@@ -362,7 +364,7 @@ export class ElasticsearchModelService
     return this.postUpdate(cls, item, id);
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, data: Partial<T>): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, data: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
     const id = ModelRegistryIndex.getIdSource(cls).getValue(data);
@@ -538,7 +540,7 @@ export class ElasticsearchModelService
   upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     cls: Class<T>,
     idx: SingleItemIndex<T, K, S>,
-    body: Partial<T>
+    body: OptionalId<T>
   ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }

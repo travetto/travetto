@@ -15,6 +15,8 @@ import {
   ModelStorageUtil,
   type ModelType,
   NotFoundError,
+  type OptionalId,
+  type PartialWithId,
   UniqueError
 } from '@travetto/model';
 import {
@@ -121,7 +123,7 @@ export abstract class BaseSQLModelService<C = unknown>
   async executeUpdatePartial<T extends ModelType>(
     modelClass: Class<T>,
     where: WhereClause<T>,
-    data: Partial<T>,
+    data: Partial<T> | PartialWithId<T>,
     returning: boolean
   ): Promise<{ count: number; records: Record<string, unknown>[] }> {
     const preparedData = await ModelCrudUtil.prePartialUpdate(modelClass, data);
@@ -160,7 +162,7 @@ export abstract class BaseSQLModelService<C = unknown>
     return preppedItem;
   }
 
-  async executeUpsert<T extends ModelType>(modelClass: Class<T>, item: Partial<T>, conflictTarget: string[]): Promise<T> {
+  async executeUpsert<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>, conflictTarget: string[]): Promise<T> {
     ModelCrudUtil.ensureNotSubType(modelClass);
     const [id, preppedItem] = await ModelCrudUtil.preStore(modelClass, item);
     const rawItem: Record<string, unknown> = castTo(preppedItem);
@@ -191,7 +193,7 @@ export abstract class BaseSQLModelService<C = unknown>
     return this.loadSingle(modelClass, result.records[0]);
   }
 
-  async create<T extends ModelType>(modelClass: Class<T>, item: Partial<T>): Promise<T> {
+  async create<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>): Promise<T> {
     const [, preppedItem] = await ModelCrudUtil.preStore(modelClass, item);
     const rawItem: Record<string, unknown> = castTo(preppedItem);
     const tableContext = this.connection.getContext(modelClass);
@@ -219,12 +221,12 @@ export abstract class BaseSQLModelService<C = unknown>
     return preppedItem;
   }
 
-  async upsert<T extends ModelType>(modelClass: Class<T>, item: Partial<T>): Promise<T> {
+  async upsert<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>): Promise<T> {
     const idFieldName = ModelRegistryIndex.getIdSource(modelClass).field;
     return this.executeUpsert(modelClass, item, [this.dialect.escapeIdentifier(String(idFieldName))]);
   }
 
-  async updatePartial<T extends ModelType>(modelClass: Class<T>, item: Partial<T>): Promise<T> {
+  async updatePartial<T extends ModelType>(modelClass: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(modelClass);
     const idSource = ModelRegistryIndex.getIdSource(modelClass);
     const id = idSource.getValue(item);
@@ -449,10 +451,10 @@ export abstract class BaseSQLModelService<C = unknown>
     const errors: unknown[] = [];
 
     // Process the inbound bulk request into groups: inserts, deletes, updates, and upserts
-    const inserts: Partial<T>[] = [];
+    const inserts: OptionalId<T>[] = [];
     const deletes: string[] = [];
     const updates: T[] = [];
-    const upserts: { upsert?: Partial<T> }[] = [];
+    const upserts: { upsert?: OptionalId<T> }[] = [];
 
     const idSource = ModelRegistryIndex.getIdSource(modelClass);
     const idFieldName = idSource.field;
@@ -607,7 +609,7 @@ export abstract class BaseSQLModelService<C = unknown>
   async upsertByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     modelClass: Class<T>,
     indexConfig: SingleItemIndex<T, K, S>,
-    body: Partial<T>
+    body: OptionalId<T>
   ): Promise<T> {
     return ModelIndexedUtil.naiveUpsert(castTo(this), modelClass, indexConfig, body);
   }

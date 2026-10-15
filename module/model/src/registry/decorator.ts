@@ -20,7 +20,9 @@ export function Model(config: Partial<ModelConfig<ModelType>> | string = {}) {
     adapter.register(config);
 
     const registered = adapter.get();
-    const idField = registered.id?.field ?? (SchemaRegistryIndex.getForRegister(cls).get().fields.id ? 'id' : undefined);
+    const schemaFields = SchemaRegistryIndex.getForRegister(cls).get().fields;
+    const modelIdField = Object.values(schemaFields).find(field => field.specifiers?.includes('modelId'))?.name;
+    const idField = registered.id?.field ?? modelIdField ?? (schemaFields.id ? 'id' : undefined);
     if (idField) {
       if (!registered.id) {
         adapter.register({ id: { field: idField, generator: (): string => Util.uuid(32) } });

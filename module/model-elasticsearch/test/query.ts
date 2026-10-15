@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Model } from '@travetto/model';
+import { Model, type ModelId } from '@travetto/model';
 import type { WhereClause } from '@travetto/model-query';
 import { Registry } from '@travetto/registry';
 import { DataUtil, Schema } from '@travetto/schema';
@@ -10,7 +10,7 @@ import { ElasticsearchQueryUtil } from '@travetto/model-elasticsearch/src/intern
 
 @Model()
 class QueryTestUser {
-  id: string;
+  id: ModelId;
   name: string;
 }
 

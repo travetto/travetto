@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Inject, InjectableFactory } from '@travetto/di';
-import { Model, type ModelCrudSupport, ModelRegistryIndex, Transient } from '@travetto/model';
+import { Model, type ModelCrudSupport, type ModelId, ModelRegistryIndex, Transient } from '@travetto/model';
 import { type Class, castTo, RuntimeError } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
@@ -14,7 +14,7 @@ export const TestModelSvcSymbol = Symbol.for('@travetto/auth:test-model-svc');
 
 @Model({ autoCreate: 'production' })
 class User implements RegisteredPrincipal {
-  id: string;
+  id: ModelId;
   @Transient()
   password?: string;
   salt?: string;
