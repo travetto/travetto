@@ -3,6 +3,7 @@ import assert from 'node:assert';
 import { Registry } from '@travetto/registry';
 import { Suite, Test } from '@travetto/test';
 
+import { NotFoundError } from '../src/error/not-found.ts';
 import { Id, Model } from '../src/registry/decorator.ts';
 import { ModelRegistryIndex } from '../src/registry/registry-index.ts';
 import { CustomIdModel } from '../support/test/crud.ts';
@@ -85,5 +86,24 @@ class ModelIdSourceSuite {
     const source = ModelRegistryIndex.getIdSource(NaturalKeyModel);
     assert(source.field === 'isbn');
     assert(source.generator === undefined);
+  }
+
+  @Test('Verify getNotFoundError')
+  async testNotFoundError(): Promise<void> {
+    await Registry.init();
+    const source = ModelRegistryIndex.getIdSource(DefaultModel);
+
+    const errorFromItem = source.getNotFoundError({ id: 'missing-123', name: 'Item' });
+    assert(errorFromItem instanceof NotFoundError);
+    assert(errorFromItem.message.includes('missing-123'));
+    assert(errorFromItem.message.includes('DefaultModel'));
+
+    const errorFromId = source.getNotFoundError('missing-456');
+    assert(errorFromId instanceof NotFoundError);
+    assert(errorFromId.message.includes('missing-456'));
+
+    const errorFromEmpty = source.getNotFoundError({});
+    assert(errorFromEmpty instanceof NotFoundError);
+    assert(errorFromEmpty.message.includes('unknown'));
   }
 }

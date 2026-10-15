@@ -123,7 +123,7 @@ export class ElasticsearchModelService
       if (!expiry.expired) {
         return item;
       }
-      throw new NotFoundError(cls, ModelRegistryIndex.getIdSource(cls).getOptionalValue(item)!);
+      throw ModelRegistryIndex.getIdSource(cls).getNotFoundError(item);
     } else {
       return item;
     }

@@ -1,6 +1,7 @@
 import { Util, castKey, castTo, type Any, type Class } from '@travetto/runtime';
 import { ValidationResultError } from '@travetto/schema';
 
+import { NotFoundError } from '../error/not-found.ts';
 import type { ModelIdGenerator, ModelType } from '../types/model.ts';
 import type { ModelIdConfig } from './types.ts';
 
@@ -85,5 +86,13 @@ export class ModelIdSource<T extends ModelType = Any> {
   getWhereClause<W = Record<string, unknown>>(idOrItem: string | unknown): W {
     const id = typeof idOrItem === 'string' ? idOrItem : this.getOptionalValue(idOrItem);
     return castTo({ [String(this.field)]: id });
+  }
+
+  /**
+   * Produce a NotFoundError for an item or identifier
+   */
+  getNotFoundError(idOrItem: string | unknown, details?: Record<string, unknown>): NotFoundError {
+    const id = typeof idOrItem === 'string' ? idOrItem : this.getOptionalValue(idOrItem);
+    return new NotFoundError(this.#modelClass, id ?? 'unknown', details);
   }
 }

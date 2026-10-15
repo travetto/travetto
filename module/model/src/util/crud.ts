@@ -53,11 +53,11 @@ export class ModelCrudUtil {
     const result = SchemaRegistryIndex.getBaseClass(cls).from(resolvedInput);
 
     if (!(result instanceof cls || result.constructor.Ⲑid === cls.Ⲑid)) {
-      const id = ModelRegistryIndex.getIdSource(cls).getOptionalValue(result);
+      const idSource = ModelRegistryIndex.getIdSource(cls);
       if (onTypeMismatch === 'notfound') {
-        throw new NotFoundError(cls, id ?? 'unknown');
+        throw idSource.getNotFoundError(result);
       } else {
-        throw new ExistsError(cls, id ?? 'unknown');
+        throw new ExistsError(cls, idSource.getOptionalValue(result) ?? 'unknown');
       }
     }
 

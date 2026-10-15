@@ -139,7 +139,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   checkExpiry<T extends ModelType>(cls: Class<T>, item: T): T {
     const { expiresAt } = ModelRegistryIndex.getConfig(cls);
     if (expiresAt && ModelExpiryUtil.getExpiryState(cls, item).expired) {
-      throw new NotFoundError(cls, ModelRegistryIndex.getIdSource(cls).getOptionalValue(item)!);
+      throw ModelRegistryIndex.getIdSource(cls).getNotFoundError(item);
     }
     return item;
   }
