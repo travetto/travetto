@@ -1,6 +1,7 @@
 import { DependencyRegistryIndex } from '@travetto/di';
 import { type Class, castTo, RuntimeError } from '@travetto/runtime';
 
+import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
 import type { ModelType } from '../../src/types/model.ts';
 import { ModelBulkUtil } from '../../src/util/bulk.ts';
 import { ModelCrudUtil } from '../../src/util/crud.ts';
@@ -10,6 +11,10 @@ import { ModelSuite } from './suite.ts';
 export abstract class BaseModelSuite<T> {
   serviceClass: Class<T>;
   configClass: Class;
+
+  createId<U extends ModelType>(cls: Class<U>): string {
+    return ModelRegistryIndex.getIdSource(cls).create();
+  }
 
   async getSize<U extends ModelType>(cls: Class<U>): Promise<number> {
     const svc = await this.service;

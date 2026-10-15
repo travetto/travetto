@@ -3,7 +3,6 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 
 import { Model } from '../../src/registry/decorator.ts';
-import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
 import type { ModelBulkSupport } from '../../src/types/bulk.ts';
 import { BaseModelSuite } from './base.ts';
 
@@ -46,7 +45,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
   @Test()
   async bulkUpdate() {
     const service = await this.service;
-    const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}`, id: ModelRegistryIndex.getIdSource(User).create() }));
+    const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}`, id: this.createId(User) }));
 
     const result = await service.processBulk(
       User,
@@ -66,7 +65,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
   @Test()
   async bulkDelete() {
     const service = await this.service;
-    const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}`, id: ModelRegistryIndex.getIdSource(User).create() }));
+    const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}`, id: this.createId(User) }));
 
     const result = await service.processBulk(
       User,

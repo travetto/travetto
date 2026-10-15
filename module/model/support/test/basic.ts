@@ -46,7 +46,7 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
     const service = await this.service;
 
     const person = Person.from({
-      id: ModelRegistryIndex.getIdSource(Person).create(),
+      id: this.createId(Person),
       name: 'Bob',
       age: 25,
       gender: 'm'
@@ -59,7 +59,7 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(single.age === 25);
 
     await assert.rejects(async () => {
-      await service.get(Person, ModelRegistryIndex.getIdSource(Person).create());
+      await service.get(Person, this.createId(Person));
     }, NotFoundError);
 
     await service.delete(Person, person.id);
@@ -74,7 +74,7 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
     const service = await this.service;
 
     const { id } = await service.create(Person, {
-      id: ModelRegistryIndex.getIdSource(Person).create(),
+      id: this.createId(Person),
       name: 'Bob',
       age: 25,
       gender: 'm'
@@ -88,7 +88,7 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
   @Test('Should not persist computed properties')
   async testComputed() {
     const service = await this.service;
-    const id = ModelRegistryIndex.getIdSource(ComputedPerson).create();
+    const id = this.createId(ComputedPerson);
     await service.create(
       ComputedPerson,
       ComputedPerson.from({

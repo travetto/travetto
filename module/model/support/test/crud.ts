@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Id, Model, type ModelCrudSupport, ModelRegistryIndex, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
+import { Id, Model, type ModelCrudSupport, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
 import { Match, Precision, Required, Schema, Text, ValidationResultError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
@@ -108,7 +108,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     const people = [1, 2, 3, 8].map(x =>
       Person.from({
-        id: ModelRegistryIndex.getIdSource(Person).create(),
+        id: this.createId(Person),
         name: 'Bob',
         age: 20 + x,
         gender: 'm',
@@ -126,7 +126,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(single.age === 23);
 
     await assert.rejects(async () => {
-      await service.get(Person, ModelRegistryIndex.getIdSource(Person).create());
+      await service.get(Person, this.createId(Person));
     }, NotFoundError);
   }
 
@@ -282,7 +282,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     const people = [1, 2, 3].map(x =>
       Person.from({
-        id: ModelRegistryIndex.getIdSource(Person).create(),
+        id: this.createId(Person),
         name: 'Bob',
         age: 20 + x,
         gender: 'm',
@@ -311,7 +311,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
         service.upsert(
           Person,
           Person.from({
-            id: ModelRegistryIndex.getIdSource(Person).create(),
+            id: this.createId(Person),
             name: 'Bob',
             age: 20 + x,
             gender: 'm',
