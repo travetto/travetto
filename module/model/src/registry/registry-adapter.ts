@@ -2,6 +2,7 @@ import type { RegistryAdapter } from '@travetto/registry';
 import { type Class, RuntimeError, Util } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
+import { ModelIdSource } from './model-id.ts';
 import type { ModelConfig } from './types.ts';
 
 const DEFAULT_ID_PATTERN = /^[0-9a-f]{32}$/i;
@@ -25,6 +26,7 @@ function combineClasses(target: ModelConfig, sources: Partial<ModelConfig>[]): M
 export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
   #cls: Class;
   #config: ModelConfig;
+  #idSource: ModelIdSource;
 
   constructor(cls: Class) {
     this.#cls = cls;
@@ -86,5 +88,9 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
 
   get(): ModelConfig {
     return this.#config;
+  }
+
+  getIdSource(): ModelIdSource {
+    return (this.#idSource ??= new ModelIdSource(this.#cls, this.#config.idField));
   }
 }
