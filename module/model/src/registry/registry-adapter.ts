@@ -54,7 +54,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
         config.idField = parent.idField;
       }
 
-      if (parent.idGenerator !== undefined && config.idGenerator === undefined) {
+      if (parent.idGenerator && !config.idGenerator) {
         config.idGenerator = parent.idGenerator;
       }
 

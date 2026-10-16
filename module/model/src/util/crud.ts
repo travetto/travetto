@@ -78,11 +78,8 @@ export class ModelCrudUtil {
 
     let currentId = idSource.getOptionalValue(item);
     if (!currentId) {
-      const generator = ModelRegistryIndex.getIdGenerator(cls);
-      if (generator) {
-        currentId = generator();
-        idSource.setValue(item, currentId);
-      }
+      currentId = ModelRegistryIndex.createId(cls);
+      idSource.setValue(item, currentId);
     }
 
     if (DataUtil.isPlainObject(item)) {
@@ -102,7 +99,7 @@ export class ModelCrudUtil {
       }
     }
 
-    if (!currentId && !ModelRegistryIndex.getIdGenerator(cls)) {
+    if (!currentId) {
       errors.push({ kind: 'required', path: castTo(idSource.field), type: 'string', message: `${idSource.field} is required` });
     }
 

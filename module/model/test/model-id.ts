@@ -24,13 +24,6 @@ class CustomGeneratorModel {
 }
 
 @Model()
-@IdGenerator(false)
-class NaturalKeyModel {
-  isbn: ModelId;
-  title: string;
-}
-
-@Model()
 class AutoDiscoveredIdModel {
   isbn: ModelId;
   title: string;
@@ -86,15 +79,6 @@ class ModelIdSourceSuite {
     const source = ModelRegistryIndex.getIdSource(CustomGeneratorModel);
     assert(source.field === 'identifier');
     assert(ModelRegistryIndex.createId(CustomGeneratorModel) === 'custom-id-value');
-  }
-
-  @Test('Verify natural key')
-  async testNaturalKey(): Promise<void> {
-    await Registry.init();
-    const source = ModelRegistryIndex.getIdSource(NaturalKeyModel);
-    assert(source.field === 'isbn');
-    assert(ModelRegistryIndex.getIdGenerator(NaturalKeyModel) === undefined);
-    assert.throws(() => ModelRegistryIndex.createId(NaturalKeyModel));
   }
 
   @Test('Verify getNotFoundError')

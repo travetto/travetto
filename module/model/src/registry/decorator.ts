@@ -22,16 +22,14 @@ export function Model(config: Partial<ModelConfig<ModelType>> | string = {}) {
 }
 
 /**
- * Model class decorator for custom identifier generation or natural keys
+ * Model class decorator for custom identifier generation
  *
  * @augments `@travetto/schema:Schema`
  * @kind decorator
  */
-export function IdGenerator(generator?: ModelIdGenerator | false) {
+export function IdGenerator(generator: ModelIdGenerator) {
   return function <T extends ModelType, U extends Class<T>>(cls: U): void {
-    ModelRegistryIndex.getForRegister(cls).register({
-      ...(generator !== undefined ? { idGenerator: generator } : {})
-    });
+    ModelRegistryIndex.getForRegister(cls).register({ idGenerator: generator });
   };
 }
 

@@ -24,14 +24,6 @@ export class SkuModel {
   title: string;
 }
 
-@Model()
-@IdGenerator(false)
-export class BookModel {
-  @Match(/^(?:978|979)-\d+$/)
-  isbn: ModelId;
-  title: string;
-}
-
 @Schema()
 class Address {
   @Text() street1: string;
@@ -509,38 +501,5 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     await service.delete(SkuModel, created.sku);
     await assert.rejects(() => service.get(SkuModel, created.sku), NotFoundError);
-  }
-
-  @Test('Verify natural key with @IdGenerator(false) and @Match validation')
-  async testNaturalKeyId() {
-    const service = await this.service;
-
-    // Fails when id is missing
-    await assert.rejects(() => service.create(BookModel, BookModel.from({ title: 'No ISBN' })), ValidationResultError);
-
-    // Fails when id violates regex
-    await assert.rejects(
-      () => service.create(BookModel, BookModel.from({ isbn: '123-bad-isbn', title: 'Invalid ISBN' })),
-      ValidationResultError
-    );
-
-    // Succeeds when valid
-    const created = await service.create(BookModel, BookModel.from({ isbn: '978-1234567890', title: 'Good Book' }));
-
-    assert.strictEqual(created.isbn, '978-1234567890');
-    assert.strictEqual(created.title, 'Good Book');
-
-    const retrieved = await service.get(BookModel, created.isbn);
-    assert.strictEqual(retrieved.isbn, '978-1234567890');
-    assert.strictEqual(retrieved.title, 'Good Book');
-
-    const updated = await service.updatePartial(BookModel, {
-      isbn: '978-1234567890',
-      title: 'Great Book'
-    });
-    assert.strictEqual(updated.title, 'Great Book');
-
-    await service.delete(BookModel, '978-1234567890');
-    await assert.rejects(() => service.get(BookModel, '978-1234567890'), NotFoundError);
   }
 }

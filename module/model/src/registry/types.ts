@@ -41,9 +41,9 @@ export class ModelConfig<T extends ModelType = ModelType> {
    */
   idField?: [keyof T] extends [never] ? string : Extract<keyof T, string>;
   /**
-   * Identifier generator function, or false for manual natural keys
+   * Identifier generator function
    */
-  idGenerator?: ModelIdGenerator | false;
+  idGenerator?: ModelIdGenerator;
   /**
    * Indices
    */

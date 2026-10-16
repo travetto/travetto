@@ -41,7 +41,7 @@ export class ModelRegistryIndex implements RegistryIndex {
     return this.#instance.getIdSource(cls);
   }
 
-  static getIdGenerator<T extends ModelType>(cls: Class<T>): ModelIdGenerator | undefined {
+  static getIdGenerator<T extends ModelType>(cls: Class<T>): ModelIdGenerator {
     return this.#instance.getIdGenerator(cls);
   }
 
@@ -77,12 +77,10 @@ export class ModelRegistryIndex implements RegistryIndex {
 
     if (idField) {
       adapter.register({ idField: castTo(idField) });
-      if (registered.idGenerator === undefined) {
+      if (!registered.idGenerator) {
         adapter.register({ idGenerator: (): string => Util.uuid(32) });
       }
-      if (adapter.get().idGenerator !== false) {
-        SchemaRegistryIndex.getForRegister(cls, true).registerField(castTo(idField), { required: { active: false } });
-      }
+      SchemaRegistryIndex.getForRegister(cls, true).registerField(castTo(idField), { required: { active: false } });
     }
   }
 
@@ -140,20 +138,15 @@ export class ModelRegistryIndex implements RegistryIndex {
   /**
    * Get identifier generator function for a model class
    */
-  getIdGenerator<T extends ModelType>(cls: Class<T>): ModelIdGenerator | undefined {
-    const generator = this.getConfig(cls).idGenerator;
-    return generator !== false ? (generator ?? ((): string => Util.uuid(32))) : undefined;
+  getIdGenerator<T extends ModelType>(cls: Class<T>): ModelIdGenerator {
+    return this.getConfig(cls).idGenerator ?? ((): string => Util.uuid(32));
   }
 
   /**
    * Create a new identifier for a model class
    */
   createId<T extends ModelType>(cls: Class<T>): string {
-    const generator = this.getIdGenerator(cls);
-    if (!generator) {
-      throw new RuntimeError(`Model ${cls.name} has disabled id generation (natural key)`);
-    }
-    return generator();
+    return this.getIdGenerator(cls)();
   }
 
   /**
