@@ -227,17 +227,11 @@ class ${uniqueId} extends ${type.mappedClassName} {
       }
     }
 
-    const tags = ts.getJSDocTags(node);
     const typeSpecifiers = typeExpr.original ? DocUtil.readDocTag(typeExpr.original, 'specifier') : [];
-    const nodeSpecifiers = tags
-      .filter(tag => tag.tagName.getText() === 'specifier')
-      .map(tag =>
-        typeof tag.comment === 'string' ? tag.comment : Array.isArray(tag.comment) ? tag.comment.map(part => part.text).join('') : ''
-      )
-      .filter(specifier => !!specifier);
-    const specifiers = [...new Set([...typeSpecifiers, ...nodeSpecifiers])];
-    if (specifiers.length) {
-      attrs.specifiers = specifiers;
+    const nodeSpecifiers = DocUtil.readNodeDocTags(node, 'specifier');
+
+    if (typeSpecifiers.length || nodeSpecifiers.length) {
+      attrs.specifiers = [...new Set([...typeSpecifiers, ...nodeSpecifiers])];
     }
 
     const params: ts.Expression[] = [];
