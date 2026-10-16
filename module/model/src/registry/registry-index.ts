@@ -1,5 +1,5 @@
 import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
-import { type Any, type Class, castTo, RuntimeError, Util } from '@travetto/runtime';
+import { type Any, type Class, castTo, RuntimeError } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelIdGenerator, ModelType } from '../types/model.ts';
@@ -71,17 +71,16 @@ export class ModelRegistryIndex implements RegistryIndex {
 
     const adapter = this.store.getForRegister(cls, true);
     const registered = adapter.get();
-    const schemaFields = SchemaRegistryIndex.getForRegister(cls, true).get().fields;
+    const schemaFields = SchemaRegistryIndex.getForRegister(cls, true).get()?.fields ?? {};
     const modelIdField = Object.values(schemaFields).find(field => field.aliases?.includes('modelId'))?.name;
     const idField = registered.idField ?? modelIdField ?? (schemaFields.id ? 'id' : undefined);
 
-    if (idField) {
-      adapter.register({ idField: castTo(idField) });
-      if (!registered.idGenerator) {
-        adapter.register({ idGenerator: (): string => Util.uuid(32) });
-      }
-      SchemaRegistryIndex.getForRegister(cls, true).registerField(castTo(idField), { required: { active: false } });
+    if (!idField) {
+      throw new RuntimeError(`Model ${cls.name} is missing a primary identifier field (id: ModelId)`);
     }
+
+    adapter.register({ idField: castTo(idField) });
+    SchemaRegistryIndex.getForRegister(cls, true).registerField(castTo(idField), { required: { active: false } });
   }
 
   onCreate(cls: Class): void {
@@ -139,7 +138,7 @@ export class ModelRegistryIndex implements RegistryIndex {
    * Get identifier generator function for a model class
    */
   getIdGenerator<T extends ModelType>(cls: Class<T>): ModelIdGenerator {
-    return this.getConfig(cls).idGenerator ?? ((): string => Util.uuid(32));
+    return this.getConfig(cls).idGenerator;
   }
 
   /**

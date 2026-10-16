@@ -1,5 +1,5 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import type { Class } from '@travetto/runtime';
+import { type Class, Util } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelConfig } from './types.ts';
@@ -22,6 +22,7 @@ function combineClasses(target: ModelConfig, sources: Partial<ModelConfig>[]): M
 export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
   #cls: Class;
   #config: ModelConfig;
+  #hasCustomGenerator = false;
 
   constructor(cls: Class) {
     this.#cls = cls;
@@ -33,10 +34,14 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
       indices: {},
       autoCreate: 'development',
       store: this.#cls.name,
+      idGenerator: (): string => Util.uuid(32),
       postLoad: [],
       prePersist: [],
       transientFields: []
     });
+    if (data.some(d => d.idGenerator)) {
+      this.#hasCustomGenerator = true;
+    }
     combineClasses(config, data);
     return config;
   }
@@ -54,7 +59,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
         config.idField = parent.idField;
       }
 
-      if (parent.idGenerator && !config.idGenerator) {
+      if (parent.idGenerator && !this.#hasCustomGenerator) {
         config.idGenerator = parent.idGenerator;
       }
 

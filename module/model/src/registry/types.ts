@@ -43,7 +43,7 @@ export class ModelConfig<T extends ModelType = ModelType> {
   /**
    * Identifier generator function
    */
-  idGenerator?: ModelIdGenerator;
+  idGenerator: ModelIdGenerator;
   /**
    * Indices
    */

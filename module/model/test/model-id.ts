@@ -29,6 +29,10 @@ class AutoDiscoveredIdModel {
   title: string;
 }
 
+class InvalidMissingIdModel {
+  name: string;
+}
+
 @Suite('ModelIdSource Suite')
 class ModelIdSourceSuite {
   @Test('Verify ModelRegistryIndex integration for default model')
@@ -139,5 +143,11 @@ class ModelIdSourceSuite {
 
     const part: PartialWithId<AutoDiscoveredIdModel> = { isbn: '978-0441013593' };
     assert(part.isbn === '978-0441013593');
+  }
+
+  @Test('Verify error thrown when model has no id field')
+  async testMissingIdFieldThrows(): Promise<void> {
+    ModelRegistryIndex.getForRegister(InvalidMissingIdModel).register();
+    assert.throws(() => Registry.finalizeForIndex(ModelRegistryIndex), /missing a primary identifier/);
   }
 }
