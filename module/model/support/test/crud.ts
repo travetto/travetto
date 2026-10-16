@@ -359,6 +359,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   async testRawUpdate() {
     const service = await this.service;
     const o = await service.create(Simple, { name: 'bob' });
+    console.log(o);
     const b = await service.update(Simple, { id: o.id, name: 'roger' });
     const id = b.id;
 

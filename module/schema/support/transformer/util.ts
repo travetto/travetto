@@ -22,6 +22,12 @@ export class SchemaTransformUtil {
   static TYPES_IMPORT = '@travetto/schema/src/types.ts';
   static BIND_UTIL_IMPORT = '@travetto/schema/src/bind-util.ts';
 
+  static readTags(node: ts.Node, typeExpr: AnyType, name: string): string[] {
+    const typeSpecifiers = typeExpr.original ? DocUtil.readDocTag(typeExpr.original, name) : [];
+    const nodeSpecifiers = DocUtil.readNodeDocTags(node, name);
+    return [...new Set([...typeSpecifiers, ...nodeSpecifiers])];
+  }
+
   /**
    * Produce concrete type given transformer type
    */
@@ -227,12 +233,8 @@ class ${uniqueId} extends ${type.mappedClassName} {
       }
     }
 
-    const typeSpecifiers = typeExpr.original ? DocUtil.readDocTag(typeExpr.original, 'specifier') : [];
-    const nodeSpecifiers = DocUtil.readNodeDocTags(node, 'specifier');
-
-    if (typeSpecifiers.length || nodeSpecifiers.length) {
-      attrs.specifiers = [...new Set([...typeSpecifiers, ...nodeSpecifiers])];
-    }
+    attrs.specifiers = this.readTags(node, typeExpr, 'specifier');
+    attrs.aliases = this.readTags(node, typeExpr, 'alias');
 
     const params: ts.Expression[] = [];
 

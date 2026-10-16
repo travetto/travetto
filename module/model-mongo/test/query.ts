@@ -1,11 +1,13 @@
 import assert from 'node:assert';
 
+import { Model, type ModelId } from '@travetto/model';
 import { Suite, Test } from '@travetto/test';
 
 import { MongoUtil } from '@travetto/model-mongo/src/internal/util.ts';
 
-class User {
-  id: string;
+@Model()
+class MongoUser {
+  id: ModelId;
   name: string;
 }
 
@@ -24,7 +26,7 @@ class Type {
 export class QueryTest {
   @Test()
   async validateQuery() {
-    const out = MongoUtil.extractSimple(User, { a: { b: { c: 5 } } });
+    const out = MongoUtil.extractSimple(MongoUser, { a: { b: { c: 5 } } });
     assert(out['a.b.c'] === 5);
 
     const out2 = MongoUtil.extractWhereClause(Type, {
@@ -47,7 +49,7 @@ export class QueryTest {
   @Test()
   async translateIds() {
     const ids = ['a'.repeat(24), 'b'.repeat(24), 'c'.repeat(24)];
-    const out = MongoUtil.extractWhereClause(User, {
+    const out = MongoUtil.extractWhereClause(MongoUser, {
       $and: [{ id: { $in: ids } }]
     });
 
@@ -62,7 +64,7 @@ export class QueryTest {
 
   @Test()
   async translateRegex() {
-    const out = MongoUtil.extractWhereClause(User, {
+    const out = MongoUtil.extractWhereClause(MongoUser, {
       name: { $regex: '/google.$/' }
     });
 
