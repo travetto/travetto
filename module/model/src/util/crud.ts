@@ -88,7 +88,7 @@ export class ModelCrudUtil {
 
     SchemaRegistryIndex.get(cls).ensureInstanceTypeField(item);
 
-    item = await this.prePersist(cls, castTo(item), scope);
+    item = await this.prePersist(cls, item, scope);
 
     let errors: ValidationError[] = [];
     try {
@@ -227,9 +227,9 @@ export class ModelCrudUtil {
       idSource.deleteValue(item);
     }
 
-    const result = await this.prePersist(cls, castTo(item), 'partial');
-    await SchemaValidator.validatePartial(cls, castTo(item));
-    return result;
+    const result = await this.prePersist(cls, item, 'partial');
+    await SchemaValidator.validatePartial(cls, item);
+    return castTo(result);
   }
 
   /**
@@ -240,8 +240,8 @@ export class ModelCrudUtil {
     get: () => Promise<T>,
     item: PartialWithId<T> | Partial<T>
   ): Promise<T> {
-    const prepared = await this.prePartialUpdate(cls, castTo(item));
+    const prepared = await this.prePartialUpdate(cls, item);
     const full = await get();
-    return cls.from(castTo({ ...full, ...prepared }));
+    return cls.from({ ...full, ...prepared });
   }
 }

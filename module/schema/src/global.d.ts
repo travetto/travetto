@@ -8,6 +8,6 @@ declare global {
      * NOTE: Only applies to Schema-based classes, will throw a runtime error otherwise
      * @param data The data to bind
      */
-    from<T>(this: Class<T>, data: DeepPartial<T>): T;
+    from<T>(this: Class<T>, data: Partial<T> | DeepPartial<T>): T;
   }
 }
