@@ -21,7 +21,7 @@ export function Model(config: Partial<ModelConfig<ModelType>> | string = {}) {
 
     const registered = adapter.get();
     const schemaFields = SchemaRegistryIndex.getForRegister(cls).get().fields;
-    const modelIdField = Object.values(schemaFields).find(field => field.specifiers?.includes('modelId'))?.name;
+    const modelIdField = Object.values(schemaFields).find(field => field.aliases?.includes('modelId'))?.name;
     const idField = registered.id?.field ?? modelIdField ?? (schemaFields.id ? 'id' : undefined);
     if (idField) {
       if (!registered.id) {

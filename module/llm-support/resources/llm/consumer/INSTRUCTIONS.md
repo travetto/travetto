@@ -38,7 +38,7 @@ Do not recommend excluded operations unless explicitly requested:
   - Omit `@Body()` on `@Post()`, `@Put()`, or `@Patch()` endpoint parameters taking schema DTOs.
   - Prefer standard JSDoc comments (`/** ... */`) over `@Description()` for schema and endpoint descriptions.
 - Visibility & Encapsulation: Do not use TS visibility modifiers (`private`, `protected`, or `public`) or TypeScript's `override` keyword on class methods or properties. Use standard ECMAScript public by default and `#private` fields/methods when private accessibility is needed.
-- Model Identifiers: Primary identifier fields on models should be typed using `ModelId` from `@travetto/model` (`id: ModelId`). The schema transformer auto-detects `ModelId` via `@specifier modelId`, allowing `@Model()` to auto-discover the primary key and ensuring proper behavior with `OptionalId<T>` and `PartialWithId<T>`.
+- Model Identifiers: Primary identifier fields on models should be typed using `ModelId` from `@travetto/model` (`id: ModelId`). The schema transformer auto-detects `ModelId` via `@alias modelId`, allowing `@Model()` to auto-discover the primary key and ensuring proper behavior with `OptionalId<T>` and `PartialWithId<T>`.
 - Model Query Handling: When building query filters or aggregations, compose compound clauses via `ModelQueryUtil.getWhereClause(cls, ...)` rather than manually building backend-specific query filter objects.
 - Dependency Injection: Avoid defensive null checks on `@Inject()` dependencies. In test setups or scripts, ensure `await Registry.init()` is executed prior to accessing services.
 - Code Style & Safety:

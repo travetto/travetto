@@ -2,7 +2,7 @@ declare const modelIdTag: unique symbol;
 
 /**
  * Model Identifier branded type
- * @specifier modelId
+ * @alias modelId
  */
 export type ModelId = string & { readonly [modelIdTag]?: null };
 

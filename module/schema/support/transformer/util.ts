@@ -228,25 +228,20 @@ class ${uniqueId} extends ${type.mappedClassName} {
     }
 
     const tags = ts.getJSDocTags(node);
-    const aliases = tags.filter(tag => tag.tagName.getText() === 'alias');
-    if (aliases.length) {
-      attrs.aliases = aliases.map(alias => alias.comment).filter(alias => !!alias);
-    }
-
-    const typeSpecifiers = typeExpr.original ? DocUtil.readDocTag(typeExpr.original, 'specifier') : [];
-    const nodeSpecifiers = tags
-      .filter(tag => tag.tagName.getText() === 'specifier')
+    const typeAliases = typeExpr.original ? DocUtil.readDocTag(typeExpr.original, 'alias') : [];
+    const nodeAliases = tags
+      .filter(tag => tag.tagName.getText() === 'alias')
       .map(tag =>
         typeof tag.comment === 'string' ? tag.comment : Array.isArray(tag.comment) ? tag.comment.map(part => part.text).join('') : ''
       )
-      .filter(specifier => !!specifier);
+      .filter(alias => !!alias);
     if (typeExpr.original && 'aliasSymbol' in typeExpr.original && typeExpr.original.aliasSymbol?.name === 'ModelId') {
-      typeSpecifiers.push('modelId');
+      typeAliases.push('modelId');
     }
-    const specifiers = [...new Set([...typeSpecifiers, ...nodeSpecifiers])];
-    if (specifiers.length) {
-      attrs.specifiers = specifiers;
-      if (specifiers.includes('modelId')) {
+    const aliases = [...new Set([...typeAliases, ...nodeAliases])];
+    if (aliases.length) {
+      attrs.aliases = aliases;
+      if (aliases.includes('modelId')) {
         attrs.required = { active: false };
       }
     }
