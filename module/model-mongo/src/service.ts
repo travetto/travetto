@@ -88,7 +88,7 @@ import {
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { MongoModelConfig } from './config.ts';
-import { MongoUtil, type WithId } from './internal/util.ts';
+import { MongoUtil } from './internal/util.ts';
 
 type BlobRaw = GridFSFile & { metadata?: BinaryMetadata };
 

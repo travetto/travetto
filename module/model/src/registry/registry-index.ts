@@ -21,7 +21,7 @@ export class ModelRegistryIndex implements RegistryIndex {
     return this.#instance.getConfig(cls);
   }
 
-  static has(cls: Class): boolean {
+  static has(cls: Class): cls is Class<ModelType> {
     return this.#instance.store.has(cls);
   }
 

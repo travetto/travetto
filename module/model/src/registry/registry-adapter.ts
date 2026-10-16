@@ -54,7 +54,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
 
     // Establish id field
     if (!config.idField) {
-      const modelIdFields = Object.values(schemaFields).filter(field => field.aliases?.includes('modelId'));
+      const modelIdFields = Object.values(schemaFields).filter(field => field.specifiers?.includes('modelId'));
       if (!modelIdFields.length) {
         throw new RuntimeError(`Model ${this.#cls.name} is missing a ModelId (primary identifier) field`);
       } else if (modelIdFields.length > 1) {

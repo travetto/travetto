@@ -103,7 +103,7 @@ export class ElasticsearchQueryUtil {
   ): Record<string, unknown> {
     const items = [];
     const fields = SchemaRegistryIndex.get(cls).getFields();
-    const idField = ModelRegistryIndex.has(cls) ? ModelRegistryIndex.getIdSource(cls as Class<ModelType>).field : undefined;
+    const idField = ModelRegistryIndex.has(cls) ? ModelRegistryIndex.getIdSource(cls).field : undefined;
 
     for (const property of TypedObject.keys(item)) {
       if (property === '$text') {

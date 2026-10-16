@@ -28,7 +28,6 @@ const RADIANS_TO: Record<DistanceUnit, number> = {
   rad: 1
 };
 
-export type WithId<T, I = unknown> = T & { _id?: I };
 export type BasicIdx = Record<string, IndexDirection>;
 
 function flattenKeys(obj: Record<string, unknown>, prefix = ''): Record<string, 1 | -1> {
