@@ -294,7 +294,7 @@ export class ElasticsearchQueryUtil {
   /**
    * Build query from the where clause
    */
-  static extractWhereQuery<T extends ModelType>(cls: Class<T>, clause: WhereClause<T>, config?: EsSchemaConfig): Record<string, unknown> {
+  static extractWhereQuery<T>(cls: Class<T>, clause: WhereClause<T>, config?: EsSchemaConfig): Record<string, unknown> {
     if (ModelQueryUtil.has$And(clause)) {
       return { bool: { must: clause.$and.map(item => this.extractWhereQuery<T>(cls, item, config)) } };
     } else if (ModelQueryUtil.has$Or(clause)) {
