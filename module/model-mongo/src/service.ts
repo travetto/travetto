@@ -213,7 +213,7 @@ export class MongoModelService
     return item;
   }
 
-  preUpdate<T extends ModelType>(cls: Class<T>, item: unknown): string | undefined {
+  preUpdate<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): string | undefined {
     const idSource = ModelRegistryIndex.getIdSource(cls);
     const id = idSource.getOptionalValue(item);
     if (id) {
