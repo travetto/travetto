@@ -235,15 +235,9 @@ class ${uniqueId} extends ${type.mappedClassName} {
         typeof tag.comment === 'string' ? tag.comment : Array.isArray(tag.comment) ? tag.comment.map(part => part.text).join('') : ''
       )
       .filter(alias => !!alias);
-    if (typeExpr.original && 'aliasSymbol' in typeExpr.original && typeExpr.original.aliasSymbol?.name === 'ModelId') {
-      typeAliases.push('modelId');
-    }
     const aliases = [...new Set([...typeAliases, ...nodeAliases])];
     if (aliases.length) {
       attrs.aliases = aliases;
-      if (aliases.includes('modelId')) {
-        attrs.required = { active: false };
-      }
     }
 
     const params: ts.Expression[] = [];
