@@ -17,16 +17,16 @@ export class CustomIdModel {
 let skuSequence = 0;
 
 @Model()
+@IdGenerator(() => `SKU-${++skuSequence}`)
 export class SkuModel {
-  @IdGenerator(() => `SKU-${++skuSequence}`)
   @Match(/^SKU-\d+$/)
   sku: ModelId;
   title: string;
 }
 
 @Model()
+@IdGenerator(false)
 export class BookModel {
-  @IdGenerator(false)
   @Match(/^(?:978|979)-\d+$/)
   isbn: ModelId;
   title: string;

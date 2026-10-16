@@ -17,15 +17,15 @@ class DefaultModel {
 }
 
 @Model()
+@IdGenerator((): string => 'custom-id-value')
 class CustomGeneratorModel {
-  @IdGenerator((): string => 'custom-id-value')
   identifier: ModelId;
   name: string;
 }
 
 @Model()
+@IdGenerator(false)
 class NaturalKeyModel {
-  @IdGenerator(false)
   isbn: ModelId;
   title: string;
 }
