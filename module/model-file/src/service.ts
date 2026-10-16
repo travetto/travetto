@@ -168,8 +168,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
       throw new ExistsError(cls, id);
     }
 
-    await fs.writeFile(file, BinaryUtil.binaryArrayToUint8Array(JSONUtil.toBinaryArray(prepped)));
-    return prepped;
+    return this.upsert(cls, prepped);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
