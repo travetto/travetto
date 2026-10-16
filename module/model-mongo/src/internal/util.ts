@@ -102,7 +102,7 @@ export class MongoUtil {
     recursive: boolean = true
   ): Record<string, unknown> {
     const fields = base ? SchemaRegistryIndex.getOptional(base)?.getFields() : undefined;
-    const idFieldName = base ? ModelRegistryIndex.getIdSource(base).field : 'id';
+    const idFieldName = base ? ModelRegistryIndex.getConfig(base).idField : undefined;
     const out: Record<string, unknown> = {};
     const sub = item;
     const keys = Object.keys(sub);
@@ -114,7 +114,7 @@ export class MongoUtil {
       const isPlain = value && DataUtil.isPlainObject(value);
       const firstKey = isPlain ? Object.keys(value)[0] : '';
 
-      if (subpath === idFieldName || subpath === '_id' || subpath === 'id') {
+      if (subpath === idFieldName || subpath === '_id') {
         if (!firstKey) {
           out._id = Array.isArray(value) ? value.map(subValue => this.uuid(subValue)) : this.uuid(`${value}`);
         } else if (firstKey === '$in' || firstKey === '$nin' || firstKey === '$eq' || firstKey === '$ne') {
@@ -165,7 +165,7 @@ export class MongoUtil {
             }
           };
         }
-        out[subpath === idFieldName || subpath === 'id' ? '_id' : subpath] = value;
+        out[subpath === idFieldName ? '_id' : subpath] = value;
       }
     }
     return out;

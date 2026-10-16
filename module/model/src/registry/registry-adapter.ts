@@ -37,6 +37,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
       class: this.#cls,
       indices: {},
       autoCreate: 'development',
+      idField: undefined!,
       idGenerator: undefined!,
       store: this.#cls.name,
       postLoad: [],
@@ -62,6 +63,16 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
       config.idField = parent?.idField ?? modelIdFields[0].name;
     }
 
+    if (this.#config.indices) {
+      for (const idx of Object.values(this.#config.indices)) {
+        if ('fields' in idx && Array.isArray(idx.fields) && idx.fields.some(field => field === config.idField)) {
+          throw new RuntimeError('Cannot create an index with the id field', {
+            details: idx
+          });
+        }
+      }
+    }
+
     if (parent) {
       const parentSchema = parent && SchemaRegistryIndex.has(parent.class) ? SchemaRegistryIndex.getConfig(parent.class) : undefined;
 
@@ -77,10 +88,10 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
 
     config.idGenerator ??= DEFAULT_ID_GENERATOR;
 
-    const idFieldConfig = schemaFields[config.idField!];
+    const idFieldConfig = schemaFields[config.idField];
     const match =
       config.idGenerator === DEFAULT_ID_GENERATOR ? (idFieldConfig.match ?? { regex: DEFAULT_ID_PATTERN }) : idFieldConfig.match;
-    SchemaRegistryIndex.getForRegister(this.#cls, true).registerField(idFieldConfig.name, {
+    SchemaRegistryIndex.getForRegister(this.#cls, true).registerField(config.idField, {
       required: { active: false },
       ...(match ? { match } : {})
     });

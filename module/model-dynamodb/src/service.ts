@@ -315,6 +315,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async upsertModel(cls: Class<ModelType>): Promise<void> {
     const table = this.#resolveTable(cls);
     const idx = DynamoDBUtil.computeIndexConfig(cls);
+    const idField = ModelRegistryIndex.getConfig(cls).idField;
 
     const [currentTable, currentTTL] = await Promise.all([
       ModelStorageUtil.runAndIgnoreNotFound(() => this.client.describeTable({ TableName: table }), isNotFoundError),
@@ -325,21 +326,21 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       console.debug('Creating Table', { table, idx });
       await this.client.createTable({
         TableName: table,
-        KeySchema: [{ KeyType: 'HASH', AttributeName: 'id' }],
+        KeySchema: [{ KeyType: 'HASH', AttributeName: idField }],
         BillingMode: 'PAY_PER_REQUEST',
-        AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }, ...idx.attributes],
+        AttributeDefinitions: [{ AttributeName: idField, AttributeType: 'S' }, ...idx.attributes],
         GlobalSecondaryIndexes: idx.indices
       });
     } else {
       const indexUpdates = DynamoDBUtil.findChangedGlobalIndexes(currentTable.Table?.GlobalSecondaryIndexes, idx.indices);
-      const changedAttributes = DynamoDBUtil.findChangedAttributes(currentTable.Table?.AttributeDefinitions, idx.attributes);
+      const changedAttributes = DynamoDBUtil.findChangedAttributes(cls, currentTable.Table?.AttributeDefinitions, idx.attributes);
 
       console.debug('Updating Table', { table, idx, current: currentTable.Table, indexUpdates, changedAttributes });
 
       if (changedAttributes.length || indexUpdates?.length) {
         await this.client.updateTable({
           TableName: table,
-          AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }, ...idx.attributes],
+          AttributeDefinitions: [{ AttributeName: idField, AttributeType: 'S' }, ...idx.attributes],
           GlobalSecondaryIndexUpdates: indexUpdates
         });
       }

@@ -39,7 +39,7 @@ export class ModelConfig<T extends ModelType = ModelType> {
   /**
    * Identifier field name
    */
-  idField?: [keyof T] extends [never] ? string : Extract<keyof T, string>;
+  idField: [keyof T] extends [never] ? string : Extract<keyof T, string>;
   /**
    * Identifier generator function
    */

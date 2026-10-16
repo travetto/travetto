@@ -1,8 +1,6 @@
 import { castKey, castTo, type Any, type Class } from '@travetto/runtime';
 import { ValidationResultError } from '@travetto/schema';
 
-import { ExistsError } from '../error/exists.ts';
-import { NotFoundError } from '../error/not-found.ts';
 import type { ModelType, OptionalId, PartialWithId } from '../types/model.ts';
 
 /**
@@ -12,9 +10,9 @@ export class ModelIdSource<T extends ModelType = Any> {
   #modelClass: Class<T>;
   field: [keyof T] extends [never] ? string : Extract<keyof T, string>;
 
-  constructor(modelClass: Class<T>, field?: Extract<keyof T, string>) {
+  constructor(modelClass: Class<T>, field: Extract<keyof T, string>) {
     this.#modelClass = modelClass;
-    this.field = field ?? castTo('id');
+    this.field = field;
   }
 
   /**

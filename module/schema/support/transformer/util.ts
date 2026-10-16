@@ -228,16 +228,16 @@ class ${uniqueId} extends ${type.mappedClassName} {
     }
 
     const tags = ts.getJSDocTags(node);
-    const typeAliases = typeExpr.original ? DocUtil.readDocTag(typeExpr.original, 'alias') : [];
-    const nodeAliases = tags
-      .filter(tag => tag.tagName.getText() === 'alias')
+    const typeSpecifiers = typeExpr.original ? DocUtil.readDocTag(typeExpr.original, 'specifier') : [];
+    const nodeSpecifiers = tags
+      .filter(tag => tag.tagName.getText() === 'specifier')
       .map(tag =>
         typeof tag.comment === 'string' ? tag.comment : Array.isArray(tag.comment) ? tag.comment.map(part => part.text).join('') : ''
       )
-      .filter(alias => !!alias);
-    const aliases = [...new Set([...typeAliases, ...nodeAliases])];
-    if (aliases.length) {
-      attrs.aliases = aliases;
+      .filter(specifier => !!specifier);
+    const specifiers = [...new Set([...typeSpecifiers, ...nodeSpecifiers])];
+    if (specifiers.length) {
+      attrs.specifiers = specifiers;
     }
 
     const params: ts.Expression[] = [];
