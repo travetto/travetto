@@ -1,5 +1,5 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { type Class, RuntimeError, Util, castTo } from '@travetto/runtime';
+import { type Class, RuntimeError, Util } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelConfig } from './types.ts';
@@ -35,8 +35,8 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
       class: this.#cls,
       indices: {},
       autoCreate: 'development',
+      idGenerator: undefined!,
       store: this.#cls.name,
-      idGenerator: DEFAULT_ID_GENERATOR,
       postLoad: [],
       prePersist: [],
       transientFields: []
@@ -47,6 +47,19 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
 
   finalize(parent?: ModelConfig): void {
     const config = this.#config;
+    const schemaFields = SchemaRegistryIndex.getForRegister(this.#cls, true).get()?.fields ?? {};
+
+    // Establish id field
+    if (!config.idField) {
+      const modelIdFields = Object.values(schemaFields).filter(field => field.aliases?.includes('modelId'));
+      if (!modelIdFields.length) {
+        throw new RuntimeError(`Model ${this.#cls.name} is missing a ModelId (primary identifier) field`);
+      } else if (modelIdFields.length > 1) {
+        throw new RuntimeError(`Model ${this.#cls.name} is has multiple ModelId (primary identifier) fields`);
+      }
+      config.idField = parent?.idField ?? modelIdFields[0].name;
+    }
+
     if (parent) {
       const parentSchema = parent && SchemaRegistryIndex.has(parent.class) ? SchemaRegistryIndex.getConfig(parent.class) : undefined;
 
@@ -54,33 +67,18 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
         config.store = parent.store;
       }
 
-      if (parent.idField && !config.idField) {
-        config.idField = parent.idField;
-      }
-
-      if (parent.idGenerator && config.idGenerator === DEFAULT_ID_GENERATOR) {
-        config.idGenerator = parent.idGenerator;
-      }
-
+      config.idGenerator ??= parent.idGenerator;
       config.postLoad = [...(parent.postLoad ?? []), ...(config.postLoad ?? [])];
       config.prePersist = [...(parent.prePersist ?? []), ...(config.prePersist ?? [])];
       config.transientFields = [...(parent.transientFields ?? []), ...(config.transientFields ?? [])];
     }
 
-    const schemaFields = SchemaRegistryIndex.getForRegister(this.#cls, true).get()?.fields ?? {};
-    const modelIdField = Object.values(schemaFields).find(field => field.aliases?.includes('modelId'))?.name;
-    const idField = config.idField ?? modelIdField;
+    config.idGenerator ??= DEFAULT_ID_GENERATOR;
 
-    if (!idField) {
-      throw new RuntimeError(`Model ${this.#cls.name} is missing a ModelId (primary identifier) field`);
-    }
-
-    config.idField = castTo(idField);
-    const idFieldConfig = schemaFields[idField];
-    const match = config.idGenerator === DEFAULT_ID_GENERATOR && !idFieldConfig?.match ? { regex: DEFAULT_ID_PATTERN } : undefined;
-    SchemaRegistryIndex.getForRegister(this.#cls, true).registerField(castTo(idField), {
+    const idFieldConfig = schemaFields[config.idField!];
+    SchemaRegistryIndex.getForRegister(this.#cls, true).registerField(idFieldConfig.name, {
       required: { active: false },
-      ...(match ? { match } : {})
+      match: idFieldConfig.match ?? { regex: DEFAULT_ID_PATTERN }
     });
   }
 
