@@ -5,8 +5,6 @@ import { castTo } from '@travetto/runtime';
 import { Schema, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
-import { ExistsError } from '../src/error/exists.ts';
-import { NotFoundError } from '../src/error/not-found.ts';
 import { IdGenerator, Model } from '../src/registry/decorator.ts';
 import { ModelRegistryIndex } from '../src/registry/registry-index.ts';
 import type { ModelId, OptionalId, PartialWithId } from '../src/types/model.ts';
@@ -95,44 +93,6 @@ class ModelIdSourceSuite {
     const source = ModelRegistryIndex.getIdSource(CustomGeneratorModel);
     assert(source.field === 'identifier');
     assert(ModelRegistryIndex.createId(CustomGeneratorModel) === 'custom-id-value');
-  }
-
-  @Test('Verify getNotFoundError')
-  async testNotFoundError(): Promise<void> {
-    await Registry.init();
-    const source = ModelRegistryIndex.getIdSource(DefaultModel);
-
-    const errorFromItem = source.getNotFoundError({ id: 'missing-123', name: 'Item' });
-    assert(errorFromItem instanceof NotFoundError);
-    assert(errorFromItem.message.includes('missing-123'));
-    assert(errorFromItem.message.includes('DefaultModel'));
-
-    const errorFromId = source.getNotFoundError('missing-456');
-    assert(errorFromId instanceof NotFoundError);
-    assert(errorFromId.message.includes('missing-456'));
-
-    const errorFromEmpty = source.getNotFoundError({});
-    assert(errorFromEmpty instanceof NotFoundError);
-    assert(errorFromEmpty.message.includes('unknown'));
-  }
-
-  @Test('Verify getExistsError')
-  async testExistsError(): Promise<void> {
-    await Registry.init();
-    const source = ModelRegistryIndex.getIdSource(DefaultModel);
-
-    const errorFromItem = source.getExistsError({ id: 'existing-123', name: 'Item' });
-    assert(errorFromItem instanceof ExistsError);
-    assert(errorFromItem.message.includes('existing-123'));
-    assert(errorFromItem.message.includes('DefaultModel'));
-
-    const errorFromId = source.getExistsError('existing-456');
-    assert(errorFromId instanceof ExistsError);
-    assert(errorFromId.message.includes('existing-456'));
-
-    const errorFromEmpty = source.getExistsError({});
-    assert(errorFromEmpty instanceof ExistsError);
-    assert(errorFromEmpty.message.includes('unknown'));
   }
 
   @Test('Verify auto-discovered ModelId field')

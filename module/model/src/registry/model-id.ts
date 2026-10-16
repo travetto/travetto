@@ -67,20 +67,4 @@ export class ModelIdSource<T extends ModelType = Any> {
     const id = typeof idOrItem === 'string' ? idOrItem : this.getOptionalValue(idOrItem);
     return castTo({ [this.field]: id });
   }
-
-  /**
-   * Produce a NotFoundError for an item or identifier
-   */
-  getNotFoundError(idOrItem: string | T | Partial<T>, details?: Record<string, unknown>): NotFoundError {
-    const id = typeof idOrItem === 'string' ? idOrItem : this.getOptionalValue(idOrItem);
-    return new NotFoundError(this.#modelClass, id ?? 'unknown', details);
-  }
-
-  /**
-   * Produce an ExistsError for an item or identifier
-   */
-  getExistsError(idOrItem: string | T | Partial<T>, details?: Record<string, unknown>): ExistsError {
-    const id = typeof idOrItem === 'string' ? idOrItem : this.getOptionalValue(idOrItem);
-    return new ExistsError(this.#modelClass, id ?? 'unknown', details);
-  }
 }

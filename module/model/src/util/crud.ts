@@ -1,6 +1,7 @@
 import { type BinaryArray, BinaryUtil, type Class, castKey, castTo, hasFunction, JSONUtil, RuntimeError } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 
+import { ExistsError } from '../error/exists.ts';
 import { SubTypeNotSupportedError } from '../error/invalid-sub-type.ts';
 import { NotFoundError } from '../error/not-found.ts';
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
@@ -52,11 +53,10 @@ export class ModelCrudUtil {
     const result = SchemaRegistryIndex.getBaseClass(cls).from(resolvedInput);
 
     if (!(result instanceof cls || result.constructor.Ⲑid === cls.Ⲑid)) {
-      const idSource = ModelRegistryIndex.getIdSource(cls);
       if (onTypeMismatch === 'notfound') {
-        throw idSource.getNotFoundError(result);
+        throw NotFoundError.from(cls, result);
       } else {
-        throw idSource.getExistsError(result);
+        throw ExistsError.from(cls, result);
       }
     }
 
