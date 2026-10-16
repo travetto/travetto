@@ -1,6 +1,7 @@
 import { Util, castKey, castTo, type Any, type Class } from '@travetto/runtime';
 import { ValidationResultError } from '@travetto/schema';
 
+import { ExistsError } from '../error/exists.ts';
 import { NotFoundError } from '../error/not-found.ts';
 import type { ModelIdGenerator, ModelType } from '../types/model.ts';
 import type { ModelIdConfig } from './types.ts';
@@ -94,5 +95,13 @@ export class ModelIdSource<T extends ModelType = Any> {
   getNotFoundError(idOrItem: string | unknown, details?: Record<string, unknown>): NotFoundError {
     const id = typeof idOrItem === 'string' ? idOrItem : this.getOptionalValue(idOrItem);
     return new NotFoundError(this.#modelClass, id ?? 'unknown', details);
+  }
+
+  /**
+   * Produce an ExistsError for an item or identifier
+   */
+  getExistsError(idOrItem: string | unknown, details?: Record<string, unknown>): ExistsError {
+    const id = typeof idOrItem === 'string' ? idOrItem : this.getOptionalValue(idOrItem);
+    return new ExistsError(this.#modelClass, id ?? 'unknown', details);
   }
 }
