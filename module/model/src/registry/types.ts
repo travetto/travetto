@@ -1,6 +1,6 @@
 import type { Class } from '@travetto/runtime';
 
-import type { ModelIdGenerator, ModelType } from '../types/model.ts';
+import type { ModelId, ModelType } from '../types/model.ts';
 
 export type DataHandler<T = unknown> = (inst: T) => Promise<T | void> | T | void;
 
@@ -43,7 +43,7 @@ export class ModelConfig<T extends ModelType = ModelType> {
   /**
    * Identifier generator function
    */
-  idGenerator: ModelIdGenerator;
+  idGenerator: () => ModelId;
   /**
    * Indices
    */

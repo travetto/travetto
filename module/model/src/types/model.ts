@@ -27,11 +27,6 @@ export type PartialWithId<T> = {
 };
 
 /**
- * Model Id Generator function
- */
-export type ModelIdGenerator = () => string;
-
-/**
  * Simple model interface
  */
 export type ModelType = {};

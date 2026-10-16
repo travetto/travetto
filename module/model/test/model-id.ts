@@ -53,7 +53,6 @@ class ModelIdSourceSuite {
     await Registry.init();
     const source = ModelRegistryIndex.getIdSource(DefaultModel);
     assert(source.field === 'id');
-    assert(ModelRegistryIndex.getIdGenerator(DefaultModel) !== undefined);
 
     const generatedId = ModelRegistryIndex.createId(DefaultModel);
     assert(typeof generatedId === 'string');
@@ -141,7 +140,6 @@ class ModelIdSourceSuite {
     await Registry.init();
     const source = ModelRegistryIndex.getIdSource(AutoDiscoveredIdModel);
     assert(source.field === 'isbn');
-    assert(ModelRegistryIndex.getIdGenerator(AutoDiscoveredIdModel) !== undefined);
     const generated = ModelRegistryIndex.createId(AutoDiscoveredIdModel);
     assert(typeof generated === 'string');
     assert(generated.length === 32);

@@ -76,9 +76,11 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
     config.idGenerator ??= DEFAULT_ID_GENERATOR;
 
     const idFieldConfig = schemaFields[config.idField!];
+    const match =
+      config.idGenerator === DEFAULT_ID_GENERATOR ? (idFieldConfig.match ?? { regex: DEFAULT_ID_PATTERN }) : idFieldConfig.match;
     SchemaRegistryIndex.getForRegister(this.#cls, true).registerField(idFieldConfig.name, {
       required: { active: false },
-      match: idFieldConfig.match ?? { regex: DEFAULT_ID_PATTERN }
+      ...(match ? { match } : {})
     });
   }
 
