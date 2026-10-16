@@ -113,7 +113,7 @@ export class MongoUtil {
       const isPlain = value && DataUtil.isPlainObject(value);
       const firstKey = isPlain ? Object.keys(value)[0] : '';
 
-      if (subpath === idFieldName || subpath === '_id') {
+      if (subpath === idFieldName) {
         if (!firstKey) {
           out._id = Array.isArray(value) ? value.map(subValue => this.uuid(subValue)) : this.uuid(`${value}`);
         } else if (firstKey === '$in' || firstKey === '$nin' || firstKey === '$eq' || firstKey === '$ne') {
