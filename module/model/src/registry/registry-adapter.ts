@@ -4,6 +4,9 @@ import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelConfig } from './types.ts';
 
+const DEFAULT_ID_PATTERN = /^[0-9a-f]{32}$/i;
+const DEFAULT_ID_GENERATOR = (): string => Util.uuid(32);
+
 function combineClasses(target: ModelConfig, sources: Partial<ModelConfig>[]): ModelConfig {
   for (const source of sources) {
     Object.assign(target, source, {
@@ -22,7 +25,6 @@ function combineClasses(target: ModelConfig, sources: Partial<ModelConfig>[]): M
 export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
   #cls: Class;
   #config: ModelConfig;
-  #hasCustomGenerator = false;
 
   constructor(cls: Class) {
     this.#cls = cls;
@@ -34,14 +36,11 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
       indices: {},
       autoCreate: 'development',
       store: this.#cls.name,
-      idGenerator: (): string => Util.uuid(32),
+      idGenerator: DEFAULT_ID_GENERATOR,
       postLoad: [],
       prePersist: [],
       transientFields: []
     });
-    if (data.some(d => d.idGenerator)) {
-      this.#hasCustomGenerator = true;
-    }
     combineClasses(config, data);
     return config;
   }
@@ -59,7 +58,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
         config.idField = parent.idField;
       }
 
-      if (parent.idGenerator && !this.#hasCustomGenerator) {
+      if (parent.idGenerator && config.idGenerator === DEFAULT_ID_GENERATOR) {
         config.idGenerator = parent.idGenerator;
       }
 
@@ -77,7 +76,12 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
     }
 
     config.idField = castTo(idField);
-    SchemaRegistryIndex.getForRegister(this.#cls, true).registerField(castTo(idField), { required: { active: false } });
+    const idFieldConfig = schemaFields[idField];
+    const match = config.idGenerator === DEFAULT_ID_GENERATOR && !idFieldConfig?.match ? { regex: DEFAULT_ID_PATTERN } : undefined;
+    SchemaRegistryIndex.getForRegister(this.#cls, true).registerField(castTo(idField), {
+      required: { active: false },
+      ...(match ? { match } : {})
+    });
   }
 
   get(): ModelConfig {

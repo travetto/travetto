@@ -10,19 +10,11 @@ import type { ModelType, OptionalId, PartialWithId } from '../types/model.ts';
  */
 export class ModelIdSource<T extends ModelType = Any> {
   #modelClass: Class<T>;
-  #validator?: (id: string) => boolean;
   field: [keyof T] extends [never] ? string : Extract<keyof T, string>;
 
   constructor(modelClass: Class<T>, field?: Extract<keyof T, string>) {
     this.#modelClass = modelClass;
     this.field = field ?? castTo('id');
-  }
-
-  /**
-   * Validate whether an identifier is valid
-   */
-  valid(id: string): boolean {
-    return this.#validator ? this.#validator(id) : typeof id === 'string' && id.length > 0;
   }
 
   /**

@@ -1,7 +1,8 @@
 import assert from 'node:assert';
 
 import { Registry } from '@travetto/registry';
-import { Schema } from '@travetto/schema';
+import { castTo } from '@travetto/runtime';
+import { Schema, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
 import { ExistsError } from '../src/error/exists.ts';
@@ -22,6 +23,11 @@ class DefaultModel {
 class CustomGeneratorModel {
   identifier: ModelId;
   name: string;
+}
+
+@Model()
+class SubclassCustomModel extends CustomGeneratorModel {
+  extra: string;
 }
 
 @Model()
@@ -162,5 +168,29 @@ class ModelIdSourceSuite {
   async testPlainIdThrows(): Promise<void> {
     ModelRegistryIndex.getForRegister(PlainIdModel).register();
     assert.throws(() => Registry.finalizeForIndex(ModelRegistryIndex), /primary identifier/);
+  }
+
+  @Test('Verify schema validation with default uuid pattern and custom generator')
+  async testSchemaValidation(): Promise<void> {
+    await Registry.init();
+    const validUuid = '0123456789abcdef0123456789abcdef';
+    const validDefault = await SchemaValidator.validate(DefaultModel, { id: validUuid, name: 'Alice' });
+    assert(validDefault.id === validUuid);
+
+    const validDefaultWithoutId = await SchemaValidator.validate(DefaultModel, castTo({ name: 'Alice' }));
+    assert(validDefaultWithoutId.id === undefined);
+
+    await assert.rejects(() => SchemaValidator.validate(DefaultModel, { id: 'invalid-uuid-format', name: 'Alice' }), ValidationResultError);
+
+    const validCustom = await SchemaValidator.validate(CustomGeneratorModel, { identifier: 'custom-id-value', name: 'Bob' });
+    assert(validCustom.identifier === 'custom-id-value');
+
+    const validSubclass = await SchemaValidator.validate(SubclassCustomModel, {
+      identifier: 'subclass-custom-id',
+      name: 'Charlie',
+      extra: 'detail'
+    });
+    assert(validSubclass.identifier === 'subclass-custom-id');
+    assert(ModelRegistryIndex.createId(SubclassCustomModel) === 'custom-id-value');
   }
 }
