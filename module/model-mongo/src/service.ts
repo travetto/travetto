@@ -195,7 +195,7 @@ export class MongoModelService
   restoreId<T extends ModelType>(cls: Class<T>, item: Record<string, unknown>): void {
     if (item._id) {
       const idFieldName = ModelRegistryIndex.getIdSource(cls).field;
-      item[String(idFieldName)] ??= MongoUtil.idToString(castTo(item._id));
+      item[idFieldName] ??= MongoUtil.idToString(castTo(item._id));
       delete item._id;
     }
   }
@@ -591,10 +591,10 @@ export class MongoModelService
 
   async updatePartialByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     cls: Class<T>,
-    idx: SingleItemIndex<T, K>,
+    idx: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
     return this.update(cls, item);
   }
 

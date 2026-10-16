@@ -53,7 +53,7 @@ class ModelIdSourceSuite {
     assert(source.getValue(item) === 'test-123');
     assert(source.getOptionalValue(item) === 'test-123');
 
-    const emptyItem: Partial<DefaultModel> = { name: 'No Id' };
+    const emptyItem: OptionalId<DefaultModel> = { name: 'No Id' };
     assert(source.getOptionalValue(emptyItem) === undefined);
     assert.throws(() => source.getValue(emptyItem));
 

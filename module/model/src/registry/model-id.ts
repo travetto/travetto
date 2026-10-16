@@ -3,7 +3,7 @@ import { ValidationResultError } from '@travetto/schema';
 
 import { ExistsError } from '../error/exists.ts';
 import { NotFoundError } from '../error/not-found.ts';
-import type { ModelIdGenerator, ModelType } from '../types/model.ts';
+import type { ModelIdGenerator, ModelType, OptionalId, PartialWithId } from '../types/model.ts';
 import type { ModelIdConfig } from './types.ts';
 
 /**
@@ -41,14 +41,14 @@ export class ModelIdSource<T extends ModelType = Any> {
   /**
    * Extract identifier from an item if present
    */
-  getOptionalValue(item: unknown): string | undefined {
+  getOptionalValue(item: Partial<T> | PartialWithId<T> | OptionalId<T>): string | undefined {
     return castTo(item && typeof item === 'object' ? item[castKey(this.field)] : undefined);
   }
 
   /**
    * Extract identifier from an item, throwing a validation error if missing
    */
-  getValue(item: unknown): string {
+  getValue(item: Partial<T> | PartialWithId<T>): string {
     const id = this.getOptionalValue(item);
     if (!id) {
       throw new ValidationResultError([
@@ -56,7 +56,7 @@ export class ModelIdSource<T extends ModelType = Any> {
           kind: 'required',
           path: castTo(this.field),
           type: 'string',
-          message: `${String(this.field)} is required`
+          message: `${this.field} is required`
         }
       ]);
     }
@@ -66,33 +66,33 @@ export class ModelIdSource<T extends ModelType = Any> {
   /**
    * Set the identifier on an item
    */
-  setValue(item: unknown, id: string): void {
+  setValue(item: Partial<T> | OptionalId<T>, id: string): void {
     if (item && typeof item === 'object') {
-      castTo<Record<string, unknown>>(item)[String(this.field)] = id;
+      castTo<Record<string, unknown>>(item)[this.field] = id;
     }
   }
 
   /**
    * Delete the identifier on an item
    */
-  deleteValue(item: unknown): void {
+  deleteValue(item: Partial<T> | PartialWithId<T> | OptionalId<T>): void {
     if (item && typeof item === 'object') {
-      delete castTo<Record<string, unknown>>(item)[String(this.field)];
+      delete castTo<Record<string, unknown>>(item)[this.field];
     }
   }
 
   /**
    * Build an identifier where-clause / filter
    */
-  getWhereClause<W = Record<string, unknown>>(idOrItem: string | unknown): W {
+  getWhereClause<W = Record<string, unknown>>(idOrItem: string | T): W {
     const id = typeof idOrItem === 'string' ? idOrItem : this.getOptionalValue(idOrItem);
-    return castTo({ [String(this.field)]: id });
+    return castTo({ [this.field]: id });
   }
 
   /**
    * Produce a NotFoundError for an item or identifier
    */
-  getNotFoundError(idOrItem: string | unknown, details?: Record<string, unknown>): NotFoundError {
+  getNotFoundError(idOrItem: string | T | Partial<T>, details?: Record<string, unknown>): NotFoundError {
     const id = typeof idOrItem === 'string' ? idOrItem : this.getOptionalValue(idOrItem);
     return new NotFoundError(this.#modelClass, id ?? 'unknown', details);
   }
@@ -100,7 +100,7 @@ export class ModelIdSource<T extends ModelType = Any> {
   /**
    * Produce an ExistsError for an item or identifier
    */
-  getExistsError(idOrItem: string | unknown, details?: Record<string, unknown>): ExistsError {
+  getExistsError(idOrItem: string | T | Partial<T>, details?: Record<string, unknown>): ExistsError {
     const id = typeof idOrItem === 'string' ? idOrItem : this.getOptionalValue(idOrItem);
     return new ExistsError(this.#modelClass, id ?? 'unknown', details);
   }

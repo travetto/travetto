@@ -1,4 +1,4 @@
-import { type BinaryArray, BinaryUtil, type Class, castKey, castTo, hasFunction, JSONUtil, RuntimeError, Util } from '@travetto/runtime';
+import { type BinaryArray, BinaryUtil, type Class, castKey, castTo, hasFunction, JSONUtil, RuntimeError } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { SubTypeNotSupportedError } from '../error/invalid-sub-type.ts';
@@ -100,7 +100,7 @@ export class ModelCrudUtil {
     }
 
     if (!currentId && !idSource.generator) {
-      errors.push({ kind: 'required', path: castTo(idSource.field), type: 'string', message: `${String(idSource.field)} is required` });
+      errors.push({ kind: 'required', path: castTo(idSource.field), type: 'string', message: `${idSource.field} is required` });
     }
 
     if (errors.length) {
@@ -235,8 +235,12 @@ export class ModelCrudUtil {
   /**
    * Ensure everything is correct for a partial update
    */
-  static async naivePartialUpdate<T extends ModelType>(cls: Class<T>, get: () => Promise<T>, item: PartialWithId<T>): Promise<T> {
-    const prepared = await this.prePartialUpdate(cls, item);
+  static async naivePartialUpdate<T extends ModelType>(
+    cls: Class<T>,
+    get: () => Promise<T>,
+    item: PartialWithId<T> | Partial<T>
+  ): Promise<T> {
+    const prepared = await this.prePartialUpdate(cls, castTo(item));
     const full = await get();
     return cls.from(castTo({ ...full, ...prepared }));
   }
