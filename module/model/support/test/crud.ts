@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Id, Model, type ModelCrudSupport, type ModelId, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
+import { IdGenerator, Model, type ModelCrudSupport, type ModelId, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
 import { castTo } from '@travetto/runtime';
 import { Match, Precision, Required, Schema, Text, ValidationResultError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
@@ -10,7 +10,6 @@ import { BaseModelSuite } from './base.ts';
 
 @Model()
 export class CustomIdModel {
-  @Id()
   customId: ModelId;
   name: string;
 }
@@ -19,7 +18,7 @@ let skuSequence = 0;
 
 @Model()
 export class SkuModel {
-  @Id(() => `SKU-${++skuSequence}`)
+  @IdGenerator(() => `SKU-${++skuSequence}`)
   @Match(/^SKU-\d+$/)
   sku: ModelId;
   title: string;
@@ -27,7 +26,7 @@ export class SkuModel {
 
 @Model()
 export class BookModel {
-  @Id(false)
+  @IdGenerator(false)
   @Match(/^(?:978|979)-\d+$/)
   isbn: ModelId;
   title: string;
@@ -512,7 +511,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     await assert.rejects(() => service.get(SkuModel, created.sku), NotFoundError);
   }
 
-  @Test('Verify natural key with @Id(false) and @Match validation')
+  @Test('Verify natural key with @IdGenerator(false) and @Match validation')
   async testNaturalKeyId() {
     const service = await this.service;
 

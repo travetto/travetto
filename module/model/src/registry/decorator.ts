@@ -1,7 +1,7 @@
 import { type Class, castTo, getClass, Util } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import type { ModelIdGenerator, ModelType } from '../types/model.ts';
+import type { IsModelId, ModelIdGenerator, ModelType } from '../types/model.ts';
 import { ModelRegistryIndex } from './registry-index.ts';
 import type { DataHandler, ModelConfig, PrePersistScope } from './types.ts';
 
@@ -36,18 +36,22 @@ export function Model(config: Partial<ModelConfig<ModelType>> | string = {}) {
 }
 
 /**
- * Model field decorator for denoting the primary identifier field and generation behavior
+ * Model field decorator for custom identifier generation or natural keys
+ * Can only be applied to a field typed as ModelId.
  * @augments `@travetto/schema:Field`
  * @kind decorator
  */
-export function Id(generator?: ModelIdGenerator | false) {
-  return function <K extends string, C extends Partial<Record<K, unknown>>>(instance: C, property: K): void {
+export function IdGenerator(generator?: ModelIdGenerator | false) {
+  return function <K extends string, C extends Partial<Record<K, unknown>>>(
+    instance: IsModelId<C[K]> extends true ? C : never,
+    property: K
+  ): void {
     const cls = getClass(instance);
     const isAuto = generator !== false;
     ModelRegistryIndex.getForRegister(cls).register({
       id: {
         field: property,
-        generator: generator ?? ((): string => Util.uuid(32))
+        generator: isAuto ? (generator ?? ((): string => Util.uuid(32))) : false
       }
     });
     if (isAuto) {

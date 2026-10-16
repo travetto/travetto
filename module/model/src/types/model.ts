@@ -6,7 +6,7 @@ declare const modelIdTag: unique symbol;
  */
 export type ModelId = string & { readonly [modelIdTag]?: null };
 
-type IsModelId<T> = typeof modelIdTag extends keyof T ? true : false;
+export type IsModelId<T> = typeof modelIdTag extends keyof NonNullable<T> ? true : false;
 
 /**
  * Type where the model's identifier field is optional, but other required fields remain mandatory

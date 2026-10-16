@@ -5,7 +5,7 @@ import { Suite, Test } from '@travetto/test';
 
 import { ExistsError } from '../src/error/exists.ts';
 import { NotFoundError } from '../src/error/not-found.ts';
-import { Id, Model } from '../src/registry/decorator.ts';
+import { IdGenerator, Model } from '../src/registry/decorator.ts';
 import { ModelRegistryIndex } from '../src/registry/registry-index.ts';
 import type { ModelId, OptionalId, PartialWithId } from '../src/types/model.ts';
 import { CustomIdModel } from '../support/test/crud.ts';
@@ -18,14 +18,14 @@ class DefaultModel {
 
 @Model()
 class CustomGeneratorModel {
-  @Id((): string => 'custom-id-value')
+  @IdGenerator((): string => 'custom-id-value')
   identifier: ModelId;
   name: string;
 }
 
 @Model()
 class NaturalKeyModel {
-  @Id(false)
+  @IdGenerator(false)
   isbn: ModelId;
   title: string;
 }

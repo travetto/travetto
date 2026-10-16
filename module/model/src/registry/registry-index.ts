@@ -83,7 +83,7 @@ export class ModelRegistryIndex implements RegistryIndex {
     const idField = this.getIdSource(cls).field;
     if (!(idField in schema.fields)) {
       throw new RuntimeError(
-        `Model ${cls.name} does not define an id field. Expected '${String(idField)}' to be declared, or use @Id to designate an id field.`
+        `Model ${cls.name} does not define an id field. Expected a field with type 'ModelId' or name '${idField}' to be declared.`
       );
     }
   }
