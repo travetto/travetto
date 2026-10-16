@@ -1,5 +1,4 @@
-import { type Class, castTo, getClass, Util } from '@travetto/runtime';
-import { SchemaRegistryIndex } from '@travetto/schema';
+import { type Class, castTo, getClass } from '@travetto/runtime';
 
 import type { IsModelId, ModelIdGenerator, ModelType } from '../types/model.ts';
 import { ModelRegistryIndex } from './registry-index.ts';
@@ -18,19 +17,6 @@ export function Model(config: Partial<ModelConfig<ModelType>> | string = {}) {
     }
     const adapter = ModelRegistryIndex.getForRegister(cls);
     adapter.register(config);
-
-    const registered = adapter.get();
-    const schemaFields = SchemaRegistryIndex.getForRegister(cls).get().fields;
-    const modelIdField = Object.values(schemaFields).find(field => field.aliases?.includes('modelId'))?.name;
-    const idField = registered.id?.field ?? modelIdField ?? (schemaFields.id ? 'id' : undefined);
-    if (idField) {
-      if (!registered.id) {
-        adapter.register({ id: { field: idField, generator: (): string => Util.uuid(32) } });
-      }
-      if (adapter.get().id?.generator !== false) {
-        SchemaRegistryIndex.getForRegister(cls).registerField(castTo(idField), { required: { active: false } });
-      }
-    }
     return cls;
   };
 }
@@ -46,17 +32,12 @@ export function IdGenerator(generator?: ModelIdGenerator | false) {
     instance: IsModelId<C[K]> extends true ? C : never,
     property: K
   ): void {
-    const cls = getClass(instance);
-    const isAuto = generator !== false;
-    ModelRegistryIndex.getForRegister(cls).register({
+    ModelRegistryIndex.getForRegister(getClass(instance)).register({
       id: {
         field: property,
-        generator: isAuto ? (generator ?? ((): string => Util.uuid(32))) : false
+        ...(generator !== undefined ? { generator } : {})
       }
     });
-    if (isAuto) {
-      SchemaRegistryIndex.getForRegister(cls).registerField(property, { required: { active: false } });
-    }
   };
 }
 

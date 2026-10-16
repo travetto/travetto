@@ -1,5 +1,5 @@
 import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
-import { type Any, type Class, castTo, RuntimeError } from '@travetto/runtime';
+import { type Any, type Class, castTo, RuntimeError, Util } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelType } from '../types/model.ts';
@@ -56,6 +56,27 @@ export class ModelRegistryIndex implements RegistryIndex {
 
   /** @private */ constructor(source: unknown) {
     Registry.validateConstructor(source);
+  }
+
+  finalize(cls: Class): void {
+    this.store.finalize(cls);
+
+    const adapter = this.store.getForRegister(cls, true);
+    const registered = adapter.get();
+    const schemaFields = SchemaRegistryIndex.getForRegister(cls, true).get().fields;
+    const modelIdField = Object.values(schemaFields).find(field => field.aliases?.includes('modelId'))?.name;
+    const idField = registered.id?.field ?? modelIdField ?? (schemaFields.id ? 'id' : undefined);
+
+    if (idField) {
+      if (!registered.id) {
+        adapter.register({ id: { field: idField, generator: (): string => Util.uuid(32) } });
+      } else if (registered.id.generator === undefined) {
+        adapter.register({ id: { field: idField, generator: (): string => Util.uuid(32) } });
+      }
+      if (adapter.get().id?.generator !== false) {
+        SchemaRegistryIndex.getForRegister(cls, true).registerField(castTo(idField), { required: { active: false } });
+      }
+    }
   }
 
   onCreate(cls: Class): void {
