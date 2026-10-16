@@ -43,9 +43,9 @@ class ModelIdSourceSuite {
     await Registry.init();
     const source = ModelRegistryIndex.getIdSource(DefaultModel);
     assert(source.field === 'id');
-    assert(source.generator !== undefined);
+    assert(ModelRegistryIndex.getIdGenerator(DefaultModel) !== undefined);
 
-    const generatedId = source.create();
+    const generatedId = ModelRegistryIndex.createId(DefaultModel);
     assert(typeof generatedId === 'string');
     assert(generatedId.length === 32);
 
@@ -85,7 +85,7 @@ class ModelIdSourceSuite {
     await Registry.init();
     const source = ModelRegistryIndex.getIdSource(CustomGeneratorModel);
     assert(source.field === 'identifier');
-    assert(source.create() === 'custom-id-value');
+    assert(ModelRegistryIndex.createId(CustomGeneratorModel) === 'custom-id-value');
   }
 
   @Test('Verify natural key')
@@ -93,7 +93,8 @@ class ModelIdSourceSuite {
     await Registry.init();
     const source = ModelRegistryIndex.getIdSource(NaturalKeyModel);
     assert(source.field === 'isbn');
-    assert(source.generator === undefined);
+    assert(ModelRegistryIndex.getIdGenerator(NaturalKeyModel) === undefined);
+    assert.throws(() => ModelRegistryIndex.createId(NaturalKeyModel));
   }
 
   @Test('Verify getNotFoundError')
@@ -139,8 +140,8 @@ class ModelIdSourceSuite {
     await Registry.init();
     const source = ModelRegistryIndex.getIdSource(AutoDiscoveredIdModel);
     assert(source.field === 'isbn');
-    assert(source.generator !== undefined);
-    const generated = source.create();
+    assert(ModelRegistryIndex.getIdGenerator(AutoDiscoveredIdModel) !== undefined);
+    const generated = ModelRegistryIndex.createId(AutoDiscoveredIdModel);
     assert(typeof generated === 'string');
     assert(generated.length === 32);
   }

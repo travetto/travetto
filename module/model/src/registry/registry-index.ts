@@ -2,7 +2,7 @@ import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/regi
 import { type Any, type Class, castTo, RuntimeError, Util } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import type { ModelType } from '../types/model.ts';
+import type { ModelIdGenerator, ModelType } from '../types/model.ts';
 import { ModelIdSource } from './model-id.ts';
 import { ModelRegistryAdapter } from './registry-adapter.ts';
 import type { IndexConfig, ModelConfig } from './types.ts';
@@ -41,6 +41,14 @@ export class ModelRegistryIndex implements RegistryIndex {
     return this.#instance.getIdSource(cls);
   }
 
+  static getIdGenerator<T extends ModelType>(cls: Class<T>): ModelIdGenerator | undefined {
+    return this.#instance.getIdGenerator(cls);
+  }
+
+  static createId<T extends ModelType>(cls: Class<T>): string {
+    return this.#instance.createId(cls);
+  }
+
   static getClasses(): Class[] {
     return this.#instance.store.getClasses();
   }
@@ -65,15 +73,14 @@ export class ModelRegistryIndex implements RegistryIndex {
     const registered = adapter.get();
     const schemaFields = SchemaRegistryIndex.getForRegister(cls, true).get().fields;
     const modelIdField = Object.values(schemaFields).find(field => field.aliases?.includes('modelId'))?.name;
-    const idField = registered.id?.field ?? modelIdField ?? (schemaFields.id ? 'id' : undefined);
+    const idField = registered.idField ?? modelIdField ?? (schemaFields.id ? 'id' : undefined);
 
     if (idField) {
-      if (!registered.id) {
-        adapter.register({ id: { field: idField, generator: (): string => Util.uuid(32) } });
-      } else if (registered.id.generator === undefined) {
-        adapter.register({ id: { field: idField, generator: (): string => Util.uuid(32) } });
+      adapter.register({ idField: castTo(idField) });
+      if (registered.idGenerator === undefined) {
+        adapter.register({ idGenerator: (): string => Util.uuid(32) });
       }
-      if (adapter.get().id?.generator !== false) {
+      if (adapter.get().idGenerator !== false) {
         SchemaRegistryIndex.getForRegister(cls, true).registerField(castTo(idField), { required: { active: false } });
       }
     }
@@ -126,8 +133,27 @@ export class ModelRegistryIndex implements RegistryIndex {
    * Get identifier handler for a model class
    */
   getIdSource<T extends ModelType>(cls: Class<T>): ModelIdSource<T> {
-    const modelId = this.#idCache.getOrInsertComputed(cls.Ⲑid, () => new ModelIdSource(cls, this.getConfig(cls).id));
+    const modelId = this.#idCache.getOrInsertComputed(cls.Ⲑid, () => new ModelIdSource(cls, castTo(this.getConfig(cls).idField)));
     return castTo(modelId);
+  }
+
+  /**
+   * Get identifier generator function for a model class
+   */
+  getIdGenerator<T extends ModelType>(cls: Class<T>): ModelIdGenerator | undefined {
+    const generator = this.getConfig(cls).idGenerator;
+    return generator !== false ? (generator ?? ((): string => Util.uuid(32))) : undefined;
+  }
+
+  /**
+   * Create a new identifier for a model class
+   */
+  createId<T extends ModelType>(cls: Class<T>): string {
+    const generator = this.getIdGenerator(cls);
+    if (!generator) {
+      throw new RuntimeError(`Model ${cls.name} has disabled id generation (natural key)`);
+    }
+    return generator();
   }
 
   /**

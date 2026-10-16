@@ -1,10 +1,9 @@
-import { Util, castKey, castTo, type Any, type Class } from '@travetto/runtime';
+import { castKey, castTo, type Any, type Class } from '@travetto/runtime';
 import { ValidationResultError } from '@travetto/schema';
 
 import { ExistsError } from '../error/exists.ts';
 import { NotFoundError } from '../error/not-found.ts';
-import type { ModelIdGenerator, ModelType, OptionalId, PartialWithId } from '../types/model.ts';
-import type { ModelIdConfig } from './types.ts';
+import type { ModelType, OptionalId, PartialWithId } from '../types/model.ts';
 
 /**
  * Encapsulates identifier operations for a model class.
@@ -13,22 +12,10 @@ export class ModelIdSource<T extends ModelType = Any> {
   #modelClass: Class<T>;
   #validator?: (id: string) => boolean;
   field: [keyof T] extends [never] ? string : Extract<keyof T, string>;
-  generator?: ModelIdGenerator;
 
-  constructor(modelClass: Class<T>, config?: ModelIdConfig<T>) {
+  constructor(modelClass: Class<T>, field?: Extract<keyof T, string>) {
     this.#modelClass = modelClass;
-    this.field = config?.field ?? castTo('id');
-    const generator = config?.generator;
-    if (generator !== false) {
-      this.generator = generator ?? ((): string => Util.uuid(32));
-    }
-  }
-
-  /**
-   * Create a new identifier using the configured generator or default uuid
-   */
-  create(): string {
-    return (this.generator ?? ((): string => Util.uuid(32)))();
+    this.field = field ?? castTo('id');
   }
 
   /**

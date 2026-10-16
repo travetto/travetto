@@ -67,7 +67,7 @@ export abstract class AuthModelServiceSuite<T> {
   @Test()
   async authenticate() {
     const pre = User.from({
-      id: ModelRegistryIndex.getIdSource(User).create(),
+      id: ModelRegistryIndex.createId(User),
       password: 'bob',
       details: {}
     });

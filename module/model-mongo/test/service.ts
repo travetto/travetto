@@ -38,7 +38,7 @@ class MongoBasicSuite extends ModelBasicSuite {
   @Test()
   async upsert() {
     const svc = await this.service;
-    const user = await svc.upsert(UniqueUser, UniqueUser.from({ name: 'bob', id: ModelRegistryIndex.getIdSource(UniqueUser).create() }));
+    const user = await svc.upsert(UniqueUser, UniqueUser.from({ name: 'bob', id: ModelRegistryIndex.createId(UniqueUser) }));
     assert(user.id.length === 32);
 
     const found = await svc.get(UniqueUser, user.id);

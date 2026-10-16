@@ -25,20 +25,6 @@ export type IndexConfig<V extends string = string, T extends ModelType = ModelTy
 };
 
 /**
- * Model identifier configuration
- */
-export type ModelIdConfig<T extends ModelType = ModelType> = {
-  /**
-   * Identifier field name
-   */
-  field: [keyof T] extends [never] ? string : Extract<keyof T, string>;
-  /**
-   * Identifier generator function, or false for manual natural keys
-   */
-  generator?: ModelIdGenerator | false;
-};
-
-/**
  * Model config
  */
 export class ModelConfig<T extends ModelType = ModelType> {
@@ -51,9 +37,13 @@ export class ModelConfig<T extends ModelType = ModelType> {
    */
   store: string;
   /**
-   * Identifier configuration
+   * Identifier field name
    */
-  id?: ModelIdConfig<T>;
+  idField?: [keyof T] extends [never] ? string : Extract<keyof T, string>;
+  /**
+   * Identifier generator function, or false for manual natural keys
+   */
+  idGenerator?: ModelIdGenerator | false;
   /**
    * Indices
    */

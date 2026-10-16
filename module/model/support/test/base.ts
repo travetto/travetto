@@ -13,7 +13,7 @@ export abstract class BaseModelSuite<T> {
   configClass: Class;
 
   createId<U extends ModelType>(cls: Class<U>): string {
-    return ModelRegistryIndex.getIdSource(cls).create();
+    return ModelRegistryIndex.createId(cls);
   }
 
   async getSize<U extends ModelType>(cls: Class<U>): Promise<number> {

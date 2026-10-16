@@ -33,10 +33,8 @@ export function IdGenerator(generator?: ModelIdGenerator | false) {
     property: K
   ): void {
     ModelRegistryIndex.getForRegister(getClass(instance)).register({
-      id: {
-        field: property,
-        ...(generator !== undefined ? { generator } : {})
-      }
+      idField: castTo(property),
+      ...(generator !== undefined ? { idGenerator: generator } : {})
     });
   };
 }
