@@ -1,9 +1,11 @@
 import assert from 'node:assert';
 
-import { Model, type ModelId } from '@travetto/model';
+import { Model, ModelRegistryIndex, type ModelId } from '@travetto/model';
+import { Registry, RegistryIndexStore } from '@travetto/registry';
 import { Suite, Test } from '@travetto/test';
 
 import { MongoUtil } from '@travetto/model-mongo/src/internal/util.ts';
+import { ModelSuite } from '@travetto/model/support/test/suite';
 
 @Model()
 class MongoUser {
@@ -48,6 +50,8 @@ export class QueryTest {
 
   @Test()
   async translateIds() {
+    await Registry.init();
+
     const ids = ['a'.repeat(24), 'b'.repeat(24), 'c'.repeat(24)];
     const out = MongoUtil.extractWhereClause(MongoUser, {
       $and: [{ id: { $in: ids } }]
