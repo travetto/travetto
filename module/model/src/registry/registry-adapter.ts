@@ -1,5 +1,5 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { type Class, Util } from '@travetto/runtime';
+import { type Class, RuntimeError, Util, castTo } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelConfig } from './types.ts';
@@ -67,6 +67,17 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
       config.prePersist = [...(parent.prePersist ?? []), ...(config.prePersist ?? [])];
       config.transientFields = [...(parent.transientFields ?? []), ...(config.transientFields ?? [])];
     }
+
+    const schemaFields = SchemaRegistryIndex.getForRegister(this.#cls, true).get()?.fields ?? {};
+    const modelIdField = Object.values(schemaFields).find(field => field.aliases?.includes('modelId'))?.name;
+    const idField = config.idField ?? modelIdField;
+
+    if (!idField) {
+      throw new RuntimeError(`Model ${this.#cls.name} is missing a ModelId (primary identifier) field`);
+    }
+
+    config.idField = castTo(idField);
+    SchemaRegistryIndex.getForRegister(this.#cls, true).registerField(castTo(idField), { required: { active: false } });
   }
 
   get(): ModelConfig {

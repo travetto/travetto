@@ -66,23 +66,6 @@ export class ModelRegistryIndex implements RegistryIndex {
     Registry.validateConstructor(source);
   }
 
-  finalize(cls: Class): void {
-    this.store.finalize(cls);
-
-    const adapter = this.store.getForRegister(cls, true);
-    const registered = adapter.get();
-    const schemaFields = SchemaRegistryIndex.getForRegister(cls, true).get()?.fields ?? {};
-    const modelIdField = Object.values(schemaFields).find(field => field.aliases?.includes('modelId'))?.name;
-    const idField = registered.idField ?? modelIdField;
-
-    if (!idField) {
-      throw new RuntimeError(`Model ${cls.name} is missing a ModelId (primary identifier) field`);
-    }
-
-    adapter.register({ idField: castTo(idField) });
-    SchemaRegistryIndex.getForRegister(cls, true).registerField(castTo(idField), { required: { active: false } });
-  }
-
   onCreate(cls: Class): void {
     if (!SchemaRegistryIndex.has(cls)) {
       return;
