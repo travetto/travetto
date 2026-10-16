@@ -50,7 +50,7 @@ export class ModelCrudUtil {
     const resolvedInput: object =
       typeof input === 'string' ? JSONUtil.fromUTF8(input) : BinaryUtil.isBinaryArray(input) ? JSONUtil.fromBinaryArray(input) : input;
 
-    const result = SchemaRegistryIndex.getBaseClass(cls).from(resolvedInput);
+    const result = SchemaRegistryIndex.getBaseClass(cls).from<T>(resolvedInput);
 
     if (!(result instanceof cls || result.constructor.Ⲑid === cls.Ⲑid)) {
       if (onTypeMismatch === 'notfound') {
