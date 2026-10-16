@@ -677,7 +677,7 @@ export class MongoModelService
     const [id, item] = await ModelCrudUtil.preStore(cls, data);
     this.preUpdate(cls, item);
     const where = ModelQueryUtil.getWhereClause(cls, query.where);
-    Object.assign(castTo<Record<string, unknown>>(where), ModelRegistryIndex.getIdSource(cls).getWhereClause(id));
+    Object.assign(where, ModelRegistryIndex.getIdSource(cls).getWhereClause(id));
 
     const filter = MongoUtil.extractWhereFilter(cls, where);
     const result = await col.replaceOne(filter, item);
