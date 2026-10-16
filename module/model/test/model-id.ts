@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 
 import { Registry } from '@travetto/registry';
+import { Schema } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
 import { ExistsError } from '../src/error/exists.ts';
@@ -29,8 +30,14 @@ class AutoDiscoveredIdModel {
   title: string;
 }
 
+@Schema()
 class InvalidMissingIdModel {
   name: string;
+}
+
+@Schema()
+class PlainIdModel {
+  id: string;
 }
 
 @Suite('ModelIdSource Suite')
@@ -148,6 +155,12 @@ class ModelIdSourceSuite {
   @Test('Verify error thrown when model has no id field')
   async testMissingIdFieldThrows(): Promise<void> {
     ModelRegistryIndex.getForRegister(InvalidMissingIdModel).register();
-    assert.throws(() => Registry.finalizeForIndex(ModelRegistryIndex), /missing a primary identifier/);
+    assert.throws(() => Registry.finalizeForIndex(ModelRegistryIndex), /primary identifier/);
+  }
+
+  @Test('Verify error thrown when model has id: string without ModelId')
+  async testPlainIdThrows(): Promise<void> {
+    ModelRegistryIndex.getForRegister(PlainIdModel).register();
+    assert.throws(() => Registry.finalizeForIndex(ModelRegistryIndex), /primary identifier/);
   }
 }

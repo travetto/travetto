@@ -49,7 +49,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
   finalize(parent?: ModelConfig): void {
     const config = this.#config;
     if (parent) {
-      const parentSchema = parent ? SchemaRegistryIndex.getConfig(parent.class) : undefined; // Ensure schema is finalized first
+      const parentSchema = parent && SchemaRegistryIndex.has(parent.class) ? SchemaRegistryIndex.getConfig(parent.class) : undefined;
 
       if (parentSchema?.discriminatedField && parent.store) {
         config.store = parent.store;
