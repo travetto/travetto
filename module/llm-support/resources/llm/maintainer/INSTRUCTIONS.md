@@ -1,92 +1,40 @@
-# Maintainer Notes
+# Framework Maintainer Instructions
 
-## Module Role
-This module owns LLM-oriented generation guidance for Travetto.
+## Toolchain & Workflow
+- **Compiler Daemon (`trvc`)**: Never invoke `tsc` directly. Check compiler status with `npx trvc info` (JSON `state` of `'watch-start'` or `'compile-end'` means ready; `'compile-failed'` means build errors are present in `messages.error`; empty output means stopped). Local CLI commands (`trv <cmd>`) auto-start the daemon if needed. Use `npx trvc start`, `npx trvc restart`, `npx trvc stop`, or `npx trvc clean` (clears caches and restarts) to manage it.
+- **Linting**: Always run `npx trv lint --fix` as a final step after making code changes.
+- **Documentation Generation**: Run `npx trv doc:angular` (not `npx trv doc`) when updating documentation so both module docs and website docs (`related/travetto.github.io`) are generated.
+- **Barrel Exports**: Keep `__index__.ts` files updated when adding or removing source files.
+- **Generated & Archived Files**: Never manually edit generated outputs (such as `openapi.yml`) or modify files in `archived/`.
 
-## Implementation Rules
-- Keep operation metadata explicit and testable.
-- Track excluded operations in `src/recommendation.ts`.
-- Keep install/workflow guidance focused on direct generation workflows.
-- Avoid provider-specific integrations in this phase.
-- Framework Code Exposure Rule: Any code exposed to the LLM that is found within the Travetto framework MUST be exposed under a `doc/` folder (sample usage code), NEVER from `src/` or internal implementation files.
-- Minimal Decorator Usage Rule: Rely on Travetto's AST reflection and sensible defaults to infer metadata rather than explicitly duplicating clear information. Omit `@Required` for non-optional properties, `@PathParam` / `@QueryParam` when parameter names match, `@Body` on POST/PUT DTO parameters, and prefer JSDoc comments over `@Description`.
-- Compiler State Verification Rule: Use `npx trvc info` to check compiler server status. Active compiler servers return a JSON object with a `state` field (such as `'watch-start'`, `'compile-end'`, `'init'`, `'compile-failed'`). If `state` is `'compile-failed'`, build errors occurred and error details are available in the `messages.error` field of the info payload (which preserves scoped messages keyed by scope, such as `error` and `reset`). The compiler runs as an independent background daemon; `npx trvc start` ensures it is running, `npx trvc restart` restarts it, and `npx trvc stop` stops it. Local CLI commands (`trv <cmd>`) automatically start the watch daemon if it is not already running. Executing `npx trvc clean` is allowed and clears caches and restarts the compiler. Inactive servers return empty output.
-- Compiler Reset and Watch Communication Rule: Rely on compiler logs (not compiler state payloads) to convey reset reasons and requirement details. The watch operation and CLI should stream live compiler logs (`WatchUtil.watchCompilerLogs()`) rather than emitting custom restart/reset log messages. `WatchUtil.watchCompilerLogs()` connects directly without waiting for `'watch-start'` and flushes pre-existing scoped messages (`reset`, `error`). In watch CLI operations, `SIGINT`/`SIGTERM` handlers must initiate full process shutdown via `ShutdownManager.shutdown({ mode: 'exit', reason: 'quit' })` to abort ongoing pause/wait signals cleanly.
-- VS Code TypeScript Language Server Restart Rule: In the VS Code plugin, triggering the Travetto "Restart Compiler" command (`travetto.compiler.trvc:restart`) awaits compiler restart completion and then restarts the TypeScript language server (`typescript.restartTsServer`) to ensure TypeScript diagnostics, types, and IntelliSense synchronize with freshly compiled files.
-- Compiler Logging and IPC Logger Rule: `IpcLogger` must never be disabled (it is always active for transmitting compiler events across IPC). `TRV_QUIET` only governs the current process's decision to write to stdout/stderr (suppressing console output, progress bars, and line rewrites). `TRV_BUILD` strictly governs the compiler log level threshold, and an explicit `TRV_BUILD` overrides quiet suppression when deciding to write to stdout/stderr.
+## PR & Maintenance Discipline
+- **Minimal Churn**: Keep changes tightly scoped to the requested task or bug fix. Do not touch, reformat, or rename unrelated code (including expanding existing abbreviations outside the PR scope) or make purely cosmetic/stylistic rewrites.
+- **Intentional Deletions**: Never restore or re-add code that was intentionally removed unless explicitly requested by the user.
+- **Instruction Hygiene**: Follow the selective update policy in `.agents/AGENTS.md`—only record cross-cutting repo conventions or explicit user rule requests here, never module-specific implementation details.
 
-## Framework Principles
-- Treat llm-support as framework guidance infrastructure, not app-specific scaffolding.
-- Preserve stable public contracts (operation ids, tool names, output shapes) unless a versioned compatibility change is planned.
-- Keep guidance declarative and data-driven when possible to reduce execution branching and drift.
-- Favor explicit policy over convention: codify exclusions, defaults, and verification expectations in source.
-
-## Engineering Best Practices
-- Use schema classes for boundary contracts and runtime validation.
-- Keep recommendations explainable: each operation should have intent, dependency rationale, and verification guidance.
-- Maintain deterministic execution planning and artifact reporting for traceability.
-- Prefer additive evolution of guidance catalogs and workflows over mutation of existing semantics.
-- Ensure every new capability has at least one integrity test (metadata shape, discoverability, or execution coverage).
-- Keep documentation synchronized with behavior changes in the same change set.
-- Continuous Feedback Integration: When receiving feedback, corrections, or workflow preferences, update the maintainer `INSTRUCTIONS.md` (and consumer `INSTRUCTIONS.md` if relevant) to codify the guidance for future agent sessions.
-
-## Compatibility And Change Discipline
-- Breaking contract changes require an explicit compatibility note and migration guidance.
-- New operations should avoid overlapping semantics unless distinction is documented.
-- Excluded operations must remain visible in policy/tests, even when omitted from default recommendations.
-- Guidance should remain monorepo-aware and avoid assumptions that only apply to single-package apps.
-
-## Framework Coding Guidelines
-- **Visibility Modifiers**: Do not use TS visibility modifiers (`private`, `protected`, or `public`). Use ECMAScript standard public by default and `#private` fields/methods when private accessibility is needed.
-- **Override Keyword**: Do not use TypeScript's `override` keyword on class methods or properties.
-- **Inline SQL Formatting**: Format inline SQL queries using standard practices: one line per main section (`SELECT`, `FROM`, `WHERE`, `GROUP BY`, `ORDER BY`, etc.). For optional query clauses (such as limit, offset, or sort), place each optional clause on its own line using an inlined conditional expression (e.g. `FROM <table>\n${limit !== undefined ? `LIMIT ${limit}` : ''}` where `\n` is an actual newline in the template literal), rather than creating intermediate variables or placing optional tokens immediately adjacent to each other on a single line.
-- **Generated Files**: `openapi.yml` (and other OpenAPI definition outputs) are generated automatically. Do not manually edit, inspect, or track changes in them directly as they will be regenerated.
-- **Documentation Generation**: When modifying documentation or running doc generation, execute `npx trv doc:angular` instead of `npx trv doc`, as it produces both the module docs and the website documentation (`related/travetto.github.io`).
-- **Barrel Exports**: Always check and update `__index__.ts` files when adding or removing files to ensure barrel exports are correct.
-- **TypeScript Compilation**: Never invoke `tsc` directly in shell commands. The Travetto compiler (`trv`) wraps TypeScript compilation.
-- **Dependency Injection and Registry Initialization**:
-  - Do not use defensive null checks (e.g., `if (this.source)`) on injected dependencies (`@Inject()`).
-  - If there is concern about uninitialized dependencies in scripts or tests, ensure `await Registry.init()` is called first so that all dependencies and services are properly initialized.
-- **Model Query Handling**:
-  - When building query filters or aggregations in model services, compose compound clauses (such as `$and`, field existence, or type constraints) directly via `ModelQueryUtil.getWhereClause(cls, ...)` rather than manually stitching backend-specific query filter objects.
-  - For query types with selective pagination (such as faceting), only include relevant pagination fields (e.g., `limit` and `offset`) on `ModelQuery` rather than inheriting inapplicable options (e.g., `sort`) from `PageableModelQuery`.
-- **Model Storage Lifecycle (`deleteModel`, `deleteStorage`, `truncateModel`, `truncateBlob`)**:
-  - `deleteModel`, `deleteStorage`, and `truncateModel` are required methods on `ModelStorageSupport`.
-  - `deleteModel` and `deleteStorage` must be idempotent and must not throw if the underlying storage/model item is not found or already deleted. Error handling must specifically check for not-found error conditions (e.g., 404, `NoSuchBucket`, `ResourceNotFoundException`, `isTableNotFoundError`) rather than indiscriminately catching and swallowing all errors. Prefer `ModelStorageUtil.runAndIgnoreNotFound(operation, notFoundPredicate)` for clean, boilerplate-free handling.
-  - In SQL backends supporting multi-table drops (such as MySQL via `DROP TABLE IF EXISTS table1, table2, ...`), `deleteStorage` should execute all table drops in a single statement via `dropTables` / `getDropTablesSQL` to avoid performance bottlenecks from sequential roundtrips.
-  - Multi-statement SQL queries: in SQLite, when executing multiple SQL statements as a batch (e.g. joined by `;\n`), always prepend the query with an explicit `-- exec\n` marker to trigger `client.exec()`. Never infer execution mode by checking for semicolons in the query string, which causes single statements (like schema introspection queries) containing semicolons or line breaks to mistakenly execute in exec mode without returning records.
-  - Truncate operations (`truncateModel`, `truncateBlob`) must never swallow not-found errors; only delete operations (`deleteModel`, `deleteStorage`) may swallow not-found errors.
-  - Keep `deleteModel` (structure/DDL destruction) and `truncateModel` (record/data purge) as distinct responsibilities; `truncateModel` must purge records without dropping or altering the underlying schema, table, or storage container. In SQL (and structured datastores), truncating a non-existent table must throw an error.
-  - Runtime services (such as `CacheService.purge()`) that clear data must invoke `truncateModel`, never `deleteModel`.
-- **Model CRUD Operations and Semantics**:
-  - `ModelCrudUtil` provides lifecycle helper methods (`preCreate`, `preUpdate`, `preUpsert`, `preDelete`, `prePartialUpdate`, `naivePartialUpdate`) accepting an optional `{ ensureNotSubType?: boolean }` flag for non-polymorphic providers. ID generation is governed by `ModelConfig.idGenerator` (defaulting to `() => Util.uuid(32)`). The `id` field receives a default pattern matching a UUID (`CommonRegex.uuid`, supporting 32 hex digits with no dashes: `/^[0-9a-f]{32}$/i`), allowing `SchemaValidator` to validate ID format automatically.
-  - Model ID Generation in Tests: Do not manually set IDs on models in tests when creating or upserting items (`service.create`, `service.upsert`, `service.processBulk` with `{ insert }`), as IDs are autogenerated by `ModelConfig.idGenerator`. Only explicitly set IDs in tests if testing a specific non-UUID value, testing explicit ID preservation, or querying/updating/deleting a non-existent ID. When testing that `service.get` rejects for a non-existent item (`NotFoundError`), pass a simple nonsense ID (e.g. `'randomId'`) rather than calling `Util.uuid(...)`.
-  - `create(cls, item)`: Prepared via `ModelCrudUtil.preCreate(cls, item, options)`. Requires pre-store preparation (`ensureId: true` by default). If an entity with the specified identifier already exists in storage, must throw `ExistsError(cls, id)`.
-  - `update(cls, item)` and `updateByQuery(cls, item, query)`: Prepared via `ModelCrudUtil.preUpdate(cls, item, options)`. Requires `item.id` to be present on the input. Omitting `id` is a client validation failure and must throw `ValidationResultError` (`id is required`). Must pass `{ ensureId: false }` to `preStore`. If the target record does not exist in storage, must throw `NotFoundError(cls, item.id)`.
-  - `upsert(cls, item)`: Prepared via `ModelCrudUtil.preUpsert(cls, item, options)`. Requires pre-store/pre-upsert preparation (`ensureId: true`). Inserts if non-existent or updates/replaces if existing.
-  - `updatePartial(cls, item)`: Direct entity partial updates require `item.id`. All providers first prepare and validate via `ModelCrudUtil.prePartialUpdate(cls, item, options)` (`validateId: true` by default). Missing `id` throws `ValidationResultError`. If the target entity does not exist in storage, throws `NotFoundError(cls, item.id)`. Providers without native partial update support subsequently merge into a full entity via `ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), prepared)`. (Note: `updatePartialByQuery` and `updatePartialByIndex` do NOT require `id` in the partial payload and pass `{ validateId: false }` because the target record is selected by query/index predicates).
-  - `delete(cls, id)`: Prepared via `ModelCrudUtil.preDelete(cls, id, options)`. Omitting `id` throws `ValidationResultError`. If the target record does not exist in storage, must throw `NotFoundError(cls, id)`.
-  - `processBulk(cls, operations)`: Prepared via `ModelBulkUtil.preStore(cls, operations, options)`. Bulk operations iterate through each operation and delegate to the corresponding CRUD lifecycle hook (`preCreate` for insert, `preUpdate` for update, `preUpsert` for upsert, `preDelete` for delete), tracking IDs into `insertedIds`, `updatedIds`, `upsertedIds`, `existingUpsertedIds`, and `deletedIds`.
-  - Polymorphic Subtypes: Operations on non-polymorphic providers must pass `{ ensureNotSubType: true }` to the `ModelCrudUtil.pre*` lifecycle helpers or invoke `ModelCrudUtil.ensureNotSubType(cls, targetType)`.
-- **Code Maintenance & Intentional Deletions**:
-  - Never restore or re-add code that was removed unless explicitly requested or approved by the user.
-  - Never modify or touch files in the `archived/` directory; it is preserved for historical reasons only.
-- **PR Scope & Minimal Churn**:
-  - Do not touch, reformat, or rename existing code (including expanding abbreviated identifiers or variables) when it is not material to the PR. Keep changes tightly focused on the requested functionality or bug fix.
-  - Do not make cosmetic changes, stylistic rearrangements, or guard rewrites that provide no functional or behavioral benefit.
+## Framework Coding Standards
+- **Visibility & Class Modifiers**: Do not use TypeScript visibility modifiers (`private`, `protected`, `public`) or the `override` keyword. Use standard ECMAScript public by default and `#private` fields/methods for private state.
+- **Minimal Decorator Usage**: Rely on Travetto's AST reflection and defaults instead of redundant decorators:
+  - Omit `@Required()` on non-optional properties (`prop: string`).
+  - Omit `@PathParam()` / `@QueryParam()` when method parameter names match route/query parameters.
+  - Omit `@Body()` on `@Post()`, `@Put()`, or `@Patch()` endpoint parameters typed with schema DTOs.
+  - Prefer JSDoc comments (`/** ... */`) over `@Description()`.
 - **Code Style & Safety**:
-  - Prefer declarative object definitions with inline conditional spreading (`...(condition ? { ... } : {})`) over creating mutable objects and appending properties via `if` statements.
-  - Use optional chaining (`?.`) instead of non-null assertions (`!`) on schema and registry lookups (e.g., `SchemaRegistryIndex.getNestedFieldConfig(...)`).
-  - Avoid redundant `String(...)` conversions inside template literals (e.g., use `` `$${field}` `` instead of `` `$${String(field)}` ``).
-  - Avoid inline `.catch` invocations on promises unless strictly necessary (e.g., an unawaited promise). Prefer standard `try / catch` blocks instead.
-  - Avoid creating redundant type aliases or duplicate types (e.g., introducing a short alias alongside a canonical descriptive type). Expose a single canonical descriptive type name.
-- **Test Skipping**:
-  - Use `@SkipIf(predicate)` and `@SkipUnless(predicate)` decorators from `@travetto/test` on test methods or suites to conditionally skip execution.
-  - Skip predicates must be functions that receive the suite instance: `(instance: T) => boolean | Promise<boolean>`. Static boolean values are not supported.
+  - Do not use abbreviations on new identifiers unless explicitly approved.
+  - Prefer declarative object literals with inline conditional spreading (`...(condition ? { ... } : {})`) over mutating objects via `if` statements.
+  - Use optional chaining (`?.`) instead of non-null assertions (`!`) on registry and schema lookups.
+  - Avoid redundant `String(...)` conversions inside template literals (use `` `${field}` `` instead of `` `${String(field)}` ``).
+  - Prefer `try / catch` blocks over inline `.catch()` on promises unless handling an intentionally unawaited promise.
+  - Expose a single canonical descriptive type name rather than creating short or duplicate type aliases.
+- **Inline SQL Formatting**: Place each main SQL clause (`SELECT`, `FROM`, `WHERE`, `GROUP BY`, `ORDER BY`) on its own line. Put optional clauses (e.g., `LIMIT`, `OFFSET`) on their own line via inlined conditional expressions (`${limit !== undefined ? `LIMIT ${limit}` : ''}`) rather than intermediate variables.
+- **Dependency Injection**: Do not add defensive null checks on `@Inject()` properties. In standalone scripts or tests, call `await Registry.init()` before accessing services.
+- **Testing Conventions**:
+  - Use `@SkipIf(suite => boolean)` and `@SkipUnless(suite => boolean)` from `@travetto/test` (predicates must be functions receiving the suite instance, not static booleans).
+  - Do not manually set `.id` on models in tests when creating or upserting records, as IDs are autogenerated via `ModelConfig.idGenerator` and validated as 32-char hex UUIDs. Only set `.id` explicitly when testing custom ID preservation or querying/updating/deleting a non-existent ID (using a simple string like `'randomId'`).
+- **Model & Storage Conventions**:
+  - Compose compound query filters in model services via `ModelQueryUtil.getWhereClause(cls, ...)` rather than manually stitching backend-specific filter objects.
+  - Keep `deleteModel` / `deleteStorage` (DDL destruction; must be idempotent and ignore not-found errors via `ModelStorageUtil.runAndIgnoreNotFound`) distinct from `truncateModel` / `truncateBlob` (data purge without dropping schema; must throw on missing tables). Runtime data purges (e.g., `CacheService.purge()`) must call `truncateModel`.
 
-## Catalog Evolution
-When adding operations:
-1. Add type-safe operation metadata.
-2. Add workflow/install entries if module dependencies change.
-3. Add/update tests for filtering and exclusion behavior.
-4. Update consumer instructions if scope changes.
+## `@travetto/llm-support` Module Rules
+- **Framework Code Exposure**: Any framework reference code exposed to LLMs must originate from sample usage files under `doc/`, never from `src/` or internal files.
+- **Catalog & Contract Discipline**: Keep operation metadata, tool names, and schema contracts explicit, deterministic, and backward-compatible. Track excluded operations in `src/recommendation.ts` and ensure new operations include integrity/discoverability tests.

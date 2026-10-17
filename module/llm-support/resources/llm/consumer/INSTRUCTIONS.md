@@ -1,63 +1,47 @@
 # LLM Support Instructions
-Task-oriented guidance and operations for generating Travetto projects and features.
+Task-oriented guidance and conventions for generating and developing Travetto applications.
 
 ## Core Intent
-Use this module to discover and execute generation-ready guidance for:
-- project bootstrap and model backend selection
-- web/controller/service and interceptor creation
-- auth, uploads, model-indexed/model-query flows
-- lint/test quality enablement
-- email generation and delivery sub-operations
+Use `@travetto/llm-support` to discover and execute generation-ready guidance for:
+- Project bootstrap and model backend selection
+- Web controllers, services, and interceptors
+- Auth, uploads, and model persistence/query flows
+- Lint and test quality setup
+- Email template generation and delivery
 
 ## Scope Decisions
 Do not recommend excluded operations unless explicitly requested:
-- log:config
-- log:instrumentation
-- eslint:profile
-- test:mock-service
+- `log:config`
+- `log:instrumentation`
+- `eslint:profile`
+- `test:mock-service`
 
 ## Usage Workflow
 1. Discover command shapes with `npx trv cli:schema` when uncertain.
 2. Request recommendations with `npx trv llm:support:recommend`.
-3. Select bundles/workflows/operations and generate plan-first changes.
-4. Check compiler status with `npx trvc info` (inspecting the JSON `state` field; `'watch-start'` or `'compile-end'` indicates ready; `'compile-failed'` indicates build errors; if running, no build commands are necessary; running `npx trvc clean` is allowed and will restart the compiler automatically after clean is finished; empty response means the compiler is not running). Local CLI commands (`trv <cmd>`) will auto-start the watch daemon if not running.
-5. Clean up formatting and style violations by running `npx trv lint --fix`.
-6. Validate with targeted tests and compile checks.
+3. Select bundles, workflows, or operations and generate plan-first changes (`npx trv llm:support:plan`, then `npx trv llm:support:execute`).
+4. Check compiler status with `npx trvc info` (`state` of `'watch-start'` or `'compile-end'` indicates ready; `'compile-failed'` reports build errors in `messages.error`; empty output means stopped). Local `trv <cmd>` invocations auto-start the watch daemon if not running, and `npx trvc clean` clears caches and restarts automatically.
+5. Clean up formatting and style violations with `npx trv lint --fix`.
+6. Validate with targeted tests (`npx trv test <pattern>`).
 
-## Framework Development Principles
-- Prefer explicit contracts over implicit behavior; generated guidance should map to named operations, modules, and outcomes.
-- Keep module boundaries clear: routing, service logic, persistence, and transport concerns should remain separable.
-- Optimize for composability; recommendations should combine cleanly without hidden coupling.
-- Default to safe behavior (plan-first, dry-run-first, minimal scope changes) and require explicit opt-in for destructive actions.
-- Scope Discipline: Do not touch, reformat, or rename existing code when it is not material to the task at hand.
-- Favor deterministic outputs so repeated runs with the same inputs produce equivalent guidance.
-- Sourced framework code rule: Reference code exposed to LLMs from framework modules MUST originate from sample usage files in `doc/` directories, never from `src/` or internal files.
-- Minimal Decorator Usage Rule: Rely on compile-time AST reflection and framework defaults rather than redundant decorator duplication:
+## Application Coding Conventions
+- **Minimal Decorator Usage**: Rely on Travetto's compile-time AST reflection and defaults rather than redundant decorators:
   - Omit `@Required()` on non-optional TypeScript properties (`prop: string`).
-  - Omit `@PathParam()` / `@QueryParam()` when argument names match route/query parameters.
+  - Omit `@PathParam()` / `@QueryParam()` when parameter names match route/query parameters.
   - Omit `@Body()` on `@Post()`, `@Put()`, or `@Patch()` endpoint parameters taking schema DTOs.
   - Prefer standard JSDoc comments (`/** ... */`) over `@Description()` for schema and endpoint descriptions.
-- Visibility & Encapsulation: Do not use TS visibility modifiers (`private`, `protected`, or `public`) or TypeScript's `override` keyword on class methods or properties. Use standard ECMAScript public by default and `#private` fields/methods when private accessibility is needed.
-- Model Query Handling: When building query filters or aggregations, compose compound clauses via `ModelQueryUtil.getWhereClause(cls, ...)` rather than manually building backend-specific query filter objects.
-- Model CRUD Semantics: Direct entity updates via `update()` or `updatePartial()` require a valid `id` property on the input payload, throwing `ValidationResultError` when missing. Query- or index-based partial updates identify targets via criteria and do not require `id` in the payload. Model IDs are autogenerated upon creation/upsert via `ModelConfig.idGenerator` (defaulting to 32-character UUIDs) and validated by `SchemaValidator` with a default UUID pattern; do not set IDs manually in tests unless testing a specific non-UUID value or querying non-existent entities.
-- Dependency Injection: Avoid defensive null checks on `@Inject()` dependencies. In test setups or scripts, ensure `await Registry.init()` is executed prior to accessing services.
-- Code Style & Safety:
+- **Visibility & Encapsulation**: Do not use TypeScript visibility modifiers (`private`, `protected`, `public`) or the `override` keyword. Use standard ECMAScript public by default and `#private` fields/methods when private accessibility is needed.
+- **Dependency Injection**: Avoid defensive null checks on `@Inject()` dependencies. In custom scripts or test setups, ensure `await Registry.init()` is called before accessing services.
+- **Model & Query Usage**:
+  - Model IDs are autogenerated on `create()` / `upsert()` (defaulting to 32-char UUIDs); do not manually assign IDs in tests unless testing custom ID behavior or querying non-existent records.
+  - Direct entity updates (`update`, `updatePartial`) require a valid `id` on the payload, whereas query- or index-based partial updates identify targets via criteria.
+  - When composing complex query filters programmatically, use `ModelQueryUtil.getWhereClause(cls, ...)`.
+- **Code Style & Safety**:
+  - Keep changes scoped to the task at hand; do not reformat or rename unrelated code.
   - Prefer declarative object definitions with inline conditional spreading (`...(condition ? { ... } : {})`) over mutable property assignment.
-  - Use optional chaining (`?.`) instead of non-null assertions (`!`) on registry and schema lookups.
-  - Avoid redundant `String(...)` conversions inside template literals.
-  - Avoid inline `.catch` invocations on promises unless strictly necessary (e.g., an unawaited promise). Prefer standard `try / catch` blocks instead.
-
-## Best Practices
-- Schema-first boundaries: define input/output contracts with schema classes at ownership boundaries.
-- Dependency clarity: always separate required modules from optional adapters and explain why optional items exist.
-- Compatibility discipline: preserve stable operation ids and tool names; additive changes are preferred over breaking renames.
-- Compiler status checking: inspect compiler server state using `npx trvc info`. A JSON object with a `state` field (e.g. `'watch-start'`, `'compile-end'`, `'init'`, `'compile-failed'`) indicates an active compiler. When `'compile-failed'`, build errors occurred and error details are in the payload. When running, no build commands are necessary; running `npx trvc clean` is permitted and will cause the compiler to restart automatically after clean completes. Empty output indicates it is stopped. Local CLI commands (`trv <cmd>`) will auto-start the watch daemon if not running.
-- Validation before confidence: verify recommendations against command shape, run `npx trv lint --fix` to clean up formatting, then verify generated output with targeted tests.
-- Incremental adoption: start with baseline bundles and layer advanced features only when requirements justify complexity.
-- Explain tradeoffs: when multiple stack choices exist, provide capability-based selection criteria (query, indexed, blob, expiry, etc.).
-- Keep examples production-oriented: avoid toy guidance that skips error handling, configuration boundaries, or testability.
-
-## Change Quality Expectations
-- Every new operation should include clear intent, required modules, optional modules, and verification checks.
-- Every guidance expansion should include corresponding tests for discoverability and metadata integrity.
-- Every consumer-facing behavior change should be reflected in these instructions so agent behavior stays aligned with framework expectations.
+  - Use optional chaining (`?.`) instead of non-null assertions (`!`).
+  - Avoid redundant `String(...)` conversions inside template literals, and prefer `try / catch` over inline `.catch()` on promises.
+- **Architecture & Best Practices**:
+  - Define input/output contracts with `@Schema()` classes at ownership boundaries.
+  - Keep routing, service logic, and persistence concerns cleanly separated.
+  - Start with baseline bundles and layer optional adapters only as capability requirements (query, indexed, blob, expiry) demand.
