@@ -82,20 +82,22 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   async save() {
     const service = await this.service;
 
-    const people = [1, 2, 3, 8].map(x =>
-      Person.from({
-        id: Util.uuid(32),
-        name: 'Bob',
-        age: 20 + x,
-        gender: 'm',
-        address: {
-          street1: 'a',
-          ...(x === 1 ? { street2: 'b' } : {})
-        }
-      })
+    const people = await Promise.all(
+      [1, 2, 3, 8].map(x =>
+        service.upsert(
+          Person,
+          Person.from({
+            name: 'Bob',
+            age: 20 + x,
+            gender: 'm',
+            address: {
+              street1: 'a',
+              ...(x === 1 ? { street2: 'b' } : {})
+            }
+          })
+        )
+      )
     );
-
-    await Promise.all(people.map(el => service.upsert(Person, el)));
 
     const single = await service.get(Person, people[2].id);
     assert(single !== undefined);
@@ -279,20 +281,22 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   async list() {
     const service = await this.service;
 
-    const people = [1, 2, 3].map(x =>
-      Person.from({
-        id: Util.uuid(32),
-        name: 'Bob',
-        age: 20 + x,
-        gender: 'm',
-        address: {
-          street1: 'a',
-          ...(x === 1 ? { street2: 'b' } : {})
-        }
-      })
+    const people = await Promise.all(
+      [1, 2, 3].map(x =>
+        service.upsert(
+          Person,
+          Person.from({
+            name: 'Bob',
+            age: 20 + x,
+            gender: 'm',
+            address: {
+              street1: 'a',
+              ...(x === 1 ? { street2: 'b' } : {})
+            }
+          })
+        )
+      )
     );
-
-    await Promise.all(people.map(el => service.upsert(Person, el)));
 
     const found = (await this.toArray(service.list(Person))).toSorted((a, b) => a.age - b.age);
 
@@ -310,7 +314,6 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
         service.upsert(
           Person,
           Person.from({
-            id: Util.uuid(32),
             name: 'Bob',
             age: 20 + x,
             gender: 'm',
