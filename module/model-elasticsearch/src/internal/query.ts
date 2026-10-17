@@ -133,7 +133,7 @@ export class ElasticsearchQueryUtil {
       const subPath = declaredType === String ? (property === idField && !path ? '_id' : `${path}${property}`) : `${path}${property}`;
 
       const subPathQuery = (value: unknown): {} =>
-        subPath === '_id'
+        property === idField && !path
           ? { ids: { values: Array.isArray(value) ? value : [value] } }
           : { [Array.isArray(value) ? 'terms' : 'term']: { [subPath]: value } };
 

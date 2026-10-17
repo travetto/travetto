@@ -2,7 +2,7 @@ import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/regi
 import { type Class, castKey, RuntimeError } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import type { ModelType } from '../types/model.ts';
+import type { ModelId, ModelType } from '../types/model.ts';
 import type { ModelIdSource } from './model-id.ts';
 import { ModelRegistryAdapter } from './registry-adapter.ts';
 import type { IndexConfig, ModelConfig } from './types.ts';
@@ -41,7 +41,7 @@ export class ModelRegistryIndex implements RegistryIndex {
     return this.#instance.getIdSource(cls);
   }
 
-  static createId<T extends ModelType>(cls: Class<T>): string {
+  static createId<T extends ModelType>(cls: Class<T>): ModelId {
     return this.#instance.createId(cls);
   }
 
@@ -106,7 +106,7 @@ export class ModelRegistryIndex implements RegistryIndex {
   /**
    * Create a new identifier for a model class
    */
-  createId<T extends ModelType>(cls: Class<T>): string {
+  createId<T extends ModelType>(cls: Class<T>): ModelId {
     return this.getConfig(cls).idGenerator();
   }
 

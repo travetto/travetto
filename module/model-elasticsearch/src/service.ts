@@ -111,8 +111,9 @@ export class ElasticsearchModelService
    * Convert _id to id
    */
   async #postLoad<T extends ModelType>(cls: Class<T>, input: SearchHit<T> | GetGetResult<T>): Promise<T> {
+    const idField = ModelRegistryIndex.getConfig(cls).idField;
     let item = {
-      ...(input._id ? { id: input._id } : {}),
+      ...(input._id ? { [idField]: input._id } : {}),
       ...input._source!
     };
 
