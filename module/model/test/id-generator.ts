@@ -2,6 +2,7 @@ import assert from 'node:assert';
 
 import { Model, ModelCrudUtil, ModelRegistryIndex } from '@travetto/model';
 import { Registry } from '@travetto/registry';
+import { Match, ValidationResultError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
 @Model()
@@ -17,6 +18,7 @@ const customPrefix = 'custom-id-';
   idGenerator: () => `${customPrefix}${++counter}`
 })
 class CustomModel {
+  @Match(new RegExp(`^${customPrefix}\\d+$`))
   id: string;
   value: string;
 }
@@ -79,7 +81,7 @@ export class ModelIdGeneratorSuite {
   @Test('Verify preCreate preserves provided id')
   async testPreCreatePreservesId() {
     await Registry.init();
-    const specificId = 'explicit-id-123';
+    const specificId = `${customPrefix}999`;
     const item = await ModelCrudUtil.preCreate(CustomModel, CustomModel.from({ id: specificId, value: 'val' }));
     assert(item.id === specificId);
   }
@@ -102,5 +104,39 @@ export class ModelIdGeneratorSuite {
     const overriddenConfig = ModelRegistryIndex.getConfig(OverriddenModel);
     const overriddenId = overriddenConfig.idGenerator();
     assert(overriddenId.startsWith('overridden-'));
+  }
+
+  @Test('Verify default ID pattern matches uuid and rejects invalid id')
+  async testDefaultIdPattern() {
+    await Registry.init();
+
+    // Valid 32-character uuid passes
+    const valid32 = await ModelCrudUtil.preCreate(
+      DefaultModel,
+      DefaultModel.from({ id: '0123456789abcdef0123456789abcdef', name: 'valid' })
+    );
+    assert(valid32.id === '0123456789abcdef0123456789abcdef');
+
+    // Valid 36-character hyphenated uuid passes
+    const valid36 = await ModelCrudUtil.preCreate(
+      DefaultModel,
+      DefaultModel.from({ id: '01234567-89ab-cdef-0123-456789abcdef', name: 'valid36' })
+    );
+    assert(valid36.id === '01234567-89ab-cdef-0123-456789abcdef');
+
+    // Invalid id throws ValidationResultError on id
+    await assert.rejects(
+      () => ModelCrudUtil.preCreate(DefaultModel, DefaultModel.from({ id: 'invalid-not-a-uuid', name: 'invalid' })),
+      (err: unknown) => err instanceof ValidationResultError && err.details.errors.some(e => e.path === 'id')
+    );
+  }
+
+  @Test('Verify preUpdate without id fails validation')
+  async testPreUpdateWithoutId() {
+    await Registry.init();
+    await assert.rejects(
+      () => ModelCrudUtil.preUpdate(DefaultModel, DefaultModel.from({ name: 'no-id' })),
+      (err: unknown) => err instanceof ValidationResultError && err.details.errors.some(e => e.path === 'id')
+    );
   }
 }

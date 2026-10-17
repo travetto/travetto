@@ -1,6 +1,6 @@
 import type { RegistryAdapter } from '@travetto/registry';
 import { type Class, Util, castTo } from '@travetto/runtime';
-import { SchemaRegistryIndex } from '@travetto/schema';
+import { CommonRegex, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelConfig } from './types.ts';
 
@@ -59,6 +59,12 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
       config.transientFields = [...(parent.transientFields ?? []), ...(config.transientFields ?? [])];
     }
     config.idGenerator ??= () => Util.uuid(32);
+
+    const idField = SchemaRegistryIndex.get(this.#cls).getFields().id;
+    if (idField) {
+      idField.required = { active: false };
+      idField.match ??= { regex: CommonRegex.uuid };
+    }
   }
 
   get(): ModelConfig {

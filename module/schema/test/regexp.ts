@@ -28,4 +28,16 @@ export class RegExpTest {
 
     assert(!CommonRegex.simpleName.test('5ro'));
   }
+
+  @Test()
+  uuid() {
+    assert(CommonRegex.uuid.test('c7b3d88b77ef4e4b9f29d28b14e9f56a'));
+    assert(CommonRegex.uuid.test('C7B3D88B77EF4E4B9F29D28B14E9F56A'));
+    assert(CommonRegex.uuid.test('c7b3d88b-77ef-4e4b-9f29-d28b14e9f56a'));
+    assert(CommonRegex.uuid.test('C7B3D88B-77EF-4E4B-9F29-D28B14E9F56A'));
+
+    assert(!CommonRegex.uuid.test('not-a-uuid'));
+    assert(!CommonRegex.uuid.test('c7b3d88b77ef4e4b9f29d28b14e9f56g'));
+    assert(!CommonRegex.uuid.test('12345'));
+  }
 }

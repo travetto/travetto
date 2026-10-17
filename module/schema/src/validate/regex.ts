@@ -10,7 +10,8 @@ export const [CommonRegex, CommonRegexToName] = (() => {
     telephone: /^(\+?\d{1,3}(\s*-?\s*|\s+))?((\(\d{3}\))|\d{3})(\s*|-|[.])(\d{3})(\s*|-|[.])(\d{4})(\s+(x|ext[.]?)\s*\d+)?$/,
     url: /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/,
     simpleName: /^([a-zA-Z\u0080-\u024F]{0,100}(?:. |-| |')){0,10}[a-zA-Z\u0080-\u024F]+$/,
-    postalCode: /^\d{5}(?:[-\s]\d{4})?$/
+    postalCode: /^\d{5}(?:[-\s]\d{4})?$/,
+    uuid: /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i
   };
   // Rebind regexes
   for (const key of TypedObject.keys(regexes)) {
