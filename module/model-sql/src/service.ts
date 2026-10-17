@@ -163,6 +163,7 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async executeUpsert<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>, conflictTarget: string[]): Promise<T> {
+    ModelCrudUtil.ensureNotSubType(modelClass);
     const [id, preppedItem] = await ModelCrudUtil.preStore(modelClass, item);
     const rawItem: Record<string, unknown> = castTo(preppedItem);
     const tableContext = this.connection.getContext(modelClass);

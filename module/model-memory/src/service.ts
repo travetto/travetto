@@ -300,7 +300,7 @@ export class MemoryModelService
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     const [id, prepped] = await ModelCrudUtil.preStore(cls, item, { ensureId: false });
-    this.#find(cls, id, 'notfound');
+    await this.get(cls, id);
     return await this.#persist(cls, prepped, 'write');
   }
 

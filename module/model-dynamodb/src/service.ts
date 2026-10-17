@@ -262,7 +262,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         return await this.client.updateItem({
           TableName: this.#resolveTable(cls),
           ConditionExpression: mode === 'update' ? 'attribute_exists(body)' : undefined,
-          Key: { id: { S: id } },
+          Key: { [config.idField]: { S: id } },
           UpdateExpression: `SET ${['body=:body', expiry !== undefined ? `${EXPIRES_ATTRIBUTE}=:expr` : undefined, ...expr]
             .filter(part => !!part)
             .join(', ')}`,

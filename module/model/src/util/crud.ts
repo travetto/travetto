@@ -245,7 +245,7 @@ export class ModelCrudUtil {
         throw e;
       }
     }
-    if (!id && options?.validateId) {
+    if (!id && options?.validateId !== false) {
       errors.push({ kind: 'required', path: castTo(idSource.field), type: 'string', message: `${idSource.field} is required` });
     }
 
