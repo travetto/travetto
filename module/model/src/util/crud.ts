@@ -342,16 +342,14 @@ export class ModelCrudUtil {
   }
 
   /**
-   * Ensure everything is correct for a partial update
+   * Apply a prepared partial update to an existing entity retrieved via `get`
    */
   static async naivePartialUpdate<T extends ModelType>(
     cls: Class<T>,
     get: (id?: string) => Promise<T>,
-    item: PartialWithId<T> | Partial<T>,
-    options?: { validateId?: boolean; ensureNotSubType?: boolean }
+    prepared: Partial<T>,
+    id?: string
   ): Promise<T> {
-    const id = item.id;
-    const prepared = await this.prePartialUpdate(cls, item, options);
     const full = await get(id);
     return cls.from(castTo({ ...full, ...prepared }));
   }

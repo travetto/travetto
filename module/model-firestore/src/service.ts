@@ -201,10 +201,11 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     const id = item.id;
-    const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, {
+    const prepared = await ModelCrudUtil.prePartialUpdate(cls, item, {
       validateId: true,
       ensureNotSubType: true
     });
+    const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), prepared);
     const cleaned = setMissingValues(full, FieldValue.delete());
     await this.#getCollection(cls)
       .doc(id)
@@ -269,7 +270,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     idx: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
+    const prepared = await ModelCrudUtil.prePartialUpdate(cls, castTo(body));
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), prepared);
     return this.update(cls, item);
   }
 
