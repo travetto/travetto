@@ -372,7 +372,7 @@ export class ElasticsearchModelService
     ModelCrudUtil.ensureNotSubType(cls);
 
     const id = ModelRegistryIndex.get(cls).idSource.get(data);
-    const item = await ModelCrudUtil.prePartialUpdate(cls, data);
+    const item = await ModelCrudUtil.prePartialUpdate(cls, data, { validateId: true });
     const script = ElasticsearchSchemaUtil.generateUpdateScript(item);
 
     try {
@@ -562,7 +562,7 @@ export class ElasticsearchModelService
     idx: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body), { validateId: false });
     return this.update(cls, item);
   }
 

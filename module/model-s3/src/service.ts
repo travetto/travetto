@@ -323,7 +323,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const [, prepped] = await ModelCrudUtil.preStore(cls, item, { ensureId: false });
+    const [, prepped] = await ModelCrudUtil.preStore(cls, item);
     return this.store(cls, prepped);
   }
 

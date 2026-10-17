@@ -214,7 +214,11 @@ export class ModelCrudUtil {
   /**
    * Ensure everything is correct for a partial update
    */
-  static async prePartialUpdate<T extends ModelType>(cls: Class<T>, item: Partial<T> | PartialWithId<T>): Promise<Partial<T>> {
+  static async prePartialUpdate<T extends ModelType>(
+    cls: Class<T>,
+    item: Partial<T> | PartialWithId<T>,
+    options?: { validateId?: boolean }
+  ): Promise<Partial<T>> {
     if (!DataUtil.isPlainObject(item)) {
       throw new RuntimeError(`A partial update requires a plain object, not an instance of ${castTo<Function>(item).constructor.name}`, {
         category: 'data'
@@ -231,7 +235,24 @@ export class ModelCrudUtil {
     }
 
     const result = await this.prePersist(cls, item, 'partial');
-    await SchemaValidator.validatePartial(cls, item);
+    let errors: ValidationError[] = [];
+    try {
+      await SchemaValidator.validatePartial(cls, item);
+    } catch (e) {
+      if (e instanceof ValidationResultError) {
+        errors = e.details.errors;
+      } else {
+        throw e;
+      }
+    }
+    if (!id && options?.validateId) {
+      errors.push({ kind: 'required', path: castTo(idSource.field), type: 'string', message: `${idSource.field} is required` });
+    }
+
+    if (errors.length) {
+      throw new ValidationResultError(errors);
+    }
+
     return castTo(result);
   }
 
@@ -241,10 +262,11 @@ export class ModelCrudUtil {
   static async naivePartialUpdate<T extends ModelType>(
     cls: Class<T>,
     get: (id?: ModelId) => Promise<T>,
-    item: PartialWithId<T> | Partial<T>
+    item: PartialWithId<T> | Partial<T>,
+    options?: { validateId?: boolean }
   ): Promise<T> {
     const id = ModelRegistryIndex.get(cls).idSource.get(item, { optional: true });
-    const prepared = await this.prePartialUpdate(cls, item);
+    const prepared = await this.prePartialUpdate(cls, item, options);
     const full = await get(id);
     return cls.from({ ...full, ...prepared });
   }

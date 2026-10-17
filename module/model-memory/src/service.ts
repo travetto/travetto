@@ -300,7 +300,7 @@ export class MemoryModelService
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     const [id, prepped] = await ModelCrudUtil.preStore(cls, item, { ensureId: false });
-    this.#find(cls, id, 'exists');
+    this.#find(cls, id, 'notfound');
     return await this.#persist(cls, prepped, 'write');
   }
 
@@ -316,6 +316,7 @@ export class MemoryModelService
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     const id = ModelRegistryIndex.get(cls).idSource.get(item);
+    this.#find(cls, id, 'notfound');
     const clean = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
     return await this.#persist(cls, clean, 'write');
   }
@@ -484,7 +485,7 @@ export class MemoryModelService
     idx: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body));
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body), { validateId: false });
     return this.update(cls, item);
   }
 
