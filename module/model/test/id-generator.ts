@@ -139,4 +139,20 @@ export class ModelIdGeneratorSuite {
       (err: unknown) => err instanceof ValidationResultError && err.details.errors.some(e => e.path === 'id')
     );
   }
+
+  @Test('Verify preUpdate without id and invalid schema returns both validation errors')
+  async testPreUpdateWithoutIdAndInvalidSchema() {
+    await Registry.init();
+    await assert.rejects(
+      () => ModelCrudUtil.preUpdate(DefaultModel, DefaultModel.from({ name: '' })),
+      (err: unknown) => {
+        if (!(err instanceof ValidationResultError)) {
+          return false;
+        }
+        const hasId = err.details.errors.some(e => e.path === 'id' && e.kind === 'required');
+        const hasName = err.details.errors.some(e => e.path === 'name' && e.kind === 'required');
+        return hasId && hasName && err.details.errors.length >= 2;
+      }
+    );
+  }
 }

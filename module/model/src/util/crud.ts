@@ -98,10 +98,22 @@ export class ModelCrudUtil {
     item = await this.prePersist(cls, item, scope);
 
     if (resolvedConfig?.validate ?? true) {
-      if (!item.id) {
-        throw new ValidationResultError([{ kind: 'required', path: 'id', type: 'string', message: 'id is required' }]);
+      let errors: ValidationError[] = [];
+      try {
+        await SchemaValidator.validate(cls, item);
+      } catch (error) {
+        if (error instanceof ValidationResultError) {
+          errors = error.details.errors;
+        } else {
+          throw error;
+        }
       }
-      await SchemaValidator.validate(cls, item);
+      if (!item.id) {
+        errors.push({ kind: 'required', path: 'id', type: 'string', message: 'id is required' });
+      }
+      if (errors.length) {
+        throw new ValidationResultError(errors);
+      }
     }
     return castTo(item);
   }
