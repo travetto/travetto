@@ -192,7 +192,6 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     const id = item.id;
     const prepared = await ModelCrudUtil.prePartialUpdate(cls, item, {
-      validateId: true,
       ensureNotSubType: true
     });
     const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), prepared);

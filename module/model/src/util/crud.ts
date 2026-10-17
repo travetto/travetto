@@ -295,7 +295,7 @@ export class ModelCrudUtil {
   }
 
   /**
-   * Ensure everything is correct for a partial update
+   * Ensure everything is correct for a partial update. Validates that `id` is present by default.
    */
   static async prePartialUpdate<T extends ModelType>(
     cls: Class<T>,
@@ -330,7 +330,7 @@ export class ModelCrudUtil {
         throw error;
       }
     }
-    if (options?.validateId && !id) {
+    if ((options?.validateId ?? true) && !id) {
       errors.push({ kind: 'required', path: 'id', type: 'string', message: 'id is required' });
     }
 

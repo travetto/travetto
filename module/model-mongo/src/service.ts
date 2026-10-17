@@ -377,7 +377,7 @@ export class MongoModelService
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     const store = await this.getStore(cls);
 
-    const final = await ModelCrudUtil.prePartialUpdate(cls, item, { validateId: true });
+    const final = await ModelCrudUtil.prePartialUpdate(cls, item);
     const simple = MongoUtil.extractSimple(cls, final, undefined, false);
 
     const operation: Partial<T> = castTo(
@@ -595,7 +595,7 @@ export class MongoModelService
     idx: SingleItemIndex<T, K>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const prepared = await ModelCrudUtil.prePartialUpdate(cls, castTo(body));
+    const prepared = await ModelCrudUtil.prePartialUpdate(cls, castTo(body), { validateId: false });
     const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), prepared);
     return this.update(cls, item);
   }
@@ -700,7 +700,7 @@ export class MongoModelService
   async updatePartialByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
     await QueryVerifier.verify(cls, query);
 
-    const item = await ModelCrudUtil.prePartialUpdate(cls, data);
+    const item = await ModelCrudUtil.prePartialUpdate(cls, data, { validateId: false });
     const col = await this.getStore(cls);
     const items = MongoUtil.extractSimple(cls, item);
     const final = Object.entries(items).reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>((document, [key, value]) => {

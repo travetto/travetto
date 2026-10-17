@@ -131,7 +131,7 @@ export abstract class BaseSQLModelService<C = unknown>
     data: Partial<T>,
     returning: boolean
   ): Promise<{ count: number; records: Record<string, unknown>[] }> {
-    const preparedData = await ModelCrudUtil.prePartialUpdate(modelClass, data);
+    const preparedData = await ModelCrudUtil.prePartialUpdate(modelClass, data, { validateId: false });
 
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);
@@ -244,7 +244,7 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async updatePartial<T extends ModelType>(modelClass: Class<T>, item: PartialWithId<T>): Promise<T> {
-    await ModelCrudUtil.prePartialUpdate(modelClass, item, { validateId: true, ensureNotSubType: true });
+    await ModelCrudUtil.prePartialUpdate(modelClass, item, { ensureNotSubType: true });
 
     const result = await this.executeUpdatePartial(modelClass, castTo({ id: item.id }), item, true);
 

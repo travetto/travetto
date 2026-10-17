@@ -398,7 +398,7 @@ export class ElasticsearchModelService
 
   async updatePartial<T extends ModelType>(cls: Class<T>, data: PartialWithId<T>): Promise<T> {
     const id = data.id;
-    const item = castTo<typeof data>(await ModelCrudUtil.prePartialUpdate(cls, data, { validateId: true, ensureNotSubType: true }));
+    const item = castTo<typeof data>(await ModelCrudUtil.prePartialUpdate(cls, data, { ensureNotSubType: true }));
     const script = ElasticsearchSchemaUtil.generateUpdateScript(item);
 
     try {
@@ -588,7 +588,7 @@ export class ElasticsearchModelService
     idx: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const prepared = await ModelCrudUtil.prePartialUpdate(cls, castTo(body));
+    const prepared = await ModelCrudUtil.prePartialUpdate(cls, castTo(body), { validateId: false });
     const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), prepared);
     return this.update(cls, item);
   }
@@ -733,7 +733,7 @@ export class ElasticsearchModelService
   async updatePartialByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
     await QueryVerifier.verify(cls, query);
 
-    const item = await ModelCrudUtil.prePartialUpdate(cls, data);
+    const item = await ModelCrudUtil.prePartialUpdate(cls, data, { validateId: false });
     const script = ElasticsearchSchemaUtil.generateUpdateScript(item);
 
     const search = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
