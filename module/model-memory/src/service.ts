@@ -139,6 +139,7 @@ export class MemoryModelService
   }
 
   async #writeIndices<T extends ModelType>(cls: Class<T>, item: T): Promise<void> {
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
     for (const idx of ModelRegistryIndex.getIndices(cls)) {
       if (!isModelIndexedIndex(idx)) {
         continue; // Only support ModelIndexed indices
@@ -150,15 +151,15 @@ export class MemoryModelService
         case 'indexed:keyed': {
           if (idx.unique) {
             const existing = this.#indices[idx.type].get(idxName)?.get(key);
-            if (existing && existing.size > 0 && !existing.has(item.id)) {
+            if (existing && existing.size > 0 && !existing.has(id)) {
               throw new UniqueError(cls, key);
             }
           }
-          this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Set()).add(item.id);
+          this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Set()).add(id);
           break;
         }
         case 'indexed:sorted': {
-          this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Map()).set(item.id, computed.getSort());
+          this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Map()).set(id, computed.getSort());
           break;
         }
       }
@@ -169,13 +170,14 @@ export class MemoryModelService
   async #persist<T extends ModelType>(cls: Class<T>, item: T, action: 'write'): Promise<T>;
   async #persist<T extends ModelType>(cls: Class<T>, item: T, action: 'write' | 'remove'): Promise<T | void> {
     const store = this.#getStore(cls);
-    await this.#removeIndices(cls, item.id);
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
+    await this.#removeIndices(cls, id);
     if (action === 'write') {
-      store.set(item.id, JSONUtil.toBinaryArray(item));
+      store.set(id, JSONUtil.toBinaryArray(item));
       await this.#writeIndices(cls, item);
       return item;
     } else {
-      store.delete(item.id);
+      store.delete(id);
     }
   }
 
@@ -291,29 +293,32 @@ export class MemoryModelService
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const prepped = await ModelCrudUtil.preCreate(cls, item);
-    this.#find(cls, prepped.id, 'exists');
+    const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
+    this.#find(cls, id, 'exists');
     return await this.#persist(cls, prepped, 'write');
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     const prepped = await ModelCrudUtil.preUpdate(cls, item);
-    await this.get(cls, prepped.id);
+    const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
+    await this.get(cls, id);
     return await this.#persist(cls, prepped, 'write');
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const store = this.#getStore(cls);
-    if (item.id && store.has(item.id)) {
-      await ModelCrudUtil.load(cls, store.get(item.id)!, 'exists');
+    const id = ModelRegistryIndex.get(cls).idSource.get(item, { optional: true });
+    if (id && store.has(id)) {
+      await ModelCrudUtil.load(cls, store.get(id)!, 'exists');
     }
     const prepped = await ModelCrudUtil.preUpsert(cls, item);
     return await this.#persist(cls, prepped, 'write');
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
-    const id = item.id;
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
     const prepared = await ModelCrudUtil.prePartialUpdate(cls, item);
-    const clean = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), prepared);
+    const clean = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), prepared, id);
     return await this.#persist(cls, clean, 'write');
   }
 
@@ -323,9 +328,8 @@ export class MemoryModelService
     if (!store.has(id)) {
       throw new NotFoundError(cls, id);
     }
-    await ModelCrudUtil.load(cls, store.get(id)!);
-    const where: ModelType = { id };
-    await this.#persist(cls, where, 'remove');
+    const existing = await ModelCrudUtil.load(cls, store.get(id)!);
+    await this.#persist(cls, existing, 'remove');
   }
 
   async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {

@@ -135,6 +135,16 @@ export function TypeCategorize(
     // Tuple type?
     return { category: 'tuple', type };
   } else if (type.isUnionOrIntersection()) {
+    if (type.isIntersection()) {
+      const primitive = type.types.find(
+        subType =>
+          (subType.getFlags() & (ts.TypeFlags.BigIntLike | ts.TypeFlags.BooleanLike | ts.TypeFlags.NumberLike | ts.TypeFlags.StringLike)) >
+          0
+      );
+      if (primitive) {
+        return { category: 'literal', type: primitive };
+      }
+    }
     if (hasComplexSubType(type)) {
       return { category: 'shape', type };
     }

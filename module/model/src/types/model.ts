@@ -1,23 +1,33 @@
-/**
- * Model identifier type
- */
-export type ModelId = string;
+declare const modelIdTag: unique symbol;
 
 /**
- * Simple model interface
- * @concrete
+ * Model Identifier branded type
+ * @specifier modelId
+ * @specifier no-generate
  */
-export interface ModelType {
-  /**
-   * Unique identifier.
-   *
-   * If not provided, will be computed on create
-   */
-  id: ModelId;
-}
+export type ModelId = string & { readonly [modelIdTag]?: null };
 
-export type OptionalId<T extends ModelType> = Omit<T, 'id'> & { id?: ModelId };
-export type PartialWithId<T extends ModelType> = Partial<T> & Pick<T, 'id'>;
+export type IsModelId<T> = typeof modelIdTag extends keyof NonNullable<T> ? true : false;
+
+/**
+ * Type where the model's identifier field is optional, but other required fields remain mandatory
+ */
+export type OptionalId<T> = {
+  [K in keyof T as IsModelId<T[K]> extends true ? never : K]: T[K];
+} & {
+  [K in keyof T as IsModelId<T[K]> extends true ? K : never]?: T[K];
+};
+
+/**
+ * Type where the model's identifier field is required, but other fields are optional
+ */
+export type PartialWithId<T> = {
+  [K in keyof T as IsModelId<T[K]> extends true ? never : K]?: T[K];
+} & {
+  [K in keyof T as IsModelId<T[K]> extends true ? K : never]-?: T[K];
+};
+
+export type ModelType = object;
 
 /**
  * Options for listing items

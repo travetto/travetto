@@ -1,5 +1,5 @@
 import { type IndexConfig, ModelRegistryIndex, type ModelType } from '@travetto/model';
-import { type Class, type Primitive, RuntimeError, type ValidFields } from '@travetto/runtime';
+import { type Class, type Primitive, type ValidFields } from '@travetto/runtime';
 
 type RetainPrimitiveFields<T> = Pick<T, ValidFields<T, Primitive | Date>>;
 
@@ -24,9 +24,6 @@ export interface QueryIndexConfig<T extends ModelType> extends IndexConfig<'quer
 }
 
 export function QueryIndex<T extends ModelType>(index: Omit<QueryIndexConfig<T>, 'class' | 'type'>) {
-  if (index.fields.some(field => field === 'id')) {
-    throw new RuntimeError('Cannot create an index with the id field');
-  }
   return function (cls: Class<T>): void {
     ModelRegistryIndex.getForRegister(cls).register({ indices: { [index.name]: { ...index, type: 'query', class: cls } } });
   };

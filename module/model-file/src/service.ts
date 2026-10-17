@@ -141,7 +141,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   checkExpiry<T extends ModelType>(cls: Class<T>, item: T): T {
     const { expiresAt } = ModelRegistryIndex.getConfig(cls);
     if (expiresAt && ModelExpiryUtil.getExpiryState(cls, item).expired) {
-      throw new NotFoundError(cls, item.id);
+      throw NotFoundError.from(cls, item);
     }
     return item;
   }
@@ -161,10 +161,11 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const prepped = await ModelCrudUtil.preCreate(cls, item);
-    const file = await this.#resolveName(cls, '.json', prepped.id);
+    const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
+    const file = await this.#resolveName(cls, '.json', id);
 
     if (await exists(file)) {
-      throw new ExistsError(cls, prepped.id);
+      throw new ExistsError(cls, id);
     }
 
     await fs.writeFile(file, BinaryUtil.binaryArrayToUint8Array(JSONUtil.toBinaryArray(prepped)));
@@ -173,28 +174,30 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     const prepped = await ModelCrudUtil.preUpdate(cls, item, { ensureNotSubType: true });
-    await this.get(cls, prepped.id);
-    const file = await this.#resolveName(cls, '.json', prepped.id);
+    const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
+    await this.get(cls, id);
+    const file = await this.#resolveName(cls, '.json', id);
     await fs.writeFile(file, BinaryUtil.binaryArrayToUint8Array(JSONUtil.toBinaryArray(prepped)));
     return prepped;
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const prepped = await ModelCrudUtil.preUpsert(cls, item, { ensureNotSubType: true });
+    const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
 
-    const file = await this.#resolveName(cls, '.json', prepped.id);
+    const file = await this.#resolveName(cls, '.json', id);
     await fs.writeFile(file, BinaryUtil.binaryArrayToUint8Array(JSONUtil.toBinaryArray(prepped)));
 
     return prepped;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
-    const id = item.id;
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
     const prepared = await ModelCrudUtil.prePartialUpdate(cls, item, {
       ensureNotSubType: true
     });
-    const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), prepared);
-    const file = await this.#resolveName(cls, '.json', full.id);
+    const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), prepared, id);
+    const file = await this.#resolveName(cls, '.json', id);
     await fs.writeFile(file, BinaryUtil.binaryArrayToUint8Array(JSONUtil.toBinaryArray(full)));
     return full;
   }

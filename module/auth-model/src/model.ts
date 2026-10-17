@@ -1,6 +1,6 @@
 import { AuthenticationError, type Authenticator, type Authorizer, type Principal } from '@travetto/auth';
 import { type ModelCrudSupport, type ModelType, NotFoundError, type OptionalId } from '@travetto/model';
-import { type Class, castTo, TimeUtil, Util } from '@travetto/runtime';
+import { type Class, TimeUtil, Util } from '@travetto/runtime';
 
 import { AuthModelUtil } from './util.ts';
 
@@ -111,7 +111,7 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
 
     const fields = await AuthModelUtil.generatePassword(identity.password!);
     const output: Partial<T> = { ...user, ...this.fromPrincipal(fields) };
-    return await this.#modelService.create(this.#cls, this.#cls.from(castTo(output)));
+    return await this.#modelService.create(this.#cls, this.#cls.from(output));
   }
 
   /**
@@ -137,7 +137,7 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
 
     const fields = await AuthModelUtil.generatePassword(password);
     const output: Partial<T> = { ...user, ...this.fromPrincipal(fields) };
-    return await this.#modelService.update(this.#cls, this.#cls.from(castTo(output)));
+    return await this.#modelService.update(this.#cls, this.#cls.from(output));
   }
 
   /**
@@ -153,7 +153,7 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
     identity.resetExpires = TimeUtil.fromNow('1h');
 
     const output: Partial<T> = { ...user, ...this.fromPrincipal(identity) };
-    await this.#modelService.update(this.#cls, this.#cls.from(castTo(output)));
+    await this.#modelService.update(this.#cls, this.#cls.from(output));
     return identity;
   }
 

@@ -175,14 +175,16 @@ export abstract class BaseSQLModelService<C = unknown>
     if (result.records.length > 0) {
       return this.loadSingle(modelClass, result.records[0]);
     } else {
-      return this.get(modelClass, rawItem.id as string);
+      const idSource = ModelRegistryIndex.get(modelClass).idSource;
+      return this.get(modelClass, idSource.get(castTo(rawItem)));
     }
   }
 
   // Crud Support
   async get<T extends ModelType>(modelClass: Class<T>, id: string): Promise<T> {
     const tableContext = this.connection.getContext(modelClass);
-    const { whereSQL, parameters } = this.#whereClause(modelClass, castTo({ id }));
+    const idSource = ModelRegistryIndex.get(modelClass).idSource;
+    const { whereSQL, parameters } = this.#whereClause(modelClass, idSource.where(id));
     const sql = this.dialect.buildSelect(tableContext, { whereSQL });
 
     const result = await this.connection.execute<Record<string, unknown>>(sql, parameters);
@@ -205,7 +207,7 @@ export abstract class BaseSQLModelService<C = unknown>
       await this.connection.execute(sql, values);
     } catch (error) {
       if (error instanceof ExistsError) {
-        throw new ExistsError(modelClass, preppedItem.id);
+        throw ExistsError.from(modelClass, preppedItem);
       }
       if (error instanceof UniqueError && (error.details?.type === 'query' || error.details?.type === 'index')) {
         throw new UniqueError(modelClass, (error.details.constraint as string) ?? 'unknown', error.details);
@@ -216,24 +218,28 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async update<T extends ModelType>(modelClass: Class<T>, item: T): Promise<T> {
-    const preppedItem = await this.executeUpdate(modelClass, castTo({ id: item.id }), item);
+    const idSource = ModelRegistryIndex.get(modelClass).idSource;
+    const id = idSource.get(item);
+    const preppedItem = await this.executeUpdate(modelClass, idSource.where(id), item);
     if (!preppedItem) {
-      throw new NotFoundError(modelClass, item.id);
+      throw new NotFoundError(modelClass, id);
     }
     return preppedItem;
   }
 
   async upsert<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>): Promise<T> {
-    return this.executeUpsert(modelClass, item, [this.dialect.escapeIdentifier('id')]);
+    const idFieldName = ModelRegistryIndex.get(modelClass).idSource.field;
+    return this.executeUpsert(modelClass, item, [this.dialect.escapeIdentifier(idFieldName)]);
   }
 
   async updatePartial<T extends ModelType>(modelClass: Class<T>, item: PartialWithId<T>): Promise<T> {
     await ModelCrudUtil.prePartialUpdate(modelClass, item, { ensureNotSubType: true });
-
-    const result = await this.executeUpdatePartial(modelClass, castTo({ id: item.id }), item, true);
+    const idSource = ModelRegistryIndex.get(modelClass).idSource;
+    const id = idSource.get(item);
+    const result = await this.executeUpdatePartial(modelClass, idSource.where(id), item, true);
 
     if (result.count === 0) {
-      throw new NotFoundError(modelClass, item.id);
+      throw new NotFoundError(modelClass, id);
     }
 
     return this.loadSingle(modelClass, result.records[0]);
@@ -242,7 +248,7 @@ export abstract class BaseSQLModelService<C = unknown>
   async delete<T extends ModelType>(modelClass: Class<T>, id: string): Promise<void> {
     id = await ModelCrudUtil.preDelete(modelClass, id, { ensureNotSubType: true });
     const tableContext = this.connection.getContext(modelClass);
-    const { whereSQL, parameters } = this.#whereClause(modelClass, castTo({ id }), false);
+    const { whereSQL, parameters } = this.#whereClause(modelClass, ModelRegistryIndex.get(modelClass).idSource.where(id), false);
     const sql = this.dialect.buildDelete(tableContext, whereSQL);
 
     const result = await this.connection.execute(sql, parameters);
@@ -336,8 +342,9 @@ export abstract class BaseSQLModelService<C = unknown>
       requestedFieldsMap.set(field.name, this.dialect.getComplexColumnType(field));
     }
 
+    const idFieldName = ModelRegistryIndex.getConfig(tableContext.cls).idField;
     for (const [columnName, columnType] of requestedFieldsMap.entries()) {
-      if (columnName === 'id') {
+      if (columnName === idFieldName) {
         continue;
       }
       if (!existingColumns.has(columnName)) {
@@ -455,11 +462,14 @@ export abstract class BaseSQLModelService<C = unknown>
     const updates: T[] = [];
     const upserts: { upsert?: OptionalId<T> }[] = [];
 
+    const idSource = ModelRegistryIndex.get(modelClass).idSource;
+    const idFieldName = idSource.field;
+
     for (const operation of preppedOperations) {
       if ('insert' in operation && operation.insert) {
         inserts.push(operation.insert);
       } else if ('delete' in operation && operation.delete) {
-        deletes.push(operation.delete.id);
+        deletes.push(idSource.get(operation.delete));
       } else if ('update' in operation && operation.update) {
         updates.push(operation.update);
       } else if ('upsert' in operation && operation.upsert) {
@@ -490,7 +500,11 @@ export abstract class BaseSQLModelService<C = unknown>
     // Convert deletes into SQL statements with a fixed batch size
     for (let index = 0; index < deletes.length; index += batchSize) {
       const subBatch = deletes.slice(index, index + batchSize);
-      const { whereSQL, parameters = [] } = this.#whereClause(modelClass, castTo({ id: { $in: subBatch } }), false);
+      const { whereSQL, parameters = [] } = this.#whereClause(
+        modelClass,
+        castTo<WhereClause<T>>({ [idFieldName]: { $in: subBatch } }),
+        false
+      );
       const sql = this.dialect.buildDelete(tableContext, whereSQL);
       commands.push({ type: 'delete', sql, values: parameters, count: subBatch.length });
     }
@@ -506,7 +520,7 @@ export abstract class BaseSQLModelService<C = unknown>
     // Generate upsert statements from other operations
     for (const operation of upserts) {
       const rawItem: Record<string, unknown> = castTo(operation.upsert);
-      const { sql, values } = this.dialect.buildUpsert(tableContext, rawItem, [this.dialect.escapeIdentifier('id')]);
+      const { sql, values } = this.dialect.buildUpsert(tableContext, rawItem, [this.dialect.escapeIdentifier(idFieldName)]);
       commands.push({ type: 'upsert', sql, values, count: 1 });
     }
 
@@ -771,9 +785,11 @@ export abstract class BaseSQLModelService<C = unknown>
     });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
 
+    const idSource = ModelRegistryIndex.get(modelClass).idSource;
+    const id = idSource.get(preppedItem);
     const tableContext = this.connection.getContext(modelClass);
     const combinedWhere: WhereClause<T> = castTo({
-      $and: [{ id: preppedItem.id }, ...(query.where ? [query.where] : [])]
+      $and: [idSource.where(id), ...(query.where ? [query.where] : [])]
     });
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, combinedWhere);
 

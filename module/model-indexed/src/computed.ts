@@ -1,4 +1,4 @@
-import type { ModelType } from '@travetto/model';
+import { ModelRegistryIndex, type ModelType } from '@travetto/model';
 import { type Any, castTo } from '@travetto/runtime';
 
 import { IndexedFieldError } from './types/error.ts';
@@ -81,11 +81,14 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
       castTo(body),
       value => typeof value === 'number' || value instanceof Date || typeof value === 'string'
     );
-    if ('id' in body && typeof body.id === 'string') {
+    const idSource = ModelRegistryIndex.get(idx.class).idSource;
+    const identifier = idSource.get(body, { optional: true });
+    if (typeof identifier === 'string') {
+      const idField = idSource.field;
       this.idPart = {
-        path: ['id'],
-        value: body.id,
-        state: body.id === null || body.id === undefined ? 'empty' : 'found',
+        path: [idField],
+        value: identifier,
+        state: 'found',
         templateValue: true
       };
     }

@@ -78,6 +78,19 @@ export class DocUtil {
   }
 
   /**
+   * Read JS Doc tags for a node
+   */
+  static readNodeDocTags(node: ts.Node, name: string): string[] {
+    return ts
+      .getJSDocTags(node)
+      .filter(tag => tag.tagName.getText() === name)
+      .map(tag =>
+        typeof tag.comment === 'string' ? tag.comment : Array.isArray(tag.comment) ? tag.comment.map(part => part.text).join('') : ''
+      )
+      .filter(value => Boolean(value));
+  }
+
+  /**
    * Has JS Doc tags for a type
    */
   static hasDocTag(type: ts.Type | ts.Symbol, name: string): boolean {

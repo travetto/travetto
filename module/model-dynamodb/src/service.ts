@@ -224,7 +224,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           TableName: this.#resolveTable(cls),
           ConditionExpression: 'attribute_not_exists(body)',
           Item: {
-            id: DynamoDBUtil.toValue(item.id),
+            [config.idField]: DynamoDBUtil.toValue(id),
             body: DynamoDBUtil.toValue(JSONUtil.toUTF8(item)),
             ...(expiry !== undefined ? { [EXPIRES_ATTRIBUTE]: DynamoDBUtil.toValue(expiry) } : {}),
             ...indices
@@ -262,7 +262,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         return await this.client.updateItem({
           TableName: this.#resolveTable(cls),
           ConditionExpression: mode === 'update' ? 'attribute_exists(body)' : undefined,
-          Key: { id: { S: id } },
+          Key: { [config.idField]: { S: id } },
           UpdateExpression: `SET ${['body=:body', expiry !== undefined ? `${EXPIRES_ATTRIBUTE}=:expr` : undefined, ...expr]
             .filter(part => !!part)
             .join(', ')}`,
@@ -315,6 +315,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async upsertModel(cls: Class<ModelType>): Promise<void> {
     const table = this.#resolveTable(cls);
     const idx = DynamoDBUtil.computeIndexConfig(cls);
+    const idField = ModelRegistryIndex.getConfig(cls).idField;
 
     const [currentTable, currentTTL] = await Promise.all([
       ModelStorageUtil.runAndIgnoreNotFound(() => this.client.describeTable({ TableName: table }), isNotFoundError),
@@ -325,21 +326,21 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       console.debug('Creating Table', { table, idx });
       await this.client.createTable({
         TableName: table,
-        KeySchema: [{ KeyType: 'HASH', AttributeName: 'id' }],
+        KeySchema: [{ KeyType: 'HASH', AttributeName: idField }],
         BillingMode: 'PAY_PER_REQUEST',
-        AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }, ...idx.attributes],
+        AttributeDefinitions: [{ AttributeName: idField, AttributeType: 'S' }, ...idx.attributes],
         GlobalSecondaryIndexes: idx.indices
       });
     } else {
       const indexUpdates = DynamoDBUtil.findChangedGlobalIndexes(currentTable.Table?.GlobalSecondaryIndexes, idx.indices);
-      const changedAttributes = DynamoDBUtil.findChangedAttributes(currentTable.Table?.AttributeDefinitions, idx.attributes);
+      const changedAttributes = DynamoDBUtil.findChangedAttributes(cls, currentTable.Table?.AttributeDefinitions, idx.attributes);
 
       console.debug('Updating Table', { table, idx, current: currentTable.Table, indexUpdates, changedAttributes });
 
       if (changedAttributes.length || indexUpdates?.length) {
         await this.client.updateTable({
           TableName: table,
-          AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }, ...idx.attributes],
+          AttributeDefinitions: [{ AttributeName: idField, AttributeType: 'S' }, ...idx.attributes],
           GlobalSecondaryIndexUpdates: indexUpdates
         });
       }
@@ -369,11 +370,12 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {
     const table = this.#resolveTable(cls);
+    const idField = ModelRegistryIndex.getConfig(cls).idField;
     let startKey: Record<string, AttributeValue> | undefined;
     do {
       const scanResult = await this.client.scan({
         TableName: table,
-        ProjectionExpression: 'id',
+        ProjectionExpression: idField,
         ExclusiveStartKey: startKey,
         Limit: 25
       });
@@ -384,7 +386,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           RequestItems: {
             [table]: items.map(item => ({
               DeleteRequest: {
-                Key: { id: item.id }
+                Key: { [idField]: item[idField] }
               }
             }))
           }
@@ -409,9 +411,10 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   // Crud
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
+    const idField = ModelRegistryIndex.getConfig(cls).idField;
     const result = await this.client.getItem({
       TableName: this.#resolveTable(cls),
-      Key: { id: DynamoDBUtil.toValue(id) }
+      Key: { [idField]: DynamoDBUtil.toValue(id) }
     });
 
     if (result?.Item?.body) {
@@ -422,27 +425,30 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const prepped = await ModelCrudUtil.preCreate(cls, item);
-    await this.#putItem(cls, prepped.id, prepped, 'create');
+    const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
+    await this.#putItem(cls, id, prepped, 'create');
     return prepped;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     item = await ModelCrudUtil.preUpdate(cls, item, { ensureNotSubType: true });
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
     if (ModelRegistryIndex.getConfig(cls).expiresAt) {
-      await this.get(cls, item.id);
+      await this.get(cls, id);
     }
-    await this.#putItem(cls, item.id, item, 'update');
+    await this.#putItem(cls, id, item, 'update');
     return item;
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const prepped = await ModelCrudUtil.preUpsert(cls, item, { ensureNotSubType: true });
-    await this.#putItem(cls, prepped.id, prepped, 'upsert');
+    const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
+    await this.#putItem(cls, id, prepped, 'upsert');
     return prepped;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
-    const id = item.id;
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
     const prepared = await ModelCrudUtil.prePartialUpdate(cls, item, {
       ensureNotSubType: true
     });
@@ -453,10 +459,11 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
     id = await ModelCrudUtil.preDelete(cls, id, { ensureNotSubType: true });
+    const idField = ModelRegistryIndex.getConfig(cls).idField;
     const result = await this.client.deleteItem({
       TableName: this.#resolveTable(cls),
       ReturnValues: 'ALL_OLD',
-      Key: { id: { S: id } }
+      Key: { [idField]: { S: id } }
     });
     if (!result.Attributes) {
       throw new NotFoundError(cls, id);
@@ -546,7 +553,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       nextOffset = JSONUtil.toBase64({
         [keyIndexAttribute]: getKey(computed),
         [sortIndexAttribute]: getSort(computed),
-        id: DynamoDBUtil.toValue(last.id)
+        id: DynamoDBUtil.toValue(ModelRegistryIndex.get(cls).idSource.get(last, { optional: true }))
       });
     }
 
