@@ -1,5 +1,5 @@
 import { ModelRegistryIndex, type ModelType, NotFoundError } from '@travetto/model';
-import { type Class, castTo, hasFunction, RuntimeError, TimeUtil } from '@travetto/runtime';
+import { type Class, castKey, castTo, hasFunction, RuntimeError, TimeUtil } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { WhereClause, WhereClauseRaw } from '../model/where-clause.ts';
@@ -31,11 +31,12 @@ export class ModelQueryUtil {
    * Verify result set is singular, and decide if failing on many should happen
    */
   static verifyGetSingleCounts<T extends ModelType>(cls: Class<T>, failOnMany: boolean, result?: T[], where?: WhereClause<T>): T {
+    const idField = ModelRegistryIndex.getConfig(cls).idField;
     result = result ?? [];
     if (result.length === 1 || (result.length > 1 && !failOnMany)) {
       return result[0]!;
     }
-    const requestedId = where && 'id' in where && typeof where.id === 'string' ? where.id : undefined;
+    const requestedId = where && idField in where && typeof where[castKey(idField)] === 'string' ? where[castKey(idField)] : undefined;
     if (result.length === 0) {
       if (requestedId) {
         throw new NotFoundError(cls, requestedId);

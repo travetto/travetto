@@ -1,11 +1,28 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Model, type ModelCrudSupport, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
-import { Precision, Required, Schema, Text } from '@travetto/schema';
+import { IdGenerator, Model, type ModelCrudSupport, type ModelId, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
+import { castTo } from '@travetto/runtime';
+import { Match, Precision, Required, Schema, Text, ValidationResultError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from './base.ts';
+
+@Model()
+export class CustomIdModel {
+  customId: ModelId;
+  name: string;
+}
+
+let skuSequence = 0;
+
+@Model()
+@IdGenerator(() => `SKU-${++skuSequence}`)
+export class SkuModel {
+  @Match(/^SKU-\d+$/)
+  sku: ModelId;
+  title: string;
+}
 
 @Schema()
 class Address {
@@ -15,7 +32,7 @@ class Address {
 
 @Model('crud-person')
 class Person {
-  id: string;
+  id: ModelId;
   @Text() name: string;
   @Precision(3, 0)
   age: number;
@@ -25,7 +42,7 @@ class Person {
 
 @Model()
 class Simple {
-  id: string;
+  id: ModelId;
   name: string;
 }
 
@@ -36,7 +53,7 @@ class SimpleItem {
 
 @Model()
 class SimpleList {
-  id: string;
+  id: ModelId;
   names: string[];
   simples?: SimpleItem[];
 }
@@ -46,14 +63,14 @@ class SimpleList {
   item.name = `${item.name}-suffix`;
 })
 class User2 {
-  id: string;
+  id: ModelId;
   address?: Address;
   name: string;
 }
 
 @Model()
 class Dated {
-  id: string;
+  id: ModelId;
 
   value?: string;
 
@@ -68,7 +85,7 @@ class Dated {
 
 @Model()
 class BigIntModel {
-  id: string;
+  id: ModelId;
   largeNumber: bigint;
   optionalBigInt?: bigint;
 }
@@ -83,7 +100,6 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     const people = [1, 2, 3, 8].map(x =>
       Person.from({
-        id: service.idSource.create(),
         name: 'Bob',
         age: 20 + x,
         gender: 'm',
@@ -101,7 +117,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(single.age === 23);
 
     await assert.rejects(async () => {
-      await service.get(Person, service.idSource.create());
+      await service.get(Person, 'bloof');
     }, NotFoundError);
   }
 
@@ -257,7 +273,6 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     const people = [1, 2, 3].map(x =>
       Person.from({
-        id: service.idSource.create(),
         name: 'Bob',
         age: 20 + x,
         gender: 'm',
@@ -286,7 +301,6 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
         service.upsert(
           Person,
           Person.from({
-            id: service.idSource.create(),
             name: 'Bob',
             age: 20 + x,
             gender: 'm',
@@ -342,6 +356,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   async testRawUpdate() {
     const service = await this.service;
     const o = await service.create(Simple, { name: 'bob' });
+    console.log(o);
     const b = await service.update(Simple, { id: o.id, name: 'roger' });
     const id = b.id;
 
@@ -436,5 +451,53 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     const final = await service.get(BigIntModel, created.id);
     assert.strictEqual(final.largeNumber, 18014398509481982n);
     assert(!final.optionalBigInt);
+  }
+
+  @Test('Verify custom id field name with default UUID generation')
+  async testCustomIdField() {
+    const service = await this.service;
+    const created = await service.create(CustomIdModel, CustomIdModel.from({ name: 'custom-id-test' }));
+
+    assert(created.customId);
+    assert.strictEqual(created.name, 'custom-id-test');
+
+    const retrieved = await service.get(CustomIdModel, created.customId);
+    assert.strictEqual(retrieved.customId, created.customId);
+    assert.strictEqual(retrieved.name, 'custom-id-test');
+
+    const updated = await service.updatePartial(CustomIdModel, {
+      customId: created.customId,
+      name: 'updated-custom-id-test'
+    });
+    assert.strictEqual(updated.name, 'updated-custom-id-test');
+
+    const retrievedUpdated = await service.get(CustomIdModel, created.customId);
+    assert.strictEqual(retrievedUpdated.name, 'updated-custom-id-test');
+
+    await service.delete(CustomIdModel, created.customId);
+    await assert.rejects(() => service.get(CustomIdModel, created.customId), NotFoundError);
+
+    // Fails on update without id
+    await assert.rejects(() => service.update(CustomIdModel, CustomIdModel.from({ name: 'no-id' })), ValidationResultError);
+
+    // Fails on updatePartial without id
+    await assert.rejects(() => service.updatePartial(CustomIdModel, castTo({ name: 'no-id' })), ValidationResultError);
+  }
+
+  @Test('Verify custom id generator function and match validation')
+  async testCustomIdGenerator() {
+    const service = await this.service;
+    const created = await service.create(SkuModel, SkuModel.from({ title: 'Item 1' }));
+
+    assert(created.sku);
+    assert(/^SKU-\d+$/.test(created.sku));
+    assert.strictEqual(created.title, 'Item 1');
+
+    const retrieved = await service.get(SkuModel, created.sku);
+    assert.strictEqual(retrieved.sku, created.sku);
+    assert.strictEqual(retrieved.title, 'Item 1');
+
+    await service.delete(SkuModel, created.sku);
+    await assert.rejects(() => service.get(SkuModel, created.sku), NotFoundError);
   }
 }

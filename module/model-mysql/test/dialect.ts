@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Model, type ModelType } from '@travetto/model';
+import { Model, type ModelId, type ModelType } from '@travetto/model';
 import type { TableContext } from '@travetto/model-sql';
 import { SQLModelSchemaUtil } from '@travetto/model-sql';
 import type { Class } from '@travetto/runtime';
@@ -21,7 +21,7 @@ class ChildItem {
 
 @Model('mysql_gap_parent')
 class ParentModel {
-  id: string;
+  id: ModelId;
   title: string;
   child: ChildItem;
 }

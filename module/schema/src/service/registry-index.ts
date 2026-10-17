@@ -10,8 +10,8 @@ import type { SchemaClassConfig, SchemaFieldConfig } from './types.ts';
 export class SchemaRegistryIndex implements RegistryIndex {
   static #instance = Registry.registerIndex(SchemaRegistryIndex);
 
-  static getForRegister(cls: Class): SchemaRegistryAdapter {
-    return this.#instance.store.getForRegister(cls);
+  static getForRegister(cls: Class, allowFinalized = false): SchemaRegistryAdapter {
+    return this.#instance.store.getForRegister(cls, allowFinalized);
   }
 
   static getConfig(cls: Class): SchemaClassConfig {

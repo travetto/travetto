@@ -1,8 +1,8 @@
-import { Model } from '@travetto/model';
+import { Model, type ModelId } from '@travetto/model';
 
 @Model()
 export class SampleModel {
-  id: string;
+  id: ModelId;
   name: string;
   age: number;
 }

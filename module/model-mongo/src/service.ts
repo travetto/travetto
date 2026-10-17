@@ -48,8 +48,7 @@ import {
   type ModelPageResult,
   type SingleItemIndex,
   type SortedIndex,
-  type SortedIndexSelection,
-  type SortedIndexSelectionType
+  type SortedIndexSelection
 } from '@travetto/model-indexed';
 import {
   type FieldAggregateResult,
@@ -89,7 +88,7 @@ import {
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { MongoModelConfig } from './config.ts';
-import { MongoUtil, type WithId } from './internal/util.ts';
+import { MongoUtil } from './internal/util.ts';
 
 type BlobRaw = GridFSFile & { metadata?: BinaryMetadata };
 
@@ -136,7 +135,6 @@ export class MongoModelService
 {
   #db: Db;
   #bucket: GridFSBucket;
-  idSource = ModelCrudUtil.uuidSource();
   client: MongoClient;
   config: MongoModelConfig;
 
@@ -194,35 +192,35 @@ export class MongoModelService
     return q;
   }
 
-  restoreId(item: { id?: string; _id?: unknown }): void {
+  restoreId<T extends ModelType>(cls: Class<T>, item: Record<string, unknown>): void {
     if (item._id) {
-      item.id ??= MongoUtil.idToString(castTo(item._id));
+      const idFieldName = ModelRegistryIndex.get(cls).idSource.field;
+      item[idFieldName] ??= MongoUtil.idToString(castTo(item._id));
       delete item._id;
     }
   }
 
   async postLoad<T extends ModelType>(cls: Class<T>, item: T | MongoWithId<T>): Promise<T> {
-    this.restoreId(item);
+    this.restoreId(cls, castTo(item));
     return await ModelCrudUtil.load(cls, item);
   }
 
-  postUpdate<T extends ModelType>(item: T, id?: string): T {
+  postUpdate<T extends ModelType>(cls: Class<T>, item: T, id?: string): T {
     if (id) {
-      item.id ??= id;
+      ModelRegistryIndex.get(cls).idSource.set(item, id);
     }
-    this.restoreId(item);
+    this.restoreId(cls, castTo(item));
     return item;
   }
 
-  preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary; id: string }): string;
-  preUpdate<T extends OptionalId<ModelType>>(item: Omit<T, 'id'> & { _id?: Binary }): undefined;
-  preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary; id: undefined }): undefined;
-  preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary; id?: string }): string | undefined {
-    if (item?.id) {
-      const id = item.id;
-      item._id = MongoUtil.uuid(id);
+  preUpdate<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): string | undefined {
+    const idSource = ModelRegistryIndex.get(cls).idSource;
+    const id = idSource.get(item, { optional: true });
+    if (id) {
+      const ref: { _id?: Binary | string } = castTo(item);
+      ref._id = MongoUtil.uuid(id);
       if (!this.config.storeId) {
-        delete item.id;
+        idSource.clear(item);
       }
       return id;
     }
@@ -335,8 +333,8 @@ export class MongoModelService
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const cleaned = await ModelCrudUtil.preStore<WithId<T, Binary>>(cls, item, this);
-    const id = this.preUpdate(cleaned);
+    const [, cleaned] = await ModelCrudUtil.preStore(cls, item);
+    const id = this.preUpdate(cls, cleaned)!;
 
     const store = await this.getStore(cls);
     try {
@@ -344,26 +342,27 @@ export class MongoModelService
       if (!result.insertedId) {
         throw new ExistsError(cls, id);
       }
-      return this.postUpdate(cleaned, id);
+      return this.postUpdate(cls, castTo(cleaned), id);
     } catch (error) {
       throw handleDuplicateKeyError(cls, id, error);
     }
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    item = await ModelCrudUtil.preStore(cls, item, this);
-    const id = this.preUpdate(item);
+    const [, prepped] = await ModelCrudUtil.preStore(cls, item, { ensureId: false });
+    item = prepped;
+    const id = this.preUpdate(cls, item)!;
     const store = await this.getStore(cls);
     const result = await store.replaceOne(this.getIdFilter(cls, id), item);
     if (result.matchedCount === 0) {
       throw new NotFoundError(cls, id);
     }
-    return this.postUpdate(item, id);
+    return this.postUpdate(cls, item, id);
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const cleaned = await ModelCrudUtil.preStore<WithId<T, Binary>>(cls, item, this);
-    const id = this.preUpdate(cleaned);
+    const [, cleaned] = await ModelCrudUtil.preStore(cls, item);
+    const id = this.preUpdate(cls, cleaned)!;
     const store = await this.getStore(cls);
 
     try {
@@ -371,14 +370,14 @@ export class MongoModelService
     } catch (error) {
       throw handleDuplicateKeyError(cls, id, error);
     }
-    return this.postUpdate(cleaned, id);
+    return this.postUpdate(cls, castTo(cleaned), id);
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     const store = await this.getStore(cls);
 
     const final = await ModelCrudUtil.prePartialUpdate(cls, item);
-    const simple = MongoUtil.extractSimple(cls, final, undefined, false);
+    const simple = MongoUtil.extractSimple(cls, castTo(final), undefined, false);
 
     const operation: Partial<T> = castTo(
       Object.entries(simple).reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>((document, [key, value]) => {
@@ -391,7 +390,7 @@ export class MongoModelService
       }, {})
     );
 
-    const id = item.id;
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
 
     const result = await store.findOneAndUpdate(this.getIdFilter(cls, id), operation, {
       returnDocument: 'after',
@@ -479,27 +478,28 @@ export class MongoModelService
       return out;
     }
 
-    const store = await this.getStore<PartialWithId<T>>(cls);
+    const store = await this.getStore<T>(cls);
     const bulk = store.initializeUnorderedBulkOp({ writeConcern: { w: 1 } });
-    const { upsertedIds, insertedIds } = await ModelBulkUtil.preStore(cls, operations, this);
+    const { upsertedIds, insertedIds } = await ModelBulkUtil.preStore(cls, operations);
 
     out.insertedIds = new Map([...upsertedIds.entries(), ...insertedIds.entries()]);
 
     for (const operation of operations) {
       if (operation.insert) {
-        this.preUpdate(operation.insert);
+        this.preUpdate(cls, operation.insert);
         bulk.insert(operation.insert);
       } else if (operation.upsert) {
-        const id = this.preUpdate(operation.upsert);
+        const id = this.preUpdate(cls, operation.upsert);
         bulk
           .find({ _id: MongoUtil.uuid(id!) })
           .upsert()
           .updateOne({ $set: operation.upsert });
       } else if (operation.update) {
-        const id = this.preUpdate(operation.update);
-        bulk.find({ _id: MongoUtil.uuid(id) }).update({ $set: operation.update });
+        const id = this.preUpdate(cls, operation.update);
+        bulk.find({ _id: MongoUtil.uuid(id!) }).update({ $set: operation.update });
       } else if (operation.delete) {
-        bulk.find({ _id: MongoUtil.uuid(operation.delete.id) }).deleteOne();
+        const id = ModelRegistryIndex.get(cls).idSource.get(operation.delete);
+        bulk.find({ _id: MongoUtil.uuid(id!) }).deleteOne();
       }
     }
 
@@ -509,7 +509,7 @@ export class MongoModelService
     for (const operation of operations) {
       const core = operation.insert ?? operation.upsert ?? operation.update;
       if (core) {
-        this.postUpdate(asFull(core));
+        this.postUpdate(cls, castTo(core));
       }
     }
 
@@ -591,10 +591,10 @@ export class MongoModelService
 
   async updatePartialByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     cls: Class<T>,
-    idx: SingleItemIndex<T, K>,
+    idx: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body), { validateId: false });
     return this.update(cls, item);
   }
 
@@ -623,12 +623,13 @@ export class MongoModelService
     yield* this.#iterateCursor(cls, cursor, options);
   }
 
-  async suggestByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>,
-    B extends SortedIndexSelectionType<T, S> & string
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]> {
+  async suggestByIndex<T extends ModelType, S extends SortedIndexSelection<T>, K extends KeyedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    prefix: string,
+    options?: ModelIndexedSearchOptions
+  ): Promise<T[]> {
     const cursor = await this.#buildIndexQuery(cls, idx, body, where =>
       castTo({
         $and: [
@@ -673,17 +674,17 @@ export class MongoModelService
     await QueryVerifier.verify(cls, query);
 
     const col = await this.getStore(cls);
-    const item = await ModelCrudUtil.preStore(cls, data, this);
-    const id = this.preUpdate(item);
+    const [id, item] = await ModelCrudUtil.preStore(cls, data);
+    this.preUpdate(cls, item);
     const where = ModelQueryUtil.getWhereClause(cls, query.where);
-    where.id = id;
+    Object.assign(where, ModelRegistryIndex.get(cls).idSource.where(id));
 
     const filter = MongoUtil.extractWhereFilter(cls, where);
     const result = await col.replaceOne(filter, item);
     if (result.matchedCount === 0) {
       throw new NotFoundError(cls, id);
     }
-    return this.postUpdate(item, id);
+    return this.postUpdate(cls, item, id);
   }
 
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
@@ -779,9 +780,12 @@ export class MongoModelService
 
     const collection = await this.getStore(cls);
 
-    const where = ModelQueryUtil.getWhereClause(cls, {
-      $and: [query?.where ?? {}, { [field]: { $exists: true } }]
-    });
+    const where = ModelQueryUtil.getWhereClause(
+      cls,
+      castTo<WhereClause<T>>({
+        $and: [query?.where ?? {}, { [field]: { $exists: true } }]
+      })
+    );
 
     const isDate = SchemaRegistryIndex.getNestedFieldConfig(cls, field)?.type === Date;
 

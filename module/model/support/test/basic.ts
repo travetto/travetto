@@ -4,11 +4,13 @@ import {
   Model,
   type ModelCrudSupport,
   ModelCrudUtil,
+  type ModelId,
   ModelRegistryIndex,
   ModelStorageUtil,
   NotFoundError,
   TransientField
 } from '@travetto/model';
+import { Util } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
@@ -16,7 +18,7 @@ import { BaseModelSuite } from './base.ts';
 
 @Model('computed_person')
 class ComputedPerson {
-  id: string;
+  id: ModelId;
   name: string;
   @TransientField()
   get nameUpper(): string {
@@ -28,7 +30,7 @@ class ComputedPerson {
 
 @Model('basic_person')
 class Person {
-  id: string;
+  id: ModelId;
   name: string;
   age: number;
   gender: 'm' | 'f';
@@ -36,7 +38,7 @@ class Person {
 
 @Model('basic_person_temp')
 export class TempPerson {
-  id: string;
+  id: ModelId;
 }
 
 @Suite()
@@ -46,7 +48,6 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
     const service = await this.service;
 
     const person = Person.from({
-      id: service.idSource.create(),
       name: 'Bob',
       age: 25,
       gender: 'm'
@@ -59,7 +60,7 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(single.age === 25);
 
     await assert.rejects(async () => {
-      await service.get(Person, service.idSource.create());
+      await service.get(Person, 'blooof');
     }, NotFoundError);
 
     await service.delete(Person, person.id);
@@ -74,7 +75,6 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
     const service = await this.service;
 
     const { id } = await service.create(Person, {
-      id: service.idSource.create(),
       name: 'Bob',
       age: 25,
       gender: 'm'
@@ -88,11 +88,9 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
   @Test('Should not persist computed properties')
   async testComputed() {
     const service = await this.service;
-    const id = service.idSource.create();
-    await service.create(
+    const { id } = await service.create(
       ComputedPerson,
       ComputedPerson.from({
-        id,
         name: 'Bob',
         ignoredField: 'secret'
       })

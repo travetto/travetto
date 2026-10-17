@@ -31,7 +31,6 @@ import {
   type SingleItemIndex,
   type SortedIndex,
   type SortedIndexSelection,
-  type SortedIndexSelectionType,
   warnIfIndexedUniqueIndex,
   warnIfNonIndexedIndex
 } from '@travetto/model-indexed';
@@ -52,7 +51,6 @@ type ScanOp = 'scan' | 'sScan' | 'zRange';
  */
 @Injectable()
 export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
-  idSource = ModelCrudUtil.uuidSource();
   client: RedisClient;
   config: RedisModelConfig;
 
@@ -155,16 +153,17 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   #removeIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
     for (const idx of ModelRegistryIndex.getIndices(cls)) {
       if (isModelIndexedIndex(idx)) {
         const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
         const resolvedKey = this.#resolveKey(cls, idx.name, computed.getKey());
         switch (idx.type) {
           case 'indexed:keyed':
-            multi.sRem(resolvedKey, item.id);
+            multi.sRem(resolvedKey, id);
             break;
           case 'indexed:sorted':
-            multi.zRem(resolvedKey, item.id);
+            multi.zRem(resolvedKey, id);
             break;
         }
       }
@@ -172,6 +171,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   #addIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
     for (const idx of ModelRegistryIndex.getIndices(cls)) {
       if (isModelIndexedIndex(idx)) {
         const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
@@ -179,14 +179,14 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
         switch (idx.type) {
           case 'indexed:keyed':
-            multi.sAdd(resolvedKey, item.id);
+            multi.sAdd(resolvedKey, id);
             break;
           case 'indexed:sorted': {
             const value = computed.getSort();
             if (typeof value === 'string') {
-              multi.zAdd(resolvedKey, { score: 0, value: `${value}${TERMINATOR}${item.id}` });
+              multi.zAdd(resolvedKey, { score: 0, value: `${value}${TERMINATOR}${id}` });
             } else {
-              multi.zAdd(resolvedKey, { score: computed.getSort(), value: item.id });
+              multi.zAdd(resolvedKey, { score: computed.getSort(), value: id });
             }
             break;
           }
@@ -196,10 +196,11 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async #store<T extends ModelType>(cls: Class<T>, item: T, action: 'write' | 'delete'): Promise<void> {
-    const key = this.#resolveKey(cls, item.id);
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
+    const key = this.#resolveKey(cls, id);
     const config = ModelRegistryIndex.getConfig(cls);
     const indices = ModelRegistryIndex.getIndices(cls);
-    const existing = await this.get(cls, item.id).catch(() => undefined);
+    const existing = await this.get(cls, id).catch(() => undefined);
 
     // Store with indices
     if (indices.length) {
@@ -226,9 +227,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
           break;
         }
         case 'delete': {
-          const count = await this.client.del(this.#resolveKey(cls, item.id));
+          const count = await this.client.del(this.#resolveKey(cls, id));
           if (!count) {
-            throw new NotFoundError(cls, item.id);
+            throw new NotFoundError(cls, id);
           }
         }
       }
@@ -239,9 +240,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       const expiry = ModelExpiryUtil.getExpiryState(cls, item);
       if (expiry.expiresAt !== undefined) {
         if (expiry.expiresAt) {
-          await this.client.pExpireAt(this.#resolveKey(cls, item.id), expiry.expiresAt.getTime());
+          await this.client.pExpireAt(this.#resolveKey(cls, id), expiry.expiresAt.getTime());
         } else {
-          await this.client.persist(this.#resolveKey(cls, item.id));
+          await this.client.persist(this.#resolveKey(cls, id));
         }
       }
     }
@@ -323,39 +324,42 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    if (item.id) {
-      await this.has(cls, item.id, 'exists');
+    const id = ModelRegistryIndex.get(cls).idSource.get(item, { optional: true });
+    if (id) {
+      await this.has(cls, id, 'exists');
     }
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    const [, prepped] = await ModelCrudUtil.preStore(cls, item);
     await this.#store(cls, prepped, 'write');
     return prepped;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    await this.has(cls, item.id, 'notfound');
-    return this.upsert(cls, item);
+    const [id, prepped] = await ModelCrudUtil.preStore(cls, item, { ensureId: false });
+    await this.has(cls, id, 'notfound');
+    await this.#store(cls, prepped, 'write');
+    return prepped;
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    const [, prepped] = await ModelCrudUtil.preStore(cls, item);
     await this.#store(cls, prepped, 'write');
     return prepped;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const id = item.id;
-    const updated = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
+    const updated = await ModelCrudUtil.naivePartialUpdate(cls, id => this.get(cls, id!), item);
     await this.#store(cls, updated, 'write');
     return updated;
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const where: ModelType = { id };
-    await this.#store(cls, where, 'delete');
+    const where: ModelType = {};
+    ModelRegistryIndex.get(cls).idSource.set(castTo(where), id);
+    await this.#store(cls, castTo<T>(where), 'delete');
   }
 
   async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
@@ -441,7 +445,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     idx: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body), { validateId: false });
     return this.update(cls, item);
   }
 
@@ -471,12 +475,13 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
   }
 
-  async suggestByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>,
-    B extends SortedIndexSelectionType<T, S> & string
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]> {
+  async suggestByIndex<T extends ModelType, S extends SortedIndexSelection<T>, K extends KeyedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    prefix: string,
+    options?: ModelIndexedSearchOptions
+  ): Promise<T[]> {
     const items: T[] = [];
     for await (const { ids } of this.#scanIndex(cls, idx, body, { limit: 10, ...options, prefix })) {
       const cleaned = ids.map(id => id.split(TERMINATOR).at(-1)!);

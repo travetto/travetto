@@ -9,7 +9,7 @@ import {
   ObjectId
 } from 'mongodb';
 
-import { type IndexConfig, IndexNotSupported, type ModelType } from '@travetto/model';
+import { type IndexConfig, IndexNotSupported, ModelRegistryIndex, type ModelType } from '@travetto/model';
 import { isModelIndexedIndex } from '@travetto/model-indexed';
 import { type DistanceUnit, isModelQueryIndex, ModelQueryUtil, type PageableModelQuery, type WhereClause } from '@travetto/model-query';
 import { BinaryUtil, type Class, CodecUtil, castTo, RuntimeError, toConcrete } from '@travetto/runtime';
@@ -28,7 +28,6 @@ const RADIANS_TO: Record<DistanceUnit, number> = {
   rad: 1
 };
 
-export type WithId<T, I = unknown> = T & { _id?: I };
 export type BasicIdx = Record<string, IndexDirection>;
 
 function flattenKeys(obj: Record<string, unknown>, prefix = ''): Record<string, 1 | -1> {
@@ -52,15 +51,16 @@ export class MongoUtil {
     return `${cls.Ⲑid}__${name}`.replace(/[^a-zA-Z0-9_]+/g, '_');
   }
 
-  static uuid(value: string): Binary {
-    try {
-      return new Binary(BinaryUtil.binaryArrayToUint8Array(CodecUtil.fromHexString(value.replaceAll('-', ''))), Binary.SUBTYPE_UUID);
-    } catch (err) {
-      if (err instanceof RuntimeError && err.message === 'Invalid hex string') {
-        return null!;
+  static uuid(value: string): Binary | string {
+    const clean = value.replaceAll('-', '');
+    if (/^[0-9a-fA-F]{32}$/.test(clean)) {
+      try {
+        return new Binary(BinaryUtil.binaryArrayToUint8Array(CodecUtil.fromHexString(clean)), Binary.SUBTYPE_UUID);
+      } catch {
+        // Fall back to string
       }
-      throw err;
     }
+    return value;
   }
 
   static idToString(id: string | ObjectId | Binary): string {
@@ -81,7 +81,7 @@ export class MongoUtil {
   /**
    * Build mongo where clause
    */
-  static extractWhereClause<T>(cls: Class<T>, clause: WhereClause<T>): Record<string, unknown> {
+  static extractWhereClause<T extends ModelType = ModelType>(cls: Class<T>, clause: WhereClause<T>): Record<string, unknown> {
     if (ModelQueryUtil.has$And(clause)) {
       return { $and: clause.$and.map(item => this.extractWhereClause<T>(cls, item)) };
     } else if (ModelQueryUtil.has$Or(clause)) {
@@ -101,6 +101,7 @@ export class MongoUtil {
     recursive: boolean = true
   ): Record<string, unknown> {
     const fields = base ? SchemaRegistryIndex.getOptional(base)?.getFields() : undefined;
+    const idFieldName = base && ModelRegistryIndex.has(base) ? ModelRegistryIndex.getConfig(base).idField : undefined;
     const out: Record<string, unknown> = {};
     const sub = item;
     const keys = Object.keys(sub);
@@ -112,7 +113,7 @@ export class MongoUtil {
       const isPlain = value && DataUtil.isPlainObject(value);
       const firstKey = isPlain ? Object.keys(value)[0] : '';
 
-      if (subpath === 'id') {
+      if (subpath === idFieldName) {
         if (!firstKey) {
           out._id = Array.isArray(value) ? value.map(subValue => this.uuid(subValue)) : this.uuid(`${value}`);
         } else if (firstKey === '$in' || firstKey === '$nin' || firstKey === '$eq' || firstKey === '$ne') {
@@ -163,7 +164,7 @@ export class MongoUtil {
             }
           };
         }
-        out[subpath === 'id' ? '_id' : subpath] = value;
+        out[subpath === idFieldName ? '_id' : subpath] = value;
       }
     }
     return out;

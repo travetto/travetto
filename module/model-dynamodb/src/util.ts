@@ -61,6 +61,7 @@ export class DynamoDBUtil {
    * Generates global secondary indices and attribute definitions based on the model's index configuration.
    */
   static computeIndexConfig<T extends ModelType>(cls: Class<T>): DynamoIndexConfig {
+    const idField = ModelRegistryIndex.getConfig(cls).idField;
     const indexes = ModelRegistryIndex.getIndices(cls);
     const attributes: AttributeDefinition[] = [];
     const toCreate: GlobalSecondaryIndex[] = [];
@@ -97,7 +98,7 @@ export class DynamoDBUtil {
         // ProvisionedThroughput: '',
         Projection: {
           ProjectionType: 'INCLUDE',
-          NonKeyAttributes: ['body', 'id']
+          NonKeyAttributes: ['body', idField]
         },
         KeySchema: keys
       });
@@ -110,16 +111,18 @@ export class DynamoDBUtil {
    * Identifies attribute definitions that have changed between current and requested configurations.
    * Compares attribute names and types to determine additions, removals, or modifications.
    */
-  static findChangedAttributes(
+  static findChangedAttributes<T extends ModelType>(
+    cls: Class<T>,
     current: AttributeDefinition[] | undefined,
     requested: AttributeDefinition[] | undefined
   ): AttributeDefinition[] {
+    const idField = ModelRegistryIndex.getConfig(cls).idField;
     const currentMap = Object.fromEntries((current ?? []).map(attr => [attr.AttributeName, attr]));
     const pendingMap = Object.fromEntries((requested ?? []).map(attr => [attr.AttributeName, attr]));
 
     const changed: AttributeDefinition[] = [];
     for (const attr of requested ?? []) {
-      if (!attr.AttributeName || attr.AttributeName === 'id') {
+      if (!attr.AttributeName || attr.AttributeName === idField) {
         continue;
       }
       if (!currentMap[attr.AttributeName] || currentMap[attr.AttributeName].AttributeType !== attr.AttributeType) {
@@ -128,7 +131,7 @@ export class DynamoDBUtil {
     }
 
     for (const attr of current ?? []) {
-      if (!attr.AttributeName || attr.AttributeName === 'id') {
+      if (!attr.AttributeName || attr.AttributeName === idField) {
         continue;
       }
       if (!pendingMap[attr.AttributeName]) {
@@ -180,6 +183,6 @@ export class DynamoDBUtil {
     } else {
       return item;
     }
-    throw new NotFoundError(cls, item.id);
+    throw NotFoundError.from(cls, item);
   }
 }

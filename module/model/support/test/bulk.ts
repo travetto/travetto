@@ -4,11 +4,12 @@ import { Suite, Test } from '@travetto/test';
 
 import { Model } from '../../src/registry/decorator.ts';
 import type { ModelBulkSupport } from '../../src/types/bulk.ts';
+import type { ModelId } from '../../src/types/model.ts';
 import { BaseModelSuite } from './base.ts';
 
 @Model('bulk-user')
 class User {
-  id: string;
+  id: ModelId;
   name?: string;
 }
 
@@ -45,7 +46,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
   @Test()
   async bulkUpdate() {
     const service = await this.service;
-    const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}`, id: service.idSource.create() }));
+    const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}` }));
 
     const result = await service.processBulk(
       User,
@@ -65,7 +66,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
   @Test()
   async bulkDelete() {
     const service = await this.service;
-    const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}`, id: service.idSource.create() }));
+    const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}` }));
 
     const result = await service.processBulk(
       User,

@@ -33,8 +33,7 @@ import {
   type ModelPageResult,
   type SingleItemIndex,
   type SortedIndex,
-  type SortedIndexSelection,
-  type SortedIndexSelectionType
+  type SortedIndexSelection
 } from '@travetto/model-indexed';
 import {
   type BinaryArray,
@@ -46,6 +45,7 @@ import {
   type Class,
   castTo,
   JSONUtil,
+  RuntimeError,
   type TimeSpan
 } from '@travetto/runtime';
 
@@ -91,7 +91,6 @@ export class MemoryModelService
     'indexed:keyed': new Map<string, Map<string, Set<string>>>()
   } as const;
 
-  idSource = ModelCrudUtil.uuidSource();
   config: MemoryModelConfig;
 
   constructor(config: MemoryModelConfig) {
@@ -148,19 +147,20 @@ export class MemoryModelService
       const idxName = indexName(cls, idx);
       const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
       const key = computed.getKey();
+      const id = ModelRegistryIndex.get(cls).idSource.get(item);
       switch (idx.type) {
         case 'indexed:keyed': {
           if (idx.unique) {
             const existing = this.#indices[idx.type].get(idxName)?.get(key);
-            if (existing && existing.size > 0 && !existing.has(item.id)) {
+            if (existing && existing.size > 0 && !existing.has(id)) {
               throw new UniqueError(cls, key);
             }
           }
-          this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Set()).add(item.id);
+          this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Set()).add(id);
           break;
         }
         case 'indexed:sorted': {
-          this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Map()).set(item.id, computed.getSort());
+          this.#indices[idx.type].getOrInsert(idxName, new Map()).getOrInsert(key, new Map()).set(id, computed.getSort());
           break;
         }
       }
@@ -171,13 +171,14 @@ export class MemoryModelService
   async #persist<T extends ModelType>(cls: Class<T>, item: T, action: 'write'): Promise<T>;
   async #persist<T extends ModelType>(cls: Class<T>, item: T, action: 'write' | 'remove'): Promise<T | void> {
     const store = this.#getStore(cls);
-    await this.#removeIndices(cls, item.id);
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
+    await this.#removeIndices(cls, id);
     if (action === 'write') {
-      store.set(item.id, JSONUtil.toBinaryArray(item));
+      store.set(id, JSONUtil.toBinaryArray(item));
       await this.#writeIndices(cls, item);
       return item;
     } else {
-      store.delete(item.id);
+      store.delete(id);
     }
   }
 
@@ -292,29 +293,30 @@ export class MemoryModelService
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    if (!item.id) {
-      item.id = this.idSource.create();
-    }
-    this.#find(cls, item.id, 'exists');
-    return await this.upsert(cls, item);
+    const [id, prepped] = await ModelCrudUtil.preStore(cls, item);
+    this.#find(cls, id, 'exists');
+    return await this.#persist(cls, prepped, 'write');
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    await this.get(cls, item.id);
-    return await this.upsert(cls, item);
+    const [id, prepped] = await ModelCrudUtil.preStore(cls, item, { ensureId: false });
+    await this.get(cls, id);
+    return await this.#persist(cls, prepped, 'write');
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const store = this.#getStore(cls);
-    if (item.id && store.has(item.id)) {
-      await ModelCrudUtil.load(cls, store.get(item.id)!, 'exists');
+    const id = ModelRegistryIndex.get(cls).idSource.get(item, { optional: true });
+    if (id && store.has(id)) {
+      await ModelCrudUtil.load(cls, store.get(id)!, 'exists');
     }
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    const [, prepped] = await ModelCrudUtil.preStore(cls, item);
     return await this.#persist(cls, prepped, 'write');
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
-    const id = item.id;
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
+    this.#find(cls, id, 'notfound');
     const clean = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
     return await this.#persist(cls, clean, 'write');
   }
@@ -324,9 +326,8 @@ export class MemoryModelService
     if (!store.has(id)) {
       throw new NotFoundError(cls, id);
     }
-    await ModelCrudUtil.load(cls, store.get(id)!);
-    const where: ModelType = { id };
-    await this.#persist(cls, where, 'remove');
+    const existing = await ModelCrudUtil.load(cls, store.get(id)!);
+    await this.#persist(cls, existing, 'remove');
   }
 
   async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
@@ -484,7 +485,7 @@ export class MemoryModelService
     idx: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body), { validateId: false });
     return this.update(cls, item);
   }
 
@@ -516,12 +517,13 @@ export class MemoryModelService
     }
   }
 
-  async suggestByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>,
-    B extends SortedIndexSelectionType<T, S> & string
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]> {
+  async suggestByIndex<T extends ModelType, S extends SortedIndexSelection<T>, K extends KeyedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    prefix: string,
+    options?: ModelIndexedSearchOptions
+  ): Promise<T[]> {
     const items: T[] = [];
     for await (const batch of this.#getIndexIds(cls, idx, body, options, id => typeof id === 'string' && id.startsWith(prefix))) {
       items.push(...(await ModelCrudUtil.filterOutNotFound(batch.map(id => this.get(cls, id)))));

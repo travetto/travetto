@@ -27,7 +27,6 @@ import {
   type SingleItemIndex,
   type SortedIndex,
   type SortedIndexSelection,
-  type SortedIndexSelectionType,
   warnIfIndexedUniqueIndex,
   warnIfNonIndexedIndex
 } from '@travetto/model-indexed';
@@ -56,7 +55,6 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return table;
   }
 
-  idSource = ModelCrudUtil.uuidSource();
   client: Firestore;
   config: FirestoreModelConfig;
 
@@ -91,7 +89,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     if (item.size > 1) {
       throw new RuntimeError(`Multiple items found for ${cls.name} Index=${idx}`);
     }
-    return item.docs[0].data().id;
+    return item.docs[0].id;
   }
 
   #buildIndexQuery<T extends ModelType>(cls: Class<T>, idx: SortedIndex<T>, body: KeyedIndexBody<T>): Query {
@@ -173,28 +171,28 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(prepped.id).create(clone<DocumentData>(prepped));
+    const [id, prepped] = await ModelCrudUtil.preStore(cls, item);
+    await this.#getCollection(cls).doc(id).create(clone<DocumentData>(prepped));
     return prepped;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(item.id).set(clone<DocumentData>(prepped), { merge: false });
+    const [id, prepped] = await ModelCrudUtil.preStore(cls, item, { ensureId: false });
+    await this.#getCollection(cls).doc(id).set(clone<DocumentData>(prepped), { merge: false });
     return prepped;
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(prepped.id).set(clone<DocumentData>(prepped));
+    const [id, prepped] = await ModelCrudUtil.preStore(cls, item);
+    await this.#getCollection(cls).doc(id).set(clone<DocumentData>(prepped));
     return prepped;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const id = item.id;
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
     const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
     const cleaned = setMissingValues(full, FieldValue.delete());
     await this.#getCollection(cls)
@@ -260,7 +258,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     idx: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, body), castTo(body), { validateId: false });
     return this.update(cls, item);
   }
 
@@ -295,12 +293,13 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     }
   }
 
-  async suggestByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>,
-    B extends SortedIndexSelectionType<T, S> & string
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]> {
+  async suggestByIndex<T extends ModelType, S extends SortedIndexSelection<T>, K extends KeyedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    prefix: string,
+    options?: ModelIndexedSearchOptions
+  ): Promise<T[]> {
     const results: T[] = [];
 
     const field = idx.sortTemplate[0].path.join('.');
