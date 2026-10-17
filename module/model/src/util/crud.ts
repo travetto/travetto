@@ -136,6 +136,66 @@ export class ModelCrudUtil {
   }
 
   /**
+   * Pre-create hook: ensures ID is generated if omitted, runs prePersist, and validates schema
+   */
+  static async preCreate<T extends ModelType>(
+    cls: Class<T>,
+    item: Partial<OptionalId<T>>,
+    provider: ModelCrudProvider,
+    options?: { ensureNotSubType?: boolean }
+  ): Promise<T> {
+    if (options?.ensureNotSubType) {
+      this.ensureNotSubType(cls);
+    }
+    return this.preStore(cls, item, provider, { ensureId: true, scope: 'all' });
+  }
+
+  /**
+   * Pre-update hook: checks subtype if requested, requires ID (throwing ValidationResultError if missing),
+   * runs prePersist, and validates schema
+   */
+  static async preUpdate<T extends ModelType>(
+    cls: Class<T>,
+    item: T,
+    provider: ModelCrudProvider,
+    options?: { ensureNotSubType?: boolean }
+  ): Promise<T> {
+    if (options?.ensureNotSubType) {
+      this.ensureNotSubType(cls);
+    }
+    return this.preStore(cls, item, provider, { ensureId: false, scope: 'all' });
+  }
+
+  /**
+   * Pre-upsert hook: checks subtype if requested, ensures ID is generated if omitted,
+   * runs prePersist, and validates schema
+   */
+  static async preUpsert<T extends ModelType>(
+    cls: Class<T>,
+    item: OptionalId<T>,
+    provider: ModelCrudProvider,
+    options?: { ensureNotSubType?: boolean }
+  ): Promise<T> {
+    if (options?.ensureNotSubType) {
+      this.ensureNotSubType(cls);
+    }
+    return this.preStore(cls, item, provider, { ensureId: true, scope: 'all' });
+  }
+
+  /**
+   * Pre-delete hook: checks subtype if requested, and validates ID presence
+   */
+  static async preDelete<T extends ModelType>(cls: Class<T>, id: string, options?: { ensureNotSubType?: boolean }): Promise<string> {
+    if (options?.ensureNotSubType) {
+      this.ensureNotSubType(cls);
+    }
+    if (!id) {
+      throw new ValidationResultError([{ kind: 'required', path: 'id', type: 'string', message: 'id is required' }]);
+    }
+    return id;
+  }
+
+  /**
    * Recursively deletes or masks transient fields from an object based on its Model config.
    * If transient fields are present, returns a copy with those fields set to undefined.
    */
@@ -240,8 +300,11 @@ export class ModelCrudUtil {
   static async prePartialUpdate<T extends ModelType>(
     cls: Class<T>,
     item: Partial<T> | PartialWithId<T>,
-    options?: { validateId?: boolean }
+    options?: { validateId?: boolean; ensureNotSubType?: boolean }
   ): Promise<Partial<T>> {
+    if (options?.ensureNotSubType) {
+      this.ensureNotSubType(cls);
+    }
     if (!DataUtil.isPlainObject(item)) {
       throw new RuntimeError(`A partial update requires a plain object, not an instance of ${castTo<Function>(item).constructor.name}`, {
         category: 'data'
@@ -285,7 +348,7 @@ export class ModelCrudUtil {
     cls: Class<T>,
     get: (id?: string) => Promise<T>,
     item: PartialWithId<T> | Partial<T>,
-    options?: { validateId?: boolean }
+    options?: { validateId?: boolean; ensureNotSubType?: boolean }
   ): Promise<T> {
     const id = item.id;
     const prepared = await this.prePartialUpdate(cls, item, options);

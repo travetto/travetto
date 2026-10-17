@@ -174,7 +174,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    const prepped = await ModelCrudUtil.preCreate(cls, item, this);
     try {
       await this.#getCollection(cls).doc(prepped.id).create(clone<DocumentData>(prepped));
     } catch (error) {
@@ -187,24 +187,24 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
-    const prepped = await ModelCrudUtil.preStore(cls, item, this, { ensureId: false });
+    const prepped = await ModelCrudUtil.preUpdate(cls, item, this, { ensureNotSubType: true });
     await this.get(cls, prepped.id);
     await this.#getCollection(cls).doc(prepped.id).set(clone<DocumentData>(prepped), { merge: false });
     return prepped;
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    const prepped = await ModelCrudUtil.preUpsert(cls, item, this, { ensureNotSubType: true });
     await this.#getCollection(cls).doc(prepped.id).set(clone<DocumentData>(prepped));
     return prepped;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
-    const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, { validateId: true });
+    const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, {
+      validateId: true,
+      ensureNotSubType: true
+    });
     const cleaned = setMissingValues(full, FieldValue.delete());
     await this.#getCollection(cls)
       .doc(id)
@@ -213,7 +213,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
-    ModelCrudUtil.ensureNotSubType(cls);
+    id = await ModelCrudUtil.preDelete(cls, id, { ensureNotSubType: true });
     try {
       await this.#getCollection(cls).doc(id).delete({ exists: true });
     } catch (error) {

@@ -335,7 +335,7 @@ export class MongoModelService
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const cleaned = await ModelCrudUtil.preStore<WithId<T, Binary>>(cls, item, this);
+    const cleaned = await ModelCrudUtil.preCreate<WithId<T, Binary>>(cls, item, this);
     const id = this.preUpdate(cleaned);
 
     const store = await this.getStore(cls);
@@ -351,7 +351,7 @@ export class MongoModelService
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    item = await ModelCrudUtil.preStore(cls, item, this, { ensureId: false });
+    item = await ModelCrudUtil.preUpdate(cls, item, this);
     const id = this.preUpdate(item);
     const store = await this.getStore(cls);
     const result = await store.replaceOne(this.getIdFilter(cls, id), item);
@@ -362,7 +362,7 @@ export class MongoModelService
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const cleaned = await ModelCrudUtil.preStore<WithId<T, Binary>>(cls, item, this);
+    const cleaned = await ModelCrudUtil.preUpsert<WithId<T, Binary>>(cls, item, this);
     const id = this.preUpdate(cleaned);
     const store = await this.getStore(cls);
 
@@ -406,6 +406,7 @@ export class MongoModelService
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
+    id = await ModelCrudUtil.preDelete(cls, id);
     const store = await this.getStore(cls);
     const result = await store.deleteOne(this.getIdFilter(cls, id, false));
     if (result.deletedCount === 0) {

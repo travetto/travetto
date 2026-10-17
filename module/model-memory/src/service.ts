@@ -292,13 +292,13 @@ export class MemoryModelService
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    const prepped = await ModelCrudUtil.preCreate(cls, item, this);
     this.#find(cls, prepped.id, 'exists');
     return await this.#persist(cls, prepped, 'write');
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    const prepped = await ModelCrudUtil.preStore(cls, item, this, { ensureId: false });
+    const prepped = await ModelCrudUtil.preUpdate(cls, item, this);
     await this.get(cls, prepped.id);
     return await this.#persist(cls, prepped, 'write');
   }
@@ -308,7 +308,7 @@ export class MemoryModelService
     if (item.id && store.has(item.id)) {
       await ModelCrudUtil.load(cls, store.get(item.id)!, 'exists');
     }
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    const prepped = await ModelCrudUtil.preUpsert(cls, item, this);
     return await this.#persist(cls, prepped, 'write');
   }
 
@@ -319,6 +319,7 @@ export class MemoryModelService
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
+    id = await ModelCrudUtil.preDelete(cls, id);
     const store = this.#getStore(cls);
     if (!store.has(id)) {
       throw new NotFoundError(cls, id);

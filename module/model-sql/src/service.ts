@@ -149,8 +149,7 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async executeUpdate<T extends ModelType>(modelClass: Class<T>, where: WhereClause<T>, item: T): Promise<T | undefined> {
-    ModelCrudUtil.ensureNotSubType(modelClass);
-    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this, { ensureId: false });
+    const preppedItem = await ModelCrudUtil.preUpdate(modelClass, item, this, { ensureNotSubType: true });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
 
     const tableContext = this.connection.getContext(modelClass);
@@ -173,8 +172,9 @@ export abstract class BaseSQLModelService<C = unknown>
     conflictTarget: string[],
     modelSource?: ModelCrudProvider
   ): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(modelClass);
-    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
+    const preppedItem = await ModelCrudUtil.preUpsert(modelClass, item, modelSource ?? { idSource: this.idSource }, {
+      ensureNotSubType: true
+    });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
     const tableContext = this.connection.getContext(modelClass);
 
@@ -204,7 +204,7 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async create<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>, modelSource?: ModelCrudProvider): Promise<T> {
-    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
+    const preppedItem = await ModelCrudUtil.preCreate(modelClass, item, modelSource ?? { idSource: this.idSource });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
     const tableContext = this.connection.getContext(modelClass);
 
@@ -244,10 +244,7 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async updatePartial<T extends ModelType>(modelClass: Class<T>, item: PartialWithId<T>): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(modelClass);
-    if (!item.id) {
-      throw new ValidationResultError([{ kind: 'required', path: 'id', type: 'string', message: 'id is required' }]);
-    }
+    await ModelCrudUtil.prePartialUpdate(modelClass, item, { validateId: true, ensureNotSubType: true });
 
     const result = await this.executeUpdatePartial(modelClass, castTo({ id: item.id }), item, true);
 
@@ -259,7 +256,7 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async delete<T extends ModelType>(modelClass: Class<T>, id: string): Promise<void> {
-    ModelCrudUtil.ensureNotSubType(modelClass);
+    id = await ModelCrudUtil.preDelete(modelClass, id, { ensureNotSubType: true });
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, castTo({ id }), false);
     const sql = this.dialect.buildDelete(tableContext, whereSQL);

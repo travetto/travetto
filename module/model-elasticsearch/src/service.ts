@@ -301,7 +301,7 @@ export class ElasticsearchModelService
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
-    ModelCrudUtil.ensureNotSubType(cls);
+    id = await ModelCrudUtil.preDelete(cls, id, { ensureNotSubType: true });
 
     try {
       const result = await this.client.delete({
@@ -321,7 +321,7 @@ export class ElasticsearchModelService
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const clean = await ModelCrudUtil.preStore(cls, item, this);
+    const clean = await ModelCrudUtil.preCreate(cls, item, this);
     const id = this.preUpdate(clean);
 
     try {
@@ -343,9 +343,7 @@ export class ElasticsearchModelService
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
-
-    item = await ModelCrudUtil.preStore(cls, item, this, { ensureId: false });
+    item = await ModelCrudUtil.preUpdate(cls, item, this, { ensureNotSubType: true });
 
     const id = this.preUpdate(item);
 
@@ -363,9 +361,7 @@ export class ElasticsearchModelService
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, input: OptionalId<T>): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
-
-    const item = await ModelCrudUtil.preStore(cls, input, this);
+    const item = await ModelCrudUtil.preUpsert(cls, input, this, { ensureNotSubType: true });
     const id = this.preUpdate(item);
 
     await this.client.update({
@@ -380,10 +376,8 @@ export class ElasticsearchModelService
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, data: PartialWithId<T>): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
-
     const id = data.id;
-    const item = castTo<typeof data>(await ModelCrudUtil.prePartialUpdate(cls, data, { validateId: true }));
+    const item = castTo<typeof data>(await ModelCrudUtil.prePartialUpdate(cls, data, { validateId: true, ensureNotSubType: true }));
     const script = ElasticsearchSchemaUtil.generateUpdateScript(item);
 
     try {
