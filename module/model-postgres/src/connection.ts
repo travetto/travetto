@@ -92,9 +92,9 @@ export class PostgresConnection extends SQLConnection<PoolClient> {
     } catch (error) {
       if (isPgDatabaseError(error)) {
         if (error.code === '23505') {
-          const constraint = error.constraint ?? (error.detail ? 'index' : 'query');
+          const constraint = error.constraint ?? (error.detail?.startsWith('Key (id)=') ? 'id' : error.detail ? 'index' : 'query');
           const detail = error.detail ?? query;
-          throw new UniqueError('index', constraint, { detail, query });
+          throw this.dialect.createUniqueOrExistsError(constraint, { detail, query, type: 'index' });
         } else if (error.code === '42P07') {
           throw new ExistsError('index', query);
         }

@@ -361,6 +361,10 @@ ${offset !== undefined ? `OFFSET ${offset}` : ''};`;
     );
   }
 
+  override isPrimaryKeyConstraint(constraint?: string): boolean {
+    return !!constraint && (constraint.endsWith('_pkey') || super.isPrimaryKeyConstraint(constraint));
+  }
+
   #getTextVectorExpression<T extends ModelType>(tableContext: TableContext<T>, language = 'english'): string | undefined {
     const textFields = this.getTextSearchFields(tableContext);
     if (textFields.length === 0) {

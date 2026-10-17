@@ -117,7 +117,7 @@ export class MysqlConnection extends SQLConnection<PoolConnection> {
           const message = error instanceof Error ? error.message : '';
           const match = message.match(/for key '([^']+)'/);
           const key = match ? match[1] : 'query';
-          throw new UniqueError('query', key, { message, query });
+          throw this.dialect.createUniqueOrExistsError(key, { message, query, type: 'query' });
         }
         case 'ER_DUP_KEYNAME':
           throw new ExistsError('index', query);

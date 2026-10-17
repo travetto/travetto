@@ -1,5 +1,4 @@
-import type { IndexConfig, ModelType } from '@travetto/model';
-import { ModelRegistryIndex } from '@travetto/model';
+import { ExistsError, type IndexConfig, ModelRegistryIndex, type ModelType, UniqueError } from '@travetto/model';
 import { isModelIndexedIndex } from '@travetto/model-indexed';
 import {
   isModelQueryIndex,
@@ -272,6 +271,23 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     return [this.getTruncateTableSQL(context)];
   }
   abstract isTableNotFoundError(error: unknown): boolean;
+
+  /**
+   * Determines if a constraint name represents a primary key constraint
+   */
+  isPrimaryKeyConstraint(constraint?: string): boolean {
+    return !!constraint && (constraint === 'id' || constraint.endsWith('.id') || constraint === 'PRIMARY');
+  }
+
+  /**
+   * Creates an ExistsError or UniqueError based on whether the constraint is on the primary key
+   */
+  createUniqueOrExistsError(constraint: string, details: Record<string, unknown> = {}): ExistsError | UniqueError {
+    if (this.isPrimaryKeyConstraint(constraint)) {
+      return new ExistsError('query', (details.query as string) ?? constraint);
+    }
+    return new UniqueError((details.type as string) ?? 'query', constraint, details);
+  }
 
   getDropTableSQL(context: TableContext): string {
     return `DROP TABLE IF EXISTS ${this.escapeIdentifier(context.tableName)};`;

@@ -213,18 +213,11 @@ export abstract class BaseSQLModelService<C = unknown>
     try {
       await this.connection.execute(sql, values);
     } catch (error) {
+      if (error instanceof ExistsError) {
+        throw new ExistsError(modelClass, preppedItem.id);
+      }
       if (error instanceof UniqueError && (error.details?.type === 'query' || error.details?.type === 'index')) {
-        const constraint = (error.details.constraint as string) ?? '';
-        if (
-          constraint.endsWith('.id') ||
-          constraint === 'id' ||
-          constraint.endsWith('_pkey') ||
-          constraint.endsWith('.PRIMARY') ||
-          constraint === 'PRIMARY'
-        ) {
-          throw new ExistsError(modelClass, preppedItem.id);
-        }
-        throw new UniqueError(modelClass, constraint || 'unknown', error.details);
+        throw new UniqueError(modelClass, (error.details.constraint as string) ?? 'unknown', error.details);
       }
       throw error;
     }
