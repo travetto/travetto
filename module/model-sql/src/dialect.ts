@@ -711,7 +711,8 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     const idFieldName = idSource.field;
 
     if (rawItems.length === 1) {
-      const { whereSQL, parameters = [] } = this.compileWhere(tableContext, idSource.getWhereClause(castTo(rawItems[0])));
+      const id = idSource.get(castTo(rawItems[0]));
+      const { whereSQL, parameters = [] } = this.compileWhere(tableContext, idSource.where(id));
       return this.buildUpdate(tableContext, rawItems[0], whereSQL, parameters);
     }
 

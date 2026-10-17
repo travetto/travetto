@@ -246,10 +246,10 @@ export class ElasticsearchModelService
 
   preUpdate<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): string | undefined {
     const idSource = ModelRegistryIndex.getIdSource(cls);
-    const id = idSource.getOptionalValue(item);
+    const id = idSource.getOptional(item);
     if (id) {
       if (!this.config.storeId) {
-        idSource.deleteValue(item);
+        idSource.clear(item);
       }
       return id;
     }
@@ -258,7 +258,7 @@ export class ElasticsearchModelService
 
   postUpdate<T extends ModelType>(cls: Class<T>, item: T, id?: string): T {
     if (!this.config.storeId && id) {
-      ModelRegistryIndex.getIdSource(cls).setValue(item, id);
+      ModelRegistryIndex.getIdSource(cls).set(item, id);
     }
     return item;
   }
@@ -368,7 +368,7 @@ export class ElasticsearchModelService
   async updatePartial<T extends ModelType>(cls: Class<T>, data: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const id = ModelRegistryIndex.getIdSource(cls).getValue(data);
+    const id = ModelRegistryIndex.getIdSource(cls).get(data);
     const item = await ModelCrudUtil.prePartialUpdate(cls, data);
     const script = ElasticsearchSchemaUtil.generateUpdateScript(item);
 
@@ -412,7 +412,7 @@ export class ElasticsearchModelService
       const identity: { _index: string; _type?: unknown } = { _index: index };
 
       if (operation.delete) {
-        toRun.push({ delete: { ...identity, _id: ModelRegistryIndex.getIdSource(cls).getOptionalValue(operation.delete)! } });
+        toRun.push({ delete: { ...identity, _id: ModelRegistryIndex.getIdSource(cls).getOptional(operation.delete)! } });
       } else if (operation.insert) {
         const id = this.preUpdate(cls, operation.insert);
         toRun.push({ create: { ...identity, _id: id } }, operation.insert);
@@ -475,7 +475,7 @@ export class ElasticsearchModelService
 
         if (responseItem.result === 'created') {
           out.insertedIds.set(i, responseItem._id!);
-          ModelRegistryIndex.getIdSource(cls).setValue((operations[i].insert ?? operations[i].upsert)!, responseItem._id!);
+          ModelRegistryIndex.getIdSource(cls).set((operations[i].insert ?? operations[i].upsert)!, responseItem._id!);
         }
 
         out.counts[property] += 1;
@@ -626,7 +626,7 @@ export class ElasticsearchModelService
       results.hits.hits.map(hit =>
         this.#postLoad(cls, hit).then(item => {
           if (shouldRemoveIds) {
-            idSource.deleteValue(item);
+            idSource.clear(item);
           }
           return item;
         })
@@ -659,7 +659,7 @@ export class ElasticsearchModelService
     if (id) {
       where = {
         ...where,
-        ...ModelRegistryIndex.getIdSource(cls).getWhereClause(id)
+        ...ModelRegistryIndex.getIdSource(cls).where(id)
       };
     }
     query.where = where;

@@ -207,7 +207,7 @@ export class MongoModelService
 
   postUpdate<T extends ModelType>(cls: Class<T>, item: T, id?: string): T {
     if (id) {
-      ModelRegistryIndex.getIdSource(cls).setValue(item, id);
+      ModelRegistryIndex.getIdSource(cls).set(item, id);
     }
     this.restoreId(cls, castTo(item));
     return item;
@@ -215,12 +215,12 @@ export class MongoModelService
 
   preUpdate<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): string | undefined {
     const idSource = ModelRegistryIndex.getIdSource(cls);
-    const id = idSource.getOptionalValue(item);
+    const id = idSource.getOptional(item);
     if (id) {
       const ref: { _id?: Binary | string } = castTo(item);
       ref._id = MongoUtil.uuid(id);
       if (!this.config.storeId) {
-        idSource.deleteValue(item);
+        idSource.clear(item);
       }
       return id;
     }
@@ -390,7 +390,7 @@ export class MongoModelService
       }, {})
     );
 
-    const id = ModelRegistryIndex.getIdSource(cls).getValue(item);
+    const id = ModelRegistryIndex.getIdSource(cls).get(item);
 
     const result = await store.findOneAndUpdate(this.getIdFilter(cls, id), operation, {
       returnDocument: 'after',
@@ -498,7 +498,7 @@ export class MongoModelService
         const id = this.preUpdate(cls, operation.update);
         bulk.find({ _id: MongoUtil.uuid(id!) }).update({ $set: operation.update });
       } else if (operation.delete) {
-        const id = ModelRegistryIndex.getIdSource(cls).getOptionalValue(operation.delete);
+        const id = ModelRegistryIndex.getIdSource(cls).getOptional(operation.delete);
         bulk.find({ _id: MongoUtil.uuid(id!) }).deleteOne();
       }
     }
@@ -677,7 +677,7 @@ export class MongoModelService
     const [id, item] = await ModelCrudUtil.preStore(cls, data);
     this.preUpdate(cls, item);
     const where = ModelQueryUtil.getWhereClause(cls, query.where);
-    Object.assign(where, ModelRegistryIndex.getIdSource(cls).getWhereClause(id));
+    Object.assign(where, ModelRegistryIndex.getIdSource(cls).where(id));
 
     const filter = MongoUtil.extractWhereFilter(cls, where);
     const result = await col.replaceOne(filter, item);

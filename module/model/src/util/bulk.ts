@@ -43,7 +43,7 @@ export class ModelBulkUtil {
         operation.update = item;
         updatedIds.set(i, id);
       } else if ('upsert' in operation && operation.upsert) {
-        const isNew = !ModelRegistryIndex.getIdSource(cls).getOptionalValue(operation.upsert);
+        const isNew = !ModelRegistryIndex.getIdSource(cls).getOptional(operation.upsert);
         const [id, item] = await ModelCrudUtil.preStore(cls, operation.upsert);
         operation.upsert = item;
         if (isNew) {

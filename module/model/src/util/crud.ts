@@ -76,10 +76,10 @@ export class ModelCrudUtil {
   ): Promise<[id: string, item: T]> {
     const idSource = ModelRegistryIndex.getIdSource(cls);
 
-    let currentId = idSource.getOptionalValue(item);
+    let currentId = idSource.getOptional(item);
     if (!currentId) {
       currentId = ModelRegistryIndex.createId(cls);
-      idSource.setValue(item, currentId);
+      idSource.set(item, currentId);
     }
 
     if (DataUtil.isPlainObject(item)) {
@@ -218,13 +218,13 @@ export class ModelCrudUtil {
       });
     }
     const idSource = ModelRegistryIndex.getIdSource(cls);
-    const id = idSource.getOptionalValue(item);
+    const id = idSource.getOptional(item);
     const keys = Object.keys(item);
     if ((keys.length === 1 && id) || keys.length === 0) {
       throw new RuntimeError('No fields to update');
     } else {
       item = { ...item };
-      idSource.deleteValue(item);
+      idSource.clear(item);
     }
 
     const result = await this.prePersist(cls, item, 'partial');

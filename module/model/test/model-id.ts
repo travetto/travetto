@@ -57,20 +57,20 @@ class ModelIdSourceSuite {
     assert(generatedId.length === 32);
 
     const item: DefaultModel = { id: 'test-123', name: 'Sample' };
-    assert(source.getValue(item) === 'test-123');
-    assert(source.getOptionalValue(item) === 'test-123');
+    assert(source.get(item) === 'test-123');
+    assert(source.getOptional(item) === 'test-123');
 
     const emptyItem: OptionalId<DefaultModel> = { name: 'No Id' };
-    assert(source.getOptionalValue(emptyItem) === undefined);
-    assert.throws(() => source.getValue(emptyItem));
+    assert(source.getOptional(emptyItem) === undefined);
+    assert.throws(() => source.get(emptyItem));
 
-    source.setValue(emptyItem, 'assigned-id');
+    source.set(emptyItem, 'assigned-id');
     assert(emptyItem.id === 'assigned-id');
 
-    source.deleteValue(emptyItem);
+    source.clear(emptyItem);
     assert(emptyItem.id === undefined);
 
-    const whereClause = source.getWhereClause('filter-id');
+    const whereClause = source.where('filter-id');
     assert.deepStrictEqual(whereClause, { id: 'filter-id' });
   }
 
@@ -81,9 +81,9 @@ class ModelIdSourceSuite {
     assert(source.field === 'customId');
 
     const item: CustomIdModel = { customId: 'code-1', name: 'Item' };
-    assert(source.getValue(item) === 'code-1');
+    assert(source.get(item) === 'code-1');
 
-    const whereClause = source.getWhereClause('code-99');
+    const whereClause = source.where('code-99');
     assert.deepStrictEqual(whereClause, { customId: 'code-99' });
   }
 

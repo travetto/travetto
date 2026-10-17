@@ -447,7 +447,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const id = ModelRegistryIndex.getIdSource(cls).getValue(item);
+    const id = ModelRegistryIndex.getIdSource(cls).get(item);
     const itemAsT = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
     await this.#putItem(cls, id, itemAsT, 'update');
     return itemAsT;
@@ -547,7 +547,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       nextOffset = JSONUtil.toBase64({
         [keyIndexAttribute]: getKey(computed),
         [sortIndexAttribute]: getSort(computed),
-        id: DynamoDBUtil.toValue(ModelRegistryIndex.getIdSource(cls).getOptionalValue(last))
+        id: DynamoDBUtil.toValue(ModelRegistryIndex.getIdSource(cls).getOptional(last))
       });
     }
 

@@ -181,7 +181,7 @@ export abstract class BaseSQLModelService<C = unknown>
   // Crud Support
   async get<T extends ModelType>(modelClass: Class<T>, id: string): Promise<T> {
     const tableContext = this.connection.getContext(modelClass);
-    const { whereSQL, parameters } = this.#whereClause(modelClass, ModelRegistryIndex.getIdSource(modelClass).getWhereClause(id));
+    const { whereSQL, parameters } = this.#whereClause(modelClass, ModelRegistryIndex.getIdSource(modelClass).where(id));
     const sql = this.dialect.buildSelect(tableContext, { whereSQL });
 
     const result = await this.connection.execute<Record<string, unknown>>(sql, parameters);
@@ -213,8 +213,8 @@ export abstract class BaseSQLModelService<C = unknown>
 
   async update<T extends ModelType>(modelClass: Class<T>, item: T): Promise<T> {
     const idSource = ModelRegistryIndex.getIdSource(modelClass);
-    const id = idSource.getValue(item);
-    const preppedItem = await this.executeUpdate(modelClass, idSource.getWhereClause(id), item);
+    const id = idSource.get(item);
+    const preppedItem = await this.executeUpdate(modelClass, idSource.where(id), item);
     if (!preppedItem) {
       throw new NotFoundError(modelClass, id);
     }
@@ -229,8 +229,8 @@ export abstract class BaseSQLModelService<C = unknown>
   async updatePartial<T extends ModelType>(modelClass: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(modelClass);
     const idSource = ModelRegistryIndex.getIdSource(modelClass);
-    const id = idSource.getValue(item);
-    const result = await this.executeUpdatePartial(modelClass, idSource.getWhereClause(id), item, true);
+    const id = idSource.get(item);
+    const result = await this.executeUpdatePartial(modelClass, idSource.where(id), item, true);
 
     if (result.count === 0) {
       throw new NotFoundError(modelClass, id);
@@ -242,7 +242,7 @@ export abstract class BaseSQLModelService<C = unknown>
   async delete<T extends ModelType>(modelClass: Class<T>, id: string): Promise<void> {
     ModelCrudUtil.ensureNotSubType(modelClass);
     const tableContext = this.connection.getContext(modelClass);
-    const { whereSQL, parameters } = this.#whereClause(modelClass, ModelRegistryIndex.getIdSource(modelClass).getWhereClause(id), false);
+    const { whereSQL, parameters } = this.#whereClause(modelClass, ModelRegistryIndex.getIdSource(modelClass).where(id), false);
     const sql = this.dialect.buildDelete(tableContext, whereSQL);
 
     const result = await this.connection.execute(sql, parameters);
@@ -463,7 +463,7 @@ export abstract class BaseSQLModelService<C = unknown>
       if ('insert' in operation && operation.insert) {
         inserts.push(operation.insert);
       } else if ('delete' in operation && operation.delete) {
-        deletes.push(idSource.getOptionalValue(operation.delete)!);
+        deletes.push(idSource.getOptional(operation.delete)!);
       } else if ('update' in operation && operation.update) {
         updates.push(operation.update);
       } else if ('upsert' in operation && operation.upsert) {
@@ -780,7 +780,7 @@ export abstract class BaseSQLModelService<C = unknown>
 
     const tableContext = this.connection.getContext(modelClass);
     const combinedWhere: WhereClause<T> = castTo<WhereClause<T>>({
-      $and: [ModelRegistryIndex.getIdSource(modelClass).getWhereClause(id), ...(query.where ? [query.where] : [])]
+      $and: [ModelRegistryIndex.getIdSource(modelClass).where(id), ...(query.where ? [query.where] : [])]
     });
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, combinedWhere);
 

@@ -153,7 +153,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   #removeIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
-    const id = ModelRegistryIndex.getIdSource(cls).getValue(item);
+    const id = ModelRegistryIndex.getIdSource(cls).get(item);
     for (const idx of ModelRegistryIndex.getIndices(cls)) {
       if (isModelIndexedIndex(idx)) {
         const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
@@ -171,7 +171,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   #addIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
-    const id = ModelRegistryIndex.getIdSource(cls).getValue(item);
+    const id = ModelRegistryIndex.getIdSource(cls).get(item);
     for (const idx of ModelRegistryIndex.getIndices(cls)) {
       if (isModelIndexedIndex(idx)) {
         const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
@@ -196,7 +196,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async #store<T extends ModelType>(cls: Class<T>, item: T, action: 'write' | 'delete'): Promise<void> {
-    const id = ModelRegistryIndex.getIdSource(cls).getValue(item);
+    const id = ModelRegistryIndex.getIdSource(cls).get(item);
     const key = this.#resolveKey(cls, id);
     const config = ModelRegistryIndex.getConfig(cls);
     const indices = ModelRegistryIndex.getIndices(cls);
@@ -324,7 +324,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const id = ModelRegistryIndex.getIdSource(cls).getOptionalValue(item);
+    const id = ModelRegistryIndex.getIdSource(cls).getOptional(item);
     if (id) {
       await this.has(cls, id, 'exists');
     }
@@ -335,7 +335,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const id = ModelRegistryIndex.getIdSource(cls).getValue(item);
+    const id = ModelRegistryIndex.getIdSource(cls).get(item);
     await this.has(cls, id, 'notfound');
     return this.upsert(cls, item);
   }
@@ -349,7 +349,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const id = ModelRegistryIndex.getIdSource(cls).getValue(item);
+    const id = ModelRegistryIndex.getIdSource(cls).get(item);
     const updated = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
     await this.#store(cls, updated, 'write');
     return updated;
@@ -358,7 +358,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
     ModelCrudUtil.ensureNotSubType(cls);
     const where: ModelType = {};
-    ModelRegistryIndex.getIdSource(cls).setValue(castTo(where), id);
+    ModelRegistryIndex.getIdSource(cls).set(castTo(where), id);
     await this.#store(cls, castTo<T>(where), 'delete');
   }
 

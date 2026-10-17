@@ -295,7 +295,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     if (preStore) {
       [id, prepped] = await ModelCrudUtil.preStore(cls, item);
     } else {
-      id = ModelRegistryIndex.getIdSource(cls).getValue(prepped);
+      id = ModelRegistryIndex.getIdSource(cls).get(prepped);
     }
     const content = JSONUtil.toBinaryArray(prepped);
     await this.client.putObject(
@@ -310,7 +310,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const id = ModelRegistryIndex.getIdSource(cls).getOptionalValue(item);
+    const id = ModelRegistryIndex.getIdSource(cls).getOptional(item);
     if (id) {
       if (await this.head(cls, id)) {
         throw new ExistsError(cls, id);
@@ -321,7 +321,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const id = ModelRegistryIndex.getIdSource(cls).getValue(item);
+    const id = ModelRegistryIndex.getIdSource(cls).get(item);
     if (!(await this.head(cls, id))) {
       throw new NotFoundError(cls, id);
     }
@@ -335,7 +335,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const id = ModelRegistryIndex.getIdSource(cls).getValue(item);
+    const id = ModelRegistryIndex.getIdSource(cls).get(item);
     const prepped = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
     return this.store<T>(cls, prepped, false);
   }

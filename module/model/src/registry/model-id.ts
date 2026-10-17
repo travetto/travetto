@@ -1,7 +1,8 @@
+import type { WhereClause } from '@travetto/model-query';
 import { castKey, castTo, type Any, type Class } from '@travetto/runtime';
 import { ValidationResultError } from '@travetto/schema';
 
-import type { ModelType, OptionalId, PartialWithId } from '../types/model.ts';
+import type { ModelId, ModelType, OptionalId, PartialWithId } from '../types/model.ts';
 
 /**
  * Encapsulates identifier operations for a model class.
@@ -18,15 +19,15 @@ export class ModelIdSource<T extends ModelType = Any> {
   /**
    * Extract identifier from an item if present
    */
-  getOptionalValue(item: Partial<T> | PartialWithId<T> | OptionalId<T>): string | undefined {
+  getOptional(item: Partial<T> | PartialWithId<T> | OptionalId<T>): string | undefined {
     return castTo(item && typeof item === 'object' ? item[castKey(this.field)] : undefined);
   }
 
   /**
    * Extract identifier from an item, throwing a validation error if missing
    */
-  getValue(item: Partial<T> | PartialWithId<T>): string {
-    const id = this.getOptionalValue(item);
+  get(item: Partial<T> | PartialWithId<T>): string {
+    const id = this.getOptional(item);
     if (!id) {
       throw new ValidationResultError([
         {
@@ -43,7 +44,7 @@ export class ModelIdSource<T extends ModelType = Any> {
   /**
    * Set the identifier on an item
    */
-  setValue(item: Partial<T> | OptionalId<T>, id: string): void {
+  set(item: Partial<T> | OptionalId<T>, id: string): void {
     if (item && typeof item === 'object') {
       castTo<Record<string, unknown>>(item)[this.field] = id;
     }
@@ -52,7 +53,7 @@ export class ModelIdSource<T extends ModelType = Any> {
   /**
    * Delete the identifier on an item
    */
-  deleteValue(item: Partial<T> | PartialWithId<T> | OptionalId<T>): void {
+  clear(item: Partial<T> | PartialWithId<T> | OptionalId<T>): void {
     if (item && typeof item === 'object') {
       delete castTo<Record<string, unknown>>(item)[this.field];
     }
@@ -61,8 +62,7 @@ export class ModelIdSource<T extends ModelType = Any> {
   /**
    * Build an identifier where-clause / filter
    */
-  getWhereClause<W = Record<string, unknown>>(idOrItem: string | T): W {
-    const id = typeof idOrItem === 'string' ? idOrItem : this.getOptionalValue(idOrItem);
+  where(id: ModelId): WhereClause<T> {
     return castTo({ [this.field]: id });
   }
 }
