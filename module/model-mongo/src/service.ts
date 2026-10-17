@@ -675,7 +675,7 @@ export class MongoModelService
     await QueryVerifier.verify(cls, query);
 
     const col = await this.getStore(cls);
-    const item = await ModelCrudUtil.preStore(cls, data, this, { ensureId: false });
+    const item = await ModelCrudUtil.preUpdate(cls, data, this);
     const id = this.preUpdate(item);
     const where = ModelQueryUtil.getWhereClause(cls, query.where);
     where.id = id;

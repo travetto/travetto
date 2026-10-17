@@ -676,10 +676,9 @@ export class ElasticsearchModelService
 
   // Query Crud
   async updateByQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
     await QueryVerifier.verify(cls, query);
 
-    const item = await ModelCrudUtil.preStore(cls, data, this, { ensureId: false });
+    const item = await ModelCrudUtil.preUpdate(cls, data, this, { ensureNotSubType: true });
     const id = this.preUpdate(item);
 
     const where = ModelQueryUtil.getWhereClause(cls, query.where);

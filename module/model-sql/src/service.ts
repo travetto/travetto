@@ -792,8 +792,9 @@ export abstract class BaseSQLModelService<C = unknown>
     modelSource?: ModelCrudProvider
   ): Promise<T> {
     await QueryVerifier.verify(modelClass, query);
-    ModelCrudUtil.ensureNotSubType(modelClass);
-    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource }, { ensureId: false });
+    const preppedItem = await ModelCrudUtil.preUpdate(modelClass, item, modelSource ?? { idSource: this.idSource }, {
+      ensureNotSubType: true
+    });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
 
     const tableContext = this.connection.getContext(modelClass);
