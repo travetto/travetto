@@ -11,7 +11,7 @@ export const [CommonRegex, CommonRegexToName] = (() => {
     url: /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/,
     simpleName: /^([a-zA-Z\u0080-\u024F]{0,100}(?:. |-| |')){0,10}[a-zA-Z\u0080-\u024F]+$/,
     postalCode: /^\d{5}(?:[-\s]\d{4})?$/,
-    uuid: /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i
+    uuid: /^[0-9a-f]{32}$/i
   };
   // Rebind regexes
   for (const key of TypedObject.keys(regexes)) {

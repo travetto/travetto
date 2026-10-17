@@ -117,12 +117,15 @@ export class ModelIdGeneratorSuite {
     );
     assert(valid32.id === '0123456789abcdef0123456789abcdef');
 
-    // Valid 36-character hyphenated uuid passes
-    const valid36 = await ModelCrudUtil.preCreate(
-      DefaultModel,
-      DefaultModel.from({ id: '01234567-89ab-cdef-0123-456789abcdef', name: 'valid36' })
+    // Hyphenated uuid fails validation (only 32 hex digits allowed)
+    await assert.rejects(
+      () =>
+        ModelCrudUtil.preCreate(
+          DefaultModel,
+          DefaultModel.from({ id: '01234567-89ab-cdef-0123-456789abcdef', name: 'invalid-hyphenated' })
+        ),
+      (err: unknown) => err instanceof ValidationResultError && err.details.errors.some(e => e.path === 'id')
     );
-    assert(valid36.id === '01234567-89ab-cdef-0123-456789abcdef');
 
     // Invalid id throws ValidationResultError on id
     await assert.rejects(
