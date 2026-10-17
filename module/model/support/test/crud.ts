@@ -104,7 +104,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(single.age === 23);
 
     await assert.rejects(async () => {
-      await service.get(Person, Util.uuid(32));
+      await service.get(Person, 'randomId');
     }, NotFoundError);
   }
 

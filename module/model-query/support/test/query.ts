@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { type ModelCrudSupport, NotFoundError } from '@travetto/model';
-import { TimeUtil, Util } from '@travetto/runtime';
+import { TimeUtil } from '@travetto/runtime';
 import { SkipUnless, Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
@@ -362,7 +362,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   async verifyNestedQuery() {
     const service = await this.service;
 
-    const entityId = Util.uuid(32);
+    const entityId = 'nested-entity-id';
 
     await service.create(
       Note,

@@ -9,7 +9,6 @@ import {
   NotFoundError,
   TransientField
 } from '@travetto/model';
-import { Util } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
@@ -60,7 +59,7 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(single.age === 25);
 
     await assert.rejects(async () => {
-      await service.get(Person, Util.uuid(32));
+      await service.get(Person, 'randomId');
     }, NotFoundError);
 
     await service.delete(Person, person.id);
