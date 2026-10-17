@@ -423,14 +423,13 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    const prepped = await ModelCrudUtil.preCreate(cls, item, this);
     await this.#putItem(cls, prepped.id, prepped, 'create');
     return prepped;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
-    item = await ModelCrudUtil.preStore(cls, item, this);
+    item = await ModelCrudUtil.preUpdate(cls, item, this, { ensureNotSubType: true });
     if (ModelRegistryIndex.getConfig(cls).expiresAt) {
       await this.get(cls, item.id);
     }
@@ -439,22 +438,23 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    const prepped = await ModelCrudUtil.preUpsert(cls, item, this, { ensureNotSubType: true });
     await this.#putItem(cls, prepped.id, prepped, 'upsert');
     return prepped;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
-    const itemAsT = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
+    const prepared = await ModelCrudUtil.prePartialUpdate(cls, item, {
+      ensureNotSubType: true
+    });
+    const itemAsT = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), prepared);
     await this.#putItem(cls, id, itemAsT, 'update');
     return itemAsT;
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
-    ModelCrudUtil.ensureNotSubType(cls);
+    id = await ModelCrudUtil.preDelete(cls, id, { ensureNotSubType: true });
     const result = await this.client.deleteItem({
       TableName: this.#resolveTable(cls),
       ReturnValues: 'ALL_OLD',
@@ -523,7 +523,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     idx: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
+    const prepared = await ModelCrudUtil.prePartialUpdate(cls, castTo(body), { validateId: false });
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), prepared);
     return this.update(cls, item);
   }
 

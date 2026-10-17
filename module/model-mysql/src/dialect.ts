@@ -276,6 +276,10 @@ GROUP BY INDEX_NAME, TABLE_NAME, NON_UNIQUE;
     );
   }
 
+  override isPrimaryKeyConstraint(constraint?: string): boolean {
+    return !!constraint && (constraint.endsWith('.PRIMARY') || super.isPrimaryKeyConstraint(constraint));
+  }
+
   getCreateTextSearchIndexSQLs<T extends ModelType>(tableContext: TableContext<T>): string[] {
     const textFields = this.getTextSearchFields(tableContext);
     if (textFields.length === 0) {

@@ -15,6 +15,7 @@ import {
   type ModelStorageSupport,
   ModelStorageUtil,
   type ModelType,
+  ExistsError,
   NotFoundError,
   type OptionalId,
   type PartialWithId,
@@ -60,7 +61,7 @@ import {
   type WhereClause
 } from '@travetto/model-query';
 import { type Class, castTo, JSONUtil, Runtime } from '@travetto/runtime';
-import { SchemaRegistryIndex } from '@travetto/schema';
+import { SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
 import { WorkPool } from '@travetto/worker';
 
 import type { SQLConnection } from './connection.ts';
@@ -130,7 +131,7 @@ export abstract class BaseSQLModelService<C = unknown>
     data: Partial<T>,
     returning: boolean
   ): Promise<{ count: number; records: Record<string, unknown>[] }> {
-    const preparedData = await ModelCrudUtil.prePartialUpdate(modelClass, data);
+    const preparedData = await ModelCrudUtil.prePartialUpdate(modelClass, data, { validateId: false });
 
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);
@@ -148,8 +149,7 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async executeUpdate<T extends ModelType>(modelClass: Class<T>, where: WhereClause<T>, item: T): Promise<T | undefined> {
-    ModelCrudUtil.ensureNotSubType(modelClass);
-    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
+    const preppedItem = await ModelCrudUtil.preUpdate(modelClass, item, this, { ensureNotSubType: true });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
 
     const tableContext = this.connection.getContext(modelClass);
@@ -172,8 +172,9 @@ export abstract class BaseSQLModelService<C = unknown>
     conflictTarget: string[],
     modelSource?: ModelCrudProvider
   ): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(modelClass);
-    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
+    const preppedItem = await ModelCrudUtil.preUpsert(modelClass, item, modelSource ?? { idSource: this.idSource }, {
+      ensureNotSubType: true
+    });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
     const tableContext = this.connection.getContext(modelClass);
 
@@ -203,7 +204,7 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async create<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>, modelSource?: ModelCrudProvider): Promise<T> {
-    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
+    const preppedItem = await ModelCrudUtil.preCreate(modelClass, item, modelSource ?? { idSource: this.idSource });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
     const tableContext = this.connection.getContext(modelClass);
 
@@ -212,6 +213,9 @@ export abstract class BaseSQLModelService<C = unknown>
     try {
       await this.connection.execute(sql, values);
     } catch (error) {
+      if (error instanceof ExistsError) {
+        throw new ExistsError(modelClass, preppedItem.id);
+      }
       if (error instanceof UniqueError && (error.details?.type === 'query' || error.details?.type === 'index')) {
         throw new UniqueError(modelClass, (error.details.constraint as string) ?? 'unknown', error.details);
       }
@@ -233,7 +237,7 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async updatePartial<T extends ModelType>(modelClass: Class<T>, item: PartialWithId<T>): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(modelClass);
+    await ModelCrudUtil.prePartialUpdate(modelClass, item, { ensureNotSubType: true });
 
     const result = await this.executeUpdatePartial(modelClass, castTo({ id: item.id }), item, true);
 
@@ -245,7 +249,7 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async delete<T extends ModelType>(modelClass: Class<T>, id: string): Promise<void> {
-    ModelCrudUtil.ensureNotSubType(modelClass);
+    id = await ModelCrudUtil.preDelete(modelClass, id, { ensureNotSubType: true });
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, castTo({ id }), false);
     const sql = this.dialect.buildDelete(tableContext, whereSQL);
@@ -781,8 +785,9 @@ export abstract class BaseSQLModelService<C = unknown>
     modelSource?: ModelCrudProvider
   ): Promise<T> {
     await QueryVerifier.verify(modelClass, query);
-    ModelCrudUtil.ensureNotSubType(modelClass);
-    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
+    const preppedItem = await ModelCrudUtil.preUpdate(modelClass, item, modelSource ?? { idSource: this.idSource }, {
+      ensureNotSubType: true
+    });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
 
     const tableContext = this.connection.getContext(modelClass);

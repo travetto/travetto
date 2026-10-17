@@ -206,6 +206,8 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       const multi = this.client.multi();
       if (existing) {
         this.#removeIndices(cls, existing, multi);
+      } else if (action === 'delete') {
+        throw new NotFoundError(cls, item.id);
       }
       switch (action) {
         case 'write': {
@@ -326,34 +328,36 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     if (item.id) {
       await this.has(cls, item.id, 'exists');
     }
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    const prepped = await ModelCrudUtil.preCreate(cls, item, this);
     await this.#store(cls, prepped, 'write');
     return prepped;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
-    await this.has(cls, item.id, 'notfound');
-    return this.upsert(cls, item);
+    const prepped = await ModelCrudUtil.preUpdate(cls, item, this, { ensureNotSubType: true });
+    await this.has(cls, prepped.id, 'notfound');
+    await this.#store(cls, prepped, 'write');
+    return prepped;
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    const prepped = await ModelCrudUtil.preUpsert(cls, item, this, { ensureNotSubType: true });
     await this.#store(cls, prepped, 'write');
     return prepped;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
-    const updated = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
+    const prepared = await ModelCrudUtil.prePartialUpdate(cls, item, {
+      ensureNotSubType: true
+    });
+    const updated = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), prepared);
     await this.#store(cls, updated, 'write');
     return updated;
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
-    ModelCrudUtil.ensureNotSubType(cls);
+    id = await ModelCrudUtil.preDelete(cls, id, { ensureNotSubType: true });
     const where: ModelType = { id };
     await this.#store(cls, where, 'delete');
   }
@@ -441,7 +445,8 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     idx: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
+    const prepared = await ModelCrudUtil.prePartialUpdate(cls, castTo(body), { validateId: false });
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), prepared);
     return this.update(cls, item);
   }
 

@@ -297,6 +297,10 @@ WHERE type='index' AND tbl_name=?;
     return error instanceof Error && /no such table/i.test(error.message);
   }
 
+  override isPrimaryKeyConstraint(constraint?: string): boolean {
+    return super.isPrimaryKeyConstraint(constraint);
+  }
+
   getCreateTextSearchIndexSQLs<T extends ModelType>(tableContext: TableContext<T>): string[] {
     const textFields = this.getTextSearchFields(tableContext);
     if (textFields.length === 0) {

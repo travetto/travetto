@@ -9,6 +9,7 @@ import {
   type ModelStorageSupport,
   ModelStorageUtil,
   type ModelType,
+  ExistsError,
   NotFoundError,
   type OptionalId,
   type PartialWithId
@@ -41,6 +42,13 @@ const setMissingValues = <T>(input: T, missingValue: unknown): T =>
 
 function isNotFoundError(error: unknown): boolean {
   return error instanceof Error && (error.message.includes('NOT_FOUND') || (error as { code?: number }).code === 5);
+}
+
+function isExistsError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    (error.message.includes('ALREADY_EXISTS') || error.message.includes('already exists') || (error as { code?: number }).code === 6)
+  );
 }
 
 /**
@@ -173,29 +181,37 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(prepped.id).create(clone<DocumentData>(prepped));
+    const prepped = await ModelCrudUtil.preCreate(cls, item, this);
+    try {
+      await this.#getCollection(cls).doc(prepped.id).create(clone<DocumentData>(prepped));
+    } catch (error) {
+      if (isExistsError(error)) {
+        throw new ExistsError(cls, prepped.id);
+      }
+      throw error;
+    }
     return prepped;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(item.id).set(clone<DocumentData>(prepped), { merge: false });
+    const prepped = await ModelCrudUtil.preUpdate(cls, item, this, { ensureNotSubType: true });
+    await this.get(cls, prepped.id);
+    await this.#getCollection(cls).doc(prepped.id).set(clone<DocumentData>(prepped), { merge: false });
     return prepped;
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    const prepped = await ModelCrudUtil.preUpsert(cls, item, this, { ensureNotSubType: true });
     await this.#getCollection(cls).doc(prepped.id).set(clone<DocumentData>(prepped));
     return prepped;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
-    const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
+    const prepared = await ModelCrudUtil.prePartialUpdate(cls, item, {
+      ensureNotSubType: true
+    });
+    const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), prepared);
     const cleaned = setMissingValues(full, FieldValue.delete());
     await this.#getCollection(cls)
       .doc(id)
@@ -204,7 +220,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
-    ModelCrudUtil.ensureNotSubType(cls);
+    id = await ModelCrudUtil.preDelete(cls, id, { ensureNotSubType: true });
     try {
       await this.#getCollection(cls).doc(id).delete({ exists: true });
     } catch (error) {
@@ -260,7 +276,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     idx: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
+    const prepared = await ModelCrudUtil.prePartialUpdate(cls, castTo(body), { validateId: false });
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), prepared);
     return this.update(cls, item);
   }
 

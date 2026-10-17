@@ -39,6 +39,7 @@ Do not recommend excluded operations unless explicitly requested:
   - Prefer standard JSDoc comments (`/** ... */`) over `@Description()` for schema and endpoint descriptions.
 - Visibility & Encapsulation: Do not use TS visibility modifiers (`private`, `protected`, or `public`) or TypeScript's `override` keyword on class methods or properties. Use standard ECMAScript public by default and `#private` fields/methods when private accessibility is needed.
 - Model Query Handling: When building query filters or aggregations, compose compound clauses via `ModelQueryUtil.getWhereClause(cls, ...)` rather than manually building backend-specific query filter objects.
+- Model CRUD Semantics: Direct entity updates via `update()` or `updatePartial()` require a valid `id` property on the input payload, throwing `ValidationResultError` when missing. Query- or index-based partial updates identify targets via criteria and do not require `id` in the payload.
 - Dependency Injection: Avoid defensive null checks on `@Inject()` dependencies. In test setups or scripts, ensure `await Registry.init()` is executed prior to accessing services.
 - Code Style & Safety:
   - Prefer declarative object definitions with inline conditional spreading (`...(condition ? { ... } : {})`) over mutable property assignment.

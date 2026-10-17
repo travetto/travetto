@@ -1,8 +1,9 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Model, type ModelCrudSupport, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
-import { Precision, Required, Schema, Text } from '@travetto/schema';
+import { ExistsError, Model, type ModelCrudSupport, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
+import { castTo } from '@travetto/runtime';
+import { Precision, Required, Schema, Text, ValidationResultError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from './base.ts';
@@ -166,6 +167,29 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   async testMissingUpdatePartial() {
     const service = await this.service;
     await assert.rejects(() => service.updatePartial(User2, { id: '-1', name: 'bob' }), NotFoundError);
+  }
+
+  @Test('Verify update without id fails validation')
+  async testUpdateWithoutIdFails() {
+    const service = await this.service;
+    await assert.rejects(() => service.update(Simple, castTo(Simple.from({ name: 'bob' }))), ValidationResultError);
+    await assert.rejects(() => service.updatePartial(Simple, castTo({ name: 'bob' })), ValidationResultError);
+  }
+
+  @Test('Verify update and delete on missing item fails with NotFoundError')
+  async testMissingItemFails() {
+    const service = await this.service;
+    const nonExistentId = service.idSource.create();
+    await assert.rejects(() => service.update(Simple, Simple.from({ id: nonExistentId, name: 'bob' })), NotFoundError);
+    await assert.rejects(() => service.updatePartial(Simple, { id: nonExistentId, name: 'bob' }), NotFoundError);
+    await assert.rejects(() => service.delete(Simple, nonExistentId), NotFoundError);
+  }
+
+  @Test('Verify create with duplicate id fails with ExistsError')
+  async testDuplicateCreateFails() {
+    const service = await this.service;
+    const created = await service.create(Simple, Simple.from({ name: 'bob' }));
+    await assert.rejects(() => service.create(Simple, Simple.from({ id: created.id, name: 'bob2' })), ExistsError);
   }
 
   @Test('Verify partial update with field removal and lists')

@@ -182,7 +182,7 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
             if (message?.startsWith('UNIQUE')) {
               const match = message.match(/UNIQUE constraint failed: (.*)/);
               const key = match ? match[1] : 'query';
-              throw new UniqueError('query', key, { message, query });
+              throw this.dialect.createUniqueOrExistsError(key, { message, query, type: 'query' });
             }
             break;
           }
@@ -190,7 +190,7 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
           case 'SQLITE_CONSTRAINT_INDEX': {
             const match = message?.match(/UNIQUE constraint failed: (.*)/);
             const key = match ? match[1] : 'query';
-            throw new UniqueError('query', key, { message, query });
+            throw this.dialect.createUniqueOrExistsError(key, { message, query, type: 'query' });
           }
           case 'SQLITE_CONSTRAINT_PRIMARYKEY':
             throw new ExistsError('query', query);

@@ -292,16 +292,15 @@ export class MemoryModelService
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    if (!item.id) {
-      item.id = this.idSource.create();
-    }
-    this.#find(cls, item.id, 'exists');
-    return await this.upsert(cls, item);
+    const prepped = await ModelCrudUtil.preCreate(cls, item, this);
+    this.#find(cls, prepped.id, 'exists');
+    return await this.#persist(cls, prepped, 'write');
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    await this.get(cls, item.id);
-    return await this.upsert(cls, item);
+    const prepped = await ModelCrudUtil.preUpdate(cls, item, this);
+    await this.get(cls, prepped.id);
+    return await this.#persist(cls, prepped, 'write');
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
@@ -309,17 +308,19 @@ export class MemoryModelService
     if (item.id && store.has(item.id)) {
       await ModelCrudUtil.load(cls, store.get(item.id)!, 'exists');
     }
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    const prepped = await ModelCrudUtil.preUpsert(cls, item, this);
     return await this.#persist(cls, prepped, 'write');
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     const id = item.id;
-    const clean = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
+    const prepared = await ModelCrudUtil.prePartialUpdate(cls, item);
+    const clean = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), prepared);
     return await this.#persist(cls, clean, 'write');
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
+    id = await ModelCrudUtil.preDelete(cls, id);
     const store = this.#getStore(cls);
     if (!store.has(id)) {
       throw new NotFoundError(cls, id);
@@ -484,7 +485,8 @@ export class MemoryModelService
     idx: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), castTo(body));
+    const prepared = await ModelCrudUtil.prePartialUpdate(cls, castTo(body), { validateId: false });
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), prepared);
     return this.update(cls, item);
   }
 
