@@ -12,10 +12,6 @@ export abstract class BaseModelSuite<T> {
   serviceClass: Class<T>;
   configClass: Class;
 
-  createId<U extends ModelType>(cls: Class<U>): ModelId {
-    return ModelRegistryIndex.createId(cls);
-  }
-
   async getSize<U extends ModelType>(cls: Class<U>): Promise<number> {
     const svc = await this.service;
     if (ModelCrudUtil.isSupported(svc)) {

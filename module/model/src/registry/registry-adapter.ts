@@ -85,14 +85,13 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
       config.prePersist = [...(parent.prePersist ?? []), ...(config.prePersist ?? [])];
       config.transientFields = [...(parent.transientFields ?? []), ...(config.transientFields ?? [])];
     } else {
+      config.idGenerator ??= DEFAULT_ID_GENERATOR;
       const idFieldConfig = schemaFields[config.idField];
       SchemaRegistryIndex.getForRegister(this.#cls, true).registerField(config.idField, {
         required: { active: false },
-        match: { regex: DEFAULT_ID_PATTERN, ...idFieldConfig.match }
+        ...(this.#config.idGenerator === DEFAULT_ID_GENERATOR ? { match: { regex: DEFAULT_ID_PATTERN, ...idFieldConfig.match } } : {})
       });
     }
-
-    config.idGenerator ??= DEFAULT_ID_GENERATOR;
   }
 
   get(): ModelConfig {

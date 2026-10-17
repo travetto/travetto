@@ -160,7 +160,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const [id, prepped] = await ModelCrudUtil.preStore(cls, item);
+    const id = ModelRegistryIndex.ensureId(cls, item);
 
     const file = await this.#resolveName(cls, '.json', id);
 
@@ -168,7 +168,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
       throw new ExistsError(cls, id);
     }
 
-    return this.upsert(cls, prepped);
+    return this.upsert(cls, item);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {

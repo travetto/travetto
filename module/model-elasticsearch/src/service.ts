@@ -328,10 +328,12 @@ export class ElasticsearchModelService
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
+    const id = ModelRegistryIndex.getIdSource(cls).get(item);
+
     const [, prepped] = await ModelCrudUtil.preStore(cls, item);
     item = prepped;
 
-    const id = this.preUpdate(cls, item)!;
+    this.preUpdate(cls, item)!;
 
     if (ModelRegistryIndex.getConfig(cls).expiresAt) {
       await this.get(cls, id);

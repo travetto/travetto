@@ -19,14 +19,25 @@ export class ModelIdSource<T extends ModelType = Any> {
   /**
    * Extract identifier from an item if present
    */
-  getOptional(item: Partial<T> | PartialWithId<T> | OptionalId<T>): string | undefined {
+  getOptional(item: Partial<T> | PartialWithId<T> | OptionalId<T>): ModelId | undefined {
     return castTo(item && typeof item === 'object' ? item[castKey(this.field)] : undefined);
+  }
+
+  /**
+   * Extract identifier from an item if present
+   */
+  getOrSet(item: Partial<T> | PartialWithId<T> | OptionalId<T>, generate: () => ModelId): ModelId {
+    let id: ModelId = castTo(item && typeof item === 'object' ? item[castKey(this.field)] : undefined);
+    if (!id) {
+      this.set(castTo(item), (id = generate()));
+    }
+    return id;
   }
 
   /**
    * Extract identifier from an item, throwing a validation error if missing
    */
-  get(item: Partial<T> | PartialWithId<T>): string {
+  get(item: Partial<T> | PartialWithId<T>): ModelId {
     const id = this.getOptional(item);
     if (!id) {
       throw new ValidationResultError([
@@ -44,10 +55,11 @@ export class ModelIdSource<T extends ModelType = Any> {
   /**
    * Set the identifier on an item
    */
-  set(item: Partial<T> | OptionalId<T>, id: string): void {
+  set(item: Partial<T> | OptionalId<T>, id: ModelId): ModelId {
     if (item && typeof item === 'object') {
       castTo<Record<string, unknown>>(item)[this.field] = id;
     }
+    return id;
   }
 
   /**

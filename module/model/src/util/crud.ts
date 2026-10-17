@@ -76,11 +76,7 @@ export class ModelCrudUtil {
   ): Promise<[id: string, item: T]> {
     const idSource = ModelRegistryIndex.getIdSource(cls);
 
-    let currentId = idSource.getOptional(item);
-    if (!currentId) {
-      currentId = ModelRegistryIndex.createId(cls);
-      idSource.set(item, currentId);
-    }
+    const currentId = ModelRegistryIndex.ensureId(cls, item);
 
     if (DataUtil.isPlainObject(item)) {
       item = cls.from(castTo(item));

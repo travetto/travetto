@@ -52,7 +52,7 @@ class ModelIdSourceSuite {
     const source = ModelRegistryIndex.getIdSource(DefaultModel);
     assert(source.field === 'id');
 
-    const generatedId = ModelRegistryIndex.createId(DefaultModel);
+    const generatedId = ModelRegistryIndex.getConfig(DefaultModel).idGenerator();
     assert(typeof generatedId === 'string');
     assert(generatedId.length === 32);
 
@@ -92,7 +92,7 @@ class ModelIdSourceSuite {
     await Registry.init();
     const source = ModelRegistryIndex.getIdSource(CustomGeneratorModel);
     assert(source.field === 'identifier');
-    assert(ModelRegistryIndex.createId(CustomGeneratorModel) === 'custom-id-value');
+    assert(ModelRegistryIndex.getConfig(CustomGeneratorModel).idGenerator() === 'custom-id-value');
   }
 
   @Test('Verify auto-discovered ModelId field')
@@ -100,7 +100,7 @@ class ModelIdSourceSuite {
     await Registry.init();
     const source = ModelRegistryIndex.getIdSource(AutoDiscoveredIdModel);
     assert(source.field === 'isbn');
-    const generated = ModelRegistryIndex.createId(AutoDiscoveredIdModel);
+    const generated = ModelRegistryIndex.getConfig(AutoDiscoveredIdModel).idGenerator();
     assert(typeof generated === 'string');
     assert(generated.length === 32);
   }
@@ -149,6 +149,6 @@ class ModelIdSourceSuite {
       extra: 'detail'
     });
     assert(validSubclass.identifier === 'subclass-custom-id');
-    assert(ModelRegistryIndex.createId(SubclassCustomModel) === 'custom-id-value');
+    assert(ModelRegistryIndex.getConfig(SubclassCustomModel).idGenerator() === 'custom-id-value');
   }
 }

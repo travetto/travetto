@@ -100,7 +100,6 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     const people = [1, 2, 3, 8].map(x =>
       Person.from({
-        id: this.createId(Person),
         name: 'Bob',
         age: 20 + x,
         gender: 'm',
@@ -118,7 +117,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(single.age === 23);
 
     await assert.rejects(async () => {
-      await service.get(Person, this.createId(Person));
+      await service.get(Person, 'bloof');
     }, NotFoundError);
   }
 
@@ -274,7 +273,6 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     const people = [1, 2, 3].map(x =>
       Person.from({
-        id: this.createId(Person),
         name: 'Bob',
         age: 20 + x,
         gender: 'm',
@@ -303,7 +301,6 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
         service.upsert(
           Person,
           Person.from({
-            id: this.createId(Person),
             name: 'Bob',
             age: 20 + x,
             gender: 'm',

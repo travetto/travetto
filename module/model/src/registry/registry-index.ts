@@ -41,8 +41,8 @@ export class ModelRegistryIndex implements RegistryIndex {
     return this.#instance.getIdSource(cls);
   }
 
-  static createId<T extends ModelType>(cls: Class<T>): ModelId {
-    return this.#instance.createId(cls);
+  static ensureId<T extends ModelType>(cls: Class<T>, item: T): ModelId {
+    return this.#instance.ensureId(cls, item);
   }
 
   static getClasses(): Class[] {
@@ -104,17 +104,17 @@ export class ModelRegistryIndex implements RegistryIndex {
   }
 
   /**
-   * Create a new identifier for a model class
-   */
-  createId<T extends ModelType>(cls: Class<T>): ModelId {
-    return this.getConfig(cls).idGenerator();
-  }
-
-  /**
    * Get Indices
    */
   getIndices<T extends ModelType>(cls: Class<T>): IndexConfig[] {
     return Object.values(this.getConfig(cls).indices ?? []);
+  }
+
+  /**
+   * Ensure id is available on the item
+   */
+  ensureId<T extends ModelType>(cls: Class<T>, item: T): ModelId {
+    return this.getIdSource(cls).getOrSet(item, this.getConfig(cls).idGenerator);
   }
 
   /**

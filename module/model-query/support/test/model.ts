@@ -47,7 +47,7 @@ export class Names {
 export class NoteEntity {
   @Text()
   label: string;
-  id: ModelId;
+  id?: string;
 }
 
 @Model()

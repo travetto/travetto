@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Model, type ModelId, ModelRegistryIndex } from '@travetto/model';
+import { Model, type ModelId } from '@travetto/model';
 import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
 import { QueryIndex } from '@travetto/model-query';
 import { Suite, Test } from '@travetto/test';
@@ -38,7 +38,7 @@ class MongoBasicSuite extends ModelBasicSuite {
   @Test()
   async upsert() {
     const svc = await this.service;
-    const user = await svc.upsert(UniqueUser, UniqueUser.from({ name: 'bob', id: ModelRegistryIndex.createId(UniqueUser) }));
+    const user = await svc.upsert(UniqueUser, UniqueUser.from({ name: 'bob' }));
     assert(user.id.length === 32);
 
     const found = await svc.get(UniqueUser, user.id);

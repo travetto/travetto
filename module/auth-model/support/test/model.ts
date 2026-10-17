@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Inject, InjectableFactory } from '@travetto/di';
-import { Model, type ModelCrudSupport, type ModelId, ModelRegistryIndex, Transient } from '@travetto/model';
+import { Model, type ModelCrudSupport, type ModelId, Transient } from '@travetto/model';
 import { type Class, castTo, RuntimeError } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
@@ -67,7 +67,6 @@ export abstract class AuthModelServiceSuite<T> {
   @Test()
   async authenticate() {
     const pre = User.from({
-      id: ModelRegistryIndex.createId(User),
       password: 'bob',
       details: {}
     });
