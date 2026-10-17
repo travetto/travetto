@@ -9,6 +9,7 @@ export type BulkPreStore<T extends ModelType> = {
   upsertedIds: Map<number, string>;
   updatedIds: Map<number, string>;
   existingUpsertedIds: Map<number, string>;
+  deletedIds: Map<number, string>;
   operations: BulkOperation<T>[];
 };
 
@@ -22,33 +23,42 @@ export class ModelBulkUtil {
    * Prepares bulk operations for storage
    * @param cls
    * @param operations
+   * @param options
    */
-  static async preStore<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkPreStore<T>> {
+  static async preStore<T extends ModelType>(
+    cls: Class<T>,
+    operations: BulkOperation<T>[],
+    options?: { ensureNotSubType?: boolean }
+  ): Promise<BulkPreStore<T>> {
     const insertedIds = new Map<number, string>();
     const upsertedIds = new Map<number, string>();
     const updatedIds = new Map<number, string>();
     const existingUpsertedIds = new Map<number, string>();
+    const deletedIds = new Map<number, string>();
 
     // Pre store
-    let i = 0;
+    let operationIndex = 0;
     for (const operation of operations) {
       if ('insert' in operation && operation.insert) {
-        operation.insert = await ModelCrudUtil.preStore(cls, operation.insert);
-        insertedIds.set(i, operation.insert.id!);
+        operation.insert = await ModelCrudUtil.preCreate(cls, operation.insert, options);
+        insertedIds.set(operationIndex, operation.insert.id!);
       } else if ('update' in operation && operation.update) {
-        operation.update = await ModelCrudUtil.preStore(cls, operation.update);
-        updatedIds.set(i, operation.update.id);
+        operation.update = await ModelCrudUtil.preUpdate(cls, operation.update, options);
+        updatedIds.set(operationIndex, operation.update.id);
       } else if ('upsert' in operation && operation.upsert) {
         const isNew = !operation.upsert.id;
-        operation.upsert = await ModelCrudUtil.preStore(cls, operation.upsert);
+        operation.upsert = await ModelCrudUtil.preUpsert(cls, operation.upsert, options);
         if (isNew) {
-          upsertedIds.set(i, operation.upsert.id!);
+          upsertedIds.set(operationIndex, operation.upsert.id!);
         } else {
-          existingUpsertedIds.set(i, operation.upsert.id!);
+          existingUpsertedIds.set(operationIndex, operation.upsert.id!);
         }
+      } else if ('delete' in operation && operation.delete) {
+        await ModelCrudUtil.preDelete(cls, operation.delete.id, options);
+        deletedIds.set(operationIndex, operation.delete.id);
       }
-      i += 1;
+      operationIndex += 1;
     }
-    return { insertedIds, upsertedIds, updatedIds, existingUpsertedIds, operations };
+    return { insertedIds, upsertedIds, updatedIds, existingUpsertedIds, deletedIds, operations };
   }
 }

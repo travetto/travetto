@@ -80,4 +80,16 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
     );
     assert(res2.counts.delete === 4);
   }
+
+  @Test()
+  async bulkUpdateMissingId() {
+    const service = await this.service;
+    await assert.rejects(() => service.processBulk(User, [{ update: User.from({ name: 'no-id' }) }]));
+  }
+
+  @Test()
+  async bulkDeleteMissingId() {
+    const service = await this.service;
+    await assert.rejects(() => service.processBulk(User, [{ delete: User.from({ name: 'no-id' }) }]));
+  }
 }
