@@ -33,8 +33,7 @@ import {
   type ModelPageResult,
   type SingleItemIndex,
   type SortedIndex,
-  type SortedIndexSelection,
-  type SortedIndexSelectionType
+  type SortedIndexSelection
 } from '@travetto/model-indexed';
 import {
   type BinaryArray,
@@ -517,12 +516,13 @@ export class MemoryModelService
     }
   }
 
-  async suggestByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>,
-    B extends SortedIndexSelectionType<T, S> & string
-  >(cls: Class<T>, idx: SortedIndex<T, K, S>, body: KeyedIndexBody<T, K>, prefix: B, options?: ModelIndexedSearchOptions): Promise<T[]> {
+  async suggestByIndex<T extends ModelType, S extends SortedIndexSelection<T>, K extends KeyedIndexSelection<T>>(
+    cls: Class<T>,
+    idx: SortedIndex<T, K, S>,
+    body: KeyedIndexBody<T, K>,
+    prefix: string,
+    options?: ModelIndexedSearchOptions
+  ): Promise<T[]> {
     const items: T[] = [];
     for await (const batch of this.#getIndexIds(cls, idx, body, options, id => typeof id === 'string' && id.startsWith(prefix))) {
       items.push(...(await ModelCrudUtil.filterOutNotFound(batch.map(id => this.get(cls, id)))));
