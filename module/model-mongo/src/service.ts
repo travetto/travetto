@@ -194,7 +194,7 @@ export class MongoModelService
 
   restoreId<T extends ModelType>(cls: Class<T>, item: Record<string, unknown>): void {
     if (item._id) {
-      const idFieldName = ModelRegistryIndex.getIdSource(cls).field;
+      const idFieldName = ModelRegistryIndex.get(cls).idSource.field;
       item[idFieldName] ??= MongoUtil.idToString(castTo(item._id));
       delete item._id;
     }
@@ -207,15 +207,15 @@ export class MongoModelService
 
   postUpdate<T extends ModelType>(cls: Class<T>, item: T, id?: string): T {
     if (id) {
-      ModelRegistryIndex.getIdSource(cls).set(item, id);
+      ModelRegistryIndex.get(cls).idSource.set(item, id);
     }
     this.restoreId(cls, castTo(item));
     return item;
   }
 
   preUpdate<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): string | undefined {
-    const idSource = ModelRegistryIndex.getIdSource(cls);
-    const id = idSource.getOptional(item);
+    const idSource = ModelRegistryIndex.get(cls).idSource;
+    const id = idSource.get(item, { optional: true });
     if (id) {
       const ref: { _id?: Binary | string } = castTo(item);
       ref._id = MongoUtil.uuid(id);
@@ -349,7 +349,7 @@ export class MongoModelService
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    const [, prepped] = await ModelCrudUtil.preStore(cls, item);
+    const [, prepped] = await ModelCrudUtil.preStore(cls, item, { ensureId: false });
     item = prepped;
     const id = this.preUpdate(cls, item)!;
     const store = await this.getStore(cls);
@@ -390,7 +390,7 @@ export class MongoModelService
       }, {})
     );
 
-    const id = ModelRegistryIndex.getIdSource(cls).get(item);
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
 
     const result = await store.findOneAndUpdate(this.getIdFilter(cls, id), operation, {
       returnDocument: 'after',
@@ -498,7 +498,7 @@ export class MongoModelService
         const id = this.preUpdate(cls, operation.update);
         bulk.find({ _id: MongoUtil.uuid(id!) }).update({ $set: operation.update });
       } else if (operation.delete) {
-        const id = ModelRegistryIndex.getIdSource(cls).getOptional(operation.delete);
+        const id = ModelRegistryIndex.get(cls).idSource.get(operation.delete);
         bulk.find({ _id: MongoUtil.uuid(id!) }).deleteOne();
       }
     }
@@ -677,7 +677,7 @@ export class MongoModelService
     const [id, item] = await ModelCrudUtil.preStore(cls, data);
     this.preUpdate(cls, item);
     const where = ModelQueryUtil.getWhereClause(cls, query.where);
-    Object.assign(where, ModelRegistryIndex.getIdSource(cls).where(id));
+    Object.assign(where, ModelRegistryIndex.get(cls).idSource.where(id));
 
     const filter = MongoUtil.extractWhereFilter(cls, where);
     const result = await col.replaceOne(filter, item);

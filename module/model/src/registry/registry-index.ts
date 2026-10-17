@@ -1,9 +1,8 @@
-import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
+import { type RegistrationMethods, Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
 import { type Class, castKey, RuntimeError } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
-import type { ModelId, ModelType } from '../types/model.ts';
-import type { ModelIdSource } from './model-id.ts';
+import type { ModelType } from '../types/model.ts';
 import { ModelRegistryAdapter } from './registry-adapter.ts';
 import type { IndexConfig, ModelConfig } from './types.ts';
 
@@ -37,12 +36,8 @@ export class ModelRegistryIndex implements RegistryIndex {
     return this.#instance.getExpiryFieldName(cls);
   }
 
-  static getIdSource<T extends ModelType>(cls: Class<T>): ModelIdSource<T> {
-    return this.#instance.getIdSource(cls);
-  }
-
-  static ensureId<T extends ModelType>(cls: Class<T>, item: T): ModelId {
-    return this.#instance.ensureId(cls, item);
+  static get(cls: Class): Omit<ModelRegistryAdapter, RegistrationMethods> {
+    return this.#instance.store.get(cls);
   }
 
   static getClasses(): Class[] {
@@ -97,24 +92,10 @@ export class ModelRegistryIndex implements RegistryIndex {
   }
 
   /**
-   * Get identifier handler for a model class
-   */
-  getIdSource<T extends ModelType>(cls: Class<T>): ModelIdSource<T> {
-    return this.store.get(cls).getIdSource();
-  }
-
-  /**
    * Get Indices
    */
   getIndices<T extends ModelType>(cls: Class<T>): IndexConfig[] {
     return Object.values(this.getConfig(cls).indices ?? []);
-  }
-
-  /**
-   * Ensure id is available on the item
-   */
-  ensureId<T extends ModelType>(cls: Class<T>, item: T): ModelId {
-    return this.getIdSource(cls).getOrSet(item, this.getConfig(cls).idGenerator);
   }
 
   /**

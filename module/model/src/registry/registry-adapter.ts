@@ -2,6 +2,7 @@ import type { RegistryAdapter } from '@travetto/registry';
 import { type Class, RuntimeError, Util } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
+import type { ModelId, ModelType } from '../types/model.ts';
 import { ModelIdSource } from './model-id.ts';
 import type { ModelConfig } from './types.ts';
 
@@ -30,6 +31,10 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
 
   constructor(cls: Class) {
     this.#cls = cls;
+  }
+
+  get idSource(): ModelIdSource {
+    return (this.#idSource ??= new ModelIdSource(this.#cls, this.#config.idField));
   }
 
   register(...data: Partial<ModelConfig>[]): ModelConfig {
@@ -98,7 +103,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
     return this.#config;
   }
 
-  getIdSource(): ModelIdSource {
-    return (this.#idSource ??= new ModelIdSource(this.#cls, this.#config.idField));
+  ensureId<T extends ModelType>(item: T): ModelId {
+    return this.idSource.getOrSet(item, this.#config.idGenerator);
   }
 }

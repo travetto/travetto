@@ -19,13 +19,6 @@ export class ModelIdSource<T extends ModelType = Any> {
   /**
    * Extract identifier from an item if present
    */
-  getOptional(item: Partial<T> | PartialWithId<T> | OptionalId<T>): ModelId | undefined {
-    return castTo(item && typeof item === 'object' ? item[castKey(this.field)] : undefined);
-  }
-
-  /**
-   * Extract identifier from an item if present
-   */
   getOrSet(item: Partial<T> | PartialWithId<T> | OptionalId<T>, generate: () => ModelId): ModelId {
     let id: ModelId = castTo(item && typeof item === 'object' ? item[castKey(this.field)] : undefined);
     if (!id) {
@@ -35,11 +28,14 @@ export class ModelIdSource<T extends ModelType = Any> {
   }
 
   /**
-   * Extract identifier from an item, throwing a validation error if missing
+   * Extract identifier from an item, throwing a validation error if missing and non-optional
    */
-  get(item: Partial<T> | PartialWithId<T>): ModelId {
-    const id = this.getOptional(item);
-    if (!id) {
+  get(item: Partial<T> | PartialWithId<T>): ModelId;
+  get(item: Partial<T> | PartialWithId<T>, config: { optional: false }): ModelId;
+  get(item: Partial<T> | PartialWithId<T>, config: { optional: true }): ModelId | undefined;
+  get(item: Partial<T> | PartialWithId<T>, config?: { optional: boolean }): ModelId | undefined {
+    const id = item && typeof item === 'object' ? item[castKey(this.field)] : undefined;
+    if (!id && config?.optional !== true) {
       throw new ValidationResultError([
         {
           kind: 'required',

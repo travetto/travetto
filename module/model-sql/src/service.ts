@@ -145,7 +145,7 @@ export abstract class BaseSQLModelService<C = unknown>
 
   async executeUpdate<T extends ModelType>(modelClass: Class<T>, where: WhereClause<T>, item: T): Promise<T | undefined> {
     ModelCrudUtil.ensureNotSubType(modelClass);
-    const [, preppedItem] = await ModelCrudUtil.preStore(modelClass, item);
+    const [, preppedItem] = await ModelCrudUtil.preStore(modelClass, item, { ensureId: false });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
 
     const tableContext = this.connection.getContext(modelClass);
@@ -163,7 +163,6 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async executeUpsert<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>, conflictTarget: string[]): Promise<T> {
-    ModelCrudUtil.ensureNotSubType(modelClass);
     const [id, preppedItem] = await ModelCrudUtil.preStore(modelClass, item);
     const rawItem: Record<string, unknown> = castTo(preppedItem);
     const tableContext = this.connection.getContext(modelClass);
@@ -181,7 +180,7 @@ export abstract class BaseSQLModelService<C = unknown>
   // Crud Support
   async get<T extends ModelType>(modelClass: Class<T>, id: string): Promise<T> {
     const tableContext = this.connection.getContext(modelClass);
-    const { whereSQL, parameters } = this.#whereClause(modelClass, ModelRegistryIndex.getIdSource(modelClass).where(id));
+    const { whereSQL, parameters } = this.#whereClause(modelClass, ModelRegistryIndex.get(modelClass).idSource.where(id));
     const sql = this.dialect.buildSelect(tableContext, { whereSQL });
 
     const result = await this.connection.execute<Record<string, unknown>>(sql, parameters);
@@ -212,7 +211,7 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async update<T extends ModelType>(modelClass: Class<T>, item: T): Promise<T> {
-    const idSource = ModelRegistryIndex.getIdSource(modelClass);
+    const idSource = ModelRegistryIndex.get(modelClass).idSource;
     const id = idSource.get(item);
     const preppedItem = await this.executeUpdate(modelClass, idSource.where(id), item);
     if (!preppedItem) {
@@ -222,13 +221,13 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async upsert<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>): Promise<T> {
-    const idFieldName = ModelRegistryIndex.getIdSource(modelClass).field;
+    const idFieldName = ModelRegistryIndex.get(modelClass).idSource.field;
     return this.executeUpsert(modelClass, item, [this.dialect.escapeIdentifier(String(idFieldName))]);
   }
 
   async updatePartial<T extends ModelType>(modelClass: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(modelClass);
-    const idSource = ModelRegistryIndex.getIdSource(modelClass);
+    const idSource = ModelRegistryIndex.get(modelClass).idSource;
     const id = idSource.get(item);
     const result = await this.executeUpdatePartial(modelClass, idSource.where(id), item, true);
 
@@ -242,7 +241,7 @@ export abstract class BaseSQLModelService<C = unknown>
   async delete<T extends ModelType>(modelClass: Class<T>, id: string): Promise<void> {
     ModelCrudUtil.ensureNotSubType(modelClass);
     const tableContext = this.connection.getContext(modelClass);
-    const { whereSQL, parameters } = this.#whereClause(modelClass, ModelRegistryIndex.getIdSource(modelClass).where(id), false);
+    const { whereSQL, parameters } = this.#whereClause(modelClass, ModelRegistryIndex.get(modelClass).idSource.where(id), false);
     const sql = this.dialect.buildDelete(tableContext, whereSQL);
 
     const result = await this.connection.execute(sql, parameters);
@@ -336,7 +335,7 @@ export abstract class BaseSQLModelService<C = unknown>
       requestedFieldsMap.set(field.name, this.dialect.getComplexColumnType(field));
     }
 
-    const idFieldName = ModelRegistryIndex.getIdSource(tableContext.cls).field;
+    const idFieldName = ModelRegistryIndex.getConfig(tableContext.cls).idField;
     for (const [columnName, columnType] of requestedFieldsMap.entries()) {
       if (columnName === idFieldName) {
         continue;
@@ -456,14 +455,14 @@ export abstract class BaseSQLModelService<C = unknown>
     const updates: T[] = [];
     const upserts: { upsert?: OptionalId<T> }[] = [];
 
-    const idSource = ModelRegistryIndex.getIdSource(modelClass);
+    const idSource = ModelRegistryIndex.get(modelClass).idSource;
     const idFieldName = idSource.field;
 
     for (const operation of preppedOperations) {
       if ('insert' in operation && operation.insert) {
         inserts.push(operation.insert);
       } else if ('delete' in operation && operation.delete) {
-        deletes.push(idSource.getOptional(operation.delete)!);
+        deletes.push(idSource.get(operation.delete));
       } else if ('update' in operation && operation.update) {
         updates.push(operation.update);
       } else if ('upsert' in operation && operation.upsert) {
@@ -774,13 +773,12 @@ export abstract class BaseSQLModelService<C = unknown>
   // Query Crud Support
   async updateByQuery<T extends ModelType>(modelClass: Class<T>, item: T, query: ModelQuery<T>): Promise<T> {
     await QueryVerifier.verify(modelClass, query);
-    ModelCrudUtil.ensureNotSubType(modelClass);
-    const [id, preppedItem] = await ModelCrudUtil.preStore(modelClass, item);
+    const [id, preppedItem] = await ModelCrudUtil.preStore(modelClass, item, { ensureId: false });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
 
     const tableContext = this.connection.getContext(modelClass);
     const combinedWhere: WhereClause<T> = castTo<WhereClause<T>>({
-      $and: [ModelRegistryIndex.getIdSource(modelClass).where(id), ...(query.where ? [query.where] : [])]
+      $and: [ModelRegistryIndex.get(modelClass).idSource.where(id), ...(query.where ? [query.where] : [])]
     });
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, combinedWhere);
 

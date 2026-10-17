@@ -147,7 +147,7 @@ export class MemoryModelService
       const idxName = indexName(cls, idx);
       const computed = ModelIndexedComputedIndex.get(idx, item).validate({ sort: true });
       const key = computed.getKey();
-      const id = ModelRegistryIndex.getIdSource(cls).get(item);
+      const id = ModelRegistryIndex.get(cls).idSource.get(item);
       switch (idx.type) {
         case 'indexed:keyed': {
           if (idx.unique) {
@@ -171,7 +171,7 @@ export class MemoryModelService
   async #persist<T extends ModelType>(cls: Class<T>, item: T, action: 'write'): Promise<T>;
   async #persist<T extends ModelType>(cls: Class<T>, item: T, action: 'write' | 'remove'): Promise<T | void> {
     const store = this.#getStore(cls);
-    const id = ModelRegistryIndex.getIdSource(cls).get(item);
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
     await this.#removeIndices(cls, id);
     if (action === 'write') {
       store.set(id, JSONUtil.toBinaryArray(item));
@@ -299,14 +299,14 @@ export class MemoryModelService
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    const id = ModelRegistryIndex.getIdSource(cls).get(item);
-    await this.get(cls, id);
-    return await this.upsert(cls, item);
+    const [id, prepped] = await ModelCrudUtil.preStore(cls, item, { ensureId: false });
+    this.#find(cls, id, 'exists');
+    return await this.#persist(cls, prepped, 'write');
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const store = this.#getStore(cls);
-    const id = ModelRegistryIndex.getIdSource(cls).getOptional(item);
+    const id = ModelRegistryIndex.get(cls).idSource.get(item, { optional: true });
     if (id && store.has(id)) {
       await ModelCrudUtil.load(cls, store.get(id)!, 'exists');
     }
@@ -315,7 +315,7 @@ export class MemoryModelService
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
-    const id = ModelRegistryIndex.getIdSource(cls).get(item);
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
     const clean = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
     return await this.#persist(cls, clean, 'write');
   }

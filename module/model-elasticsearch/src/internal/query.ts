@@ -103,7 +103,7 @@ export class ElasticsearchQueryUtil {
   ): Record<string, unknown> {
     const items = [];
     const fields = SchemaRegistryIndex.get(cls).getFields();
-    const idField = ModelRegistryIndex.has(cls) ? ModelRegistryIndex.getIdSource(cls).field : undefined;
+    const idField = ModelRegistryIndex.has(cls) ? ModelRegistryIndex.getConfig(cls).idField : undefined;
 
     for (const property of TypedObject.keys(item)) {
       if (property === '$text') {
@@ -350,7 +350,7 @@ export class ElasticsearchQueryUtil {
     };
 
     const sort = query.sort;
-    const idField = ModelRegistryIndex.getIdSource(cls).field;
+    const idField = ModelRegistryIndex.getConfig(cls).idField;
 
     if (query.select) {
       const [inc, exc] = this.getSelect(query.select, idField);

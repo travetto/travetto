@@ -81,8 +81,8 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
       castTo(body),
       value => typeof value === 'number' || value instanceof Date || typeof value === 'string'
     );
-    const idSource = ModelRegistryIndex.getIdSource(idx.class);
-    const id = idSource.getOptional(body);
+    const idSource = ModelRegistryIndex.get(idx.class).idSource;
+    const id = idSource.get(body, { optional: true });
     if (typeof id === 'string') {
       const idField = idSource.field;
       this.idPart = {

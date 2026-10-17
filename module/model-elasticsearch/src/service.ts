@@ -18,6 +18,7 @@ import {
   ModelCrudUtil,
   type ModelExpirySupport,
   ModelExpiryUtil,
+  type ModelId,
   type ModelListOptions,
   ModelRegistryIndex,
   type ModelStorageSupport,
@@ -244,9 +245,9 @@ export class ElasticsearchModelService
     }
   }
 
-  preUpdate<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): string | undefined {
-    const idSource = ModelRegistryIndex.getIdSource(cls);
-    const id = idSource.getOptional(item);
+  preUpdate<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): ModelId | undefined {
+    const idSource = ModelRegistryIndex.get(cls).idSource;
+    const id = idSource.get(item, { optional: true });
     if (id) {
       if (!this.config.storeId) {
         idSource.clear(item);
@@ -258,7 +259,7 @@ export class ElasticsearchModelService
 
   postUpdate<T extends ModelType>(cls: Class<T>, item: T, id?: string): T {
     if (!this.config.storeId && id) {
-      ModelRegistryIndex.getIdSource(cls).set(item, id);
+      ModelRegistryIndex.get(cls).idSource.set(item, id);
     }
     return item;
   }
@@ -328,9 +329,9 @@ export class ElasticsearchModelService
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const id = ModelRegistryIndex.getIdSource(cls).get(item);
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
 
-    const [, prepped] = await ModelCrudUtil.preStore(cls, item);
+    const [, prepped] = await ModelCrudUtil.preStore(cls, item, { ensureId: false });
     item = prepped;
 
     this.preUpdate(cls, item)!;
@@ -370,7 +371,7 @@ export class ElasticsearchModelService
   async updatePartial<T extends ModelType>(cls: Class<T>, data: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const id = ModelRegistryIndex.getIdSource(cls).get(data);
+    const id = ModelRegistryIndex.get(cls).idSource.get(data);
     const item = await ModelCrudUtil.prePartialUpdate(cls, data);
     const script = ElasticsearchSchemaUtil.generateUpdateScript(item);
 
@@ -414,7 +415,7 @@ export class ElasticsearchModelService
       const identity: { _index: string; _type?: unknown } = { _index: index };
 
       if (operation.delete) {
-        toRun.push({ delete: { ...identity, _id: ModelRegistryIndex.getIdSource(cls).getOptional(operation.delete)! } });
+        toRun.push({ delete: { ...identity, _id: ModelRegistryIndex.get(cls).idSource.get(operation.delete) } });
       } else if (operation.insert) {
         const id = this.preUpdate(cls, operation.insert);
         toRun.push({ create: { ...identity, _id: id } }, operation.insert);
@@ -477,7 +478,7 @@ export class ElasticsearchModelService
 
         if (responseItem.result === 'created') {
           out.insertedIds.set(i, responseItem._id!);
-          ModelRegistryIndex.getIdSource(cls).set((operations[i].insert ?? operations[i].upsert)!, responseItem._id!);
+          ModelRegistryIndex.get(cls).idSource.set((operations[i].insert ?? operations[i].upsert)!, responseItem._id!);
         }
 
         out.counts[property] += 1;
@@ -621,7 +622,7 @@ export class ElasticsearchModelService
 
     const search = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
     const results = await this.execSearch(cls, search);
-    const idSource = ModelRegistryIndex.getIdSource(cls);
+    const idSource = ModelRegistryIndex.get(cls).idSource;
     const idFieldName = idSource.field;
     const shouldRemoveIds = query.select && idFieldName in query.select && !query.select[castKey(idFieldName)];
     return Promise.all(
@@ -654,14 +655,14 @@ export class ElasticsearchModelService
     ModelCrudUtil.ensureNotSubType(cls);
     await QueryVerifier.verify(cls, query);
 
-    const [id, item] = await ModelCrudUtil.preStore(cls, data);
+    const [id, item] = await ModelCrudUtil.preStore(cls, data, { ensureId: false });
     this.preUpdate(cls, item);
 
     let where = ModelQueryUtil.getWhereClause(cls, query.where);
     if (id) {
       where = {
         ...where,
-        ...ModelRegistryIndex.getIdSource(cls).where(id)
+        ...ModelRegistryIndex.get(cls).idSource.where(id)
       };
     }
     query.where = where;
@@ -756,7 +757,7 @@ export class ElasticsearchModelService
     });
     const search = ElasticsearchQueryUtil.getSearchObject(cls, resolvedQuery);
     const result = await this.execSearch(cls, search);
-    const idSource = ModelRegistryIndex.getIdSource(cls);
+    const idSource = ModelRegistryIndex.get(cls).idSource;
     const all = result.hits.hits.map(hit => castTo<T>(field === idSource.field ? { [idSource.field]: hit._id } : hit._source));
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, item => item, query);
   }

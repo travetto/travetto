@@ -7,7 +7,7 @@ import { NotFoundError } from '../error/not-found.ts';
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
 import type { DataHandler, PrePersistScope } from '../registry/types.ts';
 import type { ModelCrudSupport } from '../types/crud.ts';
-import type { ModelType, OptionalId, PartialWithId } from '../types/model.ts';
+import type { ModelId, ModelType, OptionalId, PartialWithId } from '../types/model.ts';
 
 type ModelLoadInput = string | BinaryArray | object;
 
@@ -72,35 +72,42 @@ export class ModelCrudUtil {
   static async preStore<T extends ModelType>(
     cls: Class<T>,
     item: OptionalId<T>,
-    scope: PrePersistScope = 'all'
+    config?: {
+      scope?: PrePersistScope;
+      validate?: boolean;
+      ensureId?: boolean;
+    }
   ): Promise<[id: string, item: T]> {
-    const idSource = ModelRegistryIndex.getIdSource(cls);
+    SchemaRegistryIndex.get(cls).ensureInstanceTypeField(item);
 
-    const currentId = ModelRegistryIndex.ensureId(cls, item);
+    const scope = config?.scope ?? 'all';
+
+    const idSource = ModelRegistryIndex.get(cls).idSource;
+    const currentId = config?.ensureId !== false ? ModelRegistryIndex.get(cls).ensureId(item) : idSource.get(item, { optional: true });
 
     if (DataUtil.isPlainObject(item)) {
       item = cls.from(castTo(item));
     }
 
-    SchemaRegistryIndex.get(cls).ensureInstanceTypeField(item);
-
     item = await this.prePersist(cls, item, scope);
 
-    let errors: ValidationError[] = [];
-    try {
-      await SchemaValidator.validate(cls, item);
-    } catch (error) {
-      if (error instanceof ValidationResultError) {
-        errors = error.details.errors;
+    if (config?.validate ?? true) {
+      let errors: ValidationError[] = [];
+      try {
+        await SchemaValidator.validate(cls, item);
+      } catch (error) {
+        if (error instanceof ValidationResultError) {
+          errors = error.details.errors;
+        }
       }
-    }
 
-    if (!currentId) {
-      errors.push({ kind: 'required', path: castTo(idSource.field), type: 'string', message: `${idSource.field} is required` });
-    }
+      if (!currentId) {
+        errors.push({ kind: 'required', path: castTo(idSource.field), type: 'string', message: `${idSource.field} is required` });
+      }
 
-    if (errors.length) {
-      throw new ValidationResultError(errors);
+      if (errors.length) {
+        throw new ValidationResultError(errors);
+      }
     }
     return [currentId!, castTo(item)];
   }
@@ -213,8 +220,8 @@ export class ModelCrudUtil {
         category: 'data'
       });
     }
-    const idSource = ModelRegistryIndex.getIdSource(cls);
-    const id = idSource.getOptional(item);
+    const idSource = ModelRegistryIndex.get(cls).idSource;
+    const id = idSource.get(item, { optional: true });
     const keys = Object.keys(item);
     if ((keys.length === 1 && id) || keys.length === 0) {
       throw new RuntimeError('No fields to update');
@@ -233,11 +240,12 @@ export class ModelCrudUtil {
    */
   static async naivePartialUpdate<T extends ModelType>(
     cls: Class<T>,
-    get: () => Promise<T>,
+    get: (id?: ModelId) => Promise<T>,
     item: PartialWithId<T> | Partial<T>
   ): Promise<T> {
+    const id = ModelRegistryIndex.get(cls).idSource.get(item, { optional: true });
     const prepared = await this.prePartialUpdate(cls, item);
-    const full = await get();
+    const full = await get(id);
     return cls.from({ ...full, ...prepared });
   }
 }

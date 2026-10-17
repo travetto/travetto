@@ -49,7 +49,7 @@ class ModelIdSourceSuite {
   @Test('Verify ModelRegistryIndex integration for default model')
   async testDefaultModel(): Promise<void> {
     await Registry.init();
-    const source = ModelRegistryIndex.getIdSource(DefaultModel);
+    const source = ModelRegistryIndex.get(DefaultModel).idSource;
     assert(source.field === 'id');
 
     const generatedId = ModelRegistryIndex.getConfig(DefaultModel).idGenerator();
@@ -58,10 +58,10 @@ class ModelIdSourceSuite {
 
     const item: DefaultModel = { id: 'test-123', name: 'Sample' };
     assert(source.get(item) === 'test-123');
-    assert(source.getOptional(item) === 'test-123');
+    assert(source.get(item, { optional: true }) === 'test-123');
 
     const emptyItem: OptionalId<DefaultModel> = { name: 'No Id' };
-    assert(source.getOptional(emptyItem) === undefined);
+    assert(source.get(emptyItem, { optional: true }) === undefined);
     assert.throws(() => source.get(emptyItem));
 
     source.set(emptyItem, 'assigned-id');
@@ -77,7 +77,7 @@ class ModelIdSourceSuite {
   @Test('Verify custom id field')
   async testCustomIdField(): Promise<void> {
     await Registry.init();
-    const source = ModelRegistryIndex.getIdSource(CustomIdModel);
+    const source = ModelRegistryIndex.get(CustomIdModel).idSource;
     assert(source.field === 'customId');
 
     const item: CustomIdModel = { customId: 'code-1', name: 'Item' };
@@ -90,7 +90,7 @@ class ModelIdSourceSuite {
   @Test('Verify custom generator')
   async testCustomGenerator(): Promise<void> {
     await Registry.init();
-    const source = ModelRegistryIndex.getIdSource(CustomGeneratorModel);
+    const source = ModelRegistryIndex.get(CustomGeneratorModel).idSource;
     assert(source.field === 'identifier');
     assert(ModelRegistryIndex.getConfig(CustomGeneratorModel).idGenerator() === 'custom-id-value');
   }
@@ -98,7 +98,7 @@ class ModelIdSourceSuite {
   @Test('Verify auto-discovered ModelId field')
   async testAutoDiscoveredId(): Promise<void> {
     await Registry.init();
-    const source = ModelRegistryIndex.getIdSource(AutoDiscoveredIdModel);
+    const source = ModelRegistryIndex.get(AutoDiscoveredIdModel).idSource;
     assert(source.field === 'isbn');
     const generated = ModelRegistryIndex.getConfig(AutoDiscoveredIdModel).idGenerator();
     assert(typeof generated === 'string');

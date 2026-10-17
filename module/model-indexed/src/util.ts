@@ -50,7 +50,7 @@ export class ModelIndexedUtil {
     idx: SingleItemIndex<T, K, S>,
     body: Partial<T>
   ): Promise<T> {
-    const idSource = ModelRegistryIndex.getIdSource(cls);
+    const idSource = ModelRegistryIndex.get(cls).idSource;
     const id = idSource.get(await service.getByIndex(cls, idx, castTo(body)));
     idSource.set(castTo(body), id);
     return await service.update(cls, castTo(body));

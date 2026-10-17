@@ -198,7 +198,7 @@ export abstract class AbstractANSI99Dialect {
   }
 
   getCreateTableSQL(context: TableContext): string {
-    const idFieldName = ModelRegistryIndex.getIdSource(context.cls).field;
+    const idFieldName = ModelRegistryIndex.getConfig(context.cls).idField;
     const idFieldConfig = context.simpleFields.get(idFieldName)!;
     const idType = this.getColumnType(idFieldConfig);
     const columnDefinitions: string[] = [`${this.escapeIdentifier(idFieldName)} ${idType} PRIMARY KEY`];
@@ -707,7 +707,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
       return { sql: '', values: [] };
     }
 
-    const idSource = ModelRegistryIndex.getIdSource(tableContext.cls);
+    const idSource = ModelRegistryIndex.get(tableContext.cls).idSource;
     const idFieldName = idSource.field;
 
     if (rawItems.length === 1) {
@@ -771,7 +771,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     whereSQL?: string,
     whereParameters: unknown[] = []
   ): { sql: string; values: unknown[] } {
-    const idFieldName = ModelRegistryIndex.getIdSource(tableContext.cls).field;
+    const idFieldName = ModelRegistryIndex.getConfig(tableContext.cls).idField;
     const sets: string[] = [];
     const values: unknown[] = [];
 
@@ -856,7 +856,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     rawItem: Record<string, unknown>,
     conflictTarget: string[]
   ): { sql: string; values: unknown[] } {
-    const idFieldName = ModelRegistryIndex.getIdSource(tableContext.cls).field;
+    const idFieldName = ModelRegistryIndex.getConfig(tableContext.cls).idField;
     const columns: string[] = [];
     const values: unknown[] = [];
     const updates: string[] = [];

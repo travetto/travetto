@@ -289,14 +289,9 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     }
   }
 
-  async store<T extends ModelType>(cls: Class<T>, item: OptionalId<T>, preStore = true): Promise<T> {
-    let prepped: T = castTo(item);
-    let id: string;
-    if (preStore) {
-      [id, prepped] = await ModelCrudUtil.preStore(cls, item);
-    } else {
-      id = ModelRegistryIndex.getIdSource(cls).get(prepped);
-    }
+  async store<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
+    const prepped: T = castTo(item);
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
     const content = JSONUtil.toBinaryArray(prepped);
     await this.client.putObject(
       this.#query(cls, id, {
@@ -310,34 +305,32 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const id = ModelRegistryIndex.getIdSource(cls).getOptional(item);
-    if (id) {
-      if (await this.head(cls, id)) {
-        throw new ExistsError(cls, id);
-      }
+    const [id, prepped] = await ModelCrudUtil.preStore(cls, item);
+    if (id && (await this.head(cls, id))) {
+      throw new ExistsError(cls, id);
     }
-    return this.store(cls, item);
+    return this.store(cls, prepped);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const id = ModelRegistryIndex.getIdSource(cls).get(item);
+    const [id, prepped] = await ModelCrudUtil.preStore(cls, item, { ensureId: false });
     if (!(await this.head(cls, id))) {
       throw new NotFoundError(cls, id);
     }
-    return this.store(cls, item);
+    return this.store(cls, prepped);
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    return this.store(cls, item);
+    const [, prepped] = await ModelCrudUtil.preStore(cls, item, { ensureId: false });
+    return this.store(cls, prepped);
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const id = ModelRegistryIndex.getIdSource(cls).get(item);
-    const prepped = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
-    return this.store<T>(cls, prepped, false);
+    const prepped = await ModelCrudUtil.naivePartialUpdate(cls, id => this.get(cls, id!), item);
+    return this.store<T>(cls, prepped);
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {

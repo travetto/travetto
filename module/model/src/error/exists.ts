@@ -8,7 +8,7 @@ import type { ModelType } from '../types/model';
  */
 export class ExistsError extends RuntimeError {
   static from<T extends ModelType>(cls: Class<T>, idOrItem: Partial<T>): ExistsError {
-    return new ExistsError(cls, ModelRegistryIndex.getIdSource(cls).getOptional(idOrItem) ?? 'unknown');
+    return new ExistsError(cls, ModelRegistryIndex.get(cls).idSource.get(idOrItem, { optional: true }) ?? 'unknown');
   }
 
   constructor(cls: Class | string, id: string, details?: Record<string, unknown>) {

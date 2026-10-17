@@ -39,11 +39,11 @@ export class ModelBulkUtil {
         operation.insert = item;
         insertedIds.set(i, id);
       } else if ('update' in operation && operation.update) {
-        const [id, item] = await ModelCrudUtil.preStore(cls, operation.update);
+        const [id, item] = await ModelCrudUtil.preStore(cls, operation.update, { ensureId: false });
         operation.update = item;
         updatedIds.set(i, id);
       } else if ('upsert' in operation && operation.upsert) {
-        const isNew = !ModelRegistryIndex.getIdSource(cls).getOptional(operation.upsert);
+        const isNew = !ModelRegistryIndex.get(cls).idSource.get(operation.upsert, { optional: true });
         const [id, item] = await ModelCrudUtil.preStore(cls, operation.upsert);
         operation.upsert = item;
         if (isNew) {
