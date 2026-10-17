@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
 import { ExistsError, Model, type ModelCrudSupport, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
-import { castTo } from '@travetto/runtime';
+import { castTo, Util } from '@travetto/runtime';
 import { Precision, Required, Schema, Text, ValidationResultError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
@@ -82,27 +82,29 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   async save() {
     const service = await this.service;
 
-    const people = [1, 2, 3, 8].map(x =>
-      Person.from({
-        id: service.idSource.create(),
-        name: 'Bob',
-        age: 20 + x,
-        gender: 'm',
-        address: {
-          street1: 'a',
-          ...(x === 1 ? { street2: 'b' } : {})
-        }
-      })
+    const people = await Promise.all(
+      [1, 2, 3, 8].map(x =>
+        service.upsert(
+          Person,
+          Person.from({
+            name: 'Bob',
+            age: 20 + x,
+            gender: 'm',
+            address: {
+              street1: 'a',
+              ...(x === 1 ? { street2: 'b' } : {})
+            }
+          })
+        )
+      )
     );
-
-    await Promise.all(people.map(el => service.upsert(Person, el)));
 
     const single = await service.get(Person, people[2].id);
     assert(single !== undefined);
     assert(single.age === 23);
 
     await assert.rejects(async () => {
-      await service.get(Person, service.idSource.create());
+      await service.get(Person, 'randomId');
     }, NotFoundError);
   }
 
@@ -179,7 +181,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   @Test('Verify update and delete on missing item fails with NotFoundError')
   async testMissingItemFails() {
     const service = await this.service;
-    const nonExistentId = service.idSource.create();
+    const nonExistentId = Util.uuid(32);
     await assert.rejects(() => service.update(Simple, Simple.from({ id: nonExistentId, name: 'bob' })), NotFoundError);
     await assert.rejects(() => service.updatePartial(Simple, { id: nonExistentId, name: 'bob' }), NotFoundError);
     await assert.rejects(() => service.delete(Simple, nonExistentId), NotFoundError);
@@ -279,20 +281,22 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   async list() {
     const service = await this.service;
 
-    const people = [1, 2, 3].map(x =>
-      Person.from({
-        id: service.idSource.create(),
-        name: 'Bob',
-        age: 20 + x,
-        gender: 'm',
-        address: {
-          street1: 'a',
-          ...(x === 1 ? { street2: 'b' } : {})
-        }
-      })
+    const people = await Promise.all(
+      [1, 2, 3].map(x =>
+        service.upsert(
+          Person,
+          Person.from({
+            name: 'Bob',
+            age: 20 + x,
+            gender: 'm',
+            address: {
+              street1: 'a',
+              ...(x === 1 ? { street2: 'b' } : {})
+            }
+          })
+        )
+      )
     );
-
-    await Promise.all(people.map(el => service.upsert(Person, el)));
 
     const found = (await this.toArray(service.list(Person))).toSorted((a, b) => a.age - b.age);
 
@@ -310,7 +314,6 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
         service.upsert(
           Person,
           Person.from({
-            id: service.idSource.create(),
             name: 'Bob',
             age: 20 + x,
             gender: 'm',

@@ -15,6 +15,7 @@ export const Messages = new Map<string, string>(
     '[[:url:]]': '{path} is not a valid url',
     '[[:simpleName:]]': '{path} is not a proper name',
     '[[:postalCode:]]': '{path} is not a valid postal code',
-    '[[:email:]]': '{path} is not a valid email address'
+    '[[:email:]]': '{path} is not a valid email address',
+    '[[:uuid:]]': '{path} is not a valid uuid'
   })
 );

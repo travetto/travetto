@@ -7,13 +7,9 @@ import { NotFoundError } from '../error/not-found.ts';
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
 import type { DataHandler, PrePersistScope } from '../registry/types.ts';
 import type { ModelCrudSupport } from '../types/crud.ts';
-import type { ModelIdSource, ModelType, OptionalId, PartialWithId } from '../types/model.ts';
+import type { ModelType, OptionalId, PartialWithId } from '../types/model.ts';
 
 type ModelLoadInput = string | BinaryArray | object;
-
-export type ModelCrudProvider = {
-  idSource: ModelIdSource;
-};
 
 /**
  * Crud utilities
@@ -23,15 +19,6 @@ export class ModelCrudUtil {
    * Type guard for determining if service supports crud operations
    */
   static isSupported = hasFunction<ModelCrudSupport>('upsert');
-
-  /**
-   * Build a uuid generator
-   */
-  static uuidSource(length: number = 32): ModelIdSource {
-    const create = (): string => Util.uuid(length);
-    const valid = (id: string): boolean => id.length === length && /^[0-9a-f]+$/i.test(id);
-    return { create, valid };
-  }
 
   static async filterOutNotFound<T extends ModelType>(actions: Promise<T>[] | undefined): Promise<T[]> {
     if (!actions) {
@@ -81,13 +68,11 @@ export class ModelCrudUtil {
    *
    * @param cls Type to store for
    * @param item Item to store
-   * @param provider Provider providing ID source
    * @param config Configuration options or prePersist scope
    */
   static async preStore<T extends ModelType>(
     cls: Class<T>,
     item: Partial<OptionalId<T>>,
-    provider: ModelCrudProvider,
     config?:
       | {
           scope?: PrePersistScope;
@@ -101,7 +86,7 @@ export class ModelCrudUtil {
     const ensureId = resolvedConfig?.ensureId ?? true;
 
     if (ensureId && !item.id) {
-      item.id = provider.idSource.create();
+      item.id = ModelRegistryIndex.getConfig(cls).idGenerator();
     }
 
     if (DataUtil.isPlainObject(item)) {
@@ -119,15 +104,13 @@ export class ModelCrudUtil {
       } catch (error) {
         if (error instanceof ValidationResultError) {
           errors = error.details.errors;
+        } else {
+          throw error;
         }
       }
-
       if (!item.id) {
         errors.push({ kind: 'required', path: 'id', type: 'string', message: 'id is required' });
-      } else if (!provider.idSource.valid(item.id)) {
-        errors.push({ kind: 'invalid', path: 'id', value: item.id, type: 'string', message: `${item.id} is an invalid value for \`id\`` });
       }
-
       if (errors.length) {
         throw new ValidationResultError(errors);
       }
@@ -141,45 +124,34 @@ export class ModelCrudUtil {
   static async preCreate<T extends ModelType>(
     cls: Class<T>,
     item: Partial<OptionalId<T>>,
-    provider: ModelCrudProvider,
     options?: { ensureNotSubType?: boolean }
   ): Promise<T> {
     if (options?.ensureNotSubType) {
       this.ensureNotSubType(cls);
     }
-    return this.preStore(cls, item, provider, { ensureId: true, scope: 'all' });
+    return this.preStore(cls, item, { ensureId: true, scope: 'all' });
   }
 
   /**
    * Pre-update hook: checks subtype if requested, requires ID (throwing ValidationResultError if missing),
    * runs prePersist, and validates schema
    */
-  static async preUpdate<T extends ModelType>(
-    cls: Class<T>,
-    item: T,
-    provider: ModelCrudProvider,
-    options?: { ensureNotSubType?: boolean }
-  ): Promise<T> {
+  static async preUpdate<T extends ModelType>(cls: Class<T>, item: T, options?: { ensureNotSubType?: boolean }): Promise<T> {
     if (options?.ensureNotSubType) {
       this.ensureNotSubType(cls);
     }
-    return this.preStore(cls, item, provider, { ensureId: false, scope: 'all' });
+    return this.preStore(cls, item, { ensureId: false, scope: 'all' });
   }
 
   /**
    * Pre-upsert hook: checks subtype if requested, ensures ID is generated if omitted,
    * runs prePersist, and validates schema
    */
-  static async preUpsert<T extends ModelType>(
-    cls: Class<T>,
-    item: OptionalId<T>,
-    provider: ModelCrudProvider,
-    options?: { ensureNotSubType?: boolean }
-  ): Promise<T> {
+  static async preUpsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>, options?: { ensureNotSubType?: boolean }): Promise<T> {
     if (options?.ensureNotSubType) {
       this.ensureNotSubType(cls);
     }
-    return this.preStore(cls, item, provider, { ensureId: true, scope: 'all' });
+    return this.preStore(cls, item, { ensureId: true, scope: 'all' });
   }
 
   /**

@@ -52,7 +52,6 @@ type ScanOp = 'scan' | 'sScan' | 'zRange';
  */
 @Injectable()
 export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
-  idSource = ModelCrudUtil.uuidSource();
   client: RedisClient;
   config: RedisModelConfig;
 
@@ -328,20 +327,20 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     if (item.id) {
       await this.has(cls, item.id, 'exists');
     }
-    const prepped = await ModelCrudUtil.preCreate(cls, item, this);
+    const prepped = await ModelCrudUtil.preCreate(cls, item);
     await this.#store(cls, prepped, 'write');
     return prepped;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    const prepped = await ModelCrudUtil.preUpdate(cls, item, this, { ensureNotSubType: true });
+    const prepped = await ModelCrudUtil.preUpdate(cls, item, { ensureNotSubType: true });
     await this.has(cls, prepped.id, 'notfound');
     await this.#store(cls, prepped, 'write');
     return prepped;
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preUpsert(cls, item, this, { ensureNotSubType: true });
+    const prepped = await ModelCrudUtil.preUpsert(cls, item, { ensureNotSubType: true });
     await this.#store(cls, prepped, 'write');
     return prepped;
   }

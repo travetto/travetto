@@ -120,7 +120,6 @@ export class ElasticsearchModelService
     ModelQuerySuggestSupport,
     ModelQueryFacetSupport
 {
-  idSource = ModelCrudUtil.uuidSource();
   client: Client;
   manager: IndexManager;
   config: ElasticsearchModelConfig;
@@ -334,7 +333,7 @@ export class ElasticsearchModelService
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const clean = await ModelCrudUtil.preCreate(cls, item, this);
+    const clean = await ModelCrudUtil.preCreate(cls, item);
     const id = this.#preStore(clean);
 
     try {
@@ -356,7 +355,7 @@ export class ElasticsearchModelService
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    item = await ModelCrudUtil.preUpdate(cls, item, this, { ensureNotSubType: true });
+    item = await ModelCrudUtil.preUpdate(cls, item, { ensureNotSubType: true });
 
     const id = this.#preStore(item);
 
@@ -382,7 +381,7 @@ export class ElasticsearchModelService
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, input: OptionalId<T>): Promise<T> {
-    const item = await ModelCrudUtil.preUpsert(cls, input, this, { ensureNotSubType: true });
+    const item = await ModelCrudUtil.preUpsert(cls, input, { ensureNotSubType: true });
     const id = this.#preStore(item);
 
     await this.client.update({
@@ -432,7 +431,7 @@ export class ElasticsearchModelService
   }
 
   async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse<EsBulkError>> {
-    await ModelBulkUtil.preStore(cls, operations, this);
+    await ModelBulkUtil.preStore(cls, operations);
 
     type BulkDoc = Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string; _id?: string }>>;
     const body = operations.reduce<(T | BulkDoc | { doc: T })[]>((toRun, operation) => {
@@ -678,7 +677,7 @@ export class ElasticsearchModelService
   async updateByQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T> {
     await QueryVerifier.verify(cls, query);
 
-    const item = await ModelCrudUtil.preUpdate(cls, data, this, { ensureNotSubType: true });
+    const item = await ModelCrudUtil.preUpdate(cls, data, { ensureNotSubType: true });
     const id = this.#preStore(item);
 
     const where = ModelQueryUtil.getWhereClause(cls, query.where);

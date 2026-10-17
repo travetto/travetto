@@ -42,11 +42,6 @@ All [Data Modeling Support](https://github.com/travetto/travetto/tree/main/modul
 ```typescript
 export interface ModelBasicSupport<C = unknown> {
   /**
-   * Id Source
-   */
-  idSource: ModelIdSource;
-
-  /**
    * Get underlying client
    */
   get client(): C;
@@ -205,7 +200,7 @@ export interface ModelBulkSupport extends ModelCrudSupport {
 ```
 
 ## Declaration
-Models are declared via the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14) decorator, which allows the system to know that this is a class that is compatible with the module. The only requirement for a model is the [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10)
+Models are declared via the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14) decorator, which allows the system to know that this is a class that is compatible with the module. The only requirement for a model is the [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L5)
 
 **Code: ModelType**
 ```typescript

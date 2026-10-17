@@ -1,5 +1,5 @@
 import { type Class, castTo, getClass } from '@travetto/runtime';
-import { SchemaRegistryIndex } from '@travetto/schema';
+import { CommonRegex, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelType } from '../types/model.ts';
 import { ModelRegistryIndex } from './registry-index.ts';
@@ -17,8 +17,12 @@ export function Model(config: Partial<ModelConfig<ModelType>> | string = {}) {
       config = { store: config };
     }
     ModelRegistryIndex.getForRegister(cls).register(config);
-    if (SchemaRegistryIndex.getForRegister(cls).get().fields.id) {
-      SchemaRegistryIndex.getForRegister(cls).registerField('id', { required: { active: false } });
+    const idField = SchemaRegistryIndex.getForRegister(cls).get().fields.id;
+    if (idField) {
+      SchemaRegistryIndex.getForRegister(cls).registerField('id', {
+        required: { active: false },
+        ...(!idField.match ? { match: { regex: CommonRegex.uuid } } : {})
+      });
     }
     return cls;
   };

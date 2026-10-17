@@ -136,7 +136,6 @@ export class MongoModelService
 {
   #db: Db;
   #bucket: GridFSBucket;
-  idSource = ModelCrudUtil.uuidSource();
   client: MongoClient;
   config: MongoModelConfig;
 
@@ -335,7 +334,7 @@ export class MongoModelService
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const cleaned = await ModelCrudUtil.preCreate<WithId<T, Binary>>(cls, item, this);
+    const cleaned = await ModelCrudUtil.preCreate<WithId<T, Binary>>(cls, item);
     const id = this.#preStore(cleaned);
 
     const store = await this.getStore(cls);
@@ -351,7 +350,7 @@ export class MongoModelService
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    item = await ModelCrudUtil.preUpdate(cls, item, this);
+    item = await ModelCrudUtil.preUpdate(cls, item);
     const id = this.#preStore(item);
     const store = await this.getStore(cls);
     const result = await store.replaceOne(this.getIdFilter(cls, id), item);
@@ -362,7 +361,7 @@ export class MongoModelService
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const cleaned = await ModelCrudUtil.preUpsert<WithId<T, Binary>>(cls, item, this);
+    const cleaned = await ModelCrudUtil.preUpsert<WithId<T, Binary>>(cls, item);
     const id = this.#preStore(cleaned);
     const store = await this.getStore(cls);
 
@@ -482,7 +481,7 @@ export class MongoModelService
 
     const store = await this.getStore<PartialWithId<T>>(cls);
     const bulk = store.initializeUnorderedBulkOp({ writeConcern: { w: 1 } });
-    const { upsertedIds, insertedIds } = await ModelBulkUtil.preStore(cls, operations, this);
+    const { upsertedIds, insertedIds } = await ModelBulkUtil.preStore(cls, operations);
 
     out.insertedIds = new Map([...upsertedIds.entries(), ...insertedIds.entries()]);
 
@@ -675,7 +674,7 @@ export class MongoModelService
     await QueryVerifier.verify(cls, query);
 
     const col = await this.getStore(cls);
-    const item = await ModelCrudUtil.preUpdate(cls, data, this);
+    const item = await ModelCrudUtil.preUpdate(cls, data);
     const id = this.#preStore(item);
     const where = ModelQueryUtil.getWhereClause(cls, query.where);
     where.id = id;

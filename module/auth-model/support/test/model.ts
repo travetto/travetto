@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Inject, InjectableFactory } from '@travetto/di';
 import { Model, type ModelCrudSupport, Transient } from '@travetto/model';
-import { type Class, castTo, RuntimeError } from '@travetto/runtime';
+import { type Class, castTo, RuntimeError, Util } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
@@ -48,9 +48,6 @@ export abstract class AuthModelServiceSuite<T> {
   @Inject()
   authService: ModelAuthService<User>;
 
-  @Inject(TestModelSvcSymbol)
-  svc: ModelCrudSupport;
-
   @Test()
   async register() {
     const pre = User.from({
@@ -67,7 +64,7 @@ export abstract class AuthModelServiceSuite<T> {
   @Test()
   async authenticate() {
     const pre = User.from({
-      id: this.svc.idSource.create(),
+      id: Util.uuid(32),
       password: 'bob',
       details: {}
     });

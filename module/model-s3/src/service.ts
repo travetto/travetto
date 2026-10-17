@@ -67,7 +67,6 @@ type S3Metadata = Pick<
  */
 @Injectable()
 export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, ModelStorageSupport, ModelExpirySupport {
-  idSource = ModelCrudUtil.uuidSource();
   client: S3;
   config: S3ModelConfig;
 
@@ -293,7 +292,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   async store<T extends ModelType>(cls: Class<T>, item: OptionalId<T>, preStore = true): Promise<T> {
     let prepped: T = castTo(item);
     if (preStore) {
-      prepped = await ModelCrudUtil.preUpsert(cls, item, this, { ensureNotSubType: true });
+      prepped = await ModelCrudUtil.preUpsert(cls, item, { ensureNotSubType: true });
     }
     const content = JSONUtil.toBinaryArray(prepped);
     await this.client.putObject(
@@ -308,7 +307,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preCreate(cls, item, this);
+    const prepped = await ModelCrudUtil.preCreate(cls, item);
     if (await this.head(cls, prepped.id)) {
       throw new ExistsError(cls, prepped.id);
     }
@@ -316,7 +315,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    const prepped = await ModelCrudUtil.preUpdate(cls, item, this, { ensureNotSubType: true });
+    const prepped = await ModelCrudUtil.preUpdate(cls, item, { ensureNotSubType: true });
     if (!(await this.head(cls, prepped.id))) {
       throw new NotFoundError(cls, prepped.id);
     }
@@ -324,7 +323,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preUpsert(cls, item, this, { ensureNotSubType: true });
+    const prepped = await ModelCrudUtil.preUpsert(cls, item, { ensureNotSubType: true });
     return this.store(cls, prepped, false);
   }
 

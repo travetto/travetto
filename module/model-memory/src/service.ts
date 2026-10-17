@@ -91,7 +91,6 @@ export class MemoryModelService
     'indexed:keyed': new Map<string, Map<string, Set<string>>>()
   } as const;
 
-  idSource = ModelCrudUtil.uuidSource();
   config: MemoryModelConfig;
 
   constructor(config: MemoryModelConfig) {
@@ -292,13 +291,13 @@ export class MemoryModelService
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preCreate(cls, item, this);
+    const prepped = await ModelCrudUtil.preCreate(cls, item);
     this.#find(cls, prepped.id, 'exists');
     return await this.#persist(cls, prepped, 'write');
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    const prepped = await ModelCrudUtil.preUpdate(cls, item, this);
+    const prepped = await ModelCrudUtil.preUpdate(cls, item);
     await this.get(cls, prepped.id);
     return await this.#persist(cls, prepped, 'write');
   }
@@ -308,7 +307,7 @@ export class MemoryModelService
     if (item.id && store.has(item.id)) {
       await ModelCrudUtil.load(cls, store.get(item.id)!, 'exists');
     }
-    const prepped = await ModelCrudUtil.preUpsert(cls, item, this);
+    const prepped = await ModelCrudUtil.preUpsert(cls, item);
     return await this.#persist(cls, prepped, 'write');
   }
 

@@ -81,16 +81,16 @@ This schema provides a powerful base for data binding and validation at runtime.
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L172">@Telephone</a> ensures string field matches basic telephone regex</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L182">@Url</a> ensures string field matches basic url regex</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/common.ts#L41">@Ignore</a> exclude from auto schema registration</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L202">@Integer</a> ensures number passed in is only a whole number</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L211">@Float</a> ensures number passed in allows fractional values</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L229">@Currency</a> provides support for standard currency</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L212">@Integer</a> ensures number passed in is only a whole number</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L221">@Float</a> ensures number passed in allows fractional values</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L239">@Currency</a> provides support for standard currency</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L88">@Text</a> indicates that a field is expecting natural language input, not just discrete values</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L97">@LongText</a> same as text, but expects longer form content</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L44">@Readonly</a> defines a that field should not be bindable external to the class</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L35">@Writeonly</a> defines a that field should not be exported in serialization, but that it can be bound to</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L54">@Secret</a> marks a field as being sensitive. This is used by certain logging activities to ensure sensitive information is not logged out.</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L239">@Specifier</a> attributes additional specifiers to a field, allowing for more specification beyond just the field's type.</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L248">@DiscriminatorField</a> allows for promoting a given field as the owner of the sub type discriminator.</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L249">@Specifier</a> attributes additional specifiers to a field, allowing for more specification beyond just the field's type.</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L258">@DiscriminatorField</a> allows for promoting a given field as the owner of the sub type discriminator.</li>
 </ul>
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated. <br><br>
 Just like the class, all fields can be defined with

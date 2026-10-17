@@ -64,7 +64,6 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return table;
   }
 
-  idSource = ModelCrudUtil.uuidSource();
   client: Firestore;
   config: FirestoreModelConfig;
 
@@ -181,7 +180,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preCreate(cls, item, this);
+    const prepped = await ModelCrudUtil.preCreate(cls, item);
     try {
       await this.#getCollection(cls).doc(prepped.id).create(clone<DocumentData>(prepped));
     } catch (error) {
@@ -194,14 +193,14 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    const prepped = await ModelCrudUtil.preUpdate(cls, item, this, { ensureNotSubType: true });
+    const prepped = await ModelCrudUtil.preUpdate(cls, item, { ensureNotSubType: true });
     await this.get(cls, prepped.id);
     await this.#getCollection(cls).doc(prepped.id).set(clone<DocumentData>(prepped), { merge: false });
     return prepped;
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preUpsert(cls, item, this, { ensureNotSubType: true });
+    const prepped = await ModelCrudUtil.preUpsert(cls, item, { ensureNotSubType: true });
     await this.#getCollection(cls).doc(prepped.id).set(clone<DocumentData>(prepped));
     return prepped;
   }

@@ -184,6 +184,16 @@ export function Url(message?: string): PropType<StringType> {
 }
 
 /**
+ * Mark an input as a uuid
+ * @param message The message to show when the constraint fails
+ * @augments `@travetto/schema:Input`
+ * @kind decorator
+ */
+export function UUID(message?: string): PropType<StringType> {
+  return Match(CommonRegex.uuid, message);
+}
+
+/**
  * Determine the numeric precision of the value
  * @param digits The number of digits a number should have
  * @param decimals The number of decimal digits to support

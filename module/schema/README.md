@@ -73,16 +73,16 @@ This schema provides a powerful base for data binding and validation at runtime.
    *  [@Telephone](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L172) ensures string field matches basic telephone regex
    *  [@Url](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L182) ensures string field matches basic url regex
    *  [@Ignore](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/common.ts#L41) exclude from auto schema registration
-   *  [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L202) ensures number passed in is only a whole number
-   *  [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L211) ensures number passed in allows fractional values
-   *  [@Currency](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L229) provides support for standard currency
+   *  [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L212) ensures number passed in is only a whole number
+   *  [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L221) ensures number passed in allows fractional values
+   *  [@Currency](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L239) provides support for standard currency
    *  [@Text](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L88) indicates that a field is expecting natural language input, not just discrete values
    *  [@LongText](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L97) same as text, but expects longer form content
    *  [@Readonly](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L44) defines a that field should not be bindable external to the class
    *  [@Writeonly](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L35) defines a that field should not be exported in serialization, but that it can be bound to
    *  [@Secret](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L54) marks a field as being sensitive. This is used by certain logging activities to ensure sensitive information is not logged out.
-   *  [@Specifier](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L239) attributes additional specifiers to a field, allowing for more specification beyond just the field's type.
-   *  [@DiscriminatorField](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L248) allows for promoting a given field as the owner of the sub type discriminator.
+   *  [@Specifier](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L249) attributes additional specifiers to a field, allowing for more specification beyond just the field's type.
+   *  [@DiscriminatorField](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L258) allows for promoting a given field as the owner of the sub type discriminator.
 
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated. 
 

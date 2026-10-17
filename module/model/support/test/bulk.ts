@@ -45,7 +45,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
   @Test()
   async bulkUpdate() {
     const service = await this.service;
-    const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}`, id: service.idSource.create() }));
+    const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}` }));
 
     const result = await service.processBulk(
       User,
@@ -65,7 +65,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
   @Test()
   async bulkDelete() {
     const service = await this.service;
-    const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}`, id: service.idSource.create() }));
+    const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}` }));
 
     const result = await service.processBulk(
       User,
