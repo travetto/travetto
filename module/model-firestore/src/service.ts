@@ -9,6 +9,7 @@ import {
   type ModelStorageSupport,
   ModelStorageUtil,
   type ModelType,
+  ExistsError,
   NotFoundError,
   type OptionalId,
   type PartialWithId
@@ -174,14 +175,22 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(prepped.id).create(clone<DocumentData>(prepped));
+    try {
+      await this.#getCollection(cls).doc(prepped.id).create(clone<DocumentData>(prepped));
+    } catch (error) {
+      if (error && error instanceof Error && (error.message.includes('ALREADY_EXISTS') || error.message.includes('already exists'))) {
+        throw new ExistsError(cls, prepped.id);
+      }
+      throw error;
+    }
     return prepped;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(item.id).set(clone<DocumentData>(prepped), { merge: false });
+    const prepped = await ModelCrudUtil.preStore(cls, item, this, { ensureId: false });
+    await this.get(cls, prepped.id);
+    await this.#getCollection(cls).doc(prepped.id).set(clone<DocumentData>(prepped), { merge: false });
     return prepped;
   }
 
@@ -195,7 +204,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
-    const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
+    const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, { validateId: true });
     const cleaned = setMissingValues(full, FieldValue.delete());
     await this.#getCollection(cls)
       .doc(id)

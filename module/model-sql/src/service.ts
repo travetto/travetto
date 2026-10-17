@@ -15,6 +15,7 @@ import {
   type ModelStorageSupport,
   ModelStorageUtil,
   type ModelType,
+  ExistsError,
   NotFoundError,
   type OptionalId,
   type PartialWithId,
@@ -60,7 +61,7 @@ import {
   type WhereClause
 } from '@travetto/model-query';
 import { type Class, castTo, JSONUtil, Runtime } from '@travetto/runtime';
-import { SchemaRegistryIndex } from '@travetto/schema';
+import { SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
 import { WorkPool } from '@travetto/worker';
 
 import type { SQLConnection } from './connection.ts';
@@ -149,7 +150,7 @@ export abstract class BaseSQLModelService<C = unknown>
 
   async executeUpdate<T extends ModelType>(modelClass: Class<T>, where: WhereClause<T>, item: T): Promise<T | undefined> {
     ModelCrudUtil.ensureNotSubType(modelClass);
-    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this);
+    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, this, { ensureId: false });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
 
     const tableContext = this.connection.getContext(modelClass);
@@ -213,7 +214,17 @@ export abstract class BaseSQLModelService<C = unknown>
       await this.connection.execute(sql, values);
     } catch (error) {
       if (error instanceof UniqueError && (error.details?.type === 'query' || error.details?.type === 'index')) {
-        throw new UniqueError(modelClass, (error.details.constraint as string) ?? 'unknown', error.details);
+        const constraint = (error.details.constraint as string) ?? '';
+        if (
+          constraint.endsWith('.id') ||
+          constraint === 'id' ||
+          constraint.endsWith('_pkey') ||
+          constraint.endsWith('.PRIMARY') ||
+          constraint === 'PRIMARY'
+        ) {
+          throw new ExistsError(modelClass, preppedItem.id);
+        }
+        throw new UniqueError(modelClass, constraint || 'unknown', error.details);
       }
       throw error;
     }
@@ -234,6 +245,9 @@ export abstract class BaseSQLModelService<C = unknown>
 
   async updatePartial<T extends ModelType>(modelClass: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(modelClass);
+    if (!item.id) {
+      throw new ValidationResultError([{ kind: 'required', path: 'id', type: 'string', message: 'id is required' }]);
+    }
 
     const result = await this.executeUpdatePartial(modelClass, castTo({ id: item.id }), item, true);
 
@@ -782,7 +796,7 @@ export abstract class BaseSQLModelService<C = unknown>
   ): Promise<T> {
     await QueryVerifier.verify(modelClass, query);
     ModelCrudUtil.ensureNotSubType(modelClass);
-    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource });
+    const preppedItem = await ModelCrudUtil.preStore(modelClass, item, modelSource ?? { idSource: this.idSource }, { ensureId: false });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
 
     const tableContext = this.connection.getContext(modelClass);

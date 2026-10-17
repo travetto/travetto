@@ -23,6 +23,7 @@ import {
   type ModelStorageSupport,
   ModelStorageUtil,
   type ModelType,
+  ExistsError,
   NotFoundError,
   type OptionalId,
   type PartialWithId
@@ -316,12 +317,23 @@ export class ElasticsearchModelService
     const clean = await ModelCrudUtil.preStore(cls, item, this);
     const id = this.preUpdate(clean);
 
-    await this.client.index({
-      ...this.manager.getIdentity(cls),
-      id,
-      refresh: true,
-      body: castTo<T & { id: never }>(clean)
-    });
+    try {
+      await this.client.index({
+        ...this.manager.getIdentity(cls),
+        id,
+        op_type: 'create',
+        refresh: true,
+        body: castTo<T & { id: never }>(clean)
+      });
+    } catch (error) {
+      if (
+        (error instanceof errors.ResponseError && (error.body?.result === 'conflict' || error.statusCode === 409)) ||
+        (error instanceof Error && error.message.includes('version_conflict_engine_exception'))
+      ) {
+        throw new ExistsError(cls, id);
+      }
+      throw error;
+    }
 
     return this.postUpdate(clean, id);
   }
@@ -329,13 +341,11 @@ export class ElasticsearchModelService
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    item = await ModelCrudUtil.preStore(cls, item, this);
+    item = await ModelCrudUtil.preStore(cls, item, this, { ensureId: false });
 
     const id = this.preUpdate(item);
 
-    if (ModelRegistryIndex.getConfig(cls).expiresAt) {
-      await this.get(cls, id);
-    }
+    await this.get(cls, id);
 
     await this.client.index({
       ...this.manager.getIdentity(cls),
@@ -369,7 +379,7 @@ export class ElasticsearchModelService
     ModelCrudUtil.ensureNotSubType(cls);
 
     const id = data.id;
-    const item = castTo<typeof data>(await ModelCrudUtil.prePartialUpdate(cls, data));
+    const item = castTo<typeof data>(await ModelCrudUtil.prePartialUpdate(cls, data, { validateId: true }));
     const script = ElasticsearchSchemaUtil.generateUpdateScript(item);
 
     try {
@@ -649,7 +659,7 @@ export class ElasticsearchModelService
     ModelCrudUtil.ensureNotSubType(cls);
     await QueryVerifier.verify(cls, query);
 
-    const item = await ModelCrudUtil.preStore(cls, data, this);
+    const item = await ModelCrudUtil.preStore(cls, data, this, { ensureId: false });
     const id = this.preUpdate(item);
 
     const where = ModelQueryUtil.getWhereClause(cls, query.where);

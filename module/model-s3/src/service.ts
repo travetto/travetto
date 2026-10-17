@@ -308,20 +308,20 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    if (item.id) {
-      if (await this.head(cls, item.id)) {
-        throw new ExistsError(cls, item.id);
-      }
+    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    if (await this.head(cls, prepped.id)) {
+      throw new ExistsError(cls, prepped.id);
     }
-    return this.store(cls, item);
+    return this.store(cls, prepped, false);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    if (!(await this.head(cls, item.id))) {
-      throw new NotFoundError(cls, item.id);
+    const prepped = await ModelCrudUtil.preStore(cls, item, this, { ensureId: false });
+    if (!(await this.head(cls, prepped.id))) {
+      throw new NotFoundError(cls, prepped.id);
     }
-    return this.store(cls, item);
+    return this.store(cls, prepped, false);
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
@@ -332,7 +332,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
-    const prepped = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
+    const prepped = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, { validateId: true });
     return this.store<T>(cls, prepped, false);
   }
 

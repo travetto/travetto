@@ -351,7 +351,7 @@ export class MongoModelService
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    item = await ModelCrudUtil.preStore(cls, item, this);
+    item = await ModelCrudUtil.preStore(cls, item, this, { ensureId: false });
     const id = this.preUpdate(item);
     const store = await this.getStore(cls);
     const result = await store.replaceOne(this.getIdFilter(cls, id), item);
@@ -377,7 +377,7 @@ export class MongoModelService
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     const store = await this.getStore(cls);
 
-    const final = await ModelCrudUtil.prePartialUpdate(cls, item);
+    const final = await ModelCrudUtil.prePartialUpdate(cls, item, { validateId: true });
     const simple = MongoUtil.extractSimple(cls, final, undefined, false);
 
     const operation: Partial<T> = castTo(
@@ -673,7 +673,7 @@ export class MongoModelService
     await QueryVerifier.verify(cls, query);
 
     const col = await this.getStore(cls);
-    const item = await ModelCrudUtil.preStore(cls, data, this);
+    const item = await ModelCrudUtil.preStore(cls, data, this, { ensureId: false });
     const id = this.preUpdate(item);
     const where = ModelQueryUtil.getWhereClause(cls, query.where);
     where.id = id;

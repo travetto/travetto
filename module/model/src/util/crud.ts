@@ -7,7 +7,7 @@ import { NotFoundError } from '../error/not-found.ts';
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
 import type { DataHandler, PrePersistScope } from '../registry/types.ts';
 import type { ModelCrudSupport } from '../types/crud.ts';
-import type { ModelIdSource, ModelType, OptionalId } from '../types/model.ts';
+import type { ModelIdSource, ModelType, OptionalId, PartialWithId } from '../types/model.ts';
 
 type ModelLoadInput = string | BinaryArray | object;
 
@@ -81,14 +81,26 @@ export class ModelCrudUtil {
    *
    * @param cls Type to store for
    * @param item Item to store
+   * @param provider Provider providing ID source
+   * @param config Configuration options or prePersist scope
    */
   static async preStore<T extends ModelType>(
     cls: Class<T>,
     item: Partial<OptionalId<T>>,
     provider: ModelCrudProvider,
-    scope: PrePersistScope = 'all'
+    config?:
+      | {
+          scope?: PrePersistScope;
+          validate?: boolean;
+          ensureId?: boolean;
+        }
+      | PrePersistScope
   ): Promise<T> {
-    if (!item.id) {
+    const resolvedConfig = typeof config === 'string' ? { scope: config } : config;
+    const scope = resolvedConfig?.scope ?? 'all';
+    const ensureId = resolvedConfig?.ensureId ?? true;
+
+    if (ensureId && !item.id) {
       item.id = provider.idSource.create();
     }
 
@@ -100,21 +112,25 @@ export class ModelCrudUtil {
 
     item = await this.prePersist(cls, item, scope);
 
-    let errors: ValidationError[] = [];
-    try {
-      await SchemaValidator.validate(cls, item);
-    } catch (error) {
-      if (error instanceof ValidationResultError) {
-        errors = error.details.errors;
+    if (resolvedConfig?.validate ?? true) {
+      let errors: ValidationError[] = [];
+      try {
+        await SchemaValidator.validate(cls, item);
+      } catch (error) {
+        if (error instanceof ValidationResultError) {
+          errors = error.details.errors;
+        }
       }
-    }
 
-    if (!provider.idSource.valid(item.id!)) {
-      errors.push({ kind: 'invalid', path: 'id', value: item.id!, type: 'string', message: `${item.id!} is an invalid value for \`id\`` });
-    }
+      if (!item.id) {
+        errors.push({ kind: 'required', path: 'id', type: 'string', message: 'id is required' });
+      } else if (!provider.idSource.valid(item.id)) {
+        errors.push({ kind: 'invalid', path: 'id', value: item.id, type: 'string', message: `${item.id} is an invalid value for \`id\`` });
+      }
 
-    if (errors.length) {
-      throw new ValidationResultError(errors);
+      if (errors.length) {
+        throw new ValidationResultError(errors);
+      }
     }
     return castTo(item);
   }
@@ -221,30 +237,59 @@ export class ModelCrudUtil {
   /**
    * Ensure everything is correct for a partial update
    */
-  static async prePartialUpdate<T extends ModelType>(cls: Class<T>, item: Partial<T>): Promise<Partial<T>> {
+  static async prePartialUpdate<T extends ModelType>(
+    cls: Class<T>,
+    item: Partial<T> | PartialWithId<T>,
+    options?: { validateId?: boolean }
+  ): Promise<Partial<T>> {
     if (!DataUtil.isPlainObject(item)) {
       throw new RuntimeError(`A partial update requires a plain object, not an instance of ${castTo<Function>(item).constructor.name}`, {
         category: 'data'
       });
     }
+    const id = item.id;
     const keys = Object.keys(item);
-    if ((keys.length === 1 && item.id) || keys.length === 0) {
+    if ((keys.length === 1 && id) || keys.length === 0) {
       throw new RuntimeError('No fields to update');
     } else {
       item = { ...item };
       delete item.id;
     }
+
     const result = await this.prePersist(cls, castTo(item), 'partial');
-    await SchemaValidator.validatePartial(cls, item);
-    return result;
+    let errors: ValidationError[] = [];
+    try {
+      await SchemaValidator.validatePartial(cls, item);
+    } catch (error) {
+      if (error instanceof ValidationResultError) {
+        errors = error.details.errors;
+      } else {
+        throw error;
+      }
+    }
+    if (options?.validateId && !id) {
+      errors.push({ kind: 'required', path: 'id', type: 'string', message: 'id is required' });
+    }
+
+    if (errors.length) {
+      throw new ValidationResultError(errors);
+    }
+
+    return castTo(result);
   }
 
   /**
    * Ensure everything is correct for a partial update
    */
-  static async naivePartialUpdate<T extends ModelType>(cls: Class<T>, get: () => Promise<T>, item: Partial<T>): Promise<T> {
-    const prepared = await this.prePartialUpdate(cls, item);
-    const full = await get();
+  static async naivePartialUpdate<T extends ModelType>(
+    cls: Class<T>,
+    get: (id?: string) => Promise<T>,
+    item: PartialWithId<T> | Partial<T>,
+    options?: { validateId?: boolean }
+  ): Promise<T> {
+    const id = item.id;
+    const prepared = await this.prePartialUpdate(cls, item, options);
+    const full = await get(id);
     return cls.from(castTo({ ...full, ...prepared }));
   }
 }

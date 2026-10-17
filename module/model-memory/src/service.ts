@@ -292,16 +292,15 @@ export class MemoryModelService
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    if (!item.id) {
-      item.id = this.idSource.create();
-    }
-    this.#find(cls, item.id, 'exists');
-    return await this.upsert(cls, item);
+    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    this.#find(cls, prepped.id, 'exists');
+    return await this.#persist(cls, prepped, 'write');
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    await this.get(cls, item.id);
-    return await this.upsert(cls, item);
+    const prepped = await ModelCrudUtil.preStore(cls, item, this, { ensureId: false });
+    await this.get(cls, prepped.id);
+    return await this.#persist(cls, prepped, 'write');
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
@@ -315,7 +314,7 @@ export class MemoryModelService
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     const id = item.id;
-    const clean = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
+    const clean = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, { validateId: true });
     return await this.#persist(cls, clean, 'write');
   }
 

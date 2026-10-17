@@ -430,7 +430,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    item = await ModelCrudUtil.preStore(cls, item, this);
+    item = await ModelCrudUtil.preStore(cls, item, this, { ensureId: false });
     if (ModelRegistryIndex.getConfig(cls).expiresAt) {
       await this.get(cls, item.id);
     }
@@ -448,7 +448,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
-    const itemAsT = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item);
+    const itemAsT = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, { validateId: true });
     await this.#putItem(cls, id, itemAsT, 'update');
     return itemAsT;
   }
