@@ -83,6 +83,13 @@ const ELASTICSEARCH_REPLACER = {
   }
 };
 
+function isConflictError(error: unknown): boolean {
+  return (
+    (error instanceof errors.ResponseError && (error.body?.result === 'conflict' || error.statusCode === 409)) ||
+    (error instanceof Error && error.message.includes('version_conflict_engine_exception'))
+  );
+}
+
 /**
  * Elasticsearch model source.
  */
@@ -326,10 +333,7 @@ export class ElasticsearchModelService
         body: castTo<T & { id: never }>(clean)
       });
     } catch (error) {
-      if (
-        (error instanceof errors.ResponseError && (error.body?.result === 'conflict' || error.statusCode === 409)) ||
-        (error instanceof Error && error.message.includes('version_conflict_engine_exception'))
-      ) {
+      if (isConflictError(error)) {
         throw new ExistsError(cls, id);
       }
       throw error;
