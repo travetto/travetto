@@ -44,6 +44,13 @@ function isNotFoundError(error: unknown): boolean {
   return error instanceof Error && (error.message.includes('NOT_FOUND') || (error as { code?: number }).code === 5);
 }
 
+function isExistsError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    (error.message.includes('ALREADY_EXISTS') || error.message.includes('already exists') || (error as { code?: number }).code === 6)
+  );
+}
+
 /**
  * A model service backed by Firestore
  */
@@ -178,7 +185,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     try {
       await this.#getCollection(cls).doc(prepped.id).create(clone<DocumentData>(prepped));
     } catch (error) {
-      if (error && error instanceof Error && (error.message.includes('ALREADY_EXISTS') || error.message.includes('already exists'))) {
+      if (isExistsError(error)) {
         throw new ExistsError(cls, prepped.id);
       }
       throw error;
