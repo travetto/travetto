@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
 import { ExistsError, Model, type ModelCrudSupport, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
-import { castTo } from '@travetto/runtime';
+import { castTo, Util } from '@travetto/runtime';
 import { Precision, Required, Schema, Text, ValidationResultError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
@@ -84,7 +84,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     const people = [1, 2, 3, 8].map(x =>
       Person.from({
-        id: service.idSource.create(),
+        id: Util.uuid(32),
         name: 'Bob',
         age: 20 + x,
         gender: 'm',
@@ -102,7 +102,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(single.age === 23);
 
     await assert.rejects(async () => {
-      await service.get(Person, service.idSource.create());
+      await service.get(Person, Util.uuid(32));
     }, NotFoundError);
   }
 
@@ -179,7 +179,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   @Test('Verify update and delete on missing item fails with NotFoundError')
   async testMissingItemFails() {
     const service = await this.service;
-    const nonExistentId = service.idSource.create();
+    const nonExistentId = Util.uuid(32);
     await assert.rejects(() => service.update(Simple, Simple.from({ id: nonExistentId, name: 'bob' })), NotFoundError);
     await assert.rejects(() => service.updatePartial(Simple, { id: nonExistentId, name: 'bob' }), NotFoundError);
     await assert.rejects(() => service.delete(Simple, nonExistentId), NotFoundError);
@@ -281,7 +281,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     const people = [1, 2, 3].map(x =>
       Person.from({
-        id: service.idSource.create(),
+        id: Util.uuid(32),
         name: 'Bob',
         age: 20 + x,
         gender: 'm',
@@ -310,7 +310,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
         service.upsert(
           Person,
           Person.from({
-            id: service.idSource.create(),
+            id: Util.uuid(32),
             name: 'Bob',
             age: 20 + x,
             gender: 'm',

@@ -5,7 +5,6 @@ import {
   type IndexConfig,
   type ModelBulkSupport,
   ModelBulkUtil,
-  type ModelCrudProvider,
   type ModelCrudSupport,
   ModelCrudUtil,
   type ModelExpirySupport,
@@ -91,8 +90,6 @@ export abstract class BaseSQLModelService<C = unknown>
   abstract readonly client: C;
   abstract connection: SQLConnection;
 
-  idSource = ModelCrudUtil.uuidSource();
-
   get dialect(): AbstractANSI99Dialect {
     return this.connection.dialect;
   }
@@ -149,7 +146,7 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   async executeUpdate<T extends ModelType>(modelClass: Class<T>, where: WhereClause<T>, item: T): Promise<T | undefined> {
-    const preppedItem = await ModelCrudUtil.preUpdate(modelClass, item, this, { ensureNotSubType: true });
+    const preppedItem = await ModelCrudUtil.preUpdate(modelClass, item, { ensureNotSubType: true });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
 
     const tableContext = this.connection.getContext(modelClass);
@@ -166,13 +163,8 @@ export abstract class BaseSQLModelService<C = unknown>
     return preppedItem;
   }
 
-  async executeUpsert<T extends ModelType>(
-    modelClass: Class<T>,
-    item: OptionalId<T>,
-    conflictTarget: string[],
-    modelSource?: ModelCrudProvider
-  ): Promise<T> {
-    const preppedItem = await ModelCrudUtil.preUpsert(modelClass, item, modelSource ?? { idSource: this.idSource }, {
+  async executeUpsert<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>, conflictTarget: string[]): Promise<T> {
+    const preppedItem = await ModelCrudUtil.preUpsert(modelClass, item, {
       ensureNotSubType: true
     });
     const rawItem: Record<string, unknown> = castTo(preppedItem);
@@ -203,8 +195,8 @@ export abstract class BaseSQLModelService<C = unknown>
     return this.loadSingle(modelClass, result.records[0]);
   }
 
-  async create<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>, modelSource?: ModelCrudProvider): Promise<T> {
-    const preppedItem = await ModelCrudUtil.preCreate(modelClass, item, modelSource ?? { idSource: this.idSource });
+  async create<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>): Promise<T> {
+    const preppedItem = await ModelCrudUtil.preCreate(modelClass, item);
     const rawItem: Record<string, unknown> = castTo(preppedItem);
     const tableContext = this.connection.getContext(modelClass);
 
@@ -446,7 +438,7 @@ export abstract class BaseSQLModelService<C = unknown>
 
   // Bulk Support
   async processBulk<T extends ModelType>(modelClass: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse> {
-    const { insertedIds, upsertedIds, operations: preppedOperations } = await ModelBulkUtil.preStore(modelClass, operations, this);
+    const { insertedIds, upsertedIds, operations: preppedOperations } = await ModelBulkUtil.preStore(modelClass, operations);
     const addedIdentifiers = new Map([...insertedIds.entries(), ...upsertedIds.entries()]);
 
     const counts = {
@@ -778,14 +770,9 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   // Query Crud Support
-  async updateByQuery<T extends ModelType>(
-    modelClass: Class<T>,
-    item: T,
-    query: ModelQuery<T>,
-    modelSource?: ModelCrudProvider
-  ): Promise<T> {
+  async updateByQuery<T extends ModelType>(modelClass: Class<T>, item: T, query: ModelQuery<T>): Promise<T> {
     await QueryVerifier.verify(modelClass, query);
-    const preppedItem = await ModelCrudUtil.preUpdate(modelClass, item, modelSource ?? { idSource: this.idSource }, {
+    const preppedItem = await ModelCrudUtil.preUpdate(modelClass, item, {
       ensureNotSubType: true
     });
     const rawItem: Record<string, unknown> = castTo(preppedItem);

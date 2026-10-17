@@ -62,7 +62,6 @@ function isNotFoundError(error: unknown): boolean {
  */
 @Injectable()
 export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
-  idSource = ModelCrudUtil.uuidSource();
   client: DynamoDB;
   config: DynamoDBModelConfig;
 
@@ -423,13 +422,13 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preCreate(cls, item, this);
+    const prepped = await ModelCrudUtil.preCreate(cls, item);
     await this.#putItem(cls, prepped.id, prepped, 'create');
     return prepped;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    item = await ModelCrudUtil.preUpdate(cls, item, this, { ensureNotSubType: true });
+    item = await ModelCrudUtil.preUpdate(cls, item, { ensureNotSubType: true });
     if (ModelRegistryIndex.getConfig(cls).expiresAt) {
       await this.get(cls, item.id);
     }
@@ -438,7 +437,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preUpsert(cls, item, this, { ensureNotSubType: true });
+    const prepped = await ModelCrudUtil.preUpsert(cls, item, { ensureNotSubType: true });
     await this.#putItem(cls, prepped.id, prepped, 'upsert');
     return prepped;
   }

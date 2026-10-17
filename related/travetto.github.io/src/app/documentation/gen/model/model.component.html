@@ -51,11 +51,6 @@ All <a class="module-link" routerLink="/docs/model" title="Datastore abstraction
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelBasicSupport<span class="token operator">&lt;</span><span class="token constant">C</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
-   * Id Source
-   */</span>
-  idSource<span class="token operator">:</span> ModelIdSource<span class="token punctuation">;</span>
-
-  <span class="token comment">/**
    * Get underlying client
    */</span>
   <span class="token keyword">get</span> <span class="token function">client</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token constant">C</span><span class="token punctuation">;</span>
@@ -231,11 +226,11 @@ Finally, there is support for <a target="_blank" class="source-link" href="https
 
 <h2 id="declaration">Declaration</h2>
 
-Models are declared via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">&#64;Model</a> decorator, which allows the system to know that this is a class that is compatible with the module. The only requirement for a model is the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10">ModelType</a>
+Models are declared via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">&#64;Model</a> decorator, which allows the system to know that this is a class that is compatible with the module. The only requirement for a model is the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L5">ModelType</a>
 
   <figure class="code">
     <figcaption class="code">ModelType
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L5">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelType</span> <span class="token punctuation">{{'{'}}</span>

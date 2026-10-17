@@ -1,4 +1,4 @@
-import { ModelCrudUtil, type ModelType, type OptionalId, type PartialWithId } from '@travetto/model';
+import type { ModelType, OptionalId, PartialWithId } from '@travetto/model';
 import type {
   FacetModelQuery,
   FieldAggregateResult,
@@ -17,7 +17,6 @@ import { asFull, type Class, castTo } from '@travetto/runtime';
 export class QueryModelService
   implements ModelQueryAggregateSupport, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport
 {
-  idSource = ModelCrudUtil.uuidSource();
   get client(): unknown {
     return undefined;
   }

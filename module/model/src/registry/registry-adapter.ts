@@ -1,5 +1,5 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import type { Class } from '@travetto/runtime';
+import { type Class, Util, castTo } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelConfig } from './types.ts';
@@ -12,6 +12,9 @@ function combineClasses(target: ModelConfig, sources: Partial<ModelConfig>[]): M
       prePersist: [...(target.prePersist || []), ...(source.prePersist || [])],
       transientFields: [...(target.transientFields || []), ...(source.transientFields || [])]
     });
+    if (source.idGenerator) {
+      target.idGenerator = source.idGenerator;
+    }
   }
   if (target.store) {
     target.store = target.store.toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');
@@ -28,7 +31,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
   }
 
   register(...data: Partial<ModelConfig>[]): ModelConfig {
-    const config = (this.#config ??= {
+    const config = (this.#config ??= castTo({
       class: this.#cls,
       indices: {},
       autoCreate: 'development',
@@ -36,7 +39,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
       postLoad: [],
       prePersist: [],
       transientFields: []
-    });
+    }));
     combineClasses(config, data);
     return config;
   }
@@ -50,13 +53,16 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
         config.store = parent.store;
       }
 
+      config.idGenerator ??= parent.idGenerator;
       config.postLoad = [...(parent.postLoad ?? []), ...(config.postLoad ?? [])];
       config.prePersist = [...(parent.prePersist ?? []), ...(config.prePersist ?? [])];
       config.transientFields = [...(parent.transientFields ?? []), ...(config.transientFields ?? [])];
     }
+    config.idGenerator ??= () => Util.uuid(32);
   }
 
   get(): ModelConfig {
+    this.#config.idGenerator ??= () => Util.uuid(32);
     return this.#config;
   }
 }

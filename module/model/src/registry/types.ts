@@ -53,6 +53,10 @@ export class ModelConfig<T extends ModelType = ModelType> {
    */
   autoCreate?: 'production' | 'development' | 'off';
   /**
+   * ID generator
+   */
+  idGenerator: () => string;
+  /**
    * Pre-persist handlers
    */
   prePersist?: { scope: PrePersistScope; handler: DataHandler<unknown> }[];

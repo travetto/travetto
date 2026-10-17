@@ -96,7 +96,6 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     }
   }
 
-  idSource = ModelCrudUtil.uuidSource();
   config: FileModelConfig;
 
   constructor(config: FileModelConfig) {
@@ -161,7 +160,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preCreate(cls, item, this);
+    const prepped = await ModelCrudUtil.preCreate(cls, item);
     const file = await this.#resolveName(cls, '.json', prepped.id);
 
     if (await exists(file)) {
@@ -173,7 +172,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    const prepped = await ModelCrudUtil.preUpdate(cls, item, this, { ensureNotSubType: true });
+    const prepped = await ModelCrudUtil.preUpdate(cls, item, { ensureNotSubType: true });
     await this.get(cls, prepped.id);
     const file = await this.#resolveName(cls, '.json', prepped.id);
     await fs.writeFile(file, BinaryUtil.binaryArrayToUint8Array(JSONUtil.toBinaryArray(prepped)));
@@ -181,7 +180,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preUpsert(cls, item, this, { ensureNotSubType: true });
+    const prepped = await ModelCrudUtil.preUpsert(cls, item, { ensureNotSubType: true });
 
     const file = await this.#resolveName(cls, '.json', prepped.id);
     await fs.writeFile(file, BinaryUtil.binaryArrayToUint8Array(JSONUtil.toBinaryArray(prepped)));

@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { type ModelCrudSupport, NotFoundError } from '@travetto/model';
-import { TimeUtil } from '@travetto/runtime';
+import { TimeUtil, Util } from '@travetto/runtime';
 import { SkipUnless, Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
@@ -19,7 +19,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
 
     const people = [1, 2, 3, 8].map(x =>
       Person.from({
-        id: svc.idSource.create(),
+        id: Util.uuid(32),
         name: 'Bob Omber',
         age: 20 + x,
         gender: 'm',
@@ -286,7 +286,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
 
     const people = [1, 2, 3, 8].map(x =>
       Person.from({
-        id: service.idSource.create(),
+        id: Util.uuid(32),
         name: 'Bob',
         age: 20 + x,
         gender: 'm',
@@ -364,7 +364,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   async verifyNestedQuery() {
     const service = await this.service;
 
-    const id = service.idSource.create();
+    const id = Util.uuid(32);
 
     await service.create(
       Note,
