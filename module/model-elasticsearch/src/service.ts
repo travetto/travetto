@@ -90,6 +90,19 @@ function isConflictError(error: unknown): boolean {
   );
 }
 
+function isNotFoundError(error: unknown): boolean {
+  return (
+    (error instanceof errors.ResponseError &&
+      (error.statusCode === 404 ||
+        error.body?.result === 'not_found' ||
+        (typeof error.body === 'object' &&
+          error.body !== null &&
+          'error' in error.body &&
+          (error.body as { error?: { type?: string } }).error?.type === 'document_missing_exception'))) ||
+    (error instanceof Error && error.message.includes('document_missing_exception'))
+  );
+}
+
 /**
  * Elasticsearch model source.
  */
@@ -313,7 +326,7 @@ export class ElasticsearchModelService
         throw new NotFoundError(cls, id);
       }
     } catch (error) {
-      if (error && error instanceof errors.ResponseError && error.body && error.body.result === 'not_found') {
+      if (isNotFoundError(error)) {
         throw new NotFoundError(cls, id);
       }
       throw error;
@@ -347,15 +360,23 @@ export class ElasticsearchModelService
 
     const id = this.preUpdate(item);
 
-    await this.get(cls, id);
+    if (ModelRegistryIndex.getConfig(cls).expiresAt) {
+      await this.get(cls, id);
+    }
 
-    await this.client.index({
-      ...this.manager.getIdentity(cls),
-      id,
-      op_type: 'index',
-      refresh: true,
-      body: castTo<T & { id: never }>(item)
-    });
+    try {
+      await this.client.update({
+        ...this.manager.getIdentity(cls),
+        id,
+        refresh: true,
+        script: ElasticsearchSchemaUtil.generateReplaceScript(castTo(item))
+      });
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        throw new NotFoundError(cls, id);
+      }
+      throw error;
+    }
 
     return this.postUpdate(item, id);
   }
