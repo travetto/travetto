@@ -265,9 +265,9 @@ export class ElasticsearchModelService
     }
   }
 
-  preUpdate(item: { id: string }): string;
-  preUpdate(item: {}): undefined;
-  preUpdate(item: { id?: string }): string | undefined {
+  #preStore(item: { id: string }): string;
+  #preStore(item: {}): undefined;
+  #preStore(item: { id?: string }): string | undefined {
     if ('id' in item && typeof item.id === 'string') {
       const id = item.id;
       if (!this.config.storeId) {
@@ -278,7 +278,7 @@ export class ElasticsearchModelService
     return;
   }
 
-  postUpdate<T extends ModelType>(item: T, id?: string): T {
+  #postStore<T extends ModelType>(item: T, id?: string): T {
     if (!this.config.storeId) {
       item.id = id!;
     }
@@ -335,7 +335,7 @@ export class ElasticsearchModelService
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const clean = await ModelCrudUtil.preCreate(cls, item, this);
-    const id = this.preUpdate(clean);
+    const id = this.#preStore(clean);
 
     try {
       await this.client.index({
@@ -352,13 +352,13 @@ export class ElasticsearchModelService
       throw error;
     }
 
-    return this.postUpdate(clean, id);
+    return this.#postStore(clean, id);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     item = await ModelCrudUtil.preUpdate(cls, item, this, { ensureNotSubType: true });
 
-    const id = this.preUpdate(item);
+    const id = this.#preStore(item);
 
     if (ModelRegistryIndex.getConfig(cls).expiresAt) {
       await this.get(cls, id);
@@ -378,12 +378,12 @@ export class ElasticsearchModelService
       throw error;
     }
 
-    return this.postUpdate(item, id);
+    return this.#postStore(item, id);
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, input: OptionalId<T>): Promise<T> {
     const item = await ModelCrudUtil.preUpsert(cls, input, this, { ensureNotSubType: true });
-    const id = this.preUpdate(item);
+    const id = this.#preStore(item);
 
     await this.client.update({
       ...this.manager.getIdentity(cls),
@@ -393,7 +393,7 @@ export class ElasticsearchModelService
       doc_as_upsert: true
     });
 
-    return this.postUpdate(item, id);
+    return this.#postStore(item, id);
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, data: PartialWithId<T>): Promise<T> {
@@ -443,13 +443,13 @@ export class ElasticsearchModelService
       if (operation.delete) {
         toRun.push({ delete: { ...identity, _id: operation.delete.id } });
       } else if (operation.insert) {
-        const id = this.preUpdate(operation.insert);
+        const id = this.#preStore(operation.insert);
         toRun.push({ create: { ...identity, _id: id } }, castTo(operation.insert));
       } else if (operation.upsert) {
-        const id = this.preUpdate(operation.upsert);
+        const id = this.#preStore(operation.upsert);
         toRun.push({ index: { ...identity, _id: id } }, castTo(operation.upsert));
       } else if (operation.update) {
-        const id = this.preUpdate(operation.update);
+        const id = this.#preStore(operation.update);
         toRun.push({ update: { ...identity, _id: id } }, { doc: operation.update });
       }
       return toRun;
@@ -679,7 +679,7 @@ export class ElasticsearchModelService
     await QueryVerifier.verify(cls, query);
 
     const item = await ModelCrudUtil.preUpdate(cls, data, this, { ensureNotSubType: true });
-    const id = this.preUpdate(item);
+    const id = this.#preStore(item);
 
     const where = ModelQueryUtil.getWhereClause(cls, query.where);
     if (id) {
@@ -715,7 +715,7 @@ export class ElasticsearchModelService
       }
     }
 
-    return this.postUpdate(item, id);
+    return this.#postStore(item, id);
   }
 
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
