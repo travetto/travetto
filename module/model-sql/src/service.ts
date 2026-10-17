@@ -34,7 +34,6 @@ import {
   type SingleItemIndex,
   type SortedIndex,
   type SortedIndexSelection,
-  type SortedIndexSelectionType,
   warnIfIndexedUniqueIndex,
   warnIfNonIndexedIndex
 } from '@travetto/model-indexed';
@@ -699,16 +698,11 @@ export abstract class BaseSQLModelService<C = unknown>
     };
   }
 
-  async suggestByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>,
-    B extends SortedIndexSelectionType<T, S> & string
-  >(
+  async suggestByIndex<T extends ModelType, S extends SortedIndexSelection<T>, K extends KeyedIndexSelection<T>>(
     modelClass: Class<T>,
     indexConfig: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
-    prefix: B,
+    prefix: string,
     options?: ModelIndexedSearchOptions
   ): Promise<T[]> {
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate();
