@@ -47,7 +47,7 @@ export class FileModelConfig {
   namespace: string = '.';
   modifyStorage?: boolean;
   cullRate?: number | TimeSpan;
-  readBeforeUpdate?: boolean = true;
+  readBeforeUpdate?: boolean = false;
 
   @PostConstruct()
   async finalizeConfig(): Promise<void> {

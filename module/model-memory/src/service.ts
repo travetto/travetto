@@ -61,7 +61,7 @@ export class MemoryModelConfig {
   modifyStorage?: boolean = true;
   namespace?: string;
   cullRate?: number | TimeSpan;
-  readBeforeUpdate?: boolean = true;
+  readBeforeUpdate?: boolean = false;
 }
 
 function indexName<T extends ModelType>(cls: Class<T>, idx: AllIndexes<T>, suffix?: string): string {

@@ -28,6 +28,8 @@ class S3CrudSuite extends ModelCrudSuite {
   async testUpdateWithoutReadBeforeUpdate() {
     const service = await this.service;
     const config = await DependencyRegistryIndex.getInstance(this.configClass);
+    assert(config.readBeforeUpdate === true);
+    assert(new this.configClass().readBeforeUpdate === false);
     try {
       config.readBeforeUpdate = false;
       const nonExistentId = Util.uuid(32);

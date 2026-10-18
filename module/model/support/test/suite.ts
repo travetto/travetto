@@ -7,7 +7,7 @@ import { type SuitePhaseHandler, SuiteRegistryIndex, TestFixtures } from '@trave
 import { ModelRegistryIndex } from '../../src/registry/registry-index.ts';
 import { ModelStorageUtil } from '../../src/util/storage.ts';
 
-type ConfigType = { autoCreate?: boolean; namespace?: string; modifyStorage?: boolean };
+type ConfigType = { autoCreate?: boolean; namespace?: string; modifyStorage?: boolean; readBeforeUpdate?: boolean };
 
 class ModelSuiteHandler<T extends { configClass: Class<ConfigType>; serviceClass: Class }> implements SuitePhaseHandler<T> {
   qualifier?: symbol;
@@ -28,6 +28,10 @@ class ModelSuiteHandler<T extends { configClass: Class<ConfigType>; serviceClass
     // We manually create
     config.autoCreate = false;
 
+    if ('readBeforeUpdate' in config) {
+      config.readBeforeUpdate = true;
+    }
+
     const service = await DependencyRegistryIndex.getInstance<T>(instance.serviceClass, this.qualifier);
     if (ModelStorageUtil.isSupported(service)) {
       await service.createStorage();
@@ -35,6 +39,11 @@ class ModelSuiteHandler<T extends { configClass: Class<ConfigType>; serviceClass
   }
 
   async beforeEach(instance: T) {
+    const config = await DependencyRegistryIndex.getInstance<ConfigType>(instance.configClass);
+    if ('readBeforeUpdate' in config) {
+      config.readBeforeUpdate = true;
+    }
+
     const service = await DependencyRegistryIndex.getInstance<T>(instance.serviceClass, this.qualifier);
     if (ModelStorageUtil.isSupported(service)) {
       await Promise.all(
@@ -72,9 +81,7 @@ class ModelSuiteHandler<T extends { configClass: Class<ConfigType>; serviceClass
  * @example opt-in
  * @kind decorator
  */
-export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean; namespace?: string }>; serviceClass: Class }>(
-  qualifier?: symbol
-) {
+export function ModelSuite<T extends { configClass: Class<ConfigType>; serviceClass: Class }>(qualifier?: symbol) {
   const fixtures = new TestFixtures(['@travetto/model']);
   return (target: Class<T>): void => {
     target.prototype.fixtures = fixtures;
