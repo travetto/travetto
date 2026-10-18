@@ -280,7 +280,7 @@ export class ModelCrudUtil {
     }
 
     const result = await this.prePersist(cls, castTo(item), 'partial');
-    if (options?.validateId ?? true) {
+    if (options?.validateId ?? false) {
       idSource.get(item); // Throws ValidationResultError if id is missing
     }
     await SchemaValidator.validatePartial(cls, item);
