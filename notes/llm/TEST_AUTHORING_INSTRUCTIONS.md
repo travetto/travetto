@@ -431,12 +431,12 @@ export abstract class CacheServiceSuite {
 Define models directly in the test file or a nearby `models/` directory:
 
 ```ts
-import { Model } from '@travetto/model';
+import { Model, type ModelId } from '@travetto/model';
 import { Schema } from '@travetto/schema';
 
 @Model()
 class TestPerson {
-  id: string;
+  id: ModelId;
   name: string;
   age: number;
 }

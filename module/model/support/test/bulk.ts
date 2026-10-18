@@ -4,11 +4,12 @@ import { Suite, Test } from '@travetto/test';
 
 import { Model } from '../../src/registry/decorator.ts';
 import type { ModelBulkSupport } from '../../src/types/bulk.ts';
+import type { ModelId } from '../../src/types/model.ts';
 import { BaseModelSuite } from './base.ts';
 
 @Model('bulk-user')
 class User {
-  id: string;
+  id: ModelId;
   name?: string;
 }
 

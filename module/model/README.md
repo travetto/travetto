@@ -16,15 +16,15 @@ yarn add @travetto/model
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval. This module builds heavily upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding."), which is used for data model validation.
 
 ## A Simple Model
-A model can be simply defined by usage of the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14) decorator, which opts it into the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") contracts, as well as making it available to the [ModelRegistryIndex](https://github.com/travetto/travetto/tree/main/module/model/src/registry/registry-index.ts#L12).
+A model can be simply defined by usage of the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13) decorator, which opts it into the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") contracts, as well as making it available to the [ModelRegistryIndex](https://github.com/travetto/travetto/tree/main/module/model/src/registry/registry-index.ts#L12).
 
 **Code: Basic Structure**
 ```typescript
-import { Model } from '@travetto/model';
+import { Model, type ModelId } from '@travetto/model';
 
 @Model()
 export class SampleModel {
-  id: string;
+  id: ModelId;
   name: string;
   age: number;
 }
@@ -200,7 +200,7 @@ export interface ModelBulkSupport extends ModelCrudSupport {
 ```
 
 ## Declaration
-Models are declared via the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14) decorator, which allows the system to know that this is a class that is compatible with the module. The only requirement for a model is the [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L5)
+Models are declared via the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13) decorator, which allows the system to know that this is a class that is compatible with the module. The only requirement for a model is the [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10)
 
 **Code: ModelType**
 ```typescript
@@ -210,7 +210,7 @@ export interface ModelType {
    *
    * If not provided, will be computed on create
    */
-  id: string;
+  id: ModelId;
 }
 ```
 
@@ -297,7 +297,7 @@ export abstract class BaseModelSuite<T> {
 ```
 
 ## CLI - model:export
-The module provides the ability to generate an export of the model structure from all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14)s within the application. This is useful for being able to generate the appropriate files to manually create the data schemas in production.
+The module provides the ability to generate an export of the model structure from all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13)s within the application. This is useful for being able to generate the appropriate files to manually create the data schemas in production.
 
 **Terminal: Help for model:export**
 ```bash
@@ -331,7 +331,7 @@ TypeError: Cannot redefine property: toJSON
 ```
 
 ## CLI - model:install
-The module provides the ability to install all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14)s within the application given the current configuration being targeted. This is useful for being able to prepare the datastore manually.
+The module provides the ability to install all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13)s within the application given the current configuration being targeted. This is useful for being able to prepare the datastore manually.
 
 **Terminal: Help for model:install**
 ```bash

@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/api/types';
 
-import { Model } from '@travetto/model';
+import { Model, type ModelId } from '@travetto/model';
 import { Registry } from '@travetto/registry';
 import { Currency, Float, Integer, Precision, Schema, Text } from '@travetto/schema';
 import { BeforeAll, Suite, Test } from '@travetto/test';
@@ -17,7 +17,7 @@ class Address {
 
 @Model()
 class Person {
-  id: string;
+  id: ModelId;
   type?: string;
   createdDate?: Date;
   updatedDate?: Date;
@@ -29,14 +29,14 @@ class Person {
 
 @Model()
 class SimpleNested {
-  id: string;
+  id: ModelId;
   addresses: Address[];
   random: object;
 }
 
 @Model()
 class Numerical {
-  id: string;
+  id: ModelId;
 
   @Currency()
   money: number;

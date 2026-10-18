@@ -48,12 +48,12 @@ Create the file `src/model.ts`
 
 **Code: Models**
 ```typescript
-import { Model } from '@travetto/model';
+import { Model, type ModelId } from '@travetto/model';
 import { Schema } from '@travetto/schema';
 
 @Model()
 export class Todo {
-  id: string;
+  id: ModelId;
   text: string;
   created?: Date;
   completed?: boolean;
@@ -70,7 +70,7 @@ export class TodoSearch {
 }
 ```
 
-as you can see, the model structure is simple. Everything that uses the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14) services needs to implement [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L5).
+as you can see, the model structure is simple. Everything that uses the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13) services needs to implement [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10).
 
 ## Building the Service Layer
 Next we establish the functionality for the service layer. The operations we need are:

@@ -32,12 +32,12 @@ A [keyedIndex](https://github.com/travetto/travetto/tree/main/module/model-index
 
 **Code: Creating a Keyed Index**
 ```typescript
-import { Model } from '@travetto/model';
+import { Model, type ModelId } from '@travetto/model';
 import { keyedIndex } from '@travetto/model-indexed';
 
 @Model()
 export class User {
-  id: string;
+  id: ModelId;
   name: string;
   email: string;
 }
@@ -57,12 +57,12 @@ A [uniqueIndex](https://github.com/travetto/travetto/tree/main/module/model-inde
 
 **Code: Creating a Unique Index**
 ```typescript
-import { Model } from '@travetto/model';
+import { Model, type ModelId } from '@travetto/model';
 import { uniqueIndex } from '@travetto/model-indexed';
 
 @Model()
 export class User {
-  id: string;
+  id: ModelId;
   name: string;
   email: string;
 }
@@ -80,12 +80,12 @@ A [sortedIndex](https://github.com/travetto/travetto/tree/main/module/model-inde
 
 **Code: Creating a Sorted Index**
 ```typescript
-import { Model } from '@travetto/model';
+import { Model, type ModelId } from '@travetto/model';
 import { sortedIndex } from '@travetto/model-indexed';
 
 @Model()
 export class User {
-  id: string;
+  id: ModelId;
   name: string;
   age: number;
   createdAt: Date;
@@ -111,12 +111,12 @@ Indexes can use multiple fields or nested fields in their keys. This allows quer
 
 **Code: Composite Key Index**
 ```typescript
-import { Model } from '@travetto/model';
+import { Model, type ModelId } from '@travetto/model';
 import { keyedIndex } from '@travetto/model-indexed';
 
 @Model()
 export class Order {
-  id: string;
+  id: ModelId;
   customerId: string;
   status: string;
   productId: string;
@@ -248,11 +248,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param prefix The prefix to use for suggesting entities
    * @param options The configuration for pagination
    */
-  suggestByIndex<
-    T extends ModelType,
-    S extends SortedIndexSelection<T>,
-    K extends KeyedIndexSelection<T>
-  >(
+  suggestByIndex<T extends ModelType, S extends SortedIndexSelection<T>, K extends KeyedIndexSelection<T>>(
     cls: Class<T>,
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
@@ -418,7 +414,7 @@ export async function listWithFilterExample(modelService: ModelIndexedSupport) {
 ```
 
 ## Integration
-Index registration happens automatically when models are decorated with [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14). Model services like [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module."), [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module."), and [SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") implement the [ModelIndexedSupport](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L20) interface to provide indexed access.
+Index registration happens automatically when models are decorated with [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13). Model services like [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module."), [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module."), and [SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") implement the [ModelIndexedSupport](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L20) interface to provide indexed access.
 
 ### Reading Registry Information
 You can access registered indexes via [ModelRegistryIndex](https://github.com/travetto/travetto/tree/main/module/model/src/registry/registry-index.ts#L12) at runtime:

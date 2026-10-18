@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Model, type ModelCrudSupport, type ModelType, NotFoundError, UniqueError } from '@travetto/model';
+import { Model, type ModelCrudSupport, type ModelType, NotFoundError, UniqueError, type ModelId } from '@travetto/model';
 import { type Class } from '@travetto/runtime';
 import { SkipUnless, Suite, Test } from '@travetto/test';
 
@@ -18,7 +18,7 @@ import { Address, BigIntModel, Person, Todo } from './model.ts';
   unique: true
 })
 class UniqueUser2 {
-  id: string;
+  id: ModelId;
   name: string;
 }
 

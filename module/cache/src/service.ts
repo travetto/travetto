@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@travetto/di';
-import { ExpiresAt, Model, type ModelExpirySupport, ModelStorageUtil, NotFoundError } from '@travetto/model';
+import { ExpiresAt, Model, type ModelExpirySupport, ModelStorageUtil, NotFoundError, type ModelId } from '@travetto/model';
 import { ModelIndexedUtil, sortedIndex } from '@travetto/model-indexed';
 import { JSONUtil, RuntimeError, TimeUtil } from '@travetto/runtime';
 import { MaxLength, Text } from '@travetto/schema';
@@ -12,7 +12,7 @@ const INFINITE_MAX_AGE = TimeUtil.duration('10y', 'ms');
 
 @Model({ autoCreate: 'production' })
 export class CacheRecord {
-  id: string;
+  id: ModelId;
   @Text()
   entry: string;
   @MaxLength(500)

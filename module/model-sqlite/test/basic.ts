@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Model } from '@travetto/model';
+import { Model, type ModelId } from '@travetto/model';
 import { castTo } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
@@ -16,7 +16,7 @@ import { SqliteModelService } from '../src/service.ts';
 
 @Model('sqlite_temp_person')
 class SqliteTempPerson {
-  id: string;
+  id: ModelId;
 }
 
 @WithSuiteContext()
