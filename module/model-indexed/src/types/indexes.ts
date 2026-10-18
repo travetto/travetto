@@ -1,4 +1,4 @@
-import type { IndexConfig, ModelType } from '@travetto/model';
+import type { IndexConfig, ModelId, ModelType } from '@travetto/model';
 import type { Any, DeepPartial, IntrinsicType } from '@travetto/runtime';
 
 type TypeProjection<T, V, B = IntrinsicType> = {
@@ -37,8 +37,8 @@ export type KeyedIndexWithPartialBody<T, K> = {
     : never;
 } & DeepPartial<Omit<T, keyof K>>; // 2. All other fields in T (not in K) become OPTIONAL
 
-export type FullKeyedIndexBody<T, K, S> = KeyedIndexBody<Omit<T, 'id'>, Merge<K, S>> & { id?: string };
-export type FullKeyedIndexWithPartialBody<T, K, S> = KeyedIndexWithPartialBody<Omit<T, 'id'>, Merge<K, S>> & { id?: string };
+export type FullKeyedIndexBody<T, K, S> = KeyedIndexBody<Omit<T, 'id'>, Merge<K, S>> & { id?: ModelId };
+export type FullKeyedIndexWithPartialBody<T, K, S> = KeyedIndexWithPartialBody<Omit<T, 'id'>, Merge<K, S>> & { id?: ModelId };
 
 export type TemplateValue = 1 | -1 | true;
 export type TemplatePart<T extends TemplateValue = TemplateValue> = { path: string[]; value: T; part: 'key' | 'sort' };

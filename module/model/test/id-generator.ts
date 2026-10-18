@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Model, ModelCrudUtil, ModelRegistryIndex } from '@travetto/model';
+import { Model, ModelCrudUtil, type ModelId, ModelRegistryIndex } from '@travetto/model';
 import { Registry } from '@travetto/registry';
 import { castTo } from '@travetto/runtime';
 import { Match, Schema, SchemaValidator, UUID, ValidationResultError } from '@travetto/schema';
@@ -8,7 +8,7 @@ import { Suite, Test } from '@travetto/test';
 
 @Model()
 class DefaultModel {
-  id: string;
+  id: ModelId;
   name: string;
 }
 
@@ -21,7 +21,7 @@ class OptionalModel {
 @Model()
 class UuidValidatedModel {
   @UUID()
-  id: string;
+  id: ModelId;
   name: string;
 }
 
@@ -33,7 +33,7 @@ const customPrefix = 'custom-id-';
 })
 class CustomModel {
   @Match(new RegExp(`^${customPrefix}\\d+$`))
-  id: string;
+  id: ModelId;
   value: string;
 }
 
@@ -156,7 +156,7 @@ export class ModelIdGeneratorSuite {
   async testDirectValidationRequiredness() {
     await Registry.init();
 
-    // DefaultModel has id: string (required), so direct validation without id rejects
+    // DefaultModel has id: ModelId (required), so direct validation without id rejects
     await assert.rejects(
       () => SchemaValidator.validate(DefaultModel, castTo({ name: 'Alice' })),
       (err: unknown) => err instanceof ValidationResultError && err.details.errors.some(e => e.path === 'id' && e.kind === 'required')

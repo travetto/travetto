@@ -1,4 +1,9 @@
 /**
+ * Model identifier type
+ */
+export type ModelId = string;
+
+/**
  * Simple model interface
  * @concrete
  */
@@ -8,10 +13,10 @@ export interface ModelType {
    *
    * If not provided, will be computed on create
    */
-  id: string;
+  id: ModelId;
 }
 
-export type OptionalId<T extends ModelType> = Omit<T, 'id'> & { id?: string };
+export type OptionalId<T extends ModelType> = Omit<T, 'id'> & { id?: ModelId };
 export type PartialWithId<T extends ModelType> = Partial<T> & Pick<T, 'id'>;
 
 /**

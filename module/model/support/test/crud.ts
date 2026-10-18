@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { ExistsError, Model, type ModelCrudSupport, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
+import { ExistsError, Model, type ModelCrudSupport, type ModelId, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
 import { castTo, Util } from '@travetto/runtime';
 import { Precision, Required, Schema, Text, ValidationResultError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
@@ -16,7 +16,7 @@ class Address {
 
 @Model('crud-person')
 class Person {
-  id: string;
+  id: ModelId;
   @Text() name: string;
   @Precision(3, 0)
   age: number;
@@ -26,7 +26,7 @@ class Person {
 
 @Model()
 class Simple {
-  id: string;
+  id: ModelId;
   name: string;
 }
 
@@ -37,7 +37,7 @@ class SimpleItem {
 
 @Model()
 class SimpleList {
-  id: string;
+  id: ModelId;
   names: string[];
   simples?: SimpleItem[];
 }
@@ -47,14 +47,14 @@ class SimpleList {
   item.name = `${item.name}-suffix`;
 })
 class User2 {
-  id: string;
+  id: ModelId;
   address?: Address;
   name: string;
 }
 
 @Model()
 class Dated {
-  id: string;
+  id: ModelId;
 
   value?: string;
 
@@ -69,7 +69,7 @@ class Dated {
 
 @Model()
 class BigIntModel {
-  id: string;
+  id: ModelId;
   largeNumber: bigint;
   optionalBigInt?: bigint;
 }

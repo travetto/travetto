@@ -1,9 +1,9 @@
-import { Model } from '@travetto/model';
+import { Model, type ModelId } from '@travetto/model';
 import { Schema } from '@travetto/schema';
 
 @Model()
 export class Todo {
-  id: string;
+  id: ModelId;
   text: string;
   created?: Date;
   completed?: boolean;

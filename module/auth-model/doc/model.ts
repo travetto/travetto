@@ -1,9 +1,9 @@
 import type { RegisteredPrincipal } from '@travetto/auth-model';
-import { Model } from '@travetto/model';
+import { Model, type ModelId } from '@travetto/model';
 
 @Model()
 export class User implements RegisteredPrincipal {
-  id: string;
+  id: ModelId;
   source: string;
   details: Record<string, unknown>;
   password?: string;

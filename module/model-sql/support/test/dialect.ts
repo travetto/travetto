@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Model, type ModelType, TransientField } from '@travetto/model';
+import { Model, type ModelType, TransientField, type ModelId } from '@travetto/model';
 import { Registry } from '@travetto/registry';
 import type { Class } from '@travetto/runtime';
 import { DiscriminatorField, Required, Schema } from '@travetto/schema';
@@ -20,7 +20,7 @@ class ChildItem {
 
 @Model('dialect_gap_parent')
 class ParentModel {
-  id: string;
+  id: ModelId;
   title: string;
   child: ChildItem;
 }
@@ -28,7 +28,7 @@ class ParentModel {
 @Schema()
 @Model('dialect_gap_simple')
 class SimpleModel {
-  id: string;
+  id: ModelId;
   @Required()
   requiredField: string;
   optionalField?: string;
@@ -39,7 +39,7 @@ class SimpleModel {
 @Schema()
 @Model('dialect_gap_base_poly')
 abstract class BasePolymorphic {
-  id: string;
+  id: ModelId;
   @DiscriminatorField()
   type: string;
   @Required()

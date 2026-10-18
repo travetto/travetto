@@ -1,20 +1,20 @@
 import assert from 'node:assert';
 
-import { Model, ModelBulkUtil, SubTypeNotSupportedError } from '@travetto/model';
+import { Model, ModelBulkUtil, type ModelId, SubTypeNotSupportedError } from '@travetto/model';
 import { Registry } from '@travetto/registry';
 import { DiscriminatorField, Schema, Text, ValidationResultError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
 @Model()
 class BulkItem {
-  id: string;
+  id: ModelId;
   name: string;
 }
 
 @Schema()
 @Model()
 abstract class BaseWorker {
-  id: string;
+  id: ModelId;
   @DiscriminatorField()
   type: string;
   @Text()
