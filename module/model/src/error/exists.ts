@@ -7,7 +7,7 @@ import type { ModelType } from '../types/model.ts';
  * Represents when a data item already exists
  */
 export class ExistsError extends RuntimeError {
-  static from<T extends ModelType>(cls: Class<T>, item: Partial<T>): ExistsError {
+  static for<T extends ModelType>(cls: Class<T>, item: Partial<T>): ExistsError {
     return new ExistsError(cls, ModelRegistryIndex.get(cls).idSource.get(item, { optional: true }) ?? 'unknown');
   }
 

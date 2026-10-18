@@ -183,6 +183,6 @@ export class DynamoDBUtil {
     } else {
       return item;
     }
-    throw NotFoundError.from(cls, item);
+    throw NotFoundError.for(cls, item);
   }
 }

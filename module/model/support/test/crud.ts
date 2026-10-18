@@ -17,7 +17,7 @@ import { Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from './base.ts';
 
-@Model()
+@Model('crud-custom-id')
 export class CustomIdModel {
   customId: ModelId;
   name: string;
@@ -25,7 +25,7 @@ export class CustomIdModel {
 
 let skuSequence = 0;
 
-@Model()
+@Model('crud-sku')
 @IdGenerator(() => `SKU-${++skuSequence}`)
 export class SkuModel {
   @Match(/^SKU-\d+$/)

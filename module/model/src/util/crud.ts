@@ -1,5 +1,5 @@
 import { type BinaryArray, BinaryUtil, type Class, castKey, castTo, hasFunction, JSONUtil, RuntimeError, Util } from '@travetto/runtime';
-import { DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { DataUtil, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { ExistsError } from '../error/exists.ts';
 import { SubTypeNotSupportedError } from '../error/invalid-sub-type.ts';
@@ -54,9 +54,9 @@ export class ModelCrudUtil {
 
     if (!(result instanceof cls || result.constructor.Ⲑid === cls.Ⲑid)) {
       if (onTypeMismatch === 'notfound') {
-        throw NotFoundError.from(cls, result);
+        throw NotFoundError.for(cls, result);
       } else {
-        throw ExistsError.from(cls, result);
+        throw ExistsError.for(cls, result);
       }
     }
 
@@ -280,7 +280,23 @@ export class ModelCrudUtil {
     }
 
     const result = await this.prePersist(cls, castTo(item), 'partial');
-    await SchemaValidator.validatePartial(cls, item);
+    let errors: ValidationError[] = [];
+    try {
+      await SchemaValidator.validatePartial(cls, item);
+    } catch (error) {
+      if (error instanceof ValidationResultError) {
+        errors = error.details.errors;
+      } else {
+        throw error;
+      }
+    }
+    if ((options?.validateId ?? true) && !id) {
+      errors.push({ kind: 'required', path: castTo(idSource.field), type: 'string', message: `${idSource.field} is required` });
+    }
+
+    if (errors.length) {
+      throw new ValidationResultError(errors);
+    }
 
     return castTo(result);
   }

@@ -11,25 +11,25 @@ import type { ModelId, OptionalId, PartialWithId } from '../src/types/model.ts';
 import { ModelCrudUtil } from '../src/util/crud.ts';
 import { CustomIdModel } from '../support/test/crud.ts';
 
-@Model()
+@Model('model-id-default')
 class DefaultModel {
   id: ModelId;
   name: string;
 }
 
-@Model()
+@Model('model-id-custom-generator')
 @IdGenerator((): string => 'custom-id-value')
 class CustomGeneratorModel {
   identifier: ModelId;
   name: string;
 }
 
-@Model()
+@Model('model-id-subclass')
 class SubclassCustomModel extends CustomGeneratorModel {
   extra: string;
 }
 
-@Model()
+@Model('model-id-auto-discovered')
 class AutoDiscoveredIdModel {
   isbn: ModelId;
   title: string;

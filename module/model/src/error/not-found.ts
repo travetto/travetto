@@ -7,7 +7,7 @@ import type { ModelType } from '../types/model.ts';
  * Represents when a model of cls and id cannot be found
  */
 export class NotFoundError extends RuntimeError {
-  static from<T extends ModelType>(cls: Class<T>, item: Partial<T>): NotFoundError {
+  static for<T extends ModelType>(cls: Class<T>, item: Partial<T>): NotFoundError {
     return new NotFoundError(cls, ModelRegistryIndex.get(cls).idSource.get(item, { optional: true }) ?? 'unknown');
   }
 

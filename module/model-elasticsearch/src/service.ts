@@ -146,7 +146,7 @@ export class ElasticsearchModelService
       if (!expiry.expired) {
         return item;
       }
-      throw NotFoundError.from(cls, item);
+      throw NotFoundError.for(cls, item);
     } else {
       return item;
     }
