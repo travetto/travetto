@@ -207,7 +207,7 @@ export abstract class BaseSQLModelService<C = unknown>
       await this.connection.execute(sql, values);
     } catch (error) {
       if (error instanceof ExistsError) {
-        throw ExistsError.from(modelClass, preppedItem);
+        throw ExistsError.for(modelClass, preppedItem);
       }
       if (error instanceof UniqueError && (error.details?.type === 'query' || error.details?.type === 'index')) {
         throw new UniqueError(modelClass, (error.details.constraint as string) ?? 'unknown', error.details);
