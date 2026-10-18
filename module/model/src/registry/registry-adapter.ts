@@ -66,13 +66,13 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
 
     // Establish id field
     if (!config.idField) {
-      const modelIdFields = Object.values(schemaFields).filter(field => field.specifiers?.includes('modelId'));
-      if (!modelIdFields.length) {
+      const [idField, ...othersFields] = Object.values(schemaFields).filter(field => field.specifiers?.includes('modelId'));
+      if (!idField) {
         throw new RuntimeError(`Model ${this.#cls.name} is missing a ModelId (primary identifier) field`);
-      } else if (modelIdFields.length > 1) {
+      } else if (othersFields.length) {
         throw new RuntimeError(`Model ${this.#cls.name} has multiple ModelId (primary identifier) fields`);
       }
-      config.idField = modelIdFields[0].name;
+      config.idField = idField.name;
     }
 
     if (this.#config.indices) {
