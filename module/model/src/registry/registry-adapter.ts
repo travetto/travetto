@@ -62,6 +62,8 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
     const config = this.#config;
     const schemaFields = SchemaRegistryIndex.getForRegister(this.#cls, true).get()?.fields ?? {};
 
+    config.idField ??= parent?.idField ?? undefined!;
+
     // Establish id field
     if (!config.idField) {
       const modelIdFields = Object.values(schemaFields).filter(field => field.specifiers?.includes('modelId'));
@@ -70,7 +72,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
       } else if (modelIdFields.length > 1) {
         throw new RuntimeError(`Model ${this.#cls.name} has multiple ModelId (primary identifier) fields`);
       }
-      config.idField = parent?.idField ?? modelIdFields[0].name;
+      config.idField = modelIdFields[0].name;
     }
 
     if (this.#config.indices) {
@@ -99,7 +101,6 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
   }
 
   get(): ModelConfig {
-    this.#config.idGenerator ??= DEFAULT_ID_GENERATOR;
     return this.#config;
   }
 
