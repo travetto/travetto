@@ -54,7 +54,7 @@ export class MongoUtil {
 
   static uuid(value: string): Binary | string {
     const clean = value.replaceAll('-', '');
-    if (/^[0-9a-fA-F]{32}$/.test(clean)) {
+    if (/^[0-9a-f]{32}$/i.test(clean)) {
       try {
         return new Binary(BinaryUtil.binaryArrayToUint8Array(CodecUtil.fromHexString(clean)), Binary.SUBTYPE_UUID);
       } catch {
