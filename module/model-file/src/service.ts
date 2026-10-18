@@ -174,11 +174,11 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    const prepped = await ModelCrudUtil.preUpdate(cls, item, { ensureNotSubType: true });
+    const prepped = await ModelCrudUtil.preUpdate(cls, item, {
+      ensureNotSubType: true,
+      get: this.config.readBeforeUpdate ? id => this.get(cls, id) : undefined
+    });
     const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
-    if (this.config.readBeforeUpdate) {
-      await this.get(cls, id);
-    }
     const file = await this.#resolveName(cls, '.json', id);
     await fs.writeFile(file, BinaryUtil.binaryArrayToUint8Array(JSONUtil.toBinaryArray(prepped)));
     return prepped;
