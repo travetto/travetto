@@ -120,13 +120,28 @@ export class ModelCrudUtil {
 
   /**
    * Pre-update hook: checks subtype if requested, requires ID (throwing ValidationResultError if missing),
-   * runs prePersist, and validates schema
+   * runs prePersist, validates schema, and optionally invokes `getOperation` to verify existing record
    */
-  static async preUpdate<T extends ModelType>(cls: Class<T>, item: T, options?: { ensureNotSubType?: boolean }): Promise<T> {
+  static async preUpdate<T extends ModelType>(
+    cls: Class<T>,
+    item: T,
+    options?: {
+      ensureNotSubType?: boolean;
+      getOperation?: (id: string) => Promise<unknown>;
+      readBeforeUpdate?: boolean;
+      getBeforeRead?: boolean;
+    }
+  ): Promise<T> {
     if (options?.ensureNotSubType) {
       this.ensureNotSubType(cls);
     }
-    return this.preStore(cls, item, { ensureId: false, scope: 'all' });
+    const prepped = await this.preStore(cls, item, { ensureId: false, scope: 'all' });
+    const shouldRead = options?.readBeforeUpdate ?? options?.getBeforeRead ?? true;
+    if (shouldRead && options?.getOperation) {
+      const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
+      await options.getOperation(id);
+    }
+    return prepped;
   }
 
   /**

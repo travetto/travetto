@@ -317,11 +317,15 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    const prepped = await ModelCrudUtil.preUpdate(cls, item, { ensureNotSubType: true });
-    const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
-    if (!(await this.head(cls, id))) {
-      throw new NotFoundError(cls, id);
-    }
+    const prepped = await ModelCrudUtil.preUpdate(cls, item, {
+      ensureNotSubType: true,
+      getOperation: async id => {
+        if (!(await this.head(cls, id))) {
+          throw new NotFoundError(cls, id);
+        }
+      },
+      readBeforeUpdate: this.config.readBeforeUpdate
+    });
     return this.store(cls, prepped, false);
   }
 

@@ -61,6 +61,7 @@ export class MemoryModelConfig {
   modifyStorage?: boolean = true;
   namespace?: string;
   cullRate?: number | TimeSpan;
+  readBeforeUpdate?: boolean = false;
 }
 
 function indexName<T extends ModelType>(cls: Class<T>, idx: AllIndexes<T>, suffix?: string): string {
@@ -299,9 +300,10 @@ export class MemoryModelService
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    const prepped = await ModelCrudUtil.preUpdate(cls, item);
-    const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
-    await this.get(cls, id);
+    const prepped = await ModelCrudUtil.preUpdate(cls, item, {
+      getOperation: id => this.get(cls, id),
+      readBeforeUpdate: this.config.readBeforeUpdate
+    });
     return await this.#persist(cls, prepped, 'write');
   }
 
