@@ -18,6 +18,7 @@ export class FirestoreModelConfig {
   namespace?: string;
   modifyStorage?: boolean;
   credentials?: FirestoreModelConfigCredentials;
+  readBeforeUpdate?: boolean = true;
 
   @PostConstruct()
   async finalizeConfig(): Promise<void> {

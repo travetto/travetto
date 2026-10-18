@@ -47,6 +47,7 @@ export class FileModelConfig {
   namespace: string = '.';
   modifyStorage?: boolean;
   cullRate?: number | TimeSpan;
+  readBeforeUpdate?: boolean = true;
 
   @PostConstruct()
   async finalizeConfig(): Promise<void> {
@@ -175,7 +176,9 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     const prepped = await ModelCrudUtil.preUpdate(cls, item, { ensureNotSubType: true });
     const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
-    await this.get(cls, id);
+    if (this.config.readBeforeUpdate) {
+      await this.get(cls, id);
+    }
     const file = await this.#resolveName(cls, '.json', id);
     await fs.writeFile(file, BinaryUtil.binaryArrayToUint8Array(JSONUtil.toBinaryArray(prepped)));
     return prepped;
