@@ -1,5 +1,6 @@
 import assert from 'node:assert';
 
+import { Model, type ModelId } from '@travetto/model';
 import type { WhereClause } from '@travetto/model-query';
 import { Registry } from '@travetto/registry';
 import { DataUtil, Schema } from '@travetto/schema';
@@ -7,9 +8,9 @@ import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { ElasticsearchQueryUtil } from '@travetto/model-elasticsearch/src/internal/query.ts';
 
-@Schema()
-class User {
-  id: string;
+@Model()
+class QueryTestUser {
+  id: ModelId;
   name: string;
 }
 
@@ -111,7 +112,7 @@ export class QueryTest {
 
   @Test()
   async translateIds() {
-    const out = ElasticsearchQueryUtil.extractWhereQuery(User, {
+    const out = ElasticsearchQueryUtil.extractWhereQuery(QueryTestUser, {
       $and: [{ id: { $in: ['a'.repeat(24), 'b'.repeat(24), 'c'.repeat(24)] } }]
     });
 
@@ -124,7 +125,7 @@ export class QueryTest {
 
   @Test()
   async testRegEx() {
-    const out = ElasticsearchQueryUtil.extractWhereQuery(User, {
+    const out = ElasticsearchQueryUtil.extractWhereQuery(QueryTestUser, {
       name: {
         $regex: '/google.$/'
       }
@@ -139,7 +140,7 @@ export class QueryTest {
 
   @Test()
   async testRegExCaseInsensitive() {
-    const out = ElasticsearchQueryUtil.extractWhereQuery(User, {
+    const out = ElasticsearchQueryUtil.extractWhereQuery(QueryTestUser, {
       name: {
         $regex: '/google.$/i'
       }

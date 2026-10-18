@@ -198,7 +198,7 @@ export class SchemaFaker {
     const out: Record<string, unknown> = {};
 
     for (const [name, fieldConfig] of Object.entries(fields)) {
-      if (name === subTypeField || name === 'id') {
+      if (name === subTypeField || fieldConfig.specifiers?.includes('no-generate')) {
         // Do not set primary fields
         continue;
       }

@@ -1,5 +1,5 @@
 import { ModelRegistryIndex, type ModelType, NotFoundError } from '@travetto/model';
-import { type Class, castTo, hasFunction, RuntimeError, TimeUtil } from '@travetto/runtime';
+import { type Class, castKey, castTo, hasFunction, RuntimeError, TimeUtil } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { WhereClause, WhereClauseRaw } from '../model/where-clause.ts';
@@ -35,7 +35,8 @@ export class ModelQueryUtil {
     if (result.length === 1 || (result.length > 1 && !failOnMany)) {
       return result[0]!;
     }
-    const requestedId = where && 'id' in where && typeof where.id === 'string' ? where.id : undefined;
+    const idField = ModelRegistryIndex.getConfig(cls).idField;
+    const requestedId = where && idField in where && typeof where[castKey(idField)] === 'string' ? where[castKey(idField)] : undefined;
     if (result.length === 0) {
       if (requestedId) {
         throw new NotFoundError(cls, requestedId);

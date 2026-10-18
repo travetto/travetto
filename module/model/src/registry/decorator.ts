@@ -1,6 +1,6 @@
 import { type Class, castTo, getClass } from '@travetto/runtime';
 
-import type { ModelType } from '../types/model.ts';
+import type { ModelId, ModelType } from '../types/model.ts';
 import { ModelRegistryIndex } from './registry-index.ts';
 import type { DataHandler, ModelConfig, PrePersistScope } from './types.ts';
 
@@ -17,6 +17,18 @@ export function Model(config: Partial<ModelConfig<ModelType>> | string = {}) {
     }
     ModelRegistryIndex.getForRegister(cls).register(config);
     return cls;
+  };
+}
+
+/**
+ * Model class decorator for custom identifier generation
+ *
+ * @augments `@travetto/schema:Schema`
+ * @kind decorator
+ */
+export function IdGenerator(generator: () => ModelId) {
+  return function <T extends ModelType, U extends Class<T>>(cls: U): void {
+    ModelRegistryIndex.getForRegister(cls).register({ idGenerator: generator });
   };
 }
 

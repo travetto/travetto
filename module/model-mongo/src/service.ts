@@ -192,35 +192,35 @@ export class MongoModelService
     return q;
   }
 
-  restoreId(item: { id?: string; _id?: unknown }): void {
+  restoreId<T extends ModelType>(cls: Class<T>, item: Record<string, unknown>): void {
     if (item._id) {
-      item.id ??= MongoUtil.idToString(castTo(item._id));
+      const idFieldName = ModelRegistryIndex.get(cls).idSource.field;
+      item[idFieldName] ??= MongoUtil.idToString(castTo(item._id));
       delete item._id;
     }
   }
 
   async postLoad<T extends ModelType>(cls: Class<T>, item: T | MongoWithId<T>): Promise<T> {
-    this.restoreId(item);
+    this.restoreId(cls, castTo(item));
     return await ModelCrudUtil.load(cls, item);
   }
 
-  #postStore<T extends ModelType>(item: T, id?: string): T {
+  #postStore<T extends ModelType>(cls: Class<T>, item: T, id?: string): T {
     if (id) {
-      item.id ??= id;
+      ModelRegistryIndex.get(cls).idSource.set(item, id);
     }
-    this.restoreId(item);
+    this.restoreId(cls, castTo(item));
     return item;
   }
 
-  #preStore<T extends OptionalId<ModelType>>(item: T & { _id?: Binary; id: string }): string;
-  #preStore<T extends OptionalId<ModelType>>(item: Omit<T, 'id'> & { _id?: Binary }): undefined;
-  #preStore<T extends OptionalId<ModelType>>(item: T & { _id?: Binary; id: undefined }): undefined;
-  #preStore<T extends OptionalId<ModelType>>(item: T & { _id?: Binary; id?: string }): string | undefined {
-    if (item?.id) {
-      const id = item.id;
-      item._id = MongoUtil.uuid(id);
+  #preStore<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): string | undefined {
+    const idSource = ModelRegistryIndex.get(cls).idSource;
+    const id = idSource.get(item, { optional: true });
+    if (id) {
+      const ref: { _id?: Binary | string } = castTo(item);
+      ref._id = MongoUtil.uuid(id);
       if (!this.config.storeId) {
-        delete item.id;
+        idSource.clear(item);
       }
       return id;
     }
@@ -333,8 +333,8 @@ export class MongoModelService
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const cleaned = await ModelCrudUtil.preCreate<WithId<T, Binary>>(cls, item);
-    const id = this.#preStore(cleaned);
+    const cleaned = await ModelCrudUtil.preCreate(cls, item);
+    const id = this.#preStore(cls, cleaned)!;
 
     const store = await this.getStore(cls);
     try {
@@ -342,7 +342,7 @@ export class MongoModelService
       if (!result.insertedId) {
         throw new ExistsError(cls, id);
       }
-      return this.#postStore(cleaned, id);
+      return this.#postStore(cls, castTo(cleaned), id);
     } catch (error) {
       throw handleDuplicateKeyError(cls, id, error);
     }
@@ -350,18 +350,18 @@ export class MongoModelService
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     item = await ModelCrudUtil.preUpdate(cls, item);
-    const id = this.#preStore(item);
+    const id = this.#preStore(cls, item)!;
     const store = await this.getStore(cls);
     const result = await store.replaceOne(this.getIdFilter(cls, id), item);
     if (result.matchedCount === 0) {
       throw new NotFoundError(cls, id);
     }
-    return this.#postStore(item, id);
+    return this.#postStore(cls, item, id);
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const cleaned = await ModelCrudUtil.preUpsert<WithId<T, Binary>>(cls, item);
-    const id = this.#preStore(cleaned);
+    const cleaned = await ModelCrudUtil.preUpsert(cls, item);
+    const id = this.#preStore(cls, cleaned)!;
     const store = await this.getStore(cls);
 
     try {
@@ -369,7 +369,7 @@ export class MongoModelService
     } catch (error) {
       throw handleDuplicateKeyError(cls, id, error);
     }
-    return this.#postStore(cleaned, id);
+    return this.#postStore(cls, castTo(cleaned), id);
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
@@ -389,7 +389,7 @@ export class MongoModelService
       }, {})
     );
 
-    const id = item.id;
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
 
     const result = await store.findOneAndUpdate(this.getIdFilter(cls, id), operation, {
       returnDocument: 'after',
@@ -478,7 +478,7 @@ export class MongoModelService
       return out;
     }
 
-    const store = await this.getStore<PartialWithId<T>>(cls);
+    const store = await this.getStore<T>(cls);
     const bulk = store.initializeUnorderedBulkOp({ writeConcern: { w: 1 } });
     const { upsertedIds, insertedIds } = await ModelBulkUtil.preStore(cls, operations);
 
@@ -486,19 +486,20 @@ export class MongoModelService
 
     for (const operation of operations) {
       if (operation.insert) {
-        this.#preStore(operation.insert);
+        this.#preStore(cls, operation.insert);
         bulk.insert(operation.insert);
       } else if (operation.upsert) {
-        const id = this.#preStore(operation.upsert);
+        const id = this.#preStore(cls, operation.upsert);
         bulk
           .find({ _id: MongoUtil.uuid(id!) })
           .upsert()
           .updateOne({ $set: operation.upsert });
       } else if (operation.update) {
-        const id = this.#preStore(operation.update);
-        bulk.find({ _id: MongoUtil.uuid(id) }).update({ $set: operation.update });
+        const id = this.#preStore(cls, operation.update);
+        bulk.find({ _id: MongoUtil.uuid(id!) }).update({ $set: operation.update });
       } else if (operation.delete) {
-        bulk.find({ _id: MongoUtil.uuid(operation.delete.id) }).deleteOne();
+        const id = ModelRegistryIndex.get(cls).idSource.get(operation.delete);
+        bulk.find({ _id: MongoUtil.uuid(id!) }).deleteOne();
       }
     }
 
@@ -508,7 +509,7 @@ export class MongoModelService
     for (const operation of operations) {
       const core = operation.insert ?? operation.upsert ?? operation.update;
       if (core) {
-        this.#postStore(asFull(core));
+        this.#postStore(cls, castTo(core));
       }
     }
 
@@ -675,16 +676,16 @@ export class MongoModelService
 
     const col = await this.getStore(cls);
     const item = await ModelCrudUtil.preUpdate(cls, data);
-    const id = this.#preStore(item);
+    const id = this.#preStore(cls, item)!;
     const where = ModelQueryUtil.getWhereClause(cls, query.where);
-    where.id = id;
+    Object.assign(where, ModelRegistryIndex.get(cls).idSource.where(id));
 
     const filter = MongoUtil.extractWhereFilter(cls, where);
     const result = await col.replaceOne(filter, item);
     if (result.matchedCount === 0) {
       throw new NotFoundError(cls, id);
     }
-    return this.#postStore(item, id);
+    return this.#postStore(cls, item, id);
   }
 
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
@@ -780,9 +781,12 @@ export class MongoModelService
 
     const collection = await this.getStore(cls);
 
-    const where = ModelQueryUtil.getWhereClause(cls, {
-      $and: [query?.where ?? {}, { [field]: { $exists: true } }]
-    });
+    const where = ModelQueryUtil.getWhereClause(
+      cls,
+      castTo<WhereClause<T>>({
+        $and: [query?.where ?? {}, { [field]: { $exists: true } }]
+      })
+    );
 
     const isDate = SchemaRegistryIndex.getNestedFieldConfig(cls, field)?.type === Date;
 

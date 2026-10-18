@@ -294,9 +294,10 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     if (preStore) {
       prepped = await ModelCrudUtil.preUpsert(cls, item, { ensureNotSubType: true });
     }
+    const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
     const content = JSONUtil.toBinaryArray(prepped);
     await this.client.putObject(
-      this.#query(cls, prepped.id, {
+      this.#query(cls, id, {
         Body: BinaryUtil.binaryArrayToUint8Array(content),
         ContentType: 'application/json',
         ContentLength: content.byteLength,
@@ -308,16 +309,18 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const prepped = await ModelCrudUtil.preCreate(cls, item);
-    if (await this.head(cls, prepped.id)) {
-      throw new ExistsError(cls, prepped.id);
+    const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
+    if (await this.head(cls, id)) {
+      throw new ExistsError(cls, id);
     }
     return this.store(cls, prepped, false);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     const prepped = await ModelCrudUtil.preUpdate(cls, item, { ensureNotSubType: true });
-    if (!(await this.head(cls, prepped.id))) {
-      throw new NotFoundError(cls, prepped.id);
+    const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
+    if (!(await this.head(cls, id))) {
+      throw new NotFoundError(cls, id);
     }
     return this.store(cls, prepped, false);
   }
@@ -328,11 +331,11 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
-    const id = item.id;
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
     const prepared = await ModelCrudUtil.prePartialUpdate(cls, item, {
       ensureNotSubType: true
     });
-    const prepped = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), prepared);
+    const prepped = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), prepared, id);
     return this.store<T>(cls, prepped, false);
   }
 

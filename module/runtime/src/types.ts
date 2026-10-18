@@ -19,13 +19,15 @@ export type NumericLikeIntrinsic = Date | NumericPrimitive;
 
 export type IntrinsicType = Primitive | Date | ArrayBuffer | Uint8Array | Uint16Array | Uint32Array | Readable | Buffer | Blob | File;
 
-export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends IntrinsicType | undefined
-    ? T[P] | undefined
-    : T[P] extends Any[]
-      ? (DeepPartial<T[P][number]> | null | undefined)[]
-      : DeepPartial<T[P]>;
-};
+export type DeepPartial<T> =
+  | Partial<T>
+  | {
+      [P in keyof T]?: T[P] extends IntrinsicType | undefined
+        ? T[P] | undefined
+        : T[P] extends Any[]
+          ? (DeepPartial<T[P][number]> | null | undefined)[]
+          : DeepPartial<T[P]>;
+    };
 
 export type ValidFields<T, I> = {
   [K in keyof T]: T[K] extends Primitive | I | undefined ? K : T[K] extends Function | undefined ? never : K;

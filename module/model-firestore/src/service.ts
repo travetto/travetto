@@ -97,7 +97,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     if (item.size > 1) {
       throw new RuntimeError(`Multiple items found for ${cls.name} Index=${idx}`);
     }
-    return item.docs[0].data().id;
+    return item.docs[0].id;
   }
 
   #buildIndexQuery<T extends ModelType>(cls: Class<T>, idx: SortedIndex<T>, body: KeyedIndexBody<T>): Query {
@@ -180,11 +180,12 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const prepped = await ModelCrudUtil.preCreate(cls, item);
+    const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
     try {
-      await this.#getCollection(cls).doc(prepped.id).create(clone<DocumentData>(prepped));
+      await this.#getCollection(cls).doc(id).create(clone<DocumentData>(prepped));
     } catch (error) {
       if (isExistsError(error)) {
-        throw new ExistsError(cls, prepped.id);
+        throw new ExistsError(cls, id);
       }
       throw error;
     }
@@ -193,19 +194,21 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     const prepped = await ModelCrudUtil.preUpdate(cls, item, { ensureNotSubType: true });
-    await this.get(cls, prepped.id);
-    await this.#getCollection(cls).doc(prepped.id).set(clone<DocumentData>(prepped), { merge: false });
+    const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
+    await this.get(cls, id);
+    await this.#getCollection(cls).doc(id).set(clone<DocumentData>(prepped), { merge: false });
     return prepped;
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const prepped = await ModelCrudUtil.preUpsert(cls, item, { ensureNotSubType: true });
-    await this.#getCollection(cls).doc(prepped.id).set(clone<DocumentData>(prepped));
+    const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
+    await this.#getCollection(cls).doc(id).set(clone<DocumentData>(prepped));
     return prepped;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: PartialWithId<T>): Promise<T> {
-    const id = item.id;
+    const id = ModelRegistryIndex.get(cls).idSource.get(item);
     const prepared = await ModelCrudUtil.prePartialUpdate(cls, item, {
       ensureNotSubType: true
     });

@@ -66,7 +66,7 @@ import {
   type ValidStringFields,
   type WhereClause
 } from '@travetto/model-query';
-import { asConstructable, asFull, type Class, castTo, JSONUtil, ShutdownManager, TypedObject } from '@travetto/runtime';
+import { asConstructable, asFull, type Class, castKey, castTo, JSONUtil, ShutdownManager, TypedObject } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
 import type { ElasticsearchModelConfig } from './config.ts';
@@ -131,12 +131,13 @@ export class ElasticsearchModelService
    * Convert _id to id
    */
   async #postLoad<T extends ModelType>(cls: Class<T>, input: SearchHit<T> | GetGetResult<T>): Promise<T> {
-    let item = {
-      ...(input._id ? { id: input._id } : {}),
+    const idField = ModelRegistryIndex.getConfig(cls).idField;
+    const raw = {
+      ...(input._id ? { [idField]: input._id } : {}),
       ...input._source!
     };
 
-    item = await ModelCrudUtil.load(cls, item);
+    const item = await ModelCrudUtil.load(cls, raw);
 
     const { expiresAt } = ModelRegistryIndex.getConfig(cls);
 
@@ -145,7 +146,7 @@ export class ElasticsearchModelService
       if (!expiry.expired) {
         return item;
       }
-      throw new NotFoundError(cls, item.id);
+      throw NotFoundError.for(cls, item);
     } else {
       return item;
     }
@@ -263,22 +264,20 @@ export class ElasticsearchModelService
     }
   }
 
-  #preStore(item: { id: string }): string;
-  #preStore(item: {}): undefined;
-  #preStore(item: { id?: string }): string | undefined {
-    if ('id' in item && typeof item.id === 'string') {
-      const id = item.id;
+  #preStore<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): string | undefined {
+    const idSource = ModelRegistryIndex.get(cls).idSource;
+    const id = idSource.get(item, { optional: true });
+    if (id) {
       if (!this.config.storeId) {
-        delete item.id;
+        idSource.clear(item);
       }
       return id;
     }
-    return;
   }
 
-  #postStore<T extends ModelType>(item: T, id?: string): T {
-    if (!this.config.storeId) {
-      item.id = id!;
+  #postStore<T extends ModelType>(cls: Class<T>, item: T, id?: string): T {
+    if (!this.config.storeId && id) {
+      ModelRegistryIndex.get(cls).idSource.set(item, id);
     }
     return item;
   }
@@ -333,7 +332,7 @@ export class ElasticsearchModelService
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const clean = await ModelCrudUtil.preCreate(cls, item);
-    const id = this.#preStore(clean);
+    const id = this.#preStore(cls, clean)!;
 
     try {
       await this.client.index({
@@ -350,13 +349,13 @@ export class ElasticsearchModelService
       throw error;
     }
 
-    return this.#postStore(clean, id);
+    return this.#postStore(cls, clean, id);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     item = await ModelCrudUtil.preUpdate(cls, item, { ensureNotSubType: true });
 
-    const id = this.#preStore(item);
+    const id = this.#preStore(cls, item)!;
 
     if (ModelRegistryIndex.getConfig(cls).expiresAt) {
       await this.get(cls, id);
@@ -376,12 +375,12 @@ export class ElasticsearchModelService
       throw error;
     }
 
-    return this.#postStore(item, id);
+    return this.#postStore(cls, item, id);
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, input: OptionalId<T>): Promise<T> {
     const item = await ModelCrudUtil.preUpsert(cls, input, { ensureNotSubType: true });
-    const id = this.#preStore(item);
+    const id = this.#preStore(cls, item)!;
 
     await this.client.update({
       ...this.manager.getIdentity(cls),
@@ -391,11 +390,11 @@ export class ElasticsearchModelService
       doc_as_upsert: true
     });
 
-    return this.#postStore(item, id);
+    return this.#postStore(cls, item, id);
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, data: PartialWithId<T>): Promise<T> {
-    const id = data.id;
+    const id = ModelRegistryIndex.get(cls).idSource.get(data);
     const item = castTo<typeof data>(await ModelCrudUtil.prePartialUpdate(cls, data, { ensureNotSubType: true }));
     const script = ElasticsearchSchemaUtil.generateUpdateScript(item);
 
@@ -439,15 +438,15 @@ export class ElasticsearchModelService
       const identity: { _index: string; _type?: unknown } = { _index: index };
 
       if (operation.delete) {
-        toRun.push({ delete: { ...identity, _id: operation.delete.id } });
+        toRun.push({ delete: { ...identity, _id: ModelRegistryIndex.get(cls).idSource.get(operation.delete) } });
       } else if (operation.insert) {
-        const id = this.#preStore(operation.insert);
+        const id = this.#preStore(cls, operation.insert);
         toRun.push({ create: { ...identity, _id: id } }, castTo(operation.insert));
       } else if (operation.upsert) {
-        const id = this.#preStore(operation.upsert);
+        const id = this.#preStore(cls, operation.upsert);
         toRun.push({ index: { ...identity, _id: id } }, castTo(operation.upsert));
       } else if (operation.update) {
-        const id = this.#preStore(operation.update);
+        const id = this.#preStore(cls, operation.update);
         toRun.push({ update: { ...identity, _id: id } }, { doc: operation.update });
       }
       return toRun;
@@ -502,7 +501,7 @@ export class ElasticsearchModelService
 
         if (responseItem.result === 'created') {
           out.insertedIds.set(i, responseItem._id!);
-          (operations[i].insert ?? operations[i].upsert)!.id = responseItem._id!;
+          ModelRegistryIndex.get(cls).idSource.set((operations[i].insert ?? operations[i].upsert)!, responseItem._id!);
         }
 
         out.counts[property] += 1;
@@ -647,12 +646,14 @@ export class ElasticsearchModelService
 
     const search = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
     const results = await this.execSearch(cls, search);
-    const shouldRemoveIds = query.select && 'id' in query.select && !query.select.id;
+    const idSource = ModelRegistryIndex.get(cls).idSource;
+    const idFieldName = idSource.field;
+    const shouldRemoveIds = query.select && idFieldName in query.select && !query.select[castKey(idFieldName)];
     return Promise.all(
       results.hits.hits.map(hit =>
         this.#postLoad(cls, hit).then(item => {
           if (shouldRemoveIds) {
-            delete castTo<OptionalId<T>>(item).id;
+            idSource.clear(item);
           }
           return item;
         })
@@ -678,11 +679,14 @@ export class ElasticsearchModelService
     await QueryVerifier.verify(cls, query);
 
     const item = await ModelCrudUtil.preUpdate(cls, data, { ensureNotSubType: true });
-    const id = this.#preStore(item);
+    const id = this.#preStore(cls, item)!;
 
-    const where = ModelQueryUtil.getWhereClause(cls, query.where);
+    let where = ModelQueryUtil.getWhereClause(cls, query.where);
     if (id) {
-      where.id = id;
+      where = {
+        ...where,
+        ...ModelRegistryIndex.get(cls).idSource.where(id)
+      };
     }
     query.where = where;
 
@@ -714,7 +718,7 @@ export class ElasticsearchModelService
       }
     }
 
-    return this.#postStore(item, id);
+    return this.#postStore(cls, item, id);
   }
 
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
@@ -776,7 +780,8 @@ export class ElasticsearchModelService
     });
     const search = ElasticsearchQueryUtil.getSearchObject(cls, resolvedQuery);
     const result = await this.execSearch(cls, search);
-    const all = result.hits.hits.map(hit => castTo<T>(field === 'id' ? { id: hit._id } : hit._source));
+    const idSource = ModelRegistryIndex.get(cls).idSource;
+    const all = result.hits.hits.map(hit => castTo<T>(field === idSource.field ? { [idSource.field]: hit._id } : hit._source));
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, all, item => item, query);
   }
 

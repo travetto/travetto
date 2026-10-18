@@ -1,5 +1,5 @@
-import { type BinaryArray, BinaryUtil, type Class, castKey, castTo, hasFunction, JSONUtil, RuntimeError, Util } from '@travetto/runtime';
-import { DataUtil, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
+import { type BinaryArray, BinaryUtil, type Class, castKey, castTo, hasFunction, JSONUtil, RuntimeError } from '@travetto/runtime';
+import { DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ExistsError } from '../error/exists.ts';
 import { SubTypeNotSupportedError } from '../error/invalid-sub-type.ts';
@@ -54,9 +54,9 @@ export class ModelCrudUtil {
 
     if (!(result instanceof cls || result.constructor.Ⲑid === cls.Ⲑid)) {
       if (onTypeMismatch === 'notfound') {
-        throw new NotFoundError(cls, result.id);
+        throw NotFoundError.for(cls, result);
       } else {
-        throw new ExistsError(cls, result.id);
+        throw ExistsError.for(cls, result);
       }
     }
 
@@ -85,8 +85,9 @@ export class ModelCrudUtil {
     const scope = resolvedConfig?.scope ?? 'all';
     const ensureId = resolvedConfig?.ensureId ?? true;
 
-    if (ensureId && !item.id) {
-      item.id = ModelRegistryIndex.getConfig(cls).idGenerator();
+    const idSource = ModelRegistryIndex.get(cls).idSource;
+    if (ensureId) {
+      idSource.getOrSet(item, ModelRegistryIndex.getConfig(cls).idGenerator);
     }
 
     if (DataUtil.isPlainObject(item)) {
@@ -147,7 +148,8 @@ export class ModelCrudUtil {
       this.ensureNotSubType(cls);
     }
     if (!id) {
-      throw new ValidationResultError([{ kind: 'required', path: 'id', type: 'string', message: 'id is required' }]);
+      const field = ModelRegistryIndex.get(cls).idSource.field;
+      throw new ValidationResultError([{ kind: 'required', path: castTo(field), type: 'string', message: `${field} is required` }]);
     }
     return id;
   }
@@ -267,33 +269,21 @@ export class ModelCrudUtil {
         category: 'data'
       });
     }
-    const id = item.id;
+    const idSource = ModelRegistryIndex.get(cls).idSource;
+    const id = idSource.get(item, { optional: true });
     const keys = Object.keys(item);
     if ((keys.length === 1 && id) || keys.length === 0) {
       throw new RuntimeError('No fields to update');
     } else {
       item = { ...item };
-      delete item.id;
+      idSource.clear(item);
     }
 
     const result = await this.prePersist(cls, castTo(item), 'partial');
-    let errors: ValidationError[] = [];
-    try {
-      await SchemaValidator.validatePartial(cls, item);
-    } catch (error) {
-      if (error instanceof ValidationResultError) {
-        errors = error.details.errors;
-      } else {
-        throw error;
-      }
+    if (options?.validateId ?? false) {
+      idSource.get(item); // Throws ValidationResultError if id is missing
     }
-    if ((options?.validateId ?? true) && !id) {
-      errors.push({ kind: 'required', path: 'id', type: 'string', message: 'id is required' });
-    }
-
-    if (errors.length) {
-      throw new ValidationResultError(errors);
-    }
+    await SchemaValidator.validatePartial(cls, item);
 
     return castTo(result);
   }

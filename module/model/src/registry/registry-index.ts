@@ -1,5 +1,5 @@
-import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
-import { type Class, castTo, RuntimeError } from '@travetto/runtime';
+import { type RegistrationMethods, Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
+import { type Class, castKey, castTo, RuntimeError } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelType } from '../types/model.ts';
@@ -20,7 +20,7 @@ export class ModelRegistryIndex implements RegistryIndex {
     return this.#instance.getConfig(cls);
   }
 
-  static has(cls: Class): boolean {
+  static has(cls: Class): cls is Class<ModelType> {
     return this.#instance.store.has(cls);
   }
 
@@ -34,6 +34,10 @@ export class ModelRegistryIndex implements RegistryIndex {
 
   static getExpiryFieldName<T extends ModelType>(cls: Class<T>): keyof T {
     return this.#instance.getExpiryFieldName(cls);
+  }
+
+  static get(cls: Class): Omit<ModelRegistryAdapter, RegistrationMethods> {
+    return this.#instance.store.get(cls);
   }
 
   static getClasses(): Class[] {
@@ -103,6 +107,6 @@ export class ModelRegistryIndex implements RegistryIndex {
     if (!expiry) {
       throw new RuntimeError(`${cls.name} is not configured with expiry support, please use @ExpiresAt to declare expiration behavior`);
     }
-    return castTo(expiry);
+    return castKey(expiry);
   }
 }

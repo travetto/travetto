@@ -226,24 +226,7 @@ Finally, there is support for <a target="_blank" class="source-link" href="https
 
 <h2 id="declaration">Declaration</h2>
 
-Models are declared via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13">&#64;Model</a> decorator, which allows the system to know that this is a class that is compatible with the module. The only requirement for a model is the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10">ModelType</a>
-
-  <figure class="code">
-    <figcaption class="code">ModelType
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10">Source</a></cite>
-
-</figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelType</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token comment">/**
-   * Unique identifier.
-   *
-   * If not provided, will be computed on create
-   */</span>
-  id<span class="token operator">:</span> ModelId<span class="token punctuation">;</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>
-  </figure>
-
-The <code class="item field">id</code> is the only required field for a model, as this is a hard requirement on naming and type. This may make using existing data models impossible if types other than strings are required. Additionally, the <code class="item field">type</code> field, is intended to record the base model type, but can be remapped. This is important to support polymorphism, not only in <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a>, but also in <a class="module-link" routerLink="/docs/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a>.
+Models are declared via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13">&#64;Model</a> decorator, which allows the system to know that this is a class that is compatible with the module. The only requirement for a model is to have a single <code class="item class">ModelId</code>. This may make using existing data models impossible if types other than strings are required. Additionally, the <code class="item field">type</code> field, is intended to record the base model type, but can be remapped. This is important to support polymorphism, not only in <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a>, but also in <a class="module-link" routerLink="/docs/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a>.
 
 <h2 id="implementations">Implementations</h2>
 

@@ -200,21 +200,7 @@ export interface ModelBulkSupport extends ModelCrudSupport {
 ```
 
 ## Declaration
-Models are declared via the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13) decorator, which allows the system to know that this is a class that is compatible with the module. The only requirement for a model is the [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10)
-
-**Code: ModelType**
-```typescript
-export interface ModelType {
-  /**
-   * Unique identifier.
-   *
-   * If not provided, will be computed on create
-   */
-  id: ModelId;
-}
-```
-
-The `id` is the only required field for a model, as this is a hard requirement on naming and type. This may make using existing data models impossible if types other than strings are required. Additionally, the `type` field, is intended to record the base model type, but can be remapped. This is important to support polymorphism, not only in [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations."), but also in [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.").
+Models are declared via the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13) decorator, which allows the system to know that this is a class that is compatible with the module. The only requirement for a model is to have a single `ModelId`. This may make using existing data models impossible if types other than strings are required. Additionally, the `type` field, is intended to record the base model type, but can be remapped. This is important to support polymorphism, not only in [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations."), but also in [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.").
 
 ## Implementations
 |Service|Basic|CRUD|Indexed|Expiry|Blob|Bulk|
