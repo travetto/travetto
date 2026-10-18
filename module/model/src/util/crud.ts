@@ -87,7 +87,7 @@ export class ModelCrudUtil {
 
     const idSource = ModelRegistryIndex.get(cls).idSource;
     if (ensureId) {
-      idSource.getOrSet(item, ModelRegistryIndex.getConfig(cls).idGenerator);
+      idSource.getOrSet(item);
     }
 
     if (DataUtil.isPlainObject(item)) {

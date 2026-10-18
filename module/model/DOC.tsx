@@ -6,7 +6,7 @@ import {
   type ModelBulkSupport,
   type ModelCrudSupport,
   type ModelExpirySupport,
-  ModelRegistryIndex,
+  ModelRegistryIndex
 } from '@travetto/model';
 import { toConcrete } from '@travetto/runtime';
 
@@ -92,10 +92,11 @@ export const text = (
     </c.Section>
     <c.Section title="Declaration">
       Models are declared via the {Model} decorator, which allows the system to know that this is a class that is compatible with the
-      module. The only requirement for a model is to have a single {d.class('ModelId')}. This may make using
-      existing data models impossible if types other than strings are required. Additionally, the {d.field('type')} field, is intended to
-      record the base model type, but can be remapped. This is important to support polymorphism, not only in {d.module('Model')}, but also
-      in {d.module('Schema')}.
+      module. The only requirement for a model is to have a primary identifier field. This can be fulfilled either by naming a field{' '}
+      {d.field('id')} (e.g. {d.field('id: string')}) or by typing any custom field name as {d.class('ModelId')} (e.g.{' '}
+      {d.field('<field>: ModelId')}). This may make using existing data models impossible if types other than strings are required.
+      Additionally, the {d.field('type')} field, is intended to record the base model type, but can be remapped. This is important to
+      support polymorphism, not only in {d.module('Model')}, but also in {d.module('Schema')}.
     </c.Section>
     <c.Section title="Implementations">
       <ModelImplementations />

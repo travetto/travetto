@@ -5,11 +5,12 @@ import {
   getClass,
   type NumericLikeIntrinsic,
   type NumericPrimitive,
-  type Primitive
+  type Primitive,
+  Util
 } from '@travetto/runtime';
 
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
-import { CONSTRUCTOR_PROPERTY, type SchemaInputConfig } from '../service/types.ts';
+import { CONSTRUCTOR_PROPERTY, type SchemaFieldConfig, type SchemaInputConfig } from '../service/types.ts';
 import { CommonRegex } from '../validate/regex.ts';
 
 type StringType = string | string[];
@@ -190,7 +191,7 @@ export function Url(message?: string): PropType<StringType> {
  * @kind decorator
  */
 export function UUID(message?: string): PropType<StringType> {
-  return Match(CommonRegex.uuid, message);
+  return input({ match: { regex: CommonRegex.uuid, message }, generator: (): string => Util.uuid() });
 }
 
 /**
@@ -262,4 +263,14 @@ export function DiscriminatorField(): (instance: ClassInstance, property: string
       discriminatedField: property
     });
   };
+}
+
+/**
+ * Custom generator for generating field values
+ * @param generator The generator function
+ * @augments `@travetto/schema:Input`
+ * @kind decorator
+ */
+export function Generator(generator: (config?: SchemaFieldConfig) => unknown): PropType<unknown> {
+  return input({ generator });
 }
