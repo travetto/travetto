@@ -301,7 +301,8 @@ export class MemoryModelService
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     const prepped = await ModelCrudUtil.preUpdate(cls, item, {
-      get: this.config.readBeforeUpdate ? id => this.get(cls, id) : undefined
+      getOperation: id => this.get(cls, id),
+      readBeforeUpdate: this.config.readBeforeUpdate
     });
     return await this.#persist(cls, prepped, 'write');
   }

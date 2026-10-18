@@ -338,7 +338,8 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     const prepped = await ModelCrudUtil.preUpdate(cls, item, {
       ensureNotSubType: true,
-      get: this.config.readBeforeUpdate ? id => this.has(cls, id, 'notfound') : undefined
+      getOperation: id => this.has(cls, id, 'notfound'),
+      readBeforeUpdate: this.config.readBeforeUpdate
     });
     await this.#store(cls, prepped, 'write');
     return prepped;

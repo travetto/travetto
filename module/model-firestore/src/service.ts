@@ -195,7 +195,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     const prepped = await ModelCrudUtil.preUpdate(cls, item, {
       ensureNotSubType: true,
-      get: this.config.readBeforeUpdate ? id => this.get(cls, id) : undefined
+      getOperation: id => this.get(cls, id),
+      readBeforeUpdate: this.config.readBeforeUpdate
     });
     const id = ModelRegistryIndex.get(cls).idSource.get(prepped);
     await this.#getCollection(cls).doc(id).set(clone<DocumentData>(prepped), { merge: false });

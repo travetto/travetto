@@ -179,4 +179,32 @@ export class ModelIdGeneratorSuite {
       }
     );
   }
+
+  @Test('Verify preUpdate invokes getOperation when readBeforeUpdate is true')
+  async testPreUpdateGetOperationEnabled() {
+    await Registry.init();
+    let fetchedId: string | undefined;
+    const item = DefaultModel.from({ id: '0123456789abcdef0123456789abcdef', name: 'Bob' });
+    await ModelCrudUtil.preUpdate(DefaultModel, item, {
+      getOperation: async id => {
+        fetchedId = id;
+      },
+      readBeforeUpdate: true
+    });
+    assert(fetchedId === item.id);
+  }
+
+  @Test('Verify preUpdate skips getOperation when readBeforeUpdate is false')
+  async testPreUpdateGetOperationDisabled() {
+    await Registry.init();
+    let fetchedId: string | undefined;
+    const item = DefaultModel.from({ id: '0123456789abcdef0123456789abcdef', name: 'Bob' });
+    await ModelCrudUtil.preUpdate(DefaultModel, item, {
+      getOperation: async id => {
+        fetchedId = id;
+      },
+      readBeforeUpdate: false
+    });
+    assert(fetchedId === undefined);
+  }
 }
