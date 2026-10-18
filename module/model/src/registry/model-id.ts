@@ -1,28 +1,41 @@
 import type { WhereClause } from '@travetto/model-query';
-import { castKey, castTo, type Any, type Class } from '@travetto/runtime';
-import { ValidationResultError } from '@travetto/schema';
+import { castKey, castTo, type Any, type Class, Util } from '@travetto/runtime';
+import { type SchemaFieldConfig, ValidationResultError } from '@travetto/schema';
 
 import type { ModelId, ModelType, OptionalId, PartialWithId } from '../types/model.ts';
+
+export const DEFAULT_ID_GENERATOR = (): ModelId => castTo(Util.uuid(32));
 
 /**
  * Encapsulates identifier operations for a model class.
  */
 export class ModelIdSource<T extends ModelType = Any> {
-  #modelClass: Class<T>;
-  field: [keyof T] extends [never] ? string : Extract<keyof T, string>;
+  readonly modelClass: Class<T>;
+  readonly idField: SchemaFieldConfig;
 
-  constructor(modelClass: Class<T>, field: Extract<keyof T, string>) {
-    this.#modelClass = modelClass;
-    this.field = field;
+  constructor(modelClass: Class<T>, idField: SchemaFieldConfig) {
+    this.modelClass = modelClass;
+    this.idField = idField;
+  }
+
+  get field(): [keyof T] extends [never] ? string : Extract<keyof T, string> {
+    return castTo(this.idField.name);
+  }
+
+  /**
+   * Get identifier generator for the field
+   */
+  get generator(): () => ModelId {
+    return castTo(this.idField.generator ?? DEFAULT_ID_GENERATOR);
   }
 
   /**
    * Extract identifier from an item if present, generating and setting if missing
    */
-  getOrSet(item: Partial<T> | PartialWithId<T> | OptionalId<T>, generate: () => ModelId): ModelId {
+  getOrSet(item: Partial<T> | PartialWithId<T> | OptionalId<T>): ModelId {
     let identifier: ModelId = castTo(item && typeof item === 'object' ? item[castKey(this.field)] : undefined);
     if (!identifier) {
-      this.set(castTo(item), (identifier = generate()));
+      this.set(castTo(item), (identifier = this.generator()));
     }
     return identifier;
   }

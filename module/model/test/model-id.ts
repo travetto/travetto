@@ -1,14 +1,11 @@
 import assert from 'node:assert';
 
+import { Model, ModelCrudUtil, type ModelId, ModelRegistryIndex, type OptionalId, type PartialWithId } from '@travetto/model';
 import { Registry } from '@travetto/registry';
 import { castTo } from '@travetto/runtime';
-import { Schema, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { Generator, Schema, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
-import { IdGenerator, Model } from '../src/registry/decorator.ts';
-import { ModelRegistryIndex } from '../src/registry/registry-index.ts';
-import type { ModelId, OptionalId, PartialWithId } from '../src/types/model.ts';
-import { ModelCrudUtil } from '../src/util/crud.ts';
 import { CustomIdModel } from '../support/test/crud.ts';
 
 @Model('model-id-default')
@@ -18,8 +15,8 @@ class DefaultModel {
 }
 
 @Model('model-id-custom-generator')
-@IdGenerator((): string => 'custom-id-value')
 class CustomGeneratorModel {
+  @Generator((): string => 'custom-id-value')
   identifier: ModelId;
   name: string;
 }
@@ -45,15 +42,23 @@ class PlainIdModel {
   id: string;
 }
 
-@Suite('ModelIdSource Suite')
-class ModelIdSourceSuite {
+@Schema()
+class BothIdsModel {
+  id: string;
+  customId: ModelId;
+}
+
+@Suite()
+export class ModelIdSourceSuite {
   @Test('Verify ModelRegistryIndex integration for default model')
   async testDefaultModel(): Promise<void> {
     await Registry.init();
     const source = ModelRegistryIndex.get(DefaultModel).idSource;
     assert(source.field === 'id');
+    assert(source.idField.name === 'id');
+    assert(source.idField.class === DefaultModel);
 
-    const generatedId = ModelRegistryIndex.getConfig(DefaultModel).idGenerator();
+    const generatedId = source.generator();
     assert(typeof generatedId === 'string');
     assert(generatedId.length === 32);
 
@@ -93,7 +98,7 @@ class ModelIdSourceSuite {
     await Registry.init();
     const source = ModelRegistryIndex.get(CustomGeneratorModel).idSource;
     assert(source.field === 'identifier');
-    assert(ModelRegistryIndex.getConfig(CustomGeneratorModel).idGenerator() === 'custom-id-value');
+    assert(source.generator() === 'custom-id-value');
   }
 
   @Test('Verify auto-discovered ModelId field')
@@ -101,7 +106,7 @@ class ModelIdSourceSuite {
     await Registry.init();
     const source = ModelRegistryIndex.get(AutoDiscoveredIdModel).idSource;
     assert(source.field === 'isbn');
-    const generated = ModelRegistryIndex.getConfig(AutoDiscoveredIdModel).idGenerator();
+    const generated = source.generator();
     assert(typeof generated === 'string');
     assert(generated.length === 32);
   }
@@ -119,14 +124,32 @@ class ModelIdSourceSuite {
 
   @Test('Verify error thrown when model has no id field')
   async testMissingIdFieldThrows(): Promise<void> {
-    ModelRegistryIndex.getForRegister(InvalidMissingIdModel).register();
-    assert.throws(() => Registry.finalizeForIndex(ModelRegistryIndex), /primary identifier/);
+    const adapter = ModelRegistryIndex.getForRegister(InvalidMissingIdModel);
+    adapter.register();
+    assert.throws(() => adapter.finalize(), /primary identifier/);
   }
 
-  @Test('Verify error thrown when model has id: string without ModelId')
-  async testPlainIdThrows(): Promise<void> {
-    ModelRegistryIndex.getForRegister(PlainIdModel).register();
-    assert.throws(() => Registry.finalizeForIndex(ModelRegistryIndex), /primary identifier/);
+  @Test('Verify model with plain id: string succeeds')
+  async testPlainIdSucceeds(): Promise<void> {
+    const adapter = ModelRegistryIndex.getForRegister(PlainIdModel);
+    adapter.register();
+    adapter.finalize();
+    const source = ModelRegistryIndex.get(PlainIdModel).idSource;
+    assert(source.field === 'id');
+    assert(typeof source.generator === 'function');
+    assert(source.generator().length === 32);
+
+    const emptyItem: OptionalId<PlainIdModel> = {};
+    assert(emptyItem.id === undefined);
+  }
+
+  @Test('Verify ModelId takes precedence over plain id')
+  async testModelIdPrecedence(): Promise<void> {
+    const adapter = ModelRegistryIndex.getForRegister(BothIdsModel);
+    adapter.register();
+    adapter.finalize();
+    const source = ModelRegistryIndex.get(BothIdsModel).idSource;
+    assert(source.field === 'customId');
   }
 
   @Test('Verify schema validation with default uuid pattern and custom generator')
@@ -152,6 +175,6 @@ class ModelIdSourceSuite {
       extra: 'detail'
     });
     assert(validSubclass.identifier === 'subclass-custom-id');
-    assert(ModelRegistryIndex.getConfig(SubclassCustomModel).idGenerator() === 'custom-id-value');
+    assert(ModelRegistryIndex.get(SubclassCustomModel).idSource.generator() === 'custom-id-value');
   }
 }

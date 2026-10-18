@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Registry } from '@travetto/registry';
-import { Max, Min, Precision, Schema } from '@travetto/schema';
+import { CommonRegex, Field, Max, Min, Precision, Schema, UUID } from '@travetto/schema';
 import { SchemaFaker } from '@travetto/schema-faker';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
@@ -44,6 +44,18 @@ class UserScore {
   score: number;
 }
 
+@Schema()
+class CustomGeneratorClass {
+  @Field({ generator: () => 'custom-mocked-value' })
+  customField: string;
+}
+
+@Schema()
+class UuidClass {
+  @UUID()
+  uuidField: string;
+}
+
 @Suite()
 class DataGenerationSuite {
   @BeforeAll()
@@ -71,5 +83,19 @@ class DataGenerationSuite {
     assert(user.score <= 100);
     const scoreText = `${user.score}`;
     assert(!scoreText.includes('.') || scoreText.split('.')[1].length < 3);
+  }
+
+  @Test('Verify field custom generator')
+  verifyCustomGenerator() {
+    const instance = SchemaFaker.generate(CustomGeneratorClass);
+    assert(instance.customField === 'custom-mocked-value');
+  }
+
+  @Test('Verify UUID generator')
+  verifyUuidGenerator() {
+    const instance = SchemaFaker.generate(UuidClass);
+    assert(typeof instance.uuidField === 'string');
+    assert(instance.uuidField.length === 32);
+    assert(CommonRegex.uuid.test(instance.uuidField));
   }
 }

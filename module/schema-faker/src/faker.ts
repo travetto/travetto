@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { type Class, castTo, TimeUtil } from '@travetto/runtime';
+import { type Class, castTo, TimeUtil, Util } from '@travetto/runtime';
 import { BindUtil, CommonRegex, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 /**
@@ -11,7 +11,8 @@ export class SchemaFaker {
     [CommonRegex.email, faker.internet.email],
     [CommonRegex.url, faker.internet.url],
     [CommonRegex.telephone, faker.phone.number],
-    [CommonRegex.postalCode, faker.location.zipCode]
+    [CommonRegex.postalCode, faker.location.zipCode],
+    [CommonRegex.uuid, Util.uuid]
   ]);
 
   /**
@@ -164,6 +165,9 @@ export class SchemaFaker {
    * @param config Field config
    */
   static #value(config: SchemaFieldConfig, subArray = false): unknown {
+    if (config.generator) {
+      return config.generator(config);
+    }
     if (!subArray && config.array) {
       return this.#array(config);
     } else if (config.enum) {
@@ -198,8 +202,14 @@ export class SchemaFaker {
     const out: Record<string, unknown> = {};
 
     for (const [name, fieldConfig] of Object.entries(fields)) {
-      if (name === subTypeField || fieldConfig.specifiers?.includes('no-generate')) {
-        // Do not set primary fields
+      if (name === subTypeField) {
+        continue;
+      }
+      if (fieldConfig.generator) {
+        const value = fieldConfig.generator(fieldConfig);
+        if (value !== undefined) {
+          out[name] = value;
+        }
         continue;
       }
       if (fieldConfig.required?.active === false && Math.random() < 0.5) {

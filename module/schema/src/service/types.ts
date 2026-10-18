@@ -181,6 +181,10 @@ export interface SchemaInputConfig extends SchemaCoreConfig, SchemaBasicType {
    * Default value
    */
   default?: IntrinsicType | [];
+  /**
+   * Custom generator function for generating field values
+   */
+  generator?: (config?: SchemaFieldConfig) => unknown;
 }
 
 /**

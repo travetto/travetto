@@ -1,18 +1,9 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import {
-  ExistsError,
-  IdGenerator,
-  Model,
-  type ModelCrudSupport,
-  type ModelId,
-  NotFoundError,
-  PersistValue,
-  PrePersist
-} from '@travetto/model';
+import { ExistsError, Model, type ModelCrudSupport, type ModelId, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
 import { castTo, Util } from '@travetto/runtime';
-import { Match, Precision, Required, Schema, Text, ValidationResultError } from '@travetto/schema';
+import { Generator, Match, Precision, Required, Schema, Text, ValidationResultError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from './base.ts';
@@ -26,8 +17,8 @@ export class CustomIdModel {
 let skuSequence = 0;
 
 @Model('crud-sku')
-@IdGenerator(() => `SKU-${++skuSequence}`)
 export class SkuModel {
+  @Generator(() => `SKU-${++skuSequence}`)
   @Match(/^SKU-\d+$/)
   sku: ModelId;
   title: string;

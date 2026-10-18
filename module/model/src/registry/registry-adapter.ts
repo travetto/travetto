@@ -1,12 +1,10 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { type Class, RuntimeError, Util, castTo } from '@travetto/runtime';
+import { type Class, RuntimeError, castTo } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelId, ModelType } from '../types/model.ts';
 import { ModelIdSource } from './model-id.ts';
 import type { ModelConfig } from './types.ts';
-
-const DEFAULT_ID_GENERATOR = (): string => Util.uuid(32);
 
 function combineClasses(target: ModelConfig, sources: Partial<ModelConfig>[]): ModelConfig {
   for (const source of sources) {
@@ -16,9 +14,6 @@ function combineClasses(target: ModelConfig, sources: Partial<ModelConfig>[]): M
       prePersist: [...(target.prePersist || []), ...(source.prePersist || [])],
       transientFields: [...(target.transientFields || []), ...(source.transientFields || [])]
     });
-    if (source.idGenerator) {
-      target.idGenerator = source.idGenerator;
-    }
     if (source.idField) {
       target.idField = source.idField;
     }
@@ -39,7 +34,7 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
   }
 
   get idSource(): ModelIdSource {
-    return (this.#idSource ??= new ModelIdSource(this.#cls, this.#config.idField));
+    return this.#idSource;
   }
 
   register(...data: Partial<ModelConfig>[]): ModelConfig {
@@ -48,7 +43,6 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
       indices: {},
       autoCreate: 'development',
       idField: undefined!,
-      idGenerator: undefined!,
       store: this.#cls.name,
       postLoad: [],
       prePersist: [],
@@ -67,12 +61,16 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
     // Establish id field
     if (!config.idField) {
       const [idField, ...othersFields] = Object.values(schemaFields).filter(field => field.specifiers?.includes('modelId'));
-      if (!idField) {
+      if (idField) {
+        if (othersFields.length) {
+          throw new RuntimeError(`Model ${this.#cls.name} has multiple ModelId (primary identifier) fields`);
+        }
+        config.idField = idField.name;
+      } else if (schemaFields.id) {
+        config.idField = 'id';
+      } else {
         throw new RuntimeError(`Model ${this.#cls.name} is missing a ModelId (primary identifier) field`);
-      } else if (othersFields.length) {
-        throw new RuntimeError(`Model ${this.#cls.name} has multiple ModelId (primary identifier) fields`);
       }
-      config.idField = idField.name;
     }
 
     if (this.#config.indices) {
@@ -92,12 +90,12 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
         config.store = parent.store;
       }
 
-      config.idGenerator ??= parent.idGenerator;
       config.postLoad = [...(parent.postLoad ?? []), ...(config.postLoad ?? [])];
       config.prePersist = [...(parent.prePersist ?? []), ...(config.prePersist ?? [])];
       config.transientFields = [...(parent.transientFields ?? []), ...(config.transientFields ?? [])];
     }
-    config.idGenerator ??= DEFAULT_ID_GENERATOR;
+
+    this.#idSource = new ModelIdSource(this.#cls, schemaFields[config.idField]);
   }
 
   get(): ModelConfig {
@@ -105,6 +103,6 @@ export class ModelRegistryAdapter implements RegistryAdapter<ModelConfig> {
   }
 
   ensureId<T extends ModelType>(item: T): ModelId {
-    return this.idSource.getOrSet(item, this.#config.idGenerator);
+    return this.idSource.getOrSet(item);
   }
 }

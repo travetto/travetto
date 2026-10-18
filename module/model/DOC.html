@@ -18,7 +18,7 @@
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval. This module builds heavily upon the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a>, which is used for data model validation.
 <h2 id="a-simple-model">A Simple Model</h2>
 
-A model can be simply defined by usage of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13">@Model</a> decorator, which opts it into the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> contracts, as well as making it available to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/registry-index.ts#L12">ModelRegistryIndex</a>.
+A model can be simply defined by usage of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">@Model</a> decorator, which opts it into the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> contracts, as well as making it available to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/registry-index.ts#L12">ModelRegistryIndex</a>.
 
   <figure class="code">
     <figcaption class="code">Basic Structure
@@ -226,7 +226,7 @@ Finally, there is support for <a target="_blank" class="source-link" href="https
 
 <h2 id="declaration">Declaration</h2>
 
-Models are declared via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13">@Model</a> decorator, which allows the system to know that this is a class that is compatible with the module. The only requirement for a model is to have a single <code class="item class">ModelId</code>. This may make using existing data models impossible if types other than strings are required. Additionally, the <code class="item field">type</code> field, is intended to record the base model type, but can be remapped. This is important to support polymorphism, not only in <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a>, but also in <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a>.
+Models are declared via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">@Model</a> decorator, which allows the system to know that this is a class that is compatible with the module. The only requirement for a model is to have a primary identifier field. This can be fulfilled either by naming a field <code class="item field">id</code> (e.g. <code class="item field">id: string</code>) or by typing any custom field name as <code class="item class">ModelId</code> (e.g. <code class="item field">&lt;field&gt;: ModelId</code>). This may make using existing data models impossible if types other than strings are required. Additionally, the <code class="item field">type</code> field, is intended to record the base model type, but can be remapped. This is important to support polymorphism, not only in <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a>, but also in <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a>.
 
 <h2 id="implementations">Implementations</h2>
 
@@ -386,7 +386,7 @@ To enforce that these contracts are honored, the module provides shared test sui
 
 <h2 id="cli-model-export">CLI - model:export</h2>
 
-The module provides the ability to generate an export of the model structure from all the various <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13">@Model</a> s within the application. This is useful for being able to generate the appropriate files to manually create the data schemas in production.
+The module provides the ability to generate an export of the model structure from all the various <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">@Model</a> s within the application. This is useful for being able to generate the appropriate files to manually create the data schemas in production.
 
   <figure class="terminal">
     <figcaption class="terminal">Showing help for model:export
@@ -423,7 +423,7 @@ TypeError: Cannot redefine property: toJSON
 
 <h2 id="cli-model-install">CLI - model:install</h2>
 
-The module provides the ability to install all the various <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13">@Model</a> s within the application given the current configuration being targeted. This is useful for being able to prepare the datastore manually.
+The module provides the ability to install all the various <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14">@Model</a> s within the application given the current configuration being targeted. This is useful for being able to prepare the datastore manually.
 
   <figure class="terminal">
     <figcaption class="terminal">Showing help for model:install

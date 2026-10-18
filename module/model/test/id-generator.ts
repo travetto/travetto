@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Model, ModelCrudUtil, type ModelId, ModelRegistryIndex } from '@travetto/model';
 import { Registry } from '@travetto/registry';
 import { castTo } from '@travetto/runtime';
-import { Match, Schema, SchemaValidator, UUID, ValidationResultError } from '@travetto/schema';
+import { Generator, Match, Schema, SchemaValidator, UUID, ValidationResultError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
 @Model()
@@ -28,11 +28,10 @@ class UuidValidatedModel {
 let counter = 0;
 const customPrefix = 'custom-id-';
 
-@Model({
-  idGenerator: () => `${customPrefix}${++counter}`
-})
+@Model()
 class CustomModel {
   @Match(new RegExp(`^${customPrefix}\\d+$`))
+  @Generator(() => `${customPrefix}${++counter}`)
   id: ModelId;
   value: string;
 }
@@ -42,45 +41,38 @@ class InheritedModel extends CustomModel {
   extra: string;
 }
 
-@Model({
-  idGenerator: () => `overridden-${++counter}`
-})
-class OverriddenModel extends CustomModel {
-  other: string;
-}
-
 @Suite()
 export class ModelIdGeneratorSuite {
   @Test('Verify default ID generator is 32 character uuid')
   async testDefaultIdGenerator() {
     await Registry.init();
-    const config = ModelRegistryIndex.getConfig(DefaultModel);
-    assert(typeof config.idGenerator === 'function');
+    const generator = ModelRegistryIndex.get(DefaultModel).idSource.generator;
+    assert(typeof generator === 'function');
 
-    const generatedId = config.idGenerator();
+    const generatedId = generator();
     assert(generatedId.length === 32);
     assert(/^[0-9a-f]{32}$/i.test(generatedId));
 
-    const secondId = config.idGenerator();
+    const secondId = generator();
     assert(secondId.length === 32);
     assert(generatedId !== secondId);
   }
 
-  @Test('Verify custom ID generator on ModelConfig')
+  @Test('Verify custom ID generator on field via @Generator')
   async testCustomIdGenerator() {
     await Registry.init();
-    const config = ModelRegistryIndex.getConfig(CustomModel);
-    assert(typeof config.idGenerator === 'function');
+    const generator = ModelRegistryIndex.get(CustomModel).idSource.generator;
+    assert(typeof generator === 'function');
 
-    const id1 = config.idGenerator();
+    const id1 = generator();
     assert(id1.startsWith(customPrefix));
 
-    const id2 = config.idGenerator();
+    const id2 = generator();
     assert(id2.startsWith(customPrefix));
     assert(id1 !== id2);
   }
 
-  @Test('Verify preCreate uses model idGenerator when id is omitted')
+  @Test('Verify preCreate uses field generator when id is omitted')
   async testPreCreateUsesIdGenerator() {
     await Registry.init();
     const defaultItem = await ModelCrudUtil.preCreate(DefaultModel, DefaultModel.from({ name: 'test' }));
@@ -100,7 +92,7 @@ export class ModelIdGeneratorSuite {
     assert(item.id === specificId);
   }
 
-  @Test('Verify preUpsert uses model idGenerator when id is omitted')
+  @Test('Verify preUpsert uses field generator when id is omitted')
   async testPreUpsertUsesIdGenerator() {
     await Registry.init();
     const customItem = await ModelCrudUtil.preUpsert(CustomModel, CustomModel.from({ value: 'val' }));
@@ -108,16 +100,12 @@ export class ModelIdGeneratorSuite {
     assert(customItem.id.startsWith(customPrefix));
   }
 
-  @Test('Verify inheritance of idGenerator')
+  @Test('Verify inheritance of field generator')
   async testInheritance() {
     await Registry.init();
-    const inheritedConfig = ModelRegistryIndex.getConfig(InheritedModel);
-    const inheritedId = inheritedConfig.idGenerator();
+    const inheritedGenerator = ModelRegistryIndex.get(InheritedModel).idSource.generator;
+    const inheritedId = inheritedGenerator();
     assert(inheritedId.startsWith(customPrefix));
-
-    const overriddenConfig = ModelRegistryIndex.getConfig(OverriddenModel);
-    const overriddenId = overriddenConfig.idGenerator();
-    assert(overriddenId.startsWith('overridden-'));
   }
 
   @Test('Verify ID pattern behavior with and without @UUID')
