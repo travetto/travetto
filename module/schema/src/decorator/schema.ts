@@ -19,7 +19,7 @@ type ValidStringField<T> = { [K in Extract<keyof T, string>]: T[K] extends strin
 export function Schema(config?: Partial<Pick<SchemaClassConfig, 'validators' | 'methods'>>) {
   return <T, U extends Class<T>>(cls: U): void => {
     cls.from ??= function <V>(this: Class<V>, data: DeepPartial<V>): V {
-      return BindUtil.bindSchema(this, data);
+      return BindUtil.bindSchema(this, data) as V;
     };
     SchemaRegistryIndex.getForRegister(cls).registerClass(config);
   };

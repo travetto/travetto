@@ -7,7 +7,6 @@ import {
   type ModelCrudSupport,
   type ModelExpirySupport,
   ModelRegistryIndex,
-  type ModelType
 } from '@travetto/model';
 import { toConcrete } from '@travetto/runtime';
 
@@ -15,8 +14,6 @@ import { Model } from './src/registry/decorator.ts';
 import { ModelExportCommand } from './support/cli.model_export.ts';
 import { ModelInstallCommand } from './support/cli.model_install.ts';
 import { Links } from './support/doc.support.ts';
-
-const ModelTypeContract = toConcrete<ModelType>();
 
 const ModelImplementations = () => {
   const modelImplHeader = ['Service', 'Basic', 'CRUD', 'Indexed', 'Expiry', 'Blob', 'Bulk'].map(name => <td>{name}</td>);
@@ -95,9 +92,7 @@ export const text = (
     </c.Section>
     <c.Section title="Declaration">
       Models are declared via the {Model} decorator, which allows the system to know that this is a class that is compatible with the
-      module. The only requirement for a model is the {ModelTypeContract}
-      <c.Code src={ModelTypeContract} />
-      The {d.field('id')} is the only required field for a model, as this is a hard requirement on naming and type. This may make using
+      module. The only requirement for a model is to have a single {d.class('ModelId')}. This may make using
       existing data models impossible if types other than strings are required. Additionally, the {d.field('type')} field, is intended to
       record the base model type, but can be remapped. This is important to support polymorphism, not only in {d.module('Model')}, but also
       in {d.module('Schema')}.

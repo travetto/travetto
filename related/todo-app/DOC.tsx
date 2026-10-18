@@ -1,6 +1,5 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, type DocJSXElement, type DocJSXElementByFn, DocRunUtil, d, isDocJSXElement, PackageDocUtil } from '@travetto/doc';
-import { Model, type ModelType } from '@travetto/model';
 import {
   type BinaryArray,
   BinaryUtil,
@@ -116,8 +115,7 @@ $ ${d.trv} eslint:register
         </ul>
         Create the file {d.path('src/model.ts')}
         <c.Code title="Models" src="src/model.ts" />
-        as you can see, the model structure is simple. Everything that uses the {Model} services needs to implement{' '}
-        {toConcrete<ModelType>()}.
+        as you can see, the model structure is simple. 
       </c.Section>
       <c.Section title="Building the Service Layer">
         Next we establish the functionality for the service layer. The operations we need are:
