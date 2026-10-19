@@ -35,20 +35,20 @@
     "postinstall": "rm -rf node_modules/@travetto && ln -sf ../../../../node_modules/.bin/trv node_modules/.bin/trv && ln -sf ../../../../node_modules/.bin/trvc node_modules/.bin/trvc"
   },
   "devDependencies": {
-    "@travetto/compiler": "^8.0.0",
-    "@travetto/cli": "^8.0.0",
-    "@travetto/doc": "^8.0.0",
-    "@travetto/email-compiler": "^8.0.0",
-    "@travetto/lint": "^8.0.0",
-    "@travetto/log": "^8.0.0",
-    "@travetto/pack": "^8.0.0",
-    "@travetto/test": "^8.0.0",
-    "@types/node": "^26.2.0",
-    "@types/vscode": "^1.134.0"
+    "@travetto/cli": "^8.0.2",
+    "@travetto/compiler": "^8.0.2",
+    "@travetto/doc": "^8.0.2",
+    "@travetto/email-compiler": "^8.0.3",
+    "@travetto/lint": "^8.0.2",
+    "@travetto/log": "^8.0.3",
+    "@travetto/pack": "^8.0.1",
+    "@travetto/test": "^8.0.2",
+    "@types/node": "^26.6.5",
+    "@types/vscode": "^1.140.0"
   },
   "dependencies": {
-    "@travetto/registry": "^8.0.0",
-    "@travetto/runtime": "^8.0.0",
+    "@travetto/registry": "^8.0.1",
+    "@travetto/runtime": "^8.0.1",
     "temporal-polyfill-lite": "^0.4.3"
   },
   "travetto": {
