@@ -231,6 +231,17 @@ export class CompilerServer {
     return path.toPosix(path.relative(this.#ctx.workspace.path, path.resolve(this.#ctx.workspace.path, file)));
   }
 
+  #clearErrorsForFile(file?: string): void {
+    if (!file || !this.info.messages?.error) {
+      return;
+    }
+    const targetFile = this.#normalizeFile(file);
+    this.info.messages.error = this.info.messages.error.filter(item => item.scope !== targetFile);
+    if (this.info.messages.error.length === 0) {
+      delete this.info.messages.error;
+    }
+  }
+
   /**
    * Process events
    */
@@ -243,13 +254,7 @@ export class CompilerServer {
       this.#emitEvent(event);
 
       if (event.type === 'change') {
-        if (this.info.messages?.error) {
-          const targetFile = this.#normalizeFile(event.payload.file);
-          this.info.messages.error = this.info.messages.error.filter(item => item.scope !== targetFile);
-          if (this.info.messages.error.length === 0) {
-            delete this.info.messages.error;
-          }
-        }
+        this.#clearErrorsForFile(event.payload.file);
       } else if (event.type === 'state') {
         this.info.state = event.payload.state;
         if (event.payload.state === 'init' || event.payload.state === 'compile-start') {
@@ -271,13 +276,8 @@ export class CompilerServer {
         switch (event.payload.phase) {
           case 'failure': {
             if (event.payload.scope) {
+              this.#clearErrorsForFile(event.payload.scope);
               event.payload.scope = this.#normalizeFile(event.payload.scope);
-              if (messages.error) {
-                messages.error = messages.error.filter(item => item.scope !== event.payload.scope);
-                if (messages.error.length === 0) {
-                  delete messages.error;
-                }
-              }
             }
             messages[event.payload.phase] = [event.payload];
             break;
