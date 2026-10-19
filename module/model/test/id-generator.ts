@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Model, ModelCrudUtil, ModelRegistryIndex } from '@travetto/model';
 import { Registry } from '@travetto/registry';
 import { castTo } from '@travetto/runtime';
-import { Generator, Match, Schema, SchemaValidator, UUID, ValidationResultError } from '@travetto/schema';
+import { Generator, Match, Schema, SchemaValidator, Uuid, ValidationResultError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
 @Model()
@@ -20,7 +20,7 @@ class OptionalModel {
 
 @Model()
 class UuidValidatedModel {
-  @UUID()
+  @Uuid()
   id: string;
   name: string;
 }
@@ -108,11 +108,11 @@ export class ModelIdGeneratorSuite {
     assert(inheritedId.startsWith(customPrefix));
   }
 
-  @Test('Verify ID pattern behavior with and without @UUID')
+  @Test('Verify ID pattern behavior with and without @Uuid')
   async testDefaultIdPattern() {
     await Registry.init();
 
-    // Default model without @UUID accepts arbitrary string id
+    // Default model without @Uuid accepts arbitrary string id
     const customItem = await ModelCrudUtil.preCreate(DefaultModel, DefaultModel.from({ id: 'arbitrary-custom-id', name: 'valid-custom' }));
     assert(customItem.id === 'arbitrary-custom-id');
 
