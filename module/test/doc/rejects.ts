@@ -11,7 +11,7 @@ class SimpleTest {
     });
 
     await assert.doesNotReject(async () => {
-      let a = 5;
+      // does nothing
     });
   }
 }

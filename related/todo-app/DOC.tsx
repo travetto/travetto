@@ -9,7 +9,6 @@ import {
   ExecUtil,
   RuntimeIndex,
   ShutdownManager,
-  toConcrete,
   Util
 } from '@travetto/runtime';
 
@@ -115,7 +114,7 @@ $ ${d.trv} eslint:register
         </ul>
         Create the file {d.path('src/model.ts')}
         <c.Code title="Models" src="src/model.ts" />
-        as you can see, the model structure is simple. 
+        as you can see, the model structure is simple.
       </c.Section>
       <c.Section title="Building the Service Layer">
         Next we establish the functionality for the service layer. The operations we need are:

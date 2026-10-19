@@ -7,13 +7,12 @@ import { Suite, Test } from '@travetto/test';
 import { NotFoundError } from '../../src/error/not-found.ts';
 import { ExpiresAt, Model } from '../../src/registry/decorator.ts';
 import type { ModelExpirySupport } from '../../src/types/expiry.ts';
-import type { ModelId } from '../../src/types/model.ts';
 import { ModelExpiryUtil } from '../../src/util/expiry.ts';
 import { BaseModelSuite } from './base.ts';
 
 @Model('expiry-user')
 export class ExpiryUser {
-  id: ModelId;
+  id: string;
   @ExpiresAt()
   expiresAt?: Date;
   payload?: string;

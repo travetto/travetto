@@ -4,7 +4,7 @@ import { type SchemaFieldConfig, ValidationResultError } from '@travetto/schema'
 
 import type { ModelId, ModelType, OptionalId, PartialWithId } from '../types/model.ts';
 
-export const DEFAULT_ID_GENERATOR = (): ModelId => castTo(Util.uuid(32));
+const DEFAULT_ID_GENERATOR = (): ModelId => castTo(Util.uuid(32));
 
 /**
  * Encapsulates identifier operations for a model class.

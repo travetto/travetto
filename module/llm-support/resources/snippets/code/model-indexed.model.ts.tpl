@@ -1,8 +1,8 @@
-import { Model, type ModelId } from '@travetto/model';
+import { Model } from '@travetto/model';
 
 @Model()
 export class {{modelName}} {
-  id: ModelId;
+  id: string;
   name: string;
   createdAt: Date;
 }

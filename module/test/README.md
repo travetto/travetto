@@ -186,7 +186,7 @@ class SimpleTest {
     });
 
     assert.doesNotThrow(() => {
-      let a = 5;
+      // does nothing
     });
   }
 }
@@ -210,7 +210,7 @@ class SimpleTest {
     });
 
     await assert.doesNotReject(async () => {
-      let a = 5;
+      // does nothing
     });
   }
 }

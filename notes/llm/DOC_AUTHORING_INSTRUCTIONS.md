@@ -368,11 +368,11 @@ The `src` prop on `c.Code` and `c.Config` accepts multiple types of sources:
 2. Structure files with named exports for fine-grained extraction:
    ```tsx
    // doc/operations.ts
-   import { Model, type ModelId } from '@travetto/model';
+   import { Model } from '@travetto/model';
    
    @Model()
    export class User {
-     id: ModelId;
+     id: string;
      name: string;
    }
    

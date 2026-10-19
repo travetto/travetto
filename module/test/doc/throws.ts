@@ -11,7 +11,7 @@ class SimpleTest {
     });
 
     assert.doesNotThrow(() => {
-      let a = 5;
+      // does nothing
     });
   }
 }

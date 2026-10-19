@@ -1,4 +1,4 @@
-import { Model, type ModelId } from '@travetto/model';
+import { Model } from '@travetto/model';
 
 import { sortedIndex } from '../../../src/indexes.ts';
 
@@ -156,7 +156,7 @@ export const SUGGEST_DATA = [...AP_NAMES, ...BA_NAMES, ...CH_NAMES];
 
 @Model('suggestItem')
 export class SuggestItem {
-  id: ModelId;
+  id: string;
   name: string;
   age?: number;
 }

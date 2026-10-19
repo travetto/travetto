@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Model, type ModelCrudSupport, type ModelId, NotFoundError, PersistValue, SubTypeNotSupportedError } from '@travetto/model';
+import { Model, type ModelCrudSupport, NotFoundError, PersistValue, SubTypeNotSupportedError } from '@travetto/model';
 import { castTo } from '@travetto/runtime';
 import { DiscriminatorField, Schema, Text, TypeMismatchError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
@@ -12,7 +12,7 @@ import { BaseModelSuite } from './base.ts';
 @Schema()
 @Model()
 export abstract class Worker {
-  id: ModelId;
+  id: string;
   @DiscriminatorField()
   _type: string;
   @Text()

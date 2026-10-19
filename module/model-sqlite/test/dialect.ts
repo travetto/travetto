@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Model, type ModelType, type ModelId } from '@travetto/model';
+import { Model, type ModelType } from '@travetto/model';
 import type { TableContext } from '@travetto/model-sql';
 import { SQLModelSchemaUtil } from '@travetto/model-sql';
 import type { Class } from '@travetto/runtime';
@@ -18,7 +18,7 @@ class ChildItem {
 
 @Model('sqlite_gap_parent')
 class ParentModel {
-  id: ModelId;
+  id: string;
   child: ChildItem;
 }
 

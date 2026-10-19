@@ -209,7 +209,7 @@ export function Model(config?: Partial<ModelConfig>) {
 
 // 2. Use decorator
 @Model({ store: 'users' })
-class User { id: ModelId; name: string; }
+class User { id: string; name: string; }
 
 // 3. Query registry at runtime
 const config = ModelRegistryIndex.getConfig(User);

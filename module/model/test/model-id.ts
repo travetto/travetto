@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Model, ModelCrudUtil, type ModelId, ModelRegistryIndex, type OptionalId, type PartialWithId } from '@travetto/model';
 import { Registry } from '@travetto/registry';
 import { castTo } from '@travetto/runtime';
-import { Generator, Schema, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { Generator, Schema, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
 import { CustomIdModel } from '../support/test/crud.ts';

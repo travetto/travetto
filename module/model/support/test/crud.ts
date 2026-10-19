@@ -32,7 +32,7 @@ class Address {
 
 @Model('crud-person')
 class Person {
-  id: ModelId;
+  id: string;
   @Text() name: string;
   @Precision(3, 0)
   age: number;
@@ -42,7 +42,7 @@ class Person {
 
 @Model()
 class Simple {
-  id: ModelId;
+  id: string;
   name: string;
 }
 
@@ -53,7 +53,7 @@ class SimpleItem {
 
 @Model()
 class SimpleList {
-  id: ModelId;
+  id: string;
   names: string[];
   simples?: SimpleItem[];
 }
@@ -63,14 +63,14 @@ class SimpleList {
   item.name = `${item.name}-suffix`;
 })
 class User2 {
-  id: ModelId;
+  id: string;
   address?: Address;
   name: string;
 }
 
 @Model()
 class Dated {
-  id: ModelId;
+  id: string;
 
   value?: string;
 
@@ -85,7 +85,7 @@ class Dated {
 
 @Model()
 class BigIntModel {
-  id: ModelId;
+  id: string;
   largeNumber: bigint;
   optionalBigInt?: bigint;
 }

@@ -4,7 +4,6 @@ import {
   Model,
   type ModelCrudSupport,
   ModelCrudUtil,
-  type ModelId,
   ModelRegistryIndex,
   ModelStorageUtil,
   NotFoundError,
@@ -17,7 +16,7 @@ import { BaseModelSuite } from './base.ts';
 
 @Model('computed_person')
 class ComputedPerson {
-  id: ModelId;
+  id: string;
   name: string;
   @TransientField()
   get nameUpper(): string {
@@ -29,7 +28,7 @@ class ComputedPerson {
 
 @Model('basic_person')
 class Person {
-  id: ModelId;
+  id: string;
   name: string;
   age: number;
   gender: 'm' | 'f';
@@ -37,7 +36,7 @@ class Person {
 
 @Model('basic_person_temp')
 export class TempPerson {
-  id: ModelId;
+  id: string;
 }
 
 @Suite()

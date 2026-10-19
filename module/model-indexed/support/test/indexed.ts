@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
 import { ModelBulkUtil, NotFoundError, UniqueError } from '@travetto/model';
-import { castTo, TimeUtil } from '@travetto/runtime';
+import { TimeUtil } from '@travetto/runtime';
 import { SkipUnless, Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';

@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Model, type ModelType, type ModelId } from '@travetto/model';
+import { Model, type ModelType } from '@travetto/model';
 import { Registry } from '@travetto/registry';
 import type { Class } from '@travetto/runtime';
 import { Schema, type SchemaFieldConfig } from '@travetto/schema';
@@ -12,7 +12,7 @@ import type { ResolvedPathContext, TableContext } from '../../src/types.ts';
 
 @Model()
 class User {
-  id: ModelId;
+  id: string;
   name: string;
 }
 
@@ -23,7 +23,7 @@ class Nested {
 
 @Model()
 class WhereType {
-  id: ModelId;
+  id: string;
   name: string;
   age: number;
   nestedList: Nested[];

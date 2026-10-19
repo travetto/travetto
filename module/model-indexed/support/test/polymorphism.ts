@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Model, NotFoundError, SubTypeNotSupportedError, type ModelId } from '@travetto/model';
+import { Model, NotFoundError, SubTypeNotSupportedError } from '@travetto/model';
 import { Discriminated } from '@travetto/schema';
 import { SkipUnless, Suite, Test } from '@travetto/test';
 
@@ -13,7 +13,7 @@ import { ModelIndexedUtil } from '../../src/util.ts';
 @Model()
 @Discriminated('type')
 export class IndexedWorker {
-  id: ModelId;
+  id: string;
   type: string;
   name: string;
   age?: number;
@@ -52,7 +52,7 @@ export abstract class ModelIndexedPolymorphismSuite extends BaseModelSuite<Model
       IndexedEngineer.from({ name: 'cob', major: 'oranges', age: now })
     ];
 
-    const updated = await this.saveAll(IndexedWorker, [doc, fire, eng]);
+    await this.saveAll(IndexedWorker, [doc, fire, eng]);
 
     const result = await service.getByIndex(IndexedWorker, workerNameIndex, {
       age: now,
