@@ -26,7 +26,7 @@ export class Compiler {
       const state = await CompilerState.get(new ManifestIndex(manifest));
       await new Compiler(state, delta, process.env.TRV_COMPILER_WATCH === 'true').run();
     } catch (error) {
-      log.error('Fatal initialization error in compiler', error, { phase: 'error' });
+      log.error('Fatal initialization error in compiler', error, { phase: 'error', scope: 'compiler' });
       EventUtil.sendEvent('state', { workspace: ctx.workspace.path, state: 'compile-failed' });
       process.exitCode = 1;
     }
@@ -72,7 +72,7 @@ export class Compiler {
       case 'error': {
         process.exitCode = 1;
         if (errorMessage) {
-          log.error('Shutting down due to failure', errorMessage, { phase: 'error' });
+          log.error('Shutting down due to failure', errorMessage, { phase: 'error', scope: 'compiler' });
         }
         break;
       }
@@ -131,7 +131,10 @@ export class Compiler {
       const imp = nodeModIdx >= 0 ? file.substring(nodeModIdx + nodeModSeparator.length) : file;
       if (diagnostics?.length) {
         for (const diagnostic of diagnostics) {
-          log.error(`ERROR ${imp}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], { phase: 'error' });
+          log.error(`ERROR ${imp}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], {
+            phase: 'error',
+            scope: file
+          });
         }
         // Touch file to ensure recompilation later
         if (await fs.stat(file, { throwIfNoEntry: false })) {

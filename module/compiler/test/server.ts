@@ -1,0 +1,103 @@
+import assert from 'node:assert';
+
+import type { ManifestContext } from '@travetto/manifest';
+import { Suite, Test } from '@travetto/test';
+
+import { CompilerServer } from '../src/server/server.ts';
+import type { CompilerEvent } from '../src/types.ts';
+
+@Suite()
+class CompilerServerTests {
+  #createContext(): ManifestContext {
+    return {
+      workspace: { name: 'test-app', path: '/test/app', mono: false, manager: 'npm' },
+      build: { compilerUrl: 'http://localhost:20000', outputFolder: '.trv/output', toolFolder: '.trv/tool', typesFolder: '.trv/types' },
+      main: { name: 'test-app', folder: '', version: '1.0.0' }
+    };
+  }
+
+  @Test()
+  async verifyErrorNormalizationAndCleanup() {
+    const context = this.#createContext();
+    const server = new CompilerServer(context, false);
+
+    const events: CompilerEvent[] = [
+      {
+        type: 'log',
+        payload: {
+          level: 'error',
+          message: 'ERROR /test/app/src/alpha.ts:10:5 -- Type error',
+          phase: 'error',
+          scope: '/test/app/src/alpha.ts'
+        }
+      },
+      {
+        type: 'log',
+        payload: {
+          level: 'error',
+          message: 'ERROR src/beta.ts:20:8 -- Syntax error',
+          phase: 'error',
+          scope: 'src/beta.ts'
+        }
+      }
+    ];
+
+    async function* generateEvents(): AsyncIterable<CompilerEvent> {
+      for (const event of events) {
+        yield event;
+      }
+    }
+
+    await server.processEvents(() => generateEvents());
+
+    assert.strictEqual(server.info.messages?.error?.length, 2);
+    assert.strictEqual(server.info.messages?.error?.[0].scope, 'src/alpha.ts');
+    assert.strictEqual(server.info.messages?.error?.[1].scope, 'src/beta.ts');
+
+    // Failure event for alpha should replace alpha errors
+    const failureEvents: CompilerEvent[] = [
+      {
+        type: 'log',
+        payload: {
+          level: 'error',
+          message: 'Compilation failed',
+          phase: 'failure',
+          scope: '/test/app/src/alpha.ts'
+        }
+      }
+    ];
+
+    await server.processEvents(async function* () {
+      for (const event of failureEvents) {
+        yield event;
+      }
+    });
+
+    assert.strictEqual(server.info.messages?.error?.length, 1);
+    assert.strictEqual(server.info.messages?.error?.[0].scope, 'src/beta.ts');
+    assert.strictEqual(server.info.messages?.failure?.[0].scope, 'src/alpha.ts');
+
+    // Change event for beta should clear beta error
+    const changeEvents: CompilerEvent[] = [
+      {
+        type: 'change',
+        payload: {
+          action: 'update',
+          file: '/test/app/src/beta.ts',
+          import: 'test-app/src/beta.ts',
+          output: '.trv/output/src/beta.js',
+          module: 'test-app',
+          time: Date.now()
+        }
+      }
+    ];
+
+    await server.processEvents(async function* () {
+      for (const event of changeEvents) {
+        yield event;
+      }
+    });
+
+    assert.strictEqual(server.info.messages?.error, undefined);
+  }
+}

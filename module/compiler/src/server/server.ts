@@ -1,7 +1,7 @@
 import { setMaxListeners } from 'node:events';
 import http from 'node:http';
 
-import type { ManifestContext } from '@travetto/manifest';
+import { type ManifestContext, path } from '@travetto/manifest';
 
 import { CommonUtil } from '../common.ts';
 import { EventUtil } from '../event.ts';
@@ -227,6 +227,10 @@ export class CompilerServer {
     }
   }
 
+  #normalizeFile(file: string): string {
+    return path.toPosix(path.relative(this.#ctx.workspace.path, path.resolve(this.#ctx.workspace.path, file)));
+  }
+
   /**
    * Process events
    */
@@ -240,10 +244,8 @@ export class CompilerServer {
 
       if (event.type === 'change') {
         if (this.info.messages?.error) {
-          const prefix = `ERROR ${event.payload.file}:`;
-          this.info.messages.error = this.info.messages.error.filter(
-            item => item.scope !== event.payload.file && !item.message.startsWith(prefix)
-          );
+          const targetFile = this.#normalizeFile(event.payload.file);
+          this.info.messages.error = this.info.messages.error.filter(item => item.scope !== targetFile);
           if (this.info.messages.error.length === 0) {
             delete this.info.messages.error;
           }
@@ -268,22 +270,23 @@ export class CompilerServer {
         const messages = (this.info.messages ??= {});
         switch (event.payload.phase) {
           case 'failure': {
-            messages[event.payload.phase] = [event.payload];
-            const failedTarget =
-              event.payload.scope ?? (typeof event.payload.args?.[0] === 'string' ? event.payload.args[0].split(':')[0] : undefined);
-            if (failedTarget && messages.error) {
-              const prefix = `ERROR ${failedTarget}:`;
-              messages.error = messages.error.filter(item => item.scope !== failedTarget && !item.message.startsWith(prefix));
-              if (messages.error.length === 0) {
-                delete messages.error;
+            if (event.payload.scope) {
+              event.payload.scope = this.#normalizeFile(event.payload.scope);
+              if (messages.error) {
+                messages.error = messages.error.filter(item => item.scope !== event.payload.scope);
+                if (messages.error.length === 0) {
+                  delete messages.error;
+                }
               }
             }
+            messages[event.payload.phase] = [event.payload];
             break;
           }
           case 'reset':
             messages[event.payload.phase] = [event.payload];
             break;
           case 'error':
+            event.payload.scope = this.#normalizeFile(event.payload.scope ?? '');
             (messages.error ??= []).push(event.payload);
             break;
         }
