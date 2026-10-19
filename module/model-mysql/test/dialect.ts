@@ -7,7 +7,7 @@ import type { Class } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
-import { BaseSQLDialectSuite } from '@travetto/model-sql/support/test/dialect.ts';
+import { BaseSQLDialectSuite, UuidModel } from '@travetto/model-sql/support/test/dialect.ts';
 
 import { MysqlDialect } from '../src/dialect.ts';
 
@@ -107,5 +107,12 @@ export class MysqlDialectSuite extends BaseSQLDialectSuite {
 
     const emptySQL = this.dialect.getDropTablesSQL([]);
     assert(emptySQL === '');
+  }
+
+  @Test('Verify MySQL UUID column generation')
+  async testMysqlUuidColumn() {
+    const tableContext = getTableContext(UuidModel);
+    const createTableSql = this.dialect.getCreateTableSQL(tableContext);
+    assert(createTableSql.includes('`id` CHAR(32) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY'));
   }
 }
