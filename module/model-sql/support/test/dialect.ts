@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Model, type ModelType, TransientField } from '@travetto/model';
 import { Registry } from '@travetto/registry';
 import type { Class } from '@travetto/runtime';
-import { DiscriminatorField, Required, Schema } from '@travetto/schema';
+import { DiscriminatorField, Required, Schema, Uuid } from '@travetto/schema';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import type { AbstractANSI99Dialect } from '../../src/dialect.ts';
@@ -34,6 +34,16 @@ class SimpleModel {
   optionalField?: string;
   @TransientField()
   transientField: string;
+  @Uuid()
+  uuidField?: string;
+}
+
+@Schema()
+@Model('dialect_gap_uuid')
+export class UuidModel {
+  @Uuid()
+  id: string;
+  name: string;
 }
 
 @Schema()
@@ -53,7 +63,7 @@ class SubTypeA extends BasePolymorphic {
   subTypeAOnlyRequired: string;
 }
 
-function getTableContext<T extends ModelType>(modelClass: Class<T>): TableContext<T> {
+export function getTableContext<T extends ModelType>(modelClass: Class<T>): TableContext<T> {
   return {
     tableName: modelClass.name.toLowerCase(),
     ...SQLModelSchemaUtil.getSchemaContext(modelClass)
@@ -121,5 +131,21 @@ export abstract class BaseSQLDialectSuite {
     const { sets, values } = this.dialect.compilePartialUpdate(tableContext, { title: 'Updated Title' });
     assert.deepStrictEqual(sets, [`${quote}title${quote} = ${placeholder}`]);
     assert.deepStrictEqual(values, ['Updated Title']);
+  }
+
+  @Test('Verify UUID column generation')
+  async testUuidFieldColumn() {
+    const dialect = this.dialect;
+    const quote = dialect.escapeIdentifier('').substring(0, 1) || '"';
+    const simpleContext = getTableContext(SimpleModel);
+    const simpleSQL = dialect.getCreateTableSQL(simpleContext);
+
+    const expectedIdType = dialect.getColumnType(simpleContext.simpleFields.get('id')!);
+    const idLine = simpleSQL.split('\n').find(line => line.includes(`${quote}id${quote}`));
+    assert(idLine?.includes(expectedIdType));
+
+    const expectedUuidType = dialect.getColumnType(simpleContext.simpleFields.get('uuidField')!);
+    const uuidLine = simpleSQL.split('\n').find(line => line.includes(`${quote}uuidField${quote}`));
+    assert(uuidLine?.includes(expectedUuidType));
   }
 }

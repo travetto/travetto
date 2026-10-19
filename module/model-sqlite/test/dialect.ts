@@ -7,7 +7,7 @@ import type { Class } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
-import { BaseSQLDialectSuite } from '@travetto/model-sql/support/test/dialect.ts';
+import { BaseSQLDialectSuite, UuidModel } from '@travetto/model-sql/support/test/dialect.ts';
 
 import { SqliteDialect } from '../src/dialect.ts';
 
@@ -58,5 +58,12 @@ export class SqliteDialectSuite extends BaseSQLDialectSuite {
 
     const emptySQL = this.dialect.getDropTablesSQL([]);
     assert(emptySQL === '');
+  }
+
+  @Test('Verify SQLite UUID column generation')
+  async testSqliteUuidColumn() {
+    const tableContext = getTableContext(UuidModel);
+    const createTableSql = this.dialect.getCreateTableSQL(tableContext);
+    assert(createTableSql.includes('"id" TEXT PRIMARY KEY'));
   }
 }

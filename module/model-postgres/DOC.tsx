@@ -20,7 +20,7 @@ export const text = (
     <ul>
       <li>
         Simple scalar fields map directly to individual native PostgreSQL columns (e.g., {d.input('VARCHAR')}, {d.input('INTEGER')},{' '}
-        {d.input('TIMESTAMP')}).
+        {d.input('TIMESTAMP')}, or {d.input('UUID')}).
       </li>
       <li>
         Simple scalar arrays (such as {d.input('string[]')}, {d.input('number[]')}, or {d.input('boolean[]')}) map directly to PostgreSQL
