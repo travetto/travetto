@@ -1,7 +1,7 @@
 import { setMaxListeners } from 'node:events';
 import fs from 'node:fs/promises';
 
-import { type DeltaEvent, getManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil } from '@travetto/manifest';
+import { type DeltaEvent, getManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil, path } from '@travetto/manifest';
 
 import { CommonUtil } from './common.ts';
 import { EventUtil } from './event.ts';
@@ -130,7 +130,7 @@ export class Compiler {
       const nodeModIdx = file.lastIndexOf(nodeModSeparator);
       const imp = nodeModIdx >= 0 ? file.substring(nodeModIdx + nodeModSeparator.length) : file;
       if (diagnostics?.length) {
-        const normalizedFile = this.#state.normalizeFile(file);
+        const normalizedFile = path.relative(this.#state.manifest.workspace.path, file);
         for (const diagnostic of diagnostics) {
           log.error(`ERROR ${imp}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], {
             phase: 'error',
@@ -168,7 +168,7 @@ export class Compiler {
     }
 
     const diagnostics = isDelete ? [] : ((await this.#state.compileSourceFile(event.entry.sourceFile, true)) ?? []);
-    const normalizedFile = this.#state.normalizeFile(event.file);
+    const normalizedFile = path.relative(this.#state.manifest.workspace.path, event.file);
 
     if (diagnostics.length) {
       log.error('Compilation failed', `${event.file}: ${diagnostics.length} errors found`, { phase: 'failure', file: normalizedFile });

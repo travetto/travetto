@@ -168,13 +168,6 @@ export class CompilerState implements CompilerHost {
     return path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder, file);
   }
 
-  /**
-   * Normalizes a file path relative to the workspace root
-   */
-  normalizeFile(file: string): string {
-    return path.relative(this.#manifest.workspace.path, file);
-  }
-
   getArbitraryInputFile(): string {
     const randomSource = this.#manifestIndex.getWorkspaceModules().filter(module => module.files.src?.length)[0].files.src[0].sourceFile;
 
