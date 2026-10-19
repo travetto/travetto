@@ -166,9 +166,12 @@ export class Compiler {
     const diagnostics = isDelete ? [] : ((await this.#state.compileSourceFile(event.entry.sourceFile, true)) ?? []);
 
     if (diagnostics.length) {
-      log.error('Compilation failed', `${event.entry.sourceFile}: ${diagnostics.length} errors found`, { phase: 'failure' });
+      log.error('Compilation failed', `${event.file}: ${diagnostics.length} errors found`, { phase: 'failure', scope: event.file });
       for (const diagnostic of diagnostics) {
-        log.error(`ERROR ${event.file}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], { phase: 'error' });
+        log.error(`ERROR ${event.file}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], {
+          phase: 'error',
+          scope: event.file
+        });
       }
     } else if (!isDelete) {
       log.info(`Compiled ${event.entry.sourceFile} on ${event.action}`);

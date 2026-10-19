@@ -238,7 +238,17 @@ export class CompilerServer {
 
       this.#emitEvent(event);
 
-      if (event.type === 'state') {
+      if (event.type === 'change') {
+        if (this.info.messages?.error) {
+          const prefix = `ERROR ${event.payload.file}:`;
+          this.info.messages.error = this.info.messages.error.filter(
+            item => item.scope !== event.payload.file && !item.message.startsWith(prefix)
+          );
+          if (this.info.messages.error.length === 0) {
+            delete this.info.messages.error;
+          }
+        }
+      } else if (event.type === 'state') {
         this.info.state = event.payload.state;
         if (event.payload.state === 'init' || event.payload.state === 'compile-start') {
           delete this.info.messages?.error;
@@ -257,7 +267,19 @@ export class CompilerServer {
       } else if (event.type === 'log') {
         const messages = (this.info.messages ??= {});
         switch (event.payload.phase) {
-          case 'failure':
+          case 'failure': {
+            messages[event.payload.phase] = [event.payload];
+            const failedTarget =
+              event.payload.scope ?? (typeof event.payload.args?.[0] === 'string' ? event.payload.args[0].split(':')[0] : undefined);
+            if (failedTarget && messages.error) {
+              const prefix = `ERROR ${failedTarget}:`;
+              messages.error = messages.error.filter(item => item.scope !== failedTarget && !item.message.startsWith(prefix));
+              if (messages.error.length === 0) {
+                delete messages.error;
+              }
+            }
+            break;
+          }
           case 'reset':
             messages[event.payload.phase] = [event.payload];
             break;

@@ -28,6 +28,10 @@ export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
     return { value: undefined, done: this.#done };
   }
 
+  has(predicate: (item: X) => boolean): boolean {
+    return this.#queue.some(predicate);
+  }
+
   add(item: X): void {
     this.#queue.push(item);
     this.#ready.resolve();

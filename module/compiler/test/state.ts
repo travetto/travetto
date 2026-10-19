@@ -1,8 +1,10 @@
 import assert from 'node:assert';
+import fs from 'node:fs';
 
 import { ManifestIndex, type ManifestRoot, path } from '@travetto/manifest';
 import { Suite, Test } from '@travetto/test';
 
+import { AsyncQueue } from '../src/queue.ts';
 import { CompilerState } from '../src/state.ts';
 
 @Suite()
@@ -68,5 +70,44 @@ class CompilerStateTests {
 
     state.resetSourceHash(alphaSource);
     assert.deepStrictEqual(state.getFailedFiles(), []);
+  }
+
+  @Test()
+  async verifyRealpath() {
+    const baseManifest = this.#createManifest();
+    const state = await CompilerState.get(new ManifestIndex(baseManifest));
+    const cwd = path.resolve('.');
+    assert.strictEqual(state.realpath(cwd), cwd);
+
+    const symlinkPath = path.resolve('node_modules/@travetto/compiler');
+    if (fs.existsSync(symlinkPath)) {
+      const real = state.realpath(symlinkPath);
+      assert.strictEqual(real, path.resolve('module/compiler'));
+    }
+  }
+
+  @Test()
+  async verifyAsyncQueueHas() {
+    const queue = new AsyncQueue<{ file: string }>();
+    assert.strictEqual(
+      queue.has(item => item.file === 'test.ts'),
+      false
+    );
+    queue.add({ file: 'test.ts' });
+    assert.strictEqual(
+      queue.has(item => item.file === 'test.ts'),
+      true
+    );
+    assert.strictEqual(
+      queue.has(item => item.file === 'other.ts'),
+      false
+    );
+    const next = await queue.next();
+    assert.strictEqual(next.value?.file, 'test.ts');
+    assert.strictEqual(
+      queue.has(item => item.file === 'test.ts'),
+      false
+    );
+    queue.close();
   }
 }

@@ -336,6 +336,8 @@ export class CompilerState implements CompilerHost {
 
   resetSourceHash(sourceFile: string): void {
     this.#sourceHashes.delete(sourceFile);
+    this.#sourceContents.delete(sourceFile);
+    this.#sourceFileObjects.delete(sourceFile);
   }
 
   /**
@@ -396,6 +398,14 @@ export class CompilerState implements CompilerHost {
     return path.dirname(ts.getDefaultLibFilePath(this.#compilerOptions));
   }
 
+  realpath(sourceFile: string): string {
+    try {
+      return path.toPosix(fs.realpathSync(sourceFile));
+    } catch {
+      return sourceFile;
+    }
+  }
+
   fileExists(sourceFile: string): boolean {
     return this.#sourceToEntry.has(sourceFile) || this.#fileExists(sourceFile);
   }
@@ -418,8 +428,14 @@ export class CompilerState implements CompilerHost {
   }
 
   readFile(sourceFile: string): string | undefined {
-    const contents = this.#sourceContents.get(sourceFile) ?? this.#readFile(sourceFile);
-    this.#sourceContents.set(sourceFile, contents);
+    let contents = this.#sourceContents.get(sourceFile);
+    if (contents === undefined) {
+      contents = this.#readFile(sourceFile);
+      this.#sourceContents.set(sourceFile, contents);
+      if (contents && (!this.#sourceHashes.has(sourceFile) || this.#sourceHashes.get(sourceFile) === -1)) {
+        this.#sourceHashes.set(sourceFile, CompilerUtil.naiveHash(contents));
+      }
+    }
     return contents;
   }
 
