@@ -26,9 +26,9 @@ class CompilerServerTests {
         type: 'log',
         payload: {
           level: 'error',
-          message: 'ERROR /test/app/src/alpha.ts:10:5 -- Type error',
+          message: 'ERROR src/alpha.ts:10:5 -- Type error',
           phase: 'error',
-          file: '/test/app/src/alpha.ts'
+          file: 'src/alpha.ts'
         }
       },
       {
@@ -62,7 +62,7 @@ class CompilerServerTests {
           level: 'error',
           message: 'Compilation failed',
           phase: 'failure',
-          file: '/test/app/src/alpha.ts'
+          file: 'src/alpha.ts'
         }
       }
     ];
@@ -83,7 +83,7 @@ class CompilerServerTests {
         type: 'change',
         payload: {
           action: 'update',
-          file: '/test/app/src/beta.ts',
+          file: 'src/beta.ts',
           import: 'test-app/src/beta.ts',
           output: '.trv/output/src/beta.js',
           module: 'test-app',

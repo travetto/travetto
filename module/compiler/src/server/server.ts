@@ -1,7 +1,7 @@
 import { setMaxListeners } from 'node:events';
 import http from 'node:http';
 
-import { type ManifestContext, path } from '@travetto/manifest';
+import type { ManifestContext } from '@travetto/manifest';
 
 import { CommonUtil } from '../common.ts';
 import { EventUtil } from '../event.ts';
@@ -227,16 +227,11 @@ export class CompilerServer {
     }
   }
 
-  #normalizeFile(file: string): string {
-    return path.toPosix(path.relative(this.#ctx.workspace.path, path.resolve(this.#ctx.workspace.path, file)));
-  }
-
   #clearErrorsForFile(file?: string): void {
     if (!file || !this.info.messages?.error) {
       return;
     }
-    const targetFile = this.#normalizeFile(file);
-    this.info.messages.error = this.info.messages.error.filter(item => item.file !== targetFile);
+    this.info.messages.error = this.info.messages.error.filter(item => item.file !== file);
     if (this.info.messages.error.length === 0) {
       delete this.info.messages.error;
     }
@@ -277,7 +272,6 @@ export class CompilerServer {
           case 'failure': {
             if (event.payload.file) {
               this.#clearErrorsForFile(event.payload.file);
-              event.payload.file = this.#normalizeFile(event.payload.file);
             }
             messages[event.payload.phase] = [event.payload];
             break;
@@ -286,9 +280,6 @@ export class CompilerServer {
             messages[event.payload.phase] = [event.payload];
             break;
           case 'error':
-            if (event.payload.file) {
-              event.payload.file = this.#normalizeFile(event.payload.file);
-            }
             (messages.error ??= []).push(event.payload);
             break;
         }

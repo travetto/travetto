@@ -200,7 +200,7 @@ export class Compiler {
       this.#sendEvent('change', {
         action: event.action,
         time: Date.now(),
-        file: event.file,
+        file: normalizedFile,
         import: event.entry.import,
         output: event.entry.outputFile!,
         module: event.entry.module.name

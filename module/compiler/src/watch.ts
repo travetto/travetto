@@ -153,7 +153,14 @@ export class CompilerWatcher {
             .filter(event => this.#isValidFile(event.file));
 
           if (filesChanged.length) {
-            EventUtil.sendEvent('file', { workspace: this.#state.manifest.workspace.path, time: Date.now(), files: filesChanged });
+            EventUtil.sendEvent('file', {
+              workspace: this.#state.manifest.workspace.path,
+              time: Date.now(),
+              files: filesChanged.map(item => ({
+                action: item.action,
+                file: path.toPosix(path.relative(this.#root, item.file))
+              }))
+            });
           }
 
           const changedPackageFiles = events
