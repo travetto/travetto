@@ -123,7 +123,7 @@ import { errors, jwtVerify, SignJWT } from 'jose';
 
 import { type AuthContext, AuthenticationError, type AuthToken, type Principal } from '@travetto/auth';
 import { Inject, Injectable } from '@travetto/di';
-import { castTo, RuntimeError, TimeUtil } from '@travetto/runtime';
+import { RuntimeError } from '@travetto/runtime';
 import { CookieJar, type WebAsyncContext, type WebRequest, type WebResponse } from '@travetto/web';
 
 import type { WebAuthConfig } from './config.ts';
