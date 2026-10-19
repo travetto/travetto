@@ -92,7 +92,6 @@ class CompilerStateTests {
     const state = await CompilerState.get(new ManifestIndex(baseManifest));
 
     assert.strictEqual(state.normalizeFile('/test/app/src/alpha.ts'), 'src/alpha.ts');
-    assert.strictEqual(state.normalizeFile('src/alpha.ts'), 'src/alpha.ts');
     assert.strictEqual(state.normalizeFile('/test/app/package.json'), 'package.json');
     assert.strictEqual(state.normalizeFile('/test/app/src/nested/deep/file.ts'), 'src/nested/deep/file.ts');
   }

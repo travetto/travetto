@@ -169,10 +169,10 @@ export class CompilerState implements CompilerHost {
   }
 
   /**
-   * Normalizes a file path relative to the workspace root in POSIX format
+   * Normalizes a file path relative to the workspace root
    */
   normalizeFile(file: string): string {
-    return path.toPosix(path.relative(this.#manifest.workspace.path, path.resolve(this.#manifest.workspace.path, file)));
+    return path.relative(this.#manifest.workspace.path, file);
   }
 
   getArbitraryInputFile(): string {
