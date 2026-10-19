@@ -1,5 +1,5 @@
 import { type RegistrationMethods, Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
-import { type Class, castKey, castTo, RuntimeError } from '@travetto/runtime';
+import { type Class, castKey, RuntimeError } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelType } from '../types/model.ts';

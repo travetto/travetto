@@ -73,7 +73,6 @@ import {
   type WhereClause
 } from '@travetto/model-query';
 import {
-  asFull,
   type BinaryMetadata,
   BinaryMetadataUtil,
   type BinaryType,

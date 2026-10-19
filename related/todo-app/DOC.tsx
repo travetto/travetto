@@ -9,7 +9,6 @@ import {
   ExecUtil,
   RuntimeIndex,
   ShutdownManager,
-  toConcrete,
   Util
 } from '@travetto/runtime';
 

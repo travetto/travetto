@@ -52,7 +52,7 @@ export abstract class ModelIndexedPolymorphismSuite extends BaseModelSuite<Model
       IndexedEngineer.from({ name: 'cob', major: 'oranges', age: now })
     ];
 
-    const updated = await this.saveAll(IndexedWorker, [doc, fire, eng]);
+    await this.saveAll(IndexedWorker, [doc, fire, eng]);
 
     const result = await service.getByIndex(IndexedWorker, workerNameIndex, {
       age: now,
