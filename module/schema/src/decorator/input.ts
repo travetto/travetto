@@ -190,8 +190,8 @@ export function Url(message?: string): PropType<StringType> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function UUID(message?: string): PropType<StringType> {
-  return input({ match: { regex: CommonRegex.uuid, message }, generator: (): string => Util.uuid() });
+export function Uuid(message?: string): PropType<StringType> {
+  return input({ specifiers: ['uuid'], match: { regex: CommonRegex.uuid, message }, generator: (): string => Util.uuid() });
 }
 
 /**

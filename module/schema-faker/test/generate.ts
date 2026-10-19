@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Registry } from '@travetto/registry';
-import { CommonRegex, Field, Max, Min, Precision, Schema, UUID } from '@travetto/schema';
+import { CommonRegex, Field, Max, Min, Precision, Schema, Uuid } from '@travetto/schema';
 import { SchemaFaker } from '@travetto/schema-faker';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
@@ -52,7 +52,7 @@ class CustomGeneratorClass {
 
 @Schema()
 class UuidClass {
-  @UUID()
+  @Uuid()
   uuidField: string;
 }
 

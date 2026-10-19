@@ -28,7 +28,8 @@ import {
   RangeSchema,
   Response,
   StringMatches,
-  TemplateLit
+  TemplateLit,
+  UuidSchema
 } from './models/validation.ts';
 
 function findError(errors: ValidationError[], path: string, message: string) {
@@ -653,6 +654,22 @@ class Validation {
         assert(err.details.errors[0].path === 'values');
         assert(err.details.errors[0].kind === 'required');
       }
+    );
+  }
+
+  @Test('Verify UUID 32 char no dashes pattern validation')
+  async testUuidValidation() {
+    await assert.doesNotReject(() => SchemaValidator.validate(UuidSchema, { value: '550e8400e29b41d4a716446655440000' }));
+    await assert.doesNotReject(() => SchemaValidator.validate(UuidSchema, { value: '550E8400E29B41D4A716446655440000' }));
+
+    await assert.rejects(
+      () => SchemaValidator.validate(UuidSchema, { value: '550e8400-e29b-41d4-a716-446655440000' }),
+      err => err instanceof ValidationResultError && err.details.errors[0].kind === 'match'
+    );
+
+    await assert.rejects(
+      () => SchemaValidator.validate(UuidSchema, { value: 'orange' }),
+      err => err instanceof ValidationResultError && err.details.errors[0].kind === 'match'
     );
   }
 }

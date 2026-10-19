@@ -1,5 +1,19 @@
 import type { TimeUnit } from '@travetto/runtime';
-import { CommonRegex, Discriminated, Float, Match, Max, Min, MinLength, Required, Schema, SubType, Url, Validator } from '@travetto/schema';
+import {
+  CommonRegex,
+  Discriminated,
+  Float,
+  Match,
+  Max,
+  Min,
+  MinLength,
+  Required,
+  Schema,
+  SubType,
+  Url,
+  Uuid,
+  Validator
+} from '@travetto/schema';
 
 @Schema()
 @Validator((o: CustomValidated) => {
@@ -160,4 +174,10 @@ export class NumberArrayMinMaxSchema {
 export class BigIntArrayMinMaxSchema {
   @Min(0n)
   values: bigint[];
+}
+
+@Schema()
+export class UuidSchema {
+  @Uuid()
+  value: string;
 }

@@ -72,6 +72,7 @@ This schema provides a powerful base for data binding and validation at runtime.
    *  [@Email](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L163) ensures string field matches basic email regex
    *  [@Telephone](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L173) ensures string field matches basic telephone regex
    *  [@Url](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L183) ensures string field matches basic url regex
+   *  [@Uuid](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L193) marks a field as a 32-character hexadecimal UUID, enforcing format validation and enabling optimized binary/native storage in supported backends
    *  [@Ignore](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/common.ts#L41) exclude from auto schema registration
    *  [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L213) ensures number passed in is only a whole number
    *  [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L222) ensures number passed in allows fractional values
