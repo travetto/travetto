@@ -428,14 +428,8 @@ export class CompilerState implements CompilerHost {
   }
 
   readFile(sourceFile: string): string | undefined {
-    let contents = this.#sourceContents.get(sourceFile);
-    if (contents === undefined) {
-      contents = this.#readFile(sourceFile);
-      this.#sourceContents.set(sourceFile, contents);
-      if (contents && (!this.#sourceHashes.has(sourceFile) || this.#sourceHashes.get(sourceFile) === -1)) {
-        this.#sourceHashes.set(sourceFile, CompilerUtil.naiveHash(contents));
-      }
-    }
+    const contents = this.#sourceContents.get(sourceFile) ?? this.#readFile(sourceFile);
+    this.#sourceContents.set(sourceFile, contents);
     return contents;
   }
 
