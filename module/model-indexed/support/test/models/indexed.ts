@@ -1,11 +1,11 @@
-import { Model, TransientField, type ModelId } from '@travetto/model';
+import { Model, TransientField } from '@travetto/model';
 import { Schema } from '@travetto/schema';
 
 import { keyedIndex, sortedIndex, uniqueIndex } from '../../../src/indexes.ts';
 
 @Model('index_user')
 export class User {
-  id: ModelId;
+  id: string;
   name: string;
 }
 
@@ -16,7 +16,7 @@ export const userNameIndex = keyedIndex(User, {
 
 @Model('index_unique_user')
 export class UniqueUser {
-  id: ModelId;
+  id: string;
   name: string;
 }
 
@@ -27,13 +27,13 @@ export const userUniqueNameIndex = uniqueIndex(UniqueUser, {
 
 @Model('index_user_2')
 export class User2 {
-  id: ModelId;
+  id: string;
   name: string;
 }
 
 @Model()
 export class User3 {
-  id: ModelId;
+  id: string;
   name: string;
   age: number;
   color?: string;
@@ -63,7 +63,7 @@ export class Child {
 
 @Model()
 export class User4 {
-  id: ModelId;
+  id: string;
   createdDate?: Date = new Date();
   color: string;
   child: Child;
@@ -83,7 +83,7 @@ export const nameCreatedIndex = sortedIndex(User4, {
 
 @Model('computed_indexed_user')
 export class ComputedIndexedUser {
-  id: ModelId;
+  id: string;
   name: string;
   get nameUppercase(): string {
     return this.name.toUpperCase();
@@ -97,7 +97,7 @@ export const computedNameIndex = keyedIndex(ComputedIndexedUser, {
 
 @Model('transient_indexed_user')
 export class TransientIndexedUser {
-  id: ModelId;
+  id: string;
   @TransientField()
   name?: string;
 }

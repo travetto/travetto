@@ -9,7 +9,7 @@ export type ModelId = string & { readonly [modelIdTag]?: null };
 export type IsModelId<T> = typeof modelIdTag extends keyof NonNullable<T> ? true : false;
 
 export type ModelIdKey<T> = {
-  [K in keyof T]: IsModelId<T[K]> extends true ? K : never;
+  [K in keyof T]-?: IsModelId<T[K]> extends true ? K : never;
 }[keyof T] extends infer M
   ? [M] extends [never]
     ? 'id' extends keyof T

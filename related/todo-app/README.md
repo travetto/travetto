@@ -48,12 +48,12 @@ Create the file `src/model.ts`
 
 **Code: Models**
 ```typescript
-import { Model, type ModelId } from '@travetto/model';
+import { Model } from '@travetto/model';
 import { Schema } from '@travetto/schema';
 
 @Model()
 export class Todo {
-  id: ModelId;
+  id: string;
   text: string;
   created?: Date;
   completed?: boolean;
@@ -409,7 +409,7 @@ npx trv web:http
           replyTo: 'Travetto Mailer <mailer@travetto.dev>'
         }
       },
-      MemoryModelConfig: { modifyStorage: true },
+      MemoryModelConfig: { modifyStorage: true, readBeforeUpdate: false },
       MongoModelConfig: {
         hosts: [ 'localhost' ],
         namespace: 'app',

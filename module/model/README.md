@@ -20,11 +20,11 @@ A model can be simply defined by usage of the [@Model](https://github.com/travet
 
 **Code: Basic Structure**
 ```typescript
-import { Model, type ModelId } from '@travetto/model';
+import { Model } from '@travetto/model';
 
 @Model()
 export class SampleModel {
-  id: ModelId;
+  id: string;
   name: string;
   age: number;
 }

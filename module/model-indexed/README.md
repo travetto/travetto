@@ -32,12 +32,12 @@ A [keyedIndex](https://github.com/travetto/travetto/tree/main/module/model-index
 
 **Code: Creating a Keyed Index**
 ```typescript
-import { Model, type ModelId } from '@travetto/model';
+import { Model } from '@travetto/model';
 import { keyedIndex } from '@travetto/model-indexed';
 
 @Model()
 export class User {
-  id: ModelId;
+  id: string;
   name: string;
   email: string;
 }
@@ -57,12 +57,12 @@ A [uniqueIndex](https://github.com/travetto/travetto/tree/main/module/model-inde
 
 **Code: Creating a Unique Index**
 ```typescript
-import { Model, type ModelId } from '@travetto/model';
+import { Model } from '@travetto/model';
 import { uniqueIndex } from '@travetto/model-indexed';
 
 @Model()
 export class User {
-  id: ModelId;
+  id: string;
   name: string;
   email: string;
 }
@@ -80,12 +80,12 @@ A [sortedIndex](https://github.com/travetto/travetto/tree/main/module/model-inde
 
 **Code: Creating a Sorted Index**
 ```typescript
-import { Model, type ModelId } from '@travetto/model';
+import { Model } from '@travetto/model';
 import { sortedIndex } from '@travetto/model-indexed';
 
 @Model()
 export class User {
-  id: ModelId;
+  id: string;
   name: string;
   age: number;
   createdAt: Date;
@@ -111,12 +111,12 @@ Indexes can use multiple fields or nested fields in their keys. This allows quer
 
 **Code: Composite Key Index**
 ```typescript
-import { Model, type ModelId } from '@travetto/model';
+import { Model } from '@travetto/model';
 import { keyedIndex } from '@travetto/model-indexed';
 
 @Model()
 export class Order {
-  id: ModelId;
+  id: string;
   customerId: string;
   status: string;
   productId: string;

@@ -1,4 +1,4 @@
-import { Model, type ModelType, type ModelId } from '@travetto/model';
+import { Model, type ModelType } from '@travetto/model';
 import { LongText, type Point, Precision, Schema, Text } from '@travetto/schema';
 
 @Schema()
@@ -10,13 +10,13 @@ export class Address {
 @Model('query-todo-version')
 export class Todo {
   version = 0;
-  id: ModelId;
+  id: string;
   @Text() text: string;
 }
 
 @Model('query-person')
 export class Person {
-  id: ModelId;
+  id: string;
   @Text() name: string;
   @Precision(3, 0)
   age: number;
@@ -26,20 +26,20 @@ export class Person {
 
 @Model('query-simple')
 export class Simple {
-  id: ModelId;
+  id: string;
   name: string;
 }
 
 @Model('query-simple-list')
 export class SimpleList {
-  id: ModelId;
+  id: string;
   names: string[];
   simples?: Simple[];
 }
 
 @Model()
 export class Names {
-  id: ModelId;
+  id: string;
   values: string[];
 }
 
@@ -52,38 +52,38 @@ export class NoteEntity {
 
 @Model()
 export class Note implements ModelType {
-  id: ModelId;
+  id: string;
   entities?: NoteEntity[];
 }
 
 @Model()
 export class Location {
-  id: ModelId;
+  id: string;
   point: Point;
 }
 
 @Model()
 export class Region {
-  id: ModelId;
+  id: string;
   points: Point[];
 }
 
 @Model()
 export class Aged {
-  id: ModelId;
+  id: string;
   createdAt: Date;
 }
 
 @Model()
 export class MultiFieldModel {
-  id: ModelId;
+  id: string;
   createdAt: Date;
   score: number;
 }
 
 @Model()
 export class WithNestedLists {
-  id: ModelId;
+  id: string;
   tags?: string[] = [];
   names?: string[] = [];
 }
@@ -95,14 +95,14 @@ class NamedSubNested {
 
 @Model()
 export class WithNestedNestedLists {
-  id: ModelId;
+  id: string;
   tags?: string[] = [];
   sub?: NamedSubNested;
 }
 
 @Model('bigint-model-2')
 export class BigIntModel {
-  id: ModelId;
+  id: string;
   largeNumber: bigint;
   optionalBigInt?: bigint;
 }
@@ -119,7 +119,7 @@ export class Family {
 
 @Model()
 export class PersonFamily implements ModelType {
-  id: ModelId;
+  id: string;
   family?: Family;
 }
 
@@ -135,13 +135,13 @@ export class RecipeSection {
 
 @Model()
 export class Recipe implements ModelType {
-  id: ModelId;
+  id: string;
   sections: RecipeSection[] = [];
 }
 
 @Model('query-article')
 export class Article implements ModelType {
-  id: ModelId;
+  id: string;
   @Text() title: string;
   @LongText() content: string;
   status: 'draft' | 'published';

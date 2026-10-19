@@ -46,6 +46,7 @@ export class RedisModelConfig {
   client: RedisClientOptions = {};
   namespace?: string;
   modifyStorage?: boolean;
+  readBeforeUpdate?: boolean = false;
 }
 ```
 

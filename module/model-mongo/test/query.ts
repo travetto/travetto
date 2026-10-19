@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Model, ModelRegistryIndex, type ModelId } from '@travetto/model';
+import { Model, ModelRegistryIndex } from '@travetto/model';
 import { Registry, RegistryIndexStore } from '@travetto/registry';
 import { Suite, Test } from '@travetto/test';
 
@@ -9,7 +9,7 @@ import { ModelSuite } from '@travetto/model/support/test/suite';
 
 @Model()
 class MongoUser {
-  id: ModelId;
+  id: string;
   name: string;
 }
 

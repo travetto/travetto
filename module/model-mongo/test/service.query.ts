@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Model, type ModelId } from '@travetto/model';
+import { Model } from '@travetto/model';
 import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
 import { castTo } from '@travetto/runtime';
 import { LongText } from '@travetto/schema';
@@ -10,7 +10,7 @@ import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
 
 @Model()
 class TextModel {
-  id: ModelId;
+  id: string;
 
   @LongText()
   document: string;

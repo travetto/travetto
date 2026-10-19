@@ -63,6 +63,7 @@ export class S3ModelConfig {
   chunkSize = 5 * 2 ** 20; // Chunk size in bytes
 
   modifyStorage?: boolean;
+  readBeforeUpdate?: boolean = false;
 
   /**
    * Provide base URL for public access

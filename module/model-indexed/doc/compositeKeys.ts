@@ -1,9 +1,9 @@
-import { Model, type ModelId } from '@travetto/model';
+import { Model } from '@travetto/model';
 import { keyedIndex } from '@travetto/model-indexed';
 
 @Model()
 export class Order {
-  id: ModelId;
+  id: string;
   customerId: string;
   status: string;
   productId: string;
