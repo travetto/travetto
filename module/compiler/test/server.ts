@@ -28,7 +28,7 @@ class CompilerServerTests {
           level: 'error',
           message: 'ERROR /test/app/src/alpha.ts:10:5 -- Type error',
           phase: 'error',
-          scope: '/test/app/src/alpha.ts'
+          file: '/test/app/src/alpha.ts'
         }
       },
       {
@@ -37,7 +37,7 @@ class CompilerServerTests {
           level: 'error',
           message: 'ERROR src/beta.ts:20:8 -- Syntax error',
           phase: 'error',
-          scope: 'src/beta.ts'
+          file: 'src/beta.ts'
         }
       }
     ];
@@ -51,8 +51,8 @@ class CompilerServerTests {
     await server.processEvents(() => generateEvents());
 
     assert.strictEqual(server.info.messages?.error?.length, 2);
-    assert.strictEqual(server.info.messages?.error?.[0].scope, 'src/alpha.ts');
-    assert.strictEqual(server.info.messages?.error?.[1].scope, 'src/beta.ts');
+    assert.strictEqual(server.info.messages?.error?.[0].file, 'src/alpha.ts');
+    assert.strictEqual(server.info.messages?.error?.[1].file, 'src/beta.ts');
 
     // Failure event for alpha should replace alpha errors
     const failureEvents: CompilerEvent[] = [
@@ -62,7 +62,7 @@ class CompilerServerTests {
           level: 'error',
           message: 'Compilation failed',
           phase: 'failure',
-          scope: '/test/app/src/alpha.ts'
+          file: '/test/app/src/alpha.ts'
         }
       }
     ];
@@ -74,8 +74,8 @@ class CompilerServerTests {
     });
 
     assert.strictEqual(server.info.messages?.error?.length, 1);
-    assert.strictEqual(server.info.messages?.error?.[0].scope, 'src/beta.ts');
-    assert.strictEqual(server.info.messages?.failure?.[0].scope, 'src/alpha.ts');
+    assert.strictEqual(server.info.messages?.error?.[0].file, 'src/beta.ts');
+    assert.strictEqual(server.info.messages?.failure?.[0].file, 'src/alpha.ts');
 
     // Change event for beta should clear beta error
     const changeEvents: CompilerEvent[] = [

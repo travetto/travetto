@@ -1,7 +1,7 @@
 import { setMaxListeners } from 'node:events';
 import fs from 'node:fs/promises';
 
-import { type DeltaEvent, getManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil } from '@travetto/manifest';
+import { type DeltaEvent, getManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil, path } from '@travetto/manifest';
 
 import { CommonUtil } from './common.ts';
 import { EventUtil } from './event.ts';
@@ -26,7 +26,7 @@ export class Compiler {
       const state = await CompilerState.get(new ManifestIndex(manifest));
       await new Compiler(state, delta, process.env.TRV_COMPILER_WATCH === 'true').run();
     } catch (error) {
-      log.error('Fatal initialization error in compiler', error, { phase: 'error', scope: 'compiler' });
+      log.error('Fatal initialization error in compiler', error, { phase: 'error' });
       EventUtil.sendEvent('state', { workspace: ctx.workspace.path, state: 'compile-failed' });
       process.exitCode = 1;
     }
@@ -52,6 +52,10 @@ export class Compiler {
     process.once('disconnect', () => this.#shutdown('manual')).on('message', event => event === 'shutdown' && this.#shutdown('manual'));
   }
 
+  #normalizeFile(file: string): string {
+    return path.toPosix(path.relative(this.#state.manifest.workspace.path, path.resolve(this.#state.manifest.workspace.path, file)));
+  }
+
   #sendEvent<E extends CompilerEvent>(type: E['type'], payload: E['payload']): void {
     payload.workspace = this.#state.manifest.workspace.path;
     EventUtil.sendEvent(type, payload);
@@ -72,7 +76,7 @@ export class Compiler {
       case 'error': {
         process.exitCode = 1;
         if (errorMessage) {
-          log.error('Shutting down due to failure', errorMessage, { phase: 'error', scope: 'compiler' });
+          log.error('Shutting down due to failure', errorMessage, { phase: 'error' });
         }
         break;
       }
@@ -130,10 +134,11 @@ export class Compiler {
       const nodeModIdx = file.lastIndexOf(nodeModSeparator);
       const imp = nodeModIdx >= 0 ? file.substring(nodeModIdx + nodeModSeparator.length) : file;
       if (diagnostics?.length) {
+        const normalizedFile = this.#normalizeFile(file);
         for (const diagnostic of diagnostics) {
           log.error(`ERROR ${imp}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], {
             phase: 'error',
-            scope: file
+            file: normalizedFile
           });
         }
         // Touch file to ensure recompilation later
@@ -167,13 +172,14 @@ export class Compiler {
     }
 
     const diagnostics = isDelete ? [] : ((await this.#state.compileSourceFile(event.entry.sourceFile, true)) ?? []);
+    const normalizedFile = this.#normalizeFile(event.file);
 
     if (diagnostics.length) {
-      log.error('Compilation failed', `${event.file}: ${diagnostics.length} errors found`, { phase: 'failure', scope: event.file });
+      log.error('Compilation failed', `${event.file}: ${diagnostics.length} errors found`, { phase: 'failure', file: normalizedFile });
       for (const diagnostic of diagnostics) {
         log.error(`ERROR ${event.file}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], {
           phase: 'error',
-          scope: event.file
+          file: normalizedFile
         });
       }
     } else if (!isDelete) {

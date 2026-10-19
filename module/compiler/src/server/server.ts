@@ -236,7 +236,7 @@ export class CompilerServer {
       return;
     }
     const targetFile = this.#normalizeFile(file);
-    this.info.messages.error = this.info.messages.error.filter(item => item.scope !== targetFile);
+    this.info.messages.error = this.info.messages.error.filter(item => item.file !== targetFile);
     if (this.info.messages.error.length === 0) {
       delete this.info.messages.error;
     }
@@ -275,9 +275,9 @@ export class CompilerServer {
         const messages = (this.info.messages ??= {});
         switch (event.payload.phase) {
           case 'failure': {
-            if (event.payload.scope) {
-              this.#clearErrorsForFile(event.payload.scope);
-              event.payload.scope = this.#normalizeFile(event.payload.scope);
+            if (event.payload.file) {
+              this.#clearErrorsForFile(event.payload.file);
+              event.payload.file = this.#normalizeFile(event.payload.file);
             }
             messages[event.payload.phase] = [event.payload];
             break;
@@ -286,7 +286,9 @@ export class CompilerServer {
             messages[event.payload.phase] = [event.payload];
             break;
           case 'error':
-            event.payload.scope = this.#normalizeFile(event.payload.scope ?? '');
+            if (event.payload.file) {
+              event.payload.file = this.#normalizeFile(event.payload.file);
+            }
             (messages.error ??= []).push(event.payload);
             break;
         }
