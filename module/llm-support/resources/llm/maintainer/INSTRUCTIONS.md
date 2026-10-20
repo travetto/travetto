@@ -23,7 +23,7 @@
   - Do not use abbreviations on new identifiers unless explicitly approved.
   - Prefer declarative object literals with inline conditional spreading (`...(condition ? { ... } : {})`) over mutating objects via `if` statements.
   - Use optional chaining (`?.`) instead of non-null assertions (`!`) on registry and schema lookups.
-  - Avoid redundant `String(...)` conversions inside template literals (use `` `${field}` `` instead of `` `${String(field)}` ``).
+  - Avoid using `Boolean`, `Number`, or `String` for type coercion unless necessary (prefer `!!value` / `!value` for boolean coercion, `+value` for numeric conversion, and `.toString()` or `` `${value}` `` for string conversion).
   - Prefer `try / catch` blocks over inline `.catch()` on promises unless handling an intentionally unawaited promise.
   - Expose a single canonical descriptive type name rather than creating short or duplicate type aliases.
 - **Inline SQL Formatting**: Place each main SQL clause (`SELECT`, `FROM`, `WHERE`, `GROUP BY`, `ORDER BY`) on its own line. Put optional clauses (e.g., `LIMIT`, `OFFSET`) on their own line via inlined conditional expressions (`${limit !== undefined ? `LIMIT ${limit}` : ''}`) rather than intermediate variables.

@@ -40,7 +40,7 @@ Do not recommend excluded operations unless explicitly requested:
   - Keep changes scoped to the task at hand; do not reformat or rename unrelated code.
   - Prefer declarative object definitions with inline conditional spreading (`...(condition ? { ... } : {})`) over mutable property assignment.
   - Use optional chaining (`?.`) instead of non-null assertions (`!`).
-  - Avoid redundant `String(...)` conversions inside template literals, and prefer `try / catch` over inline `.catch()` on promises.
+  - Avoid using `Boolean`, `Number`, or `String` for type coercion unless necessary (prefer `!!value` / `!value`, `+value`, and `.toString()` or `` `${value}` ``), and prefer `try / catch` over inline `.catch()` on promises.
 - **Architecture & Best Practices**:
   - Define input/output contracts with `@Schema()` classes at ownership boundaries.
   - Keep routing, service logic, and persistence concerns cleanly separated.
