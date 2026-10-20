@@ -4,7 +4,7 @@ import type { ManifestContext } from '@travetto/manifest';
 import { Suite, Test } from '@travetto/test';
 
 import { CompilerServer } from '../src/server/server.ts';
-import { CompilerReset, type CompilerEvent } from '../src/types.ts';
+import { CompilerReset, CompilerRestart, type CompilerEvent } from '../src/types.ts';
 
 @Suite()
 class CompilerServerTests {
@@ -102,16 +102,16 @@ class CompilerServerTests {
   }
 
   @Test()
-  async verifyCompilerResetModeOption() {
-    const defaultReset = new CompilerReset('Normal reset');
-    assert.strictEqual(defaultReset.mode, 'hard');
+  async verifyCompilerEvents() {
+    const reset = new CompilerReset('Reset');
+    assert.ok(reset instanceof CompilerReset);
 
-    const softReset = new CompilerReset('FSEvents failure', undefined, 'soft');
-    assert.strictEqual(softReset.mode, 'soft');
+    const restart = new CompilerRestart('Restart');
+    assert.ok(restart instanceof CompilerRestart);
   }
 
   @Test()
-  async verifyHardResetHandling() {
+  async verifyResetHandling() {
     const context = this.#createContext();
     const server = new CompilerServer(context, false);
     const initialIteration = server.info.iteration;
@@ -145,7 +145,7 @@ class CompilerServerTests {
   }
 
   @Test()
-  async verifySoftResetHandling() {
+  async verifyRestartHandling() {
     const context = this.#createContext();
     const server = new CompilerServer(context, false);
     const initialIteration = server.info.iteration;
@@ -168,8 +168,7 @@ class CompilerServerTests {
         yield {
           type: 'state',
           payload: {
-            state: 'reset',
-            extra: { mode: 'soft' }
+            state: 'restart'
           }
         };
       }
