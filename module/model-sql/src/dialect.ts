@@ -641,7 +641,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
         } else if (operator === '$exists') {
           clause = { sql: value ? `${sqlPath} IS NOT NULL` : `${sqlPath} IS NULL` };
         } else if (operator === '$regex') {
-          const regex = value instanceof RegExp ? value : new RegExp(String(value));
+          const regex = value instanceof RegExp ? value : typeof value === 'string' ? new RegExp(value) : undefined!;
           const caseInsensitive = regex.flags.includes('i');
           const regexOp = this.getRegexOperator(caseInsensitive);
           const regexSource = this.formatRegex(regex.source, caseInsensitive);

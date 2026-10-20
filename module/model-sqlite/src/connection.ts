@@ -69,18 +69,23 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
     }
     // Register custom regex function for SQL regex support
     db.function('regexp', (pattern, value) => {
-      const patStr = String(pattern);
-      const valStr = String(value);
-      if (patStr.startsWith('(?i)')) {
-        return new RegExp(patStr.slice(4), 'i').test(valStr) ? 1 : 0;
+      if (typeof pattern !== 'string' || typeof value !== 'string') {
+        throw new RuntimeError('Invalid parameters for regexp function');
       }
-      return new RegExp(patStr).test(valStr) ? 1 : 0;
+      if (pattern.startsWith('(?i)')) {
+        return new RegExp(pattern.slice(4), 'i').test(value) ? 1 : 0;
+      }
+      return new RegExp(pattern).test(value) ? 1 : 0;
     });
     // Register custom json_contains function for JSON containment checks
     db.function('json_contains', (target, candidate) => {
+      if (typeof target !== 'string' || typeof candidate !== 'string') {
+        throw new RuntimeError('Invalid parameters for json_contains function');
+      }
+
       try {
-        const targetRaw = JSON.parse(String(target));
-        const candidateRaw = JSON.parse(String(candidate));
+        const targetRaw = JSON.parse(target);
+        const candidateRaw = JSON.parse(candidate);
 
         const matches = (t: unknown, c: unknown): boolean => {
           if (c === null) {

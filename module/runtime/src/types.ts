@@ -49,7 +49,7 @@ type KeyPathsInner<T, PrimitiveType = IntrinsicType | IntrinsicType[], PREFIX ex
     : never;
 }[keyof T];
 
-export type KeyPaths<T, PrimitiveType = IntrinsicType | IntrinsicType[]> = KeyPathsInner<Required<T>, PrimitiveType>;
+export type KeyPaths<T, PrimitiveType = IntrinsicType | IntrinsicType[]> = KeyPathsInner<Required<T>, PrimitiveType> & string;
 
 export const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T & string>(value: T): K[];

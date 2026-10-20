@@ -733,7 +733,7 @@ export class MongoModelService
     }
 
     const unwinds: object[] = [];
-    const segments = String(field).split('.');
+    const segments = field.split('.');
     for (let index = 1; index <= segments.length; index++) {
       const subPath = segments.slice(0, index);
       const fieldConfiguration = SchemaRegistryIndex.getNestedFieldConfig(cls, subPath);

@@ -55,7 +55,7 @@ class MemoryExpirySuite extends ModelExpirySuite {
   configClass = MemoryModelConfig;
 
   @Test()
-  @SkipUnless(() => Boolean(global.gc))
+  @SkipUnless(() => !!global.gc)
   async ensureCulled() {
     const service = await this.service;
 

@@ -87,7 +87,7 @@ export class DocUtil {
       .map(tag =>
         typeof tag.comment === 'string' ? tag.comment : Array.isArray(tag.comment) ? tag.comment.map(part => part.text).join('') : ''
       )
-      .filter(value => Boolean(value));
+      .filter(Boolean);
   }
 
   /**

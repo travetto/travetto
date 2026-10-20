@@ -32,7 +32,7 @@ export class CompilerManager {
     const subProcess = spawn(process.argv0, ['-e', 'import("@travetto/compiler/bin/trvc-target.js")'], {
       env: {
         ...process.env,
-        TRV_COMPILER_WATCH: String(watching),
+        TRV_COMPILER_WATCH: watching.toString(),
         TRV_MANIFEST: CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.workspace.name)
       },
       detached: true,

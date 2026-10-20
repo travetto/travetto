@@ -708,7 +708,7 @@ export abstract class BaseSQLModelService<C = unknown>
 
     return {
       items,
-      nextOffset: items.length === options?.limit ? String(nextOffset) : undefined
+      nextOffset: items.length === options?.limit ? nextOffset.toString() : undefined
     };
   }
 
@@ -852,7 +852,7 @@ export abstract class BaseSQLModelService<C = unknown>
     await QueryVerifier.verify(modelClass, query);
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, query?.where);
-    const resolvedContext = this.dialect.resolvePath(tableContext, String(field).split('.'), 'read');
+    const resolvedContext = this.dialect.resolvePath(tableContext, field.split('.'), 'read');
 
     const sql = this.dialect.buildFacet(tableContext, resolvedContext, whereSQL, query?.limit, query?.offset);
 
@@ -873,7 +873,7 @@ export abstract class BaseSQLModelService<C = unknown>
     await QueryVerifier.verify(modelClass, query);
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, query?.where);
-    const { sqlPath } = this.dialect.resolvePath(tableContext, String(field).split('.'), 'read');
+    const { sqlPath } = this.dialect.resolvePath(tableContext, field.split('.'), 'read');
     const isDate = SchemaRegistryIndex.getNestedFieldConfig(modelClass, field)!.type === Date;
 
     const sql = this.dialect.buildFieldAggregate(tableContext, sqlPath, isDate, whereSQL);
