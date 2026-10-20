@@ -75,7 +75,7 @@ export class CompilerServer {
     return this.#ctx;
   }
 
-  isRestartableEvent(event: CompilerEvent): event is CompilerEvent & { type: 'state'; payload: { state: 'reset' | 'restart' } } {
+  isResetEvent(event: CompilerEvent): event is CompilerEvent & { type: 'state'; payload: { state: 'reset' | 'restart' } } {
     return event.type === 'state' && ['reset', 'restart'].includes(event.payload.state);
   }
 
@@ -197,20 +197,6 @@ export class CompilerServer {
     return { clean: true };
   }
 
-  async #restartServer(mode: 'reset' | 'restart'): Promise<void> {
-    if (mode === 'reset') {
-      this.info.messages = {};
-      this.#ctx = getManifestContext();
-    }
-    this.info.compilerProcessId = 0;
-    await this.#handle.compiler.ensureKilled(RESET_KILL_TIMEOUT_MILLISECONDS);
-    await CompilerUtil.clearCaches(mode === 'reset');
-    if (mode === 'reset') {
-      log.info('Reset event received, wiping compiler caches and output');
-      await this.#disconnectActive();
-    }
-  }
-
   /**
    * Request handler
    */
@@ -259,7 +245,7 @@ export class CompilerServer {
    * Process events
    */
   async processEvents(input: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
-    for await (const event of CommonUtil.restartableEvents(input, this.signal, event => this.isRestartableEvent(event))) {
+    for await (const event of CommonUtil.restartableEvents(input, this.signal, event => this.isResetEvent(event))) {
       if (event.type === 'progress') {
         await Log.onProgressEvent(event.payload);
       }
@@ -303,8 +289,16 @@ export class CompilerServer {
         }
         log.render(event.payload);
       }
-      if (this.isRestartableEvent(event)) {
-        await this.#restartServer(event.payload.state);
+      if (this.isResetEvent(event)) {
+        if (event.payload.state === 'reset') {
+          log.info('Reset event received, wiping compiler caches and output');
+          this.info.messages = {};
+          this.#ctx = getManifestContext();
+          await this.#disconnectActive();
+        }
+        this.info.compilerProcessId = 0;
+        await this.#handle.compiler.ensureKilled(RESET_KILL_TIMEOUT_MILLISECONDS);
+        await CompilerUtil.clearCaches(event.payload.state === 'reset');
       }
     }
 
