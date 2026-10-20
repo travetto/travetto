@@ -9,6 +9,7 @@ export type CompilerStateType =
   | 'watch-start'
   | 'watch-end'
   | 'reset'
+  | 'hard-restart'
   | 'closed';
 
 export type CompilerLogPhase = 'failure' | 'error' | 'reset';
@@ -85,11 +86,11 @@ export type CompilerServerInfo = {
 
 export class CompilerReset extends Error {
   files?: string[];
-  clean?: boolean;
-  constructor(message: string, files?: string[], options?: ErrorOptions & { clean?: boolean }) {
-    super(message, options);
+  mode: 'reset' | 'hard-restart';
+  constructor(message: string, files?: string[], mode: 'reset' | 'hard-restart' = 'reset') {
+    super(message);
     this.files = files;
-    this.clean = options?.clean;
+    this.mode = mode;
   }
 }
 

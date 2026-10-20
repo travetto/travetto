@@ -102,13 +102,16 @@ class CompilerServerTests {
   }
 
   @Test()
-  async verifyCompilerResetCleanOption() {
-    const reset = new CompilerReset('Git branch change', undefined, { clean: true });
-    assert.strictEqual(reset.clean, true);
+  async verifyCompilerResetModeOption() {
+    const defaultReset = new CompilerReset('Normal reset');
+    assert.strictEqual(defaultReset.mode, 'reset');
+
+    const hardRestart = new CompilerReset('Git branch change', undefined, 'hard-restart');
+    assert.strictEqual(hardRestart.mode, 'hard-restart');
   }
 
   @Test()
-  async verifyCleanResetHandling() {
+  async verifyHardRestartHandling() {
     const context = this.#createContext();
     const server = new CompilerServer(context, false);
     const initialIteration = server.info.iteration;
@@ -131,8 +134,7 @@ class CompilerServerTests {
         yield {
           type: 'state',
           payload: {
-            state: 'reset',
-            extra: { clean: true }
+            state: 'hard-restart'
           }
         };
       }

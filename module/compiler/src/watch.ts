@@ -288,7 +288,7 @@ export class CompilerWatcher {
             new CompilerReset(
               `Git branch or commit change detected: ${currentHead.hash}(${currentHead.ref})=>${nextHead.hash}(${nextHead.ref})`,
               undefined,
-              { clean: true }
+              'hard-restart'
             )
           );
         }
