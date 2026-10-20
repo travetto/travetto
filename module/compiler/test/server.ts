@@ -113,9 +113,8 @@ class CompilerServerTests {
     assert.ok(restart instanceof CompilerRestart);
 
     assert.strictEqual(server.isResetEvent({ type: 'state', payload: { state: 'reset' } }), true);
-    assert.strictEqual(server.isResetEvent({ type: 'state', payload: { state: 'restart' } }), false);
-    assert.strictEqual(server.isRestartEvent({ type: 'state', payload: { state: 'restart' } }), true);
-    assert.strictEqual(server.isRestartEvent({ type: 'state', payload: { state: 'reset' } }), false);
+    assert.strictEqual(server.isResetEvent({ type: 'state', payload: { state: 'restart' } }), true);
+    assert.strictEqual(server.isResetEvent({ type: 'state', payload: { state: 'compile-start' } }), false);
   }
 
   @Test()

@@ -71,10 +71,6 @@ export class CompilerServer {
     return this.info.watching;
   }
 
-  get context(): ManifestContext {
-    return this.#ctx;
-  }
-
   isResetEvent(event: CompilerEvent): event is CompilerEvent & { type: 'state'; payload: { state: 'reset' | 'restart' } } {
     return event.type === 'state' && ['reset', 'restart'].includes(event.payload.state);
   }

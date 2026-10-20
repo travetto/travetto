@@ -110,7 +110,7 @@ export class CompilerManager {
     // Wait for build to be ready
     if (server) {
       log.debug('Start Server');
-      await server.processEvents(signal => this.#runTarget(server.context, watch, signal));
+      await server.processEvents(signal => this.#runTarget(ctx, watch, signal));
       log.debug('End Server');
       if (server.info.state === 'compile-failed') {
         await this.#failWithBuildErrors(server.info);
