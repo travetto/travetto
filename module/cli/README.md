@@ -557,9 +557,6 @@ A simple example of the validation can be found in the `doc` command:
 @Validator(async cmd => {
   const docFile = path.resolve(cmd.input);
   if (!(await fs.stat(docFile, { throwIfNoEntry: false }))) {
-    if (cmd.input === 'DOC.tsx') {
-      return;
-    }
     return { message: `input: ${cmd.input} does not exist`, path: 'input', source: 'flag', kind: 'invalid' };
   }
 })
