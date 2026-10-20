@@ -66,14 +66,12 @@ export class DocCommand implements CliCommandShape {
     );
 
     const rendered: Record<string, string> = {};
-    const files: Record<string, string> = {};
 
     for (const [format, out] of outputs) {
       const result = await ctx.render(format);
       rendered[format] = result;
       if (out) {
         const finalName = path.resolve(out);
-        files[format] = finalName;
         await fs.writeFile(finalName, result, 'utf8');
         console.log(`Wrote docs ${this.input}: ${finalName}`);
       } else {
