@@ -201,6 +201,12 @@ export class CompilerServer {
     return { clean: true };
   }
 
+  async #restartServer(clean?: boolean): Promise<void> {
+    this.info.compilerProcessId = 0;
+    await this.#handle.compiler.ensureKilled(RESET_KILL_TIMEOUT_MILLISECONDS);
+    await CompilerUtil.clearCaches(clean);
+  }
+
   /**
    * Request handler
    */
@@ -294,17 +300,13 @@ export class CompilerServer {
         log.render(event.payload);
       }
       if (this.isResetEvent(event)) {
-        this.info.compilerProcessId = 0;
-        await this.#handle.compiler.ensureKilled(RESET_KILL_TIMEOUT_MILLISECONDS);
         log.info('Reset event received, wiping compiler caches and output');
         this.info.messages = {};
-        await CompilerUtil.clearCaches(this.#ctx, true);
+        await this.#restartServer(true);
         this.#ctx = getManifestContext();
         await this.#disconnectActive();
       } else if (this.isRestartEvent(event)) {
-        this.info.compilerProcessId = 0;
-        await this.#handle.compiler.ensureKilled(RESET_KILL_TIMEOUT_MILLISECONDS);
-        await CompilerUtil.clearCaches();
+        await this.#restartServer();
       }
     }
 
