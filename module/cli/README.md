@@ -23,7 +23,6 @@ Usage:  [options] [command]
 
 Commands:
   doc                   Generate documentation outputs from a module `DOC.tsx` entry file.
-  doc:angular           Generate documentation into the angular webapp under related/travetto.github.io
   doc:mapping           Generate module mapping for
   email:compile         Compile all email templates into generated runtime artifacts.
   email:editor          Start the email template editor service for interactive preview and testing.
@@ -555,10 +554,13 @@ A simple example of the validation can be found in the `doc` command:
 
 **Code: Simple Validation Example**
 ```typescript
-@Validator(async cmd => {
-  const docFile = path.resolve(cmd.input);
+@Validator(async command => {
+  const docFile = path.resolve(command.input);
   if (!(await fs.stat(docFile, { throwIfNoEntry: false }))) {
-    return { message: `input: ${cmd.input} does not exist`, path: 'input', source: 'flag', kind: 'invalid' };
+    if (command.input === 'DOC.tsx') {
+      return;
+    }
+    return { message: `input: ${command.input} does not exist`, path: 'input', source: 'flag', kind: 'invalid' };
   }
 })
 ```

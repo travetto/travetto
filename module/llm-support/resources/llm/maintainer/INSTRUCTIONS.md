@@ -3,7 +3,7 @@
 ## Toolchain & Workflow
 - **Compiler Daemon (`trvc`)**: Never invoke `tsc` directly. Check compiler status with `npx trvc info` (JSON `state` of `'watch-start'` or `'compile-end'` means ready; `'compile-failed'` means build errors are present in `messages.error`; empty output means stopped). Local CLI commands (`trv <cmd>`) auto-start the daemon if needed. Use `npx trvc start`, `npx trvc restart`, `npx trvc stop`, or `npx trvc clean` (clears caches and restarts) to manage it.
 - **Linting**: Always run `npx trv lint --fix` as a final step after making code changes.
-- **Documentation Generation**: Run `npx trv doc:angular` (not `npx trv doc`) when updating documentation so both module docs and website docs (`related/travetto.github.io`) are generated.
+- **Documentation Generation**: Run `npx trv repo:exec -- trv doc` when updating documentation so both module docs and website docs (`related/travetto.github.io`) are generated.
 - **Barrel Exports**: Keep `__index__.ts` files updated when adding or removing source files.
 - **Generated & Archived Files**: Never manually edit generated outputs (such as `openapi.yml`) or modify files in `archived/`.
 

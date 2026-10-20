@@ -1,16 +1,6 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, type DocJSXElement, type DocJSXElementByFn, DocRunUtil, d, isDocJSXElement, PackageDocUtil } from '@travetto/doc';
-import {
-  type BinaryArray,
-  BinaryUtil,
-  CodecUtil,
-  castTo,
-  Env,
-  ExecUtil,
-  RuntimeIndex,
-  ShutdownManager,
-  Util
-} from '@travetto/runtime';
+import { type BinaryArray, BinaryUtil, CodecUtil, castTo, Env, ExecUtil, RuntimeIndex, ShutdownManager, Util } from '@travetto/runtime';
 
 const TodoRoot = d.ref('Todo App', RuntimeIndex.getModule('@travetto/todo-app')!.sourcePath);
 
