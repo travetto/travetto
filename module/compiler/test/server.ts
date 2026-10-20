@@ -1,30 +1,13 @@
 import assert from 'node:assert';
 
 import type { ManifestContext } from '@travetto/manifest';
-import { AfterAll, BeforeAll, Suite, Test } from '@travetto/test';
+import { Suite, Test } from '@travetto/test';
 
-import { Log } from '../src/log.ts';
 import { CompilerServer } from '../src/server/server.ts';
 import { CompilerReset, type CompilerEvent } from '../src/types.ts';
 
 @Suite()
 class CompilerServerTests {
-  #originalRender?: typeof Log.render;
-
-  @BeforeAll()
-  beforeAll(): void {
-    const proto = Object.getPrototypeOf(Log);
-    this.#originalRender = proto.render;
-    proto.render = (): void => {};
-  }
-
-  @AfterAll()
-  afterAll(): void {
-    if (this.#originalRender) {
-      Object.getPrototypeOf(Log).render = this.#originalRender;
-    }
-  }
-
   #createContext(): ManifestContext {
     return {
       workspace: { name: 'test-app', path: '/test/app', mono: false, manager: 'npm' },
