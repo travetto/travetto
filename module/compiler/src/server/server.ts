@@ -299,7 +299,6 @@ export class CompilerServer {
           this.#ctx = getManifestContext();
           await this.#disconnectActive();
         } else {
-          log.info('Restart event received, awaiting compiler target cleanup');
           await CompilerUtil.clearCaches();
         }
       }

@@ -292,7 +292,6 @@ export class Compiler {
             log.error(`Resetting due to: ${error.message}`, error.files, { scope: 'reset' });
             this.#shutdown('reset', error.message);
           } else if (error instanceof CompilerRestart) {
-            log.error(`Restarting due to: ${error.message}`, error.files, { scope: 'restart' });
             this.#shutdown('restart', error.message);
           } else {
             this.#shutdown('error', error.message);
