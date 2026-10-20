@@ -77,7 +77,7 @@ export class Compiler {
         break;
       }
       case 'reset': {
-        this.#sendEvent('state', { state: mode, soft });
+        this.#sendEvent('state', { state: 'reset', soft });
         process.exitCode = 0;
         break;
       }
