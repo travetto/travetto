@@ -3,10 +3,8 @@ import path from 'node:path';
 
 import { CliCommand, type CliCommandShape } from '@travetto/cli';
 import { PackageUtil } from '@travetto/manifest';
-import { Env, ExecUtil, Runtime, RuntimeIndex, WatchUtil } from '@travetto/runtime';
+import { Env, ExecUtil, Runtime, WatchUtil } from '@travetto/runtime';
 import { MinLength, Validator } from '@travetto/schema';
-
-import type { DocRenderContext, DocRenderHook } from '../src/types.ts';
 
 /**
  * Generate documentation outputs from a module `DOC.tsx` entry file.
@@ -60,19 +58,6 @@ export class DocCommand implements CliCommandShape {
     });
   }
 
-  async runHooks(context: DocRenderContext): Promise<void> {
-    for (const hookTarget of this.hooks) {
-      try {
-        const { hook } = await Runtime.importFrom<{ hook: DocRenderHook }>(hookTarget);
-        await hook.afterRender?.(context);
-      } catch (error) {
-        if (error instanceof Error) {
-          console.error(`Doc hook error in ${hookTarget}: ${error.message}`);
-        }
-      }
-    }
-  }
-
   async render(): Promise<void> {
     const { DocRenderer } = await import('../src/render/renderer.ts');
     const ctx = await DocRenderer.get(this.input, Runtime);
@@ -96,7 +81,10 @@ export class DocCommand implements CliCommandShape {
       }
     }
 
-    await this.runHooks({ module: RuntimeIndex.mainModule, rendered, files });
+    for (const hookTarget of this.hooks) {
+      const { hook } = await Runtime.importFrom<{ hook: (_: typeof rendered) => Promise<void> }>(hookTarget);
+      await hook(rendered);
+    }
   }
 
   async main(): Promise<void> {

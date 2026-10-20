@@ -1,25 +1,7 @@
-import type { IndexedModule } from '@travetto/manifest';
-
 import type { JSXElement, ValidHtmlTags } from '../support/jsx-runtime.ts';
 import type { c, JSXElementByFn } from './jsx.ts';
 
 export type Wrapper = Record<string, (cnt: string) => string>;
-
-/**
- * Render context provided to doc lifecycle hooks
- */
-export interface DocRenderContext {
-  module: IndexedModule;
-  rendered: Record<string, string>;
-  files: Record<string, string>;
-}
-
-/**
- * Hook for customizing doc generation outputs
- */
-export interface DocRenderHook {
-  afterRender?(context: DocRenderContext): Promise<void> | void;
-}
 
 /**
  * Document file shape
