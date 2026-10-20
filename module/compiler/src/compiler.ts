@@ -57,7 +57,7 @@ export class Compiler {
     EventUtil.sendEvent(type, payload);
   }
 
-  #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset', errorMessage?: string): void {
+  #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset', errorMessage?: string, clean?: boolean): void {
     if (this.#shuttingDown) {
       return;
     }
@@ -77,7 +77,7 @@ export class Compiler {
         break;
       }
       case 'reset': {
-        this.#sendEvent('state', { state: 'reset' });
+        this.#sendEvent('state', { state: 'reset', extra: { clean: !!clean } });
         process.exitCode = 0;
         break;
       }
@@ -290,7 +290,11 @@ export class Compiler {
           if (error instanceof CompilerReset) {
             log.error(`Restarting due to: ${error.message}`, error.files, { scope: 'reset' });
           }
-          this.#shutdown(error instanceof CompilerReset ? 'reset' : 'error', error.message);
+          this.#shutdown(
+            error instanceof CompilerReset ? 'reset' : 'error',
+            error.message,
+            error instanceof CompilerReset ? error.clean : false
+          );
         }
       }
     }

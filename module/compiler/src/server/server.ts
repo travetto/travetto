@@ -1,7 +1,7 @@
 import { setMaxListeners } from 'node:events';
 import http from 'node:http';
 
-import type { ManifestContext } from '@travetto/manifest';
+import { getManifestContext, type ManifestContext } from '@travetto/manifest';
 
 import { CommonUtil } from '../common.ts';
 import { EventUtil } from '../event.ts';
@@ -71,7 +71,11 @@ export class CompilerServer {
     return this.info.watching;
   }
 
-  isResetEvent(event: CompilerEvent): boolean {
+  get context(): ManifestContext {
+    return this.#ctx;
+  }
+
+  isResetEvent(event: CompilerEvent): event is CompilerEvent & { type: 'state' } {
     return event.type === 'state' && event.payload.state === 'reset';
   }
 
@@ -289,7 +293,15 @@ export class CompilerServer {
         log.info('Reset event received, awaiting compiler target cleanup');
         this.info.compilerProcessId = 0;
         await this.#handle.compiler.ensureKilled(RESET_KILL_TIMEOUT_MILLISECONDS);
-        await CompilerUtil.clearCaches();
+        if (event.payload.extra?.clean === true) {
+          log.info('Clean requested on reset, wiping compiler caches and output');
+          this.info.messages = {};
+          await CompilerUtil.clearCaches(this.#ctx, true);
+          this.#ctx = getManifestContext();
+          await this.#disconnectActive();
+        } else {
+          await CompilerUtil.clearCaches();
+        }
       }
     }
 

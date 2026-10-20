@@ -85,9 +85,11 @@ export type CompilerServerInfo = {
 
 export class CompilerReset extends Error {
   files?: string[];
-  constructor(message: string, files?: string[], extra?: ErrorOptions) {
-    super(message, extra);
+  clean?: boolean;
+  constructor(message: string, files?: string[], options?: ErrorOptions & { clean?: boolean }) {
+    super(message, options);
     this.files = files;
+    this.clean = options?.clean;
   }
 }
 

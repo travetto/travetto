@@ -4,7 +4,7 @@ import type { ManifestContext } from '@travetto/manifest';
 import { Suite, Test } from '@travetto/test';
 
 import { CompilerServer } from '../src/server/server.ts';
-import type { CompilerEvent } from '../src/types.ts';
+import { CompilerReset, type CompilerEvent } from '../src/types.ts';
 
 @Suite()
 class CompilerServerTests {
@@ -99,5 +99,46 @@ class CompilerServerTests {
     });
 
     assert.strictEqual(server.info.messages?.error, undefined);
+  }
+
+  @Test()
+  async verifyCompilerResetCleanOption() {
+    const reset = new CompilerReset('Git branch change', undefined, { clean: true });
+    assert.strictEqual(reset.clean, true);
+  }
+
+  @Test()
+  async verifyCleanResetHandling() {
+    const context = this.#createContext();
+    const server = new CompilerServer(context, false);
+    const initialIteration = server.info.iteration;
+
+    server.info.messages = {
+      error: [
+        {
+          level: 'error',
+          message: 'ERROR src/alpha.ts:10:5 -- Type error',
+          phase: 'error',
+          file: 'src/alpha.ts'
+        }
+      ]
+    };
+
+    let executed = false;
+    await server.processEvents(async function* () {
+      if (!executed) {
+        executed = true;
+        yield {
+          type: 'state',
+          payload: {
+            state: 'reset',
+            extra: { clean: true }
+          }
+        };
+      }
+    });
+
+    assert.deepStrictEqual(server.info.messages, {});
+    assert.ok(server.info.iteration > initialIteration);
   }
 }

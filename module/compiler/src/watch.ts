@@ -282,9 +282,15 @@ export class CompilerWatcher {
     const checkChange = async (): Promise<void> => {
       try {
         const nextHead = await this.#getGitHeadRef();
-        if (nextHead && currentHead && nextHead.hash !== currentHead.hash) {
+        if (nextHead && currentHead && (nextHead.hash !== currentHead.hash || nextHead.ref !== currentHead.ref)) {
           currentHead = nextHead;
-          this.#queue.throw(new CompilerReset(`Git branch or commit change detected: ${currentHead.hash}=>${nextHead.hash}`));
+          this.#queue.throw(
+            new CompilerReset(
+              `Git branch or commit change detected: ${currentHead.hash}(${currentHead.ref})=>${nextHead.hash}(${nextHead.ref})`,
+              undefined,
+              { clean: true }
+            )
+          );
         }
       } finally {
         isChecking = undefined;
