@@ -20,7 +20,8 @@
     "reinit-deps": "find . -name 'node_modules' -type d | grep -v -E '(github[.]io|vscode-plugin|[.]trv)' | xargs rm -rf; rm -f package-lock.json; npm i",
     "vscode:package": "cd related/vscode-plugin; npm run package",
     "version": "trv repo:version",
-    "preversion": "trv repo:exec -cf DOC.tsx trv doc"
+    "docs": "trv repo:exec -cf DOC.tsx trv doc",
+    "preversion": "npm run docs"
   },
   "travetto": {
     "build": {
