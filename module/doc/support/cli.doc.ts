@@ -15,13 +15,13 @@ import type { DocRenderContext, DocRenderHook } from '../src/types.ts';
  * iterative documentation authoring.
  */
 @CliCommand()
-@Validator(async command => {
-  const docFile = path.resolve(command.input);
+@Validator(async cmd => {
+  const docFile = path.resolve(cmd.input);
   if (!(await fs.stat(docFile, { throwIfNoEntry: false }))) {
-    if (command.input === 'DOC.tsx') {
+    if (cmd.input === 'DOC.tsx') {
       return;
     }
-    return { message: `input: ${command.input} does not exist`, path: 'input', source: 'flag', kind: 'invalid' };
+    return { message: `input: ${cmd.input} does not exist`, path: 'input', source: 'flag', kind: 'invalid' };
   }
 })
 export class DocCommand implements CliCommandShape {
@@ -75,7 +75,7 @@ export class DocCommand implements CliCommandShape {
 
   async render(): Promise<void> {
     const { DocRenderer } = await import('../src/render/renderer.ts');
-    const rendererContext = await DocRenderer.get(this.input, Runtime);
+    const ctx = await DocRenderer.get(this.input, Runtime);
     const outputs = this.outputs.map(output =>
       output.includes('.') ? [path.extname(output).replace('.', ''), path.resolve(output)] : ([output, null] as const)
     );
@@ -83,11 +83,11 @@ export class DocCommand implements CliCommandShape {
     const rendered: Record<string, string> = {};
     const files: Record<string, string> = {};
 
-    for (const [format, outputFile] of outputs) {
-      const result = await rendererContext.render(format);
+    for (const [format, out] of outputs) {
+      const result = await ctx.render(format);
       rendered[format] = result;
-      if (outputFile) {
-        const finalName = path.resolve(outputFile);
+      if (out) {
+        const finalName = path.resolve(out);
         files[format] = finalName;
         await fs.writeFile(finalName, result, 'utf8');
         console.log(`Wrote docs ${this.input}: ${finalName}`);

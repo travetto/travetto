@@ -554,13 +554,13 @@ A simple example of the validation can be found in the `doc` command:
 
 **Code: Simple Validation Example**
 ```typescript
-@Validator(async command => {
-  const docFile = path.resolve(command.input);
+@Validator(async cmd => {
+  const docFile = path.resolve(cmd.input);
   if (!(await fs.stat(docFile, { throwIfNoEntry: false }))) {
-    if (command.input === 'DOC.tsx') {
+    if (cmd.input === 'DOC.tsx') {
       return;
     }
-    return { message: `input: ${command.input} does not exist`, path: 'input', source: 'flag', kind: 'invalid' };
+    return { message: `input: ${cmd.input} does not exist`, path: 'input', source: 'flag', kind: 'invalid' };
   }
 })
 ```

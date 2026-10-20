@@ -16,17 +16,17 @@ export const hook: DocRenderHook = {
 
     try {
       html = html
-        .replace(/href="[^"]+travetto\/tree\/[^/]+\/module\/([^/"]+)"/g, (_: string, reference: string) => `routerLink="/docs/${reference}"`)
+        .replace(/href="[^"]+travetto\/tree\/[^/]+\/module\/([^/"]+)"/g, (_, ref) => `routerLink="/docs/${ref}"`)
         .replace(/^src="images\//g, `src="/assets/images/${moduleName}/`)
-        .replace(/(href|src)="https?:\/\/travetto.dev\//g, (_: string, attribute: string) => `${attribute}="/`)
+        .replace(/(href|src)="https?:\/\/travetto.dev\//g, (_, attr) => `${attr}="/`)
         .replaceAll('@', '&#64;')
-        .replaceAll('process.env.NODE_ENV', (text: string) => text.replaceAll('.', '\u2024'));
+        .replaceAll('process.env.NODE_ENV', text => text.replaceAll('.', '\u2024'));
 
       if (moduleName === 'todo-app') {
         html = html.replace(
           /(<h1>(?:[\n\r]|.)*)(<h2.*?\s*<ol>(?:[\r\n]|.)*?<\/ol>)((?:[\r\n]|.)*)/m,
-          (_: string, heading: string, tableOfContents: string, text: string) =>
-            `<div class="toc"><div class="inner">${tableOfContents.trim()}</div></div>\n<div class="documentation">\n${heading}\n${text}\n</div>\n`
+          (_, heading, toc, text) =>
+            `<div class="toc"><div class="inner">${toc.trim()}</div></div>\n<div class="documentation">\n${heading}\n${text}\n</div>\n`
         );
       }
 
