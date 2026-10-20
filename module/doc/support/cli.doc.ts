@@ -63,13 +63,8 @@ export class DocCommand implements CliCommandShape {
   async runHooks(context: DocRenderContext): Promise<void> {
     for (const hookTarget of this.hooks) {
       try {
-        const moduleExports = await Runtime.importFrom<Record<string, unknown>>(hookTarget);
-        const hook = (moduleExports.hook ?? moduleExports.default ?? moduleExports) as DocRenderHook;
-        if (typeof hook?.afterRender === 'function') {
-          await hook.afterRender(context);
-        } else if (typeof moduleExports.afterRender === 'function') {
-          await moduleExports.afterRender(context);
-        }
+        const { hook } = await Runtime.importFrom<{ hook: DocRenderHook }>(hookTarget);
+        await hook.afterRender?.(context);
       } catch (error) {
         if (error instanceof Error) {
           console.error(`Doc hook error in ${hookTarget}: ${error.message}`);
