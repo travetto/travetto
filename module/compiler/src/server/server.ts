@@ -71,7 +71,7 @@ export class CompilerServer {
     return this.info.watching;
   }
 
-  isResetEvent(event: CompilerEvent): event is CompilerEvent & { type: 'state'; payload: { state: 'reset'; soft?: boolean } } {
+  isResetEvent(event: CompilerEvent): event is CompilerEvent & { type: 'state' } {
     return event.type === 'state' && event.payload.state === 'reset';
   }
 
