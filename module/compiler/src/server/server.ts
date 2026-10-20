@@ -290,16 +290,16 @@ export class CompilerServer {
         log.render(event.payload);
       }
       if (this.isResetEvent(event)) {
-        log.info('Reset event received, awaiting compiler target cleanup');
         this.info.compilerProcessId = 0;
         await this.#handle.compiler.ensureKilled(RESET_KILL_TIMEOUT_MILLISECONDS);
         if (event.payload.state === 'reset') {
-          log.info('Reset requested, wiping compiler caches and output');
+          log.info('Reset event received, wiping compiler caches and output');
           this.info.messages = {};
           await CompilerUtil.clearCaches(this.#ctx, true);
           this.#ctx = getManifestContext();
           await this.#disconnectActive();
         } else {
+          log.info('Restart event received, awaiting compiler target cleanup');
           await CompilerUtil.clearCaches();
         }
       }

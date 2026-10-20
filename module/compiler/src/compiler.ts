@@ -288,14 +288,15 @@ export class Compiler {
         this.#sendEvent('state', { state: 'watch-end' });
       } catch (error) {
         if (error instanceof Error) {
-          if (error instanceof CompilerReset || error instanceof CompilerRestart) {
-            log.error(`Restarting due to: ${error.message}`, error.files, { scope: 'reset' });
+          if (error instanceof CompilerReset) {
+            log.error(`Resetting due to: ${error.message}`, error.files, { scope: 'reset' });
+            this.#shutdown('reset', error.message);
+          } else if (error instanceof CompilerRestart) {
+            log.error(`Restarting due to: ${error.message}`, error.files, { scope: 'restart' });
+            this.#shutdown('restart', error.message);
+          } else {
+            this.#shutdown('error', error.message);
           }
-          this.#shutdown(
-            error instanceof CompilerReset ? 'reset' :
-            error instanceof CompilerRestart ? 'restart' : 'error',
-            error.message
-          );
         }
       }
     }
