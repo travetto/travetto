@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { type ManifestContext, getManifestContext, ManifestModuleUtil, type ManifestRoot, type Package, PackageUtil, path } from '@travetto/manifest';
+import { type ManifestContext, ManifestModuleUtil, type ManifestRoot, type Package, PackageUtil, path } from '@travetto/manifest';
 
 /**
  * Standard utilities for compiler
@@ -50,12 +50,8 @@ export class CompilerUtil {
   /**
    * Clear package and module scan caches, with optional deletion of compiler output data
    */
-  static async clearCaches(clean?: boolean): Promise<void>;
-  static async clearCaches(context?: ManifestContext, deleteOutput?: boolean): Promise<void>;
-  static async clearCaches(cleanOrContext?: ManifestContext | boolean, deleteOutput = false): Promise<void> {
-    const clean = typeof cleanOrContext === 'boolean' ? cleanOrContext : deleteOutput;
-    const context = typeof cleanOrContext === 'boolean' ? getManifestContext() : cleanOrContext;
-    if (context && clean) {
+  static async clearCaches(context: ManifestContext, deleteOutput = false): Promise<void> {
+    if (context && deleteOutput) {
       await Promise.all(
         [context.build.outputFolder, context.build.typesFolder].map(folder =>
           fs.rm(path.resolve(context.workspace.path, folder), { recursive: true, force: true })
