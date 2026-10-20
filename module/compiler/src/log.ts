@@ -80,11 +80,7 @@ class Logger extends CompilerLogger {
 
   /** Log event with filtering by level */
   render(event: CompilerLogEvent): void {
-    if (
-      process.env.TRV_BUILD === 'none' ||
-      (this.disabled && event.level !== 'error') ||
-      LEVEL_TO_PRIORITY[this.level] > LEVEL_TO_PRIORITY[event.level]
-    ) {
+    if ((this.disabled && event.level !== 'error') || LEVEL_TO_PRIORITY[this.level] > LEVEL_TO_PRIORITY[event.level]) {
       return;
     }
     const params = [event.message, ...(event.args ?? [])].map(arg =>
