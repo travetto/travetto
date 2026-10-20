@@ -75,8 +75,12 @@ export class CompilerServer {
     return this.#ctx;
   }
 
-  isResetEvent(event: CompilerEvent): event is CompilerEvent & { type: 'state' } {
-    return event.type === 'state' && (event.payload.state === 'reset' || event.payload.state === 'restart');
+  isResetEvent(event: CompilerEvent): boolean {
+    return event.type === 'state' && event.payload.state === 'reset';
+  }
+
+  isRestartEvent(event: CompilerEvent): boolean {
+    return event.type === 'state' && event.payload.state === 'restart';
   }
 
   async #tryListen(attempt = 0): Promise<'ok' | 'running'> {
@@ -245,7 +249,7 @@ export class CompilerServer {
    * Process events
    */
   async processEvents(input: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
-    for await (const event of CommonUtil.restartableEvents(input, this.signal, this.isResetEvent)) {
+    for await (const event of CommonUtil.restartableEvents(input, this.signal, event => this.isResetEvent(event) || this.isRestartEvent(event))) {
       if (event.type === 'progress') {
         await Log.onProgressEvent(event.payload);
       }
@@ -292,15 +296,15 @@ export class CompilerServer {
       if (this.isResetEvent(event)) {
         this.info.compilerProcessId = 0;
         await this.#handle.compiler.ensureKilled(RESET_KILL_TIMEOUT_MILLISECONDS);
-        if (event.payload.state === 'reset') {
-          log.info('Reset event received, wiping compiler caches and output');
-          this.info.messages = {};
-          await CompilerUtil.clearCaches(this.#ctx, true);
-          this.#ctx = getManifestContext();
-          await this.#disconnectActive();
-        } else {
-          await CompilerUtil.clearCaches();
-        }
+        log.info('Reset event received, wiping compiler caches and output');
+        this.info.messages = {};
+        await CompilerUtil.clearCaches(this.#ctx, true);
+        this.#ctx = getManifestContext();
+        await this.#disconnectActive();
+      } else if (this.isRestartEvent(event)) {
+        this.info.compilerProcessId = 0;
+        await this.#handle.compiler.ensureKilled(RESET_KILL_TIMEOUT_MILLISECONDS);
+        await CompilerUtil.clearCaches();
       }
     }
 

@@ -103,11 +103,19 @@ class CompilerServerTests {
 
   @Test()
   async verifyCompilerEvents() {
+    const context = this.#createContext();
+    const server = new CompilerServer(context, false);
+
     const reset = new CompilerReset('Reset');
     assert.ok(reset instanceof CompilerReset);
 
     const restart = new CompilerRestart('Restart');
     assert.ok(restart instanceof CompilerRestart);
+
+    assert.strictEqual(server.isResetEvent({ type: 'state', payload: { state: 'reset' } }), true);
+    assert.strictEqual(server.isResetEvent({ type: 'state', payload: { state: 'restart' } }), false);
+    assert.strictEqual(server.isRestartEvent({ type: 'state', payload: { state: 'restart' } }), true);
+    assert.strictEqual(server.isRestartEvent({ type: 'state', payload: { state: 'reset' } }), false);
   }
 
   @Test()
