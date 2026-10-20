@@ -68,6 +68,32 @@ class CompilerLogTests {
   }
 
   @Test()
+  async verifyLoggerSuppressionUnderBuildNone() {
+    const originalBuild = process.env.TRV_BUILD;
+    try {
+      process.env.TRV_BUILD = 'none';
+      const captured: string[] = [];
+      const originalConsoleError = console.error;
+      console.error = (message?: unknown, ...parameters: unknown[]) => {
+        captured.push(`error: ${message} ${parameters.join(' ')}`);
+      };
+      try {
+        const logger = Log.scoped('test-none');
+        logger.error('should be suppressed');
+        assert.strictEqual(captured.length, 0);
+      } finally {
+        console.error = originalConsoleError;
+      }
+    } finally {
+      if (originalBuild !== undefined) {
+        process.env.TRV_BUILD = originalBuild;
+      } else {
+        delete process.env.TRV_BUILD;
+      }
+    }
+  }
+
+  @Test()
   async verifyLevelAndDisabledDecoupled() {
     Log.level = 'debug';
     assert.strictEqual(Log.level, 'debug');
