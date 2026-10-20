@@ -51,7 +51,7 @@ export class CompilerUtil {
    * Clear package and module scan caches, with optional deletion of compiler output data
    */
   static async clearCaches(context: ManifestContext, deleteOutput = false): Promise<void> {
-    if (context && deleteOutput) {
+    if (deleteOutput) {
       await Promise.all(
         [context.build.outputFolder, context.build.typesFolder].map(folder =>
           fs.rm(path.resolve(context.workspace.path, folder), { recursive: true, force: true })
