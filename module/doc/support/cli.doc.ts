@@ -16,9 +16,6 @@ import { MinLength, Validator } from '@travetto/schema';
 @Validator(async cmd => {
   const docFile = path.resolve(cmd.input);
   if (!(await fs.stat(docFile, { throwIfNoEntry: false }))) {
-    if (cmd.input === 'DOC.tsx') {
-      return;
-    }
     return { message: `input: ${cmd.input} does not exist`, path: 'input', source: 'flag', kind: 'invalid' };
   }
 })
