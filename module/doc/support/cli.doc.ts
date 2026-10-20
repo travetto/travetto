@@ -85,7 +85,7 @@ export class DocCommand implements CliCommandShape {
     }
   }
 
-  async main(): Promise<void> {
+  main(): Promise<void> {
     this.input = path.resolve(this.input);
     return this.watch ? this.runWatch() : this.render();
   }
