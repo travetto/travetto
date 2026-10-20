@@ -104,14 +104,14 @@ class CompilerServerTests {
   @Test()
   async verifyCompilerResetModeOption() {
     const defaultReset = new CompilerReset('Normal reset');
-    assert.strictEqual(defaultReset.mode, 'reset');
+    assert.strictEqual(defaultReset.mode, 'hard');
 
-    const hardRestart = new CompilerReset('Git branch change', undefined, 'hard-restart');
-    assert.strictEqual(hardRestart.mode, 'hard-restart');
+    const softReset = new CompilerReset('FSEvents failure', undefined, 'soft');
+    assert.strictEqual(softReset.mode, 'soft');
   }
 
   @Test()
-  async verifyHardRestartHandling() {
+  async verifyHardResetHandling() {
     const context = this.#createContext();
     const server = new CompilerServer(context, false);
     const initialIteration = server.info.iteration;
@@ -134,7 +134,7 @@ class CompilerServerTests {
         yield {
           type: 'state',
           payload: {
-            state: 'hard-restart'
+            state: 'reset'
           }
         };
       }
@@ -142,5 +142,40 @@ class CompilerServerTests {
 
     assert.deepStrictEqual(server.info.messages, {});
     assert.ok(server.info.iteration > initialIteration);
+  }
+
+  @Test()
+  async verifySoftResetHandling() {
+    const context = this.#createContext();
+    const server = new CompilerServer(context, false);
+    const initialIteration = server.info.iteration;
+
+    server.info.messages = {
+      error: [
+        {
+          level: 'error',
+          message: 'ERROR src/alpha.ts:10:5 -- Type error',
+          phase: 'error',
+          file: 'src/alpha.ts'
+        }
+      ]
+    };
+
+    let executed = false;
+    await server.processEvents(async function* () {
+      if (!executed) {
+        executed = true;
+        yield {
+          type: 'state',
+          payload: {
+            state: 'reset',
+            extra: { mode: 'soft' }
+          }
+        };
+      }
+    });
+
+    assert.strictEqual(server.info.messages?.error?.length, 1);
+    assert.strictEqual(server.info.iteration, initialIteration);
   }
 }

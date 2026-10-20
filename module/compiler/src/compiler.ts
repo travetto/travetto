@@ -57,7 +57,7 @@ export class Compiler {
     EventUtil.sendEvent(type, payload);
   }
 
-  #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset' | 'hard-restart', errorMessage?: string): void {
+  #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset', errorMessage?: string, resetMode?: 'hard' | 'soft'): void {
     if (this.#shuttingDown) {
       return;
     }
@@ -76,9 +76,8 @@ export class Compiler {
         }
         break;
       }
-      case 'reset':
-      case 'hard-restart': {
-        this.#sendEvent('state', { state: mode });
+      case 'reset': {
+        this.#sendEvent('state', { state: 'reset', extra: resetMode === 'soft' ? { mode: 'soft' } : undefined });
         process.exitCode = 0;
         break;
       }
@@ -292,8 +291,9 @@ export class Compiler {
             log.error(`Restarting due to: ${error.message}`, error.files, { scope: 'reset' });
           }
           this.#shutdown(
-            error instanceof CompilerReset ? error.mode : 'error',
-            error.message
+            error instanceof CompilerReset ? 'reset' : 'error',
+            error.message,
+            error instanceof CompilerReset ? error.mode : undefined
           );
         }
       }

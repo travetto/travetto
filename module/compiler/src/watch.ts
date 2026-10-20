@@ -189,7 +189,7 @@ export class CompilerWatcher {
         } catch (out) {
           if (out instanceof Error) {
             if (out.message.includes('Events were dropped by the FSEvents client.')) {
-              this.#queue.throw(new CompilerReset('FSEvents failure'));
+              this.#queue.throw(new CompilerReset('FSEvents failure', undefined, 'soft'));
             } else {
               this.#queue.throw(out);
             }
@@ -286,9 +286,7 @@ export class CompilerWatcher {
           currentHead = nextHead;
           this.#queue.throw(
             new CompilerReset(
-              `Git branch or commit change detected: ${currentHead.hash}(${currentHead.ref})=>${nextHead.hash}(${nextHead.ref})`,
-              undefined,
-              'hard-restart'
+              `Git branch or commit change detected: ${currentHead.hash}(${currentHead.ref})=>${nextHead.hash}(${nextHead.ref})`
             )
           );
         }
