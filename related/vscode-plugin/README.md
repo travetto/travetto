@@ -11,29 +11,29 @@ The currently supported features are:
    *  Miscellaneous utilities
 
 ## Testing
-The test related functionality relies upon the [Testing](https://github.com/travetto/travetto/tree/main/module/test#readme "Declarative test framework") module being installed, and used to define tests ([@Suite](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L14) and [@Test](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L20)).
+The test related functionality relies upon the [Testing](https://github.com/travetto/travetto/tree/main/module/test#readme "Declarative test framework") module being installed, and used to define tests ([@Suite](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L13) and [@Test](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L25)).
 
 ### Real-time Test Evaluation
-The real-time test functionality will re-evaluate your test code on save.  This means as you type and save, the test will run.  The test will provide feedback inline, using green to indicate success, red to indicate failure, and gray to indicate unknown.![Real-time Testing](https://travetto.dev/assets/images/vscode-plugin/real-time-testing.gif)
+The real-time test functionality will re-evaluate your test code on save. This means as you type and save, the test will run. The test will provide feedback inline, using green to indicate success, red to indicate failure, and gray to indicate unknown.![Real-time Testing](https://travetto.dev/assets/images/vscode-plugin/real-time-testing.gif)
 
 ### Debugging Tests
-While working on a test, if you want to debug it, you can press running `command-shift-t` on OSX or `ctrl-shift-t` on Windows/Linux.  This will start a debug session with the current line activated as a breakpoint.  This allows you to seamlessly jump into a debug session while writing tests.![Debugging Single Test](https://travetto.dev/assets/images/vscode-plugin/debug-single-test.gif) In addition to manual invocation at a line, each test has a [CodeLens](https://code.visualstudio.com/api/language-extensions/programmatic-language-features#codelens-show-actionable-context-information-within-source-code), that allows for trigger the test as well.![Debugging Single Test](https://travetto.dev/assets/images/vscode-plugin/debug-code-lens.gif)
+While working on a test, if you want to debug it, you can press running `command-shift-t` on OSX or `ctrl-shift-t` on Windows/Linux. This will start a debug session with the current line activated as a breakpoint. This allows you to seamlessly jump into a debug session while writing tests.![Debugging Single Test](https://travetto.dev/assets/images/vscode-plugin/debug-single-test.gif) In addition to manual invocation at a line, each test has a [CodeLens](https://code.visualstudio.com/api/language-extensions/programmatic-language-features#codelens-show-actionable-context-information-within-source-code), that allows for trigger the test as well.![Debugging Single Test](https://travetto.dev/assets/images/vscode-plugin/debug-code-lens.gif)
 
 ### Commands
 
-   *  `Travetto: Debug Tests` to force a running all the tests in debug mode.  Will not establish a breakpoint, but will use any existing breakpoints.
+   *  `Travetto: Debug Tests` to force a running all the tests in debug mode. Will not establish a breakpoint, but will use any existing breakpoints.
    *  `Travetto: Re-run Tests` to force a full re-run of all the tests in a given document
 
 ## CLI Running
-While using the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework"), a common pattern is to use [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L20) annotations to define entry points into the application.  These entry points can take parameters, and if using the cli, you can invoke them with parameters, type checked and validated. 
+While using the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework"), a common pattern is to use [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/registry/decorator.ts#L20) annotations to define entry points into the application. These entry points can take parameters, and if using the cli, you can invoke them with parameters, type checked and validated. 
 
 The plugin exposes this functionality as a command, to allow you to debug these commands directly from the editor.
 
 ### Running
-![Run Workflow](https://travetto.dev/assets/images/vscode-plugin/run-workflow.gif) Launching relies upon the command `Travetto: Run New Command`.  This will show you a list of the available entry points in the project, with the parameters they support.  Selecting a command will take you through the parameter flow to select inputs, and once all parameters are selected, your command will launch. After running and selecting a configuration for a command, you can now access those configurations via `Travetto: Run Recent Command`.  This allows you to execute a recent run that you can invoke immediately without prompting for inputs. If you find yourself running the same application multiple times, you can also invoke `Travetto: Run Most Recent Command` to bypass application selection overall.
+![Run Workflow](https://travetto.dev/assets/images/vscode-plugin/run-workflow.gif) Launching relies upon the command `Travetto: Run New Command`. This will show you a list of the available entry points in the project, with the parameters they support. Selecting a command will take you through the parameter flow to select inputs, and once all parameters are selected, your command will launch. After running and selecting a configuration for a command, you can now access those configurations via `Travetto: Run Recent Command`. This allows you to execute a recent run that you can invoke immediately without prompting for inputs. If you find yourself running the same application multiple times, you can also invoke `Travetto: Run Most Recent Command` to bypass application selection overall.
 
 ### Exporting and Customizing
-![Export Workflow](https://travetto.dev/assets/images/vscode-plugin/run-export-workflow.gif) If at any point in time, you wish to modify the launch configuration of any command, you can execute `Travetto: Export Command`, and it will provide the same options as launch.  The only difference is that instead of running the command, you will have a new debug launch config.  This option is now completely independent from the plugin and can be modified without issue.
+![Export Workflow](https://travetto.dev/assets/images/vscode-plugin/run-export-workflow.gif) If at any point in time, you wish to modify the launch configuration of any command, you can execute `Travetto: Export Command`, and it will provide the same options as launch. The only difference is that instead of running the command, you will have a new debug launch config. This option is now completely independent from the plugin and can be modified without issue.
 
 ### Commands
 
@@ -43,14 +43,14 @@ The plugin exposes this functionality as a command, to allow you to debug these 
    *  `Travetto: Export Command` to export an command config
 
 ### Running from Command Line
-When invoking commands from the terminal (within VSCode), the CLI will delegate the relevant commands to the VSCode plugin.  This allows for more customization of entry points, as well as ability to leverage aliases/scripts (e.g. `npm start`) as a way of unifying the tooling.
+When invoking commands from the terminal (within VSCode), the CLI will delegate the relevant commands to the VSCode plugin. This allows for more customization of entry points, as well as ability to leverage aliases/scripts (e.g. `npm start`) as a way of unifying the tooling.
 
 ## Email Template Development
-While developing emails, the desire to visual inspect output, as well as quickly test changes is paramount.  To that end, the plugin supports the ability to compile, view, and send email templates all from within the plugin. 
+While developing emails, the desire to visual inspect output, as well as quickly test changes is paramount. To that end, the plugin supports the ability to compile, view, and send email templates all from within the plugin. 
 
-The plugin exposes this functionality as a command, to allow you to debug these applications directly from the editor.![Editing](https://travetto.dev/assets/images/vscode-plugin/email-editing.gif) Any file that ends with `.email.tsx` is assumed to be an email template, and will trigger background compilation upon editing the file.  All of the following commands require the user to be actively editing the `.email.tsx` file to be available. 
+The plugin exposes this functionality as a command, to allow you to debug these applications directly from the editor.![Editing](https://travetto.dev/assets/images/vscode-plugin/email-editing.gif) Any file that ends with `.email.tsx` is assumed to be an email template, and will trigger background compilation upon editing the file. All of the following commands require the user to be actively editing the `.email.tsx` file to be available. 
 
-Additional, for rendering the email, a context may be needed to exercise the various logic paths. The plugin picks up `resources/email/dev.yml` by default, and if its not found, then an empty object is provided.
+Additional, for rendering the email, a context may be needed to exercise the various logic paths. The plugin picks up `resources/email/local.yml` by default, and if its not found, then an empty object is provided.
 
 ### Commands
 
@@ -61,7 +61,7 @@ Additional, for rendering the email, a context may be needed to exercise the var
 
 ## Misc Utilities
 Currently the supported commands are:
-   *  `Travetto: Clean` to run the cli operation `travetto clean`.  This will purge the project's cache, which is generally after workspace changes, like npm installs.
+   *  `Travetto: Clean` to run the cli operation `travetto clean`. This will purge the project's cache, which is generally after workspace changes, like npm installs.
 
 ## Release Info
 

@@ -23,7 +23,6 @@ Usage:  [options] [command]
 
 Commands:
   doc                   Generate documentation outputs from a module `DOC.tsx` entry file.
-  doc:angular           Generate documentation into the angular webapp under related/travetto.github.io
   doc:mapping           Generate module mapping for
   email:compile         Compile all email templates into generated runtime artifacts.
   email:editor          Start the email template editor service for interactive preview and testing.

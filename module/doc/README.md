@@ -108,6 +108,7 @@ Description:
 Options:
   -i, --input <string>    Input File (default: "DOC.tsx")
   -o, --outputs <string>  Outputs (default: ["README.md","DOC.html"])
+  -h, --hooks <string>    Hooks (default: ["@travetto/mono-repo/support/doc.angular.ts"])
   -w, --watch             Watch? (default: false)
   --help                  display help for command
 ```

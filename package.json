@@ -20,7 +20,7 @@
     "reinit-deps": "find . -name 'node_modules' -type d | grep -v -E '(github[.]io|vscode-plugin|[.]trv)' | xargs rm -rf; rm -f package-lock.json; npm i",
     "vscode:package": "cd related/vscode-plugin; npm run package",
     "version": "trv repo:version",
-    "preversion": "trv doc:angular"
+    "preversion": "trv repo:exec -cf DOC.tsx trv doc"
   },
   "travetto": {
     "build": {
@@ -31,6 +31,9 @@
       "outputs": [
         "README.md",
         "DOC.html"
+      ],
+      "hooks": [
+        "@travetto/mono-repo/support/doc.angular.ts"
       ]
     }
   },

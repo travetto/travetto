@@ -63,6 +63,9 @@
       "outputs": [
         "README.md",
         "DOC.html"
+      ],
+      "hooks": [
+        "travetto-plugin/support/doc.angular.ts"
       ]
     }
   },

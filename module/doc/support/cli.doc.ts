@@ -27,6 +27,9 @@ export class DocCommand implements CliCommandShape {
   @MinLength(1)
   outputs: string[] = PackageUtil.readPackage(Runtime.workspace.path)?.travetto?.doc?.outputs ?? ['README.md'];
 
+  /** Hooks */
+  hooks: string[] = PackageUtil.readPackage(Runtime.workspace.path)?.travetto?.doc?.hooks ?? [];
+
   /** Watch? */
   watch = false;
 
@@ -59,15 +62,23 @@ export class DocCommand implements CliCommandShape {
       output.includes('.') ? [path.extname(output).replace('.', ''), path.resolve(output)] : ([output, null] as const)
     );
 
+    const rendered: Record<string, string> = {};
+
     for (const [format, out] of outputs) {
       const result = await ctx.render(format);
+      rendered[format] = result;
       if (out) {
         const finalName = path.resolve(out);
         await fs.writeFile(finalName, result, 'utf8');
-        console.log(`Wrote docs ${this.input}: ${finalName}`);
+        console.log(`Wrote docs ${Runtime.stripWorkspacePath(finalName)}`);
       } else {
         process.stdout.write(result);
       }
+    }
+
+    for (const hookTarget of this.hooks) {
+      const { hook } = await Runtime.importFrom<{ hook: (_: typeof rendered) => Promise<void> }>(hookTarget);
+      await hook(rendered);
     }
   }
 
