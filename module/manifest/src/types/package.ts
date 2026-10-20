@@ -49,6 +49,7 @@ export type Package = {
       root?: string;
       baseUrl?: string;
       outputs?: string[];
+      hooks?: string[];
     };
     workspaceInclude?: boolean;
     build?: Partial<ManifestContext['build']> & {

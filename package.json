@@ -31,6 +31,9 @@
       "outputs": [
         "README.md",
         "DOC.html"
+      ],
+      "hooks": [
+        "@travetto/mono-repo/support/doc.angular.ts"
       ]
     }
   },
