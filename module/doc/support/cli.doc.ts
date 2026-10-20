@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { CliCommand, type CliCommandShape } from '@travetto/cli';
-import { type IndexedModule, PackageUtil } from '@travetto/manifest';
+import { PackageUtil } from '@travetto/manifest';
 import { Env, ExecUtil, Runtime, RuntimeIndex, WatchUtil } from '@travetto/runtime';
 import { MinLength, Validator } from '@travetto/schema';
 
@@ -96,9 +96,7 @@ export class DocCommand implements CliCommandShape {
       }
     }
 
-    const found = RuntimeIndex.findModuleForArbitraryFile(this.input);
-    const currentModule: IndexedModule = RuntimeIndex.getModule(found?.name ?? Runtime.main.name)!;
-    await this.runHooks({ module: currentModule, rendered, files });
+    await this.runHooks({ module: RuntimeIndex.mainModule, rendered, files });
   }
 
   async main(): Promise<void> {
