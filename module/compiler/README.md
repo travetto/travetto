@@ -49,14 +49,18 @@ $ TRV_BUILD=debug trvc build
 2029-03-14T04:00:02.450Z info  [compiler-exec  ] Launching compiler
 2029-03-14T04:00:02.762Z debug [server         ] Compilation started
 2029-03-14T04:00:02.947Z info  [server         ] State changed: init
-2029-03-14T04:00:03.093Z debug [compiler-exec  ] Finished
-2029-03-14T04:00:04.003Z debug [event-stream   ] Finished event stream
-2029-03-14T04:00:04.495Z debug [compiler-exec  ] Shutting down process
-2029-03-14T04:00:05.066Z info  [server         ] Closing down server
-2029-03-14T04:00:05.307Z debug [server         ] Server close event
-2029-03-14T04:00:05.952Z info  [server         ] Closed down server
-2029-03-14T04:00:06.859Z debug [server         ] Finished processing events
-2029-03-14T04:00:07.720Z debug [compiler-exec  ] End Server
+2029-03-14T04:00:03.093Z debug [server         ] Compiler loaded: 1 files changed
+2029-03-14T04:00:04.003Z info  [server         ] State changed: compile-start
+2029-03-14T04:00:04.495Z info  [server         ] State changed: compile-end
+2029-03-14T04:00:05.066Z debug [server         ] Compiler process shutdown
+2029-03-14T04:00:05.307Z debug [compiler-exec  ] Finished
+2029-03-14T04:00:05.952Z debug [event-stream   ] Finished event stream
+2029-03-14T04:00:06.859Z debug [compiler-exec  ] Shutting down process
+2029-03-14T04:00:07.720Z info  [server         ] Closing down server
+2029-03-14T04:00:08.179Z debug [server         ] Server close event
+2029-03-14T04:00:08.588Z info  [server         ] Closed down server
+2029-03-14T04:00:09.493Z debug [server         ] Finished processing events
+2029-03-14T04:00:10.395Z debug [compiler-exec  ] End Server
 ```
 
 **Terminal: Sample trv output with default log level**
