@@ -56,7 +56,7 @@ export type CompilerLogEvent = Scoped<{
   file?: string;
 }>;
 export type CompilerProgressEvent = Scoped<{ idx: number; total: number; message: string; operation: 'compile'; complete?: boolean }>;
-export type CompilerStateEvent = Scoped<{ state: CompilerStateType; extra?: Record<string, unknown> }>;
+export type CompilerStateEvent = Scoped<{ state: CompilerStateType; soft?: boolean; extra?: Record<string, unknown> }>;
 export type FileChangeEvent = Scoped<{ files: { file: string; action: ChangeEventType }[]; time: number }>;
 export type CompilerAllEvent = Scoped<{}>;
 
@@ -85,9 +85,11 @@ export type CompilerServerInfo = {
 
 export class CompilerReset extends Error {
   files?: string[];
-  constructor(message: string, files?: string[], extra?: ErrorOptions) {
+  soft?: boolean;
+  constructor(message: string, extra?: ErrorOptions & { files?: string[]; soft?: boolean }) {
     super(message, extra);
-    this.files = files;
+    this.files = extra?.files;
+    this.soft = extra?.soft;
   }
 }
 

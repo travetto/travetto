@@ -161,14 +161,14 @@ export class CompilerWatcher {
             .filter(file => packageFiles.has(file))
             .map(file => path.relative(this.#root, file));
           if (changedPackageFiles.length) {
-            throw new CompilerReset('Package information changed', changedPackageFiles);
+            throw new CompilerReset('Package information changed', { files: changedPackageFiles });
           }
 
           const changedCompilerFiles = filesChanged
             .filter(item => this.#state.isCompilerFile(item.file))
             .map(item => path.relative(this.#root, item.file));
           if (changedCompilerFiles.length) {
-            throw new CompilerReset('Compiler source changed', changedCompilerFiles);
+            throw new CompilerReset('Compiler source changed', { files: changedCompilerFiles });
           }
 
           const items = filesChanged.map(event => this.#toCandidateEvent(event)).filter(event => this.#isValidEvent(event));
@@ -189,7 +189,7 @@ export class CompilerWatcher {
         } catch (out) {
           if (out instanceof Error) {
             if (out.message.includes('Events were dropped by the FSEvents client.')) {
-              this.#queue.throw(new CompilerReset('FSEvents failure'));
+              this.#queue.throw(new CompilerReset('FSEvents failure', { soft: true }));
             } else {
               this.#queue.throw(out);
             }
@@ -223,7 +223,7 @@ export class CompilerWatcher {
       const full = path.resolve(toolRootFolder, file);
       const stat = await fs.stat(full, { throwIfNoEntry: false });
       if (toolFolders.has(full) && !stat) {
-        this.#queue.throw(new CompilerReset('Tooling folder removed', [path.relative(this.#root, full)]));
+        this.#queue.throw(new CompilerReset('Tooling folder removed', { files: [path.relative(this.#root, full)] }));
       }
     });
     this.#cleanup.tool = (): void => listener.close();

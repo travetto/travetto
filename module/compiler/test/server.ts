@@ -4,7 +4,7 @@ import type { ManifestContext } from '@travetto/manifest';
 import { Suite, Test } from '@travetto/test';
 
 import { CompilerServer } from '../src/server/server.ts';
-import type { CompilerEvent } from '../src/types.ts';
+import { CompilerReset, type CompilerEvent } from '../src/types.ts';
 
 @Suite()
 class CompilerServerTests {
@@ -99,5 +99,96 @@ class CompilerServerTests {
     });
 
     assert.strictEqual(server.info.messages?.error, undefined);
+  }
+
+  @Test()
+  async verifyCompilerEvents() {
+    const context = this.#createContext();
+    const server = new CompilerServer(context, false);
+
+    const reset = new CompilerReset('Reset');
+    assert.ok(reset instanceof CompilerReset);
+    assert.strictEqual(reset.soft, undefined);
+
+    const softReset = new CompilerReset('Soft Reset', { soft: true });
+    assert.ok(softReset instanceof CompilerReset);
+    assert.strictEqual(softReset.soft, true);
+
+    const filesReset = new CompilerReset('Files Reset', { files: ['a.ts'] });
+    assert.ok(filesReset instanceof CompilerReset);
+    assert.deepStrictEqual(filesReset.files, ['a.ts']);
+
+    assert.strictEqual(server.isResetEvent({ type: 'state', payload: { state: 'reset' } }), true);
+    assert.strictEqual(server.isResetEvent({ type: 'state', payload: { state: 'reset', soft: true } }), true);
+    assert.strictEqual(server.isResetEvent({ type: 'state', payload: { state: 'compile-start' } }), false);
+  }
+
+  @Test()
+  async verifyResetHandling() {
+    const context = this.#createContext();
+    const server = new CompilerServer(context, false);
+    const initialIteration = server.info.iteration;
+
+    server.info.messages = {
+      error: [
+        {
+          level: 'error',
+          message: 'ERROR src/alpha.ts:10:5 -- Type error',
+          phase: 'error',
+          file: 'src/alpha.ts'
+        }
+      ]
+    };
+
+    let executed = false;
+    await server.processEvents(async function* () {
+      if (!executed) {
+        executed = true;
+        yield {
+          type: 'state',
+          payload: {
+            state: 'reset'
+          }
+        };
+      }
+    });
+
+    assert.deepStrictEqual(server.info.messages, {});
+    assert.ok(server.info.iteration > initialIteration);
+  }
+
+  @Test()
+  async verifySoftResetHandling() {
+    const context = this.#createContext();
+    const server = new CompilerServer(context, false);
+    const initialIteration = server.info.iteration;
+
+    server.info.messages = {
+      error: [
+        {
+          level: 'error',
+          message: 'ERROR src/alpha.ts:10:5 -- Type error',
+          phase: 'error',
+          file: 'src/alpha.ts'
+        }
+      ]
+    };
+
+    let executed = false;
+    await server.processEvents(async function* () {
+      if (!executed) {
+        executed = true;
+        yield {
+          type: 'state',
+          payload: {
+            state: 'reset',
+            soft: true
+          }
+        };
+      }
+    });
+
+    assert.strictEqual(server.info.messages?.error?.length, 1);
+    assert.strictEqual(server.info.iteration, initialIteration);
   }
 }
