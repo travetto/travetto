@@ -286,15 +286,11 @@ export class Compiler {
         }
         this.#sendEvent('state', { state: 'watch-end' });
       } catch (error) {
-        if (error instanceof Error) {
-          if (error instanceof CompilerReset) {
-            if (!error.soft) {
-              log.error(`Resetting due to: ${error.message}`, error.files, { scope: 'reset' });
-            }
-            this.#shutdown('reset', error.message, error.soft);
-          } else {
-            this.#shutdown('error', error.message);
-          }
+        if (error instanceof CompilerReset) {
+          log.error(`Resetting due to: ${error.message}`, error.files, { scope: 'reset' });
+          this.#shutdown('reset', error.message, error.soft);
+        } else if (error instanceof Error) {
+          this.#shutdown('error', error.message);
         }
       }
     }
