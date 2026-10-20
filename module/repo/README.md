@@ -204,6 +204,7 @@ Options:
   -c, --changed                        Only changed modules (default: false)
   -w, --workers <number>               Number of concurrent workers (default: 9)
   --prefix-output, --no-prefix-output  Prefix output by folder (default: true)
+  -cf, --check-file <string>           Only run if the module as a specific file
   --show-stdout, --no-show-stdout      Show stdout (default: true)
   --help                               display help for command
 ```

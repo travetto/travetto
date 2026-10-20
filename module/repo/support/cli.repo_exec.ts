@@ -1,4 +1,6 @@
 import { spawn } from 'node:child_process';
+import { stat } from 'node:fs/promises';
+import path from 'node:path';
 
 import { CliCommand, type CliCommandShape, CliParseUtil } from '@travetto/cli';
 import { Env } from '@travetto/runtime';
@@ -26,6 +28,12 @@ export class RepoExecCommand implements CliCommandShape {
   /** Prefix output by folder */
   prefixOutput = true;
 
+  /**
+   * Only run if the module as a specific file
+   * @alias cf
+   */
+  checkFile?: string;
+
   /** Show stdout */
   showStdout = true;
 
@@ -52,7 +60,13 @@ export class RepoExecCommand implements CliCommandShape {
         progressMessage: module => `Running '${cmd} ${finalArgs.join(' ')}' [%completed/%total] ${module?.sourceFolder ?? ''}`,
         showStdout: this.showStdout,
         prefixOutput: this.prefixOutput,
-        workerCount: this.workers
+        workerCount: this.workers,
+        filter: async module =>
+          !this.checkFile ||
+          stat(path.resolve(module.sourceFolder, this.checkFile)).then(
+            () => true,
+            () => false
+          )
       }
     );
   }

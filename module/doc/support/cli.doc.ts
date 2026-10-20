@@ -70,7 +70,7 @@ export class DocCommand implements CliCommandShape {
       if (out) {
         const finalName = path.resolve(out);
         await fs.writeFile(finalName, result, 'utf8');
-        console.log(`Wrote docs ${this.input}: ${finalName}`);
+        console.log(`Wrote docs ${Runtime.stripWorkspacePath(finalName)}`);
       } else {
         process.stdout.write(result);
       }

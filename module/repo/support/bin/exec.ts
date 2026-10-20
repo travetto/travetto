@@ -171,7 +171,7 @@ export class RepoExecUtil {
       {
         max: workerCount,
         min: workerCount,
-        total: modules.length,
+        total: modulesToRun.length,
         isSuccess: config.isSuccess ?? ((result: ExecutionResult): boolean => result.valid)
       }
     );
