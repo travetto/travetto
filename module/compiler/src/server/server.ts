@@ -227,6 +227,16 @@ export class CompilerServer {
     }
   }
 
+  #clearErrorsForFile(file?: string): void {
+    if (!file || !this.info.messages?.error) {
+      return;
+    }
+    this.info.messages.error = this.info.messages.error.filter(item => item.file !== file);
+    if (this.info.messages.error.length === 0) {
+      delete this.info.messages.error;
+    }
+  }
+
   /**
    * Process events
    */
@@ -238,7 +248,9 @@ export class CompilerServer {
 
       this.#emitEvent(event);
 
-      if (event.type === 'state') {
+      if (event.type === 'change') {
+        this.#clearErrorsForFile(event.payload.file);
+      } else if (event.type === 'state') {
         this.info.state = event.payload.state;
         if (event.payload.state === 'init' || event.payload.state === 'compile-start') {
           delete this.info.messages?.error;
@@ -257,7 +269,13 @@ export class CompilerServer {
       } else if (event.type === 'log') {
         const messages = (this.info.messages ??= {});
         switch (event.payload.phase) {
-          case 'failure':
+          case 'failure': {
+            if (event.payload.file) {
+              this.#clearErrorsForFile(event.payload.file);
+            }
+            messages[event.payload.phase] = [event.payload];
+            break;
+          }
           case 'reset':
             messages[event.payload.phase] = [event.payload];
             break;

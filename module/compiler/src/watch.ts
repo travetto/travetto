@@ -98,9 +98,9 @@ export class CompilerWatcher {
     if (!event.entry) {
       log.debug(`Skipping unknown file ${event.file}`);
       return false;
-    } else if (event.action === 'update' && !this.#state.checkIfSourceChanged(event.entry.sourceFile)) {
+    } else if ((event.action === 'update' || event.action === 'create') && !this.#state.checkIfSourceChanged(event.entry.sourceFile)) {
       const relativeFile = event.file.replace(`${this.#root}/`, '');
-      log.debug(`Skipping update, as contents unchanged ${relativeFile}`);
+      log.debug(`Skipping ${event.action}, as contents unchanged ${relativeFile}`);
       return false;
     }
     return true;
@@ -312,9 +312,12 @@ export class CompilerWatcher {
   }
 
   add(file: string): void {
+    if (this.#queue.has(item => item.file === file)) {
+      return;
+    }
+    this.#state.resetSourceHash(file);
     const candidate = this.#toCandidateEvent({ action: 'update', file });
     if (this.#isValidEvent(candidate)) {
-      this.#state.resetSourceHash(file);
       this.#queue.add(candidate);
     }
   }

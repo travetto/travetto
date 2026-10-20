@@ -1,7 +1,7 @@
 import { setMaxListeners } from 'node:events';
 import fs from 'node:fs/promises';
 
-import { type DeltaEvent, getManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil } from '@travetto/manifest';
+import { type DeltaEvent, getManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil, path } from '@travetto/manifest';
 
 import { CommonUtil } from './common.ts';
 import { EventUtil } from './event.ts';
@@ -130,8 +130,12 @@ export class Compiler {
       const nodeModIdx = file.lastIndexOf(nodeModSeparator);
       const imp = nodeModIdx >= 0 ? file.substring(nodeModIdx + nodeModSeparator.length) : file;
       if (diagnostics?.length) {
+        const normalizedFile = path.relative(this.#state.manifest.workspace.path, file);
         for (const diagnostic of diagnostics) {
-          log.error(`ERROR ${imp}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], { phase: 'error' });
+          log.error(`ERROR ${imp}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], {
+            phase: 'error',
+            file: normalizedFile
+          });
         }
         // Touch file to ensure recompilation later
         if (await fs.stat(file, { throwIfNoEntry: false })) {
@@ -164,11 +168,15 @@ export class Compiler {
     }
 
     const diagnostics = isDelete ? [] : ((await this.#state.compileSourceFile(event.entry.sourceFile, true)) ?? []);
+    const normalizedFile = path.relative(this.#state.manifest.workspace.path, event.file);
 
     if (diagnostics.length) {
-      log.error('Compilation failed', `${event.entry.sourceFile}: ${diagnostics.length} errors found`, { phase: 'failure' });
+      log.error('Compilation failed', `${event.file}: ${diagnostics.length} errors found`, { phase: 'failure', file: normalizedFile });
       for (const diagnostic of diagnostics) {
-        log.error(`ERROR ${event.file}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], { phase: 'error' });
+        log.error(`ERROR ${event.file}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], {
+          phase: 'error',
+          file: normalizedFile
+        });
       }
     } else if (!isDelete) {
       log.info(`Compiled ${event.entry.sourceFile} on ${event.action}`);
@@ -188,7 +196,7 @@ export class Compiler {
       this.#sendEvent('change', {
         action: event.action,
         time: Date.now(),
-        file: event.file,
+        file: normalizedFile,
         import: event.entry.import,
         output: event.entry.outputFile!,
         module: event.entry.module.name

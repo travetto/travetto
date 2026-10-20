@@ -336,6 +336,8 @@ export class CompilerState implements CompilerHost {
 
   resetSourceHash(sourceFile: string): void {
     this.#sourceHashes.delete(sourceFile);
+    this.#sourceContents.delete(sourceFile);
+    this.#sourceFileObjects.delete(sourceFile);
   }
 
   /**
@@ -394,6 +396,14 @@ export class CompilerState implements CompilerHost {
   }
   getDefaultLibLocation(): string {
     return path.dirname(ts.getDefaultLibFilePath(this.#compilerOptions));
+  }
+
+  realpath(sourceFile: string): string {
+    try {
+      return path.toPosix(fs.realpathSync(sourceFile));
+    } catch {
+      return sourceFile;
+    }
   }
 
   fileExists(sourceFile: string): boolean {
