@@ -9,7 +9,7 @@ import { EventUtil } from './event.ts';
 import { IpcLog as log } from './log.ts';
 import { AsyncQueue } from './queue.ts';
 import type { CompilerState } from './state.ts';
-import { CompilerReset, CompilerRestart, type CompilerWatchEvent, type CompileStateEntry } from './types.ts';
+import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from './types.ts';
 
 const executeFile = promisify(execFile);
 const fromLines = <K extends string[]>(output: string, ...keys: K): Record<K[number], string> | undefined => {
@@ -189,7 +189,7 @@ export class CompilerWatcher {
         } catch (out) {
           if (out instanceof Error) {
             if (out.message.includes('Events were dropped by the FSEvents client.')) {
-              this.#queue.throw(new CompilerRestart('FSEvents failure'));
+              this.#queue.throw(new CompilerReset('FSEvents failure', undefined, { soft: true }));
             } else {
               this.#queue.throw(out);
             }

@@ -7,7 +7,7 @@ import { CommonUtil } from './common.ts';
 import { EventUtil } from './event.ts';
 import { IpcLog as log } from './log.ts';
 import { CompilerState } from './state.ts';
-import { type CompileEmitEvent, type CompilerEvent, CompilerReset, CompilerRestart, type CompilerWatchEvent } from './types.ts';
+import { type CompileEmitEvent, type CompilerEvent, CompilerReset, type CompilerWatchEvent } from './types.ts';
 import { CompilerWatcher } from './watch.ts';
 
 /**
@@ -57,7 +57,7 @@ export class Compiler {
     EventUtil.sendEvent(type, payload);
   }
 
-  #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset' | 'restart', errorMessage?: string): void {
+  #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset', errorMessage?: string, soft?: boolean): void {
     if (this.#shuttingDown) {
       return;
     }
@@ -76,9 +76,8 @@ export class Compiler {
         }
         break;
       }
-      case 'reset':
-      case 'restart': {
-        this.#sendEvent('state', { state: mode });
+      case 'reset': {
+        this.#sendEvent('state', { state: mode, soft });
         process.exitCode = 0;
         break;
       }
@@ -289,10 +288,10 @@ export class Compiler {
       } catch (error) {
         if (error instanceof Error) {
           if (error instanceof CompilerReset) {
-            log.error(`Resetting due to: ${error.message}`, error.files, { scope: 'reset' });
-            this.#shutdown('reset', error.message);
-          } else if (error instanceof CompilerRestart) {
-            this.#shutdown('restart', error.message);
+            if (!error.soft) {
+              log.error(`Resetting due to: ${error.message}`, error.files, { scope: 'reset' });
+            }
+            this.#shutdown('reset', error.message, error.soft);
           } else {
             this.#shutdown('error', error.message);
           }

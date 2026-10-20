@@ -71,8 +71,8 @@ export class CompilerServer {
     return this.info.watching;
   }
 
-  isResetEvent(event: CompilerEvent): event is CompilerEvent & { type: 'state'; payload: { state: 'reset' | 'restart' } } {
-    return event.type === 'state' && ['reset', 'restart'].includes(event.payload.state);
+  isResetEvent(event: CompilerEvent): event is CompilerEvent & { type: 'state'; payload: { state: 'reset'; soft?: boolean } } {
+    return event.type === 'state' && event.payload.state === 'reset';
   }
 
   async #tryListen(attempt = 0): Promise<'ok' | 'running'> {
@@ -286,7 +286,7 @@ export class CompilerServer {
         log.render(event.payload);
       }
       if (this.isResetEvent(event)) {
-        if (event.payload.state === 'reset') {
+        if (!event.payload.soft) {
           log.info('Reset event received, wiping compiler caches and output');
           this.info.messages = {};
           this.#ctx = getManifestContext();
@@ -294,7 +294,7 @@ export class CompilerServer {
         }
         this.info.compilerProcessId = 0;
         await this.#handle.compiler.ensureKilled(RESET_KILL_TIMEOUT_MILLISECONDS);
-        await CompilerUtil.clearCaches(this.#ctx, event.payload.state === 'reset');
+        await CompilerUtil.clearCaches(this.#ctx, !event.payload.soft);
       }
     }
 
