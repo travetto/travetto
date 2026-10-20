@@ -86,10 +86,10 @@ export type CompilerServerInfo = {
 export class CompilerReset extends Error {
   files?: string[];
   soft?: boolean;
-  constructor(message: string, files?: string[], extra?: (ErrorOptions & { soft?: boolean }) | boolean) {
-    super(message, typeof extra === 'object' ? extra : undefined);
-    this.files = files;
-    this.soft = typeof extra === 'boolean' ? extra : extra?.soft;
+  constructor(message: string, extra?: ErrorOptions & { files?: string[]; soft?: boolean }) {
+    super(message, extra);
+    this.files = extra?.files;
+    this.soft = extra?.soft;
   }
 }
 

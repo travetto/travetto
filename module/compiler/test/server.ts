@@ -110,9 +110,13 @@ class CompilerServerTests {
     assert.ok(reset instanceof CompilerReset);
     assert.strictEqual(reset.soft, undefined);
 
-    const softReset = new CompilerReset('Soft Reset', undefined, { soft: true });
+    const softReset = new CompilerReset('Soft Reset', { soft: true });
     assert.ok(softReset instanceof CompilerReset);
     assert.strictEqual(softReset.soft, true);
+
+    const filesReset = new CompilerReset('Files Reset', { files: ['a.ts'] });
+    assert.ok(filesReset instanceof CompilerReset);
+    assert.deepStrictEqual(filesReset.files, ['a.ts']);
 
     assert.strictEqual(server.isResetEvent({ type: 'state', payload: { state: 'reset' } }), true);
     assert.strictEqual(server.isResetEvent({ type: 'state', payload: { state: 'reset', soft: true } }), true);
