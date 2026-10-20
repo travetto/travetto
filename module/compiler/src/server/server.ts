@@ -75,12 +75,8 @@ export class CompilerServer {
     return this.#ctx;
   }
 
-  isResetEvent(event: CompilerEvent): boolean {
-    return event.type === 'state' && event.payload.state === 'reset';
-  }
-
-  isRestartEvent(event: CompilerEvent): boolean {
-    return event.type === 'state' && event.payload.state === 'restart';
+  isRestartableEvent(event: CompilerEvent): event is CompilerEvent & { type: 'state'; payload: { state: 'reset' | 'restart' } } {
+    return event.type === 'state' && ['reset', 'restart'].includes(event.payload.state);
   }
 
   async #tryListen(attempt = 0): Promise<'ok' | 'running'> {
@@ -201,10 +197,18 @@ export class CompilerServer {
     return { clean: true };
   }
 
-  async #restartServer(clean?: boolean): Promise<void> {
+  async #restartServer(mode: 'reset' | 'restart'): Promise<void> {
+    if (mode === 'reset') {
+      this.info.messages = {};
+      this.#ctx = getManifestContext();
+    }
     this.info.compilerProcessId = 0;
     await this.#handle.compiler.ensureKilled(RESET_KILL_TIMEOUT_MILLISECONDS);
-    await CompilerUtil.clearCaches(clean);
+    await CompilerUtil.clearCaches(mode === 'reset');
+    if (mode === 'reset') {
+      log.info('Reset event received, wiping compiler caches and output');
+      await this.#disconnectActive();
+    }
   }
 
   /**
@@ -255,7 +259,7 @@ export class CompilerServer {
    * Process events
    */
   async processEvents(input: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
-    for await (const event of CommonUtil.restartableEvents(input, this.signal, event => this.isResetEvent(event) || this.isRestartEvent(event))) {
+    for await (const event of CommonUtil.restartableEvents(input, this.signal, event => this.isRestartableEvent(event))) {
       if (event.type === 'progress') {
         await Log.onProgressEvent(event.payload);
       }
@@ -299,14 +303,8 @@ export class CompilerServer {
         }
         log.render(event.payload);
       }
-      if (this.isResetEvent(event)) {
-        log.info('Reset event received, wiping compiler caches and output');
-        this.info.messages = {};
-        await this.#restartServer(true);
-        this.#ctx = getManifestContext();
-        await this.#disconnectActive();
-      } else if (this.isRestartEvent(event)) {
-        await this.#restartServer();
+      if (this.isRestartableEvent(event)) {
+        await this.#restartServer(event.payload.state);
       }
     }
 
