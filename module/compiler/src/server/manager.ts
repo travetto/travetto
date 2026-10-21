@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 import type { ManifestContext } from '@travetto/manifest';
 
@@ -29,33 +30,51 @@ export class CompilerManager {
     const queue = new AsyncQueue<CompilerEvent>();
 
     log.info('Launching compiler');
-    const subProcess = spawn(process.argv0, ['-e', 'import("@travetto/compiler/bin/trvc-target.js")'], {
+    const targetScript = fileURLToPath(import.meta.resolve('@travetto/compiler/bin/trvc-target.js'));
+    const subProcess = spawn(process.argv0, [targetScript], {
       env: {
         ...process.env,
         TRV_COMPILER_WATCH: watching.toString(),
         TRV_MANIFEST: CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.workspace.name)
       },
-      detached: true,
+      detached: false,
       stdio: ['pipe', 1, 2, 'ipc']
     })
       .on('message', message => EventUtil.isCompilerEvent(message) && queue.add(message))
       .on('exit', () => queue.close());
 
-    const kill = (): unknown => {
+    const exitPromise = new Promise<void>(resolve => subProcess.once('exit', () => resolve()));
+    const kill = (): void => {
       log.debug('Shutting down process');
-      return subProcess.connected ? subProcess.send('shutdown', () => subProcess.kill()) : subProcess.kill();
+      if (subProcess.connected) {
+        subProcess.send('shutdown', () => subProcess.kill());
+      } else {
+        subProcess.kill();
+      }
     };
 
     process.once('SIGINT', kill);
     signal.addEventListener('abort', kill);
 
-    yield* queue;
+    try {
+      yield* queue;
+    } finally {
+      process.off('SIGINT', kill);
+      signal.removeEventListener('abort', kill);
+      if (subProcess.exitCode === null && subProcess.signalCode === null) {
+        kill();
+        await Promise.race([exitPromise, CommonUtil.nonBlockingTimeout(1000)]);
+        if (subProcess.exitCode === null && subProcess.signalCode === null) {
+          subProcess.kill('SIGKILL');
+          await exitPromise;
+        }
+      }
+    }
 
     if (subProcess.exitCode !== 0 && subProcess.exitCode) {
       log.error(`Terminated during compilation, code=${subProcess.exitCode}, killed=${subProcess.killed}`);
       process.exitCode = subProcess.exitCode;
     }
-    process.off('SIGINT', kill);
 
     log.debug('Finished');
   }
@@ -63,7 +82,8 @@ export class CompilerManager {
   /** Spawn the compiler server as a detached background daemon */
   static async #spawnProcess(ctx: ManifestContext, client: CompilerClient): Promise<boolean> {
     log.info('Spawning compiler daemon in background');
-    const subProcess = spawn(process.argv0, ['-e', 'import("@travetto/compiler/bin/trvc.js")', 'trvc', 'server'], {
+    const trvcScript = fileURLToPath(import.meta.resolve('@travetto/compiler/bin/trvc.js'));
+    const subProcess = spawn(process.argv0, [trvcScript, 'server'], {
       env: {
         ...process.env,
         TRV_COMPILER_WATCH: 'true'

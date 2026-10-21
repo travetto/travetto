@@ -3,13 +3,14 @@ import { watch } from 'node:fs';
 import fs from 'node:fs/promises';
 import { promisify } from 'node:util';
 
-import { ManifestFileUtil, ManifestModuleUtil, ManifestUtil, PACKAGE_MANAGERS, PackageUtil, path } from '@travetto/manifest';
+import { ManifestModuleUtil, ManifestUtil, PACKAGE_MANAGERS, PackageUtil, path } from '@travetto/manifest';
 
+import { CommonUtil } from './common.ts';
 import { EventUtil } from './event.ts';
 import { IpcLog as log } from './log.ts';
 import { AsyncQueue } from './queue.ts';
 import type { CompilerState } from './state.ts';
-import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from './types.ts';
+import { CompilerReset, type CompilerWatchEvent, type CompilerWatchRawEvent, type CompileStateEntry } from './types.ts';
 
 const executeFile = promisify(execFile);
 const fromLines = <K extends string[]>(output: string, ...keys: K): Record<K[number], string> | undefined => {
@@ -25,19 +26,18 @@ const fromLines = <K extends string[]>(output: string, ...keys: K): Record<K[num
 
 type CompilerWatchEventCandidate = Omit<CompilerWatchEvent, 'entry'> & { entry?: CompileStateEntry };
 
-export class CompilerWatcher {
+export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
   #state: CompilerState;
-  #cleanup: Partial<Record<'tool' | 'workspace' | 'canary' | 'git', () => void | Promise<void>>> = {};
-  #watchCanary: string = '.trv/canary.id';
-  #lastWorkspaceModified: number;
-  #watchCanaryFrequency = 5;
+  #cleanup: Partial<Record<'tool' | 'workspace' | 'git' | 'rotation', () => void | Promise<void>>> = {};
+  #lastWorkspaceEventTime = Date.now();
+  #watchRotationFrequency = 30; // 30 seconds
   #root: string;
-  #queue: AsyncQueue<CompilerWatchEvent>;
+  #rawQueue: AsyncQueue<CompilerWatchRawEvent>;
 
   constructor(state: CompilerState, signal: AbortSignal) {
     this.#state = state;
     this.#root = state.manifest.workspace.path;
-    this.#queue = new AsyncQueue(signal);
+    this.#rawQueue = new AsyncQueue(signal);
     signal.addEventListener('abort', () =>
       Object.values(this.#cleanup).forEach(fn => {
         fn?.();
@@ -67,7 +67,17 @@ export class CompilerWatcher {
     return [...ignores].toSorted().map(ignore => (ignore.endsWith('/') ? ignore : `${ignore}/`));
   }
 
-  #toCandidateEvent({ action, file }: Pick<CompilerWatchEvent, 'action' | 'file'>): CompilerWatchEventCandidate {
+  #isValidFile(file: string): boolean {
+    const relativeFile = file.replace(`${this.#root}/`, '');
+    if (relativeFile.startsWith('.')) {
+      return false;
+    } else if (!ManifestModuleUtil.isSourceType(file)) {
+      return false;
+    }
+    return true;
+  }
+
+  #toCandidateEvent({ action, file }: CompilerWatchRawEvent): CompilerWatchEventCandidate {
     let entry = this.#state.getBySource(file);
     const module = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(file);
 
@@ -76,22 +86,10 @@ export class CompilerWatcher {
       const moduleFile = file.includes(`${moduleRoot}/`) ? file.split(`${moduleRoot}/`)[1] : file;
       entry = this.#state.registerInput(module, moduleFile);
     } else if (action === 'delete' && entry) {
-      this.#state.removeSource(entry.sourceFile); // Ensure we remove it
+      this.#state.removeSource(entry.sourceFile);
     }
 
     return { entry, file: entry?.sourceFile ?? file, action, moduleFile: entry?.moduleFile ?? '' };
-  }
-
-  #isValidFile(file: string): boolean {
-    const relativeFile = file.replace(`${this.#root}/`, '');
-    if (relativeFile === this.#watchCanary) {
-      return false;
-    } else if (relativeFile.startsWith('.')) {
-      return false;
-    } else if (!ManifestModuleUtil.isSourceType(file)) {
-      return false;
-    }
-    return true;
   }
 
   #isValidEvent(event: CompilerWatchEventCandidate): event is CompilerWatchEvent {
@@ -106,9 +104,9 @@ export class CompilerWatcher {
     return true;
   }
 
-  async #updateManifestWithEvents(compilerEvents: CompilerWatchEvent[]): Promise<void> {
+  #updateManifestInMemory(compilerEvents: CompilerWatchEvent[]): void {
     const eventsByModule = this.#state.manifestIndex.groupByLineage(
-      compilerEvents.map(event => ({ item: event, module: event.entry!.module.name })).filter(x => x.item.action !== 'update')
+      compilerEvents.map(event => ({ item: event, module: event.entry.module.name })).filter(x => x.item.action !== 'update')
     );
 
     for (const [moduleName, events] of eventsByModule.entries()) {
@@ -116,44 +114,51 @@ export class CompilerWatcher {
       for (const { moduleFile, action, entry } of events) {
         ManifestUtil.updateManifest(moduleManifest, entry.module.name, moduleFile, action);
       }
+    }
+  }
+
+  async writeBatchManifests(compilerEvents: CompilerWatchEvent[]): Promise<void> {
+    const eventsByModule = this.#state.manifestIndex.groupByLineage(
+      compilerEvents.map(event => ({ item: event, module: event.entry.module.name })).filter(x => x.item.action !== 'update')
+    );
+
+    for (const [moduleName, events] of eventsByModule.entries()) {
+      const moduleManifest = this.#state.manifestIndex.resolveDependentManifest(moduleName);
       log.debug('Updating manifest', [{ module: moduleName, events: events.length }]);
       await ManifestUtil.writeManifest(moduleManifest);
     }
 
-    this.#state.manifestIndex.init(ManifestUtil.getManifestLocation(this.#state.manifest));
+    if (eventsByModule.size > 0) {
+      this.#state.manifestIndex.init(ManifestUtil.getManifestLocation(this.#state.manifest));
+    }
   }
 
   async #listenWorkspace(): Promise<void> {
     const lib = await import('@parcel/watcher');
     const ignore = await this.#getWatchIgnores();
-    const packageFiles = new Set(
-      ['package.json', ...PACKAGE_MANAGERS.flatMap(x => [x.workspaceFile!, x.lock].filter(Boolean))].map(file =>
-        path.resolve(this.#root, file)
-      )
+
+    const rootPackageFiles = ['package.json', ...PACKAGE_MANAGERS.flatMap(x => [x.workspaceFile!, x.lock].filter(Boolean))].map(file =>
+      path.resolve(this.#root, file)
     );
+    const workspacePackageFiles = Object.values(this.#state.manifest.modules)
+      .filter(m => m.workspace)
+      .map(m => path.resolve(this.#root, m.sourceFolder, 'package.json'));
+
+    const packageFiles = new Set([...rootPackageFiles, ...workspacePackageFiles]);
 
     log.debug('Ignore Globs', ignore);
     log.debug('Watching', this.#root);
 
-    await this.#cleanup.workspace?.();
+    const previousCleanup = this.#cleanup.workspace;
 
     const listener = await lib.subscribe(
       this.#root,
       async (error, events) => {
-        this.#lastWorkspaceModified = Date.now();
+        this.#lastWorkspaceEventTime = Date.now();
 
         try {
           if (error) {
             throw error instanceof Error ? error : new Error(`${error}`);
-          }
-
-          // One event per file set
-          const filesChanged = events
-            .map(event => ({ file: path.toPosix(event.path), action: event.type }))
-            .filter(event => this.#isValidFile(event.file));
-
-          if (filesChanged.length) {
-            EventUtil.sendEvent('file', { workspace: this.#state.manifest.workspace.path, time: Date.now(), files: filesChanged });
           }
 
           const changedPackageFiles = events
@@ -164,37 +169,25 @@ export class CompilerWatcher {
             throw new CompilerReset('Package information changed', { files: changedPackageFiles });
           }
 
-          const changedCompilerFiles = filesChanged
-            .filter(item => this.#state.isCompilerFile(item.file))
-            .map(item => path.relative(this.#root, item.file));
-          if (changedCompilerFiles.length) {
-            throw new CompilerReset('Compiler source changed', { files: changedCompilerFiles });
-          }
+          const filesChanged = events
+            .map(event => ({ file: path.toPosix(event.path), action: event.type }))
+            .filter(event => this.#isValidFile(event.file));
 
-          const items = filesChanged.map(event => this.#toCandidateEvent(event)).filter(event => this.#isValidEvent(event));
-
-          if (items.length === 0) {
-            return;
-          }
-
-          try {
-            await this.#updateManifestWithEvents(items);
-          } catch (manifestError) {
-            throw new CompilerReset('Manifest rebuild failure');
-          }
-
-          for (const item of items) {
-            this.#queue.add(item);
+          if (filesChanged.length) {
+            EventUtil.sendEvent('file', { workspace: this.#state.manifest.workspace.path, time: Date.now(), files: filesChanged });
+            for (const item of filesChanged) {
+              this.#rawQueue.add(item);
+            }
           }
         } catch (out) {
           if (out instanceof Error) {
             if (out.message.includes('Events were dropped by the FSEvents client.')) {
-              this.#queue.throw(new CompilerReset('FSEvents failure', { soft: true }));
+              this.#rawQueue.throw(new CompilerReset('FSEvents failure', { soft: true }));
             } else {
-              this.#queue.throw(out);
+              this.#rawQueue.throw(out);
             }
           } else {
-            this.#queue.throw(new Error(`${out}`));
+            this.#rawQueue.throw(new Error(`${out}`));
           }
         }
       },
@@ -202,6 +195,26 @@ export class CompilerWatcher {
     );
 
     this.#cleanup.workspace = (): Promise<void> => listener.unsubscribe();
+    if (previousCleanup) {
+      await previousCleanup();
+    }
+  }
+
+  async #listenWorkspaceRotation(): Promise<void> {
+    await this.#cleanup.rotation?.();
+    const intervalId = setInterval(async () => {
+      const idleTimeSeconds = Math.trunc((Date.now() - this.#lastWorkspaceEventTime) / 1000);
+      if (idleTimeSeconds >= this.#watchRotationFrequency) {
+        log.debug('Rotating parcel watcher subscription after idle period');
+        try {
+          await this.#listenWorkspace();
+        } catch (error) {
+          log.warn('Failed to rotate parcel subscription', error);
+        }
+      }
+    }, this.#watchRotationFrequency * 1000);
+
+    this.#cleanup.rotation = (): void => clearInterval(intervalId);
   }
 
   async #listenToolFolder(): Promise<void> {
@@ -223,35 +236,10 @@ export class CompilerWatcher {
       const full = path.resolve(toolRootFolder, file);
       const stat = await fs.stat(full, { throwIfNoEntry: false });
       if (toolFolders.has(full) && !stat) {
-        this.#queue.throw(new CompilerReset('Tooling folder removed', { files: [path.relative(this.#root, full)] }));
+        this.#rawQueue.throw(new CompilerReset('Tooling folder removed', { files: [path.relative(this.#root, full)] }));
       }
     });
     this.#cleanup.tool = (): void => listener.close();
-  }
-
-  async #listenCanary(): Promise<void> {
-    await this.#cleanup.canary?.();
-    const full = path.resolve(this.#root, this.#watchCanary);
-    await ManifestFileUtil.bufferedFileWrite(full, '');
-    this.#lastWorkspaceModified = Date.now();
-
-    log.debug('Starting workspace canary');
-    const canaryId = setInterval(async () => {
-      const delta = Math.trunc((Date.now() - this.#lastWorkspaceModified) / 1000);
-      if (delta > 600) {
-        log.error('Restarting canary due to extra long delay');
-        this.#lastWorkspaceModified = Date.now(); // Reset
-      } else if (delta > this.#watchCanaryFrequency * 2) {
-        this.#queue.throw(new CompilerReset(`Workspace watch stopped responding ${delta}s ago`));
-      } else if (delta > this.#watchCanaryFrequency) {
-        log.error('Restarting parcel due to inactivity');
-        await this.#listenWorkspace();
-      } else {
-        await fs.utimes(full, new Date(), new Date());
-      }
-    }, this.#watchCanaryFrequency * 1000);
-
-    this.#cleanup.canary = (): void => clearInterval(canaryId);
   }
 
   async #getGitHeadRef(): Promise<{ hash: string; ref: string } | undefined> {
@@ -284,7 +272,7 @@ export class CompilerWatcher {
         const nextHead = await this.#getGitHeadRef();
         if (nextHead && currentHead && nextHead.hash !== currentHead.hash) {
           currentHead = nextHead;
-          this.#queue.throw(new CompilerReset(`Git branch or commit change detected: ${currentHead.hash}=>${nextHead.hash}`));
+          this.#rawQueue.throw(new CompilerReset(`Git branch or commit change detected: ${currentHead.hash}=>${nextHead.hash}`));
         }
       } finally {
         isChecking = undefined;
@@ -312,23 +300,45 @@ export class CompilerWatcher {
   }
 
   add(file: string): void {
-    if (this.#queue.has(item => item.file === file)) {
+    if (this.#rawQueue.has(item => item.file === file)) {
       return;
     }
     this.#state.resetSourceHash(file);
-    const candidate = this.#toCandidateEvent({ action: 'update', file });
-    if (this.#isValidEvent(candidate)) {
-      this.#queue.add(candidate);
-    }
+    this.#rawQueue.add({ action: 'update', file });
   }
 
-  [Symbol.asyncIterator](): AsyncIterator<CompilerWatchEvent> {
-    if (!this.#cleanup.workspace) {
-      this.#listenWorkspace();
-      this.#listenToolFolder();
-      this.#listenCanary();
-      this.#listenGitChanges();
+  async prepareBatch(rawEvents: CompilerWatchRawEvent[]): Promise<CompilerWatchEvent[]> {
+    const changedCompilerFiles = rawEvents
+      .filter(item => this.#state.isCompilerFile(item.file))
+      .map(item => path.relative(this.#root, item.file));
+    if (changedCompilerFiles.length) {
+      throw new CompilerReset('Compiler source changed', { files: changedCompilerFiles });
     }
-    return this.#queue[Symbol.asyncIterator]();
+
+    const items = rawEvents.map(event => this.#toCandidateEvent(event)).filter(event => this.#isValidEvent(event));
+
+    if (items.length > 0) {
+      this.#updateManifestInMemory(items);
+    }
+
+    return items;
+  }
+
+  async *[Symbol.asyncIterator](): AsyncIterator<CompilerWatchEvent[]> {
+    if (!this.#cleanup.workspace) {
+      await this.#listenWorkspace();
+      await this.#listenWorkspaceRotation();
+      await this.#listenToolFolder();
+      await this.#listenGitChanges();
+    }
+
+    for await (const firstEvent of this.#rawQueue) {
+      await CommonUtil.nonBlockingTimeout(25);
+      const batch = [firstEvent, ...this.#rawQueue.drain()];
+      const prepared = await this.prepareBatch(batch);
+      if (prepared.length > 0) {
+        yield prepared;
+      }
+    }
   }
 }

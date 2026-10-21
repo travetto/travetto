@@ -29,12 +29,13 @@ export type CompileEmitEvent = {
 };
 export type CompileStateEntry = {
   sourceFile: string;
-  tscOutputFile: string;
-  outputFile?: string;
+  outputFile: string;
+  tscOutputFile?: string;
   module: ManifestModule;
   import: string;
   moduleFile: string;
 };
+export type CompilerWatchRawEvent = { action: ChangeEventType; file: string };
 export type CompilerWatchEvent = { action: ChangeEventType; file: string; entry: CompileStateEntry; moduleFile: string };
 
 type Scoped<T extends {}> = T & { workspace?: string };

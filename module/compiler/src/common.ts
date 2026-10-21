@@ -14,7 +14,8 @@ export class CommonUtil {
   static async *restartableEvents<T>(
     input: (signal: AbortSignal) => AsyncIterable<T>,
     parent: AbortSignal,
-    shouldRestart: (item: T) => boolean
+    shouldRestart: (item: T) => boolean,
+    onRestart?: (item: T) => Promise<void>
   ): AsyncIterable<T> {
     outer: while (!parent.aborted) {
       const controller = new AbortController();
@@ -24,27 +25,37 @@ export class CommonUtil {
       parent.addEventListener('abort', kill);
 
       const stream = input(controller.signal);
+      const iterator = stream[Symbol.asyncIterator]();
 
       log.debug('Started event stream');
 
       // Wait for all events, close at the end
-      for await (const event of stream) {
-        yield event;
-        if (shouldRestart(event)) {
-          log.debug('Restarting stream');
-          controller.abort(); // Ensure terminated of process
-          parent.removeEventListener('abort', kill);
-          continue outer;
+      try {
+        for (;;) {
+          const next = await iterator.next();
+          if (next.done) {
+            break;
+          }
+          const event = next.value;
+          yield event;
+          if (shouldRestart(event)) {
+            log.debug('Restarting stream');
+            controller.abort(); // Ensure terminated of process
+            parent.removeEventListener('abort', kill);
+            await iterator.return?.().catch(() => {});
+            await onRestart?.(event);
+            continue outer;
+          }
+        }
+      } finally {
+        parent.removeEventListener('abort', kill);
+        if (!controller.signal.aborted) {
+          // Shutdown source if still running
+          controller.abort();
         }
       }
 
       log.debug('Finished event stream');
-
-      // Natural exit, we done
-      if (!controller.signal.aborted) {
-        // Shutdown source if still running
-        controller.abort();
-      }
       return;
     }
   }

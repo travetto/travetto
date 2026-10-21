@@ -261,6 +261,16 @@ export class ManifestModuleUtil {
   }
 
   /**
+   * Get the output file without an extension
+   */
+  static withoutOutputExtension(outputFile: string): string {
+    if (outputFile.endsWith(this.TYPINGS_EXT)) {
+      return outputFile.slice(0, -this.TYPINGS_EXT.length);
+    }
+    return outputFile.replace(/[.][cm]?js$/, '');
+  }
+
+  /**
    * Determine if this type is considered source code
    */
   static isSourceType(type: ManifestModuleFileType | string): boolean {
