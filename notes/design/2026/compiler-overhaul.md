@@ -410,18 +410,12 @@ Rewrite `CompilerWatcher` so that:
        - **Crucial `.d.ts` signature hook**: Wrap `const program = this.#builderProgram.getProgram(); const originalEmit = program.emit.bind(program);` so `program.emit` injects `this.#transformerManager.get()` when `customTransformers` is not passed, and wraps `originalEmit` in `try/catch` to convert any thrown transformer error into a `ts.Diagnostic` on `targetSourceFile`!
          - Because `BuilderProgram.emitNextAffectedFile` calls `state.program.emit` with `customTransformers = undefined`, `BuilderProgram` executes its native `computeSignatureWithDiagnostics` on the emitted `.d.ts` text (`typescript.js:132404`) and **automatically queues importing files if and only if the `.d.ts` declaration signature changed**!
    - Add `compileAffectedFiles(changedFiles: string[]): AsyncGenerator<{ sourceFile: string; diagnostics: CompilerDiagnosticItem[]; duration: number }>`:
-     - First, for any file in `changedFiles` that is **not** a `.ts` file (`package-json`, `js`, `typings`), emit it via `await this.compileSourceFile(file)` and yield `{ sourceFile: file, diagnostics: [], duration }`.
-     - For `.ts` files in `changedFiles`: ensure their `SourceFile` is refreshed (if `produceDelta` flagged a `.ts` file whose output `.js` is missing on disk even though `.tsbuildinfo` has the same hash, salt its `SourceFile.version` with `:missing` on initial load so `BuilderProgram` knows it must re-emit it!).
-     - Obtain `const builder = await this.getBuilderProgram(true)`.
-     - Loop `while (true)`:
-       - Call `const next = builder.emitNextAffectedFile((fileName, text, writeByteOrderMark, onError, sourceFiles) => this.#writeEmittedFile(fileName, text, writeByteOrderMark, sourceFiles))`.
-       - If `!next`, break!
-       - If `next.affected` is a `ts.SourceFile` (and `this.#sourceToEntry.has(next.affected.fileName)`):
-         - Collect syntactic, semantic, declaration, and emit diagnostics for `next.affected` (filtering out the ignored patterns via `#filterDiagnostics(rawDiagnostics)`).
-         - Update `this.#failures` for `next.affected.fileName` (if `diagnostics.length > 0`, set `#failures.set(sourceFile, diagnostics.length)` and backdate `entry.outputFile` mtime to `0` via `fs.utimesSync(entry.outputFile, 0, 0)` so `produceDelta` also knows it failed; otherwise `this.#failures.delete(sourceFile)`).
-         - Yield `{ sourceFile: next.affected.fileName, diagnostics, duration }`.
-     - Also re-check any previously failed files in `this.#failures.keys()` that weren't in `affected` using the current `builder.getProgram()` so fixed cross-file errors are cleared immediately!
-     - Finally, call `builder.emitBuildInfo((fileName, text, writeByteOrderMark) => this.#writeFile(fileName, text, writeByteOrderMark))` so `.trv/output/.tsbuildinfo` is saved to disk!
+     - Initialize a compilation `queue` with `changedFiles` and any existing failed files (`this.#failures.keys()`) so fixed diagnostics are resolved immediately.
+     - Maintain `#fileToDependencies` and `#fileToImporters` reverse dependency maps.
+     - For non-TS files (`package-json`, `js`, `typings`), compile directly via `compileSourceFile(file)` and yield.
+     - For TS files: compile via `compileSourceFile(file, needsNewProgram, dtsChangeRef)` (reusing the ASTs from `oldProgram: this.#program`).
+     - If `dtsChangeRef.changed` is true (i.e. the public interface/types of the emitted `.d.ts` actually changed), look up dependent workspace files via `#fileToImporters.get(file)` and add them to `queue`. If only function bodies or private implementations changed without affecting `.d.ts`, zero dependent files are recompiled.
+     - This eliminates the multi-second full-program emit iteration and delivers sub-150ms incremental recompilation in watch mode.
 
 #### [compiler.ts](file:///Users/arcsine/Code/travetto/module/compiler/src/compiler.ts)
 1. **Initial Build (`run()`)**:

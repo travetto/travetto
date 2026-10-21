@@ -1,14 +1,6 @@
 import fs from 'node:fs';
 
-import type {
-  CompilerHost,
-  CompilerOptions,
-  Diagnostic,
-  EmitAndSemanticDiagnosticsBuilderProgram,
-  Program,
-  ScriptTarget,
-  SourceFile
-} from 'typescript';
+import type { CompilerHost, CompilerOptions, Diagnostic, Program, ScriptTarget, SourceFile } from 'typescript';
 
 import {
   type ManifestIndex,
@@ -45,13 +37,15 @@ export class CompilerState implements CompilerHost {
   #sourceFileObjects = new Map<string, SourceFile>();
   #sourceHashes = new Map<string, number>();
 
+  #fileToDependencies = new Map<string, Set<string>>();
+  #fileToImporters = new Map<string, Set<string>>();
+
   #manifestIndex: ManifestIndex;
   #manifest: ManifestRoot;
   #modules: ManifestModule[];
   #transformerManager: TransformerManager;
   #compilerOptions: CompilerOptions;
   #program: Program;
-  #builderProgram?: EmitAndSemanticDiagnosticsBuilderProgram;
 
   #resolveEmittedFilePath(entry: CompileStateEntry, emittedPath: string): { outputLocation: string; typingsLocation?: string } {
     const baseOutput = entry.outputFile.replace(/[.][cm]?js$/, '');
@@ -209,62 +203,6 @@ export class CompilerState implements CompilerHost {
     return this.getBySource(randomSource)!.sourceFile;
   }
 
-  getTypeScriptFiles(): string[] {
-    return [...this.#sourceFiles].filter(file => ManifestModuleUtil.getFileType(file) === 'ts');
-  }
-
-  async getBuilderProgram(force = false): Promise<EmitAndSemanticDiagnosticsBuilderProgram> {
-    if (force || !this.#builderProgram) {
-      await this.initializeTypescript();
-      let oldProgram: EmitAndSemanticDiagnosticsBuilderProgram | undefined = this.#builderProgram;
-      if (!oldProgram && this.#compilerOptions.tsBuildInfoFile && ts.sys.fileExists(this.#compilerOptions.tsBuildInfoFile)) {
-        oldProgram = ts.readBuilderProgram(this.#compilerOptions, this);
-      }
-
-      this.#builderProgram = ts.createEmitAndSemanticDiagnosticsBuilderProgram(
-        this.getTypeScriptFiles(),
-        this.#compilerOptions,
-        this,
-        oldProgram
-      );
-
-      const program = this.#builderProgram.getProgram();
-      this.#transformerManager.init(program.getTypeChecker());
-
-      const originalEmit = program.emit.bind(program);
-      program.emit = (...arguments_: Parameters<Program['emit']>) => {
-        const [targetSourceFile, writeFile, cancellationToken, emitOnlyDtsFiles, customTransformers] = arguments_;
-        try {
-          return originalEmit(
-            targetSourceFile,
-            writeFile,
-            cancellationToken,
-            emitOnlyDtsFiles,
-            customTransformers ?? this.#transformerManager.get()
-          );
-        } catch (error) {
-          const message = error instanceof Error ? error.message : `${error}`;
-          return {
-            emitSkipped: true,
-            diagnostics: [
-              {
-                file: targetSourceFile,
-                start: 0,
-                length: 1,
-                messageText: `Transformer failure: ${message}`,
-                category: ts.DiagnosticCategory.Error,
-                code: 99999
-              }
-            ]
-          };
-        }
-      };
-
-      await CommonUtil.queueMacroTask();
-    }
-    return this.#builderProgram;
-  }
-
   #filterDiagnostics(rawDiagnostics: readonly Diagnostic[]): CompilerDiagnosticItem[] {
     const diagnostics: CompilerDiagnosticItem[] = [];
     for (const diagnostic of rawDiagnostics.filter(item => item.category === ts.DiagnosticCategory.Error)) {
@@ -301,12 +239,79 @@ export class CompilerState implements CompilerHost {
         oldProgram: this.#program
       });
       this.#transformerManager.init(this.#program.getTypeChecker());
+
+      const originalEmit = this.#program.emit.bind(this.#program);
+      this.#program.emit = (...arguments_: Parameters<Program['emit']>) => {
+        const [targetSourceFile, writeFile, cancellationToken, emitOnlyDtsFiles, customTransformers] = arguments_;
+        try {
+          return originalEmit(
+            targetSourceFile,
+            writeFile,
+            cancellationToken,
+            emitOnlyDtsFiles,
+            customTransformers ?? this.#transformerManager.get()
+          );
+        } catch (error) {
+          const message = error instanceof Error ? error.message : `${error}`;
+          return {
+            emitSkipped: true,
+            diagnostics: [
+              {
+                file: targetSourceFile,
+                start: 0,
+                length: 1,
+                messageText: `Transformer failure: ${message}`,
+                category: ts.DiagnosticCategory.Error,
+                code: 99999
+              }
+            ]
+          };
+        }
+      };
+
       await CommonUtil.queueMacroTask();
     }
     return this.#program;
   }
 
-  async compileSourceFile(sourceFile: string, needsNewProgram = false): Promise<CompilerDiagnosticItem[] | undefined> {
+  #updateFileDependencies(sourceFile: string, program: Program): void {
+    const previousDependencies = this.#fileToDependencies.get(sourceFile);
+    if (previousDependencies) {
+      for (const dependency of previousDependencies) {
+        this.#fileToImporters.get(dependency)?.delete(sourceFile);
+      }
+    }
+
+    const nextDependencies = new Set<string>();
+    const tsSourceFile = program.getSourceFile(sourceFile);
+    if (tsSourceFile) {
+      for (const statement of tsSourceFile.statements) {
+        if (ts.isImportDeclaration(statement) || ts.isExportDeclaration(statement)) {
+          const specifier = statement.moduleSpecifier;
+          if (specifier && ts.isStringLiteral(specifier)) {
+            const resolved = ts.resolveModuleName(specifier.text, sourceFile, this.#compilerOptions, this);
+            const resolvedFileName = resolved.resolvedModule?.resolvedFileName;
+            if (resolvedFileName && this.#sourceToEntry.has(resolvedFileName) && resolvedFileName !== sourceFile) {
+              nextDependencies.add(resolvedFileName);
+              let importers = this.#fileToImporters.get(resolvedFileName);
+              if (!importers) {
+                importers = new Set();
+                this.#fileToImporters.set(resolvedFileName, importers);
+              }
+              importers.add(sourceFile);
+            }
+          }
+        }
+      }
+    }
+    this.#fileToDependencies.set(sourceFile, nextDependencies);
+  }
+
+  async compileSourceFile(
+    sourceFile: string,
+    needsNewProgram = false,
+    dtsChangeRef?: { changed: boolean }
+  ): Promise<CompilerDiagnosticItem[] | undefined> {
     const output = this.#sourceToEntry.get(sourceFile)?.outputFile;
     if (!output) {
       return;
@@ -328,13 +333,22 @@ export class CompilerState implements CompilerHost {
         break;
       case 'ts': {
         const program = await this.getProgram(needsNewProgram);
-        const tsSourceFile = program.getSourceFile(sourceFile)!;
+        const tsSourceFile = program.getSourceFile(sourceFile);
+        if (!tsSourceFile) {
+          return [];
+        }
         program.emit(
           tsSourceFile,
           (fileName, text, writeByteOrderMark) => {
             const entry = this.#sourceToEntry.get(sourceFile);
             if (entry) {
               const { outputLocation, typingsLocation } = this.#resolveEmittedFilePath(entry, fileName);
+              if (dtsChangeRef && outputLocation.endsWith('.d.ts')) {
+                const previous = this.#readFile(outputLocation);
+                if (previous !== text) {
+                  dtsChangeRef.changed = true;
+                }
+              }
               this.#writeFile(outputLocation, text, writeByteOrderMark);
               if (typingsLocation) {
                 this.#writeFile(typingsLocation, text, writeByteOrderMark);
@@ -347,6 +361,7 @@ export class CompilerState implements CompilerHost {
           false,
           this.#transformerManager.get()
         );
+        this.#updateFileDependencies(sourceFile, program);
         const rawDiagnostics = [
           ...program.getSemanticDiagnostics(tsSourceFile),
           ...program.getSyntacticDiagnostics(tsSourceFile),
@@ -355,6 +370,12 @@ export class CompilerState implements CompilerHost {
         const diagnostics = this.#filterDiagnostics(rawDiagnostics);
         if (diagnostics.length) {
           this.#failures.set(sourceFile, diagnostics.length);
+          const entry = this.#sourceToEntry.get(sourceFile);
+          if (entry && fs.existsSync(entry.outputFile)) {
+            try {
+              fs.utimesSync(entry.outputFile, 0, 0);
+            } catch {}
+          }
         }
         return diagnostics;
       }
@@ -457,6 +478,15 @@ export class CompilerState implements CompilerHost {
       this.#outputToEntry.delete(entry.outputFile);
     }
 
+    const dependencies = this.#fileToDependencies.get(sourceFile);
+    if (dependencies) {
+      for (const dependency of dependencies) {
+        this.#fileToImporters.get(dependency)?.delete(sourceFile);
+      }
+      this.#fileToDependencies.delete(sourceFile);
+    }
+    this.#fileToImporters.delete(sourceFile);
+
     if (!entry) {
       return false;
     }
@@ -551,101 +581,38 @@ export class CompilerState implements CompilerHost {
   async *compileAffectedFiles(
     changedFiles: string[]
   ): AsyncGenerator<{ sourceFile: string; diagnostics: CompilerDiagnosticItem[]; duration: number }> {
-    const tsFiles: string[] = [];
+    const queue = new Set<string>(changedFiles);
+    for (const failedFile of this.#failures.keys()) {
+      queue.add(failedFile);
+    }
 
-    for (const file of changedFiles) {
+    const processed = new Set<string>();
+    let needsNewProgram = true;
+
+    for (const file of queue) {
+      if (processed.has(file)) {
+        continue;
+      }
+      processed.add(file);
+
       const start = Date.now();
       const type = ManifestModuleUtil.getFileType(file);
       if (type !== 'ts') {
         const diagnostics = (await this.compileSourceFile(file)) ?? [];
         yield { sourceFile: file, diagnostics, duration: Date.now() - start };
       } else {
-        tsFiles.push(file);
-      }
-    }
+        const dtsChangeRef = { changed: false };
+        const diagnostics = (await this.compileSourceFile(file, needsNewProgram, dtsChangeRef)) ?? [];
+        needsNewProgram = false;
+        yield { sourceFile: file, diagnostics, duration: Date.now() - start };
 
-    if (tsFiles.length || this.#failures.size) {
-      const builder = await this.getBuilderProgram(true);
-      const emittedFiles = new Set<string>();
-
-      while (true) {
-        const start = Date.now();
-        const next = builder.emitNextAffectedFile(
-          (
-            fileName: string,
-            text: string,
-            writeByteOrderMark: boolean,
-            onError?: (message: string) => void,
-            sourceFiles?: readonly SourceFile[]
-          ) => {
-            if (fileName.endsWith('.tsbuildinfo')) {
-              this.#writeFile(fileName, text, writeByteOrderMark);
-              return;
-            }
-            const sourceFile = sourceFiles?.[0]?.fileName;
-            const entry = sourceFile ? this.#sourceToEntry.get(sourceFile) : undefined;
-            if (entry) {
-              const { outputLocation, typingsLocation } = this.#resolveEmittedFilePath(entry, fileName);
-              this.#writeFile(outputLocation, text, writeByteOrderMark);
-              if (typingsLocation) {
-                this.#writeFile(typingsLocation, text, writeByteOrderMark);
+        if (dtsChangeRef.changed) {
+          const importers = this.#fileToImporters.get(file);
+          if (importers) {
+            for (const importer of importers) {
+              if (!processed.has(importer)) {
+                queue.add(importer);
               }
-            } else {
-              this.#writeFile(fileName, text, writeByteOrderMark);
-            }
-          }
-        );
-
-        if (!next) {
-          break;
-        }
-
-        if (next.affected && 'fileName' in next.affected) {
-          const sourceFile = next.affected.fileName;
-          if (this.#sourceToEntry.has(sourceFile)) {
-            emittedFiles.add(sourceFile);
-            const tsSourceFile = next.affected as SourceFile;
-            const program = builder.getProgram();
-            const rawDiagnostics = [
-              ...program.getSyntacticDiagnostics(tsSourceFile),
-              ...program.getSemanticDiagnostics(tsSourceFile),
-              ...program.getDeclarationDiagnostics(tsSourceFile),
-              ...(next.result.diagnostics ?? [])
-            ];
-            const diagnostics = this.#filterDiagnostics(rawDiagnostics);
-            if (diagnostics.length) {
-              this.#failures.set(sourceFile, diagnostics.length);
-              const entry = this.#sourceToEntry.get(sourceFile);
-              if (entry && fs.existsSync(entry.outputFile)) {
-                try {
-                  fs.utimesSync(entry.outputFile, 0, 0);
-                } catch {}
-              }
-            } else {
-              this.#failures.delete(sourceFile);
-            }
-            yield { sourceFile, diagnostics, duration: Date.now() - start };
-          }
-        }
-      }
-
-      // Re-verify any previously failed files that weren't in the affected emit set
-      for (const failedFile of [...this.#failures.keys()]) {
-        if (!emittedFiles.has(failedFile)) {
-          const start = Date.now();
-          const tsSourceFile = builder.getProgram().getSourceFile(failedFile);
-          if (tsSourceFile) {
-            const rawDiagnostics = [
-              ...builder.getProgram().getSyntacticDiagnostics(tsSourceFile),
-              ...builder.getProgram().getSemanticDiagnostics(tsSourceFile),
-              ...builder.getProgram().getDeclarationDiagnostics(tsSourceFile)
-            ];
-            const diagnostics = this.#filterDiagnostics(rawDiagnostics);
-            if (diagnostics.length) {
-              this.#failures.set(failedFile, diagnostics.length);
-            } else {
-              this.#failures.delete(failedFile);
-              yield { sourceFile: failedFile, diagnostics: [], duration: Date.now() - start };
             }
           }
         }

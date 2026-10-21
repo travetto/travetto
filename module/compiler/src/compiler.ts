@@ -285,7 +285,7 @@ export class Compiler {
     }
 
     if (this.#watch && !this.#shutdownSignal.aborted) {
-      await this.#state.getBuilderProgram();
+      await this.#state.getProgram();
 
       log.info('Watch is ready');
       this.#sendEvent('state', { state: this.#state.hasErrors() ? 'compile-failed' : 'watch-start' });
