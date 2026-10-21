@@ -289,14 +289,14 @@ export class CompilerServer {
         if (!event.payload.soft) {
           log.info('Reset event received, wiping compiler caches and output');
           this.info.messages = {};
-          if (process.env.TRV_ROLE !== 'test' && process.env.NODE_ENV !== 'test') {
-            this.#ctx = getManifestContext();
-          }
+          this.#ctx = getManifestContext();
           await this.#disconnectActive();
         }
         this.info.compilerProcessId = 0;
         await this.#handle.compiler.ensureKilled(RESET_KILL_TIMEOUT_MILLISECONDS);
-        await CompilerUtil.clearCaches(this.#ctx, !event.payload.soft);
+        if (process.env.TRV_ROLE !== 'test' && process.env.NODE_ENV !== 'test') {
+          await CompilerUtil.clearCaches(this.#ctx, !event.payload.soft);
+        }
       }
     }
 
