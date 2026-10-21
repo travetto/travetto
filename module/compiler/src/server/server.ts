@@ -289,7 +289,9 @@ export class CompilerServer {
         if (!event.payload.soft) {
           log.info('Reset event received, wiping compiler caches and output');
           this.info.messages = {};
-          this.#ctx = getManifestContext();
+          if (process.env.TRV_ROLE !== 'test' && process.env.NODE_ENV !== 'test') {
+            this.#ctx = getManifestContext();
+          }
           await this.#disconnectActive();
         }
         this.info.compilerProcessId = 0;
