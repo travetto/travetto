@@ -26,7 +26,6 @@ class Logger extends CompilerLogger {
 
   #level?: CompilerLogLevel;
   #disabled?: boolean;
-  #logProgress?: boolean;
 
   workspace: string = process.cwd();
   scope?: string;

@@ -14,23 +14,23 @@ type JSONInputConfig = { reviver?: JSONTransformer };
 type JSONCloneConfig = JSONOutputConfig & JSONInputConfig;
 type JSONError = { $trv: (typeof VALID_JSON_ERROR_TYPES)[number]; name?: string } & Partial<RuntimeErrorOptions<Record<string, unknown>>>;
 
-Object.defineProperty(BigInt.prototype, 'toJSON', {
-  value() {
-    return `${this}n`;
-  }
-});
+try {
+  // Allows for big int serialization in json
+  Object.defineProperty(BigInt.prototype, 'toJSON', {
+    value() {
+      return `${this}n`;
+    }
+  });
 
-Object.defineProperty(Error.prototype, 'toJSON', {
-  value() {
-    return JSONUtil.errorToJSONError(this);
-  }
-});
-
-Object.defineProperty(RuntimeError.prototype, 'toJSON', {
-  value() {
-    return JSONUtil.errorToJSONError(this);
-  }
-});
+  // Allows for proper error serialization
+  Object.defineProperty(Error.prototype, 'toJSON', {
+    value() {
+      return JSONUtil.errorToJSONError(this);
+    }
+  });
+} catch {
+  // Ignore if we somehow hit re-initialization
+}
 
 const ISO_8601_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/;
 const BIGINT_REGEX = /^-?\d+n$/;
