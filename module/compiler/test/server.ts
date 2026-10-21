@@ -5,7 +5,6 @@ import { Suite, Test } from '@travetto/test';
 
 import { CompilerServer } from '../src/server/server.ts';
 import { CompilerReset, type CompilerEvent } from '../src/types.ts';
-import { CompilerUtil } from '../src/util.ts';
 
 @Suite()
 class CompilerServerTests {
@@ -191,12 +190,5 @@ class CompilerServerTests {
 
     assert.strictEqual(server.info.messages?.error?.length, 1);
     assert.strictEqual(server.info.iteration, initialIteration);
-  }
-
-  @Test()
-  async verifyOutputNotDeletedInTesting() {
-    const context = this.#createContext();
-    assert.strictEqual(process.env.TRV_ROLE, 'test');
-    await CompilerUtil.clearCaches(context, true);
   }
 }

@@ -294,9 +294,7 @@ export class CompilerServer {
         }
         this.info.compilerProcessId = 0;
         await this.#handle.compiler.ensureKilled(RESET_KILL_TIMEOUT_MILLISECONDS);
-        if (process.env.TRV_ROLE !== 'test' && process.env.NODE_ENV !== 'test') {
-          await CompilerUtil.clearCaches(this.#ctx, !event.payload.soft);
-        }
+        await CompilerUtil.clearCaches(this.#ctx, !event.payload.soft);
       }
     }
 
