@@ -31,11 +31,9 @@ export class CompilerState implements CompilerHost {
   #sourceDirectory = new Map<string, string>();
   #sourceToEntry = new Map<string, CompileStateEntry>();
   #outputToEntry = new Map<string, CompileStateEntry>();
-  #tscOutputFileToOutput = new Map<string, string>();
 
   #sourceContents = new Map<string, string | undefined>();
   #sourceFileObjects = new Map<string, SourceFile>();
-  #sourceHashes = new Map<string, number>();
 
   #fileToDependencies = new Map<string, Set<string>>();
   #fileToImporters = new Map<string, Set<string>>();
@@ -450,7 +448,6 @@ export class CompilerState implements CompilerHost {
 
     this.#outputToEntry.set(outputFile, entry);
     this.#sourceFiles.add(sourceFile);
-    this.#sourceHashes.set(sourceFile, -1); // Unknown
     this.#sourceToEntry.set(sourceFile, entry);
     this.#sourceDirectory.set(sourceFolder, sourceFolder);
 
@@ -462,22 +459,19 @@ export class CompilerState implements CompilerHost {
     if (contents === undefined) {
       return false;
     }
-    const prevHash = this.#sourceHashes.get(sourceFile);
-    if (contents.length === 0 && prevHash !== undefined && prevHash >= 0) {
+    const previousContents = this.#sourceContents.get(sourceFile);
+    if (contents.length === 0 && (previousContents?.length ?? 0) > 0) {
       return false; // Ignore transient empty file on save
     }
-    const currentHash = CompilerUtil.naiveHash(contents);
-    const changed = prevHash !== currentHash;
+    const changed = previousContents !== contents;
     if (changed) {
-      this.#sourceHashes.set(sourceFile, currentHash);
       this.#sourceContents.set(sourceFile, contents);
       this.#sourceFileObjects.delete(sourceFile);
     }
     return changed;
   }
 
-  resetSourceHash(sourceFile: string): void {
-    this.#sourceHashes.delete(sourceFile);
+  resetSource(sourceFile: string): void {
     this.#sourceContents.delete(sourceFile);
     this.#sourceFileObjects.delete(sourceFile);
   }
@@ -491,7 +485,6 @@ export class CompilerState implements CompilerHost {
 
     this.#sourceFileObjects.delete(sourceFile);
     this.#sourceContents.delete(sourceFile);
-    this.#sourceHashes.delete(sourceFile);
     this.#sourceToEntry.delete(sourceFile);
     this.#sourceFiles.delete(sourceFile);
     if (entry?.outputFile) {
@@ -590,11 +583,7 @@ export class CompilerState implements CompilerHost {
     }
     return this.#sourceFileObjects.getOrInsertComputed(sourceFile, () => {
       const content = this.readFile(sourceFile) ?? '';
-      const hash = this.#sourceHashes.get(sourceFile) ?? CompilerUtil.naiveHash(content);
-      this.#sourceHashes.set(sourceFile, hash);
-      const sourceFileObject = ts.createSourceFile(sourceFile, content, language);
-      (sourceFileObject as { version?: string }).version = `${hash}`;
-      return sourceFileObject;
+      return ts.createSourceFile(sourceFile, content, language);
     });
   }
 }

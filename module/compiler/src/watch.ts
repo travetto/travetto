@@ -273,7 +273,7 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
     if (this.#queue.has(item => item.file === file)) {
       return;
     }
-    this.#state.resetSourceHash(file);
+    this.#state.resetSource(file);
     this.#queue.add({ action: 'update', file });
   }
 

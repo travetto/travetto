@@ -68,7 +68,7 @@ class CompilerStateTests {
 
     assert.deepStrictEqual(state.getFailedFiles(), []);
 
-    state.resetSourceHash(alphaSource);
+    state.resetSource(alphaSource);
     assert.deepStrictEqual(state.getFailedFiles(), []);
   }
 
