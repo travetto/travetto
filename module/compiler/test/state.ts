@@ -6,6 +6,7 @@ import { Suite, Test } from '@travetto/test';
 
 import { AsyncQueue } from '../src/queue.ts';
 import { CompilerState } from '../src/state.ts';
+import { CompilerUtil } from '../src/util.ts';
 
 @Suite()
 class CompilerStateTests {
@@ -68,7 +69,7 @@ class CompilerStateTests {
 
     assert.deepStrictEqual(state.getFailedFiles(), []);
 
-    state.resetSourceHash(alphaSource);
+    state.resetSource(alphaSource);
     assert.deepStrictEqual(state.getFailedFiles(), []);
   }
 
@@ -109,5 +110,16 @@ class CompilerStateTests {
       false
     );
     queue.close();
+  }
+
+  @Test()
+  async verifyProcessManagement() {
+    assert.strictEqual(CompilerUtil.isProcessRunning(undefined), false);
+    assert.strictEqual(CompilerUtil.isProcessRunning(0), false);
+    assert.strictEqual(CompilerUtil.isProcessRunning(-1), false);
+
+    assert.strictEqual(await CompilerUtil.killProcess(undefined), false);
+    assert.strictEqual(await CompilerUtil.killProcess(0), false);
+    assert.strictEqual(await CompilerUtil.killProcess(-1), false);
   }
 }

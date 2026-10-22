@@ -1,6 +1,6 @@
 import type { CompilerEvent, CompilerEventType, CompilerStateEvent } from './types.ts';
 
-const VALID_EVENT_TYPES = new Set<CompilerEventType>(['change', 'log', 'progress', 'state', 'all', 'file']);
+const VALID_EVENT_TYPES = new Set<CompilerEventType>(['change', 'log', 'progress', 'state', 'all']);
 
 export class EventUtil {
   static isCompilerEventType = (value: string): value is CompilerEventType => VALID_EVENT_TYPES.has(value as CompilerEventType);

@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-import type { CompilerHost, CompilerOptions, Program, ScriptTarget, SourceFile } from 'typescript';
+import type { CompilerHost, CompilerOptions, Diagnostic, Program, ScriptTarget, SourceFile } from 'typescript';
 
 import {
   type ManifestIndex,
@@ -31,11 +31,12 @@ export class CompilerState implements CompilerHost {
   #sourceDirectory = new Map<string, string>();
   #sourceToEntry = new Map<string, CompileStateEntry>();
   #outputToEntry = new Map<string, CompileStateEntry>();
-  #tscOutputFileToOutput = new Map<string, string>();
 
   #sourceContents = new Map<string, string | undefined>();
   #sourceFileObjects = new Map<string, SourceFile>();
-  #sourceHashes = new Map<string, number>();
+
+  #fileToDependencies = new Map<string, Set<string>>();
+  #fileToImporters = new Map<string, Set<string>>();
 
   #manifestIndex: ManifestIndex;
   #manifest: ManifestRoot;
@@ -115,7 +116,9 @@ export class CompilerState implements CompilerHost {
       rootDir: this.#manifest.workspace.path,
       moduleResolution: ts.ModuleResolutionKind.Bundler,
       module: ts.ModuleKind.ESNext,
-      outDir: this.#outputPath
+      outDir: this.#outputPath,
+      incremental: true,
+      tsBuildInfoFile: path.resolve(this.#outputPath, '.tsbuildinfo')
     };
   }
 
@@ -184,12 +187,100 @@ export class CompilerState implements CompilerHost {
         oldProgram: this.#program
       });
       this.#transformerManager.init(this.#program.getTypeChecker());
+
       await CommonUtil.queueMacroTask();
     }
     return this.#program;
   }
 
-  async compileSourceFile(sourceFile: string, needsNewProgram = false): Promise<CompilerDiagnosticItem[] | undefined> {
+  #resolveEmittedFilePath(entry: CompileStateEntry, emittedPath: string): { outputLocation: string; typingsLocation?: string } {
+    const baseOutput = entry.outputFile.replace(/[.][cm]?js$/, '');
+    let outputLocation: string;
+    if (emittedPath.endsWith('.d.ts.map')) {
+      outputLocation = `${baseOutput}.d.ts.map`;
+    } else if (emittedPath.endsWith('.d.ts')) {
+      outputLocation = `${baseOutput}.d.ts`;
+    } else if (emittedPath.endsWith('.js.map')) {
+      outputLocation = `${entry.outputFile}.map`;
+    } else {
+      outputLocation = entry.outputFile;
+    }
+
+    let typingsLocation: string | undefined;
+    if (
+      ManifestModuleUtil.TYPINGS_WITH_MAP_EXT_REGEX.test(emittedPath) &&
+      TYPINGS_FOLDER_KEYS.has(ManifestModuleUtil.getFolderKey(entry.moduleFile))
+    ) {
+      typingsLocation = outputLocation.replace(this.#outputPath, this.#typingsPath);
+    }
+
+    return { outputLocation, typingsLocation };
+  }
+
+  #filterDiagnostics(rawDiagnostics: readonly Diagnostic[]): CompilerDiagnosticItem[] {
+    const diagnostics: CompilerDiagnosticItem[] = [];
+    for (const diagnostic of rawDiagnostics.filter(item => item.category === ts.DiagnosticCategory.Error)) {
+      const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+      if (
+        message.includes("is not under 'rootDir'") ||
+        message.includes("does not exist on type 'EnvDataCombinedType'") ||
+        message.startsWith('Could not find a declaration file for module') ||
+        message.startsWith("Cannot find module '@travetto") ||
+        message.startsWith("This JSX tag requires the module path '@travetto") ||
+        message.startsWith("JSX element implicitly has type 'any'")
+      ) {
+        continue;
+      }
+      let line = 1;
+      let column = 1;
+      if (diagnostic.file && diagnostic.start !== undefined) {
+        const position = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
+        line = position.line + 1;
+        column = position.character + 1;
+      }
+      diagnostics.push({ line, column, message });
+    }
+    return diagnostics;
+  }
+
+  #updateFileDependencies(sourceFile: string, program: Program): void {
+    const previousDependencies = this.#fileToDependencies.get(sourceFile);
+    if (previousDependencies) {
+      for (const dependency of previousDependencies) {
+        this.#fileToImporters.get(dependency)?.delete(sourceFile);
+      }
+    }
+
+    const nextDependencies = new Set<string>();
+    const tsSourceFile = program.getSourceFile(sourceFile);
+    if (tsSourceFile) {
+      for (const statement of tsSourceFile.statements) {
+        if (ts.isImportDeclaration(statement) || ts.isExportDeclaration(statement)) {
+          const specifier = statement.moduleSpecifier;
+          if (specifier && ts.isStringLiteral(specifier)) {
+            const resolved = ts.resolveModuleName(specifier.text, sourceFile, this.#compilerOptions, this);
+            const resolvedFileName = resolved.resolvedModule?.resolvedFileName;
+            if (resolvedFileName && this.#sourceToEntry.has(resolvedFileName) && resolvedFileName !== sourceFile) {
+              nextDependencies.add(resolvedFileName);
+              let importers = this.#fileToImporters.get(resolvedFileName);
+              if (!importers) {
+                importers = new Set();
+                this.#fileToImporters.set(resolvedFileName, importers);
+              }
+              importers.add(sourceFile);
+            }
+          }
+        }
+      }
+    }
+    this.#fileToDependencies.set(sourceFile, nextDependencies);
+  }
+
+  async compileSourceFile(
+    sourceFile: string,
+    needsNewProgram = false,
+    dtsChangeRef?: { changed: boolean }
+  ): Promise<CompilerDiagnosticItem[] | undefined> {
     const output = this.#sourceToEntry.get(sourceFile)?.outputFile;
     if (!output) {
       return;
@@ -201,9 +292,8 @@ export class CompilerState implements CompilerHost {
       case 'package-json': {
         const text = this.readFile(sourceFile)!;
         const finalText = CompilerUtil.rewritePackageJSON(this.#manifest, text);
-        const location = this.#tscOutputFileToOutput.get(output) ?? output;
-        this.#writeFile(location, finalText);
-        this.#writeExternalTypings(location, finalText);
+        this.#writeFile(output, finalText);
+        this.#writeExternalTypings(output, finalText);
         break;
       }
       case 'js':
@@ -212,46 +302,100 @@ export class CompilerState implements CompilerHost {
         break;
       case 'ts': {
         const program = await this.getProgram(needsNewProgram);
-        const tsSourceFile = program.getSourceFile(sourceFile)!;
-        program.emit(
-          tsSourceFile,
-          (...args) => this.writeFile(args[0], args[1], args[2]),
-          undefined,
-          false,
-          this.#transformerManager.get()
-        );
-        const diagnostics: CompilerDiagnosticItem[] = [];
+        const tsSourceFile = program.getSourceFile(sourceFile);
+        if (!tsSourceFile) {
+          return [];
+        }
+        try {
+          program.emit(
+            tsSourceFile,
+            (fileName, text, writeByteOrderMark) => {
+              const entry = this.#sourceToEntry.get(sourceFile);
+              if (entry) {
+                const { outputLocation, typingsLocation } = this.#resolveEmittedFilePath(entry, fileName);
+                if (dtsChangeRef && outputLocation.endsWith('.d.ts')) {
+                  const previous = this.#readFile(outputLocation);
+                  if (previous !== text) {
+                    dtsChangeRef.changed = true;
+                  }
+                }
+                this.#writeFile(outputLocation, text, writeByteOrderMark);
+                if (typingsLocation) {
+                  this.#writeFile(typingsLocation, text, writeByteOrderMark);
+                }
+              } else {
+                this.#writeFile(fileName, text, writeByteOrderMark);
+              }
+            },
+            undefined,
+            false,
+            this.#transformerManager.get()
+          );
+        } catch (error) {
+          const message = error instanceof Error ? error.message : `${error}`;
+          const failureDiagnostic: CompilerDiagnosticItem = { line: 1, column: 1, message: `Transformer failure: ${message}` };
+          this.#failures.set(sourceFile, 1);
+          return [failureDiagnostic];
+        }
+        this.#updateFileDependencies(sourceFile, program);
         const rawDiagnostics = [
           ...program.getSemanticDiagnostics(tsSourceFile),
           ...program.getSyntacticDiagnostics(tsSourceFile),
           ...program.getDeclarationDiagnostics(tsSourceFile)
-        ].filter(diagnostic => diagnostic.category === ts.DiagnosticCategory.Error);
-
-        for (const diagnostic of rawDiagnostics) {
-          const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
-          if (
-            message.includes("is not under 'rootDir'") ||
-            message.includes("does not exist on type 'EnvDataCombinedType'") ||
-            message.startsWith('Could not find a declaration file for module') ||
-            message.startsWith("Cannot find module '@travetto") ||
-            message.startsWith("This JSX tag requires the module path '@travetto") ||
-            message.startsWith("JSX element implicitly has type 'any'")
-          ) {
-            continue;
-          }
-          let line = 1;
-          let column = 1;
-          if (diagnostic.file && diagnostic.start !== undefined) {
-            const position = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
-            line = position.line + 1;
-            column = position.character + 1;
-          }
-          diagnostics.push({ line, column, message });
-        }
+        ];
+        const diagnostics = this.#filterDiagnostics(rawDiagnostics);
         if (diagnostics.length) {
           this.#failures.set(sourceFile, diagnostics.length);
+          const entry = this.#sourceToEntry.get(sourceFile);
+          if (entry && fs.existsSync(entry.outputFile)) {
+            try {
+              fs.utimesSync(entry.outputFile, 0, 0);
+            } catch {}
+          }
         }
         return diagnostics;
+      }
+    }
+  }
+
+  async *compileAffectedFiles(
+    changedFiles: string[]
+  ): AsyncGenerator<{ sourceFile: string; diagnostics: CompilerDiagnosticItem[]; duration: number }> {
+    const queue = new Set<string>(changedFiles);
+    for (const failedFile of this.#failures.keys()) {
+      queue.add(failedFile);
+    }
+
+    const processed = new Set<string>();
+    let needsNewProgram = true;
+
+    for (const file of queue) {
+      if (processed.has(file)) {
+        continue;
+      }
+      processed.add(file);
+
+      const start = Date.now();
+      const type = ManifestModuleUtil.getFileType(file);
+      if (type !== 'ts') {
+        const diagnostics = (await this.compileSourceFile(file)) ?? [];
+        yield { sourceFile: file, diagnostics, duration: Date.now() - start };
+      } else {
+        const dtsChangeRef = { changed: false };
+        const diagnostics = (await this.compileSourceFile(file, needsNewProgram, dtsChangeRef)) ?? [];
+        needsNewProgram = false;
+        yield { sourceFile: file, diagnostics, duration: Date.now() - start };
+
+        if (dtsChangeRef.changed) {
+          const importers = this.#fileToImporters.get(file);
+          if (importers) {
+            for (const importer of importers) {
+              if (!processed.has(importer)) {
+                queue.add(importer);
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -292,50 +436,42 @@ export class CompilerState implements CompilerHost {
     const relativeOutput = `${module.outputFolder}/${moduleFile}`;
     const sourceFile = path.resolve(this.#manifest.workspace.path, relativeSource);
     const sourceFolder = path.dirname(sourceFile);
-    const fileType = ManifestModuleUtil.getFileType(moduleFile);
-    const isTypings = fileType === 'typings';
-    const tscOutputFile = path.resolve(this.#outputPath, ManifestModuleUtil.withOutputExtension(relativeSource));
     const outputFile = path.resolve(this.#outputPath, ManifestModuleUtil.withOutputExtension(relativeOutput));
 
-    const entry: CompileStateEntry = { sourceFile, outputFile, module, tscOutputFile, import: `${module.name}/${moduleFile}`, moduleFile };
+    const entry: CompileStateEntry = {
+      sourceFile,
+      outputFile,
+      module,
+      import: `${module.name}/${moduleFile}`,
+      moduleFile
+    };
 
     this.#outputToEntry.set(outputFile, entry);
     this.#sourceFiles.add(sourceFile);
-    this.#sourceHashes.set(sourceFile, -1); // Unknown
     this.#sourceToEntry.set(sourceFile, entry);
     this.#sourceDirectory.set(sourceFolder, sourceFolder);
-
-    this.#tscOutputFileToOutput.set(tscOutputFile, outputFile);
-    this.#tscOutputFileToOutput.set(`${tscOutputFile}.map`, `${outputFile}.map`);
-
-    if (!isTypings) {
-      const srcBase = `${ManifestModuleUtil.withoutSourceExtension(tscOutputFile)}${ManifestModuleUtil.TYPINGS_EXT}`;
-      const outBase = `${ManifestModuleUtil.withoutSourceExtension(outputFile)}${ManifestModuleUtil.TYPINGS_EXT}`;
-      this.#tscOutputFileToOutput.set(`${srcBase}.map`, `${outBase}.map`);
-      this.#tscOutputFileToOutput.set(srcBase, outBase);
-    }
 
     return entry;
   }
 
   checkIfSourceChanged(sourceFile: string): boolean {
     const contents = this.#readFile(sourceFile);
-    const prevHash = this.#sourceHashes.get(sourceFile);
-    if (!contents || (contents.length === 0 && prevHash)) {
-      return false; // Ignore empty file
+    if (contents === undefined) {
+      return false;
     }
-    const currentHash = CompilerUtil.naiveHash(contents);
-    const changed = prevHash !== currentHash;
+    const previousContents = this.#sourceContents.get(sourceFile);
+    if (contents.length === 0 && (previousContents?.length ?? 0) > 0) {
+      return false; // Ignore transient empty file on save
+    }
+    const changed = previousContents !== contents;
     if (changed) {
-      this.#sourceHashes.set(sourceFile, currentHash);
       this.#sourceContents.set(sourceFile, contents);
       this.#sourceFileObjects.delete(sourceFile);
     }
     return changed;
   }
 
-  resetSourceHash(sourceFile: string): void {
-    this.#sourceHashes.delete(sourceFile);
+  resetSource(sourceFile: string): void {
     this.#sourceContents.delete(sourceFile);
     this.#sourceFileObjects.delete(sourceFile);
   }
@@ -349,29 +485,39 @@ export class CompilerState implements CompilerHost {
 
     this.#sourceFileObjects.delete(sourceFile);
     this.#sourceContents.delete(sourceFile);
-    this.#sourceHashes.delete(sourceFile);
     this.#sourceToEntry.delete(sourceFile);
     this.#sourceFiles.delete(sourceFile);
-    this.#outputToEntry.delete(entry?.outputFile ?? undefined!);
+    if (entry?.outputFile) {
+      this.#outputToEntry.delete(entry.outputFile);
+    }
+
+    const dependencies = this.#fileToDependencies.get(sourceFile);
+    if (dependencies) {
+      for (const dependency of dependencies) {
+        this.#fileToImporters.get(dependency)?.delete(sourceFile);
+      }
+      this.#fileToDependencies.delete(sourceFile);
+    }
+    this.#fileToImporters.delete(sourceFile);
 
     if (!entry) {
       return false;
     }
 
-    const tscOutputDts = `${ManifestModuleUtil.withoutSourceExtension(entry.tscOutputFile)}${ManifestModuleUtil.TYPINGS_EXT}`;
-    const inputs = [entry.tscOutputFile, `${entry.tscOutputFile}.map`, tscOutputDts, `${tscOutputDts}.map`];
-    let deleted = false;
+    const baseOutput = entry.outputFile.replace(/[.][cm]?js$/, '');
+    const outputs = [entry.outputFile, `${entry.outputFile}.map`, `${baseOutput}.d.ts`, `${baseOutput}.d.ts.map`];
 
-    for (const input of inputs) {
-      const output = this.#tscOutputFileToOutput.get(input);
-      if (output) {
-        deleted = true;
+    for (const output of outputs) {
+      if (fs.existsSync(output)) {
         fs.rmSync(output, { force: true });
       }
-      this.#tscOutputFileToOutput.delete(input);
+      const typingsOutput = output.replace(this.#outputPath, this.#typingsPath);
+      if (fs.existsSync(typingsOutput)) {
+        fs.rmSync(typingsOutput, { force: true });
+      }
     }
 
-    return deleted;
+    return true;
   }
 
   getAllFiles(): string[] {
@@ -418,13 +564,11 @@ export class CompilerState implements CompilerHost {
     // JSX runtime shenanigans
     text = text.replace(/support\/jsx-runtime"/g, 'support/jsx-runtime.js"');
 
-    const location = this.#tscOutputFileToOutput.get(outputFile) ?? outputFile;
-
     if (ManifestModuleUtil.TYPINGS_WITH_MAP_EXT_REGEX.test(outputFile)) {
-      this.#writeExternalTypings(location, text, bom);
+      this.#writeExternalTypings(outputFile, text, bom);
     }
 
-    this.#writeFile(location, text, bom);
+    this.#writeFile(outputFile, text, bom);
   }
 
   readFile(sourceFile: string): string | undefined {
@@ -438,8 +582,8 @@ export class CompilerState implements CompilerHost {
       this.#sourceFileObjects.delete(sourceFile);
     }
     return this.#sourceFileObjects.getOrInsertComputed(sourceFile, () => {
-      const content = this.readFile(sourceFile)!;
-      return ts.createSourceFile(sourceFile, content ?? '', language);
+      const content = this.readFile(sourceFile) ?? '';
+      return ts.createSourceFile(sourceFile, content, language);
     });
   }
 }

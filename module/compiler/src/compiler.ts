@@ -1,5 +1,4 @@
 import { setMaxListeners } from 'node:events';
-import fs from 'node:fs/promises';
 
 import { type DeltaEvent, getManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil, path } from '@travetto/manifest';
 
@@ -122,27 +121,22 @@ export class Compiler {
     let i = 0;
     let lastSent = Date.now();
 
-    for (const file of files) {
-      const start = Date.now();
-      const diagnostics = await this.#state.compileSourceFile(file);
-      const duration = Date.now() - start;
+    for await (const result of this.#state.compileAffectedFiles(files)) {
       const nodeModSeparator = 'node_modules/';
-      const nodeModIdx = file.lastIndexOf(nodeModSeparator);
-      const imp = nodeModIdx >= 0 ? file.substring(nodeModIdx + nodeModSeparator.length) : file;
-      if (diagnostics?.length) {
-        const normalizedFile = path.relative(this.#state.manifest.workspace.path, file);
-        for (const diagnostic of diagnostics) {
+      const nodeModIdx = result.sourceFile.lastIndexOf(nodeModSeparator);
+      const imp = nodeModIdx >= 0 ? result.sourceFile.substring(nodeModIdx + nodeModSeparator.length) : result.sourceFile;
+
+      if (result.diagnostics.length) {
+        const normalizedFile = path.relative(this.#state.manifest.workspace.path, result.sourceFile);
+        for (const diagnostic of result.diagnostics) {
           log.error(`ERROR ${imp}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], {
             phase: 'error',
             file: normalizedFile
           });
         }
-        // Touch file to ensure recompilation later
-        if (await fs.stat(file, { throwIfNoEntry: false })) {
-          await fs.utimes(file, new Date(), new Date());
-        }
       }
-      yield { file: imp, sourceFile: file, i: (i += 1), total: files.length, duration };
+
+      yield { file: imp, sourceFile: result.sourceFile, i: (i += 1), total: files.length, duration: result.duration };
       if (Date.now() - lastSent > 50) {
         // Limit to 1 every 50ms
         lastSent = Date.now();
@@ -152,56 +146,76 @@ export class Compiler {
         break;
       }
     }
+
     this.#sendEvent('progress', { total: files.length, idx: files.length, message: 'Complete', operation: 'compile', complete: true });
 
     await CommonUtil.queueMacroTask();
-
     log.debug(`Compiled ${i} files`);
   }
 
-  async #onWatchEvent(event: CompilerWatchEvent): Promise<void> {
-    const isDelete = event.action === 'delete';
-    if (isDelete) {
-      if (this.#state.removeSource(event.entry.sourceFile)) {
-        log.info(`Removed ${event.entry.sourceFile}, ${event.entry.outputFile}`);
-      }
-    }
+  async #onWatchBatch(events: CompilerWatchEvent[]): Promise<void> {
+    const deleteEvents = events.filter(event => event.action === 'delete');
+    const createOrUpdateEvents = events.filter(event => event.action !== 'delete');
 
-    const diagnostics = isDelete ? [] : ((await this.#state.compileSourceFile(event.entry.sourceFile, true)) ?? []);
-    const normalizedFile = path.relative(this.#state.manifest.workspace.path, event.file);
-
-    if (diagnostics.length) {
-      log.error('Compilation failed', `${event.file}: ${diagnostics.length} errors found`, { phase: 'failure', file: normalizedFile });
-      for (const diagnostic of diagnostics) {
-        log.error(`ERROR ${event.file}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], {
-          phase: 'error',
-          file: normalizedFile
-        });
-      }
-    } else if (!isDelete) {
-      log.info(`Compiled ${event.entry.sourceFile} on ${event.action}`);
-    }
-
-    if (!diagnostics.length && this.#state.hasErrors()) {
-      for (const failedFile of this.#state.getFailedFiles()) {
-        if (failedFile !== event.entry.sourceFile) {
-          this.#watcher.add(failedFile);
+    if (deleteEvents.length) {
+      for (const deleteEvent of deleteEvents) {
+        if (this.#state.removeSource(deleteEvent.entry.sourceFile)) {
+          log.info(`Removed ${deleteEvent.entry.sourceFile}, ${deleteEvent.entry.outputFile}`);
         }
       }
     }
 
-    this.#sendEvent('state', { state: this.#state.hasErrors() ? 'compile-failed' : 'watch-start' });
+    const changedFiles = createOrUpdateEvents.map(event => event.entry.sourceFile);
+    const compiledFiles = new Set<string>();
 
-    if (!diagnostics.length) {
+    for await (const result of this.#state.compileAffectedFiles(changedFiles)) {
+      const normalizedFile = path.relative(this.#state.manifest.workspace.path, result.sourceFile);
+      if (result.diagnostics.length) {
+        log.error('Compilation failed', `${result.sourceFile}: ${result.diagnostics.length} errors found`, {
+          phase: 'failure',
+          file: normalizedFile
+        });
+        for (const diagnostic of result.diagnostics) {
+          log.error(`ERROR ${result.sourceFile}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], {
+            phase: 'error',
+            file: normalizedFile
+          });
+        }
+      } else {
+        compiledFiles.add(result.sourceFile);
+        log.info(`Compiled ${result.sourceFile}`);
+      }
+    }
+
+    await this.#watcher.writeBatchManifests(events);
+
+    for (const deleteEvent of deleteEvents) {
+      const normalizedFile = path.relative(this.#state.manifest.workspace.path, deleteEvent.file);
       this.#sendEvent('change', {
-        action: event.action,
+        action: deleteEvent.action,
         time: Date.now(),
         file: normalizedFile,
-        import: event.entry.import,
-        output: event.entry.outputFile!,
-        module: event.entry.module.name
+        import: deleteEvent.entry.import,
+        output: deleteEvent.entry.outputFile,
+        module: deleteEvent.entry.module.name
       });
     }
+
+    for (const event of createOrUpdateEvents) {
+      if (compiledFiles.has(event.entry.sourceFile)) {
+        const normalizedFile = path.relative(this.#state.manifest.workspace.path, event.file);
+        this.#sendEvent('change', {
+          action: event.action,
+          time: Date.now(),
+          file: normalizedFile,
+          import: event.entry.import,
+          output: event.entry.outputFile,
+          module: event.entry.module.name
+        });
+      }
+    }
+
+    this.#sendEvent('state', { state: this.#state.hasErrors() ? 'compile-failed' : 'watch-start' });
   }
 
   /**
@@ -211,9 +225,7 @@ export class Compiler {
     log.debug('Compilation started');
 
     this.#sendEvent('state', { state: 'init', extra: { processId: process.pid } });
-
     log.debug(`Compiler loaded: ${this.#deltaEvents.length} files changed`);
-
     this.#sendEvent('state', { state: 'compile-start' });
 
     const deleteEvents = this.#deltaEvents.filter(event => event.type === 'delete');
@@ -274,15 +286,14 @@ export class Compiler {
     }
 
     if (this.#watch && !this.#shutdownSignal.aborted) {
-      const resolved = this.#state.getArbitraryInputFile();
-      await this.#state.compileSourceFile(resolved);
+      await this.#state.getProgram();
 
       log.info('Watch is ready');
-
       this.#sendEvent('state', { state: this.#state.hasErrors() ? 'compile-failed' : 'watch-start' });
+
       try {
-        for await (const event of this.#watcher) {
-          await this.#onWatchEvent(event);
+        for await (const batch of this.#watcher) {
+          await this.#onWatchBatch(batch);
         }
         this.#sendEvent('state', { state: 'watch-end' });
       } catch (error) {
@@ -296,7 +307,6 @@ export class Compiler {
     }
 
     log.debug('Compiler process shutdown');
-
     this.#shutdown('complete');
   }
 }

@@ -35,19 +35,6 @@ export class CompilerUtil {
   }
 
   /**
-   * Naive hashing
-   */
-  static naiveHash(text: string): number {
-    let hash = 5381;
-
-    for (let i = 0; i < text.length; i += 1) {
-      hash = (hash * 33) ^ text.charCodeAt(i);
-    }
-
-    return Math.abs(hash);
-  }
-
-  /**
    * Clear package and module scan caches, with optional deletion of compiler output data
    */
   static async clearCaches(context: ManifestContext, deleteOutput = false): Promise<void> {
@@ -60,6 +47,48 @@ export class CompilerUtil {
     }
     PackageUtil.clearCache();
     ManifestModuleUtil.clearScanCache();
+  }
+
+  /**
+   * Check if a process ID is currently alive
+   */
+  static isProcessRunning(processId: number | undefined): boolean {
+    if (!processId || processId <= 0) {
+      return false;
+    }
+    try {
+      process.kill(processId, 0);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Terminate a process by PID and wait for it to exit
+   */
+  static async killProcess(processId: number | undefined, timeoutMilliseconds = 3000): Promise<boolean> {
+    if (!processId || processId <= 0) {
+      return false;
+    }
+    if (!this.isProcessRunning(processId)) {
+      return false;
+    }
+    try {
+      process.kill(processId);
+    } catch {
+      return false;
+    }
+    const start = Date.now();
+    while (this.isProcessRunning(processId) && Date.now() - start < timeoutMilliseconds) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    if (this.isProcessRunning(processId)) {
+      try {
+        process.kill(processId, 'SIGKILL');
+      } catch {}
+    }
+    return true;
   }
 
   /**
