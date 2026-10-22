@@ -17,16 +17,16 @@ export class Compiler {
    * Run compiler as a main entry point
    */
   static async main(): Promise<void> {
-    const context = ManifestUtil.getWorkspaceContext(getManifestContext());
+    const ctx = ManifestUtil.getWorkspaceContext(getManifestContext());
 
     try {
-      const manifest = await ManifestUtil.buildManifest(context);
+      const manifest = await ManifestUtil.buildManifest(ctx);
       const delta = await ManifestDeltaUtil.produceDelta(manifest);
       const state = await CompilerState.get(new ManifestIndex(manifest));
       await new Compiler(state, delta, process.env.TRV_COMPILER_WATCH === 'true').run();
     } catch (error) {
       log.error('Fatal initialization error in compiler', error, { phase: 'error' });
-      EventUtil.sendEvent('state', { workspace: context.workspace.path, state: 'compile-failed' });
+      EventUtil.sendEvent('state', { workspace: ctx.workspace.path, state: 'compile-failed' });
       process.exitCode = 1;
     }
   }
@@ -92,12 +92,14 @@ export class Compiler {
    * Log compilation statistics
    */
   logStatistics(metrics: CompileEmitEvent[]): void {
+    // Simple metrics
     const durations = metrics.map(event => event.duration);
     const total = durations.reduce((a, b) => a + b, 0);
     const avg = total / durations.length;
     const sorted = [...durations].sort((a, b) => a - b);
     const median = sorted[Math.trunc(sorted.length / 2)];
 
+    // Find the 5 slowest files
     const slowest = [...metrics]
       .sort((a, b) => b.duration - a.duration)
       .slice(0, 5)
@@ -116,7 +118,7 @@ export class Compiler {
    * Emit all files as a stream
    */
   async *emit(files: string[]): AsyncIterable<CompileEmitEvent> {
-    let index = 0;
+    let i = 0;
     let lastSent = Date.now();
 
     for await (const result of this.#state.compileAffectedFiles(files)) {
@@ -134,10 +136,11 @@ export class Compiler {
         }
       }
 
-      yield { file: imp, sourceFile: result.sourceFile, i: (index += 1), total: files.length, duration: result.duration };
+      yield { file: imp, sourceFile: result.sourceFile, i: (i += 1), total: files.length, duration: result.duration };
       if (Date.now() - lastSent > 50) {
+        // Limit to 1 every 50ms
         lastSent = Date.now();
-        this.#sendEvent('progress', { total: files.length, idx: index, message: imp, operation: 'compile' });
+        this.#sendEvent('progress', { total: files.length, idx: i, message: imp, operation: 'compile' });
       }
       if (this.#shutdownSignal.aborted) {
         break;
@@ -147,7 +150,7 @@ export class Compiler {
     this.#sendEvent('progress', { total: files.length, idx: files.length, message: 'Complete', operation: 'compile', complete: true });
 
     await CommonUtil.queueMacroTask();
-    log.debug(`Compiled ${index} files`);
+    log.debug(`Compiled ${i} files`);
   }
 
   async #onWatchBatch(events: CompilerWatchEvent[]): Promise<void> {

@@ -47,30 +47,6 @@ export class CompilerState implements CompilerHost {
   #compilerOptions: CompilerOptions;
   #program: Program;
 
-  #resolveEmittedFilePath(entry: CompileStateEntry, emittedPath: string): { outputLocation: string; typingsLocation?: string } {
-    const baseOutput = entry.outputFile.replace(/[.][cm]?js$/, '');
-    let outputLocation: string;
-    if (emittedPath.endsWith('.d.ts.map')) {
-      outputLocation = `${baseOutput}.d.ts.map`;
-    } else if (emittedPath.endsWith('.d.ts')) {
-      outputLocation = `${baseOutput}.d.ts`;
-    } else if (emittedPath.endsWith('.js.map')) {
-      outputLocation = `${entry.outputFile}.map`;
-    } else {
-      outputLocation = entry.outputFile;
-    }
-
-    let typingsLocation: string | undefined;
-    if (
-      ManifestModuleUtil.TYPINGS_WITH_MAP_EXT_REGEX.test(emittedPath) &&
-      TYPINGS_FOLDER_KEYS.has(ManifestModuleUtil.getFolderKey(entry.moduleFile))
-    ) {
-      typingsLocation = outputLocation.replace(this.#outputPath, this.#typingsPath);
-    }
-
-    return { outputLocation, typingsLocation };
-  }
-
   #readFile(sourceFile: string): string | undefined {
     const location = this.#sourceToEntry.get(sourceFile)?.sourceFile ?? sourceFile;
     try {
@@ -203,32 +179,6 @@ export class CompilerState implements CompilerHost {
     return this.getBySource(randomSource)!.sourceFile;
   }
 
-  #filterDiagnostics(rawDiagnostics: readonly Diagnostic[]): CompilerDiagnosticItem[] {
-    const diagnostics: CompilerDiagnosticItem[] = [];
-    for (const diagnostic of rawDiagnostics.filter(item => item.category === ts.DiagnosticCategory.Error)) {
-      const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
-      if (
-        message.includes("is not under 'rootDir'") ||
-        message.includes("does not exist on type 'EnvDataCombinedType'") ||
-        message.startsWith('Could not find a declaration file for module') ||
-        message.startsWith("Cannot find module '@travetto") ||
-        message.startsWith("This JSX tag requires the module path '@travetto") ||
-        message.startsWith("JSX element implicitly has type 'any'")
-      ) {
-        continue;
-      }
-      let line = 1;
-      let column = 1;
-      if (diagnostic.file && diagnostic.start !== undefined) {
-        const position = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
-        line = position.line + 1;
-        column = position.character + 1;
-      }
-      diagnostics.push({ line, column, message });
-    }
-    return diagnostics;
-  }
-
   async getProgram(force = false): Promise<Program> {
     if (force || !this.#program) {
       await this.initializeTypescript();
@@ -272,6 +222,56 @@ export class CompilerState implements CompilerHost {
       await CommonUtil.queueMacroTask();
     }
     return this.#program;
+  }
+
+  #resolveEmittedFilePath(entry: CompileStateEntry, emittedPath: string): { outputLocation: string; typingsLocation?: string } {
+    const baseOutput = entry.outputFile.replace(/[.][cm]?js$/, '');
+    let outputLocation: string;
+    if (emittedPath.endsWith('.d.ts.map')) {
+      outputLocation = `${baseOutput}.d.ts.map`;
+    } else if (emittedPath.endsWith('.d.ts')) {
+      outputLocation = `${baseOutput}.d.ts`;
+    } else if (emittedPath.endsWith('.js.map')) {
+      outputLocation = `${entry.outputFile}.map`;
+    } else {
+      outputLocation = entry.outputFile;
+    }
+
+    let typingsLocation: string | undefined;
+    if (
+      ManifestModuleUtil.TYPINGS_WITH_MAP_EXT_REGEX.test(emittedPath) &&
+      TYPINGS_FOLDER_KEYS.has(ManifestModuleUtil.getFolderKey(entry.moduleFile))
+    ) {
+      typingsLocation = outputLocation.replace(this.#outputPath, this.#typingsPath);
+    }
+
+    return { outputLocation, typingsLocation };
+  }
+
+  #filterDiagnostics(rawDiagnostics: readonly Diagnostic[]): CompilerDiagnosticItem[] {
+    const diagnostics: CompilerDiagnosticItem[] = [];
+    for (const diagnostic of rawDiagnostics.filter(item => item.category === ts.DiagnosticCategory.Error)) {
+      const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+      if (
+        message.includes("is not under 'rootDir'") ||
+        message.includes("does not exist on type 'EnvDataCombinedType'") ||
+        message.startsWith('Could not find a declaration file for module') ||
+        message.startsWith("Cannot find module '@travetto") ||
+        message.startsWith("This JSX tag requires the module path '@travetto") ||
+        message.startsWith("JSX element implicitly has type 'any'")
+      ) {
+        continue;
+      }
+      let line = 1;
+      let column = 1;
+      if (diagnostic.file && diagnostic.start !== undefined) {
+        const position = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
+        line = position.line + 1;
+        column = position.character + 1;
+      }
+      diagnostics.push({ line, column, message });
+    }
+    return diagnostics;
   }
 
   #updateFileDependencies(sourceFile: string, program: Program): void {
@@ -382,6 +382,48 @@ export class CompilerState implements CompilerHost {
     }
   }
 
+  async *compileAffectedFiles(
+    changedFiles: string[]
+  ): AsyncGenerator<{ sourceFile: string; diagnostics: CompilerDiagnosticItem[]; duration: number }> {
+    const queue = new Set<string>(changedFiles);
+    for (const failedFile of this.#failures.keys()) {
+      queue.add(failedFile);
+    }
+
+    const processed = new Set<string>();
+    let needsNewProgram = true;
+
+    for (const file of queue) {
+      if (processed.has(file)) {
+        continue;
+      }
+      processed.add(file);
+
+      const start = Date.now();
+      const type = ManifestModuleUtil.getFileType(file);
+      if (type !== 'ts') {
+        const diagnostics = (await this.compileSourceFile(file)) ?? [];
+        yield { sourceFile: file, diagnostics, duration: Date.now() - start };
+      } else {
+        const dtsChangeRef = { changed: false };
+        const diagnostics = (await this.compileSourceFile(file, needsNewProgram, dtsChangeRef)) ?? [];
+        needsNewProgram = false;
+        yield { sourceFile: file, diagnostics, duration: Date.now() - start };
+
+        if (dtsChangeRef.changed) {
+          const importers = this.#fileToImporters.get(file);
+          if (importers) {
+            for (const importer of importers) {
+              if (!processed.has(importer)) {
+                queue.add(importer);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   hasErrors(sourceFile?: string): boolean {
     return sourceFile ? this.#failures.has(sourceFile) : this.#failures.size > 0;
   }
@@ -442,12 +484,12 @@ export class CompilerState implements CompilerHost {
     if (contents === undefined) {
       return false;
     }
-    const previousHash = this.#sourceHashes.get(sourceFile);
-    if (contents.length === 0 && previousHash !== undefined && previousHash >= 0) {
+    const prevHash = this.#sourceHashes.get(sourceFile);
+    if (contents.length === 0 && prevHash !== undefined && prevHash >= 0) {
       return false; // Ignore transient empty file on save
     }
     const currentHash = CompilerUtil.naiveHash(contents);
-    const changed = previousHash !== currentHash;
+    const changed = prevHash !== currentHash;
     if (changed) {
       this.#sourceHashes.set(sourceFile, currentHash);
       this.#sourceContents.set(sourceFile, contents);
@@ -576,47 +618,5 @@ export class CompilerState implements CompilerHost {
       (sourceFileObject as { version?: string }).version = `${hash}`;
       return sourceFileObject;
     });
-  }
-
-  async *compileAffectedFiles(
-    changedFiles: string[]
-  ): AsyncGenerator<{ sourceFile: string; diagnostics: CompilerDiagnosticItem[]; duration: number }> {
-    const queue = new Set<string>(changedFiles);
-    for (const failedFile of this.#failures.keys()) {
-      queue.add(failedFile);
-    }
-
-    const processed = new Set<string>();
-    let needsNewProgram = true;
-
-    for (const file of queue) {
-      if (processed.has(file)) {
-        continue;
-      }
-      processed.add(file);
-
-      const start = Date.now();
-      const type = ManifestModuleUtil.getFileType(file);
-      if (type !== 'ts') {
-        const diagnostics = (await this.compileSourceFile(file)) ?? [];
-        yield { sourceFile: file, diagnostics, duration: Date.now() - start };
-      } else {
-        const dtsChangeRef = { changed: false };
-        const diagnostics = (await this.compileSourceFile(file, needsNewProgram, dtsChangeRef)) ?? [];
-        needsNewProgram = false;
-        yield { sourceFile: file, diagnostics, duration: Date.now() - start };
-
-        if (dtsChangeRef.changed) {
-          const importers = this.#fileToImporters.get(file);
-          if (importers) {
-            for (const importer of importers) {
-              if (!processed.has(importer)) {
-                queue.add(importer);
-              }
-            }
-          }
-        }
-      }
-    }
   }
 }
