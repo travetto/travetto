@@ -68,11 +68,14 @@ export class CompilerUtil {
    * Terminate a process by PID and wait for it to exit
    */
   static async killProcess(processId: number | undefined, timeoutMilliseconds = 3000): Promise<boolean> {
+    if (!processId || processId <= 0) {
+      return false;
+    }
     if (!this.isProcessRunning(processId)) {
       return false;
     }
     try {
-      process.kill(processId!);
+      process.kill(processId);
     } catch {
       return false;
     }
@@ -82,7 +85,7 @@ export class CompilerUtil {
     }
     if (this.isProcessRunning(processId)) {
       try {
-        process.kill(processId!, 'SIGKILL');
+        process.kill(processId, 'SIGKILL');
       } catch {}
     }
     return true;
