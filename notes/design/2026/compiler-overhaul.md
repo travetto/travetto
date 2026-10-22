@@ -35,11 +35,10 @@ sequenceDiagram
 
     PW->>Q: Enqueue raw { file, action } (Zero state/manifest mutation!)
     Loop->>Q: Wait for event + drain batch (coalesce 25ms)
-    Loop->>IPC: 1. Send state: 'compile-start'
-    Loop->>Manifest: 2. Update in-memory ManifestIndex & remove deleted outputs
-    Loop->>TSC: 3. Create/update tsc BuilderProgram & run emitNextAffectedFile()
-    Loop->>Manifest: 4. Atomically write updated manifest.json to disk (temp + rename)
-    Loop->>IPC: 5. Send 'change' events + state: 'watch-start' (or 'compile-failed')
+    Loop->>Manifest: 1. Update in-memory ManifestIndex & remove deleted outputs
+    Loop->>TSC: 2. Create/update tsc BuilderProgram & run emitNextAffectedFile()
+    Loop->>Manifest: 3. Atomically write updated manifest.json to disk (temp + rename)
+    Loop->>IPC: 4. Send 'change' events + state: 'watch-start' (or 'compile-failed')
 ```
 
 ---
@@ -427,11 +426,10 @@ Rewrite `CompilerWatcher` so that:
 2. **Watch Mode (`#onWatchBatch(rawEvents: CompilerWatchRawEvent[])`)**:
    - When `this.#watcher` yields a batch of raw events:
      1. Call `const events = await this.#watcher.prepareBatch(rawEvents)` (which checks `isCompilerFile`, updates `CompilerState` entries and in-memory `ManifestIndex`, and filters out unchanged files). If `events.length === 0`, return without emitting state churn!
-     2. Send `this.#sendEvent('state', { state: 'compile-start' })`.
-     3. Handle any `'delete'` events (`removeSource` + log).
-     4. Call `this.#state.compileAffectedFiles(createOrUpdateFiles)` to compile the modified files + any `tsc`-determined affected importers + recheck any previously failed files.
-     5. Call `await this.#watcher.writeBatchManifests(events)` so `manifest.json` is written atomically to disk *after* `.js` files are emitted and *before* `change` / `watch-start` events are sent!
-     6. Send `change` events for all successfully compiled/deleted files in the batch, and send `this.#sendEvent('state', { state: this.#state.hasErrors() ? 'compile-failed' : 'watch-start' })` once at the end of the batch!
+     2. Handle any `'delete'` events (`removeSource` + log).
+     3. Call `this.#state.compileAffectedFiles(createOrUpdateFiles)` to compile the modified files + any affected importers + recheck any previously failed files.
+     4. Call `await this.#watcher.writeBatchManifests(events)` so `manifest.json` is written atomically to disk *after* `.js` files are emitted and *before* `change` / `watch-start` events are sent!
+     5. Send `change` events for all successfully compiled/deleted files in the batch, and send `this.#sendEvent('state', { state: this.#state.hasErrors() ? 'compile-failed' : 'watch-start' })` once at the end of the batch!
 
 ---
 

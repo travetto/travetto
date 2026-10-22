@@ -165,8 +165,6 @@ export class Compiler {
       }
     }
 
-    this.#sendEvent('state', { state: 'compile-start' });
-
     const changedFiles = createOrUpdateEvents.map(event => event.entry.sourceFile);
     const compiledFiles = new Set<string>();
 
