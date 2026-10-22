@@ -190,35 +190,6 @@ export class CompilerState implements CompilerHost {
       });
       this.#transformerManager.init(this.#program.getTypeChecker());
 
-      const originalEmit = this.#program.emit.bind(this.#program);
-      this.#program.emit = (...arguments_: Parameters<Program['emit']>) => {
-        const [targetSourceFile, writeFile, cancellationToken, emitOnlyDtsFiles, customTransformers] = arguments_;
-        try {
-          return originalEmit(
-            targetSourceFile,
-            writeFile,
-            cancellationToken,
-            emitOnlyDtsFiles,
-            customTransformers ?? this.#transformerManager.get()
-          );
-        } catch (error) {
-          const message = error instanceof Error ? error.message : `${error}`;
-          return {
-            emitSkipped: true,
-            diagnostics: [
-              {
-                file: targetSourceFile,
-                start: 0,
-                length: 1,
-                messageText: `Transformer failure: ${message}`,
-                category: ts.DiagnosticCategory.Error,
-                code: 99999
-              }
-            ]
-          };
-        }
-      };
-
       await CommonUtil.queueMacroTask();
     }
     return this.#program;
@@ -337,30 +308,37 @@ export class CompilerState implements CompilerHost {
         if (!tsSourceFile) {
           return [];
         }
-        program.emit(
-          tsSourceFile,
-          (fileName, text, writeByteOrderMark) => {
-            const entry = this.#sourceToEntry.get(sourceFile);
-            if (entry) {
-              const { outputLocation, typingsLocation } = this.#resolveEmittedFilePath(entry, fileName);
-              if (dtsChangeRef && outputLocation.endsWith('.d.ts')) {
-                const previous = this.#readFile(outputLocation);
-                if (previous !== text) {
-                  dtsChangeRef.changed = true;
+        try {
+          program.emit(
+            tsSourceFile,
+            (fileName, text, writeByteOrderMark) => {
+              const entry = this.#sourceToEntry.get(sourceFile);
+              if (entry) {
+                const { outputLocation, typingsLocation } = this.#resolveEmittedFilePath(entry, fileName);
+                if (dtsChangeRef && outputLocation.endsWith('.d.ts')) {
+                  const previous = this.#readFile(outputLocation);
+                  if (previous !== text) {
+                    dtsChangeRef.changed = true;
+                  }
                 }
+                this.#writeFile(outputLocation, text, writeByteOrderMark);
+                if (typingsLocation) {
+                  this.#writeFile(typingsLocation, text, writeByteOrderMark);
+                }
+              } else {
+                this.#writeFile(fileName, text, writeByteOrderMark);
               }
-              this.#writeFile(outputLocation, text, writeByteOrderMark);
-              if (typingsLocation) {
-                this.#writeFile(typingsLocation, text, writeByteOrderMark);
-              }
-            } else {
-              this.#writeFile(fileName, text, writeByteOrderMark);
-            }
-          },
-          undefined,
-          false,
-          this.#transformerManager.get()
-        );
+            },
+            undefined,
+            false,
+            this.#transformerManager.get()
+          );
+        } catch (error) {
+          const message = error instanceof Error ? error.message : `${error}`;
+          const failureDiagnostic: CompilerDiagnosticItem = { line: 1, column: 1, message: `Transformer failure: ${message}` };
+          this.#failures.set(sourceFile, 1);
+          return [failureDiagnostic];
+        }
         this.#updateFileDependencies(sourceFile, program);
         const rawDiagnostics = [
           ...program.getSemanticDiagnostics(tsSourceFile),
