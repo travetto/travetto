@@ -25,37 +25,28 @@ export class CommonUtil {
       parent.addEventListener('abort', kill);
 
       const stream = input(controller.signal);
-      const iterator = stream[Symbol.asyncIterator]();
 
       log.debug('Started event stream');
 
       // Wait for all events, close at the end
-      try {
-        for (;;) {
-          const next = await iterator.next();
-          if (next.done) {
-            break;
-          }
-          const event = next.value;
-          yield event;
-          if (shouldRestart(event)) {
-            log.debug('Restarting stream');
-            controller.abort(); // Ensure terminated of process
-            parent.removeEventListener('abort', kill);
-            await iterator.return?.().catch(() => {});
-            await onRestart?.(event);
-            continue outer;
-          }
-        }
-      } finally {
-        parent.removeEventListener('abort', kill);
-        if (!controller.signal.aborted) {
-          // Shutdown source if still running
-          controller.abort();
+      for await (const event of stream) {
+        yield event;
+        if (shouldRestart(event)) {
+          log.debug('Restarting stream');
+          controller.abort(); // Ensure terminated of process
+          parent.removeEventListener('abort', kill);
+          await onRestart?.(event);
+          continue outer;
         }
       }
 
       log.debug('Finished event stream');
+
+      // Natural exit, we done
+      if (!controller.signal.aborted) {
+        // Shutdown source if still running
+        controller.abort();
+      }
       return;
     }
   }
