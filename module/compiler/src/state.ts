@@ -5,7 +5,6 @@ import type { CompilerHost, CompilerOptions, Program, ScriptTarget, SourceFile }
 import {
   type ManifestIndex,
   type ManifestModule,
-  type ManifestModuleFolderType,
   ManifestModuleUtil,
   type ManifestRoot,
   path
@@ -16,8 +15,6 @@ import { CommonUtil } from './common.ts';
 import { tsProxy as ts, tsProxyInit } from './ts-proxy.ts';
 import type { CompileStateEntry, CompilerDiagnosticItem } from './types.ts';
 import { CompilerUtil } from './util.ts';
-
-const TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'support', 'src', '$package']);
 
 export class CompilerState implements CompilerHost {
   static async get(idx: ManifestIndex): Promise<CompilerState> {
@@ -31,7 +28,6 @@ export class CompilerState implements CompilerHost {
   #sourceDirectory = new Map<string, string>();
   #sourceToEntry = new Map<string, CompileStateEntry>();
   #outputToEntry = new Map<string, CompileStateEntry>();
-  #tscOutputFileToOutput = new Map<string, string>();
 
   #sourceContents = new Map<string, string | undefined>();
   #sourceFileObjects = new Map<string, SourceFile>();
@@ -81,14 +77,14 @@ export class CompilerState implements CompilerHost {
   }
 
   #writeExternalTypings(location: string, text: string, bom?: boolean): void {
-    let core = location.replace('.map', '');
+    let core = location.replace(ManifestModuleUtil.MAP_EXT, '');
     if (!this.#outputToEntry.has(core)) {
       core = core.replace(ManifestModuleUtil.TYPINGS_EXT_REGEX, ManifestModuleUtil.OUTPUT_EXT);
     }
     const entry = this.#outputToEntry.get(core);
     if (entry) {
       const relative = this.#manifestIndex.getFromSource(entry.sourceFile)?.relativeFile;
-      if (relative && TYPINGS_FOLDER_KEYS.has(ManifestModuleUtil.getFolderKey(relative))) {
+      if (relative && CompilerUtil.isExternalTypings(relative)) {
         this.#writeFile(location.replace(this.#outputPath, this.#typingsPath), text, bom);
       }
     }
@@ -188,9 +184,18 @@ export class CompilerState implements CompilerHost {
     return this.#program;
   }
 
+  #resolveEmittedFilePath(entry: CompileStateEntry, emittedPath: string): { outputLocation: string; typingsLocation?: string } {
+    return CompilerUtil.resolveEmittedFilePath(entry.outputFile, emittedPath, {
+      moduleFile: entry.moduleFile,
+      outputPath: this.#outputPath,
+      typingsPath: this.#typingsPath
+    });
+  }
+
   async compileSourceFile(sourceFile: string, needsNewProgram = false): Promise<CompilerDiagnosticItem[] | undefined> {
-    const output = this.#sourceToEntry.get(sourceFile)?.outputFile;
-    if (!output) {
+    const entry = this.#sourceToEntry.get(sourceFile);
+    const output = entry?.outputFile;
+    if (!output || !entry) {
       return;
     }
 
@@ -200,9 +205,8 @@ export class CompilerState implements CompilerHost {
       case 'package-json': {
         const text = this.readFile(sourceFile)!;
         const finalText = CompilerUtil.rewritePackageJSON(this.#manifest, text);
-        const location = this.#tscOutputFileToOutput.get(output) ?? output;
-        this.#writeFile(location, finalText);
-        this.#writeExternalTypings(location, finalText);
+        this.#writeFile(output, finalText);
+        this.#writeExternalTypings(output, finalText);
         break;
       }
       case 'js':
@@ -214,7 +218,13 @@ export class CompilerState implements CompilerHost {
         const tsSourceFile = program.getSourceFile(sourceFile)!;
         program.emit(
           tsSourceFile,
-          (...args) => this.writeFile(args[0], args[1], args[2]),
+          (...args) => {
+            const { outputLocation, typingsLocation } = this.#resolveEmittedFilePath(entry, args[0]);
+            this.writeFile(outputLocation, args[1], args[2]);
+            if (typingsLocation) {
+              this.#writeExternalTypings(typingsLocation, args[1], args[2]);
+            }
+          },
           undefined,
           false,
           this.#transformerManager.get()
@@ -291,27 +301,20 @@ export class CompilerState implements CompilerHost {
     const relativeOutput = `${module.outputFolder}/${moduleFile}`;
     const sourceFile = path.resolve(this.#manifest.workspace.path, relativeSource);
     const sourceFolder = path.dirname(sourceFile);
-    const fileType = ManifestModuleUtil.getFileType(moduleFile);
-    const isTypings = fileType === 'typings';
-    const tscOutputFile = path.resolve(this.#outputPath, ManifestModuleUtil.withOutputExtension(relativeSource));
     const outputFile = path.resolve(this.#outputPath, ManifestModuleUtil.withOutputExtension(relativeOutput));
 
-    const entry: CompileStateEntry = { sourceFile, outputFile, module, tscOutputFile, import: `${module.name}/${moduleFile}`, moduleFile };
+    const entry: CompileStateEntry = {
+      sourceFile,
+      outputFile,
+      module,
+      import: `${module.name}/${moduleFile}`,
+      moduleFile
+    };
 
     this.#outputToEntry.set(outputFile, entry);
     this.#sourceFiles.add(sourceFile);
     this.#sourceToEntry.set(sourceFile, entry);
     this.#sourceDirectory.set(sourceFolder, sourceFolder);
-
-    this.#tscOutputFileToOutput.set(tscOutputFile, outputFile);
-    this.#tscOutputFileToOutput.set(`${tscOutputFile}.map`, `${outputFile}.map`);
-
-    if (!isTypings) {
-      const srcBase = `${ManifestModuleUtil.withoutSourceExtension(tscOutputFile)}${ManifestModuleUtil.TYPINGS_EXT}`;
-      const outBase = `${ManifestModuleUtil.withoutSourceExtension(outputFile)}${ManifestModuleUtil.TYPINGS_EXT}`;
-      this.#tscOutputFileToOutput.set(`${srcBase}.map`, `${outBase}.map`);
-      this.#tscOutputFileToOutput.set(srcBase, outBase);
-    }
 
     return entry;
   }
@@ -349,26 +352,27 @@ export class CompilerState implements CompilerHost {
     this.#sourceContents.delete(sourceFile);
     this.#sourceToEntry.delete(sourceFile);
     this.#sourceFiles.delete(sourceFile);
-    this.#outputToEntry.delete(entry?.outputFile ?? undefined!);
+    if (entry?.outputFile) {
+      this.#outputToEntry.delete(entry.outputFile);
+    }
 
     if (!entry) {
       return false;
     }
 
-    const tscOutputDts = `${ManifestModuleUtil.withoutSourceExtension(entry.tscOutputFile)}${ManifestModuleUtil.TYPINGS_EXT}`;
-    const inputs = [entry.tscOutputFile, `${entry.tscOutputFile}.map`, tscOutputDts, `${tscOutputDts}.map`];
-    let deleted = false;
+    const outputs = CompilerUtil.getEmittedOutputs(entry.outputFile);
 
-    for (const input of inputs) {
-      const output = this.#tscOutputFileToOutput.get(input);
-      if (output) {
-        deleted = true;
+    for (const output of outputs) {
+      if (fs.existsSync(output)) {
         fs.rmSync(output, { force: true });
       }
-      this.#tscOutputFileToOutput.delete(input);
+      const typingsOutput = output.replace(this.#outputPath, this.#typingsPath);
+      if (fs.existsSync(typingsOutput)) {
+        fs.rmSync(typingsOutput, { force: true });
+      }
     }
 
-    return deleted;
+    return true;
   }
 
   getAllFiles(): string[] {
@@ -415,13 +419,11 @@ export class CompilerState implements CompilerHost {
     // JSX runtime shenanigans
     text = text.replace(/support\/jsx-runtime"/g, 'support/jsx-runtime.js"');
 
-    const location = this.#tscOutputFileToOutput.get(outputFile) ?? outputFile;
-
-    if (ManifestModuleUtil.TYPINGS_WITH_MAP_EXT_REGEX.test(outputFile)) {
-      this.#writeExternalTypings(location, text, bom);
+    if (ManifestModuleUtil.isTypingsWithMapFile(outputFile)) {
+      this.#writeExternalTypings(outputFile, text, bom);
     }
 
-    this.#writeFile(location, text, bom);
+    this.#writeFile(outputFile, text, bom);
   }
 
   readFile(sourceFile: string): string | undefined {

@@ -29,8 +29,8 @@ export type CompileEmitEvent = {
 };
 export type CompileStateEntry = {
   sourceFile: string;
-  tscOutputFile: string;
-  outputFile?: string;
+  outputFile: string;
+  tscOutputFile?: string;
   module: ManifestModule;
   import: string;
   moduleFile: string;

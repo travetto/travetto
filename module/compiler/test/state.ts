@@ -122,4 +122,36 @@ class CompilerStateTests {
     assert.strictEqual(await CompilerUtil.killProcess(0), false);
     assert.strictEqual(await CompilerUtil.killProcess(-1), false);
   }
+
+  @Test()
+  verifyEmittedPathsAndOutputs() {
+    assert.deepStrictEqual(CompilerUtil.getEmittedOutputs('/app/dist/index.js'), [
+      '/app/dist/index.js',
+      '/app/dist/index.js.map',
+      '/app/dist/index.d.ts',
+      '/app/dist/index.d.ts.map'
+    ]);
+
+    assert.strictEqual(CompilerUtil.isExternalTypings('src/main.ts'), true);
+    assert.strictEqual(CompilerUtil.isExternalTypings('test/main.ts'), false);
+
+    const jsResolution = CompilerUtil.resolveEmittedFilePath(
+      '/app/dist/src/main.js',
+      'main.js'
+    );
+    assert.strictEqual(jsResolution.outputLocation, '/app/dist/src/main.js');
+    assert.strictEqual(jsResolution.typingsLocation, undefined);
+
+    const dtsResolution = CompilerUtil.resolveEmittedFilePath(
+      '/app/dist/src/main.js',
+      'main.d.ts',
+      {
+        moduleFile: 'src/main.ts',
+        outputPath: '/app/dist',
+        typingsPath: '/app/dist/typings'
+      }
+    );
+    assert.strictEqual(dtsResolution.outputLocation, '/app/dist/src/main.d.ts');
+    assert.strictEqual(dtsResolution.typingsLocation, '/app/dist/typings/src/main.d.ts');
+  }
 }

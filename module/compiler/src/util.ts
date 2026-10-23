@@ -1,11 +1,74 @@
 import fs from 'node:fs/promises';
 
-import { type ManifestContext, ManifestModuleUtil, type ManifestRoot, type Package, PackageUtil, path } from '@travetto/manifest';
+import {
+  type ManifestContext,
+  type ManifestModuleFolderType,
+  ManifestModuleUtil,
+  type ManifestRoot,
+  type Package,
+  PackageUtil,
+  path
+} from '@travetto/manifest';
 
 /**
  * Standard utilities for compiler
  */
 export class CompilerUtil {
+  static readonly TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'support', 'src', '$package']);
+
+  /**
+   * Determine if a module file is in a folder whose typings are exported
+   */
+  static isExternalTypings(moduleFile: string): boolean {
+    return this.TYPINGS_FOLDER_KEYS.has(ManifestModuleUtil.getFolderKey(moduleFile));
+  }
+
+  /**
+   * Get all expected output files for a primary output file
+   */
+  static getEmittedOutputs(outputFile: string): string[] {
+    const baseOutput = ManifestModuleUtil.withoutOutputExtension(outputFile);
+    return [
+      outputFile,
+      `${outputFile}${ManifestModuleUtil.MAP_EXT}`,
+      `${baseOutput}${ManifestModuleUtil.TYPINGS_EXT}`,
+      `${baseOutput}${ManifestModuleUtil.TYPINGS_EXT}${ManifestModuleUtil.MAP_EXT}`
+    ];
+  }
+
+  /**
+   * Resolve an emitted path to its final output and optional external typings location
+   */
+  static resolveEmittedFilePath(
+    outputFile: string,
+    emittedPath: string,
+    options?: {
+      moduleFile?: string;
+      outputPath?: string;
+      typingsPath?: string;
+    }
+  ): { outputLocation: string; typingsLocation?: string } {
+    const isMap = emittedPath.endsWith(ManifestModuleUtil.MAP_EXT);
+    const isTypings = ManifestModuleUtil.isTypingsWithMapFile(emittedPath);
+
+    const outputLocation = isTypings
+      ? `${ManifestModuleUtil.withoutOutputExtension(outputFile)}${ManifestModuleUtil.TYPINGS_EXT}${isMap ? ManifestModuleUtil.MAP_EXT : ''}`
+      : isMap
+        ? `${outputFile}${ManifestModuleUtil.MAP_EXT}`
+        : outputFile;
+
+    let typingsLocation: string | undefined;
+    if (
+      isTypings &&
+      options?.outputPath &&
+      options?.typingsPath &&
+      (!options.moduleFile || this.isExternalTypings(options.moduleFile))
+    ) {
+      typingsLocation = outputLocation.replace(options.outputPath, options.typingsPath);
+    }
+
+    return { outputLocation, typingsLocation };
+  }
   /**
    * Rewrites the package.json to target output file names, and pins versions
    * @param manifest
