@@ -4,7 +4,6 @@ export * from './src/event.ts';
 export * from './src/log.ts';
 export * from './src/server/client.ts';
 export * from './src/server/manager.ts';
-export * from './src/server/process-handle.ts';
 export * from './src/server/server.ts';
 export * from './src/state.ts';
 export * from './src/types.ts';
