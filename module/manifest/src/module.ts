@@ -38,11 +38,29 @@ export class ManifestModuleUtil {
   static TYPINGS_EXT = '.d.ts';
   static OUTPUT_EXT = '.js';
   static SOURCE_DEF_EXT = '.ts';
+  static MAP_EXT = '.map';
+
   static SOURCE_EXT_REGEX = /[.][cm]?[tj]sx?$/;
+  static OUTPUT_EXT_REGEX = /[.][cm]?js$/;
+  static OUTPUT_WITH_MAP_EXT_REGEX = /[.][cm]?js([.]map)?$/;
   static TYPINGS_EXT_REGEX = /[.]d[.][cm]?ts$/;
   static TYPINGS_WITH_MAP_EXT_REGEX = /[.]d[.][cm]?ts([.]map)?$/;
 
   static #scanCache: Record<string, string[]> = {};
+
+  /**
+   * Determine if a file path is a declaration file (.d.ts, .d.mts, .d.cts)
+   */
+  static isTypingsFile(file: string): boolean {
+    return this.TYPINGS_EXT_REGEX.test(file);
+  }
+
+  /**
+   * Determine if a file path is a declaration file or map (.d.ts, .d.ts.map, etc.)
+   */
+  static isTypingsWithMapFile(file: string): boolean {
+    return this.TYPINGS_WITH_MAP_EXT_REGEX.test(file);
+  }
 
   /**
    * Clear scan cache
@@ -134,7 +152,7 @@ export class ManifestModuleUtil {
       moduleFile.startsWith('support/resources/')
     ) {
       return 'fixture';
-    } else if (moduleFile.endsWith(this.TYPINGS_EXT)) {
+    } else if (this.isTypingsFile(moduleFile)) {
       return 'typings';
     } else {
       const ext = path.extname(moduleFile);
@@ -244,7 +262,7 @@ export class ManifestModuleUtil {
    * Get the output file name for a given input
    */
   static withOutputExtension(sourceFile: string): string {
-    if (sourceFile.endsWith(this.TYPINGS_EXT)) {
+    if (this.isTypingsFile(sourceFile)) {
       return sourceFile;
     }
     return this.#pathToExtension(sourceFile, ManifestModuleUtil.OUTPUT_EXT);
@@ -254,10 +272,20 @@ export class ManifestModuleUtil {
    * Get the file without an extension
    */
   static withoutSourceExtension(sourceFile: string): string {
-    if (sourceFile.endsWith(this.TYPINGS_EXT)) {
+    if (this.isTypingsFile(sourceFile)) {
       return sourceFile;
     }
     return this.#pathToExtension(sourceFile, '');
+  }
+
+  /**
+   * Get the output file without an extension
+   */
+  static withoutOutputExtension(outputFile: string): string {
+    if (this.isTypingsFile(outputFile)) {
+      return outputFile.replace(this.TYPINGS_EXT_REGEX, '');
+    }
+    return outputFile.replace(this.OUTPUT_EXT_REGEX, '');
   }
 
   /**
