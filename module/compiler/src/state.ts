@@ -32,6 +32,9 @@ export class CompilerState implements CompilerHost {
   #sourceContents = new Map<string, string | undefined>();
   #sourceFileObjects = new Map<string, SourceFile>();
 
+  #fileToDependencies = new Map<string, Set<string>>();
+  #fileToImporters = new Map<string, Set<string>>();
+
   #manifestIndex: ManifestIndex;
   #manifest: ManifestRoot;
   #modules: ManifestModule[];
@@ -51,9 +54,9 @@ export class CompilerState implements CompilerHost {
     return undefined;
   }
 
-  #writeFile(location: string, text: string, bom?: boolean): void {
+  #writeFile(location: string, text: string, writeByteOrderMark?: boolean): void {
     try {
-      ts.sys.writeFile(location, text, bom);
+      ts.sys.writeFile(location, text, writeByteOrderMark);
     } catch {
       fs.mkdirSync(path.dirname(location), { recursive: true });
       fs.writeFileSync(location, text, 'utf8');
@@ -73,20 +76,6 @@ export class CompilerState implements CompilerHost {
       return ts.sys.directoryExists(location);
     } catch {
       return fs.existsSync(location);
-    }
-  }
-
-  #writeExternalTypings(location: string, text: string, bom?: boolean): void {
-    let core = location.replace(ManifestModuleUtil.MAP_EXT, '');
-    if (!this.#outputToEntry.has(core)) {
-      core = core.replace(ManifestModuleUtil.TYPINGS_EXT_REGEX, ManifestModuleUtil.OUTPUT_EXT);
-    }
-    const entry = this.#outputToEntry.get(core);
-    if (entry) {
-      const relative = this.#manifestIndex.getFromSource(entry.sourceFile)?.relativeFile;
-      if (relative && CompilerUtil.isExternalTypings(relative)) {
-        this.#writeFile(location.replace(this.#outputPath, this.#typingsPath), text, bom);
-      }
     }
   }
 
@@ -179,6 +168,7 @@ export class CompilerState implements CompilerHost {
         oldProgram: this.#program
       });
       this.#transformerManager.init(this.#program.getTypeChecker());
+
       await CommonUtil.queueMacroTask();
     }
     return this.#program;
@@ -192,7 +182,68 @@ export class CompilerState implements CompilerHost {
     });
   }
 
-  async compileSourceFile(sourceFile: string, needsNewProgram = false): Promise<CompilerDiagnosticItem[] | undefined> {
+  #writeOutput(
+    outputLocation: string,
+    text: string,
+    writeByteOrderMark?: boolean,
+    typingsLocation?: string,
+    declarationChange?: { changed: boolean }
+  ): void {
+    if (declarationChange && ManifestModuleUtil.isTypingsFile(outputLocation)) {
+      const previous = this.#readFile(outputLocation);
+      if (previous !== text) {
+        declarationChange.changed = true;
+      }
+    }
+    this.#writeFile(outputLocation, text, writeByteOrderMark);
+    if (typingsLocation) {
+      this.#writeFile(typingsLocation, text, writeByteOrderMark);
+    }
+  }
+
+  #updateFileDependencies(sourceFile: string, program?: Program): void {
+    const previousDependencies = this.#fileToDependencies.get(sourceFile);
+    if (previousDependencies) {
+      for (const dependency of previousDependencies) {
+        this.#fileToImporters.get(dependency)?.delete(sourceFile);
+      }
+      this.#fileToDependencies.delete(sourceFile);
+    }
+    if (!program) {
+      this.#fileToImporters.delete(sourceFile);
+      return;
+    }
+
+    const nextDependencies = new Set<string>();
+    const tsSourceFile = program.getSourceFile(sourceFile);
+    if (tsSourceFile) {
+      for (const statement of tsSourceFile.statements) {
+        if (ts.isImportDeclaration(statement) || ts.isExportDeclaration(statement)) {
+          const specifier = statement.moduleSpecifier;
+          if (specifier && ts.isStringLiteral(specifier)) {
+            const resolved = ts.resolveModuleName(specifier.text, sourceFile, this.#compilerOptions, this);
+            const resolvedFileName = resolved.resolvedModule?.resolvedFileName;
+            if (resolvedFileName && this.#sourceToEntry.has(resolvedFileName) && resolvedFileName !== sourceFile) {
+              nextDependencies.add(resolvedFileName);
+              let importers = this.#fileToImporters.get(resolvedFileName);
+              if (!importers) {
+                importers = new Set();
+                this.#fileToImporters.set(resolvedFileName, importers);
+              }
+              importers.add(sourceFile);
+            }
+          }
+        }
+      }
+    }
+    this.#fileToDependencies.set(sourceFile, nextDependencies);
+  }
+
+  async compileSourceFile(
+    sourceFile: string,
+    needsNewProgram = false,
+    declarationChange?: { changed: boolean }
+  ): Promise<CompilerDiagnosticItem[] | undefined> {
     const entry = this.#sourceToEntry.get(sourceFile);
     const output = entry?.outputFile;
     if (!output || !entry) {
@@ -205,30 +256,34 @@ export class CompilerState implements CompilerHost {
       case 'package-json': {
         const text = this.readFile(sourceFile)!;
         const finalText = CompilerUtil.rewritePackageJSON(this.#manifest, text);
-        this.#writeFile(output, finalText);
-        this.#writeExternalTypings(output, finalText);
+        const typingsLocation = CompilerUtil.isExternalTypings(entry.moduleFile)
+          ? output.replace(this.#outputPath, this.#typingsPath)
+          : undefined;
+        this.#writeOutput(output, finalText, false, typingsLocation);
         break;
       }
       case 'js':
-      case 'typings':
-        this.writeFile(output, this.readFile(sourceFile)!);
+        this.#writeOutput(output, this.readFile(sourceFile)!);
         break;
+      case 'typings': {
+        const { outputLocation, typingsLocation } = this.#resolveEmittedFilePath(entry, output);
+        this.#writeOutput(outputLocation, this.readFile(sourceFile)!, false, typingsLocation, declarationChange);
+        break;
+      }
       case 'ts': {
         const program = await this.getProgram(needsNewProgram);
         const tsSourceFile = program.getSourceFile(sourceFile)!;
         program.emit(
           tsSourceFile,
-          (...args) => {
-            const { outputLocation, typingsLocation } = this.#resolveEmittedFilePath(entry, args[0]);
-            this.writeFile(outputLocation, args[1], args[2]);
-            if (typingsLocation) {
-              this.#writeExternalTypings(typingsLocation, args[1], args[2]);
-            }
+          (fileName, text, writeByteOrderMark) => {
+            const { outputLocation, typingsLocation } = this.#resolveEmittedFilePath(entry, fileName);
+            this.#writeOutput(outputLocation, text, writeByteOrderMark, typingsLocation, declarationChange);
           },
           undefined,
           false,
           this.#transformerManager.get()
         );
+        this.#updateFileDependencies(sourceFile, program);
         const diagnostics: CompilerDiagnosticItem[] = [];
         const rawDiagnostics = [
           ...program.getSemanticDiagnostics(tsSourceFile),
@@ -261,6 +316,48 @@ export class CompilerState implements CompilerHost {
           this.#failures.set(sourceFile, diagnostics.length);
         }
         return diagnostics;
+      }
+    }
+  }
+
+  async *compileAffectedFiles(
+    changedFiles: string[]
+  ): AsyncGenerator<{ sourceFile: string; diagnostics: CompilerDiagnosticItem[]; duration: number }> {
+    const queue = new Set<string>(changedFiles);
+    for (const failedFile of this.#failures.keys()) {
+      queue.add(failedFile);
+    }
+
+    const processed = new Set<string>();
+    let needsNewProgram = true;
+
+    for (const file of queue) {
+      if (processed.has(file)) {
+        continue;
+      }
+      processed.add(file);
+
+      const start = Date.now();
+      const type = ManifestModuleUtil.getFileType(file);
+      if (type !== 'ts') {
+        const diagnostics = (await this.compileSourceFile(file)) ?? [];
+        yield { sourceFile: file, diagnostics, duration: Date.now() - start };
+      } else {
+        const declarationChange = { changed: false };
+        const diagnostics = (await this.compileSourceFile(file, needsNewProgram, declarationChange)) ?? [];
+        needsNewProgram = false;
+        yield { sourceFile: file, diagnostics, duration: Date.now() - start };
+
+        if (declarationChange.changed) {
+          const importers = this.#fileToImporters.get(file);
+          if (importers) {
+            for (const importer of importers) {
+              if (!processed.has(importer)) {
+                queue.add(importer);
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -356,6 +453,8 @@ export class CompilerState implements CompilerHost {
       this.#outputToEntry.delete(entry.outputFile);
     }
 
+    this.#updateFileDependencies(sourceFile);
+
     if (!entry) {
       return false;
     }
@@ -415,15 +514,10 @@ export class CompilerState implements CompilerHost {
     return this.#sourceDirectory.has(sourceDirectory) || this.#directoryExists(sourceDirectory);
   }
 
-  writeFile(outputFile: string, text: string, bom?: boolean): void {
+  writeFile(outputFile: string, text: string, writeByteOrderMark?: boolean): void {
     // JSX runtime shenanigans
     text = text.replace(/support\/jsx-runtime"/g, 'support/jsx-runtime.js"');
-
-    if (ManifestModuleUtil.isTypingsWithMapFile(outputFile)) {
-      this.#writeExternalTypings(outputFile, text, bom);
-    }
-
-    this.#writeFile(outputFile, text, bom);
+    this.#writeFile(outputFile, text, writeByteOrderMark);
   }
 
   readFile(sourceFile: string): string | undefined {

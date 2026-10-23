@@ -1,5 +1,4 @@
 import { setMaxListeners } from 'node:events';
-import fs from 'node:fs/promises';
 
 import { type DeltaEvent, getManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil, path } from '@travetto/manifest';
 
@@ -122,27 +121,22 @@ export class Compiler {
     let i = 0;
     let lastSent = Date.now();
 
-    for (const file of files) {
-      const start = Date.now();
-      const diagnostics = await this.#state.compileSourceFile(file);
-      const duration = Date.now() - start;
+    for await (const result of this.#state.compileAffectedFiles(files)) {
       const nodeModSeparator = 'node_modules/';
-      const nodeModIdx = file.lastIndexOf(nodeModSeparator);
-      const imp = nodeModIdx >= 0 ? file.substring(nodeModIdx + nodeModSeparator.length) : file;
-      if (diagnostics?.length) {
-        const normalizedFile = path.relative(this.#state.manifest.workspace.path, file);
-        for (const diagnostic of diagnostics) {
+      const nodeModIdx = result.sourceFile.lastIndexOf(nodeModSeparator);
+      const imp = nodeModIdx >= 0 ? result.sourceFile.substring(nodeModIdx + nodeModSeparator.length) : result.sourceFile;
+
+      if (result.diagnostics.length) {
+        const normalizedFile = path.relative(this.#state.manifest.workspace.path, result.sourceFile);
+        for (const diagnostic of result.diagnostics) {
           log.error(`ERROR ${imp}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], {
             phase: 'error',
             file: normalizedFile
           });
         }
-        // Touch file to ensure recompilation later
-        if (await fs.stat(file, { throwIfNoEntry: false })) {
-          await fs.utimes(file, new Date(), new Date());
-        }
       }
-      yield { file: imp, sourceFile: file, i: (i += 1), total: files.length, duration };
+
+      yield { file: imp, sourceFile: result.sourceFile, i: (i += 1), total: files.length, duration: result.duration };
       if (Date.now() - lastSent > 50) {
         // Limit to 1 every 50ms
         lastSent = Date.now();
