@@ -8,6 +8,7 @@
 - **Generated & Archived Files**: Never manually edit generated outputs (such as `openapi.yml`) or modify files in `archived/`.
 
 ## PR & Maintenance Discipline
+- **Stacked PRs**: When splitting large changes into dependent PR chains, use `gh stack` (`init`, `sync`, `submit`) to manage branches locally and link PRs on GitHub.
 - **Minimal Churn**: Keep changes tightly scoped to the requested task or bug fix. Do not touch, reformat, or rename unrelated code (including expanding existing abbreviations outside the PR scope) or make purely cosmetic/stylistic rewrites.
 - **Intentional Deletions**: Never restore or re-add code that was intentionally removed unless explicitly requested by the user.
 - **Instruction Hygiene**: Follow the selective update policy in `.agents/AGENTS.md`—only record cross-cutting repo conventions or explicit user rule requests here, never module-specific implementation details.
