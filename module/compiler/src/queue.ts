@@ -32,6 +32,11 @@ export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
     return this.#queue.some(predicate);
   }
 
+  drain(): X[] {
+    const items = this.#queue.splice(0, this.#queue.length);
+    return items;
+  }
+
   add(item: X): void {
     this.#queue.push(item);
     this.#ready.resolve();
