@@ -6,7 +6,7 @@ import type { ManifestContext } from '@travetto/manifest';
 
 import { CommonUtil } from '../common.ts';
 import type { CompilerEventPayload, CompilerEventType, CompilerServerInfo, CompilerStateType, CompilerLoggerShape } from '../types.ts';
-import { ProcessHandle } from './process-handle.ts';
+import { CompilerUtil } from '../util.ts';
 
 type FetchEventsConfig<T> = {
   signal?: AbortSignal;
@@ -26,14 +26,12 @@ const streamAgent = new Agent({
 export class CompilerClient {
   #url: string;
   #log: CompilerLoggerShape;
-  #handle: Record<'compiler' | 'server', ProcessHandle>;
   #ctx: ManifestContext;
 
   constructor(ctx: ManifestContext, log: CompilerLoggerShape) {
     this.#ctx = ctx;
     this.#url = ctx.build.compilerUrl.replace('localhost', '127.0.0.1');
     this.#log = log;
-    this.#handle = { compiler: new ProcessHandle(ctx, 'compiler'), server: new ProcessHandle(ctx, 'server') };
   }
 
   toString(): string {
@@ -87,13 +85,12 @@ export class CompilerClient {
   async stop(): Promise<boolean> {
     const info = await this.info();
     if (!info) {
-      this.#log.debug('Stopping server, info not found, manual killing');
-      return Promise.all([this.#handle.server.kill(), this.#handle.compiler.kill()]).then(results => results.some(result => result));
+      return false;
     }
 
-    await this.#fetch('/stop').catch(() => {}); // Trigger
-    this.#log.debug('Waiting for compiler to exit');
-    await this.#handle.compiler.ensureKilled();
+    await this.#fetch('/stop').catch(() => {});
+    this.#log.debug('Waiting for compiler and server to exit');
+    await Promise.all([CompilerUtil.killProcess(info.compilerProcessId), CompilerUtil.killProcess(info.serverProcessId)]);
     return true;
   }
 
