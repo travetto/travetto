@@ -35,7 +35,6 @@ export class CompilerState implements CompilerHost {
 
   #sourceContents = new Map<string, string | undefined>();
   #sourceFileObjects = new Map<string, SourceFile>();
-  #sourceHashes = new Map<string, number>();
 
   #manifestIndex: ManifestIndex;
   #manifest: ManifestRoot;
@@ -301,7 +300,6 @@ export class CompilerState implements CompilerHost {
 
     this.#outputToEntry.set(outputFile, entry);
     this.#sourceFiles.add(sourceFile);
-    this.#sourceHashes.set(sourceFile, -1); // Unknown
     this.#sourceToEntry.set(sourceFile, entry);
     this.#sourceDirectory.set(sourceFolder, sourceFolder);
 
@@ -320,22 +318,22 @@ export class CompilerState implements CompilerHost {
 
   checkIfSourceChanged(sourceFile: string): boolean {
     const contents = this.#readFile(sourceFile);
-    const prevHash = this.#sourceHashes.get(sourceFile);
-    if (!contents || (contents.length === 0 && prevHash)) {
-      return false; // Ignore empty file
+    if (contents === undefined) {
+      return false;
     }
-    const currentHash = CompilerUtil.naiveHash(contents);
-    const changed = prevHash !== currentHash;
+    const previousContents = this.#sourceContents.get(sourceFile);
+    if (contents.length === 0 && (previousContents?.length ?? 0) > 0) {
+      return false; // Ignore transient empty file on save
+    }
+    const changed = previousContents !== contents;
     if (changed) {
-      this.#sourceHashes.set(sourceFile, currentHash);
       this.#sourceContents.set(sourceFile, contents);
       this.#sourceFileObjects.delete(sourceFile);
     }
     return changed;
   }
 
-  resetSourceHash(sourceFile: string): void {
-    this.#sourceHashes.delete(sourceFile);
+  resetSource(sourceFile: string): void {
     this.#sourceContents.delete(sourceFile);
     this.#sourceFileObjects.delete(sourceFile);
   }
@@ -349,7 +347,6 @@ export class CompilerState implements CompilerHost {
 
     this.#sourceFileObjects.delete(sourceFile);
     this.#sourceContents.delete(sourceFile);
-    this.#sourceHashes.delete(sourceFile);
     this.#sourceToEntry.delete(sourceFile);
     this.#sourceFiles.delete(sourceFile);
     this.#outputToEntry.delete(entry?.outputFile ?? undefined!);
@@ -438,8 +435,8 @@ export class CompilerState implements CompilerHost {
       this.#sourceFileObjects.delete(sourceFile);
     }
     return this.#sourceFileObjects.getOrInsertComputed(sourceFile, () => {
-      const content = this.readFile(sourceFile)!;
-      return ts.createSourceFile(sourceFile, content ?? '', language);
+      const content = this.readFile(sourceFile) ?? '';
+      return ts.createSourceFile(sourceFile, content, language);
     });
   }
 }

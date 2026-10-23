@@ -315,7 +315,7 @@ export class CompilerWatcher {
     if (this.#queue.has(item => item.file === file)) {
       return;
     }
-    this.#state.resetSourceHash(file);
+    this.#state.resetSource(file);
     const candidate = this.#toCandidateEvent({ action: 'update', file });
     if (this.#isValidEvent(candidate)) {
       this.#queue.add(candidate);
