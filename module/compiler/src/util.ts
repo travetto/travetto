@@ -35,19 +35,6 @@ export class CompilerUtil {
   }
 
   /**
-   * Naive hashing
-   */
-  static naiveHash(text: string): number {
-    let hash = 5381;
-
-    for (let i = 0; i < text.length; i += 1) {
-      hash = (hash * 33) ^ text.charCodeAt(i);
-    }
-
-    return Math.abs(hash);
-  }
-
-  /**
    * Clear package and module scan caches, with optional deletion of compiler output data
    */
   static async clearCaches(context: ManifestContext, deleteOutput = false): Promise<void> {
