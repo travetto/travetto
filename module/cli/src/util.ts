@@ -34,7 +34,7 @@ export class CliUtil {
 
     let child: ChildProcess | undefined;
     const stop = (reason: 'restart' | 'quit') => () => ShutdownManager.shutdownWithChild(child, { reason, mode: 'exit' });
-    await WatchUtil.watchCompilerEvents('file', stop('restart'));
+    await WatchUtil.watchCompilerEvents('change', stop('restart'));
     await WatchUtil.watchCompilerLogs();
 
     process
