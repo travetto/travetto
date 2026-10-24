@@ -9,7 +9,6 @@ import { Log } from '../log.ts';
 import type { CompilerEvent, CompilerEventType, CompilerProgressEvent, CompilerServerInfo } from '../types.ts';
 import { CompilerUtil } from '../util.ts';
 import { CompilerClient } from './client.ts';
-import { ProcessHandle } from './process-handle.ts';
 
 const log = Log.scoped('server');
 const RESET_KILL_TIMEOUT_MILLISECONDS = 3000;
@@ -28,13 +27,11 @@ export class CompilerServer {
   info: CompilerServerInfo;
   #client: CompilerClient;
   #url: string;
-  #handle: Record<'compiler' | 'server', ProcessHandle>;
 
   constructor(ctx: ManifestContext, watching: boolean) {
     this.#ctx = ctx;
     this.#client = new CompilerClient(ctx, Log.scoped('server.client'));
     this.#url = this.#client.url;
-    this.#handle = { server: new ProcessHandle(ctx, 'server'), compiler: new ProcessHandle(ctx, 'compiler') };
 
     this.info = {
       state: 'startup',
@@ -102,8 +99,6 @@ export class CompilerServer {
       // Let the server finish
       await this.#client.waitForState(['closed'], 'Server closed', this.signal);
       return this.#tryListen(attempt + 1);
-    } else if (output === 'ok') {
-      await this.#handle.server.writePidFile(this.info.serverProcessId);
     }
 
     return output;
@@ -237,11 +232,26 @@ export class CompilerServer {
     }
   }
 
+  async #handleResetEvent(event: CompilerEvent): Promise<void> {
+    if (this.isResetEvent(event)) {
+      if (!event.payload.soft) {
+        log.info('Reset event received, wiping compiler caches and output');
+        this.info.messages = {};
+        this.#ctx = getManifestContext();
+        await this.#disconnectActive();
+      }
+      const previousProcessId = this.info.compilerProcessId;
+      this.info.compilerProcessId = 0;
+      await CompilerUtil.killProcess(previousProcessId, RESET_KILL_TIMEOUT_MILLISECONDS);
+      await CompilerUtil.clearCaches(this.#ctx, !event.payload.soft);
+    }
+  }
+
   /**
    * Process events
    */
   async processEvents(input: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
-    for await (const event of CommonUtil.restartableEvents(input, this.signal, this.isResetEvent)) {
+    for await (const event of CommonUtil.restartableEvents(input, this.signal, this.isResetEvent, event => this.#handleResetEvent(event))) {
       if (event.type === 'progress') {
         await Log.onProgressEvent(event.payload);
       }
@@ -257,10 +267,9 @@ export class CompilerServer {
           if (EventUtil.hasProcessId(event.payload)) {
             if (this.info.watching && !this.info.compilerProcessId) {
               // Ensure we are killing in watch mode on first set
-              await this.#handle.compiler.kill();
+              await CompilerUtil.killProcess(this.info.compilerProcessId);
             }
             this.info.compilerProcessId = event.payload.extra.processId;
-            await this.#handle.compiler.writePidFile(this.info.compilerProcessId);
           }
         } else if (event.payload.state === 'watch-start') {
           this.info.messages = {};
@@ -284,17 +293,6 @@ export class CompilerServer {
             break;
         }
         log.render(event.payload);
-      }
-      if (this.isResetEvent(event)) {
-        if (!event.payload.soft) {
-          log.info('Reset event received, wiping compiler caches and output');
-          this.info.messages = {};
-          this.#ctx = getManifestContext();
-          await this.#disconnectActive();
-        }
-        this.info.compilerProcessId = 0;
-        await this.#handle.compiler.ensureKilled(RESET_KILL_TIMEOUT_MILLISECONDS);
-        await CompilerUtil.clearCaches(this.#ctx, !event.payload.soft);
       }
     }
 
@@ -333,7 +331,7 @@ export class CompilerServer {
       // Timeout or other error
       // Force shutdown
       this.#server.closeAllConnections();
-      await this.#handle.compiler.kill();
+      await CompilerUtil.killProcess(this.info.compilerProcessId);
     }
 
     log.info('Closed down server');

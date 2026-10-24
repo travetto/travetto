@@ -14,7 +14,8 @@ export class CommonUtil {
   static async *restartableEvents<T>(
     input: (signal: AbortSignal) => AsyncIterable<T>,
     parent: AbortSignal,
-    shouldRestart: (item: T) => boolean
+    shouldRestart: (item: T) => boolean,
+    onRestart?: (item: T) => Promise<void>
   ): AsyncIterable<T> {
     outer: while (!parent.aborted) {
       const controller = new AbortController();
@@ -34,6 +35,7 @@ export class CommonUtil {
           log.debug('Restarting stream');
           controller.abort(); // Ensure terminated of process
           parent.removeEventListener('abort', kill);
+          await onRestart?.(event);
           continue outer;
         }
       }
