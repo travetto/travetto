@@ -57,11 +57,9 @@ export type CompilerLogEvent = Scoped<{
 }>;
 export type CompilerProgressEvent = Scoped<{ idx: number; total: number; message: string; operation: 'compile'; complete?: boolean }>;
 export type CompilerStateEvent = Scoped<{ state: CompilerStateType; soft?: boolean; extra?: Record<string, unknown> }>;
-export type FileChangeEvent = Scoped<{ files: { file: string; action: ChangeEventType }[]; time: number }>;
 export type CompilerAllEvent = Scoped<{}>;
 
 export type CompilerEvent =
-  | { type: 'file'; payload: FileChangeEvent }
   | { type: 'change'; payload: CompilerChangeEvent }
   | { type: 'log'; payload: CompilerLogEvent }
   | { type: 'progress'; payload: CompilerProgressEvent }
