@@ -1,34 +1,21 @@
-import { execFile } from 'node:child_process';
 import { watch } from 'node:fs';
 import fs from 'node:fs/promises';
-import { promisify } from 'node:util';
 
-import { ManifestFileUtil, ManifestModuleUtil, ManifestUtil, PACKAGE_MANAGERS, PackageUtil, path } from '@travetto/manifest';
+import { ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
 
 import { CommonUtil } from './common.ts';
-import { EventUtil } from './event.ts';
 import { IpcLog as log } from './log.ts';
 import { AsyncQueue } from './queue.ts';
 import type { CompilerState } from './state.ts';
 import { CompilerReset, type CompilerWatchEvent, type CompilerWatchRawEvent, type CompileStateEntry } from './types.ts';
 
-const executeFile = promisify(execFile);
-const fromLines = <K extends string[]>(output: string, ...keys: K): Record<K[number], string> | undefined => {
-  const lines = output
-    .split('\n')
-    .map(x => x.trim())
-    .filter(Boolean);
-  if (!lines.length) {
-    return;
-  }
-  return Object.fromEntries(keys.map((key, idx) => [key, lines[idx]])) as Record<K[number], string>;
-};
+const CONFIGURATION_FILE_PATTERN = /(^|\/)(package\.json|tsconfig(\..+)?\.json|package-lock\.json|yarn\.lock|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/;
 
 type CompilerWatchEventCandidate = Omit<CompilerWatchEvent, 'entry'> & { entry?: CompileStateEntry };
 
 export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
   #state: CompilerState;
-  #cleanup: Partial<Record<'tool' | 'workspace' | 'git' | 'rotation', () => void | Promise<void>>> = {};
+  #cleanup: Partial<Record<'tool' | 'workspace' | 'rotation', () => void | Promise<void>>> = {};
   #lastWorkspaceEventTime = Date.now();
   #watchRotationFrequency = 30; // 30 seconds
   #root: string;
@@ -86,7 +73,7 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
     const relativeFile = file.replace(`${this.#root}/`, '');
     if (relativeFile.startsWith('.')) {
       return false;
-    } else if (!ManifestModuleUtil.isSourceType(file)) {
+    } else if (!ManifestModuleUtil.isSourceType(file) && !CONFIGURATION_FILE_PATTERN.test(file)) {
       return false;
     }
     return true;
@@ -212,63 +199,6 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
     this.#cleanup.rotation = (): void => clearInterval(intervalId);
   }
 
-  async #getGitHeadRef(): Promise<{ hash: string; ref: string } | undefined> {
-    return executeFile('git', ['rev-parse', 'HEAD', '--symbolic-full-name', 'HEAD'], { cwd: this.#root }).then(
-      ({ stdout }) => fromLines(stdout, 'hash', 'ref'),
-      () => undefined
-    );
-  }
-
-  async #getGitDirectories(): Promise<{ gitDirectory: string; commonDirectory: string } | undefined> {
-    return await executeFile('git', ['rev-parse', '--git-dir', '--git-common-dir'], { cwd: this.#root }).then(
-      ({ stdout }) => fromLines(stdout, 'gitDirectory', 'commonDirectory'),
-      () => undefined
-    );
-  }
-
-  async #listenGitChanges(): Promise<void> {
-    const directories = await this.#getGitDirectories();
-    if (!directories) {
-      return;
-    }
-    const { gitDirectory, commonDirectory } = directories;
-
-    log.debug('Starting git canary in', gitDirectory);
-    let currentHead = await this.#getGitHeadRef();
-    let isChecking: Promise<void> | undefined;
-
-    const checkChange = async (): Promise<void> => {
-      try {
-        const nextHead = await this.#getGitHeadRef();
-        if (nextHead && currentHead && nextHead.hash !== currentHead.hash) {
-          currentHead = nextHead;
-          this.#queue.throw(new CompilerReset(`Git branch or commit change detected: ${currentHead.hash}=>${nextHead.hash}`));
-        }
-      } finally {
-        isChecking = undefined;
-      }
-    };
-
-    const watchers: { close(): void }[] = [];
-    const targets = [
-      {
-        folder: path.resolve(this.#root, gitDirectory),
-        filter: (file?: string | null): boolean => !file || /^(HEAD|packed-refs|refs)/.test(file)
-      },
-      { folder: path.resolve(this.#root, commonDirectory, 'refs', 'heads'), filter: (): boolean => true }
-    ];
-
-    for (const { folder, filter } of targets) {
-      if (await fs.stat(folder, { throwIfNoEntry: false })) {
-        watchers.push(watch(folder, { encoding: 'utf8' }, (_, file) => filter(file) && (isChecking ??= checkChange())));
-      }
-    }
-
-    this.#cleanup.git = (): void => {
-      watchers.forEach(watcher => watcher.close());
-    };
-  }
-
   add(file: string): void {
     if (this.#queue.has(item => item.file === file)) {
       return;
@@ -285,6 +215,13 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
       throw new CompilerReset('Compiler source changed', { files: changedCompilerFiles });
     }
 
+    const changedConfigurationFiles = rawEvents
+      .filter(item => CONFIGURATION_FILE_PATTERN.test(item.file))
+      .map(item => path.relative(this.#root, item.file));
+    if (changedConfigurationFiles.length) {
+      throw new CompilerReset('Package or compiler configuration changed', { files: changedConfigurationFiles, soft: true });
+    }
+
     const items = rawEvents.map(event => this.#toCandidateEvent(event)).filter(event => this.#isValidEvent(event));
 
     if (items.length > 0) {
@@ -299,7 +236,6 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
       await this.#listenWorkspace();
       await this.#listenWorkspaceRotation();
       await this.#listenToolFolder();
-      await this.#listenGitChanges();
     }
 
     for await (const firstEvent of this.#queue) {

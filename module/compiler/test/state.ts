@@ -6,7 +6,9 @@ import { Suite, Test } from '@travetto/test';
 
 import { AsyncQueue } from '../src/queue.ts';
 import { CompilerState } from '../src/state.ts';
+import { CompilerReset } from '../src/types.ts';
 import { CompilerUtil } from '../src/util.ts';
+import { CompilerWatcher } from '../src/watch.ts';
 
 @Suite()
 class CompilerStateTests {
@@ -135,23 +137,59 @@ class CompilerStateTests {
     assert.strictEqual(CompilerUtil.isExternalTypings('src/main.ts'), true);
     assert.strictEqual(CompilerUtil.isExternalTypings('test/main.ts'), false);
 
-    const jsResolution = CompilerUtil.resolveEmittedFilePath(
-      '/app/dist/src/main.js',
-      'main.js'
-    );
+    const jsResolution = CompilerUtil.resolveEmittedFilePath('/app/dist/src/main.js', 'main.js');
     assert.strictEqual(jsResolution.outputLocation, '/app/dist/src/main.js');
     assert.strictEqual(jsResolution.typingsLocation, undefined);
 
-    const dtsResolution = CompilerUtil.resolveEmittedFilePath(
-      '/app/dist/src/main.js',
-      'main.d.ts',
-      {
-        moduleFile: 'src/main.ts',
-        outputPath: '/app/dist',
-        typingsPath: '/app/dist/typings'
-      }
-    );
+    const dtsResolution = CompilerUtil.resolveEmittedFilePath('/app/dist/src/main.js', 'main.d.ts', {
+      moduleFile: 'src/main.ts',
+      outputPath: '/app/dist',
+      typingsPath: '/app/dist/typings'
+    });
     assert.strictEqual(dtsResolution.outputLocation, '/app/dist/src/main.d.ts');
     assert.strictEqual(dtsResolution.typingsLocation, '/app/dist/typings/src/main.d.ts');
+  }
+
+  @Test()
+  async verifyConfigurationFileChangesTriggerSoftReset() {
+    const baseManifest = this.#createManifest();
+    const state = await CompilerState.get(new ManifestIndex(baseManifest));
+    const controller = new AbortController();
+    const watcher = new CompilerWatcher(state, controller.signal);
+
+    await assert.rejects(
+      async () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/package.json') }]),
+      (error: unknown) => error instanceof CompilerReset && error.soft === true
+    );
+
+    await assert.rejects(
+      async () => watcher.prepareBatch([{ action: 'create', file: path.resolve('/test/app/module/sub/package.json') }]),
+      (error: unknown) => error instanceof CompilerReset && error.soft === true
+    );
+
+    await assert.rejects(
+      async () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/tsconfig.json') }]),
+      (error: unknown) => error instanceof CompilerReset && error.soft === true
+    );
+
+    await assert.rejects(
+      async () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/yarn.lock') }]),
+      (error: unknown) => error instanceof CompilerReset && error.soft === true
+    );
+
+    await assert.rejects(
+      async () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/pnpm-lock.yaml') }]),
+      (error: unknown) => error instanceof CompilerReset && error.soft === true
+    );
+
+    await assert.rejects(
+      async () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/pnpm-workspace.yaml') }]),
+      (error: unknown) => error instanceof CompilerReset && error.soft === true
+    );
+
+    await assert.rejects(
+      async () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/package-lock.json') }]),
+      (error: unknown) => error instanceof CompilerReset && error.soft === true
+    );
   }
 }
