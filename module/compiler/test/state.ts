@@ -192,4 +192,18 @@ class CompilerStateTests {
       (error: unknown) => error instanceof CompilerReset && error.soft === true
     );
   }
+
+  @Test()
+  async verifyJsxRuntimeRewrite() {
+    const baseManifest = this.#createManifest();
+    const state = await CompilerState.get(new ManifestIndex(baseManifest));
+    const targetPath = path.resolve('.trv/test-jsx-runtime.js');
+    try {
+      state.writeFile(targetPath, 'import { jsx } from "@travetto/doc/support/jsx-runtime";');
+      const content = fs.readFileSync(targetPath, 'utf8');
+      assert.strictEqual(content, 'import { jsx } from "@travetto/doc/support/jsx-runtime.js";');
+    } finally {
+      fs.rmSync(targetPath, { force: true });
+    }
+  }
 }

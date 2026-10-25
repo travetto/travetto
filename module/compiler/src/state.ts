@@ -189,6 +189,8 @@ export class CompilerState implements CompilerHost {
     typingsLocation?: string,
     declarationChange?: { changed: boolean }
   ): void {
+    // JSX runtime shenanigans
+    text = text.replace(/support\/jsx-runtime"/g, 'support/jsx-runtime.js"');
     if (declarationChange && ManifestModuleUtil.isTypingsFile(outputLocation)) {
       const previous = this.#readFile(outputLocation);
       if (previous !== text) {
