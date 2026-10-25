@@ -5,7 +5,6 @@ import { promisify } from 'node:util';
 
 import { ManifestModuleUtil, ManifestUtil, PACKAGE_MANAGERS, PackageUtil, path } from '@travetto/manifest';
 
-import { EventUtil } from './event.ts';
 import { IpcLog as log } from './log.ts';
 import { AsyncQueue } from './queue.ts';
 import type { CompilerState } from './state.ts';
@@ -148,10 +147,6 @@ export class CompilerWatcher {
           const filesChanged = events
             .map(event => ({ file: path.toPosix(event.path), action: event.type }))
             .filter(event => this.#isValidFile(event.file));
-
-          if (filesChanged.length) {
-            EventUtil.sendEvent('file', { workspace: this.#state.manifest.workspace.path, time: Date.now(), files: filesChanged });
-          }
 
           const changedPackageFiles = events
             .map(event => path.toPosix(event.path))
