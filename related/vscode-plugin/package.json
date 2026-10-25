@@ -49,7 +49,7 @@
   "dependencies": {
     "@travetto/registry": "^8.0.1",
     "@travetto/runtime": "^8.0.1",
-    "temporal-polyfill-lite": "^1.0.0"
+    "temporal-polyfill-lite": "^0.4.3"
   },
   "travetto": {
     "displayName": "Travetto Plugin",
