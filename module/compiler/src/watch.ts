@@ -3,7 +3,7 @@ import { watch } from 'node:fs';
 import fs from 'node:fs/promises';
 import { promisify } from 'node:util';
 
-import { ManifestFileUtil, ManifestModuleUtil, ManifestUtil, PACKAGE_MANAGERS, PackageUtil, path } from '@travetto/manifest';
+import { ManifestModuleUtil, ManifestUtil, PACKAGE_MANAGERS, PackageUtil, path } from '@travetto/manifest';
 
 import { EventUtil } from './event.ts';
 import { IpcLog as log } from './log.ts';
@@ -27,10 +27,9 @@ type CompilerWatchEventCandidate = Omit<CompilerWatchEvent, 'entry'> & { entry?:
 
 export class CompilerWatcher {
   #state: CompilerState;
-  #cleanup: Partial<Record<'tool' | 'workspace' | 'canary' | 'git', () => void | Promise<void>>> = {};
-  #watchCanary: string = '.trv/canary.id';
-  #lastWorkspaceModified: number;
-  #watchCanaryFrequency = 5;
+  #cleanup: Partial<Record<'tool' | 'workspace' | 'git' | 'rotation', () => void | Promise<void>>> = {};
+  #lastWorkspaceEventTime = Date.now();
+  #watchRotationFrequency = 30; // 30 seconds
   #root: string;
   #queue: AsyncQueue<CompilerWatchEvent>;
 
@@ -84,9 +83,7 @@ export class CompilerWatcher {
 
   #isValidFile(file: string): boolean {
     const relativeFile = file.replace(`${this.#root}/`, '');
-    if (relativeFile === this.#watchCanary) {
-      return false;
-    } else if (relativeFile.startsWith('.')) {
+    if (relativeFile.startsWith('.')) {
       return false;
     } else if (!ManifestModuleUtil.isSourceType(file)) {
       return false;
@@ -140,7 +137,7 @@ export class CompilerWatcher {
     const listener = await lib.subscribe(
       this.#root,
       async (error, events) => {
-        this.#lastWorkspaceModified = Date.now();
+        this.#lastWorkspaceEventTime = Date.now();
 
         try {
           if (error) {
@@ -201,7 +198,19 @@ export class CompilerWatcher {
       { ignore }
     );
 
-    this.#cleanup.workspace = (): Promise<void> => listener.unsubscribe();
+    const packageJsonFile = path.resolve(this.#root, 'package.json');
+    const pkgListener = watch(packageJsonFile, { encoding: 'utf8' }, () => {
+      this.#lastWorkspaceEventTime = Date.now();
+      const candidate = this.#toCandidateEvent({ action: 'update', file: packageJsonFile });
+      if (this.#isValidEvent(candidate)) {
+        this.#queue.add(candidate);
+      }
+    });
+
+    this.#cleanup.workspace = async (): Promise<void> => {
+      pkgListener.close();
+      await listener.unsubscribe();
+    };
   }
 
   async #listenToolFolder(): Promise<void> {
@@ -229,29 +238,22 @@ export class CompilerWatcher {
     this.#cleanup.tool = (): void => listener.close();
   }
 
-  async #listenCanary(): Promise<void> {
-    await this.#cleanup.canary?.();
-    const full = path.resolve(this.#root, this.#watchCanary);
-    await ManifestFileUtil.bufferedFileWrite(full, '');
-    this.#lastWorkspaceModified = Date.now();
+  async #listenWorkspaceRotation(): Promise<void> {
+    await this.#cleanup.rotation?.();
 
-    log.debug('Starting workspace canary');
-    const canaryId = setInterval(async () => {
-      const delta = Math.trunc((Date.now() - this.#lastWorkspaceModified) / 1000);
-      if (delta > 600) {
-        log.error('Restarting canary due to extra long delay');
-        this.#lastWorkspaceModified = Date.now(); // Reset
-      } else if (delta > this.#watchCanaryFrequency * 2) {
-        this.#queue.throw(new CompilerReset(`Workspace watch stopped responding ${delta}s ago`));
-      } else if (delta > this.#watchCanaryFrequency) {
-        log.error('Restarting parcel due to inactivity');
-        await this.#listenWorkspace();
-      } else {
-        await fs.utimes(full, new Date(), new Date());
+    const intervalId = setInterval(async () => {
+      const idleTimeSeconds = Math.trunc((Date.now() - this.#lastWorkspaceEventTime) / 1000);
+      if (idleTimeSeconds >= this.#watchRotationFrequency) {
+        log.debug('Rotating parcel watcher subscription after idle period');
+        try {
+          await this.#listenWorkspace();
+        } catch (error) {
+          log.warn('Failed to rotate parcel subscription', error);
+        }
       }
-    }, this.#watchCanaryFrequency * 1000);
+    }, this.#watchRotationFrequency * 1000);
 
-    this.#cleanup.canary = (): void => clearInterval(canaryId);
+    this.#cleanup.rotation = (): void => clearInterval(intervalId);
   }
 
   async #getGitHeadRef(): Promise<{ hash: string; ref: string } | undefined> {
@@ -326,7 +328,7 @@ export class CompilerWatcher {
     if (!this.#cleanup.workspace) {
       this.#listenWorkspace();
       this.#listenToolFolder();
-      this.#listenCanary();
+      this.#listenWorkspaceRotation();
       this.#listenGitChanges();
     }
     return this.#queue[Symbol.asyncIterator]();
