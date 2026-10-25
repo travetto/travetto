@@ -70,8 +70,7 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
   }
 
   #isValidFile(file: string): boolean {
-    const relativeFile = file.replace(`${this.#root}/`, '');
-    if (relativeFile.startsWith('.')) {
+    if (file.includes('/.')) {
       return false;
     } else if (!ManifestModuleUtil.isSourceType(file) && !CONFIGURATION_FILE_PATTERN.test(file)) {
       return false;
@@ -208,21 +207,23 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
   }
 
   async prepareBatch(rawEvents: CompilerWatchRawEvent[]): Promise<CompilerWatchEvent[]> {
-    const changedCompilerFiles = rawEvents
+    const validEvents = rawEvents.filter(item => !item.file.includes('/.'));
+
+    const changedCompilerFiles = validEvents
       .filter(item => this.#state.isCompilerFile(item.file))
       .map(item => path.relative(this.#root, item.file));
     if (changedCompilerFiles.length) {
       throw new CompilerReset('Compiler source changed', { files: changedCompilerFiles });
     }
 
-    const changedConfigurationFiles = rawEvents
+    const changedConfigurationFiles = validEvents
       .filter(item => CONFIGURATION_FILE_PATTERN.test(item.file))
       .map(item => path.relative(this.#root, item.file));
     if (changedConfigurationFiles.length) {
       throw new CompilerReset('Package or compiler configuration changed', { files: changedConfigurationFiles, soft: true });
     }
 
-    const items = rawEvents.map(event => this.#toCandidateEvent(event)).filter(event => this.#isValidEvent(event));
+    const items = validEvents.map(event => this.#toCandidateEvent(event)).filter(event => this.#isValidEvent(event));
 
     if (items.length > 0) {
       this.#updateManifestInMemory(items);

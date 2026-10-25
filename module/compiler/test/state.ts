@@ -191,6 +191,15 @@ class CompilerStateTests {
       async () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/package-lock.json') }]),
       (error: unknown) => error instanceof CompilerReset && error.soft === true
     );
+
+    // Should NOT reset for changes in separate work folders (.<name>/)
+    const ignoredEvents = await watcher.prepareBatch([
+      { action: 'update', file: path.resolve('/test/app/.worktrees/branch-a/package.json') },
+      { action: 'update', file: path.resolve('/test/app/.worktree/package.json') },
+      { action: 'update', file: path.resolve('/test/app/.gemini/scratch/tsconfig.json') },
+      { action: 'update', file: path.resolve('/test/app/module/sub/.cache/package.json') }
+    ]);
+    assert.deepStrictEqual(ignoredEvents, []);
   }
 
   @Test()
