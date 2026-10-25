@@ -35,7 +35,7 @@
     "@travetto/registry": "^8.0.1",
     "@travetto/runtime": "^8.0.1",
     "@travetto/schema": "^8.0.2",
-    "find-my-way": "^9.9.0"
+    "find-my-way": "^9.10.0"
   },
   "peerDependencies": {
     "@travetto/cli": "^8.0.2",

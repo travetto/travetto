@@ -30,11 +30,11 @@
     "access": "public"
   },
   "dependencies": {
-    "@fastify/busboy": "^3.2.2",
+    "@fastify/busboy": "^3.2.4",
     "@travetto/config": "^8.0.3",
     "@travetto/web": "^8.0.3",
-    "file-type": "^22.1.1",
-    "mime": "^4.1.0"
+    "file-type": "^22.2.0",
+    "mime": "^4.1.1"
   },
   "peerDependencies": {
     "@travetto/test": "^8.0.2"

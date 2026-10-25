@@ -50,7 +50,7 @@
   "devDependencies": {
     "@travetto/repo": "^8.0.1",
     "rollup-plugin-visualizer": "^7.1.1",
-    "temporal-polyfill-lite": "^0.4.3"
+    "temporal-polyfill-lite": "^1.0.0"
   },
   "version": "0.0.0",
   "allowScripts": {
