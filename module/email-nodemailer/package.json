@@ -30,7 +30,7 @@
   "dependencies": {
     "@travetto/email": "^8.0.3",
     "@types/nodemailer": "^8.0.2",
-    "nodemailer": "^10.0.14"
+    "nodemailer": "^10.1.4"
   },
   "devDependencies": {
     "@aws-sdk/client-sesv2": "^3.1146.0"
