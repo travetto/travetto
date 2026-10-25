@@ -171,5 +171,25 @@ class CompilerStateTests {
       async () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/tsconfig.json') }]),
       (error: unknown) => error instanceof CompilerReset && error.soft === true
     );
+
+    await assert.rejects(
+      async () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/yarn.lock') }]),
+      (error: unknown) => error instanceof CompilerReset && error.soft === true
+    );
+
+    await assert.rejects(
+      async () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/pnpm-lock.yaml') }]),
+      (error: unknown) => error instanceof CompilerReset && error.soft === true
+    );
+
+    await assert.rejects(
+      async () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/pnpm-workspace.yaml') }]),
+      (error: unknown) => error instanceof CompilerReset && error.soft === true
+    );
+
+    await assert.rejects(
+      async () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/package-lock.json') }]),
+      (error: unknown) => error instanceof CompilerReset && error.soft === true
+    );
   }
 }

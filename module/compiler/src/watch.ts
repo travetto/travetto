@@ -9,7 +9,7 @@ import { AsyncQueue } from './queue.ts';
 import type { CompilerState } from './state.ts';
 import { CompilerReset, type CompilerWatchEvent, type CompilerWatchRawEvent, type CompileStateEntry } from './types.ts';
 
-const CONFIGURATION_FILE_PATTERN = /(^|\/)(package\.json|tsconfig(\..+)?\.json|package-lock\.json|yarn\.lock|pnpm-lock\.yaml)$/;
+const CONFIGURATION_FILE_PATTERN = /(^|\/)(package\.json|tsconfig(\..+)?\.json|package-lock\.json|yarn\.lock|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/;
 
 type CompilerWatchEventCandidate = Omit<CompilerWatchEvent, 'entry'> & { entry?: CompileStateEntry };
 
