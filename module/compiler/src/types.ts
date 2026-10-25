@@ -35,6 +35,7 @@ export type CompileStateEntry = {
   import: string;
   moduleFile: string;
 };
+export type CompilerWatchRawEvent = { action: ChangeEventType; file: string };
 export type CompilerWatchEvent = { action: ChangeEventType; file: string; entry: CompileStateEntry; moduleFile: string };
 
 type Scoped<T extends {}> = T & { workspace?: string };
@@ -57,6 +58,7 @@ export type CompilerLogEvent = Scoped<{
 }>;
 export type CompilerProgressEvent = Scoped<{ idx: number; total: number; message: string; operation: 'compile'; complete?: boolean }>;
 export type CompilerStateEvent = Scoped<{ state: CompilerStateType; soft?: boolean; extra?: Record<string, unknown> }>;
+export type FileChangeEvent = Scoped<{ files: { file: string; action: ChangeEventType }[]; time: number }>;
 export type CompilerAllEvent = Scoped<{}>;
 
 export type CompilerEvent =
