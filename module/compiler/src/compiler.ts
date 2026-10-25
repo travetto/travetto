@@ -165,31 +165,25 @@ export class Compiler {
       }
     }
 
+    const changedFiles = createOrUpdateEvents.map(event => event.entry.sourceFile);
     const compiledFiles = new Set<string>();
 
-    for (const event of createOrUpdateEvents) {
-      const diagnostics = (await this.#state.compileSourceFile(event.entry.sourceFile, true)) ?? [];
-      const normalizedFile = path.relative(this.#state.manifest.workspace.path, event.file);
-
-      if (diagnostics.length) {
-        log.error('Compilation failed', `${event.file}: ${diagnostics.length} errors found`, { phase: 'failure', file: normalizedFile });
-        for (const diagnostic of diagnostics) {
-          log.error(`ERROR ${event.file}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], {
+    for await (const result of this.#state.compileAffectedFiles(changedFiles)) {
+      const normalizedFile = path.relative(this.#state.manifest.workspace.path, result.sourceFile);
+      if (result.diagnostics.length) {
+        log.error('Compilation failed', `${result.sourceFile}: ${result.diagnostics.length} errors found`, {
+          phase: 'failure',
+          file: normalizedFile
+        });
+        for (const diagnostic of result.diagnostics) {
+          log.error(`ERROR ${result.sourceFile}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], {
             phase: 'error',
             file: normalizedFile
           });
         }
       } else {
-        compiledFiles.add(event.entry.sourceFile);
-        log.info(`Compiled ${event.entry.sourceFile} on ${event.action}`);
-      }
-
-      if (!diagnostics.length && this.#state.hasErrors()) {
-        for (const failedFile of this.#state.getFailedFiles()) {
-          if (failedFile !== event.entry.sourceFile) {
-            this.#watcher.add(failedFile);
-          }
-        }
+        compiledFiles.add(result.sourceFile);
+        log.info(`Compiled ${result.sourceFile}`);
       }
     }
 
