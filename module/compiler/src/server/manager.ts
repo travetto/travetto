@@ -77,7 +77,7 @@ export class CompilerManager {
     while (Date.now() - startTime < STARTUP_TIMEOUT_MILLISECONDS) {
       await CommonUtil.blockingTimeout(STARTUP_POLL_INTERVAL_MILLISECONDS);
       const info = await client.info();
-      if (info && info.state !== 'startup') {
+      if (CompilerUtil.isServerRunning(info)) {
         log.info('Compiler daemon is running', info.serverProcessId);
         return true;
       }
@@ -141,7 +141,7 @@ export class CompilerManager {
     quiet = false
   ): Promise<{ state: 'already-running' | 'started' | 'compile-failed'; info?: CompilerServerInfo }> {
     const existingInfo = await client.info();
-    if (existingInfo && existingInfo.state !== 'closed' && existingInfo.state !== 'startup') {
+    if (CompilerUtil.isServerRunning(existingInfo)) {
       const processId = existingInfo.serverProcessId;
       if (!quiet) {
         console.log(`Server already running ${ctx.workspace.path}: ${client.url} (PID: ${processId})`);

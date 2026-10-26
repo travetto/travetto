@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { setTimeout } from 'node:timers/promises';
 
 import {
   type ManifestContext,
@@ -9,6 +10,16 @@ import {
   PackageUtil,
   path
 } from '@travetto/manifest';
+
+import type { CompilerServerInfo } from './types';
+
+const sendSignal = (processId: number, signal?: NodeJS.Signals) => {
+  try {
+    return process.kill(processId, signal ?? 0);
+  } catch {
+    return false;
+  }
+};
 
 /**
  * Standard utilities for compiler
@@ -58,12 +69,7 @@ export class CompilerUtil {
         : outputFile;
 
     let typingsLocation: string | undefined;
-    if (
-      isTypings &&
-      options?.outputPath &&
-      options?.typingsPath &&
-      (!options.moduleFile || this.isExternalTypings(options.moduleFile))
-    ) {
+    if (isTypings && options?.outputPath && options?.typingsPath && (!options.moduleFile || this.isExternalTypings(options.moduleFile))) {
       typingsLocation = outputLocation.replace(options.outputPath, options.typingsPath);
     }
 
@@ -113,45 +119,20 @@ export class CompilerUtil {
   }
 
   /**
-   * Check if a process ID is currently alive
+   * Terminate processes by PID and wait for it to exit
    */
-  static isProcessRunning(processId: number | undefined): boolean {
-    if (!processId || processId <= 0) {
-      return false;
-    }
-    try {
-      process.kill(processId, 0);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  /**
-   * Terminate a process by PID and wait for it to exit
-   */
-  static async killProcess(processId: number | undefined, timeoutMilliseconds = 3000): Promise<boolean> {
-    if (!processId || processId <= 0) {
-      return false;
-    }
-    if (!this.isProcessRunning(processId)) {
-      return false;
-    }
-    try {
-      process.kill(processId);
-    } catch {
-      return false;
-    }
+  static async killProcesses(processIds: (number | undefined)[], timeoutMilliseconds = 3000): Promise<void> {
     const start = Date.now();
-    while (this.isProcessRunning(processId) && Date.now() - start < timeoutMilliseconds) {
-      await new Promise(resolve => setTimeout(resolve, 50));
-    }
-    if (this.isProcessRunning(processId)) {
-      try {
-        process.kill(processId, 'SIGKILL');
-      } catch {}
-    }
-    return true;
+    await Promise.all(
+      processIds.map(async processId => {
+        if (processId && processId > 0 && sendSignal(processId, 'SIGINT')) {
+          while (sendSignal(processId) && Date.now() - start < timeoutMilliseconds) {
+            await setTimeout(50);
+          }
+          sendSignal(processId, 'SIGKILL');
+        }
+      })
+    );
   }
 
   /**
@@ -161,5 +142,12 @@ export class CompilerUtil {
     for await (const event of input) {
       handler(event);
     }
+  }
+
+  /**
+   * Is the compiler server running?
+   */
+  static isServerRunning(info: CompilerServerInfo | undefined): info is CompilerServerInfo {
+    return !!info && info.state !== 'closed' && info.state !== 'startup';
   }
 }

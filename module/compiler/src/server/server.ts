@@ -6,12 +6,18 @@ import { getManifestContext, type ManifestContext } from '@travetto/manifest';
 import { CommonUtil } from '../common.ts';
 import { EventUtil } from '../event.ts';
 import { Log } from '../log.ts';
-import type { CompilerEvent, CompilerEventType, CompilerProgressEvent, CompilerServerInfo } from '../types.ts';
+import type {
+  CompilerEvent,
+  CompilerEventType,
+  CompilerLogEvent,
+  CompilerProgressEvent,
+  CompilerServerInfo,
+  CompilerStateEvent
+} from '../types.ts';
 import { CompilerUtil } from '../util.ts';
 import { CompilerClient } from './client.ts';
 
 const log = Log.scoped('server');
-const RESET_KILL_TIMEOUT_MILLISECONDS = 3000;
 const IDLE_TIMEOUT_MILLISECONDS = 1000 * 60 * 2; // 2 minutes
 
 /**
@@ -242,9 +248,51 @@ export class CompilerServer {
       }
       const previousProcessId = this.info.compilerProcessId;
       this.info.compilerProcessId = 0;
-      await CompilerUtil.killProcess(previousProcessId, RESET_KILL_TIMEOUT_MILLISECONDS);
+      await CompilerUtil.killProcesses([previousProcessId]);
       await CompilerUtil.clearCaches(this.#ctx, !event.payload.soft);
     }
+  }
+
+  // Track the lifecycle vents of the compiler, ensuring proper reset of state on restart
+  async #onStateEvent(event: CompilerStateEvent): Promise<void> {
+    this.info.state = event.state;
+    log.info(`State changed: ${this.info.state}`);
+
+    switch (event.state) {
+      case 'init':
+      case 'compile-start': {
+        delete this.info.messages?.error;
+        if (EventUtil.hasProcessId(event) && this.info.compilerProcessId !== event.extra.processId) {
+          await CompilerUtil.killProcesses([this.info.compilerProcessId]);
+          this.info.compilerProcessId = event.extra.processId;
+        }
+        break;
+      }
+      case 'watch-start':
+        this.info.messages = {};
+        break;
+    }
+  }
+
+  // Handle log events, ensuring we are properly storing errors
+  async #onLogEvent(event: CompilerLogEvent): Promise<void> {
+    const messages = (this.info.messages ??= {});
+    switch (event.phase) {
+      case 'failure': {
+        if (event.file) {
+          this.#clearErrorsForFile(event.file);
+        }
+        messages[event.phase] = [event];
+        break;
+      }
+      case 'reset':
+        messages[event.phase] = [event];
+        break;
+      case 'error':
+        (messages.error ??= []).push(event);
+        break;
+    }
+    log.render(event);
   }
 
   /**
@@ -252,47 +300,21 @@ export class CompilerServer {
    */
   async processEvents(input: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
     for await (const event of CommonUtil.restartableEvents(input, this.signal, this.isResetEvent, event => this.#handleResetEvent(event))) {
-      if (event.type === 'progress') {
-        await Log.onProgressEvent(event.payload);
-      }
-
       this.#emitEvent(event);
 
-      if (event.type === 'change') {
-        this.#clearErrorsForFile(event.payload.file);
-      } else if (event.type === 'state') {
-        this.info.state = event.payload.state;
-        if (event.payload.state === 'init' || event.payload.state === 'compile-start') {
-          delete this.info.messages?.error;
-          if (EventUtil.hasProcessId(event.payload)) {
-            if (this.info.watching && !this.info.compilerProcessId) {
-              // Ensure we are killing in watch mode on first set
-              await CompilerUtil.killProcess(this.info.compilerProcessId);
-            }
-            this.info.compilerProcessId = event.payload.extra.processId;
-          }
-        } else if (event.payload.state === 'watch-start') {
-          this.info.messages = {};
-        }
-        log.info(`State changed: ${this.info.state}`);
-      } else if (event.type === 'log') {
-        const messages = (this.info.messages ??= {});
-        switch (event.payload.phase) {
-          case 'failure': {
-            if (event.payload.file) {
-              this.#clearErrorsForFile(event.payload.file);
-            }
-            messages[event.payload.phase] = [event.payload];
-            break;
-          }
-          case 'reset':
-            messages[event.payload.phase] = [event.payload];
-            break;
-          case 'error':
-            (messages.error ??= []).push(event.payload);
-            break;
-        }
-        log.render(event.payload);
+      switch (event.type) {
+        case 'progress':
+          await Log.onProgressEvent(event.payload);
+          break;
+        case 'change':
+          this.#clearErrorsForFile(event.payload.file);
+          break;
+        case 'state':
+          await this.#onStateEvent(event.payload);
+          break;
+        case 'log':
+          await this.#onLogEvent(event.payload);
+          break;
       }
     }
 
@@ -331,7 +353,7 @@ export class CompilerServer {
       // Timeout or other error
       // Force shutdown
       this.#server.closeAllConnections();
-      await CompilerUtil.killProcess(this.info.compilerProcessId);
+      await CompilerUtil.killProcesses([this.info.compilerProcessId]);
     }
 
     log.info('Closed down server');

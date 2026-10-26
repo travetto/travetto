@@ -70,7 +70,7 @@ export class CompilerClient {
 
   async isWatching(): Promise<boolean> {
     const info = await this.info();
-    return info?.watching === true && info.state !== 'closed' && info.state !== 'startup';
+    return CompilerUtil.isServerRunning(info) && info.watching === true;
   }
 
   /** Clean the server */
@@ -90,7 +90,7 @@ export class CompilerClient {
 
     await this.#fetch('/stop').catch(() => {});
     this.#log.debug('Waiting for compiler and server to exit');
-    await Promise.all([CompilerUtil.killProcess(info.compilerProcessId), CompilerUtil.killProcess(info.serverProcessId)]);
+    await CompilerUtil.killProcesses([info.compilerProcessId, info.serverProcessId]);
     return true;
   }
 

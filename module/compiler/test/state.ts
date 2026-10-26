@@ -115,17 +115,6 @@ class CompilerStateTests {
   }
 
   @Test()
-  async verifyProcessManagement() {
-    assert.strictEqual(CompilerUtil.isProcessRunning(undefined), false);
-    assert.strictEqual(CompilerUtil.isProcessRunning(0), false);
-    assert.strictEqual(CompilerUtil.isProcessRunning(-1), false);
-
-    assert.strictEqual(await CompilerUtil.killProcess(undefined), false);
-    assert.strictEqual(await CompilerUtil.killProcess(0), false);
-    assert.strictEqual(await CompilerUtil.killProcess(-1), false);
-  }
-
-  @Test()
   verifyEmittedPathsAndOutputs() {
     assert.deepStrictEqual(CompilerUtil.getEmittedOutputs('/app/dist/index.js'), [
       '/app/dist/index.js',
