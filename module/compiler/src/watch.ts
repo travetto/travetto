@@ -35,7 +35,7 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
   async #getWatchIgnores(): Promise<string[]> {
     const pkg = PackageUtil.readPackage(this.#root);
     const patterns = [...(pkg?.travetto?.build?.watchIgnores ?? []), '**/node_modules', '.*/**/node_modules'];
-    const ignores = new Set(['node_modules', '.git', this.#state.resolveOutputFile('.')]);
+    const ignores = new Set(['node_modules', '.git', this.#state.manifest.build.outputFolder, this.#state.manifest.build.typesFolder]);
     for (const item of patterns) {
       if (item.includes('*')) {
         for await (const sub of fs.glob(item, { cwd: this.#root })) {
@@ -130,7 +130,11 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
       (error, events) => {
         this.#lastWorkspaceEventTime = Date.now();
         if (error) {
-          this.#queue.throw(error);
+          if (Error.isError(error) && error.message.includes('must be re-scanned')) {
+            this.#queue.throw(new CompilerReset('File system must be re-scanned'));
+          } else {
+            this.#queue.throw(error);
+          }
         } else {
           for (const event of events) {
             const file = path.toPosix(event.path);
