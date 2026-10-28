@@ -71,7 +71,7 @@ export class Session<T extends SessionData = SessionData> {
    * Set session value
    */
   setValue<V>(key: string, value: V): void {
-    const data = (this.data ??= castTo({}))!;
+    const data = (this.data ??= castTo<T>({}));
     data[castKey<T>(key)] = castTo(value);
   }
 

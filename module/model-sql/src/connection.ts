@@ -135,7 +135,7 @@ export abstract class SQLConnection<C = unknown, F extends SQLConfiguration = SQ
   async runWithTransaction<Result>(mode: TransactionType, operation: () => Promise<Result>): Promise<Result> {
     if (this.activeTransaction) {
       if (mode === 'isolated' || mode === 'force') {
-        const transactionId = mode === 'isolated' ? `tx${Util.uuid()}` : undefined;
+        const transactionId = mode === 'isolated' ? `tx${Util.randomId(16)}` : undefined;
         try {
           await this.startTransaction(transactionId);
           const result = await operation();

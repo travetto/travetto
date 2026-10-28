@@ -20,7 +20,7 @@ export abstract class ModelQueryFacetSuite extends BaseModelSuite<ModelQueryFace
   @Test('verify aggregations')
   async testFacet() {
     const people = ' '
-      .repeat(50)
+      .repeat(51)
       .split('')
       .map(() =>
         Person.from({
@@ -36,7 +36,7 @@ export abstract class ModelQueryFacetSuite extends BaseModelSuite<ModelQueryFace
     const service = await this.service;
     const saved = await this.saveAll(Person, people);
 
-    assert(saved === 50);
+    assert(saved === 51);
 
     const results = await service.facetByQuery(Person, 'gender');
 

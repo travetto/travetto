@@ -5,7 +5,7 @@ import type { AuthConfig, AuthContext } from '@travetto/auth';
 import type { SessionData, SessionService } from '@travetto/auth-session';
 import { AuthContextInterceptor, type WebAuthConfig } from '@travetto/auth-web';
 import { Inject, Injectable } from '@travetto/di';
-import { castTo, Util } from '@travetto/runtime';
+import { castTo } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 import {
   Body,
@@ -44,8 +44,8 @@ class AutoLogin implements WebInterceptor {
 
   filter({ next }: WebChainedContext) {
     this.auth.principal ??= {
-      id: Util.uuid(),
-      sessionId: Util.uuid(),
+      id: 'auth-id',
+      sessionId: 'session-id',
       issuedAt: new Date(),
       details: {}
     };

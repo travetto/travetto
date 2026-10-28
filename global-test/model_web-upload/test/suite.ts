@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Inject } from '@travetto/di';
 import type { MemoryModelService } from '@travetto/model-memory';
 import { Registry } from '@travetto/registry';
-import { type BinaryMetadata, BinaryMetadataUtil, castTo, type RuntimeError, Util } from '@travetto/runtime';
+import { type BinaryMetadata, BinaryMetadataUtil, castTo, type RuntimeError } from '@travetto/runtime';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { ContextParam, Controller, Get, Post, WebHeaderUtil, type WebRequest } from '@travetto/web';
 import { type FileMap, Upload } from '@travetto/web-upload';
@@ -36,7 +36,7 @@ class TestUploadController {
 
   @Post('/cached')
   async uploadCached(@Upload() file: Blob) {
-    const location = Util.uuid();
+    const location = 'blob-id';
     await this.service.upsertBlob(location, file, {
       cacheControl: 'max-age=3600',
       contentLanguage: 'en-GB'

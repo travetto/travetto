@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { type Class, castTo, TimeUtil, Util } from '@travetto/runtime';
+import { type Class, castTo, TimeUtil } from '@travetto/runtime';
 import { BindUtil, CommonRegex, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 /**
@@ -11,8 +11,7 @@ export class SchemaFaker {
     [CommonRegex.email, faker.internet.email],
     [CommonRegex.url, faker.internet.url],
     [CommonRegex.telephone, faker.phone.number],
-    [CommonRegex.postalCode, faker.location.zipCode],
-    [CommonRegex.uuid, Util.uuid]
+    [CommonRegex.postalCode, faker.location.zipCode]
   ]);
 
   /**

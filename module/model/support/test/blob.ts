@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { BinaryMetadataUtil, BinaryUtil, Util } from '@travetto/runtime';
+import { BinaryMetadataUtil, BinaryUtil } from '@travetto/runtime';
 import { SkipUnless, Suite, Test, TestFixtures } from '@travetto/test';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
@@ -17,7 +17,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const service = await this.service;
     const buffer = await this.fixture.readBinaryArray('/asset.yml');
 
-    const id = Util.uuid();
+    const id = 'blob-id-1';
 
     await service.upsertBlob(id, buffer);
     const m = await service.getBlobMetadata(id);
@@ -30,7 +30,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const service = await this.service;
     const buffer = await this.fixture.readBinaryArray('/asset.yml');
 
-    const id = Util.uuid();
+    const id = 'blob-id-2';
 
     await service.upsertBlob(id, buffer, { hash: '10' });
     assert((await service.getBlobMetadata(id)).hash === '10');
@@ -47,7 +47,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const service = await this.service;
     const buffer = await this.fixture.readBinaryArray('/asset.yml');
 
-    const id = Util.uuid();
+    const id = 'blob-id-3';
     await service.upsertBlob(id, buffer);
     const { hash } = await service.getBlobMetadata(id);
 
@@ -61,7 +61,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const service = await this.service;
     const buffer = await this.fixture.readBinaryArray('/asset.yml');
 
-    const id = Util.uuid();
+    const id = 'blob-id-4';
     await service.upsertBlob(id, buffer);
 
     await service.deleteBlob(id);
@@ -76,7 +76,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const service = await this.service;
     const buffer = await this.fixture.readBinaryArray('/text.txt');
 
-    const id = Util.uuid();
+    const id = 'blob-id-4';
     await service.upsertBlob(id, buffer);
 
     const retrieved = await service.getBlob(id);

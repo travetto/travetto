@@ -40,10 +40,10 @@ export class Util {
   }
 
   /**
-   * Generate a random UUID
+   * Generate a random id of a given byte length
    * @param length The length of the uuid to generate
    */
-  static uuid(length: number = 32): string {
+  static randomId(length: number): string {
     const bytes = crypto.getRandomValues(new Uint8Array(Math.ceil(length / 2)));
     if (length === 32) {
       // Make valid uuid-v4
@@ -51,6 +51,13 @@ export class Util {
       bytes[8] = (bytes[8] & 0x3f) | 0x80;
     }
     return bytes.toHex().substring(0, length);
+  }
+
+  /**
+   * Generate a UUIDv4 (no dashes)
+   */
+  static uuid(): string {
+    return Util.randomId(32);
   }
 
   /**

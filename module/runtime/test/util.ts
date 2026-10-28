@@ -7,11 +7,14 @@ import { Suite, Test } from '@travetto/test';
 export class UtilTest {
   @Test()
   verifyUUID() {
-    assert(Util.uuid(32).length === 32);
-    assert(/^[0-9a-f]{32}$/.test(Util.uuid(32)));
-
     assert(Util.uuid().length === 32);
-    assert(/^[0-9a-f]{32}$/.test(Util.uuid(32)));
+    assert(/^[0-9a-f]{32}$/.test(Util.uuid()));
+  }
+
+  @Test()
+  verifyRandomId() {
+    assert(Util.randomId(64).length === 64);
+    assert(/^[0-9a-f]{64}$/.test(Util.randomId(64)));
   }
 
   @Test()
@@ -264,7 +267,7 @@ export class UtilTest {
 
     // The first frame should point back to this file
     assert(parts[0].filename.endsWith('runtime/test/util.ts'));
-    assert(parts[0].line === 252);
+    assert(parts[0].line === 255);
     assert(parts[0].column === 17);
   }
 }

@@ -147,9 +147,8 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
   async generateResetToken(userId: string): Promise<RegisteredPrincipal> {
     const user = await this.#retrieve(userId);
     const identity = this.toPrincipal(user);
-    const salt = Util.uuid();
 
-    identity.resetToken = await AuthModelUtil.generateHash(Util.uuid(), salt, 25000, 32);
+    identity.resetToken = await Util.randomId(64);
     identity.resetExpires = TimeUtil.fromNow('1h');
 
     const output: Partial<T> = { ...user, ...this.fromPrincipal(identity) };

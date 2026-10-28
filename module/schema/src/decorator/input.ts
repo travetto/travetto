@@ -191,7 +191,7 @@ export function Url(message?: string): PropType<StringType> {
  * @kind decorator
  */
 export function Uuid(message?: string): PropType<StringType> {
-  return input({ specifiers: ['uuid'], match: { regex: CommonRegex.uuid, message }, generator: (): string => Util.uuid() });
+  return input({ specifiers: ['uuid'], match: { regex: CommonRegex.uuid, message }, generator: Util.uuid });
 }
 
 /**

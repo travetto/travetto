@@ -48,7 +48,7 @@ export class TodoController {
 
   @Post()
   async createTodo(todo: Todo): Promise<Todo> {
-    todo.id ??= Util.uuid();
+    todo.id ??= Util.randomId(64);
     this.store.push(todo);
     return todo;
   }

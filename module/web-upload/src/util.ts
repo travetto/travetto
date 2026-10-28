@@ -146,7 +146,7 @@ export class WebUploadUtil {
    * Convert an UploadItem to a File
    */
   static async toFile({ stream, filename, field, contentType }: UploadItem, config: Partial<WebUploadConfig>): Promise<File> {
-    const uniqueDirectory = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
+    const uniqueDirectory = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.randomId(5)}`);
     await fs.mkdir(uniqueDirectory, { recursive: true });
 
     filename = filename ? path.basename(filename) : `unknown_${Date.now()}`;

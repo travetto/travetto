@@ -40,7 +40,7 @@ export class WorkPool {
             pendingAcquires += 1;
             const factoryInput = isWorkerFactory(input) ? await input() : { execute: input };
             const worker: Worker<I, O> = {
-              id: Util.uuid(),
+              id: Util.randomId(16),
               active: true,
               ...factoryInput
             };

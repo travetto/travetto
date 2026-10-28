@@ -48,7 +48,7 @@ export class AuthModelUtil {
       throw new RuntimeError('Password is required', { category: 'data' });
     }
 
-    salt = typeof salt === 'number' ? Util.uuid(salt) : salt;
+    salt = typeof salt === 'number' ? Util.randomId(salt) : salt;
     const hash = await this.generateHash(password, salt);
 
     return { salt, hash };

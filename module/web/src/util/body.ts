@@ -110,7 +110,7 @@ export class WebBodyUtil {
       }
       out.body = body;
     } else if (body instanceof FormData) {
-      const boundary = `${'-'.repeat(24)}-multipart-${Util.uuid()}`;
+      const boundary = `${'-'.repeat(24)}-multipart-${Util.randomId(24)}`;
       out.headers.set('Content-Type', `multipart/form-data; boundary=${boundary}`);
       out.body = this.buildMultiPartBody(body, boundary);
     } else {

@@ -1,10 +1,20 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { ExistsError, Model, type ModelCrudSupport, type ModelId, NotFoundError, PersistValue, PrePersist } from '@travetto/model';
-import { castTo, Util } from '@travetto/runtime';
+import { DependencyRegistryIndex } from '@travetto/di';
+import {
+  ExistsError,
+  Model,
+  type ModelCrudSupport,
+  type ModelId,
+  ModelRegistryIndex,
+  NotFoundError,
+  PersistValue,
+  PrePersist
+} from '@travetto/model';
+import { castTo } from '@travetto/runtime';
 import { Generator, Match, Precision, Required, Schema, Text, ValidationResultError } from '@travetto/schema';
-import { Suite, Test } from '@travetto/test';
+import { SkipUnless, Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from './base.ts';
 
@@ -197,7 +207,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   @Test('Verify update and delete on missing item fails with NotFoundError')
   async testMissingItemFails() {
     const service = await this.service;
-    const nonExistentId = Util.uuid(32);
+    const nonExistentId = ModelRegistryIndex.get(CustomIdModel).idSource.generator();
     await assert.rejects(() => service.update(Simple, Simple.from({ id: nonExistentId, name: 'bob' })), NotFoundError);
     await assert.rejects(() => service.updatePartial(Simple, { id: nonExistentId, name: 'bob' }), NotFoundError);
     await assert.rejects(() => service.delete(Simple, nonExistentId), NotFoundError);
@@ -527,5 +537,25 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     await service.delete(SkuModel, created.sku);
     await assert.rejects(() => service.get(SkuModel, created.sku), NotFoundError);
+  }
+
+  @SkipUnless(async (self: ModelCrudSuite) => {
+    const config = await DependencyRegistryIndex.getInstance(self.configClass);
+    return 'readBeforeUpdate' in config && config.readBeforeUpdate === true;
+  })
+  @Test('Verify update creates when readBeforeUpdate is false')
+  async testUpdateWithoutReadBeforeUpdate() {
+    const service = await this.service;
+    const config = await DependencyRegistryIndex.getInstance(this.configClass);
+    try {
+      config.readBeforeUpdate = false;
+      const nonExistentId = ModelRegistryIndex.get(CustomIdModel).idSource.generator();
+      const result = await service.update(CustomIdModel, CustomIdModel.from({ customId: nonExistentId, name: 'bob' }));
+      assert(result.customId === nonExistentId);
+      const fetched = await service.get(CustomIdModel, nonExistentId);
+      assert(fetched.name === 'bob');
+    } finally {
+      config.readBeforeUpdate = true;
+    }
   }
 }

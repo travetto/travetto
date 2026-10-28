@@ -100,7 +100,7 @@ export class RunUtil {
 
     const events = parsed.filter(testFilter).reduce((runs, test) => {
       runs
-        .getOrInsert(test.classId, { import: test.import, classId: test.classId, methodNames: [], runId: Util.uuid(), metadata })
+        .getOrInsert(test.classId, { import: test.import, classId: test.classId, methodNames: [], runId: Util.randomId(16), metadata })
         .methodNames!.push(test.methodName);
       return runs;
     }, new Map<string, TestRun>());

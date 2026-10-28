@@ -22,7 +22,7 @@ class ModelSuiteHandler<T extends { configClass: Class<ConfigType>; serviceClass
 
     const config = await DependencyRegistryIndex.getInstance<ConfigType>(instance.configClass);
     if ('namespace' in config) {
-      config.namespace = `test_${Util.uuid(12)}`;
+      config.namespace = `test_${Util.randomId(12)}`;
     }
 
     // We manually create

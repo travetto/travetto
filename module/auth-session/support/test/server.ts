@@ -4,7 +4,7 @@ import { type AuthContext, AuthenticationError } from '@travetto/auth';
 import type { SessionContext, SessionService } from '@travetto/auth-session';
 import { type AsyncContext, WithAsyncContext } from '@travetto/context';
 import { Inject } from '@travetto/di';
-import { type Class, Util } from '@travetto/runtime';
+import type { Class } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
@@ -34,9 +34,9 @@ export abstract class AuthSessionServerSuite<T> {
   @Test()
   async testSessionEstablishment() {
     this.auth.principal = {
-      id: 'orange',
+      id: 'auth-id',
       details: {},
-      sessionId: Util.uuid()
+      sessionId: 'session-id'
     };
 
     assert(this.sessionContext.get() === undefined);
@@ -54,9 +54,9 @@ export abstract class AuthSessionServerSuite<T> {
     assert(session2.data?.name === 'bob');
 
     this.auth.principal = {
-      id: 'orange',
+      id: 'auth-id',
       details: {},
-      sessionId: Util.uuid()
+      sessionId: 'session-id-alt'
     };
 
     this.sessionContext.set(undefined); // Disconnect

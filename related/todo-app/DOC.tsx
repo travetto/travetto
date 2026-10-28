@@ -56,7 +56,7 @@ function TableOfContents({ root }: { root: () => DocJSXElement }) {
 
 export const text = async () => {
   const startupOutput = await init();
-  const key = Util.uuid(80);
+  const key = Util.randomId(80);
   let root: DocJSXElement;
   return (root = (
     <>
