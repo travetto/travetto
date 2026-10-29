@@ -428,7 +428,7 @@ export class ElasticsearchModelService
     }
   }
 
-  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse<EsBulkError>> {
+  async #processBulkBatch<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse<EsBulkError>> {
     await ModelBulkUtil.preStore(cls, operations);
 
     type BulkDoc = Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string; _id?: string }>>;
@@ -509,6 +509,14 @@ export class ElasticsearchModelService
     }
 
     return out;
+  }
+
+  async processBulk<T extends ModelType>(
+    cls: Class<T>,
+    operations: Iterable<BulkOperation<T>> | AsyncIterable<BulkOperation<T>>,
+    batchSize = 500
+  ): Promise<BulkResponse<EsBulkError>> {
+    return castTo(ModelBulkUtil.batch(operations, batchSize, batch => this.#processBulkBatch(cls, batch)));
   }
 
   // Expiry

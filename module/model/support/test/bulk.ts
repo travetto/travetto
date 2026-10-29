@@ -4,6 +4,7 @@ import { Suite, Test } from '@travetto/test';
 
 import { Model } from '../../src/registry/decorator.ts';
 import type { ModelBulkSupport } from '../../src/types/bulk.ts';
+import { ModelBulkUtil } from '../../src/util/bulk.ts';
 import { BaseModelSuite } from './base.ts';
 
 @Model('bulk-user')
@@ -91,5 +92,33 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
   async bulkDeleteMissingId() {
     const service = await this.service;
     await assert.rejects(() => service.processBulk(User, [{ delete: User.from({ name: 'no-id' }) }]));
+  }
+
+  @Test()
+  async bulkAsyncIterable() {
+    const service = await this.service;
+    async function* operations() {
+      for (let i = 0; i < 5; i++) {
+        yield { insert: User.from({ name: `stream-${i}` }) };
+      }
+    }
+
+    const result = await service.processBulk(User, operations(), 2);
+    assert(result.counts.insert === 5);
+    assert(result.insertedIds.size === 5);
+  }
+
+  @Test()
+  async bulkImportStream() {
+    const service = await this.service;
+    async function* objects() {
+      for (let i = 0; i < 5; i++) {
+        yield { name: `import-${i}` };
+      }
+    }
+
+    const result = await ModelBulkUtil.import(service, User, objects(), { batchSize: 2 });
+    assert(result.counts.upsert === 5);
+    assert(result.insertedIds.size === 5);
   }
 }

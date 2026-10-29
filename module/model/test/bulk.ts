@@ -160,26 +160,32 @@ export class ModelBulkUtilSuite {
     );
   }
 
-  @Test('Verify importCSV streams and chunks bulk operations')
+  @Test('Verify processBulk and importCSV stream and chunk bulk operations')
   async testImportCSV() {
     await Registry.init();
     const csvPath = await this.fixture.resolve('bulk-users.csv');
     const batches: BulkOperation<BulkItem>[][] = [];
 
     const mockService = castTo<ModelBulkSupport>({
-      async processBulk(cls: Class<BulkItem>, operations: BulkOperation<BulkItem>[]): Promise<BulkResponse> {
-        batches.push(operations);
-        return {
-          errors: [],
-          insertedIds: new Map(operations.map((operation, index) => [index, `id-${index}`])),
-          counts: {
-            update: 0,
-            insert: 0,
-            upsert: operations.length,
-            delete: 0,
-            error: 0
-          }
-        };
+      async processBulk(
+        cls: Class<BulkItem>,
+        operations: Iterable<BulkOperation<BulkItem>> | AsyncIterable<BulkOperation<BulkItem>>,
+        batchSize = 500
+      ): Promise<BulkResponse> {
+        return ModelBulkUtil.batch(operations, batchSize, async batch => {
+          batches.push(batch);
+          return {
+            errors: [],
+            insertedIds: new Map(batch.map((operation, index) => [index, `id-${index}`])),
+            counts: {
+              update: 0,
+              insert: 0,
+              upsert: batch.length,
+              delete: 0,
+              error: 0
+            }
+          };
+        });
       }
     });
 
@@ -202,6 +208,41 @@ export class ModelBulkUtilSuite {
     assert(response.insertedIds.get(2) === 'id-0');
   }
 
+  @Test('Verify ModelBulkUtil.import accepts arbitrary object stream')
+  async testImportObjects() {
+    await Registry.init();
+    const batches: BulkOperation<BulkItem>[][] = [];
+
+    const mockService = castTo<ModelBulkSupport>({
+      async processBulk(
+        cls: Class<BulkItem>,
+        operations: Iterable<BulkOperation<BulkItem>> | AsyncIterable<BulkOperation<BulkItem>>,
+        batchSize = 500
+      ): Promise<BulkResponse> {
+        return ModelBulkUtil.batch(operations, batchSize, async batch => {
+          batches.push(batch);
+          return {
+            errors: [],
+            insertedIds: new Map(),
+            counts: { update: 0, insert: 0, upsert: batch.length, delete: 0, error: 0 }
+          };
+        });
+      }
+    });
+
+    async function* objects() {
+      yield { name: 'Item 1', age: 10 };
+      yield { name: 'Item 2', age: 20 };
+      yield { name: 'Item 3', age: 30 };
+    }
+
+    const response = await ModelBulkUtil.import(mockService, BulkItem, objects(), { batchSize: 2 });
+    assert(batches.length === 2);
+    assert(batches[0].length === 2);
+    assert(batches[1].length === 1);
+    assert(response.counts.upsert === 3);
+  }
+
   @Test('Verify importCSV handles polymorphic types from TSV')
   async testImportCSVPolymorphicTSV() {
     await Registry.init();
@@ -209,19 +250,25 @@ export class ModelBulkUtilSuite {
     const batches: BulkOperation<BaseWorker>[][] = [];
 
     const mockService = castTo<ModelBulkSupport>({
-      async processBulk(cls: Class<BaseWorker>, operations: BulkOperation<BaseWorker>[]): Promise<BulkResponse> {
-        batches.push(operations);
-        return {
-          errors: [],
-          insertedIds: new Map(),
-          counts: {
-            update: 0,
-            insert: operations.length,
-            upsert: 0,
-            delete: 0,
-            error: 0
-          }
-        };
+      async processBulk(
+        cls: Class<BaseWorker>,
+        operations: Iterable<BulkOperation<BaseWorker>> | AsyncIterable<BulkOperation<BaseWorker>>,
+        batchSize = 500
+      ): Promise<BulkResponse> {
+        return ModelBulkUtil.batch(operations, batchSize, async batch => {
+          batches.push(batch);
+          return {
+            errors: [],
+            insertedIds: new Map(),
+            counts: {
+              update: 0,
+              insert: batch.length,
+              upsert: 0,
+              delete: 0,
+              error: 0
+            }
+          };
+        });
       }
     });
 

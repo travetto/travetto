@@ -40,6 +40,40 @@ export class ModelBulkUtil {
   }
 
   /**
+   * Helper to execute bulk operations in batches from an iterable or async iterable
+   */
+  static async batch<T extends ModelType>(
+    operations: Iterable<BulkOperation<T>> | AsyncIterable<BulkOperation<T>>,
+    batchSize = 500,
+    handler: (batch: BulkOperation<T>[]) => Promise<BulkResponse>
+  ): Promise<BulkResponse> {
+    if (Array.isArray(operations) && operations.length <= batchSize) {
+      return handler(operations);
+    }
+    const total: BulkResponse = {
+      errors: [],
+      insertedIds: new Map(),
+      counts: { update: 0, insert: 0, upsert: 0, delete: 0, error: 0 }
+    };
+    let batch: BulkOperation<T>[] = [];
+    let globalIndex = 0;
+    for await (const operation of operations) {
+      batch.push(operation);
+      if (batch.length >= batchSize) {
+        const response = await handler(batch);
+        this.#mergeBulkResponse(total, response, globalIndex);
+        globalIndex += batch.length;
+        batch = [];
+      }
+    }
+    if (batch.length > 0) {
+      const response = await handler(batch);
+      this.#mergeBulkResponse(total, response, globalIndex);
+    }
+    return total;
+  }
+
+  /**
    * Prepares bulk operations for storage
    * @param cls
    * @param operations
@@ -86,7 +120,33 @@ export class ModelBulkUtil {
   }
 
   /**
-   * Import a CSV/TSV into a model via bulk operations
+   * Import an object stream into a model via bulk operations
+   * @param service The model bulk service to target
+   * @param cls The model class to populate
+   * @param source The stream of raw object records (e.g. from JSONUtil.fromCSV)
+   * @param options Import options including batch size and operation mode
+   */
+  static async import<T extends ModelType>(
+    service: ModelBulkSupport,
+    cls: Class<T>,
+    source: AsyncIterable<Record<string, unknown>> | Iterable<Record<string, unknown>>,
+    options?: BulkImportOptions
+  ): Promise<BulkResponse> {
+    const mode = options?.mode ?? 'upsert';
+
+    async function* toOperations(): AsyncIterable<BulkOperation<T>> {
+      for await (const row of source) {
+        const expanded = BindUtil.expandPaths(row);
+        const instance = SchemaRegistryIndex.getBaseClass(cls).from(castTo(expanded));
+        yield { [mode]: instance } as BulkOperation<T>;
+      }
+    }
+
+    return service.processBulk(cls, toOperations(), options?.batchSize);
+  }
+
+  /**
+   * Import a CSV/TSV file into a model via bulk operations
    * @param service The model bulk service to target
    * @param cls The model class to populate
    * @param location File path of the CSV/TSV
@@ -96,43 +156,8 @@ export class ModelBulkUtil {
     service: ModelBulkSupport,
     cls: Class<T>,
     location: string,
-    options?: BulkImportOptions
+    options?: BulkImportOptions & { separator?: string }
   ): Promise<BulkResponse> {
-    const batchSize = options?.batchSize ?? 500;
-    const mode = options?.mode ?? 'upsert';
-    const total: BulkResponse = {
-      errors: [],
-      insertedIds: new Map(),
-      counts: {
-        update: 0,
-        insert: 0,
-        upsert: 0,
-        delete: 0,
-        error: 0
-      }
-    };
-
-    let batch: BulkOperation<T>[] = [];
-    let globalIndex = 0;
-
-    for await (const row of JSONUtil.fromCSV<Record<string, unknown>>(location, options?.separator)) {
-      const expanded = BindUtil.expandPaths(row);
-      const instance = SchemaRegistryIndex.getBaseClass(cls).from(castTo(expanded));
-      batch.push({ [mode]: instance });
-
-      if (batch.length >= batchSize) {
-        const response = await service.processBulk(cls, batch);
-        this.#mergeBulkResponse(total, response, globalIndex);
-        globalIndex += batch.length;
-        batch = [];
-      }
-    }
-
-    if (batch.length > 0) {
-      const response = await service.processBulk(cls, batch);
-      this.#mergeBulkResponse(total, response, globalIndex);
-    }
-
-    return total;
+    return this.import(service, cls, JSONUtil.fromCSV(location, options?.separator), options);
   }
 }

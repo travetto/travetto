@@ -460,7 +460,7 @@ export class MongoModelService
   }
 
   // Bulk
-  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse<{ index: number }>> {
+  async #processBulkBatch<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse<{ index: number }>> {
     const out: BulkResponse<{ index: number }> = {
       errors: [],
       counts: {
@@ -534,6 +534,14 @@ export class MongoModelService
     }
 
     return out;
+  }
+
+  async processBulk<T extends ModelType>(
+    cls: Class<T>,
+    operations: Iterable<BulkOperation<T>> | AsyncIterable<BulkOperation<T>>,
+    batchSize = 500
+  ): Promise<BulkResponse<{ index: number }>> {
+    return castTo(ModelBulkUtil.batch(operations, batchSize, batch => this.#processBulkBatch(cls, batch)));
   }
 
   // Expiry
