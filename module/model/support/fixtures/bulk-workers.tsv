@@ -1,0 +1,3 @@
+type	name	specialty
+specialist_worker	Doctor	Cardiology
+specialist_worker	Surgeon	Neurology

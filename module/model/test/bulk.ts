@@ -1,14 +1,23 @@
 import assert from 'node:assert';
 
-import { Model, ModelBulkUtil, SubTypeNotSupportedError } from '@travetto/model';
+import {
+  type BulkOperation,
+  type BulkResponse,
+  type ModelBulkSupport,
+  Model,
+  ModelBulkUtil,
+  SubTypeNotSupportedError
+} from '@travetto/model';
 import { Registry } from '@travetto/registry';
+import { castTo, type Class } from '@travetto/runtime';
 import { DiscriminatorField, Schema, Text, ValidationResultError } from '@travetto/schema';
-import { Suite, Test } from '@travetto/test';
+import { Suite, Test, TestFixtures } from '@travetto/test';
 
 @Model()
 class BulkItem {
   id: string;
   name: string;
+  age?: number;
 }
 
 @Schema()
@@ -28,6 +37,7 @@ class SpecialistWorker extends BaseWorker {
 
 @Suite()
 export class ModelBulkUtilSuite {
+  fixture = new TestFixtures();
   @Test('Verify insert generates id when omitted and populates insertedIds')
   async testInsertGeneratesId() {
     await Registry.init();
@@ -148,5 +158,81 @@ export class ModelBulkUtilSuite {
         ),
       (error: unknown) => error instanceof SubTypeNotSupportedError
     );
+  }
+
+  @Test('Verify importCSV streams and chunks bulk operations')
+  async testImportCSV() {
+    await Registry.init();
+    const csvPath = await this.fixture.resolve('bulk-users.csv');
+    const batches: BulkOperation<BulkItem>[][] = [];
+
+    const mockService = castTo<ModelBulkSupport>({
+      async processBulk(cls: Class<BulkItem>, operations: BulkOperation<BulkItem>[]): Promise<BulkResponse> {
+        batches.push(operations);
+        return {
+          errors: [],
+          insertedIds: new Map(operations.map((operation, index) => [index, `id-${index}`])),
+          counts: {
+            update: 0,
+            insert: 0,
+            upsert: operations.length,
+            delete: 0,
+            error: 0
+          }
+        };
+      }
+    });
+
+    const response = await ModelBulkUtil.importCSV(mockService, BulkItem, csvPath, { batchSize: 2 });
+
+    assert(batches.length === 2);
+    assert(batches[0].length === 2);
+    assert(batches[1].length === 1);
+    assert(batches[0][0].upsert?.name === 'Alice');
+    assert(batches[0][0].upsert?.age === 30);
+    assert(batches[0][1].upsert?.name === 'Bob');
+    assert(batches[0][1].upsert?.age === 25);
+    assert(batches[1][0].upsert?.name === 'Charlie');
+    assert(batches[1][0].upsert?.age === 40);
+
+    assert(response.counts.upsert === 3);
+    assert(response.insertedIds.size === 3);
+    assert(response.insertedIds.get(0) === 'id-0');
+    assert(response.insertedIds.get(1) === 'id-1');
+    assert(response.insertedIds.get(2) === 'id-0');
+  }
+
+  @Test('Verify importCSV handles polymorphic types from TSV')
+  async testImportCSVPolymorphicTSV() {
+    await Registry.init();
+    const tsvPath = await this.fixture.resolve('bulk-workers.tsv');
+    const batches: BulkOperation<BaseWorker>[][] = [];
+
+    const mockService = castTo<ModelBulkSupport>({
+      async processBulk(cls: Class<BaseWorker>, operations: BulkOperation<BaseWorker>[]): Promise<BulkResponse> {
+        batches.push(operations);
+        return {
+          errors: [],
+          insertedIds: new Map(),
+          counts: {
+            update: 0,
+            insert: operations.length,
+            upsert: 0,
+            delete: 0,
+            error: 0
+          }
+        };
+      }
+    });
+
+    const response = await ModelBulkUtil.importCSV(mockService, BaseWorker, tsvPath, { mode: 'insert' });
+
+    assert(batches.length === 1);
+    assert(batches[0].length === 2);
+    assert(batches[0][0].insert instanceof SpecialistWorker);
+    assert((batches[0][0].insert as SpecialistWorker).specialty === 'Cardiology');
+    assert(batches[0][1].insert instanceof SpecialistWorker);
+    assert((batches[0][1].insert as SpecialistWorker).specialty === 'Neurology');
+    assert(response.counts.insert === 2);
   }
 }
