@@ -2,6 +2,7 @@ import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type BulkOperation,
   type BulkResponse,
+  type BulkSource,
   type IndexConfig,
   type ModelBulkSupport,
   ModelBulkUtil,
@@ -556,13 +557,7 @@ export abstract class BaseSQLModelService<C = unknown>
     };
   }
 
-  async processBulk<T extends ModelType>(
-    modelClass: Class<T>,
-    operations:
-      | Iterable<BulkOperation<T> | OptionalId<T> | Record<string, unknown>>
-      | AsyncIterable<BulkOperation<T> | OptionalId<T> | Record<string, unknown>>,
-    batchSize = 500
-  ): Promise<BulkResponse> {
+  async processBulk<T extends ModelType>(modelClass: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse> {
     return ModelBulkUtil.batch(modelClass, operations, batchSize, batch => this.#processBulkBatch(modelClass, batch));
   }
 

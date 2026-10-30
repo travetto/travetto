@@ -3,10 +3,10 @@ import assert from 'node:assert';
 import {
   type BulkOperation,
   type BulkResponse,
+  type BulkSource,
   type ModelBulkSupport,
   Model,
   ModelBulkUtil,
-  type OptionalId,
   SubTypeNotSupportedError
 } from '@travetto/model';
 import { Registry } from '@travetto/registry';
@@ -168,13 +168,7 @@ export class ModelBulkUtilSuite {
     const batches: BulkOperation<BulkItem>[][] = [];
 
     const mockService = castTo<ModelBulkSupport>({
-      async processBulk(
-        cls: Class<BulkItem>,
-        operations:
-          | Iterable<BulkOperation<BulkItem> | OptionalId<BulkItem> | Record<string, unknown>>
-          | AsyncIterable<BulkOperation<BulkItem> | OptionalId<BulkItem> | Record<string, unknown>>,
-        batchSize = 500
-      ): Promise<BulkResponse> {
+      async processBulk(cls: Class<BulkItem>, operations: BulkSource<BulkItem>, batchSize = 500): Promise<BulkResponse> {
         return ModelBulkUtil.batch(cls, operations, batchSize, async batch => {
           batches.push(batch);
           return {
@@ -217,13 +211,7 @@ export class ModelBulkUtilSuite {
     const batches: BulkOperation<BulkItem>[][] = [];
 
     const mockService = castTo<ModelBulkSupport>({
-      async processBulk(
-        cls: Class<BulkItem>,
-        operations:
-          | Iterable<BulkOperation<BulkItem> | OptionalId<BulkItem> | Record<string, unknown>>
-          | AsyncIterable<BulkOperation<BulkItem> | OptionalId<BulkItem> | Record<string, unknown>>,
-        batchSize = 500
-      ): Promise<BulkResponse> {
+      async processBulk(cls: Class<BulkItem>, operations: BulkSource<BulkItem>, batchSize = 500): Promise<BulkResponse> {
         return ModelBulkUtil.batch(cls, operations, batchSize, async batch => {
           batches.push(batch);
           return {
@@ -255,13 +243,7 @@ export class ModelBulkUtilSuite {
     const batches: BulkOperation<BaseWorker>[][] = [];
 
     const mockService = castTo<ModelBulkSupport>({
-      async processBulk(
-        cls: Class<BaseWorker>,
-        operations:
-          | Iterable<BulkOperation<BaseWorker> | OptionalId<BaseWorker> | Record<string, unknown>>
-          | AsyncIterable<BulkOperation<BaseWorker> | OptionalId<BaseWorker> | Record<string, unknown>>,
-        batchSize = 500
-      ): Promise<BulkResponse> {
+      async processBulk(cls: Class<BaseWorker>, operations: BulkSource<BaseWorker>, batchSize = 500): Promise<BulkResponse> {
         return ModelBulkUtil.batch(cls, operations, batchSize, async batch => {
           batches.push(batch);
           return {
@@ -296,11 +278,7 @@ export class ModelBulkUtilSuite {
     const batches: BulkOperation<BulkItem>[][] = [];
 
     const mockService = castTo<ModelBulkSupport>({
-      async processBulk(
-        cls: Class<BulkItem>,
-        operations: Iterable<BulkOperation<BulkItem>> | AsyncIterable<BulkOperation<BulkItem>>,
-        batchSize = 500
-      ): Promise<BulkResponse> {
+      async processBulk(cls: Class<BulkItem>, operations: BulkSource<BulkItem>, batchSize = 500): Promise<BulkResponse> {
         return ModelBulkUtil.batch(cls, operations, batchSize, async batch => {
           batches.push(batch);
           return {

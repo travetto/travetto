@@ -12,6 +12,7 @@ import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type BulkOperation,
   type BulkResponse,
+  type BulkSource,
   type ModelBulkSupport,
   ModelBulkUtil,
   type ModelCrudSupport,
@@ -511,14 +512,8 @@ export class ElasticsearchModelService
     return out;
   }
 
-  async processBulk<T extends ModelType>(
-    cls: Class<T>,
-    operations:
-      | Iterable<BulkOperation<T> | OptionalId<T> | Record<string, unknown>>
-      | AsyncIterable<BulkOperation<T> | OptionalId<T> | Record<string, unknown>>,
-    batchSize = 500
-  ): Promise<BulkResponse<EsBulkError>> {
-    return castTo(ModelBulkUtil.batch(cls, operations, batchSize, batch => this.#processBulkBatch(cls, batch)));
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse<EsBulkError>> {
+    return ModelBulkUtil.batch(cls, operations, batchSize, batch => this.#processBulkBatch(cls, batch));
   }
 
   // Expiry

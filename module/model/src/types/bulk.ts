@@ -10,6 +10,13 @@ import type { ModelType, OptionalId } from './model.ts';
 export type BulkOperation<T extends ModelType> = { delete?: T } & { insert?: OptionalId<T> } & { update?: T } & { upsert?: OptionalId<T> };
 
 /**
+ * Bulk source for operations
+ */
+export type BulkSource<T extends ModelType> =
+  | Iterable<BulkOperation<T> | OptionalId<T> | Record<string, unknown>>
+  | AsyncIterable<BulkOperation<T> | OptionalId<T> | Record<string, unknown>>;
+
+/**
  * Bulk response provides a summary of all the operations
  */
 export interface BulkResponse<E = unknown> {
@@ -58,11 +65,5 @@ export class BulkProcessError extends RuntimeError<{ errors: BulkErrorItem[] }> 
  * @concrete
  */
 export interface ModelBulkSupport extends ModelCrudSupport {
-  processBulk<T extends ModelType>(
-    cls: Class<T>,
-    operations:
-      | Iterable<BulkOperation<T> | OptionalId<T> | Record<string, unknown>>
-      | AsyncIterable<BulkOperation<T> | OptionalId<T> | Record<string, unknown>>,
-    batchSize?: number
-  ): Promise<BulkResponse>;
+  processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize?: number): Promise<BulkResponse>;
 }

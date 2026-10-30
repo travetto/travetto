@@ -17,6 +17,7 @@ import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type BulkOperation,
   type BulkResponse,
+  type BulkSource,
   ExistsError,
   type ModelBlobSupport,
   type ModelBulkSupport,
@@ -538,12 +539,10 @@ export class MongoModelService
 
   async processBulk<T extends ModelType>(
     cls: Class<T>,
-    operations:
-      | Iterable<BulkOperation<T> | OptionalId<T> | Record<string, unknown>>
-      | AsyncIterable<BulkOperation<T> | OptionalId<T> | Record<string, unknown>>,
+    operations: BulkSource<T>,
     batchSize = 500
   ): Promise<BulkResponse<{ index: number }>> {
-    return castTo(ModelBulkUtil.batch(cls, operations, batchSize, batch => this.#processBulkBatch(cls, batch)));
+    return ModelBulkUtil.batch(cls, operations, batchSize, batch => this.#processBulkBatch(cls, batch));
   }
 
   // Expiry
