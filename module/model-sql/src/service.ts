@@ -19,7 +19,8 @@ import {
   NotFoundError,
   type OptionalId,
   type PartialWithId,
-  UniqueError
+  UniqueError,
+  type BulkOperationSource
 } from '@travetto/model';
 import {
   type FullKeyedIndexBody,
@@ -444,8 +445,8 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   // Bulk Support
-  async #processBulkBatch<T extends ModelType>(modelClass: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse> {
-    const { insertedIds, upsertedIds, operations: preppedOperations } = await ModelBulkUtil.preStore(modelClass, operations);
+  async #processBulkBatch<T extends ModelType>(modelClass: Class<T>, operations: BulkOperationSource<T>[]): Promise<BulkResponse> {
+    const { insertedIds, upsertedIds, operations: resolvedOperations } = await ModelBulkUtil.preStore(modelClass, operations);
     const addedIdentifiers = new Map([...insertedIds.entries(), ...upsertedIds.entries()]);
 
     const counts = {
@@ -466,7 +467,7 @@ export abstract class BaseSQLModelService<C = unknown>
     const idSource = ModelRegistryIndex.get(modelClass).idSource;
     const idFieldName = idSource.field;
 
-    for (const operation of preppedOperations) {
+    for (const operation of resolvedOperations) {
       if ('insert' in operation && operation.insert) {
         inserts.push(operation.insert);
       } else if ('delete' in operation && operation.delete) {

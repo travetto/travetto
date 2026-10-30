@@ -27,7 +27,8 @@ import {
   ExistsError,
   NotFoundError,
   type OptionalId,
-  type PartialWithId
+  type PartialWithId,
+  type BulkOperationSource
 } from '@travetto/model';
 import {
   type FullKeyedIndexBody,
@@ -429,11 +430,11 @@ export class ElasticsearchModelService
     }
   }
 
-  async #processBulkBatch<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse<EsBulkError>> {
-    await ModelBulkUtil.preStore(cls, operations);
+  async #processBulkBatch<T extends ModelType>(cls: Class<T>, operations: BulkOperationSource<T>[]): Promise<BulkResponse<EsBulkError>> {
+    const { operations: resolvedOperations } = await ModelBulkUtil.preStore(cls, operations);
 
     type BulkDoc = Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string; _id?: string }>>;
-    const body = operations.reduce<(T | BulkDoc | { doc: T })[]>((toRun, operation) => {
+    const body = resolvedOperations.reduce<(T | BulkDoc | { doc: T })[]>((toRun, operation) => {
       const core = operation.upsert ?? operation.delete ?? operation.insert ?? operation.update ?? { constructor: cls };
       const { index } = this.manager.getIdentity(asConstructable<T>(core).constructor);
       const identity: { _index: string; _type?: unknown } = { _index: index };
@@ -489,7 +490,7 @@ export class ElasticsearchModelService
             property = 'insert';
             break;
           case 'index':
-            property = operations[i].insert ? 'insert' : 'upsert';
+            property = resolvedOperations[i].insert ? 'insert' : 'upsert';
             break;
           case 'delete':
           case 'update':
@@ -502,7 +503,7 @@ export class ElasticsearchModelService
 
         if (responseItem.result === 'created') {
           out.insertedIds.set(i, responseItem._id!);
-          ModelRegistryIndex.get(cls).idSource.set((operations[i].insert ?? operations[i].upsert)!, responseItem._id!);
+          ModelRegistryIndex.get(cls).idSource.set((resolvedOperations[i].insert ?? resolvedOperations[i].upsert)!, responseItem._id!);
         }
 
         out.counts[property] += 1;

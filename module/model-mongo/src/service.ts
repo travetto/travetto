@@ -15,7 +15,7 @@ import {
 
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
-  type BulkOperation,
+  type BulkOperationSource,
   type BulkResponse,
   type BulkSource,
   ExistsError,
@@ -461,7 +461,10 @@ export class MongoModelService
   }
 
   // Bulk
-  async #processBulkBatch<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse<{ index: number }>> {
+  async #processBulkBatch<T extends ModelType>(
+    cls: Class<T>,
+    operations: BulkOperationSource<T>[]
+  ): Promise<BulkResponse<{ index: number }>> {
     const out: BulkResponse<{ index: number }> = {
       errors: [],
       counts: {
@@ -480,11 +483,11 @@ export class MongoModelService
 
     const store = await this.getStore<T>(cls);
     const bulk = store.initializeUnorderedBulkOp({ writeConcern: { w: 1 } });
-    const { upsertedIds, insertedIds } = await ModelBulkUtil.preStore(cls, operations);
+    const { upsertedIds, insertedIds, operations: resolvedOperations } = await ModelBulkUtil.preStore(cls, operations);
 
     out.insertedIds = new Map([...upsertedIds.entries(), ...insertedIds.entries()]);
 
-    for (const operation of operations) {
+    for (const operation of resolvedOperations) {
       if (operation.insert) {
         this.#preStore(cls, operation.insert);
         bulk.insert(operation.insert);
@@ -506,7 +509,7 @@ export class MongoModelService
     const result = await bulk.execute({});
 
     // Restore all ids
-    for (const operation of operations) {
+    for (const operation of resolvedOperations) {
       const core = operation.insert ?? operation.upsert ?? operation.update;
       if (core) {
         this.#postStore(cls, castTo(core));
@@ -519,15 +522,15 @@ export class MongoModelService
 
     if (out.counts) {
       out.counts.delete = result.deletedCount;
-      out.counts.update = operations.filter(item => item.update).length;
+      out.counts.update = resolvedOperations.filter(item => item.update).length;
       out.counts.insert = result.insertedCount;
-      out.counts.upsert = operations.filter(item => item.upsert).length;
+      out.counts.upsert = resolvedOperations.filter(item => item.upsert).length;
     }
 
     if (result.hasWriteErrors()) {
       out.errors = result.getWriteErrors();
       for (const error of out.errors) {
-        const operation = operations[error.index];
+        const operation = resolvedOperations[error.index];
         const key = TypedObject.keys(operation)[0];
         out.counts[key] -= 1;
       }

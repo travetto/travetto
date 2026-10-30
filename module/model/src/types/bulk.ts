@@ -9,12 +9,12 @@ import type { ModelType, OptionalId } from './model.ts';
  */
 export type BulkOperation<T extends ModelType> = { delete?: T } & { insert?: OptionalId<T> } & { update?: T } & { upsert?: OptionalId<T> };
 
+export type BulkOperationSource<T extends ModelType> = BulkOperation<T> | OptionalId<T>;
+
 /**
  * Bulk source for operations
  */
-export type BulkSource<T extends ModelType> =
-  | Iterable<BulkOperation<T> | OptionalId<T> | Record<string, unknown>>
-  | AsyncIterable<BulkOperation<T> | OptionalId<T> | Record<string, unknown>>;
+export type BulkSource<T extends ModelType> = Iterable<BulkOperationSource<T>> | AsyncIterable<BulkOperationSource<T>>;
 
 /**
  * Bulk response provides a summary of all the operations

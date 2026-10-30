@@ -2,8 +2,8 @@ import { castTo, type Class, hasFunction } from '@travetto/runtime';
 import { BindUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
-import type { BulkOperation, BulkResponse, BulkSource, ModelBulkSupport } from '../types/bulk.ts';
-import type { ModelType, OptionalId } from '../types/model.ts';
+import type { BulkOperation, BulkOperationSource, BulkResponse, BulkSource, ModelBulkSupport } from '../types/bulk.ts';
+import type { ModelType } from '../types/model.ts';
 import { ModelCrudUtil } from './crud.ts';
 
 export type BulkPreStore<T extends ModelType> = {
@@ -36,10 +36,7 @@ export class ModelBulkUtil {
   /**
    * Helper to convert an item or bulk operation into a BulkOperation
    */
-  static toBulkOperation<T extends ModelType>(
-    cls: Class<T>,
-    operation: BulkOperation<T> | OptionalId<T> | Record<string, unknown>
-  ): BulkOperation<T> {
+  static toBulkOperation<T extends ModelType>(cls: Class<T>, operation: BulkOperationSource<T>): BulkOperation<T> {
     if (operation instanceof cls) {
       return { upsert: operation };
     }
@@ -94,7 +91,7 @@ export class ModelBulkUtil {
    */
   static async preStore<T extends ModelType>(
     cls: Class<T>,
-    operations: (BulkOperation<T> | OptionalId<T> | Record<string, unknown>)[],
+    operations: BulkOperationSource<T>[],
     options?: { ensureNotSubType?: boolean }
   ): Promise<BulkPreStore<T>> {
     const insertedIds = new Map<number, string>();
