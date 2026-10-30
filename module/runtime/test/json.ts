@@ -130,4 +130,26 @@ export class JSONUtilSuite {
     assert.deepStrictEqual(records[1], { id: '2', title: 'Beta', score: '88' });
     assert.deepStrictEqual(records[2], { id: '3', title: 'Gamma', score: '100' });
   }
+
+  @Test()
+  async verifyFromCSVSynchronousWithBlankLines() {
+    const lines = ['', 'name,age,city', '   ', 'Alice,30,Seattle', '', 'Bob,25,"New York, NY"', '   \t  ', 'Charlie,40,Chicago', ''];
+
+    const records: { name: string; age: string; city: string }[] = [];
+    for await (const row of JSONUtil.fromCSV<{ name: string; age: string; city: string }>(lines)) {
+      records.push(row);
+    }
+
+    assert.strictEqual(records.length, 3);
+    assert.deepStrictEqual(records[0], { name: 'Alice', age: '30', city: 'Seattle' });
+    assert.deepStrictEqual(records[1], { name: 'Bob', age: '25', city: 'New York, NY' });
+    assert.deepStrictEqual(records[2], { name: 'Charlie', age: '40', city: 'Chicago' });
+
+    const defaultRecords: Record<string, string>[] = [];
+    for await (const row of JSONUtil.fromCSV(lines)) {
+      defaultRecords.push(row);
+    }
+    assert.strictEqual(defaultRecords.length, 3);
+    assert.deepStrictEqual(defaultRecords[0], { name: 'Alice', age: '30', city: 'Seattle' });
+  }
 }

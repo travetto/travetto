@@ -5,6 +5,7 @@ import {
   type BulkResponse,
   type BulkSource,
   type ModelBulkSupport,
+  BulkProcessError,
   Model,
   ModelBulkUtil,
   SubTypeNotSupportedError
@@ -167,15 +168,16 @@ export class ModelBulkUtilSuite {
 
     const mockService = castTo<ModelBulkSupport>({
       async processBulk(cls: Class<BulkItem>, operations: BulkSource<BulkItem>, batchSize = 500): Promise<BulkResponse> {
-        return ModelBulkUtil.batch(cls, operations, batchSize, async batch => {
-          batches.push(batch);
+        return ModelBulkUtil.batch(operations, batchSize, async batch => {
+          const normalized = batch.map(item => ModelBulkUtil.toBulkOperation(cls, item));
+          batches.push(normalized);
           return {
             errors: [],
-            insertedIds: new Map(batch.map((operation, index) => [index, `id-${index}`])),
+            insertedIds: new Map(normalized.map((operation, index) => [index, `id-${index}`])),
             counts: {
               update: 0,
               insert: 0,
-              upsert: batch.length,
+              upsert: normalized.length,
               delete: 0,
               error: 0
             }
@@ -216,15 +218,16 @@ export class ModelBulkUtilSuite {
 
     const mockService = castTo<ModelBulkSupport>({
       async processBulk(cls: Class<BaseWorker>, operations: BulkSource<BaseWorker>, batchSize = 500): Promise<BulkResponse> {
-        return ModelBulkUtil.batch(cls, operations, batchSize, async batch => {
-          batches.push(batch);
+        return ModelBulkUtil.batch(operations, batchSize, async batch => {
+          const normalized = batch.map(item => ModelBulkUtil.toBulkOperation(cls, item));
+          batches.push(normalized);
           return {
             errors: [],
             insertedIds: new Map(),
             counts: {
               update: 0,
               insert: 0,
-              upsert: batch.length,
+              upsert: normalized.length,
               delete: 0,
               error: 0
             }
@@ -256,12 +259,13 @@ export class ModelBulkUtilSuite {
 
     const mockService = castTo<ModelBulkSupport>({
       async processBulk(cls: Class<BulkItem>, operations: BulkSource<BulkItem>, batchSize = 500): Promise<BulkResponse> {
-        return ModelBulkUtil.batch(cls, operations, batchSize, async batch => {
-          batches.push(batch);
+        return ModelBulkUtil.batch(operations, batchSize, async batch => {
+          const normalized = batch.map(item => ModelBulkUtil.toBulkOperation(cls, item));
+          batches.push(normalized);
           return {
             errors: [],
             insertedIds: new Map(),
-            counts: { update: 0, insert: 0, upsert: batch.length, delete: 0, error: 0 }
+            counts: { update: 0, insert: 0, upsert: normalized.length, delete: 0, error: 0 }
           };
         });
       }
@@ -286,5 +290,82 @@ export class ModelBulkUtilSuite {
     assert(prepped.operations[0].upsert?.name === 'Alpha');
     assert(prepped.operations[1].upsert?.name === 'Beta');
     assert(prepped.operations[2].upsert?.name === 'Gamma');
+  }
+
+  @Test('Verify error indices are offset across batches in BulkResponse')
+  async testBulkResponseErrorIndexOffset() {
+    await Registry.init();
+    type CustomBulkError = { index?: number; idx?: number; message: string };
+
+    const items = [
+      BulkItem.from({ name: 'First' }),
+      BulkItem.from({ name: 'Second' }),
+      BulkItem.from({ name: 'Third' }),
+      BulkItem.from({ name: 'Fourth' })
+    ];
+
+    let batchCount = 0;
+    const response = await ModelBulkUtil.batch<BulkItem, CustomBulkError>(items, 2, async () => {
+      batchCount += 1;
+      if (batchCount === 1) {
+        return {
+          errors: [{ index: 1, message: 'First batch error' }],
+          insertedIds: new Map(),
+          counts: { update: 0, insert: 0, upsert: 1, delete: 0, error: 1 }
+        };
+      } else {
+        return {
+          errors: [
+            { index: 0, message: 'Second batch error index' },
+            { idx: 1, message: 'Second batch error idx' }
+          ],
+          insertedIds: new Map(),
+          counts: { update: 0, insert: 0, upsert: 0, delete: 0, error: 2 }
+        };
+      }
+    });
+
+    assert.strictEqual(response.errors.length, 3);
+    assert.strictEqual(response.errors[0].index, 1);
+    assert.strictEqual(response.errors[1].index, 2);
+    assert.strictEqual(response.errors[2].idx, 3);
+  }
+
+  @Test('Verify thrown BulkProcessError indices are offset across batches')
+  async testBulkProcessErrorIndexOffset() {
+    await Registry.init();
+
+    const items = [
+      BulkItem.from({ name: 'First' }),
+      BulkItem.from({ name: 'Second' }),
+      BulkItem.from({ name: 'Third' }),
+      BulkItem.from({ name: 'Fourth' })
+    ];
+
+    let batchCount = 0;
+    await assert.rejects(
+      () =>
+        ModelBulkUtil.batch<BulkItem>(items, 2, async () => {
+          batchCount += 1;
+          if (batchCount === 1) {
+            return {
+              errors: [],
+              insertedIds: new Map(),
+              counts: { update: 0, insert: 0, upsert: 2, delete: 0, error: 0 }
+            };
+          } else {
+            const validationError = new ValidationResultError([
+              { kind: 'required', path: 'name', type: 'string', message: 'name is required' }
+            ]);
+            throw new BulkProcessError([{ idx: 1, error: validationError }]);
+          }
+        }),
+      (error: unknown) => {
+        assert(error instanceof BulkProcessError);
+        assert.strictEqual(error.details?.errors?.length, 1);
+        assert.strictEqual(error.details?.errors?.[0]?.idx, 3);
+        return true;
+      }
+    );
   }
 }

@@ -514,7 +514,7 @@ export class ElasticsearchModelService
   }
 
   async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse<EsBulkError>> {
-    return ModelBulkUtil.batch(cls, operations, batchSize, batch => this.#processBulkBatch(cls, batch));
+    return ModelBulkUtil.batch(operations, batchSize, batch => this.#processBulkBatch(cls, batch));
   }
 
   // Expiry

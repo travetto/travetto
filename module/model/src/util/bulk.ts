@@ -2,7 +2,14 @@ import { castTo, type Class, hasFunction } from '@travetto/runtime';
 import { BindUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
-import type { BulkOperation, BulkOperationSource, BulkResponse, BulkSource, ModelBulkSupport } from '../types/bulk.ts';
+import {
+  BulkProcessError,
+  type BulkOperation,
+  type BulkOperationSource,
+  type BulkResponse,
+  type BulkSource,
+  type ModelBulkSupport
+} from '../types/bulk.ts';
 import type { ModelType } from '../types/model.ts';
 import { ModelCrudUtil } from './crud.ts';
 
@@ -22,6 +29,18 @@ export class ModelBulkUtil {
   static isSupported = hasFunction<ModelBulkSupport>('processBulk');
 
   static #mergeBulkResponse<E>(target: BulkResponse<E>, source: BulkResponse<E>, indexOffset: number): void {
+    if (indexOffset > 0) {
+      for (const error of source.errors) {
+        if (typeof error === 'object' && error !== null) {
+          if ('index' in error && typeof error.index === 'number') {
+            error.index += indexOffset;
+          }
+          if ('idx' in error && typeof error.idx === 'number') {
+            error.idx += indexOffset;
+          }
+        }
+      }
+    }
     target.errors.push(...source.errors);
     for (const [key, value] of source.insertedIds.entries()) {
       target.insertedIds.set(key + indexOffset, value);
@@ -31,6 +50,23 @@ export class ModelBulkUtil {
     target.counts.upsert += source.counts.upsert;
     target.counts.delete += source.counts.delete;
     target.counts.error += source.counts.error;
+  }
+
+  static async #processBatch<T extends ModelType, E = unknown>(
+    handler: (batch: BulkOperationSource<T>[]) => Promise<BulkResponse<E>>,
+    batch: BulkOperationSource<T>[],
+    globalIndex: number
+  ): Promise<BulkResponse<E>> {
+    try {
+      return await handler(batch);
+    } catch (error) {
+      if (globalIndex > 0 && error instanceof BulkProcessError && error.details?.errors) {
+        for (const entry of error.details.errors) {
+          entry.idx += globalIndex;
+        }
+      }
+      throw error;
+    }
   }
 
   /**
@@ -52,32 +88,31 @@ export class ModelBulkUtil {
    * Helper to execute bulk operations in batches from an iterable or async iterable
    */
   static async batch<T extends ModelType, E = unknown>(
-    cls: Class<T>,
     operations: BulkSource<T>,
     batchSize = 500,
-    handler: (batch: BulkOperation<T>[]) => Promise<BulkResponse<E>>
+    handler: (batch: BulkOperationSource<T>[]) => Promise<BulkResponse<E>>
   ): Promise<BulkResponse<E>> {
     if (Array.isArray(operations) && operations.length <= batchSize) {
-      return handler(operations.map(operation => this.toBulkOperation(cls, operation)));
+      return this.#processBatch(handler, operations, 0);
     }
     const total: BulkResponse<E> = {
       errors: [],
       insertedIds: new Map(),
       counts: { update: 0, insert: 0, upsert: 0, delete: 0, error: 0 }
     };
-    let batch: BulkOperation<T>[] = [];
+    let batch: BulkOperationSource<T>[] = [];
     let globalIndex = 0;
     for await (const operation of operations) {
-      batch.push(this.toBulkOperation(cls, operation));
+      batch.push(operation);
       if (batch.length >= batchSize) {
-        const response = await handler(batch);
+        const response = await this.#processBatch(handler, batch, globalIndex);
         this.#mergeBulkResponse(total, response, globalIndex);
         globalIndex += batch.length;
         batch = [];
       }
     }
     if (batch.length > 0) {
-      const response = await handler(batch);
+      const response = await this.#processBatch(handler, batch, globalIndex);
       this.#mergeBulkResponse(total, response, globalIndex);
     }
     return total;

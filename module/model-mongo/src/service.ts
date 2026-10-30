@@ -545,7 +545,7 @@ export class MongoModelService
     operations: BulkSource<T>,
     batchSize = 500
   ): Promise<BulkResponse<{ index: number }>> {
-    return ModelBulkUtil.batch(cls, operations, batchSize, batch => this.#processBulkBatch(cls, batch));
+    return ModelBulkUtil.batch(operations, batchSize, batch => this.#processBulkBatch(cls, batch));
   }
 
   // Expiry
