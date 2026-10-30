@@ -558,10 +558,10 @@ export abstract class BaseSQLModelService<C = unknown>
 
   async processBulk<T extends ModelType>(
     modelClass: Class<T>,
-    operations: Iterable<BulkOperation<T>> | AsyncIterable<BulkOperation<T>>,
+    operations: Iterable<BulkOperation<T> | OptionalId<T>> | AsyncIterable<BulkOperation<T> | OptionalId<T>>,
     batchSize = 500
   ): Promise<BulkResponse> {
-    return ModelBulkUtil.batch(operations, batchSize, batch => this.#processBulkBatch(modelClass, batch));
+    return ModelBulkUtil.batch(modelClass, operations, batchSize, batch => this.#processBulkBatch(modelClass, batch));
   }
 
   // Expiry Support

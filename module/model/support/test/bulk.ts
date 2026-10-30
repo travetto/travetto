@@ -121,4 +121,26 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
     assert(result.counts.upsert === 5);
     assert(result.insertedIds.size === 5);
   }
+
+  @Test()
+  async bulkItemsDirectly() {
+    const service = await this.service;
+    const users = [0, 1, 2, 3].map(x => User.from({ name: `direct-${x}` }));
+    const result = await service.processBulk(User, users);
+    assert(result.counts.upsert === 4);
+    assert(result.insertedIds.size === 4);
+  }
+
+  @Test()
+  async bulkItemsAsyncIterableDirectly() {
+    const service = await this.service;
+    async function* users() {
+      for (let i = 0; i < 4; i++) {
+        yield User.from({ name: `stream-direct-${i}` });
+      }
+    }
+    const result = await service.processBulk(User, users(), 2);
+    assert(result.counts.upsert === 4);
+    assert(result.insertedIds.size === 4);
+  }
 }

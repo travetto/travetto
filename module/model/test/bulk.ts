@@ -172,7 +172,7 @@ export class ModelBulkUtilSuite {
         operations: Iterable<BulkOperation<BulkItem>> | AsyncIterable<BulkOperation<BulkItem>>,
         batchSize = 500
       ): Promise<BulkResponse> {
-        return ModelBulkUtil.batch(operations, batchSize, async batch => {
+        return ModelBulkUtil.batch(cls, operations, batchSize, async batch => {
           batches.push(batch);
           return {
             errors: [],
@@ -219,7 +219,7 @@ export class ModelBulkUtilSuite {
         operations: Iterable<BulkOperation<BulkItem>> | AsyncIterable<BulkOperation<BulkItem>>,
         batchSize = 500
       ): Promise<BulkResponse> {
-        return ModelBulkUtil.batch(operations, batchSize, async batch => {
+        return ModelBulkUtil.batch(cls, operations, batchSize, async batch => {
           batches.push(batch);
           return {
             errors: [],
@@ -255,7 +255,7 @@ export class ModelBulkUtilSuite {
         operations: Iterable<BulkOperation<BaseWorker>> | AsyncIterable<BulkOperation<BaseWorker>>,
         batchSize = 500
       ): Promise<BulkResponse> {
-        return ModelBulkUtil.batch(operations, batchSize, async batch => {
+        return ModelBulkUtil.batch(cls, operations, batchSize, async batch => {
           batches.push(batch);
           return {
             errors: [],
@@ -281,5 +281,48 @@ export class ModelBulkUtilSuite {
     assert(batches[0][1].insert instanceof SpecialistWorker);
     assert((batches[0][1].insert as SpecialistWorker).specialty === 'Neurology');
     assert(response.counts.insert === 2);
+  }
+
+  @Test('Verify raw items are treated as upserts')
+  async testTreatItemsAsUpsert() {
+    await Registry.init();
+    const batches: BulkOperation<BulkItem>[][] = [];
+
+    const mockService = castTo<ModelBulkSupport>({
+      async processBulk(
+        cls: Class<BulkItem>,
+        operations: Iterable<BulkOperation<BulkItem>> | AsyncIterable<BulkOperation<BulkItem>>,
+        batchSize = 500
+      ): Promise<BulkResponse> {
+        return ModelBulkUtil.batch(cls, operations, batchSize, async batch => {
+          batches.push(batch);
+          return {
+            errors: [],
+            insertedIds: new Map(),
+            counts: { update: 0, insert: 0, upsert: batch.length, delete: 0, error: 0 }
+          };
+        });
+      }
+    });
+
+    const items = [
+      BulkItem.from({ name: 'Alpha', age: 10 }),
+      BulkItem.from({ name: 'Beta', age: 20 }),
+      BulkItem.from({ name: 'Gamma', age: 30 })
+    ];
+
+    const response = await mockService.processBulk(BulkItem, items, 2);
+    assert(batches.length === 2);
+    assert(batches[0][0].upsert?.name === 'Alpha');
+    assert(batches[0][1].upsert?.name === 'Beta');
+    assert(batches[1][0].upsert?.name === 'Gamma');
+    assert(response.counts.upsert === 3);
+
+    // Also verify preStore directly with raw items
+    const prepped = await ModelBulkUtil.preStore(BulkItem, items);
+    assert(prepped.operations.length === 3);
+    assert(prepped.operations[0].upsert?.name === 'Alpha');
+    assert(prepped.operations[1].upsert?.name === 'Beta');
+    assert(prepped.operations[2].upsert?.name === 'Gamma');
   }
 }

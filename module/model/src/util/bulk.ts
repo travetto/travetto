@@ -3,7 +3,7 @@ import { BindUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
 import type { BulkOperation, BulkResponse, ModelBulkSupport } from '../types/bulk.ts';
-import type { ModelType } from '../types/model.ts';
+import type { ModelType, OptionalId } from '../types/model.ts';
 import { ModelCrudUtil } from './crud.ts';
 
 export type BulkPreStore<T extends ModelType> = {
@@ -40,15 +40,25 @@ export class ModelBulkUtil {
   }
 
   /**
+   * Helper to convert an item or bulk operation into a BulkOperation
+   */
+  static toBulkOperation<T extends ModelType>(cls: Class<T>, operation: BulkOperation<T> | OptionalId<T>): BulkOperation<T> {
+    return operation instanceof cls || !('insert' in operation || 'update' in operation || 'upsert' in operation || 'delete' in operation)
+      ? { upsert: castTo(operation) }
+      : operation;
+  }
+
+  /**
    * Helper to execute bulk operations in batches from an iterable or async iterable
    */
   static async batch<T extends ModelType>(
-    operations: Iterable<BulkOperation<T>> | AsyncIterable<BulkOperation<T>>,
+    cls: Class<T>,
+    operations: Iterable<BulkOperation<T> | OptionalId<T>> | AsyncIterable<BulkOperation<T> | OptionalId<T>>,
     batchSize = 500,
     handler: (batch: BulkOperation<T>[]) => Promise<BulkResponse>
   ): Promise<BulkResponse> {
     if (Array.isArray(operations) && operations.length <= batchSize) {
-      return handler(operations);
+      return handler(operations.map(operation => this.toBulkOperation(cls, operation)));
     }
     const total: BulkResponse = {
       errors: [],
@@ -58,7 +68,7 @@ export class ModelBulkUtil {
     let batch: BulkOperation<T>[] = [];
     let globalIndex = 0;
     for await (const operation of operations) {
-      batch.push(operation);
+      batch.push(this.toBulkOperation(cls, operation));
       if (batch.length >= batchSize) {
         const response = await handler(batch);
         this.#mergeBulkResponse(total, response, globalIndex);
@@ -81,7 +91,7 @@ export class ModelBulkUtil {
    */
   static async preStore<T extends ModelType>(
     cls: Class<T>,
-    operations: BulkOperation<T>[],
+    operations: (BulkOperation<T> | OptionalId<T>)[],
     options?: { ensureNotSubType?: boolean }
   ): Promise<BulkPreStore<T>> {
     const insertedIds = new Map<number, string>();
@@ -94,7 +104,10 @@ export class ModelBulkUtil {
 
     // Pre store
     let operationIndex = 0;
-    for (const operation of operations) {
+    const preppedOperations: BulkOperation<T>[] = [];
+    for (const rawOperation of operations) {
+      const operation = this.toBulkOperation(cls, rawOperation);
+      preppedOperations.push(operation);
       if ('insert' in operation && operation.insert) {
         operation.insert = await ModelCrudUtil.preCreate(cls, operation.insert, options);
         insertedIds.set(operationIndex, idSource.get(operation.insert));
@@ -116,7 +129,7 @@ export class ModelBulkUtil {
       }
       operationIndex += 1;
     }
-    return { insertedIds, upsertedIds, updatedIds, existingUpsertedIds, deletedIds, operations };
+    return { insertedIds, upsertedIds, updatedIds, existingUpsertedIds, deletedIds, operations: preppedOperations };
   }
 
   /**
@@ -132,13 +145,13 @@ export class ModelBulkUtil {
     source: AsyncIterable<Record<string, unknown>> | Iterable<Record<string, unknown>>,
     options?: BulkImportOptions
   ): Promise<BulkResponse> {
-    const mode = options?.mode ?? 'upsert';
+    const mode = options?.mode;
 
-    async function* toOperations(): AsyncIterable<BulkOperation<T>> {
+    async function* toOperations(): AsyncIterable<BulkOperation<T> | T> {
       for await (const row of source) {
         const expanded = BindUtil.expandPaths(row);
         const instance = SchemaRegistryIndex.getBaseClass(cls).from(castTo(expanded));
-        yield { [mode]: instance } as BulkOperation<T>;
+        yield mode && mode !== 'upsert' ? ({ [mode]: instance } as BulkOperation<T>) : instance;
       }
     }
 

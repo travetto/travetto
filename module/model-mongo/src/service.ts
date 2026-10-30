@@ -538,10 +538,10 @@ export class MongoModelService
 
   async processBulk<T extends ModelType>(
     cls: Class<T>,
-    operations: Iterable<BulkOperation<T>> | AsyncIterable<BulkOperation<T>>,
+    operations: Iterable<BulkOperation<T> | OptionalId<T>> | AsyncIterable<BulkOperation<T> | OptionalId<T>>,
     batchSize = 500
   ): Promise<BulkResponse<{ index: number }>> {
-    return castTo(ModelBulkUtil.batch(operations, batchSize, batch => this.#processBulkBatch(cls, batch)));
+    return castTo(ModelBulkUtil.batch(cls, operations, batchSize, batch => this.#processBulkBatch(cls, batch)));
   }
 
   // Expiry
