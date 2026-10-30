@@ -171,7 +171,10 @@ export class JSONUtil {
   /**
    * Read from CSV input stream
    */
-  static async *fromCSV<T extends object = object>(input: Iterable<string> | AsyncIterable<string>, separator = ''): AsyncIterable<T> {
+  static async *fromCSV<T extends object = Record<string, string>>(
+    input: Iterable<string> | AsyncIterable<string>,
+    separator = ''
+  ): AsyncIterable<T> {
     let fieldNames: string[] = [];
     for await (const line of input) {
       if (!line.trim()) {
