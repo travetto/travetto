@@ -16,6 +16,7 @@ yarn add @travetto/model-dynamodb
 This module provides an [DynamoDB](https://aws.amazon.com/dynamodb/)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations."). This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [DynamoDB](https://aws.amazon.com/dynamodb/). The entire document is stored as a single value, so nothing is needed to handle schema updates in real time. Indices on the other hand are more complicated, and will not be retroactively computed for new values. 
 
 Supported features:
+   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L67)
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10)
    *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10)
    *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L20)

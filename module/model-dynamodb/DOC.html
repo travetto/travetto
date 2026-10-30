@@ -17,7 +17,8 @@
 
 This module provides an <a target="_blank" class="external-link" href="https://aws.amazon.com/dynamodb/">DynamoDB</a>-based implementation for the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a>. This source allows the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> module to read, write and query against <a target="_blank" class="external-link" href="https://aws.amazon.com/dynamodb/">DynamoDB</a>. The entire document is stored as a single value, so nothing is needed to handle schema updates in real time. Indices on the other hand are more complicated, and will not be retroactively computed for new values. <br><br>
 Supported features:
-<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10">CRUD</a></li>
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L67">Bulk</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10">CRUD</a></li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10">Expiry</a></li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L20">Indexed</a></li>
 </ul>
