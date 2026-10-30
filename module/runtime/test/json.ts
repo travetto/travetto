@@ -107,9 +107,8 @@ export class JSONUtilSuite {
 
   @Test()
   async verifyFromCSV() {
-    const csvPath = await this.fixture.resolve('sample.csv');
     const records: { name: string; age: string; city: string }[] = [];
-    for await (const row of JSONUtil.fromCSV<{ name: string; age: string; city: string }>(csvPath)) {
+    for await (const row of JSONUtil.fromCSV<(typeof records)[0]>(this.fixture.readLines('sample.csv'))) {
       records.push(row);
     }
 
@@ -121,9 +120,8 @@ export class JSONUtilSuite {
 
   @Test()
   async verifyFromTSV() {
-    const tsvPath = await this.fixture.resolve('sample.tsv');
     const records: { id: string; title: string; score: string }[] = [];
-    for await (const row of JSONUtil.fromCSV<{ id: string; title: string; score: string }>(tsvPath)) {
+    for await (const row of JSONUtil.fromCSV<(typeof records)[0]>(this.fixture.readLines('sample.tsv'))) {
       records.push(row);
     }
 

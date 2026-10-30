@@ -1,6 +1,4 @@
 import { AssertionError } from 'node:assert';
-import { open } from 'node:fs/promises';
-import { createInterface } from 'node:readline/promises';
 
 import type { BinaryArray } from './binary.ts';
 import { CodecUtil } from './codec.ts';
@@ -171,26 +169,18 @@ export class JSONUtil {
   }
 
   /**
-   * Read from CSV
-   * @param location
-   * @param separator
+   * Read from CSV input stream
    */
-  static async *fromCSV<T>(location: string, separator: string = ''): AsyncIterable<T> {
-    const handle = await open(location, 'r');
-    const stream = handle.createReadStream();
-    try {
-      let fieldNames: string[] = [];
-      for await (const line of createInterface(stream)) {
-        separator ||= line.split('\t').length > line.split(',').length ? '\t' : ',';
-        const items = CodecUtil.parseLine(line, separator);
-        if (fieldNames.length === 0) {
-          fieldNames = items;
-        } else {
-          yield Object.fromEntries(fieldNames.map((key, i) => [key, items[i]])) as T;
-        }
+  static async *fromCSV<T>(input: AsyncIterable<string>, separator: string = ''): AsyncIterable<T> {
+    let fieldNames: string[] = [];
+    for await (const line of input) {
+      separator ||= line.split('\t').length > line.split(',').length ? '\t' : ',';
+      const items = CodecUtil.parseLine(line, separator);
+      if (fieldNames.length === 0) {
+        fieldNames = items;
+      } else {
+        yield Object.fromEntries(fieldNames.map((key, i) => [key, items[i]])) as T;
       }
-    } finally {
-      await handle.close();
     }
   }
 }
