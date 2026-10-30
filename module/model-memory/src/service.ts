@@ -358,37 +358,44 @@ export class MemoryModelService
       delete: 0,
       error: 0
     };
+    const errors: unknown[] = [];
 
-    for (const operation of resolvedOperations) {
-      if ('insert' in operation && operation.insert) {
-        const id = idSource.get(operation.insert);
-        if (store.has(id)) {
-          throw new ExistsError(cls, id);
+    for (let index = 0; index < resolvedOperations.length; index += 1) {
+      const operation = resolvedOperations[index];
+      try {
+        if ('insert' in operation && operation.insert) {
+          const id = idSource.get(operation.insert);
+          if (store.has(id)) {
+            throw new ExistsError(cls, id);
+          }
+          await this.#persist(cls, castTo<T>(operation.insert), 'write');
+          counts.insert += 1;
+        } else if ('update' in operation && operation.update) {
+          const id = idSource.get(operation.update);
+          if (!store.has(id)) {
+            throw new NotFoundError(cls, id);
+          }
+          await this.#persist(cls, operation.update, 'write');
+          counts.update += 1;
+        } else if ('upsert' in operation && operation.upsert) {
+          await this.#persist(cls, castTo<T>(operation.upsert), 'write');
+          counts.upsert += 1;
+        } else if ('delete' in operation && operation.delete) {
+          const id = idSource.get(operation.delete);
+          if (!store.has(id)) {
+            throw new NotFoundError(cls, id);
+          }
+          await this.#persist(cls, operation.delete, 'remove');
+          counts.delete += 1;
         }
-        await this.#persist(cls, castTo<T>(operation.insert), 'write');
-        counts.insert += 1;
-      } else if ('update' in operation && operation.update) {
-        const id = idSource.get(operation.update);
-        if (!store.has(id)) {
-          throw new NotFoundError(cls, id);
-        }
-        await this.#persist(cls, operation.update, 'write');
-        counts.update += 1;
-      } else if ('upsert' in operation && operation.upsert) {
-        await this.#persist(cls, castTo<T>(operation.upsert), 'write');
-        counts.upsert += 1;
-      } else if ('delete' in operation && operation.delete) {
-        const id = idSource.get(operation.delete);
-        if (!store.has(id)) {
-          throw new NotFoundError(cls, id);
-        }
-        await this.#persist(cls, operation.delete, 'remove');
-        counts.delete += 1;
+      } catch (error) {
+        counts.error += 1;
+        errors.push(typeof error === 'object' && error !== null ? Object.assign(error, { index }) : { index, error });
       }
     }
 
     return {
-      errors: [],
+      errors,
       insertedIds: new Map([...insertedIds.entries(), ...upsertedIds.entries()]),
       counts
     };
