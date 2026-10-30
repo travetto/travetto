@@ -175,7 +175,7 @@ export class JSONUtil {
    * @param location
    * @param separator
    */
-  static async *fromCSV<T>(location: string, separator: string = ''): AsyncIterable<T> {
+  static async *readCSV<T>(location: string, separator: string = ''): AsyncIterable<T> {
     const handle = await open(location, 'r');
     const stream = handle.createReadStream();
     try {
@@ -193,4 +193,6 @@ export class JSONUtil {
       await handle.close();
     }
   }
+
+  static fromCSV = this.readCSV;
 }

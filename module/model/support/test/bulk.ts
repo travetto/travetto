@@ -4,7 +4,6 @@ import { Suite, Test } from '@travetto/test';
 
 import { Model } from '../../src/registry/decorator.ts';
 import type { ModelBulkSupport } from '../../src/types/bulk.ts';
-import { ModelBulkUtil } from '../../src/util/bulk.ts';
 import { BaseModelSuite } from './base.ts';
 
 @Model('bulk-user')
@@ -117,7 +116,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
       }
     }
 
-    const result = await ModelBulkUtil.import(service, User, objects(), { batchSize: 2 });
+    const result = await service.processBulk(User, objects(), 2);
     assert(result.counts.upsert === 5);
     assert(result.insertedIds.size === 5);
   }

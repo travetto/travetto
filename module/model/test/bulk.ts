@@ -6,10 +6,11 @@ import {
   type ModelBulkSupport,
   Model,
   ModelBulkUtil,
+  type OptionalId,
   SubTypeNotSupportedError
 } from '@travetto/model';
 import { Registry } from '@travetto/registry';
-import { castTo, type Class } from '@travetto/runtime';
+import { castTo, type Class, JSONUtil } from '@travetto/runtime';
 import { DiscriminatorField, Schema, Text, ValidationResultError } from '@travetto/schema';
 import { Suite, Test, TestFixtures } from '@travetto/test';
 
@@ -160,8 +161,8 @@ export class ModelBulkUtilSuite {
     );
   }
 
-  @Test('Verify processBulk and importCSV stream and chunk bulk operations')
-  async testImportCSV() {
+  @Test('Verify processBulk with JSONUtil.readCSV stream and chunks')
+  async testProcessBulkWithCSV() {
     await Registry.init();
     const csvPath = await this.fixture.resolve('bulk-users.csv');
     const batches: BulkOperation<BulkItem>[][] = [];
@@ -169,7 +170,9 @@ export class ModelBulkUtilSuite {
     const mockService = castTo<ModelBulkSupport>({
       async processBulk(
         cls: Class<BulkItem>,
-        operations: Iterable<BulkOperation<BulkItem>> | AsyncIterable<BulkOperation<BulkItem>>,
+        operations:
+          | Iterable<BulkOperation<BulkItem> | OptionalId<BulkItem> | Record<string, unknown>>
+          | AsyncIterable<BulkOperation<BulkItem> | OptionalId<BulkItem> | Record<string, unknown>>,
         batchSize = 500
       ): Promise<BulkResponse> {
         return ModelBulkUtil.batch(cls, operations, batchSize, async batch => {
@@ -189,7 +192,7 @@ export class ModelBulkUtilSuite {
       }
     });
 
-    const response = await ModelBulkUtil.importCSV(mockService, BulkItem, csvPath, { batchSize: 2 });
+    const response = await mockService.processBulk(BulkItem, JSONUtil.readCSV(csvPath), 2);
 
     assert(batches.length === 2);
     assert(batches[0].length === 2);
@@ -208,15 +211,17 @@ export class ModelBulkUtilSuite {
     assert(response.insertedIds.get(2) === 'id-0');
   }
 
-  @Test('Verify ModelBulkUtil.import accepts arbitrary object stream')
-  async testImportObjects() {
+  @Test('Verify processBulk accepts arbitrary object stream')
+  async testProcessBulkObjects() {
     await Registry.init();
     const batches: BulkOperation<BulkItem>[][] = [];
 
     const mockService = castTo<ModelBulkSupport>({
       async processBulk(
         cls: Class<BulkItem>,
-        operations: Iterable<BulkOperation<BulkItem>> | AsyncIterable<BulkOperation<BulkItem>>,
+        operations:
+          | Iterable<BulkOperation<BulkItem> | OptionalId<BulkItem> | Record<string, unknown>>
+          | AsyncIterable<BulkOperation<BulkItem> | OptionalId<BulkItem> | Record<string, unknown>>,
         batchSize = 500
       ): Promise<BulkResponse> {
         return ModelBulkUtil.batch(cls, operations, batchSize, async batch => {
@@ -236,15 +241,15 @@ export class ModelBulkUtilSuite {
       yield { name: 'Item 3', age: 30 };
     }
 
-    const response = await ModelBulkUtil.import(mockService, BulkItem, objects(), { batchSize: 2 });
+    const response = await mockService.processBulk(BulkItem, objects(), 2);
     assert(batches.length === 2);
     assert(batches[0].length === 2);
     assert(batches[1].length === 1);
     assert(response.counts.upsert === 3);
   }
 
-  @Test('Verify importCSV handles polymorphic types from TSV')
-  async testImportCSVPolymorphicTSV() {
+  @Test('Verify processBulk handles polymorphic types from TSV')
+  async testProcessBulkPolymorphicTSV() {
     await Registry.init();
     const tsvPath = await this.fixture.resolve('bulk-workers.tsv');
     const batches: BulkOperation<BaseWorker>[][] = [];
@@ -252,7 +257,9 @@ export class ModelBulkUtilSuite {
     const mockService = castTo<ModelBulkSupport>({
       async processBulk(
         cls: Class<BaseWorker>,
-        operations: Iterable<BulkOperation<BaseWorker>> | AsyncIterable<BulkOperation<BaseWorker>>,
+        operations:
+          | Iterable<BulkOperation<BaseWorker> | OptionalId<BaseWorker> | Record<string, unknown>>
+          | AsyncIterable<BulkOperation<BaseWorker> | OptionalId<BaseWorker> | Record<string, unknown>>,
         batchSize = 500
       ): Promise<BulkResponse> {
         return ModelBulkUtil.batch(cls, operations, batchSize, async batch => {
@@ -262,8 +269,8 @@ export class ModelBulkUtilSuite {
             insertedIds: new Map(),
             counts: {
               update: 0,
-              insert: batch.length,
-              upsert: 0,
+              insert: 0,
+              upsert: batch.length,
               delete: 0,
               error: 0
             }
@@ -272,15 +279,15 @@ export class ModelBulkUtilSuite {
       }
     });
 
-    const response = await ModelBulkUtil.importCSV(mockService, BaseWorker, tsvPath, { mode: 'insert' });
+    const response = await mockService.processBulk(BaseWorker, JSONUtil.readCSV(tsvPath));
 
     assert(batches.length === 1);
     assert(batches[0].length === 2);
-    assert(batches[0][0].insert instanceof SpecialistWorker);
-    assert((batches[0][0].insert as SpecialistWorker).specialty === 'Cardiology');
-    assert(batches[0][1].insert instanceof SpecialistWorker);
-    assert((batches[0][1].insert as SpecialistWorker).specialty === 'Neurology');
-    assert(response.counts.insert === 2);
+    assert(batches[0][0].upsert instanceof SpecialistWorker);
+    assert((batches[0][0].upsert as SpecialistWorker).specialty === 'Cardiology');
+    assert(batches[0][1].upsert instanceof SpecialistWorker);
+    assert((batches[0][1].upsert as SpecialistWorker).specialty === 'Neurology');
+    assert(response.counts.upsert === 2);
   }
 
   @Test('Verify raw items are treated as upserts')

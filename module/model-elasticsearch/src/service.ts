@@ -513,7 +513,9 @@ export class ElasticsearchModelService
 
   async processBulk<T extends ModelType>(
     cls: Class<T>,
-    operations: Iterable<BulkOperation<T> | OptionalId<T>> | AsyncIterable<BulkOperation<T> | OptionalId<T>>,
+    operations:
+      | Iterable<BulkOperation<T> | OptionalId<T> | Record<string, unknown>>
+      | AsyncIterable<BulkOperation<T> | OptionalId<T> | Record<string, unknown>>,
     batchSize = 500
   ): Promise<BulkResponse<EsBulkError>> {
     return castTo(ModelBulkUtil.batch(cls, operations, batchSize, batch => this.#processBulkBatch(cls, batch)));

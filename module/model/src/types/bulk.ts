@@ -60,7 +60,9 @@ export class BulkProcessError extends RuntimeError<{ errors: BulkErrorItem[] }> 
 export interface ModelBulkSupport extends ModelCrudSupport {
   processBulk<T extends ModelType>(
     cls: Class<T>,
-    operations: Iterable<BulkOperation<T> | OptionalId<T>> | AsyncIterable<BulkOperation<T> | OptionalId<T>>,
+    operations:
+      | Iterable<BulkOperation<T> | OptionalId<T> | Record<string, unknown>>
+      | AsyncIterable<BulkOperation<T> | OptionalId<T> | Record<string, unknown>>,
     batchSize?: number
   ): Promise<BulkResponse>;
 }

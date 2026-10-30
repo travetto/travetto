@@ -1,4 +1,4 @@
-import { castTo, type Class, hasFunction, JSONUtil } from '@travetto/runtime';
+import { castTo, type Class, hasFunction } from '@travetto/runtime';
 import { BindUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
@@ -13,12 +13,6 @@ export type BulkPreStore<T extends ModelType> = {
   existingUpsertedIds: Map<number, string>;
   deletedIds: Map<number, string>;
   operations: BulkOperation<T>[];
-};
-
-export type BulkImportOptions = {
-  batchSize?: number;
-  separator?: string;
-  mode?: 'insert' | 'upsert';
 };
 
 export class ModelBulkUtil {
@@ -42,10 +36,19 @@ export class ModelBulkUtil {
   /**
    * Helper to convert an item or bulk operation into a BulkOperation
    */
-  static toBulkOperation<T extends ModelType>(cls: Class<T>, operation: BulkOperation<T> | OptionalId<T>): BulkOperation<T> {
-    return operation instanceof cls || !('insert' in operation || 'update' in operation || 'upsert' in operation || 'delete' in operation)
-      ? { upsert: castTo(operation) }
-      : operation;
+  static toBulkOperation<T extends ModelType>(
+    cls: Class<T>,
+    operation: BulkOperation<T> | OptionalId<T> | Record<string, unknown>
+  ): BulkOperation<T> {
+    if (operation instanceof cls) {
+      return { upsert: operation };
+    }
+    if ('insert' in operation || 'update' in operation || 'upsert' in operation || 'delete' in operation) {
+      return operation;
+    }
+    const expanded = BindUtil.expandPaths(operation);
+    const instance = SchemaRegistryIndex.getBaseClass(cls).from(castTo(expanded));
+    return { upsert: instance };
   }
 
   /**
@@ -53,7 +56,9 @@ export class ModelBulkUtil {
    */
   static async batch<T extends ModelType>(
     cls: Class<T>,
-    operations: Iterable<BulkOperation<T> | OptionalId<T>> | AsyncIterable<BulkOperation<T> | OptionalId<T>>,
+    operations:
+      | Iterable<BulkOperation<T> | OptionalId<T> | Record<string, unknown>>
+      | AsyncIterable<BulkOperation<T> | OptionalId<T> | Record<string, unknown>>,
     batchSize = 500,
     handler: (batch: BulkOperation<T>[]) => Promise<BulkResponse>
   ): Promise<BulkResponse> {
@@ -91,7 +96,7 @@ export class ModelBulkUtil {
    */
   static async preStore<T extends ModelType>(
     cls: Class<T>,
-    operations: (BulkOperation<T> | OptionalId<T>)[],
+    operations: (BulkOperation<T> | OptionalId<T> | Record<string, unknown>)[],
     options?: { ensureNotSubType?: boolean }
   ): Promise<BulkPreStore<T>> {
     const insertedIds = new Map<number, string>();
@@ -130,47 +135,5 @@ export class ModelBulkUtil {
       operationIndex += 1;
     }
     return { insertedIds, upsertedIds, updatedIds, existingUpsertedIds, deletedIds, operations: preppedOperations };
-  }
-
-  /**
-   * Import an object stream into a model via bulk operations
-   * @param service The model bulk service to target
-   * @param cls The model class to populate
-   * @param source The stream of raw object records (e.g. from JSONUtil.fromCSV)
-   * @param options Import options including batch size and operation mode
-   */
-  static async import<T extends ModelType>(
-    service: ModelBulkSupport,
-    cls: Class<T>,
-    source: AsyncIterable<Record<string, unknown>> | Iterable<Record<string, unknown>>,
-    options?: BulkImportOptions
-  ): Promise<BulkResponse> {
-    const mode = options?.mode;
-
-    async function* toOperations(): AsyncIterable<BulkOperation<T> | T> {
-      for await (const row of source) {
-        const expanded = BindUtil.expandPaths(row);
-        const instance = SchemaRegistryIndex.getBaseClass(cls).from(castTo(expanded));
-        yield mode && mode !== 'upsert' ? ({ [mode]: instance } as BulkOperation<T>) : instance;
-      }
-    }
-
-    return service.processBulk(cls, toOperations(), options?.batchSize);
-  }
-
-  /**
-   * Import a CSV/TSV file into a model via bulk operations
-   * @param service The model bulk service to target
-   * @param cls The model class to populate
-   * @param location File path of the CSV/TSV
-   * @param options Import options including batch size, separator, and operation mode
-   */
-  static async importCSV<T extends ModelType>(
-    service: ModelBulkSupport,
-    cls: Class<T>,
-    location: string,
-    options?: BulkImportOptions & { separator?: string }
-  ): Promise<BulkResponse> {
-    return this.import(service, cls, JSONUtil.fromCSV(location, options?.separator), options);
   }
 }
