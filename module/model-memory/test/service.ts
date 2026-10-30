@@ -6,6 +6,7 @@ import { SkipUnless, Suite, Test } from '@travetto/test';
 
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
 import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
+import { ModelBulkSuite } from '@travetto/model/support/test/bulk.ts';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud';
 import { ExpiryUser, ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
@@ -26,6 +27,12 @@ class MemoryCrudSuite extends ModelCrudSuite {
 
 @Suite()
 class MemoryBlobSuite extends ModelBlobSuite {
+  serviceClass = MemoryModelService;
+  configClass = MemoryModelConfig;
+}
+
+@Suite()
+class MemoryBulkSuite extends ModelBulkSuite {
   serviceClass = MemoryModelService;
   configClass = MemoryModelConfig;
 }
