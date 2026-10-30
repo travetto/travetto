@@ -2,6 +2,7 @@ import { DynamoDBModelConfig, DynamoDBModelService } from '@travetto/model-dynam
 import { Suite } from '@travetto/test';
 
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
+import { ModelBulkSuite } from '@travetto/model/support/test/bulk.ts';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
@@ -14,6 +15,12 @@ class DynamoDBBasicSuite extends ModelBasicSuite {
 
 @Suite()
 class DynamoDBCrudSuite extends ModelCrudSuite {
+  serviceClass = DynamoDBModelService;
+  configClass = DynamoDBModelConfig;
+}
+
+@Suite()
+class DynamoDBBulkSuite extends ModelBulkSuite {
   serviceClass = DynamoDBModelService;
   configClass = DynamoDBModelConfig;
 }
