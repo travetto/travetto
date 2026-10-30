@@ -10,9 +10,9 @@ import {
   SubTypeNotSupportedError
 } from '@travetto/model';
 import { Registry } from '@travetto/registry';
-import { castTo, type Class, JSONUtil } from '@travetto/runtime';
+import { castTo, type Class } from '@travetto/runtime';
 import { DiscriminatorField, Schema, Text, ValidationResultError } from '@travetto/schema';
-import { Suite, Test, TestFixtures } from '@travetto/test';
+import { Suite, Test } from '@travetto/test';
 
 @Model()
 class BulkItem {
@@ -38,7 +38,6 @@ class SpecialistWorker extends BaseWorker {
 
 @Suite()
 export class ModelBulkUtilSuite {
-  fixture = new TestFixtures();
   @Test('Verify insert generates id when omitted and populates insertedIds')
   async testInsertGeneratesId() {
     await Registry.init();
@@ -161,10 +160,9 @@ export class ModelBulkUtilSuite {
     );
   }
 
-  @Test('Verify processBulk with JSONUtil.readCSV stream and chunks')
-  async testProcessBulkWithCSV() {
+  @Test('Verify processBulk with object stream and batches')
+  async testProcessBulkStream() {
     await Registry.init();
-    const csvPath = await this.fixture.resolve('bulk-users.csv');
     const batches: BulkOperation<BulkItem>[][] = [];
 
     const mockService = castTo<ModelBulkSupport>({
@@ -186,7 +184,13 @@ export class ModelBulkUtilSuite {
       }
     });
 
-    const response = await mockService.processBulk(BulkItem, JSONUtil.readCSV(csvPath), 2);
+    async function* objects() {
+      yield { name: 'Alice', age: 30 };
+      yield { name: 'Bob', age: 25 };
+      yield { name: 'Charlie', age: 40 };
+    }
+
+    const response = await mockService.processBulk(BulkItem, objects(), 2);
 
     assert(batches.length === 2);
     assert(batches[0].length === 2);
@@ -205,41 +209,9 @@ export class ModelBulkUtilSuite {
     assert(response.insertedIds.get(2) === 'id-0');
   }
 
-  @Test('Verify processBulk accepts arbitrary object stream')
-  async testProcessBulkObjects() {
+  @Test('Verify processBulk handles polymorphic types')
+  async testProcessBulkPolymorphic() {
     await Registry.init();
-    const batches: BulkOperation<BulkItem>[][] = [];
-
-    const mockService = castTo<ModelBulkSupport>({
-      async processBulk(cls: Class<BulkItem>, operations: BulkSource<BulkItem>, batchSize = 500): Promise<BulkResponse> {
-        return ModelBulkUtil.batch(cls, operations, batchSize, async batch => {
-          batches.push(batch);
-          return {
-            errors: [],
-            insertedIds: new Map(),
-            counts: { update: 0, insert: 0, upsert: batch.length, delete: 0, error: 0 }
-          };
-        });
-      }
-    });
-
-    async function* objects() {
-      yield { name: 'Item 1', age: 10 };
-      yield { name: 'Item 2', age: 20 };
-      yield { name: 'Item 3', age: 30 };
-    }
-
-    const response = await mockService.processBulk(BulkItem, objects(), 2);
-    assert(batches.length === 2);
-    assert(batches[0].length === 2);
-    assert(batches[1].length === 1);
-    assert(response.counts.upsert === 3);
-  }
-
-  @Test('Verify processBulk handles polymorphic types from TSV')
-  async testProcessBulkPolymorphicTSV() {
-    await Registry.init();
-    const tsvPath = await this.fixture.resolve('bulk-workers.tsv');
     const batches: BulkOperation<BaseWorker>[][] = [];
 
     const mockService = castTo<ModelBulkSupport>({
@@ -261,7 +233,12 @@ export class ModelBulkUtilSuite {
       }
     });
 
-    const response = await mockService.processBulk(BaseWorker, JSONUtil.readCSV(tsvPath));
+    async function* workers() {
+      yield { type: 'specialist_worker', name: 'Dr. Smith', specialty: 'Cardiology' };
+      yield { type: 'specialist_worker', name: 'Dr. Jones', specialty: 'Neurology' };
+    }
+
+    const response = await mockService.processBulk(BaseWorker, workers());
 
     assert(batches.length === 1);
     assert(batches[0].length === 2);
