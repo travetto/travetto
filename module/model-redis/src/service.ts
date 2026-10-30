@@ -3,6 +3,11 @@ import { createClient } from '@redis/client';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   ExistsError,
+  type BulkOperationSource,
+  type BulkResponse,
+  type BulkSource,
+  type ModelBulkSupport,
+  ModelBulkUtil,
   type ModelCrudSupport,
   ModelCrudUtil,
   type ModelExpirySupport,
@@ -50,7 +55,7 @@ type ScanOp = 'scan' | 'sScan' | 'zRange';
  * A model service backed by redis
  */
 @Injectable()
-export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
+export class RedisModelService implements ModelCrudSupport, ModelBulkSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
   client: RedisClient;
   config: RedisModelConfig;
 
@@ -372,6 +377,121 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     for await (const { ids } of this.#streamValues('scan', { match: `${this.#resolveKey(cls)}:*` }, options)) {
       yield await this.#getBodies(cls, ids, id => id);
     }
+  }
+
+  // Bulk
+  async #processBulkBatch<T extends ModelType>(cls: Class<T>, operations: BulkOperationSource<T>[]): Promise<BulkResponse> {
+    const { insertedIds, upsertedIds, operations: resolvedOperations } = await ModelBulkUtil.preStore(cls, operations);
+    const idSource = ModelRegistryIndex.get(cls).idSource;
+    const config = ModelRegistryIndex.getConfig(cls);
+
+    const counts = {
+      update: 0,
+      insert: 0,
+      upsert: 0,
+      delete: 0,
+      error: 0
+    };
+    const errors: unknown[] = [];
+
+    // Check existing states for entities to validate existence and update indices
+    const keys = resolvedOperations.map(operation => {
+      const entity = operation.insert ?? operation.update ?? operation.upsert ?? operation.delete;
+      return entity ? this.#resolveKey(cls, idSource.get(entity)) : '';
+    });
+    const existingRaw = await this.client.mGet(keys);
+    const existingMap = new Map<number, T>();
+    for (let index = 0; index < existingRaw.length; index += 1) {
+      if (existingRaw[index]) {
+        existingMap.set(index, await ModelCrudUtil.load(cls, existingRaw[index]!));
+      }
+    }
+
+    const multi = this.client.multi();
+
+    for (let index = 0; index < resolvedOperations.length; index += 1) {
+      const operation = resolvedOperations[index];
+      const existing = existingMap.get(index);
+      const key = keys[index];
+
+      try {
+        if ('insert' in operation && operation.insert) {
+          if (existing) {
+            throw new ExistsError(cls, idSource.get(operation.insert));
+          }
+          multi.set(key, JSONUtil.toUTF8(operation.insert));
+          this.#addIndices(cls, castTo<T>(operation.insert), multi);
+          if (config.expiresAt) {
+            const expiry = ModelExpiryUtil.getExpiryState(cls, castTo<T>(operation.insert));
+            if (expiry.expiresAt !== undefined) {
+              if (expiry.expiresAt) {
+                multi.pExpireAt(key, expiry.expiresAt.getTime());
+              } else {
+                multi.persist(key);
+              }
+            }
+          }
+          counts.insert += 1;
+        } else if ('update' in operation && operation.update) {
+          if (!existing) {
+            throw new NotFoundError(cls, idSource.get(operation.update));
+          }
+          this.#removeIndices(cls, existing, multi);
+          multi.set(key, JSONUtil.toUTF8(operation.update));
+          this.#addIndices(cls, operation.update, multi);
+          if (config.expiresAt) {
+            const expiry = ModelExpiryUtil.getExpiryState(cls, operation.update);
+            if (expiry.expiresAt !== undefined) {
+              if (expiry.expiresAt) {
+                multi.pExpireAt(key, expiry.expiresAt.getTime());
+              } else {
+                multi.persist(key);
+              }
+            }
+          }
+          counts.update += 1;
+        } else if ('upsert' in operation && operation.upsert) {
+          if (existing) {
+            this.#removeIndices(cls, existing, multi);
+          }
+          multi.set(key, JSONUtil.toUTF8(operation.upsert));
+          this.#addIndices(cls, castTo<T>(operation.upsert), multi);
+          if (config.expiresAt) {
+            const expiry = ModelExpiryUtil.getExpiryState(cls, castTo<T>(operation.upsert));
+            if (expiry.expiresAt !== undefined) {
+              if (expiry.expiresAt) {
+                multi.pExpireAt(key, expiry.expiresAt.getTime());
+              } else {
+                multi.persist(key);
+              }
+            }
+          }
+          counts.upsert += 1;
+        } else if ('delete' in operation && operation.delete) {
+          if (!existing) {
+            throw new NotFoundError(cls, idSource.get(operation.delete));
+          }
+          this.#removeIndices(cls, existing, multi);
+          multi.del(key);
+          counts.delete += 1;
+        }
+      } catch (error) {
+        counts.error += 1;
+        errors.push(typeof error === 'object' && error !== null ? Object.assign(error, { index }) : { index, error });
+      }
+    }
+
+    await multi.exec();
+
+    return {
+      errors,
+      insertedIds: new Map([...insertedIds.entries(), ...upsertedIds.entries()]),
+      counts
+    };
+  }
+
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse> {
+    return ModelBulkUtil.batch(operations, batchSize, batch => this.#processBulkBatch(cls, batch));
   }
 
   // Expiry
