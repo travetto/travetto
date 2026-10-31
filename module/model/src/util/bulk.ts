@@ -33,18 +33,16 @@ export class ModelBulkUtil {
     if (indexOffset > 0) {
       for (const error of source.errors) {
         if (typeof error === 'object' && error !== null) {
-          target.errors.push({
-            ...error,
-            ...('index' in error && typeof error.index === 'number' ? { index: error.index + indexOffset } : {}),
-            ...('idx' in error && typeof error.idx === 'number' ? { idx: error.idx + indexOffset } : {})
-          });
-        } else {
-          target.errors.push(error);
+          if ('index' in error && typeof error.index === 'number') {
+            error.index += indexOffset;
+          }
+          if ('idx' in error && typeof error.idx === 'number') {
+            error.idx += indexOffset;
+          }
         }
       }
-    } else {
-      target.errors.push(...source.errors);
     }
+    target.errors.push(...source.errors);
     for (const [key, value] of source.insertedIds.entries()) {
       target.insertedIds.set(key + indexOffset, value);
     }
