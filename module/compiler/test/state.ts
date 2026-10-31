@@ -1,5 +1,8 @@
 import assert from 'node:assert';
+import { execFile } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
+import { promisify } from 'node:util';
 
 import { ManifestIndex, type ManifestRoot, path } from '@travetto/manifest';
 import { Suite, Test } from '@travetto/test';
@@ -202,6 +205,77 @@ class CompilerStateTests {
       assert.strictEqual(content, 'import { jsx } from "@travetto/doc/support/jsx-runtime.js";');
     } finally {
       fs.rmSync(targetPath, { force: true });
+    }
+  }
+
+  @Test()
+  async verifyGitHeadChangeTriggersSoftReset() {
+    const executeFile = promisify(execFile);
+    const tempDirectory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'git-watch-test-'));
+    try {
+      await executeFile('git', ['init', '-b', 'main'], { cwd: tempDirectory });
+      await executeFile('git', ['config', 'user.name', 'Test'], { cwd: tempDirectory });
+      await executeFile('git', ['config', 'user.email', 'test@test.com'], { cwd: tempDirectory });
+      await fs.promises.writeFile(path.join(tempDirectory, 'package.json'), JSON.stringify({ name: 'git-test' }), 'utf8');
+      await fs.promises.mkdir(path.join(tempDirectory, '.trv/output'), { recursive: true });
+      await fs.promises.writeFile(path.join(tempDirectory, 'README.md'), '# Initial', 'utf8');
+      await executeFile('git', ['add', '.'], { cwd: tempDirectory });
+      await executeFile('git', ['commit', '-m', 'Initial commit'], { cwd: tempDirectory });
+
+      const manifest: ManifestRoot = {
+        generated: Date.now(),
+        workspace: { name: 'git-test', path: tempDirectory, mono: false, manager: 'npm' },
+        build: { compilerUrl: 'http://localhost:20000', outputFolder: '.trv/output', toolFolder: '.trv/tool', typesFolder: '.trv/types' },
+        main: { name: 'git-test', folder: '', version: '1.0.0' },
+        modules: {
+          'git-test': {
+            main: true,
+            name: 'git-test',
+            version: '1.0.0',
+            workspace: true,
+            production: true,
+            sourceFolder: '',
+            outputFolder: 'node_modules/git-test',
+            roles: ['std'],
+            parents: [],
+            files: {}
+          }
+        }
+      };
+
+      const state = await CompilerState.get(new ManifestIndex(manifest));
+      const controller = new AbortController();
+      const watcher = new CompilerWatcher(state, controller.signal);
+
+      const iteratorPromise = (async () => {
+        try {
+          for await (const _ of watcher) {
+            // Wait for events
+          }
+        } catch (error) {
+          return error;
+        }
+      })();
+
+      // Wait a moment for watcher to initialize
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Make a new commit to change HEAD
+      await fs.promises.writeFile(path.join(tempDirectory, 'README.md'), '# Updated', 'utf8');
+      await executeFile('git', ['commit', '-am', 'Second commit'], { cwd: tempDirectory });
+
+      const result = await Promise.race([
+        iteratorPromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timed out waiting for git reset')), 5000))
+      ]);
+
+      controller.abort();
+
+      assert.ok(result instanceof CompilerReset);
+      assert.strictEqual(result.soft, true);
+      assert.ok(result.message.includes('Git branch or commit change detected'));
+    } finally {
+      await fs.promises.rm(tempDirectory, { recursive: true, force: true });
     }
   }
 }
