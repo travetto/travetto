@@ -10,6 +10,7 @@ import {
   type BulkSource,
   type ModelBulkSupport
 } from '../types/bulk.ts';
+import type { ModelCrudSupport } from '../types/crud.ts';
 import type { ModelType } from '../types/model.ts';
 import { ModelCrudUtil } from './crud.ts';
 
@@ -82,6 +83,92 @@ export class ModelBulkUtil {
     const expanded = BindUtil.expandPaths(operation);
     const instance = SchemaRegistryIndex.getBaseClass(cls).from(castTo(expanded));
     return { upsert: instance };
+  }
+
+  /**
+   * Helper for native providers to execute pre-processed operations against native batch APIs
+   */
+  static async processRaw<T extends ModelType, E = unknown>(
+    cls: Class<T>,
+    operations: BulkSource<T>,
+    batchSize = 500,
+    handler: (prepped: BulkPreStore<T>) => Promise<BulkResponse<E>>
+  ): Promise<BulkResponse<E>> {
+    return this.batch(operations, batchSize, async rawBatch => {
+      const prepped = await this.preStore(cls, rawBatch);
+      return handler(prepped);
+    });
+  }
+
+  /**
+   * Executes bulk operations against standard ModelCrudSupport operations.
+   * Useful for services without native batch primitives (e.g. Memory, File).
+   */
+  static async processCrud<T extends ModelType>(
+    service: ModelCrudSupport,
+    cls: Class<T>,
+    operations: BulkSource<T>,
+    batchSize = 500
+  ): Promise<BulkResponse> {
+    return this.batch(operations, batchSize, async rawBatch => {
+      const idSource = ModelRegistryIndex.get(cls).idSource;
+
+      // Upfront validation: ensure required IDs are present for update/delete so missing IDs fail before execution
+      for (const rawOperation of rawBatch) {
+        const operation = this.toBulkOperation(cls, rawOperation);
+        if ('update' in operation && operation.update) {
+          const id = idSource.get(operation.update, { optional: true });
+          if (!id) {
+            await ModelCrudUtil.preUpdate(cls, operation.update);
+          }
+        } else if ('delete' in operation && operation.delete) {
+          const id = typeof operation.delete === 'string' ? operation.delete : idSource.get(castTo(operation.delete), { optional: true });
+          if (!id) {
+            await ModelCrudUtil.preDelete(cls, castTo(id));
+          }
+        }
+      }
+
+      const counts = {
+        update: 0,
+        insert: 0,
+        upsert: 0,
+        delete: 0,
+        error: 0
+      };
+      const errors: unknown[] = [];
+      const insertedIds = new Map<number, string>();
+
+      for (let index = 0; index < rawBatch.length; index += 1) {
+        const operation = this.toBulkOperation(cls, rawBatch[index]);
+        try {
+          if ('insert' in operation && operation.insert) {
+            const result = await service.create(cls, operation.insert);
+            insertedIds.set(index, idSource.get(result));
+            counts.insert += 1;
+          } else if ('update' in operation && operation.update) {
+            await service.update(cls, operation.update);
+            counts.update += 1;
+          } else if ('upsert' in operation && operation.upsert) {
+            const isNew = !idSource.get(operation.upsert, { optional: true });
+            const result = await service.upsert(cls, operation.upsert);
+            if (isNew) {
+              insertedIds.set(index, idSource.get(result));
+            }
+            counts.upsert += 1;
+          } else if ('delete' in operation && operation.delete) {
+            const id = typeof operation.delete === 'string' ? operation.delete : idSource.get(castTo(operation.delete));
+            await service.delete(cls, id);
+            counts.delete += 1;
+          }
+        } catch (error) {
+          counts.error += 1;
+          errors.push(typeof error === 'object' && error !== null ? Object.assign(error, { index }) : { index, error });
+        }
+      }
+
+      return { counts, errors, insertedIds };
+    });
   }
 
   /**

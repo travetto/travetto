@@ -5,9 +5,14 @@ import {
   type BulkResponse,
   type BulkSource,
   type ModelBulkSupport,
+  type ModelCrudSupport,
+  type ModelType,
+  type OptionalId,
   BulkProcessError,
+  ExistsError,
   Model,
   ModelBulkUtil,
+  NotFoundError,
   SubTypeNotSupportedError
 } from '@travetto/model';
 import { Registry } from '@travetto/registry';
@@ -367,5 +372,103 @@ export class ModelBulkUtilSuite {
         return true;
       }
     );
+  }
+
+  @Test('Verify processCrud delegates to ModelCrudSupport and catches errors')
+  async testProcessCrud() {
+    await Registry.init();
+
+    const storage = new Map<string, BulkItem>();
+    const mockService: ModelCrudSupport = {
+      client: 'mock',
+      async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
+        const entity = item as unknown as BulkItem;
+        entity.id ??= `gen-${Math.random()}`;
+        if (storage.has(entity.id)) {
+          throw new ExistsError(cls as Class, entity.id);
+        }
+        storage.set(entity.id, entity);
+        return castTo<T>(entity);
+      },
+      async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
+        const entity = item as unknown as BulkItem;
+        if (!storage.has(entity.id)) {
+          throw new NotFoundError(cls as Class, entity.id);
+        }
+        storage.set(entity.id, entity);
+        return castTo<T>(entity);
+      },
+      async upsert<T extends ModelType>(_cls: Class<T>, item: OptionalId<T>): Promise<T> {
+        const entity = item as unknown as BulkItem;
+        entity.id ??= `gen-${Math.random()}`;
+        storage.set(entity.id, entity);
+        return castTo<T>(entity);
+      },
+      async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
+        if (!storage.has(id)) {
+          throw new NotFoundError(cls as Class, id);
+        }
+        storage.delete(id);
+      },
+      async get<T>(cls: Class<T>, id: string): Promise<T> {
+        const found = storage.get(id);
+        if (!found) {
+          throw new NotFoundError(cls as Class, id);
+        }
+        return found as unknown as T;
+      },
+      list: undefined as unknown as ModelCrudSupport['list'],
+      updatePartial: undefined as unknown as ModelCrudSupport['updatePartial']
+    };
+
+    // Prepopulate 1 item
+    storage.set('existing-1', BulkItem.from({ id: 'existing-1', name: 'Existing' }));
+
+    const response = await ModelBulkUtil.processCrud(mockService, BulkItem, [
+      { insert: BulkItem.from({ name: 'Inserted' }) },
+      { update: BulkItem.from({ id: 'existing-1', name: 'Updated' }) },
+      { update: BulkItem.from({ id: 'missing-id', name: 'Missing' }) },
+      { upsert: BulkItem.from({ id: 'new-upsert', name: 'Upserted' }) },
+      { delete: BulkItem.from({ id: 'existing-1' }) },
+      { delete: BulkItem.from({ id: 'missing-delete' }) }
+    ]);
+
+    assert.strictEqual(response.counts.insert, 1);
+    assert.strictEqual(response.counts.update, 1);
+    assert.strictEqual(response.counts.upsert, 1);
+    assert.strictEqual(response.counts.delete, 1);
+    assert.strictEqual(response.counts.error, 2);
+    assert.strictEqual(response.errors.length, 2);
+    assert.strictEqual((response.errors[0] as { index: number }).index, 2);
+    assert.strictEqual((response.errors[1] as { index: number }).index, 5);
+    assert.strictEqual(response.insertedIds.size, 1);
+  }
+
+  @Test('Verify processRaw handles preStore and merges response')
+  async testProcessRaw() {
+    await Registry.init();
+
+    const response = await ModelBulkUtil.processRaw(
+      BulkItem,
+      [{ insert: BulkItem.from({ name: 'Raw Insert' }) }, { upsert: BulkItem.from({ name: 'Raw Upsert' }) }],
+      10,
+      async prepped => {
+        assert.strictEqual(prepped.operations.length, 2);
+        assert(prepped.insertedIds.has(0));
+        assert(prepped.upsertedIds.has(1));
+        return {
+          counts: { insert: 1, update: 0, upsert: 1, delete: 0, error: 0 },
+          errors: [],
+          insertedIds: new Map([
+            [0, 'raw-insert'],
+            [1, 'raw-upsert']
+          ])
+        };
+      }
+    );
+
+    assert.strictEqual(response.counts.insert, 1);
+    assert.strictEqual(response.counts.upsert, 1);
+    assert.strictEqual(response.insertedIds.size, 2);
   }
 }
