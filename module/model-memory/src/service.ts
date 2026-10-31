@@ -346,8 +346,20 @@ export class MemoryModelService
   }
 
   // Bulk Support
-  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, config: number | BulkConfig = 500): Promise<BulkResponse> {
-    return ModelBulkUtil.processCrud(this, cls, operations, config);
+  async *processBulkStream<T extends ModelType>(
+    cls: Class<T>,
+    operations: BulkSource<T>,
+    config: number | BulkConfig = 500
+  ): AsyncIterable<BulkResponse> {
+    yield* ModelBulkUtil.processCrudStream(this, cls, operations, config);
+  }
+
+  async processBulk<T extends ModelType>(
+    cls: Class<T>,
+    operations: BulkSource<T>,
+    config: number | BulkConfig = 500
+  ): Promise<BulkResponse> {
+    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, config));
   }
 
   // Blob Support

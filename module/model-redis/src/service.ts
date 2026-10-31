@@ -380,8 +380,12 @@ export class RedisModelService implements ModelCrudSupport, ModelBulkSupport, Mo
   }
 
   // Bulk
-  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, config: number | BulkConfig = 500): Promise<BulkResponse> {
-    return ModelBulkUtil.processRaw(cls, operations, config, async ({ operations: resolvedOperations }) => {
+  async *processBulkStream<T extends ModelType>(
+    cls: Class<T>,
+    operations: BulkSource<T>,
+    config: number | BulkConfig = 500
+  ): AsyncIterable<BulkResponse> {
+    yield* ModelBulkUtil.processRawStream(cls, operations, config, async ({ operations: resolvedOperations }) => {
       const idSource = ModelRegistryIndex.get(cls).idSource;
       const config = ModelRegistryIndex.getConfig(cls);
 
@@ -490,6 +494,14 @@ export class RedisModelService implements ModelCrudSupport, ModelBulkSupport, Mo
 
       return { counts, errors, insertedIds };
     });
+  }
+
+  async processBulk<T extends ModelType>(
+    cls: Class<T>,
+    operations: BulkSource<T>,
+    config: number | BulkConfig = 500
+  ): Promise<BulkResponse> {
+    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, config));
   }
 
   // Expiry

@@ -247,8 +247,12 @@ export class FirestoreModelService implements ModelCrudSupport, ModelBulkSupport
   }
 
   // Bulk
-  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, config: number | BulkConfig = 500): Promise<BulkResponse> {
-    return ModelBulkUtil.processRaw(cls, operations, config, async ({ operations: resolvedOperations }) => {
+  async *processBulkStream<T extends ModelType>(
+    cls: Class<T>,
+    operations: BulkSource<T>,
+    config: number | BulkConfig = 500
+  ): AsyncIterable<BulkResponse> {
+    yield* ModelBulkUtil.processRawStream(cls, operations, config, async ({ operations: resolvedOperations }) => {
       const idSource = ModelRegistryIndex.get(cls).idSource;
       const collection = this.#getCollection(cls);
 
@@ -331,6 +335,14 @@ export class FirestoreModelService implements ModelCrudSupport, ModelBulkSupport
 
       return { counts, errors, insertedIds };
     });
+  }
+
+  async processBulk<T extends ModelType>(
+    cls: Class<T>,
+    operations: BulkSource<T>,
+    config: number | BulkConfig = 500
+  ): Promise<BulkResponse> {
+    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, config));
   }
 
   // Indexed contract

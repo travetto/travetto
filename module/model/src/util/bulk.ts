@@ -34,16 +34,18 @@ export class ModelBulkUtil {
     if (indexOffset > 0) {
       for (const error of source.errors) {
         if (typeof error === 'object' && error !== null) {
-          if ('index' in error && typeof error.index === 'number') {
-            error.index += indexOffset;
-          }
-          if ('idx' in error && typeof error.idx === 'number') {
-            error.idx += indexOffset;
-          }
+          target.errors.push({
+            ...error,
+            ...('index' in error && typeof error.index === 'number' ? { index: error.index + indexOffset } : {}),
+            ...('idx' in error && typeof error.idx === 'number' ? { idx: error.idx + indexOffset } : {})
+          });
+        } else {
+          target.errors.push(error);
         }
       }
+    } else {
+      target.errors.push(...source.errors);
     }
-    target.errors.push(...source.errors);
     for (const [key, value] of source.insertedIds.entries()) {
       target.insertedIds.set(key + indexOffset, value);
     }
@@ -52,6 +54,24 @@ export class ModelBulkUtil {
     target.counts.upsert += source.counts.upsert;
     target.counts.delete += source.counts.delete;
     target.counts.error += source.counts.error;
+  }
+
+  /**
+   * Collects an async iterable of BulkResponse items into a single unified BulkResponse
+   */
+  static async collect<E = unknown>(stream: AsyncIterable<BulkResponse<E>>): Promise<BulkResponse<E>> {
+    const total: BulkResponse<E> = {
+      errors: [],
+      insertedIds: new Map(),
+      counts: { update: 0, insert: 0, upsert: 0, delete: 0, error: 0 }
+    };
+    let globalIndex = 0;
+    for await (const response of stream) {
+      this.#mergeBulkResponse(total, response, globalIndex);
+      globalIndex +=
+        response.counts.update + response.counts.insert + response.counts.upsert + response.counts.delete + response.counts.error;
+    }
+    return total;
   }
 
   static async #processBatch<T extends ModelType, E = unknown>(
@@ -87,6 +107,21 @@ export class ModelBulkUtil {
   }
 
   /**
+   * Helper for native providers to stream pre-processed operations against native batch APIs
+   */
+  static async *processRawStream<T extends ModelType, E = unknown>(
+    cls: Class<T>,
+    operations: BulkSource<T>,
+    config: number | BulkConfig<E> = 500,
+    handler: (prepped: BulkPreStore<T>) => Promise<BulkResponse<E>>
+  ): AsyncIterable<BulkResponse<E>> {
+    yield* this.batchStream(operations, config, async rawBatch => {
+      const prepped = await this.preStore(cls, rawBatch);
+      return handler(prepped);
+    });
+  }
+
+  /**
    * Helper for native providers to execute pre-processed operations against native batch APIs
    */
   static async processRaw<T extends ModelType, E = unknown>(
@@ -95,23 +130,20 @@ export class ModelBulkUtil {
     config: number | BulkConfig<E> = 500,
     handler: (prepped: BulkPreStore<T>) => Promise<BulkResponse<E>>
   ): Promise<BulkResponse<E>> {
-    return this.batch(operations, config, async rawBatch => {
-      const prepped = await this.preStore(cls, rawBatch);
-      return handler(prepped);
-    });
+    return this.collect(this.processRawStream(cls, operations, config, handler));
   }
 
   /**
-   * Executes bulk operations against standard ModelCrudSupport operations.
+   * Executes bulk operations against standard ModelCrudSupport operations as an async stream.
    * Useful for services without native batch primitives (e.g. Memory, File).
    */
-  static async processCrud<T extends ModelType>(
+  static async *processCrudStream<T extends ModelType>(
     service: ModelCrudSupport,
     cls: Class<T>,
     operations: BulkSource<T>,
     config: number | BulkConfig = 500
-  ): Promise<BulkResponse> {
-    return this.batch(operations, config, async rawBatch => {
+  ): AsyncIterable<BulkResponse> {
+    yield* this.batchStream(operations, config, async rawBatch => {
       const idSource = ModelRegistryIndex.get(cls).idSource;
 
       // Upfront validation: ensure required IDs are present for update/delete so missing IDs fail before execution
@@ -173,27 +205,36 @@ export class ModelBulkUtil {
   }
 
   /**
-   * Helper to execute bulk operations in batches from an iterable or async iterable
+   * Executes bulk operations against standard ModelCrudSupport operations.
+   * Useful for services without native batch primitives (e.g. Memory, File).
    */
-  static async batch<T extends ModelType, E = unknown>(
+  static async processCrud<T extends ModelType>(
+    service: ModelCrudSupport,
+    cls: Class<T>,
+    operations: BulkSource<T>,
+    config: number | BulkConfig = 500
+  ): Promise<BulkResponse> {
+    return this.collect(this.processCrudStream(service, cls, operations, config));
+  }
+
+  /**
+   * Helper to execute bulk operations in batches from an iterable or async iterable as an async stream
+   */
+  static async *batchStream<T extends ModelType, E = unknown>(
     operations: BulkSource<T>,
     config: number | BulkConfig<E> = 500,
     handler: (batch: BulkOperationSource<T>[]) => Promise<BulkResponse<E>>
-  ): Promise<BulkResponse<E>> {
-    const { batchSize = 500, onBatch } =
-      typeof config === 'number' ? { batchSize: config } : (config ?? {});
+  ): AsyncIterable<BulkResponse<E>> {
+    const { batchSize = 500, onBatch } = typeof config === 'number' ? { batchSize: config } : (config ?? {});
 
     if (Array.isArray(operations) && operations.length <= batchSize) {
       const response = await this.#processBatch(handler, operations, 0);
       response.index = 0;
       await onBatch?.(response, 0);
-      return response;
+      yield response;
+      return;
     }
-    const total: BulkResponse<E> = {
-      errors: [],
-      insertedIds: new Map(),
-      counts: { update: 0, insert: 0, upsert: 0, delete: 0, error: 0 }
-    };
+
     let batch: BulkOperationSource<T>[] = [];
     let globalIndex = 0;
     let batchIndex = 0;
@@ -203,7 +244,7 @@ export class ModelBulkUtil {
         const response = await this.#processBatch(handler, batch, globalIndex);
         response.index = batchIndex;
         await onBatch?.(response, batchIndex);
-        this.#mergeBulkResponse(total, response, globalIndex);
+        yield response;
         globalIndex += batch.length;
         batchIndex += 1;
         batch = [];
@@ -213,9 +254,19 @@ export class ModelBulkUtil {
       const response = await this.#processBatch(handler, batch, globalIndex);
       response.index = batchIndex;
       await onBatch?.(response, batchIndex);
-      this.#mergeBulkResponse(total, response, globalIndex);
+      yield response;
     }
-    return total;
+  }
+
+  /**
+   * Helper to execute bulk operations in batches from an iterable or async iterable
+   */
+  static async batch<T extends ModelType, E = unknown>(
+    operations: BulkSource<T>,
+    config: number | BulkConfig<E> = 500,
+    handler: (batch: BulkOperationSource<T>[]) => Promise<BulkResponse<E>>
+  ): Promise<BulkResponse<E>> {
+    return this.collect(this.batchStream(operations, config, handler));
   }
 
   /**

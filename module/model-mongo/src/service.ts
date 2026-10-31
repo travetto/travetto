@@ -462,12 +462,12 @@ export class MongoModelService
   }
 
   // Bulk
-  async processBulk<T extends ModelType>(
+  async *processBulkStream<T extends ModelType>(
     cls: Class<T>,
     operations: BulkSource<T>,
     config: number | BulkConfig<{ index: number }> = 500
-  ): Promise<BulkResponse<{ index: number }>> {
-    return ModelBulkUtil.processRaw<T, { index: number }>(
+  ): AsyncIterable<BulkResponse<{ index: number }>> {
+    yield* ModelBulkUtil.processRawStream<T, { index: number }>(
       cls,
       operations,
       config,
@@ -544,6 +544,14 @@ export class MongoModelService
         return response;
       }
     );
+  }
+
+  async processBulk<T extends ModelType>(
+    cls: Class<T>,
+    operations: BulkSource<T>,
+    config: number | BulkConfig<{ index: number }> = 500
+  ): Promise<BulkResponse<{ index: number }>> {
+    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, config));
   }
 
   // Expiry

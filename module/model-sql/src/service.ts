@@ -446,8 +446,12 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   // Bulk Support
-  async processBulk<T extends ModelType>(modelClass: Class<T>, operations: BulkSource<T>, config: number | BulkConfig = 500): Promise<BulkResponse> {
-    return ModelBulkUtil.processRaw(
+  async *processBulkStream<T extends ModelType>(
+    modelClass: Class<T>,
+    operations: BulkSource<T>,
+    config: number | BulkConfig = 500
+  ): AsyncIterable<BulkResponse> {
+    yield* ModelBulkUtil.processRawStream(
       modelClass,
       operations,
       config,
@@ -563,6 +567,14 @@ export abstract class BaseSQLModelService<C = unknown>
         };
       }
     );
+  }
+
+  async processBulk<T extends ModelType>(
+    modelClass: Class<T>,
+    operations: BulkSource<T>,
+    config: number | BulkConfig = 500
+  ): Promise<BulkResponse> {
+    return ModelBulkUtil.collect(this.processBulkStream(modelClass, operations, config));
   }
 
   // Expiry Support
