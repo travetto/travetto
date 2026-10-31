@@ -445,11 +445,7 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   // Bulk Support
-  processBulkStream<T extends ModelType>(
-    modelClass: Class<T>,
-    operations: BulkSource<T>,
-    batchSize: number = 500
-  ): AsyncIterable<BulkResponse> {
+  processBulkStream<T extends ModelType>(modelClass: Class<T>, operations: BulkSource<T>, batchSize = 500): AsyncIterable<BulkResponse> {
     return ModelBulkUtil.stream(modelClass, operations, batchSize, async ({ insertedIds, upsertedIds, operations: resolvedOperations }) => {
       const addedIdentifiers = new Map([...insertedIds.entries(), ...upsertedIds.entries()]);
 
@@ -563,7 +559,7 @@ export abstract class BaseSQLModelService<C = unknown>
     });
   }
 
-  async processBulk<T extends ModelType>(modelClass: Class<T>, operations: BulkSource<T>, batchSize: number = 500): Promise<BulkResponse> {
+  async processBulk<T extends ModelType>(modelClass: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse> {
     return ModelBulkUtil.collect(this.processBulkStream(modelClass, operations, batchSize));
   }
 

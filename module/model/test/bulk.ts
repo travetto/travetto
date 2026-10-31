@@ -45,7 +45,7 @@ class SpecialistWorker extends BaseWorker {
 
 function batch<T extends ModelType, E = unknown>(
   operations: BulkSource<T>,
-  batchSize: number = 500,
+  batchSize = 500,
   handler: (batch: BulkOperationSource<T>[]) => Promise<BulkResponse<E>>
 ): Promise<BulkResponse<E>> {
   return ModelBulkUtil.collect(ModelBulkUtil.batchStream(operations, batchSize, handler));

@@ -109,7 +109,7 @@ export class ModelBulkUtil {
   static stream<T extends ModelType, E = unknown>(
     cls: Class<T>,
     operations: BulkSource<T>,
-    batchSize: number = 500,
+    batchSize = 500,
     handler: (prepped: BulkPreStore<T>) => Promise<BulkResponse<E>>
   ): AsyncIterable<BulkResponse<E>> {
     return this.batchStream(operations, batchSize, async rawBatch => {
@@ -126,7 +126,7 @@ export class ModelBulkUtil {
     service: ModelCrudSupport,
     cls: Class<T>,
     operations: BulkSource<T>,
-    batchSize: number = 500
+    batchSize = 500
   ): AsyncIterable<BulkResponse> {
     return this.batchStream(operations, batchSize, async rawBatch => {
       const idSource = ModelRegistryIndex.get(cls).idSource;
@@ -194,7 +194,7 @@ export class ModelBulkUtil {
    */
   static async *batchStream<T extends ModelType, E = unknown>(
     operations: BulkSource<T>,
-    batchSize: number = 500,
+    batchSize = 500,
     handler: (batch: BulkOperationSource<T>[]) => Promise<BulkResponse<E>>
   ): AsyncIterable<BulkResponse<E>> {
     if (Array.isArray(operations) && operations.length <= batchSize) {

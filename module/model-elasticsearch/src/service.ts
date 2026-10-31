@@ -433,7 +433,7 @@ export class ElasticsearchModelService
   processBulkStream<T extends ModelType>(
     cls: Class<T>,
     operations: BulkSource<T>,
-    batchSize: number = 500
+    batchSize = 500
   ): AsyncIterable<BulkResponse<EsBulkError>> {
     return ModelBulkUtil.stream<T, EsBulkError>(cls, operations, batchSize, async ({ operations: resolvedOperations }) => {
       type BulkDoc = Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string; _id?: string }>>;
@@ -520,11 +520,7 @@ export class ElasticsearchModelService
     });
   }
 
-  async processBulk<T extends ModelType>(
-    cls: Class<T>,
-    operations: BulkSource<T>,
-    batchSize: number = 500
-  ): Promise<BulkResponse<EsBulkError>> {
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse<EsBulkError>> {
     return ModelBulkUtil.collect(this.processBulkStream(cls, operations, batchSize));
   }
 

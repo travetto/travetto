@@ -465,7 +465,7 @@ export class MongoModelService
   processBulkStream<T extends ModelType, const E extends WriteError = WriteError>(
     cls: Class<T>,
     operations: BulkSource<T>,
-    batchSize: number = 500
+    batchSize = 500
   ): AsyncIterable<BulkResponse<E>> {
     return ModelBulkUtil.stream<T, E>(cls, operations, batchSize, async ({ upsertedIds, insertedIds, operations: resolvedOperations }) => {
       const response: BulkResponse<E> = {
@@ -544,7 +544,7 @@ export class MongoModelService
   async processBulk<T extends ModelType>(
     cls: Class<T>,
     operations: BulkSource<T>,
-    batchSize: number = 500
+    batchSize = 500
   ): Promise<BulkResponse<{ index: number }>> {
     return ModelBulkUtil.collect(this.processBulkStream(cls, operations, batchSize));
   }
