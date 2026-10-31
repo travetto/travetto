@@ -15,7 +15,6 @@ import {
 
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
-  type BulkOperationSource,
   type BulkResponse,
   type BulkSource,
   ExistsError,
@@ -91,6 +90,7 @@ import type { MongoModelConfig } from './config.ts';
 import { MongoUtil, type WithId } from './internal/util.ts';
 
 type BlobRaw = GridFSFile & { metadata?: BinaryMetadata };
+type WriteError = { index: number };
 
 type MongoTextSearch = RootFilterOperators<unknown>['$text'];
 
@@ -460,18 +460,22 @@ export class MongoModelService
       .findOneAndUpdate({ filename: location }, { $set: { metadata, contentType: metadata.contentType! } });
   }
 
-  // Bulk
-  async processBulk<T extends ModelType>(
+  // Bulk support
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse<WriteError>> {
+    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, batchSize));
+  }
+
+  processBulkStream<T extends ModelType>(
     cls: Class<T>,
     operations: BulkSource<T>,
     batchSize = 500
-  ): Promise<BulkResponse<{ index: number }>> {
-    return ModelBulkUtil.processRaw<T, { index: number }>(
+  ): AsyncIterable<BulkResponse<WriteError>> {
+    return ModelBulkUtil.stream<T, WriteError>(
       cls,
       operations,
       batchSize,
       async ({ upsertedIds, insertedIds, operations: resolvedOperations }) => {
-        const response: BulkResponse<{ index: number }> = {
+        const response: BulkResponse<WriteError> = {
           errors: [],
           counts: {
             delete: 0,

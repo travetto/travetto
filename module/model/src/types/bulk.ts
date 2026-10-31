@@ -38,6 +38,10 @@ export interface BulkResponse<E = unknown> {
     delete: number;
     error: number;
   };
+  /**
+   * 0-based batch index if reporting a batch
+   */
+  index?: number;
 }
 
 type BulkErrorItem = { message: string; type: string; errors?: ValidationError[]; idx: number };
@@ -66,4 +70,5 @@ export class BulkProcessError extends RuntimeError<{ errors: BulkErrorItem[] }> 
  */
 export interface ModelBulkSupport extends ModelCrudSupport {
   processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize?: number): Promise<BulkResponse>;
+  processBulkStream<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize?: number): AsyncIterable<BulkResponse>;
 }

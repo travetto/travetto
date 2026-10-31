@@ -446,7 +446,11 @@ export abstract class BaseSQLModelService<C = unknown>
 
   // Bulk Support
   async processBulk<T extends ModelType>(modelClass: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse> {
-    return ModelBulkUtil.processRaw(
+    return ModelBulkUtil.collect(this.processBulkStream(modelClass, operations, batchSize));
+  }
+
+  processBulkStream<T extends ModelType>(modelClass: Class<T>, operations: BulkSource<T>, batchSize = 500): AsyncIterable<BulkResponse> {
+    return ModelBulkUtil.stream<T, unknown>(
       modelClass,
       operations,
       batchSize,
