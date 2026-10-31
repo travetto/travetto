@@ -4,11 +4,11 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@travetto/cli": "^8.0.2"
+    "@travetto/cli": "^8.1.0-rc.0"
   },
   "devDependencies": {
-    "@travetto/compiler": "^8.0.2",
-    "@travetto/pack": "^8.0.1"
+    "@travetto/compiler": "^8.1.0-rc.0",
+    "@travetto/pack": "^8.1.0-rc.0"
   },
   "travetto": {}
 }

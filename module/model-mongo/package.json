@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-mongo",
-  "version": "8.0.8",
+  "version": "8.1.0-rc.0",
   "description": "Mongo backing for the travetto model module.",
   "keywords": [
     "database",
@@ -29,14 +29,14 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/config": "^8.0.3",
-    "@travetto/model": "^8.0.4",
-    "@travetto/model-indexed": "^8.0.4",
-    "@travetto/model-query": "^8.0.8",
+    "@travetto/config": "^8.1.0-rc.0",
+    "@travetto/model": "^8.1.0-rc.0",
+    "@travetto/model-indexed": "^8.1.0-rc.0",
+    "@travetto/model-query": "^8.1.0-rc.0",
     "mongodb": "^7.8.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.0.2"
+    "@travetto/cli": "^8.1.0-rc.0"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
