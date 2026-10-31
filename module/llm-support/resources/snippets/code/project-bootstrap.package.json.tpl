@@ -7,12 +7,12 @@
     "start": "trv web:http"
   },
   "dependencies": {
-    "@travetto/di": "^8.0.0",
-    "@travetto/web": "^8.0.0",
-    "@travetto/web-http": "^8.0.0"
+    "@travetto/di": "^8.1.0",
+    "@travetto/web": "^8.1.0",
+    "@travetto/web-http": "^8.1.0"
   },
   "devDependencies": {
-    "@travetto/cli": "^8.0.0",
-    "@travetto/compiler": "^8.0.0"
+    "@travetto/cli": "^8.1.0",
+    "@travetto/compiler": "^8.1.0"
   }
 }

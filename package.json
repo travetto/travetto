@@ -48,7 +48,7 @@
     "minimatch": "^10.2.2"
   },
   "devDependencies": {
-    "@travetto/repo": "^8.0.1",
+    "@travetto/repo": "^8.1.0-rc.0",
     "rollup-plugin-visualizer": "^7.1.1",
     "temporal-polyfill-lite": "^1.0.0"
   },
