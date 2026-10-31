@@ -10,7 +10,8 @@ import {
   MongoServerError,
   type WithId as MongoWithId,
   type ObjectId,
-  type RootFilterOperators
+  type RootFilterOperators,
+  type WriteError
 } from 'mongodb';
 
 import { Injectable, PostConstruct } from '@travetto/di';
@@ -461,88 +462,83 @@ export class MongoModelService
   }
 
   // Bulk
-  processBulkStream<T extends ModelType>(
+  processBulkStream<T extends ModelType, const E extends WriteError = WriteError>(
     cls: Class<T>,
     operations: BulkSource<T>,
     batchSize: number = 500
-  ): AsyncIterable<BulkResponse<{ index: number }>> {
-    return ModelBulkUtil.processRawStream<T, { index: number }>(
-      cls,
-      operations,
-      batchSize,
-      async ({ upsertedIds, insertedIds, operations: resolvedOperations }) => {
-        const response: BulkResponse<{ index: number }> = {
-          errors: [],
-          counts: {
-            delete: 0,
-            update: 0,
-            upsert: 0,
-            insert: 0,
-            error: 0
-          },
-          insertedIds: new Map([...upsertedIds.entries(), ...insertedIds.entries()])
-        };
+  ): AsyncIterable<BulkResponse<E>> {
+    return ModelBulkUtil.stream<T, E>(cls, operations, batchSize, async ({ upsertedIds, insertedIds, operations: resolvedOperations }) => {
+      const response: BulkResponse<E> = {
+        errors: [],
+        counts: {
+          delete: 0,
+          update: 0,
+          upsert: 0,
+          insert: 0,
+          error: 0
+        },
+        insertedIds: new Map([...upsertedIds.entries(), ...insertedIds.entries()])
+      };
 
-        if (resolvedOperations.length === 0) {
-          return response;
-        }
-
-        const store = await this.getStore<T>(cls);
-        const bulk = store.initializeUnorderedBulkOp({ writeConcern: { w: 1 } });
-
-        for (const operation of resolvedOperations) {
-          if (operation.insert) {
-            this.#preStore(cls, operation.insert);
-            bulk.insert(operation.insert);
-          } else if (operation.upsert) {
-            const identifier = this.#preStore(cls, operation.upsert);
-            bulk
-              .find({ _id: MongoUtil.uuid(identifier!) })
-              .upsert()
-              .updateOne({ $set: operation.upsert });
-          } else if (operation.update) {
-            const identifier = this.#preStore(cls, operation.update);
-            bulk.find({ _id: MongoUtil.uuid(identifier!) }).update({ $set: operation.update });
-          } else if (operation.delete) {
-            const identifier = ModelRegistryIndex.get(cls).idSource.get(operation.delete);
-            bulk.find({ _id: MongoUtil.uuid(identifier!) }).deleteOne();
-          }
-        }
-
-        const result = await bulk.execute({});
-
-        // Restore all ids
-        for (const operation of resolvedOperations) {
-          const core = operation.insert ?? operation.upsert ?? operation.update;
-          if (core) {
-            this.#postStore(cls, castTo(core));
-          }
-        }
-
-        for (const [index, identifier] of TypedObject.entries<Record<string, string>>(result.upsertedIds)) {
-          response.insertedIds.set(+index, MongoUtil.idToString(identifier));
-        }
-
-        if (response.counts) {
-          response.counts.delete = result.deletedCount;
-          response.counts.update = resolvedOperations.filter(item => item.update).length;
-          response.counts.insert = result.insertedCount;
-          response.counts.upsert = resolvedOperations.filter(item => item.upsert).length;
-        }
-
-        if (result.hasWriteErrors()) {
-          response.errors = result.getWriteErrors();
-          for (const error of response.errors) {
-            const operation = resolvedOperations[error.index];
-            const key = TypedObject.keys(operation)[0];
-            response.counts[key] -= 1;
-          }
-          response.counts.error = response.errors.length;
-        }
-
+      if (resolvedOperations.length === 0) {
         return response;
       }
-    );
+
+      const store = await this.getStore<T>(cls);
+      const bulk = store.initializeUnorderedBulkOp({ writeConcern: { w: 1 } });
+
+      for (const operation of resolvedOperations) {
+        if (operation.insert) {
+          this.#preStore(cls, operation.insert);
+          bulk.insert(operation.insert);
+        } else if (operation.upsert) {
+          const identifier = this.#preStore(cls, operation.upsert);
+          bulk
+            .find({ _id: MongoUtil.uuid(identifier!) })
+            .upsert()
+            .updateOne({ $set: operation.upsert });
+        } else if (operation.update) {
+          const identifier = this.#preStore(cls, operation.update);
+          bulk.find({ _id: MongoUtil.uuid(identifier!) }).update({ $set: operation.update });
+        } else if (operation.delete) {
+          const identifier = ModelRegistryIndex.get(cls).idSource.get(operation.delete);
+          bulk.find({ _id: MongoUtil.uuid(identifier!) }).deleteOne();
+        }
+      }
+
+      const result = await bulk.execute({});
+
+      // Restore all ids
+      for (const operation of resolvedOperations) {
+        const core = operation.insert ?? operation.upsert ?? operation.update;
+        if (core) {
+          this.#postStore(cls, castTo(core));
+        }
+      }
+
+      for (const [index, identifier] of TypedObject.entries<Record<string, string>>(result.upsertedIds)) {
+        response.insertedIds.set(+index, MongoUtil.idToString(identifier));
+      }
+
+      if (response.counts) {
+        response.counts.delete = result.deletedCount;
+        response.counts.update = resolvedOperations.filter(item => item.update).length;
+        response.counts.insert = result.insertedCount;
+        response.counts.upsert = resolvedOperations.filter(item => item.upsert).length;
+      }
+
+      if (result.hasWriteErrors()) {
+        response.errors = result.getWriteErrors() as E[];
+        for (const error of response.errors) {
+          const operation = resolvedOperations[error.index];
+          const key = TypedObject.keys(operation)[0];
+          response.counts[key] -= 1;
+        }
+        response.counts.error = response.errors.length;
+      }
+
+      return response;
+    });
   }
 
   async processBulk<T extends ModelType>(

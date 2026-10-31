@@ -106,7 +106,7 @@ export class ModelBulkUtil {
   /**
    * Helper for native providers to stream pre-processed operations against native batch APIs
    */
-  static processRawStream<T extends ModelType, E = unknown>(
+  static stream<T extends ModelType, E = unknown>(
     cls: Class<T>,
     operations: BulkSource<T>,
     batchSize: number = 500,

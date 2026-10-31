@@ -493,59 +493,54 @@ export class DynamoDBModelService
 
   // Bulk Support
   processBulkStream<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize: number = 500): AsyncIterable<BulkResponse> {
-    return ModelBulkUtil.processRawStream(
-      cls,
-      operations,
-      batchSize,
-      async ({ operations: resolvedOperations, upsertedIds: newUpsertedIds }) => {
-        const idSource = ModelRegistryIndex.get(cls).idSource;
+    return ModelBulkUtil.stream(cls, operations, batchSize, async ({ operations: resolvedOperations, upsertedIds: newUpsertedIds }) => {
+      const idSource = ModelRegistryIndex.get(cls).idSource;
 
-        const counts = {
-          update: 0,
-          insert: 0,
-          upsert: 0,
-          delete: 0,
-          error: 0
-        };
-        const errors: unknown[] = [];
-        const insertedIds = new Map<number, string>();
+      const counts = {
+        update: 0,
+        insert: 0,
+        upsert: 0,
+        delete: 0,
+        error: 0
+      };
+      const errors: unknown[] = [];
+      const insertedIds = new Map<number, string>();
 
-        for (let index = 0; index < resolvedOperations.length; index += 1) {
-          const operation = resolvedOperations[index];
-          try {
-            if ('insert' in operation && operation.insert) {
-              const id = idSource.get(operation.insert);
-              await this.#putItem(cls, id, operation.insert, 'create');
-              counts.insert += 1;
-              insertedIds.set(index, id);
-            } else if ('update' in operation && operation.update) {
-              const id = idSource.get(operation.update);
-              if (ModelRegistryIndex.getConfig(cls).expiresAt) {
-                await this.get(cls, id);
-              }
-              await this.#putItem(cls, id, operation.update, 'update');
-              counts.update += 1;
-            } else if ('upsert' in operation && operation.upsert) {
-              const id = idSource.get(operation.upsert);
-              await this.#putItem(cls, id, operation.upsert, 'upsert');
-              counts.upsert += 1;
-              if (newUpsertedIds.has(index)) {
-                insertedIds.set(index, id);
-              }
-            } else if ('delete' in operation && operation.delete) {
-              const id = idSource.get(operation.delete);
-              await this.delete(cls, id);
-              counts.delete += 1;
+      for (let index = 0; index < resolvedOperations.length; index += 1) {
+        const operation = resolvedOperations[index];
+        try {
+          if ('insert' in operation && operation.insert) {
+            const id = idSource.get(operation.insert);
+            await this.#putItem(cls, id, operation.insert, 'create');
+            counts.insert += 1;
+            insertedIds.set(index, id);
+          } else if ('update' in operation && operation.update) {
+            const id = idSource.get(operation.update);
+            if (ModelRegistryIndex.getConfig(cls).expiresAt) {
+              await this.get(cls, id);
             }
-          } catch (error) {
-            counts.error += 1;
-            errors.push(typeof error === 'object' && error !== null ? Object.assign(error, { index }) : { index, error });
+            await this.#putItem(cls, id, operation.update, 'update');
+            counts.update += 1;
+          } else if ('upsert' in operation && operation.upsert) {
+            const id = idSource.get(operation.upsert);
+            await this.#putItem(cls, id, operation.upsert, 'upsert');
+            counts.upsert += 1;
+            if (newUpsertedIds.has(index)) {
+              insertedIds.set(index, id);
+            }
+          } else if ('delete' in operation && operation.delete) {
+            const id = idSource.get(operation.delete);
+            await this.delete(cls, id);
+            counts.delete += 1;
           }
+        } catch (error) {
+          counts.error += 1;
+          errors.push(typeof error === 'object' && error !== null ? Object.assign(error, { index }) : { index, error });
         }
-
-        return { counts, errors, insertedIds };
       }
-    );
+
+      return { counts, errors, insertedIds };
+    });
   }
 
   async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize: number = 500): Promise<BulkResponse> {
