@@ -7,7 +7,6 @@ import { Config } from '@travetto/config';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   ExistsError,
-  type BulkOperationSource,
   type BulkResponse,
   type BulkSource,
   type ModelBlobSupport,
@@ -224,64 +223,8 @@ export class FileModelService implements ModelCrudSupport, ModelBulkSupport, Mod
   }
 
   // Bulk Support
-  async #processBulkBatch<T extends ModelType>(cls: Class<T>, operations: BulkOperationSource<T>[]): Promise<BulkResponse> {
-    const { insertedIds, upsertedIds, operations: resolvedOperations } = await ModelBulkUtil.preStore(cls, operations);
-    const idSource = ModelRegistryIndex.get(cls).idSource;
-
-    const counts = {
-      update: 0,
-      insert: 0,
-      upsert: 0,
-      delete: 0,
-      error: 0
-    };
-    const errors: unknown[] = [];
-
-    for (let index = 0; index < resolvedOperations.length; index += 1) {
-      const operation = resolvedOperations[index];
-      try {
-        if ('insert' in operation && operation.insert) {
-          const id = idSource.get(operation.insert);
-          const file = await this.#resolveName(cls, '.json', id);
-          if (await exists(file)) {
-            throw new ExistsError(cls, id);
-          }
-          await fs.writeFile(file, BinaryUtil.binaryArrayToUint8Array(JSONUtil.toBinaryArray(operation.insert)));
-          counts.insert += 1;
-        } else if ('update' in operation && operation.update) {
-          const id = idSource.get(operation.update);
-          const file = await this.#resolveName(cls, '.json', id);
-          if (!(await exists(file))) {
-            throw new NotFoundError(cls, id);
-          }
-          await fs.writeFile(file, BinaryUtil.binaryArrayToUint8Array(JSONUtil.toBinaryArray(operation.update)));
-          counts.update += 1;
-        } else if ('upsert' in operation && operation.upsert) {
-          const id = idSource.get(operation.upsert);
-          const file = await this.#resolveName(cls, '.json', id);
-          await fs.writeFile(file, BinaryUtil.binaryArrayToUint8Array(JSONUtil.toBinaryArray(operation.upsert)));
-          counts.upsert += 1;
-        } else if ('delete' in operation && operation.delete) {
-          const id = idSource.get(operation.delete);
-          const file = await this.#find(cls, '.json', id);
-          await fs.unlink(file);
-          counts.delete += 1;
-        }
-      } catch (error) {
-        counts.error += 1;
-        errors.push(typeof error === 'object' && error !== null ? Object.assign(error, { index }) : { index, error });
-      }
-    }
-
-    return {
-      errors,
-      insertedIds: new Map([...insertedIds.entries(), ...upsertedIds.entries()]),
-      counts
-    };
-  }
-
   async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse> {
-    return ModelBulkUtil.batch(operations, batchSize, batch => this.#processBulkBatch(cls, batch));
+    return ModelBulkUtil.processCrud(this, cls, operations, batchSize);
   }
 
   // Blob
