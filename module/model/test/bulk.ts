@@ -1,7 +1,6 @@
 import assert from 'node:assert';
 
 import {
-  type BatchResult,
   type BulkConfig,
   type BulkOperation,
   type BulkResponse,
@@ -477,7 +476,8 @@ export class ModelBulkUtilSuite {
   @Test('Verify processBulk onBatch callback with batches and streams')
   async testProcessBulkOnBatchCallback() {
     await Registry.init();
-    const emittedBatchResults: BatchResult[] = [];
+    const emittedBatchResponses: BulkResponse[] = [];
+    const emittedIndices: number[] = [];
 
     const mockService = castTo<ModelBulkSupport>({
       async processBulk(cls: Class<BulkItem>, operations: BulkSource<BulkItem>, config: number | BulkConfig = 500): Promise<BulkResponse> {
@@ -508,22 +508,28 @@ export class ModelBulkUtilSuite {
 
     const response = await mockService.processBulk(BulkItem, objects(), {
       batchSize: 2,
-      onBatch: async (result: BatchResult) => {
-        emittedBatchResults.push(result);
+      onBatch: async (result: BulkResponse, index: number) => {
+        emittedBatchResponses.push(result);
+        emittedIndices.push(index);
       }
     });
 
-    assert.strictEqual(emittedBatchResults.length, 3);
-    assert.strictEqual(emittedBatchResults[0].counts.upsert, 2);
-    assert.strictEqual(emittedBatchResults[1].counts.upsert, 2);
-    assert.strictEqual(emittedBatchResults[2].counts.upsert, 1);
+    assert.strictEqual(emittedBatchResponses.length, 3);
+    assert.deepStrictEqual(emittedIndices, [0, 1, 2]);
+    assert.strictEqual(emittedBatchResponses[0].index, 0);
+    assert.strictEqual(emittedBatchResponses[1].index, 1);
+    assert.strictEqual(emittedBatchResponses[2].index, 2);
+    assert.strictEqual(emittedBatchResponses[0].counts.upsert, 2);
+    assert.strictEqual(emittedBatchResponses[1].counts.upsert, 2);
+    assert.strictEqual(emittedBatchResponses[2].counts.upsert, 1);
     assert.strictEqual(response.counts.upsert, 5);
   }
 
   @Test('Verify processBulk onBatch callback with array within single batch')
   async testProcessBulkOnBatchSingleBatch() {
     await Registry.init();
-    const emittedBatchResults: BatchResult[] = [];
+    const emittedBatchResponses: BulkResponse[] = [];
+    const emittedIndices: number[] = [];
 
     const mockService = castTo<ModelBulkSupport>({
       async processBulk(cls: Class<BulkItem>, operations: BulkSource<BulkItem>, config: number | BulkConfig = 500): Promise<BulkResponse> {
@@ -551,13 +557,16 @@ export class ModelBulkUtilSuite {
 
     const response = await mockService.processBulk(BulkItem, items, {
       batchSize: 10,
-      onBatch: (result: BatchResult) => {
-        emittedBatchResults.push(result);
+      onBatch: (result: BulkResponse, index: number) => {
+        emittedBatchResponses.push(result);
+        emittedIndices.push(index);
       }
     });
 
-    assert.strictEqual(emittedBatchResults.length, 1);
-    assert.strictEqual(emittedBatchResults[0].counts.insert, 2);
+    assert.strictEqual(emittedBatchResponses.length, 1);
+    assert.deepStrictEqual(emittedIndices, [0]);
+    assert.strictEqual(emittedBatchResponses[0].index, 0);
+    assert.strictEqual(emittedBatchResponses[0].counts.insert, 2);
     assert.strictEqual(response.counts.insert, 2);
   }
 }

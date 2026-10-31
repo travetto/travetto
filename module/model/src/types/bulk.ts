@@ -38,19 +38,18 @@ export interface BulkResponse<E = unknown> {
     delete: number;
     error: number;
   };
+  /**
+   * 0-based batch index if reporting a batch
+   */
+  index?: number;
 }
-
-/**
- * Result of a single batch within a bulk process
- */
-export type BatchResult<E = unknown> = BulkResponse<E>;
 
 /**
  * Configuration options for bulk processing
  */
 export type BulkConfig<E = unknown> = {
   batchSize?: number;
-  onBatch?: (result: BatchResult<E>) => Promise<void> | void;
+  onBatch?: (result: BulkResponse<E>, index: number) => Promise<void> | void;
 };
 
 type BulkErrorItem = { message: string; type: string; errors?: ValidationError[]; idx: number };

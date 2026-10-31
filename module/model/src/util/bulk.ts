@@ -3,7 +3,6 @@ import { BindUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
 import {
-  type BatchResult,
   type BulkConfig,
   BulkProcessError,
   type BulkOperation,
@@ -186,7 +185,8 @@ export class ModelBulkUtil {
 
     if (Array.isArray(operations) && operations.length <= batchSize) {
       const response = await this.#processBatch(handler, operations, 0);
-      await onBatch?.(response);
+      response.index = 0;
+      await onBatch?.(response, 0);
       return response;
     }
     const total: BulkResponse<E> = {
@@ -196,19 +196,23 @@ export class ModelBulkUtil {
     };
     let batch: BulkOperationSource<T>[] = [];
     let globalIndex = 0;
+    let batchIndex = 0;
     for await (const operation of operations) {
       batch.push(operation);
       if (batch.length >= batchSize) {
         const response = await this.#processBatch(handler, batch, globalIndex);
-        await onBatch?.(response);
+        response.index = batchIndex;
+        await onBatch?.(response, batchIndex);
         this.#mergeBulkResponse(total, response, globalIndex);
         globalIndex += batch.length;
+        batchIndex += 1;
         batch = [];
       }
     }
     if (batch.length > 0) {
       const response = await this.#processBatch(handler, batch, globalIndex);
-      await onBatch?.(response);
+      response.index = batchIndex;
+      await onBatch?.(response, batchIndex);
       this.#mergeBulkResponse(total, response, globalIndex);
     }
     return total;
