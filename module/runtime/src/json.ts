@@ -167,4 +167,26 @@ export class JSONUtil {
   static cloneFromTransmit<T, R = T>(input: T): R {
     return JSONUtil.clone<T, R>(input, { reviver: JSONUtil.TRANSMIT_REVIVER });
   }
+
+  /**
+   * Read from CSV input stream
+   */
+  static async *fromCSV<T extends object = Record<string, string>>(
+    input: Iterable<string> | AsyncIterable<string>,
+    separator = ''
+  ): AsyncIterable<T> {
+    let fieldNames: string[] = [];
+    for await (const line of input) {
+      if (!line.trim()) {
+        continue;
+      }
+      separator ||= line.split('\t').length > line.split(',').length ? '\t' : ',';
+      const items = CodecUtil.parseLine(line, separator);
+      if (fieldNames.length === 0) {
+        fieldNames = items;
+      } else {
+        yield Object.fromEntries(fieldNames.map((key, i) => [key, items[i]])) as T;
+      }
+    }
+  }
 }

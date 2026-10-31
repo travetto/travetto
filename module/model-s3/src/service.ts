@@ -8,7 +8,11 @@ import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   ExistsError,
+  type BulkResponse,
+  type BulkSource,
   type ModelBlobSupport,
+  type ModelBulkSupport,
+  ModelBulkUtil,
   type ModelCrudSupport,
   ModelCrudUtil,
   type ModelExpirySupport,
@@ -66,7 +70,7 @@ type S3Metadata = Pick<
  * Asset source backed by S3
  */
 @Injectable()
-export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, ModelStorageSupport, ModelExpirySupport {
+export class S3ModelService implements ModelCrudSupport, ModelBulkSupport, ModelBlobSupport, ModelStorageSupport, ModelExpirySupport {
   client: S3;
   config: S3ModelConfig;
 
@@ -355,6 +359,11 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     for await (const batch of this.#iterateBucket(cls, options)) {
       yield ModelCrudUtil.filterOutNotFound(batch.map(item => this.get(cls, item.id)));
     }
+  }
+
+  // Bulk
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse> {
+    return ModelBulkUtil.processCrud(this, cls, operations, batchSize);
   }
 
   // Expiry

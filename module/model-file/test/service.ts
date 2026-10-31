@@ -9,6 +9,7 @@ import { Suite, Test } from '@travetto/test';
 
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
 import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
+import { ModelBulkSuite } from '@travetto/model/support/test/bulk.ts';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 import { ExpiryUser, ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 
@@ -26,6 +27,12 @@ class FileCrudSuite extends ModelCrudSuite {
 
 @Suite()
 class FileBlobSuite extends ModelBlobSuite {
+  serviceClass = FileModelService;
+  configClass = FileModelConfig;
+}
+
+@Suite()
+class FileBulkSuite extends ModelBulkSuite {
   serviceClass = FileModelService;
   configClass = FileModelConfig;
 }

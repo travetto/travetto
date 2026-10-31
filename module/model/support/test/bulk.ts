@@ -92,4 +92,54 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
     const service = await this.service;
     await assert.rejects(() => service.processBulk(User, [{ delete: User.from({ name: 'no-id' }) }]));
   }
+
+  @Test()
+  async bulkAsyncIterable() {
+    const service = await this.service;
+    async function* operations() {
+      for (let i = 0; i < 5; i++) {
+        yield { insert: User.from({ name: `stream-${i}` }) };
+      }
+    }
+
+    const result = await service.processBulk(User, operations(), 2);
+    assert(result.counts.insert === 5);
+    assert(result.insertedIds.size === 5);
+  }
+
+  @Test()
+  async bulkImportStream() {
+    const service = await this.service;
+    async function* objects() {
+      for (let i = 0; i < 5; i++) {
+        yield { name: `import-${i}` };
+      }
+    }
+
+    const result = await service.processBulk(User, objects(), 2);
+    assert(result.counts.upsert === 5);
+    assert(result.insertedIds.size === 5);
+  }
+
+  @Test()
+  async bulkItemsDirectly() {
+    const service = await this.service;
+    const users = [0, 1, 2, 3].map(x => User.from({ name: `direct-${x}` }));
+    const result = await service.processBulk(User, users);
+    assert(result.counts.upsert === 4);
+    assert(result.insertedIds.size === 4);
+  }
+
+  @Test()
+  async bulkItemsAsyncIterableDirectly() {
+    const service = await this.service;
+    async function* users() {
+      for (let i = 0; i < 4; i++) {
+        yield User.from({ name: `stream-direct-${i}` });
+      }
+    }
+    const result = await service.processBulk(User, users(), 2);
+    assert(result.counts.upsert === 4);
+    assert(result.insertedIds.size === 4);
+  }
 }

@@ -12,6 +12,10 @@ import {
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   ExistsError,
+  type BulkResponse,
+  type BulkSource,
+  type ModelBulkSupport,
+  ModelBulkUtil,
   type ModelCrudSupport,
   ModelCrudUtil,
   type ModelExpirySupport,
@@ -60,7 +64,9 @@ function isNotFoundError(error: unknown): boolean {
  * A model service backed by DynamoDB
  */
 @Injectable()
-export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
+export class DynamoDBModelService
+  implements ModelCrudSupport, ModelBulkSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport
+{
   client: DynamoDB;
   config: DynamoDBModelConfig;
 
@@ -483,6 +489,58 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     )) {
       yield items;
     }
+  }
+
+  // Bulk Support
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse> {
+    return ModelBulkUtil.processRaw(cls, operations, batchSize, async ({ operations: resolvedOperations, upsertedIds: newUpsertedIds }) => {
+      const idSource = ModelRegistryIndex.get(cls).idSource;
+
+      const counts = {
+        update: 0,
+        insert: 0,
+        upsert: 0,
+        delete: 0,
+        error: 0
+      };
+      const errors: unknown[] = [];
+      const insertedIds = new Map<number, string>();
+
+      for (let index = 0; index < resolvedOperations.length; index += 1) {
+        const operation = resolvedOperations[index];
+        try {
+          if ('insert' in operation && operation.insert) {
+            const id = idSource.get(operation.insert);
+            await this.#putItem(cls, id, operation.insert, 'create');
+            counts.insert += 1;
+            insertedIds.set(index, id);
+          } else if ('update' in operation && operation.update) {
+            const id = idSource.get(operation.update);
+            if (ModelRegistryIndex.getConfig(cls).expiresAt) {
+              await this.get(cls, id);
+            }
+            await this.#putItem(cls, id, operation.update, 'update');
+            counts.update += 1;
+          } else if ('upsert' in operation && operation.upsert) {
+            const id = idSource.get(operation.upsert);
+            await this.#putItem(cls, id, operation.upsert, 'upsert');
+            counts.upsert += 1;
+            if (newUpsertedIds.has(index)) {
+              insertedIds.set(index, id);
+            }
+          } else if ('delete' in operation && operation.delete) {
+            const id = idSource.get(operation.delete);
+            await this.delete(cls, id);
+            counts.delete += 1;
+          }
+        } catch (error) {
+          counts.error += 1;
+          errors.push(typeof error === 'object' && error !== null ? Object.assign(error, { index }) : { index, error });
+        }
+      }
+
+      return { counts, errors, insertedIds };
+    });
   }
 
   // Expiry

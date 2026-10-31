@@ -118,4 +118,25 @@ export class CodecUtilTest {
     assert(isUint8Array(b3));
     assert(new TextDecoder('utf8').decode(b3) === '123');
   }
+
+  @Test()
+  verifyParseLineSimple() {
+    assert.deepStrictEqual(CodecUtil.parseLine('a,b,c'), ['a', 'b', 'c']);
+    assert.deepStrictEqual(CodecUtil.parseLine(' a , b , c '), ['a', 'b', 'c']);
+    assert.deepStrictEqual(CodecUtil.parseLine('a,,c'), ['a', '', 'c']);
+  }
+
+  @Test()
+  verifyParseLineCustomDelimiter() {
+    assert.deepStrictEqual(CodecUtil.parseLine('col1\tcol2\tcol3', '\t'), ['col1', 'col2', 'col3']);
+    assert.deepStrictEqual(CodecUtil.parseLine('1;2;3', ';'), ['1', '2', '3']);
+  }
+
+  @Test()
+  verifyParseLineQuotedValues() {
+    assert.deepStrictEqual(CodecUtil.parseLine('"a,b",c,"d,e"'), ['a,b', 'c', 'd,e']);
+    assert.deepStrictEqual(CodecUtil.parseLine('"He said ""hello""",world'), ['He said "hello"', 'world']);
+    assert.deepStrictEqual(CodecUtil.parseLine('a,"",c'), ['a', '', 'c']);
+    assert.deepStrictEqual(CodecUtil.parseLine('"col\t1"\tcol2', '\t'), ['col\t1', 'col2']);
+  }
 }

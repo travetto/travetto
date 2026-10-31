@@ -7,7 +7,11 @@ import { Config } from '@travetto/config';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   ExistsError,
+  type BulkResponse,
+  type BulkSource,
   type ModelBlobSupport,
+  type ModelBulkSupport,
+  ModelBulkUtil,
   type ModelCrudSupport,
   ModelCrudUtil,
   type ModelExpirySupport,
@@ -65,7 +69,7 @@ const exists = (file: string): Promise<boolean> =>
  * Standard file support
  */
 @Injectable()
-export class FileModelService implements ModelCrudSupport, ModelBlobSupport, ModelExpirySupport, ModelStorageSupport {
+export class FileModelService implements ModelCrudSupport, ModelBulkSupport, ModelBlobSupport, ModelExpirySupport, ModelStorageSupport {
   /** @private */
   static async *scanFolder(folder: string, suffix: string, options?: ModelListOptions): AsyncGenerator<[id: string, field: string][]> {
     const found: [id: string, field: string][] = [];
@@ -216,6 +220,11 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     for await (const batch of FileModelService.scanFolder(await this.#resolveName(cls, '.json'), '.json', options)) {
       yield ModelCrudUtil.filterOutNotFound(batch.map(([id]) => this.get(cls, id)));
     }
+  }
+
+  // Bulk Support
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse> {
+    return ModelBulkUtil.processCrud(this, cls, operations, batchSize);
   }
 
   // Blob

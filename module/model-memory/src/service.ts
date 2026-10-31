@@ -3,7 +3,11 @@ import { Injectable, PostConstruct } from '@travetto/di';
 import {
   ExistsError,
   IndexNotSupported,
+  type BulkResponse,
+  type BulkSource,
   type ModelBlobSupport,
+  type ModelBulkSupport,
+  ModelBulkUtil,
   type ModelCrudSupport,
   ModelCrudUtil,
   type ModelExpirySupport,
@@ -83,7 +87,7 @@ function getFirstId(data: Map<string, unknown> | Set<string>, value?: string | n
  */
 @Injectable()
 export class MemoryModelService
-  implements ModelCrudSupport, ModelBlobSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport
+  implements ModelCrudSupport, ModelBulkSupport, ModelBlobSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport
 {
   #store = new Map<string, StoreType>();
   #indices = {
@@ -338,6 +342,11 @@ export class MemoryModelService
     for await (const batch of this.#iterateIds([...this.#getStore(cls).keys()], options)) {
       yield ModelCrudUtil.filterOutNotFound(batch.map(id => this.get(cls, id)));
     }
+  }
+
+  // Bulk Support
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse> {
+    return ModelBulkUtil.processCrud(this, cls, operations, batchSize);
   }
 
   // Blob Support

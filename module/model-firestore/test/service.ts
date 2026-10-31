@@ -2,6 +2,7 @@ import { FirestoreModelConfig, FirestoreModelService } from '@travetto/model-fir
 import { Suite } from '@travetto/test';
 
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
+import { ModelBulkSuite } from '@travetto/model/support/test/bulk.ts';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
 
@@ -13,6 +14,12 @@ class FirestoreBasicSuite extends ModelBasicSuite {
 
 @Suite()
 class FirestoreCrudSuite extends ModelCrudSuite {
+  serviceClass = FirestoreModelService;
+  configClass = FirestoreModelConfig;
+}
+
+@Suite()
+class FirestoreBulkSuite extends ModelBulkSuite {
   serviceClass = FirestoreModelService;
   configClass = FirestoreModelConfig;
 }

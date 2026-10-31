@@ -8,6 +8,7 @@ type TextInput = string | BinaryArray;
 
 const UTF8_DECODER = new TextDecoder('utf8');
 const UTF8_ENCODER = new TextEncoder();
+const DOUBLE_QUOTE = '"'.charCodeAt(0);
 
 /**
  * Utilities for encoding and decoding common formats
@@ -119,5 +120,36 @@ export class CodecUtil {
         return data.substring(0, end).trim();
       }
     }
+  }
+
+  /**
+   * Parse a single delimited line respecting RFC 4180 quotes
+   */
+  static parseLine(line: string, delimiter = ','): string[] {
+    const values: string[] = [];
+    const current: number[] = [];
+    let inQuotes = false;
+    const delimiterCode = delimiter.charCodeAt(0);
+
+    for (let i = 0; i < line.length; i += 1) {
+      const charCode = line.charCodeAt(i);
+      if (charCode === DOUBLE_QUOTE) {
+        if (inQuotes && line.charCodeAt(i + 1) === DOUBLE_QUOTE) {
+          i += 1; // Skip next quote
+        } else {
+          inQuotes = !inQuotes;
+          continue;
+        }
+      }
+
+      if (charCode === delimiterCode && !inQuotes) {
+        values.push(String.fromCharCode(...current).trim());
+        current.splice(0, current.length);
+      } else {
+        current.push(charCode);
+      }
+    }
+    values.push(String.fromCharCode(...current).trim());
+    return values;
   }
 }

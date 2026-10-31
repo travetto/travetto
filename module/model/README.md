@@ -33,7 +33,7 @@ export class SampleModel {
 Once the model is defined, it can be leveraged with any of the services that implement the various model storage contracts. These contracts allow for persisting and fetching of the associated model object.
 
 ## Contracts
-The module is mainly composed of contracts. The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10), [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L60).
+The module is mainly composed of contracts. The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10), [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L67).
 
 ### Basic
 All [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations, must honor the [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L9) contract to be able to participate in the model ecosystem. This contract represents the bare minimum for a model service.
@@ -190,12 +190,12 @@ export interface ModelBlobSupport {
 ```
 
 ### Bulk
-Finally, there is support for [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L60) operations. This is not to simply imply issuing many commands at in parallel, but implementation support for an atomic/bulk operation. This should allow for higher throughput on data ingest, and potentially for atomic support on transactions.
+Finally, there is support for [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L67) operations. This is not to simply imply issuing many commands at in parallel, but implementation support for an atomic/bulk operation. This should allow for higher throughput on data ingest, and potentially for atomic support on transactions.
 
 **Code: Bulk Contract**
 ```typescript
 export interface ModelBulkSupport extends ModelCrudSupport {
-  processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse>;
+  processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize?: number): Promise<BulkResponse>;
 }
 ```
 

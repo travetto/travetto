@@ -12,6 +12,7 @@ import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type BulkOperation,
   type BulkResponse,
+  type BulkSource,
   type ModelBulkSupport,
   ModelBulkUtil,
   type ModelCrudSupport,
@@ -26,7 +27,8 @@ import {
   ExistsError,
   NotFoundError,
   type OptionalId,
-  type PartialWithId
+  type PartialWithId,
+  type BulkOperationSource
 } from '@travetto/model';
 import {
   type FullKeyedIndexBody,
@@ -428,87 +430,87 @@ export class ElasticsearchModelService
     }
   }
 
-  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse<EsBulkError>> {
-    await ModelBulkUtil.preStore(cls, operations);
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse<EsBulkError>> {
+    return ModelBulkUtil.processRaw<T, EsBulkError>(cls, operations, batchSize, async ({ operations: resolvedOperations }) => {
+      type BulkDoc = Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string; _id?: string }>>;
+      const body = resolvedOperations.reduce<(T | BulkDoc | { doc: T })[]>((toRun, operation) => {
+        const core = operation.upsert ?? operation.delete ?? operation.insert ?? operation.update ?? { constructor: cls };
+        const { index } = this.manager.getIdentity(asConstructable<T>(core).constructor);
+        const identity: { _index: string; _type?: unknown } = { _index: index };
 
-    type BulkDoc = Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string; _id?: string }>>;
-    const body = operations.reduce<(T | BulkDoc | { doc: T })[]>((toRun, operation) => {
-      const core = operation.upsert ?? operation.delete ?? operation.insert ?? operation.update ?? { constructor: cls };
-      const { index } = this.manager.getIdentity(asConstructable<T>(core).constructor);
-      const identity: { _index: string; _type?: unknown } = { _index: index };
+        if (operation.delete) {
+          toRun.push({ delete: { ...identity, _id: ModelRegistryIndex.get(cls).idSource.get(operation.delete) } });
+        } else if (operation.insert) {
+          const identifier = this.#preStore(cls, operation.insert);
+          toRun.push({ create: { ...identity, _id: identifier } }, castTo(operation.insert));
+        } else if (operation.upsert) {
+          const identifier = this.#preStore(cls, operation.upsert);
+          toRun.push({ index: { ...identity, _id: identifier } }, castTo(operation.upsert));
+        } else if (operation.update) {
+          const identifier = this.#preStore(cls, operation.update);
+          toRun.push({ update: { ...identity, _id: identifier } }, { doc: operation.update });
+        }
+        return toRun;
+      }, []);
 
-      if (operation.delete) {
-        toRun.push({ delete: { ...identity, _id: ModelRegistryIndex.get(cls).idSource.get(operation.delete) } });
-      } else if (operation.insert) {
-        const id = this.#preStore(cls, operation.insert);
-        toRun.push({ create: { ...identity, _id: id } }, castTo(operation.insert));
-      } else if (operation.upsert) {
-        const id = this.#preStore(cls, operation.upsert);
-        toRun.push({ index: { ...identity, _id: id } }, castTo(operation.upsert));
-      } else if (operation.update) {
-        const id = this.#preStore(cls, operation.update);
-        toRun.push({ update: { ...identity, _id: id } }, { doc: operation.update });
-      }
-      return toRun;
-    }, []);
+      const result = await this.client.bulk({
+        operations: body,
+        refresh: true
+      });
 
-    const result = await this.client.bulk({
-      operations: body,
-      refresh: true
-    });
+      const response: BulkResponse<EsBulkError> = {
+        counts: {
+          delete: 0,
+          insert: 0,
+          upsert: 0,
+          update: 0,
+          error: 0
+        },
+        insertedIds: new Map(),
+        errors: []
+      };
 
-    const out: BulkResponse<EsBulkError> = {
-      counts: {
-        delete: 0,
-        insert: 0,
-        upsert: 0,
-        update: 0,
-        error: 0
-      },
-      insertedIds: new Map(),
-      errors: []
-    };
+      type CountProperty = keyof (typeof response)['counts'];
 
-    type CountProperty = keyof (typeof out)['counts'];
-
-    for (let i = 0; i < result.items.length; i += 1) {
-      const item = result.items[i];
-      const [key] = TypedObject.keys(item);
-      const responseItem = item[key]!;
-      if (responseItem.error) {
-        out.errors.push({
-          reason: responseItem.error!.reason!,
-          type: responseItem.error!.type
-        });
-        out.counts.error += 1;
-      } else {
-        let property: CountProperty;
-        switch (key) {
-          case 'create':
-            property = 'insert';
-            break;
-          case 'index':
-            property = operations[i].insert ? 'insert' : 'upsert';
-            break;
-          case 'delete':
-          case 'update':
-            property = key;
-            break;
-          default: {
-            throw new Error(`Unknown response key: ${key}`);
+      for (let index = 0; index < result.items.length; index += 1) {
+        const item = result.items[index];
+        const [key] = TypedObject.keys(item);
+        const responseItem = item[key]!;
+        if (responseItem.error) {
+          response.errors.push({
+            reason: responseItem.error!.reason!,
+            type: responseItem.error!.type
+          });
+          response.counts.error += 1;
+        } else {
+          let property: CountProperty;
+          switch (key) {
+            case 'create':
+              property = 'insert';
+              break;
+            case 'index':
+              property = resolvedOperations[index].insert ? 'insert' : 'upsert';
+              break;
+            case 'delete':
+            case 'update':
+              property = key;
+              break;
+            default: {
+              throw new Error(`Unknown response key: ${key}`);
+            }
           }
-        }
 
-        if (responseItem.result === 'created') {
-          out.insertedIds.set(i, responseItem._id!);
-          ModelRegistryIndex.get(cls).idSource.set((operations[i].insert ?? operations[i].upsert)!, responseItem._id!);
-        }
+          if (responseItem.result === 'created') {
+            response.insertedIds.set(index, responseItem._id!);
+            ModelRegistryIndex.get(cls).idSource.set((resolvedOperations[index].insert ?? resolvedOperations[index].upsert)!, responseItem._id!);
+          }
 
-        out.counts[property] += 1;
+          response.counts[property] += 1;
+        }
       }
-    }
 
-    return out;
+      return response;
+    });
   }
 
   // Expiry

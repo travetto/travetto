@@ -2,6 +2,7 @@ import { Injectable, PostConstruct } from '@travetto/di';
 import {
   type BulkOperation,
   type BulkResponse,
+  type BulkSource,
   type IndexConfig,
   type ModelBulkSupport,
   ModelBulkUtil,
@@ -18,7 +19,8 @@ import {
   NotFoundError,
   type OptionalId,
   type PartialWithId,
-  UniqueError
+  UniqueError,
+  type BulkOperationSource
 } from '@travetto/model';
 import {
   type FullKeyedIndexBody,
@@ -443,117 +445,123 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   // Bulk Support
-  async processBulk<T extends ModelType>(modelClass: Class<T>, operations: BulkOperation<T>[]): Promise<BulkResponse> {
-    const { insertedIds, upsertedIds, operations: preppedOperations } = await ModelBulkUtil.preStore(modelClass, operations);
-    const addedIdentifiers = new Map([...insertedIds.entries(), ...upsertedIds.entries()]);
+  async processBulk<T extends ModelType>(modelClass: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse> {
+    return ModelBulkUtil.processRaw(
+      modelClass,
+      operations,
+      batchSize,
+      async ({ insertedIds, upsertedIds, operations: resolvedOperations }) => {
+        const addedIdentifiers = new Map([...insertedIds.entries(), ...upsertedIds.entries()]);
 
-    const counts = {
-      update: 0,
-      insert: 0,
-      upsert: 0,
-      delete: 0,
-      error: 0
-    };
-    const errors: unknown[] = [];
+        const counts = {
+          update: 0,
+          insert: 0,
+          upsert: 0,
+          delete: 0,
+          error: 0
+        };
+        const errors: unknown[] = [];
 
-    // Process the inbound bulk request into groups: inserts, deletes, updates, and upserts
-    const inserts: OptionalId<T>[] = [];
-    const deletes: string[] = [];
-    const updates: T[] = [];
-    const upserts: { upsert?: OptionalId<T> }[] = [];
+        // Process the inbound bulk request into groups: inserts, deletes, updates, and upserts
+        const inserts: OptionalId<T>[] = [];
+        const deletes: string[] = [];
+        const updates: T[] = [];
+        const upserts: { upsert?: OptionalId<T> }[] = [];
 
-    const idSource = ModelRegistryIndex.get(modelClass).idSource;
-    const idFieldName = idSource.field;
+        const idSource = ModelRegistryIndex.get(modelClass).idSource;
+        const idFieldName = idSource.field;
 
-    for (const operation of preppedOperations) {
-      if ('insert' in operation && operation.insert) {
-        inserts.push(operation.insert);
-      } else if ('delete' in operation && operation.delete) {
-        deletes.push(idSource.get(operation.delete));
-      } else if ('update' in operation && operation.update) {
-        updates.push(operation.update);
-      } else if ('upsert' in operation && operation.upsert) {
-        upserts.push(operation);
-      }
-    }
-
-    type SqlCommand = {
-      type: 'insert' | 'delete' | 'update' | 'upsert';
-      sql: string;
-      values: unknown[];
-      count: number;
-      identifier?: string;
-    };
-
-    const commands: SqlCommand[] = [];
-    const batchSize = 100;
-    const tableContext = this.connection.getContext(modelClass);
-
-    // Convert inserts into SQL statements with a fixed batch size
-    for (let index = 0; index < inserts.length; index += batchSize) {
-      const subBatch = inserts.slice(index, index + batchSize);
-      const rawItems: Record<string, unknown>[] = castTo(subBatch);
-      const { sql, values } = this.dialect.buildInsertAll(tableContext, rawItems);
-      commands.push({ type: 'insert', sql, values, count: subBatch.length });
-    }
-
-    // Convert deletes into SQL statements with a fixed batch size
-    for (let index = 0; index < deletes.length; index += batchSize) {
-      const subBatch = deletes.slice(index, index + batchSize);
-      const { whereSQL, parameters = [] } = this.#whereClause(
-        modelClass,
-        castTo<WhereClause<T>>({ [idFieldName]: { $in: subBatch } }),
-        false
-      );
-      const sql = this.dialect.buildDelete(tableContext, whereSQL);
-      commands.push({ type: 'delete', sql, values: parameters, count: subBatch.length });
-    }
-
-    // Convert updates into SQL statements with a fixed batch size
-    for (let index = 0; index < updates.length; index += batchSize) {
-      const subBatch = updates.slice(index, index + batchSize);
-      const rawItems: Record<string, unknown>[] = castTo(subBatch);
-      const { sql, values } = this.dialect.buildUpdateAll(tableContext, rawItems);
-      commands.push({ type: 'update', sql, values, count: subBatch.length });
-    }
-
-    // Generate upsert statements from other operations
-    for (const operation of upserts) {
-      const rawItem: Record<string, unknown> = castTo(operation.upsert);
-      const { sql, values } = this.dialect.buildUpsert(tableContext, rawItem, [this.dialect.escapeIdentifier(idFieldName)]);
-      commands.push({ type: 'upsert', sql, values, count: 1 });
-    }
-
-    // Run the final list of SQL commands through a workpool
-    await WorkPool.run(
-      async command => {
-        try {
-          const result = await this.connection.execute(command.sql, command.values);
-          if (command.type === 'update' && result.count === 0) {
-            counts.error += 1;
-            errors.push(new NotFoundError(modelClass, command.identifier!));
-          } else if (command.type === 'delete' && result.count < command.count) {
-            counts.delete += result.count;
-            const missingCount = command.count - result.count;
-            counts.error += missingCount;
-            errors.push(new NotFoundError(modelClass, `Bulk delete missed ${missingCount} record(s)`));
-          } else {
-            counts[command.type] += command.count;
+        for (const operation of resolvedOperations) {
+          if ('insert' in operation && operation.insert) {
+            inserts.push(operation.insert);
+          } else if ('delete' in operation && operation.delete) {
+            deletes.push(idSource.get(operation.delete));
+          } else if ('update' in operation && operation.update) {
+            updates.push(operation.update);
+          } else if ('upsert' in operation && operation.upsert) {
+            upserts.push(operation);
           }
-        } catch (error) {
-          counts.error += command.count;
-          errors.push(error);
         }
-      },
-      commands,
-      { max: 8 }
-    );
 
-    return {
-      errors,
-      insertedIds: addedIdentifiers,
-      counts
-    };
+        type SqlCommand = {
+          type: 'insert' | 'delete' | 'update' | 'upsert';
+          sql: string;
+          values: unknown[];
+          count: number;
+          identifier?: string;
+        };
+
+        const commands: SqlCommand[] = [];
+        const sqlBatchSize = 100;
+        const tableContext = this.connection.getContext(modelClass);
+
+        // Convert inserts into SQL statements with a fixed batch size
+        for (let index = 0; index < inserts.length; index += sqlBatchSize) {
+          const subBatch = inserts.slice(index, index + sqlBatchSize);
+          const rawItems: Record<string, unknown>[] = castTo(subBatch);
+          const { sql, values } = this.dialect.buildInsertAll(tableContext, rawItems);
+          commands.push({ type: 'insert', sql, values, count: subBatch.length });
+        }
+
+        // Convert deletes into SQL statements with a fixed batch size
+        for (let index = 0; index < deletes.length; index += sqlBatchSize) {
+          const subBatch = deletes.slice(index, index + sqlBatchSize);
+          const { whereSQL, parameters = [] } = this.#whereClause(
+            modelClass,
+            castTo<WhereClause<T>>({ [idFieldName]: { $in: subBatch } }),
+            false
+          );
+          const sql = this.dialect.buildDelete(tableContext, whereSQL);
+          commands.push({ type: 'delete', sql, values: parameters, count: subBatch.length });
+        }
+
+        // Convert updates into SQL statements with a fixed batch size
+        for (let index = 0; index < updates.length; index += sqlBatchSize) {
+          const subBatch = updates.slice(index, index + sqlBatchSize);
+          const rawItems: Record<string, unknown>[] = castTo(subBatch);
+          const { sql, values } = this.dialect.buildUpdateAll(tableContext, rawItems);
+          commands.push({ type: 'update', sql, values, count: subBatch.length });
+        }
+
+        // Generate upsert statements from other operations
+        for (const operation of upserts) {
+          const rawItem: Record<string, unknown> = castTo(operation.upsert);
+          const { sql, values } = this.dialect.buildUpsert(tableContext, rawItem, [this.dialect.escapeIdentifier(idFieldName)]);
+          commands.push({ type: 'upsert', sql, values, count: 1 });
+        }
+
+        // Run the final list of SQL commands through a workpool
+        await WorkPool.run(
+          async command => {
+            try {
+              const result = await this.connection.execute(command.sql, command.values);
+              if (command.type === 'update' && result.count === 0) {
+                counts.error += 1;
+                errors.push(new NotFoundError(modelClass, command.identifier!));
+              } else if (command.type === 'delete' && result.count < command.count) {
+                counts.delete += result.count;
+                const missingCount = command.count - result.count;
+                counts.error += missingCount;
+                errors.push(new NotFoundError(modelClass, `Bulk delete missed ${missingCount} record(s)`));
+              } else {
+                counts[command.type] += command.count;
+              }
+            } catch (error) {
+              counts.error += command.count;
+              errors.push(error);
+            }
+          },
+          commands,
+          { max: 8 }
+        );
+
+        return {
+          errors,
+          insertedIds: addedIdentifiers,
+          counts
+        };
+      }
+    );
   }
 
   // Expiry Support

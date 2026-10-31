@@ -2,6 +2,7 @@ import { RedisModelConfig, RedisModelService } from '@travetto/model-redis';
 import { Suite } from '@travetto/test';
 
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
+import { ModelBulkSuite } from '@travetto/model/support/test/bulk.ts';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
@@ -15,6 +16,12 @@ class RedisBasicSuite extends ModelBasicSuite {
 @Suite()
 class RedisCrudSuite extends ModelCrudSuite {
   indexLimitSkew = 10;
+  serviceClass = RedisModelService;
+  configClass = RedisModelConfig;
+}
+
+@Suite()
+class RedisBulkSuite extends ModelBulkSuite {
   serviceClass = RedisModelService;
   configClass = RedisModelConfig;
 }
