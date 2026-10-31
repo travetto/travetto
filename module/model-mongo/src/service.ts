@@ -10,8 +10,7 @@ import {
   MongoServerError,
   type WithId as MongoWithId,
   type ObjectId,
-  type RootFilterOperators,
-  type WriteError
+  type RootFilterOperators
 } from 'mongodb';
 
 import { Injectable, PostConstruct } from '@travetto/di';
@@ -91,6 +90,7 @@ import type { MongoModelConfig } from './config.ts';
 import { MongoUtil, type WithId } from './internal/util.ts';
 
 type BlobRaw = GridFSFile & { metadata?: BinaryMetadata };
+type WriteError = { index: number };
 
 type MongoTextSearch = RootFilterOperators<unknown>['$text'];
 
