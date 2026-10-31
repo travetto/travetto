@@ -1,6 +1,5 @@
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
-  type BulkConfig,
   type BulkOperation,
   type BulkResponse,
   type BulkSource,
@@ -449,12 +448,12 @@ export abstract class BaseSQLModelService<C = unknown>
   async *processBulkStream<T extends ModelType>(
     modelClass: Class<T>,
     operations: BulkSource<T>,
-    config: number | BulkConfig = 500
+    batchSize: number = 500
   ): AsyncIterable<BulkResponse> {
     yield* ModelBulkUtil.processRawStream(
       modelClass,
       operations,
-      config,
+      batchSize,
       async ({ insertedIds, upsertedIds, operations: resolvedOperations }) => {
         const addedIdentifiers = new Map([...insertedIds.entries(), ...upsertedIds.entries()]);
 
@@ -569,12 +568,8 @@ export abstract class BaseSQLModelService<C = unknown>
     );
   }
 
-  async processBulk<T extends ModelType>(
-    modelClass: Class<T>,
-    operations: BulkSource<T>,
-    config: number | BulkConfig = 500
-  ): Promise<BulkResponse> {
-    return ModelBulkUtil.collect(this.processBulkStream(modelClass, operations, config));
+  async processBulk<T extends ModelType>(modelClass: Class<T>, operations: BulkSource<T>, batchSize: number = 500): Promise<BulkResponse> {
+    return ModelBulkUtil.collect(this.processBulkStream(modelClass, operations, batchSize));
   }
 
   // Expiry Support

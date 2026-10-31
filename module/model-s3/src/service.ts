@@ -8,7 +8,6 @@ import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   ExistsError,
-  type BulkConfig,
   type BulkResponse,
   type BulkSource,
   type ModelBlobSupport,
@@ -366,17 +365,13 @@ export class S3ModelService implements ModelCrudSupport, ModelBulkSupport, Model
   async *processBulkStream<T extends ModelType>(
     cls: Class<T>,
     operations: BulkSource<T>,
-    config: number | BulkConfig = 500
+    batchSize: number = 500
   ): AsyncIterable<BulkResponse> {
-    yield* ModelBulkUtil.processCrudStream(this, cls, operations, config);
+    yield* ModelBulkUtil.processCrudStream(this, cls, operations, batchSize);
   }
 
-  async processBulk<T extends ModelType>(
-    cls: Class<T>,
-    operations: BulkSource<T>,
-    config: number | BulkConfig = 500
-  ): Promise<BulkResponse> {
-    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, config));
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize: number = 500): Promise<BulkResponse> {
+    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, batchSize));
   }
 
   // Expiry

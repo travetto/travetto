@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
 import {
-  type BulkConfig,
   type BulkOperation,
+  type BulkOperationSource,
   type BulkResponse,
   type BulkSource,
   type ModelBulkSupport,
@@ -41,6 +41,14 @@ abstract class BaseWorker {
 @Model()
 class SpecialistWorker extends BaseWorker {
   specialty: string;
+}
+
+function batch<T extends ModelType, E = unknown>(
+  operations: BulkSource<T>,
+  batchSize: number = 500,
+  handler: (batch: BulkOperationSource<T>[]) => Promise<BulkResponse<E>>
+): Promise<BulkResponse<E>> {
+  return ModelBulkUtil.collect(ModelBulkUtil.batchStream(operations, batchSize, handler));
 }
 
 @Suite()
@@ -173,8 +181,8 @@ export class ModelBulkUtilSuite {
     const batches: BulkOperation<BulkItem>[][] = [];
 
     const mockService = castTo<ModelBulkSupport>({
-      async processBulk(cls: Class<BulkItem>, operations: BulkSource<BulkItem>, config: number | BulkConfig = 500): Promise<BulkResponse> {
-        return ModelBulkUtil.batch(operations, config, async batch => {
+      async processBulk(cls: Class<BulkItem>, operations: BulkSource<BulkItem>, config: number = 500): Promise<BulkResponse> {
+        return batch(operations, config, async batch => {
           const normalized = batch.map(item => ModelBulkUtil.toBulkOperation(cls, item));
           batches.push(normalized);
           return {
@@ -223,12 +231,8 @@ export class ModelBulkUtilSuite {
     const batches: BulkOperation<BaseWorker>[][] = [];
 
     const mockService = castTo<ModelBulkSupport>({
-      async processBulk(
-        cls: Class<BaseWorker>,
-        operations: BulkSource<BaseWorker>,
-        config: number | BulkConfig = 500
-      ): Promise<BulkResponse> {
-        return ModelBulkUtil.batch(operations, config, async batch => {
+      async processBulk(cls: Class<BaseWorker>, operations: BulkSource<BaseWorker>, config: number = 500): Promise<BulkResponse> {
+        return batch(operations, config, async batch => {
           const normalized = batch.map(item => ModelBulkUtil.toBulkOperation(cls, item));
           batches.push(normalized);
           return {
@@ -268,8 +272,8 @@ export class ModelBulkUtilSuite {
     const batches: BulkOperation<BulkItem>[][] = [];
 
     const mockService = castTo<ModelBulkSupport>({
-      async processBulk(cls: Class<BulkItem>, operations: BulkSource<BulkItem>, config: number | BulkConfig = 500): Promise<BulkResponse> {
-        return ModelBulkUtil.batch(operations, config, async batch => {
+      async processBulk(cls: Class<BulkItem>, operations: BulkSource<BulkItem>, config: number = 500): Promise<BulkResponse> {
+        return batch(operations, config, async batch => {
           const normalized = batch.map(item => ModelBulkUtil.toBulkOperation(cls, item));
           batches.push(normalized);
           return {
@@ -315,7 +319,7 @@ export class ModelBulkUtilSuite {
     ];
 
     let batchCount = 0;
-    const response = await ModelBulkUtil.batch<BulkItem, CustomBulkError>(items, 2, async () => {
+    const response = await batch<BulkItem, CustomBulkError>(items, 2, async () => {
       batchCount += 1;
       if (batchCount === 1) {
         return {
@@ -355,7 +359,7 @@ export class ModelBulkUtilSuite {
     let batchCount = 0;
     await assert.rejects(
       () =>
-        ModelBulkUtil.batch<BulkItem>(items, 2, async () => {
+        batch<BulkItem>(items, 2, async () => {
           batchCount += 1;
           if (batchCount === 1) {
             return {
@@ -407,122 +411,6 @@ export class ModelBulkUtilSuite {
     assert.strictEqual(response.insertedIds.size, 2);
   }
 
-  @Test('Verify processBulk onBatch callback with batches and streams')
-  async testProcessBulkOnBatchCallback() {
-    await Registry.init();
-    const emittedBatchResponses: BulkResponse[] = [];
-    const emittedIndices: number[] = [];
-
-    const mockService = {
-      async *processBulkStream<T extends ModelType>(
-        cls: Class<T>,
-        operations: BulkSource<T>,
-        config: number | BulkConfig = 500
-      ): AsyncIterable<BulkResponse> {
-        yield* ModelBulkUtil.batchStream(operations, config, async batch => {
-          const normalized = batch.map(item => ModelBulkUtil.toBulkOperation(cls, item));
-          return {
-            errors: [],
-            insertedIds: new Map(normalized.map((operation, index) => [index, `batch-id-${index}`])),
-            counts: {
-              update: 0,
-              insert: 0,
-              upsert: normalized.length,
-              delete: 0,
-              error: 0
-            }
-          };
-        });
-      },
-      async processBulk<T extends ModelType>(
-        cls: Class<T>,
-        operations: BulkSource<T>,
-        config: number | BulkConfig = 500
-      ): Promise<BulkResponse> {
-        return ModelBulkUtil.collect(this.processBulkStream(cls, operations, config));
-      }
-    };
-
-    async function* objects() {
-      yield { name: 'Alice', age: 30 };
-      yield { name: 'Bob', age: 25 };
-      yield { name: 'Charlie', age: 40 };
-      yield { name: 'Dave', age: 35 };
-      yield { name: 'Eve', age: 28 };
-    }
-
-    const response = await mockService.processBulk(BulkItem, objects(), {
-      batchSize: 2,
-      onBatch: async (result: BulkResponse, index: number) => {
-        emittedBatchResponses.push(result);
-        emittedIndices.push(index);
-      }
-    });
-
-    assert.strictEqual(emittedBatchResponses.length, 3);
-    assert.deepStrictEqual(emittedIndices, [0, 1, 2]);
-    assert.strictEqual(emittedBatchResponses[0].index, 0);
-    assert.strictEqual(emittedBatchResponses[1].index, 1);
-    assert.strictEqual(emittedBatchResponses[2].index, 2);
-    assert.strictEqual(emittedBatchResponses[0].counts.upsert, 2);
-    assert.strictEqual(emittedBatchResponses[1].counts.upsert, 2);
-    assert.strictEqual(emittedBatchResponses[2].counts.upsert, 1);
-    assert.strictEqual(response.counts.upsert, 5);
-  }
-
-  @Test('Verify processBulk onBatch callback with array within single batch')
-  async testProcessBulkOnBatchSingleBatch() {
-    await Registry.init();
-    const emittedBatchResponses: BulkResponse[] = [];
-    const emittedIndices: number[] = [];
-
-    const mockService = {
-      async *processBulkStream<T extends ModelType>(
-        cls: Class<T>,
-        operations: BulkSource<T>,
-        config: number | BulkConfig = 500
-      ): AsyncIterable<BulkResponse> {
-        yield* ModelBulkUtil.batchStream(operations, config, async batch => {
-          const normalized = batch.map(item => ModelBulkUtil.toBulkOperation(cls, item));
-          return {
-            errors: [],
-            insertedIds: new Map(normalized.map((operation, index) => [index, `single-id-${index}`])),
-            counts: {
-              update: 0,
-              insert: normalized.length,
-              upsert: 0,
-              delete: 0,
-              error: 0
-            }
-          };
-        });
-      },
-      async processBulk<T extends ModelType>(
-        cls: Class<T>,
-        operations: BulkSource<T>,
-        config: number | BulkConfig = 500
-      ): Promise<BulkResponse> {
-        return ModelBulkUtil.collect(this.processBulkStream(cls, operations, config));
-      }
-    };
-
-    const items = [BulkItem.from({ name: 'First' }), BulkItem.from({ name: 'Second' })];
-
-    const response = await mockService.processBulk(BulkItem, items, {
-      batchSize: 10,
-      onBatch: (result: BulkResponse, index: number) => {
-        emittedBatchResponses.push(result);
-        emittedIndices.push(index);
-      }
-    });
-
-    assert.strictEqual(emittedBatchResponses.length, 1);
-    assert.deepStrictEqual(emittedIndices, [0]);
-    assert.strictEqual(emittedBatchResponses[0].index, 0);
-    assert.strictEqual(emittedBatchResponses[0].counts.insert, 2);
-    assert.strictEqual(response.counts.insert, 2);
-  }
-
   @Test('Verify processBulkStream directly yielding batches')
   async testProcessBulkStreamDirectly() {
     await Registry.init();
@@ -531,7 +419,7 @@ export class ModelBulkUtilSuite {
       async *processBulkStream<T extends ModelType>(
         cls: Class<T>,
         operations: BulkSource<T>,
-        config: number | BulkConfig = 500
+        config: number = 500
       ): AsyncIterable<BulkResponse> {
         yield* ModelBulkUtil.batchStream(operations, config, async batch => {
           const normalized = batch.map(item => ModelBulkUtil.toBulkOperation(cls, item));
@@ -548,11 +436,7 @@ export class ModelBulkUtilSuite {
           };
         });
       },
-      async processBulk<T extends ModelType>(
-        cls: Class<T>,
-        operations: BulkSource<T>,
-        config: number | BulkConfig = 500
-      ): Promise<BulkResponse> {
+      async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, config: number = 500): Promise<BulkResponse> {
         return ModelBulkUtil.collect(this.processBulkStream(cls, operations, config));
       }
     };
@@ -644,7 +528,7 @@ export class ModelBulkUtilSuite {
         { update: BulkItem.from({ id: 'missing-id', name: 'Missing' }) },
         { upsert: BulkItem.from({ id: 'new-upsert', name: 'Upserted' }) }
       ],
-      { batchSize: 2 }
+      2
     )) {
       batches.push(batch);
     }
@@ -662,7 +546,7 @@ export class ModelBulkUtilSuite {
         mockService,
         BulkItem,
         [{ insert: BulkItem.from({ name: 'Inserted 2' }) }, { upsert: BulkItem.from({ name: 'Upserted 2' }) }],
-        { batchSize: 1 }
+        1
       )
     );
 

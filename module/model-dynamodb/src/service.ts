@@ -12,7 +12,6 @@ import {
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   ExistsError,
-  type BulkConfig,
   type BulkResponse,
   type BulkSource,
   type ModelBulkSupport,
@@ -496,12 +495,12 @@ export class DynamoDBModelService
   async *processBulkStream<T extends ModelType>(
     cls: Class<T>,
     operations: BulkSource<T>,
-    config: number | BulkConfig = 500
+    batchSize: number = 500
   ): AsyncIterable<BulkResponse> {
     yield* ModelBulkUtil.processRawStream(
       cls,
       operations,
-      config,
+      batchSize,
       async ({ operations: resolvedOperations, upsertedIds: newUpsertedIds }) => {
         const idSource = ModelRegistryIndex.get(cls).idSource;
 
@@ -553,12 +552,8 @@ export class DynamoDBModelService
     );
   }
 
-  async processBulk<T extends ModelType>(
-    cls: Class<T>,
-    operations: BulkSource<T>,
-    config: number | BulkConfig = 500
-  ): Promise<BulkResponse> {
-    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, config));
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize: number = 500): Promise<BulkResponse> {
+    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, batchSize));
   }
 
   // Expiry

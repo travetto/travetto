@@ -7,7 +7,6 @@ import { Config } from '@travetto/config';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   ExistsError,
-  type BulkConfig,
   type BulkResponse,
   type BulkSource,
   type ModelBlobSupport,
@@ -227,17 +226,13 @@ export class FileModelService implements ModelCrudSupport, ModelBulkSupport, Mod
   async *processBulkStream<T extends ModelType>(
     cls: Class<T>,
     operations: BulkSource<T>,
-    config: number | BulkConfig = 500
+    batchSize: number = 500
   ): AsyncIterable<BulkResponse> {
-    yield* ModelBulkUtil.processCrudStream(this, cls, operations, config);
+    yield* ModelBulkUtil.processCrudStream(this, cls, operations, batchSize);
   }
 
-  async processBulk<T extends ModelType>(
-    cls: Class<T>,
-    operations: BulkSource<T>,
-    config: number | BulkConfig = 500
-  ): Promise<BulkResponse> {
-    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, config));
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize: number = 500): Promise<BulkResponse> {
+    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, batchSize));
   }
 
   // Blob

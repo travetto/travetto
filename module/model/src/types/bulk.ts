@@ -44,14 +44,6 @@ export interface BulkResponse<E = unknown> {
   index?: number;
 }
 
-/**
- * Configuration options for bulk processing
- */
-export type BulkConfig<E = unknown> = {
-  batchSize?: number;
-  onBatch?: (result: BulkResponse<E>, index: number) => Promise<void> | void;
-};
-
 type BulkErrorItem = { message: string; type: string; errors?: ValidationError[]; idx: number };
 
 /**
@@ -77,10 +69,6 @@ export class BulkProcessError extends RuntimeError<{ errors: BulkErrorItem[] }> 
  * @concrete
  */
 export interface ModelBulkSupport extends ModelCrudSupport {
-  processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, config?: number | BulkConfig): Promise<BulkResponse>;
-  processBulkStream<T extends ModelType>(
-    cls: Class<T>,
-    operations: BulkSource<T>,
-    config?: number | BulkConfig
-  ): AsyncIterable<BulkResponse>;
+  processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize?: number): Promise<BulkResponse>;
+  processBulkStream<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize?: number): AsyncIterable<BulkResponse>;
 }

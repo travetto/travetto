@@ -2,7 +2,6 @@ import { type DocumentData, FieldValue, Firestore, type Query } from '@google-cl
 
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
-  type BulkConfig,
   type BulkResponse,
   type BulkSource,
   type ModelBulkSupport,
@@ -250,9 +249,9 @@ export class FirestoreModelService implements ModelCrudSupport, ModelBulkSupport
   async *processBulkStream<T extends ModelType>(
     cls: Class<T>,
     operations: BulkSource<T>,
-    config: number | BulkConfig = 500
+    batchSize: number = 500
   ): AsyncIterable<BulkResponse> {
-    yield* ModelBulkUtil.processRawStream(cls, operations, config, async ({ operations: resolvedOperations }) => {
+    yield* ModelBulkUtil.processRawStream(cls, operations, batchSize, async ({ operations: resolvedOperations }) => {
       const idSource = ModelRegistryIndex.get(cls).idSource;
       const collection = this.#getCollection(cls);
 
@@ -337,12 +336,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelBulkSupport
     });
   }
 
-  async processBulk<T extends ModelType>(
-    cls: Class<T>,
-    operations: BulkSource<T>,
-    config: number | BulkConfig = 500
-  ): Promise<BulkResponse> {
-    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, config));
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize: number = 500): Promise<BulkResponse> {
+    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, batchSize));
   }
 
   // Indexed contract

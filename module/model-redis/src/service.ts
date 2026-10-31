@@ -3,7 +3,6 @@ import { createClient } from '@redis/client';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   ExistsError,
-  type BulkConfig,
   type BulkResponse,
   type BulkSource,
   type ModelBulkSupport,
@@ -383,9 +382,9 @@ export class RedisModelService implements ModelCrudSupport, ModelBulkSupport, Mo
   async *processBulkStream<T extends ModelType>(
     cls: Class<T>,
     operations: BulkSource<T>,
-    config: number | BulkConfig = 500
+    batchSize: number = 500
   ): AsyncIterable<BulkResponse> {
-    yield* ModelBulkUtil.processRawStream(cls, operations, config, async ({ operations: resolvedOperations }) => {
+    yield* ModelBulkUtil.processRawStream(cls, operations, batchSize, async ({ operations: resolvedOperations }) => {
       const idSource = ModelRegistryIndex.get(cls).idSource;
       const config = ModelRegistryIndex.getConfig(cls);
 
@@ -496,12 +495,8 @@ export class RedisModelService implements ModelCrudSupport, ModelBulkSupport, Mo
     });
   }
 
-  async processBulk<T extends ModelType>(
-    cls: Class<T>,
-    operations: BulkSource<T>,
-    config: number | BulkConfig = 500
-  ): Promise<BulkResponse> {
-    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, config));
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize: number = 500): Promise<BulkResponse> {
+    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, batchSize));
   }
 
   // Expiry

@@ -3,7 +3,6 @@ import { BindUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
 import {
-  type BulkConfig,
   BulkProcessError,
   type BulkOperation,
   type BulkOperationSource,
@@ -112,10 +111,10 @@ export class ModelBulkUtil {
   static async *processRawStream<T extends ModelType, E = unknown>(
     cls: Class<T>,
     operations: BulkSource<T>,
-    config: number | BulkConfig<E> = 500,
+    batchSize: number = 500,
     handler: (prepped: BulkPreStore<T>) => Promise<BulkResponse<E>>
   ): AsyncIterable<BulkResponse<E>> {
-    yield* this.batchStream(operations, config, async rawBatch => {
+    yield* this.batchStream(operations, batchSize, async rawBatch => {
       const prepped = await this.preStore(cls, rawBatch);
       return handler(prepped);
     });
@@ -127,10 +126,10 @@ export class ModelBulkUtil {
   static async processRaw<T extends ModelType, E = unknown>(
     cls: Class<T>,
     operations: BulkSource<T>,
-    config: number | BulkConfig<E> = 500,
+    batchSize: number = 500,
     handler: (prepped: BulkPreStore<T>) => Promise<BulkResponse<E>>
   ): Promise<BulkResponse<E>> {
-    return this.collect(this.processRawStream(cls, operations, config, handler));
+    return this.collect(this.processRawStream(cls, operations, batchSize, handler));
   }
 
   /**
@@ -141,9 +140,9 @@ export class ModelBulkUtil {
     service: ModelCrudSupport,
     cls: Class<T>,
     operations: BulkSource<T>,
-    config: number | BulkConfig = 500
+    batchSize: number = 500
   ): AsyncIterable<BulkResponse> {
-    yield* this.batchStream(operations, config, async rawBatch => {
+    yield* this.batchStream(operations, batchSize, async rawBatch => {
       const idSource = ModelRegistryIndex.get(cls).idSource;
 
       // Upfront validation: ensure required IDs are present for update/delete so missing IDs fail before execution
@@ -205,19 +204,29 @@ export class ModelBulkUtil {
   }
 
   /**
+   * Executes bulk operations against standard ModelCrudSupport operations.
+   * Useful for services without native batch primitives (e.g. Memory, File).
+   */
+  static async processCrud<T extends ModelType>(
+    service: ModelCrudSupport,
+    cls: Class<T>,
+    operations: BulkSource<T>,
+    batchSize: number = 500
+  ): Promise<BulkResponse> {
+    return this.collect(this.processCrudStream(service, cls, operations, batchSize));
+  }
+
+  /**
    * Helper to execute bulk operations in batches from an iterable or async iterable as an async stream
    */
   static async *batchStream<T extends ModelType, E = unknown>(
     operations: BulkSource<T>,
-    config: number | BulkConfig<E> = 500,
+    batchSize: number = 500,
     handler: (batch: BulkOperationSource<T>[]) => Promise<BulkResponse<E>>
   ): AsyncIterable<BulkResponse<E>> {
-    const { batchSize = 500, onBatch } = typeof config === 'number' ? { batchSize: config } : (config ?? {});
-
     if (Array.isArray(operations) && operations.length <= batchSize) {
       const response = await this.#processBatch(handler, operations, 0);
       response.index = 0;
-      await onBatch?.(response, 0);
       yield response;
       return;
     }
@@ -230,7 +239,6 @@ export class ModelBulkUtil {
       if (batch.length >= batchSize) {
         const response = await this.#processBatch(handler, batch, globalIndex);
         response.index = batchIndex;
-        await onBatch?.(response, batchIndex);
         yield response;
         globalIndex += batch.length;
         batchIndex += 1;
@@ -240,7 +248,6 @@ export class ModelBulkUtil {
     if (batch.length > 0) {
       const response = await this.#processBatch(handler, batch, globalIndex);
       response.index = batchIndex;
-      await onBatch?.(response, batchIndex);
       yield response;
     }
   }
@@ -250,10 +257,10 @@ export class ModelBulkUtil {
    */
   static async batch<T extends ModelType, E = unknown>(
     operations: BulkSource<T>,
-    config: number | BulkConfig<E> = 500,
+    batchSize: number = 500,
     handler: (batch: BulkOperationSource<T>[]) => Promise<BulkResponse<E>>
   ): Promise<BulkResponse<E>> {
-    return this.collect(this.batchStream(operations, config, handler));
+    return this.collect(this.batchStream(operations, batchSize, handler));
   }
 
   /**
