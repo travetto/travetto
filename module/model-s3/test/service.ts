@@ -8,6 +8,7 @@ import { Suite, Test } from '@travetto/test';
 
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
 import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
+import { ModelBulkSuite } from '@travetto/model/support/test/bulk.ts';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
@@ -20,6 +21,12 @@ class S3BasicSuite extends ModelBasicSuite {
 
 @Suite()
 class S3CrudSuite extends ModelCrudSuite {
+  serviceClass = S3ModelService;
+  configClass = S3ModelConfig;
+}
+
+@Suite()
+class S3BulkSuite extends ModelBulkSuite {
   serviceClass = S3ModelService;
   configClass = S3ModelConfig;
 }
