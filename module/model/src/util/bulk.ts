@@ -205,19 +205,6 @@ export class ModelBulkUtil {
   }
 
   /**
-   * Executes bulk operations against standard ModelCrudSupport operations.
-   * Useful for services without native batch primitives (e.g. Memory, File).
-   */
-  static async processCrud<T extends ModelType>(
-    service: ModelCrudSupport,
-    cls: Class<T>,
-    operations: BulkSource<T>,
-    config: number | BulkConfig = 500
-  ): Promise<BulkResponse> {
-    return this.collect(this.processCrudStream(service, cls, operations, config));
-  }
-
-  /**
    * Helper to execute bulk operations in batches from an iterable or async iterable as an async stream
    */
   static async *batchStream<T extends ModelType, E = unknown>(
