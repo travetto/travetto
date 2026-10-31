@@ -2,7 +2,6 @@ import { type DocumentData, FieldValue, Firestore, type Query } from '@google-cl
 
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
-  type BulkOperationSource,
   type BulkResponse,
   type BulkSource,
   type ModelBulkSupport,
@@ -247,93 +246,90 @@ export class FirestoreModelService implements ModelCrudSupport, ModelBulkSupport
   }
 
   // Bulk
-  async #processBulkBatch<T extends ModelType>(cls: Class<T>, operations: BulkOperationSource<T>[]): Promise<BulkResponse> {
-    const { insertedIds, upsertedIds, operations: resolvedOperations } = await ModelBulkUtil.preStore(cls, operations);
-    const idSource = ModelRegistryIndex.get(cls).idSource;
-    const collection = this.#getCollection(cls);
-
-    const counts = {
-      update: 0,
-      insert: 0,
-      upsert: 0,
-      delete: 0,
-      error: 0
-    };
-    const errors: unknown[] = [];
-
-    // Verify entity existence beforehand where needed
-    const docRefs = resolvedOperations.map(operation => {
-      const entity = operation.insert ?? operation.update ?? operation.upsert ?? operation.delete;
-      return entity ? collection.doc(idSource.get(entity)) : null;
-    });
-
-    const snapshots = await this.client.getAll(...docRefs.filter((ref): ref is NonNullable<typeof ref> => ref !== null));
-    const snapshotMap = new Map<string, boolean>();
-    for (const snapshot of snapshots) {
-      snapshotMap.set(snapshot.id, snapshot.exists);
-    }
-
-    const batch = this.client.batch();
-    const queuedOperations: { property: 'insert' | 'update' | 'upsert' | 'delete'; index: number }[] = [];
-
-    for (let index = 0; index < resolvedOperations.length; index += 1) {
-      const operation = resolvedOperations[index];
-      const docRef = docRefs[index];
-      if (!docRef) {
-        continue;
-      }
-      const existsInDb = snapshotMap.get(docRef.id) ?? false;
-
-      try {
-        if ('insert' in operation && operation.insert) {
-          if (existsInDb) {
-            throw new ExistsError(cls, docRef.id);
-          }
-          batch.create(docRef, clone<DocumentData>(operation.insert));
-          queuedOperations.push({ property: 'insert', index });
-        } else if ('update' in operation && operation.update) {
-          if (!existsInDb) {
-            throw new NotFoundError(cls, docRef.id);
-          }
-          batch.set(docRef, clone<DocumentData>(operation.update), { merge: false });
-          queuedOperations.push({ property: 'update', index });
-        } else if ('upsert' in operation && operation.upsert) {
-          batch.set(docRef, clone<DocumentData>(operation.upsert));
-          queuedOperations.push({ property: 'upsert', index });
-        } else if ('delete' in operation && operation.delete) {
-          if (!existsInDb) {
-            throw new NotFoundError(cls, docRef.id);
-          }
-          batch.delete(docRef);
-          queuedOperations.push({ property: 'delete', index });
-        }
-      } catch (error) {
-        counts.error += 1;
-        errors.push(typeof error === 'object' && error !== null ? Object.assign(error, { index }) : { index, error });
-      }
-    }
-
-    if (queuedOperations.length > 0) {
-      try {
-        await batch.commit();
-        for (const item of queuedOperations) {
-          counts[item.property] += 1;
-        }
-      } catch (error) {
-        counts.error += queuedOperations.length;
-        errors.push(error);
-      }
-    }
-
-    return {
-      errors,
-      insertedIds: new Map([...insertedIds.entries(), ...upsertedIds.entries()]),
-      counts
-    };
-  }
-
   async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse> {
-    return ModelBulkUtil.batch(operations, batchSize, batch => this.#processBulkBatch(cls, batch));
+    return ModelBulkUtil.processRaw(cls, operations, batchSize, async ({ operations: resolvedOperations }) => {
+      const idSource = ModelRegistryIndex.get(cls).idSource;
+      const collection = this.#getCollection(cls);
+
+      const counts = {
+        update: 0,
+        insert: 0,
+        upsert: 0,
+        delete: 0,
+        error: 0
+      };
+      const errors: unknown[] = [];
+      const insertedIds = new Map<number, string>();
+
+      // Verify entity existence beforehand where needed
+      const docRefs = resolvedOperations.map(operation => {
+        const entity = operation.insert ?? operation.update ?? operation.upsert ?? operation.delete;
+        return entity ? collection.doc(idSource.get(entity)) : null;
+      });
+
+      const snapshots = await this.client.getAll(...docRefs.filter((ref): ref is NonNullable<typeof ref> => ref !== null));
+      const snapshotMap = new Map<string, boolean>();
+      for (const snapshot of snapshots) {
+        snapshotMap.set(snapshot.id, snapshot.exists);
+      }
+
+      const batch = this.client.batch();
+      const queuedOperations: { property: 'insert' | 'update' | 'upsert' | 'delete'; index: number; id?: string }[] = [];
+
+      for (let index = 0; index < resolvedOperations.length; index += 1) {
+        const operation = resolvedOperations[index];
+        const docRef = docRefs[index];
+        if (!docRef) {
+          continue;
+        }
+        const existsInDb = snapshotMap.get(docRef.id) ?? false;
+
+        try {
+          if ('insert' in operation && operation.insert) {
+            if (existsInDb) {
+              throw new ExistsError(cls, docRef.id);
+            }
+            batch.create(docRef, clone<DocumentData>(operation.insert));
+            queuedOperations.push({ property: 'insert', index, id: docRef.id });
+          } else if ('update' in operation && operation.update) {
+            if (!existsInDb) {
+              throw new NotFoundError(cls, docRef.id);
+            }
+            batch.set(docRef, clone<DocumentData>(operation.update), { merge: false });
+            queuedOperations.push({ property: 'update', index });
+          } else if ('upsert' in operation && operation.upsert) {
+            batch.set(docRef, clone<DocumentData>(operation.upsert));
+            queuedOperations.push({ property: 'upsert', index, id: !existsInDb ? docRef.id : undefined });
+          } else if ('delete' in operation && operation.delete) {
+            if (!existsInDb) {
+              throw new NotFoundError(cls, docRef.id);
+            }
+            batch.delete(docRef);
+            queuedOperations.push({ property: 'delete', index });
+          }
+        } catch (error) {
+          counts.error += 1;
+          errors.push(typeof error === 'object' && error !== null ? Object.assign(error, { index }) : { index, error });
+        }
+      }
+
+      if (queuedOperations.length > 0) {
+        try {
+          await batch.commit();
+          for (const item of queuedOperations) {
+            counts[item.property] += 1;
+            if (item.id) {
+              insertedIds.set(item.index, item.id);
+            }
+          }
+        } catch (error) {
+          counts.error += queuedOperations.length;
+          errors.push(error);
+        }
+      }
+
+      return { counts, errors, insertedIds };
+    });
   }
 
   // Indexed contract
