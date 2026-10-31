@@ -461,8 +461,16 @@ export class MongoModelService
       .findOneAndUpdate({ filename: location }, { $set: { metadata, contentType: metadata.contentType! } });
   }
 
-  // Bulk
-  processBulkStream<T extends ModelType, const E extends WriteError = WriteError>(
+  // Bulk support
+  async processBulk<T extends ModelType, E extends WriteError = WriteError>(
+    cls: Class<T>,
+    operations: BulkSource<T>,
+    batchSize = 500
+  ): Promise<BulkResponse<E>> {
+    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, batchSize));
+  }
+
+  processBulkStream<T extends ModelType, E extends WriteError = WriteError>(
     cls: Class<T>,
     operations: BulkSource<T>,
     batchSize = 500
@@ -539,14 +547,6 @@ export class MongoModelService
 
       return response;
     });
-  }
-
-  async processBulk<T extends ModelType>(
-    cls: Class<T>,
-    operations: BulkSource<T>,
-    batchSize = 500
-  ): Promise<BulkResponse<{ index: number }>> {
-    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, batchSize));
   }
 
   // Expiry

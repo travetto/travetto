@@ -430,6 +430,11 @@ export class ElasticsearchModelService
     }
   }
 
+  // Bulk Support
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse<EsBulkError>> {
+    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, batchSize));
+  }
+
   processBulkStream<T extends ModelType>(
     cls: Class<T>,
     operations: BulkSource<T>,
@@ -518,10 +523,6 @@ export class ElasticsearchModelService
 
       return response;
     });
-  }
-
-  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse<EsBulkError>> {
-    return ModelBulkUtil.collect(this.processBulkStream(cls, operations, batchSize));
   }
 
   // Expiry
