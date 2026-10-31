@@ -1,5 +1,7 @@
+import { execFile } from 'node:child_process';
 import { watch } from 'node:fs';
 import fs from 'node:fs/promises';
+import { promisify } from 'node:util';
 
 import { ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
 
@@ -9,13 +11,28 @@ import { AsyncQueue } from './queue.ts';
 import type { CompilerState } from './state.ts';
 import { CompilerReset, type CompilerWatchEvent, type CompilerWatchRawEvent, type CompileStateEntry } from './types.ts';
 
-const CONFIGURATION_FILE_PATTERN = /(^|\/)(package\.json|tsconfig(\..+)?\.json|package-lock\.json|yarn\.lock|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/;
+const executeFile = promisify(execFile);
+const gitRevParse = async <K extends string>(command: string[], cwd: string, keys: K[]): Promise<Record<K, string> | undefined> => {
+  try {
+    const { stdout } = await executeFile('git', ['rev-parse', ...command], { cwd });
+    const lines = stdout
+      .split('\n')
+      .map(line => line.trim())
+      .filter(Boolean);
+    if (lines.length) {
+      return Object.fromEntries(keys.map((key, index) => [key, lines[index]])) as Record<K, string>;
+    }
+  } catch {}
+};
+
+const CONFIGURATION_FILE_PATTERN =
+  /(^|\/)(package\.json|tsconfig(\..{,30})?\.json|package-lock\.json|yarn\.lock|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/;
 
 type CompilerWatchEventCandidate = Omit<CompilerWatchEvent, 'entry'> & { entry?: CompileStateEntry };
 
 export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
   #state: CompilerState;
-  #cleanup: Partial<Record<'tool' | 'workspace' | 'rotation', () => void | Promise<void>>> = {};
+  #cleanup: Partial<Record<'tool' | 'workspace' | 'rotation' | 'git', () => void | Promise<void>>> = {};
   #lastWorkspaceEventTime = Date.now();
   #watchRotationFrequency = 30; // 30 seconds
   #root: string;
@@ -202,6 +219,52 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
     this.#cleanup.rotation = (): void => clearInterval(intervalId);
   }
 
+  async #listenGitChanges(): Promise<void> {
+    const directories = await gitRevParse(['--git-dir', '--git-common-dir'], this.#root, ['gitDirectory', 'commonDirectory']);
+    if (!directories) {
+      return;
+    }
+    const { gitDirectory, commonDirectory } = directories;
+
+    log.debug('Starting git canary in', gitDirectory);
+    let currentHead = await gitRevParse(['HEAD'], this.#root, ['hash']);
+    let isChecking: Promise<void> | undefined;
+
+    const checkChange = async (): Promise<void> => {
+      try {
+        await CommonUtil.nonBlockingTimeout(50);
+        const nextHead = await gitRevParse(['HEAD'], this.#root, ['hash']);
+        if (nextHead && (!currentHead || nextHead.hash !== currentHead.hash)) {
+          const from = currentHead ? currentHead.hash : 'empty';
+          const to = nextHead.hash;
+          currentHead = nextHead;
+          this.#queue.throw(new CompilerReset(`Git branch or commit change detected: ${from}=>${to}`, { soft: true }));
+        }
+      } finally {
+        isChecking = undefined;
+      }
+    };
+
+    const watchers: { close(): void }[] = [];
+    const targets = [
+      {
+        folder: path.resolve(this.#root, gitDirectory),
+        filter: (file?: string | null): boolean => !file || /^(HEAD|packed-refs|refs)/.test(file)
+      },
+      { folder: path.resolve(this.#root, commonDirectory, 'refs', 'heads'), filter: (): boolean => true }
+    ];
+
+    for (const { folder, filter } of targets) {
+      if (await fs.stat(folder, { throwIfNoEntry: false })) {
+        watchers.push(watch(folder, { encoding: 'utf8' }, (_, file) => filter(file) && (isChecking ??= checkChange())));
+      }
+    }
+
+    this.#cleanup.git = (): void => {
+      watchers.forEach(watcher => watcher.close());
+    };
+  }
+
   add(file: string): void {
     if (this.#queue.has(item => item.file === file)) {
       return;
@@ -241,6 +304,7 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
       await this.#listenWorkspace();
       await this.#listenWorkspaceRotation();
       await this.#listenToolFolder();
+      await this.#listenGitChanges();
     }
 
     for await (const firstEvent of this.#queue) {
