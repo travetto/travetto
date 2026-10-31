@@ -26,7 +26,7 @@ const gitRevParse = async <K extends string>(command: string[], cwd: string, key
 };
 
 const CONFIGURATION_FILE_PATTERN =
-  /(^|\/)(package\.json|tsconfig(\..+)?\.json|package-lock\.json|yarn\.lock|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/;
+  /(^|\/)(package\.json|tsconfig(\.[.]{,30})?\.json|package-lock\.json|yarn\.lock|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/;
 
 type CompilerWatchEventCandidate = Omit<CompilerWatchEvent, 'entry'> & { entry?: CompileStateEntry };
 
