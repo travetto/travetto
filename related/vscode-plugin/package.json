@@ -349,5 +349,9 @@
         "when": "travetto.test && !inDebugMode && resourceFilename =~ /[.]tsx?$/ && editorFocus"
       }
     ]
+  },
+  "allowScripts": {
+    "@parcel/watcher@2.6.0": true,
+    "fsevents@2.3.3": true
   }
 }
