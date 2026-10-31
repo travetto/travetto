@@ -35,7 +35,7 @@
     "@rollup/plugin-terser": "^1.0.2",
     "@travetto/runtime": "^8.0.1",
     "@travetto/terminal": "^8.0.1",
-    "rollup": "^4.65.0"
+    "rollup": "^4.67.2"
   },
   "peerDependencies": {
     "@travetto/cli": "^8.0.2"
