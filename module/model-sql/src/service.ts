@@ -1,5 +1,6 @@
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
+  type BulkConfig,
   type BulkOperation,
   type BulkResponse,
   type BulkSource,
@@ -445,11 +446,11 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   // Bulk Support
-  async processBulk<T extends ModelType>(modelClass: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse> {
+  async processBulk<T extends ModelType>(modelClass: Class<T>, operations: BulkSource<T>, config: number | BulkConfig = 500): Promise<BulkResponse> {
     return ModelBulkUtil.processRaw(
       modelClass,
       operations,
-      batchSize,
+      config,
       async ({ insertedIds, upsertedIds, operations: resolvedOperations }) => {
         const addedIdentifiers = new Map([...insertedIds.entries(), ...upsertedIds.entries()]);
 

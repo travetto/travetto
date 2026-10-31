@@ -3,6 +3,7 @@ import { createClient } from '@redis/client';
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
   ExistsError,
+  type BulkConfig,
   type BulkResponse,
   type BulkSource,
   type ModelBulkSupport,
@@ -379,8 +380,8 @@ export class RedisModelService implements ModelCrudSupport, ModelBulkSupport, Mo
   }
 
   // Bulk
-  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse> {
-    return ModelBulkUtil.processRaw(cls, operations, batchSize, async ({ operations: resolvedOperations }) => {
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, config: number | BulkConfig = 500): Promise<BulkResponse> {
+    return ModelBulkUtil.processRaw(cls, operations, config, async ({ operations: resolvedOperations }) => {
       const idSource = ModelRegistryIndex.get(cls).idSource;
       const config = ModelRegistryIndex.getConfig(cls);
 

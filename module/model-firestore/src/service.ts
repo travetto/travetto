@@ -2,6 +2,7 @@ import { type DocumentData, FieldValue, Firestore, type Query } from '@google-cl
 
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
+  type BulkConfig,
   type BulkResponse,
   type BulkSource,
   type ModelBulkSupport,
@@ -246,8 +247,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelBulkSupport
   }
 
   // Bulk
-  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse> {
-    return ModelBulkUtil.processRaw(cls, operations, batchSize, async ({ operations: resolvedOperations }) => {
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, config: number | BulkConfig = 500): Promise<BulkResponse> {
+    return ModelBulkUtil.processRaw(cls, operations, config, async ({ operations: resolvedOperations }) => {
       const idSource = ModelRegistryIndex.get(cls).idSource;
       const collection = this.#getCollection(cls);
 

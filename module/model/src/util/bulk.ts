@@ -3,6 +3,8 @@ import { BindUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
 import {
+  type BatchResult,
+  type BulkConfig,
   BulkProcessError,
   type BulkOperation,
   type BulkOperationSource,
@@ -91,10 +93,10 @@ export class ModelBulkUtil {
   static async processRaw<T extends ModelType, E = unknown>(
     cls: Class<T>,
     operations: BulkSource<T>,
-    batchSize = 500,
+    config: number | BulkConfig<E> = 500,
     handler: (prepped: BulkPreStore<T>) => Promise<BulkResponse<E>>
   ): Promise<BulkResponse<E>> {
-    return this.batch(operations, batchSize, async rawBatch => {
+    return this.batch(operations, config, async rawBatch => {
       const prepped = await this.preStore(cls, rawBatch);
       return handler(prepped);
     });
@@ -108,9 +110,9 @@ export class ModelBulkUtil {
     service: ModelCrudSupport,
     cls: Class<T>,
     operations: BulkSource<T>,
-    batchSize = 500
+    config: number | BulkConfig = 500
   ): Promise<BulkResponse> {
-    return this.batch(operations, batchSize, async rawBatch => {
+    return this.batch(operations, config, async rawBatch => {
       const idSource = ModelRegistryIndex.get(cls).idSource;
 
       // Upfront validation: ensure required IDs are present for update/delete so missing IDs fail before execution
@@ -176,11 +178,16 @@ export class ModelBulkUtil {
    */
   static async batch<T extends ModelType, E = unknown>(
     operations: BulkSource<T>,
-    batchSize = 500,
+    config: number | BulkConfig<E> = 500,
     handler: (batch: BulkOperationSource<T>[]) => Promise<BulkResponse<E>>
   ): Promise<BulkResponse<E>> {
+    const { batchSize = 500, onBatch } =
+      typeof config === 'number' ? { batchSize: config } : (config ?? {});
+
     if (Array.isArray(operations) && operations.length <= batchSize) {
-      return this.#processBatch(handler, operations, 0);
+      const response = await this.#processBatch(handler, operations, 0);
+      await onBatch?.(response);
+      return response;
     }
     const total: BulkResponse<E> = {
       errors: [],
@@ -193,6 +200,7 @@ export class ModelBulkUtil {
       batch.push(operation);
       if (batch.length >= batchSize) {
         const response = await this.#processBatch(handler, batch, globalIndex);
+        await onBatch?.(response);
         this.#mergeBulkResponse(total, response, globalIndex);
         globalIndex += batch.length;
         batch = [];
@@ -200,6 +208,7 @@ export class ModelBulkUtil {
     }
     if (batch.length > 0) {
       const response = await this.#processBatch(handler, batch, globalIndex);
+      await onBatch?.(response);
       this.#mergeBulkResponse(total, response, globalIndex);
     }
     return total;

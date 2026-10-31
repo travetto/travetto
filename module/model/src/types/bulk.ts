@@ -40,6 +40,19 @@ export interface BulkResponse<E = unknown> {
   };
 }
 
+/**
+ * Result of a single batch within a bulk process
+ */
+export type BatchResult<E = unknown> = BulkResponse<E>;
+
+/**
+ * Configuration options for bulk processing
+ */
+export type BulkConfig<E = unknown> = {
+  batchSize?: number;
+  onBatch?: (result: BatchResult<E>) => Promise<void> | void;
+};
+
 type BulkErrorItem = { message: string; type: string; errors?: ValidationError[]; idx: number };
 
 /**
@@ -65,5 +78,5 @@ export class BulkProcessError extends RuntimeError<{ errors: BulkErrorItem[] }> 
  * @concrete
  */
 export interface ModelBulkSupport extends ModelCrudSupport {
-  processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize?: number): Promise<BulkResponse>;
+  processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, config?: number | BulkConfig): Promise<BulkResponse>;
 }

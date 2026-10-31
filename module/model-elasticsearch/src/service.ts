@@ -10,6 +10,7 @@ import type {
 
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
+  type BulkConfig,
   type BulkOperation,
   type BulkResponse,
   type BulkSource,
@@ -430,8 +431,8 @@ export class ElasticsearchModelService
     }
   }
 
-  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): Promise<BulkResponse<EsBulkError>> {
-    return ModelBulkUtil.processRaw<T, EsBulkError>(cls, operations, batchSize, async ({ operations: resolvedOperations }) => {
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, config: number | BulkConfig<EsBulkError> = 500): Promise<BulkResponse<EsBulkError>> {
+    return ModelBulkUtil.processRaw<T, EsBulkError>(cls, operations, config, async ({ operations: resolvedOperations }) => {
       type BulkDoc = Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string; _id?: string }>>;
       const body = resolvedOperations.reduce<(T | BulkDoc | { doc: T })[]>((toRun, operation) => {
         const core = operation.upsert ?? operation.delete ?? operation.insert ?? operation.update ?? { constructor: cls };

@@ -15,6 +15,7 @@ import {
 
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
+  type BulkConfig,
   type BulkOperationSource,
   type BulkResponse,
   type BulkSource,
@@ -464,12 +465,12 @@ export class MongoModelService
   async processBulk<T extends ModelType>(
     cls: Class<T>,
     operations: BulkSource<T>,
-    batchSize = 500
+    config: number | BulkConfig<{ index: number }> = 500
   ): Promise<BulkResponse<{ index: number }>> {
     return ModelBulkUtil.processRaw<T, { index: number }>(
       cls,
       operations,
-      batchSize,
+      config,
       async ({ upsertedIds, insertedIds, operations: resolvedOperations }) => {
         const response: BulkResponse<{ index: number }> = {
           errors: [],
