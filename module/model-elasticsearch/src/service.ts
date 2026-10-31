@@ -430,12 +430,12 @@ export class ElasticsearchModelService
     }
   }
 
-  async *processBulkStream<T extends ModelType>(
+  processBulkStream<T extends ModelType>(
     cls: Class<T>,
     operations: BulkSource<T>,
     batchSize: number = 500
   ): AsyncIterable<BulkResponse<EsBulkError>> {
-    yield* ModelBulkUtil.processRawStream<T, EsBulkError>(cls, operations, batchSize, async ({ operations: resolvedOperations }) => {
+    return ModelBulkUtil.processRawStream<T, EsBulkError>(cls, operations, batchSize, async ({ operations: resolvedOperations }) => {
       type BulkDoc = Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string; _id?: string }>>;
       const body = resolvedOperations.reduce<(T | BulkDoc | { doc: T })[]>((toRun, operation) => {
         const core = operation.upsert ?? operation.delete ?? operation.insert ?? operation.update ?? { constructor: cls };

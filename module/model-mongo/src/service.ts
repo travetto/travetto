@@ -461,12 +461,12 @@ export class MongoModelService
   }
 
   // Bulk
-  async *processBulkStream<T extends ModelType>(
+  processBulkStream<T extends ModelType>(
     cls: Class<T>,
     operations: BulkSource<T>,
     batchSize: number = 500
   ): AsyncIterable<BulkResponse<{ index: number }>> {
-    yield* ModelBulkUtil.processRawStream<T, { index: number }>(
+    return ModelBulkUtil.processRawStream<T, { index: number }>(
       cls,
       operations,
       batchSize,

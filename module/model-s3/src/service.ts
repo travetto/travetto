@@ -362,12 +362,8 @@ export class S3ModelService implements ModelCrudSupport, ModelBulkSupport, Model
   }
 
   // Bulk
-  async *processBulkStream<T extends ModelType>(
-    cls: Class<T>,
-    operations: BulkSource<T>,
-    batchSize: number = 500
-  ): AsyncIterable<BulkResponse> {
-    yield* ModelBulkUtil.processCrudStream(this, cls, operations, batchSize);
+  processBulkStream<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize: number = 500): AsyncIterable<BulkResponse> {
+    return ModelBulkUtil.processCrudStream(this, cls, operations, batchSize);
   }
 
   async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize: number = 500): Promise<BulkResponse> {

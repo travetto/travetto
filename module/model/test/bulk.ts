@@ -388,12 +388,8 @@ export class ModelBulkUtilSuite {
     await Registry.init();
 
     const mockService = {
-      async *processBulkStream<T extends ModelType>(
-        cls: Class<T>,
-        operations: BulkSource<T>,
-        config: number = 500
-      ): AsyncIterable<BulkResponse> {
-        yield* ModelBulkUtil.batchStream(operations, config, async batch => {
+      processBulkStream<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, config: number = 500): AsyncIterable<BulkResponse> {
+        return ModelBulkUtil.batchStream(operations, config, async batch => {
           const normalized = batch.map(item => ModelBulkUtil.toBulkOperation(cls, item));
           return {
             errors: [],

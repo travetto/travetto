@@ -106,13 +106,13 @@ export class ModelBulkUtil {
   /**
    * Helper for native providers to stream pre-processed operations against native batch APIs
    */
-  static async *processRawStream<T extends ModelType, E = unknown>(
+  static processRawStream<T extends ModelType, E = unknown>(
     cls: Class<T>,
     operations: BulkSource<T>,
     batchSize: number = 500,
     handler: (prepped: BulkPreStore<T>) => Promise<BulkResponse<E>>
   ): AsyncIterable<BulkResponse<E>> {
-    yield* this.batchStream(operations, batchSize, async rawBatch => {
+    return this.batchStream(operations, batchSize, async rawBatch => {
       const prepped = await this.preStore(cls, rawBatch);
       return handler(prepped);
     });
@@ -122,13 +122,13 @@ export class ModelBulkUtil {
    * Executes bulk operations against standard ModelCrudSupport operations as an async stream.
    * Useful for services without native batch primitives (e.g. Memory, File).
    */
-  static async *processCrudStream<T extends ModelType>(
+  static processCrudStream<T extends ModelType>(
     service: ModelCrudSupport,
     cls: Class<T>,
     operations: BulkSource<T>,
     batchSize: number = 500
   ): AsyncIterable<BulkResponse> {
-    yield* this.batchStream(operations, batchSize, async rawBatch => {
+    return this.batchStream(operations, batchSize, async rawBatch => {
       const idSource = ModelRegistryIndex.get(cls).idSource;
 
       // Upfront validation: ensure required IDs are present for update/delete so missing IDs fail before execution

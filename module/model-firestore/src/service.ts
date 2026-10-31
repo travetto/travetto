@@ -246,12 +246,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelBulkSupport
   }
 
   // Bulk
-  async *processBulkStream<T extends ModelType>(
-    cls: Class<T>,
-    operations: BulkSource<T>,
-    batchSize: number = 500
-  ): AsyncIterable<BulkResponse> {
-    yield* ModelBulkUtil.processRawStream(cls, operations, batchSize, async ({ operations: resolvedOperations }) => {
+  processBulkStream<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize: number = 500): AsyncIterable<BulkResponse> {
+    return ModelBulkUtil.processRawStream(cls, operations, batchSize, async ({ operations: resolvedOperations }) => {
       const idSource = ModelRegistryIndex.get(cls).idSource;
       const collection = this.#getCollection(cls);
 

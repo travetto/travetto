@@ -492,12 +492,8 @@ export class DynamoDBModelService
   }
 
   // Bulk Support
-  async *processBulkStream<T extends ModelType>(
-    cls: Class<T>,
-    operations: BulkSource<T>,
-    batchSize: number = 500
-  ): AsyncIterable<BulkResponse> {
-    yield* ModelBulkUtil.processRawStream(
+  processBulkStream<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize: number = 500): AsyncIterable<BulkResponse> {
+    return ModelBulkUtil.processRawStream(
       cls,
       operations,
       batchSize,

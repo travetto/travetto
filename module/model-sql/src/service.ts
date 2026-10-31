@@ -445,12 +445,12 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   // Bulk Support
-  async *processBulkStream<T extends ModelType>(
+  processBulkStream<T extends ModelType>(
     modelClass: Class<T>,
     operations: BulkSource<T>,
     batchSize: number = 500
   ): AsyncIterable<BulkResponse> {
-    yield* ModelBulkUtil.processRawStream(
+    return ModelBulkUtil.processRawStream(
       modelClass,
       operations,
       batchSize,
