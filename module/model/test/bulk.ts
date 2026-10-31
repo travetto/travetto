@@ -383,34 +383,6 @@ export class ModelBulkUtilSuite {
     );
   }
 
-  @Test('Verify processRaw handles preStore and merges response')
-  async testProcessRaw() {
-    await Registry.init();
-
-    const response = await ModelBulkUtil.processRaw(
-      BulkItem,
-      [{ insert: BulkItem.from({ name: 'Raw Insert' }) }, { upsert: BulkItem.from({ name: 'Raw Upsert' }) }],
-      10,
-      async prepped => {
-        assert.strictEqual(prepped.operations.length, 2);
-        assert(prepped.insertedIds.has(0));
-        assert(prepped.upsertedIds.has(1));
-        return {
-          counts: { insert: 1, update: 0, upsert: 1, delete: 0, error: 0 },
-          errors: [],
-          insertedIds: new Map([
-            [0, 'raw-insert'],
-            [1, 'raw-upsert']
-          ])
-        };
-      }
-    );
-
-    assert.strictEqual(response.counts.insert, 1);
-    assert.strictEqual(response.counts.upsert, 1);
-    assert.strictEqual(response.insertedIds.size, 2);
-  }
-
   @Test('Verify processBulkStream directly yielding batches')
   async testProcessBulkStreamDirectly() {
     await Registry.init();

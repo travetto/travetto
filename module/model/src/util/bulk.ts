@@ -121,18 +121,6 @@ export class ModelBulkUtil {
   }
 
   /**
-   * Helper for native providers to execute pre-processed operations against native batch APIs
-   */
-  static async processRaw<T extends ModelType, E = unknown>(
-    cls: Class<T>,
-    operations: BulkSource<T>,
-    batchSize: number = 500,
-    handler: (prepped: BulkPreStore<T>) => Promise<BulkResponse<E>>
-  ): Promise<BulkResponse<E>> {
-    return this.collect(this.processRawStream(cls, operations, batchSize, handler));
-  }
-
-  /**
    * Executes bulk operations against standard ModelCrudSupport operations as an async stream.
    * Useful for services without native batch primitives (e.g. Memory, File).
    */
@@ -204,19 +192,6 @@ export class ModelBulkUtil {
   }
 
   /**
-   * Executes bulk operations against standard ModelCrudSupport operations.
-   * Useful for services without native batch primitives (e.g. Memory, File).
-   */
-  static async processCrud<T extends ModelType>(
-    service: ModelCrudSupport,
-    cls: Class<T>,
-    operations: BulkSource<T>,
-    batchSize: number = 500
-  ): Promise<BulkResponse> {
-    return this.collect(this.processCrudStream(service, cls, operations, batchSize));
-  }
-
-  /**
    * Helper to execute bulk operations in batches from an iterable or async iterable as an async stream
    */
   static async *batchStream<T extends ModelType, E = unknown>(
@@ -250,17 +225,6 @@ export class ModelBulkUtil {
       response.index = batchIndex;
       yield response;
     }
-  }
-
-  /**
-   * Helper to execute bulk operations in batches from an iterable or async iterable
-   */
-  static async batch<T extends ModelType, E = unknown>(
-    operations: BulkSource<T>,
-    batchSize: number = 500,
-    handler: (batch: BulkOperationSource<T>[]) => Promise<BulkResponse<E>>
-  ): Promise<BulkResponse<E>> {
-    return this.collect(this.batchStream(operations, batchSize, handler));
   }
 
   /**
