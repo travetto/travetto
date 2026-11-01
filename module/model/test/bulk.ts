@@ -176,7 +176,7 @@ export class ModelBulkUtilSuite {
   }
 
   @Test('Verify mutateBulk with object stream and batches')
-  async testApplyBulkWithStreamSource() {
+  async testMutateBulkWithStreamSource() {
     await Registry.init();
     const batches: BulkOperation<BulkItem>[][] = [];
 
@@ -226,7 +226,7 @@ export class ModelBulkUtilSuite {
   }
 
   @Test('Verify mutateBulk handles polymorphic types')
-  async testApplyBulkPolymorphic() {
+  async testMutateBulkPolymorphic() {
     await Registry.init();
     const batches: BulkOperation<BaseWorker>[][] = [];
 
@@ -384,7 +384,7 @@ export class ModelBulkUtilSuite {
   }
 
   @Test('Verify mutateBulk directly yielding batches')
-  async testApplyBulkDirectly() {
+  async testMutateBulkDirectly() {
     await Registry.init();
 
     const mockService = {
