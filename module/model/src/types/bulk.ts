@@ -69,6 +69,8 @@ export class BulkProcessError extends RuntimeError<{ errors: BulkErrorItem[] }> 
  * @concrete
  */
 export interface ModelBulkSupport extends ModelCrudSupport {
-  processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize?: number): Promise<BulkResponse>;
-  processBulkStream<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize?: number): AsyncIterable<BulkResponse>;
+  /**
+   * Apply bulk operations, yielding each batch response as it finishes
+   */
+  applyBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize?: number): AsyncIterable<BulkResponse>;
 }

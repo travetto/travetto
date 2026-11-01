@@ -47,7 +47,7 @@ export const text = (
       </ul>
     </c.Section>
     <c.Section title="Bulk Operations">
-      Bulk operations ({d.method('processBulk')}) batch insert, delete, and update statements for high performance. Bulk updates utilize
+      Bulk operations ({d.method('applyBulk')}) batch insert, delete, and update statements for high performance. Bulk updates utilize
       standard ANSI SQL {d.input('CASE ... WHEN')} constructs to update multiple records in a single database query across all SQL engines.
     </c.Section>
     <c.Section title="Supported Features">

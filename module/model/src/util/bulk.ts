@@ -27,7 +27,7 @@ export class ModelBulkUtil {
   /**
    * Type guard for determining if service supports bulk operation
    */
-  static isSupported = hasFunction<ModelBulkSupport>('processBulk');
+  static isSupported = hasFunction<ModelBulkSupport>('applyBulk');
 
   static #mergeBulkResponse<E>(target: BulkResponse<E>, source: BulkResponse<E>, indexOffset: number): void {
     if (indexOffset > 0) {
