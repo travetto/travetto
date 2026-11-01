@@ -106,7 +106,7 @@ export class ModelBulkUtil {
   /**
    * Helper for native providers to stream pre-processed operations against native batch APIs
    */
-  static stream<T extends ModelType, E = unknown>(
+  static mutateBulk<T extends ModelType, E = unknown>(
     cls: Class<T>,
     operations: BulkSource<T>,
     batchSize = 500,
@@ -122,7 +122,7 @@ export class ModelBulkUtil {
    * Executes bulk operations against standard ModelCrudSupport operations as an async stream.
    * Useful for services without native batch primitives (e.g. Memory, File).
    */
-  static processCrudStream<T extends ModelType>(
+  static mutateBulkWithCrud<T extends ModelType>(
     service: ModelCrudSupport,
     cls: Class<T>,
     operations: BulkSource<T>,

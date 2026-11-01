@@ -363,7 +363,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBulkSupport, Model
 
   // Bulk support
   mutateBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): AsyncIterable<BulkResponse> {
-    return ModelBulkUtil.processCrudStream(this, cls, operations, batchSize);
+    return ModelBulkUtil.mutateBulkWithCrud(this, cls, operations, batchSize);
   }
 
   // Expiry

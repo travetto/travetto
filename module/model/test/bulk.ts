@@ -484,7 +484,7 @@ export class ModelBulkUtilSuite {
     storage.set('existing-1', BulkItem.from({ id: 'existing-1', name: 'Existing' }));
 
     const batches: BulkResponse[] = [];
-    for await (const batch of ModelBulkUtil.processCrudStream(
+    for await (const batch of ModelBulkUtil.mutateBulkWithCrud(
       mockService,
       BulkItem,
       [
@@ -507,7 +507,7 @@ export class ModelBulkUtilSuite {
     assert.strictEqual(batches[1].counts.upsert, 1);
 
     const collected = await ModelBulkUtil.collect(
-      ModelBulkUtil.processCrudStream(
+      ModelBulkUtil.mutateBulkWithCrud(
         mockService,
         BulkItem,
         [{ insert: BulkItem.from({ name: 'Inserted 2' }) }, { upsert: BulkItem.from({ name: 'Upserted 2' }) }],

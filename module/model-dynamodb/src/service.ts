@@ -493,7 +493,7 @@ export class DynamoDBModelService
 
   // Bulk Support
   mutateBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): AsyncIterable<BulkResponse> {
-    return ModelBulkUtil.stream(cls, operations, batchSize, async ({ operations: resolvedOperations, upsertedIds: newUpsertedIds }) => {
+    return ModelBulkUtil.mutateBulk(cls, operations, batchSize, async ({ operations: resolvedOperations, upsertedIds: newUpsertedIds }) => {
       const idSource = ModelRegistryIndex.get(cls).idSource;
 
       const counts = {
