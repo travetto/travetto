@@ -1,5 +1,5 @@
 import { DependencyRegistryIndex } from '@travetto/di';
-import { type Class, castTo, RuntimeError } from '@travetto/runtime';
+import { type Class, RuntimeError } from '@travetto/runtime';
 
 import type { ModelType } from '../../src/types/model.ts';
 import { ModelBulkUtil } from '../../src/util/bulk.ts';
@@ -37,15 +37,20 @@ export abstract class BaseModelSuite<T> {
     }
   }
 
-  get service(): Promise<T> {
-    return DependencyRegistryIndex.getInstance(this.serviceClass);
+  async listAll<M extends ModelType>(cls: Class<M>): Promise<M[]> {
+    const items: M[] = [];
+    const svc = await this.service;
+    if (ModelCrudUtil.isSupported(svc)) {
+      for await (const item of svc.list(cls)) {
+        items.push(item);
+      }
+    } else {
+      throw new RuntimeError(`List is not supported for this service: ${this.serviceClass.name}`);
+    }
+    return items;
   }
 
-  async toArray<U>(src: AsyncIterable<U | U[]> | AsyncGenerator<U | U[]>): Promise<U[]> {
-    const out: (U | U[])[] = [];
-    for await (const el of src) {
-      out.push(el);
-    }
-    return castTo(out.flat());
+  get service(): Promise<T> {
+    return DependencyRegistryIndex.getInstance(this.serviceClass);
   }
 }

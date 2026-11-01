@@ -324,7 +324,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
       )
     );
 
-    const found = (await this.toArray(service.list(Person))).toSorted((a, b) => a.age - b.age);
+    const found = (await this.listAll(Person)).toSorted((a, b) => a.age - b.age);
 
     assert(found[0].age === people[0].age);
     assert(found[1].age === people[1].age);
