@@ -152,4 +152,77 @@ export class JSONUtilSuite {
     assert.strictEqual(defaultRecords.length, 3);
     assert.deepStrictEqual(defaultRecords[0], { name: 'Alice', age: '30', city: 'Seattle' });
   }
+
+  @Test()
+  async verifyFromUTF8LinesWithAsyncIterable() {
+    type SampleRecord = { id: number; name: string; active?: boolean; tags?: string[] };
+    const records: SampleRecord[] = [];
+    for await (const record of JSONUtil.fromUTF8Lines<SampleRecord>(this.fixture.readLines('sample.ndjson'))) {
+      records.push(record);
+    }
+
+    assert.strictEqual(records.length, 3);
+    assert.deepStrictEqual(records[0], { id: 1, name: 'first', active: true });
+    assert.deepStrictEqual(records[1], { id: 2, name: 'second', active: false });
+    assert.deepStrictEqual(records[2], { id: 3, name: 'third', tags: ['a', 'b'] });
+  }
+
+  @Test()
+  async verifyFromUTF8LinesWithSynchronousIterableAndBlankLines() {
+    const lines = [
+      '',
+      '  {"identifier": 100, "message": "hello"}  ',
+      '   ',
+      '{"identifier": 200, "message": "world"}',
+      '\t\r\n',
+      '{"identifier": 300, "message": "test"}'
+    ];
+
+    type MessageRecord = { identifier: number; message: string };
+    const records: MessageRecord[] = [];
+    for await (const record of JSONUtil.fromUTF8Lines<MessageRecord>(lines)) {
+      records.push(record);
+    }
+
+    assert.strictEqual(records.length, 3);
+    assert.deepStrictEqual(records[0], { identifier: 100, message: 'hello' });
+    assert.deepStrictEqual(records[1], { identifier: 200, message: 'world' });
+    assert.deepStrictEqual(records[2], { identifier: 300, message: 'test' });
+
+    const defaultRecords: object[] = [];
+    for await (const record of JSONUtil.fromUTF8Lines(lines)) {
+      defaultRecords.push(record);
+    }
+    assert.strictEqual(defaultRecords.length, 3);
+    assert.deepStrictEqual(defaultRecords[0], { identifier: 100, message: 'hello' });
+  }
+
+  @Test()
+  async verifyFromUTF8LinesEmpty() {
+    const emptyLines: string[] = ['', '   ', '\t', '\n'];
+    const records: object[] = [];
+    for await (const record of JSONUtil.fromUTF8Lines(emptyLines)) {
+      records.push(record);
+    }
+    assert.strictEqual(records.length, 0);
+
+    const completelyEmpty: string[] = [];
+    for await (const record of JSONUtil.fromUTF8Lines(completelyEmpty)) {
+      records.push(record);
+    }
+    assert.strictEqual(records.length, 0);
+  }
+
+  @Test()
+  async verifyFromUTF8LinesWithInvalidJSON() {
+    const lines = ['{"valid": true}', '{"invalid":'];
+    const records: object[] = [];
+    await assert.rejects(async () => {
+      for await (const record of JSONUtil.fromUTF8Lines(lines)) {
+        records.push(record);
+      }
+    }, SyntaxError);
+    assert.strictEqual(records.length, 1);
+    assert.deepStrictEqual(records[0], { valid: true });
+  }
 }

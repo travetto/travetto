@@ -169,6 +169,18 @@ export class JSONUtil {
   }
 
   /**
+   * Read from new line delimited JSON stream
+   */
+  static async *fromUTF8Lines<T extends object = object>(input: Iterable<string> | AsyncIterable<string>): AsyncIterable<T> {
+    for await (const line of input) {
+      if (!line.trim()) {
+        continue;
+      }
+      yield this.fromUTF8<T>(line);
+    }
+  }
+
+  /**
    * Read from CSV input stream
    */
   static async *fromCSV<T extends object = Record<string, string>>(
