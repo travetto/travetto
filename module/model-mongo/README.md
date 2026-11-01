@@ -17,7 +17,7 @@ This module provides an [mongodb](https://mongodb.com)-based implementation for 
 
 Supported features:
    *  [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8)
-   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L67)
+   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L71)
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10)
    *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10)
    *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L20)

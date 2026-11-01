@@ -27,18 +27,11 @@ export abstract class BaseModelSuite<T> {
   async saveAll<M extends ModelType>(cls: Class<M>, items: M[]): Promise<number> {
     const svc = await this.service;
     if (ModelBulkUtil.isSupported(svc)) {
-      const result = await svc.processBulk(
-        cls,
-        items.map(x => ({ insert: x }))
-      );
+      const result = await ModelBulkUtil.collect(svc.mutateBulk(cls, items));
       return result.counts.insert;
     } else if (ModelCrudUtil.isSupported(svc)) {
-      const out: Promise<M>[] = [];
-      for (const el of items) {
-        out.push(svc.create(cls, el));
-      }
-      await Promise.all(out);
-      return out.length;
+      const result = await ModelBulkUtil.collect(ModelBulkUtil.mutateBulkWithCrud(svc, cls, items));
+      return result.counts.insert;
     } else {
       throw new Error('Service does not support crud operations');
     }

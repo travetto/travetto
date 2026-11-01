@@ -38,9 +38,11 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   async #seed(names: string[]): Promise<void> {
     const service = await this.service;
     if (ModelBulkUtil.isSupported(service)) {
-      await service.processBulk(
-        SuggestItem,
-        names.map(name => ({ insert: { name } }))
+      await ModelBulkUtil.collect(
+        service.mutateBulk(
+          SuggestItem,
+          names.map(name => ({ name }))
+        )
       );
     } else {
       for (const item of names) {

@@ -16,7 +16,7 @@ yarn add @travetto/model
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval. This module builds heavily upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding."), which is used for data model validation.
 
 ## A Simple Model
-A model can be simply defined by usage of the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14) decorator, which opts it into the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") contracts, as well as making it available to the [ModelRegistryIndex](https://github.com/travetto/travetto/tree/main/module/model/src/registry/registry-index.ts#L12).
+A model can be simply defined by usage of the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13) decorator, which opts it into the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") contracts, as well as making it available to the [ModelRegistryIndex](https://github.com/travetto/travetto/tree/main/module/model/src/registry/registry-index.ts#L12).
 
 **Code: Basic Structure**
 ```typescript
@@ -33,7 +33,7 @@ export class SampleModel {
 Once the model is defined, it can be leveraged with any of the services that implement the various model storage contracts. These contracts allow for persisting and fetching of the associated model object.
 
 ## Contracts
-The module is mainly composed of contracts. The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10), [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L67).
+The module is mainly composed of contracts. The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10), [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L71).
 
 ### Basic
 All [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations, must honor the [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L9) contract to be able to participate in the model ecosystem. This contract represents the bare minimum for a model service.
@@ -190,17 +190,20 @@ export interface ModelBlobSupport {
 ```
 
 ### Bulk
-Finally, there is support for [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L67) operations. This is not to simply imply issuing many commands at in parallel, but implementation support for an atomic/bulk operation. This should allow for higher throughput on data ingest, and potentially for atomic support on transactions.
+Finally, there is support for [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L71) operations. This is not to simply imply issuing many commands at in parallel, but implementation support for an atomic/bulk operation. This should allow for higher throughput on data ingest, and potentially for atomic support on transactions.
 
 **Code: Bulk Contract**
 ```typescript
 export interface ModelBulkSupport extends ModelCrudSupport {
-  processBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize?: number): Promise<BulkResponse>;
+  /**
+   * Apply bulk operations, yielding each batch response as it finishes
+   */
+  mutateBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize?: number): AsyncIterable<BulkResponse>;
 }
 ```
 
 ## Declaration
-Models are declared via the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14) decorator, which allows the system to know that this is a class that is compatible with the module. The only requirement for a model is to have a primary identifier field. This can be fulfilled either by naming a field `id` (e.g. `id: string`) or by typing any custom field name as `ModelId` (e.g. `<field>: ModelId`). Fields decorated with [@Uuid](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L193) (such as `id`) receive the `uuid` specifier and format validation (32-character hexadecimal), allowing underlying storage providers to optimize column and index representations. This may make using existing data models impossible if types other than strings are required. Additionally, the `type` field, is intended to record the base model type, but can be remapped. This is important to support polymorphism, not only in [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations."), but also in [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.").
+Models are declared via the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13) decorator, which allows the system to know that this is a class that is compatible with the module. The only requirement for a model is to have a primary identifier field. This can be fulfilled either by naming a field `id` (e.g. `id: string`) or by typing any custom field name as `ModelId` (e.g. `<field>: ModelId`). Fields decorated with [@Uuid](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L193) (such as `id`) receive the `uuid` specifier and format validation (32-character hexadecimal), allowing underlying storage providers to optimize column and index representations. This may make using existing data models impossible if types other than strings are required. Additionally, the `type` field, is intended to record the base model type, but can be remapped. This is important to support polymorphism, not only in [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations."), but also in [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.").
 
 ## Implementations
 |Service|Basic|CRUD|Indexed|Expiry|Blob|Bulk|
@@ -251,18 +254,11 @@ export abstract class BaseModelSuite<T> {
   async saveAll<M extends ModelType>(cls: Class<M>, items: M[]): Promise<number> {
     const svc = await this.service;
     if (ModelBulkUtil.isSupported(svc)) {
-      const result = await svc.processBulk(
-        cls,
-        items.map(x => ({ insert: x }))
-      );
+      const result = await ModelBulkUtil.collect(svc.mutateBulk(cls, items));
       return result.counts.insert;
     } else if (ModelCrudUtil.isSupported(svc)) {
-      const out: Promise<M>[] = [];
-      for (const el of items) {
-        out.push(svc.create(cls, el));
-      }
-      await Promise.all(out);
-      return out.length;
+      const result = await ModelBulkUtil.collect(ModelBulkUtil.mutateBulkWithCrud(svc, cls, items));
+      return result.counts.insert;
     } else {
       throw new Error('Service does not support crud operations');
     }
@@ -283,7 +279,7 @@ export abstract class BaseModelSuite<T> {
 ```
 
 ## CLI - model:export
-The module provides the ability to generate an export of the model structure from all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14)s within the application. This is useful for being able to generate the appropriate files to manually create the data schemas in production.
+The module provides the ability to generate an export of the model structure from all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13)s within the application. This is useful for being able to generate the appropriate files to manually create the data schemas in production.
 
 **Terminal: Help for model:export**
 ```bash
@@ -313,7 +309,7 @@ Examples:
 ```
 
 ## CLI - model:install
-The module provides the ability to install all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L14)s within the application given the current configuration being targeted. This is useful for being able to prepare the datastore manually.
+The module provides the ability to install all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13)s within the application given the current configuration being targeted. This is useful for being able to prepare the datastore manually.
 
 **Terminal: Help for model:install**
 ```bash

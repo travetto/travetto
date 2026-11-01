@@ -40,12 +40,12 @@ Supported transaction modes include:
 
 <h2 id="bulk-operations">Bulk Operations</h2>
 
-Bulk operations (<code class="item method">processBulk</code>) batch insert, delete, and update statements for high performance. Bulk updates utilize standard ANSI SQL <code class="item input">CASE ... WHEN</code> constructs to update multiple records in a single database query across all SQL engines.
+Bulk operations (<code class="item method">mutateBulk</code>) batch insert, delete, and update statements for high performance. Bulk updates utilize standard ANSI SQL <code class="item input">CASE ... WHEN</code> constructs to update multiple records in a single database query across all SQL engines.
 
 <h2 id="supported-features">Supported Features</h2>
 
-All SQL model service implementations derive from <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L78">BaseSQLModelService</a> and support:
-<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L67">Bulk</a></li>
+All SQL model service implementations derive from <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L76">BaseSQLModelService</a> and support:
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L71">Bulk</a></li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10">CRUD</a></li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10">Expiry</a></li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L20">Indexed</a></li>
