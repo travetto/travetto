@@ -27,12 +27,7 @@ export abstract class BaseModelSuite<T> {
   async saveAll<M extends ModelType>(cls: Class<M>, items: M[]): Promise<number> {
     const svc = await this.service;
     if (ModelBulkUtil.isSupported(svc)) {
-      const result = await ModelBulkUtil.collect(
-        svc.mutateBulk(
-          cls,
-          items.map(x => ({ insert: x }))
-        )
-      );
+      const result = await ModelBulkUtil.collect(svc.mutateBulk(cls, items));
       return result.counts.insert;
     } else if (ModelCrudUtil.isSupported(svc)) {
       const out: Promise<M>[] = [];

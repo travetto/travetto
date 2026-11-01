@@ -41,7 +41,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
       await ModelBulkUtil.collect(
         service.mutateBulk(
           SuggestItem,
-          names.map(name => ({ insert: { name } }))
+          names.map(name => ({ name }))
         )
       );
     } else {
