@@ -355,9 +355,9 @@ export class S3ModelService implements ModelCrudSupport, ModelBulkSupport, Model
     await this.client.deleteObject(this.#query(cls, id));
   }
 
-  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
     for await (const batch of this.#iterateBucket(cls, options)) {
-      yield ModelCrudUtil.filterOutNotFound(batch.map(item => this.get(cls, item.id)));
+      yield* await ModelCrudUtil.filterOutNotFound(batch.map(item => this.get(cls, item.id)));
     }
   }
 

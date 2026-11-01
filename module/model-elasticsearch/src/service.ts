@@ -415,7 +415,7 @@ export class ElasticsearchModelService
     return this.get(cls, id);
   }
 
-  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
     for await (const batch of this.#scrollCollection(
       cls,
       () => ({
@@ -424,7 +424,7 @@ export class ElasticsearchModelService
       }),
       options
     )) {
-      yield batch.items;
+      yield* batch.items;
     }
   }
 
@@ -615,9 +615,9 @@ export class ElasticsearchModelService
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
     options?: ModelListOptions
-  ): AsyncIterable<T[]> {
+  ): AsyncIterable<T> {
     for await (const { items } of this.#scrollIndex(cls, idx, body, options)) {
-      yield items;
+      yield* items;
     }
   }
 

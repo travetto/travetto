@@ -412,10 +412,12 @@ export class MongoModelService
     }
   }
 
-  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
     const store = await this.getStore(cls);
     const cursor = store.find(this.getWhereFilter(cls, {}), { timeout: true });
-    yield* this.#iterateCursor(cls, cursor, options);
+    for await (const item of this.#iterateCursor(cls, cursor, options)) {
+      yield* item;
+    }
   }
 
   // Blob
@@ -623,9 +625,11 @@ export class MongoModelService
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
     options?: ModelListOptions
-  ): AsyncIterable<T[]> {
+  ): AsyncIterable<T> {
     const cursor = await this.#buildIndexQuery(cls, idx, body);
-    yield* this.#iterateCursor(cls, cursor, options);
+    for await (const batch of this.#iterateCursor(cls, cursor, options)) {
+      yield* batch;
+    }
   }
 
   async suggestByIndex<T extends ModelType, S extends SortedIndexSelection<T>, K extends KeyedIndexSelection<T>>(

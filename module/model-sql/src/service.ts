@@ -257,8 +257,10 @@ export abstract class BaseSQLModelService<C = unknown>
     }
   }
 
-  async *list<T extends ModelType>(modelClass: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
-    yield* this.listWithOffset(modelClass, options);
+  async *list<T extends ModelType>(modelClass: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
+    for await (const batch of this.listWithOffset(modelClass, options)) {
+      yield* batch;
+    }
   }
 
   async *listWithOffset<T extends ModelType>(modelClass: Class<T>, options?: ModelListOptions & { offset?: number }): AsyncIterable<T[]> {
@@ -662,7 +664,7 @@ export abstract class BaseSQLModelService<C = unknown>
     indexConfig: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
     options?: ModelListOptions & { offset?: number }
-  ): AsyncIterable<T[]> {
+  ): AsyncIterable<T> {
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate();
     const where: WhereClause<T> = castTo(computed.project());
 
@@ -687,7 +689,7 @@ export abstract class BaseSQLModelService<C = unknown>
       }
 
       const items = await this.loadMany(modelClass, result.records);
-      yield items;
+      yield* items;
       produced += items.length;
       offset += items.length;
     }
@@ -707,10 +709,11 @@ export abstract class BaseSQLModelService<C = unknown>
     const items: T[] = [];
     let nextOffset = listOptions.offset ?? 0;
 
-    for await (const batch of this.listByIndex(modelClass, indexConfig, body, listOptions)) {
-      items.push(...batch);
-      nextOffset += batch.length;
+    for await (const item of this.listByIndex(modelClass, indexConfig, body, listOptions)) {
+      items.push(item);
     }
+
+    nextOffset += items.length;
 
     return {
       items,

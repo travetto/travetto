@@ -355,8 +355,8 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     const controller = new AbortController();
     const found: Person[] = [];
 
-    for await (const items of service.list(Person, { abort: controller.signal, batchSizeHint: 1 })) {
-      found.push(...items);
+    for await (const item of service.list(Person, { abort: controller.signal, batchSizeHint: 1 })) {
+      found.push(item);
       controller.abort();
       await timers.setTimeout(10);
     }

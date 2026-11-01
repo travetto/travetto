@@ -338,9 +338,9 @@ export class MemoryModelService
     await this.#persist(cls, existing, 'remove');
   }
 
-  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
     for await (const batch of this.#iterateIds([...this.#getStore(cls).keys()], options)) {
-      yield ModelCrudUtil.filterOutNotFound(batch.map(id => this.get(cls, id)));
+      yield* await ModelCrudUtil.filterOutNotFound(batch.map(id => this.get(cls, id)));
     }
   }
 
@@ -525,9 +525,9 @@ export class MemoryModelService
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
     options?: ModelListOptions
-  ): AsyncIterable<T[]> {
+  ): AsyncIterable<T> {
     for await (const batch of this.#getIndexIds(cls, idx, body, options)) {
-      yield ModelCrudUtil.filterOutNotFound(batch.map(id => this.get(cls, id)));
+      yield* await ModelCrudUtil.filterOutNotFound(batch.map(id => this.get(cls, id)));
     }
   }
 
