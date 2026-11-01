@@ -15,6 +15,6 @@ yarn add @travetto/model-file
 
 This module provides an file-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations."). Supported features:
    *  [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8)
-   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L67)
+   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L71)
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10)
    *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10)

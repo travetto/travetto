@@ -461,7 +461,7 @@ export class MongoModelService
   }
 
   // Bulk support
-  applyBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): AsyncIterable<BulkResponse<WriteError>> {
+  mutateBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): AsyncIterable<BulkResponse<WriteError>> {
     return ModelBulkUtil.stream<T, WriteError>(
       cls,
       operations,

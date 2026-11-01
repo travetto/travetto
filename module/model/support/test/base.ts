@@ -28,7 +28,7 @@ export abstract class BaseModelSuite<T> {
     const svc = await this.service;
     if (ModelBulkUtil.isSupported(svc)) {
       const result = await ModelBulkUtil.collect(
-        svc.applyBulk(
+        svc.mutateBulk(
           cls,
           items.map(x => ({ insert: x }))
         )

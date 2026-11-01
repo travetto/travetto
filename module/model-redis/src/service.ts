@@ -379,7 +379,7 @@ export class RedisModelService implements ModelCrudSupport, ModelBulkSupport, Mo
   }
 
   // Bulk support
-  applyBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): AsyncIterable<BulkResponse> {
+  mutateBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): AsyncIterable<BulkResponse> {
     return ModelBulkUtil.stream(cls, operations, batchSize, async ({ operations: resolvedOperations }) => {
       const idSource = ModelRegistryIndex.get(cls).idSource;
       const config = ModelRegistryIndex.getConfig(cls);

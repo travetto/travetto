@@ -429,7 +429,7 @@ export class ElasticsearchModelService
   }
 
   // Bulk Support
-  applyBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): AsyncIterable<BulkResponse<EsBulkError>> {
+  mutateBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): AsyncIterable<BulkResponse<EsBulkError>> {
     return ModelBulkUtil.stream<T, EsBulkError>(cls, operations, batchSize, async ({ operations: resolvedOperations }) => {
       type BulkDoc = Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string; _id?: string }>>;
       const body = resolvedOperations.reduce<(T | BulkDoc | { doc: T })[]>((toRun, operation) => {

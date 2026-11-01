@@ -18,7 +18,7 @@ This module provides a [SQLite](https://www.sqlite.org/)-based implementation fo
 The schema generated will not generally map to existing tables as it is attempting to produce a document store like experience on top of a [SQL](https://en.wikipedia.org/wiki/SQL) database. Every table generated maps to a model, with simple fields mapped as individual columns and complex fields/arrays mapped as serialized `TEXT` columns. 
 
 Supported features:
-   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L67)
+   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L71)
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L10)
    *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10)
    *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/service.ts#L20)
@@ -43,7 +43,7 @@ export class Init {
 }
 ```
 
-where the [SqliteModelConfig](https://github.com/travetto/travetto/tree/main/module/model-sqlite/src/config.ts#L10) is defined by:
+where the [SqliteModelConfig](https://github.com/travetto/travetto/tree/main/module/model-sqlite/src/config.ts#L9) is defined by:
 
 **Code: Structure of SqliteModelConfig**
 ```typescript

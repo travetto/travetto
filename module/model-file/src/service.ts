@@ -223,7 +223,7 @@ export class FileModelService implements ModelCrudSupport, ModelBulkSupport, Mod
   }
 
   // Bulk Support
-  applyBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): AsyncIterable<BulkResponse> {
+  mutateBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize = 500): AsyncIterable<BulkResponse> {
     return ModelBulkUtil.processCrudStream(this, cls, operations, batchSize);
   }
 

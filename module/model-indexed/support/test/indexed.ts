@@ -39,7 +39,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     const service = await this.service;
     if (ModelBulkUtil.isSupported(service)) {
       await ModelBulkUtil.collect(
-        service.applyBulk(
+        service.mutateBulk(
           SuggestItem,
           names.map(name => ({ insert: { name } }))
         )

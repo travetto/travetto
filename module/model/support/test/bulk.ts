@@ -19,7 +19,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
   async bulkInsert() {
     const service = await this.service;
     const result = await ModelBulkUtil.collect(
-      service.applyBulk(User, [{ insert: User.from({}) }, { insert: User.from({}) }, { insert: User.from({}) }, { insert: User.from({}) }])
+      service.mutateBulk(User, [{ insert: User.from({}) }, { insert: User.from({}) }, { insert: User.from({}) }, { insert: User.from({}) }])
     );
 
     assert(result.counts.insert === 4);
@@ -30,7 +30,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
   async bulkUpsert() {
     const service = await this.service;
     const result = await ModelBulkUtil.collect(
-      service.applyBulk(User, [{ upsert: User.from({}) }, { upsert: User.from({}) }, { upsert: User.from({}) }, { upsert: User.from({}) }])
+      service.mutateBulk(User, [{ upsert: User.from({}) }, { upsert: User.from({}) }, { upsert: User.from({}) }, { upsert: User.from({}) }])
     );
 
     assert(result.counts.upsert === 4);
@@ -43,7 +43,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
     const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}` }));
 
     const result = await ModelBulkUtil.collect(
-      service.applyBulk(
+      service.mutateBulk(
         User,
         users.map(u => ({ insert: u }))
       )
@@ -52,7 +52,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
     assert(result.insertedIds.size === 4);
 
     const res2 = await ModelBulkUtil.collect(
-      service.applyBulk(
+      service.mutateBulk(
         User,
         users.map(u => ({ update: u }))
       )
@@ -67,7 +67,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
     const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}` }));
 
     const result = await ModelBulkUtil.collect(
-      service.applyBulk(
+      service.mutateBulk(
         User,
         users.map(u => ({ insert: u }))
       )
@@ -76,7 +76,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
     assert(result.insertedIds.size === 4);
 
     const res2 = await ModelBulkUtil.collect(
-      service.applyBulk(
+      service.mutateBulk(
         User,
         users.map(u => ({ delete: u }))
       )
@@ -87,13 +87,13 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
   @Test()
   async bulkUpdateMissingId() {
     const service = await this.service;
-    await assert.rejects(() => ModelBulkUtil.collect(service.applyBulk(User, [{ update: User.from({ name: 'no-id' }) }])));
+    await assert.rejects(() => ModelBulkUtil.collect(service.mutateBulk(User, [{ update: User.from({ name: 'no-id' }) }])));
   }
 
   @Test()
   async bulkDeleteMissingId() {
     const service = await this.service;
-    await assert.rejects(() => ModelBulkUtil.collect(service.applyBulk(User, [{ delete: User.from({ name: 'no-id' }) }])));
+    await assert.rejects(() => ModelBulkUtil.collect(service.mutateBulk(User, [{ delete: User.from({ name: 'no-id' }) }])));
   }
 
   @Test()
@@ -105,7 +105,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
       }
     }
 
-    const result = await ModelBulkUtil.collect(service.applyBulk(User, operations(), 2));
+    const result = await ModelBulkUtil.collect(service.mutateBulk(User, operations(), 2));
     assert(result.counts.insert === 5);
     assert(result.insertedIds.size === 5);
   }
@@ -119,7 +119,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
       }
     }
 
-    const result = await ModelBulkUtil.collect(service.applyBulk(User, objects(), 2));
+    const result = await ModelBulkUtil.collect(service.mutateBulk(User, objects(), 2));
     assert(result.counts.upsert === 5);
     assert(result.insertedIds.size === 5);
   }
@@ -128,7 +128,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
   async bulkItemsDirectly() {
     const service = await this.service;
     const users = [0, 1, 2, 3].map(x => User.from({ name: `direct-${x}` }));
-    const result = await ModelBulkUtil.collect(service.applyBulk(User, users));
+    const result = await ModelBulkUtil.collect(service.mutateBulk(User, users));
     assert(result.counts.upsert === 4);
     assert(result.insertedIds.size === 4);
   }
@@ -141,7 +141,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
         yield User.from({ name: `stream-direct-${i}` });
       }
     }
-    const result = await ModelBulkUtil.collect(service.applyBulk(User, users(), 2));
+    const result = await ModelBulkUtil.collect(service.mutateBulk(User, users(), 2));
     assert(result.counts.upsert === 4);
     assert(result.insertedIds.size === 4);
   }

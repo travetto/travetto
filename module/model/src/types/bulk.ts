@@ -72,5 +72,5 @@ export interface ModelBulkSupport extends ModelCrudSupport {
   /**
    * Apply bulk operations, yielding each batch response as it finishes
    */
-  applyBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize?: number): AsyncIterable<BulkResponse>;
+  mutateBulk<T extends ModelType>(cls: Class<T>, operations: BulkSource<T>, batchSize?: number): AsyncIterable<BulkResponse>;
 }

@@ -443,7 +443,7 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   // Bulk Support
-  applyBulk<T extends ModelType>(modelClass: Class<T>, operations: BulkSource<T>, batchSize = 500): AsyncIterable<BulkResponse> {
+  mutateBulk<T extends ModelType>(modelClass: Class<T>, operations: BulkSource<T>, batchSize = 500): AsyncIterable<BulkResponse> {
     return ModelBulkUtil.stream<T, unknown>(
       modelClass,
       operations,
