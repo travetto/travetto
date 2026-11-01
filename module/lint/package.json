@@ -1,6 +1,6 @@
 {
   "name": "@travetto/lint",
-  "version": "8.1.0-rc.0",
+  "version": "8.1.0-rc.1",
   "description": "Linting and Formatting integration for Travetto",
   "keywords": [
     "cspell",
@@ -31,12 +31,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/runtime": "^8.1.0-rc.0",
+    "@travetto/runtime": "^8.1.0-rc.1",
     "oxfmt": "^0.75.0",
     "oxlint": "^1.90.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.1.0-rc.1"
+    "@travetto/cli": "^8.1.0-rc.2"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

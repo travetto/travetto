@@ -1,6 +1,6 @@
 {
   "name": "@travetto/test",
-  "version": "8.1.0-rc.0",
+  "version": "8.1.0-rc.1",
   "description": "Declarative test framework",
   "keywords": [
     "ast-transformations",
@@ -31,14 +31,14 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/registry": "^8.1.0-rc.0",
-    "@travetto/runtime": "^8.1.0-rc.0",
-    "@travetto/terminal": "^8.1.0-rc.0",
-    "@travetto/worker": "^8.1.0-rc.0",
+    "@travetto/registry": "^8.1.0-rc.1",
+    "@travetto/runtime": "^8.1.0-rc.1",
+    "@travetto/terminal": "^8.1.0-rc.1",
+    "@travetto/worker": "^8.1.0-rc.1",
     "yaml": "^2.9.1"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.1.0-rc.1",
+    "@travetto/cli": "^8.1.0-rc.2",
     "@travetto/transformer": "^8.1.0-rc.0"
   },
   "peerDependenciesMeta": {
