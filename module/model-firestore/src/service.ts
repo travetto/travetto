@@ -239,9 +239,9 @@ export class FirestoreModelService implements ModelCrudSupport, ModelBulkSupport
     }
   }
 
-  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
     for await (const { items } of this.#scanCollection(cls, () => this.#getCollection(cls), options)) {
-      yield items;
+      yield* items;
     }
   }
 
@@ -401,9 +401,9 @@ export class FirestoreModelService implements ModelCrudSupport, ModelBulkSupport
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
     options?: ModelListOptions
-  ): AsyncIterable<T[]> {
+  ): AsyncIterable<T> {
     for await (const { items } of this.#scanCollection(cls, () => this.#buildIndexQuery(cls, idx, body), options)) {
-      yield items;
+      yield* items;
     }
   }
 

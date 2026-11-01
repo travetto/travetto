@@ -476,7 +476,7 @@ export class DynamoDBModelService
     }
   }
 
-  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
     for await (const { items } of this.#scanCollection(
       cls,
       (batchSize, lastKey) =>
@@ -487,7 +487,7 @@ export class DynamoDBModelService
         }),
       options
     )) {
-      yield items;
+      yield* items;
     }
   }
 
@@ -623,9 +623,9 @@ export class DynamoDBModelService
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
     options?: ModelListOptions
-  ): AsyncIterable<T[]> {
+  ): AsyncIterable<T> {
     for await (const { items } of this.#scanIndex(cls, idx, body, options)) {
-      yield items;
+      yield* items;
     }
   }
 

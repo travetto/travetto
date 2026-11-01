@@ -110,7 +110,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
     options?: ModelListOptions
-  ): AsyncIterable<T[]>;
+  ): AsyncIterable<T>;
 
   /**
    * Suggest entities by ranged index as defined by fields of idx and a prefix

@@ -368,8 +368,8 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     const controller = new AbortController();
     const found: User3[] = [];
 
-    for await (const items of service.listByIndex(User3, userAgeIndex, { name: 'page' }, { abort: controller.signal, batchSizeHint: 1 })) {
-      found.push(...items);
+    for await (const item of service.listByIndex(User3, userAgeIndex, { name: 'page' }, { abort: controller.signal, batchSizeHint: 1 })) {
+      found.push(item);
       controller.abort();
       await timers.setTimeout(10);
     }

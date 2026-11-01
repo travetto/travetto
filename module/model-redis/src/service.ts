@@ -372,9 +372,9 @@ export class RedisModelService implements ModelCrudSupport, ModelBulkSupport, Mo
     await this.#store(cls, castTo<T>(where), 'delete');
   }
 
-  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
     for await (const { ids } of this.#streamValues('scan', { match: `${this.#resolveKey(cls)}:*` }, options)) {
-      yield await this.#getBodies(cls, ids, id => id);
+      yield* await this.#getBodies(cls, ids, id => id);
     }
   }
 
@@ -593,9 +593,9 @@ export class RedisModelService implements ModelCrudSupport, ModelBulkSupport, Mo
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
     options?: ModelListOptions
-  ): AsyncIterable<T[]> {
+  ): AsyncIterable<T> {
     for await (const { ids } of this.#scanIndex(cls, idx, body, options)) {
-      yield await this.#getBodies(cls, ids, id => this.#resolveKey(cls, id));
+      yield* await this.#getBodies(cls, ids, id => this.#resolveKey(cls, id));
     }
   }
 

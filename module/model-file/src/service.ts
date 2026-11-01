@@ -216,9 +216,9 @@ export class FileModelService implements ModelCrudSupport, ModelBulkSupport, Mod
     await fs.unlink(file);
   }
 
-  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]> {
+  async *list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T> {
     for await (const batch of FileModelService.scanFolder(await this.#resolveName(cls, '.json'), '.json', options)) {
-      yield ModelCrudUtil.filterOutNotFound(batch.map(([id]) => this.get(cls, id)));
+      yield* await ModelCrudUtil.filterOutNotFound(batch.map(([id]) => this.get(cls, id)));
     }
   }
 
