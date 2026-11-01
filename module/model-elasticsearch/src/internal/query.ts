@@ -10,7 +10,7 @@ import {
   type TextSearchClause,
   type WhereClause
 } from '@travetto/model-query';
-import { type Any, type Class, castTo, RuntimeError, TypedObject } from '@travetto/runtime';
+import { type Any, type Class, castTo, TypedObject } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { EsSchemaConfig } from './types.ts';

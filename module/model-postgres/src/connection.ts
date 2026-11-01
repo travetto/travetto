@@ -2,7 +2,7 @@ import { type DatabaseError, type Pool, type PoolClient, default as pg } from 'p
 
 import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
-import { ExistsError, UniqueError } from '@travetto/model';
+import { ExistsError } from '@travetto/model';
 import { SQLConnection } from '@travetto/model-sql';
 import { castTo, ShutdownManager } from '@travetto/runtime';
 

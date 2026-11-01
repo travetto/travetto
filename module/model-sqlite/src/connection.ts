@@ -6,7 +6,7 @@ import { createPool, type Pool } from 'generic-pool';
 
 import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
-import { ExistsError, UniqueError } from '@travetto/model';
+import { ExistsError } from '@travetto/model';
 import { SQLConnection } from '@travetto/model-sql';
 import { castTo, JSONUtil, Runtime, RuntimeError, ShutdownManager, Util } from '@travetto/runtime';
 

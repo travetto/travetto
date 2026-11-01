@@ -10,7 +10,6 @@ import type {
 
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
-  type BulkOperation,
   type BulkResponse,
   type BulkSource,
   type ModelBulkSupport,
@@ -27,8 +26,7 @@ import {
   ExistsError,
   NotFoundError,
   type OptionalId,
-  type PartialWithId,
-  type BulkOperationSource
+  type PartialWithId
 } from '@travetto/model';
 import {
   type FullKeyedIndexBody,

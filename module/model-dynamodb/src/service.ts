@@ -45,7 +45,7 @@ import {
   type SortedIndex,
   type SortedIndexSelection
 } from '@travetto/model-indexed';
-import { type Class, castTo, JSONUtil, Runtime, ShutdownManager, TimeUtil } from '@travetto/runtime';
+import { type Class, castTo, JSONUtil, ShutdownManager, TimeUtil } from '@travetto/runtime';
 
 import type { DynamoDBModelConfig } from './config.ts';
 import { DynamoDBUtil } from './util.ts';

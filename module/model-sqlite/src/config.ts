@@ -1,7 +1,6 @@
 import type { DatabaseSyncOptions } from 'node:sqlite';
 
 import { Config } from '@travetto/config';
-import { Runtime } from '@travetto/runtime';
 
 /**
  * SQLite Model Configuration

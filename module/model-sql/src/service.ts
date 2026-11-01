@@ -1,6 +1,5 @@
 import { Injectable, PostConstruct } from '@travetto/di';
 import {
-  type BulkOperation,
   type BulkResponse,
   type BulkSource,
   type IndexConfig,
@@ -19,8 +18,7 @@ import {
   NotFoundError,
   type OptionalId,
   type PartialWithId,
-  UniqueError,
-  type BulkOperationSource
+  UniqueError
 } from '@travetto/model';
 import {
   type FullKeyedIndexBody,
@@ -60,8 +58,8 @@ import {
   type ValidStringFields,
   type WhereClause
 } from '@travetto/model-query';
-import { type Class, castTo, JSONUtil, Runtime } from '@travetto/runtime';
-import { SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
+import { type Class, castTo, JSONUtil } from '@travetto/runtime';
+import { SchemaRegistryIndex } from '@travetto/schema';
 import { WorkPool } from '@travetto/worker';
 
 import type { SQLConnection } from './connection.ts';

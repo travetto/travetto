@@ -1,5 +1,4 @@
 import { type Class, castTo, getClass } from '@travetto/runtime';
-import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelType } from '../types/model.ts';
 import { ModelRegistryIndex } from './registry-index.ts';

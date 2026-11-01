@@ -8,7 +8,7 @@ import {
   type TextSearchState
 } from '@travetto/model-sql';
 import { type Class, castTo, JSONUtil } from '@travetto/runtime';
-import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { type SchemaFieldConfig } from '@travetto/schema';
 
 export class MysqlDialect extends AbstractANSI99Dialect {
   override escapeIdentifier(name: string): string {

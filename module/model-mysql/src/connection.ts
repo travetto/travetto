@@ -3,7 +3,7 @@ import type { OkPacket, Pool, PoolConnection, ResultSetHeader, TypeCastField } f
 
 import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
-import { ExistsError, type ModelType, UniqueError } from '@travetto/model';
+import { ExistsError, type ModelType } from '@travetto/model';
 import { SQLConnection, type TableContext } from '@travetto/model-sql';
 import { type Class, castTo, JSONUtil, ShutdownManager } from '@travetto/runtime';
 
