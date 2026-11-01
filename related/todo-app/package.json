@@ -27,9 +27,9 @@
   },
   "dependencies": {
     "@travetto/auth-web": "^8.1.0-rc.0",
-    "@travetto/auth-web-session": "^8.1.0-rc.1",
+    "@travetto/auth-web-session": "^8.1.0-rc.2",
     "@travetto/log": "^8.1.0-rc.0",
-    "@travetto/model-mongo": "^8.1.0-rc.1",
+    "@travetto/model-mongo": "^8.1.0-rc.2",
     "@travetto/openapi": "^8.1.0-rc.0",
     "@travetto/web-http": "^8.1.0-rc.0",
     "@travetto/web-rpc": "^8.1.0-rc.0",
@@ -42,7 +42,7 @@
     "@travetto/pack": "^8.1.0-rc.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.1.0-rc.0"
+    "@travetto/cli": "^8.1.0-rc.1"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

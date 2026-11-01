@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@travetto/cli": "^8.1.0-rc.0"
+    "@travetto/cli": "^8.1.0-rc.1"
   },
   "devDependencies": {
     "@travetto/compiler": "^8.1.0-rc.0",

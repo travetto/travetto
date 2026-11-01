@@ -1,6 +1,6 @@
 {
   "name": "@travetto/auth-web-session",
-  "version": "8.1.0-rc.1",
+  "version": "8.1.0-rc.2",
   "private": false,
   "description": "Web authentication session integration support for the Travetto framework",
   "keywords": [
@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@travetto/auth": "^8.1.0-rc.0",
-    "@travetto/auth-session": "^8.1.0-rc.1",
+    "@travetto/auth-session": "^8.1.0-rc.2",
     "@travetto/auth-web": "^8.1.0-rc.0",
     "@travetto/di": "^8.1.0-rc.0",
     "@travetto/web": "^8.1.0-rc.0"

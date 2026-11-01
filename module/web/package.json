@@ -38,7 +38,7 @@
     "find-my-way": "^9.10.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.1.0-rc.0",
+    "@travetto/cli": "^8.1.0-rc.1",
     "@travetto/test": "^8.1.0-rc.0",
     "@travetto/transformer": "^8.1.0-rc.0"
   },
