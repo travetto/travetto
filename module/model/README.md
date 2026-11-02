@@ -108,7 +108,7 @@ export interface ModelCrudSupport extends ModelBasicSupport {
    * @param cls The class to list
    * @param options Options for listing
    */
-  list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T[]>;
+  list<T extends ModelType>(cls: Class<T>, options?: ModelListOptions): AsyncIterable<T>;
 }
 ```
 
@@ -226,7 +226,7 @@ To enforce that these contracts are honored, the module provides shared test sui
 **Code: Memory Service Test Configuration**
 ```typescript
 import { DependencyRegistryIndex } from '@travetto/di';
-import { type Class, castTo, RuntimeError } from '@travetto/runtime';
+import { type Class, RuntimeError } from '@travetto/runtime';
 
 import type { ModelType } from '../../src/types/model.ts';
 import { ModelBulkUtil } from '../../src/util/bulk.ts';
@@ -238,42 +238,41 @@ export abstract class BaseModelSuite<T> {
   serviceClass: Class<T>;
   configClass: Class;
 
-  async getSize<U extends ModelType>(cls: Class<U>): Promise<number> {
-    const svc = await this.service;
-    if (ModelCrudUtil.isSupported(svc)) {
-      let i = 0;
-      for await (const batch of svc.list(cls)) {
-        i += batch.length;
-      }
-      return i;
-    } else {
-      throw new RuntimeError(`Size is not supported for this service: ${this.serviceClass.name}`);
-    }
-  }
-
-  async saveAll<M extends ModelType>(cls: Class<M>, items: M[]): Promise<number> {
-    const svc = await this.service;
-    if (ModelBulkUtil.isSupported(svc)) {
-      const result = await ModelBulkUtil.collect(svc.mutateBulk(cls, items));
-      return result.counts.insert;
-    } else if (ModelCrudUtil.isSupported(svc)) {
-      const result = await ModelBulkUtil.collect(ModelBulkUtil.mutateBulkWithCrud(svc, cls, items));
-      return result.counts.insert;
-    } else {
-      throw new Error('Service does not support crud operations');
-    }
-  }
-
   get service(): Promise<T> {
     return DependencyRegistryIndex.getInstance(this.serviceClass);
   }
 
-  async toArray<U>(src: AsyncIterable<U | U[]> | AsyncGenerator<U | U[]>): Promise<U[]> {
-    const out: (U | U[])[] = [];
-    for await (const el of src) {
-      out.push(el);
+  async getSize<U extends ModelType>(cls: Class<U>): Promise<number> {
+    const svc = await this.service;
+    if (!ModelCrudUtil.isSupported(svc)) {
+      throw new RuntimeError(`Size is not supported for this service: ${this.serviceClass.name}`);
     }
-    return castTo(out.flat());
+    let i = 0;
+    for await (const _ of svc.list(cls)) i += 1;
+    return i;
+  }
+
+  async saveAll<M extends ModelType>(cls: Class<M>, items: M[]): Promise<number> {
+    const service = await this.service;
+    if (!ModelBulkUtil.isSupported(service) && !ModelCrudUtil.isSupported(service)) {
+      throw new RuntimeError(`Service does not support crud operations:  ${this.serviceClass.name}`);
+    }
+    let total = 0;
+    const source = ModelBulkUtil.isSupported(service)
+      ? service.mutateBulk(cls, items)
+      : ModelBulkUtil.mutateBulkWithCrud(service, cls, items);
+    for await (const { insertedIds } of source) total += insertedIds.size;
+    return total;
+  }
+
+  async listAll<M extends ModelType>(cls: Class<M>): Promise<M[]> {
+    const svc = await this.service;
+    if (!ModelCrudUtil.isSupported(svc)) {
+      throw new RuntimeError(`List is not supported for this service: ${this.serviceClass.name}`);
+    }
+    const items: M[] = [];
+    for await (const item of svc.list(cls)) items.push(item);
+    return items;
   }
 }
 ```

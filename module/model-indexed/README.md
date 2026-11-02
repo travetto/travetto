@@ -235,7 +235,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
     idx: SortedIndex<T, K, S>,
     body: KeyedIndexBody<T, K>,
     options?: ModelListOptions
-  ): AsyncIterable<T[]>;
+  ): AsyncIterable<T>;
 
   /**
    * Suggest entities by ranged index as defined by fields of idx and a prefix
@@ -385,8 +385,8 @@ Use `listByIndex` when you want to iterate through matching items as an async st
 export async function listStreamExample(modelService: ModelIndexedSupport) {
   const items: User[] = [];
 
-  for await (const batch of modelService.listByIndex(User, recentUsers, {}, { limit: 25 })) {
-    items.push(...batch);
+  for await (const item of modelService.listByIndex(User, recentUsers, {}, { limit: 25 })) {
+    items.push(item);
   }
 
   return items;

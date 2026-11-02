@@ -58,7 +58,7 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
     "manager": "npm"
   },
   "build": {
-    "compilerUrl": "http://127.0.0.1:26803",
+    "compilerUrl": "http://localhost:44487",
     "outputFolder": ".trv/output",
     "toolFolder": ".trv/tool",
     "typesFolder": ".trv/types"
