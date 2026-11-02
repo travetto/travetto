@@ -4,11 +4,11 @@
 
 ## Refine Development Restart
 
-- Filter out files that should probably not trigger a full restart (maybe)
+- [x] Filter out files that should probably not trigger a full restart (maybe)
 
 ## VSCode Code Assist LLM
 
-- Coding assistant not triggering same fs events as expected
+- [x] Coding assistant not triggering same fs events as expected
 
 ## Model Transaction Support
 
