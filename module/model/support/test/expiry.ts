@@ -18,6 +18,8 @@ export class ExpiryUser {
   payload?: string;
 }
 
+const TEN_ITEMS = Array(10).fill(0);
+
 @Suite()
 export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport> {
   delayFactor: number = 1;
@@ -114,17 +116,9 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
     assert(total === 0);
 
     // Create
-    await Promise.all(
-      Array(10)
-        .fill(0)
-        .map((x, i) =>
-          service.upsert(
-            ExpiryUser,
-            ExpiryUser.from({
-              expiresAt: this.timeFromNow(300 + i * this.delayFactor)
-            })
-          )
-        )
+    await this.saveAll(
+      ExpiryUser,
+      TEN_ITEMS.map((_, i) => ExpiryUser.from({ expiresAt: this.timeFromNow(300 + i * this.delayFactor) }))
     );
 
     // Let expire

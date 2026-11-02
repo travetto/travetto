@@ -363,7 +363,10 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   async listByIndexAbortSignal() {
     const service = await this.service;
 
-    await Promise.all([20, 30, 40].map(age => service.create(User3, User3.from({ name: 'page', age, color: `${age}` }))));
+    await this.saveAll(
+      User3,
+      [20, 30, 40].map(age => User3.from({ name: 'page', age, color: `${age}` }))
+    );
 
     const controller = new AbortController();
     const found: User3[] = [];

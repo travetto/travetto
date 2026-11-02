@@ -11,46 +11,40 @@ export abstract class BaseModelSuite<T> {
   serviceClass: Class<T>;
   configClass: Class;
 
+  get service(): Promise<T> {
+    return DependencyRegistryIndex.getInstance(this.serviceClass);
+  }
+
   async getSize<U extends ModelType>(cls: Class<U>): Promise<number> {
     const svc = await this.service;
-    if (ModelCrudUtil.isSupported(svc)) {
-      let i = 0;
-      for await (const _ of svc.list(cls)) {
-        i += 1;
-      }
-      return i;
-    } else {
+    if (!ModelCrudUtil.isSupported(svc)) {
       throw new RuntimeError(`Size is not supported for this service: ${this.serviceClass.name}`);
     }
+    let i = 0;
+    for await (const _ of svc.list(cls)) i += 1;
+    return i;
   }
 
   async saveAll<M extends ModelType>(cls: Class<M>, items: M[]): Promise<number> {
-    const svc = await this.service;
-    if (ModelBulkUtil.isSupported(svc)) {
-      const result = await ModelBulkUtil.collect(svc.mutateBulk(cls, items));
-      return result.counts.insert + result.counts.upsert;
-    } else if (ModelCrudUtil.isSupported(svc)) {
-      const result = await ModelBulkUtil.collect(ModelBulkUtil.mutateBulkWithCrud(svc, cls, items));
-      return result.counts.insert + result.counts.upsert;
-    } else {
-      throw new Error('Service does not support crud operations');
+    const service = await this.service;
+    if (!ModelBulkUtil.isSupported(service) && !ModelCrudUtil.isSupported(service)) {
+      throw new RuntimeError(`Service does not support crud operations:  ${this.serviceClass.name}`);
     }
+    let total = 0;
+    const source = ModelBulkUtil.isSupported(service)
+      ? service.mutateBulk(cls, items)
+      : ModelBulkUtil.mutateBulkWithCrud(service, cls, items);
+    for await (const { insertedIds } of source) total += insertedIds.size;
+    return total;
   }
 
   async listAll<M extends ModelType>(cls: Class<M>): Promise<M[]> {
-    const items: M[] = [];
     const svc = await this.service;
-    if (ModelCrudUtil.isSupported(svc)) {
-      for await (const item of svc.list(cls)) {
-        items.push(item);
-      }
-    } else {
+    if (!ModelCrudUtil.isSupported(svc)) {
       throw new RuntimeError(`List is not supported for this service: ${this.serviceClass.name}`);
     }
+    const items: M[] = [];
+    for await (const item of svc.list(cls)) items.push(item);
     return items;
-  }
-
-  get service(): Promise<T> {
-    return DependencyRegistryIndex.getInstance(this.serviceClass);
   }
 }

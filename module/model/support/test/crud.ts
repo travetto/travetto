@@ -107,24 +107,18 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   @Test('save it')
   async save() {
     const service = await this.service;
-
-    const people = await Promise.all(
-      [1, 2, 3, 8].map(x =>
-        service.upsert(
-          Person,
-          Person.from({
-            name: 'Bob',
-            age: 20 + x,
-            gender: 'm',
-            address: {
-              street1: 'a',
-              ...(x === 1 ? { street2: 'b' } : {})
-            }
-          })
-        )
-      )
+    const people = [1, 2, 3, 8].map(x =>
+      Person.from({
+        name: 'Bob',
+        age: 20 + x,
+        gender: 'm',
+        address: {
+          street1: 'a',
+          ...(x === 1 ? { street2: 'b' } : {})
+        }
+      })
     );
-
+    await this.saveAll(Person, people);
     const single = await service.get(Person, people[2].id);
     assert(single !== undefined);
     assert(single.age === 23);
@@ -305,24 +299,18 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
   @Test('verify list')
   async list() {
-    const service = await this.service;
-
-    const people = await Promise.all(
-      [1, 2, 3].map(x =>
-        service.upsert(
-          Person,
-          Person.from({
-            name: 'Bob',
-            age: 20 + x,
-            gender: 'm',
-            address: {
-              street1: 'a',
-              ...(x === 1 ? { street2: 'b' } : {})
-            }
-          })
-        )
-      )
+    const people = [1, 2, 3].map(x =>
+      Person.from({
+        name: 'Bob',
+        age: 20 + x,
+        gender: 'm',
+        address: {
+          street1: 'a',
+          ...(x === 1 ? { street2: 'b' } : {})
+        }
+      })
     );
+    await this.saveAll(Person, people);
 
     const found = (await this.listAll(Person)).toSorted((a, b) => a.age - b.age);
 
@@ -335,20 +323,18 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   async listAbortSignal() {
     const service = await this.service;
 
-    await Promise.all(
+    await this.saveAll(
+      Person,
       [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(x =>
-        service.upsert(
-          Person,
-          Person.from({
-            name: 'Bob',
-            age: 20 + x,
-            gender: 'm',
-            address: {
-              street1: 'a',
-              ...(x === 1 ? { street2: 'b' } : {})
-            }
-          })
-        )
+        Person.from({
+          name: 'Bob',
+          age: 20 + x,
+          gender: 'm',
+          address: {
+            street1: 'a',
+            ...(x === 1 ? { street2: 'b' } : {})
+          }
+        })
       )
     );
 
