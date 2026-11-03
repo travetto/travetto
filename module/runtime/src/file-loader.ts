@@ -1,7 +1,6 @@
 import { createReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { createInterface } from 'node:readline/promises';
 
 import { type BinaryArray, type BinaryStream, BinaryUtil } from './binary.ts';
 import { RuntimeError } from './error.ts';
