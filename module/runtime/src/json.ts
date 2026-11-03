@@ -168,37 +168,21 @@ export class JSONUtil {
     return JSONUtil.clone<T, R>(input, { reviver: JSONUtil.TRANSMIT_REVIVER });
   }
 
-  /**
-   * Read from new line delimited JSON stream
-   */
-  static async *fromUTF8Lines<T extends object = object>(input: Iterable<string> | AsyncIterable<string>): AsyncIterable<T> {
-    for await (const line of input) {
+  /** Simple CSV parser */
+  static csvParser<T>(options?: { separator?: string; fieldNames?: string[] }): (line: string) => T | undefined {
+    let fieldNames: string[] = options?.fieldNames ?? [];
+    let separator = options?.separator ?? '';
+    return line => {
       if (!line.trim()) {
-        continue;
-      }
-      yield this.fromUTF8<T>(line);
-    }
-  }
-
-  /**
-   * Read from CSV input stream
-   */
-  static async *fromCSV<T extends object = Record<string, string>>(
-    input: Iterable<string> | AsyncIterable<string>,
-    separator = ''
-  ): AsyncIterable<T> {
-    let fieldNames: string[] = [];
-    for await (const line of input) {
-      if (!line.trim()) {
-        continue;
+        return;
       }
       separator ||= line.split('\t').length > line.split(',').length ? '\t' : ',';
       const items = CodecUtil.parseLine(line, separator);
       if (fieldNames.length === 0) {
         fieldNames = items;
       } else {
-        yield Object.fromEntries(fieldNames.map((key, i) => [key, items[i]])) as T;
+        return Object.fromEntries(fieldNames.map((key, i) => [key, items[i]])) as T;
       }
-    }
+    };
   }
 }

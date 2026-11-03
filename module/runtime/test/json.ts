@@ -3,6 +3,8 @@ import assert from 'node:assert';
 import { CodecUtil, JSONUtil } from '@travetto/runtime';
 import { Suite, Test, TestFixtures } from '@travetto/test';
 
+const addNewline = (input: string) => `${input}\n`;
+
 @Suite()
 export class JSONUtilSuite {
   fixture = new TestFixtures();
@@ -107,10 +109,10 @@ export class JSONUtilSuite {
 
   @Test()
   async verifyFromCSV() {
-    const records: { name: string; age: string; city: string }[] = [];
-    for await (const row of JSONUtil.fromCSV<(typeof records)[0]>(this.fixture.readLines('sample.csv'))) {
-      records.push(row);
-    }
+    const records = await CodecUtil.readLines(
+      this.fixture.readBinaryStream('sample.csv'),
+      JSONUtil.csvParser<{ name: string; age: string; city: string }>()
+    );
 
     assert.strictEqual(records.length, 3);
     assert.deepStrictEqual(records[0], { name: 'Alice', age: '30', city: 'Seattle' });
@@ -120,10 +122,10 @@ export class JSONUtilSuite {
 
   @Test()
   async verifyFromTSV() {
-    const records: { id: string; title: string; score: string }[] = [];
-    for await (const row of JSONUtil.fromCSV<(typeof records)[0]>(this.fixture.readLines('sample.tsv'))) {
-      records.push(row);
-    }
+    const records = await CodecUtil.readLines(
+      this.fixture.readBinaryStream('sample.tsv'),
+      JSONUtil.csvParser<{ id: string; title: string; score: string }>()
+    );
 
     assert.strictEqual(records.length, 3);
     assert.deepStrictEqual(records[0], { id: '1', title: 'Alpha', score: '95' });
@@ -133,12 +135,10 @@ export class JSONUtilSuite {
 
   @Test()
   async verifyFromCSVSynchronousWithBlankLines() {
-    const lines = ['', 'name,age,city', '   ', 'Alice,30,Seattle', '', 'Bob,25,"New York, NY"', '   \t  ', 'Charlie,40,Chicago', ''];
-
-    const records: { name: string; age: string; city: string }[] = [];
-    for await (const row of JSONUtil.fromCSV<{ name: string; age: string; city: string }>(lines)) {
-      records.push(row);
-    }
+    const lines = ['', 'name,age,city', '   ', 'Alice,30,Seattle', '', 'Bob,25,"New York, NY"', '   \t  ', 'Charlie,40,Chicago', ''].map(
+      addNewline
+    );
+    const records = await CodecUtil.readLines(lines, JSONUtil.csvParser<{ name: string; age: string; city: string }>());
 
     assert.strictEqual(records.length, 3);
     assert.deepStrictEqual(records[0], { name: 'Alice', age: '30', city: 'Seattle' });
@@ -146,7 +146,7 @@ export class JSONUtilSuite {
     assert.deepStrictEqual(records[2], { name: 'Charlie', age: '40', city: 'Chicago' });
 
     const defaultRecords: Record<string, string>[] = [];
-    for await (const row of JSONUtil.fromCSV(lines)) {
+    for await (const row of CodecUtil.streamLines(lines, JSONUtil.csvParser<Record<string, string>>())) {
       defaultRecords.push(row);
     }
     assert.strictEqual(defaultRecords.length, 3);
@@ -155,11 +155,10 @@ export class JSONUtilSuite {
 
   @Test()
   async verifyFromUTF8LinesWithAsyncIterable() {
-    type SampleRecord = { id: number; name: string; active?: boolean; tags?: string[] };
-    const records: SampleRecord[] = [];
-    for await (const record of JSONUtil.fromUTF8Lines<SampleRecord>(this.fixture.readLines('sample.ndjson'))) {
-      records.push(record);
-    }
+    const records = await CodecUtil.readLines(
+      this.fixture.readBinaryStream('sample.ndjson'),
+      JSONUtil.fromUTF8<{ id: number; name: string; active?: boolean; tags?: string[] }>
+    );
 
     assert.strictEqual(records.length, 3);
     assert.deepStrictEqual(records[0], { id: 1, name: 'first', active: true });
@@ -176,23 +175,16 @@ export class JSONUtilSuite {
       '{"identifier": 200, "message": "world"}',
       '\t\r\n',
       '{"identifier": 300, "message": "test"}'
-    ];
+    ].map(addNewline);
 
-    type MessageRecord = { identifier: number; message: string };
-    const records: MessageRecord[] = [];
-    for await (const record of JSONUtil.fromUTF8Lines<MessageRecord>(lines)) {
-      records.push(record);
-    }
+    const records = await CodecUtil.readLines(lines, JSONUtil.fromUTF8<{ identifier: number; message: string }>);
 
     assert.strictEqual(records.length, 3);
     assert.deepStrictEqual(records[0], { identifier: 100, message: 'hello' });
     assert.deepStrictEqual(records[1], { identifier: 200, message: 'world' });
     assert.deepStrictEqual(records[2], { identifier: 300, message: 'test' });
 
-    const defaultRecords: object[] = [];
-    for await (const record of JSONUtil.fromUTF8Lines(lines)) {
-      defaultRecords.push(record);
-    }
+    const defaultRecords = await CodecUtil.readLines(lines, JSONUtil.fromUTF8<{}>);
     assert.strictEqual(defaultRecords.length, 3);
     assert.deepStrictEqual(defaultRecords[0], { identifier: 100, message: 'hello' });
   }
@@ -200,25 +192,20 @@ export class JSONUtilSuite {
   @Test()
   async verifyFromUTF8LinesEmpty() {
     const emptyLines: string[] = ['', '   ', '\t', '\n'];
-    const records: object[] = [];
-    for await (const record of JSONUtil.fromUTF8Lines(emptyLines)) {
-      records.push(record);
-    }
+    const records = await CodecUtil.readLines(emptyLines, JSONUtil.fromUTF8);
     assert.strictEqual(records.length, 0);
 
     const completelyEmpty: string[] = [];
-    for await (const record of JSONUtil.fromUTF8Lines(completelyEmpty)) {
-      records.push(record);
-    }
-    assert.strictEqual(records.length, 0);
+    const records2 = await CodecUtil.readLines(completelyEmpty, JSONUtil.fromUTF8);
+    assert.strictEqual(records2.length, 0);
   }
 
   @Test()
   async verifyFromUTF8LinesWithInvalidJSON() {
-    const lines = ['{"valid": true}', '{"invalid":'];
+    const lines = ['{"valid": true}', '{"invalid":'].map(addNewline);
     const records: object[] = [];
     await assert.rejects(async () => {
-      for await (const record of JSONUtil.fromUTF8Lines(lines)) {
+      for await (const record of CodecUtil.streamLines(lines, JSONUtil.fromUTF8<object>)) {
         records.push(record);
       }
     }, SyntaxError);

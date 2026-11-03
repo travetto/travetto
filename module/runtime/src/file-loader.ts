@@ -72,21 +72,4 @@ export class FileLoader {
     const buffer = BinaryUtil.binaryArrayToBuffer(await this.readBinaryArray(relativePath));
     return new File([buffer], path.basename(relativePath));
   }
-
-  /**
-   * Read a file as a stream of lines
-   * @param relativePath  The path to read
-   */
-  async *readLines(relativePath: string): AsyncIterable<string> {
-    const location = await this.resolve(relativePath);
-    const handle = await fs.open(location, 'r');
-    try {
-      const stream = handle.createReadStream();
-      for await (const line of createInterface(stream)) {
-        yield line;
-      }
-    } finally {
-      await handle.close();
-    }
-  }
 }

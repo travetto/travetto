@@ -187,7 +187,7 @@ ${{ identifier: Runtime.getInstallCommand(module) }}
     for (const { command: cmd, schema } of resolved) {
       try {
         if (schema && !schema.private) {
-          const description = CodecUtil.readFirstLine(schema.description, '');
+          const description = CodecUtil.readFirstLine(schema.description);
           rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: description }}`);
         }
       } catch (error) {

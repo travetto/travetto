@@ -1,14 +1,22 @@
 import { createInterface } from 'node:readline/promises';
+import { Readable } from 'node:stream';
 
 import { type BinaryArray, type BinaryType, BinaryUtil } from './binary.ts';
 import { RuntimeError } from './error.ts';
 import { type Any, castTo } from './types.ts';
 
 type TextInput = string | BinaryArray;
+type LinesInput = BinaryType | string | string[] | Promise<string | string[] | BinaryType>;
+type LinesHandler<T> = (input: string) => T | undefined | Promise<T | undefined>;
+type LinesOptions = {
+  signal?: AbortSignal;
+  onError?: (error?: unknown) => unknown;
+};
 
 const UTF8_DECODER = new TextDecoder('utf8');
 const UTF8_ENCODER = new TextEncoder();
 const DOUBLE_QUOTE = '"'.charCodeAt(0);
+const isStringArray = (input: unknown): input is string[] => Array.isArray(input) && typeof input[0] === 'string';
 
 /**
  * Utilities for encoding and decoding common formats
@@ -82,16 +90,6 @@ export class CodecUtil {
     }
   }
 
-  /** Consume lines  */
-  static async readLines(stream: BinaryType, handler: (input: string) => unknown | Promise<unknown>): Promise<void> {
-    for await (const item of createInterface(BinaryUtil.toReadable(stream))) {
-      const result = await handler(item);
-      if (result === false) {
-        break;
-      }
-    }
-  }
-
   /** Read chunk as utf8 if not a binary array */
   static readUtf8Chunk(chunk: Any): BinaryArray {
     return BinaryUtil.isBinaryArray(chunk) ? chunk : this.fromUTF8String(typeof chunk === 'string' ? chunk : `${chunk}`);
@@ -107,24 +105,13 @@ export class CodecUtil {
       : Buffer.from(typeof chunk === 'string' ? chunk : `${chunk}`, castTo(encoding ?? 'utf8'));
   }
 
-  static readFirstLine(data: string): string;
-  static readFirstLine(data: string | undefined, defaultValue: string): string;
-  static readFirstLine(data: string | undefined, defaultValue: string = ''): string {
-    if (typeof data === 'undefined') {
-      return defaultValue;
-    } else {
-      const end = data.indexOf('\n');
-      if (end === -1) {
-        return data.trim();
-      } else {
-        return data.substring(0, end).trim();
-      }
-    }
+  /** Read the first line of a string */
+  static readFirstLine(data: string | undefined, defaultValue = ''): string {
+    const end = data?.indexOf('\n');
+    return data?.substring(0, end && end < 0 ? undefined : end)?.trim() ?? defaultValue;
   }
 
-  /**
-   * Parse a single delimited line respecting RFC 4180 quotes
-   */
+  /** Parse a single delimited line respecting RFC 4180 quotes */
   static parseLine(line: string, delimiter = ','): string[] {
     const values: string[] = [];
     const current: number[] = [];
@@ -151,5 +138,37 @@ export class CodecUtil {
     }
     values.push(String.fromCharCode(...current).trim());
     return values;
+  }
+
+  /** Stream lines  */
+  static async *streamLines<T = string>(stream: LinesInput, handler?: LinesHandler<T>, options?: LinesOptions): AsyncIterable<T> {
+    const source = await stream;
+    const input = typeof source === 'string' || isStringArray(source) ? Readable.from(source) : BinaryUtil.toReadable(source);
+
+    for await (const item of createInterface({ input, signal: options?.signal })) {
+      try {
+        const result = handler ? await handler(item) : item;
+        if (result === undefined) continue;
+        yield result as T;
+      } catch (error) {
+        if (options?.onError) {
+          const transformed = await options.onError(error);
+          if (transformed) {
+            throw transformed;
+          }
+        } else {
+          throw error;
+        }
+      }
+    }
+  }
+
+  /** Read lines  */
+  static async readLines<T = string>(stream: LinesInput, handler?: LinesHandler<T>, options?: LinesOptions): Promise<T[]> {
+    const out: T[] = [];
+    for await (const item of this.streamLines(stream, handler, options)) {
+      out.push(item);
+    }
+    return out;
   }
 }
