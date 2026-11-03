@@ -4,6 +4,8 @@ import { isUint8Array } from 'node:util/types';
 import { type BinaryStream, CodecUtil, castTo, RuntimeError } from '@travetto/runtime';
 import { Suite, Test, TestFixtures } from '@travetto/test';
 
+const addNewline = (input: string) => `${input}\n`;
+
 @Suite()
 export class CodecUtilTest {
   fixture = new TestFixtures();
@@ -138,5 +140,51 @@ export class CodecUtilTest {
     assert.deepStrictEqual(CodecUtil.parseLine('"He said ""hello""",world'), ['He said "hello"', 'world']);
     assert.deepStrictEqual(CodecUtil.parseLine('a,"",c'), ['a', '', 'c']);
     assert.deepStrictEqual(CodecUtil.parseLine('"col\t1"\tcol2', '\t'), ['col\t1', 'col2']);
+  }
+
+  @Test()
+  async verifyFromCSV() {
+    const records = await CodecUtil.readLines(
+      this.fixture.readBinaryStream('sample.csv'),
+      CodecUtil.csvParser<{ name: string; age: string; city: string }>()
+    );
+
+    assert.strictEqual(records.length, 3);
+    assert.deepStrictEqual(records[0], { name: 'Alice', age: '30', city: 'Seattle' });
+    assert.deepStrictEqual(records[1], { name: 'Bob', age: '25', city: 'New York, NY' });
+    assert.deepStrictEqual(records[2], { name: 'Charlie "Chuck"', age: '40', city: 'Chicago' });
+  }
+
+  @Test()
+  async verifyFromTSV() {
+    const records = await CodecUtil.readLines(
+      this.fixture.readBinaryStream('sample.tsv'),
+      CodecUtil.csvParser<{ id: string; title: string; score: string }>()
+    );
+
+    assert.strictEqual(records.length, 3);
+    assert.deepStrictEqual(records[0], { id: '1', title: 'Alpha', score: '95' });
+    assert.deepStrictEqual(records[1], { id: '2', title: 'Beta', score: '88' });
+    assert.deepStrictEqual(records[2], { id: '3', title: 'Gamma', score: '100' });
+  }
+
+  @Test()
+  async verifyFromCSVSynchronousWithBlankLines() {
+    const lines = ['', 'name,age,city', '   ', 'Alice,30,Seattle', '', 'Bob,25,"New York, NY"', '   \t  ', 'Charlie,40,Chicago', ''].map(
+      addNewline
+    );
+    const records = await CodecUtil.readLines(lines, CodecUtil.csvParser<{ name: string; age: string; city: string }>());
+
+    assert.strictEqual(records.length, 3);
+    assert.deepStrictEqual(records[0], { name: 'Alice', age: '30', city: 'Seattle' });
+    assert.deepStrictEqual(records[1], { name: 'Bob', age: '25', city: 'New York, NY' });
+    assert.deepStrictEqual(records[2], { name: 'Charlie', age: '40', city: 'Chicago' });
+
+    const defaultRecords: Record<string, string>[] = [];
+    for await (const row of CodecUtil.streamLines(lines, CodecUtil.csvParser<Record<string, string>>())) {
+      defaultRecords.push(row);
+    }
+    assert.strictEqual(defaultRecords.length, 3);
+    assert.deepStrictEqual(defaultRecords[0], { name: 'Alice', age: '30', city: 'Seattle' });
   }
 }

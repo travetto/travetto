@@ -167,22 +167,4 @@ export class JSONUtil {
   static cloneFromTransmit<T, R = T>(input: T): R {
     return JSONUtil.clone<T, R>(input, { reviver: JSONUtil.TRANSMIT_REVIVER });
   }
-
-  /** Simple CSV parser */
-  static csvParser<T>(options?: { separator?: string; fieldNames?: string[] }): (line: string) => T | undefined {
-    let fieldNames: string[] = options?.fieldNames ?? [];
-    let separator = options?.separator ?? '';
-    return line => {
-      if (!line.trim()) {
-        return;
-      }
-      separator ||= line.split('\t').length > line.split(',').length ? '\t' : ',';
-      const items = CodecUtil.parseLine(line, separator);
-      if (fieldNames.length === 0) {
-        fieldNames = items;
-      } else {
-        return Object.fromEntries(fieldNames.map((key, i) => [key, items[i]])) as T;
-      }
-    };
-  }
 }

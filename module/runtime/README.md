@@ -258,7 +258,7 @@ The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/s
 The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L12) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L134)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Encoding and Decoding Utilities
-The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16) class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
+The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L24) class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
    *  Hex
    *  Base64
    *  UTF8
