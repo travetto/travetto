@@ -2,7 +2,7 @@ import type { ChildProcess } from 'node:child_process';
 
 import { CliModuleUtil } from '@travetto/cli';
 import type { IndexedModule } from '@travetto/manifest';
-import { AsyncQueue, CodecUtil, Env, ExecUtil, type ExecutionResult, Runtime, RuntimeIndex, Util } from '@travetto/runtime';
+import { AsyncQueue, CodecUtil, CustomAsyncIterable, Env, ExecUtil, type ExecutionResult, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { type ProgressEvent, StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 
@@ -185,14 +185,13 @@ export class RepoExecUtil {
         stdoutTerm.streamList(activeItems);
       }
       await stdoutTerm.streamToBottom(
-        Util.mapAsyncIterable(
-          Util.mapAsyncIterable(work, (event): ProgressEvent<string> => {
+        new CustomAsyncIterable(work)
+          .map((event): ProgressEvent<string> => {
             const message =
               config.progressMessage?.(modulesToRun[event.progress.completed]) ?? 'Completed %completed/%total (%failed failed)';
             return { ...event.progress, value: message };
-          }),
-          TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true })
-        )
+          })
+          .map(TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true }))
       );
 
       if (stdoutTerm.interactive && config.showProgressList) {
