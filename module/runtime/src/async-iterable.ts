@@ -20,11 +20,11 @@ export class CustomAsyncIterable<T> implements AsyncIterable<T> {
   /**
    * Transforms elements using the provided operation. Returning undefined skips the item.
    */
-  map<U>(operation: (item: T) => U | undefined | Promise<U | undefined>): CustomAsyncIterable<U> {
+  map<U>(transform: (item: T) => U | undefined | Promise<U | undefined>): CustomAsyncIterable<U> {
     const existing = this.#source;
     this.#source = async function* () {
       for await (const item of existing()) {
-        const result = await operation(item);
+        const result = await transform(item);
         if (result !== undefined) {
           yield result;
         }
@@ -36,11 +36,11 @@ export class CustomAsyncIterable<T> implements AsyncIterable<T> {
   /**
    * Filters elements using a predicate function.
    */
-  filter(operation: (item: T) => boolean | Promise<boolean>): CustomAsyncIterable<T> {
+  filter(predicate: (item: T) => boolean | Promise<boolean>): CustomAsyncIterable<T> {
     const existing = this.#source;
     this.#source = async function* () {
       for await (const item of existing()) {
-        if (await operation(item)) {
+        if (await predicate(item)) {
           yield item;
         }
       }
@@ -57,5 +57,14 @@ export class CustomAsyncIterable<T> implements AsyncIterable<T> {
       output.push(item);
     }
     return output;
+  }
+
+  /**
+   * Visits each item in the array
+   */
+  async forEach(operation: (item: T) => unknown): Promise<void> {
+    for await (const item of this) {
+      await operation(item);
+    }
   }
 }
