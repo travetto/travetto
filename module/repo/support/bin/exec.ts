@@ -6,8 +6,8 @@ import { AsyncQueue, CodecUtil, Env, ExecUtil, type ExecutionResult, Runtime, Ru
 import { type ProgressEvent, StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 
-const COLORS = [
-  ...([
+const COLORS = (
+  [
     '#8787ff',
     '#87afff',
     '#87d7ff',
@@ -58,8 +58,8 @@ const COLORS = [
     '#dadada',
     '#e4e4e4',
     '#eeeeee'
-  ] as const)
-]
+  ] as const
+)
   .toSorted(() => (Math.random() < 0.5 ? -1 : 1))
   .map(color => StyleUtil.getStyle(color));
 
@@ -145,10 +145,14 @@ export class RepoExecUtil {
           processes.set(module, subProcess);
 
           if (config.showStdout && subProcess.stdout) {
-            CodecUtil.readLines(subProcess.stdout, line => stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
+            CodecUtil.streamLines(subProcess.stdout)
+              .map(line => stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit())
+              .toArray();
           }
           if (config.showStderr && subProcess.stderr) {
-            CodecUtil.readLines(subProcess.stderr, line => stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
+            CodecUtil.streamLines(subProcess.stderr)
+              .map(line => stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit())
+              .toArray();
           }
 
           const result = await ExecUtil.getResult(subProcess, { catch: true });

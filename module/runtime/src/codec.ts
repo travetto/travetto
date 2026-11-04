@@ -1,17 +1,14 @@
 import { createInterface } from 'node:readline/promises';
 import { Readable } from 'node:stream';
 
+import { CustomAsyncIterable } from './async-iterable.ts';
 import { type BinaryArray, type BinaryType, BinaryUtil } from './binary.ts';
 import { RuntimeError } from './error.ts';
 import { type Any, castTo } from './types.ts';
 
 type TextInput = string | BinaryArray;
 type LinesInput = BinaryType | string | string[] | Promise<string | string[] | BinaryType>;
-type LinesHandler<T> = (input: string) => T | undefined | Promise<T | undefined>;
-type LinesOptions = {
-  signal?: AbortSignal;
-  onError?: (error?: unknown) => unknown;
-};
+type LinesOptions = { signal?: AbortSignal };
 
 const UTF8_DECODER = new TextDecoder('utf8');
 const UTF8_ENCODER = new TextEncoder();
@@ -158,35 +155,14 @@ export class CodecUtil {
     };
   }
 
-  /** Stream lines  */
-  static async *streamLines<T = string>(stream: LinesInput, handler?: LinesHandler<T>, options?: LinesOptions): AsyncIterable<T> {
-    const source = await stream;
-    const input = typeof source === 'string' || isStringArray(source) ? Readable.from(source) : BinaryUtil.toReadable(source);
-
-    for await (const item of createInterface({ input, signal: options?.signal })) {
-      try {
-        const result = handler ? await handler(item) : item;
-        if (result === undefined) continue;
-        yield result as T;
-      } catch (error) {
-        if (options?.onError) {
-          const transformed = await options.onError(error);
-          if (transformed) {
-            throw transformed;
-          }
-        } else {
-          throw error;
-        }
-      }
-    }
-  }
-
-  /** Read lines  */
-  static async readLines<T = string>(stream: LinesInput, handler?: LinesHandler<T>, options?: LinesOptions): Promise<T[]> {
-    const out: T[] = [];
-    for await (const item of this.streamLines(stream, handler, options)) {
-      out.push(item);
-    }
-    return out;
+  /**
+   * Stream lines from a binary stream, string, or string array as a {@link CustomAsyncIterable}.
+   */
+  static streamLines(stream: LinesInput, options?: LinesOptions): CustomAsyncIterable<string> {
+    return new CustomAsyncIterable<string>(async function* () {
+      const source = await stream;
+      const input = typeof source === 'string' || isStringArray(source) ? Readable.from(source) : BinaryUtil.toReadable(source);
+      yield* createInterface({ input, signal: options?.signal });
+    });
   }
 }

@@ -258,13 +258,18 @@ The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/s
 The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L134)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Encoding and Decoding Utilities
-The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L24) class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
+The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L21) class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
    *  Hex
    *  Base64
    *  UTF8
    *  UTT8 Encoded JSON
    *  Base64 Encoded JSON
    *  New Line Delimited UTF8
+
+The `streamLines(stream, options?)` method returns a [CustomAsyncIterable](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L6) for processing line-oriented data streams asynchronously. The [CustomAsyncIterable](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L6) class offers fluent stream manipulation capabilities including:
+   *  `map(operation)` - Transforms stream items, skipping items where the mapping function evaluates to `undefined`.
+   *  `filter(predicate)` - Filters stream items based on a synchronous or asynchronous predicate function.
+   *  `toArray()` - Asynchronously collects all stream items into an array.
 
 ## Common Utilities
 Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L16) includes:
