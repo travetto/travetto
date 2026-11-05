@@ -266,13 +266,13 @@ The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/sr
    *  Base64 Encoded JSON
    *  New Line Delimited UTF8
 
-The `streamLines(stream, options?)` method returns a [CustomAsyncIterable](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L6) for processing line-oriented data streams asynchronously. The [CustomAsyncIterable](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L6) class offers fluent stream manipulation capabilities including:
+The `streamLines(stream, options?)` method returns a [CustomAsyncIterable](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L4) for processing line-oriented data streams asynchronously. The [CustomAsyncIterable](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L4) class offers fluent stream manipulation capabilities including:
    *  `map(operation)` - Transforms stream items, skipping items where the mapping function evaluates to `undefined`.
    *  `filter(predicate)` - Filters stream items based on a synchronous or asynchronous predicate function.
    *  `toArray()` - Asynchronously collects all stream items into an array.
 
 ## Common Utilities
-Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L13) includes:
+Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L15) includes:
    *  `uuid(len: number)` generates a simple uuid for use within the application.
    *  `allowDenyMatcher(rules[])` builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters. Negative rules are prefixed by '!'.
    *  `hash(text: string, size?: number)` produces a full sha512 hash.

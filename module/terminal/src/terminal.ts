@@ -61,12 +61,16 @@ export class Terminal {
   /**
    * Stream lines if interactive, with waiting indicator, otherwise print out
    */
-  async streamLines(source: AsyncIterable<string | undefined>): Promise<void> {
+  async streamLines(source: AsyncIterable<string>): Promise<void> {
     if (!this.#interactive) {
-      await new CustomAsyncIterable(source).filter(Boolean).forEach(line => this.#writer.writeLine(`> ${line}`).commit());
+      await Util.asyncStream(source)
+        .filter(Boolean)
+        .forEach(line => this.#writer.writeLine(`> ${line}`).commit());
     } else {
       await this.streamToBottom(
-        new CustomAsyncIterable(source).map(line => `%WAIT% ${line}`),
+        Util.asyncStream(source)
+          .filter(Boolean)
+          .map(line => `%WAIT% ${line}`),
         { outputStreamToMain: true }
       );
     }

@@ -2,8 +2,8 @@ import type { ChildProcess } from 'node:child_process';
 
 import { CliModuleUtil } from '@travetto/cli';
 import type { IndexedModule } from '@travetto/manifest';
-import { AsyncQueue, CodecUtil, CustomAsyncIterable, Env, ExecUtil, type ExecutionResult, Runtime, RuntimeIndex } from '@travetto/runtime';
-import { type ProgressEvent, StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
+import { AsyncQueue, CodecUtil, Env, ExecUtil, type ExecutionResult, Runtime, RuntimeIndex, Util } from '@travetto/runtime';
+import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 
 const COLORS = (
@@ -145,14 +145,10 @@ export class RepoExecUtil {
           processes.set(module, subProcess);
 
           if (config.showStdout && subProcess.stdout) {
-            CodecUtil.streamLines(subProcess.stdout)
-              .map(line => stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit())
-              .toArray();
+            CodecUtil.streamLines(subProcess.stdout).forEach(line => stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
           }
           if (config.showStderr && subProcess.stderr) {
-            CodecUtil.streamLines(subProcess.stderr)
-              .map(line => stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit())
-              .toArray();
+            CodecUtil.streamLines(subProcess.stderr).forEach(line => stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
           }
 
           const result = await ExecUtil.getResult(subProcess, { catch: true });
@@ -185,8 +181,8 @@ export class RepoExecUtil {
         stdoutTerm.streamList(activeItems);
       }
       await stdoutTerm.streamToBottom(
-        new CustomAsyncIterable(work)
-          .map((event): ProgressEvent<string> => {
+        Util.asyncStream(work)
+          .map(event => {
             const message =
               config.progressMessage?.(modulesToRun[event.progress.completed]) ?? 'Completed %completed/%total (%failed failed)';
             return { ...event.progress, value: message };

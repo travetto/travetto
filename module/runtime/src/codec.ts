@@ -138,20 +138,20 @@ export class CodecUtil {
   }
 
   /** Simple CSV parser */
-  static csvParser<T>(options?: { separator?: string; fieldNames?: string[] }): (line: string) => T | undefined {
+  static csvParser<T>(options?: { separator?: string; fieldNames?: string[] }): (line: string) => T[] {
     let fieldNames: string[] = options?.fieldNames ?? [];
     let separator = options?.separator ?? '';
     return line => {
-      if (!line.trim()) {
-        return;
+      if (line.trim()) {
+        separator ||= line.split('\t').length > line.split(',').length ? '\t' : ',';
+        const items = CodecUtil.parseLine(line, separator);
+        if (fieldNames.length === 0) {
+          fieldNames = items;
+        } else {
+          return [Object.fromEntries(fieldNames.map((key, i) => [key, items[i]])) as T];
+        }
       }
-      separator ||= line.split('\t').length > line.split(',').length ? '\t' : ',';
-      const items = CodecUtil.parseLine(line, separator);
-      if (fieldNames.length === 0) {
-        fieldNames = items;
-      } else {
-        return Object.fromEntries(fieldNames.map((key, i) => [key, items[i]])) as T;
-      }
+      return [];
     };
   }
 
@@ -163,6 +163,6 @@ export class CodecUtil {
       const source = await stream;
       const input = typeof source === 'string' || isStringArray(source) ? Readable.from(source) : BinaryUtil.toReadable(source);
       yield* createInterface({ input, signal: options?.signal });
-    });
+    }).filter(line => !!line.trim());
   }
 }

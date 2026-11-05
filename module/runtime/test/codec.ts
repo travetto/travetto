@@ -147,7 +147,7 @@ export class CodecUtilTest {
   @Test()
   async verifyFromCSV() {
     const records = await CodecUtil.streamLines(this.fixture.readBinaryStream('sample.csv'))
-      .map(CodecUtil.csvParser<{ name: string; age: string; city: string }>())
+      .flatMap(CodecUtil.csvParser<{ name: string; age: string; city: string }>())
       .toArray();
 
     assert.strictEqual(records.length, 3);
@@ -159,7 +159,7 @@ export class CodecUtilTest {
   @Test()
   async verifyFromTSV() {
     const records = await CodecUtil.streamLines(this.fixture.readBinaryStream('sample.tsv'))
-      .map(CodecUtil.csvParser<{ id: string; title: string; score: string }>())
+      .flatMap(CodecUtil.csvParser<{ id: string; title: string; score: string }>())
       .toArray();
 
     assert.strictEqual(records.length, 3);
@@ -173,14 +173,16 @@ export class CodecUtilTest {
     const lines = ['', 'name,age,city', '   ', 'Alice,30,Seattle', '', 'Bob,25,"New York, NY"', '   \t  ', 'Charlie,40,Chicago', ''].map(
       addNewline
     );
-    const records = await CodecUtil.streamLines(lines).map(CodecUtil.csvParser<{ name: string; age: string; city: string }>()).toArray();
+    const records = await CodecUtil.streamLines(lines)
+      .flatMap(CodecUtil.csvParser<{ name: string; age: string; city: string }>())
+      .toArray();
 
     assert.strictEqual(records.length, 3);
     assert.deepStrictEqual(records[0], { name: 'Alice', age: '30', city: 'Seattle' });
     assert.deepStrictEqual(records[1], { name: 'Bob', age: '25', city: 'New York, NY' });
     assert.deepStrictEqual(records[2], { name: 'Charlie', age: '40', city: 'Chicago' });
 
-    const defaultRecords = await CodecUtil.streamLines(lines).map(CodecUtil.csvParser<Record<string, string>>()).toArray();
+    const defaultRecords = await CodecUtil.streamLines(lines).flatMap(CodecUtil.csvParser<Record<string, string>>()).toArray();
 
     assert.strictEqual(defaultRecords.length, 3);
     assert.deepStrictEqual(defaultRecords[0], { name: 'Alice', age: '30', city: 'Seattle' });

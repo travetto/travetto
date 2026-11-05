@@ -88,15 +88,11 @@ export class CompilerWatchFeature extends BaseFeature {
     });
 
     if (debug && subProcess.stderr) {
-      CodecUtil.streamLines(subProcess.stderr)
-        .map(line => this.#log.error(`> ${line.trimEnd().replace(SUB_LOG_REGEX, '')}`))
-        .toArray();
+      CodecUtil.streamLines(subProcess.stderr).forEach(line => this.#log.error(`> ${line.trimEnd().replace(SUB_LOG_REGEX, '')}`));
     }
 
     if (debug && subProcess.stdout) {
-      CodecUtil.streamLines(subProcess.stdout)
-        .map(line => this.#log.info(`> ${line.trimEnd().replace(SUB_LOG_REGEX, '')}`))
-        .toArray();
+      CodecUtil.streamLines(subProcess.stdout).forEach(line => this.#log.info(`> ${line.trimEnd().replace(SUB_LOG_REGEX, '')}`));
     }
 
     return subProcess;
@@ -124,33 +120,31 @@ export class CompilerWatchFeature extends BaseFeature {
           connected = true;
           this.#log.info('Connected', state);
           const subProcess = this.run('event', ['all'], controller.signal);
-          await CodecUtil.streamLines(subProcess.stdout!)
-            .map(line => {
-              let event: CompilerEvent;
-              try {
-                event = JSONUtil.fromUTF8(line);
-              } catch (error) {
-                this.#log.error('Unable to process input as JSON', line);
-                throw error;
-              }
-              const { type, payload } = event;
-              if (typeof payload === 'object' && payload && 'workspace' in payload && payload.workspace !== Workspace.path) {
-                this.#log.debug('Ignoring compiler event for other workspace', payload.workspace);
-                return;
-              }
-              switch (type) {
-                case 'log':
-                  this.#ongLogEvent(payload);
-                  break;
-                case 'state':
-                  this.#onStateEvent(payload);
-                  break;
-                case 'progress':
-                  this.#onProgressEvent(payload, controller.signal);
-                  break;
-              }
-            })
-            .toArray();
+          await CodecUtil.streamLines(subProcess.stdout!).forEach(line => {
+            let event: CompilerEvent;
+            try {
+              event = JSONUtil.fromUTF8(line);
+            } catch (error) {
+              this.#log.error('Unable to process input as JSON', line);
+              throw error;
+            }
+            const { type, payload } = event;
+            if (typeof payload === 'object' && payload && 'workspace' in payload && payload.workspace !== Workspace.path) {
+              this.#log.debug('Ignoring compiler event for other workspace', payload.workspace);
+              return;
+            }
+            switch (type) {
+              case 'log':
+                this.#ongLogEvent(payload);
+                break;
+              case 'state':
+                this.#onStateEvent(payload);
+                break;
+              case 'progress':
+                this.#onProgressEvent(payload, controller.signal);
+                break;
+            }
+          });
         }
       } catch (error) {
         this.#log.info('Failed to connect', `${error} `);
