@@ -76,10 +76,10 @@ class TestRunnerFeature extends BaseFeature {
     );
 
     if (this.#server.stderr) {
-      CodecUtil.streamLines(this.#server.stderr).forEach(line => this.log.debug(`> stderr > ${line.trimEnd()}`));
+      this.#server.stderr.$flatMap(CodecUtil.lineParser()).$forEach(line => this.log.debug(`> stderr > ${line.trimEnd()}`));
     }
     if (this.#server.stdout) {
-      CodecUtil.streamLines(this.#server.stdout).forEach(line => this.log.debug(`> stdout > ${line.trimEnd()}`));
+      this.#server.stdout.$flatMap(CodecUtil.lineParser()).$forEach(line => this.log.debug(`> stdout > ${line.trimEnd()}`));
     }
   }
 

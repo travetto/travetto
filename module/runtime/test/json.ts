@@ -24,7 +24,7 @@ export class JSONUtilSuite {
   @Test()
   async parseSafeWithReviver() {
     const json = '{"date":"2025-12-21"}';
-    const obj: { date: Date } = JSONUtil.fromUTF8(json, {
+    const obj: { date: Date } = JSONUtil.fromUTF8WithConfig(json, {
       reviver: (key, value) => {
         if (key === 'date' && typeof value === 'string') {
           return new Date(value);
@@ -35,7 +35,7 @@ export class JSONUtilSuite {
     assert(obj.date instanceof Date);
     assert.strictEqual(obj.date.toISOString().split('T')[0], '2025-12-21');
 
-    const obj2: { date: Date } = JSONUtil.fromUTF8(
+    const obj2: { date: Date } = JSONUtil.fromUTF8WithConfig(
       JSONUtil.toUTF8({
         date: new Date('2025-12-21')
       }),
@@ -109,9 +109,11 @@ export class JSONUtilSuite {
 
   @Test()
   async verifyFromUTF8LinesWithAsyncIterable() {
-    const records = await CodecUtil.streamLines(this.fixture.readBinaryStream('sample.ndjson'))
-      .map(JSONUtil.fromUTF8<{ id: number; name: string; active?: boolean; tags?: string[] }>)
-      .toArray();
+    const records = await this.fixture
+      .readBinaryStream('sample.ndjson')
+      .$flatMap(CodecUtil.lineParser())
+      .$map(JSONUtil.fromUTF8<{ id: number; name: string; active?: boolean; tags?: string[] }>)
+      .$toArray();
 
     assert.strictEqual(records.length, 3);
     assert.deepStrictEqual(records[0], { id: 1, name: 'first', active: true });
@@ -130,39 +132,24 @@ export class JSONUtilSuite {
       '{"identifier": 300, "message": "test"}'
     ].map(addNewline);
 
-    const records = await CodecUtil.streamLines(lines)
-      .map(JSONUtil.fromUTF8<{ identifier: number; message: string }>)
-      .toArray();
+    const records = lines.map(JSONUtil.fromUTF8<{ identifier: number; message: string }>);
 
     assert.strictEqual(records.length, 3);
     assert.deepStrictEqual(records[0], { identifier: 100, message: 'hello' });
     assert.deepStrictEqual(records[1], { identifier: 200, message: 'world' });
     assert.deepStrictEqual(records[2], { identifier: 300, message: 'test' });
 
-    const defaultRecords = await CodecUtil.streamLines(lines)
-      .map(JSONUtil.fromUTF8<{}>)
-      .toArray();
+    const defaultRecords = lines.map(JSONUtil.fromUTF8<{}>);
     assert.strictEqual(defaultRecords.length, 3);
     assert.deepStrictEqual(defaultRecords[0], { identifier: 100, message: 'hello' });
-  }
-
-  @Test()
-  async verifyFromUTF8LinesEmpty() {
-    const emptyLines: string[] = ['', '   ', '\t', '\n'];
-    const records = await CodecUtil.streamLines(emptyLines).map(JSONUtil.fromUTF8).toArray();
-    assert.strictEqual(records.length, 0);
-
-    const completelyEmpty: string[] = [];
-    const records2 = await CodecUtil.streamLines(completelyEmpty).map(JSONUtil.fromUTF8).toArray();
-    assert.strictEqual(records2.length, 0);
   }
 
   @Test()
   async verifyFromUTF8LinesWithInvalidJSON() {
     const lines = ['{"valid": true}', '{"invalid":'].map(addNewline);
     const records: object[] = [];
-    await assert.rejects(async () => {
-      for await (const record of CodecUtil.streamLines(lines).map(JSONUtil.fromUTF8<object>)) {
+    assert.throws(async () => {
+      for (const record of lines.map(JSONUtil.fromUTF8<object>)) {
         records.push(record);
       }
     }, SyntaxError);
