@@ -2,6 +2,8 @@ import timers from 'node:timers/promises';
 
 import { path } from '@travetto/manifest';
 
+import { CustomAsyncIterable } from './async-iterable.ts';
+
 type StackFrame = { message: string; filename: string; line: number; column: number };
 
 const STACK_POSITION_PATTERN =
@@ -11,6 +13,8 @@ const STACK_POSITION_PATTERN =
  * Grab bag of common utilities
  */
 export class Util {
+  static asyncStream = CustomAsyncIterable.create;
+
   static #match<T, K extends unknown[]>(
     rules: { value: T; positive: boolean }[],
     compare: (rule: T, ...compareInput: K) => boolean,

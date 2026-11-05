@@ -294,7 +294,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <li>Base64 Encoded JSON</li>
 <li>New Line Delimited UTF8</li>
 </ul>
-The <code class="item method">streamLines(stream, options?)</code> method returns a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L6">CustomAsyncIterable</a> for processing line-oriented data streams asynchronously. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L6">CustomAsyncIterable</a> class offers fluent stream manipulation capabilities including:
+The <code class="item method">streamLines(stream, options?)</code> method returns a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L4">CustomAsyncIterable</a> for processing line-oriented data streams asynchronously. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L4">CustomAsyncIterable</a> class offers fluent stream manipulation capabilities including:
 <ul> <li><code class="item method">map(operation)</code> - Transforms stream items, skipping items where the mapping function evaluates to <code class="item input">undefined</code>.</li>
 <li><code class="item method">filter(predicate)</code> - Filters stream items based on a synchronous or asynchronous predicate function.</li>
 <li><code class="item method">toArray()</code> - Asynchronously collects all stream items into an array.</li>
@@ -302,7 +302,7 @@ The <code class="item method">streamLines(stream, options?)</code> method return
 
 <h2 id="common-utilities">Common Utilities</h2>
 
-Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L13">Util</a> includes:
+Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L15">Util</a> includes:
 <ul> <li><code class="item method">uuid(len: number)</code> generates a simple uuid for use within the application.</li>
 <li><code class="item method">allowDenyMatcher(rules[])</code> builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters. Negative rules are prefixed by '!'.</li>
 <li><code class="item method">hash(text: string, size?: number)</code> produces a full sha512 hash.</li>
