@@ -94,21 +94,6 @@ export class CodecUtilTest {
   }
 
   @Test()
-  async verifyStreamLines() {
-    const lines = ['one', 'two', 'three'];
-    const fromStrings = await CodecUtil.streamLines(lines.map(addNewline)).toArray();
-    assert.deepStrictEqual(fromStrings, lines);
-
-    async function* stream() {
-      for (const line of lines) {
-        yield CodecUtil.fromUTF8String(`${line}\n`);
-      }
-    }
-    const fromBinary = await CodecUtil.streamLines(stream()).toArray();
-    assert.deepStrictEqual(fromBinary, lines);
-  }
-
-  @Test()
   verifyReadChunk() {
     const b1 = CodecUtil.readUtf8Chunk('hello');
     assert(isUint8Array(b1));
@@ -125,30 +110,32 @@ export class CodecUtilTest {
 
   @Test()
   verifyParseLineSimple() {
-    assert.deepStrictEqual(CodecUtil.parseLine('a,b,c'), ['a', 'b', 'c']);
-    assert.deepStrictEqual(CodecUtil.parseLine(' a , b , c '), ['a', 'b', 'c']);
-    assert.deepStrictEqual(CodecUtil.parseLine('a,,c'), ['a', '', 'c']);
+    assert.deepStrictEqual(CodecUtil.parseCSVLine('a,b,c'), ['a', 'b', 'c']);
+    assert.deepStrictEqual(CodecUtil.parseCSVLine(' a , b , c '), ['a', 'b', 'c']);
+    assert.deepStrictEqual(CodecUtil.parseCSVLine('a,,c'), ['a', '', 'c']);
   }
 
   @Test()
   verifyParseLineCustomDelimiter() {
-    assert.deepStrictEqual(CodecUtil.parseLine('col1\tcol2\tcol3', '\t'), ['col1', 'col2', 'col3']);
-    assert.deepStrictEqual(CodecUtil.parseLine('1;2;3', ';'), ['1', '2', '3']);
+    assert.deepStrictEqual(CodecUtil.parseCSVLine('col1\tcol2\tcol3', '\t'), ['col1', 'col2', 'col3']);
+    assert.deepStrictEqual(CodecUtil.parseCSVLine('1;2;3', ';'), ['1', '2', '3']);
   }
 
   @Test()
   verifyParseLineQuotedValues() {
-    assert.deepStrictEqual(CodecUtil.parseLine('"a,b",c,"d,e"'), ['a,b', 'c', 'd,e']);
-    assert.deepStrictEqual(CodecUtil.parseLine('"He said ""hello""",world'), ['He said "hello"', 'world']);
-    assert.deepStrictEqual(CodecUtil.parseLine('a,"",c'), ['a', '', 'c']);
-    assert.deepStrictEqual(CodecUtil.parseLine('"col\t1"\tcol2', '\t'), ['col\t1', 'col2']);
+    assert.deepStrictEqual(CodecUtil.parseCSVLine('"a,b",c,"d,e"'), ['a,b', 'c', 'd,e']);
+    assert.deepStrictEqual(CodecUtil.parseCSVLine('"He said ""hello""",world'), ['He said "hello"', 'world']);
+    assert.deepStrictEqual(CodecUtil.parseCSVLine('a,"",c'), ['a', '', 'c']);
+    assert.deepStrictEqual(CodecUtil.parseCSVLine('"col\t1"\tcol2', '\t'), ['col\t1', 'col2']);
   }
 
   @Test()
   async verifyFromCSV() {
-    const records = await CodecUtil.streamLines(this.fixture.readBinaryStream('sample.csv'))
-      .flatMap(CodecUtil.csvParser<{ name: string; age: string; city: string }>())
-      .toArray();
+    const records = await this.fixture
+      .readBinaryStream('sample.csv')
+      .$flatMap(CodecUtil.lineParser())
+      .$flatMap(CodecUtil.csvParser<{ name: string; age: string; city: string }>())
+      .$toArray();
 
     assert.strictEqual(records.length, 3);
     assert.deepStrictEqual(records[0], { name: 'Alice', age: '30', city: 'Seattle' });
@@ -158,9 +145,11 @@ export class CodecUtilTest {
 
   @Test()
   async verifyFromTSV() {
-    const records = await CodecUtil.streamLines(this.fixture.readBinaryStream('sample.tsv'))
-      .flatMap(CodecUtil.csvParser<{ id: string; title: string; score: string }>())
-      .toArray();
+    const records = await this.fixture
+      .readBinaryStream('sample.tsv')
+      .$flatMap(CodecUtil.lineParser())
+      .$flatMap(CodecUtil.csvParser<{ id: string; title: string; score: string }>())
+      .$toArray();
 
     assert.strictEqual(records.length, 3);
     assert.deepStrictEqual(records[0], { id: '1', title: 'Alpha', score: '95' });
@@ -173,16 +162,14 @@ export class CodecUtilTest {
     const lines = ['', 'name,age,city', '   ', 'Alice,30,Seattle', '', 'Bob,25,"New York, NY"', '   \t  ', 'Charlie,40,Chicago', ''].map(
       addNewline
     );
-    const records = await CodecUtil.streamLines(lines)
-      .flatMap(CodecUtil.csvParser<{ name: string; age: string; city: string }>())
-      .toArray();
+    const records = lines.flatMap(CodecUtil.csvParser<{ name: string; age: string; city: string }>());
 
     assert.strictEqual(records.length, 3);
     assert.deepStrictEqual(records[0], { name: 'Alice', age: '30', city: 'Seattle' });
     assert.deepStrictEqual(records[1], { name: 'Bob', age: '25', city: 'New York, NY' });
     assert.deepStrictEqual(records[2], { name: 'Charlie', age: '40', city: 'Chicago' });
 
-    const defaultRecords = await CodecUtil.streamLines(lines).flatMap(CodecUtil.csvParser<Record<string, string>>()).toArray();
+    const defaultRecords = lines.flatMap(CodecUtil.csvParser<Record<string, string>>());
 
     assert.strictEqual(defaultRecords.length, 3);
     assert.deepStrictEqual(defaultRecords[0], { name: 'Alice', age: '30', city: 'Seattle' });

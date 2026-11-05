@@ -40,3 +40,37 @@ if (majorVersion < 25 || (majorVersion === 25 && minorVersion < 7)) {
     }
   });
 }
+
+// Apply stream operators to the Object prototype, will remove once
+// TC39 gets AsyncIterator helpers into the language
+Object.defineProperties(Object.getPrototypeOf(Object), {
+  $map: {
+    value: async function* (transform) {
+      for await (const item of this) yield await transform(item);
+    }
+  },
+  $filter: {
+    value: async function* (predicate) {
+      for await (const item of this) {
+        if (await predicate(item)) yield item;
+      }
+    }
+  },
+  $toArray: {
+    value: async function () {
+      const out = [];
+      for await (const item of this) out.push(item);
+      return out;
+    }
+  },
+  $forEach: {
+    value: async function () {
+      for await (const item of this) await visit(item);
+    }
+  },
+  $flatMap: {
+    value: async function* () {
+      for await (const item of this) yield* await transform(item);
+    }
+  }
+});

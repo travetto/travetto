@@ -1,6 +1,6 @@
 import type tty from 'node:tty';
 
-import { CustomAsyncIterable, Env, Util } from '@travetto/runtime';
+import { Env, Util } from '@travetto/runtime';
 
 import { TerminalWriter } from './writer.ts';
 
@@ -63,14 +63,10 @@ export class Terminal {
    */
   async streamLines(source: AsyncIterable<string>): Promise<void> {
     if (!this.#interactive) {
-      await Util.asyncStream(source)
-        .filter(Boolean)
-        .forEach(line => this.#writer.writeLine(`> ${line}`).commit());
+      await source.$filter(Boolean).$forEach(line => this.#writer.writeLine(`> ${line}`).commit());
     } else {
       await this.streamToBottom(
-        Util.asyncStream(source)
-          .filter(Boolean)
-          .map(line => `%WAIT% ${line}`),
+        source.$filter(Boolean).$map(line => `%WAIT% ${line}`),
         { outputStreamToMain: true }
       );
     }

@@ -1,4 +1,4 @@
-import { AsyncQueue, CustomAsyncIterable } from '@travetto/runtime';
+import { AsyncQueue } from '@travetto/runtime';
 import { Terminal, TerminalUtil } from '@travetto/terminal';
 
 import type { TestEvent } from '../../model/event.ts';
@@ -94,8 +94,8 @@ export class TapSummaryEmitter implements TestConsumerShape {
 
     const total = TestModelUtil.buildSummary();
     this.#progress = this.#terminal.streamToBottom(
-      new CustomAsyncIterable(this.#results)
-        .map(value => {
+      this.#results
+        .$map(value => {
           TestModelUtil.countTestResult(total, [value]);
           const statusLine = `${total.failed} failed, ${total.errored} errored, ${total.skipped} skipped`;
           return {
@@ -105,7 +105,7 @@ export class TapSummaryEmitter implements TestConsumerShape {
             failed: total.failed + total.errored
           };
         })
-        .map(
+        .$map(
           TerminalUtil.progressBarUpdater(this.#terminal, {
             style: {
               complete: { text: '#e5e5e5', background: '#026020' },
