@@ -10,19 +10,19 @@ export class UIController {
 
   @Get('/')
   @Produces('text/html')
-  getHomepage(): Promise<BinaryStream> {
+  getHomepage(): BinaryStream {
     return RuntimeResources.readBinaryStream('/ui/index.html');
   }
 
   @Get('js/*')
   @Produces('application/javascript')
-  getJs(): Promise<BinaryStream> {
+  getJs(): BinaryStream {
     return RuntimeResources.readBinaryStream(this.request.context.path);
   }
 
   @Get('css/*')
   @Produces('text/css')
-  getCss(): Promise<BinaryStream> {
+  getCss(): BinaryStream {
     return RuntimeResources.readBinaryStream(this.request.context.path);
   }
 }

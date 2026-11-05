@@ -4,7 +4,6 @@ import {
   BinaryUtil,
   CodecUtil,
   ConsoleManager,
-  CustomAsyncIterable,
   EnvProp,
   ExecUtil,
   FileLoader,
@@ -162,16 +161,6 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
         <li>UTT8 Encoded JSON</li>
         <li>Base64 Encoded JSON</li>
         <li>New Line Delimited UTF8</li>
-      </ul>
-      The {d.method('streamLines(stream, options?)')} method returns a {CustomAsyncIterable} for processing line-oriented data streams
-      asynchronously. The {CustomAsyncIterable} class offers fluent stream manipulation capabilities including:
-      <ul>
-        <li>
-          {d.method('map(operation)')} - Transforms stream items, skipping items where the mapping function evaluates to{' '}
-          {d.input('undefined')}.
-        </li>
-        <li>{d.method('filter(predicate)')} - Filters stream items based on a synchronous or asynchronous predicate function.</li>
-        <li>{d.method('toArray()')} - Asynchronously collects all stream items into an array.</li>
       </ul>
     </c.Section>
     <c.Section title="Common Utilities">
