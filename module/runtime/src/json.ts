@@ -113,7 +113,7 @@ export class JSONUtil {
 
   /** UTF8 string to JSON */
   static fromUTF8<T>(input: string): T {
-    return this.fromUTF8WithConfig<T>(input);
+    return JSONUtil.fromUTF8WithConfig<T>(input);
   }
 
   /** UTF8 string to JSON */
