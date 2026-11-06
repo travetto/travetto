@@ -21,22 +21,22 @@ export class BytesUtilTest {
     assert(fileType.ext === 'png');
     assert(fileType.mime === 'image/png');
 
-    const gifStream = await this.fixture.readBinaryStream('/logo.gif');
+    const gifStream = this.fixture.readBinaryStream('/logo.gif');
     const fileType2 = await WebUploadUtil.getFileType(gifStream);
     assert(fileType2.ext === 'gif');
     assert(fileType2.mime === 'image/gif');
 
-    const unnamed = await this.fixture.readBinaryStream('/logo');
+    const unnamed = this.fixture.readBinaryStream('/logo');
     const fileType3 = await WebUploadUtil.getFileType(unnamed);
     assert(fileType3.ext === 'png');
     assert(fileType3.mime === 'image/png');
 
-    const mp3Buff = await this.fixture.readBinaryStream('/small-audio.mp3');
+    const mp3Buff = this.fixture.readBinaryStream('/small-audio.mp3');
     const fileType4 = await WebUploadUtil.getFileType(mp3Buff);
     assert(fileType4.ext === 'mp3');
     assert(fileType4.mime === 'audio/mpeg');
 
-    const mp3UnnamedBuff = await this.fixture.readBinaryStream('/small-audio');
+    const mp3UnnamedBuff = this.fixture.readBinaryStream('/small-audio');
     const fileType5 = await WebUploadUtil.getFileType(mp3UnnamedBuff);
     assert(fileType5.ext === 'mp3');
     assert(fileType5.mime === 'audio/mpeg');

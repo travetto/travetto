@@ -64,6 +64,7 @@ export class CustomAsyncIterableTest {
 
     const evensOnly = await iterable()
       .$map(item => (item % 2 === 0 ? item * 10 : undefined))
+      .$filter(Boolean)
       .$toArray();
     assert.deepStrictEqual(evensOnly, [20, 40]);
   }

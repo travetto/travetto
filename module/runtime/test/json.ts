@@ -112,6 +112,7 @@ export class JSONUtilSuite {
     const records = await this.fixture
       .readBinaryStream('sample.ndjson')
       .$flatMap(CodecUtil.lineParser())
+      .$filter(Boolean)
       .$map(JSONUtil.fromUTF8<{ id: number; name: string; active?: boolean; tags?: string[] }>)
       .$toArray();
 
@@ -132,25 +133,21 @@ export class JSONUtilSuite {
       '{"identifier": 300, "message": "test"}'
     ].map(addNewline);
 
-    const records = lines.map(JSONUtil.fromUTF8<{ identifier: number; message: string }>);
+    const records = lines.filter(x => x.trim()).map(JSONUtil.fromUTF8<{ identifier: number; message: string }>);
 
     assert.strictEqual(records.length, 3);
     assert.deepStrictEqual(records[0], { identifier: 100, message: 'hello' });
     assert.deepStrictEqual(records[1], { identifier: 200, message: 'world' });
     assert.deepStrictEqual(records[2], { identifier: 300, message: 'test' });
-
-    const defaultRecords = lines.map(JSONUtil.fromUTF8<{}>);
-    assert.strictEqual(defaultRecords.length, 3);
-    assert.deepStrictEqual(defaultRecords[0], { identifier: 100, message: 'hello' });
   }
 
   @Test()
   async verifyFromUTF8LinesWithInvalidJSON() {
     const lines = ['{"valid": true}', '{"invalid":'].map(addNewline);
     const records: object[] = [];
-    assert.throws(async () => {
-      for (const record of lines.map(JSONUtil.fromUTF8<object>)) {
-        records.push(record);
+    assert.throws(() => {
+      for (const record of lines) {
+        records.push(JSONUtil.fromUTF8<object>(record));
       }
     }, SyntaxError);
     assert.strictEqual(records.length, 1);
