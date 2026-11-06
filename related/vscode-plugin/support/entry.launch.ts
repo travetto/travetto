@@ -1,6 +1,2 @@
-try {
-  // @ts-expect-error - Fix vscode navigator problem
-  delete globalThis.navigator;
-} catch {}
-
+import './patch.js';
 export * from '../src/extension.js';
