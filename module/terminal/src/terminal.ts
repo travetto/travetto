@@ -66,7 +66,7 @@ export class Terminal {
       await source.$filter(Boolean).$forEach(line => this.#writer.writeLine(`> ${line}`).commit());
     } else {
       await this.streamToBottom(
-        source.$filter(Boolean).$map(line => `%WAIT% ${line}`),
+        source.$map(line => `%WAIT% ${line}`),
         { outputStreamToMain: true }
       );
     }
