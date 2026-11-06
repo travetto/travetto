@@ -7,6 +7,8 @@ type TextInput = string | BinaryArray;
 const UTF8_DECODER = new TextDecoder('utf8');
 const UTF8_ENCODER = new TextEncoder();
 const DOUBLE_QUOTE = '"'.charCodeAt(0);
+const CARRIAGE_RETURN = '\r'.charCodeAt(0);
+const LINE_FEED = '\n'.charCodeAt(0);
 
 /**
  * Utilities for encoding and decoding common formats
@@ -130,6 +132,44 @@ export class CodecUtil {
     return values;
   }
 
+  /**
+   * Splits an array of Buffers into raw string lines and an optional
+   * trailing unresolved partial Buffer, handling both \n and \r\n line breaks.
+   */
+  static breakLines(previous: Buffer, incoming: Buffer): { lines: string[]; remainder: Buffer } {
+    const input = Buffer.concat([previous, incoming]);
+    if (!input.length) {
+      return { lines: [], remainder: Buffer.alloc(0) };
+    }
+
+    const lines: string[] = [];
+    let start = 0;
+    let eolIdx = input.indexOf(LINE_FEED, start);
+
+    while (eolIdx !== -1) {
+      let end = eolIdx;
+      // Strip CR if line ends with CRLF (\r\n)
+      if (end > start && input[end - 1] === CARRIAGE_RETURN) {
+        end -= 1;
+      }
+
+      lines.push(input.toString('utf8', start, end));
+
+      start = eolIdx + 1;
+      eolIdx = input.indexOf(LINE_FEED, start);
+    }
+
+    let remainder: Buffer = Buffer.alloc(0);
+
+    if (start < input.length) {
+      // Clone the unconsumed tail into a small independent Buffer
+      // so holding `remainder` does not prevent the full `input` Buffer from being GC'd.
+      remainder = Buffer.from(input.subarray(start));
+    }
+
+    return { lines, remainder };
+  }
+
   /** Simple CSV parser */
   static csvParser<T>(options?: { separator?: string; fieldNames?: string[] }): (line: string) => T[] {
     let fieldNames: string[] = options?.fieldNames ?? [];
@@ -152,61 +192,26 @@ export class CodecUtil {
    * Parse lines as a $flatMap compatible friend
    */
   static lineParser(options?: { trim?: 'all' | 'start' | 'end'; skipEmpty?: boolean }): (input: BinaryArray | string) => Promise<string[]> {
-    const CARRIAGE_RETURN = '\r'.charCodeAt(0);
-    const NEWLINE = '\n'.charCodeAt(0);
-    const trim = options?.trim ?? false;
     const skipEmpty = options?.skipEmpty ?? false;
+    const trim = options?.trim;
+    let remainder: Buffer = Buffer.alloc(0);
 
-    function flush(...buffer: Buffer[]): string[] {
-      let result = buffer.length === 1 ? buffer[0] : Buffer.concat(buffer);
-
-      if (result[result.length - 1] === CARRIAGE_RETURN) {
-        result = result.subarray(0, result.length - 1);
-      }
-
-      if (!result.length) {
-        return [];
-      }
-
-      let output = result.toString('utf8');
-      if (trim === 'end') {
-        output = output.trimEnd();
-      } else if (trim === 'start') {
-        output = output.trimStart();
-      } else if (trim === 'all') {
-        output = output.trim();
-      }
-      if (skipEmpty && !output.trim()) {
-        return [];
-      }
-      return [output];
-    }
-
-    let buffer: Buffer[] = [];
     return async function (input: BinaryArray | string): Promise<string[]> {
-      const array = await (typeof input === 'string' ? Buffer.from(input, 'utf8') : BinaryUtil.toBuffer(input));
-
-      // We are done
-      if (array.length === 0) {
-        return flush(...buffer);
+      const inputBuffer = BinaryUtil.binaryArrayToBuffer(BinaryUtil.isBinaryArray(input) ? input : CodecUtil.fromUTF8String(input));
+      let lines: string[];
+      if (inputBuffer.length === 0) {
+        // Flush, we are done
+        lines = remainder.length ? [remainder.toString('utf8')] : [];
+      } else {
+        ({ lines, remainder } = CodecUtil.breakLines(remainder, inputBuffer));
       }
-
-      const output: string[] = [];
-
-      let position = 0;
-      let eolIdx = array.indexOf(NEWLINE, position);
-      while (eolIdx >= 0) {
-        output.push(...flush(...buffer, array.subarray(position, eolIdx)));
-        buffer = [];
-        position = eolIdx + 1;
-        eolIdx = array.indexOf(NEWLINE, position);
+      if (skipEmpty) {
+        lines = lines.filter(line => !!line.trim());
       }
-
-      if (position < array.length) {
-        buffer.push(Buffer.from(array.subarray(position)));
+      if (trim) {
+        lines = lines.map(line => (trim === 'all' ? line.trim() : trim === 'end' ? line.trimEnd() : line.trimStart()));
       }
-
-      return output;
+      return lines;
     };
   }
 }
