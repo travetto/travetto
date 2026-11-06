@@ -112,12 +112,7 @@ export class JSONUtil {
   }
 
   /** UTF8 string to JSON */
-  static fromUTF8<T>(input: string): T {
-    return JSONUtil.fromUTF8WithConfig<T>(input);
-  }
-
-  /** UTF8 string to JSON */
-  static fromUTF8WithConfig<T>(input: string, config?: JSONInputConfig): T {
+  static fromUTF8<T>(input: string, config?: JSONInputConfig): T {
     if (!input.trim()) {
       return undefined!;
     }
@@ -157,7 +152,7 @@ export class JSONUtil {
 
   /** JSON to JSON, with optional transformations, useful for deep cloning or applying transformations to a value */
   static clone<T, R = T>(input: T, config?: JSONCloneConfig): R {
-    return JSONUtil.fromUTF8WithConfig(JSONUtil.toUTF8(input, config), config);
+    return JSONUtil.fromUTF8(JSONUtil.toUTF8(input, config), config);
   }
 
   static cloneForTransmit<T, R = T>(input: T): R {
