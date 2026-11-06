@@ -151,14 +151,18 @@ export class CodecUtil {
   /**
    * Parse lines as a $flatMap compatible friend
    */
-  static lineParser(options?: { trim?: 'all' | 'start' | 'end' }): (input: BinaryArray | string) => Promise<string[]> {
-    let buffer: Buffer[] = [];
+  static lineParser(options?: { trim?: 'all' | 'start' | 'end'; skipEmpty?: boolean }): (input: BinaryArray | string) => Promise<string[]> {
     const CARRIAGE_RETURN = '\r'.charCodeAt(0);
     const NEWLINE = '\n'.charCodeAt(0);
     const trim = options?.trim ?? false;
+    const skipEmpty = options?.skipEmpty ?? false;
 
-    function flush(): string {
+    function flush(buffer: Buffer[]): string[] {
       const result = Buffer.concat(buffer);
+      if (!result.length) {
+        return [];
+      }
+
       let output = result.toString('utf8');
       if (trim === 'end') {
         output = output.trimEnd();
@@ -167,31 +171,38 @@ export class CodecUtil {
       } else if (trim === 'all') {
         output = output.trim();
       }
-      return output;
+      if (skipEmpty && !output.trim()) {
+        return [];
+      }
+      return [output];
     }
 
+    const buffer: Buffer[] = [];
     return async function (input: BinaryArray | string): Promise<string[]> {
       const array = await (typeof input === 'string' ? Buffer.from(input, 'utf8') : BinaryUtil.toBuffer(input));
 
+      // We are done
       if (array.length === 0) {
-        // We are done
-        return [flush()];
+        return flush(buffer);
       }
 
-      const newLineIdx = array.indexOf(NEWLINE);
-      if (newLineIdx >= 0) {
-        let end = newLineIdx;
-        if (array[newLineIdx - 1] === CARRIAGE_RETURN) {
-          end -= 1;
-        }
-        buffer.push(array.subarray(0, end));
-        const output = flush();
-        buffer = [array.subarray(newLineIdx + 1)];
-        return [output];
-      } else {
-        buffer.push(array);
-        return [];
+      const output: string[] = [];
+
+      let position = 0;
+      while (array.indexOf(NEWLINE, position) >= 0) {
+        const eolIdx = array.indexOf(NEWLINE, position);
+        const chunk = array.subarray(position, array[eolIdx - 1] === CARRIAGE_RETURN ? eolIdx - 1 : eolIdx);
+        position = eolIdx + 1;
+        buffer.push(chunk);
+        output.push(...flush(buffer));
+        buffer.splice(0, buffer.length);
       }
+
+      if (position < array.length) {
+        buffer.push(array.subarray(position));
+      }
+
+      return output;
     };
   }
 }

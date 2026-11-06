@@ -146,7 +146,7 @@ export class EmailCompileUtil {
 
       let bytes: BinaryArray;
       if (ImageUtil.isKnownExtension(format)) {
-        const stream = await options.loader.readBinaryStream(source);
+        const stream = options.loader.readBinaryStream(source);
         const converted = await ImageUtil.convert(stream, { optimize: true, format });
         bytes = await BinaryUtil.toBinaryArray(converted);
       } else {

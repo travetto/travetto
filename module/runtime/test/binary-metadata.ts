@@ -1,5 +1,6 @@
 import assert from 'node:assert';
 import crypto from 'node:crypto';
+import { createReadStream } from 'node:fs';
 import { Readable } from 'node:stream';
 import { buffer } from 'node:stream/consumers';
 
@@ -12,7 +13,10 @@ export class BinaryMetadataUtilSuite {
 
   @Test()
   async verifyReadableBlob() {
-    const stream = () => this.fixture.readBinaryStream('/logo.png');
+    const stream = async () => {
+      const location = await this.fixture.resolve('/logo.png');
+      return createReadStream(location);
+    };
     const blob = BinaryMetadataUtil.makeBlob(stream, await BinaryMetadataUtil.compute(stream));
     const blobBytes = await buffer(blob.stream());
     const allBytes = await this.fixture.readBinaryArray('/logo.png');
@@ -26,7 +30,10 @@ export class BinaryMetadataUtilSuite {
 
   @Test()
   async verifyReadableBlobMultiple() {
-    const stream = () => this.fixture.readBinaryStream('/logo.png');
+    const stream = async () => {
+      const location = await this.fixture.resolve('/logo.png');
+      return createReadStream(location);
+    };
     const blob = BinaryMetadataUtil.makeBlob(stream, await BinaryMetadataUtil.compute(stream));
     await BinaryMetadataUtil.compute(blob);
     const blobBytes = await buffer(blob.stream());

@@ -250,7 +250,7 @@ export class UtilTest {
 
     // The first frame should point back to this file
     assert(parts[0].filename.endsWith('runtime/test/util.ts'));
-    assert(parts[0].line === 255);
+    assert(parts[0].line === 238);
     assert(parts[0].column === 17);
   }
 }

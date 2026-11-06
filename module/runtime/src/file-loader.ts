@@ -1,7 +1,6 @@
 import { createReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { PassThrough } from 'node:stream';
 
 import { type BinaryArray, type BinaryStream, BinaryUtil } from './binary.ts';
 import { RuntimeError } from './error.ts';
@@ -59,12 +58,9 @@ export class FileLoader {
    * Read a file as a stream
    * @param relativePath The path to read
    */
-  readBinaryStream(relativePath: string): BinaryStream {
-    const stream = new PassThrough();
-    this.resolve(relativePath)
-      .then(file => BinaryUtil.pipeline(createReadStream(file), stream))
-      .catch(error => stream.destroy(error));
-    return stream;
+  async *readBinaryStream(relativePath: string): AsyncIterable<BinaryArray> {
+    const file = await this.resolve(relativePath);
+    yield* createReadStream(file);
   }
 
   /**

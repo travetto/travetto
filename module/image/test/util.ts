@@ -28,7 +28,7 @@ class ImageUtilSuite {
 
   @Test('compress png')
   async compressPng() {
-    const imgStream = await this.fixture.readBinaryStream('google.png');
+    const imgStream = this.fixture.readBinaryStream('google.png');
     const imgBuffer = await this.fixture.readBinaryArray('google.png');
 
     const out = await ImageUtil.convert(imgStream, { optimize: true, format: 'png' });
@@ -42,7 +42,7 @@ class ImageUtilSuite {
 
   @Test('compress jpeg')
   async compressJpeg() {
-    const imgStream = await this.fixture.readBinaryStream('lincoln.jpg');
+    const imgStream = this.fixture.readBinaryStream('lincoln.jpg');
     const imgBuffer = await this.fixture.readBinaryArray('lincoln.jpg');
 
     const out = await ImageUtil.convert(imgStream, { optimize: true, format: 'avif' });
@@ -58,7 +58,7 @@ class ImageUtilSuite {
 
   @Test('compress jpeg')
   async compressJpegNoFormat() {
-    const imgStream = await this.fixture.readBinaryStream('lincoln.jpg');
+    const imgStream = this.fixture.readBinaryStream('lincoln.jpg');
     const imgBuffer = await this.fixture.readBinaryArray('lincoln.jpg');
 
     const out = await ImageUtil.convert(imgStream, { optimize: true });
@@ -105,7 +105,7 @@ class ImageUtilSuite {
 
   @Test()
   async resizeLooseWidthToFile() {
-    const imgStream = await this.fixture.readBinaryStream('lincoln.jpg');
+    const imgStream = this.fixture.readBinaryStream('lincoln.jpg');
     const out = await ImageUtil.convert(imgStream, {
       w: 100
     });
@@ -134,7 +134,7 @@ class ImageUtilSuite {
 
   @Test()
   async resizeLooseHeightToFile() {
-    const imgStream = await this.fixture.readBinaryStream('lincoln.jpg');
+    const imgStream = this.fixture.readBinaryStream('lincoln.jpg');
     const out = await ImageUtil.convert(imgStream, {
       h: 134.00005
     });
