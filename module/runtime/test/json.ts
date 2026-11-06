@@ -24,7 +24,7 @@ export class JSONUtilSuite {
   @Test()
   async parseSafeWithReviver() {
     const json = '{"date":"2025-12-21"}';
-    const obj: { date: Date } = JSONUtil.fromUTF8WithConfig(json, {
+    const obj: { date: Date } = JSONUtil.fromUTF8(json, {
       reviver: (key, value) => {
         if (key === 'date' && typeof value === 'string') {
           return new Date(value);
@@ -35,7 +35,7 @@ export class JSONUtilSuite {
     assert(obj.date instanceof Date);
     assert.strictEqual(obj.date.toISOString().split('T')[0], '2025-12-21');
 
-    const obj2: { date: Date } = JSONUtil.fromUTF8WithConfig(
+    const obj2: { date: Date } = JSONUtil.fromUTF8(
       JSONUtil.toUTF8({
         date: new Date('2025-12-21')
       }),
@@ -133,7 +133,7 @@ export class JSONUtilSuite {
       '{"identifier": 300, "message": "test"}'
     ].map(addNewline);
 
-    const records = lines.filter(x => x.trim()).map(JSONUtil.fromUTF8<{ identifier: number; message: string }>);
+    const records = lines.filter(x => x.trim()).map(v => JSONUtil.fromUTF8<{ identifier: number; message: string }>(v));
 
     assert.strictEqual(records.length, 3);
     assert.deepStrictEqual(records[0], { identifier: 100, message: 'hello' });
