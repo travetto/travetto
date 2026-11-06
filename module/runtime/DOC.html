@@ -286,7 +286,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 
 <h2 id="encoding-and-decoding-utilities">Encoding and Decoding Utilities</h2>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L21">CodecUtil</a> class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L14">CodecUtil</a> class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
 <ul> <li>Hex</li>
 <li>Base64</li>
 <li>UTF8</li>
@@ -294,15 +294,25 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <li>Base64 Encoded JSON</li>
 <li>New Line Delimited UTF8</li>
 </ul>
-The <code class="item method">streamLines(stream, options?)</code> method returns a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L4">CustomAsyncIterable</a> for processing line-oriented data streams asynchronously. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L4">CustomAsyncIterable</a> class offers fluent stream manipulation capabilities including:
-<ul> <li><code class="item method">map(operation)</code> - Transforms stream items, skipping items where the mapping function evaluates to <code class="item input">undefined</code>.</li>
-<li><code class="item method">filter(predicate)</code> - Filters stream items based on a synchronous or asynchronous predicate function.</li>
-<li><code class="item method">toArray()</code> - Asynchronously collects all stream items into an array.</li>
+For processing line-oriented data streams (such as subprocess output or incoming binary/text streams), <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L14">CodecUtil</a> provides stream parsing helpers designed to work seamlessly with async stream operators:
+<ul> <li><code class="item method">lineParser(options?)</code> produces a <code class="item method">$flatMap</code>-compatible chunk-to-line transformer that buffers across arbitrary chunk boundaries, handles carriage returns, and supports configurable trimming and blank line skipping.</li>
+<li><code class="item method">csvParser(options?)</code> produces a <code class="item method">$flatMap</code>-compatible line-to-record transformer that parses CSV or TSV lines into structured objects using the header row or provided field names.</li>
+<li><code class="item method">parseCSVLine(line, delimiter?)</code> parses individual CSV lines with support for quoted strings and custom delimiters.</li>
+</ul>
+
+<h2 id="async-stream-and-iterator-operators">Async Stream and Iterator Operators</h2>
+
+The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration), providing fluent stream transformations directly on readable streams, async generators, and async iterables:
+<ul> <li><code class="item method">$map(fn)</code> - Transforms each item asynchronously or synchronously.</li>
+<li><code class="item method">$filter(predicate)</code> - Filters items using a synchronous or asynchronous predicate.</li>
+<li><code class="item method">$flatMap(fn)</code> - Transforms each item into an array or iterable and flattens the results into the stream.</li>
+<li><code class="item method">$forEach(fn)</code> - Executes a visitor function for every stream item.</li>
+<li><code class="item method">$toArray()</code> - Asynchronously collects all items into an array.</li>
 </ul>
 
 <h2 id="common-utilities">Common Utilities</h2>
 
-Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L15">Util</a> includes:
+Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L13">Util</a> includes:
 <ul> <li><code class="item method">uuid(len: number)</code> generates a simple uuid for use within the application.</li>
 <li><code class="item method">allowDenyMatcher(rules[])</code> builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters. Negative rules are prefixed by '!'.</li>
 <li><code class="item method">hash(text: string, size?: number)</code> produces a full sha512 hash.</li>
