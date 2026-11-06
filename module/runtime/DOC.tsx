@@ -162,6 +162,32 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
         <li>Base64 Encoded JSON</li>
         <li>New Line Delimited UTF8</li>
       </ul>
+      For processing line-oriented data streams (such as subprocess output or incoming binary/text streams), {CodecUtil} provides stream
+      parsing helpers designed to work seamlessly with async stream operators:
+      <ul>
+        <li>
+          {d.method('lineParser(options?)')} produces a {d.method('$flatMap')}-compatible chunk-to-line transformer that buffers across
+          arbitrary chunk boundaries, handles carriage returns, and supports configurable trimming and blank line skipping.
+        </li>
+        <li>
+          {d.method('csvParser(options?)')} produces a {d.method('$flatMap')}-compatible line-to-record transformer that parses CSV or TSV
+          lines into structured objects using the header row or provided field names.
+        </li>
+        <li>
+          {d.method('parseCSVLine(line, delimiter?)')} parses individual CSV lines with support for quoted strings and custom delimiters.
+        </li>
+      </ul>
+    </c.Section>
+    <c.Section title="Async Stream and Iterator Operators">
+      The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration),
+      providing fluent stream transformations directly on readable streams, async generators, and async iterables:
+      <ul>
+        <li>{d.method('$map(fn)')} - Transforms each item asynchronously or synchronously.</li>
+        <li>{d.method('$filter(predicate)')} - Filters items using a synchronous or asynchronous predicate.</li>
+        <li>{d.method('$flatMap(fn)')} - Transforms each item into an array or iterable and flattens the results into the stream.</li>
+        <li>{d.method('$forEach(fn)')} - Executes a visitor function for every stream item.</li>
+        <li>{d.method('$toArray()')} - Asynchronously collects all items into an array.</li>
+      </ul>
     </c.Section>
     <c.Section title="Common Utilities">
       Common utilities used throughout the framework. Currently {Util} includes:

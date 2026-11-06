@@ -258,7 +258,7 @@ The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/s
 The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L134)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Encoding and Decoding Utilities
-The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L21) class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
+The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L14) class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
    *  Hex
    *  Base64
    *  UTF8
@@ -266,13 +266,21 @@ The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/sr
    *  Base64 Encoded JSON
    *  New Line Delimited UTF8
 
-The `streamLines(stream, options?)` method returns a [CustomAsyncIterable](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L4) for processing line-oriented data streams asynchronously. The [CustomAsyncIterable](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L4) class offers fluent stream manipulation capabilities including:
-   *  `map(operation)` - Transforms stream items, skipping items where the mapping function evaluates to `undefined`.
-   *  `filter(predicate)` - Filters stream items based on a synchronous or asynchronous predicate function.
-   *  `toArray()` - Asynchronously collects all stream items into an array.
+For processing line-oriented data streams (such as subprocess output or incoming binary/text streams), [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L14) provides stream parsing helpers designed to work seamlessly with async stream operators:
+   *  `lineParser(options?)` produces a `$flatMap`-compatible chunk-to-line transformer that buffers across arbitrary chunk boundaries, handles carriage returns, and supports configurable trimming and blank line skipping.
+   *  `csvParser(options?)` produces a `$flatMap`-compatible line-to-record transformer that parses CSV or TSV lines into structured objects using the header row or provided field names.
+   *  `parseCSVLine(line, delimiter?)` parses individual CSV lines with support for quoted strings and custom delimiters.
+
+## Async Stream and Iterator Operators
+The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration), providing fluent stream transformations directly on readable streams, async generators, and async iterables:
+   *  `$map(fn)` - Transforms each item asynchronously or synchronously.
+   *  `$filter(predicate)` - Filters items using a synchronous or asynchronous predicate.
+   *  `$flatMap(fn)` - Transforms each item into an array or iterable and flattens the results into the stream.
+   *  `$forEach(fn)` - Executes a visitor function for every stream item.
+   *  `$toArray()` - Asynchronously collects all items into an array.
 
 ## Common Utilities
-Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L15) includes:
+Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L13) includes:
    *  `uuid(len: number)` generates a simple uuid for use within the application.
    *  `allowDenyMatcher(rules[])` builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters. Negative rules are prefixed by '!'.
    *  `hash(text: string, size?: number)` produces a full sha512 hash.
