@@ -157,8 +157,13 @@ export class CodecUtil {
     const trim = options?.trim ?? false;
     const skipEmpty = options?.skipEmpty ?? false;
 
-    function flush(buffer: Buffer[]): string[] {
-      const result = Buffer.concat(buffer);
+    function flush(...buffer: Buffer[]): string[] {
+      let result = buffer.length === 1 ? buffer[0] : Buffer.concat(buffer);
+
+      if (result[result.length - 1] === CARRIAGE_RETURN) {
+        result = result.subarray(0, result.length - 1);
+      }
+
       if (!result.length) {
         return [];
       }
@@ -177,29 +182,28 @@ export class CodecUtil {
       return [output];
     }
 
-    const buffer: Buffer[] = [];
+    let buffer: Buffer[] = [];
     return async function (input: BinaryArray | string): Promise<string[]> {
       const array = await (typeof input === 'string' ? Buffer.from(input, 'utf8') : BinaryUtil.toBuffer(input));
 
       // We are done
       if (array.length === 0) {
-        return flush(buffer);
+        return flush(...buffer);
       }
 
       const output: string[] = [];
 
       let position = 0;
-      while (array.indexOf(NEWLINE, position) >= 0) {
-        const eolIdx = array.indexOf(NEWLINE, position);
-        const chunk = array.subarray(position, array[eolIdx - 1] === CARRIAGE_RETURN ? eolIdx - 1 : eolIdx);
+      let eolIdx = array.indexOf(NEWLINE, position);
+      while (eolIdx >= 0) {
+        output.push(...flush(...buffer, array.subarray(position, eolIdx)));
+        buffer = [];
         position = eolIdx + 1;
-        buffer.push(chunk);
-        output.push(...flush(buffer));
-        buffer.splice(0, buffer.length);
+        eolIdx = array.indexOf(NEWLINE, position);
       }
 
       if (position < array.length) {
-        buffer.push(array.subarray(position));
+        buffer.push(Buffer.from(array.subarray(position)));
       }
 
       return output;
