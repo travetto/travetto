@@ -61,7 +61,7 @@ export class Terminal {
   /**
    * Stream lines if interactive, with waiting indicator, otherwise print out
    */
-  async streamLines(source: AsyncIterable<string>): Promise<void> {
+  async streamLines(source: AsyncIterable<string | undefined>): Promise<void> {
     if (!this.#interactive) {
       await source.$filter(Boolean).$forEach(line => this.#writer.writeLine(`> ${line}`).commit());
     } else {
