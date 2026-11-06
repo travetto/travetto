@@ -88,11 +88,17 @@ export class CompilerWatchFeature extends BaseFeature {
     });
 
     if (debug && subProcess.stderr) {
-      CodecUtil.readLines(subProcess.stderr, line => this.#log.error(`> ${line.trimEnd().replace(SUB_LOG_REGEX, '')}`));
+      subProcess.stderr
+        .$flatMap(CodecUtil.lineParser({ trim: 'end' }))
+        .$map(line => `> ${line.replace(SUB_LOG_REGEX, '')}`)
+        .$forEach(line => this.#log.error(line));
     }
 
     if (debug && subProcess.stdout) {
-      CodecUtil.readLines(subProcess.stdout, line => this.#log.info(`> ${line.trimEnd().replace(SUB_LOG_REGEX, '')}`));
+      subProcess.stdout
+        .$flatMap(CodecUtil.lineParser({ trim: 'end' }))
+        .$map(line => `> ${line.replace(SUB_LOG_REGEX, '')}`)
+        .$forEach(line => this.#log.info(line));
     }
 
     return subProcess;
@@ -120,7 +126,7 @@ export class CompilerWatchFeature extends BaseFeature {
           connected = true;
           this.#log.info('Connected', state);
           const subProcess = this.run('event', ['all'], controller.signal);
-          await CodecUtil.readLines(subProcess.stdout!, line => {
+          await subProcess.stdout!.$flatMap(CodecUtil.lineParser()).$forEach(line => {
             let event: CompilerEvent;
             try {
               event = JSONUtil.fromUTF8(line);

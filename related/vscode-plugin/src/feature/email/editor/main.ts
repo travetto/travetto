@@ -72,10 +72,10 @@ export class EmailCompilerFeature extends BaseFeature {
     });
 
     if (this.#server.stderr) {
-      CodecUtil.readLines(this.#server.stderr, line => this.log.debug(`> stderr > ${line.trimEnd()}`));
+      this.#server.stderr.$flatMap(CodecUtil.lineParser({ trim: 'end' })).$forEach(line => this.log.debug(`> stderr > ${line}`));
     }
     if (this.#server.stdout) {
-      CodecUtil.readLines(this.#server.stdout, line => this.log.debug(`> stdout > ${line.trimEnd()}`));
+      this.#server.stdout.$flatMap(CodecUtil.lineParser({ trim: 'end' })).$forEach(line => this.log.debug(`> stdout > ${line}`));
     }
   }
 

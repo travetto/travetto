@@ -157,7 +157,9 @@ export class ParameterSelector {
             });
 
             if (subProcess.stdout) {
-              CodecUtil.readLines(subProcess.stdout, item => items.push({ label: item, description: item.trim().replace(/^[\\/]/, '') }));
+              subProcess.stdout
+                .$flatMap(CodecUtil.lineParser({ trim: 'all' }))
+                .$forEach(item => items.push({ label: item, description: item.replace(/^[\\/]/, '') }));
             }
             await ExecUtil.getResult(subProcess, { catch: true });
             quickPick.items = items;

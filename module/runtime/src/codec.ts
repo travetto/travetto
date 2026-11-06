@@ -1,22 +1,14 @@
-import { createInterface } from 'node:readline/promises';
-import { Readable } from 'node:stream';
-
 import { type BinaryArray, type BinaryType, BinaryUtil } from './binary.ts';
 import { RuntimeError } from './error.ts';
 import { type Any, castTo } from './types.ts';
 
 type TextInput = string | BinaryArray;
-type LinesInput = BinaryType | string | string[] | Promise<string | string[] | BinaryType>;
-type LinesHandler<T> = (input: string) => T | undefined | Promise<T | undefined>;
-type LinesOptions = {
-  signal?: AbortSignal;
-  onError?: (error?: unknown) => unknown;
-};
 
 const UTF8_DECODER = new TextDecoder('utf8');
 const UTF8_ENCODER = new TextEncoder();
 const DOUBLE_QUOTE = '"'.charCodeAt(0);
-const isStringArray = (input: unknown): input is string[] => Array.isArray(input) && typeof input[0] === 'string';
+const CARRIAGE_RETURN = '\r'.charCodeAt(0);
+const LINE_FEED = '\n'.charCodeAt(0);
 
 /**
  * Utilities for encoding and decoding common formats
@@ -112,7 +104,7 @@ export class CodecUtil {
   }
 
   /** Parse a single delimited line respecting RFC 4180 quotes */
-  static parseLine(line: string, delimiter = ','): string[] {
+  static parseCSVLine(line: string, delimiter = ','): string[] {
     const values: string[] = [];
     const current: number[] = [];
     let inQuotes = false;
@@ -140,53 +132,86 @@ export class CodecUtil {
     return values;
   }
 
+  /**
+   * Splits an array of Buffers into raw string lines and an optional
+   * trailing unresolved partial Buffer, handling both \n and \r\n line breaks.
+   */
+  static breakLines(previous: Buffer, incoming: Buffer): { lines: string[]; remainder: Buffer } {
+    const input = Buffer.concat([previous, incoming]);
+    if (!input.length) {
+      return { lines: [], remainder: Buffer.alloc(0) };
+    }
+
+    const lines: string[] = [];
+    let start = 0;
+    let eolIdx = input.indexOf(LINE_FEED, start);
+
+    while (eolIdx !== -1) {
+      let end = eolIdx;
+      // Strip CR if line ends with CRLF (\r\n)
+      if (end > start && input[end - 1] === CARRIAGE_RETURN) {
+        end -= 1;
+      }
+
+      lines.push(input.toString('utf8', start, end));
+
+      start = eolIdx + 1;
+      eolIdx = input.indexOf(LINE_FEED, start);
+    }
+
+    let remainder: Buffer = Buffer.alloc(0);
+
+    if (start < input.length) {
+      // Clone the unconsumed tail into a small independent Buffer
+      // so holding `remainder` does not prevent the full `input` Buffer from being GC'd.
+      remainder = Buffer.from(input.subarray(start));
+    }
+
+    return { lines, remainder };
+  }
+
   /** Simple CSV parser */
-  static csvParser<T>(options?: { separator?: string; fieldNames?: string[] }): (line: string) => T | undefined {
+  static csvParser<T>(options?: { separator?: string; fieldNames?: string[] }): (line: string) => T[] {
     let fieldNames: string[] = options?.fieldNames ?? [];
     let separator = options?.separator ?? '';
     return line => {
-      if (!line.trim()) {
-        return;
+      if (line.trim()) {
+        separator ||= line.split('\t').length > line.split(',').length ? '\t' : ',';
+        const items = CodecUtil.parseCSVLine(line, separator);
+        if (fieldNames.length === 0) {
+          fieldNames = items;
+        } else {
+          return [Object.fromEntries(fieldNames.map((key, i) => [key, items[i]])) as T];
+        }
       }
-      separator ||= line.split('\t').length > line.split(',').length ? '\t' : ',';
-      const items = CodecUtil.parseLine(line, separator);
-      if (fieldNames.length === 0) {
-        fieldNames = items;
-      } else {
-        return Object.fromEntries(fieldNames.map((key, i) => [key, items[i]])) as T;
-      }
+      return [];
     };
   }
 
-  /** Stream lines  */
-  static async *streamLines<T = string>(stream: LinesInput, handler?: LinesHandler<T>, options?: LinesOptions): AsyncIterable<T> {
-    const source = await stream;
-    const input = typeof source === 'string' || isStringArray(source) ? Readable.from(source) : BinaryUtil.toReadable(source);
+  /**
+   * Parse lines as a $flatMap compatible friend
+   */
+  static lineParser(options?: { trim?: 'all' | 'start' | 'end'; skipEmpty?: boolean }): (input: BinaryArray | string) => Promise<string[]> {
+    const skipEmpty = options?.skipEmpty ?? false;
+    const trim = options?.trim;
+    let remainder: Buffer = Buffer.alloc(0);
 
-    for await (const item of createInterface({ input, signal: options?.signal })) {
-      try {
-        const result = handler ? await handler(item) : item;
-        if (result === undefined) continue;
-        yield result as T;
-      } catch (error) {
-        if (options?.onError) {
-          const transformed = await options.onError(error);
-          if (transformed) {
-            throw transformed;
-          }
-        } else {
-          throw error;
-        }
+    return async function (input: BinaryArray | string): Promise<string[]> {
+      const inputBuffer = BinaryUtil.binaryArrayToBuffer(BinaryUtil.isBinaryArray(input) ? input : CodecUtil.fromUTF8String(input));
+      let lines: string[];
+      if (inputBuffer.length === 0) {
+        // Flush, we are done
+        lines = remainder.length ? [remainder.toString('utf8')] : [];
+      } else {
+        ({ lines, remainder } = CodecUtil.breakLines(remainder, inputBuffer));
       }
-    }
-  }
-
-  /** Read lines  */
-  static async readLines<T = string>(stream: LinesInput, handler?: LinesHandler<T>, options?: LinesOptions): Promise<T[]> {
-    const out: T[] = [];
-    for await (const item of this.streamLines(stream, handler, options)) {
-      out.push(item);
-    }
-    return out;
+      if (skipEmpty) {
+        lines = lines.filter(line => !!line.trim());
+      }
+      if (trim) {
+        lines = lines.map(line => (trim === 'all' ? line.trim() : trim === 'end' ? line.trimEnd() : line.trimStart()));
+      }
+      return lines;
+    };
   }
 }

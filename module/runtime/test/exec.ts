@@ -47,7 +47,7 @@ export class ExecUtilTest {
 
   @Test()
   async pipe() {
-    const src = await this.fixture.readBinaryStream('/logo.png');
+    const src = this.fixture.readBinaryStream('/logo.png');
 
     const process = spawn('gm', ['convert', '-resize', '100x', '-auto-orient', '-strip', '-quality', '86', '-', '-']);
 

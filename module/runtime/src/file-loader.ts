@@ -58,9 +58,9 @@ export class FileLoader {
    * Read a file as a stream
    * @param relativePath The path to read
    */
-  async readBinaryStream(relativePath: string): Promise<BinaryStream> {
+  async *readBinaryStream(relativePath: string): AsyncIterable<BinaryArray> {
     const file = await this.resolve(relativePath);
-    return createReadStream(file);
+    yield* createReadStream(file);
   }
 
   /**

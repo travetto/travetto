@@ -63,14 +63,10 @@ export class Terminal {
    */
   async streamLines(source: AsyncIterable<string | undefined>): Promise<void> {
     if (!this.#interactive) {
-      for await (const line of source) {
-        if (line !== undefined) {
-          await this.#writer.writeLine(`> ${line}`).commit();
-        }
-      }
+      await source.$filter(Boolean).$forEach(line => this.#writer.writeLine(`> ${line}`).commit());
     } else {
       await this.streamToBottom(
-        Util.mapAsyncIterable(source, line => `%WAIT% ${line}`),
+        source.$map(line => `%WAIT% ${line}`),
         { outputStreamToMain: true }
       );
     }

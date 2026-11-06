@@ -109,10 +109,11 @@ export class JSONUtilSuite {
 
   @Test()
   async verifyFromUTF8LinesWithAsyncIterable() {
-    const records = await CodecUtil.readLines(
-      this.fixture.readBinaryStream('sample.ndjson'),
-      JSONUtil.fromUTF8<{ id: number; name: string; active?: boolean; tags?: string[] }>
-    );
+    const records = await this.fixture
+      .readBinaryStream('sample.ndjson')
+      .$flatMap(CodecUtil.lineParser({ skipEmpty: true }))
+      .$map(JSONUtil.fromUTF8<{ id: number; name: string; active?: boolean; tags?: string[] }>)
+      .$toArray();
 
     assert.strictEqual(records.length, 3);
     assert.deepStrictEqual(records[0], { id: 1, name: 'first', active: true });
@@ -131,36 +132,21 @@ export class JSONUtilSuite {
       '{"identifier": 300, "message": "test"}'
     ].map(addNewline);
 
-    const records = await CodecUtil.readLines(lines, JSONUtil.fromUTF8<{ identifier: number; message: string }>);
+    const records = lines.filter(x => x.trim()).map(v => JSONUtil.fromUTF8<{ identifier: number; message: string }>(v));
 
     assert.strictEqual(records.length, 3);
     assert.deepStrictEqual(records[0], { identifier: 100, message: 'hello' });
     assert.deepStrictEqual(records[1], { identifier: 200, message: 'world' });
     assert.deepStrictEqual(records[2], { identifier: 300, message: 'test' });
-
-    const defaultRecords = await CodecUtil.readLines(lines, JSONUtil.fromUTF8<{}>);
-    assert.strictEqual(defaultRecords.length, 3);
-    assert.deepStrictEqual(defaultRecords[0], { identifier: 100, message: 'hello' });
-  }
-
-  @Test()
-  async verifyFromUTF8LinesEmpty() {
-    const emptyLines: string[] = ['', '   ', '\t', '\n'];
-    const records = await CodecUtil.readLines(emptyLines, JSONUtil.fromUTF8);
-    assert.strictEqual(records.length, 0);
-
-    const completelyEmpty: string[] = [];
-    const records2 = await CodecUtil.readLines(completelyEmpty, JSONUtil.fromUTF8);
-    assert.strictEqual(records2.length, 0);
   }
 
   @Test()
   async verifyFromUTF8LinesWithInvalidJSON() {
     const lines = ['{"valid": true}', '{"invalid":'].map(addNewline);
     const records: object[] = [];
-    await assert.rejects(async () => {
-      for await (const record of CodecUtil.streamLines(lines, JSONUtil.fromUTF8<object>)) {
-        records.push(record);
+    assert.throws(() => {
+      for (const record of lines) {
+        records.push(JSONUtil.fromUTF8<object>(record));
       }
     }, SyntaxError);
     assert.strictEqual(records.length, 1);

@@ -3,11 +3,11 @@ import type { ChildProcess } from 'node:child_process';
 import { CliModuleUtil } from '@travetto/cli';
 import type { IndexedModule } from '@travetto/manifest';
 import { AsyncQueue, CodecUtil, Env, ExecUtil, type ExecutionResult, Runtime, RuntimeIndex, Util } from '@travetto/runtime';
-import { type ProgressEvent, StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
+import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 
-const COLORS = [
-  ...([
+const COLORS = (
+  [
     '#8787ff',
     '#87afff',
     '#87d7ff',
@@ -58,8 +58,8 @@ const COLORS = [
     '#dadada',
     '#e4e4e4',
     '#eeeeee'
-  ] as const)
-]
+  ] as const
+)
   .toSorted(() => (Math.random() < 0.5 ? -1 : 1))
   .map(color => StyleUtil.getStyle(color));
 
@@ -145,10 +145,14 @@ export class RepoExecUtil {
           processes.set(module, subProcess);
 
           if (config.showStdout && subProcess.stdout) {
-            CodecUtil.readLines(subProcess.stdout, line => stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
+            subProcess.stdout
+              .$flatMap(CodecUtil.lineParser({ trim: 'end' }))
+              .$forEach(line => stdoutTerm.writer.writeLine(`${prefix}${line}`).commit());
           }
           if (config.showStderr && subProcess.stderr) {
-            CodecUtil.readLines(subProcess.stderr, line => stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
+            subProcess.stderr
+              .$flatMap(CodecUtil.lineParser({ trim: 'end' }))
+              .$forEach(line => stderrTerm.writer.writeLine(`${prefix}${line}`).commit());
           }
 
           const result = await ExecUtil.getResult(subProcess, { catch: true });
@@ -181,14 +185,13 @@ export class RepoExecUtil {
         stdoutTerm.streamList(activeItems);
       }
       await stdoutTerm.streamToBottom(
-        Util.mapAsyncIterable(
-          Util.mapAsyncIterable(work, (event): ProgressEvent<string> => {
+        work
+          .$map(event => {
             const message =
               config.progressMessage?.(modulesToRun[event.progress.completed]) ?? 'Completed %completed/%total (%failed failed)';
             return { ...event.progress, value: message };
-          }),
-          TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true })
-        )
+          })
+          .$map(TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true }))
       );
 
       if (stdoutTerm.interactive && config.showProgressList) {

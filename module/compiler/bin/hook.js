@@ -4,6 +4,10 @@ import { readFileSync } from 'node:fs';
 import module from 'node:module';
 import { fileURLToPath } from 'node:url';
 
+process.setSourceMapsEnabled(true); // Ensure source map during compilation/development
+process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps`; // Ensure it passes to children
+Error.stackTraceLimit = 50;
+
 const ogEmitWarning = process.emitWarning.bind(process);
 
 module.registerHooks({
