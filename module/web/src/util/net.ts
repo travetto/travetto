@@ -22,19 +22,19 @@ export class NetUtil {
   }
 
   /** Find free port */
-  static async getFreePort(): Promise<number> {
+  static async getFreePort(host: string = '127.0.0.1'): Promise<number> {
     return new Promise<number>((resolve, reject) => {
       const server = net.createServer();
       server.unref();
       server.on('error', reject);
 
-      server.listen({ port: 0 }, () => {
-        const addr = server.address();
-        if (!addr || typeof addr === 'string') {
+      server.listen({ port: 0, host }, () => {
+        const address = server.address();
+        if (!address || typeof address === 'string') {
           reject(new Error('Unable to get a free port'));
           return;
         }
-        const { port } = addr;
+        const { port } = address;
         server.close(() => {
           resolve(port);
         });
