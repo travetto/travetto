@@ -13,8 +13,17 @@ import { castTo, JSONUtil, Runtime, RuntimeError, ShutdownManager, Util } from '
 import type { SqliteModelConfig } from './config.ts';
 import { SqliteDialect } from './dialect.ts';
 
-const RECOVERABLE_MESSAGE = /database( table| schema)? is (locked|busy)/;
-const isRecoverableError = (error: unknown): error is Error => error instanceof Error && RECOVERABLE_MESSAGE.test(error.message);
+const RECOVERABLE_MESSAGE = /database( table| schema)? is (locked|busy)|database schema has changed|vtable constructor failed/i;
+const isRecoverableError = (error: unknown): error is Error => {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+  if (RECOVERABLE_MESSAGE.test(error.message)) {
+    return true;
+  }
+  const errorCode = 'errcode' in error && typeof error.errcode === 'number' ? error.errcode : undefined;
+  return errorCode === 5 /* SQLITE_BUSY */ || errorCode === 6 /* SQLITE_LOCKED */ || errorCode === 17; /* SQLITE_SCHEMA */
+};
 
 const normalizeParameter = (val: unknown) => {
   if (val === null) {
@@ -64,8 +73,14 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
     const file = path.resolve(this.config.file ?? Runtime.toolPath('@', 'sqlite_db'));
     await fs.mkdir(path.dirname(file), { recursive: true });
     const db = new DatabaseSync(file, this.config.options ?? {});
-    for (const q of ['PRAGMA foreign_keys = ON', 'PRAGMA journal_mode = WAL', 'PRAGMA synchronous = NORMAL']) {
-      await this.#withRetries(async () => db.exec(q));
+    const busyTimeout = this.config.busyTimeout ?? 10000;
+    for (const statement of [
+      'PRAGMA foreign_keys = ON',
+      'PRAGMA journal_mode = WAL',
+      'PRAGMA synchronous = NORMAL',
+      `PRAGMA busy_timeout = ${busyTimeout}`
+    ]) {
+      await this.#withRetries(async () => db.exec(statement));
     }
     // Register custom regex function for SQL regex support
     db.function('regexp', (pattern, value) => {
@@ -120,7 +135,8 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
    * Initializes the pool and sets connection pragma configuration
    */
   async init(): Promise<void> {
-    await this.#create();
+    const initial = await this.#create();
+    initial.close();
 
     this.#pool = createPool<DatabaseSync>(
       {
