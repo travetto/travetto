@@ -90,17 +90,11 @@ export class CompilerWatchFeature extends BaseFeature {
     });
 
     if (debug && subProcess.stderr) {
-      subProcess.stderr
-        .$flatMap(CodecUtil.toLines())
-        .$map(line => `> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`)
-        .$forEach(line => this.#log.error(line));
+      subProcess.stderr.$flatMap(CodecUtil.toLines()).$forEach(line => this.#log.error(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
     }
 
     if (debug && subProcess.stdout) {
-      subProcess.stdout
-        .$flatMap(CodecUtil.toLines())
-        .$map(line => `> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`)
-        .$forEach(line => this.#log.info(line));
+      subProcess.stdout.$flatMap(CodecUtil.toLines()).$forEach(line => this.#log.info(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
     }
 
     return subProcess;
