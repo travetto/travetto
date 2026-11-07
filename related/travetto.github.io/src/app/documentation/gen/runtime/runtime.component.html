@@ -286,7 +286,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 
 <h2 id="encoding-and-decoding-utilities">Encoding and Decoding Utilities</h2>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L14">CodecUtil</a> class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16">CodecUtil</a> class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
 <ul> <li>Hex</li>
 <li>Base64</li>
 <li>UTF8</li>
@@ -294,7 +294,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <li>Base64 Encoded JSON</li>
 <li>New Line Delimited UTF8</li>
 </ul>
-For processing line-oriented data streams (such as subprocess output or incoming binary/text streams), <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L14">CodecUtil</a> provides stream parsing helpers designed to work seamlessly with async stream operators:
+For processing line-oriented data streams (such as subprocess output or incoming binary/text streams), <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16">CodecUtil</a> provides stream parsing helpers designed to work seamlessly with async stream operators:
 <ul> <li><code class="item method">lineParser(options?)</code> produces a <code class="item method">$flatMap</code>-compatible chunk-to-line transformer that buffers across arbitrary chunk boundaries, handles carriage returns, and supports configurable trimming and blank line skipping.</li>
 <li><code class="item method">csvParser(options?)</code> produces a <code class="item method">$flatMap</code>-compatible line-to-record transformer that parses CSV or TSV lines into structured objects using the header row or provided field names.</li>
 <li><code class="item method">parseCSVLine(line, delimiter?)</code> parses individual CSV lines with support for quoted strings and custom delimiters.</li>

@@ -24,6 +24,8 @@ type ProgressState = { previous: number; bar: ProgressBar; cleanup: () => void }
 
 const SCOPE_MAX = 15;
 const SUB_LOG_REGEX = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(.\d{3})?Z?\s+(info|error|debug|warn)\s*/;
+const VALID_EVENT = ({ payload }: CompilerEvent) =>
+  !(typeof payload === 'object' && payload && 'workspace' in payload && payload.workspace !== Workspace.path);
 
 /**
  * Workspace Compilation Support
@@ -89,15 +91,15 @@ export class CompilerWatchFeature extends BaseFeature {
 
     if (debug && subProcess.stderr) {
       subProcess.stderr
-        .$flatMap(CodecUtil.lineParser({ trim: 'end' }))
-        .$map(line => `> ${line.replace(SUB_LOG_REGEX, '')}`)
+        .$flatMap(CodecUtil.toLines())
+        .$map(line => `> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`)
         .$forEach(line => this.#log.error(line));
     }
 
     if (debug && subProcess.stdout) {
       subProcess.stdout
-        .$flatMap(CodecUtil.lineParser({ trim: 'end' }))
-        .$map(line => `> ${line.replace(SUB_LOG_REGEX, '')}`)
+        .$flatMap(CodecUtil.toLines())
+        .$map(line => `> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`)
         .$forEach(line => this.#log.info(line));
     }
 
@@ -126,31 +128,24 @@ export class CompilerWatchFeature extends BaseFeature {
           connected = true;
           this.#log.info('Connected', state);
           const subProcess = this.run('event', ['all'], controller.signal);
-          await subProcess.stdout!.$flatMap(CodecUtil.lineParser()).$forEach(line => {
-            let event: CompilerEvent;
-            try {
-              event = JSONUtil.fromUTF8(line);
-            } catch (error) {
-              this.#log.error('Unable to process input as JSON', line);
-              throw error;
-            }
-            const { type, payload } = event;
-            if (typeof payload === 'object' && payload && 'workspace' in payload && payload.workspace !== Workspace.path) {
-              this.#log.debug('Ignoring compiler event for other workspace', payload.workspace);
-              return;
-            }
-            switch (type) {
-              case 'log':
-                this.#ongLogEvent(payload);
-                break;
-              case 'state':
-                this.#onStateEvent(payload);
-                break;
-              case 'progress':
-                this.#onProgressEvent(payload, controller.signal);
-                break;
-            }
-          });
+          await subProcess
+            .stdout!.$flatMap(CodecUtil.toLines())
+            .$map(JSONUtil.fromUTF8<CompilerEvent>)
+            .$onError(err => this.#log.error(`Unable to parse line: ${err}`))
+            .$filter(VALID_EVENT)
+            .$forEach(({ type, payload }) => {
+              switch (type) {
+                case 'log':
+                  this.#ongLogEvent(payload);
+                  break;
+                case 'state':
+                  this.#onStateEvent(payload);
+                  break;
+                case 'progress':
+                  this.#onProgressEvent(payload, controller.signal);
+                  break;
+              }
+            });
         }
       } catch (error) {
         this.#log.info('Failed to connect', `${error} `);

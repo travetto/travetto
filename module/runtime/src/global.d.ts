@@ -1,4 +1,5 @@
 import './types';
+import type { AsyncIterableOperators } from './async-iterable.ts';
 
 declare const write: unique symbol;
 
@@ -39,6 +40,9 @@ declare global {
      */
     interface ReadableStream {}
   }
+  interface Object extends AsyncIterableOperators<any> {}
+  interface AsyncIterable<T = unknown> extends AsyncIterableOperators<T> {} // Remove once async operators land
+  interface AsyncGenerator<T = unknown> extends AsyncIterableOperators<T> {} // Remove once async operators land
 }
 
 declare module 'buffer' {
@@ -70,6 +74,7 @@ declare module 'stream' {
    * @concrete node:stream#Readable
    */
   interface Readable {}
+  interface Readable extends AsyncIterableOperators {} // Remove once async operators land
 }
 
 declare module 'stream/web' {
@@ -77,4 +82,5 @@ declare module 'stream/web' {
    * @concrete node:stream/web#ReadableStream
    */
   interface ReadableStream {}
+  interface ReadableStream extends AsyncIterableOperators {} // Remove once async operators land
 }

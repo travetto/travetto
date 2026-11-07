@@ -1,6 +1,6 @@
 import { type BinaryArray, type BinaryType, BinaryUtil } from './binary.ts';
 import { RuntimeError } from './error.ts';
-import { type Any, castTo } from './types.ts';
+import { castTo } from './types.ts';
 
 type TextInput = string | BinaryArray;
 
@@ -82,16 +82,8 @@ export class CodecUtil {
     }
   }
 
-  /** Read chunk as utf8 if not a binary array */
-  static readUtf8Chunk(chunk: Any): BinaryArray {
-    return BinaryUtil.isBinaryArray(chunk) ? chunk : this.fromUTF8String(typeof chunk === 'string' ? chunk : `${chunk}`);
-  }
-
   /** Read chunk, default to toString if type is unknown  */
-  static readChunk(chunk: Any, encoding?: string | null): BinaryArray {
-    if (!encoding) {
-      return this.readUtf8Chunk(chunk);
-    }
+  static readChunk(chunk: unknown, encoding?: string | null): BinaryArray {
     return BinaryUtil.isBinaryArray(chunk)
       ? chunk
       : Buffer.from(typeof chunk === 'string' ? chunk : `${chunk}`, castTo(encoding ?? 'utf8'));
@@ -103,43 +95,18 @@ export class CodecUtil {
     return data?.substring(0, end && end < 0 ? undefined : end)?.trim() ?? defaultValue;
   }
 
-  /** Parse a single delimited line respecting RFC 4180 quotes */
-  static parseCSVLine(line: string, delimiter = ','): string[] {
-    const values: string[] = [];
-    const current: number[] = [];
-    let inQuotes = false;
-    const delimiterCode = delimiter.charCodeAt(0);
-
-    for (let i = 0; i < line.length; i += 1) {
-      const charCode = line.charCodeAt(i);
-      if (charCode === DOUBLE_QUOTE) {
-        if (inQuotes && line.charCodeAt(i + 1) === DOUBLE_QUOTE) {
-          i += 1; // Skip next quote
-        } else {
-          inQuotes = !inQuotes;
-          continue;
-        }
-      }
-
-      if (charCode === delimiterCode && !inQuotes) {
-        values.push(String.fromCharCode(...current).trim());
-        current.splice(0, current.length);
-      } else {
-        current.push(charCode);
-      }
-    }
-    values.push(String.fromCharCode(...current).trim());
-    return values;
-  }
-
   /**
    * Splits an array of Buffers into raw string lines and an optional
    * trailing unresolved partial Buffer, handling both \n and \r\n line breaks.
    */
-  static breakLines(previous: Buffer, incoming: Buffer): { lines: string[]; remainder: Buffer } {
-    const input = Buffer.concat([previous, incoming]);
-    if (!input.length) {
-      return { lines: [], remainder: Buffer.alloc(0) };
+  static readLines(previous: BinaryArray, incoming: TextInput): { lines: string[]; remainder: BinaryArray; done?: boolean } {
+    const input = Buffer.concat([
+      BinaryUtil.binaryArrayToBuffer(previous),
+      BinaryUtil.binaryArrayToBuffer(BinaryUtil.isBinaryArray(incoming) ? incoming : CodecUtil.fromUTF8String(incoming))
+    ]);
+
+    if (!input.byteLength) {
+      return { done: true, lines: previous.byteLength ? [CodecUtil.toUTF8String(previous)] : [], remainder: Buffer.alloc(0) };
     }
 
     const lines: string[] = [];
@@ -167,51 +134,67 @@ export class CodecUtil {
       remainder = Buffer.from(input.subarray(start));
     }
 
-    return { lines, remainder };
-  }
-
-  /** Simple CSV parser */
-  static csvParser<T>(options?: { separator?: string; fieldNames?: string[] }): (line: string) => T[] {
-    let fieldNames: string[] = options?.fieldNames ?? [];
-    let separator = options?.separator ?? '';
-    return line => {
-      if (line.trim()) {
-        separator ||= line.split('\t').length > line.split(',').length ? '\t' : ',';
-        const items = CodecUtil.parseCSVLine(line, separator);
-        if (fieldNames.length === 0) {
-          fieldNames = items;
-        } else {
-          return [Object.fromEntries(fieldNames.map((key, i) => [key, items[i]])) as T];
-        }
-      }
-      return [];
-    };
+    return { lines, remainder, done: false };
   }
 
   /**
    * Parse lines as a $flatMap compatible friend
    */
-  static lineParser(options?: { trim?: 'all' | 'start' | 'end'; skipEmpty?: boolean }): (input: BinaryArray | string) => Promise<string[]> {
+  static toLines(options?: { skipEmpty?: boolean }): (input: unknown) => string[] {
     const skipEmpty = options?.skipEmpty ?? false;
-    const trim = options?.trim;
-    let remainder: Buffer = Buffer.alloc(0);
-
-    return async function (input: BinaryArray | string): Promise<string[]> {
-      const inputBuffer = BinaryUtil.binaryArrayToBuffer(BinaryUtil.isBinaryArray(input) ? input : CodecUtil.fromUTF8String(input));
-      let lines: string[];
-      if (inputBuffer.length === 0) {
-        // Flush, we are done
-        lines = remainder.length ? [remainder.toString('utf8')] : [];
-      } else {
-        ({ lines, remainder } = CodecUtil.breakLines(remainder, inputBuffer));
-      }
-      if (skipEmpty) {
-        lines = lines.filter(line => !!line.trim());
-      }
-      if (trim) {
-        lines = lines.map(line => (trim === 'all' ? line.trim() : trim === 'end' ? line.trimEnd() : line.trimStart()));
-      }
-      return lines;
+    let remainder: BinaryArray = Buffer.alloc(0);
+    return function (input: unknown): string[] {
+      const result = CodecUtil.readLines(remainder, CodecUtil.readChunk(input));
+      remainder = result.remainder;
+      return result.lines.filter(line => !skipEmpty || !!line.trim());
     };
+  }
+
+  /** Parse a single delimited line respecting RFC 4180 quotes */
+  static readCSVLine(line: string, delimiter = ','): string[] {
+    const values: string[] = [];
+    const current: number[] = [];
+    let inQuotes = false;
+    const delimiterCode = delimiter.charCodeAt(0);
+
+    for (let i = 0; i < line.length; i += 1) {
+      const charCode = line.charCodeAt(i);
+      if (charCode === DOUBLE_QUOTE) {
+        if (inQuotes && line.charCodeAt(i + 1) === DOUBLE_QUOTE) {
+          i += 1; // Skip next quote
+        } else {
+          inQuotes = !inQuotes;
+          continue;
+        }
+      }
+
+      if (charCode === delimiterCode && !inQuotes) {
+        values.push(String.fromCharCode(...current).trim());
+        current.splice(0, current.length);
+      } else {
+        current.push(charCode);
+      }
+    }
+    values.push(String.fromCharCode(...current).trim());
+    return values;
+  }
+
+  /** Simple CSV parser */
+  static fromCSV<T>(options?: { separator?: string; fieldNames?: string[] }): (data: unknown) => T[] {
+    let fieldNames: string[] = options?.fieldNames ?? [];
+    let separator = options?.separator;
+    const readLines = CodecUtil.toLines({ skipEmpty: true });
+
+    return data =>
+      readLines(data).flatMap(line => {
+        separator ??= line.split('\t').length > line.split(',').length ? '\t' : ',';
+        const items = CodecUtil.readCSVLine(line, separator);
+        if (fieldNames.length === 0) {
+          fieldNames = items;
+          return [];
+        } else {
+          return [Object.fromEntries(fieldNames.map((key, i) => [key, items[i]])) as T];
+        }
+      });
   }
 }

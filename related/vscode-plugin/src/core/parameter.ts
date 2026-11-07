@@ -158,7 +158,8 @@ export class ParameterSelector {
 
             if (subProcess.stdout) {
               subProcess.stdout
-                .$flatMap(CodecUtil.lineParser({ trim: 'all' }))
+                .$flatMap(CodecUtil.toLines())
+                .$map(item => item.trim())
                 .$forEach(item => items.push({ label: item, description: item.replace(/^[\\/]/, '') }));
             }
             await ExecUtil.getResult(subProcess, { catch: true });

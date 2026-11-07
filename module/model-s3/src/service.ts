@@ -186,7 +186,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBulkSupport, Model
     };
     try {
       for await (const chunk of BinaryUtil.toBinaryStream(input)) {
-        const chunked = CodecUtil.readUtf8Chunk(chunk);
+        const chunked = CodecUtil.readChunk(chunk);
         buffers.push(chunked);
         total += chunked.byteLength;
         if (total > this.config.chunkSize) {

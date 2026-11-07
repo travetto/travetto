@@ -2,7 +2,7 @@ import { createReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { type BinaryArray, type BinaryStream, BinaryUtil } from './binary.ts';
+import { type BinaryArray, BinaryUtil } from './binary.ts';
 import { RuntimeError } from './error.ts';
 
 /**

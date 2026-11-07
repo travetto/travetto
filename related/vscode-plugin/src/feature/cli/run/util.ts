@@ -21,8 +21,7 @@ export class CliRunUtil {
    * @param choice
    */
   static #buildChoiceDetail(choice: RunChoice): string {
-    const detail = [CodecUtil.readFirstLine(choice.description ?? '')];
-    const out = detail.filter(Boolean).join(' ').trim();
+    const out = CodecUtil.readFirstLine(choice.description ?? '').trim();
     return out ? `${'\u00A0'.repeat(4)}${out}` : out;
   }
 

@@ -68,6 +68,7 @@ export class ExecUtil {
   ): Promise<ExecutionResult<T>> {
     const typed: ChildProcess & { [ResultSymbol]?: Promise<ExecutionResult> } = subProcess;
     const result = (typed[ResultSymbol] ??= new Promise<ExecutionResult>(resolve => {
+      const encoding = subProcess.stdout?.readableEncoding ?? subProcess.stderr?.readableEncoding;
       const stdout: BinaryArray[] = [];
       const stderr: BinaryArray[] = [];
       let done = false;
@@ -83,19 +84,18 @@ export class ExecUtil {
         };
 
         const final = {
-          stdout: options.binary ? buffers.stdout : buffers.stdout.toString(subProcess.stdout?.readableEncoding ?? 'utf8'),
-          stderr: options.binary ? buffers.stderr : buffers.stderr.toString(subProcess.stderr?.readableEncoding ?? 'utf8'),
+          stdout: options.binary ? buffers.stdout : buffers.stdout.toString(encoding ?? 'utf8'),
+          stderr: options.binary ? buffers.stderr : buffers.stderr.toString(encoding ?? 'utf8'),
           ...finalResult
         };
 
         resolve(!final.valid ? { ...final, message: `${final.message || final.stderr || final.stdout || 'failed'}` } : final);
       };
 
-      subProcess.stdout?.on('data', data => stdout.push(CodecUtil.readChunk(data, subProcess.stdout?.readableEncoding)));
-      subProcess.stderr?.on('data', data => stderr.push(CodecUtil.readChunk(data, subProcess.stderr?.readableEncoding)));
+      subProcess.stdout?.$forEach(data => stdout.push(CodecUtil.readChunk(data, encoding)));
+      subProcess.stderr?.$forEach(data => stderr.push(CodecUtil.readChunk(data, encoding)));
 
       subProcess.on('error', (error: Error) => finish({ code: 1, message: error.message, valid: false }));
-
       subProcess.on('close', (code: number) => finish({ code, valid: code === null || code === 0 }));
 
       if (subProcess.exitCode !== null) {
