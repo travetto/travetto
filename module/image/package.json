@@ -1,6 +1,6 @@
 {
   "name": "@travetto/image",
-  "version": "8.1.0-rc.2",
+  "version": "8.1.0-rc.3",
   "description": "Image support, resizing, and optimization",
   "keywords": [
     "images",
@@ -27,7 +27,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/runtime": "^8.1.0-rc.2",
+    "@travetto/runtime": "^8.1.0-rc.3",
     "sharp": "^0.35.5"
   },
   "travetto": {
