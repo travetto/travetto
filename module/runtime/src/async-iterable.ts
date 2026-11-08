@@ -29,10 +29,10 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
 
   onError(onError: (error: unknown) => Promise<unknown> | unknown): AsyncIterableOperators<Exclude<T, undefined>> {
     const { target } = this;
-    return new AsyncIterableOperators<Exclude<T, undefined>>(async function* () {
+    return new AsyncIterableOperators(async function* () {
       for await (const item of target()) {
         try {
-          yield item;
+          yield item as Exclude<T, undefined>;
         } catch (error) {
           onError(error);
         }
@@ -60,7 +60,7 @@ try {
   Object.defineProperties(Object.prototype, {
     $: {
       get() {
-        return new AsyncIterableOperators(this);
+        return new AsyncIterableOperators(() => this);
       }
     }
   });

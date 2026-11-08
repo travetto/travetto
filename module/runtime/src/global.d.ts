@@ -1,9 +1,7 @@
 import './types';
 import type { AsyncIterableOperators } from './async-iterable.ts';
 
-interface AsyncIterableProvider<T = unknown> {
-  $: AsyncIterableOperators<T>;
-}
+type AsyncIterableProvider<T = unknown> = { $: AsyncIterableOperators<T> };
 
 declare const write: unique symbol;
 
@@ -78,7 +76,6 @@ declare module 'stream' {
    * @concrete node:stream#Readable
    */
   interface Readable {}
-  interface Readable extends AsyncIterableProvider {} // Remove once async operators land
 }
 
 declare module 'stream/web' {
@@ -86,5 +83,4 @@ declare module 'stream/web' {
    * @concrete node:stream/web#ReadableStream
    */
   interface ReadableStream {}
-  interface ReadableStream extends AsyncIterableProvider {} // Remove once async operators land
 }
