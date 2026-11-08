@@ -29,6 +29,10 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
     for await (const item of this) await visit(item);
   }
 
+  async drain(): Promise<void> {
+    for await (const _ of this) null;
+  }
+
   onError(onError: (error: unknown) => Promise<unknown> | unknown): AsyncIterableOperators<Exclude<T, undefined>> {
     const { target } = this;
     return new AsyncIterableOperators(async function* () {

@@ -2,7 +2,7 @@ import type { ChildProcess } from 'node:child_process';
 
 import { CliModuleUtil } from '@travetto/cli';
 import type { IndexedModule } from '@travetto/manifest';
-import { AsyncQueue, CodecUtil, Env, ExecUtil, type ExecutionResult, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { AsyncQueue, Env, ExecUtil, type ExecutionResult, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 
@@ -144,11 +144,11 @@ export class RepoExecUtil {
           const subProcess = operation(module);
           processes.set(module, subProcess);
 
-          if (config.showStdout && subProcess.stdout) {
-            subProcess.stdout.$$.lines().forEach(line => stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
+          if (config.showStdout) {
+            subProcess.stdout?.$$.lines().forEach(line => stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
           }
-          if (config.showStderr && subProcess.stderr) {
-            subProcess.stderr.$$.lines().forEach(line => stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
+          if (config.showStderr) {
+            subProcess.stderr?.$$.lines().forEach(line => stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
           }
 
           const result = await ExecUtil.getResult(subProcess, { catch: true });
@@ -197,9 +197,7 @@ export class RepoExecUtil {
           .commit();
       }
     } else {
-      for await (const _ of work) {
-        // Ensure its all consumed
-      }
+      await work.$$.drain();
     }
 
     return results;
