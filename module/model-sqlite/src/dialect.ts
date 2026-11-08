@@ -263,11 +263,11 @@ WHERE type='index' AND tbl_name=?;
   getDropTablesSQL(tableContexts: TableContext[]): string {
     const tableNames: string[] = [];
     for (const context of tableContexts) {
-      tableNames.push(this.escapeIdentifier(context.tableName));
       const textFields = this.getTextSearchFields(context);
       if (textFields.length > 0) {
         tableNames.push(this.escapeIdentifier(`${context.tableName}_fts`));
       }
+      tableNames.push(this.escapeIdentifier(context.tableName));
     }
     const uniqueTableNames = [...new Set(tableNames)];
     if (uniqueTableNames.length === 0) {

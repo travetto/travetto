@@ -24,8 +24,14 @@ export class SqliteModelService extends BaseSQLModelService {
 
   async upsertTable<T extends ModelType>(tableContext: TableContext<T>): Promise<void> {
     await super.upsertTable(tableContext);
-    for (const sql of this.dialect.getCreateTextSearchIndexSQLs(tableContext)) {
-      await this.connection.execute(sql);
+    const textFields = this.dialect.getTextSearchFields(tableContext);
+    if (textFields.length > 0) {
+      const ftsContext: TableContext<T> = { ...tableContext, tableName: `${tableContext.tableName}_fts` };
+      if (!(await this.doesTableExist(ftsContext))) {
+        for (const statement of this.dialect.getCreateTextSearchIndexSQLs(tableContext)) {
+          await this.connection.execute(statement);
+        }
+      }
     }
   }
 }
