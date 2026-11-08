@@ -65,6 +65,11 @@ export class SqliteModelConfig {
   file?: string;
 
   /**
+   * Milliseconds to wait when database is busy or locked
+   */
+  busyTimeout: number = 10000;
+
+  /**
    * Custom options
    */
   options?: DatabaseSyncOptions;

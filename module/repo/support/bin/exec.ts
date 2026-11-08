@@ -2,12 +2,12 @@ import type { ChildProcess } from 'node:child_process';
 
 import { CliModuleUtil } from '@travetto/cli';
 import type { IndexedModule } from '@travetto/manifest';
-import { AsyncQueue, CodecUtil, Env, ExecUtil, type ExecutionResult, Runtime, RuntimeIndex, Util } from '@travetto/runtime';
-import { type ProgressEvent, StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
+import { AsyncQueue, Env, ExecUtil, type ExecutionResult, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 
-const COLORS = [
-  ...([
+const COLORS = (
+  [
     '#8787ff',
     '#87afff',
     '#87d7ff',
@@ -58,8 +58,8 @@ const COLORS = [
     '#dadada',
     '#e4e4e4',
     '#eeeeee'
-  ] as const)
-]
+  ] as const
+)
   .toSorted(() => (Math.random() < 0.5 ? -1 : 1))
   .map(color => StyleUtil.getStyle(color));
 
@@ -102,8 +102,8 @@ export class RepoExecUtil {
     operation: (module: IndexedModule) => ChildProcess,
     config: ModuleRunConfig = {}
   ): Promise<Map<IndexedModule, ExecutionResult>> {
-    config.showStdout = config.showStdout ?? (Env.DEBUG.isSet && !Env.DEBUG.isFalse);
-    config.showStderr = config.showStderr ?? true;
+    config.showStdout ??= Env.DEBUG.isSet && !Env.DEBUG.isFalse;
+    config.showStderr ??= true;
 
     const workerCount = config.workerCount ?? WorkPool.DEFAULT_SIZE;
 
@@ -144,11 +144,11 @@ export class RepoExecUtil {
           const subProcess = operation(module);
           processes.set(module, subProcess);
 
-          if (config.showStdout && subProcess.stdout) {
-            CodecUtil.readLines(subProcess.stdout, line => stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
+          if (config.showStdout) {
+            subProcess.stdout?.$$.lines().forEach(line => stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
           }
-          if (config.showStderr && subProcess.stderr) {
-            CodecUtil.readLines(subProcess.stderr, line => stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
+          if (config.showStderr) {
+            subProcess.stderr?.$$.lines().forEach(line => stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
           }
 
           const result = await ExecUtil.getResult(subProcess, { catch: true });
@@ -181,14 +181,11 @@ export class RepoExecUtil {
         stdoutTerm.streamList(activeItems);
       }
       await stdoutTerm.streamToBottom(
-        Util.mapAsyncIterable(
-          Util.mapAsyncIterable(work, (event): ProgressEvent<string> => {
-            const message =
-              config.progressMessage?.(modulesToRun[event.progress.completed]) ?? 'Completed %completed/%total (%failed failed)';
-            return { ...event.progress, value: message };
-          }),
-          TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true })
-        )
+        work.$$.map(event => {
+          const message =
+            config.progressMessage?.(modulesToRun[event.progress.completed]) ?? 'Completed %completed/%total (%failed failed)';
+          return { ...event.progress, value: message };
+        }).map(TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true }))
       );
 
       if (stdoutTerm.interactive && config.showProgressList) {
@@ -200,9 +197,7 @@ export class RepoExecUtil {
           .commit();
       }
     } else {
-      for await (const _ of work) {
-        // Ensure its all consumed
-      }
+      await work.$$.drain();
     }
 
     return results;

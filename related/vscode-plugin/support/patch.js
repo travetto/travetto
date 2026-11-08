@@ -1,12 +1,11 @@
 import fs from 'node:fs/promises';
 
-if (process.env.NODE_ENV !== 'production') {
-  process.setSourceMapsEnabled(true); // Ensure source map during compilation/development
-  process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps`; // Ensure it passes to children
-  Error.stackTraceLimit = 50;
-}
+try {
+  // @ts-expect-error - Fix vscode navigator problem
+  delete globalThis.navigator;
+} catch {}
 
-// polyfills
+// polyfills until VSCode gets to Node 26.10+
 if (!globalThis.Temporal) {
   // For anyone that doesn't have it
   void import('temporal-polyfill-lite/global');

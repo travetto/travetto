@@ -22,6 +22,7 @@ Runtime is the foundation of all <a target="_blank" class="external-link" href="
 <li>Console Management</li>
 <li>Resource Access</li>
 <li>Encoding and Decoding Utilities</li>
+<li>Async Stream and Iterator Operators</li>
 <li>Binary Utilities</li>
 <li>JSON Utilities</li>
 <li>Common Utilities</li>
@@ -286,7 +287,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 
 <h2 id="encoding-and-decoding-utilities">Encoding and Decoding Utilities</h2>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L24">CodecUtil</a> class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16">CodecUtil</a> class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
 <ul> <li>Hex</li>
 <li>Base64</li>
 <li>UTF8</li>
@@ -294,10 +295,29 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <li>Base64 Encoded JSON</li>
 <li>New Line Delimited UTF8</li>
 </ul>
+For processing line-oriented data streams (such as subprocess output or incoming binary/text streams), <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16">CodecUtil</a> provides stream parsing helpers designed to work seamlessly with async stream operators:
+<ul> <li><code class="item method">toLines(options?)</code> produces a <code class="item method">flatMap</code>-compatible chunk-to-line transformer that buffers across arbitrary chunk boundaries, handles carriage returns, and supports configurable trimming and blank line skipping.</li>
+<li><code class="item method">fromCSV(options?)</code> produces a <code class="item method">flatMap</code>-compatible line-to-record transformer that parses CSV or TSV lines into structured objects using the header row or provided field names.</li>
+<li><code class="item method">readCSVLine(line, delimiter?)</code> parses individual CSV lines with support for quoted strings and custom delimiters.</li>
+</ul>
+
+<h2 id="async-stream-and-iterator-operators">Async Stream and Iterator Operators</h2>
+
+The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration) via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L8">AsyncIterableOperators</a> class. Any readable stream, async generator, or async iterable exposes these fluent transformations through the <code class="item field">$$</code> property accessor:
+<ul> <li><code class="item method">map(transform)</code> - Transforms each item asynchronously or synchronously.</li>
+<li><code class="item method">filter(predicate)</code> - Filters items using a synchronous or asynchronous predicate.</li>
+<li><code class="item method">flatMap(transform)</code> - Transforms each item into an array or async result and flattens into the output stream.</li>
+<li><code class="item method">lines(options?)</code> - Splits chunked binary or text input into discrete lines via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16">CodecUtil</a>.</li>
+<li><code class="item method">forEach(visit)</code> - Executes a visitor function for every stream item.</li>
+<li><code class="item method">drain()</code> - Consumes all items from the stream without processing them.</li>
+<li><code class="item method">onError(handler)</code> - Catches iteration errors, invoking the callback and continuing the stream.</li>
+<li><code class="item method">toArray()</code> - Asynchronously collects all items into an array.</li>
+<li><code class="item method">toBinaryArray()</code> - Concatenates stream chunks into a single binary array.</li>
+</ul>
 
 <h2 id="common-utilities">Common Utilities</h2>
 
-Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L16">Util</a> includes:
+Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L13">Util</a> includes:
 <ul> <li><code class="item method">uuid(len: number)</code> generates a simple uuid for use within the application.</li>
 <li><code class="item method">allowDenyMatcher(rules[])</code> builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters. Negative rules are prefixed by '!'.</li>
 <li><code class="item method">hash(text: string, size?: number)</code> produces a full sha512 hash.</li>

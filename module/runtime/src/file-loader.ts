@@ -2,7 +2,7 @@ import { createReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { type BinaryArray, type BinaryStream, BinaryUtil } from './binary.ts';
+import { type BinaryArray, BinaryUtil } from './binary.ts';
 import { RuntimeError } from './error.ts';
 
 /**
@@ -58,9 +58,9 @@ export class FileLoader {
    * Read a file as a stream
    * @param relativePath The path to read
    */
-  async readBinaryStream(relativePath: string): Promise<BinaryStream> {
+  async *readBinaryStream(relativePath: string): AsyncIterable<BinaryArray> {
     const file = await this.resolve(relativePath);
-    return createReadStream(file);
+    yield* createReadStream(file);
   }
 
   /**

@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import * as vscode from 'vscode';
 
-import { CodecUtil, Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
+import { Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
 
 import type {
   CompilerEvent,
@@ -24,6 +24,8 @@ type ProgressState = { previous: number; bar: ProgressBar; cleanup: () => void }
 
 const SCOPE_MAX = 15;
 const SUB_LOG_REGEX = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(.\d{3})?Z?\s+(info|error|debug|warn)\s*/;
+const VALID_EVENT = ({ payload }: CompilerEvent) =>
+  !(typeof payload === 'object' && payload && 'workspace' in payload && payload.workspace !== Workspace.path);
 
 /**
  * Workspace Compilation Support
@@ -88,11 +90,11 @@ export class CompilerWatchFeature extends BaseFeature {
     });
 
     if (debug && subProcess.stderr) {
-      CodecUtil.readLines(subProcess.stderr, line => this.#log.error(`> ${line.trimEnd().replace(SUB_LOG_REGEX, '')}`));
+      subProcess.stderr.$$.lines().forEach(line => this.#log.error(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
     }
 
     if (debug && subProcess.stdout) {
-      CodecUtil.readLines(subProcess.stdout, line => this.#log.info(`> ${line.trimEnd().replace(SUB_LOG_REGEX, '')}`));
+      subProcess.stdout.$$.lines().forEach(line => this.#log.info(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
     }
 
     return subProcess;
@@ -120,31 +122,24 @@ export class CompilerWatchFeature extends BaseFeature {
           connected = true;
           this.#log.info('Connected', state);
           const subProcess = this.run('event', ['all'], controller.signal);
-          await CodecUtil.readLines(subProcess.stdout!, line => {
-            let event: CompilerEvent;
-            try {
-              event = JSONUtil.fromUTF8(line);
-            } catch (error) {
-              this.#log.error('Unable to process input as JSON', line);
-              throw error;
-            }
-            const { type, payload } = event;
-            if (typeof payload === 'object' && payload && 'workspace' in payload && payload.workspace !== Workspace.path) {
-              this.#log.debug('Ignoring compiler event for other workspace', payload.workspace);
-              return;
-            }
-            switch (type) {
-              case 'log':
-                this.#ongLogEvent(payload);
-                break;
-              case 'state':
-                this.#onStateEvent(payload);
-                break;
-              case 'progress':
-                this.#onProgressEvent(payload, controller.signal);
-                break;
-            }
-          });
+          await subProcess
+            .stdout!.$$.lines()
+            .map<CompilerEvent>(JSONUtil.fromUTF8)
+            .onError(err => this.#log.error(`Unable to parse line: ${err}`))
+            .filter(VALID_EVENT)
+            .forEach(({ type, payload }) => {
+              switch (type) {
+                case 'log':
+                  this.#ongLogEvent(payload);
+                  break;
+                case 'state':
+                  this.#onStateEvent(payload);
+                  break;
+                case 'progress':
+                  this.#onProgressEvent(payload, controller.signal);
+                  break;
+              }
+            });
         }
       } catch (error) {
         this.#log.info('Failed to connect', `${error} `);

@@ -1,6 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, d } from '@travetto/doc';
 import {
+  AsyncIterableOperators,
   BinaryUtil,
   CodecUtil,
   ConsoleManager,
@@ -29,6 +30,7 @@ export const text = (
       <li>Console Management</li>
       <li>Resource Access</li>
       <li>Encoding and Decoding Utilities</li>
+      <li>Async Stream and Iterator Operators</li>
       <li>Binary Utilities</li>
       <li>JSON Utilities</li>
       <li>Common Utilities</li>
@@ -161,6 +163,37 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
         <li>UTT8 Encoded JSON</li>
         <li>Base64 Encoded JSON</li>
         <li>New Line Delimited UTF8</li>
+      </ul>
+      For processing line-oriented data streams (such as subprocess output or incoming binary/text streams), {CodecUtil} provides stream
+      parsing helpers designed to work seamlessly with async stream operators:
+      <ul>
+        <li>
+          {d.method('toLines(options?)')} produces a {d.method('flatMap')}-compatible chunk-to-line transformer that buffers across
+          arbitrary chunk boundaries, handles carriage returns, and supports configurable trimming and blank line skipping.
+        </li>
+        <li>
+          {d.method('fromCSV(options?)')} produces a {d.method('flatMap')}-compatible line-to-record transformer that parses CSV or TSV
+          lines into structured objects using the header row or provided field names.
+        </li>
+        <li>
+          {d.method('readCSVLine(line, delimiter?)')} parses individual CSV lines with support for quoted strings and custom delimiters.
+        </li>
+      </ul>
+    </c.Section>
+    <c.Section title="Async Stream and Iterator Operators">
+      The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration) via
+      the {AsyncIterableOperators} class. Any readable stream, async generator, or async iterable exposes these fluent transformations
+      through the {d.field('$$')} property accessor:
+      <ul>
+        <li>{d.method('map(transform)')} - Transforms each item asynchronously or synchronously.</li>
+        <li>{d.method('filter(predicate)')} - Filters items using a synchronous or asynchronous predicate.</li>
+        <li>{d.method('flatMap(transform)')} - Transforms each item into an array or async result and flattens into the output stream.</li>
+        <li>{d.method('lines(options?)')} - Splits chunked binary or text input into discrete lines via {CodecUtil}.</li>
+        <li>{d.method('forEach(visit)')} - Executes a visitor function for every stream item.</li>
+        <li>{d.method('drain()')} - Consumes all items from the stream without processing them.</li>
+        <li>{d.method('onError(handler)')} - Catches iteration errors, invoking the callback and continuing the stream.</li>
+        <li>{d.method('toArray()')} - Asynchronously collects all items into an array.</li>
+        <li>{d.method('toBinaryArray()')} - Concatenates stream chunks into a single binary array.</li>
       </ul>
     </c.Section>
     <c.Section title="Common Utilities">

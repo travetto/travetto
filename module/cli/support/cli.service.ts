@@ -63,8 +63,8 @@ export class CliServiceCommand implements CliCommandShape {
       .then(() => queue.close());
 
     if (this.quiet) {
-      for await (const _ of queue) {
-      }
+      await queue.$$.drain();
+
       if (failureMessages.length) {
         console.error('Failure');
         failureMessages.map(stripVTControlCharacters).map(item => console.error(item));

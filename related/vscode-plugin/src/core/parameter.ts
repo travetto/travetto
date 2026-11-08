@@ -5,7 +5,7 @@ import path from 'node:path';
 import * as vscode from 'vscode';
 
 import type { CliCommandInput } from '@travetto/cli';
-import { CodecUtil, ExecUtil } from '@travetto/runtime';
+import { ExecUtil } from '@travetto/runtime';
 
 import { Workspace } from './workspace.ts';
 
@@ -157,7 +157,9 @@ export class ParameterSelector {
             });
 
             if (subProcess.stdout) {
-              CodecUtil.readLines(subProcess.stdout, item => items.push({ label: item, description: item.trim().replace(/^[\\/]/, '') }));
+              subProcess.stdout.$$.lines().forEach(item =>
+                items.push({ label: item.trim(), description: item.trim().replace(/^[\\/]/, '') })
+              );
             }
             await ExecUtil.getResult(subProcess, { catch: true });
             quickPick.items = items;

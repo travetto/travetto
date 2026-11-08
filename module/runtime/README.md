@@ -20,6 +20,7 @@ Runtime is the foundation of all [Travetto](https://travetto.dev) applications. 
    *  Console Management
    *  Resource Access
    *  Encoding and Decoding Utilities
+   *  Async Stream and Iterator Operators
    *  Binary Utilities
    *  JSON Utilities
    *  Common Utilities
@@ -258,7 +259,7 @@ The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/s
 The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L134)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Encoding and Decoding Utilities
-The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L24) class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
+The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16) class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
    *  Hex
    *  Base64
    *  UTF8
@@ -266,8 +267,25 @@ The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/sr
    *  Base64 Encoded JSON
    *  New Line Delimited UTF8
 
+For processing line-oriented data streams (such as subprocess output or incoming binary/text streams), [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16) provides stream parsing helpers designed to work seamlessly with async stream operators:
+   *  `toLines(options?)` produces a `flatMap`-compatible chunk-to-line transformer that buffers across arbitrary chunk boundaries, handles carriage returns, and supports configurable trimming and blank line skipping.
+   *  `fromCSV(options?)` produces a `flatMap`-compatible line-to-record transformer that parses CSV or TSV lines into structured objects using the header row or provided field names.
+   *  `readCSVLine(line, delimiter?)` parses individual CSV lines with support for quoted strings and custom delimiters.
+
+## Async Stream and Iterator Operators
+The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration) via the [AsyncIterableOperators](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L8) class. Any readable stream, async generator, or async iterable exposes these fluent transformations through the `$$` property accessor:
+   *  `map(transform)` - Transforms each item asynchronously or synchronously.
+   *  `filter(predicate)` - Filters items using a synchronous or asynchronous predicate.
+   *  `flatMap(transform)` - Transforms each item into an array or async result and flattens into the output stream.
+   *  `lines(options?)` - Splits chunked binary or text input into discrete lines via [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16).
+   *  `forEach(visit)` - Executes a visitor function for every stream item.
+   *  `drain()` - Consumes all items from the stream without processing them.
+   *  `onError(handler)` - Catches iteration errors, invoking the callback and continuing the stream.
+   *  `toArray()` - Asynchronously collects all items into an array.
+   *  `toBinaryArray()` - Concatenates stream chunks into a single binary array.
+
 ## Common Utilities
-Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L16) includes:
+Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L13) includes:
    *  `uuid(len: number)` generates a simple uuid for use within the application.
    *  `allowDenyMatcher(rules[])` builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters. Negative rules are prefixed by '!'.
    *  `hash(text: string, size?: number)` produces a full sha512 hash.

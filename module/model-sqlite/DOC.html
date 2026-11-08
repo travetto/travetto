@@ -71,6 +71,11 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
   file<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
+   * Milliseconds to wait when database is busy or locked
+   */</span>
+  busyTimeout<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">=</span> <span class="token number">10000</span><span class="token punctuation">;</span>
+
+  <span class="token comment">/**
    * Custom options
    */</span>
   options<span class="token operator">?</span><span class="token operator">:</span> DatabaseSyncOptions<span class="token punctuation">;</span>

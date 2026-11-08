@@ -2,20 +2,12 @@ import http from 'node:http';
 
 import type { ExtensionContext } from 'vscode';
 
-import { type BinaryArray, BinaryUtil, CodecUtil, Env, JSONUtil } from '@travetto/runtime';
+import { Env, JSONUtil } from '@travetto/runtime';
 
 import { Log } from './log.ts';
 import type { TargetEvent } from './types.ts';
 
 export class IpcSupport {
-  static async readJSONRequest<T>(request: http.IncomingMessage): Promise<T> {
-    const chunks: BinaryArray[] = [];
-    for await (const chunk of request) {
-      chunks.push(CodecUtil.readChunk(chunk));
-    }
-    return JSONUtil.fromBinaryArray(BinaryUtil.combineBinaryArrays(chunks));
-  }
-
   #controller = new AbortController();
   #handler: (response: TargetEvent) => void | Promise<void>;
   #log = new Log('travetto.vscode.ipc');
@@ -29,7 +21,7 @@ export class IpcSupport {
       response.setHeader('Content-Type', 'application/json');
       try {
         if (/post/i.test(request.method || '')) {
-          const event = await IpcSupport.readJSONRequest<TargetEvent>(request);
+          const event = await request.$$.toBinaryArray().then(JSONUtil.fromBinaryArray<TargetEvent>);
           this.#log.info('Received IPC event', event);
           await this.#handler(event);
         }

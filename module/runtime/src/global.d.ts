@@ -1,4 +1,7 @@
 import './types';
+import type { AsyncIterableOperators } from './async-iterable.ts';
+
+type AsyncIterableProvider<T = unknown> = { $$: AsyncIterableOperators<T> };
 
 declare const write: unique symbol;
 
@@ -39,6 +42,9 @@ declare global {
      */
     interface ReadableStream {}
   }
+  interface Object extends AsyncIterableProvider<any> {}
+  interface AsyncIterable<T = unknown> extends AsyncIterableProvider<T> {} // Remove once async operators land
+  interface AsyncGenerator<T = unknown> extends AsyncIterableProvider<T> {} // Remove once async operators land
 }
 
 declare module 'buffer' {
@@ -77,11 +83,4 @@ declare module 'stream/web' {
    * @concrete node:stream/web#ReadableStream
    */
   interface ReadableStream {}
-}
-
-// Remove once node 26 types are released
-declare module 'node:fs' {
-  interface StatOptions {
-    throwIfNoEntry?: boolean;
-  }
 }

@@ -87,7 +87,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   }
 
   async getFileMeta(location: string) {
-    const loc = await this.fixture.readBinaryStream(location);
+    const loc = this.fixture.readBinaryStream(location);
     return { hash: await BinaryMetadataUtil.hash(loc, { hashAlgorithm: 'sha256' }) };
   }
 

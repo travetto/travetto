@@ -23,7 +23,7 @@ async function init() {
         ...opts,
         signal: ShutdownManager.signal
       });
-      subProcess.stdout?.on('data', chunk => startupBuffer.push(CodecUtil.readUtf8Chunk(chunk)));
+      subProcess.stdout?.$$.map(CodecUtil.readChunk).forEach(chunk => startupBuffer.push(chunk));
       return subProcess;
     }
   });

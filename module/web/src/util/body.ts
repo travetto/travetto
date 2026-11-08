@@ -185,17 +185,18 @@ export class WebBodyUtil {
     }
 
     let received = 0;
-    const all: string[] = [];
 
     try {
-      for await (const chunk of BinaryUtil.toBinaryStream(input)) {
-        const bytes = CodecUtil.readUtf8Chunk(chunk);
-        received += bytes.byteLength;
-        if (received > limit) {
-          throw WebError.for('Request Entity Too Large', 413, { received, limit });
-        }
-        all.push(decoder.decode(bytes, { stream: true }));
-      }
+      const all = await BinaryUtil.toBinaryStream(input)
+        .$$.map(CodecUtil.readChunk)
+        .map(bytes => {
+          received += bytes.byteLength;
+          if (received > limit) {
+            throw WebError.for('Request Entity Too Large', 413, { received, limit });
+          }
+          return decoder.decode(bytes, { stream: true });
+        })
+        .toArray();
       all.push(decoder.decode(NULL_TERMINATOR, { stream: false }));
       return { text: all.join(''), read: received };
     } catch (error) {

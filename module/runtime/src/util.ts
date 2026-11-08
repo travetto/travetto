@@ -2,9 +2,6 @@ import timers from 'node:timers/promises';
 
 import { path } from '@travetto/manifest';
 
-import { castTo } from './types.ts';
-
-type MapFn<T, U> = (value: T, i: number) => U | Promise<U>;
 type StackFrame = { message: string; filename: string; line: number; column: number };
 
 const STACK_POSITION_PATTERN =
@@ -58,26 +55,6 @@ export class Util {
    */
   static uuid(): string {
     return Util.randomId(32);
-  }
-
-  /**
-   * Map an async iterable with various mapping functions
-   */
-  static mapAsyncIterable<T, U, V, W>(source: AsyncIterable<T>, fn1: MapFn<T, U>, fn2: MapFn<U, V>, fn3: MapFn<V, W>): AsyncIterable<W>;
-  static mapAsyncIterable<T, U, V>(source: AsyncIterable<T>, fn1: MapFn<T, U>, fn2: MapFn<U, V>): AsyncIterable<V>;
-  static mapAsyncIterable<T, U>(source: AsyncIterable<T>, fn: MapFn<T, U>): AsyncIterable<U>;
-  static async *mapAsyncIterable<T>(input: AsyncIterable<T>, ...fns: MapFn<unknown, unknown>[]): AsyncIterable<unknown> {
-    let idx = -1;
-    for await (const item of input) {
-      if (item !== undefined) {
-        idx += 1;
-        let result = item;
-        for (const fn of fns) {
-          result = castTo(await fn(result, idx));
-        }
-        yield result;
-      }
-    }
   }
 
   /**

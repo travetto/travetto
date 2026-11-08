@@ -175,7 +175,8 @@ export class WebHttpConfig {
       );
     }
 
-    this.fetchUrl = `${this.tls ? 'https' : 'http'}://${this.bindAddress}:${this.port}`;
+    const host = !this.bindAddress || this.bindAddress === '0.0.0.0' ? '127.0.0.1' : this.bindAddress === '::' ? '[::1]' : this.bindAddress;
+    this.fetchUrl = `${this.tls ? 'https' : 'http'}://${host}:${this.port}`;
   }
 }
 ```
