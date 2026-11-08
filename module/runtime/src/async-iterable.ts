@@ -30,7 +30,7 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
   }
 
   async drain(): Promise<void> {
-    for await (const _ of this) null;
+    return this.forEach(() => {}); // No op
   }
 
   onError(onError: (error: unknown) => Promise<unknown> | unknown): AsyncIterableOperators<Exclude<T, undefined>> {
