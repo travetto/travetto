@@ -20,9 +20,7 @@ export abstract class BaseModelSuite<T> {
     if (!ModelCrudUtil.isSupported(svc)) {
       throw new RuntimeError(`Size is not supported for this service: ${this.serviceClass.name}`);
     }
-    let i = 0;
-    for await (const _ of svc.list(cls)) i += 1;
-    return i;
+    return (await svc.list(cls).$$.toArray()).length;
   }
 
   async saveAll<M extends ModelType>(cls: Class<M>, items: M[]): Promise<number> {

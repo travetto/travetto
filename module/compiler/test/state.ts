@@ -249,9 +249,7 @@ class CompilerStateTests {
 
       const iteratorPromise = (async () => {
         try {
-          for await (const _ of watcher) {
-            // Wait for events
-          }
+          await watcher.$$.drain();
         } catch (error) {
           return error;
         }

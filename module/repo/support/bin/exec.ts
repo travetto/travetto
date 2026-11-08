@@ -102,8 +102,8 @@ export class RepoExecUtil {
     operation: (module: IndexedModule) => ChildProcess,
     config: ModuleRunConfig = {}
   ): Promise<Map<IndexedModule, ExecutionResult>> {
-    config.showStdout = config.showStdout ?? (Env.DEBUG.isSet && !Env.DEBUG.isFalse);
-    config.showStderr = config.showStderr ?? true;
+    config.showStdout ??= Env.DEBUG.isSet && !Env.DEBUG.isFalse;
+    config.showStderr ??= true;
 
     const workerCount = config.workerCount ?? WorkPool.DEFAULT_SIZE;
 
