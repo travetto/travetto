@@ -1,6 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, d } from '@travetto/doc';
 import {
+  AsyncIterableOperators,
   BinaryUtil,
   CodecUtil,
   ConsoleManager,
@@ -29,6 +30,7 @@ export const text = (
       <li>Console Management</li>
       <li>Resource Access</li>
       <li>Encoding and Decoding Utilities</li>
+      <li>Async Stream and Iterator Operators</li>
       <li>Binary Utilities</li>
       <li>JSON Utilities</li>
       <li>Common Utilities</li>
@@ -166,28 +168,33 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
       parsing helpers designed to work seamlessly with async stream operators:
       <ul>
         <li>
-          {d.method('lineParser(options?)')} produces a {d.method('$flatMap')}-compatible chunk-to-line transformer that buffers across
+          {d.method('toLines(options?)')} produces a {d.method('flatMap')}-compatible chunk-to-line transformer that buffers across
           arbitrary chunk boundaries, handles carriage returns, and supports configurable trimming and blank line skipping.
         </li>
         <li>
-          {d.method('csvParser(options?)')} produces a {d.method('$flatMap')}-compatible line-to-record transformer that parses CSV or TSV
+          {d.method('fromCSV(options?)')} produces a {d.method('flatMap')}-compatible line-to-record transformer that parses CSV or TSV
           lines into structured objects using the header row or provided field names.
         </li>
         <li>
-          {d.method('parseCSVLine(line, delimiter?)')} parses individual CSV lines with support for quoted strings and custom delimiters.
+          {d.method('readCSVLine(line, delimiter?)')} parses individual CSV lines with support for quoted strings and custom delimiters.
         </li>
       </ul>
     </c.Section>
     <c.Section title="Async Stream and Iterator Operators">
-      The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration),
-      providing fluent stream transformations directly on readable streams, async generators, and async iterables:
+      The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration) via
+      the {AsyncIterableOperators} class. Any readable stream, async generator, or async iterable exposes these fluent transformations
+      through the {d.field('$$')} property accessor:
       <ul>
-        <li>{d.method('$map(fn)')} - Transforms each item asynchronously or synchronously.</li>
-        <li>{d.method('$filter(predicate)')} - Filters items using a synchronous or asynchronous predicate.</li>
-        <li>{d.method('$flatMap(fn)')} - Transforms each item into an array or iterable and flattens the results into the stream.</li>
-        <li>{d.method('$forEach(fn)')} - Executes a visitor function for every stream item.</li>
-        <li>{d.method('$toArray()')} - Asynchronously collects all items into an array.</li>
+        <li>{d.method('map(transform)')} - Transforms each item asynchronously or synchronously.</li>
+        <li>{d.method('filter(predicate)')} - Filters items using a synchronous or asynchronous predicate.</li>
+        <li>{d.method('flatMap(transform)')} - Transforms each item into an array or async result and flattens into the output stream.</li>
+        <li>{d.method('lines(options?)')} - Splits chunked binary or text input into discrete lines via {CodecUtil}.</li>
+        <li>{d.method('forEach(visit)')} - Executes a visitor function for every stream item.</li>
+        <li>{d.method('drain()')} - Consumes all items from the stream without processing them.</li>
+        <li>{d.method('onError(handler)')} - Catches iteration errors, invoking the callback and continuing the stream.</li>
+        <li>{d.method('toArray()')} - Asynchronously collects all items into an array.</li>
       </ul>
+      <c.Code title="Async Stream Operators Shape" src={AsyncIterableOperators} outline />
     </c.Section>
     <c.Section title="Common Utilities">
       Common utilities used throughout the framework. Currently {Util} includes:

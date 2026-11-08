@@ -20,6 +20,7 @@ Runtime is the foundation of all [Travetto](https://travetto.dev) applications. 
    *  Console Management
    *  Resource Access
    *  Encoding and Decoding Utilities
+   *  Async Stream and Iterator Operators
    *  Binary Utilities
    *  JSON Utilities
    *  Common Utilities
@@ -267,17 +268,70 @@ The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/sr
    *  New Line Delimited UTF8
 
 For processing line-oriented data streams (such as subprocess output or incoming binary/text streams), [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16) provides stream parsing helpers designed to work seamlessly with async stream operators:
-   *  `lineParser(options?)` produces a `$flatMap`-compatible chunk-to-line transformer that buffers across arbitrary chunk boundaries, handles carriage returns, and supports configurable trimming and blank line skipping.
-   *  `csvParser(options?)` produces a `$flatMap`-compatible line-to-record transformer that parses CSV or TSV lines into structured objects using the header row or provided field names.
-   *  `parseCSVLine(line, delimiter?)` parses individual CSV lines with support for quoted strings and custom delimiters.
+   *  `toLines(options?)` produces a `flatMap`-compatible chunk-to-line transformer that buffers across arbitrary chunk boundaries, handles carriage returns, and supports configurable trimming and blank line skipping.
+   *  `fromCSV(options?)` produces a `flatMap`-compatible line-to-record transformer that parses CSV or TSV lines into structured objects using the header row or provided field names.
+   *  `readCSVLine(line, delimiter?)` parses individual CSV lines with support for quoted strings and custom delimiters.
 
 ## Async Stream and Iterator Operators
-The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration), providing fluent stream transformations directly on readable streams, async generators, and async iterables:
-   *  `$map(fn)` - Transforms each item asynchronously or synchronously.
-   *  `$filter(predicate)` - Filters items using a synchronous or asynchronous predicate.
-   *  `$flatMap(fn)` - Transforms each item into an array or iterable and flattens the results into the stream.
-   *  `$forEach(fn)` - Executes a visitor function for every stream item.
-   *  `$toArray()` - Asynchronously collects all items into an array.
+The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration) via the [AsyncIterableOperators](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L7) class. Any readable stream, async generator, or async iterable exposes these fluent transformations through the `$$` property accessor:
+   *  `map(transform)` - Transforms each item asynchronously or synchronously.
+   *  `filter(predicate)` - Filters items using a synchronous or asynchronous predicate.
+   *  `flatMap(transform)` - Transforms each item into an array or async result and flattens into the output stream.
+   *  `lines(options?)` - Splits chunked binary or text input into discrete lines via [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16).
+   *  `forEach(visit)` - Executes a visitor function for every stream item.
+   *  `drain()` - Consumes all items from the stream without processing them.
+   *  `onError(handler)` - Catches iteration errors, invoking the callback and continuing the stream.
+   *  `toArray()` - Asynchronously collects all items into an array.
+
+**Code: Async Stream Operators Shape**
+```typescript
+export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
+  target: () => AsyncIterable<T>;
+  /**
+   * Returns the underlying async iterator.
+   */
+  [Symbol.asyncIterator]();
+  /**
+   * Creates a new AsyncIterableOperators instance wrapping the target iterable factory.
+   */
+  constructor(target: () => AsyncIterable<T>);
+  /**
+   * Transforms each element in the async iterable using the provided transform function.
+   * Supports both synchronous and asynchronous transform functions.
+   */
+  map<U>(transform: (item: T) => U): AsyncIterableOperators<U>;
+  /**
+   * Filters elements in the async iterable using the provided predicate function.
+   * Supports both synchronous and asynchronous predicates.
+   */
+  filter(predicate: (item: T) => boolean | Promise<boolean>): AsyncIterableOperators<T>;
+  /**
+   * Iterates through all elements in the async iterable, invoking the visitor function for each element.
+   */
+  async forEach(visit: (item: T) => Promise<unknown> | unknown): Promise<void>;
+  /**
+   * Consumes all elements from the async iterable without processing them, discarding all output.
+   */
+  async drain(): Promise<void>;
+  /**
+   * Catches errors thrown during iteration, invoking the error callback and continuing stream consumption.
+   */
+  onError(onError: (error: unknown) => Promise<unknown> | unknown): AsyncIterableOperators<Exclude<T, undefined>>;
+  /**
+   * Maps each element to an array or async result and flattens the results into the output stream.
+   */
+  flatMap<U>(transform: (input: T) => U[] | Promise<U[]>): AsyncIterableOperators<U>;
+  /**
+   * Collects all elements of the async iterable into an array.
+   */
+  async toArray(): Promise<T[]>;
+  /**
+   * Splits a chunked binary or text stream into discrete lines, buffering partial chunks across boundaries.
+   * @param options Configuration options, such as `skipEmpty` to omit blank lines.
+   */
+  lines(options?: Parameters<typeof CodecUtil.toLines>[0]): AsyncIterableOperators<string>;
+}
+```
 
 ## Common Utilities
 Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L13) includes:
