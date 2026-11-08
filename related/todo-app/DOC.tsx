@@ -23,7 +23,7 @@ async function init() {
         ...opts,
         signal: ShutdownManager.signal
       });
-      subProcess.stdout?.$.map(CodecUtil.readChunk).forEach(chunk => startupBuffer.push(chunk));
+      subProcess.stdout?.$$.map(CodecUtil.readChunk).forEach(chunk => startupBuffer.push(chunk));
       return subProcess;
     }
   });

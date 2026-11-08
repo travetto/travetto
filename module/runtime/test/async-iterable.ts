@@ -26,7 +26,7 @@ export class CustomAsyncIterableTest {
       yield 'b';
     }
 
-    assert.deepStrictEqual(await generate().$.toArray(), ['a', 'b']);
+    assert.deepStrictEqual(await generate().$$.toArray(), ['a', 'b']);
   }
 
   @Test()
@@ -38,7 +38,7 @@ export class CustomAsyncIterableTest {
     };
 
     const doubled = await iterable()
-      .$.map(item => item * 2)
+      .$$.map(item => item * 2)
       .toArray();
     assert.deepStrictEqual(doubled, [2, 4, 6]);
 
@@ -48,7 +48,7 @@ export class CustomAsyncIterableTest {
     };
 
     const uppercase = await asyncIterable()
-      .$.map(async item => item.toUpperCase())
+      .$$.map(async item => item.toUpperCase())
       .toArray();
     assert.deepStrictEqual(uppercase, ['HELLO', 'WORLD']);
   }
@@ -63,7 +63,7 @@ export class CustomAsyncIterableTest {
     };
 
     const evensOnly = await iterable()
-      .$.map(item => (item % 2 === 0 ? item * 10 : undefined))
+      .$$.map(item => (item % 2 === 0 ? item * 10 : undefined))
       .filter(Boolean)
       .toArray();
     assert.deepStrictEqual(evensOnly, [20, 40]);
@@ -80,7 +80,7 @@ export class CustomAsyncIterableTest {
     };
 
     const filtered = await iterable()
-      .$.filter(item => item > 2)
+      .$$.filter(item => item > 2)
       .toArray();
     assert.deepStrictEqual(filtered, [3, 4, 5]);
 
@@ -91,7 +91,7 @@ export class CustomAsyncIterableTest {
     };
 
     const startsWithA = await asyncIterable()
-      .$.filter(async item => item.startsWith('a'))
+      .$$.filter(async item => item.startsWith('a'))
       .toArray();
     assert.deepStrictEqual(startsWithA, ['apple', 'avocado']);
   }
@@ -107,7 +107,7 @@ export class CustomAsyncIterableTest {
     };
 
     const result = await iterable()
-      .$.filter(item => item % 2 !== 0)
+      .$$.filter(item => item % 2 !== 0)
       .map(item => item * 10)
       .map(item => `${item}!`)
       .toArray();
@@ -118,11 +118,11 @@ export class CustomAsyncIterableTest {
   @Test()
   async verifyToArray() {
     const emptyIterable = async function* () {};
-    assert.deepStrictEqual(await emptyIterable().$.toArray(), []);
+    assert.deepStrictEqual(await emptyIterable().$$.toArray(), []);
 
     const singleIterable = async function* () {
       yield 42;
     };
-    assert.deepStrictEqual(await singleIterable().$.toArray(), [42]);
+    assert.deepStrictEqual(await singleIterable().$$.toArray(), [42]);
   }
 }

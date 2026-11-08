@@ -1,7 +1,7 @@
 import './types';
 import type { AsyncIterableOperators } from './async-iterable.ts';
 
-type AsyncIterableProvider<T = unknown> = { $: AsyncIterableOperators<T> };
+type AsyncIterableProvider<T = unknown> = { $$: AsyncIterableOperators<T> };
 
 declare const write: unique symbol;
 

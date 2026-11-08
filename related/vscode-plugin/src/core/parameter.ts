@@ -157,7 +157,7 @@ export class ParameterSelector {
             });
 
             if (subProcess.stdout) {
-              subProcess.stdout.$.flatMap(CodecUtil.toLines())
+              subProcess.stdout.$$.flatMap(CodecUtil.toLines())
                 .map(item => item.trim())
                 .forEach(item => items.push({ label: item, description: item.replace(/^[\\/]/, '') }));
             }

@@ -94,7 +94,7 @@ export class TapSummaryEmitter implements TestConsumerShape {
 
     const total = TestModelUtil.buildSummary();
     this.#progress = this.#terminal.streamToBottom(
-      this.#results.$.map(value => {
+      this.#results.$$.map(value => {
         TestModelUtil.countTestResult(total, [value]);
         const statusLine = `${total.failed} failed, ${total.errored} errored, ${total.skipped} skipped`;
         return {

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 process.setSourceMapsEnabled(true); // Ensure source map during compilation/development
 process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps`; // Ensure it passes to children
-Error.stackTraceLimit = 50;
+Error.stackTraceLimit = Number.POSITIVE_INFINITY;
 
 const ogEmitWarning = process.emitWarning.bind(process);
 

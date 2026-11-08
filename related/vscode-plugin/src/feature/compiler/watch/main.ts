@@ -90,11 +90,11 @@ export class CompilerWatchFeature extends BaseFeature {
     });
 
     if (debug && subProcess.stderr) {
-      subProcess.stderr.$.flatMap(CodecUtil.toLines()).forEach(line => this.#log.error(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
+      subProcess.stderr.$$.flatMap(CodecUtil.toLines()).forEach(line => this.#log.error(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
     }
 
     if (debug && subProcess.stdout) {
-      subProcess.stdout.$.flatMap(CodecUtil.toLines()).forEach(line => this.#log.info(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
+      subProcess.stdout.$$.flatMap(CodecUtil.toLines()).forEach(line => this.#log.info(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
     }
 
     return subProcess;
@@ -123,7 +123,7 @@ export class CompilerWatchFeature extends BaseFeature {
           this.#log.info('Connected', state);
           const subProcess = this.run('event', ['all'], controller.signal);
           await subProcess
-            .stdout!.$.flatMap(CodecUtil.toLines())
+            .stdout!.$$.flatMap(CodecUtil.toLines())
             .map(JSONUtil.fromUTF8<CompilerEvent>)
             .onError(err => this.#log.error(`Unable to parse line: ${err}`))
             .filter(VALID_EVENT)

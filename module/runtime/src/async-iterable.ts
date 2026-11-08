@@ -58,7 +58,7 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
 // TC39 gets AsyncIterator helpers into the language
 try {
   Object.defineProperties(Object.prototype, {
-    $: {
+    $$: {
       get() {
         return new AsyncIterableOperators(() => this);
       }

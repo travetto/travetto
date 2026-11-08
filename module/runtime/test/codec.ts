@@ -133,7 +133,7 @@ export class CodecUtilTest {
   async verifyFromCSV() {
     const records = await this.fixture
       .readBinaryStream('sample.csv')
-      .$.flatMap(CodecUtil.fromCSV<{ name: string; age: string; city: string }>())
+      .$$.flatMap(CodecUtil.fromCSV<{ name: string; age: string; city: string }>())
       .toArray();
 
     assert.strictEqual(records.length, 3);
@@ -146,7 +146,7 @@ export class CodecUtilTest {
   async verifyFromTSV() {
     const records = await this.fixture
       .readBinaryStream('sample.tsv')
-      .$.flatMap(CodecUtil.fromCSV<{ id: string; title: string; score: string }>())
+      .$$.flatMap(CodecUtil.fromCSV<{ id: string; title: string; score: string }>())
       .toArray();
 
     assert.strictEqual(records.length, 3);

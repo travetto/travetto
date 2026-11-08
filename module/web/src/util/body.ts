@@ -188,7 +188,7 @@ export class WebBodyUtil {
 
     try {
       const all = await BinaryUtil.toBinaryStream(input)
-        .$.map(CodecUtil.readChunk)
+        .$$.map(CodecUtil.readChunk)
         .map(bytes => {
           received += bytes.byteLength;
           if (received > limit) {
