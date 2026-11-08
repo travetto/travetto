@@ -244,24 +244,24 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
 
   @Test()
   async testExpiryWithExtend() {
-    const key = this.config({ mode: 'header', maxAgeMs: 2000 });
+    const key = this.config({ mode: 'header', maxAgeMs: 3000 });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let response = await this.request<Aged>({ context: { httpMethod: 'POST', path: '/test/session/complex' }, body: payload });
     assert(response.context.httpStatusCode === 201);
     const header = response.headers.get(key);
-    await timers.setTimeout(350);
+    await timers.setTimeout(500);
 
     response = await this.request({ context: { httpMethod: 'GET', path: '/test/session' }, headers: { [key]: header } });
     assert(response.context.httpStatusCode === 200);
     assert(response.body?.payload === payload);
     assert(!response.headers.has(key));
-    await timers.setTimeout(350);
+    await timers.setTimeout(500);
 
     response = await this.request({ context: { httpMethod: 'GET', path: '/test/session' }, headers: { [key]: header } });
     assert(response.body?.payload === payload);
     assert(!response.headers.has(key));
-    await timers.setTimeout(350);
+    await timers.setTimeout(650);
 
     response = await this.request({ context: { httpMethod: 'GET', path: '/test/session' }, headers: { [key]: header } });
     assert(response.headers.has(key));
