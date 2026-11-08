@@ -303,7 +303,7 @@ For processing line-oriented data streams (such as subprocess output or incoming
 
 <h2 id="async-stream-and-iterator-operators">Async Stream and Iterator Operators</h2>
 
-The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration) via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L7">AsyncIterableOperators</a> class. Any readable stream, async generator, or async iterable exposes these fluent transformations through the <code class="item field">$$</code> property accessor:
+The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration) via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L8">AsyncIterableOperators</a> class. Any readable stream, async generator, or async iterable exposes these fluent transformations through the <code class="item field">$$</code> property accessor:
 <ul> <li><code class="item method">map(transform)</code> - Transforms each item asynchronously or synchronously.</li>
 <li><code class="item method">filter(predicate)</code> - Filters items using a synchronous or asynchronous predicate.</li>
 <li><code class="item method">flatMap(transform)</code> - Transforms each item into an array or async result and flattens into the output stream.</li>
@@ -312,6 +312,7 @@ The runtime augments async iterables with functional stream operators (pending T
 <li><code class="item method">drain()</code> - Consumes all items from the stream without processing them.</li>
 <li><code class="item method">onError(handler)</code> - Catches iteration errors, invoking the callback and continuing the stream.</li>
 <li><code class="item method">toArray()</code> - Asynchronously collects all items into an array.</li>
+<li><code class="item method">toBinaryArray()</code> - Concatenates stream chunks into a single binary array.</li>
 </ul>
 
 <h2 id="common-utilities">Common Utilities</h2>

@@ -273,7 +273,7 @@ For processing line-oriented data streams (such as subprocess output or incoming
    *  `readCSVLine(line, delimiter?)` parses individual CSV lines with support for quoted strings and custom delimiters.
 
 ## Async Stream and Iterator Operators
-The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration) via the [AsyncIterableOperators](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L7) class. Any readable stream, async generator, or async iterable exposes these fluent transformations through the `$$` property accessor:
+The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration) via the [AsyncIterableOperators](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L8) class. Any readable stream, async generator, or async iterable exposes these fluent transformations through the `$$` property accessor:
    *  `map(transform)` - Transforms each item asynchronously or synchronously.
    *  `filter(predicate)` - Filters items using a synchronous or asynchronous predicate.
    *  `flatMap(transform)` - Transforms each item into an array or async result and flattens into the output stream.
@@ -282,6 +282,7 @@ The runtime augments async iterables with functional stream operators (pending T
    *  `drain()` - Consumes all items from the stream without processing them.
    *  `onError(handler)` - Catches iteration errors, invoking the callback and continuing the stream.
    *  `toArray()` - Asynchronously collects all items into an array.
+   *  `toBinaryArray()` - Concatenates stream chunks into a single binary array.
 
 ## Common Utilities
 Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L13) includes:

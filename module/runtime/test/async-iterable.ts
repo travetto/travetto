@@ -1,5 +1,6 @@
 import assert from 'node:assert';
 
+import { BinaryUtil } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 @Suite()
@@ -124,5 +125,15 @@ export class CustomAsyncIterableTest {
       yield 42;
     };
     assert.deepStrictEqual(await singleIterable().$$.toArray(), [42]);
+  }
+
+  @Test()
+  async verifyToBinaryArray() {
+    const chunkIterable = async function* () {
+      yield Buffer.from('hello ');
+      yield 'world';
+    };
+    const binary = await chunkIterable().$$.toBinaryArray();
+    assert.strictEqual(BinaryUtil.binaryArrayToBuffer(binary).toString('utf8'), 'hello world');
   }
 }

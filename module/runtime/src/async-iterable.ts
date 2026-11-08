@@ -1,3 +1,4 @@
+import { BinaryUtil, type BinaryArray } from './binary.ts';
 import { CodecUtil } from './codec.ts';
 
 /**
@@ -98,6 +99,12 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
    */
   lines(options?: Parameters<typeof CodecUtil.toLines>[0]): AsyncIterableOperators<string> {
     return this.flatMap(CodecUtil.toLines(options));
+  }
+  /**
+   * Joins a stream into a binary array
+   */
+  async toBinaryArray(): Promise<BinaryArray> {
+    return this.map(CodecUtil.readChunk).toArray().then(BinaryUtil.combineBinaryArrays);
   }
 }
 
