@@ -95,10 +95,7 @@ export class CodecUtil {
     return data?.substring(0, end && end < 0 ? undefined : end)?.trim() ?? defaultValue;
   }
 
-  /**
-   * Splits an array of Buffers into raw string lines and an optional
-   * trailing unresolved partial Buffer, handling both \n and \r\n line breaks.
-   */
+  /** Splits an array of Buffers into raw string lines and an optional trailing unresolved partial Buffer */
   static readLines(previous: BinaryArray, incoming: TextInput): { lines: string[]; remainder: BinaryArray; done?: boolean } {
     const input = Buffer.concat([
       BinaryUtil.binaryArrayToBuffer(previous),
@@ -137,9 +134,7 @@ export class CodecUtil {
     return { lines, remainder, done: false };
   }
 
-  /**
-   * Parse lines as a $flatMap compatible friend
-   */
+  /** Parse lines as a $flatMap compatible friend */
   static toLines(options?: { skipEmpty?: boolean }): (input: unknown) => string[] {
     const skipEmpty = options?.skipEmpty ?? false;
     let remainder: BinaryArray = Buffer.alloc(0);

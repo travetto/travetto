@@ -1,3 +1,5 @@
+import { CodecUtil } from './codec.ts';
+
 export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
   target: () => AsyncIterable<T>;
 
@@ -51,6 +53,10 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
     const out = [];
     for await (const item of this) out.push(item);
     return out;
+  }
+
+  lines(options?: Parameters<typeof CodecUtil.toLines>[0]): AsyncIterableOperators<string> {
+    return this.flatMap(CodecUtil.toLines(options));
   }
 }
 

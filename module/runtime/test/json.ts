@@ -109,10 +109,11 @@ export class JSONUtilSuite {
 
   @Test()
   async verifyFromUTF8LinesWithAsyncIterable() {
+    type Shape = { id: number; name: string; active?: boolean; tags?: string[] };
     const records = await this.fixture
       .readBinaryStream('sample.ndjson')
-      .$$.flatMap(CodecUtil.toLines({ skipEmpty: true }))
-      .map(JSONUtil.fromUTF8<{ id: number; name: string; active?: boolean; tags?: string[] }>)
+      .$$.lines({ skipEmpty: true })
+      .map<Shape>(JSONUtil.fromUTF8)
       .toArray();
 
     assert.strictEqual(records.length, 3);
