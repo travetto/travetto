@@ -194,7 +194,6 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
         <li>{d.method('onError(handler)')} - Catches iteration errors, invoking the callback and continuing the stream.</li>
         <li>{d.method('toArray()')} - Asynchronously collects all items into an array.</li>
       </ul>
-      <c.Code title="Async Stream Operators Shape" src={AsyncIterableOperators} outline />
     </c.Section>
     <c.Section title="Common Utilities">
       Common utilities used throughout the framework. Currently {Util} includes:

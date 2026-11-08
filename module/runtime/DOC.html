@@ -314,59 +314,6 @@ The runtime augments async iterables with functional stream operators (pending T
 <li><code class="item method">toArray()</code> - Asynchronously collects all items into an array.</li>
 </ul>
 
-  <figure class="code">
-    <figcaption class="code">Async Stream Operators Shape
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L7">Source</a></cite>
-
-</figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AsyncIterableOperators<span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span> <span class="token keyword">implements</span> <span class="token class-name">AsyncIterable<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token function-variable function">target</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> AsyncIterable<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Returns the underlying async iterator.
-   */</span>
-  <span class="token punctuation">[</span>Symbol<span class="token punctuation">.</span>asyncIterator<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Creates a new AsyncIterableOperators instance wrapping the target iterable factory.
-   */</span>
-  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token function-variable function">target</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> AsyncIterable<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Transforms each element in the async iterable using the provided transform function.
-   * Supports both synchronous and asynchronous transform functions.
-   */</span>
-  <span class="token generic-function"><span class="token function">map</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">U</span><span class="token operator">></span></span></span><span class="token punctuation">(</span><span class="token function-variable function">transform</span><span class="token operator">:</span> <span class="token punctuation">(</span>item<span class="token operator">:</span> <span class="token constant">T</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token constant">U</span><span class="token punctuation">)</span><span class="token operator">:</span> AsyncIterableOperators<span class="token operator">&lt;</span><span class="token constant">U</span><span class="token operator">></span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Filters elements in the async iterable using the provided predicate function.
-   * Supports both synchronous and asynchronous predicates.
-   */</span>
-  <span class="token function">filter</span><span class="token punctuation">(</span><span class="token function-variable function">predicate</span><span class="token operator">:</span> <span class="token punctuation">(</span>item<span class="token operator">:</span> <span class="token constant">T</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">boolean</span> <span class="token operator">|</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">boolean</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> AsyncIterableOperators<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Iterates through all elements in the async iterable, invoking the visitor function for each element.
-   */</span>
-  <span class="token keyword">async</span> <span class="token function">forEach</span><span class="token punctuation">(</span><span class="token function-variable function">visit</span><span class="token operator">:</span> <span class="token punctuation">(</span>item<span class="token operator">:</span> <span class="token constant">T</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">unknown</span><span class="token operator">></span> <span class="token operator">|</span> <span class="token builtin">unknown</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Consumes all elements from the async iterable without processing them, discarding all output.
-   */</span>
-  <span class="token keyword">async</span> <span class="token function">drain</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Catches errors thrown during iteration, invoking the error callback and continuing stream consumption.
-   */</span>
-  <span class="token function">onError</span><span class="token punctuation">(</span><span class="token function-variable function">onError</span><span class="token operator">:</span> <span class="token punctuation">(</span>error<span class="token operator">:</span> <span class="token builtin">unknown</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">unknown</span><span class="token operator">></span> <span class="token operator">|</span> <span class="token builtin">unknown</span><span class="token punctuation">)</span><span class="token operator">:</span> AsyncIterableOperators<span class="token operator">&lt;</span>Exclude<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token punctuation">,</span> <span class="token keyword">undefined</span><span class="token operator">>></span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Maps each element to an array or async result and flattens the results into the output stream.
-   */</span>
-  <span class="token generic-function"><span class="token function">flatMap</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">U</span><span class="token operator">></span></span></span><span class="token punctuation">(</span><span class="token function-variable function">transform</span><span class="token operator">:</span> <span class="token punctuation">(</span>input<span class="token operator">:</span> <span class="token constant">T</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token constant">U</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">|</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">U</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> AsyncIterableOperators<span class="token operator">&lt;</span><span class="token constant">U</span><span class="token operator">></span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Collects all elements of the async iterable into an array.
-   */</span>
-  <span class="token keyword">async</span> <span class="token function">toArray</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Splits a chunked binary or text stream into discrete lines, buffering partial chunks across boundaries.
-   * @param options Configuration options, such as `skipEmpty` to omit blank lines.
-   */</span>
-  <span class="token function">lines</span><span class="token punctuation">(</span>options<span class="token operator">?</span><span class="token operator">:</span> Parameters<span class="token operator">&lt;</span><span class="token keyword">typeof</span> CodecUtil<span class="token punctuation">.</span>toLines<span class="token operator">></span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> AsyncIterableOperators<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>
-  </figure>
-
 <h2 id="common-utilities">Common Utilities</h2>
 
 Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L13">Util</a> includes:

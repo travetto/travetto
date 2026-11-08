@@ -283,56 +283,6 @@ The runtime augments async iterables with functional stream operators (pending T
    *  `onError(handler)` - Catches iteration errors, invoking the callback and continuing the stream.
    *  `toArray()` - Asynchronously collects all items into an array.
 
-**Code: Async Stream Operators Shape**
-```typescript
-export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
-  target: () => AsyncIterable<T>;
-  /**
-   * Returns the underlying async iterator.
-   */
-  [Symbol.asyncIterator]();
-  /**
-   * Creates a new AsyncIterableOperators instance wrapping the target iterable factory.
-   */
-  constructor(target: () => AsyncIterable<T>);
-  /**
-   * Transforms each element in the async iterable using the provided transform function.
-   * Supports both synchronous and asynchronous transform functions.
-   */
-  map<U>(transform: (item: T) => U): AsyncIterableOperators<U>;
-  /**
-   * Filters elements in the async iterable using the provided predicate function.
-   * Supports both synchronous and asynchronous predicates.
-   */
-  filter(predicate: (item: T) => boolean | Promise<boolean>): AsyncIterableOperators<T>;
-  /**
-   * Iterates through all elements in the async iterable, invoking the visitor function for each element.
-   */
-  async forEach(visit: (item: T) => Promise<unknown> | unknown): Promise<void>;
-  /**
-   * Consumes all elements from the async iterable without processing them, discarding all output.
-   */
-  async drain(): Promise<void>;
-  /**
-   * Catches errors thrown during iteration, invoking the error callback and continuing stream consumption.
-   */
-  onError(onError: (error: unknown) => Promise<unknown> | unknown): AsyncIterableOperators<Exclude<T, undefined>>;
-  /**
-   * Maps each element to an array or async result and flattens the results into the output stream.
-   */
-  flatMap<U>(transform: (input: T) => U[] | Promise<U[]>): AsyncIterableOperators<U>;
-  /**
-   * Collects all elements of the async iterable into an array.
-   */
-  async toArray(): Promise<T[]>;
-  /**
-   * Splits a chunked binary or text stream into discrete lines, buffering partial chunks across boundaries.
-   * @param options Configuration options, such as `skipEmpty` to omit blank lines.
-   */
-  lines(options?: Parameters<typeof CodecUtil.toLines>[0]): AsyncIterableOperators<string>;
-}
-```
-
 ## Common Utilities
 Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L13) includes:
    *  `uuid(len: number)` generates a simple uuid for use within the application.
