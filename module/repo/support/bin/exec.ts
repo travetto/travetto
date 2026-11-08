@@ -145,14 +145,14 @@ export class RepoExecUtil {
           processes.set(module, subProcess);
 
           if (config.showStdout && subProcess.stdout) {
-            subProcess.stdout
-              .$flatMap(CodecUtil.toLines())
-              .$forEach(line => stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
+            subProcess.stdout.$.flatMap(CodecUtil.toLines()).forEach(line =>
+              stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit()
+            );
           }
           if (config.showStderr && subProcess.stderr) {
-            subProcess.stderr
-              .$flatMap(CodecUtil.toLines())
-              .$forEach(line => stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
+            subProcess.stderr.$.flatMap(CodecUtil.toLines()).forEach(line =>
+              stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit()
+            );
           }
 
           const result = await ExecUtil.getResult(subProcess, { catch: true });
@@ -185,13 +185,11 @@ export class RepoExecUtil {
         stdoutTerm.streamList(activeItems);
       }
       await stdoutTerm.streamToBottom(
-        work
-          .$map(event => {
-            const message =
-              config.progressMessage?.(modulesToRun[event.progress.completed]) ?? 'Completed %completed/%total (%failed failed)';
-            return { ...event.progress, value: message };
-          })
-          .$map(TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true }))
+        work.$.map(event => {
+          const message =
+            config.progressMessage?.(modulesToRun[event.progress.completed]) ?? 'Completed %completed/%total (%failed failed)';
+          return { ...event.progress, value: message };
+        }).map(TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true }))
       );
 
       if (stdoutTerm.interactive && config.showProgressList) {

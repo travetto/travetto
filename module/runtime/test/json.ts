@@ -111,9 +111,9 @@ export class JSONUtilSuite {
   async verifyFromUTF8LinesWithAsyncIterable() {
     const records = await this.fixture
       .readBinaryStream('sample.ndjson')
-      .$flatMap(CodecUtil.toLines({ skipEmpty: true }))
-      .$map(JSONUtil.fromUTF8<{ id: number; name: string; active?: boolean; tags?: string[] }>)
-      .$toArray();
+      .$.flatMap(CodecUtil.toLines({ skipEmpty: true }))
+      .map(JSONUtil.fromUTF8<{ id: number; name: string; active?: boolean; tags?: string[] }>)
+      .toArray();
 
     assert.strictEqual(records.length, 3);
     assert.deepStrictEqual(records[0], { id: 1, name: 'first', active: true });

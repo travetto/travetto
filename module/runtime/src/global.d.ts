@@ -1,6 +1,10 @@
 import './types';
 import type { AsyncIterableOperators } from './async-iterable.ts';
 
+interface AsyncIterableProvider<T = unknown> {
+  $: AsyncIterableOperators<T>;
+}
+
 declare const write: unique symbol;
 
 declare global {
@@ -40,9 +44,9 @@ declare global {
      */
     interface ReadableStream {}
   }
-  interface Object extends AsyncIterableOperators<any> {}
-  interface AsyncIterable<T = unknown> extends AsyncIterableOperators<T> {} // Remove once async operators land
-  interface AsyncGenerator<T = unknown> extends AsyncIterableOperators<T> {} // Remove once async operators land
+  interface Object extends AsyncIterableProvider<any> {}
+  interface AsyncIterable<T = unknown> extends AsyncIterableProvider<T> {} // Remove once async operators land
+  interface AsyncGenerator<T = unknown> extends AsyncIterableProvider<T> {} // Remove once async operators land
 }
 
 declare module 'buffer' {
@@ -74,7 +78,7 @@ declare module 'stream' {
    * @concrete node:stream#Readable
    */
   interface Readable {}
-  interface Readable extends AsyncIterableOperators {} // Remove once async operators land
+  interface Readable extends AsyncIterableProvider {} // Remove once async operators land
 }
 
 declare module 'stream/web' {
@@ -82,5 +86,5 @@ declare module 'stream/web' {
    * @concrete node:stream/web#ReadableStream
    */
   interface ReadableStream {}
-  interface ReadableStream extends AsyncIterableOperators {} // Remove once async operators land
+  interface ReadableStream extends AsyncIterableProvider {} // Remove once async operators land
 }

@@ -94,25 +94,23 @@ export class TapSummaryEmitter implements TestConsumerShape {
 
     const total = TestModelUtil.buildSummary();
     this.#progress = this.#terminal.streamToBottom(
-      this.#results
-        .$map(value => {
-          TestModelUtil.countTestResult(total, [value]);
-          const statusLine = `${total.failed} failed, ${total.errored} errored, ${total.skipped} skipped`;
-          return {
-            value: `Tests %completed/%total [${statusLine}] -- ${value.classId}`,
-            total: this.#state.testCount,
-            completed: total.passed,
-            failed: total.failed + total.errored
-          };
+      this.#results.$.map(value => {
+        TestModelUtil.countTestResult(total, [value]);
+        const statusLine = `${total.failed} failed, ${total.errored} errored, ${total.skipped} skipped`;
+        return {
+          value: `Tests %completed/%total [${statusLine}] -- ${value.classId}`,
+          total: this.#state.testCount,
+          completed: total.passed,
+          failed: total.failed + total.errored
+        };
+      }).map(
+        TerminalUtil.progressBarUpdater(this.#terminal, {
+          style: {
+            complete: { text: '#e5e5e5', background: '#026020' },
+            failed: { text: '#e5e5e5', background: '#8b0000' }
+          }
         })
-        .$map(
-          TerminalUtil.progressBarUpdater(this.#terminal, {
-            style: {
-              complete: { text: '#e5e5e5', background: '#026020' },
-              failed: { text: '#e5e5e5', background: '#8b0000' }
-            }
-          })
-        ),
+      ),
       { minDelay: 100 }
     );
   }
