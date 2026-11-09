@@ -197,7 +197,6 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
         <li>
           {d.method('lines(options?)')} - Splits chunked binary or text input into discrete lines via {CodecUtil}.
         </li>
-        <li>{d.method('pipe(stream?)')} - Composes stream through a Node.js duplex transform.</li>
         <li>{d.method('forEach(visit)')} - Executes a visitor function for every stream item.</li>
         <li>{d.method('toArray()')} - Asynchronously collects all items into an array.</li>
       </ul>

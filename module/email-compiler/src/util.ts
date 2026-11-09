@@ -1,10 +1,11 @@
 import path from 'node:path';
+import { compose } from 'node:stream';
 
 import type { CompileResult, Options } from 'sass';
 
 import type { EmailCompiled, EmailTemplateModule, EmailTemplateResource } from '@travetto/email';
 import { ImageUtil } from '@travetto/image';
-import { AsyncIterator, BinaryUtil, CodecUtil, RuntimeIndex } from '@travetto/runtime';
+import { BinaryUtil, CodecUtil, RuntimeIndex } from '@travetto/runtime';
 
 type Tokenized = {
   text: string;
@@ -142,11 +143,11 @@ export class EmailCompileUtil {
   static async inlineImages(html: string, options: EmailTemplateResource): Promise<string> {
     const { tokens, finalize } = await this.tokenizeResources(html, HTML_CSS_IMAGE_URLS);
     const pendingImages = [...tokens.entries()].map(async ([token, source]) => {
-      let stream = AsyncIterator.from(options.loader.readBinaryStream(source));
+      let stream = options.loader.readBinaryStream(source);
 
       const format = path.extname(source).substring(1);
       if (ImageUtil.isKnownExtension(format)) {
-        stream = stream.pipe(ImageUtil.transform({ optimize: true, format }));
+        stream = compose(stream, ImageUtil.transform({ optimize: true, format }));
       }
 
       const bytes = await BinaryUtil.toBinaryArray(stream);

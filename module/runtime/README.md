@@ -273,7 +273,7 @@ For processing line-oriented data streams (such as subprocess output or incoming
    *  `readCSVLine(line, delimiter?)` parses individual CSV lines with support for quoted strings and custom delimiters.
 
 ## Async Stream and Iterator Operators
-The runtime provides functional stream operators (emulating the TC39 AsyncIterator helpers language proposal) via the [AsyncIterableOperators](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L11) class. Any readable stream, async generator, or async iterable exposes these fluent transformations via `AsyncIterator.from(source)`:
+The runtime provides functional stream operators (emulating the TC39 AsyncIterator helpers language proposal) via the [AsyncIterableOperators](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L9) class. Any readable stream, async generator, or async iterable exposes these fluent transformations via `AsyncIterator.from(source)`:
    *  `map(transform)` - Transforms each item asynchronously or synchronously.
    *  `filter(predicate)` - Filters items using a synchronous or asynchronous predicate.
    *  `flatMap(transform)` - Transforms each item into an array or async result and flattens into the output stream.
@@ -284,7 +284,6 @@ The runtime provides functional stream operators (emulating the TC39 AsyncIterat
    *  `every(predicate)` - Returns whether all items match the predicate.
    *  `find(predicate)` - Finds the first matching item or returns undefined.
    *  `lines(options?)` - Splits chunked binary or text input into discrete lines via [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16).
-   *  `pipe(stream?)` - Composes stream through a Node.js duplex transform.
    *  `forEach(visit)` - Executes a visitor function for every stream item.
    *  `toArray()` - Asynchronously collects all items into an array.
 

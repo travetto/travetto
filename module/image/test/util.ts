@@ -3,6 +3,7 @@ import { createReadStream, createWriteStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { compose } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
 import { ImageUtil } from '@travetto/image';
@@ -42,9 +43,7 @@ class ImageUtilSuite {
 
   @Test('compress jpeg via pipe')
   async compressJpeg() {
-    const imgStream = AsyncIterator.from(this.fixture.readBinaryStream('lincoln.jpg')).pipe(
-      ImageUtil.transform({ optimize: true, format: 'avif' })
-    );
+    const imgStream = compose(this.fixture.readBinaryStream('lincoln.jpg'), ImageUtil.transform({ optimize: true, format: 'avif' }));
     const imgBuffer = await this.fixture.readBinaryArray('lincoln.jpg');
 
     const optimized = await BinaryUtil.toBinaryArray(imgStream);

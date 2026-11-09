@@ -1,5 +1,3 @@
-import { compose, type Duplex } from 'node:stream';
-
 import type { BinaryArray } from './binary.ts';
 import { CodecUtil } from './codec.ts';
 import { castTo } from './types.ts';
@@ -41,18 +39,6 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
    */
   constructor(target: () => AsyncIterable<T>) {
     this.target = target;
-  }
-
-  /**
-   * Pipeline support for any inbound duplex stream
-   */
-  pipe<U = BinaryArray>(stream?: Duplex): AsyncIterableOperators<U> {
-    const { target } = this;
-    if (stream) {
-      return new AsyncIterableOperators(() => compose(target(), stream));
-    } else {
-      return castTo(this);
-    }
   }
 
   /**
