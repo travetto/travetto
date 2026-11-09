@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { Readable } from 'node:stream';
 import { ReadableStream } from 'node:stream/web';
 
-import { AsyncIterator, CodecUtil } from '@travetto/runtime';
+import { AsyncIterator } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 @Suite()

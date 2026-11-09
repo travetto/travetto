@@ -7,7 +7,7 @@ import { compose } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
 import { ImageUtil } from '@travetto/image';
-import { AsyncIterator, BinaryUtil } from '@travetto/runtime';
+import { BinaryUtil } from '@travetto/runtime';
 import { Suite, Test, TestFixtures } from '@travetto/test';
 
 @Suite()
