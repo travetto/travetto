@@ -1,4 +1,4 @@
-import { PassThrough, Readable, type Writable } from 'node:stream';
+import { compose, type Duplex, PassThrough, Readable, type Transform, type Writable } from 'node:stream';
 import consumers from 'node:stream/consumers';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
@@ -178,6 +178,14 @@ export class BinaryUtil {
   /** Consume input into output  */
   static pipeline(input: BinaryType, output: Writable): Promise<void> {
     return pipeline(BinaryUtil.toBinaryStream(input), output);
+  }
+
+  /**
+   * Pipe input through one or more duplex/transform streams using compose
+   */
+  static pipe(input: BinaryType, ...transforms: (Duplex | Transform)[]): Readable & AsyncIterable<BinaryArray> {
+    const source = BinaryUtil.toBinaryStream(input);
+    return transforms.length ? castTo(compose(castTo([source, ...transforms]))) : castTo(source);
   }
 
   /** Create a binary array of specified size, optionally filled with a value */

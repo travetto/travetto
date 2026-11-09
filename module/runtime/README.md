@@ -273,11 +273,18 @@ For processing line-oriented data streams (such as subprocess output or incoming
    *  `readCSVLine(line, delimiter?)` parses individual CSV lines with support for quoted strings and custom delimiters.
 
 ## Async Stream and Iterator Operators
-The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration) via the [AsyncIterableOperators](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L8) class. Any readable stream, async generator, or async iterable exposes these fluent transformations through the `$$` property accessor:
+The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration) via the [AsyncIterableOperators](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L13) class. Any readable stream, async generator, or async iterable exposes these fluent transformations through the `$$` property accessor or via `AsyncIterator.from(source)`:
    *  `map(transform)` - Transforms each item asynchronously or synchronously.
    *  `filter(predicate)` - Filters items using a synchronous or asynchronous predicate.
    *  `flatMap(transform)` - Transforms each item into an array or async result and flattens into the output stream.
+   *  `take(limit)` - Yields at most the specified number of elements.
+   *  `drop(limit)` - Drops the specified number of leading elements.
+   *  `reduce(reducer, initial?)` - Reduces items into a single accumulated result.
+   *  `some(predicate)` - Returns whether at least one item matches the predicate.
+   *  `every(predicate)` - Returns whether all items match the predicate.
+   *  `find(predicate)` - Finds the first matching item or returns undefined.
    *  `lines(options?)` - Splits chunked binary or text input into discrete lines via [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16).
+   *  `pipe(stream?)` - Composes stream through a Node.js duplex transform.
    *  `forEach(visit)` - Executes a visitor function for every stream item.
    *  `drain()` - Consumes all items from the stream without processing them.
    *  `onError(handler)` - Catches iteration errors, invoking the callback and continuing the stream.

@@ -183,12 +183,21 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
     <c.Section title="Async Stream and Iterator Operators">
       The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration) via
       the {AsyncIterableOperators} class. Any readable stream, async generator, or async iterable exposes these fluent transformations
-      through the {d.field('$$')} property accessor:
+      through the {d.field('$$')} property accessor or via {d.method('AsyncIterator.from(source)')}:
       <ul>
         <li>{d.method('map(transform)')} - Transforms each item asynchronously or synchronously.</li>
         <li>{d.method('filter(predicate)')} - Filters items using a synchronous or asynchronous predicate.</li>
         <li>{d.method('flatMap(transform)')} - Transforms each item into an array or async result and flattens into the output stream.</li>
-        <li>{d.method('lines(options?)')} - Splits chunked binary or text input into discrete lines via {CodecUtil}.</li>
+        <li>{d.method('take(limit)')} - Yields at most the specified number of elements.</li>
+        <li>{d.method('drop(limit)')} - Drops the specified number of leading elements.</li>
+        <li>{d.method('reduce(reducer, initial?)')} - Reduces items into a single accumulated result.</li>
+        <li>{d.method('some(predicate)')} - Returns whether at least one item matches the predicate.</li>
+        <li>{d.method('every(predicate)')} - Returns whether all items match the predicate.</li>
+        <li>{d.method('find(predicate)')} - Finds the first matching item or returns undefined.</li>
+        <li>
+          {d.method('lines(options?)')} - Splits chunked binary or text input into discrete lines via {CodecUtil}.
+        </li>
+        <li>{d.method('pipe(stream?)')} - Composes stream through a Node.js duplex transform.</li>
         <li>{d.method('forEach(visit)')} - Executes a visitor function for every stream item.</li>
         <li>{d.method('drain()')} - Consumes all items from the stream without processing them.</li>
         <li>{d.method('onError(handler)')} - Catches iteration errors, invoking the callback and continuing the stream.</li>

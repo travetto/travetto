@@ -303,11 +303,18 @@ For processing line-oriented data streams (such as subprocess output or incoming
 
 <h2 id="async-stream-and-iterator-operators">Async Stream and Iterator Operators</h2>
 
-The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration) via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L8">AsyncIterableOperators</a> class. Any readable stream, async generator, or async iterable exposes these fluent transformations through the <code class="item field">$$</code> property accessor:
+The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration) via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L13">AsyncIterableOperators</a> class. Any readable stream, async generator, or async iterable exposes these fluent transformations through the <code class="item field">$$</code> property accessor or via <code class="item method">AsyncIterator.from(source)</code>:
 <ul> <li><code class="item method">map(transform)</code> - Transforms each item asynchronously or synchronously.</li>
 <li><code class="item method">filter(predicate)</code> - Filters items using a synchronous or asynchronous predicate.</li>
 <li><code class="item method">flatMap(transform)</code> - Transforms each item into an array or async result and flattens into the output stream.</li>
+<li><code class="item method">take(limit)</code> - Yields at most the specified number of elements.</li>
+<li><code class="item method">drop(limit)</code> - Drops the specified number of leading elements.</li>
+<li><code class="item method">reduce(reducer, initial?)</code> - Reduces items into a single accumulated result.</li>
+<li><code class="item method">some(predicate)</code> - Returns whether at least one item matches the predicate.</li>
+<li><code class="item method">every(predicate)</code> - Returns whether all items match the predicate.</li>
+<li><code class="item method">find(predicate)</code> - Finds the first matching item or returns undefined.</li>
 <li><code class="item method">lines(options?)</code> - Splits chunked binary or text input into discrete lines via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16">CodecUtil</a>.</li>
+<li><code class="item method">pipe(stream?)</code> - Composes stream through a Node.js duplex transform.</li>
 <li><code class="item method">forEach(visit)</code> - Executes a visitor function for every stream item.</li>
 <li><code class="item method">drain()</code> - Consumes all items from the stream without processing them.</li>
 <li><code class="item method">onError(handler)</code> - Catches iteration errors, invoking the callback and continuing the stream.</li>

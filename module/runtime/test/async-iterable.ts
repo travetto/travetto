@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { BinaryUtil } from '@travetto/runtime';
+import { AsyncIterator, CodecUtil } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 @Suite()
@@ -134,6 +134,69 @@ export class CustomAsyncIterableTest {
       yield 'world';
     };
     const binary = await chunkIterable().$$.toBinaryArray();
-    assert.strictEqual(BinaryUtil.binaryArrayToBuffer(binary).toString('utf8'), 'hello world');
+    assert.strictEqual(CodecUtil.toUTF8String(binary), 'hello world');
+  }
+
+  @Test()
+  async verifyTakeAndDrop() {
+    const iterable = async function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+      yield 4;
+      yield 5;
+    };
+
+    const taken = await iterable().$$.take(3).toArray();
+    assert.deepStrictEqual(taken, [1, 2, 3]);
+
+    const dropped = await iterable().$$.drop(2).toArray();
+    assert.deepStrictEqual(dropped, [3, 4, 5]);
+  }
+
+  @Test()
+  async verifyReduceSomeEveryFind() {
+    const iterable = async function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+      yield 4;
+    };
+
+    const sum = await iterable().$$.reduce((acc, val) => acc + val, 0);
+    assert.strictEqual(sum, 10);
+
+    const hasEven = await iterable().$$.some(val => val % 2 === 0);
+    assert.strictEqual(hasEven, true);
+
+    const allPositive = await iterable().$$.every(val => val > 0);
+    assert.strictEqual(allPositive, true);
+
+    const firstEven = await iterable().$$.find(val => val % 2 === 0);
+    assert.strictEqual(firstEven, 2);
+  }
+
+  @Test()
+  async verifyAsyncIteratorFrom() {
+    const fromArray = await AsyncIterator.from([10, 20, 30])
+      .map(x => x * 2)
+      .toArray();
+    assert.deepStrictEqual(fromArray, [20, 40, 60]);
+
+    async function* gen() {
+      yield 'hello';
+      yield 'world';
+    }
+    const fromGen = await AsyncIterator.from(gen()).toArray();
+    assert.deepStrictEqual(fromGen, ['hello', 'world']);
+  }
+
+  @Test()
+  async verifyLinesWithoutTrailingNewline() {
+    const stream = async function* () {
+      yield 'line1\nline2';
+    };
+    const lines = await stream().$$.lines().toArray();
+    assert.deepStrictEqual(lines, ['line1', 'line2']);
   }
 }
