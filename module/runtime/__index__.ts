@@ -1,7 +1,7 @@
 import type {} from './src/global.d.ts';
 import type {} from './src/trv.d.ts';
 
-export * from './src/async-iterable.ts';
+export * from './src/async-iterator.ts';
 export * from './src/binary.ts';
 export * from './src/binary-metadata.ts';
 export * from './src/codec.ts';
