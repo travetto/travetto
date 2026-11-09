@@ -1,4 +1,6 @@
 import assert from 'node:assert';
+import { Readable } from 'node:stream';
+import { ReadableStream } from 'node:stream/web';
 
 import { AsyncIterator, CodecUtil } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
@@ -128,16 +130,6 @@ export class CustomAsyncIterableTest {
   }
 
   @Test()
-  async verifyToBinaryArray() {
-    const chunkIterable = async function* () {
-      yield Buffer.from('hello ');
-      yield 'world';
-    };
-    const binary = await AsyncIterator.from(chunkIterable()).toBinaryArray();
-    assert.strictEqual(CodecUtil.toUTF8String(binary), 'hello world');
-  }
-
-  @Test()
   async verifyTakeAndDrop() {
     const iterable = async function* () {
       yield 1;
@@ -201,10 +193,17 @@ export class CustomAsyncIterableTest {
   }
 
   @Test()
-  async verifyObjectPrototypeNotPolluted() {
+  async verifyPrototypesNotPolluted() {
     const plainObject: Record<string, unknown> = {};
     assert(!('$$' in plainObject));
     assert(plainObject.$$ === undefined);
     assert(!('$$' in Object.prototype));
+    assert(!('$$' in Readable.prototype));
+    assert(!('$$' in ReadableStream.prototype));
+
+    const asyncGenProto = Object.getPrototypeOf((async function* () {})());
+    assert(!('$$' in asyncGenProto));
+    const asyncIterProto = Object.getPrototypeOf(asyncGenProto);
+    assert(!('$$' in asyncIterProto));
   }
 }

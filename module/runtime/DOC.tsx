@@ -199,10 +199,7 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
         </li>
         <li>{d.method('pipe(stream?)')} - Composes stream through a Node.js duplex transform.</li>
         <li>{d.method('forEach(visit)')} - Executes a visitor function for every stream item.</li>
-        <li>{d.method('drain()')} - Consumes all items from the stream without processing them.</li>
-        <li>{d.method('onError(handler)')} - Catches iteration errors, invoking the callback and continuing the stream.</li>
         <li>{d.method('toArray()')} - Asynchronously collects all items into an array.</li>
-        <li>{d.method('toBinaryArray()')} - Concatenates stream chunks into a single binary array.</li>
       </ul>
     </c.Section>
     <c.Section title="Common Utilities">

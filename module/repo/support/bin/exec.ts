@@ -203,7 +203,9 @@ export class RepoExecUtil {
           .commit();
       }
     } else {
-      await AsyncIterator.from(work).drain();
+      for await (const _ of work) {
+        // Drain
+      }
     }
 
     return results;

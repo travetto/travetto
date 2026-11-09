@@ -1,14 +1,12 @@
-import { compose, type Duplex, Readable } from 'node:stream';
-import { ReadableStream } from 'node:stream/web';
+import { compose, type Duplex } from 'node:stream';
 
-import { BinaryUtil, type BinaryArray } from './binary.ts';
+import type { BinaryArray } from './binary.ts';
 import { CodecUtil } from './codec.ts';
 import { castTo } from './types.ts';
 
 /**
  * Provides functional stream operators and helpers for async iterables.
- * Accessible via the `.$$` accessor on any async iterable, readable stream, or generator,
- * or via `AsyncIterator.from(iterable)`.
+ * Wrapped via `AsyncIterator.from(iterable)`.
  */
 export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
   target: () => AsyncIterable<T>;
@@ -29,13 +27,6 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
     } else {
       throw new TypeError('Argument is not iterable');
     }
-  }
-
-  /**
-   * Returns this instance for chained property access.
-   */
-  get $$(): this {
-    return this;
   }
 
   /**
@@ -81,12 +72,14 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
    * Filters elements in the async iterable using the provided predicate function.
    * Supports both synchronous and asynchronous predicates.
    */
+  filter<S extends T = T>(predicate: (item: T) => item is S): AsyncIterableOperators<S>;
+  filter(predicate: (item: T) => boolean | Promise<boolean>): AsyncIterableOperators<T>;
   filter(predicate: (item: T) => boolean | Promise<boolean>): AsyncIterableOperators<T> {
     const { target } = this;
     return new AsyncIterableOperators(async function* () {
       for await (const item of target()) {
         if (await predicate(item)) {
-          yield item;
+          yield castTo(item);
         }
       }
     });
@@ -195,29 +188,6 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
   }
 
   /**
-   * Consumes all elements from the async iterable without processing them, discarding all output.
-   */
-  async drain(): Promise<void> {
-    return this.forEach(() => {}); // No op
-  }
-
-  /**
-   * Catches errors thrown during iteration, invoking the error callback and continuing stream consumption.
-   */
-  onError(onError: (error: unknown) => Promise<unknown> | unknown): AsyncIterableOperators<Exclude<T, undefined>> {
-    const { target } = this;
-    return new AsyncIterableOperators(async function* () {
-      for await (const item of target()) {
-        try {
-          yield item as Exclude<T, undefined>;
-        } catch (error) {
-          onError(error);
-        }
-      }
-    });
-  }
-
-  /**
    * Maps each element to an array or async result and flattens the results into the output stream.
    */
   flatMap<U>(transform: (input: T) => AsyncIterable<U> | Iterable<U> | Promise<AsyncIterable<U> | Iterable<U>>): AsyncIterableOperators<U> {
@@ -267,13 +237,6 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
       }
     });
   }
-
-  /**
-   * Joins a stream into a binary array
-   */
-  async toBinaryArray(): Promise<BinaryArray> {
-    return this.map(CodecUtil.readChunk).toArray().then(BinaryUtil.combineBinaryArrays);
-  }
 }
 
 /**
@@ -282,23 +245,3 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
 export const AsyncIterator = {
   from: AsyncIterableOperators.from
 };
-
-// Apply stream operators specifically to stream and async iterator prototypes
-// without polluting Object.prototype
-try {
-  const asyncGeneratorPrototype = Object.getPrototypeOf((async function* () {})());
-  const asyncIteratorPrototype = Object.getPrototypeOf(asyncGeneratorPrototype);
-
-  const targets = [Readable.prototype, ReadableStream.prototype, asyncGeneratorPrototype, asyncIteratorPrototype];
-
-  for (const prototype of targets) {
-    if (prototype && !('$$' in prototype)) {
-      Object.defineProperty(prototype, '$$', {
-        get() {
-          return new AsyncIterableOperators(() => this);
-        },
-        configurable: true
-      });
-    }
-  }
-} catch {}

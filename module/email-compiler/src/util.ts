@@ -149,7 +149,7 @@ export class EmailCompileUtil {
         stream = stream.pipe(ImageUtil.transform({ optimize: true, format }));
       }
 
-      const bytes = await stream.toBinaryArray();
+      const bytes = await BinaryUtil.toBinaryArray(stream);
       return [token, `data:image/${format};base64,${CodecUtil.toBase64String(bytes)}`] as const;
     });
 

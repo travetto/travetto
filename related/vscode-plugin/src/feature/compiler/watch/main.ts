@@ -24,8 +24,9 @@ type ProgressState = { previous: number; bar: ProgressBar; cleanup: () => void }
 
 const SCOPE_MAX = 15;
 const SUB_LOG_REGEX = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(.\d{3})?Z?\s+(info|error|debug|warn)\s*/;
-const VALID_EVENT = ({ payload }: CompilerEvent) =>
-  !(typeof payload === 'object' && payload && 'workspace' in payload && payload.workspace !== Workspace.path);
+const VALID_EVENT = (event: CompilerEvent | undefined): event is CompilerEvent =>
+  event !== undefined &&
+  !(typeof event.payload === 'object' && event.payload && 'workspace' in event.payload && event.payload.workspace !== Workspace.path);
 
 /**
  * Workspace Compilation Support
@@ -90,11 +91,15 @@ export class CompilerWatchFeature extends BaseFeature {
     });
 
     if (debug && subProcess.stderr) {
-      AsyncIterator.from(subProcess.stderr).lines().forEach(line => this.#log.error(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
+      AsyncIterator.from(subProcess.stderr)
+        .lines()
+        .forEach(line => this.#log.error(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
     }
 
     if (debug && subProcess.stdout) {
-      AsyncIterator.from(subProcess.stdout).lines().forEach(line => this.#log.info(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
+      AsyncIterator.from(subProcess.stdout)
+        .lines()
+        .forEach(line => this.#log.info(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
     }
 
     return subProcess;
@@ -124,8 +129,14 @@ export class CompilerWatchFeature extends BaseFeature {
           const subProcess = this.run('event', ['all'], controller.signal);
           await AsyncIterator.from(subProcess.stdout!)
             .lines()
-            .map<CompilerEvent>(JSONUtil.fromUTF8)
-            .onError(err => this.#log.error(`Unable to parse line: ${err}`))
+            .map<CompilerEvent | undefined>(line => {
+              try {
+                return JSONUtil.fromUTF8(line);
+              } catch (err) {
+                this.#log.error(`Unable to parse line: ${err}`);
+                return undefined;
+              }
+            })
             .filter(VALID_EVENT)
             .forEach(({ type, payload }) => {
               switch (type) {
