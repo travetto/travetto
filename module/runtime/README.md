@@ -273,7 +273,7 @@ For processing line-oriented data streams (such as subprocess output or incoming
    *  `readCSVLine(line, delimiter?)` parses individual CSV lines with support for quoted strings and custom delimiters.
 
 ## Async Stream and Iterator Operators
-The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration) via the [AsyncIterableOperators](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L13) class. Any readable stream, async generator, or async iterable exposes these fluent transformations through the `$$` property accessor or via `AsyncIterator.from(source)`:
+The runtime provides functional stream operators (emulating the TC39 AsyncIterator helpers language proposal) via the [AsyncIterableOperators](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L13) class. Any readable stream, async generator, or async iterable exposes these fluent transformations via `AsyncIterator.from(source)`:
    *  `map(transform)` - Transforms each item asynchronously or synchronously.
    *  `filter(predicate)` - Filters items using a synchronous or asynchronous predicate.
    *  `flatMap(transform)` - Transforms each item into an array or async result and flattens into the output stream.
@@ -351,7 +351,7 @@ export class TimeUtil {
 ```
 
 ## Process Execution
-[ExecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L41) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object. This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
+[ExecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L42) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object. This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
 
 A simple example would be:
 

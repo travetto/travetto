@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { isUint8Array } from 'node:util/types';
 
-import { type BinaryStream, CodecUtil, castTo, RuntimeError } from '@travetto/runtime';
+import { AsyncIterator, type BinaryStream, CodecUtil, castTo, RuntimeError } from '@travetto/runtime';
 import { Suite, Test, TestFixtures } from '@travetto/test';
 
 const addNewline = (input: string) => `${input}\n`;
@@ -131,9 +131,8 @@ export class CodecUtilTest {
 
   @Test()
   async verifyFromCSV() {
-    const records = await this.fixture
-      .readBinaryStream('sample.csv')
-      .$$.flatMap(CodecUtil.fromCSV<{ name: string; age: string; city: string }>())
+    const records = await AsyncIterator.from(this.fixture.readBinaryStream('sample.csv'))
+      .flatMap(CodecUtil.fromCSV<{ name: string; age: string; city: string }>())
       .toArray();
 
     assert.strictEqual(records.length, 3);
@@ -144,9 +143,8 @@ export class CodecUtilTest {
 
   @Test()
   async verifyFromTSV() {
-    const records = await this.fixture
-      .readBinaryStream('sample.tsv')
-      .$$.flatMap(CodecUtil.fromCSV<{ id: string; title: string; score: string }>())
+    const records = await AsyncIterator.from(this.fixture.readBinaryStream('sample.tsv'))
+      .flatMap(CodecUtil.fromCSV<{ id: string; title: string; score: string }>())
       .toArray();
 
     assert.strictEqual(records.length, 3);

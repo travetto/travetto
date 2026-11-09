@@ -6,7 +6,7 @@ import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 
 import { ImageUtil } from '@travetto/image';
-import { BinaryUtil } from '@travetto/runtime';
+import { AsyncIterator, BinaryUtil } from '@travetto/runtime';
 import { Suite, Test, TestFixtures } from '@travetto/test';
 
 @Suite()
@@ -42,7 +42,9 @@ class ImageUtilSuite {
 
   @Test('compress jpeg via pipe')
   async compressJpeg() {
-    const imgStream = this.fixture.readBinaryStream('lincoln.jpg').$$.pipe(ImageUtil.transform({ optimize: true, format: 'avif' }));
+    const imgStream = AsyncIterator.from(this.fixture.readBinaryStream('lincoln.jpg')).pipe(
+      ImageUtil.transform({ optimize: true, format: 'avif' })
+    );
     const imgBuffer = await this.fixture.readBinaryArray('lincoln.jpg');
 
     const optimized = await BinaryUtil.toBinaryArray(imgStream);

@@ -2,7 +2,7 @@ import type { ChildProcess } from 'node:child_process';
 
 import { CliModuleUtil } from '@travetto/cli';
 import type { IndexedModule } from '@travetto/manifest';
-import { AsyncQueue, Env, ExecUtil, type ExecutionResult, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { AsyncIterator, AsyncQueue, Env, ExecUtil, type ExecutionResult, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 
@@ -144,11 +144,15 @@ export class RepoExecUtil {
           const subProcess = operation(module);
           processes.set(module, subProcess);
 
-          if (config.showStdout) {
-            subProcess.stdout?.$$.lines().forEach(line => stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
+          if (config.showStdout && subProcess.stdout) {
+            AsyncIterator.from(subProcess.stdout)
+              .lines()
+              .forEach(line => stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
           }
-          if (config.showStderr) {
-            subProcess.stderr?.$$.lines().forEach(line => stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
+          if (config.showStderr && subProcess.stderr) {
+            AsyncIterator.from(subProcess.stderr)
+              .lines()
+              .forEach(line => stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
           }
 
           const result = await ExecUtil.getResult(subProcess, { catch: true });
@@ -181,11 +185,13 @@ export class RepoExecUtil {
         stdoutTerm.streamList(activeItems);
       }
       await stdoutTerm.streamToBottom(
-        work.$$.map(event => {
-          const message =
-            config.progressMessage?.(modulesToRun[event.progress.completed]) ?? 'Completed %completed/%total (%failed failed)';
-          return { ...event.progress, value: message };
-        }).map(TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true }))
+        AsyncIterator.from(work)
+          .map(event => {
+            const message =
+              config.progressMessage?.(modulesToRun[event.progress.completed]) ?? 'Completed %completed/%total (%failed failed)';
+            return { ...event.progress, value: message };
+          })
+          .map(TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true }))
       );
 
       if (stdoutTerm.interactive && config.showProgressList) {
@@ -197,7 +203,7 @@ export class RepoExecUtil {
           .commit();
       }
     } else {
-      await work.$$.drain();
+      await AsyncIterator.from(work).drain();
     }
 
     return results;

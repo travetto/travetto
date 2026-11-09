@@ -2,7 +2,7 @@ import http from 'node:http';
 
 import type { ExtensionContext } from 'vscode';
 
-import { Env, JSONUtil } from '@travetto/runtime';
+import { BinaryUtil, Env, JSONUtil } from '@travetto/runtime';
 
 import { Log } from './log.ts';
 import type { TargetEvent } from './types.ts';
@@ -21,7 +21,7 @@ export class IpcSupport {
       response.setHeader('Content-Type', 'application/json');
       try {
         if (/post/i.test(request.method || '')) {
-          const event = await request.$$.toBinaryArray().then(JSONUtil.fromBinaryArray<TargetEvent>);
+          const event = await BinaryUtil.toBinaryArray(request).then(JSONUtil.fromBinaryArray<TargetEvent>);
           this.#log.info('Received IPC event', event);
           await this.#handler(event);
         }

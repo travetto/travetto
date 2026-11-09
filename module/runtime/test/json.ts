@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { CodecUtil, JSONUtil } from '@travetto/runtime';
+import { AsyncIterator, CodecUtil, JSONUtil } from '@travetto/runtime';
 import { Suite, Test, TestFixtures } from '@travetto/test';
 
 const addNewline = (input: string) => `${input}\n`;
@@ -110,9 +110,8 @@ export class JSONUtilSuite {
   @Test()
   async verifyFromUTF8LinesWithAsyncIterable() {
     type Shape = { id: number; name: string; active?: boolean; tags?: string[] };
-    const records = await this.fixture
-      .readBinaryStream('sample.ndjson')
-      .$$.lines({ skipEmpty: true })
+    const records = await AsyncIterator.from(this.fixture.readBinaryStream('sample.ndjson'))
+      .lines({ skipEmpty: true })
       .map<Shape>(JSONUtil.fromUTF8)
       .toArray();
 

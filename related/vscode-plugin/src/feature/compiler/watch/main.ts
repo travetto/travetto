@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import * as vscode from 'vscode';
 
-import { Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
+import { AsyncIterator, Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
 
 import type {
   CompilerEvent,
@@ -90,11 +90,11 @@ export class CompilerWatchFeature extends BaseFeature {
     });
 
     if (debug && subProcess.stderr) {
-      subProcess.stderr.$$.lines().forEach(line => this.#log.error(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
+      AsyncIterator.from(subProcess.stderr).lines().forEach(line => this.#log.error(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
     }
 
     if (debug && subProcess.stdout) {
-      subProcess.stdout.$$.lines().forEach(line => this.#log.info(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
+      AsyncIterator.from(subProcess.stdout).lines().forEach(line => this.#log.info(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
     }
 
     return subProcess;
@@ -122,8 +122,8 @@ export class CompilerWatchFeature extends BaseFeature {
           connected = true;
           this.#log.info('Connected', state);
           const subProcess = this.run('event', ['all'], controller.signal);
-          await subProcess
-            .stdout!.$$.lines()
+          await AsyncIterator.from(subProcess.stdout!)
+            .lines()
             .map<CompilerEvent>(JSONUtil.fromUTF8)
             .onError(err => this.#log.error(`Unable to parse line: ${err}`))
             .filter(VALID_EVENT)

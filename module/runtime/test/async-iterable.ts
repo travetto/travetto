@@ -27,7 +27,7 @@ export class CustomAsyncIterableTest {
       yield 'b';
     }
 
-    assert.deepStrictEqual(await generate().$$.toArray(), ['a', 'b']);
+    assert.deepStrictEqual(await AsyncIterator.from(generate()).toArray(), ['a', 'b']);
   }
 
   @Test()
@@ -38,8 +38,8 @@ export class CustomAsyncIterableTest {
       yield 3;
     };
 
-    const doubled = await iterable()
-      .$$.map(item => item * 2)
+    const doubled = await AsyncIterator.from(iterable())
+      .map(item => item * 2)
       .toArray();
     assert.deepStrictEqual(doubled, [2, 4, 6]);
 
@@ -48,8 +48,8 @@ export class CustomAsyncIterableTest {
       yield 'world';
     };
 
-    const uppercase = await asyncIterable()
-      .$$.map(async item => item.toUpperCase())
+    const uppercase = await AsyncIterator.from(asyncIterable())
+      .map(async item => item.toUpperCase())
       .toArray();
     assert.deepStrictEqual(uppercase, ['HELLO', 'WORLD']);
   }
@@ -63,8 +63,8 @@ export class CustomAsyncIterableTest {
       yield 4;
     };
 
-    const evensOnly = await iterable()
-      .$$.map(item => (item % 2 === 0 ? item * 10 : undefined))
+    const evensOnly = await AsyncIterator.from(iterable())
+      .map(item => (item % 2 === 0 ? item * 10 : undefined))
       .filter(Boolean)
       .toArray();
     assert.deepStrictEqual(evensOnly, [20, 40]);
@@ -80,8 +80,8 @@ export class CustomAsyncIterableTest {
       yield 5;
     };
 
-    const filtered = await iterable()
-      .$$.filter(item => item > 2)
+    const filtered = await AsyncIterator.from(iterable())
+      .filter(item => item > 2)
       .toArray();
     assert.deepStrictEqual(filtered, [3, 4, 5]);
 
@@ -91,8 +91,8 @@ export class CustomAsyncIterableTest {
       yield 'avocado';
     };
 
-    const startsWithA = await asyncIterable()
-      .$$.filter(async item => item.startsWith('a'))
+    const startsWithA = await AsyncIterator.from(asyncIterable())
+      .filter(async item => item.startsWith('a'))
       .toArray();
     assert.deepStrictEqual(startsWithA, ['apple', 'avocado']);
   }
@@ -107,8 +107,8 @@ export class CustomAsyncIterableTest {
       yield 5;
     };
 
-    const result = await iterable()
-      .$$.filter(item => item % 2 !== 0)
+    const result = await AsyncIterator.from(iterable())
+      .filter(item => item % 2 !== 0)
       .map(item => item * 10)
       .map(item => `${item}!`)
       .toArray();
@@ -119,12 +119,12 @@ export class CustomAsyncIterableTest {
   @Test()
   async verifyToArray() {
     const emptyIterable = async function* () {};
-    assert.deepStrictEqual(await emptyIterable().$$.toArray(), []);
+    assert.deepStrictEqual(await AsyncIterator.from(emptyIterable()).toArray(), []);
 
     const singleIterable = async function* () {
       yield 42;
     };
-    assert.deepStrictEqual(await singleIterable().$$.toArray(), [42]);
+    assert.deepStrictEqual(await AsyncIterator.from(singleIterable()).toArray(), [42]);
   }
 
   @Test()
@@ -133,7 +133,7 @@ export class CustomAsyncIterableTest {
       yield Buffer.from('hello ');
       yield 'world';
     };
-    const binary = await chunkIterable().$$.toBinaryArray();
+    const binary = await AsyncIterator.from(chunkIterable()).toBinaryArray();
     assert.strictEqual(CodecUtil.toUTF8String(binary), 'hello world');
   }
 
@@ -147,10 +147,10 @@ export class CustomAsyncIterableTest {
       yield 5;
     };
 
-    const taken = await iterable().$$.take(3).toArray();
+    const taken = await AsyncIterator.from(iterable()).take(3).toArray();
     assert.deepStrictEqual(taken, [1, 2, 3]);
 
-    const dropped = await iterable().$$.drop(2).toArray();
+    const dropped = await AsyncIterator.from(iterable()).drop(2).toArray();
     assert.deepStrictEqual(dropped, [3, 4, 5]);
   }
 
@@ -163,16 +163,16 @@ export class CustomAsyncIterableTest {
       yield 4;
     };
 
-    const sum = await iterable().$$.reduce((acc, val) => acc + val, 0);
+    const sum = await AsyncIterator.from(iterable()).reduce((acc, val) => acc + val, 0);
     assert.strictEqual(sum, 10);
 
-    const hasEven = await iterable().$$.some(val => val % 2 === 0);
+    const hasEven = await AsyncIterator.from(iterable()).some(val => val % 2 === 0);
     assert.strictEqual(hasEven, true);
 
-    const allPositive = await iterable().$$.every(val => val > 0);
+    const allPositive = await AsyncIterator.from(iterable()).every(val => val > 0);
     assert.strictEqual(allPositive, true);
 
-    const firstEven = await iterable().$$.find(val => val % 2 === 0);
+    const firstEven = await AsyncIterator.from(iterable()).find(val => val % 2 === 0);
     assert.strictEqual(firstEven, 2);
   }
 
@@ -196,7 +196,15 @@ export class CustomAsyncIterableTest {
     const stream = async function* () {
       yield 'line1\nline2';
     };
-    const lines = await stream().$$.lines().toArray();
+    const lines = await AsyncIterator.from(stream()).lines().toArray();
     assert.deepStrictEqual(lines, ['line1', 'line2']);
+  }
+
+  @Test()
+  async verifyObjectPrototypeNotPolluted() {
+    const plainObject: Record<string, unknown> = {};
+    assert(!('$$' in plainObject));
+    assert(plainObject.$$ === undefined);
+    assert(!('$$' in Object.prototype));
   }
 }

@@ -289,7 +289,7 @@ try {
   const asyncGeneratorPrototype = Object.getPrototypeOf((async function* () {})());
   const asyncIteratorPrototype = Object.getPrototypeOf(asyncGeneratorPrototype);
 
-  const targets = [Readable.prototype, ReadableStream.prototype, asyncGeneratorPrototype, asyncIteratorPrototype, Object.prototype];
+  const targets = [Readable.prototype, ReadableStream.prototype, asyncGeneratorPrototype, asyncIteratorPrototype];
 
   for (const prototype of targets) {
     if (prototype && !('$$' in prototype)) {

@@ -1,7 +1,7 @@
 import { stripVTControlCharacters } from 'node:util';
 
 import { CliCommand, type CliCommandShape, cliTpl } from '@travetto/cli';
-import { AsyncQueue, Util } from '@travetto/runtime';
+import { AsyncIterator, AsyncQueue, Util } from '@travetto/runtime';
 import { MethodValidator, type ValidationError } from '@travetto/schema';
 import { Terminal } from '@travetto/terminal';
 
@@ -63,7 +63,7 @@ export class CliServiceCommand implements CliCommandShape {
       .then(() => queue.close());
 
     if (this.quiet) {
-      await queue.$$.drain();
+      await AsyncIterator.from(queue).drain();
 
       if (failureMessages.length) {
         console.error('Failure');

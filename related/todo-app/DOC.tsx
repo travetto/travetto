@@ -1,6 +1,17 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, type DocJSXElement, type DocJSXElementByFn, DocRunUtil, d, isDocJSXElement, PackageDocUtil } from '@travetto/doc';
-import { type BinaryArray, BinaryUtil, CodecUtil, castTo, Env, ExecUtil, RuntimeIndex, ShutdownManager, Util } from '@travetto/runtime';
+import {
+  AsyncIterator,
+  type BinaryArray,
+  BinaryUtil,
+  CodecUtil,
+  castTo,
+  Env,
+  ExecUtil,
+  RuntimeIndex,
+  ShutdownManager,
+  Util
+} from '@travetto/runtime';
 
 const TodoRoot = d.ref('Todo App', RuntimeIndex.getModule('@travetto/todo-app')!.sourcePath);
 
@@ -23,7 +34,11 @@ async function init() {
         ...opts,
         signal: ShutdownManager.signal
       });
-      subProcess.stdout?.$$.map(CodecUtil.readChunk).forEach(chunk => startupBuffer.push(chunk));
+      if (subProcess.stdout) {
+        AsyncIterator.from(subProcess.stdout)
+          .map(CodecUtil.readChunk)
+          .forEach(chunk => startupBuffer.push(chunk));
+      }
       return subProcess;
     }
   });

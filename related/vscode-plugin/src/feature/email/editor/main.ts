@@ -2,6 +2,7 @@ import type { ChildProcess } from 'node:child_process';
 
 import * as vscode from 'vscode';
 
+import { AsyncIterator } from '@travetto/runtime';
 import type { EmailCompiled } from '@travetto/email';
 
 import type { EditorResponse } from '@travetto/email-compiler/support/bin/types.ts';
@@ -71,8 +72,12 @@ export class EmailCompilerFeature extends BaseFeature {
     });
 
     const debug = (level: string, line: string) => this.log.debug(`> ${level} > ${line.trimEnd()}`);
-    this.#server.stderr?.$$.lines().forEach(line => debug('stderr', line));
-    this.#server.stdout?.$$.lines().forEach(line => debug('stdout', line));
+    if (this.#server?.stderr) {
+      AsyncIterator.from(this.#server.stderr).lines().forEach(line => debug('stderr', line));
+    }
+    if (this.#server?.stdout) {
+      AsyncIterator.from(this.#server.stdout).lines().forEach(line => debug('stdout', line));
+    }
   }
 
   #compileActive(): void {
