@@ -180,14 +180,6 @@ export class BinaryUtil {
     return pipeline(BinaryUtil.toBinaryStream(input), output);
   }
 
-  /**
-   * Pipe input through one or more duplex/transform streams using compose
-   */
-  static pipe(input: BinaryType, ...transforms: (Duplex | Transform)[]): Readable & AsyncIterable<BinaryArray> {
-    const source = BinaryUtil.toBinaryStream(input);
-    return transforms.length ? castTo(compose(castTo([source, ...transforms]))) : castTo(source);
-  }
-
   /** Create a binary array of specified size, optionally filled with a value */
   static makeBinaryArray(size: number, fill?: string | number): BinaryArray {
     return Buffer.alloc(size, fill);
