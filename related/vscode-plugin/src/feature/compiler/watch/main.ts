@@ -90,16 +90,9 @@ export class CompilerWatchFeature extends BaseFeature {
       this.#log.debug('Finished command', command, 'with', code);
     });
 
-    if (debug && subProcess.stderr) {
-      AsyncIterator.from(subProcess.stderr)
-        .flatMap(CodecUtil.toLines())
-        .forEach(line => this.#log.error(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
-    }
-
-    if (debug && subProcess.stdout) {
-      AsyncIterator.from(subProcess.stdout)
-        .flatMap(CodecUtil.toLines())
-        .forEach(line => this.#log.info(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
+    if (debug) {
+      subProcess.stderr?.flatMap(CodecUtil.toLines()).forEach(line => this.#log.error(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
+      subProcess.stdout?.flatMap(CodecUtil.toLines()).forEach(line => this.#log.info(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
     }
 
     return subProcess;

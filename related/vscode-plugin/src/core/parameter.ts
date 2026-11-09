@@ -156,11 +156,9 @@ export class ParameterSelector {
               cwd: workingDirectory
             });
 
-            if (subProcess.stdout) {
-              AsyncIterator.from(subProcess.stdout).flatMap(CodecUtil.toLines()).forEach(item =>
-                items.push({ label: item.trim(), description: item.trim().replace(/^[\\/]/, '') })
-              );
-            }
+            subProcess.stdout?.flatMap(CodecUtil.toLines()).forEach(item => {
+              items.push({ label: item.trim(), description: item.trim().replace(/^[\\/]/, '') });
+            });
             await ExecUtil.getResult(subProcess, { catch: true });
             quickPick.items = items;
             quickPick.busy = false;

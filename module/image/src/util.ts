@@ -79,7 +79,6 @@ export class ImageUtil {
    * Get Image metadata
    */
   static async getMetadata(image: BinaryType): Promise<ImageMetadata> {
-    const { default: sharp } = await import('sharp');
     const out = await new Promise<Metadata>((resolve, reject) =>
       BinaryUtil.pipeline(
         image,

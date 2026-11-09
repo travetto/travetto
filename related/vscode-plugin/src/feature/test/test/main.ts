@@ -76,12 +76,8 @@ class TestRunnerFeature extends BaseFeature {
     );
 
     const debug = (level: string, line: string) => this.log.debug(`> ${level} > ${line.trimEnd()}`);
-    if (this.#server?.stderr) {
-      AsyncIterator.from(this.#server.stderr).flatMap(CodecUtil.toLines()).forEach(line => debug('stderr', line));
-    }
-    if (this.#server?.stdout) {
-      AsyncIterator.from(this.#server.stdout).flatMap(CodecUtil.toLines()).forEach(line => debug('stdout', line));
-    }
+    this.#server.stderr?.flatMap(CodecUtil.toLines()).forEach(line => debug('stderr', line));
+    this.#server.stdout?.flatMap(CodecUtil.toLines()).forEach(line => debug('stdout', line));
   }
 
   #getTestModule(file?: string): IndexedModule | ManifestModule | undefined {

@@ -3,7 +3,7 @@ import type { ChildProcess } from 'node:child_process';
 import { CliModuleUtil } from '@travetto/cli';
 import type { IndexedModule } from '@travetto/manifest';
 import { AsyncIterator, AsyncQueue, CodecUtil, Env, ExecUtil, type ExecutionResult, Runtime, RuntimeIndex } from '@travetto/runtime';
-import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
+import { StyleUtil, Terminal, TerminalUtil, type TerminalWriter } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 
 const COLORS = (
@@ -134,7 +134,9 @@ export class RepoExecUtil {
     const work = WorkPool.runStream<IndexedModule, ExecutionResult>(
       async module => {
         try {
-          const prefix = prefixes[module.sourceFolder] ?? '';
+          const logger = (writer: TerminalWriter) => (line: string) =>
+            writer.writeLine(`${prefixes[module.sourceFolder] ?? ''}${line.trimEnd()}`).commit();
+
           const listKey = config.progressListKey?.(module) ?? ` * ${module.name}`;
           active.add(listKey);
           [...active].sort().forEach((text, idx) => {
@@ -144,15 +146,11 @@ export class RepoExecUtil {
           const subProcess = operation(module);
           processes.set(module, subProcess);
 
-          if (config.showStdout && subProcess.stdout) {
-            AsyncIterator.from(subProcess.stdout)
-              .flatMap(CodecUtil.toLines())
-              .forEach(line => stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
+          if (config.showStdout) {
+            subProcess.stdout?.flatMap(CodecUtil.toLines()).forEach(logger(stdoutTerm.writer));
           }
-          if (config.showStderr && subProcess.stderr) {
-            AsyncIterator.from(subProcess.stderr)
-              .flatMap(CodecUtil.toLines())
-              .forEach(line => stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
+          if (config.showStderr) {
+            subProcess.stderr?.flatMap(CodecUtil.toLines()).forEach(logger(stderrTerm.writer));
           }
 
           const result = await ExecUtil.getResult(subProcess, { catch: true });
