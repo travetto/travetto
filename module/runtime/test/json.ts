@@ -111,7 +111,7 @@ export class JSONUtilSuite {
   async verifyFromUTF8LinesWithAsyncIterable() {
     type Shape = { id: number; name: string; active?: boolean; tags?: string[] };
     const records = await AsyncIterator.from(this.fixture.readBinaryStream('sample.ndjson'))
-      .lines({ skipEmpty: true })
+      .flatMap(CodecUtil.toLines({ skipEmpty: true }))
       .map<Shape>(JSONUtil.fromUTF8)
       .toArray();
 

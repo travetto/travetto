@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import * as vscode from 'vscode';
 
-import { AsyncIterator, Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
+import { AsyncIterator, CodecUtil, Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
 
 import type {
   CompilerEvent,
@@ -92,13 +92,13 @@ export class CompilerWatchFeature extends BaseFeature {
 
     if (debug && subProcess.stderr) {
       AsyncIterator.from(subProcess.stderr)
-        .lines()
+        .flatMap(CodecUtil.toLines())
         .forEach(line => this.#log.error(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
     }
 
     if (debug && subProcess.stdout) {
       AsyncIterator.from(subProcess.stdout)
-        .lines()
+        .flatMap(CodecUtil.toLines())
         .forEach(line => this.#log.info(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
     }
 
@@ -128,7 +128,7 @@ export class CompilerWatchFeature extends BaseFeature {
           this.#log.info('Connected', state);
           const subProcess = this.run('event', ['all'], controller.signal);
           await AsyncIterator.from(subProcess.stdout!)
-            .lines()
+            .flatMap(CodecUtil.toLines())
             .map<CompilerEvent | undefined>(line => {
               try {
                 return JSONUtil.fromUTF8(line);

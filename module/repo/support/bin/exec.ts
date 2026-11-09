@@ -2,7 +2,7 @@ import type { ChildProcess } from 'node:child_process';
 
 import { CliModuleUtil } from '@travetto/cli';
 import type { IndexedModule } from '@travetto/manifest';
-import { AsyncIterator, AsyncQueue, Env, ExecUtil, type ExecutionResult, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { AsyncIterator, AsyncQueue, CodecUtil, Env, ExecUtil, type ExecutionResult, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 
@@ -146,12 +146,12 @@ export class RepoExecUtil {
 
           if (config.showStdout && subProcess.stdout) {
             AsyncIterator.from(subProcess.stdout)
-              .lines()
+              .flatMap(CodecUtil.toLines())
               .forEach(line => stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
           }
           if (config.showStderr && subProcess.stderr) {
             AsyncIterator.from(subProcess.stderr)
-              .lines()
+              .flatMap(CodecUtil.toLines())
               .forEach(line => stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit());
           }
 

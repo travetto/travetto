@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { Readable } from 'node:stream';
 import { ReadableStream } from 'node:stream/web';
 
-import { AsyncIterator } from '@travetto/runtime';
+import { AsyncIterator, CodecUtil } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 @Suite()
@@ -184,11 +184,11 @@ export class CustomAsyncIterableTest {
   }
 
   @Test()
-  async verifyLinesWithoutTrailingNewline() {
+  async verifyFlatMapWithToLines() {
     const stream = async function* () {
-      yield 'line1\nline2';
+      yield 'line1\nline2\n';
     };
-    const lines = await AsyncIterator.from(stream()).lines().toArray();
+    const lines = await AsyncIterator.from(stream()).flatMap(CodecUtil.toLines()).toArray();
     assert.deepStrictEqual(lines, ['line1', 'line2']);
   }
 

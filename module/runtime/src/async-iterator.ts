@@ -1,5 +1,3 @@
-import type { BinaryArray } from './binary.ts';
-import { CodecUtil } from './codec.ts';
 import { castTo } from './types.ts';
 
 /**
@@ -196,33 +194,5 @@ export class AsyncIterator<T = unknown> implements AsyncIterable<T> {
       out.push(item);
     }
     return out;
-  }
-
-  /**
-   * Splits a chunked binary or text stream into discrete lines, buffering partial chunks across boundaries
-   * and flushing any final non-terminated trailing line.
-   * @param options Configuration options, such as `skipEmpty` to omit blank lines.
-   */
-  lines(options?: { skipEmpty?: boolean }): AsyncIterator<string> {
-    const skipEmpty = options?.skipEmpty ?? false;
-    const { target } = this;
-    return new AsyncIterator(async function* () {
-      let remainder: BinaryArray = Buffer.alloc(0);
-      for await (const chunk of target()) {
-        const result = CodecUtil.readLines(remainder, CodecUtil.readChunk(chunk));
-        remainder = result.remainder;
-        for (const line of result.lines) {
-          if (!skipEmpty || line.length > 0) {
-            yield line;
-          }
-        }
-      }
-      if (remainder.byteLength > 0) {
-        const finalLine = CodecUtil.toUTF8String(remainder);
-        if (!skipEmpty || finalLine.length > 0) {
-          yield finalLine;
-        }
-      }
-    });
   }
 }

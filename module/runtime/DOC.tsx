@@ -194,9 +194,6 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
         <li>{d.method('some(predicate)')} - Returns whether at least one item matches the predicate.</li>
         <li>{d.method('every(predicate)')} - Returns whether all items match the predicate.</li>
         <li>{d.method('find(predicate)')} - Finds the first matching item or returns undefined.</li>
-        <li>
-          {d.method('lines(options?)')} - Splits chunked binary or text input into discrete lines via {CodecUtil}.
-        </li>
         <li>{d.method('forEach(visit)')} - Executes a visitor function for every stream item.</li>
         <li>{d.method('toArray()')} - Asynchronously collects all items into an array.</li>
       </ul>
