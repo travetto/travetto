@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, d } from '@travetto/doc';
 import {
-  AsyncIterableOperators,
+  AsyncIterator,
   BinaryUtil,
   CodecUtil,
   ConsoleManager,
@@ -182,7 +182,7 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
     </c.Section>
     <c.Section title="Async Stream and Iterator Operators">
       The runtime provides functional stream operators (emulating the TC39 AsyncIterator helpers language proposal) via the{' '}
-      {AsyncIterableOperators} class. Any readable stream, async generator, or async iterable exposes these fluent transformations via{' '}
+      {AsyncIterator} class. Any readable stream, async generator, or async iterable exposes these fluent transformations via{' '}
       {d.method('AsyncIterator.from(source)')}:
       <ul>
         <li>{d.method('map(transform)')} - Transforms each item asynchronously or synchronously.</li>

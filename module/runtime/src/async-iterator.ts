@@ -3,23 +3,25 @@ import { CodecUtil } from './codec.ts';
 import { castTo } from './types.ts';
 
 /**
+ * TC39 AsyncIterator helper interface
+ *
  * Provides functional stream operators and helpers for async iterables.
  * Wrapped via `AsyncIterator.from(iterable)`.
  */
-export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
+export class AsyncIterator<T = unknown> implements AsyncIterable<T> {
   target: () => AsyncIterable<T>;
 
   /**
-   * Wrap any iterable or async iterable into an AsyncIterableOperators instance.
+   * Wrap any iterable or async iterable into an AsyncIterator instance.
    * Matches TC39 AsyncIterator.from.
    */
-  static from<T>(source: AsyncIterable<T> | Iterable<T>): AsyncIterableOperators<T> {
-    if (source instanceof AsyncIterableOperators) {
+  static from<T>(source: AsyncIterable<T> | Iterable<T>): AsyncIterator<T> {
+    if (source instanceof AsyncIterator) {
       return source;
     } else if (Symbol.asyncIterator in source) {
-      return new AsyncIterableOperators(() => source);
+      return new AsyncIterator(() => source);
     } else if (Symbol.iterator in source) {
-      return new AsyncIterableOperators(async function* () {
+      return new AsyncIterator(async function* () {
         yield* source;
       });
     } else {
@@ -35,7 +37,7 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
   }
 
   /**
-   * Creates a new AsyncIterableOperators instance wrapping the target iterable factory.
+   * Creates a new AsyncIterator instance wrapping the target iterable factory.
    */
   constructor(target: () => AsyncIterable<T>) {
     this.target = target;
@@ -45,9 +47,9 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
    * Transforms each element in the async iterable using the provided transform function.
    * Supports both synchronous and asynchronous transform functions.
    */
-  map<U>(transform: (item: T) => U | Promise<U>): AsyncIterableOperators<U> {
+  map<U>(transform: (item: T) => U | Promise<U>): AsyncIterator<U> {
     const { target } = this;
-    return new AsyncIterableOperators(async function* () {
+    return new AsyncIterator(async function* () {
       for await (const item of target()) {
         yield await transform(item);
       }
@@ -58,11 +60,11 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
    * Filters elements in the async iterable using the provided predicate function.
    * Supports both synchronous and asynchronous predicates.
    */
-  filter<S extends T = T>(predicate: (item: T) => item is S): AsyncIterableOperators<S>;
-  filter(predicate: (item: T) => boolean | Promise<boolean>): AsyncIterableOperators<T>;
-  filter(predicate: (item: T) => boolean | Promise<boolean>): AsyncIterableOperators<T> {
+  filter<S extends T = T>(predicate: (item: T) => item is S): AsyncIterator<S>;
+  filter(predicate: (item: T) => boolean | Promise<boolean>): AsyncIterator<T>;
+  filter(predicate: (item: T) => boolean | Promise<boolean>): AsyncIterator<T> {
     const { target } = this;
-    return new AsyncIterableOperators(async function* () {
+    return new AsyncIterator(async function* () {
       for await (const item of target()) {
         if (await predicate(item)) {
           yield castTo(item);
@@ -74,9 +76,9 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
   /**
    * Yields at most the specified number of items from the async iterable.
    */
-  take(limit: number): AsyncIterableOperators<T> {
+  take(limit: number): AsyncIterator<T> {
     const { target } = this;
-    return new AsyncIterableOperators(async function* () {
+    return new AsyncIterator(async function* () {
       let remaining = limit;
       if (remaining <= 0) {
         return;
@@ -94,9 +96,9 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
   /**
    * Drops the specified number of items from the start of the async iterable.
    */
-  drop(limit: number): AsyncIterableOperators<T> {
+  drop(limit: number): AsyncIterator<T> {
     const { target } = this;
-    return new AsyncIterableOperators(async function* () {
+    return new AsyncIterator(async function* () {
       let remaining = limit;
       for await (const item of target()) {
         if (remaining > 0) {
@@ -176,9 +178,9 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
   /**
    * Maps each element to an array or async result and flattens the results into the output stream.
    */
-  flatMap<U>(transform: (input: T) => AsyncIterable<U> | Iterable<U> | Promise<AsyncIterable<U> | Iterable<U>>): AsyncIterableOperators<U> {
+  flatMap<U>(transform: (input: T) => AsyncIterable<U> | Iterable<U> | Promise<AsyncIterable<U> | Iterable<U>>): AsyncIterator<U> {
     const { target } = this;
-    return new AsyncIterableOperators(async function* () {
+    return new AsyncIterator(async function* () {
       for await (const item of target()) {
         yield* await transform(item);
       }
@@ -201,10 +203,10 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
    * and flushing any final non-terminated trailing line.
    * @param options Configuration options, such as `skipEmpty` to omit blank lines.
    */
-  lines(options?: { skipEmpty?: boolean }): AsyncIterableOperators<string> {
+  lines(options?: { skipEmpty?: boolean }): AsyncIterator<string> {
     const skipEmpty = options?.skipEmpty ?? false;
     const { target } = this;
-    return new AsyncIterableOperators(async function* () {
+    return new AsyncIterator(async function* () {
       let remainder: BinaryArray = Buffer.alloc(0);
       for await (const chunk of target()) {
         const result = CodecUtil.readLines(remainder, CodecUtil.readChunk(chunk));
@@ -224,10 +226,3 @@ export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
     });
   }
 }
-
-/**
- * TC39 AsyncIterator helper interface
- */
-export const AsyncIterator = {
-  from: AsyncIterableOperators.from
-};
