@@ -1,6 +1,5 @@
 import { type ChildProcess, type SpawnOptions, spawn } from 'node:child_process';
 
-import { AsyncIterator } from './async-iterator.ts';
 import { type BinaryArray, BinaryUtil } from './binary.ts';
 import { CodecUtil } from './codec.ts';
 import { RuntimeIndex } from './manifest-index.ts';
