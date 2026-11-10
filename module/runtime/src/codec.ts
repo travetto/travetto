@@ -180,17 +180,16 @@ export class CodecUtil {
     let separator = options?.separator;
 
     return (line: string) => {
-      if (!line.trim()) {
-        return [];
+      if (line.trim()) {
+        separator ??= line.split('\t').length > line.split(',').length ? '\t' : ',';
+        const items = CodecUtil.readCSVLine(line, separator);
+        if (fieldNames.length === 0) {
+          fieldNames = items;
+        } else {
+          return [Object.fromEntries(fieldNames.map((key, i) => [key, items[i]])) as T];
+        }
       }
-      separator ??= line.split('\t').length > line.split(',').length ? '\t' : ',';
-      const items = CodecUtil.readCSVLine(line, separator);
-      if (fieldNames.length === 0) {
-        fieldNames = items;
-        return [];
-      } else {
-        return [Object.fromEntries(fieldNames.map((key, i) => [key, items[i]])) as T];
-      }
+      return [];
     };
   }
 }

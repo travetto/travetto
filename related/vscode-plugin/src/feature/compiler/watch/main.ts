@@ -24,9 +24,6 @@ type ProgressState = { previous: number; bar: ProgressBar; cleanup: () => void }
 
 const SCOPE_MAX = 15;
 const SUB_LOG_REGEX = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(.\d{3})?Z?\s+(info|error|debug|warn)\s*/;
-const VALID_EVENT = (event: CompilerEvent | undefined): event is CompilerEvent =>
-  event !== undefined &&
-  !(typeof event.payload === 'object' && event.payload && 'workspace' in event.payload && event.payload.workspace !== Workspace.path);
 
 /**
  * Workspace Compilation Support
@@ -127,15 +124,10 @@ export class CompilerWatchFeature extends BaseFeature {
           const subProcess = this.run('event', ['all'], controller.signal);
           await AsyncIterableHelper.from(subProcess.stdout!)
             .flatMap(CodecUtil.toLines())
-            .map<CompilerEvent | undefined>(line => {
-              try {
-                return JSONUtil.fromUTF8(line);
-              } catch (err) {
-                this.#log.error(`Unable to parse line: ${err}`);
-                return undefined;
-              }
-            })
-            .filter(VALID_EVENT)
+            .flatMap(JSONUtil.fromLines<CompilerEvent>({ ignoreErrors: true }))
+            .filter(
+              ({ payload }) => !(typeof payload === 'object' && payload && 'workspace' in payload && payload.workspace !== Workspace.path)
+            )
             .forEach(({ type, payload }) => {
               switch (type) {
                 case 'log':
