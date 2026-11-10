@@ -173,7 +173,10 @@ export class JSONUtil {
     return (line: string): T[] => {
       if (line.trim()) {
         try {
-          return [JSONUtil.fromUTF8(line, config)];
+          const result = JSONUtil.fromUTF8(line, config);
+          if (result !== null && result !== undefined) {
+            return [result as T];
+          }
         } catch (error) {
           if (config?.ignoreErrors !== false) {
             throw error;
