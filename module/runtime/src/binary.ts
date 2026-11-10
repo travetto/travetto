@@ -1,4 +1,4 @@
-import { compose, type Duplex, PassThrough, Readable, type Transform, type Writable } from 'node:stream';
+import { PassThrough, Readable, type Writable } from 'node:stream';
 import consumers from 'node:stream/consumers';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
