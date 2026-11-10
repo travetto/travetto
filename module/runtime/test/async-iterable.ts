@@ -1,6 +1,4 @@
 import assert from 'node:assert';
-import { Readable } from 'node:stream';
-import { ReadableStream } from 'node:stream/web';
 
 import { AsyncIterableHelper, CodecUtil } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
