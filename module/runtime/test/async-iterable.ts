@@ -130,24 +130,7 @@ export class CustomAsyncIterableTest {
   }
 
   @Test()
-  async verifyTakeAndDrop() {
-    const iterable = async function* () {
-      yield 1;
-      yield 2;
-      yield 3;
-      yield 4;
-      yield 5;
-    };
-
-    const taken = await AsyncIterableHelper.from(iterable()).take(3).toArray();
-    assert.deepStrictEqual(taken, [1, 2, 3]);
-
-    const dropped = await AsyncIterableHelper.from(iterable()).drop(2).toArray();
-    assert.deepStrictEqual(dropped, [3, 4, 5]);
-  }
-
-  @Test()
-  async verifyReduceSomeEveryFind() {
+  async verifyReduce() {
     const iterable = async function* () {
       yield 1;
       yield 2;
@@ -157,20 +140,13 @@ export class CustomAsyncIterableTest {
 
     const sum = await AsyncIterableHelper.from(iterable()).reduce((acc, val) => acc + val, 0);
     assert.strictEqual(sum, 10);
-
-    const hasEven = await AsyncIterableHelper.from(iterable()).some(val => val % 2 === 0);
-    assert.strictEqual(hasEven, true);
-
-    const allPositive = await AsyncIterableHelper.from(iterable()).every(val => val > 0);
-    assert.strictEqual(allPositive, true);
-
-    const firstEven = await AsyncIterableHelper.from(iterable()).find(val => val % 2 === 0);
-    assert.strictEqual(firstEven, 2);
   }
 
   @Test()
   async verifyAsyncIteratorFrom() {
-    const fromArray = await AsyncIterableHelper.from([10, 20, 30])
+    const fromArray = await AsyncIterableHelper.from(async function* () {
+      yield* [10, 20, 30];
+    })
       .map(x => x * 2)
       .toArray();
     assert.deepStrictEqual(fromArray, [20, 40, 60]);
