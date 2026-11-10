@@ -1,6 +1,6 @@
 {
   "name": "@travetto/compiler",
-  "version": "8.1.0-rc.1",
+  "version": "8.1.0-rc.2",
   "private": false,
   "description": "The compiler infrastructure for the Travetto framework",
   "keywords": [
@@ -39,7 +39,7 @@
     "@travetto/transformer": "^8.1.0-rc.1"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.1.0-rc.4"
+    "@travetto/cli": "^8.1.0-rc.5"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

@@ -1,6 +1,6 @@
 {
   "name": "@travetto/web-upload",
-  "version": "8.1.0-rc.3",
+  "version": "8.1.0-rc.4",
   "private": false,
   "description": "Provides integration between the travetto asset and web module.",
   "keywords": [
@@ -31,13 +31,13 @@
   },
   "dependencies": {
     "@fastify/busboy": "^3.2.5",
-    "@travetto/config": "^8.1.0-rc.3",
-    "@travetto/web": "^8.1.0-rc.3",
+    "@travetto/config": "^8.1.0-rc.4",
+    "@travetto/web": "^8.1.0-rc.4",
     "file-type": "^22.3.0",
     "mime": "^4.1.2"
   },
   "peerDependencies": {
-    "@travetto/test": "^8.1.0-rc.3"
+    "@travetto/test": "^8.1.0-rc.4"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {

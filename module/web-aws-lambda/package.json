@@ -1,6 +1,6 @@
 {
   "name": "@travetto/web-aws-lambda",
-  "version": "8.1.0-rc.3",
+  "version": "8.1.0-rc.4",
   "description": "Web APIs entry point support for AWS Lambdas.",
   "keywords": [
     "aws-lambda",
@@ -29,13 +29,13 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/web": "^8.1.0-rc.3",
+    "@travetto/web": "^8.1.0-rc.4",
     "@types/aws-lambda": "^8.10.164"
   },
   "peerDependencies": {
-    "@travetto/cli": "^8.1.0-rc.4",
-    "@travetto/pack": "^8.1.0-rc.3",
-    "@travetto/test": "^8.1.0-rc.3"
+    "@travetto/cli": "^8.1.0-rc.5",
+    "@travetto/pack": "^8.1.0-rc.4",
+    "@travetto/test": "^8.1.0-rc.4"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
