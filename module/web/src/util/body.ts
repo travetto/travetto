@@ -1,6 +1,7 @@
 import { TextDecoder } from 'node:util';
 
 import {
+  AsyncIterableHelper,
   type BinaryArray,
   BinaryMetadataUtil,
   type BinaryType,
@@ -187,8 +188,8 @@ export class WebBodyUtil {
     let received = 0;
 
     try {
-      const all = await BinaryUtil.toBinaryStream(input)
-        .$$.map(CodecUtil.readChunk)
+      const all = await AsyncIterableHelper.from(BinaryUtil.toBinaryStream(input))
+        .map(CodecUtil.readChunk)
         .map(bytes => {
           received += bytes.byteLength;
           if (received > limit) {

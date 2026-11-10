@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import * as vscode from 'vscode';
 
-import { Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
+import { AsyncIterableHelper, CodecUtil, Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
 
 import type {
   CompilerEvent,
@@ -24,8 +24,6 @@ type ProgressState = { previous: number; bar: ProgressBar; cleanup: () => void }
 
 const SCOPE_MAX = 15;
 const SUB_LOG_REGEX = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(.\d{3})?Z?\s+(info|error|debug|warn)\s*/;
-const VALID_EVENT = ({ payload }: CompilerEvent) =>
-  !(typeof payload === 'object' && payload && 'workspace' in payload && payload.workspace !== Workspace.path);
 
 /**
  * Workspace Compilation Support
@@ -89,12 +87,14 @@ export class CompilerWatchFeature extends BaseFeature {
       this.#log.debug('Finished command', command, 'with', code);
     });
 
-    if (debug && subProcess.stderr) {
-      subProcess.stderr.$$.lines().forEach(line => this.#log.error(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
-    }
-
-    if (debug && subProcess.stdout) {
-      subProcess.stdout.$$.lines().forEach(line => this.#log.info(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
+    if (debug) {
+      const output = (level: 'error' | 'info') => (line: string) => this.#log[level](`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`);
+      if (subProcess.stderr) {
+        AsyncIterableHelper.from(subProcess.stderr).flatMap(CodecUtil.toLines()).forEach(output('error'));
+      }
+      if (subProcess.stdout) {
+        AsyncIterableHelper.from(subProcess.stdout).flatMap(CodecUtil.toLines()).forEach(output('info'));
+      }
     }
 
     return subProcess;
@@ -122,11 +122,12 @@ export class CompilerWatchFeature extends BaseFeature {
           connected = true;
           this.#log.info('Connected', state);
           const subProcess = this.run('event', ['all'], controller.signal);
-          await subProcess
-            .stdout!.$$.lines()
-            .map<CompilerEvent>(JSONUtil.fromUTF8)
-            .onError(err => this.#log.error(`Unable to parse line: ${err}`))
-            .filter(VALID_EVENT)
+          await AsyncIterableHelper.from(subProcess.stdout!)
+            .flatMap(CodecUtil.toLines())
+            .flatMap(JSONUtil.fromLines<CompilerEvent>({ ignoreErrors: true }))
+            .filter(
+              ({ payload }) => !(typeof payload === 'object' && payload && 'workspace' in payload && payload.workspace !== Workspace.path)
+            )
             .forEach(({ type, payload }) => {
               switch (type) {
                 case 'log':

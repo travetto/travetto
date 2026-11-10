@@ -1,121 +1,82 @@
-import { BinaryUtil, type BinaryArray } from './binary.ts';
-import { CodecUtil } from './codec.ts';
+import { castTo } from './types.ts';
 
 /**
+ * TC39 AsyncIterable helper interface (subset)
+ *
  * Provides functional stream operators and helpers for async iterables.
- * Accessible via the `.$$` accessor on any async iterable, readable stream, or generator.
  */
-export class AsyncIterableOperators<T = unknown> implements AsyncIterable<T> {
+export class AsyncIterableHelper<T = unknown> implements AsyncIterable<T> {
   target: () => AsyncIterable<T>;
 
-  /**
-   * Returns the underlying async iterator.
-   */
+  /** Wrap any async iterable or factory into an empowered stream */
+  static from<T>(source: AsyncIterable<T> | (() => AsyncIterable<T>)): AsyncIterableHelper<T> {
+    return new AsyncIterableHelper(typeof source === 'function' ? source : () => source);
+  }
+
   [Symbol.asyncIterator]() {
     return this.target()[Symbol.asyncIterator]();
   }
 
-  /**
-   * Creates a new AsyncIterableOperators instance wrapping the target iterable factory.
-   */
+  /** Creates a new AsyncIterableHelper instance wrapping the target iterable factory. */
   constructor(target: () => AsyncIterable<T>) {
-    this.target = target;
+    this.target = target instanceof AsyncIterableHelper ? target.target : target;
   }
 
-  /**
-   * Transforms each element in the async iterable using the provided transform function.
-   * Supports both synchronous and asynchronous transform functions.
-   */
-  map<U>(transform: (item: T) => U): AsyncIterableOperators<U> {
+  /** Transforms each element in the async iterable using the provided transform function. */
+  map<U>(transform: (item: T) => U | Promise<U>): AsyncIterableHelper<U> {
     const { target } = this;
-    return new AsyncIterableOperators(async function* () {
+    return new AsyncIterableHelper(async function* () {
       for await (const item of target()) yield await transform(item);
     });
   }
 
-  /**
-   * Filters elements in the async iterable using the provided predicate function.
-   * Supports both synchronous and asynchronous predicates.
-   */
-  filter(predicate: (item: T) => boolean | Promise<boolean>): AsyncIterableOperators<T> {
+  /** Filters elements in the async iterable using the provided predicate function. */
+  filter<S extends T = T>(predicate: (item: T) => item is S): AsyncIterableHelper<S>;
+  filter(predicate: (item: T) => boolean | Promise<boolean>): AsyncIterableHelper<T>;
+  filter(predicate: (item: T) => boolean | Promise<boolean>): AsyncIterableHelper<T> {
     const { target } = this;
-    return new AsyncIterableOperators(async function* () {
-      for await (const item of target()) if (await predicate(item)) yield item;
+    return new AsyncIterableHelper(async function* () {
+      for await (const item of target()) {
+        if (await predicate(item)) yield castTo(item);
+      }
     });
   }
 
-  /**
-   * Iterates through all elements in the async iterable, invoking the visitor function for each element.
-   */
+  /** Iterates through all elements in the async iterable, invoking the visitor function for each element. */
   async forEach(visit: (item: T) => Promise<unknown> | unknown): Promise<void> {
     for await (const item of this) await visit(item);
   }
 
-  /**
-   * Consumes all elements from the async iterable without processing them, discarding all output.
-   */
-  async drain(): Promise<void> {
-    return this.forEach(() => {}); // No op
-  }
-
-  /**
-   * Catches errors thrown during iteration, invoking the error callback and continuing stream consumption.
-   */
-  onError(onError: (error: unknown) => Promise<unknown> | unknown): AsyncIterableOperators<Exclude<T, undefined>> {
-    const { target } = this;
-    return new AsyncIterableOperators(async function* () {
-      for await (const item of target()) {
-        try {
-          yield item as Exclude<T, undefined>;
-        } catch (error) {
-          onError(error);
-        }
+  /** Reduces the async iterable to a single value using an accumulator function. */
+  async reduce<U = T>(reducer: (accumulator: U, item: T) => U | Promise<U>, initialValue?: U): Promise<U> {
+    let accumulator = initialValue;
+    let first = initialValue === undefined;
+    for await (const item of this) {
+      if (first) {
+        accumulator = castTo(item);
+        first = false;
+      } else {
+        accumulator = await reducer(castTo(accumulator), item);
       }
-    });
+    }
+    if (first) {
+      throw new TypeError('Reduce of empty iterable with no initial value');
+    }
+    return castTo(accumulator);
   }
 
-  /**
-   * Maps each element to an array or async result and flattens the results into the output stream.
-   */
-  flatMap<U>(transform: (input: T) => U[] | Promise<U[]>): AsyncIterableOperators<U> {
+  /** Maps each element to an array or async result and flattens the results into the output stream. */
+  flatMap<U>(transform: (input: T) => AsyncIterable<U> | Iterable<U> | Promise<AsyncIterable<U> | Iterable<U>>): AsyncIterableHelper<U> {
     const { target } = this;
-    return new AsyncIterableOperators(async function* () {
+    return new AsyncIterableHelper(async function* () {
       for await (const item of target()) yield* await transform(item);
     });
   }
 
-  /**
-   * Collects all elements of the async iterable into an array.
-   */
+  /** Collects all elements of the async iterable into an array. */
   async toArray(): Promise<T[]> {
-    const out = [];
+    const out: T[] = [];
     for await (const item of this) out.push(item);
     return out;
   }
-
-  /**
-   * Splits a chunked binary or text stream into discrete lines, buffering partial chunks across boundaries.
-   * @param options Configuration options, such as `skipEmpty` to omit blank lines.
-   */
-  lines(options?: Parameters<typeof CodecUtil.toLines>[0]): AsyncIterableOperators<string> {
-    return this.flatMap(CodecUtil.toLines(options));
-  }
-  /**
-   * Joins a stream into a binary array
-   */
-  async toBinaryArray(): Promise<BinaryArray> {
-    return this.map(CodecUtil.readChunk).toArray().then(BinaryUtil.combineBinaryArrays);
-  }
 }
-
-// Apply stream operators to the Object prototype, will remove once
-// TC39 gets AsyncIterator helpers into the language
-try {
-  Object.defineProperties(Object.prototype, {
-    $$: {
-      get() {
-        return new AsyncIterableOperators(() => this);
-      }
-    }
-  });
-} catch {}

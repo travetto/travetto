@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { BinaryUtil } from '@travetto/runtime';
+import { AsyncIterableHelper, CodecUtil } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 @Suite()
@@ -27,7 +27,7 @@ export class CustomAsyncIterableTest {
       yield 'b';
     }
 
-    assert.deepStrictEqual(await generate().$$.toArray(), ['a', 'b']);
+    assert.deepStrictEqual(await AsyncIterableHelper.from(generate()).toArray(), ['a', 'b']);
   }
 
   @Test()
@@ -38,8 +38,8 @@ export class CustomAsyncIterableTest {
       yield 3;
     };
 
-    const doubled = await iterable()
-      .$$.map(item => item * 2)
+    const doubled = await AsyncIterableHelper.from(iterable())
+      .map(item => item * 2)
       .toArray();
     assert.deepStrictEqual(doubled, [2, 4, 6]);
 
@@ -48,8 +48,8 @@ export class CustomAsyncIterableTest {
       yield 'world';
     };
 
-    const uppercase = await asyncIterable()
-      .$$.map(async item => item.toUpperCase())
+    const uppercase = await AsyncIterableHelper.from(asyncIterable())
+      .map(async item => item.toUpperCase())
       .toArray();
     assert.deepStrictEqual(uppercase, ['HELLO', 'WORLD']);
   }
@@ -63,8 +63,8 @@ export class CustomAsyncIterableTest {
       yield 4;
     };
 
-    const evensOnly = await iterable()
-      .$$.map(item => (item % 2 === 0 ? item * 10 : undefined))
+    const evensOnly = await AsyncIterableHelper.from(iterable())
+      .map(item => (item % 2 === 0 ? item * 10 : undefined))
       .filter(Boolean)
       .toArray();
     assert.deepStrictEqual(evensOnly, [20, 40]);
@@ -80,8 +80,8 @@ export class CustomAsyncIterableTest {
       yield 5;
     };
 
-    const filtered = await iterable()
-      .$$.filter(item => item > 2)
+    const filtered = await AsyncIterableHelper.from(iterable())
+      .filter(item => item > 2)
       .toArray();
     assert.deepStrictEqual(filtered, [3, 4, 5]);
 
@@ -91,8 +91,8 @@ export class CustomAsyncIterableTest {
       yield 'avocado';
     };
 
-    const startsWithA = await asyncIterable()
-      .$$.filter(async item => item.startsWith('a'))
+    const startsWithA = await AsyncIterableHelper.from(asyncIterable())
+      .filter(async item => item.startsWith('a'))
       .toArray();
     assert.deepStrictEqual(startsWithA, ['apple', 'avocado']);
   }
@@ -107,8 +107,8 @@ export class CustomAsyncIterableTest {
       yield 5;
     };
 
-    const result = await iterable()
-      .$$.filter(item => item % 2 !== 0)
+    const result = await AsyncIterableHelper.from(iterable())
+      .filter(item => item % 2 !== 0)
       .map(item => item * 10)
       .map(item => `${item}!`)
       .toArray();
@@ -119,21 +119,50 @@ export class CustomAsyncIterableTest {
   @Test()
   async verifyToArray() {
     const emptyIterable = async function* () {};
-    assert.deepStrictEqual(await emptyIterable().$$.toArray(), []);
+    assert.deepStrictEqual(await AsyncIterableHelper.from(emptyIterable()).toArray(), []);
 
     const singleIterable = async function* () {
       yield 42;
     };
-    assert.deepStrictEqual(await singleIterable().$$.toArray(), [42]);
+    assert.deepStrictEqual(await AsyncIterableHelper.from(singleIterable()).toArray(), [42]);
   }
 
   @Test()
-  async verifyToBinaryArray() {
-    const chunkIterable = async function* () {
-      yield Buffer.from('hello ');
-      yield 'world';
+  async verifyReduce() {
+    const iterable = async function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+      yield 4;
     };
-    const binary = await chunkIterable().$$.toBinaryArray();
-    assert.strictEqual(BinaryUtil.binaryArrayToBuffer(binary).toString('utf8'), 'hello world');
+
+    const sum = await AsyncIterableHelper.from(iterable()).reduce((acc, val) => acc + val, 0);
+    assert.strictEqual(sum, 10);
+  }
+
+  @Test()
+  async verifyAsyncIteratorFrom() {
+    const fromArray = await AsyncIterableHelper.from(async function* () {
+      yield* [10, 20, 30];
+    })
+      .map(x => x * 2)
+      .toArray();
+    assert.deepStrictEqual(fromArray, [20, 40, 60]);
+
+    async function* gen() {
+      yield 'hello';
+      yield 'world';
+    }
+    const fromGen = await AsyncIterableHelper.from(gen()).toArray();
+    assert.deepStrictEqual(fromGen, ['hello', 'world']);
+  }
+
+  @Test()
+  async verifyFlatMapWithToLines() {
+    const stream = async function* () {
+      yield 'line1\nline2\n';
+    };
+    const lines = await AsyncIterableHelper.from(stream()).flatMap(CodecUtil.toLines()).toArray();
+    assert.deepStrictEqual(lines, ['line1', 'line2']);
   }
 }

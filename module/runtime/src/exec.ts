@@ -92,8 +92,8 @@ export class ExecUtil {
         resolve(!final.valid ? { ...final, message: `${final.message || final.stderr || final.stdout || 'failed'}` } : final);
       };
 
-      subProcess.stdout?.$$.forEach(data => stdout.push(CodecUtil.readChunk(data, encoding)));
-      subProcess.stderr?.$$.forEach(data => stderr.push(CodecUtil.readChunk(data, encoding)));
+      subProcess.stdout?.on('data', data => stdout.push(CodecUtil.readChunk(data, encoding)));
+      subProcess.stderr?.on('data', data => stderr.push(CodecUtil.readChunk(data, encoding)));
 
       subProcess.on('error', (error: Error) => finish({ code: 1, message: error.message, valid: false }));
       subProcess.on('close', (code: number) => finish({ code, valid: code === null || code === 0 }));

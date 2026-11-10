@@ -3,6 +3,7 @@ import { createReadStream, createWriteStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { compose } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
 import { ImageUtil } from '@travetto/image';
@@ -19,7 +20,7 @@ class ImageUtilSuite {
 
     assert(imgBuffer.byteLength > 0);
 
-    const resizedBuffer = await BinaryUtil.toBinaryArray(await ImageUtil.convert(imgBuffer, { h: 100, w: 100 }));
+    const resizedBuffer = await BinaryUtil.toBinaryArray(ImageUtil.convert(imgBuffer, { h: 100, w: 100 }));
 
     assert(resizedBuffer.byteLength > 0);
 
@@ -31,7 +32,7 @@ class ImageUtilSuite {
     const imgStream = this.fixture.readBinaryStream('google.png');
     const imgBuffer = await this.fixture.readBinaryArray('google.png');
 
-    const out = await ImageUtil.convert(imgStream, { optimize: true, format: 'png' });
+    const out = ImageUtil.convert(imgStream, { optimize: true, format: 'png' });
 
     const optimized = await BinaryUtil.toBinaryArray(out);
 
@@ -40,14 +41,12 @@ class ImageUtilSuite {
     assert(imgBuffer.byteLength >= optimized.byteLength);
   }
 
-  @Test('compress jpeg')
+  @Test('compress jpeg via pipe')
   async compressJpeg() {
-    const imgStream = this.fixture.readBinaryStream('lincoln.jpg');
+    const imgStream = compose(this.fixture.readBinaryStream('lincoln.jpg'), ImageUtil.transform({ optimize: true, format: 'avif' }));
     const imgBuffer = await this.fixture.readBinaryArray('lincoln.jpg');
 
-    const out = await ImageUtil.convert(imgStream, { optimize: true, format: 'avif' });
-
-    const optimized = await BinaryUtil.toBinaryArray(out);
+    const optimized = await BinaryUtil.toBinaryArray(imgStream);
 
     assert(optimized.byteLength > 0);
 
@@ -61,7 +60,7 @@ class ImageUtilSuite {
     const imgStream = this.fixture.readBinaryStream('lincoln.jpg');
     const imgBuffer = await this.fixture.readBinaryArray('lincoln.jpg');
 
-    const out = await ImageUtil.convert(imgStream, { optimize: true });
+    const out = ImageUtil.convert(imgStream, { optimize: true });
 
     const optimized = await BinaryUtil.toBinaryArray(out);
 
@@ -75,7 +74,7 @@ class ImageUtilSuite {
   @Test('resizeToFile')
   async resizeToFile() {
     const imgFile = await this.fixture.resolve('lincoln.jpg');
-    const out = await ImageUtil.convert(createReadStream(imgFile), {
+    const out = ImageUtil.convert(createReadStream(imgFile), {
       w: 50,
       h: 50,
       optimize: true
@@ -105,13 +104,9 @@ class ImageUtilSuite {
 
   @Test()
   async resizeLooseWidthToFile() {
-    const imgStream = this.fixture.readBinaryStream('lincoln.jpg');
-    const out = await ImageUtil.convert(imgStream, {
-      w: 100
-    });
-
     const outFile = path.resolve(os.tmpdir(), `temp.${Date.now()}.${Math.random()}.png`);
-    await pipeline(out, createWriteStream(outFile));
+    await pipeline(this.fixture.readBinaryStream('lincoln.jpg'), ImageUtil.transform({ w: 100 }), createWriteStream(outFile));
+
     assert.ok(
       await fs.stat(outFile).then(
         () => true,
@@ -135,7 +130,7 @@ class ImageUtilSuite {
   @Test()
   async resizeLooseHeightToFile() {
     const imgStream = this.fixture.readBinaryStream('lincoln.jpg');
-    const out = await ImageUtil.convert(imgStream, {
+    const out = ImageUtil.convert(imgStream, {
       h: 134.00005
     });
 
@@ -163,15 +158,18 @@ class ImageUtilSuite {
 
   @Test()
   async resizeAndChangeFormat() {
-    const imgStream = await this.fixture.readBinaryStream('lincoln.jpg');
-    const out = await ImageUtil.convert(imgStream, {
-      w: 200,
-      h: 200,
-      format: 'avif'
-    });
-
     const outFile = path.resolve(os.tmpdir(), `temp.${Date.now()}.${Math.random()}.avif`);
-    await pipeline(out, createWriteStream(outFile));
+
+    await pipeline(
+      this.fixture.readBinaryStream('lincoln.jpg'),
+      ImageUtil.transform({
+        w: 200,
+        h: 200,
+        format: 'avif'
+      }),
+      createWriteStream(outFile)
+    );
+
     assert.ok(
       await fs.stat(outFile).then(
         () => true,

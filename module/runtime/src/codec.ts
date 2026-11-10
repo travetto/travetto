@@ -175,21 +175,21 @@ export class CodecUtil {
   }
 
   /** Simple CSV parser */
-  static fromCSV<T>(options?: { separator?: string; fieldNames?: string[] }): (data: unknown) => T[] {
+  static fromCSV<T>(options?: { separator?: string; fieldNames?: string[] }): (line: string) => T[] {
     let fieldNames: string[] = options?.fieldNames ?? [];
     let separator = options?.separator;
-    const readLines = CodecUtil.toLines({ skipEmpty: true });
 
-    return data =>
-      readLines(data).flatMap(line => {
+    return (line: string) => {
+      if (line.trim()) {
         separator ??= line.split('\t').length > line.split(',').length ? '\t' : ',';
         const items = CodecUtil.readCSVLine(line, separator);
         if (fieldNames.length === 0) {
           fieldNames = items;
-          return [];
         } else {
           return [Object.fromEntries(fieldNames.map((key, i) => [key, items[i]])) as T];
         }
-      });
+      }
+      return [];
+    };
   }
 }

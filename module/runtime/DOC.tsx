@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, d } from '@travetto/doc';
 import {
-  AsyncIterableOperators,
+  AsyncIterableHelper,
   BinaryUtil,
   CodecUtil,
   ConsoleManager,
@@ -181,19 +181,16 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
       </ul>
     </c.Section>
     <c.Section title="Async Stream and Iterator Operators">
-      The runtime augments async iterables with functional stream operators (pending TC39 AsyncIterator helpers language integration) via
-      the {AsyncIterableOperators} class. Any readable stream, async generator, or async iterable exposes these fluent transformations
-      through the {d.field('$$')} property accessor:
+      The runtime provides functional stream operators (emulating the TC39 AsyncIterator helpers language proposal) via the{' '}
+      {AsyncIterableHelper} class. Any readable stream, async generator, or async iterable exposes these fluent transformations via{' '}
+      {d.method('AsyncIterableHelper.from(source)')}:
       <ul>
         <li>{d.method('map(transform)')} - Transforms each item asynchronously or synchronously.</li>
         <li>{d.method('filter(predicate)')} - Filters items using a synchronous or asynchronous predicate.</li>
         <li>{d.method('flatMap(transform)')} - Transforms each item into an array or async result and flattens into the output stream.</li>
-        <li>{d.method('lines(options?)')} - Splits chunked binary or text input into discrete lines via {CodecUtil}.</li>
+        <li>{d.method('reduce(reducer, initial?)')} - Reduces items into a single accumulated result.</li>
         <li>{d.method('forEach(visit)')} - Executes a visitor function for every stream item.</li>
-        <li>{d.method('drain()')} - Consumes all items from the stream without processing them.</li>
-        <li>{d.method('onError(handler)')} - Catches iteration errors, invoking the callback and continuing the stream.</li>
         <li>{d.method('toArray()')} - Asynchronously collects all items into an array.</li>
-        <li>{d.method('toBinaryArray()')} - Concatenates stream chunks into a single binary array.</li>
       </ul>
     </c.Section>
     <c.Section title="Common Utilities">

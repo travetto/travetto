@@ -1,10 +1,12 @@
 import assert from 'node:assert';
 import { isUint8Array } from 'node:util/types';
 
-import { type BinaryStream, CodecUtil, castTo, RuntimeError } from '@travetto/runtime';
+import { AsyncIterableHelper, type BinaryStream, CodecUtil, castTo, RuntimeError } from '@travetto/runtime';
 import { Suite, Test, TestFixtures } from '@travetto/test';
 
 const addNewline = (input: string) => `${input}\n`;
+type Person = { name: string; age: string; city: string };
+type Paper = { id: string; title: string; score: string };
 
 @Suite()
 export class CodecUtilTest {
@@ -131,9 +133,9 @@ export class CodecUtilTest {
 
   @Test()
   async verifyFromCSV() {
-    const records = await this.fixture
-      .readBinaryStream('sample.csv')
-      .$$.flatMap(CodecUtil.fromCSV<{ name: string; age: string; city: string }>())
+    const records = await AsyncIterableHelper.from(this.fixture.readBinaryStream('sample.csv'))
+      .flatMap(CodecUtil.toLines())
+      .flatMap(CodecUtil.fromCSV<Person>())
       .toArray();
 
     assert.strictEqual(records.length, 3);
@@ -144,9 +146,9 @@ export class CodecUtilTest {
 
   @Test()
   async verifyFromTSV() {
-    const records = await this.fixture
-      .readBinaryStream('sample.tsv')
-      .$$.flatMap(CodecUtil.fromCSV<{ id: string; title: string; score: string }>())
+    const records = await AsyncIterableHelper.from(this.fixture.readBinaryStream('sample.tsv'))
+      .flatMap(CodecUtil.toLines())
+      .flatMap(CodecUtil.fromCSV<Paper>())
       .toArray();
 
     assert.strictEqual(records.length, 3);
@@ -160,14 +162,14 @@ export class CodecUtilTest {
     const lines = ['', 'name,age,city', '   ', 'Alice,30,Seattle', '', 'Bob,25,"New York, NY"', '   \t  ', 'Charlie,40,Chicago', ''].map(
       addNewline
     );
-    const records = lines.flatMap<{ name: string; age: string; city: string }>(CodecUtil.fromCSV());
+    const records = lines.flatMap(CodecUtil.toLines()).flatMap<Person>(CodecUtil.fromCSV());
 
     assert.strictEqual(records.length, 3);
     assert.deepStrictEqual(records[0], { name: 'Alice', age: '30', city: 'Seattle' });
     assert.deepStrictEqual(records[1], { name: 'Bob', age: '25', city: 'New York, NY' });
     assert.deepStrictEqual(records[2], { name: 'Charlie', age: '40', city: 'Chicago' });
 
-    const defaultRecords = lines.flatMap<object>(CodecUtil.fromCSV());
+    const defaultRecords = lines.flatMap(CodecUtil.toLines()).flatMap<object>(CodecUtil.fromCSV());
 
     assert.strictEqual(defaultRecords.length, 3);
     assert.deepStrictEqual(defaultRecords[0], { name: 'Alice', age: '30', city: 'Seattle' });

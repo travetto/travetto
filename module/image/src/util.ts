@@ -1,4 +1,6 @@
-import type { Metadata, Sharp } from 'sharp';
+import { compose } from 'node:stream';
+
+import { default as sharp, type Sharp, type Metadata } from 'sharp';
 
 import { type BinaryStream, type BinaryType, BinaryUtil, castTo } from '@travetto/runtime';
 
@@ -42,9 +44,10 @@ export class ImageUtil {
     return VALID_EXTENSIONS.includes(castTo(ext));
   }
 
-  static async #getBuilder({ format, optimize, ...options }: ConvertOptions): Promise<Sharp> {
-    const { default: sharp } = await import('sharp');
-
+  /**
+   * Get a sharp transformer
+   */
+  static transform({ format, optimize, ...options }: ConvertOptions): Sharp {
     let builder = sharp();
     if (options.w || options.h) {
       const dims = [options.w, options.h].map(value => (value ? Math.trunc(value) : undefined));
@@ -66,19 +69,16 @@ export class ImageUtil {
   }
 
   /**
-   * Convert image as readable stream
+   * Convert image transform into a readable stream
    */
-  static async convert(image: BinaryType, options: ConvertOptions): Promise<BinaryStream> {
-    const builder = await this.#getBuilder(options);
-    BinaryUtil.pipeline(image, builder);
-    return builder;
+  static convert(image: BinaryType, options: ConvertOptions): BinaryStream {
+    return compose(BinaryUtil.toBinaryStream(image), ImageUtil.transform(options));
   }
 
   /**
    * Get Image metadata
    */
   static async getMetadata(image: BinaryType): Promise<ImageMetadata> {
-    const { default: sharp } = await import('sharp');
     const out = await new Promise<Metadata>((resolve, reject) =>
       BinaryUtil.pipeline(
         image,

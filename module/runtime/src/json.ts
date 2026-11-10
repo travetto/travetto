@@ -167,4 +167,20 @@ export class JSONUtil {
   static cloneFromTransmit<T, R = T>(input: T): R {
     return JSONUtil.clone<T, R>(input, { reviver: JSONUtil.TRANSMIT_REVIVER });
   }
+
+  /** From JSON lines */
+  static fromLines<T>(config?: JSONInputConfig & { ignoreErrors?: boolean }) {
+    return (line: string): T[] => {
+      if (line.trim()) {
+        try {
+          return [JSONUtil.fromUTF8(line, config)];
+        } catch (error) {
+          if (config?.ignoreErrors !== false) {
+            throw error;
+          }
+        }
+      }
+      return [];
+    };
+  }
 }

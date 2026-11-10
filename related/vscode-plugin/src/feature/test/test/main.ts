@@ -5,7 +5,7 @@ import path from 'node:path';
 import * as vscode from 'vscode';
 
 import type { IndexedModule, ManifestModule } from '@travetto/manifest';
-import { Env } from '@travetto/runtime';
+import { AsyncIterableHelper, CodecUtil, Env } from '@travetto/runtime';
 import type { TestWatchEvent } from '@travetto/test';
 
 import { ActivateOn } from '../../../core/activation.ts';
@@ -75,9 +75,13 @@ class TestRunnerFeature extends BaseFeature {
       }
     );
 
-    const debug = (level: string, line: string) => this.log.debug(`> ${level} > ${line.trimEnd()}`);
-    this.#server.stderr?.$$.lines().forEach(line => debug('stderr', line));
-    this.#server.stdout?.$$.lines().forEach(line => debug('stdout', line));
+    const debug = (level: string) => (line: string) => this.log.debug(`> ${level} > ${line.trimEnd()}`);
+    if (this.#server.stderr) {
+      AsyncIterableHelper.from(this.#server.stderr).flatMap(CodecUtil.toLines()).forEach(debug('stderror'));
+    }
+    if (this.#server.stdout) {
+      AsyncIterableHelper.from(this.#server.stdout).flatMap(CodecUtil.toLines()).forEach(debug('stdout'));
+    }
   }
 
   #getTestModule(file?: string): IndexedModule | ManifestModule | undefined {
