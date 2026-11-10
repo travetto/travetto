@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import { CliCommandRegistryIndex } from '@travetto/cli';
 import { PackageUtil } from '@travetto/manifest';
-import { type Class, castTo, RuntimeIndex } from '@travetto/runtime';
+import { type Class, castKey, RuntimeIndex } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { createElement, JSXRuntimeTag } from '../../support/jsx-runtime.ts';
@@ -138,7 +138,6 @@ export class RenderContext {
    * Create a new element from a given JSX factory
    */
   createElement<K extends keyof typeof c>(name: K, props: JSXElementByFn<K>['props']): JSXElementByFn<K> {
-    // @ts-expect-error
-    return castTo(createElement(c[name], props));
+    return createElement(c[castKey(name)], props);
   }
 }

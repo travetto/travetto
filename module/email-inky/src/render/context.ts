@@ -1,5 +1,5 @@
 import { EmailResourceLoader, type EmailTemplateLocation } from '@travetto/email';
-import { castTo, type FileLoader } from '@travetto/runtime';
+import { castKey, type FileLoader } from '@travetto/runtime';
 
 import { createElement } from '../../support/jsx-runtime.ts';
 import { c, type JSXElementByFn } from '../components.ts';
@@ -24,6 +24,6 @@ export class RenderContext implements RenderContextInit {
    * Create a new element from a given JSX factory
    */
   createElement<K extends keyof typeof c>(name: K, props: JSXElementByFn<K>['props']): JSXElementByFn<K> {
-    return castTo(createElement(castTo<Record<string, string>>(c)[name], props));
+    return createElement(c[castKey(name)], props);
   }
 }

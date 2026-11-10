@@ -50,9 +50,9 @@ export class WebBodyUtil {
    * Generate multipart body
    */
   static async *buildMultiPartBody(form: FormData, boundary: string): AsyncIterable<BinaryArray> {
-    const bytes = (value: string = '', suffix = '\r\n'): BinaryArray => CodecUtil.fromUTF8String(`${value}${suffix}`);
+    const line = (value = '') => CodecUtil.fromUTF8String(`${value}\r\n`);
     for (const [key, item] of form.entries()) {
-      yield bytes(`--${boundary}`);
+      yield line(`--${boundary}`);
       const binaryValue = typeof item === 'string' ? CodecUtil.fromUTF8String(item) : item.slice();
 
       // Headers
@@ -61,24 +61,24 @@ export class WebBodyUtil {
       }
 
       if (item instanceof File) {
-        yield bytes(`Content-Disposition: form-data; name="${key}"; filename="${item.name || key}"`);
+        yield line(`Content-Disposition: form-data; name="${key}"; filename="${item.name || key}"`);
       }
 
       for (const [header, value] of WebBodyUtil.getMetadataHeaders(binaryValue)) {
         if (header.startsWith('Content-') && header !== 'Content-Disposition') {
-          yield bytes(`${header}: ${value}`);
+          yield line(`${header}: ${value}`);
         }
       }
 
-      yield bytes();
+      yield line();
       if (binaryValue instanceof Blob) {
         yield* BinaryUtil.toBinaryStream(binaryValue);
       } else {
         yield binaryValue;
       }
-      yield bytes();
+      yield line();
     }
-    yield bytes(`--${boundary}--`);
+    yield line(`--${boundary}--`);
   }
 
   /**
@@ -131,7 +131,7 @@ export class WebBodyUtil {
 
     out.headers.setIfAbsent('Content-Type', this.defaultContentType(body));
 
-    return castTo(out);
+    return out;
   }
 
   /**
