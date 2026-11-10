@@ -38,8 +38,8 @@
     "@travetto/runtime": "^8.1.0-rc.3",
     "@travetto/worker": "^8.1.0-rc.3",
     "html-entities": "^2.6.0",
-    "purgecss": "^8.0.0",
-    "sass": "^1.107.1"
+    "purgecss": "^9.1.0",
+    "sass": "^1.108.1"
   },
   "peerDependencies": {
     "@travetto/cli": "^8.1.0-rc.4"

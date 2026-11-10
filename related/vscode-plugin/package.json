@@ -44,12 +44,12 @@
     "@travetto/pack": "^8.1.0-rc.0",
     "@travetto/test": "^8.1.0-rc.0",
     "@types/node": "^26.6.6",
-    "@types/vscode": "^1.144.0"
+    "@types/vscode": "^1.145.0"
   },
   "dependencies": {
     "@travetto/registry": "^8.1.0-rc.0",
     "@travetto/runtime": "^8.1.0-rc.0",
-    "temporal-polyfill-lite": "^1.0.0"
+    "temporal-polyfill-lite": "^1.0.1"
   },
   "travetto": {
     "displayName": "Travetto Plugin",
