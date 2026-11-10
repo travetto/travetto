@@ -277,12 +277,7 @@ The runtime provides functional stream operators (emulating the TC39 AsyncIterat
    *  `map(transform)` - Transforms each item asynchronously or synchronously.
    *  `filter(predicate)` - Filters items using a synchronous or asynchronous predicate.
    *  `flatMap(transform)` - Transforms each item into an array or async result and flattens into the output stream.
-   *  `take(limit)` - Yields at most the specified number of elements.
-   *  `drop(limit)` - Drops the specified number of leading elements.
    *  `reduce(reducer, initial?)` - Reduces items into a single accumulated result.
-   *  `some(predicate)` - Returns whether at least one item matches the predicate.
-   *  `every(predicate)` - Returns whether all items match the predicate.
-   *  `find(predicate)` - Finds the first matching item or returns undefined.
    *  `forEach(visit)` - Executes a visitor function for every stream item.
    *  `toArray()` - Asynchronously collects all items into an array.
 

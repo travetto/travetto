@@ -188,12 +188,7 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
         <li>{d.method('map(transform)')} - Transforms each item asynchronously or synchronously.</li>
         <li>{d.method('filter(predicate)')} - Filters items using a synchronous or asynchronous predicate.</li>
         <li>{d.method('flatMap(transform)')} - Transforms each item into an array or async result and flattens into the output stream.</li>
-        <li>{d.method('take(limit)')} - Yields at most the specified number of elements.</li>
-        <li>{d.method('drop(limit)')} - Drops the specified number of leading elements.</li>
         <li>{d.method('reduce(reducer, initial?)')} - Reduces items into a single accumulated result.</li>
-        <li>{d.method('some(predicate)')} - Returns whether at least one item matches the predicate.</li>
-        <li>{d.method('every(predicate)')} - Returns whether all items match the predicate.</li>
-        <li>{d.method('find(predicate)')} - Finds the first matching item or returns undefined.</li>
         <li>{d.method('forEach(visit)')} - Executes a visitor function for every stream item.</li>
         <li>{d.method('toArray()')} - Asynchronously collects all items into an array.</li>
       </ul>
