@@ -183,7 +183,7 @@ $ DEBUG=express:*,@travetto/web ${d.trv} run web
     <c.Section title="Async Stream and Iterator Operators">
       The runtime provides functional stream operators (emulating the TC39 AsyncIterator helpers language proposal) via the{' '}
       {AsyncIterableHelper} class. Any readable stream, async generator, or async iterable exposes these fluent transformations via{' '}
-      {d.method('AsyncIterator.from(source)')}:
+      {d.method('AsyncIterableHelper.from(source)')}:
       <ul>
         <li>{d.method('map(transform)')} - Transforms each item asynchronously or synchronously.</li>
         <li>{d.method('filter(predicate)')} - Filters items using a synchronous or asynchronous predicate.</li>
