@@ -273,7 +273,7 @@ For processing line-oriented data streams (such as subprocess output or incoming
    *  `readCSVLine(line, delimiter?)` parses individual CSV lines with support for quoted strings and custom delimiters.
 
 ## Async Stream and Iterator Operators
-The runtime provides functional stream operators (emulating the TC39 AsyncIterator helpers language proposal) via the [AsyncIterableHelper](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L9) class. Any readable stream, async generator, or async iterable exposes these fluent transformations via `AsyncIterableHelper.from(source)`:
+The runtime provides functional stream operators (emulating the TC39 AsyncIterator helpers language proposal) via the [AsyncIterableHelper](https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L8) class. Any readable stream, async generator, or async iterable exposes these fluent transformations via `AsyncIterableHelper.from(source)`:
    *  `map(transform)` - Transforms each item asynchronously or synchronously.
    *  `filter(predicate)` - Filters items using a synchronous or asynchronous predicate.
    *  `flatMap(transform)` - Transforms each item into an array or async result and flattens into the output stream.

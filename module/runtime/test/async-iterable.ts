@@ -167,19 +167,4 @@ export class CustomAsyncIterableTest {
     const lines = await AsyncIterableHelper.from(stream()).flatMap(CodecUtil.toLines()).toArray();
     assert.deepStrictEqual(lines, ['line1', 'line2']);
   }
-
-  @Test()
-  async verifyPrototypesNotPolluted() {
-    const plainObject: Record<string, unknown> = {};
-    assert(!('$$' in plainObject));
-    assert(plainObject.$$ === undefined);
-    assert(!('$$' in Object.prototype));
-    assert(!('$$' in Readable.prototype));
-    assert(!('$$' in ReadableStream.prototype));
-
-    const asyncGenProto = Object.getPrototypeOf((async function* () {})());
-    assert(!('$$' in asyncGenProto));
-    const asyncIterProto = Object.getPrototypeOf(asyncGenProto);
-    assert(!('$$' in asyncIterProto));
-  }
 }

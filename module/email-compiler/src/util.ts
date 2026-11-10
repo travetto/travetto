@@ -143,9 +143,9 @@ export class EmailCompileUtil {
   static async inlineImages(html: string, options: EmailTemplateResource): Promise<string> {
     const { tokens, finalize } = await this.tokenizeResources(html, HTML_CSS_IMAGE_URLS);
     const pendingImages = [...tokens.entries()].map(async ([token, source]) => {
+      const format = path.extname(source).substring(1);
       let stream = options.loader.readBinaryStream(source);
 
-      const format = path.extname(source).substring(1);
       if (ImageUtil.isKnownExtension(format)) {
         stream = compose(stream, ImageUtil.transform({ optimize: true, format }));
       }

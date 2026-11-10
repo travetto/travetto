@@ -303,7 +303,7 @@ For processing line-oriented data streams (such as subprocess output or incoming
 
 <h2 id="async-stream-and-iterator-operators">Async Stream and Iterator Operators</h2>
 
-The runtime provides functional stream operators (emulating the TC39 AsyncIterator helpers language proposal) via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L9">AsyncIterableHelper</a> class. Any readable stream, async generator, or async iterable exposes these fluent transformations via <code class="item method">AsyncIterableHelper.from(source)</code>:
+The runtime provides functional stream operators (emulating the TC39 AsyncIterator helpers language proposal) via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/async-iterable.ts#L8">AsyncIterableHelper</a> class. Any readable stream, async generator, or async iterable exposes these fluent transformations via <code class="item method">AsyncIterableHelper.from(source)</code>:
 <ul> <li><code class="item method">map(transform)</code> - Transforms each item asynchronously or synchronously.</li>
 <li><code class="item method">filter(predicate)</code> - Filters items using a synchronous or asynchronous predicate.</li>
 <li><code class="item method">flatMap(transform)</code> - Transforms each item into an array or async result and flattens into the output stream.</li>
