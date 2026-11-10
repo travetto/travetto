@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc/support */
 import { c, type DocJSXElement, type DocJSXElementByFn, DocRunUtil, d, isDocJSXElement, PackageDocUtil } from '@travetto/doc';
 import {
-  AsyncIterator,
+  AsyncIterableHelper,
   type BinaryArray,
   BinaryUtil,
   CodecUtil,
@@ -35,7 +35,7 @@ async function init() {
         signal: ShutdownManager.signal
       });
       if (subProcess.stdout) {
-        AsyncIterator.from(subProcess.stdout)
+        AsyncIterableHelper.from(subProcess.stdout)
           .map(CodecUtil.readChunk)
           .forEach(chunk => startupBuffer.push(chunk));
       }

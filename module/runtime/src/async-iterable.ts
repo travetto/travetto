@@ -1,25 +1,25 @@
 import { castTo } from './types.ts';
 
 /**
- * TC39 AsyncIterator helper interface
+ * TC39 AsyncIterable helper interface
  *
  * Provides functional stream operators and helpers for async iterables.
  * Wrapped via `AsyncIterator.from(iterable)`.
  */
-export class AsyncIterator<T = unknown> implements AsyncIterable<T> {
+export class AsyncIterableHelper<T = unknown> implements AsyncIterable<T> {
   target: () => AsyncIterable<T>;
 
   /**
    * Wrap any iterable or async iterable into an AsyncIterator instance.
    * Matches TC39 AsyncIterator.from.
    */
-  static from<T>(source: AsyncIterable<T> | Iterable<T>): AsyncIterator<T> {
-    if (source instanceof AsyncIterator) {
+  static from<T>(source: AsyncIterable<T> | Iterable<T> | (() => AsyncIterable<T>)): AsyncIterableHelper<T> {
+    if (source instanceof AsyncIterableHelper) {
       return source;
     } else if (Symbol.asyncIterator in source) {
-      return new AsyncIterator(() => source);
+      return new AsyncIterableHelper(() => source);
     } else if (Symbol.iterator in source) {
-      return new AsyncIterator(async function* () {
+      return new AsyncIterableHelper(async function* () {
         yield* source;
       });
     } else {
@@ -45,9 +45,9 @@ export class AsyncIterator<T = unknown> implements AsyncIterable<T> {
    * Transforms each element in the async iterable using the provided transform function.
    * Supports both synchronous and asynchronous transform functions.
    */
-  map<U>(transform: (item: T) => U | Promise<U>): AsyncIterator<U> {
+  map<U>(transform: (item: T) => U | Promise<U>): AsyncIterableHelper<U> {
     const { target } = this;
-    return new AsyncIterator(async function* () {
+    return new AsyncIterableHelper(async function* () {
       for await (const item of target()) {
         yield await transform(item);
       }
@@ -58,11 +58,11 @@ export class AsyncIterator<T = unknown> implements AsyncIterable<T> {
    * Filters elements in the async iterable using the provided predicate function.
    * Supports both synchronous and asynchronous predicates.
    */
-  filter<S extends T = T>(predicate: (item: T) => item is S): AsyncIterator<S>;
-  filter(predicate: (item: T) => boolean | Promise<boolean>): AsyncIterator<T>;
-  filter(predicate: (item: T) => boolean | Promise<boolean>): AsyncIterator<T> {
+  filter<S extends T = T>(predicate: (item: T) => item is S): AsyncIterableHelper<S>;
+  filter(predicate: (item: T) => boolean | Promise<boolean>): AsyncIterableHelper<T>;
+  filter(predicate: (item: T) => boolean | Promise<boolean>): AsyncIterableHelper<T> {
     const { target } = this;
-    return new AsyncIterator(async function* () {
+    return new AsyncIterableHelper(async function* () {
       for await (const item of target()) {
         if (await predicate(item)) {
           yield castTo(item);
@@ -74,9 +74,9 @@ export class AsyncIterator<T = unknown> implements AsyncIterable<T> {
   /**
    * Yields at most the specified number of items from the async iterable.
    */
-  take(limit: number): AsyncIterator<T> {
+  take(limit: number): AsyncIterableHelper<T> {
     const { target } = this;
-    return new AsyncIterator(async function* () {
+    return new AsyncIterableHelper(async function* () {
       let remaining = limit;
       if (remaining <= 0) {
         return;
@@ -94,9 +94,9 @@ export class AsyncIterator<T = unknown> implements AsyncIterable<T> {
   /**
    * Drops the specified number of items from the start of the async iterable.
    */
-  drop(limit: number): AsyncIterator<T> {
+  drop(limit: number): AsyncIterableHelper<T> {
     const { target } = this;
-    return new AsyncIterator(async function* () {
+    return new AsyncIterableHelper(async function* () {
       let remaining = limit;
       for await (const item of target()) {
         if (remaining > 0) {
@@ -176,9 +176,9 @@ export class AsyncIterator<T = unknown> implements AsyncIterable<T> {
   /**
    * Maps each element to an array or async result and flattens the results into the output stream.
    */
-  flatMap<U>(transform: (input: T) => AsyncIterable<U> | Iterable<U> | Promise<AsyncIterable<U> | Iterable<U>>): AsyncIterator<U> {
+  flatMap<U>(transform: (input: T) => AsyncIterable<U> | Iterable<U> | Promise<AsyncIterable<U> | Iterable<U>>): AsyncIterableHelper<U> {
     const { target } = this;
-    return new AsyncIterator(async function* () {
+    return new AsyncIterableHelper(async function* () {
       for await (const item of target()) {
         yield* await transform(item);
       }

@@ -226,7 +226,7 @@ To enforce that these contracts are honored, the module provides shared test sui
 **Code: Memory Service Test Configuration**
 ```typescript
 import { DependencyRegistryIndex } from '@travetto/di';
-import { AsyncIterator, type Class, RuntimeError } from '@travetto/runtime';
+import { type Class, RuntimeError } from '@travetto/runtime';
 
 import type { ModelType } from '../../src/types/model.ts';
 import { ModelBulkUtil } from '../../src/util/bulk.ts';
@@ -247,7 +247,11 @@ export abstract class BaseModelSuite<T> {
     if (!ModelCrudUtil.isSupported(svc)) {
       throw new RuntimeError(`Size is not supported for this service: ${this.serviceClass.name}`);
     }
-    return (await AsyncIterator.from(svc.list(cls)).toArray()).length;
+    let size = 0;
+    for await (const item of svc.list(cls)) {
+      size += 1;
+    }
+    return size;
   }
 
   async saveAll<M extends ModelType>(cls: Class<M>, items: M[]): Promise<number> {

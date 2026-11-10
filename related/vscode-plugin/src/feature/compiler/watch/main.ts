@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import * as vscode from 'vscode';
 
-import { AsyncIterator, CodecUtil, Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
+import { AsyncIterableHelper, CodecUtil, Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
 
 import type {
   CompilerEvent,
@@ -120,7 +120,7 @@ export class CompilerWatchFeature extends BaseFeature {
           connected = true;
           this.#log.info('Connected', state);
           const subProcess = this.run('event', ['all'], controller.signal);
-          await AsyncIterator.from(subProcess.stdout!)
+          await AsyncIterableHelper.from(subProcess.stdout!)
             .flatMap(CodecUtil.toLines())
             .map<CompilerEvent | undefined>(line => {
               try {
