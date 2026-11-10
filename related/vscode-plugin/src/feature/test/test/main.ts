@@ -5,7 +5,7 @@ import path from 'node:path';
 import * as vscode from 'vscode';
 
 import type { IndexedModule, ManifestModule } from '@travetto/manifest';
-import { AsyncIterableHelper, CodecUtil, Env } from '@travetto/runtime';
+import { CodecUtil, Env } from '@travetto/runtime';
 import type { TestWatchEvent } from '@travetto/test';
 
 import { ActivateOn } from '../../../core/activation.ts';

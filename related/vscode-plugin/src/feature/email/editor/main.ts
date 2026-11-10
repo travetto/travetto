@@ -3,7 +3,7 @@ import type { ChildProcess } from 'node:child_process';
 import * as vscode from 'vscode';
 
 import type { EmailCompiled } from '@travetto/email';
-import { AsyncIterableHelper, CodecUtil } from '@travetto/runtime';
+import { CodecUtil } from '@travetto/runtime';
 
 import type { EditorResponse } from '@travetto/email-compiler/support/bin/types.ts';
 

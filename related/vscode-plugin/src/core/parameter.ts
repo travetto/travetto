@@ -5,7 +5,7 @@ import path from 'node:path';
 import * as vscode from 'vscode';
 
 import type { CliCommandInput } from '@travetto/cli';
-import { AsyncIterableHelper, CodecUtil, ExecUtil } from '@travetto/runtime';
+import { CodecUtil, ExecUtil } from '@travetto/runtime';
 
 import { Workspace } from './workspace.ts';
 
