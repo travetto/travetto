@@ -102,6 +102,9 @@
 
 ## Web & Runtime (`@travetto/web`, `@travetto/web-http`, `@travetto/runtime`)
 
+* **Async Iterable Helpers (`AsyncIterableHelper`)**: Introduced `AsyncIterableHelper` in `@travetto/runtime` via `AsyncIterableHelper.from(source)` (emulating the core TC39 async iterator helpers pattern). Provides fluent stream transformations (`map`, `filter`, `flatMap`, `reduce`, `forEach`, `toArray`) using static wrapping with zero prototype pollution on built-in prototypes (`Object`, `Readable`, `ReadableStream`) (`2079947fe1`).
+* **Decoupled Line Processing & Stream Parsing (`CodecUtil.toLines`)**: Added `CodecUtil.toLines(options)` producing a `flatMap`-compatible chunk-to-line transformer that buffers across arbitrary chunk boundaries, handles CRLF, and skips blank lines without requiring specialized stream subclasses (`2079947fe1`, `5fa7247083`).
+* **Loopback Binding Safety**: Ensured free port detection probes and outbound test fetch requests bind explicitly to IPv4 loopback (`127.0.0.1`), resolving host resolution failures and permission issues in sandboxed environments (`91e6d742f4`).
 * **WHATWG URL Redirect Support**: Updated `WebResponse.redirect()` in `@travetto/web` to accept standard WHATWG `URL` objects in addition to strings (`c7c36b8ec4`).
 * **Dedicated TLS Development CLI**: Extracted self-signed development certificate generation from runtime startup into `trv web:tls-dev` (`8d1cdf6ac1`).
 * **Shutdown Signal Coordination**: `ShutdownManager.shutdownWithChild` in `@travetto/runtime` coordinates child subprocess exit codes and maps standard POSIX termination signals (SIGINT `130`, SIGTERM `143`) to clean shutdown (`355bb3773b`).
