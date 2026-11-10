@@ -3,7 +3,7 @@ import type { ChildProcess } from 'node:child_process';
 import * as vscode from 'vscode';
 
 import type { EmailCompiled } from '@travetto/email';
-import { CodecUtil } from '@travetto/runtime';
+import { AsyncIterableHelper, CodecUtil } from '@travetto/runtime';
 
 import type { EditorResponse } from '@travetto/email-compiler/support/bin/types.ts';
 
@@ -71,9 +71,13 @@ export class EmailCompilerFeature extends BaseFeature {
       }
     });
 
-    const debug = (level: string, line: string) => this.log.debug(`> ${level} > ${line.trimEnd()}`);
-    this.#server.stderr?.flatMap(CodecUtil.toLines()).forEach(line => debug('stderr', line));
-    this.#server.stdout?.flatMap(CodecUtil.toLines()).forEach(line => debug('stdout', line));
+    const debug = (level: string) => (line: string) => this.log.debug(`> ${level} > ${line.trimEnd()}`);
+    if (this.#server.stderr) {
+      AsyncIterableHelper.from(this.#server.stderr).flatMap(CodecUtil.toLines()).forEach(debug('stderror'));
+    }
+    if (this.#server.stdout) {
+      AsyncIterableHelper.from(this.#server.stdout).flatMap(CodecUtil.toLines()).forEach(debug('stdout'));
+    }
   }
 
   #compileActive(): void {

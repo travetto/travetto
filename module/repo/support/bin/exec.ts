@@ -146,11 +146,11 @@ export class RepoExecUtil {
           const subProcess = operation(module);
           processes.set(module, subProcess);
 
-          if (config.showStdout) {
-            subProcess.stdout?.flatMap(CodecUtil.toLines()).forEach(logger(stdoutTerm.writer));
+          if (config.showStdout && subProcess.stdout) {
+            AsyncIterableHelper.from(subProcess.stdout).flatMap(CodecUtil.toLines()).forEach(logger(stdoutTerm.writer));
           }
-          if (config.showStderr) {
-            subProcess.stderr?.flatMap(CodecUtil.toLines()).forEach(logger(stderrTerm.writer));
+          if (config.showStderr && subProcess.stderr) {
+            AsyncIterableHelper.from(subProcess.stderr).flatMap(CodecUtil.toLines()).forEach(logger(stderrTerm.writer));
           }
 
           const result = await ExecUtil.getResult(subProcess, { catch: true });

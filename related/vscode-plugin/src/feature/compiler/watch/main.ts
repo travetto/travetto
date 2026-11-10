@@ -91,8 +91,13 @@ export class CompilerWatchFeature extends BaseFeature {
     });
 
     if (debug) {
-      subProcess.stderr?.flatMap(CodecUtil.toLines()).forEach(line => this.#log.error(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
-      subProcess.stdout?.flatMap(CodecUtil.toLines()).forEach(line => this.#log.info(`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`));
+      const output = (level: 'error' | 'info') => (line: string) => this.#log[level](`> ${line.replace(SUB_LOG_REGEX, '').trimEnd()}`);
+      if (subProcess.stderr) {
+        AsyncIterableHelper.from(subProcess.stderr).flatMap(CodecUtil.toLines()).forEach(output('error'));
+      }
+      if (subProcess.stdout) {
+        AsyncIterableHelper.from(subProcess.stdout).flatMap(CodecUtil.toLines()).forEach(output('info'));
+      }
     }
 
     return subProcess;
