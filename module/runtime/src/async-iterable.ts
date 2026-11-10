@@ -35,7 +35,7 @@ export class AsyncIterableHelper<T = unknown> implements AsyncIterable<T> {
   }
 
   /**
-   * Creates a new AsyncIterator instance wrapping the target iterable factory.
+   * Creates a new AsyncIterableHelper instance wrapping the target iterable factory.
    */
   constructor(target: () => AsyncIterable<T>) {
     this.target = target;
