@@ -9,6 +9,13 @@ export interface PlainInterface {
   name: string;
 }
 
+/**
+ * @concrete
+ */
+export interface ConcreteInterface {
+  name: string;
+}
+
 export class SpecialTypeTarget {}
 
 SchemaTypeUtil.setSchemaTypeConfig(SpecialTypeTarget, {

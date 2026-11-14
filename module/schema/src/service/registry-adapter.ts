@@ -1,6 +1,7 @@
 import type { RegistryAdapter } from '@travetto/registry';
 import { BinaryUtil, type Class, castKey, castTo, describeFunction, RuntimeError, safeAssign } from '@travetto/runtime';
 
+import { SchemaTypeUtil } from '../type-config.ts';
 import { SchemaRegistryIndex } from './registry-index.ts';
 import {
   CONSTRUCTOR_PROPERTY,
@@ -100,13 +101,13 @@ function normalizeBasicType(basicType?: SchemaBasicType): void {
   if (!basicType?.type) {
     return;
   }
-  const hasSchema = SchemaRegistryIndex.has(castTo(basicType.type.value));
-  if (basicType.type.kind === 'complex' && !hasSchema) {
-    basicType.type = { kind: 'primitive', value: basicType.type.value };
-  } else if (basicType.type.kind === 'primitive' && hasSchema) {
-    basicType.type = { kind: 'complex', value: castTo(basicType.type.value) };
+  const value = basicType.type.value;
+  if (BinaryUtil.isBinaryTypeReference(value) || SchemaTypeUtil.getSchemaTypeConfig(value)) {
+    basicType.type = { kind: 'primitive', value };
+  } else if (SchemaRegistryIndex.has(castTo(value))) {
+    basicType.type = { kind: 'complex', value: castTo(value) };
   }
-  basicType.binary = basicType.type.kind === 'primitive' && BinaryUtil.isBinaryTypeReference(basicType.type.value);
+  basicType.binary = basicType.type.kind === 'primitive' && BinaryUtil.isBinaryTypeReference(value);
 }
 
 function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T): T {

@@ -4,12 +4,13 @@ import { Registry } from '@travetto/registry';
 import { Schema, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
-import type { PlainInterface, SpecialType } from './models/pointer.ts';
+import type { ConcreteInterface, PlainInterface, SpecialType } from './models/pointer.ts';
 
 @Schema()
 class Custom {
   pointer: SpecialType;
   plain?: PlainInterface;
+  concrete?: ConcreteInterface;
 }
 
 @Suite()
@@ -24,6 +25,7 @@ class PointerSuite {
     const fields = SchemaRegistryIndex.get(Custom).getFields();
     assert(fields.pointer.type.kind === 'primitive');
     assert(fields.plain.type.kind === 'complex');
+    assert(fields.concrete.type.kind === 'complex');
   }
 
   @Test()
