@@ -160,7 +160,7 @@ export class BindUtil {
     if (data instanceof cls) {
       return castTo(data);
     } else {
-      const resolvedCls = SchemaRegistryIndex.resolveInstanceType<T>(cls, asFull<T>(data));
+      const resolvedCls = SchemaRegistryIndex.has(cls) ? SchemaRegistryIndex.resolveInstanceType<T>(cls, asFull<T>(data)) : cls;
       const instance = classConstruct<T & { type?: string }>(resolvedCls);
 
       for (const key of TypedObject.keys(instance)) {
