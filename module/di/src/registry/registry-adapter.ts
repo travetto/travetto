@@ -1,5 +1,5 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { castTo, type Class, classConstruct, describeFunction, safeAssign } from '@travetto/runtime';
+import { type Class, classConstruct, describeFunction, safeAssign } from '@travetto/runtime';
 import { CONSTRUCTOR_PROPERTY, SchemaRegistryIndex } from '@travetto/schema';
 
 import { getDefaultQualifier, type InjectableCandidate, type InjectableConfig } from '../types.ts';
