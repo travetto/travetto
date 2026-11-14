@@ -263,7 +263,7 @@ class ${uniqueId} extends ${type.mappedClassName} {
       LiteralUtil.fromLiteral(state.factory, {
         array: ts.isArrayLiteralExpression(resolved),
         type: {
-          kind: typeExpr.key === 'foreign' ? 'primitive' : this.getSchemaValueTypeKind(unwrappedType),
+          kind: this.getSchemaValueTypeKind(unwrappedType),
           value
         }
       })
@@ -347,6 +347,7 @@ class ${uniqueId} extends ${type.mappedClassName} {
     switch (resolved?.key) {
       case 'managed':
         return resolved.concrete ? 'primitive' : 'complex';
+      case 'foreign':
       case 'mapped':
       case 'shape':
         return 'complex';
