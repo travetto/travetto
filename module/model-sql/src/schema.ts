@@ -35,8 +35,8 @@ export class SQLModelSchemaUtil {
       }
     }
 
-    const simpleFieldsList = fields.filter(field => !SchemaRegistryIndex.has(field.type) && !field.array);
-    const complexFieldsList = fields.filter(field => SchemaRegistryIndex.has(field.type) || field.array);
+    const simpleFieldsList = fields.filter(field => field.type.kind === 'primitive' && !field.array);
+    const complexFieldsList = fields.filter(field => field.type.kind === 'complex' || field.array);
     const simpleFields = new Map(simpleFieldsList.map(field => [field.name, field]));
     const complexFields = new Map(complexFieldsList.map(field => [field.name, field]));
     const context: SchemaContext<T> = { cls: modelClass, simpleFields, complexFields, allFields: fields };

@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { type Class, castTo, TimeUtil } from '@travetto/runtime';
+import { type Class, TimeUtil } from '@travetto/runtime';
 import { BindUtil, CommonRegex, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 /**
@@ -171,11 +171,13 @@ export class SchemaFaker {
       return this.#array(config);
     } else if (config.enum) {
       return faker.helpers.arrayElement(config.enum.values);
+    } else if (config.type.kind === 'complex') {
+      return this.generate(config.type.value);
     } else {
-      switch (config.type) {
+      switch (config.type.value) {
         case Number:
           return this.#number(config);
-        case castTo(BigInt):
+        case BigInt:
           return this.#bigInt(config);
         case String:
           return this.#string(config);
@@ -183,9 +185,6 @@ export class SchemaFaker {
           return this.#date(config);
         case Boolean:
           return faker.datatype.boolean();
-      }
-      if (SchemaRegistryIndex.has(config.type)) {
-        return this.generate(config.type);
       }
     }
   }

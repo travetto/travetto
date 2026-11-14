@@ -199,12 +199,13 @@ export class ModelCrudUtil {
 
       for (const [key, field] of Object.entries(schema.fields)) {
         const fieldKey = castKey<typeof res>(key);
-        if (!isCleanTarget(key) && res[fieldKey] !== undefined && res[fieldKey] !== null) {
+        if (field.type.kind === 'complex' && !isCleanTarget(key) && res[fieldKey] !== undefined && res[fieldKey] !== null) {
+          const fieldType = field.type.value;
           if (field.array && Array.isArray(res[fieldKey])) {
             const arr = res[fieldKey];
             let changed = false;
             const newArray = arr.map(subItem => {
-              const cleaned = this.cleanTransientFields(field.type, subItem);
+              const cleaned = this.cleanTransientFields(fieldType, subItem);
               if (cleaned !== subItem) {
                 changed = true;
               }
@@ -218,7 +219,7 @@ export class ModelCrudUtil {
             }
           } else {
             const val = res[fieldKey];
-            const cleaned = this.cleanTransientFields(field.type, val);
+            const cleaned = this.cleanTransientFields(fieldType, val);
             if (cleaned !== val) {
               if (res === item) {
                 res = { ...item };

@@ -131,7 +131,7 @@ export abstract class AbstractANSI99Dialect {
 
   abstract getRegexOperator(caseInsensitive: boolean): string;
   abstract formatRegex(source: string, caseInsensitive: boolean): string;
-  abstract castColumn(sqlPath: string, type: Class): string;
+  abstract castColumn(sqlPath: string, type: Function): string;
 
   compileJsonEquality?(sqlPath: string, identifier: string): string;
   shiftPlaceholders?(whereSQL: string, offset: number): string;
@@ -392,17 +392,17 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     let currentField: SchemaFieldConfig | undefined = tableContext.complexFields.get(firstSegment);
     let arrayField: SchemaFieldConfig | undefined = currentField?.array ? currentField : undefined;
     let arraySegmentIndex: number | undefined = currentField?.array ? 0 : undefined;
-    let currentClass = currentField?.type;
+    let currentClass = currentField?.type.kind === 'complex' ? currentField.type.value : undefined;
 
     for (let pathIndex = 1; pathIndex < path.length; pathIndex += 1) {
       const segment = path[pathIndex];
-      const subclassConfiguration = SchemaRegistryIndex.getOptional(currentClass!)?.get();
+      const subclassConfiguration = currentClass ? SchemaRegistryIndex.getOptional(currentClass)?.get() : undefined;
       currentField = subclassConfiguration?.fields[segment];
       if (currentField?.array && !arrayField) {
         arrayField = currentField;
         arraySegmentIndex = pathIndex;
       }
-      currentClass = currentField?.type;
+      currentClass = currentField?.type.kind === 'complex' ? currentField.type.value : undefined;
     }
 
     return {
@@ -425,7 +425,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
         fieldConfig = classConfiguration?.fields[segment];
         if (fieldConfig) {
           isArray = !!fieldConfig.array;
-          currentClass = fieldConfig.type;
+          currentClass = fieldConfig.type.kind === 'complex' ? fieldConfig.type.value : undefined;
         } else {
           currentClass = undefined;
         }
@@ -445,7 +445,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     const { leafField, arrayField, arraySegmentIndex } = this.#resolveSchemaPath(tableContext, path);
     const sqlPath = this.buildSqlPath(tableContext, path, mode);
 
-    const finalSqlPath = leafField && !leafField.array ? this.castColumn(sqlPath, leafField.type) : sqlPath;
+    const finalSqlPath = leafField && !leafField.array ? this.castColumn(sqlPath, leafField.type.value) : sqlPath;
 
     const arrayPath = arraySegmentIndex !== undefined ? path.slice(0, arraySegmentIndex + 1) : undefined;
     const subPath = arraySegmentIndex !== undefined ? path.slice(arraySegmentIndex + 1) : undefined;

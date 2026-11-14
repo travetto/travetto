@@ -53,7 +53,7 @@ export class MongoModelConfig {
   /**
    * Mongo client options
    */
-  @Field({ type: Object })
+  @Field({ type: { kind: 'primitive', value: Object } })
   options: Omit<mongo.MongoClientOptions, 'cert'> & {
     cert?: Buffer | string | BinaryType | (BinaryType | Buffer | string)[];
   } = {};

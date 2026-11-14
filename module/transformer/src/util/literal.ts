@@ -7,7 +7,7 @@ const TypedObject: {
 } & ObjectConstructor = Object;
 
 function isNode(value: unknown): value is ts.Node {
-  return !!value && typeof value === 'object' && 'kind' in value;
+  return !!value && typeof value === 'object' && 'kind' in value && typeof value.kind === 'number';
 }
 
 const KNOWN_FNS = new Set<unknown>([String, Number, Boolean, Date, RegExp]);

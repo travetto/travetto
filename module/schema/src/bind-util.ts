@@ -34,13 +34,13 @@ export class BindUtil {
    * @param value The provided value
    */
   static #coerceType<T>(config: SchemaInputConfig, value: unknown): T | null | undefined {
-    const typeConfig = SchemaTypeUtil.getSchemaTypeConfig(config.type);
+    const typeConfig = SchemaTypeUtil.getSchemaTypeConfig(config.type?.value);
     if (typeConfig?.bind) {
       value = typeConfig.bind(value);
     } else {
-      value = DataUtil.coerceType(value, config.type, false);
+      value = DataUtil.coerceType(value, config.type?.value, false);
 
-      if (config.type === Number && config.precision && typeof value === 'number') {
+      if (config.type?.value === Number && config.precision && typeof value === 'number') {
         if (config.precision[1]) {
           // Supports decimal
           value = +value.toFixed(config.precision[1]);
@@ -237,11 +237,12 @@ export class BindUtil {
               }
             }
 
-            if (SchemaRegistryIndex.has(field.type)) {
+            if (field.type?.kind === 'complex') {
+              const fieldType = field.type.value;
               if (field.array && Array.isArray(value)) {
-                value = value.map(item => this.bindSchema(field.type, item, config));
+                value = value.map(item => this.bindSchema(fieldType, item, config));
               } else {
-                value = this.bindSchema(field.type, value, config);
+                value = this.bindSchema(fieldType, value, config);
               }
             } else if (field.array && Array.isArray(value)) {
               value = value.map(item => this.#coerceType(field, item));
@@ -272,19 +273,19 @@ export class BindUtil {
     if (config.required?.active === false && (value === undefined || value === null)) {
       return value;
     }
-    const complex = SchemaRegistryIndex.has(config.type);
     if (config.array) {
       const subValue = !Array.isArray(value) ? [value] : value;
-      if (complex) {
-        value = subValue.map(item => this.bindSchema(config.type, item));
+      if (config.type.kind === 'complex') {
+        const type = config.type.value;
+        value = subValue.map(item => this.bindSchema(type, item));
       } else {
-        value = subValue.map(item => DataUtil.coerceType(item, config.type, false));
+        value = subValue.map(item => DataUtil.coerceType(item, config.type.value, false));
       }
     } else {
-      if (complex) {
-        value = this.bindSchema(config.type, value);
+      if (config.type.kind === 'complex') {
+        value = this.bindSchema(config.type.value, value);
       } else {
-        value = DataUtil.coerceType(value, config.type, false);
+        value = DataUtil.coerceType(value, config.type.value, false);
       }
     }
     return value;

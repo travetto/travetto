@@ -15,7 +15,7 @@ const CONFIG_PREFIX = '+=';
 const SPACE = new Set([32, 7, 13, 10]);
 
 export const ENV_PREFIX = 'env.';
-export const isBoolFlag = (value?: SchemaInputConfig): boolean => value?.type === Boolean && !value.array;
+export const isBoolFlag = (value?: SchemaInputConfig): boolean => value?.type.value === Boolean && !value.array;
 
 export type AliasesParseResult = Record<'long' | 'short' | 'raw' | 'env', string[]>;
 

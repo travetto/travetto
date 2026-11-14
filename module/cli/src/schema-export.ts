@@ -1,4 +1,4 @@
-import { type Class, castTo, describeFunction } from '@travetto/runtime';
+import { type Class, describeFunction } from '@travetto/runtime';
 import { type SchemaInputConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { CliCommandRegistryIndex } from './registry/registry-index.ts';
@@ -36,7 +36,7 @@ export class CliSchemaExportUtil {
    * Get the base type for a CLI command input
    */
   static baseInputType(config: SchemaInputConfig): Pick<CliCommandInput, 'type' | 'fileExtensions'> {
-    switch (castTo<Function>(config.type)) {
+    switch (config.type.value) {
       case Date:
         return { type: 'date' };
       case Boolean:

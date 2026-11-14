@@ -17,7 +17,8 @@ import {
   type SchemaInputConfig,
   SchemaNameResolver,
   type SchemaParameterConfig,
-  SchemaRegistryIndex
+  SchemaRegistryIndex,
+  type SchemaType
 } from '@travetto/schema';
 import {
   type ControllerConfig,
@@ -68,15 +69,15 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     prefix: string = '',
     rootField: SchemaInputConfig = input
   ): ParameterObject[] {
-    if (!SchemaRegistryIndex.has(input.type)) {
-      throw new RuntimeError(`Unknown class, not registered as a schema: ${input.type.Ⲑid}`);
+    if (input.type.kind !== 'complex') {
+      throw new RuntimeError(`Unknown class, not registered as a schema: ${input.type.value.name}`);
     }
 
-    const fields = SchemaRegistryIndex.get(input.type).getFields();
+    const fields = SchemaRegistryIndex.get(input.type.value).getFields();
     const params: ParameterObject[] = [];
     for (const sub of Object.values(fields)) {
       const name = sub.name;
-      if (SchemaRegistryIndex.has(sub.type)) {
+      if (sub.type.kind === 'complex') {
         const suffix = sub.array ? '[]' : '';
         params.push(...this.#schemaToDotParams(location, sub, prefix ? `${prefix}.${name}${suffix}` : `${name}${suffix}.`, rootField));
       } else {
@@ -101,25 +102,25 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Get the type for a given class
    */
   #getType(inputOrClass: SchemaInputConfig | Class): Record<string, unknown> {
-    let field: { type: Class; precision?: [number, number | undefined] };
+    let field: { type: SchemaType; precision?: [number, number | undefined] };
     if (!isInputConfig(inputOrClass)) {
-      field = { type: inputOrClass };
+      field = { type: { kind: SchemaRegistryIndex.has(inputOrClass) ? 'complex' : 'primitive', value: inputOrClass } };
     } else {
       field = inputOrClass;
     }
     const out: Record<string, unknown> = {};
     // Handle nested types
-    if (SchemaRegistryIndex.has(field.type)) {
-      const id = this.#nameResolver.getName(SchemaRegistryIndex.getConfig(field.type));
+    if (field.type.kind === 'complex') {
+      const id = this.#nameResolver.getName(SchemaRegistryIndex.getConfig(field.type.value));
       // Exposing
       this.#schemas[id] = this.#allSchemas[id];
       out.$ref = `${DEFINITION}/${id}`;
     } else {
-      switch (field.type) {
+      switch (field.type.value) {
         case String:
           out.type = 'string';
           break;
-        case castTo(BigInt):
+        case BigInt:
           out.type = 'integer';
           out.format = 'int64';
           break;
@@ -233,8 +234,8 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         const required: string[] = [];
 
         for (const fieldName of Object.keys(base.fields)) {
-          if (SchemaRegistryIndex.has(base.fields[fieldName].type)) {
-            this.onSchema(SchemaRegistryIndex.getConfig(base.fields[fieldName].type));
+          if (base.fields[fieldName].type.kind === 'complex') {
+            this.onSchema(SchemaRegistryIndex.getConfig(base.fields[fieldName].type.value));
           }
           properties[fieldName] = this.#processSchemaField(base.fields[fieldName], required);
         }
@@ -277,9 +278,9 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         description: 'Raw binary data'
       };
     } else {
-      const schemaConfig = SchemaRegistryIndex.getOptional(body.type)?.get();
-      const typeId = schemaConfig ? this.#nameResolver.getName(schemaConfig) : body.type.name;
-      const typeRef = schemaConfig ? this.#getType(body.type) : { type: body.type.name.toLowerCase() };
+      const schemaConfig = body.type.kind === 'complex' ? SchemaRegistryIndex.getOptional(body.type.value)?.get() : undefined;
+      const typeId = schemaConfig ? this.#nameResolver.getName(schemaConfig) : body.type.value.name;
+      const typeRef = schemaConfig ? this.#getType(castTo<Class>(body.type.value)) : { type: body.type.value.name.toLowerCase() };
       return {
         content: {
           [mime ?? 'application/json']: {
@@ -299,7 +300,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     param: EndpointParameterConfig,
     input: SchemaParameterConfig
   ): { requestBody: RequestBodyObject } | { parameters: ParameterObject[] } | undefined {
-    const complex = input.type && SchemaRegistryIndex.has(input.type);
+    const complex = input.type?.kind === 'complex';
 
     if (param.location) {
       if (param.location === 'body') {

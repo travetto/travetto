@@ -12,6 +12,6 @@ export class UnknownTest {
   async basic() {
     await Registry.init();
     const fields = SchemaRegistryIndex.get(Unknowable).getFields().value;
-    assert(fields.type === UnknownType);
+    assert(fields.type.value === UnknownType);
   }
 }

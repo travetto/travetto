@@ -77,9 +77,9 @@ export class QueryVerifier {
       // If a simple operation
       if (type) {
         handler.onSimpleType(state.extend(key), type, value, field.array ?? false);
-      } else {
+      } else if (field.type.kind === 'complex') {
         // Otherwise recurse
-        const subClass = field.type;
+        const subClass = field.type.value;
         const subValue = value;
         if (handler.onComplexType?.(state.extend(key), subClass, subValue, field.array ?? false)) {
           continue;

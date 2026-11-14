@@ -1,6 +1,6 @@
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
-import { type Class, type ClassInstance, getClass, isClass, type RetainIntrinsicFields } from '@travetto/runtime';
+import { castTo, type Class, type ClassInstance, getClass, isClass, type RetainIntrinsicFields } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { WebAsyncContext } from '../context.ts';
@@ -66,7 +66,7 @@ export class ControllerRegistryIndex implements RegistryIndex {
     const fieldMap = SchemaRegistryIndex.get(cls).getFields();
     for (const field of Object.keys(map)) {
       const { type } = fieldMap[field];
-      Object.defineProperty(instance, field, { get: ctx.getSource(type) });
+      Object.defineProperty(instance, field, { get: ctx.getSource(castTo<Class>(type.value)) });
     }
   }
 

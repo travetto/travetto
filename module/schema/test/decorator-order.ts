@@ -16,7 +16,7 @@ class MyClass {
 
   @Text()
   @Required()
-  @Field({ type: String }, { specifiers: ['weirder'], required: { active: false } })
+  @Field({ type: { kind: 'primitive', value: String } }, { specifiers: ['weirder'], required: { active: false } })
   text2: string;
 }
 

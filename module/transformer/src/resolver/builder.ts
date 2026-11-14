@@ -505,7 +505,7 @@ export const TypeBuilder: {
         name = `${primaryDeclaration.name.text}$Concrete`;
       }
 
-      return { key: 'managed', name, importName };
+      return { key: 'managed', name, importName, concrete: true };
     }
   }
 };

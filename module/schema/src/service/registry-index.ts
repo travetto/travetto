@@ -113,7 +113,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
           return undefined;
         }
         fieldConfiguration = this.getClassConfig(currentClass).fields[segment];
-        currentClass = fieldConfiguration?.type;
+        currentClass = fieldConfiguration?.type.kind === 'complex' ? fieldConfiguration.type.value : undefined;
       }
 
       return fieldConfiguration;
@@ -181,8 +181,8 @@ export class SchemaRegistryIndex implements RegistryIndex {
   ): void {
     const fields = SchemaRegistryIndex.has(cls) ? Object.values(this.getClassConfig(cls).fields) : [];
     for (const field of fields) {
-      if (SchemaRegistryIndex.has(field.type)) {
-        this.visitFields(field.type, onField, [..._path, field], root);
+      if (field.type.kind === 'complex') {
+        this.visitFields(field.type.value, onField, [..._path, field], root);
       } else {
         onField(field, _path);
       }

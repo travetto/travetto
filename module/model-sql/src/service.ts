@@ -883,7 +883,7 @@ export abstract class BaseSQLModelService<C = unknown>
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, query?.where);
     const { sqlPath } = this.dialect.resolvePath(tableContext, field.split('.'), 'read');
-    const isDate = SchemaRegistryIndex.getNestedFieldConfig(modelClass, field)!.type === Date;
+    const isDate = SchemaRegistryIndex.getNestedFieldConfig(modelClass, field)!.type.value === Date;
 
     const sql = this.dialect.buildFieldAggregate(tableContext, sqlPath, isDate, whereSQL);
 

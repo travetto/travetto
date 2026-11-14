@@ -111,7 +111,7 @@ export class ElasticsearchQueryUtil {
         const textQuery = typeof clause === 'string' ? clause : clause.query;
         const textFields: string[] = [];
         for (const [fieldName, fieldConfig] of Object.entries(fields)) {
-          if (fieldConfig.type === String && fieldConfig.specifiers?.includes('text')) {
+          if (fieldConfig.type.value === String && fieldConfig.specifiers?.includes('text')) {
             textFields.push(`${path}${fieldName}.text`);
           }
         }
@@ -130,7 +130,7 @@ export class ElasticsearchQueryUtil {
       const top = item[property];
       const declaredSchema = fields[property];
       const declaredType = declaredSchema.type;
-      const subPath = declaredType === String ? (property === idField && !path ? '_id' : `${path}${property}`) : `${path}${property}`;
+      const subPath = declaredType.value === String ? (property === idField && !path ? '_id' : `${path}${property}`) : `${path}${property}`;
 
       const subPathQuery = (value: unknown): {} =>
         property === idField && !path
@@ -139,8 +139,8 @@ export class ElasticsearchQueryUtil {
 
       if (DataUtil.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];
-        if (!subKey.startsWith('$')) {
-          const inner = this.extractWhereTermQuery(declaredType, top, config, `${subPath}.`);
+        if (!subKey.startsWith('$') && declaredType.kind === 'complex') {
+          const inner = this.extractWhereTermQuery(declaredType.value, top, config, `${subPath}.`);
           items.push(!declaredSchema.array || this.hasNestedClause(inner) ? inner : { nested: { path: subPath, query: inner } });
         } else {
           const value = top[subKey];

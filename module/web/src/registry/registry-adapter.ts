@@ -58,8 +58,8 @@ function combineEndpointConfigs(
  */
 function computeParameterLocation(endpoint: EndpointConfig, param: SchemaParameterConfig): EndpointParamLocation {
   const name = param?.name;
-  if (!SchemaRegistryIndex.has(param.type)) {
-    if ((param.type === String || param.type === Number) && name && endpoint.fullPath.includes(`:${name}`)) {
+  if (param.type.kind === 'primitive') {
+    if ((param.type.value === String || param.type.value === Number) && name && endpoint.fullPath.includes(`:${name}`)) {
       return 'path';
     } else if (param.binary) {
       return 'body';

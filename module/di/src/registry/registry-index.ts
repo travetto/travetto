@@ -62,7 +62,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
 
   async #resolveDependencyValue(dependency: Dependency, input: SchemaFieldConfig | SchemaParameterConfig, cls: Class): Promise<unknown> {
     try {
-      const target = dependency.target ?? input.type;
+      const target = dependency.target ?? castTo<Class>(input.type.value);
       return await this.getInstance(target, dependency.qualifier, dependency.resolution);
     } catch (error) {
       if (input.required?.active === false && error instanceof InjectionError && error.category === 'notfound') {

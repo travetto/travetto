@@ -53,13 +53,13 @@ export function Upload(
           throw new RuntimeError(`Unknown field type, ensure you are using ${Blob.name}, ${File.name} or ${FileMapContract.name}`);
         }
 
-        if (!(input.type === Blob || input.type === File || input.type === FileMapContract)) {
+        if (!(input.type.value === Blob || input.type.value === File || input.type.value === FileMapContract)) {
           throw new RuntimeError(
-            `Cannot use upload decorator with ${input.type.name}, but only an ${Blob.name}, ${File.name} or ${FileMapContract.name}`
+            `Cannot use upload decorator with ${input.type.value.name}, but only an ${Blob.name}, ${File.name} or ${FileMapContract.name}`
           );
         }
 
-        const isMap = input.type === FileMapContract;
+        const isMap = input.type.value === FileMapContract;
         const map = WebUploadUtil.getRequestUploads(request);
         return isMap ? map : map[getName()];
       }

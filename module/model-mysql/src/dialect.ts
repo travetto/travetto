@@ -7,7 +7,7 @@ import {
   type TableContext,
   type TextSearchState
 } from '@travetto/model-sql';
-import { type Class, castTo, JSONUtil } from '@travetto/runtime';
+import { castTo, JSONUtil } from '@travetto/runtime';
 import { type SchemaFieldConfig } from '@travetto/schema';
 
 export class MysqlDialect extends AbstractANSI99Dialect {
@@ -20,11 +20,11 @@ export class MysqlDialect extends AbstractANSI99Dialect {
   }
 
   getColumnType(fieldConfiguration: SchemaFieldConfig): string {
-    if (fieldConfiguration.type === castTo(BigInt)) {
+    if (fieldConfiguration.type.value === BigInt) {
       return 'BIGINT';
     }
 
-    if (fieldConfiguration.type === Number) {
+    if (fieldConfiguration.type.value === Number) {
       if (fieldConfiguration.precision) {
         const [digits, decimals] = fieldConfiguration.precision;
         if (decimals) {
@@ -41,15 +41,15 @@ export class MysqlDialect extends AbstractANSI99Dialect {
       return 'INT';
     }
 
-    if (fieldConfiguration.type === Date) {
+    if (fieldConfiguration.type.value === Date) {
       return 'DATETIME(6)';
     }
 
-    if (fieldConfiguration.type === Boolean) {
+    if (fieldConfiguration.type.value === Boolean) {
       return 'TINYINT(1)';
     }
 
-    if (fieldConfiguration.type === String) {
+    if (fieldConfiguration.type.value === String) {
       if (fieldConfiguration.specifiers?.includes('uuid')) {
         return 'CHAR(32) CHARACTER SET ascii COLLATE ascii_bin';
       }
@@ -70,7 +70,10 @@ export class MysqlDialect extends AbstractANSI99Dialect {
     if (!context.subPath || context.subPath.length === 0) {
       return '';
     }
-    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField?.type, context.subPath);
+    const subPathMetadata = this.getSchemaSubPathMetadata(
+      context.arrayField?.type.kind === 'complex' ? context.arrayField.type.value : undefined,
+      context.subPath
+    );
     return subPathMetadata.map(({ segment, isArray }) => (isArray ? `${segment}[*]` : segment)).join('.');
   }
 
@@ -131,7 +134,7 @@ export class MysqlDialect extends AbstractANSI99Dialect {
     return source;
   }
 
-  castColumn(sqlPath: string, type: Class): string {
+  castColumn(sqlPath: string, type: Function): string {
     if (type === Number) {
       return `CAST(${sqlPath} AS DECIMAL)`;
     } else if (type === Boolean) {

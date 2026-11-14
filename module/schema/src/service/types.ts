@@ -8,6 +8,11 @@ export type TemplateLiteral = { operation: 'and' | 'or'; values: (TemplateLitera
 export const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';
 
 /**
+ * Represents the type of a schema field or parameter
+ */
+export type SchemaType = { kind: 'primitive'; value: Function } | { kind: 'complex'; value: Class };
+
+/**
  * Represents a typed item in the schema
  */
 export type SchemaBasicType = {
@@ -24,9 +29,9 @@ export type SchemaBasicType = {
    */
   binary?: boolean;
   /**
-   * The class tied to the type
+   * The class or primitive tied to the type
    */
-  type: Class;
+  type: SchemaType;
   /**
    * Is the field a foreign type
    */
