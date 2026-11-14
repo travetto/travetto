@@ -30,7 +30,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@css-inline/css-inline": "^0.23.2",
+    "@css-inline/css-inline": "^0.24.0",
     "@travetto/config": "^8.1.0-rc.4",
     "@travetto/di": "^8.1.0-rc.4",
     "@travetto/email": "^8.1.0-rc.4",
@@ -39,7 +39,7 @@
     "@travetto/worker": "^8.1.0-rc.4",
     "html-entities": "^2.6.0",
     "purgecss": "^9.1.0",
-    "sass": "^1.108.1"
+    "sass": "^1.108.2"
   },
   "peerDependencies": {
     "@travetto/cli": "^8.1.0-rc.5"
