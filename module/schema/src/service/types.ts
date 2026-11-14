@@ -1,4 +1,4 @@
-import { type Any, type Class, type IntrinsicType, type NumericLikeIntrinsic, type Primitive, RuntimeError } from '@travetto/runtime';
+import { type Any, castTo, type Class, type IntrinsicType, type NumericLikeIntrinsic, type Primitive, RuntimeError } from '@travetto/runtime';
 
 import type { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
 
@@ -30,6 +30,13 @@ export function asComplexClass(type: SchemaType): Class {
     throw new RuntimeError(`Invalid type: expected complex schema type, got ${type.value.name}`);
   }
   return type.value;
+}
+
+/**
+ * Narrow a schema type to its complex shape for consumers that accept non-schema classes
+ */
+export function asComplexType(type: SchemaType): SchemaType & { kind: 'complex' } {
+  return castTo(type);
 }
 
 /**
