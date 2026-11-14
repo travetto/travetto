@@ -23,6 +23,16 @@ export function ensureComplex(item?: SchemaType): item is SchemaType & { kind: '
 }
 
 /**
+ * Return the underlying class of a complex schema type, throwing if it is not complex
+ */
+export function asComplexClass(type: SchemaType): Class {
+  if (!ensureComplex(type)) {
+    throw new RuntimeError(`Invalid type: expected complex schema type, got ${type.value.name}`);
+  }
+  return type.value;
+}
+
+/**
  * Input accepted for `type` in `@Field` and `@Input` decorators
  */
 export type SchemaTypeInput = SchemaType | Function | Class;

@@ -11,6 +11,7 @@ import type {
 
 import { type Class, castTo, describeFunction, RuntimeError } from '@travetto/runtime';
 import {
+  asComplexClass,
   type SchemaBasicType,
   type SchemaClassConfig,
   type SchemaFieldConfig,
@@ -280,7 +281,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     } else {
       const schemaConfig = body.type.kind === 'complex' ? SchemaRegistryIndex.getOptional(body.type.value)?.get() : undefined;
       const typeId = schemaConfig ? this.#nameResolver.getName(schemaConfig) : body.type.value.name;
-      const typeRef = schemaConfig ? this.#getType(castTo<Class>(body.type.value)) : { type: body.type.value.name.toLowerCase() };
+      const typeRef = schemaConfig ? this.#getType(asComplexClass(body.type)) : { type: body.type.value.name.toLowerCase() };
       return {
         content: {
           [mime ?? 'application/json']: {
