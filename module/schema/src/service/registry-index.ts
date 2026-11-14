@@ -151,7 +151,11 @@ export class SchemaRegistryIndex implements RegistryIndex {
    * @param item Actual instance
    */
   resolveInstanceType<T>(cls: Class<T>, item: T): Class {
-    const { discriminatedField, discriminatedType, class: targetClass } = this.store.get(cls).get();
+    const config = this.store.getOptional(cls)?.get();
+    if (!config) {
+      return cls;
+    }
+    const { discriminatedField, discriminatedType, class: targetClass } = config;
     if (!discriminatedField) {
       return targetClass;
     } else {

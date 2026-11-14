@@ -124,8 +124,9 @@ export class MongoUtil {
           throw new RuntimeError('Invalid id query');
         }
       } else if ((isPlain && !firstKey.startsWith('$')) || value?.constructor?.Ⲑid) {
-        if (recursive && subField?.type.kind === 'complex') {
-          Object.assign(out, this.extractSimple(subField.type.value, value, `${subpath}.`, recursive));
+        if (recursive) {
+          const nextBase = subField?.type.kind === 'complex' ? subField.type.value : undefined;
+          Object.assign(out, this.extractSimple(nextBase, value, `${subpath}.`, recursive));
         } else {
           out[subpath] = value;
         }

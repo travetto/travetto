@@ -175,7 +175,7 @@ export class BindUtil {
       }
 
       const out = this.bindSchemaToObject(resolvedCls, instance, data, config);
-      SchemaRegistryIndex.get(resolvedCls).ensureInstanceTypeField(out);
+      SchemaRegistryIndex.getOptional(resolvedCls)?.ensureInstanceTypeField(out);
       return out;
     }
   }
@@ -189,8 +189,7 @@ export class BindUtil {
    */
   static bindSchemaToObject<T>(cls: Class<T>, input: T, data?: object, config: BindConfig = {}): T {
     if (data && isInstance<T>(data)) {
-      const adapter = SchemaRegistryIndex.get(cls);
-      const schemaConfig = adapter.get();
+      const schemaConfig = SchemaRegistryIndex.getOptional(cls)?.get();
 
       // If no configuration
       if (!schemaConfig) {
