@@ -1,8 +1,20 @@
 import { ModelRegistryIndex, type ModelType } from '@travetto/model';
 import { type Any, castTo, type UnknownRecord } from '@travetto/runtime';
+import { DataUtil } from '@travetto/schema';
 
 import { IndexedFieldError } from './types/error.ts';
-import type { AllIndexes, FullKeyedIndexBody, KeyedIndexBody, TemplatePart, TemplateValue } from './types/indexes.ts';
+import type {
+  AllIndexes,
+  FullKeyedIndexBody,
+  FullKeyedIndexWithPartialBody,
+  KeyedIndexBody,
+  KeyedIndexSelection,
+  SingleItemIndex,
+  SortedIndex,
+  SortedIndexSelection,
+  TemplatePart,
+  TemplateValue
+} from './types/indexes.ts';
 
 const DEFAULT_SEP = '\u8203';
 
@@ -15,34 +27,21 @@ type IndexPart<T extends TemplateValue = TemplateValue, V = unknown> = {
 
 function buildIndexParts<T extends TemplateValue = TemplateValue>(
   template: TemplatePart<T>[],
-  body: UnknownRecord | undefined,
+  body: unknown,
   checkValueType?: (value: unknown) => boolean
 ): IndexPart<T>[] {
   const out: IndexPart<T>[] = [];
   for (const { path, value: templateValue } of template) {
-    let value: unknown = body;
-    let bodyPart: Pick<IndexPart, 'value' | 'state'> | undefined;
-    for (const pathItem of path) {
-      if (typeof value === 'object' && value !== null) {
-        if (value && pathItem in value) {
-          value = castTo<UnknownRecord>(value)[pathItem];
-        } else {
-          bodyPart = { value: null, state: 'missing' };
-          break;
-        }
-      } else {
-        bodyPart = { value: castTo(value), state: 'mismatch' };
-        break;
-      }
-    }
-    if (bodyPart === undefined) {
-      if (value === null || value === undefined) {
-        bodyPart = { value: null, state: 'empty' };
-      } else if (checkValueType && !checkValueType(value)) {
-        bodyPart = { value, state: 'mismatch' };
-      } else {
-        bodyPart = { value, state: 'found' };
-      }
+    const { found, value } = DataUtil.getPath(body, path);
+    let bodyPart: Pick<IndexPart, 'value' | 'state'>;
+    if (!found) {
+      bodyPart = typeof value === 'object' && value !== null ? { value: null, state: 'missing' } : { value, state: 'mismatch' };
+    } else if (value === null || value === undefined) {
+      bodyPart = { value: null, state: 'empty' };
+    } else if (checkValueType && !checkValueType(value)) {
+      bodyPart = { value, state: 'mismatch' };
+    } else {
+      bodyPart = { value, state: 'found' };
     }
     out.push({ ...bodyPart, path, templateValue });
   }
@@ -59,12 +58,22 @@ function validate<T extends ModelType>(idx: AllIndexes<T>, parts: IndexPart[]): 
   }
 }
 
-type Body<T extends ModelType> = KeyedIndexBody<T, Any> | FullKeyedIndexBody<T, Any, Any> | Partial<T>;
+type Body<T extends ModelType, K extends KeyedIndexSelection<T> = Any, S extends SortedIndexSelection<T> = Any> =
+  | T
+  | KeyedIndexBody<T, K>
+  | FullKeyedIndexBody<T, K, S>
+  | FullKeyedIndexWithPartialBody<T, K, S>
+  | Partial<T>;
 
 type IndexProcessConfig<T = {}> = T & { keyed?: boolean; sort?: boolean };
 
 export class ModelIndexedComputedIndex<T extends ModelType> {
-  static get<T extends ModelType>(idx: AllIndexes<T>, body: Body<T>): ModelIndexedComputedIndex<T> {
+  static get<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    idx: SingleItemIndex<T, K, S> | SortedIndex<T, K, S>,
+    body: Body<T, K, S>
+  ): ModelIndexedComputedIndex<T>;
+  static get<T extends ModelType>(idx: AllIndexes<T>, body: Body<T>): ModelIndexedComputedIndex<T>;
+  static get<T extends ModelType>(idx: AllIndexes<T>, body: Body<T> | object): ModelIndexedComputedIndex<T> {
     return new ModelIndexedComputedIndex(idx, body);
   }
 
@@ -73,16 +82,16 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
   idPart: IndexPart<true, string> | undefined;
   idx: AllIndexes<T>;
 
-  constructor(idx: AllIndexes<T>, body: Body<T>) {
+  constructor(idx: AllIndexes<T>, body: object) {
     this.idx = idx;
-    this.keyedParts = buildIndexParts(idx.keyTemplate, castTo(body));
+    this.keyedParts = buildIndexParts(idx.keyTemplate, body);
     this.sortParts = buildIndexParts(
       idx.sortTemplate,
-      castTo(body),
+      body,
       value => typeof value === 'number' || value instanceof Date || typeof value === 'string'
     );
     const idSource = ModelRegistryIndex.get(idx.class).idSource;
-    const identifier = idSource.get(body, { optional: true });
+    const identifier = idSource.get(castTo(body), { optional: true });
     if (typeof identifier === 'string') {
       const idField = idSource.field;
       this.idPart = {
@@ -132,34 +141,15 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
     }
   }
 
-  project(config: IndexProcessConfig<{ emptyValue?: unknown; includeId?: boolean }> = {}): UnknownRecord {
+  project<R = UnknownRecord>(config: IndexProcessConfig<{ emptyValue?: unknown; includeId?: boolean }> = {}): R {
     const { keyed = true, sort = false, emptyValue = null, includeId } = config;
     const response: UnknownRecord = {};
-    if (keyed) {
-      for (const { path, value, state } of this.keyedParts) {
-        let sub: UnknownRecord = response;
-        const all = path.slice(0);
-        const last = all.pop()!;
-        for (const part of all) {
-          sub = castTo((sub[part] ??= {}));
-        }
-        sub[last] = state === 'empty' ? emptyValue : value;
-      }
-    }
-    if (sort) {
-      for (const { path, value, state } of this.sortParts) {
-        let sub: UnknownRecord = response;
-        const all = path.slice(0);
-        const last = all.pop()!;
-        for (const part of all) {
-          sub = castTo((sub[part] ??= {}));
-        }
-        sub[last] = state === 'empty' ? emptyValue : value;
-      }
+    for (const { path, value, state } of [...(keyed ? this.keyedParts : []), ...(sort ? this.sortParts : [])]) {
+      DataUtil.setPath(response, path, state === 'empty' ? emptyValue : value);
     }
     if (includeId && this.idPart) {
       response.id = this.idPart.state === 'empty' ? emptyValue : this.idPart.value;
     }
-    return response;
+    return castTo<R>(response);
   }
 }

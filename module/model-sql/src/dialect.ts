@@ -8,7 +8,7 @@ import {
   type TextSearchClause,
   type WhereClause
 } from '@travetto/model-query';
-import { type Class, type UnknownRecord, castKey, castTo, isPlainRecord, JSONUtil, RuntimeError } from '@travetto/runtime';
+import { type Class, castTo, isRecord, JSONUtil, RuntimeError, type UnknownRecord } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex, type SchemaValueType } from '@travetto/schema';
 
 import { SQLModelSchemaUtil } from './schema.ts';
@@ -46,7 +46,7 @@ type IdentificationPath = string;
 function extractQueryIndexPathAndDirection(indexField: UnknownRecord): { path: string[]; sortDirection: 1 | -1 | true } {
   const path: string[] = [];
   let current: unknown = indexField;
-  while (typeof current === 'object' && current !== null) {
+  while (isRecord(current)) {
     const keys = Object.keys(current);
     if (keys.length === 0) {
       break;
@@ -57,7 +57,7 @@ function extractQueryIndexPathAndDirection(indexField: UnknownRecord): { path: s
     } else {
       path.push(key);
     }
-    current = castTo<UnknownRecord>(current)[key];
+    current = current[key];
   }
   const sortDirection = castTo<1 | -1 | true>(current ?? 1);
   return { path, sortDirection };
@@ -263,11 +263,11 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
   }
 
   abstract getTableExistsQuery(context: TableContext): { sql: string; parameters?: unknown[] };
-  abstract parseTableExistsResult(records: unknown[]): boolean;
+  abstract parseTableExistsResult(records: Record<string, Any>[]): boolean;
   abstract getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] };
-  abstract parseExistingColumns(records: unknown[]): Map<string, string>;
+  abstract parseExistingColumns(records: Record<string, Any>[]): Map<string, string>;
   abstract getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] };
-  abstract parseExistingIndexes(records: unknown[]): Map<string, string>;
+  abstract parseExistingIndexes(records: Record<string, Any>[]): Map<string, string>;
   abstract getDropIndexSQL(context: TableContext, indexName: string): string;
 
   abstract getTruncateTableSQL(context: TableContext): string;
@@ -669,11 +669,12 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
   }
 
   // Statement Builders
-  buildInsert<T extends ModelType>(tableContext: TableContext<T>, rawItem: UnknownRecord): { sql: string; values: unknown[] } {
-    return this.buildInsertAll(tableContext, [rawItem]);
+  buildInsert<T extends ModelType>(tableContext: TableContext<T>, item: T | UnknownRecord): { sql: string; values: unknown[] } {
+    return this.buildInsertAll(tableContext, [item]);
   }
 
-  buildInsertAll<T extends ModelType>(tableContext: TableContext<T>, rawItems: UnknownRecord[]): { sql: string; values: unknown[] } {
+  buildInsertAll<T extends ModelType>(tableContext: TableContext<T>, items: (T | UnknownRecord)[]): { sql: string; values: unknown[] } {
+    const rawItems = castTo<UnknownRecord[]>(items);
     if (rawItems.length === 0) {
       return { sql: '', values: [] };
     }
@@ -711,7 +712,8 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     return { sql, values };
   }
 
-  buildUpdateAll<T extends ModelType>(tableContext: TableContext<T>, rawItems: UnknownRecord[]): { sql: string; values: unknown[] } {
+  buildUpdateAll<T extends ModelType>(tableContext: TableContext<T>, items: (T | UnknownRecord)[]): { sql: string; values: unknown[] } {
+    const rawItems = castTo<UnknownRecord[]>(items);
     if (rawItems.length === 0) {
       return { sql: '', values: [] };
     }
@@ -731,13 +733,13 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     const setClauses: string[] = [];
     const values: unknown[] = [];
 
-    const ids = rawItems.map(item => item[castKey(idFieldName)]);
+    const ids = rawItems.map(item => item[idFieldName]);
 
     for (const field of simpleFieldsToUpdate) {
       const cases: string[] = [];
       for (const rawItem of rawItems) {
         const idPlaceholder = this.getPlaceholder(values.length + 1);
-        values.push(rawItem[castKey(idFieldName)]);
+        values.push(rawItem[idFieldName]);
         const valPlaceholder = this.getPlaceholder(values.length + 1);
         const val = rawItem[field.name];
         values.push(val === undefined || val === null ? null : val);
@@ -750,7 +752,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
       const cases: string[] = [];
       for (const rawItem of rawItems) {
         const idPlaceholder = this.getPlaceholder(values.length + 1);
-        values.push(rawItem[castKey(idFieldName)]);
+        values.push(rawItem[idFieldName]);
         const valPlaceholder = this.getPlaceholder(values.length + 1);
         const val = rawItem[field.name];
         values.push(this.getComplexColumnValue(field, val));
@@ -776,10 +778,11 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
 
   buildUpdate<T extends ModelType>(
     tableContext: TableContext<T>,
-    rawItem: UnknownRecord,
+    item: T | UnknownRecord,
     whereSQL?: string,
     whereParameters: unknown[] = []
   ): { sql: string; values: unknown[] } {
+    const rawItem = castTo<UnknownRecord>(item);
     const idFieldName = ModelRegistryIndex.getConfig(tableContext.cls).idField;
     const sets: string[] = [];
     const values: unknown[] = [];
@@ -862,9 +865,10 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
 
   buildUpsert<T extends ModelType>(
     tableContext: TableContext<T>,
-    rawItem: UnknownRecord,
+    item: T | UnknownRecord,
     conflictTarget: string[]
   ): { sql: string; values: unknown[] } {
+    const rawItem = castTo<UnknownRecord>(item);
     const idFieldName = ModelRegistryIndex.getConfig(tableContext.cls).idField;
     const columns: string[] = [];
     const values: unknown[] = [];

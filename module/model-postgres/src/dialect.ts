@@ -1,7 +1,7 @@
 import type { ModelType } from '@travetto/model';
 import type { TextSearchClause } from '@travetto/model-query';
 import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext, type TextSearchState } from '@travetto/model-sql';
-import { castTo, JSONUtil, type UnknownRecord } from '@travetto/runtime';
+import { JSONUtil } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
 /* cspell:words ILIKE regclass indexdef tablename pkey tsvector tsquery */
@@ -298,8 +298,8 @@ ${offset !== undefined ? `OFFSET ${offset}` : ''};`;
     };
   }
 
-  parseTableExistsResult(records: unknown[]): boolean {
-    return castTo<{ exists: boolean }>(records[0])?.exists ?? false;
+  parseTableExistsResult(records: Record<string, Any>[]): boolean {
+    return !!records[0]?.exists;
   }
 
   getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
@@ -311,8 +311,8 @@ ${offset !== undefined ? `OFFSET ${offset}` : ''};`;
     };
   }
 
-  parseExistingColumns(records: unknown[]): Map<string, string> {
-    return new Map(castTo<{ name: string; type: string }[]>(records).map(record => [record.name, record.type.toUpperCase()]));
+  parseExistingColumns(records: Record<string, Any>[]): Map<string, string> {
+    return new Map(records.map(record => [record.name, record.type.toUpperCase()]));
   }
 
   getAlterColumnTypeSQL(context: TableContext, columnName: string, columnType: string, existingType: string): string | undefined {
@@ -332,9 +332,9 @@ ${offset !== undefined ? `OFFSET ${offset}` : ''};`;
     };
   }
 
-  parseExistingIndexes(records: unknown[]): Map<string, string> {
+  parseExistingIndexes(records: Record<string, Any>[]): Map<string, string> {
     return new Map(
-      castTo<{ indexname: string; indexdef: string }[]>(records)
+      records
         .filter(record => !record.indexname.endsWith('_pkey') && !record.indexname.endsWith('_fts'))
         .map(record => [record.indexname, record.indexdef])
     );

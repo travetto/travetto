@@ -1,6 +1,6 @@
 import { isBooleanObject, isNumberObject, isStringObject } from 'node:util/types';
 
-import { asConstructable, asFull, type Class, castTo, TypedObject, type UnknownRecord, isPlainRecord } from '@travetto/runtime';
+import { asConstructable, asFull, type Class, castTo, isPlainRecord, isRecord, TypedObject, type UnknownRecord } from '@travetto/runtime';
 
 import { UnknownType } from './types.ts';
 
@@ -10,6 +10,39 @@ const REGEX_PATTERN = /[/](.*)[/](i|g|m|s)?/;
  * Utilities for data conversion and binding
  */
 export class DataUtil {
+  /**
+   * Read a nested value by key path
+   * @param root Root object to traverse
+   * @param path Key segments to follow
+   */
+  static getPath(root: unknown, path: string[]): { found: boolean; value: unknown } {
+    let current: unknown = root;
+    for (const segment of path) {
+      if (typeof current === 'object' && current !== null && segment in current) {
+        current = castTo<UnknownRecord>(current)[segment];
+      } else {
+        return { found: false, value: current };
+      }
+    }
+    return { found: true, value: current };
+  }
+
+  /**
+   * Write a nested value by key path, creating intermediate plain objects as needed
+   * @param root Root record to mutate
+   * @param path Key segments to follow
+   * @param value Value to assign at the leaf
+   */
+  static setPath(root: UnknownRecord, path: string[], value: unknown): void {
+    let current = root;
+    for (let index = 0; index < path.length - 1; index += 1) {
+      const segment = path[index];
+      const next = current[segment];
+      current = isRecord(next) ? next : (current[segment] = {});
+    }
+    current[path[path.length - 1]] = value;
+  }
+
   /**
    * Is a value of primitive type
    * @param value Value to check

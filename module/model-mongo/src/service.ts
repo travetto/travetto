@@ -178,7 +178,7 @@ export class MongoModelService
   ): Promise<FindCursor> {
     const store = await this.getStore(cls);
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
-    let whereClause: WhereClause<T> = castTo(computed.project());
+    let whereClause: WhereClause<T> = computed.project();
     if (transformWhere) {
       whereClause = transformWhere(whereClause);
     }
@@ -559,7 +559,7 @@ export class MongoModelService
 
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
 
-    const result = await store.findOne(this.getWhereFilter(cls, castTo(computed.project({ sort: true, includeId: true }))));
+    const result = await store.findOne(this.getWhereFilter(cls, computed.project({ sort: true, includeId: true })));
     if (!result) {
       throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
@@ -574,7 +574,7 @@ export class MongoModelService
     const store = await this.getStore(cls);
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
 
-    const result = await store.deleteOne(this.getWhereFilter(cls, castTo(computed.project({ sort: true, includeId: true }))));
+    const result = await store.deleteOne(this.getWhereFilter(cls, computed.project({ sort: true, includeId: true })));
     if (!result.deletedCount) {
       throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
@@ -598,12 +598,10 @@ export class MongoModelService
 
   async updatePartialByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     cls: Class<T>,
-    idx: SingleItemIndex<T, K>,
+    idx: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const prepared = await ModelCrudUtil.prePartialUpdate(cls, castTo(body), { validateId: false });
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), prepared);
-    return this.update(cls, item);
+    return ModelIndexedUtil.naivePartialUpdate(this, cls, idx, body);
   }
 
   async pageByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(

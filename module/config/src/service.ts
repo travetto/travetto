@@ -41,14 +41,7 @@ export class ConfigurationService {
    */
   #get<T extends UnknownRecord = UnknownRecord>(namespace?: string): T {
     const parts = namespace ? namespace.split('.') : [];
-    let sub: UnknownRecord = this.#storage;
-
-    while (parts.length && sub) {
-      const next = parts.shift()!;
-      sub = castTo(sub[next]);
-    }
-
-    return castTo(sub);
+    return castTo(DataUtil.getPath(this.#storage, parts).value);
   }
 
   /**

@@ -4,6 +4,7 @@ import {
   type Class,
   type ClassInstance,
   getClass,
+  isClass,
   type NumericLikeIntrinsic,
   type NumericPrimitive,
   type Primitive,
@@ -47,7 +48,7 @@ function input<V>(...configs: Partial<SchemaInputConfig>[]): PropType<V> {
 
 function resolveSchemaValueType(type: SchemaValueTypeInput): SchemaValueType {
   if (typeof type === 'function') {
-    return 'Ⲑid' in type ? { kind: 'complex', value: castTo<Class>(type) } : { kind: 'primitive', value: type };
+    return isClass(type) ? { kind: 'complex', value: type } : { kind: 'primitive', value: type };
   }
   return type;
 }
