@@ -171,7 +171,7 @@ export class SchemaFaker {
       return this.#array(config);
     } else if (config.enum) {
       return faker.helpers.arrayElement(config.enum.values);
-    } else if (config.type.kind === 'complex') {
+    } else if (SchemaRegistryIndex.hasValueType(config.type)) {
       return this.generate(config.type.value);
     } else {
       switch (config.type.value) {
