@@ -16,37 +16,37 @@ export type TemplateLiteral = { operation: 'and' | 'or'; values: (TemplateLitera
 export const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';
 
 /**
- * Represents the type of a schema field or parameter
+ * Represents the value type of a schema field or parameter
  */
-export type SchemaFieldType = { kind: 'primitive'; value: Function } | { kind: 'complex'; value: Class };
+export type SchemaValueType = { kind: 'primitive'; value: Function } | { kind: 'complex'; value: Class };
 
 /**
- * Return the underlying class of a complex schema type, throwing if it is not complex
+ * Return the underlying class of a complex schema value type, throwing if it is not complex
  */
-export function asComplexClass(type: SchemaFieldType): Class {
+export function asComplexClass(type: SchemaValueType): Class {
   if (type.kind !== 'complex') {
-    throw new RuntimeError(`Invalid type: expected complex schema type, got ${type.value.name}`);
+    throw new RuntimeError(`Invalid type: expected complex schema value type, got ${type.value.name}`);
   }
   return type.value;
 }
 
 /**
- * Narrow a schema type to its complex shape for consumers that accept non-schema classes
+ * Narrow a schema value type to its complex shape for consumers that accept non-schema classes
  */
-export function asComplexType(type: SchemaFieldType): SchemaFieldType & { kind: 'complex' } {
+export function asComplexType(type: SchemaValueType): SchemaValueType & { kind: 'complex' } {
   return castTo(type);
 }
 
 /**
  * Input accepted for `type` in `@Field` and `@Input` decorators
  */
-export type SchemaFieldTypeInput = SchemaFieldType | Function | Class;
+export type SchemaValueTypeInput = SchemaValueType | Function | Class;
 
 /**
- * Decorator configuration shape accepting raw constructors/functions or `SchemaFieldType`
+ * Decorator configuration shape accepting raw constructors/functions or `SchemaValueType`
  */
 export type SchemaDecoratorConfig<T extends SchemaInputConfig = SchemaInputConfig> = Omit<Partial<T>, 'type'> & {
-  type?: SchemaFieldTypeInput;
+  type?: SchemaValueTypeInput;
 };
 
 /**
@@ -68,7 +68,7 @@ export type SchemaBasicType = {
   /**
    * The class or primitive tied to the type
    */
-  type: SchemaFieldType;
+  type: SchemaValueType;
   /**
    * Is the field a foreign type
    */

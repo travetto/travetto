@@ -15,9 +15,9 @@ import {
   CONSTRUCTOR_PROPERTY,
   type SchemaDecoratorConfig,
   type SchemaFieldConfig,
-  type SchemaFieldType,
-  type SchemaFieldTypeInput,
-  type SchemaInputConfig
+  type SchemaInputConfig,
+  type SchemaValueType,
+  type SchemaValueTypeInput
 } from '../service/types.ts';
 import { CommonRegex } from '../validate/regex.ts';
 
@@ -45,7 +45,7 @@ function input<V>(...configs: Partial<SchemaInputConfig>[]): PropType<V> {
   };
 }
 
-function resolveSchemaFieldType(type: SchemaFieldTypeInput): SchemaFieldType {
+function resolveSchemaValueType(type: SchemaValueTypeInput): SchemaValueType {
   if (typeof type === 'function') {
     return 'Ⲑid' in type ? { kind: 'complex', value: castTo<Class>(type) } : { kind: 'primitive', value: type };
   }
@@ -53,7 +53,7 @@ function resolveSchemaFieldType(type: SchemaFieldTypeInput): SchemaFieldType {
 }
 
 /**
- * Normalize decorator configs so raw constructors/functions become `SchemaFieldType`
+ * Normalize decorator configs so raw constructors/functions become `SchemaValueType`
  */
 export function normalizeSchemaDecoratorConfigs<T extends SchemaInputConfig>(
   configs: (SchemaDecoratorConfig<T> | undefined)[]
@@ -61,7 +61,7 @@ export function normalizeSchemaDecoratorConfigs<T extends SchemaInputConfig>(
   return configs
     .filter((config): config is SchemaDecoratorConfig<T> => !!config)
     .map(config =>
-      config.type ? castTo<Partial<T>>({ ...config, type: resolveSchemaFieldType(config.type) }) : castTo<Partial<T>>(config)
+      config.type ? castTo<Partial<T>>({ ...config, type: resolveSchemaValueType(config.type) }) : castTo<Partial<T>>(config)
     );
 }
 

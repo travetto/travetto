@@ -15,11 +15,11 @@ import {
   type SchemaBasicType,
   type SchemaClassConfig,
   type SchemaFieldConfig,
-  type SchemaFieldType,
   type SchemaInputConfig,
   SchemaNameResolver,
   type SchemaParameterConfig,
-  SchemaRegistryIndex
+  SchemaRegistryIndex,
+  type SchemaValueType
 } from '@travetto/schema';
 import {
   type ControllerConfig,
@@ -103,7 +103,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Get the type for a given class
    */
   #getType(inputOrClass: SchemaInputConfig | Class): Record<string, unknown> {
-    let field: { type: SchemaFieldType; precision?: [number, number | undefined] };
+    let field: { type: SchemaValueType; precision?: [number, number | undefined] };
     if (!isInputConfig(inputOrClass)) {
       field = { type: { kind: SchemaRegistryIndex.has(inputOrClass) ? 'complex' : 'primitive', value: inputOrClass } };
     } else {
