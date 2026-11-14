@@ -2,7 +2,7 @@ import { type RegistrationMethods, Registry, type RegistryIndex, RegistryIndexSt
 import { type Class, castKey, castTo, classConstruct, getParentClass, RuntimeError } from '@travetto/runtime';
 
 import { type SchemaDiscriminatedInfo, SchemaRegistryAdapter } from './registry-adapter.ts';
-import type { SchemaClassConfig, SchemaFieldConfig } from './types.ts';
+import type { SchemaClassConfig, SchemaFieldConfig, SchemaValueType } from './types.ts';
 
 /**
  * Schema registry index for managing schema configurations across classes
@@ -28,6 +28,10 @@ export class SchemaRegistryIndex implements RegistryIndex {
 
   static has(cls: Class): boolean {
     return this.#instance.store.has(cls);
+  }
+
+  static hasValueType(type?: SchemaValueType): type is SchemaValueType & { kind: 'complex' } {
+    return type?.kind === 'complex' && this.#instance.store.has(type.value);
   }
 
   static getDiscriminatedTypes(cls: Class): string[] | undefined {
@@ -113,7 +117,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
           return undefined;
         }
         fieldConfiguration = this.getClassConfig(currentClass).fields[segment];
-        currentClass = fieldConfiguration?.type.kind === 'complex' ? fieldConfiguration.type.value : undefined;
+        currentClass = SchemaRegistryIndex.hasValueType(fieldConfiguration?.type) ? fieldConfiguration.type.value : undefined;
       }
 
       return fieldConfiguration;
@@ -181,7 +185,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
   ): void {
     const fields = SchemaRegistryIndex.has(cls) ? Object.values(this.getClassConfig(cls).fields) : [];
     for (const field of fields) {
-      if (field.type.kind === 'complex') {
+      if (SchemaRegistryIndex.hasValueType(field.type)) {
         this.visitFields(field.type.value, onField, [..._path, field], root);
       } else {
         onField(field, _path);

@@ -92,7 +92,7 @@ export class SchemaValidator {
         return this.#prepareErrors(path, [{ kind: 'type', type: Array, value }]);
       }
       let errors: ValidationError[] = [];
-      if (type.kind === 'complex' && SchemaRegistryIndex.has(type.value)) {
+      if (SchemaRegistryIndex.hasValueType(type)) {
         for (let i = 0; i < value.length; i += 1) {
           const subErrors = this.#validateFields(resolveFieldMap(type.value, value[i]), value[i], `${path}[${i}]`);
           errors = errors.concat(subErrors);
@@ -104,7 +104,7 @@ export class SchemaValidator {
         }
       }
       return errors;
-    } else if (type.kind === 'complex' && SchemaRegistryIndex.has(type.value)) {
+    } else if (SchemaRegistryIndex.hasValueType(type)) {
       return this.#validateFields(resolveFieldMap(type.value, value), value, path);
     } else {
       const fieldErrors = this.#validateInput(input, value);
