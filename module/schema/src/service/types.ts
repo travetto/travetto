@@ -1,4 +1,12 @@
-import { type Any, castTo, type Class, type IntrinsicType, type NumericLikeIntrinsic, type Primitive, RuntimeError } from '@travetto/runtime';
+import {
+  type Any,
+  castTo,
+  type Class,
+  type IntrinsicType,
+  type NumericLikeIntrinsic,
+  type Primitive,
+  RuntimeError
+} from '@travetto/runtime';
 
 import type { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
 
@@ -10,23 +18,13 @@ export const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';
 /**
  * Represents the type of a schema field or parameter
  */
-export type SchemaType = { kind: 'primitive'; value: Function } | { kind: 'complex'; value: Class };
-
-/**
- * Ensure a schema type is complex, throwing if it is not
- */
-export function ensureComplex(item?: SchemaType): item is SchemaType & { kind: 'complex' } {
-  if (item?.kind !== 'complex') {
-    throw new RuntimeError(`Invalid type: expected complex schema type, got ${item?.value?.name ?? item}`);
-  }
-  return true;
-}
+export type SchemaFieldType = { kind: 'primitive'; value: Function } | { kind: 'complex'; value: Class };
 
 /**
  * Return the underlying class of a complex schema type, throwing if it is not complex
  */
-export function asComplexClass(type: SchemaType): Class {
-  if (!ensureComplex(type)) {
+export function asComplexClass(type: SchemaFieldType): Class {
+  if (type.kind !== 'complex') {
     throw new RuntimeError(`Invalid type: expected complex schema type, got ${type.value.name}`);
   }
   return type.value;
@@ -35,20 +33,20 @@ export function asComplexClass(type: SchemaType): Class {
 /**
  * Narrow a schema type to its complex shape for consumers that accept non-schema classes
  */
-export function asComplexType(type: SchemaType): SchemaType & { kind: 'complex' } {
+export function asComplexType(type: SchemaFieldType): SchemaFieldType & { kind: 'complex' } {
   return castTo(type);
 }
 
 /**
  * Input accepted for `type` in `@Field` and `@Input` decorators
  */
-export type SchemaTypeInput = SchemaType | Function | Class;
+export type SchemaFieldTypeInput = SchemaFieldType | Function | Class;
 
 /**
- * Decorator configuration shape accepting raw constructors/functions or `SchemaType`
+ * Decorator configuration shape accepting raw constructors/functions or `SchemaFieldType`
  */
 export type SchemaDecoratorConfig<T extends SchemaInputConfig = SchemaInputConfig> = Omit<Partial<T>, 'type'> & {
-  type?: SchemaTypeInput;
+  type?: SchemaFieldTypeInput;
 };
 
 /**
@@ -70,7 +68,7 @@ export type SchemaBasicType = {
   /**
    * The class or primitive tied to the type
    */
-  type: SchemaType;
+  type: SchemaFieldType;
   /**
    * Is the field a foreign type
    */

@@ -263,7 +263,7 @@ class ${uniqueId} extends ${type.mappedClassName} {
       LiteralUtil.fromLiteral(state.factory, {
         array: ts.isArrayLiteralExpression(resolved),
         type: {
-          kind: typeExpr.key === 'foreign' ? 'primitive' : this.getSchemaTypeKind(unwrappedType),
+          kind: typeExpr.key === 'foreign' ? 'primitive' : this.getSchemaFieldTypeKind(unwrappedType),
           value
         }
       })
@@ -340,9 +340,9 @@ class ${uniqueId} extends ${type.mappedClassName} {
   }
 
   /**
-   * Determine the schema type kind for a resolved AST type
+   * Determine the schema field type kind for a resolved AST type
    */
-  static getSchemaTypeKind(type?: AnyType): 'primitive' | 'complex' {
+  static getSchemaFieldTypeKind(type?: AnyType): 'primitive' | 'complex' {
     const resolved = type?.key === 'pointer' ? type.target : type;
     switch (resolved?.key) {
       case 'managed':
@@ -388,7 +388,7 @@ class ${uniqueId} extends ${type.mappedClassName} {
     }
     if (value) {
       out.type = {
-        kind: this.getSchemaTypeKind(type),
+        kind: this.getSchemaFieldTypeKind(type),
         value
       };
     }

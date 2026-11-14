@@ -9,10 +9,10 @@ import {
   type SchemaCoreConfig,
   type SchemaFieldConfig,
   type SchemaFieldMap,
+  type SchemaFieldType,
   type SchemaInputConfig,
   type SchemaMethodConfig,
-  type SchemaParameterConfig,
-  type SchemaType
+  type SchemaParameterConfig
 } from './types.ts';
 
 export type SchemaDiscriminatedInfo = Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>>;
@@ -334,7 +334,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return methodConfig;
   }
 
-  getMethodReturnType(method: string): SchemaType {
+  getMethodReturnType(method: string): SchemaFieldType {
     return this.getMethod(method).returnType!.type;
   }
 
