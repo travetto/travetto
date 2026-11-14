@@ -82,7 +82,8 @@ import {
   castTo,
   JSONUtil,
   ShutdownManager,
-  TypedObject
+  TypedObject,
+  type UnknownRecord
 } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
@@ -177,7 +178,7 @@ export class MongoModelService
   ): Promise<FindCursor> {
     const store = await this.getStore(cls);
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
-    let whereClause: WhereClause<T> = castTo(computed.project());
+    let whereClause: WhereClause<T> = computed.project();
     if (transformWhere) {
       whereClause = transformWhere(whereClause);
     }
@@ -192,7 +193,7 @@ export class MongoModelService
     return q;
   }
 
-  restoreId<T extends ModelType>(cls: Class<T>, item: Record<string, unknown>): void {
+  restoreId<T extends ModelType>(cls: Class<T>, item: UnknownRecord): void {
     if (item._id) {
       const idFieldName = ModelRegistryIndex.get(cls).idSource.field;
       item[idFieldName] ??= MongoUtil.idToString(castTo(item._id));
@@ -379,7 +380,7 @@ export class MongoModelService
     const simple = MongoUtil.extractSimple(cls, final, undefined, false);
 
     const operation: Partial<T> = castTo(
-      Object.entries(simple).reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>((document, [key, value]) => {
+      Object.entries(simple).reduce<Partial<Record<'$unset' | '$set', UnknownRecord>>>((document, [key, value]) => {
         if (value === null || value === undefined) {
           (document.$unset ??= {})[key] = value;
         } else {
@@ -558,7 +559,7 @@ export class MongoModelService
 
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
 
-    const result = await store.findOne(this.getWhereFilter(cls, castTo(computed.project({ sort: true, includeId: true }))));
+    const result = await store.findOne(this.getWhereFilter<T>(cls, computed.project({ sort: true, includeId: true })));
     if (!result) {
       throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
@@ -573,7 +574,7 @@ export class MongoModelService
     const store = await this.getStore(cls);
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
 
-    const result = await store.deleteOne(this.getWhereFilter(cls, castTo(computed.project({ sort: true, includeId: true }))));
+    const result = await store.deleteOne(this.getWhereFilter<T>(cls, computed.project({ sort: true, includeId: true })));
     if (!result.deletedCount) {
       throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
@@ -597,12 +598,10 @@ export class MongoModelService
 
   async updatePartialByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
     cls: Class<T>,
-    idx: SingleItemIndex<T, K>,
+    idx: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const prepared = await ModelCrudUtil.prePartialUpdate(cls, castTo(body), { validateId: false });
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), prepared);
-    return this.update(cls, item);
+    return ModelIndexedUtil.naivePartialUpdate(this, cls, idx, body);
   }
 
   async pageByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
@@ -711,7 +710,7 @@ export class MongoModelService
     const item = await ModelCrudUtil.prePartialUpdate(cls, data, { validateId: false });
     const col = await this.getStore(cls);
     const items = MongoUtil.extractSimple(cls, item);
-    const final = Object.entries(items).reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>((document, [key, value]) => {
+    const final = Object.entries(items).reduce<Partial<Record<'$unset' | '$set', UnknownRecord>>>((document, [key, value]) => {
       if (value === null || value === undefined) {
         (document.$unset ??= {})[key] = value;
       } else {
@@ -735,7 +734,7 @@ export class MongoModelService
 
     const col = await this.getStore(cls);
 
-    let queryObject: Record<string, unknown> = { [field]: { $exists: true } };
+    let queryObject: UnknownRecord = { [field]: { $exists: true } };
 
     if (query?.where) {
       queryObject = { $and: [queryObject, MongoUtil.extractWhereFilter(cls, query.where)] };
@@ -798,7 +797,7 @@ export class MongoModelService
 
     const isDate = SchemaRegistryIndex.getNestedFieldConfig(cls, field)?.type === Date;
 
-    const groupFields: Record<string, unknown> = {
+    const groupFields: UnknownRecord = {
       _id: null,
       count: { $sum: 1 },
       min: { $min: `$${field}` },

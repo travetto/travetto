@@ -1,7 +1,7 @@
 import { type IndexConfig, ModelRegistryIndex, type ModelType } from '@travetto/model';
-import { type Class, type Primitive, type ValidFields } from '@travetto/runtime';
+import { type Class, type Primitive, type SimpleFields } from '@travetto/runtime';
 
-type RetainPrimitiveFields<T> = Pick<T, ValidFields<T, Primitive | Date>>;
+type RetainPrimitiveFields<T> = Pick<T, SimpleFields<T, Primitive | Date>>;
 
 type IndexClauseRaw<T> = {
   [P in keyof T]?: T[P] extends object ? IndexClauseRaw<RetainPrimitiveFields<T[P]>> : 1 | -1 | true;

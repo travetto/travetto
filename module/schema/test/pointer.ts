@@ -1,14 +1,17 @@
 import assert from 'node:assert';
 
 import { Registry } from '@travetto/registry';
-import { Schema, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { isClass } from '@travetto/runtime';
+import { Schema, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
-import type { SpecialType } from './models/pointer.ts';
+import type { ConcreteInterface, PlainInterface, SpecialType } from './models/pointer.ts';
 
 @Schema()
 class Custom {
   pointer: SpecialType;
+  plain?: PlainInterface;
+  concrete?: ConcreteInterface;
 }
 
 @Suite()
@@ -16,6 +19,14 @@ class PointerSuite {
   @BeforeAll()
   ready() {
     return Registry.init();
+  }
+
+  @Test()
+  testTypeKinds() {
+    const fields = SchemaRegistryIndex.get(Custom).getFields();
+    assert(isClass(fields.pointer.type));
+    assert(isClass(fields.plain.type));
+    assert(isClass(fields.concrete.type));
   }
 
   @Test()

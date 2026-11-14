@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { isPromise } from 'node:util/types';
 
-import { asConstructable, type Class, castKey, castTo, RuntimeError } from '@travetto/runtime';
+import { asConstructable, type Class, castTo, RuntimeError, type ClassInstance } from '@travetto/runtime';
 
 import { TestExecutionError } from '../model/error.ts';
 import type { Assertion, TestConfig, TestStatus, ThrowableError } from '../model/test.ts';
@@ -80,44 +80,59 @@ export class AssertCheck {
         assertion.expected = AssertUtil.cleanValue(assertion.expected);
       }
 
-      const [actual, expected, message]: [unknown, unknown, string] = castTo(args);
-
       // Actually run the assertion
       switch (fn) {
-        case 'includes':
-          assertFn(castTo<unknown[]>(actual).includes(expected), message);
+        case 'includes': {
+          const [actual, expected, message]: [unknown[], unknown, string] = castTo(args);
+          assertFn(actual.includes(expected), message);
           break;
-        case 'test':
-          assertFn(castTo<RegExp>(expected).test(castTo(actual)), message);
+        }
+        case 'test': {
+          const [actual, expected, message]: [string, RegExp, string] = castTo(args);
+          assertFn(expected.test(actual), message);
           break;
-        case 'instanceof':
-          assertFn(actual instanceof castTo<Class>(expected), message);
+        }
+        case 'instanceof': {
+          const [actual, expected, message]: [ClassInstance, Class, string] = castTo(args);
+          assertFn(actual instanceof expected, message);
           break;
-        case 'in':
-          assertFn(castTo<string>(actual) in castTo<object>(expected), message);
+        }
+        case 'in': {
+          const [actual, expected, message]: [string, object, string] = castTo(args);
+          assertFn(actual in expected, message);
           break;
-        case 'lessThan':
-          assertFn(castTo<number>(actual) < castTo<number>(expected), message);
+        }
+        case 'lessThan': {
+          const [actual, expected, message]: [number | BigInt, number | BigInt, string] = castTo(args);
+          assertFn(actual < expected, message);
           break;
-        case 'lessThanEqual':
-          assertFn(castTo<number>(actual) <= castTo<number>(expected), message);
+        }
+        case 'lessThanEqual': {
+          const [actual, expected, message]: [number | BigInt, number | BigInt, string] = castTo(args);
+          assertFn(actual <= expected, message);
           break;
-        case 'greaterThan':
-          assertFn(castTo<number>(actual) > castTo<number>(expected), message);
+        }
+        case 'greaterThan': {
+          const [actual, expected, message]: [number | BigInt, number | BigInt, string] = castTo(args);
+          assertFn(actual > expected, message);
           break;
-        case 'greaterThanEqual':
-          assertFn(castTo<number>(actual) >= castTo<number>(expected), message);
+        }
+        case 'greaterThanEqual': {
+          const [actual, expected, message]: [number | BigInt, number | BigInt, string] = castTo(args);
+          assertFn(actual >= expected, message);
           break;
-        case 'ok':
+        }
+        case 'ok': {
           assertFn.apply(null, castTo(args));
           break;
+        }
         default:
-          if (fn && assert[castKey<typeof assert>(fn)]) {
+          if (fn && fn in assert) {
             // Assert call
             if (/not/i.test(fn)) {
               common.state = 'should not';
             }
-            assert[castTo<'ok'>(fn)].apply(null, castTo(args));
+            assert[fn as 'ok'].apply(null, castTo(args));
           }
       }
 
@@ -130,7 +145,7 @@ export class AssertCheck {
           assertion.message = OP_MAPPING[fn] ?? '{state} be {expected}';
         }
         assertion.message = assertion.message
-          .replace(/[{]([A-Za-z]+)[}]/g, (a, key: StringFields<Assertion>) => common[key] || assertion[key]!)
+          .replace(/[{]([A-Za-z]+)[}]/g, (_, key: StringFields<Assertion>) => common[key] || assertion[key]!)
           .replace(/not not/g, ''); // Handle double negatives
         assertion.error = error;
         error.message = assertion.message;

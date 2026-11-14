@@ -1,4 +1,4 @@
-import { asFull, type Class, castKey, castTo, classConstruct, TypedObject } from '@travetto/runtime';
+import { asFull, type Class, castKey, castTo, classConstruct, TypedObject, type UnknownRecord, isPlainRecord } from '@travetto/runtime';
 
 import { DataUtil } from './data.ts';
 import { SchemaRegistryIndex } from './service/registry-index.ts';
@@ -18,6 +18,21 @@ function isInstance<T>(value: unknown): value is T {
  * Utilities for binding objects to schemas
  */
 export class BindUtil {
+  /** Clean out undefined fields */
+  static #removeUndefinedField<T>(instance: T): T {
+    for (const key of TypedObject.keys(instance)) {
+      // Do not retain undefined fields
+      const descriptor = Object.getOwnPropertyDescriptor(instance, key);
+      if (descriptor?.writable === false || descriptor?.get) {
+        continue;
+      }
+      if (instance[key] === undefined) {
+        delete instance[key];
+      }
+    }
+    return instance;
+  }
+
   /**
    * Utility to make a property accessor enumerable at runtime
    */
@@ -60,11 +75,11 @@ export class BindUtil {
    *
    * @param input The object to convert
    */
-  static expandPaths(input: Record<string, unknown>): Record<string, unknown> {
-    const out: Record<string, unknown> = {};
+  static expandPaths(input: UnknownRecord): UnknownRecord {
+    const out: UnknownRecord = {};
     for (const property of Object.keys(input)) {
       const valueInput = input[property];
-      const value = DataUtil.isPlainObject(valueInput) ? this.expandPaths(valueInput) : valueInput;
+      const value = isPlainRecord(valueInput) ? this.expandPaths(valueInput) : valueInput;
       const parts = property.split('.');
       const last = parts.pop()!;
       let sub = out;
@@ -90,7 +105,7 @@ export class BindUtil {
       const arr = last.indexOf('[') > 0;
 
       if (!arr) {
-        if (sub[last] && DataUtil.isPlainObject(value)) {
+        if (sub[last] && isPlainRecord(value)) {
           sub[last] = DataUtil.deepAssign(sub[last], value, 'coerce');
         } else {
           sub[last] = value;
@@ -103,11 +118,11 @@ export class BindUtil {
         let key = /^\d+$/.test(idx) ? parseInt(idx, 10) : idx.trim() || undefined;
         sub[name] ??= typeof key === 'string' ? {} : [];
 
-        const arrSub: Record<string, unknown> & { length: number } = castTo(sub[name]);
+        const arrSub: UnknownRecord & { length: number } = castTo(sub[name]);
         if (key === undefined) {
           key = arrSub.length;
         }
-        if (arrSub[key] && DataUtil.isPlainObject(value) && DataUtil.isPlainObject(arrSub[key])) {
+        if (arrSub[key] && isPlainRecord(value) && isPlainRecord(arrSub[key])) {
           arrSub[key] = DataUtil.deepAssign(arrSub[key], value, 'coerce');
         } else {
           arrSub[key] = value;
@@ -122,16 +137,16 @@ export class BindUtil {
    * @param data The object to flatten the paths for
    * @param prefix The starting prefix
    */
-  static flattenPaths<V extends string = string>(data: Record<string, unknown>, prefix: string = ''): Record<string, V> {
+  static flattenPaths<V extends string = string>(data: UnknownRecord, prefix: string = ''): Record<string, V> {
     const out: Record<string, V> = {};
     for (const [key, value] of Object.entries(data)) {
       const pre = `${prefix}${key}`;
-      if (DataUtil.isPlainObject(value)) {
+      if (isPlainRecord(value)) {
         Object.assign(out, this.flattenPaths(value, `${pre}.`));
       } else if (Array.isArray(value)) {
         for (let i = 0; i < value.length; i += 1) {
           const element = value[i];
-          if (DataUtil.isPlainObject(element)) {
+          if (isPlainRecord(element)) {
             Object.assign(out, this.flattenPaths(element, `${pre}[${i}].`));
           } else {
             out[`${pre}[${i}]`] = element ?? '';
@@ -159,24 +174,15 @@ export class BindUtil {
     }
     if (data instanceof cls) {
       return castTo(data);
-    } else {
+    } else if (SchemaRegistryIndex.has(cls)) {
       const resolvedCls = SchemaRegistryIndex.resolveInstanceType<T>(cls, asFull<T>(data));
-      const instance = classConstruct<T & { type?: string }>(resolvedCls);
-
-      for (const key of TypedObject.keys(instance)) {
-        // Do not retain undefined fields
-        const descriptor = Object.getOwnPropertyDescriptor(instance, key);
-        if (descriptor?.writable === false || descriptor?.get) {
-          continue;
-        }
-        if (instance[key] === undefined) {
-          delete instance[key];
-        }
-      }
-
-      const out = this.bindSchemaToObject(resolvedCls, instance, data, config);
+      const instance = classConstruct(resolvedCls);
+      const out = this.bindSchemaToObject(resolvedCls, this.#removeUndefinedField(instance), data, config);
       SchemaRegistryIndex.get(resolvedCls).ensureInstanceTypeField(out);
       return out;
+    } else {
+      const instance = classConstruct<T>(cls);
+      return this.bindSchemaToObject(cls, this.#removeUndefinedField(instance), data, config);
     }
   }
 
@@ -189,8 +195,7 @@ export class BindUtil {
    */
   static bindSchemaToObject<T>(cls: Class<T>, input: T, data?: object, config: BindConfig = {}): T {
     if (data && isInstance<T>(data)) {
-      const adapter = SchemaRegistryIndex.get(cls);
-      const schemaConfig = adapter.get();
+      const schemaConfig = SchemaRegistryIndex.getOptional(cls)?.get();
 
       // If no configuration
       if (!schemaConfig) {
@@ -238,10 +243,11 @@ export class BindUtil {
             }
 
             if (SchemaRegistryIndex.has(field.type)) {
+              const fieldType = field.type;
               if (field.array && Array.isArray(value)) {
-                value = value.map(item => this.bindSchema(field.type, item, config));
+                value = value.map(item => this.bindSchema(fieldType, item, config));
               } else {
-                value = this.bindSchema(field.type, value, config);
+                value = this.bindSchema(fieldType, value, config);
               }
             } else if (field.array && Array.isArray(value)) {
               value = value.map(item => this.#coerceType(field, item));
@@ -272,16 +278,16 @@ export class BindUtil {
     if (config.required?.active === false && (value === undefined || value === null)) {
       return value;
     }
-    const complex = SchemaRegistryIndex.has(config.type);
     if (config.array) {
       const subValue = !Array.isArray(value) ? [value] : value;
-      if (complex) {
-        value = subValue.map(item => this.bindSchema(config.type, item));
+      if (SchemaRegistryIndex.has(config.type)) {
+        const type = config.type;
+        value = subValue.map(item => this.bindSchema(type, item));
       } else {
         value = subValue.map(item => DataUtil.coerceType(item, config.type, false));
       }
     } else {
-      if (complex) {
+      if (SchemaRegistryIndex.has(config.type)) {
         value = this.bindSchema(config.type, value);
       } else {
         value = DataUtil.coerceType(value, config.type, false);

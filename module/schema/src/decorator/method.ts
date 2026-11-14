@@ -1,4 +1,4 @@
-import { type Any, type ClassInstance, castTo, getClass } from '@travetto/runtime';
+import { type Any, type Class, type ClassInstance, castTo, getClass } from '@travetto/runtime';
 
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 import type { SchemaMethodConfig } from '../service/types.ts';
@@ -13,8 +13,8 @@ type MethodDecorator = (instance: ClassInstance, property: string, descriptor: P
  * @kind decorator
  */
 export function Method(...config: Partial<SchemaMethodConfig>[]) {
-  return (instanceOrCls: ClassInstance, property: string): void => {
-    SchemaRegistryIndex.getForRegister(getClass(instanceOrCls)).registerMethod(property, ...config);
+  return (target: Class | ClassInstance, property: string): void => {
+    SchemaRegistryIndex.getForRegister(getClass(target)).registerMethod(property, ...config);
   };
 }
 

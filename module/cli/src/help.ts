@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { CodecUtil, castKey, getClass, JSONUtil, Runtime } from '@travetto/runtime';
+import { CodecUtil, castKey, JSONUtil, Runtime, getConstructor } from '@travetto/runtime';
 import { SchemaRegistryIndex, ValidationResultError } from '@travetto/schema';
 
 import { cliTpl } from './color.ts';
@@ -34,8 +34,8 @@ const COMMAND_TO_MODULE = Object.fromEntries(Object.entries(MODULE_TO_COMMAND).f
 export class HelpUtil {
   /** Get usage help for a command */
   static getUsageMessage(command: CliCommandShape): string[] {
-    const schema = SchemaRegistryIndex.getConfig(getClass(command));
-    const { name: commandName } = CliCommandRegistryIndex.get(getClass(command));
+    const schema = SchemaRegistryIndex.getConfig(getConstructor(command));
+    const { name: commandName } = CliCommandRegistryIndex.get(getConstructor(command));
 
     const usage: string[] = [];
 
@@ -56,7 +56,7 @@ export class HelpUtil {
 
   /** Get description help for a command */
   static getDescriptionMessage(command: CliCommandShape): string[] {
-    const schema = SchemaRegistryIndex.getConfig(getClass(command));
+    const schema = SchemaRegistryIndex.getConfig(getConstructor(command));
     const description: string[] = [];
 
     if (schema.description) {
@@ -67,13 +67,12 @@ export class HelpUtil {
 
   /** Get options help for a command */
   static getOptionsMessage(command: CliCommandShape): string[] {
-    const schema = SchemaRegistryIndex.getConfig(getClass(command));
+    const schema = SchemaRegistryIndex.getConfig(getConstructor(command));
     const params: string[] = [];
     const descriptions: string[] = [];
 
     for (const field of Object.values(schema.fields)) {
-      const key = castKey<CliCommandShape>(field.name);
-      const defaultValue = ifDefined(command[key]) ?? ifDefined(field.default);
+      const defaultValue = ifDefined(command[castKey(field.name)]) ?? ifDefined(field.default);
       const aliases = (field.aliases ?? [])
         .filter(flag => flag.startsWith('-'))
         .filter(flag => field.type !== Boolean || (defaultValue !== true ? !flag.startsWith('--no-') : flag.startsWith('--')));
@@ -127,7 +126,7 @@ export class HelpUtil {
 
   /** Get examples for a command */
   static getExamplesMessage(command: CliCommandShape): string[] {
-    const schema = SchemaRegistryIndex.getConfig(getClass(command));
+    const schema = SchemaRegistryIndex.getConfig(getConstructor(command));
     const examples: string[] = [];
     if (schema.examples) {
       examples.push(cliTpl`${{ title: 'Examples:' }}`);

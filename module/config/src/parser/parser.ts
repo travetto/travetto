@@ -2,9 +2,9 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { DependencyRegistryIndex, Injectable, PostConstruct } from '@travetto/di';
-import { RuntimeError, toConcrete } from '@travetto/runtime';
+import { RuntimeError, toConcrete, type UnknownRecord } from '@travetto/runtime';
 
-import type { ConfigData, ConfigParser } from './types.ts';
+import type { ConfigParser } from './types.ts';
 
 @Injectable()
 export class ParserManager {
@@ -23,7 +23,7 @@ export class ParserManager {
   /**
    * Attempt ot parse a file, based on file's extension
    */
-  async parse(file: string): Promise<ConfigData> {
+  async parse(file: string): Promise<UnknownRecord> {
     const ext = path.extname(file);
     if (!this.#parsers[ext]) {
       throw new RuntimeError(`Unknown config format: ${ext}`, { category: 'data' });

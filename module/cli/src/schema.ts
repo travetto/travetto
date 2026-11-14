@@ -1,4 +1,4 @@
-import { castKey, castTo, getClass } from '@travetto/runtime';
+import { castTo, getConstructor, type UnknownRecord } from '@travetto/runtime';
 import { BindUtil, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 
 import type { CliCommandShape, ParsedState } from './types.ts';
@@ -35,18 +35,20 @@ export class CliCommandSchemaUtil {
    * Bind parsed inputs to command
    */
   static bindInput<T extends CliCommandShape>(command: T, state: ParsedState): unknown[] {
-    const template: Partial<T> = {};
+    const template: UnknownRecord = {};
     const bound: unknown[] = [];
 
     for (const item of state.all) {
       switch (item.type) {
         case 'flag': {
-          const key = castKey<T>(item.fieldName);
           const value = item.value!;
           if (item.array) {
-            castTo<unknown[]>((template[key] ??= castTo([]))).push(value);
+            const list = (template[item.fieldName] ??= []);
+            if (Array.isArray(list)) {
+              list.push(value);
+            }
           } else {
-            template[key] = castTo(value);
+            template[item.fieldName] = value;
           }
           break;
         }
@@ -60,7 +62,7 @@ export class CliCommandSchemaUtil {
       }
     }
 
-    const cls = getClass(command);
+    const cls = getConstructor(command);
     BindUtil.bindSchemaToObject(cls, command, template);
     return BindUtil.coerceMethodParams(cls, 'main', bound);
   }
@@ -69,7 +71,7 @@ export class CliCommandSchemaUtil {
    * Validate command shape with the given arguments
    */
   static async validate(command: CliCommandShape, args: unknown[]): Promise<typeof command> {
-    const cls = getClass(command);
+    const cls = getConstructor(command);
     const paramNames = SchemaRegistryIndex.get(cls)
       .getMethod('main')
       .parameters.map(config => config.name!);

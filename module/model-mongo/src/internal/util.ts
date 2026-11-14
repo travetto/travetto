@@ -12,7 +12,17 @@ import {
 import { type IndexConfig, IndexNotSupported, ModelRegistryIndex, type ModelType } from '@travetto/model';
 import { isModelIndexedIndex } from '@travetto/model-indexed';
 import { type DistanceUnit, isModelQueryIndex, ModelQueryUtil, type PageableModelQuery, type WhereClause } from '@travetto/model-query';
-import { BinaryUtil, type Class, CodecUtil, castTo, RuntimeError, toConcrete } from '@travetto/runtime';
+import {
+  BinaryUtil,
+  type Class,
+  CodecUtil,
+  castTo,
+  RuntimeError,
+  toConcrete,
+  type UnknownRecord,
+  isPlainRecord,
+  isClass
+} from '@travetto/runtime';
 import { DataUtil, type Point, SchemaRegistryIndex } from '@travetto/schema';
 
 const PointConcrete = toConcrete<Point>();
@@ -31,7 +41,7 @@ const RADIANS_TO: Record<DistanceUnit, number> = {
 export type WithId<T, I = unknown> = T & { _id?: I };
 export type BasicIdx = Record<string, IndexDirection>;
 
-function flattenKeys(obj: Record<string, unknown>, prefix = ''): Record<string, 1 | -1> {
+function flattenKeys(obj: UnknownRecord, prefix = ''): Record<string, 1 | -1> {
   const out: Record<string, 1 | -1> = {};
   for (const [key, value] of Object.entries(obj)) {
     const path = prefix ? `${prefix}.${key}` : key;
@@ -82,7 +92,7 @@ export class MongoUtil {
   /**
    * Build mongo where clause
    */
-  static extractWhereClause<T extends ModelType = ModelType>(cls: Class<T>, clause: WhereClause<T>): Record<string, unknown> {
+  static extractWhereClause<T extends ModelType = ModelType>(cls: Class<T>, clause: WhereClause<T>): UnknownRecord {
     if (ModelQueryUtil.has$And(clause)) {
       return { $and: clause.$and.map(item => this.extractWhereClause<T>(cls, item)) };
     } else if (ModelQueryUtil.has$Or(clause)) {
@@ -95,23 +105,18 @@ export class MongoUtil {
   }
 
   /**/
-  static extractSimple<T>(
-    base: Class<T> | undefined,
-    item: Record<string, unknown>,
-    path: string = '',
-    recursive: boolean = true
-  ): Record<string, unknown> {
+  static extractSimple<T>(base: Class<T> | undefined, item: UnknownRecord, path: string = '', recursive: boolean = true): UnknownRecord {
     const fields = base ? SchemaRegistryIndex.getOptional(base)?.getFields() : undefined;
     const idFieldName = base && ModelRegistryIndex.has(base) ? ModelRegistryIndex.getConfig(base).idField : undefined;
-    const out: Record<string, unknown> = {};
+    const out: UnknownRecord = {};
     const sub = item;
     const keys = Object.keys(sub);
     for (const key of keys) {
       const subpath = `${path}${key}`;
-      const value: Record<string, unknown> = castTo(sub[key]);
+      const value: UnknownRecord = castTo(sub[key]);
       const subField = fields?.[key];
 
-      const isPlain = value && DataUtil.isPlainObject(value);
+      const isPlain = value && isPlainRecord(value);
       const firstKey = isPlain ? Object.keys(value)[0] : '';
 
       if (subpath === idFieldName) {
@@ -125,7 +130,8 @@ export class MongoUtil {
         }
       } else if ((isPlain && !firstKey.startsWith('$')) || value?.constructor?.Ⲑid) {
         if (recursive) {
-          Object.assign(out, this.extractSimple(subField?.type, value, `${subpath}.`, recursive));
+          const nextBase = isClass(subField?.type) ? subField.type : undefined;
+          Object.assign(out, this.extractSimple(nextBase, value, `${subpath}.`, recursive));
         } else {
           out[subpath] = value;
         }

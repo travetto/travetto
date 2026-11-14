@@ -1,5 +1,6 @@
 import { type RegistrationMethods, Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
 import { type Class, castKey, castTo, classConstruct, getParentClass, RuntimeError } from '@travetto/runtime';
+import { isClass } from '@travetto/runtime';
 
 import { type SchemaDiscriminatedInfo, SchemaRegistryAdapter } from './registry-adapter.ts';
 import type { SchemaClassConfig, SchemaFieldConfig } from './types.ts';
@@ -26,7 +27,10 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.getNestedFieldConfig(cls, field);
   }
 
-  static has(cls: Class): boolean {
+  static has(cls?: Class | Function): cls is Class {
+    if (!cls || !isClass(cls)) {
+      return false;
+    }
     return this.#instance.store.has(cls);
   }
 
@@ -113,7 +117,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
           return undefined;
         }
         fieldConfiguration = this.getClassConfig(currentClass).fields[segment];
-        currentClass = fieldConfiguration?.type;
+        currentClass = SchemaRegistryIndex.has(fieldConfiguration?.type) ? fieldConfiguration.type : undefined;
       }
 
       return fieldConfiguration;
@@ -147,6 +151,9 @@ export class SchemaRegistryIndex implements RegistryIndex {
    * @param item Actual instance
    */
   resolveInstanceType<T>(cls: Class<T>, item: T): Class {
+    if (!this.store.has(cls)) {
+      throw new RuntimeError(`Unknown type: ${cls.Ⲑid}`);
+    }
     const { discriminatedField, discriminatedType, class: targetClass } = this.store.get(cls).get();
     if (!discriminatedField) {
       return targetClass;

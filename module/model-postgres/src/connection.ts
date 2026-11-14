@@ -4,7 +4,7 @@ import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { ExistsError } from '@travetto/model';
 import { SQLConnection } from '@travetto/model-sql';
-import { castTo, ShutdownManager } from '@travetto/runtime';
+import { castTo, ShutdownManager, type UnknownRecord } from '@travetto/runtime';
 
 import type { PostgresModelConfig } from './config.ts';
 import { PostgresDialect } from './dialect.ts';
@@ -74,7 +74,7 @@ export class PostgresConnection extends SQLConnection<PoolClient> {
   /**
    * Executes a query on the active client or pool directly
    */
-  async execute<Type = unknown>(query: string, values?: unknown[]): Promise<{ count: number; records: Type[] }> {
+  async execute<T = UnknownRecord>(query: string, values?: unknown[]): Promise<{ count: number; records: T[] }> {
     console.debug('Executing PostgreSQL query', { query, values });
 
     // Handle dynamically built SAVEPOINT names that cannot be parameterized in Postgres
@@ -89,7 +89,7 @@ export class PostgresConnection extends SQLConnection<PoolClient> {
 
     try {
       const result = await client.query(query, values);
-      const records: Type[] = [...result.rows].map(row => ({ ...row }));
+      const records: T[] = [...result.rows].map(row => ({ ...row }));
       return { count: result.rowCount ?? 0, records };
     } catch (error) {
       if (isPgDatabaseError(error)) {

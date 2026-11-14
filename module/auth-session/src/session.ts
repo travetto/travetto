@@ -1,4 +1,4 @@
-import { type AnyMap, castKey, castTo, JSONUtil } from '@travetto/runtime';
+import { type AnyMap, JSONUtil } from '@travetto/runtime';
 
 /**
  * @concrete
@@ -41,7 +41,7 @@ export class Session<T extends SessionData = SessionData> {
   /**
    * The session data
    */
-  data: T | undefined;
+  data: Partial<T> | undefined;
 
   /**
    * Create a new Session object given a partial version of itself
@@ -63,16 +63,16 @@ export class Session<T extends SessionData = SessionData> {
   /**
    * Get session value
    */
-  getValue<V>(key: string): V | undefined {
-    return this.data && key in this.data ? this.data[key] : undefined;
+  getValue<K extends keyof T>(key: K): T[K] | undefined {
+    return this.data?.[key];
   }
 
   /**
    * Set session value
    */
-  setValue<V>(key: string, value: V): void {
-    const data = (this.data ??= castTo<T>({}));
-    data[castKey<T>(key)] = castTo(value);
+  setValue<K extends keyof T>(key: K, value: T[K]): void {
+    this.data ??= {};
+    this.data[key] = value;
   }
 
   /**

@@ -1,5 +1,18 @@
-import { type BinaryArray, BinaryUtil, type Class, castKey, castTo, hasFunction, JSONUtil, RuntimeError } from '@travetto/runtime';
-import { DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import {
+  asConstructable,
+  type BinaryArray,
+  BinaryUtil,
+  type Class,
+  castTo,
+  hasFunction,
+  isPlainRecord,
+  JSONUtil,
+  RuntimeError,
+  type UnknownRecord,
+  isRecord,
+  isClass
+} from '@travetto/runtime';
+import { SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ExistsError } from '../error/exists.ts';
 import { SubTypeNotSupportedError } from '../error/invalid-sub-type.ts';
@@ -90,7 +103,7 @@ export class ModelCrudUtil {
       idSource.getOrSet(item);
     }
 
-    if (DataUtil.isPlainObject(item)) {
+    if (isPlainRecord(item)) {
       item = cls.from(castTo(item));
     }
 
@@ -173,64 +186,67 @@ export class ModelCrudUtil {
    * Recursively deletes or masks transient fields from an object based on its Model config.
    * If transient fields are present, returns a copy with those fields set to undefined.
    */
-  static cleanTransientFields<T>(cls: Class<T>, item: T): T {
-    if (!item || typeof item !== 'object') {
+  static cleanTransientFields<T extends ModelType, U extends ModelType = T>(cls: Class<T>, item: U): U {
+    if (!isRecord(item) || !SchemaRegistryIndex.has(cls)) {
       return item;
     }
-    if (SchemaRegistryIndex.has(cls)) {
-      const schema = SchemaRegistryIndex.get(cls).get();
-      const transientFields = ModelRegistryIndex.has(cls) ? ModelRegistryIndex.getConfig(cls).transientFields : undefined;
 
-      const isCleanTarget = (key: string): boolean => {
-        return transientFields?.includes(key) ?? false;
-      };
-
-      const hasTargets = Object.keys(schema.fields).some(key => isCleanTarget(key));
-
-      let res = item;
-      if (hasTargets) {
-        res = { ...item };
-        for (const key of Object.keys(schema.fields)) {
-          if (isCleanTarget(key)) {
-            res[castKey<T>(key)] = undefined!;
-          }
-        }
-      }
-
-      for (const [key, field] of Object.entries(schema.fields)) {
-        const fieldKey = castKey<typeof res>(key);
-        if (!isCleanTarget(key) && res[fieldKey] !== undefined && res[fieldKey] !== null) {
-          if (field.array && Array.isArray(res[fieldKey])) {
-            const arr = res[fieldKey];
-            let changed = false;
-            const newArray = arr.map(subItem => {
-              const cleaned = this.cleanTransientFields(field.type, subItem);
-              if (cleaned !== subItem) {
-                changed = true;
-              }
-              return cleaned;
-            });
-            if (changed) {
-              if (res === item) {
-                res = { ...item };
-              }
-              res[fieldKey] = castTo(newArray);
-            }
-          } else {
-            const val = res[fieldKey];
-            const cleaned = this.cleanTransientFields(field.type, val);
-            if (cleaned !== val) {
-              if (res === item) {
-                res = { ...item };
-              }
-              res[fieldKey] = cleaned;
-            }
-          }
-        }
-      }
-      return res;
+    const schema = SchemaRegistryIndex.get(cls).get();
+    const transientFields = ModelRegistryIndex.has(cls) ? ModelRegistryIndex.getConfig(cls).transientFields : undefined;
+    if (!transientFields?.length) {
+      return item;
     }
-    return item;
+
+    const isCleanTarget = (key: string): boolean => {
+      return transientFields?.includes(key) ?? false;
+    };
+
+    const hasTargets = Object.keys(schema.fields).some(key => isCleanTarget(key));
+
+    let result: U = item;
+    let modified = false;
+
+    const setField = (key: string, value?: unknown) => {
+      if (!modified) {
+        modified = true;
+        result = { ...result }; // Copy on first write
+      }
+      castTo<UnknownRecord>(result)[key] = value;
+    };
+
+    if (hasTargets) {
+      for (const key of Object.keys(schema.fields)) {
+        if (isCleanTarget(key)) {
+          setField(key, undefined);
+        }
+      }
+    }
+
+    for (const [key, field] of Object.entries(schema.fields)) {
+      const currentField = castTo<UnknownRecord>(result)[key];
+      if (isClass(field.type) && !isCleanTarget(key) && currentField !== undefined && currentField !== null) {
+        const fieldType = field.type;
+        if (field.array && Array.isArray(currentField)) {
+          let changed = false;
+          const newArray = currentField.map(subItem => {
+            const cleaned = this.cleanTransientFields(fieldType, subItem);
+            if (cleaned !== subItem) {
+              changed = true;
+            }
+            return cleaned;
+          });
+          if (changed) {
+            setField(key, newArray);
+          }
+        } else {
+          const cleaned = this.cleanTransientFields(fieldType, currentField);
+          if (cleaned !== currentField) {
+            setField(key, cleaned);
+          }
+        }
+      }
+    }
+    return result;
   }
 
   /**
@@ -246,11 +262,11 @@ export class ModelCrudUtil {
   /**
    * Pre persist behavior
    */
-  static async prePersist<T>(cls: Class<T>, item: T, scope: PrePersistScope): Promise<T> {
+  static async prePersist<T extends ModelType, U extends object = T>(cls: Class<T>, item: U, scope: PrePersistScope): Promise<U> {
     const config = ModelRegistryIndex.getConfig(cls);
     for (const state of config.prePersist ?? []) {
       if (state.scope === scope || scope === 'all' || state.scope === 'all') {
-        const handler: DataHandler<T> = castTo(state.handler);
+        const handler: DataHandler<U> = castTo(state.handler);
         item = (await handler(item)) ?? item;
       }
     }
@@ -260,9 +276,9 @@ export class ModelCrudUtil {
   /**
    * Post load behavior
    */
-  static async postLoad<T>(cls: Class<T>, item: T): Promise<T> {
-    const config = ModelRegistryIndex.getConfig(cls);
-    for (const handler of castTo<DataHandler<T>[]>(config.postLoad ?? [])) {
+  static async postLoad<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
+    const config = ModelRegistryIndex.getConfig<T>(cls);
+    for (const handler of config.postLoad ?? []) {
       item = (await handler(item)) ?? item;
     }
     return item;
@@ -279,8 +295,8 @@ export class ModelCrudUtil {
     if (options?.ensureNotSubType) {
       this.ensureNotSubType(cls);
     }
-    if (!DataUtil.isPlainObject(item)) {
-      throw new RuntimeError(`A partial update requires a plain object, not an instance of ${castTo<Function>(item).constructor.name}`, {
+    if (!isPlainRecord(item)) {
+      throw new RuntimeError(`A partial update requires a plain object, not an instance of ${asConstructable(item).constructor.name}`, {
         category: 'data'
       });
     }
@@ -289,18 +305,17 @@ export class ModelCrudUtil {
     const keys = Object.keys(item);
     if ((keys.length === 1 && id) || keys.length === 0) {
       throw new RuntimeError('No fields to update');
-    } else {
-      item = { ...item };
-      idSource.clear(item);
     }
+    const prepared: Partial<T> = castTo({ ...item });
+    idSource.clear(prepared);
 
-    const result = await this.prePersist(cls, castTo(item), 'partial');
+    const result = await this.prePersist(cls, prepared, 'partial');
     if (options?.validateId ?? false) {
-      idSource.get(item); // Throws ValidationResultError if id is missing
+      idSource.get(prepared); // Throws ValidationResultError if id is missing
     }
-    await SchemaValidator.validatePartial(cls, item);
+    await SchemaValidator.validatePartial(cls, prepared);
 
-    return castTo(result);
+    return result;
   }
 
   /**

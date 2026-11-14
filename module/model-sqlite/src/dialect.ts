@@ -7,7 +7,7 @@ import {
   type TextSearchState,
   type TransactionStatements
 } from '@travetto/model-sql';
-import { type Class, castTo, JSONUtil } from '@travetto/runtime';
+import { JSONUtil, type UnknownRecord } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
 export class SqliteDialect extends AbstractANSI99Dialect {
@@ -32,27 +32,20 @@ export class SqliteDialect extends AbstractANSI99Dialect {
   }
 
   getColumnType(fieldConfiguration: SchemaFieldConfig): string {
-    if (fieldConfiguration.type === castTo(BigInt)) {
-      return 'INTEGER';
+    switch (fieldConfiguration.type) {
+      case BigInt:
+        return 'INTEGER';
+      case Number:
+        return 'NUMERIC';
+      case Date:
+        return 'TEXT';
+      case Boolean:
+        return 'INTEGER';
+      case String:
+        return 'TEXT';
+      default:
+        return 'TEXT';
     }
-
-    if (fieldConfiguration.type === Number) {
-      return 'NUMERIC';
-    }
-
-    if (fieldConfiguration.type === Date) {
-      return 'TEXT';
-    }
-
-    if (fieldConfiguration.type === Boolean) {
-      return 'INTEGER';
-    }
-
-    if (fieldConfiguration.type === String) {
-      return 'TEXT';
-    }
-
-    return 'TEXT';
   }
 
   compileJsonIndexPath(columnName: string, jsonPath: string[]): string {
@@ -73,7 +66,7 @@ export class SqliteDialect extends AbstractANSI99Dialect {
       return onLeaf(parentExpression);
     }
 
-    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField?.type, context.subPath);
+    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField, context.subPath);
     const arraySegmentIndices = subPathMetadata
       .map((metadataItem, metadataIndex) => (metadataItem.isArray ? metadataIndex : -1))
       .filter(itemIndex => itemIndex !== -1);
@@ -180,7 +173,7 @@ EXISTS (
     return caseInsensitive ? `(?i)${source}` : source;
   }
 
-  castColumn(sqlPath: string, type: Class): string {
+  castColumn(sqlPath: string, type: Function): string {
     if (type === Number) {
       return `CAST(${sqlPath} AS NUMERIC)`;
     }
@@ -233,8 +226,8 @@ WHERE type='table' AND name=?;`,
     };
   }
 
-  parseExistingColumns(records: unknown[]): Map<string, string> {
-    return new Map(castTo<{ name: string; type: string }[]>(records).map(record => [record.name, record.type.toUpperCase()]));
+  parseExistingColumns(records: UnknownRecord[]): Map<string, string> {
+    return new Map(records.map(record => [`${record.name}`, `${record.type}`.toUpperCase()]));
   }
 
   getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
@@ -248,11 +241,9 @@ WHERE type='index' AND tbl_name=?;
     };
   }
 
-  parseExistingIndexes(records: unknown[]): Map<string, string> {
+  parseExistingIndexes(records: UnknownRecord[]): Map<string, string> {
     return new Map(
-      castTo<{ name: string; sql: string }[]>(records)
-        .filter(record => record.sql && !record.name.startsWith('sqlite_'))
-        .map(record => [record.name, record.sql])
+      records.filter(record => record.sql && !`${record.name}`.startsWith('sqlite_')).map(record => [`${record.name}`, `${record.sql}`])
     );
   }
 
@@ -341,7 +332,7 @@ WHERE type='index' AND tbl_name=?;
     clause: TextSearchClause,
     identificationPath: string,
     fieldPath?: string[]
-  ): { sql: string; parameters: Record<string, unknown> } {
+  ): { sql: string; parameters: UnknownRecord } {
     const rawQuery = typeof clause === 'string' ? clause : clause.query;
     const identifier = `%%${identificationPath}%%`;
 

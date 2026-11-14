@@ -13,16 +13,16 @@ npm install @travetto/web
 yarn add @travetto/web
 ```
 
-The module provides a declarative API for creating and describing a Web application. Since the framework is declarative, decorators are used to configure almost everything. The general layout of an application is a collection of [@Controller](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L12)s that employ some combination of [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15)s to help manage which functionality is executed before the [Endpoint](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14) code, within the [@Controller](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L12). This module will look at:
+The module provides a declarative API for creating and describing a Web application. Since the framework is declarative, decorators are used to configure almost everything. The general layout of an application is a collection of [@Controller](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L12)s that employ some combination of [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L19)s to help manage which functionality is executed before the [Endpoint](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14) code, within the [@Controller](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L12). This module will look at:
    *  Request/Response Pattern
    *  Defining a [@Controller](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L12)
    *  Defining an [Endpoint](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14)
-   *  Using a [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15)
-   *  Creating a Custom [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15)
+   *  Using a [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L19)
+   *  Creating a Custom [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L19)
    *  Cookies
 
 ## Request/Response Pattern
-Unlike other frameworks (e.g. [express](https://expressjs.com), [fastify](https://www.fastify.io/)), this module takes an approach that is similar to [AWS Lambda](https://aws.amazon.com/lambda/)'s model for requests and responses. What you can see here is that [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11) and [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3) are very simple objects, with the focus being on the `payload` and `body`. This is intended to provide maximal compatibility with non-HTTP sources. The driving goal is to support more than just standard HTTP servers but also allow for seamless integration with tools like event queues, web sockets, etc.
+Unlike other frameworks (e.g. [express](https://expressjs.com), [fastify](https://www.fastify.io/)), this module takes an approach that is similar to [AWS Lambda](https://aws.amazon.com/lambda/)'s model for requests and responses. What you can see here is that [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L13) and [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3) are very simple objects, with the focus being on the `payload` and `body`. This is intended to provide maximal compatibility with non-HTTP sources. The driving goal is to support more than just standard HTTP servers but also allow for seamless integration with tools like event queues, web sockets, etc.
 
 **Code: Base Shape**
 ```typescript
@@ -36,6 +36,8 @@ export class BaseWebMessage<B = unknown, C = unknown> implements WebMessage<B, C
 
 **Code: Request Shape**
 ```typescript
+import type { Primitive, UnknownRecord } from '@travetto/runtime';
+
 import type { HttpMethod, HttpProtocol } from './core.ts';
 import { BaseWebMessage } from './message.ts';
 
@@ -48,8 +50,8 @@ export interface WebConnection {
 
 export interface WebRequestContext {
   path: string;
-  pathParams?: Record<string, unknown>;
-  httpQuery?: Record<string, unknown>;
+  pathParams?: Record<string, Primitive>;
+  httpQuery?: UnknownRecord;
   httpMethod?: HttpMethod;
   connection?: WebConnection;
 }
@@ -86,7 +88,7 @@ export class WebResponse<B = unknown> extends BaseWebMessage<B, WebResponseConte
 }
 ```
 
-These objects do not represent the underlying sockets provided by various http servers, but in fact are simple wrappers that track the flow through the call stack of the various [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15)s and the [Endpoint](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14) handler. One of the biggest departures here, is that the response is not an entity that is passed around from call-site to call-site, but is is solely a return-value. This doesn't mean the return value has to be static and pre-allocated, on the contrary streams are still supported. The difference here is that the streams/asynchronous values will be consumed until the response is sent back to the user. The [CompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/compress.ts#L50) is a good reference for transforming a [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3) that can either be a stream or a fixed value.
+These objects do not represent the underlying sockets provided by various http servers, but in fact are simple wrappers that track the flow through the call stack of the various [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L19)s and the [Endpoint](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14) handler. One of the biggest departures here, is that the response is not an entity that is passed around from call-site to call-site, but is is solely a return-value. This doesn't mean the return value has to be static and pre-allocated, on the contrary streams are still supported. The difference here is that the streams/asynchronous values will be consumed until the response is sent back to the user. The [CompressInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/compress.ts#L50) is a good reference for transforming a [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3) that can either be a stream or a fixed value.
 
 ## Defining a Controller
 To start, we must define a [@Controller](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L12), which is only allowed on classes. Controllers can be configured with:
@@ -277,7 +279,7 @@ export class Simple {
 ```
 
 ### ContextParam
-In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information. Specifically you may need access to the entire [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11). These are able to be injected using the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L72) on a class-level field from the [WebAsyncContext](https://github.com/travetto/travetto/tree/main/module/web/src/context.ts#L11). These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
+In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information. Specifically you may need access to the entire [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L13). These are able to be injected using the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L72) on a class-level field from the [WebAsyncContext](https://github.com/travetto/travetto/tree/main/module/web/src/context.ts#L11). These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
 
 **Code: Example ContextParam usage**
 ```typescript
@@ -385,7 +387,7 @@ class UserController {
 ```
 
 ## Using Interceptors
-[WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15)s are a key part of the web framework, to allow for conditional functionality to be added, across all endpoints.
+[WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L19)s are a key part of the web framework, to allow for conditional functionality to be added, across all endpoints.
 
 ### Anatomy of an Interceptor
 
@@ -723,7 +725,7 @@ The resolution logic is as follows:
    *  Default to `applies()` logic for all available interceptors
 
 ## Creating a Custom WebInterceptor
-Additionally it may be desirable to create a custom interceptor. Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") by implementing the [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15) interface and adding an [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16) decorator. A simple logging interceptor:
+Additionally it may be desirable to create a custom interceptor. Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") by implementing the [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L19) interface and adding an [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16) decorator. A simple logging interceptor:
 
 **Code: Defining a new Interceptor**
 ```typescript
@@ -777,7 +779,7 @@ export class SimpleAuthInterceptor implements WebInterceptor {
 ```
 
 ## Cookie Support
-Cookies are a unique element, within the framework, as they sit on the request and response flows. Ideally we would separate these out, but given the support for key rotation, there is a scenario in which reading a cookie on the request, will result in a cookie needing to be written on the response. Because of this, cookies are treated as being outside the normal [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11) activity, and is exposed as the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L72) [CookieJar](https://github.com/travetto/travetto/tree/main/module/web/src/util/cookie.ts#L12). The [CookieJar](https://github.com/travetto/travetto/tree/main/module/web/src/util/cookie.ts#L12) has a fairly basic contract:
+Cookies are a unique element, within the framework, as they sit on the request and response flows. Ideally we would separate these out, but given the support for key rotation, there is a scenario in which reading a cookie on the request, will result in a cookie needing to be written on the response. Because of this, cookies are treated as being outside the normal [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L13) activity, and is exposed as the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L72) [CookieJar](https://github.com/travetto/travetto/tree/main/module/web/src/util/cookie.ts#L12). The [CookieJar](https://github.com/travetto/travetto/tree/main/module/web/src/util/cookie.ts#L12) has a fairly basic contract:
 
 **Code: CookieJar contract**
 ```typescript

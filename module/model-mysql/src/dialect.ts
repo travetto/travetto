@@ -7,8 +7,8 @@ import {
   type TableContext,
   type TextSearchState
 } from '@travetto/model-sql';
-import { type Class, castTo, JSONUtil } from '@travetto/runtime';
-import { type SchemaFieldConfig } from '@travetto/schema';
+import { JSONUtil, type UnknownRecord } from '@travetto/runtime';
+import type { SchemaFieldConfig } from '@travetto/schema';
 
 export class MysqlDialect extends AbstractANSI99Dialect {
   override escapeIdentifier(name: string): string {
@@ -20,7 +20,7 @@ export class MysqlDialect extends AbstractANSI99Dialect {
   }
 
   getColumnType(fieldConfiguration: SchemaFieldConfig): string {
-    if (fieldConfiguration.type === castTo(BigInt)) {
+    if (fieldConfiguration.type === BigInt) {
       return 'BIGINT';
     }
 
@@ -70,7 +70,7 @@ export class MysqlDialect extends AbstractANSI99Dialect {
     if (!context.subPath || context.subPath.length === 0) {
       return '';
     }
-    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField?.type, context.subPath);
+    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField, context.subPath);
     return subPathMetadata.map(({ segment, isArray }) => (isArray ? `${segment}[*]` : segment)).join('.');
   }
 
@@ -131,7 +131,7 @@ export class MysqlDialect extends AbstractANSI99Dialect {
     return source;
   }
 
-  castColumn(sqlPath: string, type: Class): string {
+  castColumn(sqlPath: string, type: Function): string {
     if (type === Number) {
       return `CAST(${sqlPath} AS DECIMAL)`;
     } else if (type === Boolean) {
@@ -195,8 +195,8 @@ WHERE table_schema = ? AND table_name = ?;
     };
   }
 
-  parseTableExistsResult(records: unknown[]): boolean {
-    return Number(castTo<{ total: number }>(records[0])?.total ?? 0) > 0;
+  parseTableExistsResult(records: UnknownRecord[]): boolean {
+    return +(records[0]?.total ? `${records[0].total}` : 0) > 0;
   }
 
   getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
@@ -212,8 +212,8 @@ WHERE table_schema = ? AND table_name = ?;
     };
   }
 
-  parseExistingColumns(records: unknown[]): Map<string, string> {
-    return new Map(castTo<{ name: string; type: string }[]>(records).map(record => [record.name, record.type.toUpperCase()]));
+  parseExistingColumns(records: UnknownRecord[]): Map<string, string> {
+    return new Map(records.map(record => [`${record.name}`, `${record.type}`.toUpperCase()]));
   }
 
   getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
@@ -236,12 +236,13 @@ GROUP BY INDEX_NAME, TABLE_NAME, NON_UNIQUE;
     };
   }
 
-  parseExistingIndexes(records: unknown[]): Map<string, string> {
+  parseExistingIndexes(records: UnknownRecord[]): Map<string, string> {
     return new Map(
-      castTo<{ name: string; tableName: string; nonUnique: number; indexColumns: string }[]>(records).map(record => {
-        const isUnique = Number(record.nonUnique) === 0;
-        const indexDefinition = `CREATE ${isUnique ? 'UNIQUE ' : ''}INDEX ${this.escapeIdentifier(record.name)} ON ${this.escapeIdentifier(record.tableName)} (${record.indexColumns});`;
-        return [record.name, indexDefinition];
+      records.map(record => {
+        const isUnique = +`${record.nonUnique}` === 0;
+        const name = `${record.name}`;
+        const indexDefinition = `CREATE ${isUnique ? 'UNIQUE ' : ''}INDEX ${this.escapeIdentifier(name)} ON ${this.escapeIdentifier(`${record.tableName}`)} (${record.indexColumns});`;
+        return [name, indexDefinition];
       })
     );
   }
@@ -310,7 +311,7 @@ GROUP BY INDEX_NAME, TABLE_NAME, NON_UNIQUE;
     clause: TextSearchClause,
     identificationPath: string,
     fieldPath?: string[]
-  ): { sql: string; parameters: Record<string, unknown> } {
+  ): { sql: string; parameters: UnknownRecord } {
     let columns: string;
 
     if (fieldPath && fieldPath.length > 0) {

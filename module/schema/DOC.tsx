@@ -4,10 +4,9 @@ import { toConcrete } from '@travetto/runtime';
 
 import { DataUtil } from './src/data.ts';
 import { Describe, Ignore } from './src/decorator/common.ts';
-import { Field, Readonly, Secret, Writeonly } from './src/decorator/field.ts';
+import { DiscriminatorField, Field, Readonly, Secret, Writeonly } from './src/decorator/field.ts';
 import {
   Currency,
-  DiscriminatorField,
   Email,
   Enum,
   Float,

@@ -1,4 +1,4 @@
-import { type Class, RuntimeError } from '@travetto/runtime';
+import { type Class, RuntimeError, type UnknownRecord } from '@travetto/runtime';
 
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
 import type { ModelType } from '../types/model.ts';
@@ -11,7 +11,7 @@ export class ExistsError extends RuntimeError {
     return new ExistsError(cls, ModelRegistryIndex.get(cls).idSource.get(item, { optional: true }) ?? 'unknown');
   }
 
-  constructor(cls: Class | string, id: string, details?: Record<string, unknown>) {
+  constructor(cls: Class | string, id: string, details?: UnknownRecord) {
     super(`${typeof cls === 'string' ? cls : cls.name} with id ${id} already exists`, {
       category: 'data',
       details: { id, type: typeof cls === 'string' ? cls : cls.name, ...details }

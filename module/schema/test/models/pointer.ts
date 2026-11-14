@@ -5,6 +5,17 @@ import { SchemaTypeUtil } from '@travetto/schema';
  */
 export type SpecialType = string | number | true;
 
+export interface PlainInterface {
+  name: string;
+}
+
+/**
+ * @concrete
+ */
+export interface ConcreteInterface {
+  name: string;
+}
+
 export class SpecialTypeTarget {}
 
 SchemaTypeUtil.setSchemaTypeConfig(SpecialTypeTarget, {

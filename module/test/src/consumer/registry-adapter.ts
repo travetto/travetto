@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import type { RegistryAdapter } from '@travetto/registry';
-import { type Class, classConstruct, describeFunction } from '@travetto/runtime';
+import { type Class, classConstruct, describeFunction, type UnknownRecord } from '@travetto/runtime';
 
 import type { TestConsumerConfig, TestConsumerShape } from './types.ts';
 
@@ -34,7 +34,7 @@ export class TestConsumerRegistryAdapter implements RegistryAdapter<TestConsumer
     return this.config;
   }
 
-  async instance(options?: Record<string, unknown>): Promise<TestConsumerShape> {
+  async instance(options?: UnknownRecord): Promise<TestConsumerShape> {
     const inst = classConstruct(this.#cls);
     await inst.setOptions?.(options);
     return inst;

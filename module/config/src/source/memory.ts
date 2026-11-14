@@ -1,4 +1,5 @@
-import type { ConfigData } from '../parser/types.ts';
+import type { UnknownRecord } from '@travetto/runtime';
+
 import type { ConfigPayload, ConfigSource } from './types.ts';
 
 /**
@@ -7,7 +8,7 @@ import type { ConfigPayload, ConfigSource } from './types.ts';
 export class MemoryConfigSource implements ConfigSource {
   #payload: ConfigPayload;
 
-  constructor(key: string, data: ConfigData, priority: number = 500) {
+  constructor(key: string, data: UnknownRecord, priority: number = 500) {
     this.#payload = { data, priority, source: `memory://${key}` };
   }
 

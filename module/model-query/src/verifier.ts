@@ -1,7 +1,7 @@
 /* eslint @typescript-eslint/no-unused-vars: ["error", { "args": "none"} ] */
 
-import { type Class, JSONUtil } from '@travetto/runtime';
-import { DataUtil, SchemaRegistryIndex, type ValidationError, ValidationResultError } from '@travetto/schema';
+import { type Class, isClass, isPlainRecord, JSONUtil } from '@travetto/runtime';
+import { SchemaRegistryIndex, type ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { TypeUtil } from './internal/types.ts';
 import type { ModelQuery, PageableModelQuery, Query } from './model/query.ts';
@@ -77,7 +77,7 @@ export class QueryVerifier {
       // If a simple operation
       if (type) {
         handler.onSimpleType(state.extend(key), type, value, field.array ?? false);
-      } else {
+      } else if (isClass(field.type)) {
         // Otherwise recurse
         const subClass = field.type;
         const subValue = value;
@@ -114,7 +114,7 @@ export class QueryVerifier {
       return;
     }
 
-    if (!DataUtil.isPlainObject(value)) {
+    if (!isPlainRecord(value)) {
       // Handle literal
       const actualType = TypeUtil.getActualType(value);
       if (!this.typesMatch(declaredType, actualType)) {
@@ -149,7 +149,7 @@ export class QueryVerifier {
           }
         }
       } else if (key === '$text') {
-        if (typeof keyValue !== 'string' && (!DataUtil.isPlainObject(keyValue) || typeof keyValue.query !== 'string')) {
+        if (typeof keyValue !== 'string' && (!isPlainRecord(keyValue) || typeof keyValue.query !== 'string')) {
           state.log('$text requires a string or an object with a query string');
         }
       } else if (!(key in allowed)) {
@@ -180,7 +180,7 @@ export class QueryVerifier {
           }
           return true;
         } else if (key === '$not') {
-          if (DataUtil.isPlainObject(value)) {
+          if (isPlainRecord(value)) {
             this.processWhereClause(subState, cls, value);
           } else {
             subState.log('$not requires the value to be an object');
@@ -193,7 +193,7 @@ export class QueryVerifier {
         this.checkOperatorClause(subState, type, value, TypeUtil.OPERATORS[type], isArray);
       },
       onComplexType: (subState: State, subClass: Class, subValue: unknown): boolean => {
-        if (DataUtil.isPlainObject(subValue)) {
+        if (isPlainRecord(subValue)) {
           this.processWhereClause(subState, subClass, subValue);
           return true;
         }
@@ -251,7 +251,7 @@ export class QueryVerifier {
             return;
           }
           return;
-        } else if (isPlainObject(value)) {
+        } else if (isPlainRecord(value)) {
           if (!('alias' in value)) {
             state.log('Alias is a required field for selecting');
             return;

@@ -83,7 +83,7 @@ This schema provides a powerful base for data binding and validation at runtime.
    *  [@Writeonly](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L35) defines a that field should not be exported in serialization, but that it can be bound to
    *  [@Secret](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L54) marks a field as being sensitive. This is used by certain logging activities to ensure sensitive information is not logged out.
    *  [@Specifier](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L250) attributes additional specifiers to a field, allowing for more specification beyond just the field's type.
-   *  [@DiscriminatorField](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/input.ts#L259) allows for promoting a given field as the owner of the sub type discriminator.
+   *  [@DiscriminatorField](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L63) allows for promoting a given field as the owner of the sub type discriminator.
 
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated. 
 
@@ -405,7 +405,7 @@ Validation Failed {
 ```
 
 ## Data Utilities
-Data utilities for binding values, and type conversion. Currently [DataUtil](https://github.com/travetto/travetto/tree/main/module/schema/src/data.ts#L12) includes:
+Data utilities for binding values, and type conversion. Currently [DataUtil](https://github.com/travetto/travetto/tree/main/module/schema/src/data.ts#L22) includes:
    *  `deepAssign(a, b, mode ?)` which allows for deep assignment of `b` onto `a`, the `mode` determines how aggressive the assignment is, and how flexible it is. `mode` can have any of the following values:
       *  `loose`, which is the default is the most lenient. It will not error out, and overwrites will always happen
       *  `coerce`, will attempt to force values from `b` to fit the types of `a`, and if it can't it will error out

@@ -31,6 +31,7 @@ import {
 import {
   type FullKeyedIndexBody,
   type FullKeyedIndexWithPartialBody,
+  type IndexedProjectClause,
   type KeyedIndexBody,
   type KeyedIndexSelection,
   ModelIndexedComputedIndex,
@@ -204,7 +205,7 @@ export class ElasticsearchModelService
     nextOffset?: SortResults | undefined;
   }> {
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
-    let whereClause: WhereClause<T> = castTo(computed.project());
+    let whereClause: IndexedProjectClause<T> = computed.project();
     if (transformWhere) {
       whereClause = transformWhere(whereClause);
     }
@@ -589,9 +590,7 @@ export class ElasticsearchModelService
     idx: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const prepared = await ModelCrudUtil.prePartialUpdate(cls, castTo(body), { validateId: false });
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), prepared);
-    return this.update(cls, item);
+    return ModelIndexedUtil.naivePartialUpdate(this, cls, idx, body);
   }
 
   async pageByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(

@@ -72,7 +72,6 @@ export class PackOperation {
             ['BUNDLE_SOURCEMAP', config.sourcemap],
             ['BUNDLE_SOURCES', config.includeSources],
             ['BUNDLE_OUTPUT', config.buildDirectory],
-            ['BUNDLE_ENV_FILE', config.envFile],
             ['BUNDLE_EXTERNAL', config.externalDependencies.map(module => module.split(':')[0]).join(',')]
           ] as const
         )
@@ -156,8 +155,15 @@ export class PackOperation {
     }
 
     const title = 'Writing entry scripts';
+
+    const nodeFlags = new Set([
+      ...config.nodeFlags,
+      `--env-file-if-exists=${config.envFile}`,
+      ...(config.disablePrototype ? ['--disable-proto=delete'] : [])
+    ]);
+
     for (const sh of [ShellCommands.posix, ShellCommands.win32]) {
-      const { ext, contents } = sh.script(sh.callCommandWithAllArgs('node', config.mainFile, ...config.entryArguments), true);
+      const { ext, contents } = sh.script(sh.callCommandWithAllArgs('node', ...nodeFlags, config.mainFile, ...config.entryArguments), true);
       const file = `${config.mainName}${ext}`;
       const args = config.entryArguments.join(' ');
 

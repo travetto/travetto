@@ -1,4 +1,4 @@
-import { type ClassInstance, getClass, RuntimeError, toConcrete } from '@travetto/runtime';
+import { type ClassInstance, getConstructor, RuntimeError, toConcrete } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 import { ControllerRegistryIndex, type EndpointParameterConfig, Param } from '@travetto/web';
 
@@ -24,7 +24,7 @@ export function Upload(
 
   return (instance: ClassInstance, property: string, idx: number): void => {
     // Register field
-    const cls = getClass(instance);
+    const cls = getConstructor(instance);
     const adapter = ControllerRegistryIndex.getForRegister(cls);
     const getName = (): string => SchemaRegistryIndex.get(cls).getMethod(property).parameters[idx].name!;
 

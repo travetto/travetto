@@ -34,3 +34,19 @@ export type TemplateLiteral = { operation: 'and' | 'or'; values: (TemplateLitera
 export function transformCast<T>(input: unknown): T {
   return input as T;
 }
+
+export type UnknownRecord = Record<string, unknown>;
+
+export const isRecord = (value: unknown): value is UnknownRecord =>
+  typeof value === 'object' && // separate from primitives
+  value !== undefined &&
+  value !== null && // is obvious
+  !Array.isArray(value);
+
+export const isPlainRecord = (value: unknown): value is UnknownRecord =>
+  isRecord(value) && // is obvious
+  value.constructor === Object && // separate instances (Array, DOM, ...)
+  Object.prototype.toString.call(value) === '[object Object]'; // separate build-in like Math
+
+export const isUnsafeProperty = (key: string): key is '__proto__' | 'prototype' | 'constructor' =>
+  key === 'prototype' || key === 'constructor' || key === '__proto__';

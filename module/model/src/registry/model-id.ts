@@ -1,5 +1,5 @@
 import type { WhereClause } from '@travetto/model-query';
-import { castKey, castTo, type Any, type Class, Util } from '@travetto/runtime';
+import { castKey, castTo, type Any, type Class, Util, type UnknownRecord } from '@travetto/runtime';
 import { type SchemaFieldConfig, ValidationResultError } from '@travetto/schema';
 
 import type { ModelId, ModelType, OptionalId, PartialWithId } from '../types/model.ts';
@@ -64,7 +64,7 @@ export class ModelIdSource<T extends ModelType = Any> {
    */
   set(item: Partial<T> | OptionalId<T>, identifier: ModelId): ModelId {
     if (item && typeof item === 'object') {
-      castTo<Record<string, unknown>>(item)[this.field] = identifier;
+      castTo<UnknownRecord>(item)[this.field] = identifier;
     }
     return identifier;
   }
@@ -74,7 +74,7 @@ export class ModelIdSource<T extends ModelType = Any> {
    */
   clear(item: Partial<T> | PartialWithId<T> | OptionalId<T>): void {
     if (item && typeof item === 'object') {
-      delete castTo<Record<string, unknown>>(item)[this.field];
+      delete castTo<UnknownRecord>(item)[this.field];
     }
   }
 

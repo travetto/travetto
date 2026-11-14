@@ -8,8 +8,8 @@ import {
   type TextSearchClause,
   type WhereClause
 } from '@travetto/model-query';
-import { type Class, castKey, castTo, JSONUtil, RuntimeError } from '@travetto/runtime';
-import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { type Class, castTo, isPlainRecord, isRecord, JSONUtil, RuntimeError, type UnknownRecord, isClass } from '@travetto/runtime';
+import { type SchemaBasicType, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { SQLModelSchemaUtil } from './schema.ts';
 import type { JSONSqlPathMode, ResolvedPathContext, SchemaContext, TableContext } from './types.ts';
@@ -38,15 +38,15 @@ export interface CompiledWhere {
 
 interface QueryClause {
   sql?: string;
-  parameters?: Record<string, unknown>;
+  parameters?: UnknownRecord;
 }
 
 type IdentificationPath = string;
 
-function extractQueryIndexPathAndDirection(indexField: Record<string, unknown>): { path: string[]; sortDirection: 1 | -1 | true } {
+function extractQueryIndexPathAndDirection(indexField: UnknownRecord): { path: string[]; sortDirection: 1 | -1 | true } {
   const path: string[] = [];
   let current: unknown = indexField;
-  while (typeof current === 'object' && current !== null) {
+  while (isRecord(current)) {
     const keys = Object.keys(current);
     if (keys.length === 0) {
       break;
@@ -57,7 +57,7 @@ function extractQueryIndexPathAndDirection(indexField: Record<string, unknown>):
     } else {
       path.push(key);
     }
-    current = castTo<Record<string, unknown>>(current)[key];
+    current = current[key];
   }
   const sortDirection = castTo<1 | -1 | true>(current ?? 1);
   return { path, sortDirection };
@@ -131,7 +131,7 @@ export abstract class AbstractANSI99Dialect {
 
   abstract getRegexOperator(caseInsensitive: boolean): string;
   abstract formatRegex(source: string, caseInsensitive: boolean): string;
-  abstract castColumn(sqlPath: string, type: Class): string;
+  abstract castColumn(sqlPath: string, type: Function): string;
 
   compileJsonEquality?(sqlPath: string, identifier: string): string;
   shiftPlaceholders?(whereSQL: string, offset: number): string;
@@ -263,11 +263,11 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
   }
 
   abstract getTableExistsQuery(context: TableContext): { sql: string; parameters?: unknown[] };
-  abstract parseTableExistsResult(records: unknown[]): boolean;
+  abstract parseTableExistsResult(records: UnknownRecord[]): boolean;
   abstract getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] };
-  abstract parseExistingColumns(records: unknown[]): Map<string, string>;
+  abstract parseExistingColumns(records: UnknownRecord[]): Map<string, string>;
   abstract getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] };
-  abstract parseExistingIndexes(records: unknown[]): Map<string, string>;
+  abstract parseExistingIndexes(records: UnknownRecord[]): Map<string, string>;
   abstract getDropIndexSQL(context: TableContext, indexName: string): string;
 
   abstract getTruncateTableSQL(context: TableContext): string;
@@ -287,7 +287,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
   /**
    * Creates an ExistsError or UniqueError based on whether the constraint is on the primary key
    */
-  createUniqueOrExistsError(constraint: string, details: Record<string, unknown> = {}): ExistsError | UniqueError {
+  createUniqueOrExistsError(constraint: string, details: UnknownRecord = {}): ExistsError | UniqueError {
     if (this.isPrimaryKeyConstraint(constraint)) {
       return new ExistsError('query', (details.query as string) ?? constraint);
     }
@@ -392,17 +392,17 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     let currentField: SchemaFieldConfig | undefined = tableContext.complexFields.get(firstSegment);
     let arrayField: SchemaFieldConfig | undefined = currentField?.array ? currentField : undefined;
     let arraySegmentIndex: number | undefined = currentField?.array ? 0 : undefined;
-    let currentClass = currentField?.type;
+    let currentClass = isClass(currentField?.type) ? currentField.type : undefined;
 
     for (let pathIndex = 1; pathIndex < path.length; pathIndex += 1) {
       const segment = path[pathIndex];
-      const subclassConfiguration = SchemaRegistryIndex.getOptional(currentClass!)?.get();
+      const subclassConfiguration = currentClass ? SchemaRegistryIndex.getOptional(currentClass)?.get() : undefined;
       currentField = subclassConfiguration?.fields[segment];
       if (currentField?.array && !arrayField) {
         arrayField = currentField;
         arraySegmentIndex = pathIndex;
       }
-      currentClass = currentField?.type;
+      currentClass = isClass(currentField?.type) ? currentField.type : undefined;
     }
 
     return {
@@ -413,10 +413,13 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
   }
 
   getSchemaSubPathMetadata(
-    initialClass: Class | undefined,
+    input: SchemaBasicType | undefined,
     subPath: string[]
   ): Array<{ segment: string; fieldConfig?: SchemaFieldConfig; isArray: boolean; fieldClass?: Class }> {
-    let currentClass = initialClass;
+    if (!isClass(input?.type)) {
+      throw new RuntimeError('Only complex types are supported for sub schema');
+    }
+    let currentClass: Class | undefined = input.type;
     return subPath.map(segment => {
       let fieldConfig: SchemaFieldConfig | undefined;
       let isArray = false;
@@ -425,7 +428,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
         fieldConfig = classConfiguration?.fields[segment];
         if (fieldConfig) {
           isArray = !!fieldConfig.array;
-          currentClass = fieldConfig.type;
+          currentClass = isClass(fieldConfig.type) ? fieldConfig.type : undefined;
         } else {
           currentClass = undefined;
         }
@@ -493,7 +496,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
 
   #compileSimple<T extends ModelType>(
     tableContext: TableContext<T>,
-    item: Record<string, unknown>,
+    item: UnknownRecord,
     parentPath: string[] = [],
     identificationPath: IdentificationPath = '',
     textSearches: TextSearchState[] = []
@@ -507,20 +510,16 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     for (const [key, value] of Object.entries(item)) {
       index += 1;
       const currentPath = [...parentPath, key];
-      const isPlainObject = DataUtil.isPlainObject(value);
+      const isPlainObject = isPlainRecord(value);
       const firstKey = isPlainObject ? Object.keys(value)[0] : '';
 
       const nextIdentificationPath = `${identificationPath}__${index}`;
 
       if (isPlainObject) {
         if (firstKey.startsWith('$')) {
-          clauses.push(
-            this.#compileOperator(tableContext, currentPath, value as Record<string, unknown>, nextIdentificationPath, textSearches)
-          );
+          clauses.push(this.#compileOperator(tableContext, currentPath, value, nextIdentificationPath, textSearches));
         } else {
-          clauses.push(
-            this.#compileSimple(tableContext, value as Record<string, unknown>, currentPath, nextIdentificationPath, textSearches)
-          );
+          clauses.push(this.#compileSimple(tableContext, value, currentPath, nextIdentificationPath, textSearches));
         }
       } else {
         clauses.push(this.#compileOperator(tableContext, currentPath, { $eq: value }, nextIdentificationPath, textSearches));
@@ -533,7 +532,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
   #compileOperator<T extends ModelType>(
     tableContext: TableContext<T>,
     path: string[],
-    operation: Record<string, unknown>,
+    operation: UnknownRecord,
     identificationPath: IdentificationPath = '',
     textSearches: TextSearchState[] = []
   ): QueryClause {
@@ -670,15 +669,12 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
   }
 
   // Statement Builders
-  buildInsert<T extends ModelType>(tableContext: TableContext<T>, rawItem: Record<string, unknown>): { sql: string; values: unknown[] } {
-    return this.buildInsertAll(tableContext, [rawItem]);
+  buildInsert<T extends ModelType>(tableContext: TableContext<T>, item: T): { sql: string; values: unknown[] } {
+    return this.buildInsertAll(tableContext, [item]);
   }
 
-  buildInsertAll<T extends ModelType>(
-    tableContext: TableContext<T>,
-    rawItems: Record<string, unknown>[]
-  ): { sql: string; values: unknown[] } {
-    if (rawItems.length === 0) {
+  buildInsertAll<T extends ModelType>(tableContext: TableContext<T>, items: T[]): { sql: string; values: unknown[] } {
+    if (items.length === 0) {
       return { sql: '', values: [] };
     }
 
@@ -693,7 +689,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     const values: unknown[] = [];
     const valueTuples: string[] = [];
 
-    for (const rawItem of rawItems) {
+    for (const rawItem of castTo<UnknownRecord[]>(items)) {
       const tuplePlaceholders: string[] = [];
       for (const field of tableContext.simpleFields.values()) {
         tuplePlaceholders.push(this.getPlaceholder(values.length + 1));
@@ -715,21 +711,18 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     return { sql, values };
   }
 
-  buildUpdateAll<T extends ModelType>(
-    tableContext: TableContext<T>,
-    rawItems: Record<string, unknown>[]
-  ): { sql: string; values: unknown[] } {
-    if (rawItems.length === 0) {
+  buildUpdateAll<T extends ModelType>(tableContext: TableContext<T>, items: T[]): { sql: string; values: unknown[] } {
+    if (items.length === 0) {
       return { sql: '', values: [] };
     }
 
     const idSource = ModelRegistryIndex.get(tableContext.cls).idSource;
     const idFieldName = idSource.field;
 
-    if (rawItems.length === 1) {
-      const id = idSource.get(castTo(rawItems[0]));
+    if (items.length === 1) {
+      const id = idSource.get(items[0]);
       const { whereSQL, parameters = [] } = this.compileWhere(tableContext, idSource.where(id));
-      return this.buildUpdate(tableContext, rawItems[0], whereSQL, parameters);
+      return this.buildUpdate(tableContext, items[0], whereSQL, parameters);
     }
 
     const simpleFieldsToUpdate = [...tableContext.simpleFields.values()].filter(field => field.name !== idFieldName);
@@ -738,13 +731,15 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     const setClauses: string[] = [];
     const values: unknown[] = [];
 
-    const ids = rawItems.map(item => item[castKey(idFieldName)]);
+    const rawItems = castTo<UnknownRecord[]>(items);
+
+    const ids = rawItems.map(item => item[idFieldName]);
 
     for (const field of simpleFieldsToUpdate) {
       const cases: string[] = [];
       for (const rawItem of rawItems) {
         const idPlaceholder = this.getPlaceholder(values.length + 1);
-        values.push(rawItem[castKey(idFieldName)]);
+        values.push(rawItem[idFieldName]);
         const valPlaceholder = this.getPlaceholder(values.length + 1);
         const val = rawItem[field.name];
         values.push(val === undefined || val === null ? null : val);
@@ -757,7 +752,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
       const cases: string[] = [];
       for (const rawItem of rawItems) {
         const idPlaceholder = this.getPlaceholder(values.length + 1);
-        values.push(rawItem[castKey(idFieldName)]);
+        values.push(rawItem[idFieldName]);
         const valPlaceholder = this.getPlaceholder(values.length + 1);
         const val = rawItem[field.name];
         values.push(this.getComplexColumnValue(field, val));
@@ -783,10 +778,11 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
 
   buildUpdate<T extends ModelType>(
     tableContext: TableContext<T>,
-    rawItem: Record<string, unknown>,
+    item: T,
     whereSQL?: string,
     whereParameters: unknown[] = []
   ): { sql: string; values: unknown[] } {
+    const rawItem = castTo<UnknownRecord>(item);
     const idFieldName = ModelRegistryIndex.getConfig(tableContext.cls).idField;
     const sets: string[] = [];
     const values: unknown[] = [];
@@ -867,11 +863,8 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     return { sql, values };
   }
 
-  buildUpsert<T extends ModelType>(
-    tableContext: TableContext<T>,
-    rawItem: Record<string, unknown>,
-    conflictTarget: string[]
-  ): { sql: string; values: unknown[] } {
+  buildUpsert<T extends ModelType>(tableContext: TableContext<T>, item: T, conflictTarget: string[]): { sql: string; values: unknown[] } {
+    const rawItem = castTo<UnknownRecord>(item);
     const idFieldName = ModelRegistryIndex.getConfig(tableContext.cls).idField;
     const columns: string[] = [];
     const values: unknown[] = [];

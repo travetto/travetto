@@ -9,7 +9,7 @@ import { SuiteRegistryIndex } from '../registry/registry-index.ts';
  * @kind decorator
  */
 export function SkipIf<T = unknown>(predicate: SkipPredicate<T>): ClassDecorator & MethodDecorator {
-  return castTo((target: ClassInstance | Class, property?: string, descriptor?: PropertyDescriptor) => {
+  return castTo((target: Class | ClassInstance, property?: string, descriptor?: PropertyDescriptor) => {
     if (property && descriptor) {
       SuiteRegistryIndex.getForRegister(getClass(target)).registerTest(property, descriptor.value, { skip: castTo(predicate) });
       return descriptor;

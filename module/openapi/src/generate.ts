@@ -9,7 +9,7 @@ import type {
   TagObject
 } from 'openapi3-ts/oas31';
 
-import { type Class, castTo, describeFunction, RuntimeError } from '@travetto/runtime';
+import { type Class, type UnknownRecord, BinaryUtil, castTo, describeFunction, RuntimeError, TypedObject } from '@travetto/runtime';
 import {
   type SchemaBasicType,
   type SchemaClassConfig,
@@ -69,7 +69,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     rootField: SchemaInputConfig = input
   ): ParameterObject[] {
     if (!SchemaRegistryIndex.has(input.type)) {
-      throw new RuntimeError(`Unknown class, not registered as a schema: ${input.type.Ⲑid}`);
+      throw new RuntimeError(`Unknown class, not registered as a schema: ${input.type}`);
     }
 
     const fields = SchemaRegistryIndex.get(input.type).getFields();
@@ -100,14 +100,14 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Get the type for a given class
    */
-  #getType(inputOrClass: SchemaInputConfig | Class): Record<string, unknown> {
-    let field: { type: Class; precision?: [number, number | undefined] };
+  #getType(inputOrClass: SchemaInputConfig | Class): UnknownRecord {
+    let field: { type: Function; precision?: [number, number | undefined] };
     if (!isInputConfig(inputOrClass)) {
       field = { type: inputOrClass };
     } else {
       field = inputOrClass;
     }
-    const out: Record<string, unknown> = {};
+    const out: UnknownRecord = {};
     // Handle nested types
     if (SchemaRegistryIndex.has(field.type)) {
       const id = this.#nameResolver.getName(SchemaRegistryIndex.getConfig(field.type));
@@ -119,7 +119,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         case String:
           out.type = 'string';
           break;
-        case castTo(BigInt):
+        case BigInt:
           out.type = 'integer';
           out.format = 'int64';
           break;
@@ -232,14 +232,14 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         const base = config;
         const required: string[] = [];
 
-        for (const fieldName of Object.keys(base.fields)) {
-          if (SchemaRegistryIndex.has(base.fields[fieldName].type)) {
-            this.onSchema(SchemaRegistryIndex.getConfig(base.fields[fieldName].type));
+        for (const [fieldName, field] of TypedObject.entries(base.fields)) {
+          if (SchemaRegistryIndex.has(field.type)) {
+            this.onSchema(SchemaRegistryIndex.getConfig(field.type));
           }
-          properties[fieldName] = this.#processSchemaField(base.fields[fieldName], required);
+          properties[fieldName] = this.#processSchemaField(field, required);
         }
 
-        const extra: Record<string, unknown> = {};
+        const extra: UnknownRecord = {};
         if (config.discriminatedBase) {
           const subClasses = SchemaRegistryIndex.getDiscriminatedClasses(cls);
           if (subClasses) {
@@ -264,30 +264,38 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   }
 
   /**
+   * Build JSON request body
+   */
+  #buildJsonBody(body: SchemaBasicType, typeRef: UnknownRecord, typeId: string, mime?: string | null): RequestBodyObject {
+    return {
+      content: {
+        [mime ?? 'application/json']: {
+          schema: !body.array ? typeRef : { type: 'array', items: typeRef }
+        }
+      },
+      description: this.#allSchemas[typeId]?.description ?? ''
+    };
+  }
+
+  /**
    * Standard payload structure
    */
   #getEndpointBody(body?: SchemaBasicType, mime?: string | null): RequestBodyObject {
     if (!body || body.type === undefined) {
       return { content: {}, description: '' };
-    } else if (body.binary) {
+    } else if (BinaryUtil.isBinaryTypeReference(body.type)) {
       return {
         content: {
           [mime ?? 'application/octet-stream']: { schema: { type: 'string', format: 'binary' } }
         },
         description: 'Raw binary data'
       };
+    } else if (SchemaRegistryIndex.has(body.type)) {
+      const cls = body.type;
+      const schemaConfig = SchemaRegistryIndex.getConfig(cls);
+      return this.#buildJsonBody(body, this.#getType(cls), this.#nameResolver.getName(schemaConfig), mime);
     } else {
-      const schemaConfig = SchemaRegistryIndex.getOptional(body.type)?.get();
-      const typeId = schemaConfig ? this.#nameResolver.getName(schemaConfig) : body.type.name;
-      const typeRef = schemaConfig ? this.#getType(body.type) : { type: body.type.name.toLowerCase() };
-      return {
-        content: {
-          [mime ?? 'application/json']: {
-            schema: !body!.array ? typeRef : { type: 'array', items: typeRef }
-          }
-        },
-        description: this.#allSchemas[typeId!]?.description ?? ''
-      };
+      return this.#buildJsonBody(body, { type: body.type.name.toLowerCase() }, body.type.name, mime);
     }
   }
 
@@ -299,15 +307,13 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     param: EndpointParameterConfig,
     input: SchemaParameterConfig
   ): { requestBody: RequestBodyObject } | { parameters: ParameterObject[] } | undefined {
-    const complex = input.type && SchemaRegistryIndex.has(input.type);
-
     if (param.location) {
       if (param.location === 'body') {
         const acceptsMime = endpoint.finalizedResponseHeaders.get('accepts');
         return {
           requestBody: input.specifiers?.includes('file') ? this.#buildUploadBody() : this.#getEndpointBody(input, acceptsMime)
         };
-      } else if (complex && (param.location === 'query' || param.location === 'header')) {
+      } else if (SchemaRegistryIndex.has(input.type) && (param.location === 'query' || param.location === 'header')) {
         return { parameters: this.#schemaToDotParams(param.location, input, param.prefix ? `${param.prefix}.` : '') };
       } else {
         const epParam: ParameterObject = {

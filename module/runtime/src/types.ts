@@ -18,6 +18,7 @@ export type Primitive = NumericPrimitive | boolean | string;
 export type NumericLikeIntrinsic = Date | NumericPrimitive;
 
 export type IntrinsicType = Primitive | Date | ArrayBuffer | Uint8Array | Uint16Array | Uint32Array | Readable | Buffer | Blob | File;
+export type UnknownRecord = Record<string, unknown>;
 
 export type DeepPartial<T> =
   | Partial<T>
@@ -29,27 +30,9 @@ export type DeepPartial<T> =
           : DeepPartial<T[P]>;
     };
 
-export type ValidFields<T, I> = {
-  [K in keyof T]: T[K] extends Primitive | I | undefined ? K : T[K] extends Function | undefined ? never : K;
+export type SimpleFields<T, I> = {
+  [K in keyof T]: T[K] extends I | undefined ? K : T[K] extends Function | undefined ? never : K;
 }[keyof T];
-
-export type RetainIntrinsicFields<T> = Pick<T, ValidFields<T, IntrinsicType>>;
-
-type KeyPathsInner<T, PrimitiveType = IntrinsicType | IntrinsicType[], PREFIX extends string = '', SEP extends string = '.'> = {
-  [K in keyof T]: K extends string
-    ? T[K] extends IntrinsicType[] | IntrinsicType | undefined
-      ? T[K] extends PrimitiveType
-        ? `${PREFIX}${K}`
-        : never
-      : T[K] extends Any[]
-        ? KeyPathsInner<T[K][number], PrimitiveType, `${K}${SEP}`, SEP>
-        : T[K] extends object
-          ? KeyPathsInner<T[K], PrimitiveType, `${K}${SEP}`, SEP>
-          : never
-    : never;
-}[keyof T];
-
-export type KeyPaths<T, PrimitiveType = IntrinsicType | IntrinsicType[]> = KeyPathsInner<Required<T>, PrimitiveType> & string;
 
 export const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T & string>(value: T): K[];
@@ -63,6 +46,17 @@ export const safeAssign = <T extends {}, U extends {}>(target: T, ...sources: U[
 export function castTo<T>(input: unknown): T {
   return input as T;
 }
+
+export const isRecord = (value: unknown): value is UnknownRecord =>
+  typeof value === 'object' && // separate from primitives
+  value !== undefined &&
+  value !== null && // is obvious
+  !Array.isArray(value);
+
+export const isPlainRecord = (value: unknown): value is UnknownRecord =>
+  isRecord(value) && // is obvious
+  value.constructor === Object && // separate instances (Array, DOM, ...)
+  Object.prototype.toString.call(value) === '[object Object]'; // separate build-in like Math
 
 export const isClass = (input: unknown): input is Class => typeof input === 'function' && 'Ⲑid' in input;
 export const castKey = <T>(input: string | number | symbol): keyof T => castTo(input);
@@ -95,8 +89,13 @@ export function getParentClass(cls: Class): Class | undefined {
   return parent.name && parent !== Object ? parent : undefined;
 }
 
+export const getConstructor = <T>(value: T): Class<T> => asConstructable<T>(value).constructor;
+
 /**
  * Get the class from an instance or class
  */
-export const getClass = <T = unknown>(value: ClassInstance | Class): Class<T> =>
-  'Ⲑid' in value ? castTo(value) : asConstructable<T>(value).constructor;
+export const getClass = <T = unknown>(target: Class | ClassInstance): Class<T> =>
+  'Ⲑid' in target ? castTo(target) : asConstructable<T>(target).constructor;
+
+export const isUnsafeProperty = (key: string): key is '__proto__' | 'prototype' | 'constructor' =>
+  key === 'prototype' || key === 'constructor' || key === '__proto__';

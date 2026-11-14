@@ -2,8 +2,6 @@ import { readFileSync } from 'node:fs';
 
 import type { Plugin } from 'rollup';
 
-import { RuntimeIndex } from '@travetto/runtime';
-
 import type { CoreRollupConfig } from '../../src/types.ts';
 
 export const GLOBAL_IMPORT = '__trv_imp';
@@ -25,13 +23,6 @@ globalThis.${GLOBAL_IMPORT} = trvImp;
 
   const out: Plugin = {
     name: 'travetto-entry',
-
-    intro() {
-      return readFileSync(RuntimeIndex.getFromImport('@travetto/pack/support/bin/preamble.ts')!.outputFile, 'utf8')
-        .replaceAll('%%ENV_FILE%%', config.envFile ?? '')
-        .replace(/\/\/# source.*$/m, '');
-    },
-
     load(id) {
       if (id.endsWith(config.entry)) {
         return `${importer}${readFileSync(id, 'utf8')}`;

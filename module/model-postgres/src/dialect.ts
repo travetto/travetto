@@ -1,8 +1,8 @@
 import type { ModelType } from '@travetto/model';
 import type { TextSearchClause } from '@travetto/model-query';
 import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext, type TextSearchState } from '@travetto/model-sql';
-import { type Class, castTo, JSONUtil } from '@travetto/runtime';
-import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { JSONUtil, type UnknownRecord } from '@travetto/runtime';
+import { SchemaRegistryIndex, type SchemaFieldConfig } from '@travetto/schema';
 
 /* cspell:words ILIKE regclass indexdef tablename pkey tsvector tsquery */
 
@@ -10,7 +10,7 @@ export class PostgresDialect extends AbstractANSI99Dialect {
   returningSupport = true;
 
   getComplexColumnType(field: SchemaFieldConfig): string {
-    if (field.array && !SchemaRegistryIndex.has(field.type)) {
+    if (field.array && !SchemaRegistryIndex.has(field?.type)) {
       const scalarType = this.getColumnType(field);
       return `${scalarType}[]`;
     }
@@ -18,14 +18,14 @@ export class PostgresDialect extends AbstractANSI99Dialect {
   }
 
   getComplexColumnValue(field: SchemaFieldConfig, value: unknown): unknown {
-    if (field.array && !SchemaRegistryIndex.has(field.type)) {
+    if (field.array && !SchemaRegistryIndex.has(field?.type)) {
       return value ?? null;
     }
     return super.getComplexColumnValue(field, value);
   }
 
   getColumnType(fieldConfiguration: SchemaFieldConfig): string {
-    if (fieldConfiguration.type === castTo(BigInt)) {
+    if (fieldConfiguration.type === BigInt) {
       return 'BIGINT';
     }
 
@@ -95,7 +95,7 @@ export class PostgresDialect extends AbstractANSI99Dialect {
       return Array.isArray(value) ? value : [value];
     }
 
-    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField?.type, context.subPath);
+    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField, context.subPath);
     const isArraySegment = subPathMetadata.map(item => item.isArray);
 
     const buildPayloadForValue = (item: unknown): unknown => {
@@ -137,8 +137,8 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     const arrayField = context.arrayField ?? context.leafField;
     const isTopLevel = (context.arrayPath?.length ?? 1) === 1;
     const hasSubPath = (context.subPath?.length ?? 0) > 0;
-    const isScalarArray = arrayField ? !SchemaRegistryIndex.has(arrayField.type) : true;
-    const isNative = isTopLevel && !hasSubPath && isScalarArray;
+    const isPrimitiveArray = !SchemaRegistryIndex.has(arrayField?.type);
+    const isNative = isTopLevel && !hasSubPath && isPrimitiveArray;
 
     const targetPath =
       hasSubPath && context.arrayPath && context.arrayPath.length > 0 ? this.escapeIdentifier(context.arrayPath[0]) : context.sqlPath;
@@ -218,7 +218,7 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     return source.replaceAll('\\b', '\\y');
   }
 
-  castColumn(sqlPath: string, type: Class): string {
+  castColumn(sqlPath: string, type: Function): string {
     if (type === Number) {
       return `(${sqlPath})::NUMERIC`;
     } else if (type === Boolean) {
@@ -298,8 +298,8 @@ ${offset !== undefined ? `OFFSET ${offset}` : ''};`;
     };
   }
 
-  parseTableExistsResult(records: unknown[]): boolean {
-    return castTo<{ exists: boolean }>(records[0])?.exists ?? false;
+  parseTableExistsResult(records: UnknownRecord[]): boolean {
+    return !!records[0]?.exists;
   }
 
   getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
@@ -311,8 +311,8 @@ ${offset !== undefined ? `OFFSET ${offset}` : ''};`;
     };
   }
 
-  parseExistingColumns(records: unknown[]): Map<string, string> {
-    return new Map(castTo<{ name: string; type: string }[]>(records).map(record => [record.name, record.type.toUpperCase()]));
+  parseExistingColumns(records: UnknownRecord[]): Map<string, string> {
+    return new Map(records.map(record => [`${record.name}`, `${record.type}`.toUpperCase()]));
   }
 
   getAlterColumnTypeSQL(context: TableContext, columnName: string, columnType: string, existingType: string): string | undefined {
@@ -332,11 +332,11 @@ ${offset !== undefined ? `OFFSET ${offset}` : ''};`;
     };
   }
 
-  parseExistingIndexes(records: unknown[]): Map<string, string> {
+  parseExistingIndexes(records: UnknownRecord[]): Map<string, string> {
     return new Map(
-      castTo<{ indexname: string; indexdef: string }[]>(records)
-        .filter(record => !record.indexname.endsWith('_pkey') && !record.indexname.endsWith('_fts'))
-        .map(record => [record.indexname, record.indexdef])
+      records
+        .filter(record => !`${record.indexname}`.endsWith('_pkey') && !`${record.indexname}`.endsWith('_fts'))
+        .map(record => [`${record.indexname}`, `${record.indexdef}`])
     );
   }
 
@@ -405,7 +405,7 @@ ${offset !== undefined ? `OFFSET ${offset}` : ''};`;
     clause: TextSearchClause,
     identificationPath: string,
     fieldPath?: string[]
-  ): { sql: string; parameters: Record<string, unknown> } {
+  ): { sql: string; parameters: UnknownRecord } {
     const textQuery = typeof clause === 'string' ? clause : clause.query;
     const language = typeof clause === 'object' && clause.language ? clause.language : 'english';
     const identifier = `%%${identificationPath}%%`;

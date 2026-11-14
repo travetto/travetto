@@ -35,23 +35,25 @@ Description:
   common entry point for module packaging workflows.
 
 Options:
-  -b, --buildDir <string>              Workspace for building (default: "/tmp/<temp-folder>")
-  --clean, --no-clean                  Clean workspace (default: true)
-  -o, --output <string>                Output location
-  --main-scripts, --no-main-scripts    Create entry scripts (default: true)
-  -f, --main-name <string>             Main name for build artifact
-  -e, --entry-point <string>           Entry point (default: "@travetto/cli/support/entry.trv.ts")
-  --minify, --no-minify                Minify output (default: true)
-  -sm, --sourcemap                     Bundle source maps (default: false)
-  -is, --include-sources               Include source with source maps (default: false)
-  -x, --eject-file <string>            Eject commands to file
-  -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/rollup/build.ts")
-  --env-file <string>                  Env Flag File Name (default: ".env")
-  --manifest-file <string>             Manifest File Name (default: "manifest.json")
-  -wr, --include-workspace-resources   Include workspace resources (default: false)
-  -np, --npm-package <string>          External NPM Packages (default: [])
-  -m, --module <module>                Module to run for
-  --help                               display help for command
+  -b, --buildDir <string>                      Workspace for building (default: "/tmp/<temp-folder>")
+  --clean, --no-clean                          Clean workspace (default: true)
+  -o, --output <string>                        Output location
+  --main-scripts, --no-main-scripts            Create entry scripts (default: true)
+  -f, --main-name <string>                     Main name for build artifact
+  -e, --entry-point <string>                   Entry point (default: "@travetto/cli/support/entry.trv.ts")
+  --minify, --no-minify                        Minify output (default: true)
+  -sm, --sourcemap                             Bundle source maps (default: false)
+  -is, --include-sources                       Include source with source maps (default: false)
+  -x, --eject-file <string>                    Eject commands to file
+  -r, --rollup-configuration <string>          Rollup configuration file (default: "@travetto/pack/support/rollup/build.ts")
+  --env-file <string>                          Env Flag File Name (default: ".env")
+  --manifest-file <string>                     Manifest File Name (default: "manifest.json")
+  -wr, --include-workspace-resources           Include workspace resources (default: false)
+  -np, --npm-package <string>                  External NPM Packages (default: [])
+  -m, --module <module>                        Module to run for
+  --disable-prototype, --no-disable-prototype  Disable prototype (default: true)
+  -nf, --node-flags <string>                    (default: [])
+  --help                                       display help for command
 
 Examples:
 ```
@@ -109,23 +111,25 @@ Description:
   output into a single archive file.
 
 Options:
-  -b, --buildDir <string>              Workspace for building (default: "/tmp/<temp-folder>")
-  --clean, --no-clean                  Clean workspace (default: true)
-  -o, --output <string>                Output location (default: "<module>.zip")
-  --main-scripts, --no-main-scripts    Create entry scripts (default: true)
-  -f, --main-name <string>             Main name for build artifact
-  -e, --entry-point <string>           Entry point (default: "@travetto/cli/support/entry.trv.ts")
-  --minify, --no-minify                Minify output (default: true)
-  -sm, --sourcemap                     Bundle source maps (default: false)
-  -is, --include-sources               Include source with source maps (default: false)
-  -x, --eject-file <string>            Eject commands to file
-  -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/rollup/build.ts")
-  --env-file <string>                  Env Flag File Name (default: ".env")
-  --manifest-file <string>             Manifest File Name (default: "manifest.json")
-  -wr, --include-workspace-resources   Include workspace resources (default: false)
-  -np, --npm-package <string>          External NPM Packages (default: [])
-  -m, --module <module>                Module to run for
-  --help                               display help for command
+  -b, --buildDir <string>                      Workspace for building (default: "/tmp/<temp-folder>")
+  --clean, --no-clean                          Clean workspace (default: true)
+  -o, --output <string>                        Output location (default: "<module>.zip")
+  --main-scripts, --no-main-scripts            Create entry scripts (default: true)
+  -f, --main-name <string>                     Main name for build artifact
+  -e, --entry-point <string>                   Entry point (default: "@travetto/cli/support/entry.trv.ts")
+  --minify, --no-minify                        Minify output (default: true)
+  -sm, --sourcemap                             Bundle source maps (default: false)
+  -is, --include-sources                       Include source with source maps (default: false)
+  -x, --eject-file <string>                    Eject commands to file
+  -r, --rollup-configuration <string>          Rollup configuration file (default: "@travetto/pack/support/rollup/build.ts")
+  --env-file <string>                          Env Flag File Name (default: ".env")
+  --manifest-file <string>                     Manifest File Name (default: "manifest.json")
+  -wr, --include-workspace-resources           Include workspace resources (default: false)
+  -np, --npm-package <string>                  External NPM Packages (default: [])
+  -m, --module <module>                        Module to run for
+  --disable-prototype, --no-disable-prototype  Disable prototype (default: true)
+  -nf, --node-flags <string>                    (default: [])
+  --help                                       display help for command
 
 Examples:
 ```
@@ -146,34 +150,36 @@ Description:
   push operations, including runtime user and registry customization.
 
 Options:
-  -b, --buildDir <string>                Workspace for building (default: "/tmp/<temp-folder>")
-  --clean, --no-clean                    Clean workspace (default: true)
-  -o, --output <string>                  Output location
-  --main-scripts, --no-main-scripts      Create entry scripts (default: true)
-  -f, --main-name <string>               Main name for build artifact
-  -e, --entry-point <string>             Entry point (default: "@travetto/cli/support/entry.trv.ts")
-  --minify, --no-minify                  Minify output (default: true)
-  -sm, --sourcemap                       Bundle source maps (default: false)
-  -is, --include-sources                 Include source with source maps (default: false)
-  -x, --eject-file <string>              Eject commands to file
-  -r, --rollup-configuration <string>    Rollup configuration file (default: "@travetto/pack/support/rollup/build.ts")
-  --env-file <string>                    Env Flag File Name (default: ".env")
-  --manifest-file <string>               Manifest File Name (default: "manifest.json")
-  -wr, --include-workspace-resources     Include workspace resources (default: false)
-  -np, --npm-package <string>            External NPM Packages (default: [])
-  -m, --module <module>                  Module to run for
-  -df, --docker-factory <string>         Docker Factory source (default: "@travetto/pack/support/pack.dockerfile.ts")
-  -di, --docker-image <string>           Docker Image to extend (default: "node:26-alpine")
-  -dn, --docker-name <string>            Docker Image Name (default: "<module>")
-  -ru, --runtime-user <string>           Docker Runtime user
-  -rp, --runtime-package <string>        Docker Runtime Packages (default: [])
-  -dp, --docker-port <number>            Docker Image Port (default: [])
-  -ds, --docker-stage-only               Docker Stage Only (default: false)
-  -dt, --docker-tag <string>             Docker Image Tag (default: ["latest"])
-  -dx, --docker-push                     Docker Push Tags (default: false)
-  -db, --docker-build-platform <string>  Docker Build Platform
-  -dr, --docker-registry <string>        Docker Registry
-  --help                                 display help for command
+  -b, --buildDir <string>                      Workspace for building (default: "/tmp/<temp-folder>")
+  --clean, --no-clean                          Clean workspace (default: true)
+  -o, --output <string>                        Output location
+  --main-scripts, --no-main-scripts            Create entry scripts (default: true)
+  -f, --main-name <string>                     Main name for build artifact
+  -e, --entry-point <string>                   Entry point (default: "@travetto/cli/support/entry.trv.ts")
+  --minify, --no-minify                        Minify output (default: true)
+  -sm, --sourcemap                             Bundle source maps (default: false)
+  -is, --include-sources                       Include source with source maps (default: false)
+  -x, --eject-file <string>                    Eject commands to file
+  -r, --rollup-configuration <string>          Rollup configuration file (default: "@travetto/pack/support/rollup/build.ts")
+  --env-file <string>                          Env Flag File Name (default: ".env")
+  --manifest-file <string>                     Manifest File Name (default: "manifest.json")
+  -wr, --include-workspace-resources           Include workspace resources (default: false)
+  -np, --npm-package <string>                  External NPM Packages (default: [])
+  -m, --module <module>                        Module to run for
+  --disable-prototype, --no-disable-prototype  Disable prototype (default: true)
+  -nf, --node-flags <string>                    (default: [])
+  -df, --docker-factory <string>               Docker Factory source (default: "@travetto/pack/support/pack.dockerfile.ts")
+  -di, --docker-image <string>                 Docker Image to extend (default: "node:26-alpine")
+  -dn, --docker-name <string>                  Docker Image Name (default: "<module>")
+  -ru, --runtime-user <string>                 Docker Runtime user
+  -rp, --runtime-package <string>              Docker Runtime Packages (default: [])
+  -dp, --docker-port <number>                  Docker Image Port (default: [])
+  -ds, --docker-stage-only                     Docker Stage Only (default: false)
+  -dt, --docker-tag <string>                   Docker Image Tag (default: ["latest"])
+  -dx, --docker-push                           Docker Push Tags (default: false)
+  -db, --docker-build-platform <string>        Docker Build Platform
+  -dr, --docker-registry <string>              Docker Registry
+  --help                                       display help for command
 
 Examples:
 ```
@@ -229,7 +235,7 @@ echo "Writing entry scripts todo-app.sh args=(web:http)"
 
 echo "#!/bin/sh" > $DIST/todo-app.sh
 echo "cd \$(dirname \"\$0\")" >> $DIST/todo-app.sh
-echo "node todo-app.js web:http \$@" >> $DIST/todo-app.sh
+echo "node --env-file-if-exists=.env --disable-proto=delete todo-app.js web:http \$@" >> $DIST/todo-app.sh
 chmod 755 $DIST/todo-app.sh
 
 # Writing entry scripts todo-app.cmd args=(web:http) 
@@ -237,7 +243,7 @@ chmod 755 $DIST/todo-app.sh
 echo "Writing entry scripts todo-app.cmd args=(web:http)"
 
 echo "cd %~p0" > $DIST/todo-app.cmd
-echo "node todo-app.js web:http %*" >> $DIST/todo-app.cmd
+echo "node --env-file-if-exists=.env --disable-proto=delete todo-app.js web:http %*" >> $DIST/todo-app.cmd
 chmod 755 $DIST/todo-app.cmd
 
 # Copying over module resources 
@@ -262,7 +268,6 @@ export BUNDLE_COMPRESS=true
 export BUNDLE_SOURCEMAP=false
 export BUNDLE_SOURCES=false
 export BUNDLE_OUTPUT=$DIST
-export BUNDLE_ENV_FILE=.env
 export TRV_MANIFEST=$TRV_OUT/node_modules/$MODULE
 cd $TRV_OUT
 node $REPO_ROOT/node_modules/.bin/rollup -c $TRV_OUT/node_modules/@travetto/pack/support/rollup/build.js

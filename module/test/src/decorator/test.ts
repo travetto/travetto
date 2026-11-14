@@ -1,4 +1,4 @@
-import { type ClassInstance, getClass } from '@travetto/runtime';
+import { type ClassInstance, getConstructor } from '@travetto/runtime';
 
 import type { TestConfig, ThrowableError } from '../model/test.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
@@ -27,7 +27,7 @@ export function Test(...rest: Partial<TestConfig>[]): MethodDecorator;
 export function Test(description: string, ...rest: Partial<TestConfig>[]): MethodDecorator;
 export function Test(description?: string | Partial<TestConfig>, ...rest: Partial<TestConfig>[]): MethodDecorator {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor) => {
-    SuiteRegistryIndex.getForRegister(getClass(instance)).registerTest(
+    SuiteRegistryIndex.getForRegister(getConstructor(instance)).registerTest(
       property,
       descriptor.value,
       ...(typeof description !== 'string' && description ? [description] : []),
@@ -45,7 +45,7 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
  */
 export function ShouldThrow(state: ThrowableError): MethodDecorator {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor) => {
-    SuiteRegistryIndex.getForRegister(getClass(instance)).registerTest(property, descriptor.value, { shouldThrow: state });
+    SuiteRegistryIndex.getForRegister(getConstructor(instance)).registerTest(property, descriptor.value, { shouldThrow: state });
     return descriptor;
   };
 }
@@ -57,7 +57,7 @@ export function ShouldThrow(state: ThrowableError): MethodDecorator {
  */
 export function Timeout(ms: number): MethodDecorator {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor) => {
-    SuiteRegistryIndex.getForRegister(getClass(instance)).registerTest(property, descriptor.value, { timeout: ms });
+    SuiteRegistryIndex.getForRegister(getConstructor(instance)).registerTest(property, descriptor.value, { timeout: ms });
     return descriptor;
   };
 }

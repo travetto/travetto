@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 
 import { Registry } from '@travetto/registry';
+import { isClass } from '@travetto/runtime';
 import { Max, Method, Min, Schema, SchemaRegistryIndex } from '@travetto/schema';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
@@ -50,7 +51,7 @@ class MappedTypeSuite {
     assert(config);
 
     const picked = config.getFields().picked;
-    assert(picked);
+    assert(isClass(picked.type));
     // Verify structure of picked.type
     const pickedConfig = SchemaRegistryIndex.get(picked.type);
     assert(pickedConfig.getFields().name);
@@ -60,20 +61,20 @@ class MappedTypeSuite {
     assert(pickedConfig.getFields().age.max?.limit === 110);
 
     const omitted = config.getFields().omitted;
-    assert(omitted);
+    assert(isClass(omitted.type));
     const omittedConfig = SchemaRegistryIndex.get(omitted.type);
     assert(omittedConfig.getFields().name);
     assert(omittedConfig.getFields().age);
     assert(!omittedConfig.getFields().id);
 
     const part = config.getFields().part;
-    assert(part);
+    assert(isClass(part.type));
     const partConfig = SchemaRegistryIndex.get(part.type);
     assert(!partConfig.getFields().id.required?.active);
     assert(!partConfig.getFields().name.required?.active);
 
     const req = config.getFields().req;
-    assert(req);
+    assert(isClass(req.type));
     const reqConfig = SchemaRegistryIndex.get(req.type);
     assert(reqConfig.getFields().age.required?.active);
   }
@@ -84,13 +85,13 @@ class MappedTypeSuite {
     assert(method);
 
     const p = method.parameters[0];
-    assert(p);
+    assert(isClass(p.type));
     const pConfig = SchemaRegistryIndex.get(p.type);
     assert(pConfig.getFields().name);
     assert(!pConfig.getFields().id);
 
     const o = method.parameters[1];
-    assert(o);
+    assert(isClass(o.type));
     const oConfig = SchemaRegistryIndex.get(o.type);
     assert(oConfig.getFields().name);
     assert(!oConfig.getFields().id);
@@ -102,14 +103,14 @@ class MappedTypeSuite {
     assert(method);
 
     const p = method.parameters[0];
-    assert(p);
+    assert(isClass(p.type));
     const pConfig = SchemaRegistryIndex.get(p.type);
     assert(pConfig.getFields().name);
     assert(!pConfig.getFields().id);
     assert(!pConfig.getFields().age);
 
     const r = method.parameters[1];
-    assert(r);
+    assert(isClass(r.type));
     const rConfig = SchemaRegistryIndex.get(r.type);
     assert(rConfig.getFields().age.required?.active);
   }
@@ -117,7 +118,7 @@ class MappedTypeSuite {
   @Test()
   async testComplexMappedChainsAreFlattened() {
     const field = SchemaRegistryIndex.getNestedFieldConfig(Container, 'mixed');
-    assert(field);
+    assert(isClass(field?.type));
 
     const mixed = SchemaRegistryIndex.get(field.type);
     assert(mixed);

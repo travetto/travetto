@@ -1,6 +1,16 @@
 import { isBooleanObject, isNumberObject, isStringObject } from 'node:util/types';
 
-import { asConstructable, asFull, type Class, castTo, TypedObject } from '@travetto/runtime';
+import {
+  asConstructable,
+  asFull,
+  type Class,
+  castTo,
+  isPlainRecord,
+  isRecord,
+  TypedObject,
+  type UnknownRecord,
+  isUnsafeProperty
+} from '@travetto/runtime';
 
 import { UnknownType } from './types.ts';
 
@@ -11,17 +21,41 @@ const REGEX_PATTERN = /[/](.*)[/](i|g|m|s)?/;
  */
 export class DataUtil {
   /**
-   * Is a value a plain JS object, created using {}
-   * @param value Object to check
+   * Read a nested value by key path
+   * @param root Root object to traverse
+   * @param path Key segments to follow
    */
-  static isPlainObject(value: unknown): value is Record<string, unknown> {
-    return (
-      typeof value === 'object' && // separate from primitives
-      value !== undefined &&
-      value !== null && // is obvious
-      value.constructor === Object && // separate instances (Array, DOM, ...)
-      Object.prototype.toString.call(value) === '[object Object]'
-    ); // separate build-in like Math
+  static getPath<T = unknown>(root: unknown, path: string[]): { found: boolean; value: T } {
+    let current: unknown = root;
+    for (const segment of path) {
+      if (typeof current === 'object' && current !== null && segment in current) {
+        current = castTo<UnknownRecord>(current)[segment];
+      } else {
+        return { found: false, value: current as T };
+      }
+    }
+    return { found: true, value: current as T };
+  }
+
+  /**
+   * Write a nested value by key path, creating intermediate plain objects as needed
+   * @param root Root record to mutate
+   * @param path Key segments to follow
+   * @param value Value to assign at the leaf
+   */
+  static setPath(root: UnknownRecord, path: string[], value: unknown): void {
+    let current = root;
+    for (let index = 0; index < path.length; index += 1) {
+      const segment = path[index];
+      if (isUnsafeProperty(segment)) {
+        return; // Fail silently
+      } else if (index === path.length - 1) {
+        current[segment] = value;
+      } else {
+        const next = current[segment];
+        current = isRecord(next) ? next : (current[segment] = {});
+      }
+    }
   }
 
   /**
@@ -105,11 +139,11 @@ export class DataUtil {
       } else {
         // Object merge
         value = a;
-        const bObject: Record<string, unknown> = castTo(b);
-        const valueObject: Record<string, unknown> = castTo(value);
+        const bObject: UnknownRecord = castTo(b);
+        const valueObject: UnknownRecord = castTo(value);
 
         for (const key of Object.keys(bObject)) {
-          if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+          if (isUnsafeProperty(key)) {
             continue;
           }
           valueObject[key] = this.#deepAssignRaw(valueObject[key], bObject[key], mode);
@@ -231,7 +265,7 @@ export class DataUtil {
         return input;
       }
       case Object: {
-        if (!strict || this.isPlainObject(input)) {
+        if (!strict || isPlainRecord(input)) {
           return input;
         } else {
           throw new Error('Invalid object type');
@@ -241,7 +275,7 @@ export class DataUtil {
       case String:
         return `${input}`;
     }
-    if (!strict || this.isPlainObject(input)) {
+    if (!strict || isPlainRecord(input)) {
       return input;
     } else {
       throw new Error(`Unknown type ${type.name}`);

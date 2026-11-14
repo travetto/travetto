@@ -1,6 +1,5 @@
-import { type Class, type ClassInstance, castKey, castTo, TypedObject } from '@travetto/runtime';
+import { type Class, type ClassInstance, castKey, castTo, isClass, isPlainRecord, isRecord, TypedObject } from '@travetto/runtime';
 
-import { DataUtil } from '../data.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 import type { SchemaFieldMap, SchemaInputConfig } from '../service/types.ts';
 import { SchemaTypeUtil } from '../type-config.ts';
@@ -24,7 +23,7 @@ function resolveFieldMap<T>(base: Class<T>, item: T): SchemaFieldMap {
 }
 
 function isClassInstance<T>(value: unknown): value is ClassInstance<T> {
-  return !DataUtil.isPlainObject(value) && value !== null && typeof value === 'object' && !!value.constructor;
+  return !isPlainRecord(value) && isRecord(value) && !!value.constructor;
 }
 
 function isRangeValue(value: unknown): value is NumericComparable {
@@ -84,18 +83,17 @@ export class SchemaValidator {
     }
 
     const { type, array } = input;
-    const complex = SchemaRegistryIndex.has(type);
 
-    if (type === Object || type === UnknownType) {
+    if (type === Object || type === UnknownType || !type.name) {
       return [];
     } else if (array) {
       if (!Array.isArray(value)) {
         return this.#prepareErrors(path, [{ kind: 'type', type: Array, value }]);
       }
       let errors: ValidationError[] = [];
-      if (complex) {
+      if (SchemaRegistryIndex.has(input.type)) {
         for (let i = 0; i < value.length; i += 1) {
-          const subErrors = this.#validateFields(resolveFieldMap(type, value[i]), value[i], `${path}[${i}]`);
+          const subErrors = this.#validateFields(resolveFieldMap(input.type, value[i]), value[i], `${path}[${i}]`);
           errors = errors.concat(subErrors);
         }
       } else {
@@ -105,8 +103,8 @@ export class SchemaValidator {
         }
       }
       return errors;
-    } else if (complex) {
-      return this.#validateFields(resolveFieldMap(type, value), value, path);
+    } else if (SchemaRegistryIndex.has(input.type)) {
+      return this.#validateFields(resolveFieldMap(input.type, value), value, path);
     } else {
       const fieldErrors = this.#validateInput(input, value);
       return this.#prepareErrors(path, fieldErrors);
@@ -317,7 +315,10 @@ export class SchemaValidator {
     for (const param of config.parameters) {
       const i = param.index;
       errors.push(
-        ...[...this.#validateInputSchema(param, params[i]), ...(await this.#validateClassLevel(param.type, params[i]))].map(error => {
+        ...[
+          ...this.#validateInputSchema(param, params[i]),
+          ...(isClass(param.type) ? await this.#validateClassLevel(param.type, params[i]) : [])
+        ].map(error => {
           if (param.name && typeof param.name === 'string') {
             error.path = !prefixes[i] ? error.path.replace(`${param.name}.`, '') : error.path.replace(param.name, prefixes[i]!);
           }

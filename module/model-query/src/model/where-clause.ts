@@ -1,12 +1,27 @@
-import type { KeyPaths, Primitive, TimeSpan, ValidFields } from '@travetto/runtime';
+import type { Primitive, TimeSpan, SimpleFields, IntrinsicType, Any } from '@travetto/runtime';
 import type { Point } from '@travetto/schema';
+
+type KeyPathsInner<T, PrimitiveType = IntrinsicType | IntrinsicType[], PREFIX extends string = '', SEP extends string = '.'> = {
+  [K in keyof T]: K extends string
+    ? T[K] extends IntrinsicType[] | IntrinsicType | undefined
+      ? T[K] extends PrimitiveType
+        ? `${PREFIX}${K}`
+        : never
+      : T[K] extends Any[]
+        ? KeyPathsInner<T[K][number], PrimitiveType, `${K}${SEP}`, SEP>
+        : T[K] extends object
+          ? KeyPathsInner<T[K], PrimitiveType, `${K}${SEP}`, SEP>
+          : never
+    : never;
+}[keyof T];
+
+export type KeyPaths<T, PrimitiveType = IntrinsicType | IntrinsicType[]> = KeyPathsInner<Required<T>, PrimitiveType> & string;
 
 export type QueryPrimitive = Primitive | Date | Point;
 export type QueryPrimitiveArray = QueryPrimitive[];
 export type DistanceUnit = 'mi' | 'm' | 'km' | 'ft' | 'rad';
-export type RetainQueryPrimitiveFields<T> = Pick<T, ValidFields<T, QueryPrimitive>>;
+export type RetainQueryPrimitiveFields<T> = Pick<T, SimpleFields<T, QueryPrimitive>>;
 export type ValidStringFields<T> = KeyPaths<T, String | string | string[] | String[] | undefined>;
-export type ValidNumericFields<T> = KeyPaths<T, number | bigint | Number | undefined>;
 export type ValidComparableFields<T> = KeyPaths<T, number | bigint | Number | Date | undefined>;
 
 type General<T> = {

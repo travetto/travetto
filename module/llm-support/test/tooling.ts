@@ -3,16 +3,12 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
-import type { Class } from '@travetto/runtime';
+import { isRecord, type Class } from '@travetto/runtime';
 import { SchemaValidator } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 
 import { getLlmSupportToolDefinitions, runLlmSupportFlow, runLlmSupportTool } from '../src/tooling.ts';
 import { ExecutionResponseSchema, PlanResponseSchema, RecommendationResponseSchema } from '../src/types.ts';
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
 
 async function bindAndValidate<T extends object>(schema: Class<T>, value: unknown): Promise<T> {
   const bound = schema.from({});
@@ -43,7 +39,9 @@ class LlmSupportToolingTest {
 
   @Test()
   async supportsPlanToolInvocation() {
-    const output = await runLlmSupportTool('llm_support_plan', { operations: ['create-web-route'] });
+    const output = await runLlmSupportTool('llm_support_plan', {
+      operations: ['create-web-route']
+    });
 
     const bound = await bindAndValidate(PlanResponseSchema, output);
     assert(bound.plans.length === 1);

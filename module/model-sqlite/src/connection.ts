@@ -8,7 +8,7 @@ import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { ExistsError } from '@travetto/model';
 import { SQLConnection } from '@travetto/model-sql';
-import { castTo, JSONUtil, Runtime, RuntimeError, ShutdownManager, Util } from '@travetto/runtime';
+import { castTo, JSONUtil, Runtime, RuntimeError, ShutdownManager, Util, type UnknownRecord } from '@travetto/runtime';
 
 import type { SqliteModelConfig } from './config.ts';
 import { SqliteDialect } from './dialect.ts';
@@ -168,7 +168,7 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
   /**
    * Executes a query on the active client or pool directly
    */
-  async execute<Type = unknown>(query: string, values?: unknown[]): Promise<{ count: number; records: Type[] }> {
+  async execute<T = UnknownRecord>(query: string, values?: unknown[]): Promise<{ count: number; records: T[] }> {
     const isSelect =
       query.trim().startsWith('SELECT') ||
       query.trim().startsWith('PRAGMA') ||
@@ -189,7 +189,7 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
         prepared.setReadBigInts(true);
         if (isSelect) {
           const out = prepared.all(...normalized);
-          const records: Type[] = out.map(item => ({ ...castTo<Type>(item) }));
+          const records: T[] = out.map(item => ({ ...castTo<T>(item) }));
           return { count: out.length, records };
         } else {
           const out = prepared.run(...normalized);

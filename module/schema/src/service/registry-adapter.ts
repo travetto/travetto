@@ -1,8 +1,9 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { BinaryUtil, type Class, castKey, castTo, describeFunction, RuntimeError, safeAssign } from '@travetto/runtime';
+import { type Class, castKey, castTo, describeFunction, RuntimeError, safeAssign } from '@travetto/runtime';
 
 import {
   CONSTRUCTOR_PROPERTY,
+  type SchemaBasicType,
   type SchemaClassConfig,
   type SchemaCoreConfig,
   type SchemaFieldConfig,
@@ -27,6 +28,10 @@ function assignMetadata<T>(key: symbol, base: SchemaCoreConfig, data: Partial<T>
     safeAssign(out, d);
   }
   return castTo(out);
+}
+
+function readMetadata<T>(base: SchemaCoreConfig | undefined, key: symbol): T | undefined {
+  return castTo<T>(base?.metadata?.[key]);
 }
 
 function combineCore<T extends SchemaCoreConfig>(
@@ -180,8 +185,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   getMetadata<T>(key: symbol): T | undefined {
-    const metadata = this.#config?.metadata;
-    return castTo<T>(metadata?.[key]);
+    return readMetadata<T>(this.#config, key);
   }
 
   registerField(field: string, ...data: Partial<SchemaFieldConfig>[]): SchemaFieldConfig {
@@ -197,8 +201,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   getFieldMetadata<T>(field: string, key: symbol): T | undefined {
-    const metadata = this.#config?.fields[field]?.metadata;
-    return castTo<T>(metadata?.[key]);
+    return readMetadata<T>(this.#config?.fields[field], key);
   }
 
   registerClass({ methods, ...config }: Partial<SchemaClassConfig> = {}): SchemaClassConfig {
@@ -225,8 +228,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   getMethodMetadata<T>(method: string, key: symbol): T | undefined {
-    const metadata = this.#config?.methods[method]?.metadata;
-    return castTo<T>(metadata?.[key]);
+    return readMetadata<T>(this.#config?.methods[method], key);
   }
 
   registerParameter(method: string, idx: number, ...data: Partial<SchemaParameterConfig>[]): SchemaParameterConfig {
@@ -241,8 +243,7 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
   }
 
   getParameterMetadata<T>(method: string, idx: number, key: symbol): T | undefined {
-    const metadata = this.#config?.methods[method]?.parameters[idx]?.metadata;
-    return castTo<T>(metadata?.[key]);
+    return readMetadata<T>(this.#config?.methods[method]?.parameters[idx], key);
   }
 
   finalize(parent?: SchemaClassConfig): void {
@@ -273,22 +274,11 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
     for (const method of Object.values(config.methods)) {
       method.parameters = method.parameters.toSorted((a, b) => a.index! - b.index!);
-      if (method.returnType?.type) {
-        method.returnType.binary = BinaryUtil.isBinaryTypeReference(method.returnType.type);
-      }
-      for (const input of method.parameters) {
-        if (input.type) {
-          input.binary = BinaryUtil.isBinaryTypeReference(input.type);
-        }
-      }
     }
 
     // Validate if aliases are duplicated
     const aliasMap: Record<string, SchemaFieldConfig> = {};
     for (const field of Object.values(config.fields)) {
-      if (field.type) {
-        field.binary = BinaryUtil.isBinaryTypeReference(field.type);
-      }
       for (const alias of field.aliases ?? []) {
         if (alias in aliasMap && aliasMap[alias].name !== field.name) {
           throw new RuntimeError(
@@ -324,8 +314,8 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return methodConfig;
   }
 
-  getMethodReturnType(method: string): Class {
-    return this.getMethod(method).returnType!.type;
+  getMethodReturnType(method: string): SchemaBasicType | undefined {
+    return this.getMethod(method).returnType;
   }
 
   getFields(): SchemaFieldMap {

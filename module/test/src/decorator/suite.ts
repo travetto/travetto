@@ -1,4 +1,4 @@
-import { type Class, type ClassInstance, castTo, getClass } from '@travetto/runtime';
+import { type Class, type ClassInstance, castTo, getConstructor } from '@travetto/runtime';
 
 import type { SuiteConfig } from '../model/suite.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
@@ -32,7 +32,7 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
  */
 export function BeforeAll() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(getClass(instance)).register({
+    SuiteRegistryIndex.getForRegister(getConstructor(instance)).register({
       phaseHandlers: [{ beforeAll: (realInstance: unknown): unknown => descriptor.value.call(realInstance) }]
     });
     return descriptor;
@@ -45,7 +45,7 @@ export function BeforeAll() {
  */
 export function BeforeEach() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(getClass(instance)).register({
+    SuiteRegistryIndex.getForRegister(getConstructor(instance)).register({
       phaseHandlers: [{ beforeEach: (realInstance: unknown): unknown => descriptor.value.call(realInstance) }]
     });
     return descriptor;
@@ -58,7 +58,7 @@ export function BeforeEach() {
  */
 export function AfterAll() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(getClass(instance)).register({
+    SuiteRegistryIndex.getForRegister(getConstructor(instance)).register({
       phaseHandlers: [{ afterAll: (realInstance: unknown): unknown => descriptor.value.call(realInstance) }]
     });
     return descriptor;
@@ -71,7 +71,7 @@ export function AfterAll() {
  */
 export function AfterEach() {
   return (instance: ClassInstance, property: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-    SuiteRegistryIndex.getForRegister(getClass(instance)).register({
+    SuiteRegistryIndex.getForRegister(getConstructor(instance)).register({
       phaseHandlers: [{ afterEach: (realInstance: unknown): unknown => descriptor.value.call(realInstance) }]
     });
     return descriptor;

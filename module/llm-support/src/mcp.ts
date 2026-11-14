@@ -1,4 +1,4 @@
-import { JSONUtil } from '@travetto/runtime';
+import { JSONUtil, type UnknownRecord } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 
 import { getLlmSupportToolDefinitions, type LlmSupportToolName, runLlmSupportTool } from './tooling.ts';
@@ -99,7 +99,7 @@ function toResult(id: string | number | null, result: unknown): JsonRpcResponse 
   };
 }
 
-function asObject(value: unknown): Record<string, unknown> {
+function asObject(value: unknown): UnknownRecord {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     return {};
   }

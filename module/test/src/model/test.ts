@@ -1,4 +1,4 @@
-import type { Class, ConsoleEvent, TimeSpan } from '@travetto/runtime';
+import type { Class, ConsoleEvent, TimeSpan, UnknownRecord } from '@travetto/runtime';
 
 import type { Skip, TestCore } from './common.ts';
 
@@ -144,7 +144,7 @@ export type TestRun = {
   /**
    * Test run metadata
    */
-  metadata?: Record<string, unknown>;
+  metadata?: UnknownRecord;
   /**
    * unique id for the run
    */
@@ -166,7 +166,7 @@ export type TestDiffInput = {
   /**
    * Test run metadata
    */
-  metadata?: Record<string, unknown>;
+  metadata?: UnknownRecord;
 };
 
 /**
@@ -184,7 +184,7 @@ export type TestGlobInput = {
   /**
    * Test run metadata
    */
-  metadata?: Record<string, unknown>;
+  metadata?: UnknownRecord;
 };
 
 export type TestRunInput = TestRun | TestDiffInput | TestGlobInput;

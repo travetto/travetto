@@ -8,8 +8,8 @@ import type { ControllerVisitor, ControllerVisitorOptions } from './types.ts';
  * Supports visiting the controller structure
  */
 export class ControllerVisitUtil {
-  static #onSchemaEvent(visitor: ControllerVisitor, type?: Class): unknown | Promise<unknown> {
-    return type && SchemaRegistryIndex.has(type) ? visitor.onSchema?.(SchemaRegistryIndex.getConfig(type)) : undefined;
+  static #onSchemaEvent(visitor: ControllerVisitor, type: Class): unknown | Promise<unknown> {
+    return visitor.onSchema?.(SchemaRegistryIndex.getConfig(type));
   }
 
   static async visitController(visitor: ControllerVisitor, cls: Class, options: ControllerVisitorOptions = {}): Promise<void> {
@@ -33,11 +33,13 @@ export class ControllerVisitUtil {
       }
 
       await visitor.onEndpointStart?.(endpoint, controller);
-      if (endpointSchema.returnType) {
+      if (SchemaRegistryIndex.has(endpointSchema.returnType?.type)) {
         await this.#onSchemaEvent(visitor, endpointSchema.returnType.type);
       }
       for (const param of endpointSchema.parameters) {
-        await this.#onSchemaEvent(visitor, param.type);
+        if (SchemaRegistryIndex.has(param.type)) {
+          await this.#onSchemaEvent(visitor, param.type);
+        }
       }
       await visitor.onEndpointEnd?.(endpoint, controller);
     }

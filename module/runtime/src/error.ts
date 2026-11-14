@@ -1,4 +1,4 @@
-import { castTo } from './types.ts';
+import { castTo, type UnknownRecord } from './types.ts';
 
 export type ErrorCategory = 'general' | 'notfound' | 'data' | 'permissions' | 'authentication' | 'timeout' | 'unavailable';
 
@@ -7,7 +7,7 @@ export type RuntimeErrorOptions<T> = Omit<Partial<RuntimeError>, 'details'> & (T
 /**
  * Framework error class, with the aim of being extensible
  */
-export class RuntimeError<T = Record<string, unknown> | undefined> extends Error {
+export class RuntimeError<T = UnknownRecord | undefined> extends Error {
   static defaultCategory: ErrorCategory = 'general';
 
   type: string;

@@ -45,7 +45,7 @@ import {
   type SortedIndex,
   type SortedIndexSelection
 } from '@travetto/model-indexed';
-import { type Class, castTo, JSONUtil, ShutdownManager, TimeUtil } from '@travetto/runtime';
+import { type Class, type UnknownRecord, castTo, JSONUtil, ShutdownManager, TimeUtil } from '@travetto/runtime';
 
 import type { DynamoDBModelConfig } from './config.ts';
 import { DynamoDBUtil } from './util.ts';
@@ -207,7 +207,7 @@ export class DynamoDBModelService
 
     try {
       if (mode === 'create') {
-        const indices: Record<string, unknown> = {};
+        const indices: UnknownRecord = {};
         for (const idx of ModelRegistryIndex.getIndices(cls)) {
           if (isModelIndexedIndex(idx)) {
             const { keyIndexAttribute, sortIndexAttribute } = DynamoDBUtil.indexNames(idx.name);
@@ -239,7 +239,7 @@ export class DynamoDBModelService
         };
         return await this.client.putItem(query);
       } else {
-        const indices: Record<string, unknown> = {};
+        const indices: UnknownRecord = {};
         const expr: string[] = [];
 
         for (const idx of ModelRegistryIndex.getIndices(cls)) {
@@ -586,9 +586,7 @@ export class DynamoDBModelService
     idx: SingleItemIndex<T, K, S>,
     body: FullKeyedIndexWithPartialBody<T, K, S>
   ): Promise<T> {
-    const prepared = await ModelCrudUtil.prePartialUpdate(cls, castTo(body), { validateId: false });
-    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => this.getByIndex(cls, idx, castTo(body)), prepared);
-    return this.update(cls, item);
+    return ModelIndexedUtil.naivePartialUpdate(this, cls, idx, body);
   }
 
   async pageByIndex<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(

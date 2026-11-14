@@ -1,6 +1,6 @@
 import type { Url } from 'node:url';
 
-import type { BinaryType, FileLoader } from '@travetto/runtime';
+import type { BinaryType, FileLoader, UnknownRecord } from '@travetto/runtime';
 
 /**
  * An address
@@ -45,7 +45,7 @@ export interface EmailOptions<B extends BinaryType = BinaryType> {
   html: string;
   text?: string;
   subject: string;
-  context?: Record<string, unknown>; // For templating
+  context?: UnknownRecord; // For templating
 
   disableThreading?: boolean;
 

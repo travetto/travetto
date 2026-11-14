@@ -1,7 +1,7 @@
-import { type ModelCrudSupport, ModelRegistryIndex, type ModelType, NotFoundError, type OptionalId } from '@travetto/model';
+import { type ModelCrudSupport, ModelCrudUtil, ModelRegistryIndex, type ModelType, NotFoundError, type OptionalId } from '@travetto/model';
 import { type Class, castTo, hasFunction } from '@travetto/runtime';
 
-import type { KeyedIndexSelection, SingleItemIndex, SortedIndexSelection } from './types/indexes.ts';
+import type { FullKeyedIndexWithPartialBody, KeyedIndexSelection, SingleItemIndex, SortedIndexSelection } from './types/indexes.ts';
 import type { ModelIndexedSupport } from './types/service.ts';
 
 /**
@@ -54,6 +54,24 @@ export class ModelIndexedUtil {
     const identifier = idSource.get(await service.getByIndex(cls, idx, castTo(body)));
     idSource.set(castTo(body), identifier);
     return await service.update(cls, castTo(body));
+  }
+
+  /**
+   * Naive partial update by index
+   * @param service
+   * @param cls
+   * @param idx
+   * @param body
+   */
+  static async naivePartialUpdate<T extends ModelType, K extends KeyedIndexSelection<T>, S extends SortedIndexSelection<T>>(
+    service: ModelIndexedSupport & ModelCrudSupport,
+    cls: Class<T>,
+    idx: SingleItemIndex<T, K, S>,
+    body: FullKeyedIndexWithPartialBody<T, K, S>
+  ): Promise<T> {
+    const prepared = await ModelCrudUtil.prePartialUpdate(cls, castTo(body), { validateId: false });
+    const item = await ModelCrudUtil.naivePartialUpdate(cls, () => service.getByIndex(cls, idx, castTo(body)), prepared);
+    return await service.update(cls, item);
   }
 
   /**

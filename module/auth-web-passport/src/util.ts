@@ -1,4 +1,4 @@
-import { castTo, JSONUtil } from '@travetto/runtime';
+import { castTo, isUnsafeProperty, JSONUtil, type UnknownRecord } from '@travetto/runtime';
 import type { WebFilterContext, WebRequest } from '@travetto/web';
 
 /**
@@ -9,7 +9,7 @@ export class PassportUtil {
    * Read passport state string as bas64 encoded JSON value
    * @param input The input for a state read (string, or a request)
    */
-  static readState<T = Record<string, unknown>>(input?: string | WebRequest): T | undefined {
+  static decodeState<T = UnknownRecord>(input?: string | WebRequest): T | undefined {
     const state =
       typeof input === 'string' ? input : typeof input?.context.httpQuery?.state === 'string' ? input?.context.httpQuery?.state : '';
     if (state) {
@@ -24,7 +24,7 @@ export class PassportUtil {
    * @param state
    * @returns base64 encoded state value, if state is provided
    */
-  static writeState(state?: Record<string, unknown>): string | undefined {
+  static encodeState(state?: UnknownRecord): string | undefined {
     return state ? JSONUtil.toBase64(state) : undefined;
   }
 
@@ -35,17 +35,17 @@ export class PassportUtil {
    * @param key Optional location to nest new state data
    * @returns
    */
-  static addToState(state: string | Record<string, unknown>, current?: string | WebRequest, key?: string): string {
-    const original = this.readState(current) ?? {};
-    const toAdd: Record<string, unknown> = typeof state === 'string' ? JSONUtil.fromUTF8(state) : state;
-    const base: Record<string, unknown> = key ? castTo((original[key] ??= {})) : original;
+  static addToState(state: string | UnknownRecord, current?: string | WebRequest, key?: string): string {
+    const original = this.decodeState(current) ?? {};
+    const toAdd: UnknownRecord = typeof state === 'string' ? JSONUtil.fromUTF8(state) : state;
+    const base: UnknownRecord = key ? castTo((original[key] ??= {})) : original;
     for (const property of Object.keys(toAdd)) {
-      if (property === '__proto__' || property === 'constructor' || property === 'prototype') {
+      if (isUnsafeProperty(property)) {
         continue;
       }
       base[property] = toAdd[property];
     }
-    return this.writeState(original)!;
+    return this.encodeState(original)!;
   }
 
   /**

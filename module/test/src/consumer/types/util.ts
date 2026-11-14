@@ -1,7 +1,7 @@
 import { AssertionError } from 'node:assert';
 import util from 'node:util';
 
-import { TypedObject } from '@travetto/runtime';
+import { TypedObject, type UnknownRecord } from '@travetto/runtime';
 
 export class TestConsumerUtil {
   /**
@@ -17,7 +17,7 @@ export class TestConsumerUtil {
             .slice(0, verbose ? -1 : 5)
             .join('\n')
         : error.message;
-      const subObject: Record<string, unknown> = {};
+      const subObject: UnknownRecord = {};
       for (const key of TypedObject.keys(error)) {
         if (key !== 'stack' && key !== 'message' && key !== 'name') {
           subObject[key] = error[key];

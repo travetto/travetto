@@ -1,4 +1,4 @@
-import { type Any, type ClassInstance, getClass } from '@travetto/runtime';
+import { type Any, type ClassInstance, getConstructor } from '@travetto/runtime';
 
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 import type { SchemaFieldConfig } from '../service/types.ts';
@@ -11,7 +11,7 @@ type PropType<V> = <T extends Partial<Record<K, V | Function>>, K extends string
 
 function field<V>(...configs: Partial<SchemaFieldConfig>[]): PropType<V> {
   return (instance: ClassInstance, property: string): void => {
-    SchemaRegistryIndex.getForRegister(getClass(instance)).registerField(property, ...configs);
+    SchemaRegistryIndex.getForRegister(getConstructor(instance)).registerField(property, ...configs);
   };
 }
 
@@ -23,8 +23,8 @@ function field<V>(...configs: Partial<SchemaFieldConfig>[]): PropType<V> {
  * @augments `@travetto/schema:Field`
  * @kind decorator
  */
-export function Field(type?: Partial<SchemaFieldConfig>, ...configs: Partial<SchemaFieldConfig>[]): PropType<unknown> {
-  return field(type!, ...configs);
+export function Field(...configs: Partial<SchemaFieldConfig>[]): PropType<unknown> {
+  return field(...configs);
 }
 
 /**
@@ -53,4 +53,18 @@ export function Readonly(): PropType<unknown> {
  */
 export function Secret(active = true): PropType<unknown> {
   return field({ secret: active });
+}
+
+/**
+ * Sets the discriminator field via a property decorator
+ * @augments `@travetto/schema:Input`
+ * @kind decorator
+ */
+export function DiscriminatorField(): (instance: ClassInstance, property: string) => void {
+  return (instance: ClassInstance, property: string): void => {
+    SchemaRegistryIndex.getForRegister(getConstructor(instance)).register({
+      discriminatedBase: true,
+      discriminatedField: property
+    });
+  };
 }

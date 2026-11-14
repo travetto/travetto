@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { type Class, castTo, TimeUtil } from '@travetto/runtime';
+import { type Class, TimeUtil, type UnknownRecord } from '@travetto/runtime';
 import { BindUtil, CommonRegex, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 /**
@@ -171,11 +171,13 @@ export class SchemaFaker {
       return this.#array(config);
     } else if (config.enum) {
       return faker.helpers.arrayElement(config.enum.values);
+    } else if (SchemaRegistryIndex.has(config.type)) {
+      return this.generate(config.type);
     } else {
       switch (config.type) {
         case Number:
           return this.#number(config);
-        case castTo(BigInt):
+        case BigInt:
           return this.#bigInt(config);
         case String:
           return this.#string(config);
@@ -183,9 +185,6 @@ export class SchemaFaker {
           return this.#date(config);
         case Boolean:
           return faker.datatype.boolean();
-      }
-      if (SchemaRegistryIndex.has(config.type)) {
-        return this.generate(config.type);
       }
     }
   }
@@ -198,7 +197,7 @@ export class SchemaFaker {
     const schema = SchemaRegistryIndex.get(cls);
     const fields = schema.getFields();
     const subTypeField = schema.getDiscriminatedConfig()?.discriminatedField;
-    const out: Record<string, unknown> = {};
+    const out: UnknownRecord = {};
 
     for (const [name, fieldConfig] of Object.entries(fields)) {
       if (name === subTypeField) {

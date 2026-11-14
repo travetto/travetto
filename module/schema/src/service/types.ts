@@ -1,4 +1,4 @@
-import type { Any, Class, IntrinsicType, NumericLikeIntrinsic, Primitive } from '@travetto/runtime';
+import { type Any, type Class, type IntrinsicType, type NumericLikeIntrinsic, type Primitive } from '@travetto/runtime';
 
 import type { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
 
@@ -20,13 +20,9 @@ export type SchemaBasicType = {
    */
   array?: boolean;
   /**
-   * Is the type a binary type
+   * The class or primitive constructor tied to the type
    */
-  binary?: boolean;
-  /**
-   * The class tied to the type
-   */
-  type: Class;
+  type: Function;
   /**
    * Is the field a foreign type
    */

@@ -1,5 +1,5 @@
 import { Injectable } from '@travetto/di';
-import { RuntimeResources } from '@travetto/runtime';
+import { RuntimeResources, type UnknownRecord } from '@travetto/runtime';
 
 import type { MailInterpolator } from './template.ts';
 import type { MailTransport } from './transport.ts';
@@ -52,7 +52,7 @@ export class MailService {
    * @param ctx
    * @returns
    */
-  async renderMessage(keyOrMessage: string | EmailCompiled | EmailOptions, ctx: Record<string, unknown>): Promise<EmailCompiled> {
+  async renderMessage(keyOrMessage: string | EmailCompiled | EmailOptions, ctx: UnknownRecord): Promise<EmailCompiled> {
     const template = typeof keyOrMessage === 'string' ? await this.getCompiled(keyOrMessage) : keyOrMessage;
 
     const [html, text, subject] = await Promise.all([
@@ -70,14 +70,14 @@ export class MailService {
   async send<S extends SentEmail = SentEmail>(
     message: Pick<EmailOptions, 'to' | 'from' | 'replyTo'>,
     key: string,
-    ctx?: Record<string, unknown>,
+    ctx?: UnknownRecord,
     base?: MessageWithoutBody
   ): Promise<S>;
   async send<S extends SentEmail = SentEmail>(message: EmailOptions): Promise<S>;
   async send<S extends SentEmail = SentEmail>(
     message: EmailOptions | Pick<EmailOptions, 'to' | 'from' | 'replyTo'>,
     key?: string,
-    ctx?: Record<string, unknown>,
+    ctx?: UnknownRecord,
     base?: MessageWithoutBody
   ): Promise<S> {
     const keyOrMessage = key ?? ('html' in message ? message : '') ?? '';

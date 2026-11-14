@@ -1,5 +1,5 @@
 import { DependencyRegistryIndex } from '@travetto/di';
-import { asConstructable, type Class, castKey, castTo, TypedObject } from '@travetto/runtime';
+import { asConstructable, type Class, castKey, castTo, TypedObject, type UnknownRecord, isClass } from '@travetto/runtime';
 import { BindUtil, type SchemaParameterConfig, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
@@ -92,7 +92,7 @@ export class EndpointUtil {
       case 'header':
         return isArray ? request.headers.getList(name) : request.headers.get(name);
       case 'query': {
-        const withQuery: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
+        const withQuery: typeof request & { [WebQueryExpandedSymbol]?: UnknownRecord } = request;
         const query = (withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {}));
         return query[name];
       }
@@ -110,12 +110,12 @@ export class EndpointUtil {
       return param.extract(request, param);
     } else if (param.location === 'query') {
       // TODO: Revisit the prefix logic/structure in general
-      const withQuery: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
+      const withQuery: typeof request & { [WebQueryExpandedSymbol]?: UnknownRecord } = request;
       const query = (withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {}));
       if (param.prefix) {
         // Has a prefix provided
         return query[param.prefix];
-      } else if (input.type.Ⲑid) {
+      } else if (isClass(input.type)) {
         // Is a full type
         return query;
       }

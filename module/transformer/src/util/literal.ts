@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { type TemplateLiteral, transformCast } from '../types/shared.ts';
+import { type TemplateLiteral, transformCast, type UnknownRecord } from '../types/shared.ts';
 
 const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T>(value: T): K[];
@@ -123,7 +123,7 @@ export class LiteralUtil {
     } else if (value.kind === ts.SyntaxKind.TrueKeyword) {
       return true;
     } else if (ts.isObjectLiteralExpression(value)) {
-      const out: Record<string, unknown> = {};
+      const out: UnknownRecord = {};
       for (const pair of value.properties) {
         if (ts.isPropertyAssignment(pair)) {
           out[pair.name.getText()] = this.toLiteral(pair.initializer, strict);

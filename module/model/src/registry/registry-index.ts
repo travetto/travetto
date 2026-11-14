@@ -1,5 +1,5 @@
 import { type RegistrationMethods, Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
-import { type Class, castKey, RuntimeError } from '@travetto/runtime';
+import { type Class, castKey, castTo, RuntimeError } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { ModelType } from '../types/model.ts';
@@ -16,8 +16,8 @@ export class ModelRegistryIndex implements RegistryIndex {
     return this.#instance.store.getForRegister(cls);
   }
 
-  static getConfig(cls: Class): ModelConfig {
-    return this.#instance.getConfig(cls);
+  static getConfig<T extends ModelType = ModelType>(cls: Class<T>): ModelConfig<T> {
+    return this.#instance.getConfig<T>(cls);
   }
 
   static has(cls: Class): cls is Class<ModelType> {
@@ -80,8 +80,8 @@ export class ModelRegistryIndex implements RegistryIndex {
     }
   }
 
-  getConfig(cls: Class): ModelConfig<ModelType> {
-    return this.store.get(cls).get();
+  getConfig<T extends ModelType = ModelType>(cls: Class<T>): ModelConfig<T> {
+    return castTo(this.store.get(cls).get());
   }
 
   /**

@@ -59,11 +59,11 @@ export class ModelConfig<T extends ModelType = ModelType> {
   /**
    * Pre-persist handlers
    */
-  prePersist?: { scope: PrePersistScope; handler: DataHandler<unknown> }[];
+  prePersist?: { scope: PrePersistScope; handler: DataHandler<T> }[];
   /**
    * Post-load handlers
    */
-  postLoad?: DataHandler<unknown>[];
+  postLoad?: DataHandler<T>[];
   /**
    * Fields to ignore during persistence
    */

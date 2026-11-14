@@ -1,6 +1,6 @@
 import { type AsyncContext, AsyncContextValue } from '@travetto/context';
 import { ModelRegistryIndex, type ModelType } from '@travetto/model';
-import { type AsyncMethodDescriptor, type Class, castTo, Util } from '@travetto/runtime';
+import { type AsyncMethodDescriptor, type Class, type UnknownRecord, castTo, Util } from '@travetto/runtime';
 
 import type { AbstractANSI99Dialect } from './dialect.ts';
 import { SQLModelSchemaUtil } from './schema.ts';
@@ -81,7 +81,7 @@ export abstract class SQLConnection<C = unknown, F extends SQLConfiguration = SQ
   /**
    * Executes a SQL query
    */
-  abstract execute<Type = unknown>(query: string, values?: unknown[]): Promise<{ count: number; records: Type[] }>;
+  abstract execute<T = UnknownRecord>(query: string, values?: unknown[]): Promise<{ count: number; records: T[] }>;
 
   /**
    * Runs an operation with an active connection (allocating one if not already active)

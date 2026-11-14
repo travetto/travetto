@@ -10,8 +10,8 @@ import type { SchemaCoreConfig } from '../service/types.ts';
  * @kind decorator
  */
 export function Describe(config: Partial<Omit<SchemaCoreConfig, 'metadata'>>) {
-  return (instanceOrCls: Class | ClassInstance, property?: string, descriptorOrIdx?: PropertyDescriptor | number): void => {
-    const adapter = SchemaRegistryIndex.getForRegister(getClass(instanceOrCls));
+  return (target: Class | ClassInstance, property?: string, descriptorOrIdx?: PropertyDescriptor | number): void => {
+    const adapter = SchemaRegistryIndex.getForRegister(getClass(target));
     if (!property) {
       adapter.register(config);
     } else {
@@ -31,7 +31,7 @@ export function Describe(config: Partial<Omit<SchemaCoreConfig, 'metadata'>>) {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export const IsPrivate = (): ((instanceOrCls: Class | ClassInstance, property?: string) => void) => Describe({ private: true });
+export const IsPrivate = (): ((target: Class | ClassInstance, property?: string) => void) => Describe({ private: true });
 
 /**
  * Mark a field/method as ignored

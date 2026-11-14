@@ -83,7 +83,7 @@ export class DynamoDBUtil {
           keys.push({ AttributeName: keyIndexAttribute, KeyType: 'HASH' });
           keys.push({ AttributeName: sortIndexAttribute, KeyType: 'RANGE' });
           attributes.push({ AttributeName: keyIndexAttribute, AttributeType: 'S' });
-          attributes.push({ AttributeName: sortIndexAttribute, AttributeType: castTo(fieldType) === String ? 'S' : 'N' });
+          attributes.push({ AttributeName: sortIndexAttribute, AttributeType: fieldType === String ? 'S' : 'N' });
           break;
         }
         case 'indexed:keyed': {
