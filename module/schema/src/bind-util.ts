@@ -18,6 +18,21 @@ function isInstance<T>(value: unknown): value is T {
  * Utilities for binding objects to schemas
  */
 export class BindUtil {
+  /** Clean out undefined fields */
+  static #removeUndefinedField<T>(instance: T): T {
+    for (const key of TypedObject.keys(instance)) {
+      // Do not retain undefined fields
+      const descriptor = Object.getOwnPropertyDescriptor(instance, key);
+      if (descriptor?.writable === false || descriptor?.get) {
+        continue;
+      }
+      if (instance[key] === undefined) {
+        delete instance[key];
+      }
+    }
+    return instance;
+  }
+
   /**
    * Utility to make a property accessor enumerable at runtime
    */
@@ -159,24 +174,15 @@ export class BindUtil {
     }
     if (data instanceof cls) {
       return castTo(data);
-    } else {
-      const resolvedCls = SchemaRegistryIndex.has(cls) ? SchemaRegistryIndex.resolveInstanceType<T>(cls, asFull<T>(data)) : cls;
-      const instance = classConstruct<T & { type?: string }>(resolvedCls);
-
-      for (const key of TypedObject.keys(instance)) {
-        // Do not retain undefined fields
-        const descriptor = Object.getOwnPropertyDescriptor(instance, key);
-        if (descriptor?.writable === false || descriptor?.get) {
-          continue;
-        }
-        if (instance[key] === undefined) {
-          delete instance[key];
-        }
-      }
-
-      const out = this.bindSchemaToObject(resolvedCls, instance, data, config);
-      SchemaRegistryIndex.getOptional(resolvedCls)?.ensureInstanceTypeField(out);
+    } else if (SchemaRegistryIndex.has(cls)) {
+      const resolvedCls = SchemaRegistryIndex.resolveInstanceType<T>(cls, asFull<T>(data));
+      const instance = classConstruct(resolvedCls);
+      const out = this.bindSchemaToObject(resolvedCls, this.#removeUndefinedField(instance), data, config);
+      SchemaRegistryIndex.get(resolvedCls).ensureInstanceTypeField(out);
       return out;
+    } else {
+      const instance = classConstruct<T>(cls);
+      return this.bindSchemaToObject(cls, this.#removeUndefinedField(instance), data, config);
     }
   }
 
