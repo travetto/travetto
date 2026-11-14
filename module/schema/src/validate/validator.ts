@@ -85,7 +85,7 @@ export class SchemaValidator {
 
     const { type, array } = input;
 
-    if (type.value === Object || type.value === UnknownType || !type.value.name) {
+    if (type.value === Object || type.value === UnknownType) {
       return [];
     } else if (array) {
       if (!Array.isArray(value)) {
