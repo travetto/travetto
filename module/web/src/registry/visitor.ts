@@ -33,11 +33,13 @@ export class ControllerVisitUtil {
       }
 
       await visitor.onEndpointStart?.(endpoint, controller);
-      if (endpointSchema.returnType) {
-        await this.#onSchemaEvent(visitor, endpointSchema.returnType.type);
+      if (endpointSchema.returnType?.type?.kind === 'complex') {
+        await this.#onSchemaEvent(visitor, endpointSchema.returnType.type.value);
       }
       for (const param of endpointSchema.parameters) {
-        await this.#onSchemaEvent(visitor, param.type);
+        if (param.type?.kind === 'complex') {
+          await this.#onSchemaEvent(visitor, param.type.value);
+        }
       }
       await visitor.onEndpointEnd?.(endpoint, controller);
     }

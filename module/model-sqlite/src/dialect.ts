@@ -7,7 +7,7 @@ import {
   type TextSearchState,
   type TransactionStatements
 } from '@travetto/model-sql';
-import { type Class, castTo, JSONUtil } from '@travetto/runtime';
+import { castTo, JSONUtil } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
 export class SqliteDialect extends AbstractANSI99Dialect {
@@ -32,23 +32,23 @@ export class SqliteDialect extends AbstractANSI99Dialect {
   }
 
   getColumnType(fieldConfiguration: SchemaFieldConfig): string {
-    if (fieldConfiguration.type === castTo(BigInt)) {
+    if (fieldConfiguration.type.value === BigInt) {
       return 'INTEGER';
     }
 
-    if (fieldConfiguration.type === Number) {
+    if (fieldConfiguration.type.value === Number) {
       return 'NUMERIC';
     }
 
-    if (fieldConfiguration.type === Date) {
+    if (fieldConfiguration.type.value === Date) {
       return 'TEXT';
     }
 
-    if (fieldConfiguration.type === Boolean) {
+    if (fieldConfiguration.type.value === Boolean) {
       return 'INTEGER';
     }
 
-    if (fieldConfiguration.type === String) {
+    if (fieldConfiguration.type.value === String) {
       return 'TEXT';
     }
 
@@ -73,7 +73,7 @@ export class SqliteDialect extends AbstractANSI99Dialect {
       return onLeaf(parentExpression);
     }
 
-    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField?.type, context.subPath);
+    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField ? context.arrayField.type : undefined, context.subPath);
     const arraySegmentIndices = subPathMetadata
       .map((metadataItem, metadataIndex) => (metadataItem.isArray ? metadataIndex : -1))
       .filter(itemIndex => itemIndex !== -1);
@@ -180,7 +180,7 @@ EXISTS (
     return caseInsensitive ? `(?i)${source}` : source;
   }
 
-  castColumn(sqlPath: string, type: Class): string {
+  castColumn(sqlPath: string, type: Function): string {
     if (type === Number) {
       return `CAST(${sqlPath} AS NUMERIC)`;
     }

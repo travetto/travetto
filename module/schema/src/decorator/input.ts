@@ -1,5 +1,6 @@
 import {
   type Any,
+  castTo,
   type Class,
   type ClassInstance,
   getClass,
@@ -10,7 +11,14 @@ import {
 } from '@travetto/runtime';
 
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
-import { CONSTRUCTOR_PROPERTY, type SchemaFieldConfig, type SchemaInputConfig } from '../service/types.ts';
+import {
+  CONSTRUCTOR_PROPERTY,
+  type SchemaDecoratorConfig,
+  type SchemaFieldConfig,
+  type SchemaInputConfig,
+  type SchemaValueType,
+  type SchemaValueTypeInput
+} from '../service/types.ts';
 import { CommonRegex } from '../validate/regex.ts';
 
 type StringType = string | string[];
@@ -37,6 +45,26 @@ function input<V>(...configs: Partial<SchemaInputConfig>[]): PropType<V> {
   };
 }
 
+function resolveSchemaValueType(type: SchemaValueTypeInput): SchemaValueType {
+  if (typeof type === 'function') {
+    return 'Ⲑid' in type ? { kind: 'complex', value: castTo<Class>(type) } : { kind: 'primitive', value: type };
+  }
+  return type;
+}
+
+/**
+ * Normalize decorator configs so raw constructors/functions become `SchemaValueType`
+ */
+export function normalizeSchemaDecoratorConfigs<T extends SchemaInputConfig>(
+  configs: (SchemaDecoratorConfig<T> | undefined)[]
+): Partial<T>[] {
+  return configs
+    .filter((config): config is SchemaDecoratorConfig<T> => !!config)
+    .map(config =>
+      config.type ? castTo<Partial<T>>({ ...config, type: resolveSchemaValueType(config.type) }) : castTo<Partial<T>>(config)
+    );
+}
+
 /**
  * Registering an input
  * @param type The type for the input
@@ -44,8 +72,11 @@ function input<V>(...configs: Partial<SchemaInputConfig>[]): PropType<V> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Input(type: Pick<SchemaInputConfig, 'type' | 'array'>, ...configs: Partial<SchemaInputConfig>[]): PropType<unknown> {
-  return input(type, ...configs);
+export function Input(
+  type: Pick<SchemaDecoratorConfig<SchemaInputConfig>, 'type' | 'array'>,
+  ...configs: SchemaDecoratorConfig<SchemaInputConfig>[]
+): PropType<unknown> {
+  return input(...normalizeSchemaDecoratorConfigs([type, ...configs]));
 }
 
 /**

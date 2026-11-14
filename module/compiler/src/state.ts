@@ -2,13 +2,7 @@ import fs from 'node:fs';
 
 import type { CompilerHost, CompilerOptions, Program, ScriptTarget, SourceFile } from 'typescript';
 
-import {
-  type ManifestIndex,
-  type ManifestModule,
-  ManifestModuleUtil,
-  type ManifestRoot,
-  path
-} from '@travetto/manifest';
+import { type ManifestIndex, type ManifestModule, ManifestModuleUtil, type ManifestRoot, path } from '@travetto/manifest';
 import type { TransformerManager } from '@travetto/transformer';
 
 import { CommonUtil } from './common.ts';

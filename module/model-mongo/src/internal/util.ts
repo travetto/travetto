@@ -125,7 +125,8 @@ export class MongoUtil {
         }
       } else if ((isPlain && !firstKey.startsWith('$')) || value?.constructor?.Ⲑid) {
         if (recursive) {
-          Object.assign(out, this.extractSimple(subField?.type, value, `${subpath}.`, recursive));
+          const nextBase = subField?.type.kind === 'complex' ? subField.type.value : undefined;
+          Object.assign(out, this.extractSimple(nextBase, value, `${subpath}.`, recursive));
         } else {
           out[subpath] = value;
         }
@@ -175,7 +176,7 @@ export class MongoUtil {
     const out: [BasicIdx, CreateIndexesOptions][] = [];
     const textFields: string[] = [];
     SchemaRegistryIndex.visitFields(cls, (field, path) => {
-      if (field.type === PointConcrete) {
+      if (field.type.value === PointConcrete) {
         const name = [...path, field].map(schema => schema.name).join('.');
         out.push([{ [name]: '2d' }, { name: this.namespaceIndex(cls, name) }]);
       } else if (field.specifiers?.includes('text') && (field.specifiers?.includes('long') || field.specifiers.includes('search'))) {

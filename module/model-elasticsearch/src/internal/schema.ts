@@ -1,6 +1,6 @@
 import type { MappingProperty, Script, MappingTypeMapping } from '@elastic/elasticsearch/api/types';
 
-import { type Class, castTo, toConcrete } from '@travetto/runtime';
+import { type Class, toConcrete } from '@travetto/runtime';
 import { DataUtil, type Point, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { EsSchemaConfig } from './types.ts';
@@ -87,11 +87,16 @@ export class ElasticsearchSchemaUtil {
     const properties: Record<string, MappingProperty> = {};
 
     for (const [field, config] of Object.entries(fields)) {
-      if (config.type === PointConcrete) {
+      if (config.type.kind === 'complex') {
+        properties[field] = {
+          type: config.array ? 'nested' : 'object',
+          ...this.generateSingleMapping(config.type.value, esSchema)
+        };
+      } else if (config.type.value === PointConcrete) {
         properties[field] = { type: 'geo_point' };
-      } else if (config.type === castTo(BigInt)) {
+      } else if (config.type.value === BigInt) {
         properties[field] = { type: 'long' };
-      } else if (config.type === Number) {
+      } else if (config.type.value === Number) {
         let property: Record<string, unknown> = { type: 'integer' };
         if (config.precision) {
           const [digits, decimals] = config.precision;
@@ -120,11 +125,11 @@ export class ElasticsearchSchemaUtil {
           }
         }
         properties[field] = property;
-      } else if (config.type === Date) {
+      } else if (config.type.value === Date) {
         properties[field] = { type: 'date', format: 'date_optional_time' };
-      } else if (config.type === Boolean) {
+      } else if (config.type.value === Boolean) {
         properties[field] = { type: 'boolean' };
-      } else if (config.type === String) {
+      } else if (config.type.value === String) {
         let text = {};
         if (config.specifiers?.includes('text')) {
           text = {
@@ -141,13 +146,8 @@ export class ElasticsearchSchemaUtil {
           }
         }
         properties[field] = { type: 'keyword', ...text };
-      } else if (config.type === Object) {
+      } else if (config.type.value === Object) {
         properties[field] = { type: 'object', dynamic: true };
-      } else if (SchemaRegistryIndex.has(config.type)) {
-        properties[field] = {
-          type: config.array ? 'nested' : 'object',
-          ...this.generateSingleMapping(config.type, esSchema)
-        };
       }
     }
 

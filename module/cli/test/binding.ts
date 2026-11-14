@@ -100,7 +100,7 @@ class SchemaBindingSuite {
     const color = schema.fields.color;
     assert(color.description === 'My color');
     assert(color.required?.active === false);
-    assert(color.type === String);
+    assert(color.type.value === String);
     assert(color.aliases?.includes('env.COLOR_EO'));
     assert(color.aliases?.includes('-l'));
     assert(color.aliases?.includes('--color'));
@@ -109,7 +109,7 @@ class SchemaBindingSuite {
     const age = schema.fields.age;
     assert(age.description === 'My age');
     assert(age.required?.active === false);
-    assert(age.type === Number);
+    assert(age.type.value === Number);
     assert(age.aliases?.includes('-g'));
     assert(age.aliases?.includes('--age'));
   }

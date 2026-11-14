@@ -26,7 +26,7 @@ export class ModelQueryAggregateUtil {
     if (count === 0) {
       return castTo({ count: 0 });
     }
-    const leafFieldType = SchemaRegistryIndex.getNestedFieldConfig(modelClass, field)!.type;
+    const leafFieldType = SchemaRegistryIndex.getNestedFieldConfig(modelClass, field)!.type.value;
 
     if (leafFieldType === Date) {
       return castTo({

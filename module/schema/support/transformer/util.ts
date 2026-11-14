@@ -251,17 +251,21 @@ class ${uniqueId} extends ${type.mappedClassName} {
     }
 
     const resolved = this.toConcreteType(state, typeExpr, node, config?.root ?? node);
-    const type =
+    const value =
       typeExpr.key === 'foreign'
         ? state.getConcreteType(node, state.factory.createIdentifier('Object'))
         : ts.isArrayLiteralExpression(resolved)
           ? resolved.elements[0]
           : resolved;
+    const { type: unwrappedType } = this.unwrapType(typeExpr);
 
     params.unshift(
       LiteralUtil.fromLiteral(state.factory, {
         array: ts.isArrayLiteralExpression(resolved),
-        type
+        type: {
+          kind: this.getSchemaValueTypeKind(unwrappedType),
+          value
+        }
       })
     );
 
@@ -336,34 +340,58 @@ class ${uniqueId} extends ${type.mappedClassName} {
   }
 
   /**
+   * Determine the schema value type kind for a resolved AST type
+   */
+  static getSchemaValueTypeKind(type?: AnyType): 'primitive' | 'complex' {
+    const resolved = type?.key === 'pointer' ? type.target : type;
+    switch (resolved?.key) {
+      case 'managed':
+        return resolved.concrete ? 'primitive' : 'complex';
+      case 'foreign':
+      case 'mapped':
+      case 'shape':
+        return 'complex';
+      default:
+        return 'primitive';
+    }
+  }
+
+  /**
    * Ensure type
    * @param state
    * @param node
    */
   static ensureType(state: TransformerState, anyType: AnyType, target: ts.Node): Record<string, unknown> {
     const { out, type } = this.unwrapType(anyType);
+    let value: ts.Expression | undefined;
     switch (type?.key) {
       case 'foreign': {
-        out.type = state.getForeignTarget(type);
+        value = state.getForeignTarget(type);
         break;
       }
       case 'managed':
-        out.type = state.typeToIdentifier(type);
+        value = state.typeToIdentifier(type);
         break;
       case 'mapped':
-        out.type = this.toConcreteType(state, type, target);
+        value = this.toConcreteType(state, type, target);
         break;
       case 'shape':
-        out.type = this.toConcreteType(state, type, target);
+        value = this.toConcreteType(state, type, target);
         break;
       case 'template':
-        out.type = state.factory.createIdentifier(type.ctor.name);
+        value = state.factory.createIdentifier(type.ctor.name);
         break;
       case 'literal': {
         if (type.ctor) {
-          out.type = out.array ? this.toConcreteType(state, type, target) : state.factory.createIdentifier(type.ctor.name);
+          value = out.array ? this.toConcreteType(state, type, target) : state.factory.createIdentifier(type.ctor.name);
         }
       }
+    }
+    if (value) {
+      out.type = {
+        kind: this.getSchemaValueTypeKind(type),
+        value
+      };
     }
     return out;
   }

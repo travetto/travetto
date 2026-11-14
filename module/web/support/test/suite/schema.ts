@@ -272,7 +272,7 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   @Test()
   async verifyList() {
     const responseType = getEndpointResponse('/users', 'GET');
-    assert(responseType === User);
+    assert(responseType?.value === User);
   }
 
   @Test()
@@ -284,8 +284,8 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   @Test()
   async verifyShapeClass() {
     const responseType = getEndpointResponse('/classShape/:shape', 'GET');
-    assert(responseType);
-    assert(SchemaRegistryIndex.has(responseType));
+    assert(responseType?.kind === 'complex');
+    assert(SchemaRegistryIndex.has(responseType.value));
   }
 
   @Test()
@@ -297,12 +297,12 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   @Test()
   async verifyCustomSerializable() {
     const responseType = getEndpointResponse('/customSerialize', 'GET');
-    assert(responseType === User);
+    assert(responseType?.value === User);
   }
 
   @Test()
   async verifyCustomSerializable2() {
     const responseType = getEndpointResponse('/customSerialize2', 'GET');
-    assert(responseType === User);
+    assert(responseType?.value === User);
   }
 }

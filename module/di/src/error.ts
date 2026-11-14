@@ -5,7 +5,7 @@ function getName(symbol: symbol): string {
 }
 
 export class InjectionError extends RuntimeError {
-  constructor(message: string, target: Class, qualifiers?: symbol[]) {
+  constructor(message: string, target: Class | Function, qualifiers?: symbol[]) {
     super(`${message}: [${target.Ⲑid}]${qualifiers ? `[${qualifiers.map(getName)}]` : ''}`, {
       category: 'notfound',
       details: {

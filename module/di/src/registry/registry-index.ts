@@ -62,7 +62,10 @@ export class DependencyRegistryIndex implements RegistryIndex {
 
   async #resolveDependencyValue(dependency: Dependency, input: SchemaFieldConfig | SchemaParameterConfig, cls: Class): Promise<unknown> {
     try {
-      const target = dependency.target ?? input.type;
+      if (input.type.kind !== 'complex') {
+        throw new InjectionError(`Expected complex type for dependency injection`, input.type.value);
+      }
+      const target: Class = dependency.target ?? input.type.value;
       return await this.getInstance(target, dependency.qualifier, dependency.resolution);
     } catch (error) {
       if (input.required?.active === false && error instanceof InjectionError && error.category === 'notfound') {

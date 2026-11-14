@@ -84,18 +84,17 @@ export class SchemaValidator {
     }
 
     const { type, array } = input;
-    const complex = SchemaRegistryIndex.has(type);
 
-    if (type === Object || type === UnknownType) {
+    if (type.value === Object || type.value === UnknownType || !type.value.name) {
       return [];
     } else if (array) {
       if (!Array.isArray(value)) {
         return this.#prepareErrors(path, [{ kind: 'type', type: Array, value }]);
       }
       let errors: ValidationError[] = [];
-      if (complex) {
+      if (SchemaRegistryIndex.hasValueType(type)) {
         for (let i = 0; i < value.length; i += 1) {
-          const subErrors = this.#validateFields(resolveFieldMap(type, value[i]), value[i], `${path}[${i}]`);
+          const subErrors = this.#validateFields(resolveFieldMap(type.value, value[i]), value[i], `${path}[${i}]`);
           errors = errors.concat(subErrors);
         }
       } else {
@@ -105,8 +104,8 @@ export class SchemaValidator {
         }
       }
       return errors;
-    } else if (complex) {
-      return this.#validateFields(resolveFieldMap(type, value), value, path);
+    } else if (SchemaRegistryIndex.hasValueType(type)) {
+      return this.#validateFields(resolveFieldMap(type.value, value), value, path);
     } else {
       const fieldErrors = this.#validateInput(input, value);
       return this.#prepareErrors(path, fieldErrors);
@@ -134,7 +133,7 @@ export class SchemaValidator {
    */
   static #validateInput(input: SchemaInputConfig, value: unknown): ValidationResult[] {
     const criteria: [string, SchemaInputConfig[ValidationKindCore]][] = [];
-    const config = SchemaTypeUtil.getSchemaTypeConfig(input.type);
+    const config = SchemaTypeUtil.getSchemaTypeConfig(input.type.value);
 
     if (config?.validate) {
       const kind = config.validate(value);
@@ -142,20 +141,20 @@ export class SchemaValidator {
         case undefined:
           break;
         case 'type':
-          return [{ kind, type: input.type.name }];
+          return [{ kind, type: input.type.value.name }];
         default:
           return [{ kind, value }];
       }
-    } else if (PrimitiveTypes.has(input.type)) {
-      if (typeof value !== input.type.name.toLowerCase()) {
-        return [{ kind: 'type', type: input.type.name.toLowerCase() }];
+    } else if (PrimitiveTypes.has(input.type.value)) {
+      if (typeof value !== input.type.value.name.toLowerCase()) {
+        return [{ kind: 'type', type: input.type.value.name.toLowerCase() }];
       } else if (Number.isNaN(value)) {
         return [{ kind: 'type', type: 'number' }];
       }
-    } else if (SchemaRegistryIndex.has(input.type)) {
-      if (!(value instanceof input.type)) {
+    } else if (input.type.kind === 'complex') {
+      if (!(value instanceof input.type.value)) {
         // If not an instance of the type
-        return [{ kind: 'type', type: input.type.name }];
+        return [{ kind: 'type', type: input.type.value.name }];
       }
     }
 
@@ -317,7 +316,10 @@ export class SchemaValidator {
     for (const param of config.parameters) {
       const i = param.index;
       errors.push(
-        ...[...this.#validateInputSchema(param, params[i]), ...(await this.#validateClassLevel(param.type, params[i]))].map(error => {
+        ...[
+          ...this.#validateInputSchema(param, params[i]),
+          ...(param.type.kind === 'complex' ? await this.#validateClassLevel(param.type.value, params[i]) : [])
+        ].map(error => {
           if (param.name && typeof param.name === 'string') {
             error.path = !prefixes[i] ? error.path.replace(`${param.name}.`, '') : error.path.replace(param.name, prefixes[i]!);
           }

@@ -115,7 +115,7 @@ export class EndpointUtil {
       if (param.prefix) {
         // Has a prefix provided
         return query[param.prefix];
-      } else if (input.type.Ⲑid) {
+      } else if (input.type.kind === 'complex') {
         // Is a full type
         return query;
       }

@@ -1,8 +1,8 @@
 import type { ModelType } from '@travetto/model';
 import type { TextSearchClause } from '@travetto/model-query';
 import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext, type TextSearchState } from '@travetto/model-sql';
-import { type Class, castTo, JSONUtil } from '@travetto/runtime';
-import { type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { castTo, JSONUtil } from '@travetto/runtime';
+import type { SchemaFieldConfig } from '@travetto/schema';
 
 /* cspell:words ILIKE regclass indexdef tablename pkey tsvector tsquery */
 
@@ -10,7 +10,7 @@ export class PostgresDialect extends AbstractANSI99Dialect {
   returningSupport = true;
 
   getComplexColumnType(field: SchemaFieldConfig): string {
-    if (field.array && !SchemaRegistryIndex.has(field.type)) {
+    if (field.array && field.type.kind === 'primitive') {
       const scalarType = this.getColumnType(field);
       return `${scalarType}[]`;
     }
@@ -18,18 +18,18 @@ export class PostgresDialect extends AbstractANSI99Dialect {
   }
 
   getComplexColumnValue(field: SchemaFieldConfig, value: unknown): unknown {
-    if (field.array && !SchemaRegistryIndex.has(field.type)) {
+    if (field.array && field.type.kind === 'primitive') {
       return value ?? null;
     }
     return super.getComplexColumnValue(field, value);
   }
 
   getColumnType(fieldConfiguration: SchemaFieldConfig): string {
-    if (fieldConfiguration.type === castTo(BigInt)) {
+    if (fieldConfiguration.type.value === BigInt) {
       return 'BIGINT';
     }
 
-    if (fieldConfiguration.type === Number) {
+    if (fieldConfiguration.type.value === Number) {
       if (fieldConfiguration.precision) {
         const [digits, decimals] = fieldConfiguration.precision;
         if (decimals) {
@@ -46,15 +46,15 @@ export class PostgresDialect extends AbstractANSI99Dialect {
       return 'INTEGER';
     }
 
-    if (fieldConfiguration.type === Date) {
+    if (fieldConfiguration.type.value === Date) {
       return 'TIMESTAMP(6) WITH TIME ZONE';
     }
 
-    if (fieldConfiguration.type === Boolean) {
+    if (fieldConfiguration.type.value === Boolean) {
       return 'BOOLEAN';
     }
 
-    if (fieldConfiguration.type === String) {
+    if (fieldConfiguration.type.value === String) {
       if (fieldConfiguration.specifiers?.includes('uuid')) {
         return 'UUID';
       }
@@ -95,7 +95,7 @@ export class PostgresDialect extends AbstractANSI99Dialect {
       return Array.isArray(value) ? value : [value];
     }
 
-    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField?.type, context.subPath);
+    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField ? context.arrayField.type : undefined, context.subPath);
     const isArraySegment = subPathMetadata.map(item => item.isArray);
 
     const buildPayloadForValue = (item: unknown): unknown => {
@@ -137,8 +137,8 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     const arrayField = context.arrayField ?? context.leafField;
     const isTopLevel = (context.arrayPath?.length ?? 1) === 1;
     const hasSubPath = (context.subPath?.length ?? 0) > 0;
-    const isScalarArray = arrayField ? !SchemaRegistryIndex.has(arrayField.type) : true;
-    const isNative = isTopLevel && !hasSubPath && isScalarArray;
+    const isPrimitiveArray = arrayField ? arrayField.type.kind === 'primitive' : true;
+    const isNative = isTopLevel && !hasSubPath && isPrimitiveArray;
 
     const targetPath =
       hasSubPath && context.arrayPath && context.arrayPath.length > 0 ? this.escapeIdentifier(context.arrayPath[0]) : context.sqlPath;
@@ -218,7 +218,7 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     return source.replaceAll('\\b', '\\y');
   }
 
-  castColumn(sqlPath: string, type: Class): string {
+  castColumn(sqlPath: string, type: Function): string {
     if (type === Number) {
       return `(${sqlPath})::NUMERIC`;
     } else if (type === Boolean) {
