@@ -8,7 +8,7 @@ import {
   type TextSearchState
 } from '@travetto/model-sql';
 import { castTo, JSONUtil } from '@travetto/runtime';
-import { type SchemaFieldConfig } from '@travetto/schema';
+import { ensureComplex, type SchemaFieldConfig } from '@travetto/schema';
 
 export class MysqlDialect extends AbstractANSI99Dialect {
   override escapeIdentifier(name: string): string {
@@ -71,7 +71,7 @@ export class MysqlDialect extends AbstractANSI99Dialect {
       return '';
     }
     const subPathMetadata = this.getSchemaSubPathMetadata(
-      context.arrayField?.type.kind === 'complex' ? context.arrayField.type.value : undefined,
+      context.arrayField && ensureComplex(context.arrayField.type) ? context.arrayField.type.value : undefined,
       context.subPath
     );
     return subPathMetadata.map(({ segment, isArray }) => (isArray ? `${segment}[*]` : segment)).join('.');

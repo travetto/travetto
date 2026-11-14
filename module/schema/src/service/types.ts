@@ -1,4 +1,4 @@
-import type { Any, Class, IntrinsicType, NumericLikeIntrinsic, Primitive } from '@travetto/runtime';
+import { type Any, type Class, type IntrinsicType, type NumericLikeIntrinsic, type Primitive, RuntimeError } from '@travetto/runtime';
 
 import type { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
 
@@ -11,6 +11,16 @@ export const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';
  * Represents the type of a schema field or parameter
  */
 export type SchemaType = { kind: 'primitive'; value: Function } | { kind: 'complex'; value: Class };
+
+/**
+ * Ensure a schema type is complex, throwing if it is not
+ */
+export function ensureComplex(item?: SchemaType): item is SchemaType & { kind: 'complex' } {
+  if (item?.kind !== 'complex') {
+    throw new RuntimeError(`Invalid type: expected complex schema type, got ${item?.value?.name ?? item}`);
+  }
+  return true;
+}
 
 /**
  * Input accepted for `type` in `@Field` and `@Input` decorators
