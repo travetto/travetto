@@ -140,8 +140,8 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     const arrayField = context.arrayField ?? context.leafField;
     const isTopLevel = (context.arrayPath?.length ?? 1) === 1;
     const hasSubPath = (context.subPath?.length ?? 0) > 0;
-    const isScalarArray = arrayField ? arrayField.type.kind === 'primitive' : true;
-    const isNative = isTopLevel && !hasSubPath && isScalarArray;
+    const isPrimitiveArray = arrayField ? arrayField.type.kind === 'primitive' : true;
+    const isNative = isTopLevel && !hasSubPath && isPrimitiveArray;
 
     const targetPath =
       hasSubPath && context.arrayPath && context.arrayPath.length > 0 ? this.escapeIdentifier(context.arrayPath[0]) : context.sqlPath;
