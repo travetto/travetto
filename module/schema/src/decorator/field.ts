@@ -1,7 +1,8 @@
 import { type Any, type ClassInstance, getClass } from '@travetto/runtime';
 
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
-import type { SchemaFieldConfig } from '../service/types.ts';
+import type { SchemaDecoratorConfig, SchemaFieldConfig } from '../service/types.ts';
+import { normalizeSchemaDecoratorConfigs } from './input.ts';
 
 type PropType<V> = <T extends Partial<Record<K, V | Function>>, K extends string>(
   instance: T,
@@ -23,8 +24,11 @@ function field<V>(...configs: Partial<SchemaFieldConfig>[]): PropType<V> {
  * @augments `@travetto/schema:Field`
  * @kind decorator
  */
-export function Field(type?: Partial<SchemaFieldConfig>, ...configs: Partial<SchemaFieldConfig>[]): PropType<unknown> {
-  return field(type!, ...configs);
+export function Field(
+  type?: SchemaDecoratorConfig<SchemaFieldConfig>,
+  ...configs: SchemaDecoratorConfig<SchemaFieldConfig>[]
+): PropType<unknown> {
+  return field(...normalizeSchemaDecoratorConfigs([type, ...configs]));
 }
 
 /**

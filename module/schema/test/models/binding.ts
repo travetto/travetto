@@ -4,7 +4,7 @@ import { Address } from './address.ts';
 
 @Schema()
 export class SuperAddress extends Address {
-  @Field({ type: { kind: 'primitive', value: String } })
+  @Field({ type: String })
   unit: string;
 }
 
@@ -15,11 +15,11 @@ export class RegexSimple {
 
 @Schema()
 export class Count {
-  @Field({ type: { kind: 'primitive', value: String } })
+  @Field({ type: String })
   area: string;
 
   @Float()
-  @Field({ type: { kind: 'primitive', value: Number } })
+  @Field({ type: Number })
   value: number;
 }
 
@@ -34,7 +34,7 @@ export class Person {
 
   address: Address;
 
-  @Field({ type: { kind: 'complex', value: Count }, array: true })
+  @Field({ type: Count, array: true })
   counts: Count[];
 }
 

@@ -13,6 +13,18 @@ export const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';
 export type SchemaType = { kind: 'primitive'; value: Function } | { kind: 'complex'; value: Class };
 
 /**
+ * Input accepted for `type` in `@Field` and `@Input` decorators
+ */
+export type SchemaTypeInput = SchemaType | Function | Class;
+
+/**
+ * Decorator configuration shape accepting raw constructors/functions or `SchemaType`
+ */
+export type SchemaDecoratorConfig<T extends SchemaInputConfig = SchemaInputConfig> = Omit<Partial<T>, 'type'> & {
+  type?: SchemaTypeInput;
+};
+
+/**
  * Represents a typed item in the schema
  */
 export type SchemaBasicType = {
