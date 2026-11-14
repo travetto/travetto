@@ -63,7 +63,7 @@ export interface ManagedType extends Type<'managed'> {
    */
   innerTypeProperty?: string;
   /**
-   * Whether this managed type was resolved from a @concrete tag
+   * Whether this managed type was resolved from an explicit `@concrete` target
    */
   concrete?: boolean;
 }

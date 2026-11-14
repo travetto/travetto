@@ -8,7 +8,7 @@ import {
   type TransactionStatements
 } from '@travetto/model-sql';
 import { castTo, JSONUtil } from '@travetto/runtime';
-import { asComplexClass, type SchemaFieldConfig } from '@travetto/schema';
+import type { SchemaFieldConfig } from '@travetto/schema';
 
 export class SqliteDialect extends AbstractANSI99Dialect {
   returningSupport = true;
@@ -73,10 +73,7 @@ export class SqliteDialect extends AbstractANSI99Dialect {
       return onLeaf(parentExpression);
     }
 
-    const subPathMetadata = this.getSchemaSubPathMetadata(
-      context.arrayField ? asComplexClass(context.arrayField.type) : undefined,
-      context.subPath
-    );
+    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField ? context.arrayField.type : undefined, context.subPath);
     const arraySegmentIndices = subPathMetadata
       .map((metadataItem, metadataIndex) => (metadataItem.isArray ? metadataIndex : -1))
       .filter(itemIndex => itemIndex !== -1);

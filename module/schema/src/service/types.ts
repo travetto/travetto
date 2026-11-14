@@ -21,23 +21,6 @@ export const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';
 export type SchemaValueType = { kind: 'primitive'; value: Function } | { kind: 'complex'; value: Class };
 
 /**
- * Return the underlying class of a complex schema value type, throwing if it is not complex
- */
-export function asComplexClass(type: SchemaValueType): Class {
-  if (type.kind !== 'complex') {
-    throw new RuntimeError(`Invalid type: expected complex schema value type, got ${type.value.name}`);
-  }
-  return type.value;
-}
-
-/**
- * Narrow a schema value type to its complex shape for consumers that accept non-schema classes
- */
-export function asComplexType(type: SchemaValueType): SchemaValueType & { kind: 'complex' } {
-  return castTo(type);
-}
-
-/**
  * Input accepted for `type` in `@Field` and `@Input` decorators
  */
 export type SchemaValueTypeInput = SchemaValueType | Function | Class;

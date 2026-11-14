@@ -11,7 +11,6 @@ import type {
 
 import { type Class, castTo, describeFunction, RuntimeError } from '@travetto/runtime';
 import {
-  asComplexClass,
   type SchemaBasicType,
   type SchemaClassConfig,
   type SchemaFieldConfig,
@@ -266,6 +265,20 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   }
 
   /**
+   * Build JSON request body
+   */
+  #buildJsonBody(body: SchemaBasicType, typeRef: Record<string, unknown>, typeId: string, mime?: string | null): RequestBodyObject {
+    return {
+      content: {
+        [mime ?? 'application/json']: {
+          schema: !body.array ? typeRef : { type: 'array', items: typeRef }
+        }
+      },
+      description: this.#allSchemas[typeId]?.description ?? ''
+    };
+  }
+
+  /**
    * Standard payload structure
    */
   #getEndpointBody(body?: SchemaBasicType, mime?: string | null): RequestBodyObject {
@@ -278,18 +291,12 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         },
         description: 'Raw binary data'
       };
+    } else if (body.type.kind === 'complex' && SchemaRegistryIndex.getOptional(body.type.value)?.get()) {
+      const cls = body.type.value;
+      const schemaConfig = SchemaRegistryIndex.getOptional(cls)!.get();
+      return this.#buildJsonBody(body, this.#getType(cls), this.#nameResolver.getName(schemaConfig), mime);
     } else {
-      const schemaConfig = body.type.kind === 'complex' ? SchemaRegistryIndex.getOptional(body.type.value)?.get() : undefined;
-      const typeId = schemaConfig ? this.#nameResolver.getName(schemaConfig) : body.type.value.name;
-      const typeRef = schemaConfig ? this.#getType(asComplexClass(body.type)) : { type: body.type.value.name.toLowerCase() };
-      return {
-        content: {
-          [mime ?? 'application/json']: {
-            schema: !body!.array ? typeRef : { type: 'array', items: typeRef }
-          }
-        },
-        description: this.#allSchemas[typeId!]?.description ?? ''
-      };
+      return this.#buildJsonBody(body, { type: body.type.value.name.toLowerCase() }, body.type.value.name, mime);
     }
   }
 

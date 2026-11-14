@@ -9,7 +9,7 @@ import {
   type WhereClause
 } from '@travetto/model-query';
 import { type Class, castKey, castTo, JSONUtil, RuntimeError } from '@travetto/runtime';
-import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex, type SchemaValueType } from '@travetto/schema';
 
 import { SQLModelSchemaUtil } from './schema.ts';
 import type { JSONSqlPathMode, ResolvedPathContext, SchemaContext, TableContext } from './types.ts';
@@ -413,10 +413,13 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
   }
 
   getSchemaSubPathMetadata(
-    initialClass: Class | undefined,
+    type: SchemaValueType | undefined,
     subPath: string[]
   ): Array<{ segment: string; fieldConfig?: SchemaFieldConfig; isArray: boolean; fieldClass?: Class }> {
-    let currentClass = initialClass;
+    if (type?.kind !== 'complex') {
+      throw new RuntimeError('Only complex types are supported for schema sub path evaluation');
+    }
+    let currentClass: Class | undefined = type.value;
     return subPath.map(segment => {
       let fieldConfig: SchemaFieldConfig | undefined;
       let isArray = false;

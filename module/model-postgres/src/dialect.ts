@@ -2,7 +2,7 @@ import type { ModelType } from '@travetto/model';
 import type { TextSearchClause } from '@travetto/model-query';
 import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext, type TextSearchState } from '@travetto/model-sql';
 import { castTo, JSONUtil } from '@travetto/runtime';
-import { asComplexClass, type SchemaFieldConfig } from '@travetto/schema';
+import type { SchemaFieldConfig } from '@travetto/schema';
 
 /* cspell:words ILIKE regclass indexdef tablename pkey tsvector tsquery */
 
@@ -95,10 +95,7 @@ export class PostgresDialect extends AbstractANSI99Dialect {
       return Array.isArray(value) ? value : [value];
     }
 
-    const subPathMetadata = this.getSchemaSubPathMetadata(
-      context.arrayField ? asComplexClass(context.arrayField.type) : undefined,
-      context.subPath
-    );
+    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField ? context.arrayField.type : undefined, context.subPath);
     const isArraySegment = subPathMetadata.map(item => item.isArray);
 
     const buildPayloadForValue = (item: unknown): unknown => {

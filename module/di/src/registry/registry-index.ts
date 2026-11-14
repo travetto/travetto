@@ -1,6 +1,6 @@
 import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
-import { type Class, castKey, castTo, describeFunction, getParentClass, TypedObject } from '@travetto/runtime';
-import { asComplexType, type SchemaFieldConfig, type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { type Class, castKey, castTo, describeFunction, getParentClass, RuntimeError, TypedObject } from '@travetto/runtime';
+import { type SchemaFieldConfig, type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { InjectionError } from '../error.ts';
 import type { Dependency, InjectableCandidate, InjectableConfig, PostConstructor, ResolutionType } from '../types.ts';
@@ -62,7 +62,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
 
   async #resolveDependencyValue(dependency: Dependency, input: SchemaFieldConfig | SchemaParameterConfig, cls: Class): Promise<unknown> {
     try {
-      const target = dependency.target ?? asComplexType(input.type).value;
+      const target: Class = dependency.target ?? castTo(input.type.value);
       return await this.getInstance(target, dependency.qualifier, dependency.resolution);
     } catch (error) {
       if (input.required?.active === false && error instanceof InjectionError && error.category === 'notfound') {
