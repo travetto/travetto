@@ -202,18 +202,18 @@ export class ModelCrudUtil {
     let result: U = item;
     let modified = false;
 
-    const setField = (owner: unknown, key: string, value?: unknown) => {
+    const setField = (key: string, value?: unknown) => {
       if (!modified) {
         modified = true;
         result = { ...result }; // Copy on first write
       }
-      castTo<UnknownRecord>(owner)[key] = value;
+      castTo<UnknownRecord>(result)[key] = value;
     };
 
     if (hasTargets) {
       for (const key of Object.keys(schema.fields)) {
         if (isCleanTarget(key)) {
-          setField(result, key, undefined);
+          setField(key, undefined);
         }
       }
     }
@@ -232,12 +232,12 @@ export class ModelCrudUtil {
             return cleaned;
           });
           if (changed) {
-            setField(result, key, newArray);
+            setField(key, newArray);
           }
         } else {
           const cleaned = this.cleanTransientFields(fieldType, currentField);
           if (cleaned !== currentField) {
-            setField(result, key, cleaned);
+            setField(key, cleaned);
           }
         }
       }
