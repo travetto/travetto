@@ -117,9 +117,7 @@ export class SimpleResolver implements TransformResolver {
    * Get list of properties
    */
   getPropertiesOfType(type: ts.Type): ts.Symbol[] {
-    return this.#tsChecker
-      .getPropertiesOfType(type)
-      .filter(property => property.getName() === 'constructor' || !isUnsafeProperty(property.getName()));
+    return this.#tsChecker.getPropertiesOfType(type).filter(property => !isUnsafeProperty(property.getName()));
   }
 
   /**
