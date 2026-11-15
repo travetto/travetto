@@ -1,4 +1,4 @@
-import { castTo, getClass } from '@travetto/runtime';
+import { castTo, getClass, type UnknownRecord } from '@travetto/runtime';
 import { BindUtil, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 
 import type { CliCommandShape, ParsedState } from './types.ts';
@@ -35,7 +35,7 @@ export class CliCommandSchemaUtil {
    * Bind parsed inputs to command
    */
   static bindInput<T extends CliCommandShape>(command: T, state: ParsedState): unknown[] {
-    const template: Record<string, unknown> = {};
+    const template: UnknownRecord = {};
     const bound: unknown[] = [];
 
     for (const item of state.all) {

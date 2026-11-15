@@ -7,7 +7,8 @@ import {
   hasFunction,
   isPlainRecord,
   JSONUtil,
-  RuntimeError
+  RuntimeError,
+  type UnknownRecord
 } from '@travetto/runtime';
 import { SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
@@ -197,8 +198,8 @@ export class ModelCrudUtil {
 
       const hasTargets = Object.keys(schema.fields).some(key => isCleanTarget(key));
 
-      let record: Record<string, unknown> | undefined;
-      const getRecord = (): Record<string, unknown> => (record ??= { ...castTo<Record<string, unknown>>(item) });
+      let record: UnknownRecord | undefined;
+      const getRecord = (): UnknownRecord => (record ??= { ...castTo<UnknownRecord>(item) });
 
       if (hasTargets) {
         const target = getRecord();
@@ -210,7 +211,7 @@ export class ModelCrudUtil {
       }
 
       for (const [key, field] of Object.entries(schema.fields)) {
-        const current = (record ?? castTo<Record<string, unknown>>(item))[key];
+        const current = (record ?? castTo<UnknownRecord>(item))[key];
         if (field.type.kind === 'complex' && !isCleanTarget(key) && current !== undefined && current !== null) {
           const fieldType = field.type.value;
           if (field.array && Array.isArray(current)) {

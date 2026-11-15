@@ -195,7 +195,7 @@ WHERE table_schema = ? AND table_name = ?;
     };
   }
 
-  parseTableExistsResult(records: Record<string, unknown>[]): boolean {
+  parseTableExistsResult(records: UnknownRecord[]): boolean {
     return +(records[0]?.total ? `${records[0].total}` : 0) > 0;
   }
 
@@ -212,7 +212,7 @@ WHERE table_schema = ? AND table_name = ?;
     };
   }
 
-  parseExistingColumns(records: Record<string, unknown>[]): Map<string, string> {
+  parseExistingColumns(records: UnknownRecord[]): Map<string, string> {
     return new Map(records.map(record => [`${record.name}`, `${record.type}`.toUpperCase()]));
   }
 
@@ -236,7 +236,7 @@ GROUP BY INDEX_NAME, TABLE_NAME, NON_UNIQUE;
     };
   }
 
-  parseExistingIndexes(records: Record<string, unknown>[]): Map<string, string> {
+  parseExistingIndexes(records: UnknownRecord[]): Map<string, string> {
     return new Map(
       records.map(record => {
         const isUnique = +`${record.nonUnique}` === 0;

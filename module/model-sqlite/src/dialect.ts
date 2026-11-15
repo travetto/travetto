@@ -233,7 +233,7 @@ WHERE type='table' AND name=?;`,
     };
   }
 
-  parseExistingColumns(records: Record<string, unknown>[]): Map<string, string> {
+  parseExistingColumns(records: UnknownRecord[]): Map<string, string> {
     return new Map(records.map(record => [`${record.name}`, `${record.type}`.toUpperCase()]));
   }
 
@@ -248,7 +248,7 @@ WHERE type='index' AND tbl_name=?;
     };
   }
 
-  parseExistingIndexes(records: Record<string, unknown>[]): Map<string, string> {
+  parseExistingIndexes(records: UnknownRecord[]): Map<string, string> {
     return new Map(
       records.filter(record => record.sql && !`${record.name}`.startsWith('sqlite_')).map(record => [`${record.name}`, `${record.sql}`])
     );

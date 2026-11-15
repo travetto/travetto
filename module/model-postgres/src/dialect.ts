@@ -298,7 +298,7 @@ ${offset !== undefined ? `OFFSET ${offset}` : ''};`;
     };
   }
 
-  parseTableExistsResult(records: Record<string, unknown>[]): boolean {
+  parseTableExistsResult(records: UnknownRecord[]): boolean {
     return !!records[0]?.exists;
   }
 
@@ -311,7 +311,7 @@ ${offset !== undefined ? `OFFSET ${offset}` : ''};`;
     };
   }
 
-  parseExistingColumns(records: Record<string, unknown>[]): Map<string, string> {
+  parseExistingColumns(records: UnknownRecord[]): Map<string, string> {
     return new Map(records.map(record => [`${record.name}`, `${record.type}`.toUpperCase()]));
   }
 
@@ -332,7 +332,7 @@ ${offset !== undefined ? `OFFSET ${offset}` : ''};`;
     };
   }
 
-  parseExistingIndexes(records: Record<string, unknown>[]): Map<string, string> {
+  parseExistingIndexes(records: UnknownRecord[]): Map<string, string> {
     return new Map(
       records
         .filter(record => !`${record.indexname}`.endsWith('_pkey') && !`${record.indexname}`.endsWith('_fts'))
