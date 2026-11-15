@@ -1,4 +1,4 @@
-import type { UnknownRecord } from '@travetto/runtime';
+import type { UnknownRecord } from '../types/shared.ts';
 
 const exclude = new Set([
   'parent',
