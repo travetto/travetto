@@ -263,11 +263,11 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
   }
 
   abstract getTableExistsQuery(context: TableContext): { sql: string; parameters?: unknown[] };
-  abstract parseTableExistsResult(records: Record<string, Any>[]): boolean;
+  abstract parseTableExistsResult(records: Record<string, unknown>[]): boolean;
   abstract getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] };
-  abstract parseExistingColumns(records: Record<string, Any>[]): Map<string, string>;
+  abstract parseExistingColumns(records: Record<string, unknown>[]): Map<string, string>;
   abstract getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] };
-  abstract parseExistingIndexes(records: Record<string, Any>[]): Map<string, string>;
+  abstract parseExistingIndexes(records: Record<string, unknown>[]): Map<string, string>;
   abstract getDropIndexSQL(context: TableContext, indexName: string): string;
 
   abstract getTruncateTableSQL(context: TableContext): string;

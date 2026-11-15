@@ -195,8 +195,8 @@ WHERE table_schema = ? AND table_name = ?;
     };
   }
 
-  parseTableExistsResult(records: Record<string, Any>[]): boolean {
-    return +(records[0]?.total ?? 0) > 0;
+  parseTableExistsResult(records: Record<string, unknown>[]): boolean {
+    return +(records[0]?.total ? `${records[0].total}` : 0) > 0;
   }
 
   getExistingColumnsQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
@@ -212,8 +212,8 @@ WHERE table_schema = ? AND table_name = ?;
     };
   }
 
-  parseExistingColumns(records: Record<string, Any>[]): Map<string, string> {
-    return new Map(records.map(record => [record.name, record.type.toUpperCase()]));
+  parseExistingColumns(records: Record<string, unknown>[]): Map<string, string> {
+    return new Map(records.map(record => [`${record.name}`, `${record.type}`.toUpperCase()]));
   }
 
   getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
@@ -236,12 +236,13 @@ GROUP BY INDEX_NAME, TABLE_NAME, NON_UNIQUE;
     };
   }
 
-  parseExistingIndexes(records: Record<string, Any>[]): Map<string, string> {
+  parseExistingIndexes(records: Record<string, unknown>[]): Map<string, string> {
     return new Map(
       records.map(record => {
-        const isUnique = +record.nonUnique === 0;
-        const indexDefinition = `CREATE ${isUnique ? 'UNIQUE ' : ''}INDEX ${this.escapeIdentifier(record.name)} ON ${this.escapeIdentifier(record.tableName)} (${record.indexColumns});`;
-        return [record.name, indexDefinition];
+        const isUnique = +`${record.nonUnique}` === 0;
+        const name = `${record.name}`;
+        const indexDefinition = `CREATE ${isUnique ? 'UNIQUE ' : ''}INDEX ${this.escapeIdentifier(name)} ON ${this.escapeIdentifier(`${record.tableName}`)} (${record.indexColumns});`;
+        return [name, indexDefinition];
       })
     );
   }

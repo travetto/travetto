@@ -233,8 +233,8 @@ WHERE type='table' AND name=?;`,
     };
   }
 
-  parseExistingColumns(records: Record<string, Any>[]): Map<string, string> {
-    return new Map(records.map(record => [record.name, record.type.toUpperCase()]));
+  parseExistingColumns(records: Record<string, unknown>[]): Map<string, string> {
+    return new Map(records.map(record => [`${record.name}`, `${record.type}`.toUpperCase()]));
   }
 
   getExistingIndexesQuery(context: TableContext): { sql: string; parameters?: unknown[] } {
@@ -248,8 +248,10 @@ WHERE type='index' AND tbl_name=?;
     };
   }
 
-  parseExistingIndexes(records: Record<string, Any>[]): Map<string, string> {
-    return new Map(records.filter(record => record.sql && !record.name.startsWith('sqlite_')).map(record => [record.name, record.sql]));
+  parseExistingIndexes(records: Record<string, unknown>[]): Map<string, string> {
+    return new Map(
+      records.filter(record => record.sql && !`${record.name}`.startsWith('sqlite_')).map(record => [`${record.name}`, `${record.sql}`])
+    );
   }
 
   getDropIndexSQL(context: TableContext, indexName: string): string {
