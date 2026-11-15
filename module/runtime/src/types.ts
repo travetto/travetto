@@ -112,3 +112,6 @@ export function getParentClass(cls: Class): Class | undefined {
  */
 export const getClass = <T = unknown>(value: ClassInstance | Class): Class<T> =>
   'Ⲑid' in value ? castTo(value) : asConstructable<T>(value).constructor;
+
+export const isUnsafeProperty = (key: string): key is '__proto__' | 'prototype' | 'constructor' =>
+  key === 'prototype' || key === 'constructor' || key === '__proto__';

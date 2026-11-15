@@ -1,6 +1,16 @@
 import { isBooleanObject, isNumberObject, isStringObject } from 'node:util/types';
 
-import { asConstructable, asFull, type Class, castTo, isPlainRecord, isRecord, TypedObject, type UnknownRecord } from '@travetto/runtime';
+import {
+  asConstructable,
+  asFull,
+  type Class,
+  castTo,
+  isPlainRecord,
+  isRecord,
+  TypedObject,
+  type UnknownRecord,
+  isUnsafeProperty
+} from '@travetto/runtime';
 
 import { UnknownType } from './types.ts';
 
@@ -35,12 +45,17 @@ export class DataUtil {
    */
   static setPath(root: UnknownRecord, path: string[], value: unknown): void {
     let current = root;
-    for (let index = 0; index < path.length - 1; index += 1) {
+    for (let index = 0; index < path.length; index += 1) {
       const segment = path[index];
-      const next = current[segment];
-      current = isRecord(next) ? next : (current[segment] = {});
+      if (isUnsafeProperty(segment)) {
+        return; // Fail silently
+      } else if (index === path.length - 1) {
+        current[segment] = value;
+      } else {
+        const next = current[segment];
+        current = isRecord(next) ? next : (current[segment] = {});
+      }
     }
-    current[path[path.length - 1]] = value;
   }
 
   /**
@@ -128,7 +143,7 @@ export class DataUtil {
         const valueObject: UnknownRecord = castTo(value);
 
         for (const key of Object.keys(bObject)) {
-          if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+          if (isUnsafeProperty(key)) {
             continue;
           }
           valueObject[key] = this.#deepAssignRaw(valueObject[key], bObject[key], mode);

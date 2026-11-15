@@ -1,4 +1,4 @@
-import { castTo, JSONUtil, type UnknownRecord } from '@travetto/runtime';
+import { castTo, isUnsafeProperty, JSONUtil, type UnknownRecord } from '@travetto/runtime';
 import type { WebFilterContext, WebRequest } from '@travetto/web';
 
 /**
@@ -40,7 +40,7 @@ export class PassportUtil {
     const toAdd: UnknownRecord = typeof state === 'string' ? JSONUtil.fromUTF8(state) : state;
     const base: UnknownRecord = key ? castTo((original[key] ??= {})) : original;
     for (const property of Object.keys(toAdd)) {
-      if (property === '__proto__' || property === 'constructor' || property === 'prototype') {
+      if (isUnsafeProperty(property)) {
         continue;
       }
       base[property] = toAdd[property];
