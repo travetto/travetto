@@ -200,13 +200,17 @@ export class ModelCrudUtil {
     const hasTargets = Object.keys(schema.fields).some(key => isCleanTarget(key));
 
     let result: U = item;
+    let modified = false;
 
     const setField = (owner: unknown, key: string, value?: unknown) => {
+      if (!modified) {
+        modified = true;
+        result = { ...result }; // Copy on first write
+      }
       castTo<UnknownRecord>(owner)[key] = value;
     };
 
     if (hasTargets) {
-      result = { ...result };
       for (const key of Object.keys(schema.fields)) {
         if (isCleanTarget(key)) {
           setField(result, key, undefined);
