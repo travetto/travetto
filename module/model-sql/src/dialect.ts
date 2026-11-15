@@ -517,9 +517,9 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
 
       if (isPlainObject) {
         if (firstKey.startsWith('$')) {
-          clauses.push(this.#compileOperator(tableContext, currentPath, value as UnknownRecord, nextIdentificationPath, textSearches));
+          clauses.push(this.#compileOperator(tableContext, currentPath, value, nextIdentificationPath, textSearches));
         } else {
-          clauses.push(this.#compileSimple(tableContext, value as UnknownRecord, currentPath, nextIdentificationPath, textSearches));
+          clauses.push(this.#compileSimple(tableContext, value, currentPath, nextIdentificationPath, textSearches));
         }
       } else {
         clauses.push(this.#compileOperator(tableContext, currentPath, { $eq: value }, nextIdentificationPath, textSearches));
@@ -669,13 +669,12 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
   }
 
   // Statement Builders
-  buildInsert<T extends ModelType>(tableContext: TableContext<T>, item: T | UnknownRecord): { sql: string; values: unknown[] } {
+  buildInsert<T extends ModelType>(tableContext: TableContext<T>, item: T): { sql: string; values: unknown[] } {
     return this.buildInsertAll(tableContext, [item]);
   }
 
-  buildInsertAll<T extends ModelType>(tableContext: TableContext<T>, items: (T | UnknownRecord)[]): { sql: string; values: unknown[] } {
-    const rawItems = castTo<UnknownRecord[]>(items);
-    if (rawItems.length === 0) {
+  buildInsertAll<T extends ModelType>(tableContext: TableContext<T>, items: T[]): { sql: string; values: unknown[] } {
+    if (items.length === 0) {
       return { sql: '', values: [] };
     }
 
@@ -690,7 +689,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     const values: unknown[] = [];
     const valueTuples: string[] = [];
 
-    for (const rawItem of rawItems) {
+    for (const rawItem of castTo<UnknownRecord[]>(items)) {
       const tuplePlaceholders: string[] = [];
       for (const field of tableContext.simpleFields.values()) {
         tuplePlaceholders.push(this.getPlaceholder(values.length + 1));
@@ -779,7 +778,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
 
   buildUpdate<T extends ModelType>(
     tableContext: TableContext<T>,
-    item: T | UnknownRecord,
+    item: T,
     whereSQL?: string,
     whereParameters: unknown[] = []
   ): { sql: string; values: unknown[] } {
@@ -864,11 +863,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     return { sql, values };
   }
 
-  buildUpsert<T extends ModelType>(
-    tableContext: TableContext<T>,
-    item: T | UnknownRecord,
-    conflictTarget: string[]
-  ): { sql: string; values: unknown[] } {
+  buildUpsert<T extends ModelType>(tableContext: TableContext<T>, item: T, conflictTarget: string[]): { sql: string; values: unknown[] } {
     const rawItem = castTo<UnknownRecord>(item);
     const idFieldName = ModelRegistryIndex.getConfig(tableContext.cls).idField;
     const columns: string[] = [];
