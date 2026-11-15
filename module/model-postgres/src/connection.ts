@@ -3,8 +3,8 @@ import { type DatabaseError, type Pool, type PoolClient, default as pg } from 'p
 import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { ExistsError } from '@travetto/model';
-import { SQLConnection, type SQLResultRecord } from '@travetto/model-sql';
-import { castTo, ShutdownManager } from '@travetto/runtime';
+import { SQLConnection } from '@travetto/model-sql';
+import { castTo, ShutdownManager, type UnknownRecord } from '@travetto/runtime';
 
 import type { PostgresModelConfig } from './config.ts';
 import { PostgresDialect } from './dialect.ts';
@@ -74,7 +74,7 @@ export class PostgresConnection extends SQLConnection<PoolClient> {
   /**
    * Executes a query on the active client or pool directly
    */
-  async execute<T = SQLResultRecord>(query: string, values?: unknown[]): Promise<{ count: number; records: T[] }> {
+  async execute<T = UnknownRecord>(query: string, values?: unknown[]): Promise<{ count: number; records: T[] }> {
     console.debug('Executing PostgreSQL query', { query, values });
 
     // Handle dynamically built SAVEPOINT names that cannot be parameterized in Postgres

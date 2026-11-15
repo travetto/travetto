@@ -23,5 +23,3 @@ export interface ResolvedPathContext {
   arrayPath?: string[];
   subPath?: string[];
 }
-
-export type SQLResultRecord = Record<string, unknown>;

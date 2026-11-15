@@ -65,7 +65,7 @@ import { WorkPool } from '@travetto/worker';
 import type { SQLConnection } from './connection.ts';
 import type { AbstractANSI99Dialect, CompiledWhere } from './dialect.ts';
 import { SQLModelSchemaUtil } from './schema.ts';
-import type { SQLResultRecord, TableContext } from './types.ts';
+import type { TableContext } from './types.ts';
 
 /**
  * Base SQL Model Service.
@@ -117,7 +117,7 @@ export abstract class BaseSQLModelService<C = unknown>
     return ModelCrudUtil.load(modelClass, resolvedRecord);
   }
 
-  async loadMany<T extends ModelType>(modelClass: Class<T>, records: SQLResultRecord[]): Promise<T[]> {
+  async loadMany<T extends ModelType>(modelClass: Class<T>, records: UnknownRecord[]): Promise<T[]> {
     return Promise.all(records.map(row => this.loadSingle(modelClass, row)));
   }
 
