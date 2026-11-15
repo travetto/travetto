@@ -2,6 +2,7 @@ import mustache from 'mustache';
 
 import { Injectable } from '@travetto/di';
 import { RuntimeResources } from '@travetto/runtime';
+import type { UnknownRecord } from '@travetto/runtime';
 
 /**
  * Mail interpolation engine
@@ -17,7 +18,7 @@ export interface MailInterpolator {
   /**
    * Interpolate a string with a given context
    */
-  render(text: string, ctx: Record<string, unknown>): Promise<string> | string;
+  render(text: string, ctx: UnknownRecord): Promise<string> | string;
 }
 
 @Injectable()
@@ -41,7 +42,7 @@ export class MustacheInterpolator implements MailInterpolator {
   /**
    * Interpolate text with data
    */
-  render(text: string, data: Record<string, unknown>): string {
+  render(text: string, data: UnknownRecord): string {
     return mustache.render(text, data);
   }
 }

@@ -5,7 +5,7 @@ import type { AuthConfig, AuthContext } from '@travetto/auth';
 import type { SessionData, SessionService } from '@travetto/auth-session';
 import { AuthContextInterceptor, type WebAuthConfig } from '@travetto/auth-web';
 import { Inject, Injectable } from '@travetto/di';
-import { castTo } from '@travetto/runtime';
+import { castTo, type UnknownRecord } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 import {
   Body,
@@ -28,7 +28,7 @@ import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 // Ensure auth-session is loaded
 import '../../src/interceptor.ts';
 
-type Aged = { age: number; payload?: Record<string, unknown> };
+type Aged = { age: number; payload?: UnknownRecord };
 
 @Injectable()
 class AutoLogin implements WebInterceptor {

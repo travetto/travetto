@@ -1,3 +1,5 @@
+import type { UnknownRecord } from '@travetto/runtime';
+
 import type { SuiteConfig, SuiteResult } from './suite.ts';
 import type { Assertion, TestConfig, TestResult } from './test.ts';
 
@@ -11,14 +13,14 @@ export type EventEntity = 'test' | 'suite' | 'assertion';
  */
 export type EventPhase = 'before' | 'after';
 
-type EventTpl<T extends EventEntity, P extends EventPhase, V extends {}> = { type: T; phase: P; metadata?: Record<string, unknown> } & V;
+type EventTpl<T extends EventEntity, P extends EventPhase, V extends {}> = { type: T; phase: P; metadata?: UnknownRecord } & V;
 
 export type TestRemoveEvent = {
   type: 'removeTest';
   import: string;
   classId?: string;
   methodName?: string;
-  metadata?: Record<string, unknown>;
+  metadata?: UnknownRecord;
 };
 
 /**

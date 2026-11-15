@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@travetto/di';
 import { type EmailCompiled, type MailInterpolator, MailUtil } from '@travetto/email';
-import { RuntimeError, TypedObject, WatchUtil } from '@travetto/runtime';
+import { RuntimeError, TypedObject, WatchUtil, type UnknownRecord } from '@travetto/runtime';
 
 import { EmailCompiler } from '../../src/compiler.ts';
 import { EmailCompileUtil } from '../../src/util.ts';
@@ -19,11 +19,11 @@ export class EditorService {
   @Inject()
   engine: MailInterpolator;
 
-  async #interpolate(text: string, context: Record<string, unknown>): Promise<string> {
+  async #interpolate(text: string, context: UnknownRecord): Promise<string> {
     return Promise.resolve(this.engine.render(text, context)).then(MailUtil.purgeBrand);
   }
 
-  async #renderTemplate(templateFile: string, context: Record<string, unknown>): Promise<EmailCompiled> {
+  async #renderTemplate(templateFile: string, context: UnknownRecord): Promise<EmailCompiled> {
     const email = await EmailCompiler.compile(templateFile);
     return TypedObject.fromEntries(
       await Promise.all(TypedObject.entries(email).map(([key, value]) => this.#interpolate(value, context).then(result => [key, result])))

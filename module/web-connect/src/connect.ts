@@ -1,6 +1,6 @@
 import type { IncomingMessage, OutgoingHttpHeaders, ServerResponse } from 'node:http';
 
-import { type BinaryArray, BinaryUtil, CodecUtil, castTo } from '@travetto/runtime';
+import { type BinaryArray, BinaryUtil, CodecUtil, type UnknownRecord, castTo } from '@travetto/runtime';
 import { type WebRequest, WebResponse } from '@travetto/web';
 
 export class ConnectRequest implements Pick<IncomingMessage, 'url' | 'headers'> {
@@ -28,7 +28,7 @@ export class ConnectRequest implements Pick<IncomingMessage, 'url' | 'headers'> 
     return Object.fromEntries(this.#request.headers.entries());
   }
 
-  get query(): Record<string, unknown> {
+  get query(): UnknownRecord {
     return this.#request.context.httpQuery ?? {};
   }
 }

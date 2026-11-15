@@ -1,4 +1,4 @@
-import { type Class, RuntimeError } from '@travetto/runtime';
+import { type Class, RuntimeError, type UnknownRecord } from '@travetto/runtime';
 
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
 import type { ModelType } from '../types/model.ts';
@@ -11,7 +11,7 @@ export class NotFoundError extends RuntimeError {
     return new NotFoundError(cls, ModelRegistryIndex.get(cls).idSource.get(item, { optional: true }) ?? 'unknown');
   }
 
-  constructor(cls: Class | string, id: string, details: Record<string, unknown> = {}) {
+  constructor(cls: Class | string, id: string, details: UnknownRecord = {}) {
     super(`${typeof cls === 'string' ? cls : cls.name} with id ${id} not found`, { category: 'notfound', details });
   }
 }

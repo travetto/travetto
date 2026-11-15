@@ -1,5 +1,5 @@
 import { Injectable } from '@travetto/di';
-import { JSONUtil } from '@travetto/runtime';
+import { JSONUtil, type UnknownRecord } from '@travetto/runtime';
 
 import type { LogEvent, LogFormatter } from '../types.ts';
 import { LogFormatUtil } from './util.ts';
@@ -14,7 +14,7 @@ export class GoogleLogFormatter implements LogFormatter {
   format(event: LogEvent): string {
     const context = LogFormatUtil.getContext(event);
 
-    const extra: Record<string, unknown> = {};
+    const extra: UnknownRecord = {};
     // Http request specific
     if (context && 'method' in context && 'path' in context && 'statusCode' in context) {
       extra.httpRequest = {

@@ -1,5 +1,5 @@
 import { type IndexConfig, ModelRegistryIndex, type ModelType } from '@travetto/model';
-import { type Any, type Class, type ClassInstance, castTo } from '@travetto/runtime';
+import { type Any, type Class, type ClassInstance, type UnknownRecord, castTo } from '@travetto/runtime';
 
 import type {
   AllIndexes,
@@ -13,7 +13,7 @@ import type {
 
 function buildTemplateParts<T extends TemplateValue = TemplateValue>(
   part: 'key' | 'sort',
-  template: Record<string, unknown>,
+  template: UnknownRecord,
   prefix: string[] = []
 ): TemplatePart<T>[] {
   const out: TemplatePart<T>[] = [];

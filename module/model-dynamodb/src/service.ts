@@ -45,7 +45,7 @@ import {
   type SortedIndex,
   type SortedIndexSelection
 } from '@travetto/model-indexed';
-import { type Class, castTo, JSONUtil, ShutdownManager, TimeUtil } from '@travetto/runtime';
+import { type Class, type UnknownRecord, castTo, JSONUtil, ShutdownManager, TimeUtil } from '@travetto/runtime';
 
 import type { DynamoDBModelConfig } from './config.ts';
 import { DynamoDBUtil } from './util.ts';
@@ -207,7 +207,7 @@ export class DynamoDBModelService
 
     try {
       if (mode === 'create') {
-        const indices: Record<string, unknown> = {};
+        const indices: UnknownRecord = {};
         for (const idx of ModelRegistryIndex.getIndices(cls)) {
           if (isModelIndexedIndex(idx)) {
             const { keyIndexAttribute, sortIndexAttribute } = DynamoDBUtil.indexNames(idx.name);
@@ -239,7 +239,7 @@ export class DynamoDBModelService
         };
         return await this.client.putItem(query);
       } else {
-        const indices: Record<string, unknown> = {};
+        const indices: UnknownRecord = {};
         const expr: string[] = [];
 
         for (const idx of ModelRegistryIndex.getIndices(cls)) {

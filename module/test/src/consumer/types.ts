@@ -1,4 +1,4 @@
-import type { Class } from '@travetto/runtime';
+import type { Class, UnknownRecord } from '@travetto/runtime';
 
 import type { TestEvent, TestRemoveEvent } from '../model/event.ts';
 import type { ResultsSummary, SuiteResult } from '../model/suite.ts';
@@ -35,7 +35,7 @@ export interface TestConsumerShape {
   /**
    * Set options
    */
-  setOptions?(options?: Record<string, unknown>): Promise<void> | void;
+  setOptions?(options?: UnknownRecord): Promise<void> | void;
   /**
    * Can directly update the known test run state as needed
    */

@@ -1,11 +1,20 @@
 import util from 'node:util';
 
 import { DependencyRegistryIndex, getDefaultQualifier, Injectable, PostConstruct } from '@travetto/di';
-import { type Class, castTo, Env, getClass, Runtime, RuntimeError, RuntimeResources, toConcrete } from '@travetto/runtime';
+import {
+  type Class,
+  type UnknownRecord,
+  castTo,
+  Env,
+  getClass,
+  Runtime,
+  RuntimeError,
+  RuntimeResources,
+  toConcrete
+} from '@travetto/runtime';
 import { BindUtil, DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ParserManager } from './parser/parser.ts';
-import type { ConfigData } from './parser/types.ts';
 import { FileConfigSource } from './source/file.ts';
 import { OverrideConfigSource } from './source/override.ts';
 import type { ConfigPayload, ConfigSource } from './source/types.ts';
@@ -22,7 +31,7 @@ export class ConfigBaseType {}
  */
 @Injectable()
 export class ConfigurationService {
-  #storage: Record<string, unknown> = {}; // Lowered, and flattened
+  #storage: UnknownRecord = {}; // Lowered, and flattened
   #payloads: ConfigSpecSimple[] = [];
   #secrets: (RegExp | string)[] = [/secure(-|_|[a-z])|password|private|secret|salt|(\bkey|key\b)|serviceAccount|(api(-|_)?key)/i];
 
@@ -30,9 +39,9 @@ export class ConfigurationService {
    * Get a sub tree of the config, or everything if namespace is not passed
    * @param namespace The namespace of the config to search for, can be dotted for accessing sub namespaces
    */
-  #get<T extends Record<string, unknown> = Record<string, unknown>>(namespace?: string): T {
+  #get<T extends UnknownRecord = UnknownRecord>(namespace?: string): T {
     const parts = namespace ? namespace.split('.') : [];
-    let sub: Record<string, unknown> = this.#storage;
+    let sub: UnknownRecord = this.#storage;
 
     while (parts.length && sub) {
       const next = parts.shift()!;
@@ -92,7 +101,7 @@ export class ConfigurationService {
    * Export all active configuration, useful for displaying active state
    *   - Will not show fields marked as secret
    */
-  async exportActive(): Promise<{ sources: ConfigSpecSimple[]; active: ConfigData }> {
+  async exportActive(): Promise<{ sources: ConfigSpecSimple[]; active: UnknownRecord }> {
     const configTargets = DependencyRegistryIndex.getCandidates(ConfigBaseType);
     const configs = await Promise.all(
       configTargets
@@ -103,9 +112,9 @@ export class ConfigurationService {
           return [candidate, inst] as const;
         })
     );
-    const out: Record<string, ConfigData> = {};
+    const out: Record<string, UnknownRecord> = {};
     for (const [candidate, inst] of configs) {
-      const data = BindUtil.bindSchemaToObject<ConfigData>(getClass(inst), {}, inst, {
+      const data = BindUtil.bindSchemaToObject<UnknownRecord>(getClass(inst), {}, inst, {
         filterInput: field => !('secret' in field) || !field.secret,
         filterValue: value => value !== undefined
       });

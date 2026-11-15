@@ -2,7 +2,7 @@ import type { Writable } from 'node:stream';
 
 import { stringify } from 'yaml';
 
-import { RuntimeIndex } from '@travetto/runtime';
+import { RuntimeIndex, type UnknownRecord } from '@travetto/runtime';
 
 import type { TestEvent } from '../../model/event.ts';
 import { TestConsumer } from '../decorator.ts';
@@ -25,7 +25,7 @@ export class XunitEmitter implements TestConsumerShape {
   /**
    * Process metadata information (e.g. logs)
    */
-  buildMeta(metadata: Record<string, unknown>): string {
+  buildMeta(metadata: UnknownRecord): string {
     if (!metadata) {
       return '';
     }

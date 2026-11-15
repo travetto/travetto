@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Config, type ConfigSource, ConfigurationService, MemoryConfigSource } from '@travetto/config';
 import { DependencyRegistryIndex, InjectableFactory } from '@travetto/di';
 import { Registry } from '@travetto/registry';
-import { Env } from '@travetto/runtime';
+import { Env, type UnknownRecord } from '@travetto/runtime';
 import { ValidationResultError } from '@travetto/schema';
 import { BeforeEach, Suite, Test } from '@travetto/test';
 
@@ -31,7 +31,7 @@ class Nested {
 @Config('generic')
 class Generic {
   name?: string;
-  props?: Record<string, unknown>;
+  props?: UnknownRecord;
 }
 
 @Config('props')

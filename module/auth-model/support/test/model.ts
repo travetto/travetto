@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Inject, InjectableFactory } from '@travetto/di';
 import { Model, type ModelCrudSupport, Transient } from '@travetto/model';
-import { type Class, castTo, RuntimeError } from '@travetto/runtime';
+import { type Class, type UnknownRecord, castTo, RuntimeError } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
@@ -22,7 +22,7 @@ class User implements RegisteredPrincipal {
   resetToken?: string;
   resetExpires?: Date;
   permissions?: string[];
-  details: Record<string, unknown>;
+  details: UnknownRecord;
 }
 
 class TestConfig {

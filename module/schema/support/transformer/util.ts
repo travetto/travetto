@@ -1,6 +1,7 @@
 import ts from 'typescript';
 
 import {
+  type UnknownRecord,
   type AnyType,
   DeclarationUtil,
   DecoratorUtil,
@@ -327,8 +328,8 @@ class ${uniqueId} extends ${type.mappedClassName} {
   /**
    * Unwrap type
    */
-  static unwrapType(type: AnyType): { out: Record<string, unknown>; type: AnyType } {
-    const out: Record<string, unknown> = {};
+  static unwrapType(type: AnyType): { out: UnknownRecord; type: AnyType } {
+    const out: UnknownRecord = {};
 
     while (type?.key === 'literal' && type.typeArguments?.length) {
       if (type.ctor === Array) {
@@ -361,7 +362,7 @@ class ${uniqueId} extends ${type.mappedClassName} {
    * @param state
    * @param node
    */
-  static ensureType(state: TransformerState, anyType: AnyType, target: ts.Node): Record<string, unknown> {
+  static ensureType(state: TransformerState, anyType: AnyType, target: ts.Node): UnknownRecord {
     const { out, type } = this.unwrapType(anyType);
     let value: ts.Expression | undefined;
     switch (type?.key) {

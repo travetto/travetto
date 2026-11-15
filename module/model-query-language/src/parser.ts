@@ -1,5 +1,5 @@
 import type { WhereClauseRaw } from '@travetto/model-query';
-import { castTo } from '@travetto/runtime';
+import { castTo, type UnknownRecord } from '@travetto/runtime';
 
 import { QueryLanguageTokenizer } from './tokenizer.ts';
 import { type AllNode, type ArrayNode, type GroupNode, type Literal, OPERATOR_TRANSLATION, type Token } from './types.ts';
@@ -167,7 +167,7 @@ export class QueryLanguageParser {
       case 'clause': {
         const parts = node.field!.split('.');
         const top: WhereClauseRaw<T> = {};
-        let sub: Record<string, unknown> = top;
+        let sub: UnknownRecord = top;
         for (const part of parts) {
           sub = sub[part] = {};
         }

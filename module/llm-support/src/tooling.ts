@@ -1,4 +1,4 @@
-import type { Class } from '@travetto/runtime';
+import { isRecord, type Class } from '@travetto/runtime';
 import { SchemaValidator } from '@travetto/schema';
 
 import { executeOperations } from './execute.ts';
@@ -35,10 +35,6 @@ export interface LlmSupportFlowResult {
   recommendation: RecommendationResponse;
   plan: PlanResponse;
   execution: ExecutionResponse;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function toList(value: unknown): string[] | undefined {

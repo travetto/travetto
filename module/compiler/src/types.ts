@@ -1,4 +1,5 @@
 import type { ChangeEventType, ManifestModule } from '@travetto/manifest';
+import type { UnknownRecord } from '@travetto/runtime';
 
 export type CompilerStateType =
   | 'startup'
@@ -57,7 +58,7 @@ export type CompilerLogEvent = Scoped<{
   file?: string;
 }>;
 export type CompilerProgressEvent = Scoped<{ idx: number; total: number; message: string; operation: 'compile'; complete?: boolean }>;
-export type CompilerStateEvent = Scoped<{ state: CompilerStateType; soft?: boolean; extra?: Record<string, unknown> }>;
+export type CompilerStateEvent = Scoped<{ state: CompilerStateType; soft?: boolean; extra?: UnknownRecord }>;
 export type FileChangeEvent = Scoped<{ files: { file: string; action: ChangeEventType }[]; time: number }>;
 export type CompilerAllEvent = Scoped<{}>;
 

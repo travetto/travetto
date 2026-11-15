@@ -22,7 +22,7 @@ The module provides a declarative API for creating and describing a Web applicat
    *  Cookies
 
 ## Request/Response Pattern
-Unlike other frameworks (e.g. [express](https://expressjs.com), [fastify](https://www.fastify.io/)), this module takes an approach that is similar to [AWS Lambda](https://aws.amazon.com/lambda/)'s model for requests and responses. What you can see here is that [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11) and [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3) are very simple objects, with the focus being on the `payload` and `body`. This is intended to provide maximal compatibility with non-HTTP sources. The driving goal is to support more than just standard HTTP servers but also allow for seamless integration with tools like event queues, web sockets, etc.
+Unlike other frameworks (e.g. [express](https://expressjs.com), [fastify](https://www.fastify.io/)), this module takes an approach that is similar to [AWS Lambda](https://aws.amazon.com/lambda/)'s model for requests and responses. What you can see here is that [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L13) and [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3) are very simple objects, with the focus being on the `payload` and `body`. This is intended to provide maximal compatibility with non-HTTP sources. The driving goal is to support more than just standard HTTP servers but also allow for seamless integration with tools like event queues, web sockets, etc.
 
 **Code: Base Shape**
 ```typescript
@@ -36,6 +36,8 @@ export class BaseWebMessage<B = unknown, C = unknown> implements WebMessage<B, C
 
 **Code: Request Shape**
 ```typescript
+import type { UnknownRecord } from '@travetto/runtime';
+
 import type { HttpMethod, HttpProtocol } from './core.ts';
 import { BaseWebMessage } from './message.ts';
 
@@ -48,8 +50,8 @@ export interface WebConnection {
 
 export interface WebRequestContext {
   path: string;
-  pathParams?: Record<string, unknown>;
-  httpQuery?: Record<string, unknown>;
+  pathParams?: UnknownRecord;
+  httpQuery?: UnknownRecord;
   httpMethod?: HttpMethod;
   connection?: WebConnection;
 }
@@ -277,7 +279,7 @@ export class Simple {
 ```
 
 ### ContextParam
-In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information. Specifically you may need access to the entire [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11). These are able to be injected using the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L72) on a class-level field from the [WebAsyncContext](https://github.com/travetto/travetto/tree/main/module/web/src/context.ts#L11). These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
+In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information. Specifically you may need access to the entire [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L13). These are able to be injected using the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L72) on a class-level field from the [WebAsyncContext](https://github.com/travetto/travetto/tree/main/module/web/src/context.ts#L11). These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
 
 **Code: Example ContextParam usage**
 ```typescript
@@ -777,7 +779,7 @@ export class SimpleAuthInterceptor implements WebInterceptor {
 ```
 
 ## Cookie Support
-Cookies are a unique element, within the framework, as they sit on the request and response flows. Ideally we would separate these out, but given the support for key rotation, there is a scenario in which reading a cookie on the request, will result in a cookie needing to be written on the response. Because of this, cookies are treated as being outside the normal [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11) activity, and is exposed as the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L72) [CookieJar](https://github.com/travetto/travetto/tree/main/module/web/src/util/cookie.ts#L12). The [CookieJar](https://github.com/travetto/travetto/tree/main/module/web/src/util/cookie.ts#L12) has a fairly basic contract:
+Cookies are a unique element, within the framework, as they sit on the request and response flows. Ideally we would separate these out, but given the support for key rotation, there is a scenario in which reading a cookie on the request, will result in a cookie needing to be written on the response. Because of this, cookies are treated as being outside the normal [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L13) activity, and is exposed as the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L72) [CookieJar](https://github.com/travetto/travetto/tree/main/module/web/src/util/cookie.ts#L12). The [CookieJar](https://github.com/travetto/travetto/tree/main/module/web/src/util/cookie.ts#L12) has a fairly basic contract:
 
 **Code: CookieJar contract**
 ```typescript

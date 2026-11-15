@@ -1,6 +1,7 @@
 import { Injectable } from '@travetto/di';
+import type { UnknownRecord } from '@travetto/runtime';
 
-import type { ConfigData, ConfigParser } from './types.ts';
+import type { ConfigParser } from './types.ts';
 
 const BACKSLASH = '\\'.charCodeAt(0);
 const EQUALS = '='.charCodeAt(0);
@@ -35,8 +36,8 @@ export class PropertiesConfigParser implements ConfigParser {
 
   ext = ['.properties'];
 
-  parse(text: string): ConfigData {
-    const out: ConfigData = {};
+  parse(text: string): UnknownRecord {
+    const out: UnknownRecord = {};
     const lines = text.split(/\n/g);
 
     for (let i = 0; i < lines.length; i += 1) {

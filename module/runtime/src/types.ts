@@ -18,6 +18,7 @@ export type Primitive = NumericPrimitive | boolean | string;
 export type NumericLikeIntrinsic = Date | NumericPrimitive;
 
 export type IntrinsicType = Primitive | Date | ArrayBuffer | Uint8Array | Uint16Array | Uint32Array | Readable | Buffer | Blob | File;
+export type UnknownRecord = Record<string, unknown>;
 
 export type DeepPartial<T> =
   | Partial<T>
@@ -63,6 +64,17 @@ export const safeAssign = <T extends {}, U extends {}>(target: T, ...sources: U[
 export function castTo<T>(input: unknown): T {
   return input as T;
 }
+
+export const isRecord = (value: unknown): value is UnknownRecord =>
+  typeof value === 'object' && // separate from primitives
+  value !== undefined &&
+  value !== null && // is obvious
+  !Array.isArray(value);
+
+export const isPlainRecord = (value: unknown): value is UnknownRecord =>
+  isRecord(value) && // is obvious
+  value.constructor === Object && // separate instances (Array, DOM, ...)
+  Object.prototype.toString.call(value) === '[object Object]'; // separate build-in like Math
 
 export const isClass = (input: unknown): input is Class => typeof input === 'function' && 'Ⲑid' in input;
 export const castKey = <T>(input: string | number | symbol): keyof T => castTo(input);
