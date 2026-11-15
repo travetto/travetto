@@ -1,10 +1,12 @@
+import type { UnknownRecord } from '../types/shared';
+
 const REGEX_PATTERN = /[/](.*)[/](i|g|m|s)?/;
 
 export class CoerceUtil {
   /**
    * Is a value a plain JS object, created using {}
    */
-  static #isPlainObject(value: unknown): value is Record<string, unknown> {
+  static #isPlainObject(value: unknown): value is UnknownRecord {
     return (
       typeof value === 'object' && // separate from primitives
       value !== undefined &&

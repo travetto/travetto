@@ -1,7 +1,7 @@
 import type { ModelType } from '@travetto/model';
 import type { TextSearchClause } from '@travetto/model-query';
 import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext, type TextSearchState } from '@travetto/model-sql';
-import { castTo, JSONUtil } from '@travetto/runtime';
+import { castTo, JSONUtil, type UnknownRecord } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
 /* cspell:words ILIKE regclass indexdef tablename pkey tsvector tsquery */
@@ -405,7 +405,7 @@ ${offset !== undefined ? `OFFSET ${offset}` : ''};`;
     clause: TextSearchClause,
     identificationPath: string,
     fieldPath?: string[]
-  ): { sql: string; parameters: Record<string, unknown> } {
+  ): { sql: string; parameters: UnknownRecord } {
     const textQuery = typeof clause === 'string' ? clause : clause.query;
     const language = typeof clause === 'object' && clause.language ? clause.language : 'english';
     const identifier = `%%${identificationPath}%%`;

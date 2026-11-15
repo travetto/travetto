@@ -9,7 +9,7 @@ import type {
   TagObject
 } from 'openapi3-ts/oas31';
 
-import { type Class, castTo, describeFunction, RuntimeError } from '@travetto/runtime';
+import { type Class, type UnknownRecord, castTo, describeFunction, RuntimeError } from '@travetto/runtime';
 import {
   type SchemaBasicType,
   type SchemaClassConfig,
@@ -101,14 +101,14 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Get the type for a given class
    */
-  #getType(inputOrClass: SchemaInputConfig | Class): Record<string, unknown> {
+  #getType(inputOrClass: SchemaInputConfig | Class): UnknownRecord {
     let field: { type: SchemaValueType; precision?: [number, number | undefined] };
     if (!isInputConfig(inputOrClass)) {
       field = { type: { kind: SchemaRegistryIndex.has(inputOrClass) ? 'complex' : 'primitive', value: inputOrClass } };
     } else {
       field = inputOrClass;
     }
-    const out: Record<string, unknown> = {};
+    const out: UnknownRecord = {};
     // Handle nested types
     if (SchemaRegistryIndex.hasValueType(field.type)) {
       const id = this.#nameResolver.getName(SchemaRegistryIndex.getConfig(field.type.value));
@@ -240,7 +240,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
           properties[fieldName] = this.#processSchemaField(base.fields[fieldName], required);
         }
 
-        const extra: Record<string, unknown> = {};
+        const extra: UnknownRecord = {};
         if (config.discriminatedBase) {
           const subClasses = SchemaRegistryIndex.getDiscriminatedClasses(cls);
           if (subClasses) {
@@ -267,7 +267,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Build JSON request body
    */
-  #buildJsonBody(body: SchemaBasicType, typeRef: Record<string, unknown>, typeId: string, mime?: string | null): RequestBodyObject {
+  #buildJsonBody(body: SchemaBasicType, typeRef: UnknownRecord, typeId: string, mime?: string | null): RequestBodyObject {
     return {
       content: {
         [mime ?? 'application/json']: {

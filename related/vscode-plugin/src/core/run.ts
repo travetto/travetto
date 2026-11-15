@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { Env, JSONUtil } from '@travetto/runtime';
+import { Env, JSONUtil, type UnknownRecord } from '@travetto/runtime';
 
 import { Log } from './log.ts';
 import type { EnvDict, LaunchConfig } from './types.ts';
@@ -22,7 +22,7 @@ export class RunUtil {
     };
   }
 
-  static registerEnvVars(context: vscode.ExtensionContext, data: Record<string, unknown>): void {
+  static registerEnvVars(context: vscode.ExtensionContext, data: UnknownRecord): void {
     Object.assign(this.#baseEnv, data);
     for (const [key, value] of Object.entries(data)) {
       context.environmentVariableCollection.replace(key, `${value ?? ''}`);

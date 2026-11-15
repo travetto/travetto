@@ -7,7 +7,7 @@ import {
   type TextSearchState,
   type TransactionStatements
 } from '@travetto/model-sql';
-import { castTo, JSONUtil } from '@travetto/runtime';
+import { castTo, JSONUtil, type UnknownRecord } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
 export class SqliteDialect extends AbstractANSI99Dialect {
@@ -341,7 +341,7 @@ WHERE type='index' AND tbl_name=?;
     clause: TextSearchClause,
     identificationPath: string,
     fieldPath?: string[]
-  ): { sql: string; parameters: Record<string, unknown> } {
+  ): { sql: string; parameters: UnknownRecord } {
     const rawQuery = typeof clause === 'string' ? clause : clause.query;
     const identifier = `%%${identificationPath}%%`;
 

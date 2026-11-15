@@ -1,7 +1,7 @@
 import { ChildProcess } from 'node:child_process';
 import { EventEmitter } from 'node:events';
 
-import { ShutdownManager, Util } from '@travetto/runtime';
+import { ShutdownManager, Util, type UnknownRecord } from '@travetto/runtime';
 
 /**
  * Channel that represents ipc communication
@@ -42,7 +42,7 @@ export class IpcChannel<V = unknown> {
   /**
    * Send data to the parent
    */
-  send(eventType: string, data?: Record<string, unknown>): void {
+  send(eventType: string, data?: UnknownRecord): void {
     console.debug('Sending', { pid: this.parentId, id: this.id, eventType });
     if (!this.active) {
       throw new Error('Cannot send message to inactive process');

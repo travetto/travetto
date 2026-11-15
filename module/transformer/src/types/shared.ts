@@ -34,3 +34,5 @@ export type TemplateLiteral = { operation: 'and' | 'or'; values: (TemplateLitera
 export function transformCast<T>(input: unknown): T {
   return input as T;
 }
+
+export type UnknownRecord = Record<string, unknown>;

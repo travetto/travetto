@@ -6,6 +6,7 @@ type MethodKeys<C extends {}> = {
 type Any = any;
 type PromiseFn = (...args: Any) => Promise<unknown>;
 type PromiseResult<V extends PromiseFn> = Awaited<ReturnType<V>>;
+type UnknownRecord = Record<string, unknown>;
 
 const triggerBrowserRedirect = (world: Any, url: URL): boolean => {
   const location = world?.window?.location;
@@ -86,7 +87,7 @@ function isResponse(value: unknown): value is Response {
   return !!value && typeof value === 'object' && 'status' in value && !!value.status && 'headers' in value && !!value.headers;
 }
 
-function isPlainObject(value: unknown): value is Record<string, unknown> {
+function isPlainObject(value: unknown): value is UnknownRecord {
   return (
     typeof value === 'object' && // separate from primitives
     value !== undefined &&
@@ -343,7 +344,7 @@ export function clientFactory<T extends Record<string, {}>>(): RpcClientFactory<
         ...request.core
       }
     };
-    const cache: Record<string, unknown> = {};
+    const cache: UnknownRecord = {};
     // @ts-ignore
     return new Proxy(
       {},

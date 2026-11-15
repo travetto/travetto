@@ -82,7 +82,8 @@ import {
   castTo,
   JSONUtil,
   ShutdownManager,
-  TypedObject
+  TypedObject,
+  type UnknownRecord
 } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
@@ -192,7 +193,7 @@ export class MongoModelService
     return q;
   }
 
-  restoreId<T extends ModelType>(cls: Class<T>, item: Record<string, unknown>): void {
+  restoreId<T extends ModelType>(cls: Class<T>, item: UnknownRecord): void {
     if (item._id) {
       const idFieldName = ModelRegistryIndex.get(cls).idSource.field;
       item[idFieldName] ??= MongoUtil.idToString(castTo(item._id));
@@ -379,7 +380,7 @@ export class MongoModelService
     const simple = MongoUtil.extractSimple(cls, final, undefined, false);
 
     const operation: Partial<T> = castTo(
-      Object.entries(simple).reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>((document, [key, value]) => {
+      Object.entries(simple).reduce<Partial<Record<'$unset' | '$set', UnknownRecord>>>((document, [key, value]) => {
         if (value === null || value === undefined) {
           (document.$unset ??= {})[key] = value;
         } else {
@@ -711,7 +712,7 @@ export class MongoModelService
     const item = await ModelCrudUtil.prePartialUpdate(cls, data, { validateId: false });
     const col = await this.getStore(cls);
     const items = MongoUtil.extractSimple(cls, item);
-    const final = Object.entries(items).reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>((document, [key, value]) => {
+    const final = Object.entries(items).reduce<Partial<Record<'$unset' | '$set', UnknownRecord>>>((document, [key, value]) => {
       if (value === null || value === undefined) {
         (document.$unset ??= {})[key] = value;
       } else {
@@ -735,7 +736,7 @@ export class MongoModelService
 
     const col = await this.getStore(cls);
 
-    let queryObject: Record<string, unknown> = { [field]: { $exists: true } };
+    let queryObject: UnknownRecord = { [field]: { $exists: true } };
 
     if (query?.where) {
       queryObject = { $and: [queryObject, MongoUtil.extractWhereFilter(cls, query.where)] };
@@ -798,7 +799,7 @@ export class MongoModelService
 
     const isDate = SchemaRegistryIndex.getNestedFieldConfig(cls, field)?.type.value === Date;
 
-    const groupFields: Record<string, unknown> = {
+    const groupFields: UnknownRecord = {
       _id: null,
       count: { $sum: 1 },
       min: { $min: `$${field}` },

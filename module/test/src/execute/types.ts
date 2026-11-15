@@ -1,3 +1,5 @@
+import type { UnknownRecord } from '@travetto/runtime';
+
 /**
  * Test Consumer Configuration
  */
@@ -9,7 +11,7 @@ export interface TestConsumerConfig {
   /**
    * Test result consumer options?
    */
-  consumerOptions?: Record<string, unknown>;
+  consumerOptions?: UnknownRecord;
   /**
    * Number of test suites to run concurrently, when mode is not single
    */

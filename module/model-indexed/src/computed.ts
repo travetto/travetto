@@ -1,5 +1,5 @@
 import { ModelRegistryIndex, type ModelType } from '@travetto/model';
-import { type Any, castTo } from '@travetto/runtime';
+import { type Any, castTo, type UnknownRecord } from '@travetto/runtime';
 
 import { IndexedFieldError } from './types/error.ts';
 import type { AllIndexes, FullKeyedIndexBody, KeyedIndexBody, TemplatePart, TemplateValue } from './types/indexes.ts';
@@ -15,7 +15,7 @@ type IndexPart<T extends TemplateValue = TemplateValue, V = unknown> = {
 
 function buildIndexParts<T extends TemplateValue = TemplateValue>(
   template: TemplatePart<T>[],
-  body: Record<string, unknown> | undefined,
+  body: UnknownRecord | undefined,
   checkValueType?: (value: unknown) => boolean
 ): IndexPart<T>[] {
   const out: IndexPart<T>[] = [];
@@ -25,7 +25,7 @@ function buildIndexParts<T extends TemplateValue = TemplateValue>(
     for (const pathItem of path) {
       if (typeof value === 'object' && value !== null) {
         if (value && pathItem in value) {
-          value = castTo<Record<string, unknown>>(value)[pathItem];
+          value = castTo<UnknownRecord>(value)[pathItem];
         } else {
           bodyPart = { value: null, state: 'missing' };
           break;
@@ -132,12 +132,12 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
     }
   }
 
-  project(config: IndexProcessConfig<{ emptyValue?: unknown; includeId?: boolean }> = {}): Record<string, unknown> {
+  project(config: IndexProcessConfig<{ emptyValue?: unknown; includeId?: boolean }> = {}): UnknownRecord {
     const { keyed = true, sort = false, emptyValue = null, includeId } = config;
-    const response: Record<string, unknown> = {};
+    const response: UnknownRecord = {};
     if (keyed) {
       for (const { path, value, state } of this.keyedParts) {
-        let sub: Record<string, unknown> = response;
+        let sub: UnknownRecord = response;
         const all = path.slice(0);
         const last = all.pop()!;
         for (const part of all) {
@@ -148,7 +148,7 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
     }
     if (sort) {
       for (const { path, value, state } of this.sortParts) {
-        let sub: Record<string, unknown> = response;
+        let sub: UnknownRecord = response;
         const all = path.slice(0);
         const last = all.pop()!;
         for (const part of all) {

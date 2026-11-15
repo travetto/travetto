@@ -1,6 +1,6 @@
 import type { MappingProperty, Script, MappingTypeMapping } from '@elastic/elasticsearch/api/types';
 
-import { type Class, toConcrete } from '@travetto/runtime';
+import { type Class, toConcrete, type UnknownRecord } from '@travetto/runtime';
 import { DataUtil, type Point, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { EsSchemaConfig } from './types.ts';
@@ -20,7 +20,7 @@ export class ElasticsearchSchemaUtil {
   /**
    * Build the update script for a given object
    */
-  static generateUpdateScript(item: Record<string, unknown>): Script {
+  static generateUpdateScript(item: UnknownRecord): Script {
     const out: Script = {
       lang: 'painless',
       source: `
@@ -47,7 +47,7 @@ export class ElasticsearchSchemaUtil {
    * @param item
    * @returns
    */
-  static generateReplaceScript(item: Record<string, unknown>): Script {
+  static generateReplaceScript(item: UnknownRecord): Script {
     return {
       lang: 'painless',
       source: 'ctx._source.clear(); ctx._source.putAll(params.body)',
@@ -97,7 +97,7 @@ export class ElasticsearchSchemaUtil {
       } else if (config.type.value === BigInt) {
         properties[field] = { type: 'long' };
       } else if (config.type.value === Number) {
-        let property: Record<string, unknown> = { type: 'integer' };
+        let property: UnknownRecord = { type: 'integer' };
         if (config.precision) {
           const [digits, decimals] = config.precision;
           if (decimals) {

@@ -1,13 +1,13 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { FileLoader, JSONUtil, RuntimeResources } from '@travetto/runtime';
+import { FileLoader, JSONUtil, RuntimeResources, type UnknownRecord } from '@travetto/runtime';
 import { SchemaValidator } from '@travetto/schema';
 
 import { PackageJsonSchema, type PackageJsonShape } from './template-shapes.ts';
 import type { ExecutionArtifact, ExecutionRequest, ExecutionResponse, PlanStepId } from './types.ts';
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+function isRecord(value: unknown): value is UnknownRecord {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 

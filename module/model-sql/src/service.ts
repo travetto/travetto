@@ -58,7 +58,7 @@ import {
   type ValidStringFields,
   type WhereClause
 } from '@travetto/model-query';
-import { type Class, castTo, JSONUtil } from '@travetto/runtime';
+import { type Class, type UnknownRecord, castTo, JSONUtil } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 import { WorkPool } from '@travetto/worker';
 
@@ -105,7 +105,7 @@ export abstract class BaseSQLModelService<C = unknown>
   }
 
   // Record Deserialization Helpers
-  async loadSingle<T extends ModelType>(modelClass: Class<T>, record: Record<string, unknown>): Promise<T> {
+  async loadSingle<T extends ModelType>(modelClass: Class<T>, record: UnknownRecord): Promise<T> {
     const schemaContext = SQLModelSchemaUtil.getSchemaContext(modelClass);
     const resolvedRecord = { ...record };
     for (const complexFieldName of schemaContext.complexFields.keys()) {
@@ -126,18 +126,18 @@ export abstract class BaseSQLModelService<C = unknown>
     where: WhereClause<T>,
     data: Partial<T>,
     returning: boolean
-  ): Promise<{ count: number; records: Record<string, unknown>[] }> {
+  ): Promise<{ count: number; records: UnknownRecord[] }> {
     const preparedData = await ModelCrudUtil.prePartialUpdate(modelClass, data, { validateId: false });
 
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);
     const { sql, values } = this.dialect.buildPartialUpdate(tableContext, preparedData, whereSQL, parameters, returning);
 
-    const result = await this.connection.execute<Record<string, unknown>>(sql, values);
+    const result = await this.connection.execute<UnknownRecord>(sql, values);
 
     if (result.count > 0 && returning && !this.dialect.returningSupport) {
       const selectSQL = this.dialect.buildSelect(tableContext, { whereSQL });
-      const selectResult = await this.connection.execute<Record<string, unknown>>(selectSQL, parameters);
+      const selectResult = await this.connection.execute<UnknownRecord>(selectSQL, parameters);
       return { count: result.count, records: selectResult.records };
     }
 
@@ -146,7 +146,7 @@ export abstract class BaseSQLModelService<C = unknown>
 
   async executeUpdate<T extends ModelType>(modelClass: Class<T>, where: WhereClause<T>, item: T): Promise<T | undefined> {
     const preppedItem = await ModelCrudUtil.preUpdate(modelClass, item, { ensureNotSubType: true });
-    const rawItem: Record<string, unknown> = castTo(preppedItem);
+    const rawItem: UnknownRecord = castTo(preppedItem);
 
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);
@@ -166,12 +166,12 @@ export abstract class BaseSQLModelService<C = unknown>
     const preppedItem = await ModelCrudUtil.preUpsert(modelClass, item, {
       ensureNotSubType: true
     });
-    const rawItem: Record<string, unknown> = castTo(preppedItem);
+    const rawItem: UnknownRecord = castTo(preppedItem);
     const tableContext = this.connection.getContext(modelClass);
 
     const { sql, values } = this.dialect.buildUpsert(tableContext, rawItem, conflictTarget);
 
-    const result = await this.connection.execute<Record<string, unknown>>(sql, values);
+    const result = await this.connection.execute<UnknownRecord>(sql, values);
     if (result.records.length > 0) {
       return this.loadSingle(modelClass, result.records[0]);
     } else {
@@ -187,7 +187,7 @@ export abstract class BaseSQLModelService<C = unknown>
     const { whereSQL, parameters } = this.#whereClause(modelClass, idSource.where(id));
     const sql = this.dialect.buildSelect(tableContext, { whereSQL });
 
-    const result = await this.connection.execute<Record<string, unknown>>(sql, parameters);
+    const result = await this.connection.execute<UnknownRecord>(sql, parameters);
 
     if (result.count === 0) {
       throw new NotFoundError(modelClass, id);
@@ -198,7 +198,7 @@ export abstract class BaseSQLModelService<C = unknown>
 
   async create<T extends ModelType>(modelClass: Class<T>, item: OptionalId<T>): Promise<T> {
     const preppedItem = await ModelCrudUtil.preCreate(modelClass, item);
-    const rawItem: Record<string, unknown> = castTo(preppedItem);
+    const rawItem: UnknownRecord = castTo(preppedItem);
     const tableContext = this.connection.getContext(modelClass);
 
     const { sql, values } = this.dialect.buildInsert(tableContext, rawItem);
@@ -498,7 +498,7 @@ export abstract class BaseSQLModelService<C = unknown>
         // Convert inserts into SQL statements with a fixed batch size
         for (let index = 0; index < inserts.length; index += sqlBatchSize) {
           const subBatch = inserts.slice(index, index + sqlBatchSize);
-          const rawItems: Record<string, unknown>[] = castTo(subBatch);
+          const rawItems: UnknownRecord[] = castTo(subBatch);
           const { sql, values } = this.dialect.buildInsertAll(tableContext, rawItems);
           commands.push({ type: 'insert', sql, values, count: subBatch.length });
         }
@@ -518,14 +518,14 @@ export abstract class BaseSQLModelService<C = unknown>
         // Convert updates into SQL statements with a fixed batch size
         for (let index = 0; index < updates.length; index += sqlBatchSize) {
           const subBatch = updates.slice(index, index + sqlBatchSize);
-          const rawItems: Record<string, unknown>[] = castTo(subBatch);
+          const rawItems: UnknownRecord[] = castTo(subBatch);
           const { sql, values } = this.dialect.buildUpdateAll(tableContext, rawItems);
           commands.push({ type: 'update', sql, values, count: subBatch.length });
         }
 
         // Generate upsert statements from other operations
         for (const operation of upserts) {
-          const rawItem: Record<string, unknown> = castTo(operation.upsert);
+          const rawItem: UnknownRecord = castTo(operation.upsert);
           const { sql, values } = this.dialect.buildUpsert(tableContext, rawItem, [this.dialect.escapeIdentifier(idFieldName)]);
           commands.push({ type: 'upsert', sql, values, count: 1 });
         }
@@ -597,7 +597,7 @@ export abstract class BaseSQLModelService<C = unknown>
     const { whereSQL, parameters } = this.#whereClause(modelClass, where);
     const sql = this.dialect.buildSelect(tableContext, { whereSQL });
 
-    const result = await this.connection.execute<Record<string, unknown>>(sql, parameters);
+    const result = await this.connection.execute<UnknownRecord>(sql, parameters);
     this.validateIndexResult(modelClass, result, indexConfig, computed);
 
     return this.loadSingle(modelClass, result.records[0]);
@@ -792,7 +792,7 @@ export abstract class BaseSQLModelService<C = unknown>
     const preppedItem = await ModelCrudUtil.preUpdate(modelClass, item, {
       ensureNotSubType: true
     });
-    const rawItem: Record<string, unknown> = castTo(preppedItem);
+    const rawItem: UnknownRecord = castTo(preppedItem);
 
     const idSource = ModelRegistryIndex.get(modelClass).idSource;
     const id = idSource.get(preppedItem);

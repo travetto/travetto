@@ -1,7 +1,17 @@
 import util from 'node:util';
 
 import { DependencyRegistryIndex, getDefaultQualifier, Injectable, PostConstruct } from '@travetto/di';
-import { type Class, castTo, Env, getClass, Runtime, RuntimeError, RuntimeResources, toConcrete } from '@travetto/runtime';
+import {
+  type Class,
+  type UnknownRecord,
+  castTo,
+  Env,
+  getClass,
+  Runtime,
+  RuntimeError,
+  RuntimeResources,
+  toConcrete
+} from '@travetto/runtime';
 import { BindUtil, DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ParserManager } from './parser/parser.ts';
@@ -22,7 +32,7 @@ export class ConfigBaseType {}
  */
 @Injectable()
 export class ConfigurationService {
-  #storage: Record<string, unknown> = {}; // Lowered, and flattened
+  #storage: UnknownRecord = {}; // Lowered, and flattened
   #payloads: ConfigSpecSimple[] = [];
   #secrets: (RegExp | string)[] = [/secure(-|_|[a-z])|password|private|secret|salt|(\bkey|key\b)|serviceAccount|(api(-|_)?key)/i];
 
@@ -30,9 +40,9 @@ export class ConfigurationService {
    * Get a sub tree of the config, or everything if namespace is not passed
    * @param namespace The namespace of the config to search for, can be dotted for accessing sub namespaces
    */
-  #get<T extends Record<string, unknown> = Record<string, unknown>>(namespace?: string): T {
+  #get<T extends UnknownRecord = UnknownRecord>(namespace?: string): T {
     const parts = namespace ? namespace.split('.') : [];
-    let sub: Record<string, unknown> = this.#storage;
+    let sub: UnknownRecord = this.#storage;
 
     while (parts.length && sub) {
       const next = parts.shift()!;

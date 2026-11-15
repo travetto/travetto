@@ -1,4 +1,6 @@
-export type ConfigData = Record<string, unknown>;
+import type { UnknownRecord } from '@travetto/runtime';
+
+export type ConfigData = UnknownRecord;
 
 /**
  * @concrete

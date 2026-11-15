@@ -1,6 +1,6 @@
 import { isBooleanObject, isNumberObject, isStringObject } from 'node:util/types';
 
-import { asConstructable, asFull, type Class, castTo, TypedObject } from '@travetto/runtime';
+import { asConstructable, asFull, type Class, castTo, TypedObject, type UnknownRecord } from '@travetto/runtime';
 
 import { UnknownType } from './types.ts';
 
@@ -14,7 +14,7 @@ export class DataUtil {
    * Is a value a plain JS object, created using {}
    * @param value Object to check
    */
-  static isPlainObject(value: unknown): value is Record<string, unknown> {
+  static isPlainObject(value: unknown): value is UnknownRecord {
     return (
       typeof value === 'object' && // separate from primitives
       value !== undefined &&
@@ -105,8 +105,8 @@ export class DataUtil {
       } else {
         // Object merge
         value = a;
-        const bObject: Record<string, unknown> = castTo(b);
-        const valueObject: Record<string, unknown> = castTo(value);
+        const bObject: UnknownRecord = castTo(b);
+        const valueObject: UnknownRecord = castTo(value);
 
         for (const key of Object.keys(bObject)) {
           if (key === '__proto__' || key === 'constructor' || key === 'prototype') {

@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { type Class, TimeUtil } from '@travetto/runtime';
+import { type Class, TimeUtil, type UnknownRecord } from '@travetto/runtime';
 import { BindUtil, CommonRegex, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 /**
@@ -197,7 +197,7 @@ export class SchemaFaker {
     const schema = SchemaRegistryIndex.get(cls);
     const fields = schema.getFields();
     const subTypeField = schema.getDiscriminatedConfig()?.discriminatedField;
-    const out: Record<string, unknown> = {};
+    const out: UnknownRecord = {};
 
     for (const [name, fieldConfig] of Object.entries(fields)) {
       if (name === subTypeField) {

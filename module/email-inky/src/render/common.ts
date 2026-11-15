@@ -1,3 +1,5 @@
+import type { UnknownRecord } from '@travetto/runtime';
+
 import { isJSXElement, type JSXElement } from '../../support/jsx-runtime.ts';
 
 export const getChildren = (node: JSXElement): JSXElement[] => {
@@ -44,7 +46,7 @@ export const classString = (existing: string | undefined, ...toAdd: string[]): s
 
 export const combinePropsToString = (
   allowedProps: Set<string>,
-  props: { className?: string } & Record<string, unknown>,
+  props: { className?: string } & UnknownRecord,
   addClasses: string[] = []
 ): string => {
   const out = { ...props, className: classString(props.className, ...addClasses) };

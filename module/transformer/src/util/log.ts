@@ -1,3 +1,5 @@
+import type { UnknownRecord } from '@travetto/runtime';
+
 const exclude = new Set([
   'parent',
   'checker',
@@ -54,7 +56,7 @@ export class LogUtil {
       return value.map(node => this.collapseNode(node, cache));
     } else {
       const ox = value;
-      const out: Record<string, unknown> = {};
+      const out: UnknownRecord = {};
       for (const key of TypedObject.keys(ox)) {
         if (ox[key] === null || ox[key] === undefined || Object.getPrototypeOf(ox[key]) === Function.prototype || exclude.has(key)) {
           continue;

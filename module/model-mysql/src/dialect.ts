@@ -7,7 +7,7 @@ import {
   type TableContext,
   type TextSearchState
 } from '@travetto/model-sql';
-import { castTo, JSONUtil } from '@travetto/runtime';
+import { castTo, JSONUtil, type UnknownRecord } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
 export class MysqlDialect extends AbstractANSI99Dialect {
@@ -310,7 +310,7 @@ GROUP BY INDEX_NAME, TABLE_NAME, NON_UNIQUE;
     clause: TextSearchClause,
     identificationPath: string,
     fieldPath?: string[]
-  ): { sql: string; parameters: Record<string, unknown> } {
+  ): { sql: string; parameters: UnknownRecord } {
     let columns: string;
 
     if (fieldPath && fieldPath.length > 0) {

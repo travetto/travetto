@@ -3,7 +3,7 @@ import { AssertionError } from 'node:assert';
 import type { BinaryArray } from './binary.ts';
 import { CodecUtil } from './codec.ts';
 import { RuntimeError, type RuntimeErrorOptions } from './error.ts';
-import { type Any, castTo } from './types.ts';
+import { type Any, castTo, type UnknownRecord } from './types.ts';
 
 const VALID_JSON_ERROR_TYPES = ['runtime', 'plain', 'assert'] as const;
 const VALID_JSON_ERROR_TYPE_SET = new Set<unknown>(VALID_JSON_ERROR_TYPES);
@@ -12,7 +12,7 @@ type JSONTransformer = (this: unknown, key: string, value: unknown) => unknown;
 type JSONOutputConfig = { indent?: number; replacer?: JSONTransformer };
 type JSONInputConfig = { reviver?: JSONTransformer };
 type JSONCloneConfig = JSONOutputConfig & JSONInputConfig;
-type JSONError = { $trv: (typeof VALID_JSON_ERROR_TYPES)[number]; name?: string } & Partial<RuntimeErrorOptions<Record<string, unknown>>>;
+type JSONError = { $trv: (typeof VALID_JSON_ERROR_TYPES)[number]; name?: string } & Partial<RuntimeErrorOptions<UnknownRecord>>;
 
 try {
   // Allows for big int serialization in json

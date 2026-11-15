@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { CliCommand, type CliCommandShape } from '@travetto/cli';
-import { Runtime, RuntimeIndex } from '@travetto/runtime';
+import { Runtime, RuntimeIndex, type UnknownRecord } from '@travetto/runtime';
 
 async function exists(filePath: string): Promise<boolean> {
   try {
@@ -124,7 +124,7 @@ export class LlmSupportInlineCommand implements CliCommandShape {
         continue;
       }
 
-      let meta: Record<string, unknown>;
+      let meta: UnknownRecord;
       try {
         meta = JSON.parse(match[1].trim());
       } catch (err) {

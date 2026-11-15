@@ -1,4 +1,4 @@
-import { AsyncIterableHelper, AsyncQueue } from '@travetto/runtime';
+import { AsyncIterableHelper, AsyncQueue, type UnknownRecord } from '@travetto/runtime';
 import { Terminal, TerminalUtil } from '@travetto/terminal';
 
 import type { TestEvent } from '../../model/event.ts';
@@ -28,7 +28,7 @@ export class TapSummaryEmitter implements TestConsumerShape {
   #progress: Promise<unknown> | undefined;
   #consumer: TapEmitter;
   #enhancer: TestResultsEnhancer;
-  #options?: Record<string, unknown>;
+  #options?: UnknownRecord;
   #state: TestRunState = {};
 
   constructor(terminal: Terminal = new Terminal(process.stderr)) {
@@ -79,7 +79,7 @@ export class TapSummaryEmitter implements TestConsumerShape {
     this.#consumer.log('...');
   }
 
-  setOptions(options?: Record<string, unknown>): Promise<void> | void {
+  setOptions(options?: UnknownRecord): Promise<void> | void {
     this.#options = options;
     this.#consumer.setOptions(options);
   }

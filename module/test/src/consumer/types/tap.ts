@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import { stringify } from 'yaml';
 
-import { RuntimeIndex, TimeUtil } from '@travetto/runtime';
+import { RuntimeIndex, TimeUtil, type UnknownRecord } from '@travetto/runtime';
 import { StyleUtil, Terminal } from '@travetto/terminal';
 
 import type { TestEvent } from '../../model/event.ts';
@@ -21,7 +21,7 @@ export class TapEmitter implements TestConsumerShape {
   #count = 0;
   #enhancer: TestResultsEnhancer;
   #terminal: Terminal;
-  #options?: Record<string, unknown>;
+  #options?: UnknownRecord;
   #start: number = 0;
 
   constructor(terminal = new Terminal(), enhancer: TestResultsEnhancer = CONSOLE_ENHANCER) {
@@ -29,7 +29,7 @@ export class TapEmitter implements TestConsumerShape {
     this.#enhancer = enhancer;
   }
 
-  setOptions(options?: Record<string, unknown>): Promise<void> | void {
+  setOptions(options?: UnknownRecord): Promise<void> | void {
     this.#options = options;
   }
 
@@ -48,7 +48,7 @@ export class TapEmitter implements TestConsumerShape {
   /**
    * Output supplemental data (e.g. logs)
    */
-  logMeta(metadata: Record<string, unknown>): void {
+  logMeta(metadata: UnknownRecord): void {
     const lineLength = this.#terminal.width - 5;
     let body = stringify(metadata, { lineWidth: lineLength, indent: 2 });
     body = body

@@ -10,7 +10,7 @@ import {
   type TextSearchClause,
   type WhereClause
 } from '@travetto/model-query';
-import { type Any, type Class, castTo, TypedObject } from '@travetto/runtime';
+import { type Any, type Class, type UnknownRecord, castTo, TypedObject } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { EsSchemaConfig } from './types.ts';
@@ -22,8 +22,8 @@ export class ElasticsearchQueryUtil {
   /**
    * Convert `a : { b : { c : ... }}` to `a.b.c`
    */
-  static extractSimple<T>(input: T, path: string = ''): Record<string, unknown> {
-    const out: Record<string, unknown> = {};
+  static extractSimple<T>(input: T, path: string = ''): UnknownRecord {
+    const out: UnknownRecord = {};
     const keys = TypedObject.keys(input);
     for (const key of keys) {
       const subPath = `${path}${key}`;
@@ -95,12 +95,7 @@ export class ElasticsearchQueryUtil {
   /**
    * Extract specific term for a class, and a given field
    */
-  static extractWhereTermQuery<T>(
-    cls: Class<T>,
-    item: Record<string, unknown>,
-    config?: EsSchemaConfig,
-    path: string = ''
-  ): Record<string, unknown> {
+  static extractWhereTermQuery<T>(cls: Class<T>, item: UnknownRecord, config?: EsSchemaConfig, path: string = ''): UnknownRecord {
     const items = [];
     const fields = SchemaRegistryIndex.get(cls).getFields();
     const idField = ModelRegistryIndex.has(cls) ? ModelRegistryIndex.getConfig(cls).idField : undefined;
@@ -209,7 +204,7 @@ export class ElasticsearchQueryUtil {
             case '$gt':
             case '$gte':
             case '$lte': {
-              const out: Record<string, unknown> = {};
+              const out: UnknownRecord = {};
               for (const key of Object.keys(top)) {
                 out[key.replace(/^[$]/, '')] = ModelQueryUtil.resolveComparator(top[key]);
               }
@@ -294,7 +289,7 @@ export class ElasticsearchQueryUtil {
   /**
    * Build query from the where clause
    */
-  static extractWhereQuery<T>(cls: Class<T>, clause: WhereClause<T>, config?: EsSchemaConfig): Record<string, unknown> {
+  static extractWhereQuery<T>(cls: Class<T>, clause: WhereClause<T>, config?: EsSchemaConfig): UnknownRecord {
     if (ModelQueryUtil.has$And(clause)) {
       return { bool: { must: clause.$and.map(item => this.extractWhereQuery<T>(cls, item, config)) } };
     } else if (ModelQueryUtil.has$Or(clause)) {
@@ -311,7 +306,7 @@ export class ElasticsearchQueryUtil {
    * @param cls
    * @param search
    */
-  static getSearchQuery<T extends ModelType>(cls: Class<T>, search: Record<string, unknown>, checkExpiry = true): QueryDslQueryContainer {
+  static getSearchQuery<T extends ModelType>(cls: Class<T>, search: UnknownRecord, checkExpiry = true): QueryDslQueryContainer {
     const clauses: QueryDslQueryContainer[] = [];
     if (search && Object.keys(search).length) {
       clauses.push(search);

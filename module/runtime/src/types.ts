@@ -18,6 +18,7 @@ export type Primitive = NumericPrimitive | boolean | string;
 export type NumericLikeIntrinsic = Date | NumericPrimitive;
 
 export type IntrinsicType = Primitive | Date | ArrayBuffer | Uint8Array | Uint16Array | Uint32Array | Readable | Buffer | Blob | File;
+export type UnknownRecord = Record<string, unknown>;
 
 export type DeepPartial<T> =
   | Partial<T>

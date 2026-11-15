@@ -1,4 +1,4 @@
-import { asFull, type Class, castKey, castTo, classConstruct, TypedObject } from '@travetto/runtime';
+import { asFull, type Class, castKey, castTo, classConstruct, TypedObject, type UnknownRecord } from '@travetto/runtime';
 
 import { DataUtil } from './data.ts';
 import { SchemaRegistryIndex } from './service/registry-index.ts';
@@ -75,8 +75,8 @@ export class BindUtil {
    *
    * @param input The object to convert
    */
-  static expandPaths(input: Record<string, unknown>): Record<string, unknown> {
-    const out: Record<string, unknown> = {};
+  static expandPaths(input: UnknownRecord): UnknownRecord {
+    const out: UnknownRecord = {};
     for (const property of Object.keys(input)) {
       const valueInput = input[property];
       const value = DataUtil.isPlainObject(valueInput) ? this.expandPaths(valueInput) : valueInput;
@@ -118,7 +118,7 @@ export class BindUtil {
         let key = /^\d+$/.test(idx) ? parseInt(idx, 10) : idx.trim() || undefined;
         sub[name] ??= typeof key === 'string' ? {} : [];
 
-        const arrSub: Record<string, unknown> & { length: number } = castTo(sub[name]);
+        const arrSub: UnknownRecord & { length: number } = castTo(sub[name]);
         if (key === undefined) {
           key = arrSub.length;
         }
@@ -137,7 +137,7 @@ export class BindUtil {
    * @param data The object to flatten the paths for
    * @param prefix The starting prefix
    */
-  static flattenPaths<V extends string = string>(data: Record<string, unknown>, prefix: string = ''): Record<string, V> {
+  static flattenPaths<V extends string = string>(data: UnknownRecord, prefix: string = ''): Record<string, V> {
     const out: Record<string, V> = {};
     for (const [key, value] of Object.entries(data)) {
       const pre = `${prefix}${key}`;

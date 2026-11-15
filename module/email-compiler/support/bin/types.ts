@@ -1,3 +1,5 @@
+import type { UnknownRecord } from '@travetto/runtime';
+
 export type EditorRequest =
   | { type: 'configure'; file: string }
   | { type: 'compile'; file: string }
@@ -23,6 +25,6 @@ export type EditorSender = {
 export interface EditorConfigType {
   to: string;
   from: string;
-  context?: Record<string, unknown>;
+  context?: UnknownRecord;
   sender?: EditorSender;
 }
