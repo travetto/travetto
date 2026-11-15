@@ -31,6 +31,7 @@ import {
 import {
   type FullKeyedIndexBody,
   type FullKeyedIndexWithPartialBody,
+  type IndexedProjectClause,
   type KeyedIndexBody,
   type KeyedIndexSelection,
   ModelIndexedComputedIndex,
@@ -204,7 +205,7 @@ export class ElasticsearchModelService
     nextOffset?: SortResults | undefined;
   }> {
     const computed = ModelIndexedComputedIndex.get(idx, body).validate();
-    let whereClause: WhereClause<T> = computed.project();
+    let whereClause: IndexedProjectClause<T> = computed.project();
     if (transformWhere) {
       whereClause = transformWhere(whereClause);
     }

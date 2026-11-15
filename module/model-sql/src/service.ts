@@ -604,7 +604,7 @@ export abstract class BaseSQLModelService<C = unknown>
   ): Promise<void> {
     ModelCrudUtil.ensureNotSubType(modelClass);
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate({ sort: true });
-    const where: WhereClause<T> = computed.project({ sort: true, includeId: true });
+    const where = computed.project({ sort: true, includeId: true });
 
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters } = this.#whereClause(modelClass, where);
@@ -628,9 +628,9 @@ export abstract class BaseSQLModelService<C = unknown>
     body: T
   ): Promise<T> {
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate({ sort: true });
-    const where: WhereClause<T> = computed.project({ sort: true, includeId: true });
+    const where = computed.project({ sort: true, includeId: true });
 
-    const preppedItem = await this.executeUpdate(modelClass, where, body);
+    const preppedItem = await this.executeUpdate<T>(modelClass, where, body);
     if (!preppedItem) {
       throw new NotFoundError(`${modelClass.name} Index=${indexConfig}`, computed.getKey());
     }
@@ -645,7 +645,7 @@ export abstract class BaseSQLModelService<C = unknown>
     ModelCrudUtil.ensureNotSubType(modelClass);
 
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate({ sort: true });
-    const where: WhereClause<T> = computed.project({ sort: true, includeId: true });
+    const where = computed.project({ sort: true, includeId: true });
 
     const result = await this.executeUpdatePartial(modelClass, where, castTo(body), true);
     this.validateIndexResult(modelClass, result, indexConfig, computed);
@@ -660,7 +660,7 @@ export abstract class BaseSQLModelService<C = unknown>
     options?: ModelListOptions & { offset?: number }
   ): AsyncIterable<T> {
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate();
-    const where: WhereClause<T> = computed.project();
+    const where = computed.project();
 
     const tableContext = this.connection.getContext(modelClass);
     const sortSQL = this.dialect.buildIndexSort(tableContext, indexConfig);
@@ -723,7 +723,7 @@ export abstract class BaseSQLModelService<C = unknown>
     options?: ModelIndexedSearchOptions
   ): Promise<T[]> {
     const computed = ModelIndexedComputedIndex.get(indexConfig, body).validate();
-    const where: WhereClause<T> = computed.project();
+    const where = computed.project();
 
     const tableContext = this.connection.getContext(modelClass);
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);

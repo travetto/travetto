@@ -1,10 +1,10 @@
-import type { KeyPaths, Primitive, TimeSpan, ValidFields } from '@travetto/runtime';
+import type { KeyPaths, Primitive, TimeSpan, SimpleFields } from '@travetto/runtime';
 import type { Point } from '@travetto/schema';
 
 export type QueryPrimitive = Primitive | Date | Point;
 export type QueryPrimitiveArray = QueryPrimitive[];
 export type DistanceUnit = 'mi' | 'm' | 'km' | 'ft' | 'rad';
-export type RetainQueryPrimitiveFields<T> = Pick<T, ValidFields<T, QueryPrimitive>>;
+export type RetainQueryPrimitiveFields<T> = Pick<T, SimpleFields<T, QueryPrimitive>>;
 export type ValidStringFields<T> = KeyPaths<T, String | string | string[] | String[] | undefined>;
 export type ValidNumericFields<T> = KeyPaths<T, number | bigint | Number | undefined>;
 export type ValidComparableFields<T> = KeyPaths<T, number | bigint | Number | Date | undefined>;

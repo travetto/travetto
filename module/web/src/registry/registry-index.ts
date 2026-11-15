@@ -1,10 +1,10 @@
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
-import { castTo, type Class, type ClassInstance, getClass, isClass, type RetainIntrinsicFields, RuntimeError } from '@travetto/runtime';
+import { castTo, type Class, type ClassInstance, getClass, isClass } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { WebAsyncContext } from '../context.ts';
-import type { WebInterceptor } from '../types/interceptor.ts';
+import type { WebInterceptor, WebInterceptorConfigInput } from '../types/interceptor.ts';
 import { ControllerRegistryAdapter } from './registry-adapter.ts';
 import type { ControllerConfig, EndpointConfig, EndpointDecorator } from './types.ts';
 
@@ -38,7 +38,7 @@ export class ControllerRegistryIndex implements RegistryIndex {
    */
   static createInterceptorConfigDecorator<T extends WebInterceptor>(
     cls: Class<T>,
-    config: Partial<RetainIntrinsicFields<T['config']>>,
+    config: WebInterceptorConfigInput<T>,
     extra?: Partial<EndpointConfig & ControllerConfig>
   ): EndpointDecorator {
     return (instanceOrCls: Class | ClassInstance, property?: string): void => {

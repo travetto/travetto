@@ -30,11 +30,9 @@ export type DeepPartial<T> =
           : DeepPartial<T[P]>;
     };
 
-export type ValidFields<T, I> = {
-  [K in keyof T]: T[K] extends Primitive | I | undefined ? K : T[K] extends Function | undefined ? never : K;
+export type SimpleFields<T, I> = {
+  [K in keyof T]: T[K] extends I | undefined ? K : T[K] extends Function | undefined ? never : K;
 }[keyof T];
-
-export type RetainIntrinsicFields<T> = Pick<T, ValidFields<T, IntrinsicType>>;
 
 type KeyPathsInner<T, PrimitiveType = IntrinsicType | IntrinsicType[], PREFIX extends string = '', SEP extends string = '.'> = {
   [K in keyof T]: K extends string

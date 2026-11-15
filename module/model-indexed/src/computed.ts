@@ -1,6 +1,6 @@
 import { ModelRegistryIndex, type ModelType } from '@travetto/model';
-import { type Any, castTo, type UnknownRecord } from '@travetto/runtime';
-import { DataUtil } from '@travetto/schema';
+import { type Any, castTo, type Primitive, type SimpleFields } from '@travetto/runtime';
+import { DataUtil, type Point } from '@travetto/schema';
 
 import { IndexedFieldError } from './types/error.ts';
 import type {
@@ -24,6 +24,29 @@ type IndexPart<T extends TemplateValue = TemplateValue, V = unknown> = {
   path: string[];
   templateValue: T;
 };
+
+type IndexedPrimitiveFields<T> = Pick<T, SimpleFields<T, Primitive | Date | Point>>;
+
+type IndexedProjectClauseRaw<T> = {
+  -readonly [P in keyof T]?: T[P] extends number | undefined
+    ? number
+    : T[P] extends bigint | undefined
+      ? bigint
+      : T[P] extends string | undefined
+        ? string
+        : T[P] extends boolean | undefined
+          ? boolean
+          : T[P] extends Date | undefined
+            ? Date
+            : T[P] extends Point | undefined
+              ? Point
+              : T[P] extends (infer U)[] | undefined
+                ? U[]
+                : T[P] extends object | undefined
+                  ? IndexedProjectClauseRaw<IndexedPrimitiveFields<T[P]>>
+                  : never;
+};
+export type IndexedProjectClause<T> = IndexedProjectClauseRaw<IndexedPrimitiveFields<T>>;
 
 function buildIndexParts<T extends TemplateValue = TemplateValue>(
   template: TemplatePart<T>[],
@@ -141,15 +164,16 @@ export class ModelIndexedComputedIndex<T extends ModelType> {
     }
   }
 
-  project<R = UnknownRecord>(config: IndexProcessConfig<{ emptyValue?: unknown; includeId?: boolean }> = {}): R {
+  project(config: IndexProcessConfig<{ emptyValue?: unknown; includeId?: boolean }> = {}): IndexedProjectClause<T> {
     const { keyed = true, sort = false, emptyValue = null, includeId } = config;
-    const response: UnknownRecord = {};
+    const response: Partial<T> = {};
     for (const { path, value, state } of [...(keyed ? this.keyedParts : []), ...(sort ? this.sortParts : [])]) {
       DataUtil.setPath(response, path, state === 'empty' ? emptyValue : value);
     }
     if (includeId && this.idPart) {
+      // @ts-expect-error
       response.id = this.idPart.state === 'empty' ? emptyValue : this.idPart.value;
     }
-    return castTo<R>(response);
+    return castTo<T>(response);
   }
 }

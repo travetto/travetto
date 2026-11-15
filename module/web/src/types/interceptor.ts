@@ -1,4 +1,4 @@
-import type { Class } from '@travetto/runtime';
+import type { Class, IntrinsicType, Primitive, SimpleFields } from '@travetto/runtime';
 
 import type { EndpointConfig } from '../registry/types.ts';
 import type { WebInterceptorCategory } from './core.ts';
@@ -6,6 +6,10 @@ import type { WebChainedContext } from './filter.ts';
 import type { WebResponse } from './response.ts';
 
 export type WebInterceptorContext<C = unknown> = { endpoint: EndpointConfig; config: C };
+
+export type WebInterceptorConfigInput<T extends WebInterceptor> = Partial<
+  Pick<T['config'], SimpleFields<T['config'], Primitive | IntrinsicType>>
+>;
 
 /**
  * Web interceptor structure

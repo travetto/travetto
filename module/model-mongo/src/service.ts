@@ -559,7 +559,7 @@ export class MongoModelService
 
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
 
-    const result = await store.findOne(this.getWhereFilter(cls, computed.project({ sort: true, includeId: true })));
+    const result = await store.findOne(this.getWhereFilter<T>(cls, computed.project({ sort: true, includeId: true })));
     if (!result) {
       throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
@@ -574,7 +574,7 @@ export class MongoModelService
     const store = await this.getStore(cls);
     const computed = ModelIndexedComputedIndex.get(idx, body).validate({ sort: true });
 
-    const result = await store.deleteOne(this.getWhereFilter(cls, computed.project({ sort: true, includeId: true })));
+    const result = await store.deleteOne(this.getWhereFilter<T>(cls, computed.project({ sort: true, includeId: true })));
     if (!result.deletedCount) {
       throw new NotFoundError(`${cls.name}: ${idx}`, computed.getKey({ sort: true }));
     }
