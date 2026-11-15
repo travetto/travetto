@@ -72,8 +72,7 @@ export class HelpUtil {
     const descriptions: string[] = [];
 
     for (const field of Object.values(schema.fields)) {
-      const key = castKey<CliCommandShape>(field.name);
-      const defaultValue = ifDefined(command[key]) ?? ifDefined(field.default);
+      const defaultValue = ifDefined(command[castKey(field.name)]) ?? ifDefined(field.default);
       const aliases = (field.aliases ?? [])
         .filter(flag => flag.startsWith('-'))
         .filter(flag => field.type.value !== Boolean || (defaultValue !== true ? !flag.startsWith('--no-') : flag.startsWith('--')));

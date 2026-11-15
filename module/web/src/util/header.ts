@@ -1,9 +1,9 @@
-import { type ByteRange, castKey, castTo } from '@travetto/runtime';
+import { type ByteRange, castTo } from '@travetto/runtime';
 
 import type { Cookie } from '../types/cookie.ts';
 import type { WebHeaders } from '../types/headers.ts';
 
-export type WebParsedHeader = { value: string; parameters: Record<string, string>; q?: number };
+export type WebParsedHeader<K extends string = string> = { value: K; parameters: Record<string, string>; q?: number };
 
 const SPLIT_EQ = /[ ]{0,10}=[ ]{0,10}/g;
 const SPLIT_COMMA = /[ ]{0,10},[ ]{0,10}/g;
@@ -35,12 +35,12 @@ export class WebHeaderUtil {
     const [name, value] = parts[0].split(SPLIT_EQ);
     const result: Cookie = { name, value };
     for (const part of parts.slice(1)) {
-      const [key, partValue = ''] = part.toLowerCase().split(SPLIT_EQ);
+      const [key, partValue = ''] = part.toLowerCase().split(SPLIT_EQ) as [keyof Cookie, string];
       const cleanedValue = partValue.charCodeAt(0) === QUOTE ? partValue.slice(1, -1) : partValue;
       if (key === 'expires') {
         result[key] = new Date(cleanedValue);
       } else {
-        result[castKey(key)] = castTo(cleanedValue || true);
+        result[key] = castTo(cleanedValue || true);
       }
     }
     return result;
@@ -50,17 +50,17 @@ export class WebHeaderUtil {
    * Parse header segment
    * @input input
    */
-  static parseHeaderSegment(input: string | null | undefined): WebParsedHeader {
+  static parseHeaderSegment<K extends string = string>(input: string | null | undefined): WebParsedHeader<K> {
     if (!input) {
-      return { value: '', parameters: {} };
+      return { value: '' as K, parameters: {} };
     }
     const [rawValue, ...parts] = input.split(SPLIT_SEMI);
-    const item: WebParsedHeader = { value: '', parameters: {} };
+    const item: WebParsedHeader<K> = { value: '' as K, parameters: {} };
     const value = rawValue.charCodeAt(0) === QUOTE ? rawValue.slice(1, -1) : rawValue;
     if (value.includes('=')) {
       parts.unshift(value);
     } else {
-      item.value = value;
+      item.value = value as K;
     }
     for (const part of parts) {
       const [key, partValue = ''] = part.split(SPLIT_EQ);
@@ -76,12 +76,12 @@ export class WebHeaderUtil {
   /**
    * Parse full header
    */
-  static parseHeader(input: string): WebParsedHeader[] {
+  static parseHeader<K extends string = string>(input: string): WebParsedHeader<K>[] {
     const value = input.trim();
     if (!input) {
       return [];
     }
-    return value.split(SPLIT_COMMA).map(part => this.parseHeaderSegment(part));
+    return value.split(SPLIT_COMMA).map(part => this.parseHeaderSegment<K>(part));
   }
 
   /**
@@ -123,13 +123,13 @@ export class WebHeaderUtil {
     if (header === '*' || header === '*/*') {
       return values[0];
     }
-    const sorted = this.parseHeader(header.toLowerCase())
+    const sorted = this.parseHeader<K>(header.toLowerCase())
       .filter(item => (item.q ?? 1) > 0)
       .toSorted((a, b) => (b.q ?? 1) - (a.q ?? 1));
 
     const set = new Set(values);
     for (const { value } of sorted) {
-      const vk: K = castKey(value);
+      const vk: K = value;
       if (value === '*') {
         return values[0];
       } else if (set.has(vk)) {
