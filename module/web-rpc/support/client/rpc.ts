@@ -8,6 +8,20 @@ type PromiseFn = (...args: Any) => Promise<unknown>;
 type PromiseResult<V extends PromiseFn> = Awaited<ReturnType<V>>;
 type UnknownRecord = Record<string, unknown>;
 
+const isRecord = (value: unknown): value is UnknownRecord =>
+  typeof value === 'object' && // separate from primitives
+  value !== undefined &&
+  value !== null && // is obvious
+  !Array.isArray(value);
+
+function isPlainRecord(value: unknown): value is UnknownRecord {
+  return (
+    isRecord(value) &&
+    value.constructor === Object && // separate instances (Array, DOM, ...)
+    Object.prototype.toString.call(value) === '[object Object]' // separate build-in like Math
+  );
+}
+
 const triggerBrowserRedirect = (world: Any, url: URL): boolean => {
   const location = world?.window?.location;
   if (location) {
@@ -18,7 +32,7 @@ const triggerBrowserRedirect = (world: Any, url: URL): boolean => {
 };
 
 const isBlobMap = (value: unknown): value is Record<string, Blob> => {
-  if (typeof value !== 'object' || value === null) {
+  if (!isRecord(value)) {
     return false;
   }
   for (const [key, item] of Object.entries(value)) {
@@ -85,16 +99,6 @@ export type RpcClientFactory<T extends Record<string, {}>> = <R extends Record<s
 
 function isResponse(value: unknown): value is Response {
   return !!value && typeof value === 'object' && 'status' in value && !!value.status && 'headers' in value && !!value.headers;
-}
-
-function isPlainObject(value: unknown): value is UnknownRecord {
-  return (
-    typeof value === 'object' && // separate from primitives
-    value !== undefined &&
-    value !== null && // is obvious
-    value.constructor === Object && // separate instances (Array, DOM, ...)
-    Object.prototype.toString.call(value) === '[object Object]'
-  ); // separate build-in like Math
 }
 
 function registerTimeout<T>(
@@ -222,7 +226,7 @@ export async function consumeError(error: unknown): Promise<Error> {
     const out = new Error(error.statusText);
     Object.assign(out, { status: error.status });
     return consumeError(out);
-  } else if (isPlainObject(error)) {
+  } else if (isPlainRecord(error)) {
     const out = new Error();
     Object.assign(out, error);
     return consumeError(out);
