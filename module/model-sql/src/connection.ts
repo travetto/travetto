@@ -4,7 +4,7 @@ import { type AsyncMethodDescriptor, type Class, castTo, Util } from '@travetto/
 
 import type { AbstractANSI99Dialect } from './dialect.ts';
 import { SQLModelSchemaUtil } from './schema.ts';
-import type { TableContext } from './types.ts';
+import type { SQLResultRecord, TableContext } from './types.ts';
 
 export type TransactionType = 'required' | 'isolated' | 'force';
 
@@ -81,7 +81,7 @@ export abstract class SQLConnection<C = unknown, F extends SQLConfiguration = SQ
   /**
    * Executes a SQL query
    */
-  abstract execute<Type = Record<string, unknown>>(query: string, values?: unknown[]): Promise<{ count: number; records: Type[] }>;
+  abstract execute<T = SQLResultRecord>(query: string, values?: unknown[]): Promise<{ count: number; records: T[] }>;
 
   /**
    * Runs an operation with an active connection (allocating one if not already active)

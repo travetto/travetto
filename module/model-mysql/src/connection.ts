@@ -4,7 +4,7 @@ import type { OkPacket, Pool, PoolConnection, ResultSetHeader, TypeCastField } f
 import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { ExistsError, type ModelType } from '@travetto/model';
-import { SQLConnection, type TableContext } from '@travetto/model-sql';
+import { SQLConnection, type SQLResultRecord, type TableContext } from '@travetto/model-sql';
 import { type Class, castTo, JSONUtil, ShutdownManager } from '@travetto/runtime';
 
 import type { MysqlModelConfig } from './config.ts';
@@ -97,7 +97,7 @@ export class MysqlConnection extends SQLConnection<PoolConnection> {
   /**
    * Executes a query on the active client or pool directly
    */
-  async execute<Type = unknown>(query: string, values?: unknown[]): Promise<{ count: number; records: Type[] }> {
+  async execute<T = SQLResultRecord>(query: string, values?: unknown[]): Promise<{ count: number; records: T[] }> {
     console.debug('Executing MySQL query', { query, values });
     const client = this.active ?? (await this.acquire());
     try {
@@ -107,7 +107,7 @@ export class MysqlConnection extends SQLConnection<PoolConnection> {
       } else if (isSimplePacket(results[0])) {
         return { records: [], count: results[0].affectedRows };
       } else {
-        const records: Type[] = castTo(results);
+        const records: T[] = castTo(results);
         return { records, count: records.length };
       }
     } catch (error) {

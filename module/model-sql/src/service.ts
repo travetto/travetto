@@ -65,7 +65,7 @@ import { WorkPool } from '@travetto/worker';
 import type { SQLConnection } from './connection.ts';
 import type { AbstractANSI99Dialect, CompiledWhere } from './dialect.ts';
 import { SQLModelSchemaUtil } from './schema.ts';
-import type { TableContext } from './types.ts';
+import type { SQLResultRecord, TableContext } from './types.ts';
 
 /**
  * Base SQL Model Service.
@@ -117,7 +117,7 @@ export abstract class BaseSQLModelService<C = unknown>
     return ModelCrudUtil.load(modelClass, resolvedRecord);
   }
 
-  async loadMany<T extends ModelType>(modelClass: Class<T>, records: Record<string, unknown>[]): Promise<T[]> {
+  async loadMany<T extends ModelType>(modelClass: Class<T>, records: SQLResultRecord[]): Promise<T[]> {
     return Promise.all(records.map(row => this.loadSingle(modelClass, row)));
   }
 
@@ -133,11 +133,11 @@ export abstract class BaseSQLModelService<C = unknown>
     const { whereSQL, parameters = [] } = this.#whereClause(modelClass, where);
     const { sql, values } = this.dialect.buildPartialUpdate(tableContext, preparedData, whereSQL, parameters, returning);
 
-    const result = await this.connection.execute<UnknownRecord>(sql, values);
+    const result = await this.connection.execute(sql, values);
 
     if (result.count > 0 && returning && !this.dialect.returningSupport) {
       const selectSQL = this.dialect.buildSelect(tableContext, { whereSQL });
-      const selectResult = await this.connection.execute<UnknownRecord>(selectSQL, parameters);
+      const selectResult = await this.connection.execute(selectSQL, parameters);
       return { count: result.count, records: selectResult.records };
     }
 
@@ -169,7 +169,7 @@ export abstract class BaseSQLModelService<C = unknown>
 
     const { sql, values } = this.dialect.buildUpsert(tableContext, preppedItem, conflictTarget);
 
-    const result = await this.connection.execute<UnknownRecord>(sql, values);
+    const result = await this.connection.execute(sql, values);
     if (result.records.length > 0) {
       return this.loadSingle(modelClass, result.records[0]);
     } else {
@@ -185,7 +185,7 @@ export abstract class BaseSQLModelService<C = unknown>
     const { whereSQL, parameters } = this.#whereClause(modelClass, idSource.where(id));
     const sql = this.dialect.buildSelect(tableContext, { whereSQL });
 
-    const result = await this.connection.execute<UnknownRecord>(sql, parameters);
+    const result = await this.connection.execute(sql, parameters);
 
     if (result.count === 0) {
       throw new NotFoundError(modelClass, id);
@@ -591,7 +591,7 @@ export abstract class BaseSQLModelService<C = unknown>
     const { whereSQL, parameters } = this.#whereClause(modelClass, where);
     const sql = this.dialect.buildSelect(tableContext, { whereSQL });
 
-    const result = await this.connection.execute<UnknownRecord>(sql, parameters);
+    const result = await this.connection.execute(sql, parameters);
     this.validateIndexResult(modelClass, result, indexConfig, computed);
 
     return this.loadSingle(modelClass, result.records[0]);
