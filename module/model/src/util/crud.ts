@@ -8,7 +8,8 @@ import {
   isPlainRecord,
   JSONUtil,
   RuntimeError,
-  type UnknownRecord
+  type UnknownRecord,
+  isRecord
 } from '@travetto/runtime';
 import { SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
@@ -184,59 +185,60 @@ export class ModelCrudUtil {
    * Recursively deletes or masks transient fields from an object based on its Model config.
    * If transient fields are present, returns a copy with those fields set to undefined.
    */
-  static cleanTransientFields<T, U = T>(cls: Class<T>, item: U): U {
-    if (!item || typeof item !== 'object') {
+  static cleanTransientFields<T extends ModelType, U extends ModelType = T>(cls: Class<T>, item: U): U {
+    if (!isRecord(item) || !SchemaRegistryIndex.has(cls)) {
       return item;
     }
-    if (SchemaRegistryIndex.has(cls)) {
-      const schema = SchemaRegistryIndex.get(cls).get();
-      const transientFields = ModelRegistryIndex.has(cls) ? ModelRegistryIndex.getConfig(cls).transientFields : undefined;
 
-      const isCleanTarget = (key: string): boolean => {
-        return transientFields?.includes(key) ?? false;
-      };
+    const schema = SchemaRegistryIndex.get(cls).get();
+    const transientFields = ModelRegistryIndex.has(cls) ? ModelRegistryIndex.getConfig(cls).transientFields : undefined;
 
-      const hasTargets = Object.keys(schema.fields).some(key => isCleanTarget(key));
+    const isCleanTarget = (key: string): boolean => {
+      return transientFields?.includes(key) ?? false;
+    };
 
-      let record: UnknownRecord | undefined;
-      const getRecord = (): UnknownRecord => (record ??= { ...castTo<UnknownRecord>(item) });
+    const hasTargets = Object.keys(schema.fields).some(key => isCleanTarget(key));
 
-      if (hasTargets) {
-        const target = getRecord();
-        for (const key of Object.keys(schema.fields)) {
-          if (isCleanTarget(key)) {
-            target[key] = undefined;
-          }
+    let result: U = item;
+
+    const setField = (owner: unknown, key: string, value?: unknown) => {
+      castTo<UnknownRecord>(owner)[key] = value;
+    };
+
+    if (hasTargets) {
+      result = { ...result };
+      for (const key of Object.keys(schema.fields)) {
+        if (isCleanTarget(key)) {
+          setField(result, key, undefined);
         }
       }
-
-      for (const [key, field] of Object.entries(schema.fields)) {
-        const current = (record ?? castTo<UnknownRecord>(item))[key];
-        if (field.type.kind === 'complex' && !isCleanTarget(key) && current !== undefined && current !== null) {
-          const fieldType = field.type.value;
-          if (field.array && Array.isArray(current)) {
-            let changed = false;
-            const newArray = current.map(subItem => {
-              const cleaned = this.cleanTransientFields(fieldType, subItem);
-              if (cleaned !== subItem) {
-                changed = true;
-              }
-              return cleaned;
-            });
-            if (changed) {
-              getRecord()[key] = newArray;
-            }
-          } else {
-            const cleaned = this.cleanTransientFields(fieldType, current);
-            if (cleaned !== current) {
-              getRecord()[key] = cleaned;
-            }
-          }
-        }
-      }
-      return record ? castTo<U>(record) : item;
     }
-    return item;
+
+    for (const [key, field] of Object.entries(schema.fields)) {
+      const currentField = castTo<UnknownRecord>(result)[key];
+      if (field.type.kind === 'complex' && !isCleanTarget(key) && currentField !== undefined && currentField !== null) {
+        const fieldType = field.type.value;
+        if (field.array && Array.isArray(currentField)) {
+          let changed = false;
+          const newArray = currentField.map(subItem => {
+            const cleaned = this.cleanTransientFields(fieldType, subItem);
+            if (cleaned !== subItem) {
+              changed = true;
+            }
+            return cleaned;
+          });
+          if (changed) {
+            setField(result, key, newArray);
+          }
+        } else {
+          const cleaned = this.cleanTransientFields(fieldType, currentField);
+          if (cleaned !== currentField) {
+            setField(result, key, cleaned);
+          }
+        }
+      }
+    }
+    return result;
   }
 
   /**
