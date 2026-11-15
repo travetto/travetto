@@ -1,6 +1,6 @@
 import { DependencyRegistryIndex } from '@travetto/di';
 import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
-import { castTo, type Class, type ClassInstance, getClass, isClass } from '@travetto/runtime';
+import { castTo, type Class, type ClassInstance, getClass, getConstructor, isClass } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { WebAsyncContext } from '../context.ts';
@@ -41,9 +41,9 @@ export class ControllerRegistryIndex implements RegistryIndex {
     config: WebInterceptorConfigInput<T>,
     extra?: Partial<EndpointConfig & ControllerConfig>
   ): EndpointDecorator {
-    return (instanceOrCls: Class | ClassInstance, property?: string): void => {
-      const adapter = ControllerRegistryIndex.getForRegister(getClass(instanceOrCls));
-      if (isClass(instanceOrCls)) {
+    return (target: Class | ClassInstance, property?: string): void => {
+      const adapter = ControllerRegistryIndex.getForRegister(getClass(target));
+      if (isClass(target)) {
         adapter.registerInterceptorConfig(cls, config, extra);
       } else {
         adapter.registerEndpointInterceptorConfig(property!, cls, config, extra);
@@ -61,7 +61,7 @@ export class ControllerRegistryIndex implements RegistryIndex {
 
   async #bindContextParams<T>(instance: ClassInstance<T>): Promise<void> {
     const ctx = await DependencyRegistryIndex.getInstance(WebAsyncContext);
-    const cls = getClass(instance);
+    const cls = getConstructor(instance);
     const map = this.getController(cls).contextParams;
     const fieldMap = SchemaRegistryIndex.get(cls).getFields();
     for (const field of Object.keys(map)) {

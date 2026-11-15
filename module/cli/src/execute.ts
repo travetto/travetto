@@ -1,4 +1,4 @@
-import { getClass, ShutdownManager, Util } from '@travetto/runtime';
+import { getConstructor, ShutdownManager, Util } from '@travetto/runtime';
 
 import { HelpUtil } from './help.ts';
 import { CliParseUtil } from './parse.ts';
@@ -12,7 +12,7 @@ import type { CliCommandShape } from './types.ts';
 export class ExecutionManager {
   /** Command Execution */
   static async execute(instance: CliCommandShape, args: unknown[]): Promise<void> {
-    const config = CliCommandRegistryIndex.get(getClass(instance));
+    const config = CliCommandRegistryIndex.get(getConstructor(instance));
 
     for (const item of config.preMain) {
       await item.handler(instance);

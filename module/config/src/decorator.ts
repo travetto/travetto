@@ -1,5 +1,5 @@
 import { DependencyRegistryIndex } from '@travetto/di';
-import { type Class, type ClassInstance, getClass } from '@travetto/runtime';
+import { type Class, type ClassInstance, getConstructor } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ConfigOverrideUtil } from './override.ts';
@@ -35,6 +35,6 @@ export function Config(namespace: string) {
  */
 export function EnvVar(name: string, ...others: string[]) {
   return (instance: ClassInstance, property: string): void => {
-    ConfigOverrideUtil.setOverrideConfigField(getClass(instance), property, [name, ...others]);
+    ConfigOverrideUtil.setOverrideConfigField(getConstructor(instance), property, [name, ...others]);
   };
 }

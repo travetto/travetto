@@ -34,22 +34,6 @@ export type SimpleFields<T, I> = {
   [K in keyof T]: T[K] extends I | undefined ? K : T[K] extends Function | undefined ? never : K;
 }[keyof T];
 
-type KeyPathsInner<T, PrimitiveType = IntrinsicType | IntrinsicType[], PREFIX extends string = '', SEP extends string = '.'> = {
-  [K in keyof T]: K extends string
-    ? T[K] extends IntrinsicType[] | IntrinsicType | undefined
-      ? T[K] extends PrimitiveType
-        ? `${PREFIX}${K}`
-        : never
-      : T[K] extends Any[]
-        ? KeyPathsInner<T[K][number], PrimitiveType, `${K}${SEP}`, SEP>
-        : T[K] extends object
-          ? KeyPathsInner<T[K], PrimitiveType, `${K}${SEP}`, SEP>
-          : never
-    : never;
-}[keyof T];
-
-export type KeyPaths<T, PrimitiveType = IntrinsicType | IntrinsicType[]> = KeyPathsInner<Required<T>, PrimitiveType> & string;
-
 export const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T & string>(value: T): K[];
   fromEntries<K extends string | symbol, V>(items: ([K, V] | readonly [K, V])[]): Record<K, V>;
@@ -105,11 +89,13 @@ export function getParentClass(cls: Class): Class | undefined {
   return parent.name && parent !== Object ? parent : undefined;
 }
 
+export const getConstructor = <T>(value: T): Class<T> => asConstructable<T>(value).constructor;
+
 /**
  * Get the class from an instance or class
  */
-export const getClass = <T = unknown>(value: ClassInstance | Class): Class<T> =>
-  'Ⲑid' in value ? castTo(value) : asConstructable<T>(value).constructor;
+export const getClass = <T = unknown>(target: Class | ClassInstance): Class<T> =>
+  'Ⲑid' in target ? castTo(target) : asConstructable<T>(target).constructor;
 
 export const isUnsafeProperty = (key: string): key is '__proto__' | 'prototype' | 'constructor' =>
   key === 'prototype' || key === 'constructor' || key === '__proto__';

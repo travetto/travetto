@@ -1,5 +1,5 @@
 import { Registry, type RegistryAdapter, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
-import { type Any, type Class, getClass, getParentClass, isClass, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { type Any, type Class, getConstructor, getParentClass, isClass, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { type SchemaClassConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { CliCommandConfig, CliCommandShape, PreMainHandler } from '../types.ts';
@@ -111,8 +111,8 @@ export class CliCommandRegistryIndex implements RegistryIndex {
     const list = await Promise.all(
       keys.map(async key => {
         const instance = await this.#getInstance(key);
-        const config = this.store.get(getClass(instance)).get();
-        const schema = SchemaRegistryIndex.getConfig(getClass(instance));
+        const config = this.store.get(getConstructor(instance)).get();
+        const schema = SchemaRegistryIndex.getConfig(getConstructor(instance));
         return { command: key, instance, config, schema };
       })
     );

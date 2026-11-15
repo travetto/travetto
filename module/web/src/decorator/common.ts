@@ -10,9 +10,9 @@ function isClass(target: unknown, property: unknown): target is Class<unknown> {
 }
 
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
-  return function <T>(instanceOrCls: ClassInstance | Class<T>, property?: string, _?: EndpointFunctionDescriptor) {
-    const adapter = ControllerRegistryIndex.getForRegister(getClass(instanceOrCls));
-    if (isClass(instanceOrCls, property)) {
+  return function <T>(target: Class<T> | ClassInstance, property?: string, _?: EndpointFunctionDescriptor) {
+    const adapter = ControllerRegistryIndex.getForRegister(getClass(target));
+    if (isClass(target, property)) {
       adapter.register(config);
     } else {
       adapter.registerEndpoint(property!, config);

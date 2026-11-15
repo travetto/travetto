@@ -13,8 +13,8 @@ type MethodDecorator = (instance: ClassInstance, property: string, descriptor: P
  * @kind decorator
  */
 export function Method(...config: Partial<SchemaMethodConfig>[]) {
-  return (instanceOrCls: ClassInstance, property: string): void => {
-    SchemaRegistryIndex.getForRegister(getClass(instanceOrCls)).registerMethod(property, ...config);
+  return (target: ClassInstance, property: string): void => {
+    SchemaRegistryIndex.getForRegister(getClass(target)).registerMethod(property, ...config);
   };
 }
 

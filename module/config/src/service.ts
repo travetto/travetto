@@ -3,14 +3,13 @@ import util from 'node:util';
 import { DependencyRegistryIndex, getDefaultQualifier, Injectable, PostConstruct } from '@travetto/di';
 import {
   type Class,
-  castTo,
   Env,
-  getClass,
   Runtime,
   RuntimeError,
   RuntimeResources,
   toConcrete,
-  type UnknownRecord
+  type UnknownRecord,
+  getConstructor
 } from '@travetto/runtime';
 import { BindUtil, DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
@@ -101,13 +100,13 @@ export class ConfigurationService {
         .filter(candidate => candidate.qualifier === getDefaultQualifier(candidate.class)) // Is self targeting?
         .toSorted((a, b) => a.class.name.localeCompare(b.class.name))
         .map(async candidate => {
-          const inst = await DependencyRegistryIndex.getInstance(candidate.class, candidate.qualifier);
-          return [candidate, inst] as const;
+          const instance = await DependencyRegistryIndex.getInstance(candidate.class, candidate.qualifier);
+          return [candidate, instance] as const;
         })
     );
     const out: Record<string, UnknownRecord> = {};
-    for (const [candidate, inst] of configs) {
-      const data = BindUtil.bindSchemaToObject<UnknownRecord>(getClass(inst), {}, inst, {
+    for (const [candidate, instance] of configs) {
+      const data = BindUtil.bindSchemaToObject(getConstructor(instance), {}, instance, {
         filterInput: field => !('secret' in field) || !field.secret,
         filterValue: value => value !== undefined
       });

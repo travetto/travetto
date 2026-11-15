@@ -28,9 +28,9 @@ export type InjectConfig = { qualifier?: symbol; resolution?: ResolutionType };
  * @kind decorator
  */
 export function Inject(input?: InjectConfig | symbol) {
-  return (instanceOrCls: Class | ClassInstance, property?: string, idx?: number | PropertyDescriptor): void => {
+  return (target: Class | ClassInstance, property?: string, idx?: number | PropertyDescriptor): void => {
     const config = fromInput(input);
-    const cls = getClass(instanceOrCls);
+    const cls = getClass(target);
     const propertyKey = property ?? CONSTRUCTOR_PROPERTY;
     if (typeof idx !== 'number') {
       DependencyRegistryIndex.registerFieldMetadata(cls, propertyKey, config);

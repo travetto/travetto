@@ -192,6 +192,9 @@ export class ModelCrudUtil {
 
     const schema = SchemaRegistryIndex.get(cls).get();
     const transientFields = ModelRegistryIndex.has(cls) ? ModelRegistryIndex.getConfig(cls).transientFields : undefined;
+    if (!transientFields?.length) {
+      return item;
+    }
 
     const isCleanTarget = (key: string): boolean => {
       return transientFields?.includes(key) ?? false;

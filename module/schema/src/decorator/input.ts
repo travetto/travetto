@@ -4,6 +4,7 @@ import {
   type Class,
   type ClassInstance,
   getClass,
+  getConstructor,
   isClass,
   type NumericLikeIntrinsic,
   type NumericPrimitive,
@@ -35,8 +36,8 @@ type PropType<V> = <T extends Partial<Record<K, V | Function>>, K extends string
 ) => void;
 
 function input<V>(...configs: Partial<SchemaInputConfig>[]): PropType<V> {
-  return (instanceOrCls: ClassInstance | Class, property: string, idx?: number | TypedPropertyDescriptor<Any>): void => {
-    const adapter = SchemaRegistryIndex.getForRegister(getClass(instanceOrCls));
+  return (target: Class | ClassInstance, property: string, idx?: number | TypedPropertyDescriptor<Any>): void => {
+    const adapter = SchemaRegistryIndex.getForRegister(getClass(target));
     const propertyKey = property ?? CONSTRUCTOR_PROPERTY;
     if (typeof idx === 'number') {
       adapter.registerParameter(propertyKey, idx, ...configs);
@@ -290,7 +291,7 @@ export function Specifier(...specifiers: string[]): PropType<unknown> {
  */
 export function DiscriminatorField(): (instance: ClassInstance, property: string) => void {
   return (instance: ClassInstance, property: string): void => {
-    SchemaRegistryIndex.getForRegister(getClass(instance)).register({
+    SchemaRegistryIndex.getForRegister(getConstructor(instance)).register({
       discriminatedBase: true,
       discriminatedField: property
     });

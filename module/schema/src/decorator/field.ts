@@ -1,4 +1,4 @@
-import { type Any, type ClassInstance, getClass } from '@travetto/runtime';
+import { type Any, type ClassInstance, getConstructor } from '@travetto/runtime';
 
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 import type { SchemaDecoratorConfig, SchemaFieldConfig } from '../service/types.ts';
@@ -12,7 +12,7 @@ type PropType<V> = <T extends Partial<Record<K, V | Function>>, K extends string
 
 function field<V>(...configs: Partial<SchemaFieldConfig>[]): PropType<V> {
   return (instance: ClassInstance, property: string): void => {
-    SchemaRegistryIndex.getForRegister(getClass(instance)).registerField(property, ...configs);
+    SchemaRegistryIndex.getForRegister(getConstructor(instance)).registerField(property, ...configs);
   };
 }
 

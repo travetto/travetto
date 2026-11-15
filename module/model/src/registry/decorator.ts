@@ -1,4 +1,4 @@
-import { type Class, castTo, getClass } from '@travetto/runtime';
+import { type Class, castTo, getConstructor } from '@travetto/runtime';
 
 import type { ModelType } from '../types/model.ts';
 import { ModelRegistryIndex } from './registry-index.ts';
@@ -27,7 +27,7 @@ export function Model(config: Partial<ModelConfig<ModelType>> | string = {}) {
  */
 export function ExpiresAt() {
   return <K extends string, T extends Partial<Record<K, Date>>>(instance: T, property: K): void => {
-    ModelRegistryIndex.getForRegister(getClass(instance)).register({ expiresAt: property });
+    ModelRegistryIndex.getForRegister(getConstructor(instance)).register({ expiresAt: property });
   };
 }
 
@@ -56,7 +56,7 @@ export function PrePersist<T>(handler: DataHandler<T>, scope: PrePersistScope = 
  */
 export function PersistValue<T>(handler: (current: T | undefined) => T, scope: PrePersistScope = 'all') {
   return function <K extends string, C extends Partial<Record<K, T>>>(instance: C, property: K): void {
-    ModelRegistryIndex.getForRegister(getClass(instance)).register({
+    ModelRegistryIndex.getForRegister(getConstructor(instance)).register({
       prePersist: [
         {
           scope,
@@ -77,7 +77,7 @@ export function PersistValue<T>(handler: (current: T | undefined) => T, scope: P
  */
 export function Transient<T>() {
   return function <K extends string, C extends Partial<Record<K, T>>>(instance: C, property: K): void {
-    ModelRegistryIndex.getForRegister(getClass(instance)).register({
+    ModelRegistryIndex.getForRegister(getConstructor(instance)).register({
       prePersist: [
         {
           scope: 'all',
@@ -98,7 +98,7 @@ export function Transient<T>() {
  */
 export function TransientField() {
   return function <K extends string, C extends Partial<Record<K, unknown>>>(instance: C, property: K): void {
-    ModelRegistryIndex.getForRegister(getClass(instance)).register({
+    ModelRegistryIndex.getForRegister(getConstructor(instance)).register({
       transientFields: [property]
     });
   };

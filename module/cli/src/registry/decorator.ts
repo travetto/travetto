@@ -5,7 +5,7 @@ import {
   ConsoleManager,
   describeFunction,
   Env,
-  getClass,
+  getConstructor,
   Runtime,
   RuntimeIndex
 } from '@travetto/runtime';
@@ -45,7 +45,7 @@ export function CliCommand(config: CliCommandConfigOptions = {}) {
  */
 export function CliFlag(config: CliFlagOptions) {
   return function (instance: ClassInstance, property: string): void {
-    SchemaRegistryIndex.getForRegister(getClass(instance)).registerField(property, CliParseUtil.buildAliases(config));
+    SchemaRegistryIndex.getForRegister(getConstructor(instance)).registerField(property, CliParseUtil.buildAliases(config));
   };
 }
 
@@ -56,7 +56,7 @@ export function CliFlag(config: CliFlagOptions) {
  */
 export function CliFileFlag(config: CliFlagOptions & { fileExtensions: string[] }) {
   return function (instance: ClassInstance, property: string): void {
-    SchemaRegistryIndex.getForRegister(getClass(instance)).registerField(property, {
+    SchemaRegistryIndex.getForRegister(getConstructor(instance)).registerField(property, {
       ...CliParseUtil.buildAliases(config),
       specifiers: ['file', ...config.fileExtensions.map(ext => `ext:${ext.replace(/[*.]/g, '')}`)]
     });
@@ -70,7 +70,7 @@ export function CliFileFlag(config: CliFlagOptions & { fileExtensions: string[] 
  */
 export function CliProfilesFlag(config: CliFlagOptions = {}) {
   return function <K extends string>(instance: Partial<Record<K, string[]>>, property: K): void {
-    const cls = getClass(instance);
+    const cls = getConstructor(instance);
     SchemaRegistryIndex.getForRegister(cls).registerField(property, {
       ...CliParseUtil.buildAliases(config, Env.TRV_PROFILES.key),
       required: { active: false },
@@ -88,7 +88,7 @@ export function CliProfilesFlag(config: CliFlagOptions = {}) {
  */
 export function CliModuleFlag(config: CliFlagOptions & { scope?: 'current' | 'command' } = { scope: 'current' }) {
   return function <K extends string>(instance: Partial<Record<K, string>>, property: K): void {
-    const cls = getClass(instance);
+    const cls = getConstructor(instance);
     const description = describeFunction(cls) ?? {};
     const commandModule = description.module;
 
@@ -141,7 +141,7 @@ export function CliModuleFlag(config: CliFlagOptions & { scope?: 'current' | 'co
  */
 export function CliRestartOnChangeFlag(config: CliFlagOptions = {}) {
   return function <K extends string, T extends Partial<Record<K, boolean>>>(instance: T, property: K): void {
-    const cls = getClass(instance);
+    const cls = getConstructor(instance);
     if (Runtime.production) {
       return;
     }
@@ -167,7 +167,7 @@ export function CliDebugIpcFlag(config: CliFlagOptions = {}) {
       return;
     }
 
-    const cls = getClass(instance);
+    const cls = getConstructor(instance);
     SchemaRegistryIndex.getForRegister(cls).registerField(property, {
       ...CliParseUtil.buildAliases(config, Env.TRV_DEBUG_IPC.key),
       description: 'Should the invocation support debugging via IPC (e.g. from VSCode)'
