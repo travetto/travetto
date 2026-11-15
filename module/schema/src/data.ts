@@ -15,16 +15,16 @@ export class DataUtil {
    * @param root Root object to traverse
    * @param path Key segments to follow
    */
-  static getPath(root: unknown, path: string[]): { found: boolean; value: unknown } {
+  static getPath<T = unknown>(root: unknown, path: string[]): { found: boolean; value: T } {
     let current: unknown = root;
     for (const segment of path) {
       if (typeof current === 'object' && current !== null && segment in current) {
         current = castTo<UnknownRecord>(current)[segment];
       } else {
-        return { found: false, value: current };
+        return { found: false, value: current as T };
       }
     }
-    return { found: true, value: current };
+    return { found: true, value: current as T };
   }
 
   /**

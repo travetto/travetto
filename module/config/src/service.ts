@@ -1,17 +1,7 @@
 import util from 'node:util';
 
 import { DependencyRegistryIndex, getDefaultQualifier, Injectable, PostConstruct } from '@travetto/di';
-import {
-  type Class,
-  type UnknownRecord,
-  castTo,
-  Env,
-  getClass,
-  Runtime,
-  RuntimeError,
-  RuntimeResources,
-  toConcrete
-} from '@travetto/runtime';
+import { type Class, castTo, Env, getClass, Runtime, RuntimeError, RuntimeResources, toConcrete, type UnknownRecord } from '@travetto/runtime';
 import { BindUtil, DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ParserManager } from './parser/parser.ts';
@@ -41,7 +31,7 @@ export class ConfigurationService {
    */
   #get<T extends UnknownRecord = UnknownRecord>(namespace?: string): T {
     const parts = namespace ? namespace.split('.') : [];
-    return castTo(DataUtil.getPath(this.#storage, parts).value);
+    return DataUtil.getPath<T>(this.#storage, parts).value;
   }
 
   /**
