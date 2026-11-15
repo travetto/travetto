@@ -16,7 +16,7 @@ import { ExistsError } from '../error/exists.ts';
 import { SubTypeNotSupportedError } from '../error/invalid-sub-type.ts';
 import { NotFoundError } from '../error/not-found.ts';
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
-import type { PrePersistScope } from '../registry/types.ts';
+import type { DataHandler, PrePersistScope } from '../registry/types.ts';
 import type { ModelCrudSupport } from '../types/crud.ts';
 import type { ModelType, OptionalId, PartialWithId } from '../types/model.ts';
 
@@ -256,7 +256,7 @@ export class ModelCrudUtil {
     const config = ModelRegistryIndex.getConfig(cls);
     for (const state of config.prePersist ?? []) {
       if (state.scope === scope || scope === 'all' || state.scope === 'all') {
-        const handler = castTo<(inst: U) => Promise<U | void> | U | void>(state.handler);
+        const handler: DataHandler<U> = castTo(state.handler);
         item = (await handler(item)) ?? item;
       }
     }
