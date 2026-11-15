@@ -350,7 +350,7 @@ static buildHandler(dispatcher: WebDispatcher): (request: HttpRequest, response:
 ```
 
 we can see the structure for integrating the server behavior with the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative support for creating Web Applications") module dispatcher:
-   *  Converting the node primitive request to a [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11)
+   *  Converting the node primitive request to a [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L13)
    *  Dispatching the request through the framework
    *  Receiving the [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3) and sending that back over the primitive response.
 
