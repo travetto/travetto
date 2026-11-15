@@ -1,7 +1,6 @@
 import { type InspectOptions, inspect } from 'node:util';
 
-import { safeAssign, type UnknownRecord } from '@travetto/runtime';
-import { DataUtil } from '@travetto/schema';
+import { isPlainRecord, safeAssign, type UnknownRecord } from '@travetto/runtime';
 
 import type { LogEvent } from '../types.ts';
 
@@ -12,7 +11,7 @@ export class LogFormatUtil {
   static getContext(event: LogEvent): UnknownRecord | undefined {
     const out: UnknownRecord = {};
     for (const arg of event.args ?? []) {
-      if (DataUtil.isPlainObject(arg)) {
+      if (isPlainRecord(arg)) {
         safeAssign(out, arg);
       }
     }

@@ -12,7 +12,7 @@ import {
 import { type IndexConfig, IndexNotSupported, ModelRegistryIndex, type ModelType } from '@travetto/model';
 import { isModelIndexedIndex } from '@travetto/model-indexed';
 import { type DistanceUnit, isModelQueryIndex, ModelQueryUtil, type PageableModelQuery, type WhereClause } from '@travetto/model-query';
-import { BinaryUtil, type Class, CodecUtil, castTo, RuntimeError, toConcrete, type UnknownRecord } from '@travetto/runtime';
+import { BinaryUtil, type Class, CodecUtil, castTo, RuntimeError, toConcrete, type UnknownRecord, isPlainRecord } from '@travetto/runtime';
 import { DataUtil, type Point, SchemaRegistryIndex } from '@travetto/schema';
 
 const PointConcrete = toConcrete<Point>();
@@ -106,7 +106,7 @@ export class MongoUtil {
       const value: UnknownRecord = castTo(sub[key]);
       const subField = fields?.[key];
 
-      const isPlain = value && DataUtil.isPlainObject(value);
+      const isPlain = value && isPlainRecord(value);
       const firstKey = isPlain ? Object.keys(value)[0] : '';
 
       if (subpath === idFieldName) {

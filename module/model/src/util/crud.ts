@@ -1,5 +1,15 @@
-import { type BinaryArray, BinaryUtil, type Class, castKey, castTo, hasFunction, JSONUtil, RuntimeError } from '@travetto/runtime';
-import { DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import {
+  type BinaryArray,
+  BinaryUtil,
+  type Class,
+  castKey,
+  castTo,
+  hasFunction,
+  JSONUtil,
+  RuntimeError,
+  isPlainRecord
+} from '@travetto/runtime';
+import { SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ExistsError } from '../error/exists.ts';
 import { SubTypeNotSupportedError } from '../error/invalid-sub-type.ts';
@@ -90,7 +100,7 @@ export class ModelCrudUtil {
       idSource.getOrSet(item);
     }
 
-    if (DataUtil.isPlainObject(item)) {
+    if (isPlainRecord(item)) {
       item = cls.from(castTo(item));
     }
 
@@ -280,7 +290,7 @@ export class ModelCrudUtil {
     if (options?.ensureNotSubType) {
       this.ensureNotSubType(cls);
     }
-    if (!DataUtil.isPlainObject(item)) {
+    if (!isPlainRecord(item)) {
       throw new RuntimeError(`A partial update requires a plain object, not an instance of ${castTo<Function>(item).constructor.name}`, {
         category: 'data'
       });

@@ -1,6 +1,6 @@
 import { isBooleanObject, isNumberObject, isStringObject } from 'node:util/types';
 
-import { asConstructable, asFull, type Class, castTo, TypedObject, type UnknownRecord } from '@travetto/runtime';
+import { asConstructable, asFull, type Class, castTo, TypedObject, type UnknownRecord, isPlainRecord } from '@travetto/runtime';
 
 import { UnknownType } from './types.ts';
 
@@ -10,20 +10,6 @@ const REGEX_PATTERN = /[/](.*)[/](i|g|m|s)?/;
  * Utilities for data conversion and binding
  */
 export class DataUtil {
-  /**
-   * Is a value a plain JS object, created using {}
-   * @param value Object to check
-   */
-  static isPlainObject(value: unknown): value is UnknownRecord {
-    return (
-      typeof value === 'object' && // separate from primitives
-      value !== undefined &&
-      value !== null && // is obvious
-      value.constructor === Object && // separate instances (Array, DOM, ...)
-      Object.prototype.toString.call(value) === '[object Object]'
-    ); // separate build-in like Math
-  }
-
   /**
    * Is a value of primitive type
    * @param value Value to check
@@ -231,7 +217,7 @@ export class DataUtil {
         return input;
       }
       case Object: {
-        if (!strict || this.isPlainObject(input)) {
+        if (!strict || isPlainRecord(input)) {
           return input;
         } else {
           throw new Error('Invalid object type');
@@ -241,7 +227,7 @@ export class DataUtil {
       case String:
         return `${input}`;
     }
-    if (!strict || this.isPlainObject(input)) {
+    if (!strict || isPlainRecord(input)) {
       return input;
     } else {
       throw new Error(`Unknown type ${type.name}`);

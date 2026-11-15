@@ -3,7 +3,8 @@ import assert from 'node:assert';
 import { Model } from '@travetto/model';
 import type { WhereClause } from '@travetto/model-query';
 import { Registry } from '@travetto/registry';
-import { DataUtil, Schema } from '@travetto/schema';
+import { isPlainRecord } from '@travetto/runtime';
+import { Schema } from '@travetto/schema';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { ElasticsearchQueryUtil } from '@travetto/model-elasticsearch/src/internal/query.ts';
@@ -56,11 +57,11 @@ type MustType = {
 };
 
 function isBool(o: unknown): o is { bool: { must: [MustType]; must_not: unknown; should_not: unknown } } {
-  return DataUtil.isPlainObject(o) && 'bool' in o;
+  return isPlainRecord(o) && 'bool' in o;
 }
 
 function isRegexp(o: unknown): o is { regexp: { name: { value: string; case_insensitive: boolean } } } {
-  return DataUtil.isPlainObject(o) && 'regexp' in o;
+  return isPlainRecord(o) && 'regexp' in o;
 }
 
 @Suite()

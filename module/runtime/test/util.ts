@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { AsyncQueue, Util } from '@travetto/runtime';
+import { isPlainRecord, Util } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 @Suite()
@@ -252,5 +252,14 @@ export class UtilTest {
     assert(parts[0].filename.endsWith('runtime/test/util.ts'));
     assert(parts[0].line === 238);
     assert(parts[0].column === 17);
+  }
+
+  @Test()
+  verifyObject() {
+    assert(isPlainRecord({}));
+    assert(isPlainRecord(Object.create({})));
+    assert(isPlainRecord(Object.create(null)) !== true);
+    assert(isPlainRecord(Object.create(Function)) !== true);
+    assert(isPlainRecord(new (class {})()) !== true);
   }
 }

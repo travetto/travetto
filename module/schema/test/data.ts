@@ -219,13 +219,4 @@ class DataUtilTests {
     assert(!DataUtil.isPrimitive(class {}));
     assert(!DataUtil.isPrimitive(new (class {})()));
   }
-
-  @Test()
-  verifyObject() {
-    assert(DataUtil.isPlainObject({}));
-    assert(DataUtil.isPlainObject(Object.create({})));
-    assert(DataUtil.isPlainObject(Object.create(null)) !== true);
-    assert(DataUtil.isPlainObject(Object.create(Function)) !== true);
-    assert(DataUtil.isPlainObject(new (class {})()) !== true);
-  }
 }

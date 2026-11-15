@@ -1,6 +1,5 @@
-import { type Class, type ClassInstance, castKey, castTo, TypedObject } from '@travetto/runtime';
+import { type Class, type ClassInstance, castKey, castTo, isPlainRecord, isRecord, TypedObject } from '@travetto/runtime';
 
-import { DataUtil } from '../data.ts';
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 import type { SchemaFieldMap, SchemaInputConfig } from '../service/types.ts';
 import { SchemaTypeUtil } from '../type-config.ts';
@@ -24,7 +23,7 @@ function resolveFieldMap<T>(base: Class<T>, item: T): SchemaFieldMap {
 }
 
 function isClassInstance<T>(value: unknown): value is ClassInstance<T> {
-  return !DataUtil.isPlainObject(value) && value !== null && typeof value === 'object' && !!value.constructor;
+  return !isPlainRecord(value) && isRecord(value) && !!value.constructor;
 }
 
 function isRangeValue(value: unknown): value is NumericComparable {

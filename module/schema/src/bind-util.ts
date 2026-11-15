@@ -1,4 +1,4 @@
-import { asFull, type Class, castKey, castTo, classConstruct, TypedObject, type UnknownRecord } from '@travetto/runtime';
+import { asFull, type Class, castKey, castTo, classConstruct, TypedObject, type UnknownRecord, isPlainRecord } from '@travetto/runtime';
 
 import { DataUtil } from './data.ts';
 import { SchemaRegistryIndex } from './service/registry-index.ts';
@@ -79,7 +79,7 @@ export class BindUtil {
     const out: UnknownRecord = {};
     for (const property of Object.keys(input)) {
       const valueInput = input[property];
-      const value = DataUtil.isPlainObject(valueInput) ? this.expandPaths(valueInput) : valueInput;
+      const value = isPlainRecord(valueInput) ? this.expandPaths(valueInput) : valueInput;
       const parts = property.split('.');
       const last = parts.pop()!;
       let sub = out;
@@ -105,7 +105,7 @@ export class BindUtil {
       const arr = last.indexOf('[') > 0;
 
       if (!arr) {
-        if (sub[last] && DataUtil.isPlainObject(value)) {
+        if (sub[last] && isPlainRecord(value)) {
           sub[last] = DataUtil.deepAssign(sub[last], value, 'coerce');
         } else {
           sub[last] = value;
@@ -122,7 +122,7 @@ export class BindUtil {
         if (key === undefined) {
           key = arrSub.length;
         }
-        if (arrSub[key] && DataUtil.isPlainObject(value) && DataUtil.isPlainObject(arrSub[key])) {
+        if (arrSub[key] && isPlainRecord(value) && isPlainRecord(arrSub[key])) {
           arrSub[key] = DataUtil.deepAssign(arrSub[key], value, 'coerce');
         } else {
           arrSub[key] = value;
@@ -141,12 +141,12 @@ export class BindUtil {
     const out: Record<string, V> = {};
     for (const [key, value] of Object.entries(data)) {
       const pre = `${prefix}${key}`;
-      if (DataUtil.isPlainObject(value)) {
+      if (isPlainRecord(value)) {
         Object.assign(out, this.flattenPaths(value, `${pre}.`));
       } else if (Array.isArray(value)) {
         for (let i = 0; i < value.length; i += 1) {
           const element = value[i];
-          if (DataUtil.isPlainObject(element)) {
+          if (isPlainRecord(element)) {
             Object.assign(out, this.flattenPaths(element, `${pre}[${i}].`));
           } else {
             out[`${pre}[${i}]`] = element ?? '';

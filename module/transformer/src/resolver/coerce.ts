@@ -1,21 +1,8 @@
-import type { UnknownRecord } from '../types/shared';
+import { isPlainRecord } from '../types/shared.ts';
 
 const REGEX_PATTERN = /[/](.*)[/](i|g|m|s)?/;
 
 export class CoerceUtil {
-  /**
-   * Is a value a plain JS object, created using {}
-   */
-  static #isPlainObject(value: unknown): value is UnknownRecord {
-    return (
-      typeof value === 'object' && // separate from primitives
-      value !== undefined &&
-      value !== null && // is obvious
-      value.constructor === Object && // separate instances (Array, DOM, ...)
-      Object.prototype.toString.call(value) === '[object Object]'
-    ); // separate build-in like Math
-  }
-
   /**
    * Create regex from string, including flags
    */
@@ -102,7 +89,7 @@ export class CoerceUtil {
         }
       }
       case Object: {
-        if (!strict || this.#isPlainObject(input)) {
+        if (!strict || isPlainRecord(input)) {
           return input;
         } else {
           throw new Error('Invalid object type');

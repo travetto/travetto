@@ -10,7 +10,7 @@ import {
   type TextSearchClause,
   type WhereClause
 } from '@travetto/model-query';
-import { type Any, type Class, type UnknownRecord, castTo, TypedObject } from '@travetto/runtime';
+import { type Any, type Class, type UnknownRecord, castTo, isPlainRecord, TypedObject } from '@travetto/runtime';
 import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { EsSchemaConfig } from './types.ts';
@@ -27,7 +27,7 @@ export class ElasticsearchQueryUtil {
     const keys = TypedObject.keys(input);
     for (const key of keys) {
       const subPath = `${path}${key}`;
-      if (DataUtil.isPlainObject(input[key]) && !Object.keys(input[key])[0].startsWith('$')) {
+      if (isPlainRecord(input[key]) && !Object.keys(input[key])[0].startsWith('$')) {
         Object.assign(out, this.extractSimple(input[key], `${subPath}.`));
       } else {
         out[subPath] = input[key];
@@ -80,10 +80,10 @@ export class ElasticsearchQueryUtil {
    * Type guard to check if a query object contains a nested clause
    */
   static hasNestedClause(query: unknown): boolean {
-    if (DataUtil.isPlainObject(query)) {
+    if (isPlainRecord(query)) {
       if ('nested' in query) {
         return true;
-      } else if ('bool' in query && DataUtil.isPlainObject(query.bool)) {
+      } else if ('bool' in query && isPlainRecord(query.bool)) {
         const boolQuery = query.bool as { must?: unknown[]; must_not?: unknown[]; should?: unknown[] };
         const clauses = [...(boolQuery.must ?? []), ...(boolQuery.must_not ?? []), ...(boolQuery.should ?? [])];
         return clauses.some(element => this.hasNestedClause(element));
@@ -132,7 +132,7 @@ export class ElasticsearchQueryUtil {
           ? { ids: { values: Array.isArray(value) ? value : [value] } }
           : { [Array.isArray(value) ? 'terms' : 'term']: { [subPath]: value } };
 
-      if (DataUtil.isPlainObject(top)) {
+      if (isPlainRecord(top)) {
         const subKey = Object.keys(top)[0];
         if (!subKey.startsWith('$') && declaredType.kind === 'complex') {
           const inner = this.extractWhereTermQuery(declaredType.value, top, config, `${subPath}.`);

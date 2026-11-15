@@ -8,8 +8,8 @@ import {
   type TextSearchClause,
   type WhereClause
 } from '@travetto/model-query';
-import { type Class, type UnknownRecord, castKey, castTo, JSONUtil, RuntimeError } from '@travetto/runtime';
-import { DataUtil, type SchemaFieldConfig, SchemaRegistryIndex, type SchemaValueType } from '@travetto/schema';
+import { type Class, type UnknownRecord, castKey, castTo, isPlainRecord, JSONUtil, RuntimeError } from '@travetto/runtime';
+import { type SchemaFieldConfig, SchemaRegistryIndex, type SchemaValueType } from '@travetto/schema';
 
 import { SQLModelSchemaUtil } from './schema.ts';
 import type { JSONSqlPathMode, ResolvedPathContext, SchemaContext, TableContext } from './types.ts';
@@ -510,7 +510,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     for (const [key, value] of Object.entries(item)) {
       index += 1;
       const currentPath = [...parentPath, key];
-      const isPlainObject = DataUtil.isPlainObject(value);
+      const isPlainObject = isPlainRecord(value);
       const firstKey = isPlainObject ? Object.keys(value)[0] : '';
 
       const nextIdentificationPath = `${identificationPath}__${index}`;
