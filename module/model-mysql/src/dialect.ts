@@ -7,7 +7,7 @@ import {
   type TableContext,
   type TextSearchState
 } from '@travetto/model-sql';
-import { JSONUtil } from '@travetto/runtime';
+import { JSONUtil, type UnknownRecord } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
 export class MysqlDialect extends AbstractANSI99Dialect {

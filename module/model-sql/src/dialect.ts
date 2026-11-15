@@ -8,7 +8,7 @@ import {
   type TextSearchClause,
   type WhereClause
 } from '@travetto/model-query';
-import { type Class, castTo, isRecord, JSONUtil, RuntimeError, type UnknownRecord } from '@travetto/runtime';
+import { type Class, castTo, isPlainRecord, isRecord, JSONUtil, RuntimeError, type UnknownRecord } from '@travetto/runtime';
 import { type SchemaFieldConfig, SchemaRegistryIndex, type SchemaValueType } from '@travetto/schema';
 
 import { SQLModelSchemaUtil } from './schema.ts';
@@ -712,9 +712,8 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     return { sql, values };
   }
 
-  buildUpdateAll<T extends ModelType>(tableContext: TableContext<T>, items: (T | UnknownRecord)[]): { sql: string; values: unknown[] } {
-    const rawItems = castTo<UnknownRecord[]>(items);
-    if (rawItems.length === 0) {
+  buildUpdateAll<T extends ModelType>(tableContext: TableContext<T>, items: T[]): { sql: string; values: unknown[] } {
+    if (items.length === 0) {
       return { sql: '', values: [] };
     }
 
@@ -733,7 +732,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     const setClauses: string[] = [];
     const values: unknown[] = [];
 
-    const rawItems = castTo<Record<string, unknown>[]>(items);
+    const rawItems = castTo<UnknownRecord[]>(items);
 
     const ids = rawItems.map(item => item[idFieldName]);
 

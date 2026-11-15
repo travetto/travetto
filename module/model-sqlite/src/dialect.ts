@@ -7,7 +7,7 @@ import {
   type TextSearchState,
   type TransactionStatements
 } from '@travetto/model-sql';
-import { JSONUtil } from '@travetto/runtime';
+import { JSONUtil, type UnknownRecord } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
 export class SqliteDialect extends AbstractANSI99Dialect {
