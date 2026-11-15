@@ -8,30 +8,30 @@ import { Suite, Test } from '@travetto/test';
 class PassportUtilSuite {
   @Test()
   async verifyReadWrite() {
-    assert(PassportUtil.readState(PassportUtil.writeState({ name: 'bob' }))?.name === 'bob');
+    assert(PassportUtil.decodeState(PassportUtil.encodeState({ name: 'bob' }))?.name === 'bob');
   }
 
   @Test()
   async verifyRead() {
-    assert(PassportUtil.readState(JSONUtil.toBase64({ name: 'bob' }))?.name === 'bob');
+    assert(PassportUtil.decodeState(JSONUtil.toBase64({ name: 'bob' }))?.name === 'bob');
   }
 
   @Test()
   async verifyWrite() {
-    assert(PassportUtil.writeState({ name: 'bob' }) === JSONUtil.toBase64({ name: 'bob' }));
+    assert(PassportUtil.encodeState({ name: 'bob' }) === JSONUtil.toBase64({ name: 'bob' }));
   }
 
   @Test()
   async verifyUpdate() {
     const added = PassportUtil.addToState({ name: 'george', age: 20 }, JSONUtil.toBase64({ name: 'bob' }));
-    assert(PassportUtil.readState(added)?.name === 'george');
-    assert(PassportUtil.readState(added)?.age === 20);
+    assert(PassportUtil.decodeState(added)?.name === 'george');
+    assert(PassportUtil.decodeState(added)?.age === 20);
   }
 
   @Test()
   async verifyUpdateKey() {
     const added = PassportUtil.addToState({ age: 20 }, JSONUtil.toBase64({ name: 'bob' }), 'det');
-    assert(PassportUtil.readState(added)?.name === 'bob');
-    assert(PassportUtil.readState<{ det: { age: number } }>(added)?.det.age === 20);
+    assert(PassportUtil.decodeState(added)?.name === 'bob');
+    assert(PassportUtil.decodeState<{ det: { age: number } }>(added)?.det.age === 20);
   }
 }
