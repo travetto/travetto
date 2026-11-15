@@ -36,7 +36,7 @@ export class BaseWebMessage<B = unknown, C = unknown> implements WebMessage<B, C
 
 **Code: Request Shape**
 ```typescript
-import type { UnknownRecord } from '@travetto/runtime';
+import type { Primitive, UnknownRecord } from '@travetto/runtime';
 
 import type { HttpMethod, HttpProtocol } from './core.ts';
 import { BaseWebMessage } from './message.ts';
@@ -50,7 +50,7 @@ export interface WebConnection {
 
 export interface WebRequestContext {
   path: string;
-  pathParams?: UnknownRecord;
+  pathParams?: Record<string, Primitive>;
   httpQuery?: UnknownRecord;
   httpMethod?: HttpMethod;
   connection?: WebConnection;

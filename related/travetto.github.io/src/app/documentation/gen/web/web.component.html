@@ -46,7 +46,7 @@ Unlike other frameworks (e.g. <a target="_blank" class="external-link" href="htt
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> UnknownRecord <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/runtime'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> Primitive<span class="token punctuation">,</span> UnknownRecord <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/runtime'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> HttpMethod<span class="token punctuation">,</span> HttpProtocol <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./core.ts'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> BaseWebMessage <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./message.ts'</span><span class="token punctuation">;</span>
@@ -60,7 +60,7 @@ Unlike other frameworks (e.g. <a target="_blank" class="external-link" href="htt
 
 <span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">WebRequestContext</span> <span class="token punctuation">{{'{'}}</span>
   path<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  pathParams<span class="token operator">?</span><span class="token operator">:</span> UnknownRecord<span class="token punctuation">;</span>
+  pathParams<span class="token operator">?</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> Primitive<span class="token operator">></span><span class="token punctuation">;</span>
   httpQuery<span class="token operator">?</span><span class="token operator">:</span> UnknownRecord<span class="token punctuation">;</span>
   httpMethod<span class="token operator">?</span><span class="token operator">:</span> HttpMethod<span class="token punctuation">;</span>
   connection<span class="token operator">?</span><span class="token operator">:</span> WebConnection<span class="token punctuation">;</span>
