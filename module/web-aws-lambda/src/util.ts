@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { type BinaryArray, BinaryUtil, CodecUtil, castTo } from '@travetto/runtime';
+import { type BinaryArray, BinaryUtil, CodecUtil } from '@travetto/runtime';
 import { WebBodyUtil, WebCommonUtil, WebRequest, WebResponse } from '@travetto/web';
 
 export class AwsLambdaWebUtil {
@@ -21,8 +21,8 @@ export class AwsLambdaWebUtil {
           httpProtocol: 'http',
           ip: event.requestContext.identity?.sourceIp
         },
-        httpMethod: castTo(event.httpMethod.toUpperCase()),
-        httpQuery: castTo(event.queryStringParameters!),
+        httpMethod: event.httpMethod.toUpperCase() as 'POST',
+        httpQuery: event.queryStringParameters!,
         path: event.path
       },
       headers: { ...event.headers, ...event.multiValueHeaders },
