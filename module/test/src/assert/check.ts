@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { isPromise } from 'node:util/types';
 
-import { type Any, asConstructable, type Class, castKey, castTo, RuntimeError } from '@travetto/runtime';
+import { asConstructable, type Class, castKey, castTo, RuntimeError } from '@travetto/runtime';
 
 import { TestExecutionError } from '../model/error.ts';
 import type { Assertion, TestConfig, TestStatus, ThrowableError } from '../model/test.ts';
@@ -15,17 +15,6 @@ type StringFields<T> = {
 
 const isClass = (input: unknown): input is Class =>
   input === Error || input === RuntimeError || Object.getPrototypeOf(input) !== Object.getPrototypeOf(Function);
-
-const COMPARATORS: Record<string, (actual: Any, expected: Any) => boolean> = {
-  includes: (actual, expected) => actual.includes(expected),
-  test: (actual, expected) => expected.test(actual),
-  instanceof: (actual, expected) => actual instanceof expected,
-  in: (actual, expected) => actual in expected,
-  lessThan: (actual, expected) => actual < expected,
-  lessThanEqual: (actual, expected) => actual <= expected,
-  greaterThan: (actual, expected) => actual > expected,
-  greaterThanEqual: (actual, expected) => actual >= expected
-};
 
 /**
  * Check assertion
@@ -47,57 +36,38 @@ export class AssertCheck {
     };
 
     // Invert check for negative
-    const assertFn = (value: unknown, msg?: string): void => {
-      const checkValue = positive ? value : !value;
-      if (msg !== undefined) {
-        assert(checkValue, msg);
-      } else {
-        assert(checkValue);
-      }
-    };
-    const asText = (value: unknown): string | undefined => (typeof value === 'string' ? value : undefined);
+    const assertFn = positive ? assert : (value: unknown, msg?: string): unknown => assert(!value, msg!);
 
     // Check fn to call
     if (fn === 'fail') {
       if (args.length > 1) {
-        assertion.actual = args[0];
-        assertion.expected = args[1];
-        assertion.message = asText(args[2]);
-        assertion.operator = asText(args[3]) ?? '';
+        [assertion.actual, assertion.expected, assertion.message, assertion.operator] = castTo(args);
       } else {
-        assertion.message = asText(args[0]);
+        [assertion.message] = castTo(args);
       }
     } else if (/throw|reject/i.test(fn)) {
       assertion.operator = fn;
       if (typeof args[1] !== 'string') {
-        assertion.expected = args[1];
-        assertion.message = asText(args[2]);
+        [, assertion.expected, assertion.message] = castTo(args);
       } else {
-        assertion.message = asText(args[1]);
+        [, assertion.message] = castTo(args);
       }
     } else if (fn === 'ok' || fn === 'assert') {
       fn = assertion.operator = 'ok';
-      assertion.actual = args[0];
-      assertion.message = asText(args[1]);
+      [assertion.actual, assertion.message] = castTo(args);
       assertion.expected = { toClean: (): string => (positive ? 'truthy' : 'falsy') };
       common.state = 'should be';
     } else if (fn === 'includes') {
       assertion.operator = fn;
-      assertion.actual = args[0];
-      assertion.expected = args[1];
-      assertion.message = asText(args[2]);
+      [assertion.actual, assertion.expected, assertion.message] = castTo(args);
     } else if (fn === 'instanceof') {
       assertion.operator = fn;
-      assertion.actual = args[0];
-      assertion.expected = args[1];
-      assertion.message = asText(args[2]);
+      [assertion.actual, assertion.expected, assertion.message] = castTo(args);
       assertion.actual = asConstructable(assertion.actual)?.constructor;
     } else {
       // Handle unknown
       assertion.operator = fn ?? '';
-      assertion.actual = args[0];
-      assertion.expected = args[1];
-      assertion.message = asText(args[2]);
+      [assertion.actual, assertion.expected, assertion.message] = castTo(args);
     }
 
     try {
@@ -110,20 +80,45 @@ export class AssertCheck {
         assertion.expected = AssertUtil.cleanValue(assertion.expected);
       }
 
-      const [actual, expected, rawMessage] = args;
-      const message = asText(rawMessage);
+      const [actual, expected, message]: [unknown, unknown, string] = castTo(args);
 
       // Actually run the assertion
-      if (fn in COMPARATORS) {
-        assertFn(COMPARATORS[fn](actual, expected), message);
-      } else if (fn === 'ok') {
-        assertFn(actual, asText(expected));
-      } else if (fn && fn in assert) {
-        // Assert call
-        if (/not/i.test(fn)) {
-          common.state = 'should not';
-        }
-        castTo<(...params: unknown[]) => void>(assert[castKey<typeof assert>(fn)]).apply(null, args);
+      switch (fn) {
+        case 'includes':
+          assertFn(castTo<unknown[]>(actual).includes(expected), message);
+          break;
+        case 'test':
+          assertFn(castTo<RegExp>(expected).test(castTo(actual)), message);
+          break;
+        case 'instanceof':
+          assertFn(actual instanceof castTo<Class>(expected), message);
+          break;
+        case 'in':
+          assertFn(castTo<string>(actual) in castTo<object>(expected), message);
+          break;
+        case 'lessThan':
+          assertFn(castTo<number>(actual) < castTo<number>(expected), message);
+          break;
+        case 'lessThanEqual':
+          assertFn(castTo<number>(actual) <= castTo<number>(expected), message);
+          break;
+        case 'greaterThan':
+          assertFn(castTo<number>(actual) > castTo<number>(expected), message);
+          break;
+        case 'greaterThanEqual':
+          assertFn(castTo<number>(actual) >= castTo<number>(expected), message);
+          break;
+        case 'ok':
+          assertFn.apply(null, castTo(args));
+          break;
+        default:
+          if (fn && assert[castKey<typeof assert>(fn)]) {
+            // Assert call
+            if (/not/i.test(fn)) {
+              common.state = 'should not';
+            }
+            assert[castTo<'ok'>(fn)].apply(null, castTo(args));
+          }
       }
 
       // Pushing on not error
