@@ -19,18 +19,45 @@ The cli module represents the primary entry point for execution within the frame
 ```bash
 $ trv --help
 
-TypeError: Cannot read properties of null (reading 'value')
-    at CliCommandRegistryAdapter.finalize (./src/registry/registry-adapter.ts:64:22)
-    at RegistryIndexStore.finalize (<workspace-root>/module/registry/src/store.ts:33:33)
-    at $Registry.#finalizeItems (<workspace-root>/module/registry/src/registry.ts:18:25)
-    at $Registry.process (<workspace-root>/module/registry/src/registry.ts:42:24)
-    at CliCommandRegistryIndex.#getInstance (./src/registry/registry-index.ts:89:16)
-    at async <anonymous> (./src/registry/registry-index.ts:113:26)
-    at async Promise.all (index 12)
-    at async CliCommandRegistryIndex.load (./src/registry/registry-index.ts:111:18)
-    at async HelpUtil.renderAllHelp (./src/help.ts:184:22)
-    at async ExecutionManager.getExecutionCommand (./src/execute.ts:32:21)
-    at async ExecutionManager.run (./src/execute.ts:66:23)
+Usage:  [options] [command]
+
+Commands:
+  doc                   Generate documentation outputs from a module `DOC.tsx` entry file.
+  doc:mapping           Generate module mapping for
+  email:compile         Compile all email templates into generated runtime artifacts.
+  email:editor          Start the email template editor service for interactive preview and testing.
+  email:test            Render and send a template file to a target recipient for quick validation.
+  firestore:indexes     Generate the Firestore composite indexes JSON for all registered models.
+  lint:check            Run oxlint linter for the workspace or changed files.
+  lint:format           Run oxfmt formatter for the workspace or changed files.
+  lint:register         Generate the workspace oxlint, oxfmt, and cspell configuration entry files.
+  lint:spell            Run cspell spell checker for the workspace or changed files.
+  llm:support:execute   Execute llm-support operations with dry-run by default.
+  llm:support:inline    Inline and compile reference snippets for llm-support packaging.
+  llm:support:mcp       Minimal MCP stdio server for llm-support tools.
+  llm:support:plan      Build plan-first execution details for llm-support operations.
+  llm:support:recommend Recommend llm-support bundles, workflows, and operations.
+  llm:support:status    Show llm-support execution coverage status.
+  model:export          Export model definitions for a selected provider and model set.
+  model:install         Install or update model definitions for a selected provider.
+  openapi:client        Generate API clients from an OpenAPI specification using the generator image.
+  openapi:spec          Generate the OpenAPI specification for the selected module.
+  pack                  Build a standard module package artifact.
+  pack:docker           Build container-ready artifacts and optionally publish Docker images.
+  pack:lambda           Build an AWS Lambda-ready zip package using the pack pipeline.
+  pack:zip              Build a deployable zip artifact using the standard pack pipeline.
+  repo:exec             Execute a shell command across workspace modules.
+  repo:list             List workspace modules and their relationships.
+  repo:publish          Publish unpublished workspace modules to the package registry.
+  repo:version          Bump workspace module versions and optionally commit/tag release metadata.
+  repo:version-sync     Synchronize package versions and dependency ranges across the monorepo.
+  run:double            Doubles a number
+  service               Manage development services (start/stop/restart/status) across the workspace.
+  test                  Execute the test framework for targeted files, suites, or methods.
+  test:watch            Start the test watcher for continuous test execution.
+  web:http              Start the configured web HTTP server for a module.
+  web:rpc-client        Generate web-rpc client artifacts from a specified provider or leveraging local config.
+  web:tls-dev           Generate a self-signed TLS certificate and private key for local development.
 ```
 
 This listing is from the [Travetto](https://travetto.dev) monorepo, and represents the majority of tools that can be invoked from the command line. 
