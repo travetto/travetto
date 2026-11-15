@@ -1,5 +1,6 @@
+import type { UnknownRecord } from '@travetto/runtime';
+
 import { ConfigOverrideUtil } from '../override.ts';
-import type { ConfigData } from '../parser/types.ts';
 import type { ConfigPayload, ConfigSource } from './types.ts';
 
 /**
@@ -7,8 +8,8 @@ import type { ConfigPayload, ConfigSource } from './types.ts';
  * - @EnvVar as a means to allow environment specific overrides
  */
 export class OverrideConfigSource implements ConfigSource {
-  #build(): ConfigData {
-    const out: ConfigData = {};
+  #build(): UnknownRecord {
+    const out: UnknownRecord = {};
     for (const { namespace, fields } of ConfigOverrideUtil.getAllOverrideConfigs()) {
       for (const [key, value] of Object.entries(fields)) {
         const data = value();

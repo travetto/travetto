@@ -15,7 +15,6 @@ import {
 import { BindUtil, DataUtil, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ParserManager } from './parser/parser.ts';
-import type { ConfigData } from './parser/types.ts';
 import { FileConfigSource } from './source/file.ts';
 import { OverrideConfigSource } from './source/override.ts';
 import type { ConfigPayload, ConfigSource } from './source/types.ts';
@@ -102,7 +101,7 @@ export class ConfigurationService {
    * Export all active configuration, useful for displaying active state
    *   - Will not show fields marked as secret
    */
-  async exportActive(): Promise<{ sources: ConfigSpecSimple[]; active: ConfigData }> {
+  async exportActive(): Promise<{ sources: ConfigSpecSimple[]; active: UnknownRecord }> {
     const configTargets = DependencyRegistryIndex.getCandidates(ConfigBaseType);
     const configs = await Promise.all(
       configTargets
@@ -113,9 +112,9 @@ export class ConfigurationService {
           return [candidate, inst] as const;
         })
     );
-    const out: Record<string, ConfigData> = {};
+    const out: Record<string, UnknownRecord> = {};
     for (const [candidate, inst] of configs) {
-      const data = BindUtil.bindSchemaToObject<ConfigData>(getClass(inst), {}, inst, {
+      const data = BindUtil.bindSchemaToObject<UnknownRecord>(getClass(inst), {}, inst, {
         filterInput: field => !('secret' in field) || !field.secret,
         filterValue: value => value !== undefined
       });
