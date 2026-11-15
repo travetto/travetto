@@ -72,12 +72,13 @@ export interface RegisteredPrincipal extends Principal {
 ```typescript
 import type { RegisteredPrincipal } from '@travetto/auth-model';
 import { Model } from '@travetto/model';
+import type { UnknownRecord } from '@travetto/runtime';
 
 @Model()
 export class User implements RegisteredPrincipal {
   id: string;
   source: string;
-  details: Record<string, unknown>;
+  details: UnknownRecord;
   password?: string;
   salt: string;
   hash: string;
