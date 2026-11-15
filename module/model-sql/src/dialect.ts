@@ -721,10 +721,10 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     const idSource = ModelRegistryIndex.get(tableContext.cls).idSource;
     const idFieldName = idSource.field;
 
-    if (rawItems.length === 1) {
-      const id = idSource.get(castTo(rawItems[0]));
+    if (items.length === 1) {
+      const id = idSource.get(items[0]);
       const { whereSQL, parameters = [] } = this.compileWhere(tableContext, idSource.where(id));
-      return this.buildUpdate(tableContext, rawItems[0], whereSQL, parameters);
+      return this.buildUpdate(tableContext, items[0], whereSQL, parameters);
     }
 
     const simpleFieldsToUpdate = [...tableContext.simpleFields.values()].filter(field => field.name !== idFieldName);
@@ -732,6 +732,8 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
 
     const setClauses: string[] = [];
     const values: unknown[] = [];
+
+    const rawItems = castTo<Record<string, unknown>[]>(items);
 
     const ids = rawItems.map(item => item[idFieldName]);
 
