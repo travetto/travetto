@@ -9,18 +9,10 @@ type PromiseResult<V extends PromiseFn> = Awaited<ReturnType<V>>;
 type UnknownRecord = Record<string, unknown>;
 
 const isRecord = (value: unknown): value is UnknownRecord =>
-  typeof value === 'object' && // separate from primitives
-  value !== undefined &&
-  value !== null && // is obvious
-  !Array.isArray(value);
+  typeof value === 'object' && value !== undefined && value !== null && !Array.isArray(value);
 
-function isPlainRecord(value: unknown): value is UnknownRecord {
-  return (
-    isRecord(value) &&
-    value.constructor === Object && // separate instances (Array, DOM, ...)
-    Object.prototype.toString.call(value) === '[object Object]' // separate build-in like Math
-  );
-}
+const isPlainRecord = (value: unknown): value is UnknownRecord =>
+  isRecord(value) && value.constructor === Object && Object.prototype.toString.call(value) === '[object Object]';
 
 const triggerBrowserRedirect = (world: Any, url: URL): boolean => {
   const location = world?.window?.location;
