@@ -1,9 +1,9 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { asFull, type Class, castTo, type RetainIntrinsicFields, RuntimeError, safeAssign } from '@travetto/runtime';
+import { asFull, type Class, castTo, RuntimeError, safeAssign } from '@travetto/runtime';
 import { type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 import { WebHeaders } from '@travetto/web';
 
-import type { WebInterceptor } from '../types/interceptor.ts';
+import type { WebInterceptor, WebInterceptorConfigInput } from '../types/interceptor.ts';
 import type { ControllerConfig, EndpointConfig, EndpointParameterConfig, EndpointParamLocation } from './types.ts';
 
 function combineCommon<T extends ControllerConfig | EndpointConfig>(base: T, override: Partial<T>): T {
@@ -164,7 +164,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
 
   registerInterceptorConfig<T extends WebInterceptor>(
     cls: Class<T>,
-    config: Partial<RetainIntrinsicFields<T['config']>>,
+    config: WebInterceptorConfigInput<T>,
     extra?: Partial<EndpointConfig & ControllerConfig>
   ): ControllerConfig {
     return this.register({ interceptorConfigs: [[cls, castTo(config)]], ...extra });
@@ -173,7 +173,7 @@ export class ControllerRegistryAdapter implements RegistryAdapter<ControllerConf
   registerEndpointInterceptorConfig<T extends WebInterceptor>(
     property: string,
     cls: Class<T>,
-    config: Partial<RetainIntrinsicFields<T['config']>>,
+    config: WebInterceptorConfigInput<T>,
     extra?: Partial<EndpointConfig>
   ): EndpointConfig {
     return this.registerEndpoint(property, { interceptorConfigs: [[cls, castTo(config)]], ...extra });
