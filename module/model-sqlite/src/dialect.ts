@@ -32,27 +32,20 @@ export class SqliteDialect extends AbstractANSI99Dialect {
   }
 
   getColumnType(fieldConfiguration: SchemaFieldConfig): string {
-    if (fieldConfiguration.type.value === BigInt) {
-      return 'INTEGER';
+    switch (fieldConfiguration.type) {
+      case BigInt:
+        return 'INTEGER';
+      case Number:
+        return 'NUMERIC';
+      case Date:
+        return 'TEXT';
+      case Boolean:
+        return 'INTEGER';
+      case String:
+        return 'TEXT';
+      default:
+        return 'TEXT';
     }
-
-    if (fieldConfiguration.type.value === Number) {
-      return 'NUMERIC';
-    }
-
-    if (fieldConfiguration.type.value === Date) {
-      return 'TEXT';
-    }
-
-    if (fieldConfiguration.type.value === Boolean) {
-      return 'INTEGER';
-    }
-
-    if (fieldConfiguration.type.value === String) {
-      return 'TEXT';
-    }
-
-    return 'TEXT';
   }
 
   compileJsonIndexPath(columnName: string, jsonPath: string[]): string {
@@ -73,7 +66,7 @@ export class SqliteDialect extends AbstractANSI99Dialect {
       return onLeaf(parentExpression);
     }
 
-    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField ? context.arrayField.type : undefined, context.subPath);
+    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField, context.subPath);
     const arraySegmentIndices = subPathMetadata
       .map((metadataItem, metadataIndex) => (metadataItem.isArray ? metadataIndex : -1))
       .filter(itemIndex => itemIndex !== -1);

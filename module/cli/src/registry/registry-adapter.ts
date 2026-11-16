@@ -61,7 +61,7 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
 
       aliases.push(`--${long}`);
 
-      if (field.type?.value === Boolean) {
+      if (field.type === Boolean) {
         aliases.push(`--no-${long}`);
       }
     }

@@ -78,7 +78,7 @@ export class DynamoDBUtil {
 
       switch (idx.type) {
         case 'indexed:sorted': {
-          const fieldType = SchemaRegistryIndex.getNestedFieldConfig(cls, idx.sortTemplate[0].path)?.type.value ?? cls;
+          const fieldType = SchemaRegistryIndex.getNestedFieldConfig(cls, idx.sortTemplate[0].path)?.type ?? cls;
 
           keys.push({ AttributeName: keyIndexAttribute, KeyType: 'HASH' });
           keys.push({ AttributeName: sortIndexAttribute, KeyType: 'RANGE' });

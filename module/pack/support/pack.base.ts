@@ -91,6 +91,12 @@ export abstract class BasePackCommand implements CliCommandShape {
   @Ignore()
   entryArguments: string[] = [];
 
+  /** Disable prototype */
+  disablePrototype = true;
+
+  @CliFlag({ short: 'nf', envVars: ['RUNTIME_NODE_FLAGS'] })
+  nodeFlags: string[] = [];
+
   @Ignore()
   workspaceResourceFolder: string = 'resources-workspace';
 

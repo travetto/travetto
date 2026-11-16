@@ -9,16 +9,16 @@ import type {
   TagObject
 } from 'openapi3-ts/oas31';
 
-import { type Class, type UnknownRecord, castTo, describeFunction, RuntimeError } from '@travetto/runtime';
+import { type Class, type UnknownRecord, BinaryUtil, castTo, describeFunction, RuntimeError, TypedObject } from '@travetto/runtime';
 import {
+  isComplexInput,
   type SchemaBasicType,
   type SchemaClassConfig,
   type SchemaFieldConfig,
   type SchemaInputConfig,
   SchemaNameResolver,
   type SchemaParameterConfig,
-  SchemaRegistryIndex,
-  type SchemaValueType
+  SchemaRegistryIndex
 } from '@travetto/schema';
 import {
   type ControllerConfig,
@@ -69,15 +69,19 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     prefix: string = '',
     rootField: SchemaInputConfig = input
   ): ParameterObject[] {
-    if (!SchemaRegistryIndex.hasValueType(input.type)) {
-      throw new RuntimeError(`Unknown class, not registered as a schema: ${input.type.value.name}`);
+    if (!isComplexInput(input)) {
+      throw new RuntimeError(`Unknown class, not registered as a schema: ${input.type.name}`);
     }
 
-    const fields = SchemaRegistryIndex.get(input.type.value).getFields();
+    if (!SchemaRegistryIndex.has(input.type)) {
+      throw new RuntimeError(`Unknown class, not registered as a schema: ${input.type.name}`);
+    }
+
+    const fields = SchemaRegistryIndex.get(input.type).getFields();
     const params: ParameterObject[] = [];
     for (const sub of Object.values(fields)) {
       const name = sub.name;
-      if (SchemaRegistryIndex.hasValueType(sub.type)) {
+      if (isComplexInput(sub) && SchemaRegistryIndex.has(sub.type)) {
         const suffix = sub.array ? '[]' : '';
         params.push(...this.#schemaToDotParams(location, sub, prefix ? `${prefix}.${name}${suffix}` : `${name}${suffix}.`, rootField));
       } else {
@@ -102,21 +106,21 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Get the type for a given class
    */
   #getType(inputOrClass: SchemaInputConfig | Class): UnknownRecord {
-    let field: { type: SchemaValueType; precision?: [number, number | undefined] };
+    let field: { type: Function; precision?: [number, number | undefined]; isComplex?: boolean };
     if (!isInputConfig(inputOrClass)) {
-      field = { type: { kind: SchemaRegistryIndex.has(inputOrClass) ? 'complex' : 'primitive', value: inputOrClass } };
+      field = { isComplex: SchemaRegistryIndex.has(inputOrClass), type: inputOrClass };
     } else {
       field = inputOrClass;
     }
     const out: UnknownRecord = {};
     // Handle nested types
-    if (SchemaRegistryIndex.hasValueType(field.type)) {
-      const id = this.#nameResolver.getName(SchemaRegistryIndex.getConfig(field.type.value));
+    if (isComplexInput(field) && SchemaRegistryIndex.has(field.type)) {
+      const id = this.#nameResolver.getName(SchemaRegistryIndex.getConfig(field.type));
       // Exposing
       this.#schemas[id] = this.#allSchemas[id];
       out.$ref = `${DEFINITION}/${id}`;
     } else {
-      switch (field.type.value) {
+      switch (field.type) {
         case String:
           out.type = 'string';
           break;
@@ -233,11 +237,11 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         const base = config;
         const required: string[] = [];
 
-        for (const fieldName of Object.keys(base.fields)) {
-          if (SchemaRegistryIndex.hasValueType(base.fields[fieldName].type)) {
-            this.onSchema(SchemaRegistryIndex.getConfig(base.fields[fieldName].type.value));
+        for (const [fieldName, field] of TypedObject.entries(base.fields)) {
+          if (isComplexInput(field) && SchemaRegistryIndex.has(field.type)) {
+            this.onSchema(SchemaRegistryIndex.getConfig(field.type));
           }
-          properties[fieldName] = this.#processSchemaField(base.fields[fieldName], required);
+          properties[fieldName] = this.#processSchemaField(field, required);
         }
 
         const extra: UnknownRecord = {};
@@ -284,19 +288,19 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   #getEndpointBody(body?: SchemaBasicType, mime?: string | null): RequestBodyObject {
     if (!body || body.type === undefined) {
       return { content: {}, description: '' };
-    } else if (body.binary) {
+    } else if (BinaryUtil.isBinaryTypeReference(body.type)) {
       return {
         content: {
           [mime ?? 'application/octet-stream']: { schema: { type: 'string', format: 'binary' } }
         },
         description: 'Raw binary data'
       };
-    } else if (SchemaRegistryIndex.hasValueType(body.type)) {
-      const cls = body.type.value;
+    } else if (isComplexInput(body) && SchemaRegistryIndex.has(body.type)) {
+      const cls = body.type;
       const schemaConfig = SchemaRegistryIndex.getConfig(cls);
       return this.#buildJsonBody(body, this.#getType(cls), this.#nameResolver.getName(schemaConfig), mime);
     } else {
-      return this.#buildJsonBody(body, { type: body.type.value.name.toLowerCase() }, body.type.value.name, mime);
+      return this.#buildJsonBody(body, { type: body.type.name.toLowerCase() }, body.type.name, mime);
     }
   }
 
@@ -308,15 +312,13 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     param: EndpointParameterConfig,
     input: SchemaParameterConfig
   ): { requestBody: RequestBodyObject } | { parameters: ParameterObject[] } | undefined {
-    const complex = input.type?.kind === 'complex';
-
     if (param.location) {
       if (param.location === 'body') {
         const acceptsMime = endpoint.finalizedResponseHeaders.get('accepts');
         return {
           requestBody: input.specifiers?.includes('file') ? this.#buildUploadBody() : this.#getEndpointBody(input, acceptsMime)
         };
-      } else if (complex && (param.location === 'query' || param.location === 'header')) {
+      } else if (isComplexInput(input) && (param.location === 'query' || param.location === 'header')) {
         return { parameters: this.#schemaToDotParams(param.location, input, param.prefix ? `${param.prefix}.` : '') };
       } else {
         const epParam: ParameterObject = {

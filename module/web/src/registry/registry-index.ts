@@ -66,7 +66,7 @@ export class ControllerRegistryIndex implements RegistryIndex {
     const fieldMap = SchemaRegistryIndex.get(cls).getFields();
     for (const field of Object.keys(map)) {
       const { type } = fieldMap[field];
-      Object.defineProperty(instance, field, { get: ctx.getSource(castTo(type.value)) });
+      Object.defineProperty(instance, field, { get: ctx.getSource(castTo(type)) });
     }
   }
 

@@ -14,10 +14,12 @@ export type CommonPackConfig = {
   env?: string;
   manifestFile: string;
   workspaceResourceFolder: string;
+  disablePrototype?: boolean;
 
   // Bundle
   rollupConfiguration: string;
   entryPoint: string;
+  nodeFlags: string[];
   entryArguments: string[];
   externalDependencies: string[];
   minify: boolean;
@@ -66,7 +68,6 @@ export type DockerPackFactory = (config: DockerPackConfig) => string | Promise<s
 export type DockerPackFactoryModule = { factory: DockerPackFactory };
 
 export type CoreRollupConfig = {
-  envFile?: string;
   output: OutputOptions;
   entry: string;
   files: string[];

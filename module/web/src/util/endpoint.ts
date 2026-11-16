@@ -1,6 +1,13 @@
 import { DependencyRegistryIndex } from '@travetto/di';
 import { asConstructable, type Class, castKey, castTo, TypedObject, type UnknownRecord } from '@travetto/runtime';
-import { BindUtil, type SchemaParameterConfig, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import {
+  BindUtil,
+  isComplexInput,
+  type SchemaParameterConfig,
+  SchemaRegistryIndex,
+  SchemaValidator,
+  ValidationResultError
+} from '@travetto/schema';
 
 import { ControllerRegistryIndex } from '../registry/registry-index.ts';
 import type { ControllerConfig, EndpointConfig, EndpointFunction, EndpointParameterConfig } from '../registry/types.ts';
@@ -115,7 +122,7 @@ export class EndpointUtil {
       if (param.prefix) {
         // Has a prefix provided
         return query[param.prefix];
-      } else if (input.type.kind === 'complex') {
+      } else if (isComplexInput(input)) {
         // Is a full type
         return query;
       }

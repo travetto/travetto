@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Registry } from '@travetto/registry';
-import { Method, Schema, SchemaRegistryIndex } from '@travetto/schema';
+import { isComplexInput, Method, Schema, SchemaRegistryIndex } from '@travetto/schema';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { GenericArray } from './models/generic';
@@ -55,12 +55,12 @@ class GenericInstantiationSuite {
   async testGenericInstantiation() {
     const fields = SchemaRegistryIndex.get(GenericContainer).getFields();
     assert(fields.value);
-    assert(fields.value.type.kind === 'complex');
+    assert(isComplexInput(fields.value));
 
-    const valueConfig = SchemaRegistryIndex.get(fields.value.type.value).getFields();
+    const valueConfig = SchemaRegistryIndex.get(fields.value.type).getFields();
     assert(valueConfig.items);
     assert(valueConfig.items.array);
-    assert(valueConfig.items.type.value === GenericItem);
+    assert(valueConfig.items.type === GenericItem);
   }
 
   @Test()
@@ -68,17 +68,17 @@ class GenericInstantiationSuite {
     const method = SchemaRegistryIndex.get(GenericMethodContainer).getMethod('getItems');
     assert(method.returnType);
     assert(method.returnType.array);
-    assert(method.returnType.type.value === GenericItem);
+    assert(method.returnType.type === GenericItem);
   }
 
   @Test()
   async testGenericClass() {
     const method = SchemaRegistryIndex.get(GenericMethodContainer).getMethod('getArray');
     assert(method.returnType);
-    assert(method.returnType.type.kind === 'complex');
-    assert(method.returnType.type.value !== GenericArray);
-    assert(Object.getPrototypeOf(method.returnType.type.value) === GenericArray);
-    const children = SchemaRegistryIndex.get(method.returnType.type.value);
-    assert(children.getField('items').type.value === GenericItem);
+    assert(isComplexInput(method.returnType));
+    assert(method.returnType.type !== GenericArray);
+    assert(Object.getPrototypeOf(method.returnType.type) === GenericArray);
+    const children = SchemaRegistryIndex.get(method.returnType.type);
+    assert(children.getField('items').type === GenericItem);
   }
 }

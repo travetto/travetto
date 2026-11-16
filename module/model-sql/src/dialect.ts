@@ -9,7 +9,7 @@ import {
   type WhereClause
 } from '@travetto/model-query';
 import { type Class, castTo, isPlainRecord, isRecord, JSONUtil, RuntimeError, type UnknownRecord } from '@travetto/runtime';
-import { type SchemaFieldConfig, SchemaRegistryIndex, type SchemaValueType } from '@travetto/schema';
+import { isComplexInput, type SchemaBasicType, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { SQLModelSchemaUtil } from './schema.ts';
 import type { JSONSqlPathMode, ResolvedPathContext, SchemaContext, TableContext } from './types.ts';
@@ -392,7 +392,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     let currentField: SchemaFieldConfig | undefined = tableContext.complexFields.get(firstSegment);
     let arrayField: SchemaFieldConfig | undefined = currentField?.array ? currentField : undefined;
     let arraySegmentIndex: number | undefined = currentField?.array ? 0 : undefined;
-    let currentClass = currentField?.type.kind === 'complex' ? currentField.type.value : undefined;
+    let currentClass = isComplexInput(currentField) ? currentField.type : undefined;
 
     for (let pathIndex = 1; pathIndex < path.length; pathIndex += 1) {
       const segment = path[pathIndex];
@@ -402,7 +402,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
         arrayField = currentField;
         arraySegmentIndex = pathIndex;
       }
-      currentClass = currentField?.type.kind === 'complex' ? currentField.type.value : undefined;
+      currentClass = isComplexInput(currentField) ? currentField.type : undefined;
     }
 
     return {
@@ -413,13 +413,13 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
   }
 
   getSchemaSubPathMetadata(
-    type: SchemaValueType | undefined,
+    input: SchemaBasicType | undefined,
     subPath: string[]
   ): Array<{ segment: string; fieldConfig?: SchemaFieldConfig; isArray: boolean; fieldClass?: Class }> {
-    if (type?.kind !== 'complex') {
-      throw new RuntimeError('Only complex types are supported for schema sub path evaluation');
+    if (!isComplexInput(input)) {
+      throw new RuntimeError('Only complex types are supported for sub schema');
     }
-    let currentClass: Class | undefined = type.value;
+    let currentClass: Class | undefined = input.type;
     return subPath.map(segment => {
       let fieldConfig: SchemaFieldConfig | undefined;
       let isArray = false;
@@ -428,7 +428,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
         fieldConfig = classConfiguration?.fields[segment];
         if (fieldConfig) {
           isArray = !!fieldConfig.array;
-          currentClass = fieldConfig.type.kind === 'complex' ? fieldConfig.type.value : undefined;
+          currentClass = isComplexInput(fieldConfig) ? fieldConfig.type : undefined;
         } else {
           currentClass = undefined;
         }
@@ -448,7 +448,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     const { leafField, arrayField, arraySegmentIndex } = this.#resolveSchemaPath(tableContext, path);
     const sqlPath = this.buildSqlPath(tableContext, path, mode);
 
-    const finalSqlPath = leafField && !leafField.array ? this.castColumn(sqlPath, leafField.type.value) : sqlPath;
+    const finalSqlPath = leafField && !leafField.array ? this.castColumn(sqlPath, leafField.type) : sqlPath;
 
     const arrayPath = arraySegmentIndex !== undefined ? path.slice(0, arraySegmentIndex + 1) : undefined;
     const subPath = arraySegmentIndex !== undefined ? path.slice(arraySegmentIndex + 1) : undefined;

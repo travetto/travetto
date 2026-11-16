@@ -1,7 +1,7 @@
 import type { MappingProperty, Script, MappingTypeMapping } from '@elastic/elasticsearch/api/types';
 
 import { type Class, toConcrete, type UnknownRecord } from '@travetto/runtime';
-import { DataUtil, type Point, SchemaRegistryIndex } from '@travetto/schema';
+import { DataUtil, isComplexInput, type Point, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { EsSchemaConfig } from './types.ts';
 
@@ -87,16 +87,16 @@ export class ElasticsearchSchemaUtil {
     const properties: Record<string, MappingProperty> = {};
 
     for (const [field, config] of Object.entries(fields)) {
-      if (config.type.kind === 'complex') {
+      if (isComplexInput(config)) {
         properties[field] = {
           type: config.array ? 'nested' : 'object',
-          ...this.generateSingleMapping(config.type.value, esSchema)
+          ...this.generateSingleMapping(config.type, esSchema)
         };
-      } else if (config.type.value === PointConcrete) {
+      } else if (config.type === PointConcrete) {
         properties[field] = { type: 'geo_point' };
-      } else if (config.type.value === BigInt) {
+      } else if (config.type === BigInt) {
         properties[field] = { type: 'long' };
-      } else if (config.type.value === Number) {
+      } else if (config.type === Number) {
         let property: UnknownRecord = { type: 'integer' };
         if (config.precision) {
           const [digits, decimals] = config.precision;
@@ -125,11 +125,11 @@ export class ElasticsearchSchemaUtil {
           }
         }
         properties[field] = property;
-      } else if (config.type.value === Date) {
+      } else if (config.type === Date) {
         properties[field] = { type: 'date', format: 'date_optional_time' };
-      } else if (config.type.value === Boolean) {
+      } else if (config.type === Boolean) {
         properties[field] = { type: 'boolean' };
-      } else if (config.type.value === String) {
+      } else if (config.type === String) {
         let text = {};
         if (config.specifiers?.includes('text')) {
           text = {
@@ -146,7 +146,7 @@ export class ElasticsearchSchemaUtil {
           }
         }
         properties[field] = { type: 'keyword', ...text };
-      } else if (config.type.value === Object) {
+      } else if (config.type === Object) {
         properties[field] = { type: 'object', dynamic: true };
       }
     }

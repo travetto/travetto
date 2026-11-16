@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Schema, SchemaRegistryIndex, type ValidationResultError, Validator } from '@travetto/schema';
+import { isComplexInput, Schema, SchemaRegistryIndex, type ValidationResultError, Validator } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 import { Controller, ControllerRegistryIndex, Get, type HttpMethod, PathParam, Post, QueryParam, WebResponse } from '@travetto/web';
 
@@ -109,7 +109,7 @@ function getEndpoint(path: string, method: HttpMethod) {
 function getEndpointResponse(path: string, method: HttpMethod) {
   const ep = getEndpoint(path, method);
   const resp = SchemaRegistryIndex.get(SchemaAPI).getMethod(ep.methodName);
-  return resp?.returnType?.type;
+  return resp?.returnType;
 }
 
 @Suite()
@@ -272,7 +272,7 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   @Test()
   async verifyList() {
     const responseType = getEndpointResponse('/users', 'GET');
-    assert(responseType?.value === User);
+    assert(responseType?.type === User);
   }
 
   @Test()
@@ -284,8 +284,8 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   @Test()
   async verifyShapeClass() {
     const responseType = getEndpointResponse('/classShape/:shape', 'GET');
-    assert(responseType?.kind === 'complex');
-    assert(SchemaRegistryIndex.has(responseType.value));
+    assert(isComplexInput(responseType));
+    assert(SchemaRegistryIndex.has(responseType.type));
   }
 
   @Test()
@@ -297,12 +297,12 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   @Test()
   async verifyCustomSerializable() {
     const responseType = getEndpointResponse('/customSerialize', 'GET');
-    assert(responseType?.value === User);
+    assert(responseType?.type === User);
   }
 
   @Test()
   async verifyCustomSerializable2() {
     const responseType = getEndpointResponse('/customSerialize2', 'GET');
-    assert(responseType?.value === User);
+    assert(responseType?.type === User);
   }
 }

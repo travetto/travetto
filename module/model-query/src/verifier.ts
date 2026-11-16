@@ -1,7 +1,7 @@
 /* eslint @typescript-eslint/no-unused-vars: ["error", { "args": "none"} ] */
 
 import { type Class, isPlainRecord, JSONUtil } from '@travetto/runtime';
-import { DataUtil, SchemaRegistryIndex, type ValidationError, ValidationResultError } from '@travetto/schema';
+import { DataUtil, isComplexInput, SchemaRegistryIndex, type ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { TypeUtil } from './internal/types.ts';
 import type { ModelQuery, PageableModelQuery, Query } from './model/query.ts';
@@ -74,12 +74,12 @@ export class QueryVerifier {
       const field = fields[key];
 
       // If a simple operation
-      if (field.type.kind === 'primitive') {
+      if (!isComplexInput(field)) {
         const type = TypeUtil.getDeclaredType(field)!;
         handler.onSimpleType(state.extend(key), type, value, field.array ?? false);
       } else {
         // Otherwise recurse
-        const subClass = field.type.value;
+        const subClass = field.type;
         const subValue = value;
         if (handler.onComplexType?.(state.extend(key), subClass, subValue, field.array ?? false)) {
           continue;

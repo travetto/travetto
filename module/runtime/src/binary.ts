@@ -9,21 +9,25 @@ import { castTo, hasFunction, toConcrete } from './types.ts';
 /**
  * Binary Array
  * @concrete
+ * @primitive
  */
 export type BinaryArray = Uint32Array | Uint16Array | Uint8Array | Uint8ClampedArray | Buffer<ArrayBuffer> | ArrayBuffer;
 /**
  * Binary Stream
  * @concrete
+ * @primitive
  */
 export type BinaryStream = Readable | ReadableStream | AsyncIterable<BinaryArray>;
 /**
  * Binary Container
  * @concrete
+ * @primitive
  */
 export type BinaryContainer = Blob | File;
 /**
  * Binary Type
  * @concrete
+ * @primitive
  */
 export type BinaryType = BinaryArray | BinaryStream | BinaryContainer;
 

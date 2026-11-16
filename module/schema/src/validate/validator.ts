@@ -1,6 +1,6 @@
 import { type Class, type ClassInstance, castKey, castTo, isPlainRecord, isRecord, TypedObject } from '@travetto/runtime';
 
-import { SchemaRegistryIndex } from '../service/registry-index.ts';
+import { isComplexInput, SchemaRegistryIndex } from '../service/registry-index.ts';
 import type { SchemaFieldMap, SchemaInputConfig } from '../service/types.ts';
 import { SchemaTypeUtil } from '../type-config.ts';
 import { UnknownType } from '../types.ts';
@@ -84,16 +84,16 @@ export class SchemaValidator {
 
     const { type, array } = input;
 
-    if (type.value === Object || type.value === UnknownType || !type.value.name) {
+    if (type === Object || type === UnknownType || !type.name) {
       return [];
     } else if (array) {
       if (!Array.isArray(value)) {
         return this.#prepareErrors(path, [{ kind: 'type', type: Array, value }]);
       }
       let errors: ValidationError[] = [];
-      if (SchemaRegistryIndex.hasValueType(type)) {
+      if (isComplexInput(input) && SchemaRegistryIndex.has(input.type)) {
         for (let i = 0; i < value.length; i += 1) {
-          const subErrors = this.#validateFields(resolveFieldMap(type.value, value[i]), value[i], `${path}[${i}]`);
+          const subErrors = this.#validateFields(resolveFieldMap(input.type, value[i]), value[i], `${path}[${i}]`);
           errors = errors.concat(subErrors);
         }
       } else {
@@ -103,8 +103,8 @@ export class SchemaValidator {
         }
       }
       return errors;
-    } else if (SchemaRegistryIndex.hasValueType(type)) {
-      return this.#validateFields(resolveFieldMap(type.value, value), value, path);
+    } else if (isComplexInput(input) && SchemaRegistryIndex.has(input.type)) {
+      return this.#validateFields(resolveFieldMap(input.type, value), value, path);
     } else {
       const fieldErrors = this.#validateInput(input, value);
       return this.#prepareErrors(path, fieldErrors);
@@ -132,7 +132,7 @@ export class SchemaValidator {
    */
   static #validateInput(input: SchemaInputConfig, value: unknown): ValidationResult[] {
     const criteria: [string, SchemaInputConfig[ValidationKindCore]][] = [];
-    const config = SchemaTypeUtil.getSchemaTypeConfig(input.type.value);
+    const config = SchemaTypeUtil.getSchemaTypeConfig(input.type);
 
     if (config?.validate) {
       const kind = config.validate(value);
@@ -140,20 +140,20 @@ export class SchemaValidator {
         case undefined:
           break;
         case 'type':
-          return [{ kind, type: input.type.value.name }];
+          return [{ kind, type: input.type.name }];
         default:
           return [{ kind, value }];
       }
-    } else if (PrimitiveTypes.has(input.type.value)) {
-      if (typeof value !== input.type.value.name.toLowerCase()) {
-        return [{ kind: 'type', type: input.type.value.name.toLowerCase() }];
+    } else if (PrimitiveTypes.has(input.type)) {
+      if (typeof value !== input.type.name.toLowerCase()) {
+        return [{ kind: 'type', type: input.type.name.toLowerCase() }];
       } else if (Number.isNaN(value)) {
         return [{ kind: 'type', type: 'number' }];
       }
-    } else if (input.type.kind === 'complex') {
-      if (!(value instanceof input.type.value)) {
+    } else if (isComplexInput(input)) {
+      if (!(value instanceof input.type)) {
         // If not an instance of the type
-        return [{ kind: 'type', type: input.type.value.name }];
+        return [{ kind: 'type', type: input.type.name }];
       }
     }
 
@@ -317,7 +317,7 @@ export class SchemaValidator {
       errors.push(
         ...[
           ...this.#validateInputSchema(param, params[i]),
-          ...(param.type.kind === 'complex' ? await this.#validateClassLevel(param.type.value, params[i]) : [])
+          ...(isComplexInput(param) ? await this.#validateClassLevel(param.type, params[i]) : [])
         ].map(error => {
           if (param.name && typeof param.name === 'string') {
             error.path = !prefixes[i] ? error.path.replace(`${param.name}.`, '') : error.path.replace(param.name, prefixes[i]!);

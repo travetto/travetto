@@ -2,6 +2,7 @@ import { SchemaTypeUtil } from '@travetto/schema';
 
 /**
  * @concrete #SpecialTypeTarget
+ * @primitive
  */
 export type SpecialType = string | number | true;
 

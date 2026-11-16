@@ -11,7 +11,7 @@ import {
   type UnknownRecord,
   isRecord
 } from '@travetto/runtime';
-import { SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { isComplexInput, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ExistsError } from '../error/exists.ts';
 import { SubTypeNotSupportedError } from '../error/invalid-sub-type.ts';
@@ -223,8 +223,8 @@ export class ModelCrudUtil {
 
     for (const [key, field] of Object.entries(schema.fields)) {
       const currentField = castTo<UnknownRecord>(result)[key];
-      if (field.type.kind === 'complex' && !isCleanTarget(key) && currentField !== undefined && currentField !== null) {
-        const fieldType = field.type.value;
+      if (isComplexInput(field) && !isCleanTarget(key) && currentField !== undefined && currentField !== null) {
+        const fieldType = field.type;
         if (field.array && Array.isArray(currentField)) {
           let changed = false;
           const newArray = currentField.map(subItem => {

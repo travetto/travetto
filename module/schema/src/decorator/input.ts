@@ -1,11 +1,8 @@
 import {
   type Any,
-  castTo,
   type Class,
   type ClassInstance,
   getClass,
-  getConstructor,
-  isClass,
   type NumericLikeIntrinsic,
   type NumericPrimitive,
   type Primitive,
@@ -13,14 +10,7 @@ import {
 } from '@travetto/runtime';
 
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
-import {
-  CONSTRUCTOR_PROPERTY,
-  type SchemaDecoratorConfig,
-  type SchemaFieldConfig,
-  type SchemaInputConfig,
-  type SchemaValueType,
-  type SchemaValueTypeInput
-} from '../service/types.ts';
+import { CONSTRUCTOR_PROPERTY, type SchemaFieldConfig, type SchemaInputConfig } from '../service/types.ts';
 import { CommonRegex } from '../validate/regex.ts';
 
 type StringType = string | string[];
@@ -29,13 +19,13 @@ type NumberType = NumericPrimitive | NumericPrimitive[];
 type NumberLikeType = NumericLikeIntrinsic | NumericLikeIntrinsic[];
 type EnumType = Exclude<Primitive, 'boolean'> | Exclude<Primitive, 'boolean'>[];
 
-type PropType<V> = <T extends Partial<Record<K, V | Function>>, K extends string>(
+type InputDecorator<V> = <T extends Partial<Record<K, V | Function>>, K extends string>(
   instance: T,
   property: K,
   idx?: TypedPropertyDescriptor<Any> | number
 ) => void;
 
-function input<V>(...configs: Partial<SchemaInputConfig>[]): PropType<V> {
+function input<V>(...configs: Partial<SchemaInputConfig>[]): InputDecorator<V> {
   return (target: Class | ClassInstance, property: string, idx?: number | TypedPropertyDescriptor<Any>): void => {
     const adapter = SchemaRegistryIndex.getForRegister(getClass(target));
     const propertyKey = property ?? CONSTRUCTOR_PROPERTY;
@@ -47,26 +37,6 @@ function input<V>(...configs: Partial<SchemaInputConfig>[]): PropType<V> {
   };
 }
 
-function resolveSchemaValueType(type: SchemaValueTypeInput): SchemaValueType {
-  if (typeof type === 'function') {
-    return isClass(type) ? { kind: 'complex', value: type } : { kind: 'primitive', value: type };
-  }
-  return type;
-}
-
-/**
- * Normalize decorator configs so raw constructors/functions become `SchemaValueType`
- */
-export function normalizeSchemaDecoratorConfigs<T extends SchemaInputConfig>(
-  configs: (SchemaDecoratorConfig<T> | undefined)[]
-): Partial<T>[] {
-  return configs
-    .filter((config): config is SchemaDecoratorConfig<T> => !!config)
-    .map(config =>
-      config.type ? castTo<Partial<T>>({ ...config, type: resolveSchemaValueType(config.type) }) : castTo<Partial<T>>(config)
-    );
-}
-
 /**
  * Registering an input
  * @param type The type for the input
@@ -74,11 +44,8 @@ export function normalizeSchemaDecoratorConfigs<T extends SchemaInputConfig>(
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Input(
-  type: Pick<SchemaDecoratorConfig<SchemaInputConfig>, 'type' | 'array'>,
-  ...configs: SchemaDecoratorConfig<SchemaInputConfig>[]
-): PropType<unknown> {
-  return input(...normalizeSchemaDecoratorConfigs([type, ...configs]));
+export function Input(...configs: Partial<SchemaInputConfig>[]): InputDecorator<unknown> {
+  return input(...configs);
 }
 
 /**
@@ -87,7 +54,7 @@ export function Input(
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Alias(...aliases: string[]): PropType<unknown> {
+export function Alias(...aliases: string[]): InputDecorator<unknown> {
   return input({ aliases });
 }
 
@@ -98,7 +65,7 @@ export function Alias(...aliases: string[]): PropType<unknown> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Required(active = true, message?: string): PropType<unknown> {
+export function Required(active = true, message?: string): InputDecorator<unknown> {
   return input({ required: { active, message } });
 }
 
@@ -109,7 +76,7 @@ export function Required(active = true, message?: string): PropType<unknown> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Enum(values: string[], message?: string): PropType<EnumType> {
+export function Enum(values: string[], message?: string): InputDecorator<EnumType> {
   message = message || `{path} is only allowed to be "${values.join('" or "')}"`;
   return input({ enum: { values, message } });
 }
@@ -119,7 +86,7 @@ export function Enum(values: string[], message?: string): PropType<EnumType> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Text(): PropType<StringType> {
+export function Text(): InputDecorator<StringType> {
   return input({ specifiers: ['text'] });
 }
 
@@ -128,7 +95,7 @@ export function Text(): PropType<StringType> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function LongText(): PropType<StringType> {
+export function LongText(): InputDecorator<StringType> {
   return input({ specifiers: ['text', 'long'] });
 }
 
@@ -139,7 +106,7 @@ export function LongText(): PropType<StringType> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Match(regex: RegExp, message?: string): PropType<StringType> {
+export function Match(regex: RegExp, message?: string): InputDecorator<StringType> {
   return input({ match: { regex, message } });
 }
 
@@ -150,7 +117,7 @@ export function Match(regex: RegExp, message?: string): PropType<StringType> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function MinLength(limit: number, message?: string): PropType<LengthType> {
+export function MinLength(limit: number, message?: string): InputDecorator<LengthType> {
   return input({ minlength: { limit, message }, ...(limit === 0 ? { required: { active: false } } : {}) });
 }
 
@@ -161,7 +128,7 @@ export function MinLength(limit: number, message?: string): PropType<LengthType>
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function MaxLength(limit: number, message?: string): PropType<LengthType> {
+export function MaxLength(limit: number, message?: string): InputDecorator<LengthType> {
   return input({ maxlength: { limit, message } });
 }
 
@@ -172,7 +139,7 @@ export function MaxLength(limit: number, message?: string): PropType<LengthType>
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Min(limit: NumericLikeIntrinsic, message?: string): PropType<NumberLikeType> {
+export function Min(limit: NumericLikeIntrinsic, message?: string): InputDecorator<NumberLikeType> {
   return input<NumberLikeType>({ min: { limit, message } });
 }
 
@@ -183,7 +150,7 @@ export function Min(limit: NumericLikeIntrinsic, message?: string): PropType<Num
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Max(limit: NumericLikeIntrinsic, message?: string): PropType<NumberLikeType> {
+export function Max(limit: NumericLikeIntrinsic, message?: string): InputDecorator<NumberLikeType> {
   return input<NumberLikeType>({ max: { limit, message } });
 }
 
@@ -193,7 +160,7 @@ export function Max(limit: NumericLikeIntrinsic, message?: string): PropType<Num
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Email(message?: string): PropType<StringType> {
+export function Email(message?: string): InputDecorator<StringType> {
   return Match(CommonRegex.email, message);
 }
 
@@ -203,7 +170,7 @@ export function Email(message?: string): PropType<StringType> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Telephone(message?: string): PropType<StringType> {
+export function Telephone(message?: string): InputDecorator<StringType> {
   return Match(CommonRegex.telephone, message);
 }
 
@@ -213,7 +180,7 @@ export function Telephone(message?: string): PropType<StringType> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Url(message?: string): PropType<StringType> {
+export function Url(message?: string): InputDecorator<StringType> {
   return Match(CommonRegex.url, message);
 }
 
@@ -223,7 +190,7 @@ export function Url(message?: string): PropType<StringType> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Uuid(message?: string): PropType<StringType> {
+export function Uuid(message?: string): InputDecorator<StringType> {
   return input({ specifiers: ['uuid'], match: { regex: CommonRegex.uuid, message }, generator: Util.uuid });
 }
 
@@ -234,7 +201,7 @@ export function Uuid(message?: string): PropType<StringType> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Precision(digits: number, decimals?: number): PropType<number> {
+export function Precision(digits: number, decimals?: number): InputDecorator<number> {
   return input({ precision: [digits, decimals] });
 }
 
@@ -243,7 +210,7 @@ export function Precision(digits: number, decimals?: number): PropType<number> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Integer(): PropType<NumberType> {
+export function Integer(): InputDecorator<NumberType> {
   return Precision(0);
 }
 
@@ -252,7 +219,7 @@ export function Integer(): PropType<NumberType> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Float(): PropType<number> {
+export function Float(): InputDecorator<number> {
   return Precision(10, 7);
 }
 
@@ -261,7 +228,7 @@ export function Float(): PropType<number> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Long(): PropType<NumberType> {
+export function Long(): InputDecorator<NumberType> {
   return Precision(19, 0);
 }
 
@@ -270,7 +237,7 @@ export function Long(): PropType<NumberType> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Currency(): PropType<NumberType> {
+export function Currency(): InputDecorator<NumberType> {
   return Precision(13, 2);
 }
 
@@ -280,22 +247,8 @@ export function Currency(): PropType<NumberType> {
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Specifier(...specifiers: string[]): PropType<unknown> {
+export function Specifier(...specifiers: string[]): InputDecorator<unknown> {
   return input({ specifiers });
-}
-
-/**
- * Sets the discriminator field via a property decorator
- * @augments `@travetto/schema:Input`
- * @kind decorator
- */
-export function DiscriminatorField(): (instance: ClassInstance, property: string) => void {
-  return (instance: ClassInstance, property: string): void => {
-    SchemaRegistryIndex.getForRegister(getConstructor(instance)).register({
-      discriminatedBase: true,
-      discriminatedField: property
-    });
-  };
 }
 
 /**
@@ -304,6 +257,6 @@ export function DiscriminatorField(): (instance: ClassInstance, property: string
  * @augments `@travetto/schema:Input`
  * @kind decorator
  */
-export function Generator(generator: (config?: SchemaFieldConfig) => unknown): PropType<unknown> {
+export function Generator(generator: (config?: SchemaFieldConfig) => unknown): InputDecorator<unknown> {
   return input({ generator });
 }

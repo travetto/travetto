@@ -1,4 +1,4 @@
-import { type Any, type Class, type ClassInstance, castTo, getClass } from '@travetto/runtime';
+import { type Any, type Class, type ClassInstance, castTo, getClass, getConstructor } from '@travetto/runtime';
 import { CONSTRUCTOR_PROPERTY } from '@travetto/schema';
 
 import { DependencyRegistryIndex } from './registry/registry-index.ts';
@@ -59,6 +59,6 @@ export function InjectableFactory(input?: Partial<InjectableCandidate> | symbol)
  */
 export function PostConstruct(priority: number = 10) {
   return (instance: ClassInstance, property: string, descriptor: TypedPropertyDescriptor<() => Any>): void => {
-    DependencyRegistryIndex.registerPostConstruct(getClass(instance), { operation: descriptor.value!, priority });
+    DependencyRegistryIndex.registerPostConstruct(getConstructor(instance), { operation: descriptor.value!, priority });
   };
 }

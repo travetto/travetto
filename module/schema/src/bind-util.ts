@@ -1,7 +1,7 @@
 import { asFull, type Class, castKey, castTo, classConstruct, TypedObject, type UnknownRecord, isPlainRecord } from '@travetto/runtime';
 
 import { DataUtil } from './data.ts';
-import { SchemaRegistryIndex } from './service/registry-index.ts';
+import { isComplexInput, SchemaRegistryIndex } from './service/registry-index.ts';
 import type { SchemaInputConfig, SchemaParameterConfig } from './service/types.ts';
 import { SchemaTypeUtil } from './type-config.ts';
 
@@ -49,13 +49,13 @@ export class BindUtil {
    * @param value The provided value
    */
   static #coerceType<T>(config: SchemaInputConfig, value: unknown): T | null | undefined {
-    const typeConfig = SchemaTypeUtil.getSchemaTypeConfig(config.type?.value);
+    const typeConfig = SchemaTypeUtil.getSchemaTypeConfig(config.type);
     if (typeConfig?.bind) {
       value = typeConfig.bind(value);
     } else {
-      value = DataUtil.coerceType(value, config.type?.value, false);
+      value = DataUtil.coerceType(value, config.type, false);
 
-      if (config.type?.value === Number && config.precision && typeof value === 'number') {
+      if (config.type === Number && config.precision && typeof value === 'number') {
         if (config.precision[1]) {
           // Supports decimal
           value = +value.toFixed(config.precision[1]);
@@ -242,8 +242,8 @@ export class BindUtil {
               }
             }
 
-            if (field.type?.kind === 'complex') {
-              const fieldType = field.type.value;
+            if (isComplexInput(field)) {
+              const fieldType = field.type;
               if (field.array && Array.isArray(value)) {
                 value = value.map(item => this.bindSchema(fieldType, item, config));
               } else {
@@ -280,17 +280,17 @@ export class BindUtil {
     }
     if (config.array) {
       const subValue = !Array.isArray(value) ? [value] : value;
-      if (config.type.kind === 'complex') {
-        const type = config.type.value;
+      if (isComplexInput(config)) {
+        const type = config.type;
         value = subValue.map(item => this.bindSchema(type, item));
       } else {
-        value = subValue.map(item => DataUtil.coerceType(item, config.type.value, false));
+        value = subValue.map(item => DataUtil.coerceType(item, config.type, false));
       }
     } else {
-      if (config.type.kind === 'complex') {
-        value = this.bindSchema(config.type.value, value);
+      if (isComplexInput(config)) {
+        value = this.bindSchema(config.type, value);
       } else {
-        value = DataUtil.coerceType(value, config.type.value, false);
+        value = DataUtil.coerceType(value, config.type, false);
       }
     }
     return value;

@@ -1,8 +1,6 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { BinaryUtil, type Class, castKey, castTo, describeFunction, isClass, RuntimeError, safeAssign } from '@travetto/runtime';
+import { type Class, castKey, castTo, describeFunction, RuntimeError, safeAssign } from '@travetto/runtime';
 
-import { SchemaTypeUtil } from '../type-config.ts';
-import { SchemaRegistryIndex } from './registry-index.ts';
 import {
   CONSTRUCTOR_PROPERTY,
   type SchemaBasicType,
@@ -12,8 +10,7 @@ import {
   type SchemaFieldMap,
   type SchemaInputConfig,
   type SchemaMethodConfig,
-  type SchemaParameterConfig,
-  type SchemaValueType
+  type SchemaParameterConfig
 } from './types.ts';
 
 export type SchemaDiscriminatedInfo = Required<Pick<SchemaClassConfig, 'discriminatedType' | 'discriminatedField' | 'discriminatedBase'>>;
@@ -97,21 +94,8 @@ function getConstructorConfig<T extends SchemaClassConfig>(base: Partial<T>, par
     validators: [],
     ...parentCons,
     ...baseCons,
-    returnType: { type: { kind: 'complex', value: base.class! } }
+    returnType: { isComplex: true, type: base.class! }
   };
-}
-
-function normalizeBasicType(basicType?: SchemaBasicType): void {
-  if (!basicType?.type) {
-    return;
-  }
-  const value = basicType.type.value;
-  if (BinaryUtil.isBinaryTypeReference(value) || SchemaTypeUtil.getSchemaTypeConfig(value)) {
-    basicType.type = { kind: 'primitive', value };
-  } else if (isClass(value) && SchemaRegistryIndex.has(value)) {
-    basicType.type = { kind: 'complex', value };
-  }
-  basicType.binary = basicType.type.kind === 'primitive' && BinaryUtil.isBinaryTypeReference(value);
 }
 
 function combineClassWithParent<T extends SchemaClassConfig>(base: T, parent: T): T {
@@ -290,16 +274,11 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
 
     for (const method of Object.values(config.methods)) {
       method.parameters = method.parameters.toSorted((a, b) => a.index! - b.index!);
-      normalizeBasicType(method.returnType);
-      for (const input of method.parameters) {
-        normalizeBasicType(input);
-      }
     }
 
     // Validate if aliases are duplicated
     const aliasMap: Record<string, SchemaFieldConfig> = {};
     for (const field of Object.values(config.fields)) {
-      normalizeBasicType(field);
       for (const alias of field.aliases ?? []) {
         if (alias in aliasMap && aliasMap[alias].name !== field.name) {
           throw new RuntimeError(
@@ -335,8 +314,8 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return methodConfig;
   }
 
-  getMethodReturnType(method: string): SchemaValueType {
-    return this.getMethod(method).returnType!.type;
+  getMethodReturnType(method: string): SchemaBasicType {
+    return this.getMethod(method).returnType!;
   }
 
   getFields(): SchemaFieldMap {

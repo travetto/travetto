@@ -5,7 +5,7 @@ import { ReadableStream } from 'node:stream/web';
 
 import { Registry } from '@travetto/registry';
 import { type BinaryArray, type BinaryStream, type BinaryType, castTo } from '@travetto/runtime';
-import { Schema, SchemaRegistryIndex, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
+import { Schema, SchemaValidator, type ValidationError, ValidationResultError } from '@travetto/schema';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 @Schema()
@@ -44,19 +44,6 @@ class BinaryTest {
   @BeforeAll()
   ready() {
     return Registry.init();
-  }
-
-  @Test()
-  async testRegister() {
-    const config = SchemaRegistryIndex.get(BinaryTestContainer);
-
-    for (const [key, field] of Object.entries(config.getFields())) {
-      if (field.name.startsWith('not')) {
-        assert(!field.binary, `Field ${key} is incorrectly marked as binary`);
-      } else {
-        assert(field.binary, `Field ${key} is not marked as binary`);
-      }
-    }
   }
 
   buildBinaryPayload() {

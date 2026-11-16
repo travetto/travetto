@@ -1,12 +1,4 @@
-import {
-  type Any,
-  castTo,
-  type Class,
-  type IntrinsicType,
-  type NumericLikeIntrinsic,
-  type Primitive,
-  RuntimeError
-} from '@travetto/runtime';
+import { type Any, type Class, type IntrinsicType, type NumericLikeIntrinsic, type Primitive } from '@travetto/runtime';
 
 import type { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
 
@@ -14,23 +6,6 @@ type TemplateLiteralPart = string | NumberConstructor | StringConstructor | Bool
 export type TemplateLiteral = { operation: 'and' | 'or'; values: (TemplateLiteralPart | TemplateLiteral)[] };
 
 export const CONSTRUCTOR_PROPERTY = 'CONSTRUCTOR';
-
-/**
- * Represents the value type of a schema field or parameter
- */
-export type SchemaValueType = { kind: 'primitive'; value: Function } | { kind: 'complex'; value: Class };
-
-/**
- * Input accepted for `type` in `@Field` and `@Input` decorators
- */
-export type SchemaValueTypeInput = SchemaValueType | Function | Class;
-
-/**
- * Decorator configuration shape accepting raw constructors/functions or `SchemaValueType`
- */
-export type SchemaDecoratorConfig<T extends SchemaInputConfig = SchemaInputConfig> = Omit<Partial<T>, 'type'> & {
-  type?: SchemaValueTypeInput;
-};
 
 /**
  * Represents a typed item in the schema
@@ -45,13 +20,13 @@ export type SchemaBasicType = {
    */
   array?: boolean;
   /**
-   * Is the type a binary type
-   */
-  binary?: boolean;
-  /**
    * The class or primitive tied to the type
    */
-  type: SchemaValueType;
+  type: Function;
+  /**
+   * Determines if the type is complex or not
+   */
+  isComplex?: boolean;
   /**
    * Is the field a foreign type
    */

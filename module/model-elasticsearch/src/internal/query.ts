@@ -11,7 +11,7 @@ import {
   type WhereClause
 } from '@travetto/model-query';
 import { type Any, type Class, type UnknownRecord, castTo, isPlainRecord, TypedObject } from '@travetto/runtime';
-import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
+import { DataUtil, isComplexInput, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { EsSchemaConfig } from './types.ts';
 
@@ -106,7 +106,7 @@ export class ElasticsearchQueryUtil {
         const textQuery = typeof clause === 'string' ? clause : clause.query;
         const textFields: string[] = [];
         for (const [fieldName, fieldConfig] of Object.entries(fields)) {
-          if (fieldConfig.type.value === String && fieldConfig.specifiers?.includes('text')) {
+          if (fieldConfig.type === String && fieldConfig.specifiers?.includes('text')) {
             textFields.push(`${path}${fieldName}.text`);
           }
         }
@@ -124,8 +124,8 @@ export class ElasticsearchQueryUtil {
 
       const top = item[property];
       const declaredSchema = fields[property];
-      const declaredType = declaredSchema.type;
-      const subPath = declaredType.value === String ? (property === idField && !path ? '_id' : `${path}${property}`) : `${path}${property}`;
+      const subPath =
+        declaredSchema.type === String ? (property === idField && !path ? '_id' : `${path}${property}`) : `${path}${property}`;
 
       const subPathQuery = (value: unknown): {} =>
         property === idField && !path
@@ -134,8 +134,8 @@ export class ElasticsearchQueryUtil {
 
       if (isPlainRecord(top)) {
         const subKey = Object.keys(top)[0];
-        if (!subKey.startsWith('$') && declaredType.kind === 'complex') {
-          const inner = this.extractWhereTermQuery(declaredType.value, top, config, `${subPath}.`);
+        if (!subKey.startsWith('$') && isComplexInput(declaredSchema)) {
+          const inner = this.extractWhereTermQuery(declaredSchema.type, top, config, `${subPath}.`);
           items.push(!declaredSchema.array || this.hasNestedClause(inner) ? inner : { nested: { path: subPath, query: inner } });
         } else {
           const value = top[subKey];

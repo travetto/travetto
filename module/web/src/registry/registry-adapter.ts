@@ -1,6 +1,6 @@
 import type { RegistryAdapter } from '@travetto/registry';
-import { asFull, type Class, castTo, RuntimeError, safeAssign } from '@travetto/runtime';
-import { type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { asFull, type Class, castTo, RuntimeError, safeAssign, BinaryUtil } from '@travetto/runtime';
+import { isComplexInput, type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 import { WebHeaders } from '@travetto/web';
 
 import type { WebInterceptor, WebInterceptorConfigInput } from '../types/interceptor.ts';
@@ -58,10 +58,10 @@ function combineEndpointConfigs(
  */
 function computeParameterLocation(endpoint: EndpointConfig, param: SchemaParameterConfig): EndpointParamLocation {
   const name = param?.name;
-  if (param.type.kind === 'primitive') {
-    if ((param.type.value === String || param.type.value === Number) && name && endpoint.fullPath.includes(`:${name}`)) {
+  if (!isComplexInput(param)) {
+    if ((param.type === String || param.type === Number) && name && endpoint.fullPath.includes(`:${name}`)) {
       return 'path';
-    } else if (param.binary) {
+    } else if (BinaryUtil.isBinaryTypeReference(param.type)) {
       return 'body';
     }
     return 'query';

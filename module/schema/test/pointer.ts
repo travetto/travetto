@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Registry } from '@travetto/registry';
-import { Schema, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { isComplexInput, Schema, SchemaRegistryIndex, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import type { ConcreteInterface, PlainInterface, SpecialType } from './models/pointer.ts';
@@ -23,9 +23,9 @@ class PointerSuite {
   @Test()
   testTypeKinds() {
     const fields = SchemaRegistryIndex.get(Custom).getFields();
-    assert(fields.pointer.type.kind === 'primitive');
-    assert(fields.plain.type.kind === 'complex');
-    assert(fields.concrete.type.kind === 'complex');
+    assert(!isComplexInput(fields.pointer));
+    assert(isComplexInput(fields.plain));
+    assert(isComplexInput(fields.concrete));
   }
 
   @Test()

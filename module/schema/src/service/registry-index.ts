@@ -2,7 +2,11 @@ import { type RegistrationMethods, Registry, type RegistryIndex, RegistryIndexSt
 import { type Class, castKey, castTo, classConstruct, getParentClass, RuntimeError } from '@travetto/runtime';
 
 import { type SchemaDiscriminatedInfo, SchemaRegistryAdapter } from './registry-adapter.ts';
-import type { SchemaClassConfig, SchemaFieldConfig, SchemaValueType } from './types.ts';
+import type { SchemaBasicType, SchemaClassConfig, SchemaFieldConfig } from './types.ts';
+
+export function isComplexInput<T extends SchemaBasicType>(input?: T): input is T & { isComplex: true; type: Class } {
+  return !!input?.isComplex;
+}
 
 /**
  * Schema registry index for managing schema configurations across classes
@@ -28,10 +32,6 @@ export class SchemaRegistryIndex implements RegistryIndex {
 
   static has(cls: Class): boolean {
     return this.#instance.store.has(cls);
-  }
-
-  static hasValueType(type?: SchemaValueType): type is SchemaValueType & { kind: 'complex' } {
-    return type?.kind === 'complex' && this.#instance.store.has(type.value);
   }
 
   static getDiscriminatedTypes(cls: Class): string[] | undefined {
@@ -117,7 +117,8 @@ export class SchemaRegistryIndex implements RegistryIndex {
           return undefined;
         }
         fieldConfiguration = this.getClassConfig(currentClass).fields[segment];
-        currentClass = SchemaRegistryIndex.hasValueType(fieldConfiguration?.type) ? fieldConfiguration.type.value : undefined;
+        currentClass =
+          isComplexInput(fieldConfiguration) && SchemaRegistryIndex.has(fieldConfiguration?.type) ? fieldConfiguration.type : undefined;
       }
 
       return fieldConfiguration;
@@ -188,8 +189,8 @@ export class SchemaRegistryIndex implements RegistryIndex {
   ): void {
     const fields = SchemaRegistryIndex.has(cls) ? Object.values(this.getClassConfig(cls).fields) : [];
     for (const field of fields) {
-      if (SchemaRegistryIndex.hasValueType(field.type)) {
-        this.visitFields(field.type.value, onField, [..._path, field], root);
+      if (isComplexInput(field) && SchemaRegistryIndex.has(field.type)) {
+        this.visitFields(field.type, onField, [..._path, field], root);
       } else {
         onField(field, _path);
       }

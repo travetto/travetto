@@ -20,11 +20,11 @@ export class MysqlDialect extends AbstractANSI99Dialect {
   }
 
   getColumnType(fieldConfiguration: SchemaFieldConfig): string {
-    if (fieldConfiguration.type.value === BigInt) {
+    if (fieldConfiguration.type === BigInt) {
       return 'BIGINT';
     }
 
-    if (fieldConfiguration.type.value === Number) {
+    if (fieldConfiguration.type === Number) {
       if (fieldConfiguration.precision) {
         const [digits, decimals] = fieldConfiguration.precision;
         if (decimals) {
@@ -41,15 +41,15 @@ export class MysqlDialect extends AbstractANSI99Dialect {
       return 'INT';
     }
 
-    if (fieldConfiguration.type.value === Date) {
+    if (fieldConfiguration.type === Date) {
       return 'DATETIME(6)';
     }
 
-    if (fieldConfiguration.type.value === Boolean) {
+    if (fieldConfiguration.type === Boolean) {
       return 'TINYINT(1)';
     }
 
-    if (fieldConfiguration.type.value === String) {
+    if (fieldConfiguration.type === String) {
       if (fieldConfiguration.specifiers?.includes('uuid')) {
         return 'CHAR(32) CHARACTER SET ascii COLLATE ascii_bin';
       }
@@ -70,7 +70,7 @@ export class MysqlDialect extends AbstractANSI99Dialect {
     if (!context.subPath || context.subPath.length === 0) {
       return '';
     }
-    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField ? context.arrayField.type : undefined, context.subPath);
+    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField, context.subPath);
     return subPathMetadata.map(({ segment, isArray }) => (isArray ? `${segment}[*]` : segment)).join('.');
   }
 

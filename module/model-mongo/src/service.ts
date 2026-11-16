@@ -795,7 +795,7 @@ export class MongoModelService
       })
     );
 
-    const isDate = SchemaRegistryIndex.getNestedFieldConfig(cls, field)?.type.value === Date;
+    const isDate = SchemaRegistryIndex.getNestedFieldConfig(cls, field)?.type === Date;
 
     const groupFields: UnknownRecord = {
       _id: null,

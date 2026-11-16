@@ -44,9 +44,9 @@ export class HelpUtil {
     // Ensure finalized
     for (const field of schema.methods.main?.parameters ?? []) {
       const type =
-        field.type.value === String && field.enum && field.enum?.values.length <= 7
+        field.type === String && field.enum && field.enum?.values.length <= 7
           ? field.enum?.values?.join('|')
-          : field.type.value.name.toLowerCase();
+          : field.type.name.toLowerCase();
       const arg = `${field.name}${field.array ? '...' : ''}:${type}`;
       usage.push(cliTpl`${{ input: field.required?.active !== false ? `<${arg}>` : `[${arg}]` }}`);
     }
@@ -75,12 +75,12 @@ export class HelpUtil {
       const defaultValue = ifDefined(command[castKey(field.name)]) ?? ifDefined(field.default);
       const aliases = (field.aliases ?? [])
         .filter(flag => flag.startsWith('-'))
-        .filter(flag => field.type.value !== Boolean || (defaultValue !== true ? !flag.startsWith('--no-') : flag.startsWith('--')));
+        .filter(flag => field.type !== Boolean || (defaultValue !== true ? !flag.startsWith('--no-') : flag.startsWith('--')));
       let type: string | undefined;
 
-      if (field.type.value === String && field.enum && field.enum.values.length <= 3) {
+      if (field.type === String && field.enum && field.enum.values.length <= 3) {
         type = field.enum.values?.join('|');
-      } else if (field.type.value !== Boolean) {
+      } else if (field.type !== Boolean) {
         ({ type } = CliSchemaExportUtil.baseInputType(field));
       }
 

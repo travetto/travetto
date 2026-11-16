@@ -10,7 +10,7 @@ export class PostgresDialect extends AbstractANSI99Dialect {
   returningSupport = true;
 
   getComplexColumnType(field: SchemaFieldConfig): string {
-    if (field.array && field.type.kind === 'primitive') {
+    if (field.array && field.isComplex === false) {
       const scalarType = this.getColumnType(field);
       return `${scalarType}[]`;
     }
@@ -18,18 +18,18 @@ export class PostgresDialect extends AbstractANSI99Dialect {
   }
 
   getComplexColumnValue(field: SchemaFieldConfig, value: unknown): unknown {
-    if (field.array && field.type.kind === 'primitive') {
+    if (field.array && field.isComplex === false) {
       return value ?? null;
     }
     return super.getComplexColumnValue(field, value);
   }
 
   getColumnType(fieldConfiguration: SchemaFieldConfig): string {
-    if (fieldConfiguration.type.value === BigInt) {
+    if (fieldConfiguration.type === BigInt) {
       return 'BIGINT';
     }
 
-    if (fieldConfiguration.type.value === Number) {
+    if (fieldConfiguration.type === Number) {
       if (fieldConfiguration.precision) {
         const [digits, decimals] = fieldConfiguration.precision;
         if (decimals) {
@@ -46,15 +46,15 @@ export class PostgresDialect extends AbstractANSI99Dialect {
       return 'INTEGER';
     }
 
-    if (fieldConfiguration.type.value === Date) {
+    if (fieldConfiguration.type === Date) {
       return 'TIMESTAMP(6) WITH TIME ZONE';
     }
 
-    if (fieldConfiguration.type.value === Boolean) {
+    if (fieldConfiguration.type === Boolean) {
       return 'BOOLEAN';
     }
 
-    if (fieldConfiguration.type.value === String) {
+    if (fieldConfiguration.type === String) {
       if (fieldConfiguration.specifiers?.includes('uuid')) {
         return 'UUID';
       }
@@ -95,7 +95,7 @@ export class PostgresDialect extends AbstractANSI99Dialect {
       return Array.isArray(value) ? value : [value];
     }
 
-    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField ? context.arrayField.type : undefined, context.subPath);
+    const subPathMetadata = this.getSchemaSubPathMetadata(context.arrayField, context.subPath);
     const isArraySegment = subPathMetadata.map(item => item.isArray);
 
     const buildPayloadForValue = (item: unknown): unknown => {
@@ -137,7 +137,7 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     const arrayField = context.arrayField ?? context.leafField;
     const isTopLevel = (context.arrayPath?.length ?? 1) === 1;
     const hasSubPath = (context.subPath?.length ?? 0) > 0;
-    const isPrimitiveArray = arrayField ? arrayField.type.kind === 'primitive' : true;
+    const isPrimitiveArray = arrayField?.isComplex === false;
     const isNative = isTopLevel && !hasSubPath && isPrimitiveArray;
 
     const targetPath =

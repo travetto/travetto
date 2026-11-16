@@ -13,7 +13,7 @@ import { type IndexConfig, IndexNotSupported, ModelRegistryIndex, type ModelType
 import { isModelIndexedIndex } from '@travetto/model-indexed';
 import { type DistanceUnit, isModelQueryIndex, ModelQueryUtil, type PageableModelQuery, type WhereClause } from '@travetto/model-query';
 import { BinaryUtil, type Class, CodecUtil, castTo, RuntimeError, toConcrete, type UnknownRecord, isPlainRecord } from '@travetto/runtime';
-import { DataUtil, type Point, SchemaRegistryIndex } from '@travetto/schema';
+import { DataUtil, isComplexInput, type Point, SchemaRegistryIndex } from '@travetto/schema';
 
 const PointConcrete = toConcrete<Point>();
 
@@ -120,7 +120,7 @@ export class MongoUtil {
         }
       } else if ((isPlain && !firstKey.startsWith('$')) || value?.constructor?.Ⲑid) {
         if (recursive) {
-          const nextBase = subField?.type.kind === 'complex' ? subField.type.value : undefined;
+          const nextBase = isComplexInput(subField) ? subField.type : undefined;
           Object.assign(out, this.extractSimple(nextBase, value, `${subpath}.`, recursive));
         } else {
           out[subpath] = value;
@@ -171,7 +171,7 @@ export class MongoUtil {
     const out: [BasicIdx, CreateIndexesOptions][] = [];
     const textFields: string[] = [];
     SchemaRegistryIndex.visitFields(cls, (field, path) => {
-      if (field.type.value === PointConcrete) {
+      if (field.type === PointConcrete) {
         const name = [...path, field].map(schema => schema.name).join('.');
         out.push([{ [name]: '2d' }, { name: this.namespaceIndex(cls, name) }]);
       } else if (field.specifiers?.includes('text') && (field.specifiers?.includes('long') || field.specifiers.includes('search'))) {
