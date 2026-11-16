@@ -7,7 +7,7 @@ import {
   type TableContext,
   type TextSearchState
 } from '@travetto/model-sql';
-import { isRecord, JSONUtil, type UnknownRecord } from '@travetto/runtime';
+import { isRecordWithNumberKey, isRecordWithStringKey, JSONUtil, type UnknownRecord } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
 export class MysqlDialect extends AbstractANSI99Dialect {
@@ -273,9 +273,8 @@ GROUP BY INDEX_NAME, TABLE_NAME, NON_UNIQUE;
   isTableNotFoundError(error: unknown): boolean {
     return (
       (error instanceof Error && (/unknown table/i.test(error.message) || /doesn't exist/i.test(error.message))) ||
-      (isRecord(error) &&
-        (('errno' in error && (error.errno === 1051 || error.errno === 1146)) ||
-          ('code' in error && (error.code === 'ER_BAD_TABLE_ERROR' || error.code === 'ER_NO_SUCH_TABLE'))))
+      (isRecordWithNumberKey(error, 'errno') && (error.errno === 1051 || error.errno === 1146)) ||
+      (isRecordWithStringKey(error, 'code') && (error.code === 'ER_BAD_TABLE_ERROR' || error.code === 'ER_NO_SUCH_TABLE'))
     );
   }
 

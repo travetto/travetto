@@ -14,7 +14,7 @@ import {
   ManifestUtil,
   PackageUtil
 } from '@travetto/manifest';
-import { isRecord } from '@travetto/runtime';
+import { isRecordWithKey } from '@travetto/runtime';
 
 import type { CompilerStateType } from '@travetto/compiler/src/types.ts';
 
@@ -108,7 +108,7 @@ export class Workspace {
 
   /** See if an entity is an editor */
   static isEditor(value: unknown): value is vscode.TextEditor {
-    return isRecord(value) && 'document' in value;
+    return isRecordWithKey(value, 'document');
   }
 
   /** Get the editor for a doc */

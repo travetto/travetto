@@ -1,6 +1,6 @@
 import { type BinaryArray, type BinaryType, BinaryUtil } from './binary.ts';
 import { RuntimeError } from './error.ts';
-import { castTo, isRecord } from './types.ts';
+import { castTo, isRecordWithStringKey } from './types.ts';
 
 type TextInput = string | BinaryArray;
 
@@ -77,7 +77,7 @@ export class CodecUtil {
 
   /** Detect encoding of a binary type, if possible  */
   static detectEncoding(input: BinaryType): string | undefined {
-    if (isRecord(input) && 'readableEncoding' in input && typeof input.readableEncoding === 'string') {
+    if (isRecordWithStringKey(input, 'readableEncoding')) {
       return input.readableEncoding;
     }
   }

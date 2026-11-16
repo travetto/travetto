@@ -1,5 +1,5 @@
 import type { WhereClauseRaw } from '@travetto/model-query';
-import { castTo, isRecord, type UnknownRecord } from '@travetto/runtime';
+import { castTo, isRecordWithBooleanKey, type UnknownRecord } from '@travetto/runtime';
 
 import { QueryLanguageTokenizer } from './tokenizer.ts';
 import { type AllNode, type ArrayNode, type GroupNode, type Literal, OPERATOR_TRANSLATION, type Token } from './types.ts';
@@ -7,9 +7,7 @@ import { type AllNode, type ArrayNode, type GroupNode, type Literal, OPERATOR_TR
 /**
  * Determine if a token is boolean
  */
-function isBoolean(value: unknown): value is Token & { type: 'boolean' } {
-  return isRecord(value) && 'type' in value && value.type === 'boolean';
-}
+const isBoolean = (value: unknown): value is Token & { type: 'boolean' } => isRecordWithBooleanKey(value, 'type');
 
 /**
  * Language parser

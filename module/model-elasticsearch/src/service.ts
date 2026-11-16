@@ -67,7 +67,18 @@ import {
   type ValidStringFields,
   type WhereClause
 } from '@travetto/model-query';
-import { asConstructable, asFull, type Class, castKey, castTo, JSONUtil, ShutdownManager, TypedObject, isRecord } from '@travetto/runtime';
+import {
+  asConstructable,
+  asFull,
+  type Class,
+  castKey,
+  castTo,
+  JSONUtil,
+  ShutdownManager,
+  TypedObject,
+  isRecord,
+  isRecordWithKey
+} from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
 import type { ElasticsearchModelConfig } from './config.ts';
@@ -255,7 +266,7 @@ export class ElasticsearchModelService
       });
       return result;
     } catch (error) {
-      if (error instanceof errors.ResponseError && isRecord(error.meta.body) && 'error' in error.meta.body) {
+      if (error instanceof errors.ResponseError && isRecordWithKey(error.meta.body, 'error')) {
         console.error(error.meta.body.error);
       }
       throw error;

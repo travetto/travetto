@@ -1,4 +1,4 @@
-import { isRecord } from '@travetto/transformer';
+import { isRecordWithStringKey } from '@travetto/transformer';
 
 import type { CompilerEvent, CompilerEventType, CompilerStateEvent } from './types.ts';
 
@@ -8,7 +8,7 @@ export class EventUtil {
   static isCompilerEventType = (value: string): value is CompilerEventType => VALID_EVENT_TYPES.has(value as CompilerEventType);
 
   static isCompilerEvent = (value: unknown): value is CompilerEvent =>
-    isRecord(value) && 'type' in value && typeof value.type === 'string' && EventUtil.isCompilerEventType(value.type);
+    isRecordWithStringKey(value, 'type') && EventUtil.isCompilerEventType(value.type);
 
   static hasProcessId(payload: CompilerStateEvent): payload is CompilerStateEvent & { extra: { processId: number } } {
     return typeof payload.extra?.processId === 'number';

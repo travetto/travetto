@@ -1,4 +1,14 @@
-import { type Class, type ClassInstance, castKey, castTo, isClass, isPlainRecord, isRecord, TypedObject } from '@travetto/runtime';
+import {
+  type Class,
+  type ClassInstance,
+  castKey,
+  castTo,
+  isClass,
+  isPlainRecord,
+  isRecord,
+  isRecordWithNumberKey,
+  TypedObject
+} from '@travetto/runtime';
 
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 import type { SchemaFieldMap, SchemaInputConfig } from '../service/types.ts';
@@ -31,7 +41,7 @@ function isRangeValue(value: unknown): value is NumericComparable {
 }
 
 function isLengthValue(value: unknown): value is { length: number } {
-  return typeof value === 'string' || (isRecord(value) && 'length' in value && typeof value.length === 'number');
+  return typeof value === 'string' || isRecordWithNumberKey(value, 'length');
 }
 
 /**

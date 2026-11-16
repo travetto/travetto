@@ -40,6 +40,12 @@ export type UnknownRecord = Record<string, unknown>;
 export const isRecord = (value: unknown): value is UnknownRecord =>
   typeof value === 'object' && value !== undefined && value !== null && !Array.isArray(value);
 
+export const isRecordWithKey = <K extends string | symbol>(value: unknown, key: K): value is UnknownRecord & Record<K, unknown> =>
+  isRecord(value) && key in value;
+
+export const isRecordWithStringKey = <T, K extends string | symbol>(value: unknown, key: K): value is UnknownRecord & Record<K, string> =>
+  isRecord(value) && key in value && typeof value[key as keyof typeof value] === 'string';
+
 export const isPlainRecord = (value: unknown): value is UnknownRecord =>
   isRecord(value) && // is obvious
   value.constructor === Object && // separate instances (Array, DOM, ...)

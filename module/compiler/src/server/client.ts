@@ -3,6 +3,7 @@ import rl from 'node:readline/promises';
 import timers from 'node:timers/promises';
 
 import type { ManifestContext } from '@travetto/manifest';
+import { isRecordWithStringKey } from '@travetto/runtime';
 import { isRecord } from '@travetto/transformer';
 
 import { CommonUtil } from '../common.ts';
@@ -138,7 +139,7 @@ export class CompilerClient {
           }
         }
       } catch (error) {
-        const aborted = controller.signal.aborted || (isRecord(error) && 'code' in error && error.code === 'ECONNRESET');
+        const aborted = controller.signal.aborted || (isRecordWithStringKey(error, 'code') && error.code === 'ECONNRESET');
         if (!aborted) {
           throw error;
         }

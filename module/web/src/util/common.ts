@@ -1,5 +1,4 @@
-import { type ErrorCategory, RuntimeError, Util } from '@travetto/runtime';
-import { isRecord } from '@travetto/runtime';
+import { type ErrorCategory, isRecordWithStringKey, RuntimeError, Util } from '@travetto/runtime';
 
 import type { WebError } from '../types/error.ts';
 import type { WebRequest } from '../types/request.ts';
@@ -116,7 +115,7 @@ export class WebCommonUtil {
     const body =
       error instanceof Error
         ? error
-        : isRecord(error) && 'message' in error && typeof error.message === 'string'
+        : isRecordWithStringKey(error, 'message')
           ? new RuntimeError(error.message, { details: error })
           : new RuntimeError(`${error}`);
 

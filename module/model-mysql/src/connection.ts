@@ -5,7 +5,7 @@ import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { ExistsError, type ModelType } from '@travetto/model';
 import { SQLConnection, type TableContext } from '@travetto/model-sql';
-import { type Class, type UnknownRecord, castTo, isRecord, JSONUtil, ShutdownManager } from '@travetto/runtime';
+import { type Class, type UnknownRecord, castTo, isRecord, isRecordWithKey, JSONUtil, ShutdownManager } from '@travetto/runtime';
 
 import type { MysqlModelConfig } from './config.ts';
 import { MysqlDialect } from './dialect.ts';
@@ -105,7 +105,7 @@ export class MysqlConnection extends SQLConnection<PoolConnection> {
         return { records, count: records.length };
       }
     } catch (error) {
-      const code = isRecord(error) && 'code' in error ? error.code : undefined;
+      const code = isRecordWithKey(error, 'code') ? error.code : undefined;
       switch (code) {
         case 'ER_DUP_ENTRY': {
           const message = error instanceof Error ? error.message : '';

@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { isRecord, JSONUtil, RuntimeIndex } from '@travetto/runtime';
+import { isRecordWithKey, JSONUtil, RuntimeIndex } from '@travetto/runtime';
 import { SchemaValidator } from '@travetto/schema';
 
 import { type RecommendationQuery, type SnippetSource, SnippetSourceSchema } from './types.ts';
@@ -11,7 +11,7 @@ function snippetDirectory(): string {
   return path.resolve(mod.sourcePath, 'resources', 'snippets');
 }
 
-const isErrnoException = (err: unknown): err is NodeJS.ErrnoException => isRecord(err) && 'code' in err;
+const isErrnoException = (err: unknown): err is NodeJS.ErrnoException => isRecordWithKey(err, 'code');
 
 async function loadSnippet(fullPath: string): Promise<SnippetSource> {
   const content = await fs.readFile(fullPath, 'utf8');
