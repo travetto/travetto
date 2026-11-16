@@ -71,7 +71,7 @@ export function classConstruct<T>(cls: Class<T>, args: unknown[] = []): ClassIns
 export const hasFunction =
   <T>(key: keyof T) =>
   (value: unknown): value is T =>
-    typeof value === 'object' && value !== null && typeof value[castKey(key)] === 'function';
+    isRecord(value) && typeof value[castKey(key)] === 'function';
 
 export const hasToJSON = hasFunction<{ toJSON(): object }>('toJSON');
 

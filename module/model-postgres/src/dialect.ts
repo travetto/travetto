@@ -1,7 +1,7 @@
 import type { ModelType } from '@travetto/model';
 import type { TextSearchClause } from '@travetto/model-query';
 import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext, type TextSearchState } from '@travetto/model-sql';
-import { JSONUtil, type UnknownRecord } from '@travetto/runtime';
+import { isRecord, JSONUtil, type UnknownRecord } from '@travetto/runtime';
 import { SchemaRegistryIndex, type SchemaFieldConfig } from '@travetto/schema';
 
 /* cspell:words ILIKE regclass indexdef tablename pkey tsvector tsquery */
@@ -359,8 +359,7 @@ ${offset !== undefined ? `OFFSET ${offset}` : ''};`;
 
   isTableNotFoundError(error: unknown): boolean {
     return (
-      (typeof error === 'object' && error !== null && 'code' in error && error.code === '42P01') ||
-      (error instanceof Error && /does not exist/i.test(error.message))
+      (isRecord(error) && 'code' in error && error.code === '42P01') || (error instanceof Error && /does not exist/i.test(error.message))
     );
   }
 

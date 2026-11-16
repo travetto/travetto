@@ -3,7 +3,7 @@ import { AssertionError } from 'node:assert';
 import type { BinaryArray } from './binary.ts';
 import { CodecUtil } from './codec.ts';
 import { RuntimeError, type RuntimeErrorOptions } from './error.ts';
-import { type Any, castTo, type UnknownRecord } from './types.ts';
+import { type Any, castTo, isRecord, type UnknownRecord } from './types.ts';
 
 const VALID_JSON_ERROR_TYPES = ['runtime', 'plain', 'assert'] as const;
 const VALID_JSON_ERROR_TYPE_SET = new Set<unknown>(VALID_JSON_ERROR_TYPES);
@@ -53,7 +53,7 @@ export class JSONUtil {
   };
 
   static isJSONError(value: unknown): value is JSONError {
-    return typeof value === 'object' && value !== null && '$trv' in value && VALID_JSON_ERROR_TYPE_SET.has(value.$trv);
+    return isRecord(value) && '$trv' in value && VALID_JSON_ERROR_TYPE_SET.has(value.$trv);
   }
 
   /** Convert from JSON object */

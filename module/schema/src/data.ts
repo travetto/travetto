@@ -28,7 +28,7 @@ export class DataUtil {
   static getPath<T = unknown>(root: unknown, path: string[]): { found: boolean; value: T } {
     let current: unknown = root;
     for (const segment of path) {
-      if (typeof current === 'object' && current !== null && segment in current) {
+      if (isRecord(current) && segment in current) {
         current = castTo<UnknownRecord>(current)[segment];
       } else {
         return { found: false, value: current as T };
@@ -312,9 +312,9 @@ export class DataUtil {
   static filterByKeys<T>(input: T, exclude: (string | RegExp)[]): T {
     if (Array.isArray(input)) {
       return castTo(input.map(value => this.filterByKeys(value, exclude)));
-    } else if (input !== null && input !== undefined && typeof input === 'object') {
+    } else if (isRecord(input)) {
       const out: Partial<T> = {};
-      for (const key of TypedObject.keys(input)) {
+      for (const key of TypedObject.keys<T>(input)) {
         if (!exclude.some(toMatch => typeof key === 'string' && (typeof toMatch === 'string' ? toMatch === key : toMatch.test(key)))) {
           const value = input[key];
           if (typeof value === 'object') {

@@ -38,10 +38,7 @@ export function transformCast<T>(input: unknown): T {
 export type UnknownRecord = Record<string, unknown>;
 
 export const isRecord = (value: unknown): value is UnknownRecord =>
-  typeof value === 'object' && // separate from primitives
-  value !== undefined &&
-  value !== null && // is obvious
-  !Array.isArray(value);
+  typeof value === 'object' && value !== undefined && value !== null && !Array.isArray(value);
 
 export const isPlainRecord = (value: unknown): value is UnknownRecord =>
   isRecord(value) && // is obvious

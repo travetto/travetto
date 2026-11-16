@@ -45,7 +45,7 @@ import {
   type SortedIndex,
   type SortedIndexSelection
 } from '@travetto/model-indexed';
-import { type Class, type UnknownRecord, castTo, JSONUtil, ShutdownManager, TimeUtil } from '@travetto/runtime';
+import { type Class, type UnknownRecord, castTo, isRecord, JSONUtil, ShutdownManager, TimeUtil } from '@travetto/runtime';
 
 import type { DynamoDBModelConfig } from './config.ts';
 import { DynamoDBUtil } from './util.ts';
@@ -533,7 +533,7 @@ export class DynamoDBModelService
           }
         } catch (error) {
           counts.error += 1;
-          errors.push(typeof error === 'object' && error !== null ? Object.assign(error, { index }) : { index, error });
+          errors.push(isRecord(error) ? Object.assign(error, { index }) : { index, error });
         }
       }
 

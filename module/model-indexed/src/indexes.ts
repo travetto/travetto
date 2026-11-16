@@ -1,5 +1,5 @@
 import { type IndexConfig, ModelRegistryIndex, type ModelType } from '@travetto/model';
-import { type Any, type Class, type ClassInstance, type UnknownRecord, castTo } from '@travetto/runtime';
+import { type Any, type Class, type ClassInstance, type UnknownRecord, castTo, isRecord } from '@travetto/runtime';
 
 import type {
   AllIndexes,
@@ -19,7 +19,7 @@ function buildTemplateParts<T extends TemplateValue = TemplateValue>(
   const out: TemplatePart<T>[] = [];
   for (const [key, value] of Object.entries(template)) {
     const path = prefix.length ? [...prefix, key] : [key];
-    if (typeof value === 'object' && value !== null) {
+    if (isRecord(value)) {
       out.push(...buildTemplateParts<T>(part, castTo(value), path));
     } else {
       out.push({ path, value: castTo<T>(value), part });
@@ -98,7 +98,7 @@ export function sortedIndex<T extends ModelType, K extends KeyedIndexSelection<T
 }
 
 export const isModelIndexedIndex = <T extends ModelType>(idx: Any): idx is AllIndexes<T> =>
-  typeof idx === 'object' && idx !== null && 'type' in idx && typeof idx.type === 'string' && idx.type.startsWith('indexed:');
+  isRecord(idx) && 'type' in idx && typeof idx.type === 'string' && idx.type.startsWith('indexed:');
 
 export const warnIfIndexedUniqueIndex = (service: ClassInstance, cls: Class<ModelType>, indexes: IndexConfig[]): boolean => {
   let warned = false;

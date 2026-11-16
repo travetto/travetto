@@ -105,7 +105,7 @@ export class MysqlConnection extends SQLConnection<PoolConnection> {
         return { records, count: records.length };
       }
     } catch (error) {
-      const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
+      const code = isRecord(error) && 'code' in error ? error.code : undefined;
       switch (code) {
         case 'ER_DUP_ENTRY': {
           const message = error instanceof Error ? error.message : '';

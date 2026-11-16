@@ -31,7 +31,7 @@ function isRangeValue(value: unknown): value is NumericComparable {
 }
 
 function isLengthValue(value: unknown): value is { length: number } {
-  return typeof value === 'string' || (typeof value === 'object' && !!value && 'length' in value && typeof value.length === 'number');
+  return typeof value === 'string' || (isRecord(value) && 'length' in value && typeof value.length === 'number');
 }
 
 /**

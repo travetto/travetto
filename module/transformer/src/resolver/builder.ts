@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { ManifestModuleUtil, path } from '@travetto/manifest';
 
-import { type TemplateLiteralPart, transformCast } from '../types/shared.ts';
+import { isRecord, type TemplateLiteralPart, transformCast } from '../types/shared.ts';
 import { CoreUtil } from '../util/core.ts';
 import { DeclarationUtil } from '../util/declaration.ts';
 import { DocUtil } from '../util/doc.ts';
@@ -221,8 +221,8 @@ export const TypeBuilder: {
       // If we are have a template literal type, we need to make our own type node
       if (type.flags & ts.TypeFlags.TemplateLiteral) {
         const values: TemplateLiteralPart[] = [];
-        const texts = 'texts' in type && typeof type.texts === 'object' && Array.isArray(type.texts) ? type.texts : undefined;
-        const types = 'types' in type && typeof type.types === 'object' && Array.isArray(type.types) ? type.types : undefined;
+        const texts = 'texts' in type && Array.isArray(type.texts) ? type.texts : undefined;
+        const types = 'types' in type && Array.isArray(type.types) ? type.types : undefined;
         if (texts?.length && types?.length) {
           for (let i = 0; i < texts?.length; i += 1) {
             if (texts[i] && texts[i] !== 'undefined') {

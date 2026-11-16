@@ -1,4 +1,4 @@
-import type { UnknownRecord } from '../types/shared.ts';
+import { isRecord, type UnknownRecord } from '../types/shared.ts';
 
 const exclude = new Set([
   'parent',
@@ -42,7 +42,7 @@ export class LogUtil {
    * Clean up `ts.Node` contents for logging
    */
   static collapseNode(value: unknown, cache: Set<unknown> = new Set()): unknown {
-    if (!value || !(typeof value === 'object' || typeof value === 'function')) {
+    if (!isRecord(value) || typeof value === 'function') {
       return value;
     }
 

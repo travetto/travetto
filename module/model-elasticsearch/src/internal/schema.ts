@@ -1,6 +1,6 @@
 import type { MappingProperty, Script, MappingTypeMapping } from '@elastic/elasticsearch/api/types';
 
-import { type Class, toConcrete, type UnknownRecord } from '@travetto/runtime';
+import { type Class, isRecord, toConcrete, type UnknownRecord } from '@travetto/runtime';
 import { DataUtil, type Point, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { EsSchemaConfig } from './types.ts';
@@ -8,10 +8,7 @@ import type { EsSchemaConfig } from './types.ts';
 const PointConcrete = toConcrete<Point>();
 
 const isMappingType = (input: MappingProperty): input is MappingTypeMapping & MappingProperty =>
-  !!input &&
-  (('properties' in input && typeof input.properties === 'object' && !!input.properties) ||
-    input.type === 'object' ||
-    input.type === 'nested');
+  !!input && (('properties' in input && isRecord(input.properties)) || input.type === 'object' || input.type === 'nested');
 
 /**
  * Utils for ES Schema management
@@ -167,7 +164,7 @@ export class ElasticsearchSchemaUtil {
       const path = prefix ? `${prefix}.${key}` : key;
       const currentProperty = currentProperties[key];
       const neededProperty = neededProperties[key];
-      if (typeof currentProperty === 'object' && !!currentProperty && 'properties' in currentProperty && !currentProperty.type) {
+      if (isRecord(currentProperty) && 'properties' in currentProperty && !currentProperty.type) {
         currentProperty.type = 'object';
       }
 

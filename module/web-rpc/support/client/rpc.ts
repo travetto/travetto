@@ -100,7 +100,7 @@ function registerTimeout<T>(
   stop: (value: T) => void
 ): void {
   const timer = start(() => controller.abort(), timeout);
-  if (timer && typeof timer === 'object' && 'unref' in timer && typeof timer.unref === 'function') {
+  if (isRecord(timer) && 'unref' in timer && typeof timer.unref === 'function') {
     timer.unref();
   }
   controller.signal.onabort = (): void => {

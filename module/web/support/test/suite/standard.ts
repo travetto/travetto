@@ -1,9 +1,10 @@
 import assert from 'node:assert';
 
+import { isRecord } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
-import { BaseWebSuite } from './base.ts';
 import './controller.ts'; // Ensure imported
+import { BaseWebSuite } from './base.ts';
 
 @Suite()
 export abstract class StandardWebServerSuite extends BaseWebSuite {
@@ -171,7 +172,7 @@ export abstract class StandardWebServerSuite extends BaseWebSuite {
       assert(value === encoding);
 
       assert(response.body);
-      assert(typeof response.body === 'object');
+      assert(isRecord(response.body));
       assert('json' in response.body);
       assert(typeof response.body.json === 'string');
       assert(response.body.json.startsWith('0123456789'));

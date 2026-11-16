@@ -35,7 +35,7 @@ import {
   warnIfIndexedUniqueIndex,
   warnIfNonIndexedIndex
 } from '@travetto/model-indexed';
-import { type Class, JSONUtil, RuntimeError, ShutdownManager } from '@travetto/runtime';
+import { type Class, isRecord, JSONUtil, RuntimeError, ShutdownManager } from '@travetto/runtime';
 
 import type { FirestoreModelConfig } from './config.ts';
 
@@ -305,7 +305,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelBulkSupport
           }
         } catch (error) {
           counts.error += 1;
-          errors.push(typeof error === 'object' && error !== null ? Object.assign(error, { index }) : { index, error });
+          errors.push(isRecord(error) ? Object.assign(error, { index }) : { index, error });
         }
       }
 

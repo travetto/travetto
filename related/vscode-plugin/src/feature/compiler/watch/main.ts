@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import * as vscode from 'vscode';
 
-import { AsyncIterableHelper, CodecUtil, Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
+import { AsyncIterableHelper, CodecUtil, Env, ExecUtil, isRecord, JSONUtil, Util } from '@travetto/runtime';
 
 import type {
   CompilerEvent,
@@ -125,9 +125,7 @@ export class CompilerWatchFeature extends BaseFeature {
           await AsyncIterableHelper.from(subProcess.stdout!)
             .flatMap(CodecUtil.toLines())
             .flatMap(JSONUtil.fromLines<CompilerEvent>({ ignoreErrors: true }))
-            .filter(
-              ({ payload }) => !(typeof payload === 'object' && payload && 'workspace' in payload && payload.workspace !== Workspace.path)
-            )
+            .filter(({ payload }) => !(isRecord(payload) && 'workspace' in payload && payload.workspace !== Workspace.path))
             .forEach(({ type, payload }) => {
               switch (type) {
                 case 'log':

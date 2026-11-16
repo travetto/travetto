@@ -8,7 +8,7 @@ import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { ExistsError } from '@travetto/model';
 import { SQLConnection } from '@travetto/model-sql';
-import { castTo, JSONUtil, Runtime, RuntimeError, ShutdownManager, Util, type UnknownRecord } from '@travetto/runtime';
+import { castTo, isRecord, JSONUtil, Runtime, RuntimeError, ShutdownManager, Util, type UnknownRecord } from '@travetto/runtime';
 
 import type { SqliteModelConfig } from './config.ts';
 import { SqliteDialect } from './dialect.ts';
@@ -196,7 +196,7 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
           return { count: typeof out.changes === 'number' ? out.changes : +out.changes.toString(), records: [] };
         }
       } catch (error) {
-        const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
+        const code = isRecord(error) && 'code' in error ? error.code : undefined;
         const message = error instanceof Error ? error.message : undefined;
         switch (code) {
           case 'ERR_SQLITE_ERROR': {

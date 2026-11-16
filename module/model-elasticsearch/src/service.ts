@@ -255,7 +255,7 @@ export class ElasticsearchModelService
       });
       return result;
     } catch (error) {
-      if (error instanceof errors.ResponseError && error.meta.body && typeof error.meta.body === 'object' && 'error' in error.meta.body) {
+      if (error instanceof errors.ResponseError && isRecord(error.meta.body) && 'error' in error.meta.body) {
         console.error(error.meta.body.error);
       }
       throw error;

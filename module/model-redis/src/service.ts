@@ -38,7 +38,7 @@ import {
   warnIfIndexedUniqueIndex,
   warnIfNonIndexedIndex
 } from '@travetto/model-indexed';
-import { type Class, castTo, JSONUtil, ShutdownManager } from '@travetto/runtime';
+import { type Class, castTo, isRecord, JSONUtil, ShutdownManager } from '@travetto/runtime';
 
 import type { RedisModelConfig } from './config.ts';
 
@@ -481,7 +481,7 @@ export class RedisModelService implements ModelCrudSupport, ModelBulkSupport, Mo
           }
         } catch (error) {
           counts.error += 1;
-          errors.push(typeof error === 'object' && error !== null ? Object.assign(error, { index }) : { index, error });
+          errors.push(isRecord(error) ? Object.assign(error, { index }) : { index, error });
         }
       }
 
