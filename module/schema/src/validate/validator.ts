@@ -1,6 +1,6 @@
-import { type Class, type ClassInstance, castKey, castTo, isPlainRecord, isRecord, TypedObject } from '@travetto/runtime';
+import { type Class, type ClassInstance, castKey, castTo, isClass, isPlainRecord, isRecord, TypedObject } from '@travetto/runtime';
 
-import { isComplexInput, SchemaRegistryIndex } from '../service/registry-index.ts';
+import { SchemaRegistryIndex } from '../service/registry-index.ts';
 import type { SchemaFieldMap, SchemaInputConfig } from '../service/types.ts';
 import { SchemaTypeUtil } from '../type-config.ts';
 import { UnknownType } from '../types.ts';
@@ -91,7 +91,7 @@ export class SchemaValidator {
         return this.#prepareErrors(path, [{ kind: 'type', type: Array, value }]);
       }
       let errors: ValidationError[] = [];
-      if (isComplexInput(input) && SchemaRegistryIndex.has(input.type)) {
+      if (SchemaRegistryIndex.has(input.type)) {
         for (let i = 0; i < value.length; i += 1) {
           const subErrors = this.#validateFields(resolveFieldMap(input.type, value[i]), value[i], `${path}[${i}]`);
           errors = errors.concat(subErrors);
@@ -103,7 +103,7 @@ export class SchemaValidator {
         }
       }
       return errors;
-    } else if (isComplexInput(input) && SchemaRegistryIndex.has(input.type)) {
+    } else if (SchemaRegistryIndex.has(input.type)) {
       return this.#validateFields(resolveFieldMap(input.type, value), value, path);
     } else {
       const fieldErrors = this.#validateInput(input, value);
@@ -150,7 +150,7 @@ export class SchemaValidator {
       } else if (Number.isNaN(value)) {
         return [{ kind: 'type', type: 'number' }];
       }
-    } else if (isComplexInput(input)) {
+    } else if (isClass(input.type)) {
       if (!(value instanceof input.type)) {
         // If not an instance of the type
         return [{ kind: 'type', type: input.type.name }];
@@ -317,7 +317,7 @@ export class SchemaValidator {
       errors.push(
         ...[
           ...this.#validateInputSchema(param, params[i]),
-          ...(isComplexInput(param) ? await this.#validateClassLevel(param.type, params[i]) : [])
+          ...(isClass(param.type) ? await this.#validateClassLevel(param.type, params[i]) : [])
         ].map(error => {
           if (param.name && typeof param.name === 'string') {
             error.path = !prefixes[i] ? error.path.replace(`${param.name}.`, '') : error.path.replace(param.name, prefixes[i]!);

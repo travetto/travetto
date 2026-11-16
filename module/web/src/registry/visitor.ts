@@ -1,5 +1,5 @@
-import type { Class } from '@travetto/runtime';
-import { isComplexInput, SchemaRegistryIndex } from '@travetto/schema';
+import { isClass, type Class } from '@travetto/runtime';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import { ControllerRegistryIndex } from './registry-index.ts';
 import type { ControllerVisitor, ControllerVisitorOptions } from './types.ts';
@@ -33,11 +33,11 @@ export class ControllerVisitUtil {
       }
 
       await visitor.onEndpointStart?.(endpoint, controller);
-      if (isComplexInput(endpointSchema.returnType)) {
+      if (isClass(endpointSchema.returnType?.type)) {
         await this.#onSchemaEvent(visitor, endpointSchema.returnType.type);
       }
       for (const param of endpointSchema.parameters) {
-        if (isComplexInput(param)) {
+        if (isClass(param.type)) {
           await this.#onSchemaEvent(visitor, param.type);
         }
       }

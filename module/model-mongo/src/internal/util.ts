@@ -12,8 +12,18 @@ import {
 import { type IndexConfig, IndexNotSupported, ModelRegistryIndex, type ModelType } from '@travetto/model';
 import { isModelIndexedIndex } from '@travetto/model-indexed';
 import { type DistanceUnit, isModelQueryIndex, ModelQueryUtil, type PageableModelQuery, type WhereClause } from '@travetto/model-query';
-import { BinaryUtil, type Class, CodecUtil, castTo, RuntimeError, toConcrete, type UnknownRecord, isPlainRecord } from '@travetto/runtime';
-import { DataUtil, isComplexInput, type Point, SchemaRegistryIndex } from '@travetto/schema';
+import {
+  BinaryUtil,
+  type Class,
+  CodecUtil,
+  castTo,
+  RuntimeError,
+  toConcrete,
+  type UnknownRecord,
+  isPlainRecord,
+  isClass
+} from '@travetto/runtime';
+import { DataUtil, type Point, SchemaRegistryIndex } from '@travetto/schema';
 
 const PointConcrete = toConcrete<Point>();
 
@@ -120,7 +130,7 @@ export class MongoUtil {
         }
       } else if ((isPlain && !firstKey.startsWith('$')) || value?.constructor?.Ⲑid) {
         if (recursive) {
-          const nextBase = isComplexInput(subField) ? subField.type : undefined;
+          const nextBase = isClass(subField?.type) ? subField.type : undefined;
           Object.assign(out, this.extractSimple(nextBase, value, `${subpath}.`, recursive));
         } else {
           out[subpath] = value;

@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 
 import { type Class, TimeUtil, type UnknownRecord } from '@travetto/runtime';
-import { BindUtil, CommonRegex, isComplexInput, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { BindUtil, CommonRegex, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 /**
  * Provide a faker utility for generating content
@@ -171,7 +171,7 @@ export class SchemaFaker {
       return this.#array(config);
     } else if (config.enum) {
       return faker.helpers.arrayElement(config.enum.values);
-    } else if (isComplexInput(config) && SchemaRegistryIndex.has(config.type)) {
+    } else if (SchemaRegistryIndex.has(config.type)) {
       return this.generate(config.type);
     } else {
       switch (config.type) {

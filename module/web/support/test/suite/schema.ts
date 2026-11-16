@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { isComplexInput, Schema, SchemaRegistryIndex, type ValidationResultError, Validator } from '@travetto/schema';
+import { Schema, SchemaRegistryIndex, type ValidationResultError, Validator } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 import { Controller, ControllerRegistryIndex, Get, type HttpMethod, PathParam, Post, QueryParam, WebResponse } from '@travetto/web';
 
@@ -260,13 +260,13 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   @Test()
   async verifyVoid() {
     const responseType = getEndpointResponse('/void', 'GET');
-    assert(responseType === undefined);
+    assert(responseType?.type === undefined);
   }
 
   @Test()
   async verifyVoidAll() {
     const responseType = getEndpointResponse('/voidAll', 'GET');
-    assert(responseType === undefined);
+    assert(responseType?.type === undefined);
   }
 
   @Test()
@@ -284,14 +284,13 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   @Test()
   async verifyShapeClass() {
     const responseType = getEndpointResponse('/classShape/:shape', 'GET');
-    assert(isComplexInput(responseType));
-    assert(SchemaRegistryIndex.has(responseType.type));
+    assert(SchemaRegistryIndex.has(responseType?.type));
   }
 
   @Test()
   async verifyResponseString() {
     const responseType = getEndpointResponse('/responseString/:age', 'GET');
-    assert(responseType === undefined);
+    assert(responseType?.type === undefined);
   }
 
   @Test()

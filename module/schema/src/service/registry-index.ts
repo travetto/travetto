@@ -1,12 +1,9 @@
 import { type RegistrationMethods, Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
 import { type Class, castKey, castTo, classConstruct, getParentClass, RuntimeError } from '@travetto/runtime';
+import { isClass } from '@travetto/runtime';
 
 import { type SchemaDiscriminatedInfo, SchemaRegistryAdapter } from './registry-adapter.ts';
-import type { SchemaBasicType, SchemaClassConfig, SchemaFieldConfig } from './types.ts';
-
-export function isComplexInput<T extends SchemaBasicType>(input?: T): input is T & { isComplex: true; type: Class } {
-  return !!input?.isComplex;
-}
+import type { SchemaClassConfig, SchemaFieldConfig } from './types.ts';
 
 /**
  * Schema registry index for managing schema configurations across classes
@@ -30,7 +27,10 @@ export class SchemaRegistryIndex implements RegistryIndex {
     return this.#instance.getNestedFieldConfig(cls, field);
   }
 
-  static has(cls: Class): boolean {
+  static has(cls?: Class | Function): cls is Class {
+    if (!cls || !isClass(cls)) {
+      return false;
+    }
     return this.#instance.store.has(cls);
   }
 
@@ -117,8 +117,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
           return undefined;
         }
         fieldConfiguration = this.getClassConfig(currentClass).fields[segment];
-        currentClass =
-          isComplexInput(fieldConfiguration) && SchemaRegistryIndex.has(fieldConfiguration?.type) ? fieldConfiguration.type : undefined;
+        currentClass = SchemaRegistryIndex.has(fieldConfiguration?.type) ? fieldConfiguration.type : undefined;
       }
 
       return fieldConfiguration;
@@ -189,7 +188,7 @@ export class SchemaRegistryIndex implements RegistryIndex {
   ): void {
     const fields = SchemaRegistryIndex.has(cls) ? Object.values(this.getClassConfig(cls).fields) : [];
     for (const field of fields) {
-      if (isComplexInput(field) && SchemaRegistryIndex.has(field.type)) {
+      if (SchemaRegistryIndex.has(field.type)) {
         this.visitFields(field.type, onField, [..._path, field], root);
       } else {
         onField(field, _path);

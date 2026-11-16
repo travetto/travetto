@@ -1,6 +1,6 @@
 import { Registry, type RegistryIndex, RegistryIndexStore } from '@travetto/registry';
-import { type Class, castKey, castTo, describeFunction, getParentClass, TypedObject } from '@travetto/runtime';
-import { isComplexInput, type SchemaFieldConfig, type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { type Class, castKey, castTo, describeFunction, getParentClass, isClass, TypedObject } from '@travetto/runtime';
+import { type SchemaFieldConfig, type SchemaParameterConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { InjectionError } from '../error.ts';
 import type { Dependency, InjectableCandidate, InjectableConfig, PostConstructor, ResolutionType } from '../types.ts';
@@ -62,7 +62,7 @@ export class DependencyRegistryIndex implements RegistryIndex {
 
   async #resolveDependencyValue(dependency: Dependency, input: SchemaFieldConfig | SchemaParameterConfig, cls: Class): Promise<unknown> {
     try {
-      if (!isComplexInput(input)) {
+      if (!isClass(input.type)) {
         throw new InjectionError(`Expected complex type for dependency injection`, input.type);
       }
       const target: Class = dependency.target ?? input.type;

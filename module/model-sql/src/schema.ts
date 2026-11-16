@@ -1,7 +1,7 @@
 import { ModelRegistryIndex } from '@travetto/model';
 import type { Class } from '@travetto/runtime';
-import { castTo, RuntimeError, TypedObject } from '@travetto/runtime';
-import { isComplexInput, SchemaRegistryIndex } from '@travetto/schema';
+import { castTo, isClass, RuntimeError, TypedObject } from '@travetto/runtime';
+import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { SchemaContext } from './types';
 
@@ -35,8 +35,8 @@ export class SQLModelSchemaUtil {
       }
     }
 
-    const simpleFieldsList = fields.filter(field => !isComplexInput(field) && !field.array);
-    const complexFieldsList = fields.filter(field => isComplexInput(field) || field.array);
+    const simpleFieldsList = fields.filter(field => !isClass(field.type) && !field.array);
+    const complexFieldsList = fields.filter(field => isClass(field.type) || field.array);
     const simpleFields = new Map(simpleFieldsList.map(field => [field.name, field]));
     const complexFields = new Map(complexFieldsList.map(field => [field.name, field]));
     const context: SchemaContext<T> = { cls: modelClass, simpleFields, complexFields, allFields: fields };

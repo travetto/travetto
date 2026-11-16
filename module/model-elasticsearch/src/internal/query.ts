@@ -10,8 +10,8 @@ import {
   type TextSearchClause,
   type WhereClause
 } from '@travetto/model-query';
-import { type Any, type Class, type UnknownRecord, castTo, isPlainRecord, TypedObject } from '@travetto/runtime';
-import { DataUtil, isComplexInput, SchemaRegistryIndex } from '@travetto/schema';
+import { type Any, type Class, type UnknownRecord, castTo, isClass, isPlainRecord, TypedObject } from '@travetto/runtime';
+import { DataUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { EsSchemaConfig } from './types.ts';
 
@@ -134,7 +134,7 @@ export class ElasticsearchQueryUtil {
 
       if (isPlainRecord(top)) {
         const subKey = Object.keys(top)[0];
-        if (!subKey.startsWith('$') && isComplexInput(declaredSchema)) {
+        if (!subKey.startsWith('$') && isClass(declaredSchema.type)) {
           const inner = this.extractWhereTermQuery(declaredSchema.type, top, config, `${subPath}.`);
           items.push(!declaredSchema.array || this.hasNestedClause(inner) ? inner : { nested: { path: subPath, query: inner } });
         } else {

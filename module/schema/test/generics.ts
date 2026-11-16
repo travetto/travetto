@@ -1,7 +1,8 @@
 import assert from 'node:assert';
 
 import { Registry } from '@travetto/registry';
-import { isComplexInput, Method, Schema, SchemaRegistryIndex } from '@travetto/schema';
+import { isClass } from '@travetto/runtime';
+import { Method, Schema, SchemaRegistryIndex } from '@travetto/schema';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { GenericArray } from './models/generic';
@@ -55,7 +56,7 @@ class GenericInstantiationSuite {
   async testGenericInstantiation() {
     const fields = SchemaRegistryIndex.get(GenericContainer).getFields();
     assert(fields.value);
-    assert(isComplexInput(fields.value));
+    assert(isClass(fields.value.type));
 
     const valueConfig = SchemaRegistryIndex.get(fields.value.type).getFields();
     assert(valueConfig.items);
@@ -75,7 +76,7 @@ class GenericInstantiationSuite {
   async testGenericClass() {
     const method = SchemaRegistryIndex.get(GenericMethodContainer).getMethod('getArray');
     assert(method.returnType);
-    assert(isComplexInput(method.returnType));
+    assert(isClass(method.returnType.type));
     assert(method.returnType.type !== GenericArray);
     assert(Object.getPrototypeOf(method.returnType.type) === GenericArray);
     const children = SchemaRegistryIndex.get(method.returnType.type);

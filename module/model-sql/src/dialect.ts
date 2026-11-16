@@ -8,8 +8,8 @@ import {
   type TextSearchClause,
   type WhereClause
 } from '@travetto/model-query';
-import { type Class, castTo, isPlainRecord, isRecord, JSONUtil, RuntimeError, type UnknownRecord } from '@travetto/runtime';
-import { isComplexInput, type SchemaBasicType, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
+import { type Class, castTo, isPlainRecord, isRecord, JSONUtil, RuntimeError, type UnknownRecord, isClass } from '@travetto/runtime';
+import { type SchemaBasicType, type SchemaFieldConfig, SchemaRegistryIndex } from '@travetto/schema';
 
 import { SQLModelSchemaUtil } from './schema.ts';
 import type { JSONSqlPathMode, ResolvedPathContext, SchemaContext, TableContext } from './types.ts';
@@ -392,7 +392,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     let currentField: SchemaFieldConfig | undefined = tableContext.complexFields.get(firstSegment);
     let arrayField: SchemaFieldConfig | undefined = currentField?.array ? currentField : undefined;
     let arraySegmentIndex: number | undefined = currentField?.array ? 0 : undefined;
-    let currentClass = isComplexInput(currentField) ? currentField.type : undefined;
+    let currentClass = isClass(currentField?.type) ? currentField.type : undefined;
 
     for (let pathIndex = 1; pathIndex < path.length; pathIndex += 1) {
       const segment = path[pathIndex];
@@ -402,7 +402,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
         arrayField = currentField;
         arraySegmentIndex = pathIndex;
       }
-      currentClass = isComplexInput(currentField) ? currentField.type : undefined;
+      currentClass = isClass(currentField?.type) ? currentField.type : undefined;
     }
 
     return {
@@ -416,7 +416,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
     input: SchemaBasicType | undefined,
     subPath: string[]
   ): Array<{ segment: string; fieldConfig?: SchemaFieldConfig; isArray: boolean; fieldClass?: Class }> {
-    if (!isComplexInput(input)) {
+    if (!isClass(input?.type)) {
       throw new RuntimeError('Only complex types are supported for sub schema');
     }
     let currentClass: Class | undefined = input.type;
@@ -428,7 +428,7 @@ CREATE TABLE ${this.escapeIdentifier(context.tableName)} (
         fieldConfig = classConfiguration?.fields[segment];
         if (fieldConfig) {
           isArray = !!fieldConfig.array;
-          currentClass = isComplexInput(fieldConfig) ? fieldConfig.type : undefined;
+          currentClass = isClass(fieldConfig.type) ? fieldConfig.type : undefined;
         } else {
           currentClass = undefined;
         }

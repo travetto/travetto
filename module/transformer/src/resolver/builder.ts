@@ -480,7 +480,7 @@ export const TypeBuilder: {
       const [tag] = DocUtil.readDocTag(type, 'concrete');
       let [importName, name] = tag?.split('#') ?? [];
 
-      const [hasPrimitiveDoc] = DocUtil.readDocTag(type, 'primitive');
+      const hasPrimitiveDoc = DocUtil.hasDocTag(type, 'primitive');
 
       // Resolving relative to source file
       if (!importName || importName.startsWith('.')) {
@@ -507,7 +507,7 @@ export const TypeBuilder: {
         name = `${primaryDeclaration.name.text}$Concrete`;
       }
 
-      return { key: 'managed', name, importName, primitive: !!hasPrimitiveDoc };
+      return { key: 'managed', name, importName, primitive: hasPrimitiveDoc };
     }
   }
 };

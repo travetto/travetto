@@ -1,7 +1,8 @@
 import assert from 'node:assert';
 
 import { Registry } from '@travetto/registry';
-import { isComplexInput, Schema, SchemaRegistryIndex, SchemaValidator } from '@travetto/schema';
+import { isClass } from '@travetto/runtime';
+import { Schema, SchemaRegistryIndex, SchemaValidator } from '@travetto/schema';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 @Schema()
@@ -70,7 +71,7 @@ class EdgeCases {
     const fields = SchemaRegistryIndex.get(SingleField).getFields();
     assert(fields);
     assert('single' in fields);
-    assert(isComplexInput(fields.single));
+    assert(isClass(fields.single.type));
     assert(fields.single.type !== Object);
     assert(SchemaRegistryIndex.get(fields.single.type).getFields().field.type === Number);
   }
