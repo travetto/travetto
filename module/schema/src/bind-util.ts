@@ -1,14 +1,4 @@
-import {
-  asFull,
-  type Class,
-  castKey,
-  castTo,
-  classConstruct,
-  TypedObject,
-  type UnknownRecord,
-  isPlainRecord,
-  isClass
-} from '@travetto/runtime';
+import { asFull, type Class, castKey, castTo, classConstruct, TypedObject, type UnknownRecord, isPlainRecord } from '@travetto/runtime';
 
 import { DataUtil } from './data.ts';
 import { SchemaRegistryIndex } from './service/registry-index.ts';
@@ -252,7 +242,7 @@ export class BindUtil {
               }
             }
 
-            if (isClass(field.type)) {
+            if (SchemaRegistryIndex.has(field.type)) {
               const fieldType = field.type;
               if (field.array && Array.isArray(value)) {
                 value = value.map(item => this.bindSchema(fieldType, item, config));
@@ -290,14 +280,14 @@ export class BindUtil {
     }
     if (config.array) {
       const subValue = !Array.isArray(value) ? [value] : value;
-      if (isClass(config.type)) {
+      if (SchemaRegistryIndex.has(config.type)) {
         const type = config.type;
         value = subValue.map(item => this.bindSchema(type, item));
       } else {
         value = subValue.map(item => DataUtil.coerceType(item, config.type, false));
       }
     } else {
-      if (isClass(config.type)) {
+      if (SchemaRegistryIndex.has(config.type)) {
         value = this.bindSchema(config.type, value);
       } else {
         value = DataUtil.coerceType(value, config.type, false);

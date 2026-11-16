@@ -24,7 +24,7 @@ class PointerSuite {
   @Test()
   testTypeKinds() {
     const fields = SchemaRegistryIndex.get(Custom).getFields();
-    assert(!isClass(fields.pointer.type));
+    assert(isClass(fields.pointer.type));
     assert(isClass(fields.plain.type));
     assert(isClass(fields.concrete.type));
   }
