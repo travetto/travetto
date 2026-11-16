@@ -3,8 +3,7 @@ import rl from 'node:readline/promises';
 import timers from 'node:timers/promises';
 
 import type { ManifestContext } from '@travetto/manifest';
-import { isRecordWithStringKey } from '@travetto/runtime';
-import { isRecord } from '@travetto/transformer';
+import { isRecordWithStringKey } from '@travetto/transformer';
 
 import { CommonUtil } from '../common.ts';
 import type { CompilerEventPayload, CompilerEventType, CompilerServerInfo, CompilerStateType, CompilerLoggerShape } from '../types.ts';
