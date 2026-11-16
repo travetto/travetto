@@ -56,9 +56,7 @@ const getKey = <T extends ModelType>(computed: ModelIndexedComputedIndex<T>): At
   DynamoDBUtil.toValue(computed.getKey() || 'NULL');
 const getSort = <T extends ModelType>(computed: ModelIndexedComputedIndex<T>): AttributeValue => DynamoDBUtil.toValue(computed.getSort());
 
-function isNotFoundError(error: unknown): boolean {
-  return error instanceof Error && error.name === 'ResourceNotFoundException';
-}
+const isNotFoundError = (error: unknown): boolean => error instanceof Error && error.name === 'ResourceNotFoundException';
 
 /**
  * A model service backed by DynamoDB

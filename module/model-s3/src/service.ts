@@ -41,14 +41,13 @@ import {
   RuntimeError,
   type TimeSpan,
   TimeUtil,
-  TypedObject
+  TypedObject,
+  isRecord
 } from '@travetto/runtime';
 
 import type { S3ModelConfig } from './config.ts';
 
-function isMetadataBearer(value: unknown): value is MetadataBearer {
-  return !!value && typeof value === 'object' && '$metadata' in value;
-}
+const isMetadataBearer = (value: unknown): value is MetadataBearer => isRecord(value) && '$metadata' in value;
 
 function isNotFoundError(error: unknown): error is Error | MetadataBearer {
   return (

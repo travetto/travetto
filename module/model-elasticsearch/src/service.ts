@@ -67,7 +67,7 @@ import {
   type ValidStringFields,
   type WhereClause
 } from '@travetto/model-query';
-import { asConstructable, asFull, type Class, castKey, castTo, JSONUtil, ShutdownManager, TypedObject } from '@travetto/runtime';
+import { asConstructable, asFull, type Class, castKey, castTo, JSONUtil, ShutdownManager, TypedObject, isRecord } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
 import type { ElasticsearchModelConfig } from './config.ts';
@@ -95,10 +95,7 @@ function isNotFoundError(error: unknown): boolean {
     (error instanceof errors.ResponseError &&
       (error.statusCode === 404 ||
         error.body?.result === 'not_found' ||
-        (typeof error.body === 'object' &&
-          error.body !== null &&
-          'error' in error.body &&
-          (error.body as { error?: { type?: string } }).error?.type === 'document_missing_exception'))) ||
+        (isRecord(error.body?.error) && error.body.error.type === 'document_missing_exception'))) ||
     (error instanceof Error && error.message.includes('document_missing_exception'))
   );
 }

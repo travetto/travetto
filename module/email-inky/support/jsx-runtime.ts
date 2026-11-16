@@ -1,5 +1,5 @@
 import type { EmailTemplateLocation, EmailTemplateModule } from '@travetto/email';
-import { type Class, castTo } from '@travetto/runtime';
+import { type Class, castTo, isRecord } from '@travetto/runtime';
 
 export type JSXChild = JSXElement | number | bigint | boolean | object | string;
 type JSXProps = { children?: JSXChild | JSXChild[] | null; className?: string; id?: string; name?: string; dir?: string };
@@ -79,7 +79,7 @@ export const jsx = createElement;
 export const jsxs = createRootElement;
 export const Fragment = createFragment;
 export function isJSXElement(value: unknown): value is JSXElement {
-  return value !== undefined && value !== null && typeof value === 'object' && JSXRuntimeTag in value;
+  return isRecord(value) && JSXRuntimeTag in value;
 }
 
 createFrag = Fragment;

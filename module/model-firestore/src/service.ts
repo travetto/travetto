@@ -35,7 +35,7 @@ import {
   warnIfIndexedUniqueIndex,
   warnIfNonIndexedIndex
 } from '@travetto/model-indexed';
-import { type Class, castTo, JSONUtil, RuntimeError, ShutdownManager } from '@travetto/runtime';
+import { type Class, JSONUtil, RuntimeError, ShutdownManager } from '@travetto/runtime';
 
 import type { FirestoreModelConfig } from './config.ts';
 
@@ -43,16 +43,12 @@ const clone = JSONUtil.clone;
 const setMissingValues = <T>(input: T, missingValue: unknown): T =>
   JSONUtil.clone(input, { replacer: (_, value) => value ?? null, reviver: (_, value) => value ?? missingValue });
 
-function isNotFoundError(error: unknown): boolean {
-  return error instanceof Error && (error.message.includes('NOT_FOUND') || (error as { code?: number }).code === 5);
-}
+const matchesMessageOrCode = (err: Error & { code?: number }, messages: string[], code: number): boolean =>
+  !!messages.find(msg => err.message.includes(msg)) || err.code === code;
 
-function isExistsError(error: unknown): boolean {
-  return (
-    error instanceof Error &&
-    (error.message.includes('ALREADY_EXISTS') || error.message.includes('already exists') || (error as { code?: number }).code === 6)
-  );
-}
+const isNotFoundError = (error: unknown): boolean => error instanceof Error && matchesMessageOrCode(error, ['NOT_FOUND'], 5);
+const isExistsError = (error: unknown): boolean =>
+  error instanceof Error && matchesMessageOrCode(error, ['ALREADY_EXISTS', 'already exists'], 6);
 
 /**
  * A model service backed by Firestore

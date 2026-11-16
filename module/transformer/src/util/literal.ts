@@ -1,20 +1,15 @@
 import ts from 'typescript';
 
-import { type TemplateLiteral, transformCast, type UnknownRecord } from '../types/shared.ts';
+import { isRecord, type TemplateLiteral, transformCast, type UnknownRecord } from '../types/shared.ts';
 
 const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T>(value: T): K[];
 } & ObjectConstructor = Object;
 
-function isNode(value: unknown): value is ts.Node {
-  return !!value && typeof value === 'object' && 'kind' in value;
-}
-
 const KNOWN_FNS = new Set<unknown>([String, Number, Boolean, Date, RegExp]);
 
-function isKnownFn(value: unknown): value is Function {
-  return KNOWN_FNS.has(value);
-}
+const isNode = (value: unknown): value is ts.Node => isRecord(value) && 'kind' in value;
+const isKnownFn = (value: unknown): value is Function => KNOWN_FNS.has(value);
 
 /**
  * Utilities for dealing with literals

@@ -90,7 +90,7 @@ export type RpcClientFactory<T extends Record<string, {}>> = <R extends Record<s
 ) => RpcClient<T, R>;
 
 function isResponse(value: unknown): value is Response {
-  return !!value && typeof value === 'object' && 'status' in value && !!value.status && 'headers' in value && !!value.headers;
+  return isRecord(value) && 'status' in value && !!value.status && 'headers' in value && !!value.headers;
 }
 
 function registerTimeout<T>(

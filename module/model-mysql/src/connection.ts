@@ -5,19 +5,13 @@ import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { ExistsError, type ModelType } from '@travetto/model';
 import { SQLConnection, type TableContext } from '@travetto/model-sql';
-import { type Class, type UnknownRecord, castTo, JSONUtil, ShutdownManager } from '@travetto/runtime';
+import { type Class, type UnknownRecord, castTo, isRecord, JSONUtil, ShutdownManager } from '@travetto/runtime';
 
 import type { MysqlModelConfig } from './config.ts';
 import { MysqlDialect } from './dialect.ts';
 
 function isSimplePacket(value: unknown): value is OkPacket | ResultSetHeader {
-  return (
-    value !== null &&
-    value !== undefined &&
-    typeof value === 'object' &&
-    'constructor' in value &&
-    (value.constructor.name === 'OkPacket' || value.constructor.name === 'ResultSetHeader')
-  );
+  return isRecord(value) && 'constructor' in value && ['OkPacket', 'ResultSetHeader'].includes(value.constructor.name);
 }
 
 /**
