@@ -3,7 +3,6 @@ import { SchemaTypeUtil } from '@travetto/schema';
 
 /**
  * @concrete
- * @primitive
  */
 export interface FileMap extends Record<string, File> {}
 

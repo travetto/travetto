@@ -62,10 +62,6 @@ export interface ManagedType extends Type<'managed'> {
    * Inner return property
    */
   innerTypeProperty?: string;
-  /**
-   * Whether this type is a primitive type or not
-   */
-  primitive?: boolean;
 }
 
 /**

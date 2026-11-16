@@ -15,32 +15,27 @@ declare global {
 
   /**
    * @concrete node:buffer#Blob
-   * @primitive
    */
   interface Blob {}
 
   /**
    * @concrete node:buffer#File
-   * @primitive
    */
   interface File {}
 
   /**
    * @concrete node:stream/web#ReadableStream
-   * @primitive
    */
   interface ReadableStream {}
 
   /**
    * @concrete node:buffer#Buffer
-   * @primitive
    */
   interface Buffer {}
 
   namespace NodeJS {
     /**
      * @concrete node:stream#Readable
-     * @primitive
      */
     interface ReadableStream {}
   }
@@ -49,13 +44,11 @@ declare global {
 declare module 'buffer' {
   /**
    * @concrete node:buffer#Blob
-   * @primitive
    */
   interface Blob {}
 
   /**
    * @concrete node:buffer#File
-   * @primitive
    */
   interface File {}
 }
@@ -63,13 +56,11 @@ declare module 'buffer' {
 declare module 'node:buffer' {
   /**
    * @concrete node:buffer#Blob
-   * @primitive
    */
   interface Blob {}
 
   /**
    * @concrete node:buffer#File
-   * @primitive
    */
   interface File {}
 }
@@ -77,7 +68,6 @@ declare module 'node:buffer' {
 declare module 'stream' {
   /**
    * @concrete node:stream#Readable
-   * @primitive
    */
   interface Readable {}
 }
@@ -85,7 +75,6 @@ declare module 'stream' {
 declare module 'stream/web' {
   /**
    * @concrete node:stream/web#ReadableStream
-   * @primitive
    */
   interface ReadableStream {}
 }
