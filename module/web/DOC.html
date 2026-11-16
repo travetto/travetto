@@ -15,12 +15,12 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/web</code></pre>
   </figure>
 
-The module provides a declarative API for creating and describing a Web application. Since the framework is declarative, decorators are used to configure almost everything. The general layout of an application is a collection of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L12">@Controller</a> s that employ some combination of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15">WebInterceptor</a> s to help manage which functionality is executed before the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14">Endpoint</a> code, within the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L12">@Controller</a>. This module will look at:
+The module provides a declarative API for creating and describing a Web application. Since the framework is declarative, decorators are used to configure almost everything. The general layout of an application is a collection of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L12">@Controller</a> s that employ some combination of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L19">WebInterceptor</a> s to help manage which functionality is executed before the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14">Endpoint</a> code, within the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L12">@Controller</a>. This module will look at:
 <ul> <li>Request/Response Pattern</li>
 <li>Defining a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L12">@Controller</a></li>
 <li>Defining an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14">Endpoint</a></li>
-<li>Using a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15">WebInterceptor</a></li>
-<li>Creating a Custom <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15">WebInterceptor</a></li>
+<li>Using a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L19">WebInterceptor</a></li>
+<li>Creating a Custom <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L19">WebInterceptor</a></li>
 <li>Cookies</li>
 </ul>
 
@@ -101,7 +101,7 @@ Unlike other frameworks (e.g. <a target="_blank" class="external-link" href="htt
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-These objects do not represent the underlying sockets provided by various http servers, but in fact are simple wrappers that track the flow through the call stack of the various <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15">WebInterceptor</a> s and the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14">Endpoint</a> handler. One of the biggest departures here, is that the response is not an entity that is passed around from call-site to call-site, but is is solely a return-value. This doesn't mean the return value has to be static and pre-allocated, on the contrary streams are still supported. The difference here is that the streams/asynchronous values will be consumed until the response is sent back to the user. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/compress.ts#L50">CompressInterceptor</a> is a good reference for transforming a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3">WebResponse</a> that can either be a stream or a fixed value.
+These objects do not represent the underlying sockets provided by various http servers, but in fact are simple wrappers that track the flow through the call stack of the various <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L19">WebInterceptor</a> s and the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14">Endpoint</a> handler. One of the biggest departures here, is that the response is not an entity that is passed around from call-site to call-site, but is is solely a return-value. This doesn't mean the return value has to be static and pre-allocated, on the contrary streams are still supported. The difference here is that the streams/asynchronous values will be consumed until the response is sent back to the user. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/compress.ts#L50">CompressInterceptor</a> is a good reference for transforming a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3">WebResponse</a> that can either be a stream or a fixed value.
 
 <h2 id="defining-a-controller">Defining a Controller</h2>
 
@@ -423,7 +423,7 @@ Additionally, schema related inputs can also be used with <code class="item inpu
 
 <h2 id="using-interceptors">Using Interceptors</h2>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15">WebInterceptor</a> s are a key part of the web framework, to allow for conditional functionality to be added, across all endpoints.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L19">WebInterceptor</a> s are a key part of the web framework, to allow for conditional functionality to be added, across all endpoints.
 <h3 id="anatomy-of-an-interceptor">Anatomy of an Interceptor</h3>
 
   <figure class="code">
@@ -814,7 +814,7 @@ The resolution logic is as follows:
 
 <h2 id="creating-a-custom-webinterceptor">Creating a Custom WebInterceptor</h2>
 
-Additionally it may be desirable to create a custom interceptor. Interceptors can be registered with the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a> by implementing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15">WebInterceptor</a> interface and adding an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16">@Injectable</a> decorator. A simple logging interceptor:
+Additionally it may be desirable to create a custom interceptor. Interceptors can be registered with the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a> by implementing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L19">WebInterceptor</a> interface and adding an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L16">@Injectable</a> decorator. A simple logging interceptor:
 
   <figure class="code">
     <figcaption class="code">Defining a new Interceptor

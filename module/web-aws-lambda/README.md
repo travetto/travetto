@@ -33,23 +33,25 @@ Description:
   suitable for direct Lambda upload workflows.
 
 Options:
-  -b, --buildDir <string>              Workspace for building (default: "/tmp/<temp-folder>")
-  --clean, --no-clean                  Clean workspace (default: true)
-  -o, --output <string>                Output location (default: "<module>.zip")
-  -es, --main-scripts                  Create entry scripts (default: false)
-  -f, --main-name <string>             Main name for build artifact
-  -e, --entry-point <string>           Entry point (default: "@travetto/web-aws-lambda/support/entry.handler.ts")
-  --minify, --no-minify                Minify output (default: true)
-  -sm, --sourcemap                     Bundle source maps (default: false)
-  -is, --include-sources               Include source with source maps (default: false)
-  -x, --eject-file <string>            Eject commands to file
-  -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/rollup/build.ts")
-  --env-file <string>                  Env Flag File Name (default: ".env")
-  --manifest-file <string>             Manifest File Name (default: "manifest.json")
-  -wr, --include-workspace-resources   Include workspace resources (default: false)
-  -np, --npm-package <string>          External NPM Packages (default: [])
-  -m, --module <module>                Module to run for
-  --help                               display help for command
+  -b, --buildDir <string>                      Workspace for building (default: "/tmp/<temp-folder>")
+  --clean, --no-clean                          Clean workspace (default: true)
+  -o, --output <string>                        Output location (default: "<module>.zip")
+  -es, --main-scripts                          Create entry scripts (default: false)
+  -f, --main-name <string>                     Main name for build artifact
+  -e, --entry-point <string>                   Entry point (default: "@travetto/web-aws-lambda/support/entry.handler.ts")
+  --minify, --no-minify                        Minify output (default: true)
+  -sm, --sourcemap                             Bundle source maps (default: false)
+  -is, --include-sources                       Include source with source maps (default: false)
+  -x, --eject-file <string>                    Eject commands to file
+  -r, --rollup-configuration <string>          Rollup configuration file (default: "@travetto/pack/support/rollup/build.ts")
+  --env-file <string>                          Env Flag File Name (default: ".env")
+  --manifest-file <string>                     Manifest File Name (default: "manifest.json")
+  -wr, --include-workspace-resources           Include workspace resources (default: false)
+  -np, --npm-package <string>                  External NPM Packages (default: [])
+  -m, --module <module>                        Module to run for
+  --disable-prototype, --no-disable-prototype  Disable prototype (default: true)
+  -nf, --node-flags <string>                    (default: [])
+  --help                                       display help for command
 
 Examples:
 ```
