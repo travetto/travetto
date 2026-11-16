@@ -20,7 +20,7 @@ export type SchemaBasicType = {
    */
   array?: boolean;
   /**
-   * The class or primitive tied to the type
+   * The class or primitive constructor tied to the type
    */
   type: Function;
   /**
