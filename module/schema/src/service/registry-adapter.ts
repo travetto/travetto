@@ -314,8 +314,8 @@ export class SchemaRegistryAdapter implements RegistryAdapter<SchemaClassConfig>
     return methodConfig;
   }
 
-  getMethodReturnType(method: string): SchemaBasicType {
-    return this.getMethod(method).returnType!;
+  getMethodReturnType(method: string): SchemaBasicType | undefined {
+    return this.getMethod(method).returnType;
   }
 
   getFields(): SchemaFieldMap {

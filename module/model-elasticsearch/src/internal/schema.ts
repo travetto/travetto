@@ -1,6 +1,6 @@
 import type { MappingProperty, Script, MappingTypeMapping } from '@elastic/elasticsearch/api/types';
 
-import { type Class, isClass, toConcrete, type UnknownRecord } from '@travetto/runtime';
+import { type Class, toConcrete, type UnknownRecord } from '@travetto/runtime';
 import { DataUtil, type Point, SchemaRegistryIndex } from '@travetto/schema';
 
 import type { EsSchemaConfig } from './types.ts';
@@ -87,7 +87,7 @@ export class ElasticsearchSchemaUtil {
     const properties: Record<string, MappingProperty> = {};
 
     for (const [field, config] of Object.entries(fields)) {
-      if (isClass(config.type)) {
+      if (SchemaRegistryIndex.has(config.type)) {
         properties[field] = {
           type: config.array ? 'nested' : 'object',
           ...this.generateSingleMapping(config.type, esSchema)
