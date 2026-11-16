@@ -252,19 +252,17 @@ class ${uniqueId} extends ${type.mappedClassName} {
     }
 
     const resolved = this.toConcreteType(state, typeExpr, node, config?.root ?? node);
-    const value =
+    const type =
       typeExpr.key === 'foreign'
         ? state.getConcreteType(node, state.factory.createIdentifier('Object'))
         : ts.isArrayLiteralExpression(resolved)
           ? resolved.elements[0]
           : resolved;
-    const { type: unwrappedType } = this.unwrapType(typeExpr);
 
     params.unshift(
       LiteralUtil.fromLiteral(state.factory, {
         array: ts.isArrayLiteralExpression(resolved),
-        isComplex: this.isSchemaValueComplex(unwrappedType),
-        type: value
+        type
       })
     );
 
@@ -339,30 +337,12 @@ class ${uniqueId} extends ${type.mappedClassName} {
   }
 
   /**
-   * Determine the schema value type kind for a resolved AST type
-   */
-  static isSchemaValueComplex(type?: AnyType): boolean {
-    const resolved = type?.key === 'pointer' ? type.target : type;
-    switch (resolved?.key) {
-      case 'managed':
-        return !resolved.primitive;
-      case 'foreign':
-      case 'mapped':
-      case 'shape':
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  /**
    * Ensure type
    * @param state
    * @param node
    */
   static ensureType(state: TransformerState, anyType: AnyType, target: ts.Node): UnknownRecord {
     const { out, type } = this.unwrapType(anyType);
-    out.complex = this.isSchemaValueComplex(type);
     switch (type?.key) {
       case 'foreign': {
         out.type = state.getForeignTarget(type);

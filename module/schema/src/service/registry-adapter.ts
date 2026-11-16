@@ -94,7 +94,7 @@ function getConstructorConfig<T extends SchemaClassConfig>(base: Partial<T>, par
     validators: [],
     ...parentCons,
     ...baseCons,
-    returnType: { isComplex: true, type: base.class! }
+    returnType: { type: base.class! }
   };
 }
 

@@ -24,10 +24,6 @@ export type SchemaBasicType = {
    */
   type: Function;
   /**
-   * Determines if the type is complex or not
-   */
-  isComplex?: boolean;
-  /**
    * Is the field a foreign type
    */
   isForeign?: boolean;

@@ -114,9 +114,9 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Get the type for a given class
    */
   #getType(inputOrClass: SchemaInputConfig | Class): UnknownRecord {
-    let field: { type: Function; precision?: [number, number | undefined]; isComplex?: boolean };
+    let field: { type: Function; precision?: [number, number | undefined] };
     if (!isInputConfig(inputOrClass)) {
-      field = { isComplex: SchemaRegistryIndex.has(inputOrClass), type: inputOrClass };
+      field = { type: inputOrClass };
     } else {
       field = inputOrClass;
     }

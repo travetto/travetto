@@ -2,7 +2,7 @@ import type { ModelType } from '@travetto/model';
 import type { TextSearchClause } from '@travetto/model-query';
 import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext, type TextSearchState } from '@travetto/model-sql';
 import { JSONUtil, type UnknownRecord } from '@travetto/runtime';
-import type { SchemaFieldConfig } from '@travetto/schema';
+import { SchemaRegistryIndex, type SchemaFieldConfig } from '@travetto/schema';
 
 /* cspell:words ILIKE regclass indexdef tablename pkey tsvector tsquery */
 
@@ -10,7 +10,7 @@ export class PostgresDialect extends AbstractANSI99Dialect {
   returningSupport = true;
 
   getComplexColumnType(field: SchemaFieldConfig): string {
-    if (field.array && field.isComplex === false) {
+    if (field.array && !SchemaRegistryIndex.has(field?.type)) {
       const scalarType = this.getColumnType(field);
       return `${scalarType}[]`;
     }
@@ -18,7 +18,7 @@ export class PostgresDialect extends AbstractANSI99Dialect {
   }
 
   getComplexColumnValue(field: SchemaFieldConfig, value: unknown): unknown {
-    if (field.array && field.isComplex === false) {
+    if (field.array && !SchemaRegistryIndex.has(field?.type)) {
       return value ?? null;
     }
     return super.getComplexColumnValue(field, value);
@@ -137,7 +137,7 @@ export class PostgresDialect extends AbstractANSI99Dialect {
     const arrayField = context.arrayField ?? context.leafField;
     const isTopLevel = (context.arrayPath?.length ?? 1) === 1;
     const hasSubPath = (context.subPath?.length ?? 0) > 0;
-    const isPrimitiveArray = arrayField?.isComplex === false;
+    const isPrimitiveArray = !SchemaRegistryIndex.has(arrayField?.type);
     const isNative = isTopLevel && !hasSubPath && isPrimitiveArray;
 
     const targetPath =
