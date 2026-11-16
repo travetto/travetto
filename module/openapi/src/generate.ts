@@ -9,16 +9,7 @@ import type {
   TagObject
 } from 'openapi3-ts/oas31';
 
-import {
-  type Class,
-  type UnknownRecord,
-  BinaryUtil,
-  castTo,
-  describeFunction,
-  isClass,
-  RuntimeError,
-  TypedObject
-} from '@travetto/runtime';
+import { type Class, type UnknownRecord, BinaryUtil, castTo, describeFunction, RuntimeError, TypedObject } from '@travetto/runtime';
 import {
   type SchemaBasicType,
   type SchemaClassConfig,
@@ -77,10 +68,6 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     prefix: string = '',
     rootField: SchemaInputConfig = input
   ): ParameterObject[] {
-    if (!isClass(input.type)) {
-      throw new RuntimeError(`Unknown class, not registered as a schema: ${input.type.name}`);
-    }
-
     if (!SchemaRegistryIndex.has(input.type)) {
       throw new RuntimeError(`Unknown class, not registered as a schema: ${input.type}`);
     }
