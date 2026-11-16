@@ -59,7 +59,7 @@ class SchemaRegistryIndexTests {
     assert(countListConfiguration.type === Count);
     assert(countListConfiguration.array === true);
 
-    const countValueConfiguration = SchemaRegistryIndex.getNestedFieldConfig(Count, 'value');
+    const countValueConfiguration = SchemaRegistryIndex.getNestedFieldConfig(Person, 'counts.value');
     assert(countValueConfiguration !== undefined);
     assert(countValueConfiguration.type === Number);
   }
