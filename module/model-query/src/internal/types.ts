@@ -1,5 +1,5 @@
-import { type Class, castTo, toConcrete } from '@travetto/runtime';
-import type { Point, SchemaFieldConfig } from '@travetto/schema';
+import { castTo, toConcrete } from '@travetto/runtime';
+import type { Point, SchemaBasicType } from '@travetto/schema';
 
 const st = (value: string | string[], isArray: boolean = false): Set<string> =>
   new Set((Array.isArray(value) ? value : [value]).map(item => (isArray ? `${item}[]` : item)));
@@ -39,9 +39,8 @@ export class TypeUtil {
   /**
    * Get declared type of a given field, only for primitive types
    */
-  static getDeclaredType(field: SchemaFieldConfig | Function | Class): keyof typeof TypeUtil.OPERATORS | undefined {
-    const type = 'type' in field ? field.type : field;
-    switch (type) {
+  static getDeclaredType(field: SchemaBasicType): keyof typeof TypeUtil.OPERATORS | undefined {
+    switch (field.type) {
       case String:
         return 'string';
       case Number:
@@ -54,11 +53,6 @@ export class TypeUtil {
         return 'Date';
       case PointConcrete:
         return 'Point';
-      default: {
-        if ('type' in field && field.array) {
-          return this.getDeclaredType(field.type);
-        }
-      }
     }
   }
 

@@ -72,12 +72,12 @@ export class QueryVerifier {
 
       // Find field
       const field = fields[key];
+      const type = TypeUtil.getDeclaredType(field);
 
       // If a simple operation
-      if (!isClass(field.type)) {
-        const type = TypeUtil.getDeclaredType(field)!;
+      if (type) {
         handler.onSimpleType(state.extend(key), type, value, field.array ?? false);
-      } else {
+      } else if (isClass(field.type)) {
         // Otherwise recurse
         const subClass = field.type;
         const subValue = value;
