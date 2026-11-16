@@ -150,7 +150,7 @@ export class SchemaValidator {
       } else if (Number.isNaN(value)) {
         return [{ kind: 'type', type: 'number' }];
       }
-    } else if (isClass(input.type)) {
+    } else if (SchemaRegistryIndex.has(input.type)) {
       if (!(value instanceof input.type)) {
         // If not an instance of the type
         return [{ kind: 'type', type: input.type.name }];

@@ -326,7 +326,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         return {
           requestBody: input.specifiers?.includes('file') ? this.#buildUploadBody() : this.#getEndpointBody(input, acceptsMime)
         };
-      } else if (isClass(input.type) && (param.location === 'query' || param.location === 'header')) {
+      } else if (SchemaRegistryIndex.has(input.type) && (param.location === 'query' || param.location === 'header')) {
         return { parameters: this.#schemaToDotParams(param.location, input, param.prefix ? `${param.prefix}.` : '') };
       } else {
         const epParam: ParameterObject = {
