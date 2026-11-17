@@ -41,6 +41,7 @@ export function keyedIndex<T extends ModelType, K extends KeyedIndexSelection<T>
     type: 'indexed:keyed',
     class: cls,
     name,
+    indexed: true,
     unique: false,
     key,
     keyTemplate,
@@ -64,6 +65,7 @@ export function uniqueIndex<T extends ModelType, K extends KeyedIndexSelection<T
     type: 'indexed:keyed',
     class: cls,
     name,
+    indexed: true,
     unique: true,
     key,
     keyTemplate,
@@ -88,6 +90,7 @@ export function sortedIndex<T extends ModelType, K extends KeyedIndexSelection<T
     type: 'indexed:sorted',
     class: cls,
     name,
+    indexed: true,
     key,
     sort,
     keyTemplate,
@@ -97,7 +100,7 @@ export function sortedIndex<T extends ModelType, K extends KeyedIndexSelection<T
   return idx;
 }
 
-export const isModelIndexedIndex = hasProperty<AllIndexes<ModelType>>('type', 'indexed:keyed', 'indexed:sorted');
+export const isModelIndexedIndex = hasProperty<AllIndexes<ModelType>>('indexed', true);
 
 export const warnIfIndexedUniqueIndex = (service: ClassInstance, cls: Class<ModelType>, indexes: IndexConfig[]): boolean => {
   let warned = false;

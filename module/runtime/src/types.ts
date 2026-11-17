@@ -65,15 +65,9 @@ export function classConstruct<T>(cls: Class<T>, args: unknown[] = []): ClassIns
 }
 
 export const hasProperty =
-  <T>(key: string | symbol, equalTo1?: unknown, equalTo2?: unknown) =>
+  <T>(key: string | symbol, equalTo?: unknown) =>
   (value: unknown): value is T =>
-    typeof value === 'object' &&
-    !!value &&
-    key in value &&
-    (equalTo1 === undefined ||
-      equalTo1 === value[key as keyof typeof value] ||
-      equalTo2 === undefined ||
-      equalTo2 === value[key as keyof typeof value]);
+    typeof value === 'object' && !!value && key in value && (equalTo === undefined || equalTo === value[key as keyof typeof value]);
 
 export const hasFunction =
   <T>(key: keyof T) =>
@@ -104,5 +98,5 @@ export const getConstructor = <T>(value: T): Class<T> => asConstructable<T>(valu
 export const getClass = <T = unknown>(target: Class | ClassInstance): Class<T> =>
   'Ⲑid' in target ? castTo(target) : asConstructable<T>(target).constructor;
 
-export const isUnsafeProperty = (key: string): key is '__proto__' | 'prototype' | 'constructor' =>
-  key === 'prototype' || key === 'constructor' || key === '__proto__';
+const UNSAFE_PROPERTIES = ['prototype', 'constructor', '__proto__'];
+export const isUnsafeProperty = (key: string): key is '__proto__' | 'prototype' | 'constructor' => UNSAFE_PROPERTIES.includes(key);

@@ -11,6 +11,8 @@ import type { AnyType, ResolverContext, TransformResolver } from './types.ts';
 
 const isFinalizeType = (key: string): key is keyof typeof TypeBuilder => key in TypeBuilder;
 
+const UNSAFE_PROPERTIES = ['prototype', 'constructor', '__proto__'];
+
 /**
  * Implementation of TransformResolver
  */
@@ -117,9 +119,7 @@ export class SimpleResolver implements TransformResolver {
    * Get list of properties
    */
   getPropertiesOfType(type: ts.Type): ts.Symbol[] {
-    return this.#tsChecker
-      .getPropertiesOfType(type)
-      .filter(property => property.getName() === 'prototype' || property.getName() === '__proto__');
+    return this.#tsChecker.getPropertiesOfType(type).filter(property => !UNSAFE_PROPERTIES.includes(property.getName()));
   }
 
   /**
