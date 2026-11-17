@@ -11,9 +11,6 @@ type UnknownRecord = Record<string, unknown>;
 const isRecord = (value: unknown): value is UnknownRecord =>
   typeof value === 'object' && value !== undefined && value !== null && !Array.isArray(value);
 
-const isPlainRecord = (value: unknown): value is UnknownRecord =>
-  isRecord(value) && value.constructor === Object && Object.prototype.toString.call(value) === '[object Object]';
-
 const triggerBrowserRedirect = (world: Any, url: URL): boolean => {
   const location = world?.window?.location;
   if (location) {
@@ -88,10 +85,6 @@ export type RpcClientFactory<T extends Record<string, {}>> = <R extends Record<s
   baseOpts: Omit<Partial<RpcRequest>, 'url'> & { url: RpcRequest['url'] },
   decorate?: (request: RpcRequest) => R
 ) => RpcClient<T, R>;
-
-function isResponse(value: unknown): value is Response {
-  return isRecord(value) && 'status' in value && !!value.status && 'headers' in value && !!value.headers;
-}
 
 function registerTimeout<T>(
   controller: AbortController,
@@ -214,11 +207,11 @@ export function consumeJSON<T>(input: string | unknown): T {
 export async function consumeError(error: unknown): Promise<Error> {
   if (error instanceof Error) {
     return error;
-  } else if (isResponse(error)) {
+  } else if (error instanceof Response) {
     const out = new Error(error.statusText);
     Object.assign(out, { status: error.status });
     return consumeError(out);
-  } else if (isPlainRecord(error)) {
+  } else if (isRecord(error)) {
     const out = new Error();
     Object.assign(out, error);
     return consumeError(out);
