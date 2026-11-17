@@ -24,8 +24,7 @@ const isRecoverableError = (error: unknown): error is Error => {
   if (RECOVERABLE_MESSAGE.test(error.message)) {
     return true;
   }
-  const errorCode = hasErrCode(error) ? error.errcode : undefined;
-  return errorCode === 5 /* SQLITE_BUSY */ || errorCode === 6 /* SQLITE_LOCKED */ || errorCode === 17; /* SQLITE_SCHEMA */
+  return hasErrCode(error) ? [5 /* SQLITE_BUSY */, 6 /* SQLITE_LOCKED */, 17 /* SQLITE_SCHEMA */].includes(error.errcode) : false;
 };
 
 const normalizeParameter = (val: unknown) => {

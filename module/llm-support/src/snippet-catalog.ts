@@ -46,7 +46,7 @@ async function loadSnippets(): Promise<SnippetSource[]> {
     const sorted = [...resolvedFiles].sort();
     return Promise.all(sorted.map(file => loadSnippet(path.join(dir, file))));
   } catch (err) {
-    if (isErrnoException(err) && (err.code === 'ENOENT' || err.code === 'ERR_MODULE_NOT_FOUND')) {
+    if (isErrnoException(err) && ['ENOENT', 'ERR_MODULE_NOT_FOUND'].includes(err.code!)) {
       return [];
     }
     throw err;
