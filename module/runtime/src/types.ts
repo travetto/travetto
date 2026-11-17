@@ -48,11 +48,7 @@ export function castTo<T>(input: unknown): T {
 }
 
 export const isRecord = (value: unknown): value is UnknownRecord => typeof value === 'object' && !!value && !Array.isArray(value);
-
-export const isPlainRecord = (value: unknown): value is UnknownRecord =>
-  typeof value === 'object' && // is obvious
-  value?.constructor === Object && // separate instances (Array, DOM, ...)
-  Object.prototype.toString.call(value) === '[object Object]'; // separate build-in like Math
+export const isPlainRecord = (value: unknown): value is UnknownRecord => typeof value === 'object' && value?.constructor === Object;
 
 export const isClass = (input: unknown): input is Class => typeof input === 'function' && 'Ⲑid' in input;
 export const castKey = <T>(input: string | number | symbol): keyof T => castTo(input);
