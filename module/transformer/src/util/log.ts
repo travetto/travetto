@@ -42,7 +42,7 @@ export class LogUtil {
    * Clean up `ts.Node` contents for logging
    */
   static collapseNode(value: unknown, cache: Set<unknown> = new Set()): unknown {
-    if (!value || typeof value !== 'object') {
+    if (!value || !(typeof value === 'object' || typeof value === 'function')) {
       return value;
     }
 

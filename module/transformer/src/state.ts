@@ -19,7 +19,7 @@ function hasOriginal(node: ts.Node): node is ts.Node & { original: ts.Node } {
 }
 
 function hasEscapedName(node: ts.Node): node is ts.Node & { name: { escapedText: string } } {
-  return !!node && 'name' in node && typeof node.name === 'object' && !!node.name && 'escapedText' in node.name;
+  return !!node && 'name' in node && typeof node.name === 'object' && !!node.name && 'escapedText' in node.name && !!node.name.escapedText;
 }
 
 function canRedeclare(node: ts.Node): node is ts.InterfaceDeclaration | ts.ClassDeclaration | ts.FunctionDeclaration {
