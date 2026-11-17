@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import * as vscode from 'vscode';
 
-import { AsyncIterableHelper, CodecUtil, Env, ExecUtil, isRecordWithStringKey, JSONUtil, Util } from '@travetto/runtime';
+import { AsyncIterableHelper, CodecUtil, Env, ExecUtil, hasProperty, JSONUtil, Util } from '@travetto/runtime';
 
 import type {
   CompilerEvent,
@@ -24,6 +24,7 @@ type ProgressState = { previous: number; bar: ProgressBar; cleanup: () => void }
 
 const SCOPE_MAX = 15;
 const SUB_LOG_REGEX = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(.\d{3})?Z?\s+(info|error|debug|warn)\s*/;
+const hasWorksSpace = hasProperty<{ workspace: string }>('workspace');
 
 /**
  * Workspace Compilation Support
@@ -125,7 +126,7 @@ export class CompilerWatchFeature extends BaseFeature {
           await AsyncIterableHelper.from(subProcess.stdout!)
             .flatMap(CodecUtil.toLines())
             .flatMap(JSONUtil.fromLines<CompilerEvent>({ ignoreErrors: true }))
-            .filter(({ payload }) => !(isRecordWithStringKey(payload, 'workspace') && payload.workspace !== Workspace.path))
+            .filter(({ payload }) => !(hasWorksSpace(payload) && payload.workspace !== Workspace.path))
             .forEach(({ type, payload }) => {
               switch (type) {
                 case 'log':
