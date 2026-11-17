@@ -1,7 +1,6 @@
 import type { CompilerEvent, CompilerEventType, CompilerStateEvent } from './types.ts';
-import { hasProperty } from './types.ts';
 
-const hasTypeField = hasProperty<{ type: string }>('type');
+const hasTypeField = (value: unknown): value is { type: string } => typeof value === 'object' && !!value && 'type' in value;
 
 const VALID_EVENT_TYPES = new Set<CompilerEventType>(['change', 'log', 'progress', 'state', 'all']);
 

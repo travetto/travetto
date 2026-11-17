@@ -6,10 +6,9 @@ import type { ManifestContext } from '@travetto/manifest';
 
 import { CommonUtil } from '../common.ts';
 import type { CompilerEventPayload, CompilerEventType, CompilerServerInfo, CompilerStateType, CompilerLoggerShape } from '../types.ts';
-import { hasProperty } from '../types.ts';
 import { CompilerUtil } from '../util.ts';
 
-const isConnectionReset = hasProperty('code', 'ECONNRESET');
+const isConnectionReset = (value: unknown) => typeof value === 'object' && !!value && 'code' in value && value.code === 'ECONNRESET';
 
 type FetchEventsConfig<T> = {
   signal?: AbortSignal;

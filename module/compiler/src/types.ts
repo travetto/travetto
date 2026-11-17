@@ -115,12 +115,3 @@ export abstract class CompilerLogger {
 }
 
 export type CompilerLoggerShape = Omit<CompilerLogger, 'render'>;
-
-/**
- * Check if value is a record with a string key
- */
-
-export const hasProperty =
-  <T>(key: string | symbol, equalTo?: unknown) =>
-  (value: unknown): value is T =>
-    typeof value === 'object' && !!value && key in value && (equalTo === undefined || equalTo === value[key as keyof typeof value]);
