@@ -62,9 +62,6 @@ export const isRecordWithNumberKey = <T, K extends string | symbol>(value: unkno
 export const isRecordWithStringKey = <T, K extends string | symbol>(value: unknown, key: K): value is UnknownRecord & Record<K, string> =>
   isRecord(value) && key in value && typeof value[key as keyof typeof value] === 'string';
 
-export const isRecordWithBooleanKey = <T, K extends string | symbol>(value: unknown, key: K): value is UnknownRecord & Record<K, boolean> =>
-  isRecord(value) && key in value && typeof value[key as keyof typeof value] === 'boolean';
-
 export const isPlainRecord = (value: unknown): value is UnknownRecord =>
   isRecord(value) && // is obvious
   value.constructor === Object && // separate instances (Array, DOM, ...)
