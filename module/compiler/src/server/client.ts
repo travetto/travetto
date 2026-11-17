@@ -50,19 +50,13 @@ export class CompilerClient {
 
     options?.signal?.addEventListener('abort', () => controller.abort());
     timers
-      .setTimeout(options?.timeout ?? 100, undefined, {
-        ref: false,
-        signal: timeoutController.signal
-      })
+      .setTimeout(options?.timeout ?? 100, undefined, { ref: false, signal: timeoutController.signal })
       .then(() => {
         logTimeout && this.#log.error(`Timeout on request to ${this.#url}${urlPath}`);
         controller.abort('TIMEOUT');
       })
       .catch(() => {});
-    const response = await fetch(`${this.#url}${urlPath}`, {
-      ...options,
-      signal: controller.signal
-    });
+    const response = await fetch(`${this.#url}${urlPath}`, { ...options, signal: controller.signal });
     const out = { ok: response.ok, text: await response.text() };
     timeoutController.abort();
     return out;
@@ -177,10 +171,7 @@ export class CompilerClient {
     // Loop until
     this.#log.debug(`Waiting for states, ${states.join(', ')}`);
     let finalState: CompilerStateType = 'closed';
-    for await (const event of this.fetchEvents('state', {
-      signal,
-      until: event => set.has(event.state)
-    })) {
+    for await (const event of this.fetchEvents('state', { signal, until: event => set.has(event.state) })) {
       finalState = event.state;
     }
     this.#log.debug(`Found state, one of ${states.join(', ')} `);
