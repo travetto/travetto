@@ -76,7 +76,6 @@ import {
   JSONUtil,
   ShutdownManager,
   TypedObject,
-  isRecord,
   hasProperty
 } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
