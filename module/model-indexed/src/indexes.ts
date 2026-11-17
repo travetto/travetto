@@ -106,11 +106,7 @@ export const warnIfIndexedUniqueIndex = (service: ClassInstance, cls: Class<Mode
   let warned = false;
   for (const idx of indexes) {
     if (isModelIndexedIndex(idx) && 'unique' in idx && idx.unique) {
-      console.debug('Unique indices are not supported', {
-        cls: cls.Ⲑid,
-        idx: idx.name,
-        service: service.constructor.Ⲑid
-      });
+      console.debug('Unique indices are not supported', { cls: cls.Ⲑid, idx: idx.name, service: service.constructor.Ⲑid });
       warned = true;
     }
   }
@@ -121,11 +117,7 @@ export const warnIfNonIndexedIndex = (service: ClassInstance, cls: Class<ModelTy
   let warned = false;
   for (const idx of indexes) {
     if (!isModelIndexedIndex(idx)) {
-      console.debug('Non-indexed indices are not supported', {
-        cls: cls.Ⲑid,
-        idx: idx.name,
-        service: service.constructor.Ⲑid
-      });
+      console.debug('Non-indexed indices are not supported', { cls: cls.Ⲑid, idx: idx.name, service: service.constructor.Ⲑid });
       warned = true;
     }
   }
