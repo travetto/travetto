@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { ManifestModuleUtil, path } from '@travetto/manifest';
 
-import { isRecord, type TemplateLiteralPart, transformCast } from '../types/shared.ts';
+import { type TemplateLiteralPart, transformCast } from '../types/shared.ts';
 import { CoreUtil } from '../util/core.ts';
 import { DeclarationUtil } from '../util/declaration.ts';
 import { DocUtil } from '../util/doc.ts';

@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { type IndexedFile, type ManifestIndex, ManifestModuleUtil, path } from '@travetto/manifest';
 
-import { isUnsafeProperty, transformCast } from '../types/shared.ts';
+import { transformCast } from '../types/shared.ts';
 import { DeclarationUtil } from '../util/declaration.ts';
 import { DocUtil } from '../util/doc.ts';
 import { TypeBuilder, TypeCategorize } from './builder.ts';
@@ -119,7 +119,7 @@ export class SimpleResolver implements TransformResolver {
   getPropertiesOfType(type: ts.Type): ts.Symbol[] {
     return this.#tsChecker
       .getPropertiesOfType(type)
-      .filter(property => !isUnsafeProperty(property.getName()) || property.getName() === 'constructor');
+      .filter(property => property.getName() === 'prototype' || property.getName() === '__proto__');
   }
 
   /**

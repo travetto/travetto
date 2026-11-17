@@ -8,13 +8,13 @@ import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { ExistsError } from '@travetto/model';
 import { SQLConnection } from '@travetto/model-sql';
-import { castTo, hasRecordKey, JSONUtil, Runtime, RuntimeError, ShutdownManager, Util, type UnknownRecord } from '@travetto/runtime';
+import { castTo, hasProperty, JSONUtil, Runtime, RuntimeError, ShutdownManager, Util, type UnknownRecord } from '@travetto/runtime';
 
 import type { SqliteModelConfig } from './config.ts';
 import { SqliteDialect } from './dialect.ts';
 
-const hasErrorCode = hasRecordKey<{ code: string }>('code');
-const hasErrCode = hasRecordKey<{ errcode: number }>('errcode');
+const hasErrorCode = hasProperty<{ code: string }>('code');
+const hasErrCode = hasProperty<{ errcode: number }>('errcode');
 
 const RECOVERABLE_MESSAGE = /database( table| schema)? is (locked|busy)|database schema has changed|vtable constructor failed/i;
 const isRecoverableError = (error: unknown): error is Error => {

@@ -1,10 +1,10 @@
 import type { ModelType } from '@travetto/model';
 import type { TextSearchClause } from '@travetto/model-query';
 import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext, type TextSearchState } from '@travetto/model-sql';
-import { hasRecordKey, JSONUtil, type UnknownRecord } from '@travetto/runtime';
+import { hasProperty, JSONUtil, type UnknownRecord } from '@travetto/runtime';
 import { SchemaRegistryIndex, type SchemaFieldConfig } from '@travetto/schema';
 
-const hasNotFoundCode = hasRecordKey<{ code: unknown }>('code', '42P01');
+const hasNotFoundCode = hasProperty<{ code: unknown }>('code', '42P01');
 
 /* cspell:words ILIKE regclass indexdef tablename pkey tsvector tsquery */
 

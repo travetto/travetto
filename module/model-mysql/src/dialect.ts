@@ -7,11 +7,11 @@ import {
   type TableContext,
   type TextSearchState
 } from '@travetto/model-sql';
-import { hasRecordKey, JSONUtil, type UnknownRecord } from '@travetto/runtime';
+import { hasProperty, JSONUtil, type UnknownRecord } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
-const hasErrorNo = hasRecordKey<{ errno: number }>('errno');
-const hasErrorCode = hasRecordKey<{ code: string }>('code');
+const hasErrorNo = hasProperty<{ errno: number }>('errno');
+const hasErrorCode = hasProperty<{ code: string }>('code');
 
 export class MysqlDialect extends AbstractANSI99Dialect {
   override escapeIdentifier(name: string): string {

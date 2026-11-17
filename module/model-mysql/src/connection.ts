@@ -5,13 +5,13 @@ import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { ExistsError, type ModelType } from '@travetto/model';
 import { SQLConnection, type TableContext } from '@travetto/model-sql';
-import { type Class, type UnknownRecord, castTo, hasRecordKey, JSONUtil, ShutdownManager } from '@travetto/runtime';
+import { type Class, type UnknownRecord, castTo, hasProperty, JSONUtil, ShutdownManager } from '@travetto/runtime';
 
 import type { MysqlModelConfig } from './config.ts';
 import { MysqlDialect } from './dialect.ts';
 
-const hasErrorCode = hasRecordKey<{ code: string }>('code');
-const isSimplePacket = hasRecordKey<OkPacket | ResultSetHeader>('affectedRows');
+const hasErrorCode = hasProperty<{ code: string }>('code');
+const isSimplePacket = hasProperty<OkPacket | ResultSetHeader>('affectedRows');
 
 /**
  * MySQL Connection Manager.

@@ -1,7 +1,7 @@
 import type { CompilerEvent, CompilerEventType, CompilerStateEvent } from './types.ts';
-import { hasRecordKey } from './types.ts';
+import { hasProperty } from './types.ts';
 
-const hasTypeField = hasRecordKey<{ type: string }>('type');
+const hasTypeField = hasProperty<{ type: string }>('type');
 
 const VALID_EVENT_TYPES = new Set<CompilerEventType>(['change', 'log', 'progress', 'state', 'all']);
 

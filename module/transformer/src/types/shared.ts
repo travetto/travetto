@@ -36,18 +36,3 @@ export function transformCast<T>(input: unknown): T {
 }
 
 export type UnknownRecord = Record<string, unknown>;
-
-export const isRecord = (value: unknown): value is UnknownRecord => typeof value === 'object' && !!value && !Array.isArray(value);
-
-export const hasRecordKey =
-  <T>(key: string | symbol, equalTo?: unknown) =>
-  (value: unknown): value is T =>
-    typeof value === 'object' && !!value && key in value && (equalTo === undefined || equalTo === value[key as keyof typeof value]);
-
-export const isPlainRecord = (value: unknown): value is UnknownRecord =>
-  typeof value === 'object' &&
-  value?.constructor === Object && // separate instances (Array, DOM, ...)
-  Object.prototype.toString.call(value) === '[object Object]'; // separate build-in like Math
-
-export const isUnsafeProperty = (key: string): key is '__proto__' | 'prototype' | 'constructor' =>
-  key === 'prototype' || key === 'constructor' || key === '__proto__';

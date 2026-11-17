@@ -77,7 +77,7 @@ import {
   ShutdownManager,
   TypedObject,
   isRecord,
-  hasRecordKey
+  hasProperty
 } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
@@ -87,7 +87,7 @@ import { ElasticsearchQueryUtil } from './internal/query.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
 import type { EsBulkError } from './internal/types.ts';
 
-const hasErrorField = hasRecordKey<{ error: unknown }>('error');
+const hasErrorField = hasProperty<{ error: unknown }>('error');
 
 const ELASTICSEARCH_REPLACER = {
   replacer(this: unknown, key: string, value: unknown): unknown {

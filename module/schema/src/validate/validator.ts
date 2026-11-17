@@ -3,7 +3,7 @@ import {
   type ClassInstance,
   castKey,
   castTo,
-  hasRecordKey,
+  hasProperty,
   isClass,
   isPlainRecord,
   isRecord,
@@ -19,7 +19,7 @@ import { Messages } from './messages.ts';
 import { CommonRegexToName } from './regex.ts';
 import type { ValidationError, ValidationKindCore, ValidationResult } from './types.ts';
 
-const hasLength = hasRecordKey<{ length: number }>('length');
+const hasLength = hasProperty<{ length: number }>('length');
 const PrimitiveTypes = new Set<Function>([String, Number, BigInt, Boolean]);
 type NumericComparable = number | bigint | Date;
 

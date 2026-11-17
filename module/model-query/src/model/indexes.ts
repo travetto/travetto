@@ -1,5 +1,5 @@
 import { type IndexConfig, ModelRegistryIndex, type ModelType } from '@travetto/model';
-import { hasRecordKey, type Class, type Primitive, type SimpleFields } from '@travetto/runtime';
+import { hasProperty, type Class, type Primitive, type SimpleFields } from '@travetto/runtime';
 
 type RetainPrimitiveFields<T> = Pick<T, SimpleFields<T, Primitive | Date>>;
 
@@ -29,4 +29,4 @@ export function QueryIndex<T extends ModelType>(index: Omit<QueryIndexConfig<T>,
   };
 }
 
-export const isModelQueryIndex = hasRecordKey<QueryIndexConfig<ModelType>>('type', 'query');
+export const isModelQueryIndex = hasProperty<QueryIndexConfig<ModelType>>('type', 'query');

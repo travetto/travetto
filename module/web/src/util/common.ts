@@ -1,10 +1,10 @@
-import { type ErrorCategory, hasRecordKey, RuntimeError, Util } from '@travetto/runtime';
+import { type ErrorCategory, hasProperty, RuntimeError, Util } from '@travetto/runtime';
 
 import type { WebError } from '../types/error.ts';
 import type { WebRequest } from '../types/request.ts';
 import { WebResponse } from '../types/response.ts';
 
-const hasMessage = hasRecordKey<{ message: string }>('message');
+const hasMessage = hasProperty<{ message: string }>('message');
 
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>; before?: List<T>; key: T };

@@ -1,6 +1,6 @@
 import { type BinaryArray, type BinaryType, BinaryUtil } from './binary.ts';
 import { RuntimeError } from './error.ts';
-import { castTo, hasRecordKey } from './types.ts';
+import { castTo, hasProperty } from './types.ts';
 
 type TextInput = string | BinaryArray;
 
@@ -10,7 +10,7 @@ const DOUBLE_QUOTE = '"'.charCodeAt(0);
 const CARRIAGE_RETURN = '\r'.charCodeAt(0);
 const LINE_FEED = '\n'.charCodeAt(0);
 
-const hasReadableEncoding = hasRecordKey<{ readableEncoding: string }>('readableEncoding');
+const hasReadableEncoding = hasProperty<{ readableEncoding: string }>('readableEncoding');
 
 /**
  * Utilities for encoding and decoding common formats

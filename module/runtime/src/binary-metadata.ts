@@ -6,9 +6,9 @@ import path from 'node:path';
 import { type BinaryArray, type BinaryContainer, type BinaryStream, type BinaryType, BinaryUtil } from './binary.ts';
 import { CodecUtil } from './codec.ts';
 import { RuntimeError } from './error.ts';
-import { hasRecordKey } from './types.ts';
+import { hasProperty } from './types.ts';
 
-const hasReadableEncoding = hasRecordKey<{ readableEncoding?: string }>('readableEncoding');
+const hasReadableEncoding = hasProperty<{ readableEncoding?: string }>('readableEncoding');
 
 type BlobInput = BinaryType | (() => BinaryType | Promise<BinaryType>);
 
