@@ -4,12 +4,12 @@ import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { ExistsError } from '@travetto/model';
 import { SQLConnection } from '@travetto/model-sql';
-import { castTo, isRecordWithKey, ShutdownManager, type UnknownRecord } from '@travetto/runtime';
+import { castTo, hasRecordKey, ShutdownManager, type UnknownRecord } from '@travetto/runtime';
 
 import type { PostgresModelConfig } from './config.ts';
 import { PostgresDialect } from './dialect.ts';
 
-const isPgDatabaseError = (error: unknown): error is DatabaseError => isRecordWithKey(error, 'code');
+const isPgDatabaseError = hasRecordKey<DatabaseError>('code');
 
 /**
  * PostgreSQL connection manager

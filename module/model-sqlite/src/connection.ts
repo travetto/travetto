@@ -8,10 +8,13 @@ import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { ExistsError } from '@travetto/model';
 import { SQLConnection } from '@travetto/model-sql';
-import { castTo, isRecordWithKey, JSONUtil, Runtime, RuntimeError, ShutdownManager, Util, type UnknownRecord } from '@travetto/runtime';
+import { castTo, hasRecordKey, JSONUtil, Runtime, RuntimeError, ShutdownManager, Util, type UnknownRecord } from '@travetto/runtime';
 
 import type { SqliteModelConfig } from './config.ts';
 import { SqliteDialect } from './dialect.ts';
+
+const hasErrorCode = hasRecordKey<{ code: string }>('code');
+const hasErrCode = hasRecordKey<{ errcode: number }>('errcode');
 
 const RECOVERABLE_MESSAGE = /database( table| schema)? is (locked|busy)|database schema has changed|vtable constructor failed/i;
 const isRecoverableError = (error: unknown): error is Error => {
@@ -21,7 +24,7 @@ const isRecoverableError = (error: unknown): error is Error => {
   if (RECOVERABLE_MESSAGE.test(error.message)) {
     return true;
   }
-  const errorCode = 'errcode' in error && typeof error.errcode === 'number' ? error.errcode : undefined;
+  const errorCode = hasErrCode(error) ? error.errcode : undefined;
   return errorCode === 5 /* SQLITE_BUSY */ || errorCode === 6 /* SQLITE_LOCKED */ || errorCode === 17; /* SQLITE_SCHEMA */
 };
 
@@ -196,7 +199,7 @@ export class SqliteConnection extends SQLConnection<DatabaseSync> {
           return { count: typeof out.changes === 'number' ? out.changes : +out.changes.toString(), records: [] };
         }
       } catch (error) {
-        const code = isRecordWithKey(error, 'code') ? error.code : undefined;
+        const code = hasErrorCode(error) ? error.code : undefined;
         const message = error instanceof Error ? error.message : undefined;
         switch (code) {
           case 'ERR_SQLITE_ERROR': {

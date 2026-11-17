@@ -1,4 +1,4 @@
-import { isRecordWithStringKey } from '@travetto/runtime';
+import { hasRecordKey } from '@travetto/runtime';
 
 import type { TestEvent, TestRemoveEvent } from '../model/event.ts';
 
@@ -15,7 +15,7 @@ export const TestWorkerEvents = {
 
 export type TestRunEvent = { type: 'runTest'; import: string };
 
-export const isTestRunEvent = (event: unknown): event is TestRunEvent => isRecordWithStringKey(event, 'type') && event.type === 'runTest';
+export const isTestRunEvent = hasRecordKey<TestRunEvent>('type', 'runTest');
 
 export type TestReadyEvent = { type: 'ready' };
 export type TestLogEvent = { type: 'log'; message: string };

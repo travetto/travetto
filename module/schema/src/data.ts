@@ -9,8 +9,7 @@ import {
   isRecord,
   TypedObject,
   type UnknownRecord,
-  isUnsafeProperty,
-  isRecordWithKey
+  isUnsafeProperty
 } from '@travetto/runtime';
 
 import { UnknownType } from './types.ts';
@@ -29,7 +28,7 @@ export class DataUtil {
   static getPath<T = unknown>(root: unknown, path: string[]): { found: boolean; value: T } {
     let current: unknown = root;
     for (const segment of path) {
-      if (isRecordWithKey(current, segment)) {
+      if (isRecord(current) && segment in current) {
         current = current[segment];
       } else {
         return { found: false, value: current as T };

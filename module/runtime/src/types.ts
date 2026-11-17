@@ -47,24 +47,11 @@ export function castTo<T>(input: unknown): T {
   return input as T;
 }
 
-export const isRecord = (value: unknown): value is UnknownRecord =>
-  typeof value === 'object' && // separate from primitives
-  value !== undefined &&
-  value !== null && // is obvious
-  !Array.isArray(value);
-
-export const isRecordWithKey = <K extends string | symbol>(value: unknown, key: K): value is UnknownRecord & Record<K, unknown> =>
-  isRecord(value) && key in value;
-
-export const isRecordWithNumberKey = <T, K extends string | symbol>(value: unknown, key: K): value is UnknownRecord & Record<K, number> =>
-  isRecord(value) && key in value && typeof value[key as keyof typeof value] === 'number';
-
-export const isRecordWithStringKey = <T, K extends string | symbol>(value: unknown, key: K): value is UnknownRecord & Record<K, string> =>
-  isRecord(value) && key in value && typeof value[key as keyof typeof value] === 'string';
+export const isRecord = (value: unknown): value is UnknownRecord => typeof value === 'object' && !!value && !Array.isArray(value);
 
 export const isPlainRecord = (value: unknown): value is UnknownRecord =>
-  isRecord(value) && // is obvious
-  value.constructor === Object && // separate instances (Array, DOM, ...)
+  typeof value === 'object' && // is obvious
+  value?.constructor === Object && // separate instances (Array, DOM, ...)
   Object.prototype.toString.call(value) === '[object Object]'; // separate build-in like Math
 
 export const isClass = (input: unknown): input is Class => typeof input === 'function' && 'Ⲑid' in input;
@@ -77,10 +64,15 @@ export function classConstruct<T>(cls: Class<T>, args: unknown[] = []): ClassIns
   return castTo(new cons(...args));
 }
 
+export const hasRecordKey =
+  <T>(key: string | symbol, equalTo?: unknown) =>
+  (value: unknown): value is T =>
+    typeof value === 'object' && !!value && key in value && (equalTo === undefined || equalTo === value[key as keyof typeof value]);
+
 export const hasFunction =
   <T>(key: keyof T) =>
   (value: unknown): value is T =>
-    isRecord(value) && typeof value[castKey(key)] === 'function';
+    typeof value === 'object' && !!value && key in value && typeof value[key as keyof typeof value] === 'function';
 
 export const hasToJSON = hasFunction<{ toJSON(): object }>('toJSON');
 

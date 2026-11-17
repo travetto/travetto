@@ -6,7 +6,9 @@ import path from 'node:path';
 import { type BinaryArray, type BinaryContainer, type BinaryStream, type BinaryType, BinaryUtil } from './binary.ts';
 import { CodecUtil } from './codec.ts';
 import { RuntimeError } from './error.ts';
-import { isRecord, isRecordWithStringKey } from './types.ts';
+import { hasRecordKey } from './types.ts';
+
+const hasReadableEncoding = hasRecordKey<{ readableEncoding?: string }>('readableEncoding');
 
 type BlobInput = BinaryType | (() => BinaryType | Promise<BinaryType>);
 
@@ -107,7 +109,7 @@ export class BinaryMetadataUtil {
       metadata.contentEncoding ??= input.readableEncoding!;
       metadata.size ??= (await fs.stat(location)).size;
       metadata.hash ??= await this.hash(createReadStream(location), { hashAlgorithm: 'sha256' });
-    } else if (isRecordWithStringKey(input, 'readableEncoding')) {
+    } else if (hasReadableEncoding(input)) {
       metadata.contentEncoding ??= input.readableEncoding;
     }
 

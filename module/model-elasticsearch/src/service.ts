@@ -77,7 +77,7 @@ import {
   ShutdownManager,
   TypedObject,
   isRecord,
-  isRecordWithKey
+  hasRecordKey
 } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
@@ -86,6 +86,8 @@ import { IndexManager } from './index-manager.ts';
 import { ElasticsearchQueryUtil } from './internal/query.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
 import type { EsBulkError } from './internal/types.ts';
+
+const hasErrorField = hasRecordKey<{ error: unknown }>('error');
 
 const ELASTICSEARCH_REPLACER = {
   replacer(this: unknown, key: string, value: unknown): unknown {
@@ -266,7 +268,7 @@ export class ElasticsearchModelService
       });
       return result;
     } catch (error) {
-      if (error instanceof errors.ResponseError && isRecordWithKey(error.meta.body, 'error')) {
+      if (error instanceof errors.ResponseError && hasErrorField(error.meta.body)) {
         console.error(error.meta.body.error);
       }
       throw error;

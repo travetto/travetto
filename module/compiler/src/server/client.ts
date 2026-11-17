@@ -6,8 +6,10 @@ import type { ManifestContext } from '@travetto/manifest';
 
 import { CommonUtil } from '../common.ts';
 import type { CompilerEventPayload, CompilerEventType, CompilerServerInfo, CompilerStateType, CompilerLoggerShape } from '../types.ts';
-import { isRecordWithStringKey } from '../types.ts';
+import { hasRecordKey } from '../types.ts';
 import { CompilerUtil } from '../util.ts';
+
+const isConnectionReset = hasRecordKey('code', 'ECONNRESET');
 
 type FetchEventsConfig<T> = {
   signal?: AbortSignal;
@@ -138,7 +140,7 @@ export class CompilerClient {
           }
         }
       } catch (error) {
-        const aborted = controller.signal.aborted || (isRecordWithStringKey(error, 'code') && error.code === 'ECONNRESET');
+        const aborted = controller.signal.aborted || isConnectionReset(error);
         if (!aborted) {
           throw error;
         }

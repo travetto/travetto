@@ -3,10 +3,10 @@ import {
   type ClassInstance,
   castKey,
   castTo,
+  hasRecordKey,
   isClass,
   isPlainRecord,
   isRecord,
-  isRecordWithNumberKey,
   TypedObject
 } from '@travetto/runtime';
 
@@ -19,6 +19,7 @@ import { Messages } from './messages.ts';
 import { CommonRegexToName } from './regex.ts';
 import type { ValidationError, ValidationKindCore, ValidationResult } from './types.ts';
 
+const hasLength = hasRecordKey<{ length: number }>('length');
 const PrimitiveTypes = new Set<Function>([String, Number, BigInt, Boolean]);
 type NumericComparable = number | bigint | Date;
 
@@ -41,7 +42,7 @@ function isRangeValue(value: unknown): value is NumericComparable {
 }
 
 function isLengthValue(value: unknown): value is { length: number } {
-  return typeof value === 'string' || isRecordWithNumberKey(value, 'length');
+  return typeof value === 'string' || hasLength(value);
 }
 
 /**

@@ -1,13 +1,14 @@
 import type { CompilerEvent, CompilerEventType, CompilerStateEvent } from './types.ts';
-import { isRecordWithStringKey } from './types.ts';
+import { hasRecordKey } from './types.ts';
+
+const hasTypeField = hasRecordKey<{ type: string }>('type');
 
 const VALID_EVENT_TYPES = new Set<CompilerEventType>(['change', 'log', 'progress', 'state', 'all']);
 
 export class EventUtil {
-  static isCompilerEventType = (value: string): value is CompilerEventType => VALID_EVENT_TYPES.has(value as CompilerEventType);
+  static isCompilerEventType = (value: unknown): value is CompilerEventType => VALID_EVENT_TYPES.has(value as CompilerEventType);
 
-  static isCompilerEvent = (value: unknown): value is CompilerEvent =>
-    isRecordWithStringKey(value, 'type') && EventUtil.isCompilerEventType(value.type);
+  static isCompilerEvent = (value: unknown): value is CompilerEvent => hasTypeField(value) && EventUtil.isCompilerEventType(value.type);
 
   static hasProcessId(payload: CompilerStateEvent): payload is CompilerStateEvent & { extra: { processId: number } } {
     return typeof payload.extra?.processId === 'number';

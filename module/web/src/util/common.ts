@@ -1,8 +1,10 @@
-import { type ErrorCategory, isRecordWithStringKey, RuntimeError, Util } from '@travetto/runtime';
+import { type ErrorCategory, hasRecordKey, RuntimeError, Util } from '@travetto/runtime';
 
 import type { WebError } from '../types/error.ts';
 import type { WebRequest } from '../types/request.ts';
 import { WebResponse } from '../types/response.ts';
+
+const hasMessage = hasRecordKey<{ message: string }>('message');
 
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>; before?: List<T>; key: T };
@@ -115,7 +117,7 @@ export class WebCommonUtil {
     const body =
       error instanceof Error
         ? error
-        : isRecordWithStringKey(error, 'message')
+        : hasMessage(error)
           ? new RuntimeError(error.message, { details: error })
           : new RuntimeError(`${error}`);
 

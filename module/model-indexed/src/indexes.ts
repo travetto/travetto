@@ -1,5 +1,7 @@
 import { type IndexConfig, ModelRegistryIndex, type ModelType } from '@travetto/model';
-import { type Any, type Class, type ClassInstance, type UnknownRecord, castTo, isRecord, isRecordWithStringKey } from '@travetto/runtime';
+import { type Any, type Class, type ClassInstance, type UnknownRecord, castTo, hasRecordKey, isRecord } from '@travetto/runtime';
+
+const hasTypeField = hasRecordKey<{ type: string }>('type');
 
 import type {
   AllIndexes,
@@ -98,7 +100,7 @@ export function sortedIndex<T extends ModelType, K extends KeyedIndexSelection<T
 }
 
 export const isModelIndexedIndex = <T extends ModelType>(idx: Any): idx is AllIndexes<T> =>
-  isRecordWithStringKey(idx, 'type') && idx.type.startsWith('indexed:');
+  hasTypeField(idx) && idx.type.startsWith('indexed:');
 
 export const warnIfIndexedUniqueIndex = (service: ClassInstance, cls: Class<ModelType>, indexes: IndexConfig[]): boolean => {
   let warned = false;

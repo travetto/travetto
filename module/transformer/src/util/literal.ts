@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { isRecordWithKey, type TemplateLiteral, transformCast, type UnknownRecord } from '../types/shared.ts';
+import { hasRecordKey, type TemplateLiteral, transformCast, type UnknownRecord } from '../types/shared.ts';
 
 const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T>(value: T): K[];
@@ -8,7 +8,7 @@ const TypedObject: {
 
 const KNOWN_FNS = new Set<unknown>([String, Number, Boolean, Date, RegExp]);
 
-const isNode = (value: unknown): value is ts.Node => isRecordWithKey(value, 'kind');
+const isNode = hasRecordKey<ts.Node>('kind');
 const isKnownFn = (value: unknown): value is Function => KNOWN_FNS.has(value);
 
 /**

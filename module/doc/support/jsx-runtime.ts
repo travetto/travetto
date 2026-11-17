@@ -1,4 +1,4 @@
-import { type Class, castTo, isRecordWithKey } from '@travetto/runtime';
+import { type Class, castTo, hasRecordKey } from '@travetto/runtime';
 
 type JSXChild = JSXElement | number | bigint | boolean | object | string;
 type JSXProps = { children?: JSXChild | JSXChild[] | null };
@@ -54,9 +54,7 @@ createFrag = createFragment;
 export const jsx = createElement;
 export const jsxs = createElement;
 export const Fragment = createFragment;
-export function isJSXElement(value: unknown): value is JSXElement {
-  return isRecordWithKey(value, JSXRuntimeTag);
-}
+export const isJSXElement = hasRecordKey<JSXElement>(JSXRuntimeTag);
 
 export namespace JSX {
   export interface Element extends JSXElement {}
