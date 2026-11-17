@@ -36,7 +36,8 @@
   "dependencies": {
     "@parcel/watcher": "^2.6.0",
     "@travetto/manifest": "^8.1.0-rc.1",
-    "@travetto/transformer": "^8.1.0-rc.1"
+    "@travetto/transformer": "^8.1.0-rc.1",
+    "chalk": "^6.0.1"
   },
   "peerDependencies": {
     "@travetto/cli": "^8.1.0-rc.5"

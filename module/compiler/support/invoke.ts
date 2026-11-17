@@ -1,4 +1,6 @@
 // @trv-no-transform
+import chalk from 'chalk';
+
 import { getManifestContext, ManifestUtil } from '@travetto/manifest';
 
 import { CommonUtil } from '../src/common.ts';
@@ -8,12 +10,14 @@ import { CompilerClient } from '../src/server/client.ts';
 import { CompilerManager } from '../src/server/manager.ts';
 import { CompilerUtil } from '../src/util.ts';
 
-const hasColor = (process.stdout.isTTY && /^(0)*$/.test(process.env.NO_COLOR ?? '')) || /1\d*/.test(process.env.FORCE_COLOR ?? '');
-const color =
-  (code: number) =>
-  (value: string): string =>
-    hasColor ? `\x1b[${code}m${value}\x1b[0m` : `${value}`;
-const STYLE = { error: color(91), title: color(36), main: color(92), command: color(35), arg: color(37), description: color(33) };
+const STYLE = {
+  error: chalk.redBright,
+  title: chalk.magenta,
+  main: chalk.greenBright,
+  command: chalk.blueBright,
+  arg: chalk.white,
+  description: chalk.yellow
+};
 
 const COMMANDS = {
   server: { description: 'Run the compiler in watch mode directly' },
