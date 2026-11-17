@@ -108,7 +108,7 @@ export class BinaryMetadataUtil {
       metadata.size ??= (await fs.stat(location)).size;
       metadata.hash ??= await this.hash(createReadStream(location), { hashAlgorithm: 'sha256' });
     } else if (isRecordWithStringKey(input, 'readableEncoding')) {
-      metadata.contentEncoding ??= input.readableEncoding!;
+      metadata.contentEncoding ??= input.readableEncoding;
     }
 
     return metadata;

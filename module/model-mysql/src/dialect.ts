@@ -272,9 +272,9 @@ GROUP BY INDEX_NAME, TABLE_NAME, NON_UNIQUE;
 
   isTableNotFoundError(error: unknown): boolean {
     return (
-      (error instanceof Error && (/unknown table/i.test(error.message) || /doesn't exist/i.test(error.message))) ||
-      (isRecordWithNumberKey(error, 'errno') && (error.errno === 1051 || error.errno === 1146)) ||
-      (isRecordWithStringKey(error, 'code') && (error.code === 'ER_BAD_TABLE_ERROR' || error.code === 'ER_NO_SUCH_TABLE'))
+      (error instanceof Error && /unknown table|doesn't exist/i.test(error.message)) ||
+      (isRecordWithNumberKey(error, 'errno') && [1051, 1146].includes(error.errno)) ||
+      (isRecordWithStringKey(error, 'code') && ['ER_BAD_TABLE_ERROR', 'ER_NO_SUCH_TABLE'].includes(error.code))
     );
   }
 
