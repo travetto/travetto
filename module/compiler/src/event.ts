@@ -1,6 +1,5 @@
-import { isRecordWithStringKey } from '@travetto/transformer';
-
 import type { CompilerEvent, CompilerEventType, CompilerStateEvent } from './types.ts';
+import { isRecordWithStringKey } from './types.ts';
 
 const VALID_EVENT_TYPES = new Set<CompilerEventType>(['change', 'log', 'progress', 'state', 'all']);
 

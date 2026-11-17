@@ -5,7 +5,7 @@ import { type ManifestIndex, path } from '@travetto/manifest';
 import { ImportManager } from './importer.ts';
 import { SimpleResolver } from './resolver/service.ts';
 import type { AnyType, ForeignType, ManagedType, MappedType } from './resolver/types.ts';
-import { isRecordWithStringKey, type Import } from './types/shared.ts';
+import { isRecordWithKey, type Import } from './types/shared.ts';
 import { type DecoratorMeta, ModuleNameSymbol, type State, type Transformer } from './types/visitor.ts';
 import { CoreUtil } from './util/core.ts';
 import { DeclarationUtil } from './util/declaration.ts';
@@ -19,7 +19,7 @@ function hasOriginal(node: ts.Node): node is ts.Node & { original: ts.Node } {
 }
 
 function hasEscapedName(node: ts.Node): node is ts.Node & { name: { escapedText: string } } {
-  return !!node && 'name' in node && isRecordWithStringKey(node.name, 'escapedText');
+  return !!node && 'name' in node && isRecordWithKey(node.name, 'escapedText') && typeof node.name.escapedText === 'string';
 }
 
 function canRedeclare(node: ts.Node): node is ts.InterfaceDeclaration | ts.ClassDeclaration | ts.FunctionDeclaration {

@@ -115,3 +115,20 @@ export abstract class CompilerLogger {
 }
 
 export type CompilerLoggerShape = Omit<CompilerLogger, 'render'>;
+
+/**
+ * Check if value is a record with a string key
+ */
+export const isRecordWithStringKey = <K extends string | symbol>(
+  value: unknown,
+  key: K
+): value is Record<string, unknown> & Record<K, string> => {
+  return (
+    typeof value === 'object' &&
+    value !== undefined &&
+    value !== null &&
+    !Array.isArray(value) &&
+    key in value &&
+    typeof value[key as keyof typeof value] === 'string'
+  );
+};
