@@ -88,6 +88,7 @@ import { ElasticsearchSchemaUtil } from './internal/schema.ts';
 import type { EsBulkError } from './internal/types.ts';
 
 const hasErrorField = hasProperty<{ error: unknown }>('error');
+const isDocumentMissingException = hasProperty('type', 'document_missing_exception');
 
 const ELASTICSEARCH_REPLACER = {
   replacer(this: unknown, key: string, value: unknown): unknown {
@@ -106,9 +107,7 @@ function isConflictError(error: unknown): boolean {
 function isNotFoundError(error: unknown): boolean {
   return (
     (error instanceof errors.ResponseError &&
-      (error.statusCode === 404 ||
-        error.body?.result === 'not_found' ||
-        (isRecord(error.body?.error) && error.body.error.type === 'document_missing_exception'))) ||
+      (error.statusCode === 404 || error.body?.result === 'not_found' || isDocumentMissingException(error.body?.error))) ||
     (error instanceof Error && error.message.includes('document_missing_exception'))
   );
 }
