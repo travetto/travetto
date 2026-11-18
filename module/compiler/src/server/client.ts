@@ -129,7 +129,7 @@ export class CompilerClient {
         );
 
         for await (const line of rl.createInterface(response)) {
-          if (line.trim().charAt(0) === '{') {
+          if (line.trim().at(0) === '{') {
             const event: T = JSON.parse(line);
             if (config.until?.(event)) {
               await CommonUtil.queueMacroTask();

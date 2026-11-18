@@ -50,7 +50,7 @@ export class CliCommandRegistryAdapter implements RegistryAdapter<CliCommandConf
       const aliases: string[] = (field.aliases = [...envAliases]);
 
       if (short === undefined) {
-        short = fieldName.charAt(0);
+        short = fieldName.at(0);
         if (!used.has(short)) {
           aliases.push(`-${short}`);
           used.add(short);

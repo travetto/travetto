@@ -46,7 +46,7 @@ export class CompilerWatchFeature extends BaseFeature {
     const kill = (): void => controller.abort();
     signal.addEventListener('abort', kill);
 
-    const title = type.charAt(0).toUpperCase() + type.substring(1);
+    const title = type.at(0)?.toUpperCase() + type.substring(1);
 
     return (this.#progress[type] = {
       previous: 0,

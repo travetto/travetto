@@ -34,6 +34,7 @@ export const baseOxlintConfig: OxlintConfig = {
     'no-unused-private-class-members': 'off',
     'no-unassigned-vars': 'off',
     'no-useless-escape': 'off',
+    'unicorn/prefer-at': 'error',
     'unicorn/no-useless-spread': 'off',
     'unicorn/no-useless-fallback-in-spread': 'off',
     'unicorn/prefer-string-starts-ends-with': 'off',

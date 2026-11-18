@@ -62,7 +62,7 @@ export class MysqlConnection extends SQLConnection<PoolConnection> {
     switch (field.type) {
       case 'JSON':
       case 'BLOB': {
-        if (typeof result === 'string' && result.charAt(0) === '{' && result.charAt(result.length - 1) === '}') {
+        if (typeof result === 'string' && result.at(0) === '{' && result.at(-1) === '}') {
           try {
             return JSONUtil.fromUTF8(result);
           } catch {}
