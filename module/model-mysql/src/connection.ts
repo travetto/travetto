@@ -10,8 +10,11 @@ import { type Class, type UnknownRecord, castTo, hasProperty, JSONUtil, Shutdown
 import type { MysqlModelConfig } from './config.ts';
 import { MysqlDialect } from './dialect.ts';
 
+type QueryResponse = OkPacket | ResultSetHeader;
+
 const hasErrorCode = hasProperty<{ code: string }>('code');
-const isSimplePacket = hasProperty<OkPacket | ResultSetHeader>('affectedRows');
+const hasAffectedRows = hasProperty<QueryResponse>('affectedRows');
+const isSimplePacket = (value: unknown): value is QueryResponse => hasAffectedRows(value) && value.serverStatus !== undefined;
 
 /**
  * MySQL Connection Manager.
