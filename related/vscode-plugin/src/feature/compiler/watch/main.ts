@@ -237,7 +237,7 @@ export class CompilerWatchFeature extends BaseFeature {
     const module = Workspace.workspaceIndex.findModuleForArbitraryFile(file);
     if (module) {
       const [, relativeFile] = file.split(module.sourceFolder);
-      const outputFile = path.join(Workspace.workspaceIndex.outputRoot, module.outputFolder, relativeFile.replace(/\.(ts|tsx)$/, '.js'));
+      const outputFile = path.join(Workspace.workspaceIndex.outputRoot, module.outputFolder, relativeFile.replace(/\.tsx?$/, '.js'));
       if (existsSync(outputFile)) {
         const doc = await vscode.workspace.openTextDocument(outputFile);
         await vscode.window.showTextDocument(doc);
