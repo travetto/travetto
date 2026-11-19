@@ -9,6 +9,8 @@ type Coord = { x: number; y: number };
 
 export const WAIT_TOKEN = '%WAIT%';
 const STD_WAIT_STATES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
+const SPINNER_INTERVAL_MS = 80;
+const DEFAULT_TERMINAL_SIZE = 120;
 
 const lineStatus = (line: string): string => line.replace(WAIT_TOKEN, ' ');
 const lineMain = (line: string): string => line.replace(WAIT_TOKEN, '').trim();
@@ -20,25 +22,25 @@ export class Terminal {
   #width: number;
   #height: number;
   #output: tty.WriteStream;
+  #waitIndex = 0;
 
   async #showWaitingIndicator(position: Coord, signal: AbortSignal): Promise<void> {
     let done = false;
     signal.addEventListener('abort', () => (done = true));
-    let i = 0;
     while (!done) {
       await this.#writer
         .setPosition(position)
-        .write(STD_WAIT_STATES[(i += 1 % STD_WAIT_STATES.length)])
+        .write(STD_WAIT_STATES[(this.#waitIndex += 1) % STD_WAIT_STATES.length])
         .commit(true);
-      await Util.blockingTimeout(100);
+      await Util.blockingTimeout(SPINNER_INTERVAL_MS);
     }
   }
 
   constructor(output?: tty.WriteStream, config?: { width?: number; height?: number }) {
     this.#output = output ?? process.stdout;
     this.#interactive = this.#output.isTTY && !Env.TRV_QUIET.isTrue;
-    this.#width = config?.width ?? (this.#output.isTTY ? this.#output.columns : 120);
-    this.#height = config?.height ?? (this.#output.isTTY ? this.#output.rows : 120);
+    this.#width = config?.width ?? (this.#output.isTTY ? this.#output.columns : DEFAULT_TERMINAL_SIZE);
+    this.#height = config?.height ?? (this.#output.isTTY ? this.#output.rows : DEFAULT_TERMINAL_SIZE);
     this.#writer = new TerminalWriter(this);
   }
 
