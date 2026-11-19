@@ -1,5 +1,5 @@
 import type { WhereClause } from '@travetto/model-query';
-import { castKey, castTo, type Any, type Class, Util, type UnknownRecord } from '@travetto/runtime';
+import { castKey, castTo, type Any, type Class, Util, type UnknownRecord, isRecord } from '@travetto/runtime';
 import { type SchemaFieldConfig, ValidationResultError } from '@travetto/schema';
 
 import type { ModelId, ModelType, OptionalId, PartialWithId } from '../types/model.ts';
@@ -31,7 +31,7 @@ export class ModelIdSource<T extends ModelType = Any> {
    * Extract identifier from an item if present, generating and setting if missing
    */
   getOrSet(item: Partial<T> | PartialWithId<T> | OptionalId<T>): ModelId {
-    let identifier: ModelId = castTo(item && typeof item === 'object' ? item[castKey(this.field)] : undefined);
+    let identifier: ModelId = castTo(isRecord(item) ? item[castKey(this.field)] : undefined);
     if (!identifier) {
       this.set(castTo(item), (identifier = this.generator()));
     }
@@ -45,7 +45,7 @@ export class ModelIdSource<T extends ModelType = Any> {
   get(item: Partial<T> | PartialWithId<T>, config: { optional: false }): ModelId;
   get(item: Partial<T> | PartialWithId<T>, config: { optional: true }): ModelId | undefined;
   get(item: Partial<T> | PartialWithId<T>, config?: { optional: boolean }): ModelId | undefined {
-    const identifier = item && typeof item === 'object' ? item[castKey(this.field)] : undefined;
+    const identifier = isRecord(item) ? item[castKey(this.field)] : undefined;
     if (!identifier && config?.optional !== true) {
       throw new ValidationResultError([
         {
@@ -63,7 +63,7 @@ export class ModelIdSource<T extends ModelType = Any> {
    * Set the identifier on an item
    */
   set(item: Partial<T> | OptionalId<T>, identifier: ModelId): ModelId {
-    if (item && typeof item === 'object') {
+    if (isRecord(item)) {
       castTo<UnknownRecord>(item)[this.field] = identifier;
     }
     return identifier;
@@ -73,7 +73,7 @@ export class ModelIdSource<T extends ModelType = Any> {
    * Delete the identifier on an item
    */
   clear(item: Partial<T> | PartialWithId<T> | OptionalId<T>): void {
-    if (item && typeof item === 'object') {
+    if (isRecord(item)) {
       delete castTo<UnknownRecord>(item)[this.field];
     }
   }

@@ -14,6 +14,7 @@ import {
   ManifestUtil,
   PackageUtil
 } from '@travetto/manifest';
+import { hasProperty } from '@travetto/runtime';
 
 import type { CompilerStateType } from '@travetto/compiler/src/types.ts';
 
@@ -106,9 +107,7 @@ export class Workspace {
   }
 
   /** See if an entity is an editor */
-  static isEditor(value: unknown): value is vscode.TextEditor {
-    return !!value && typeof value === 'object' && 'document' in value;
-  }
+  static isEditor = hasProperty<vscode.TextEditor>('document');
 
   /** Get the editor for a doc */
   static getEditor(doc: vscode.TextDocument): vscode.TextEditor | undefined {

@@ -47,16 +47,8 @@ export function castTo<T>(input: unknown): T {
   return input as T;
 }
 
-export const isRecord = (value: unknown): value is UnknownRecord =>
-  typeof value === 'object' && // separate from primitives
-  value !== undefined &&
-  value !== null && // is obvious
-  !Array.isArray(value);
-
-export const isPlainRecord = (value: unknown): value is UnknownRecord =>
-  isRecord(value) && // is obvious
-  value.constructor === Object && // separate instances (Array, DOM, ...)
-  Object.prototype.toString.call(value) === '[object Object]'; // separate build-in like Math
+export const isRecord = (value: unknown): value is UnknownRecord => typeof value === 'object' && !!value && !Array.isArray(value);
+export const isPlainRecord = (value: unknown): value is UnknownRecord => typeof value === 'object' && value?.constructor === Object;
 
 export const isClass = (input: unknown): input is Class => typeof input === 'function' && 'Ⲑid' in input;
 export const castKey = <T>(input: string | number | symbol): keyof T => castTo(input);
@@ -68,10 +60,15 @@ export function classConstruct<T>(cls: Class<T>, args: unknown[] = []): ClassIns
   return castTo(new cons(...args));
 }
 
+export const hasProperty =
+  <T>(key: string | symbol, equalTo?: unknown) =>
+  (value: unknown): value is T =>
+    typeof value === 'object' && !!value && key in value && (equalTo === undefined || equalTo === value[key as keyof typeof value]);
+
 export const hasFunction =
   <T>(key: keyof T) =>
   (value: unknown): value is T =>
-    typeof value === 'object' && value !== null && typeof value[castKey(key)] === 'function';
+    typeof value === 'object' && !!value && key in value && typeof value[key as keyof typeof value] === 'function';
 
 export const hasToJSON = hasFunction<{ toJSON(): object }>('toJSON');
 
@@ -97,5 +94,5 @@ export const getConstructor = <T>(value: T): Class<T> => asConstructable<T>(valu
 export const getClass = <T = unknown>(target: Class | ClassInstance): Class<T> =>
   'Ⲑid' in target ? castTo(target) : asConstructable<T>(target).constructor;
 
-export const isUnsafeProperty = (key: string): key is '__proto__' | 'prototype' | 'constructor' =>
-  key === 'prototype' || key === 'constructor' || key === '__proto__';
+const UNSAFE_PROPERTIES = ['prototype', 'constructor', '__proto__'];
+export const isUnsafeProperty = (key: string): key is '__proto__' | 'prototype' | 'constructor' => UNSAFE_PROPERTIES.includes(key);

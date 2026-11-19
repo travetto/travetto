@@ -30,7 +30,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@css-inline/css-inline": "^0.24.0",
+    "@css-inline/css-inline": "^0.25.0",
     "@travetto/config": "^8.1.0-rc.4",
     "@travetto/di": "^8.1.0-rc.4",
     "@travetto/email": "^8.1.0-rc.4",

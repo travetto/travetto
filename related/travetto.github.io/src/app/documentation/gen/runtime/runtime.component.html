@@ -287,7 +287,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 
 <h2 id="encoding-and-decoding-utilities">Encoding and Decoding Utilities</h2>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16">CodecUtil</a> class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L18">CodecUtil</a> class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
 <ul> <li>Hex</li>
 <li>Base64</li>
 <li>UTF8</li>
@@ -295,7 +295,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <li>Base64 Encoded JSON</li>
 <li>New Line Delimited UTF8</li>
 </ul>
-For processing line-oriented data streams (such as subprocess output or incoming binary/text streams), <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16">CodecUtil</a> provides stream parsing helpers designed to work seamlessly with async stream operators:
+For processing line-oriented data streams (such as subprocess output or incoming binary/text streams), <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L18">CodecUtil</a> provides stream parsing helpers designed to work seamlessly with async stream operators:
 <ul> <li><code class="item method">toLines(options?)</code> produces a <code class="item method">flatMap</code>-compatible chunk-to-line transformer that buffers across arbitrary chunk boundaries, handles carriage returns, and supports configurable trimming and blank line skipping.</li>
 <li><code class="item method">fromCSV(options?)</code> produces a <code class="item method">flatMap</code>-compatible line-to-record transformer that parses CSV or TSV lines into structured objects using the header row or provided field names.</li>
 <li><code class="item method">readCSVLine(line, delimiter?)</code> parses individual CSV lines with support for quoted strings and custom delimiters.</li>
@@ -338,7 +338,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 
 <h2 id="json-utilities">JSON Utilities</h2>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/json.ts#L39">JSONUtil</a> class provides a comprehensive set of utilities for working with JSON data, including serialization, deserialization, encoding, and deep cloning capabilities. The utility handles special types like <code class="item input">Date</code>, <code class="item input">BigInt</code>, and <code class="item input">Error</code> objects seamlessly. Key features include:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/json.ts#L41">JSONUtil</a> class provides a comprehensive set of utilities for working with JSON data, including serialization, deserialization, encoding, and deep cloning capabilities. The utility handles special types like <code class="item input">Date</code>, <code class="item input">BigInt</code>, and <code class="item input">Error</code> objects seamlessly. Key features include:
 <ul> <li><code class="item method">fromUTF8(input, config?)</code> - Parse JSON from a UTF-8 string</li>
 <li><code class="item method">toUTF8(value, config?)</code> - Serialize a value to JSON string</li>
 <li><code class="item method">toUTF8Pretty(value)</code> - Serialize with pretty formatting (2-space indent)</li>

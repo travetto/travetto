@@ -5,20 +5,16 @@ import type { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { ExistsError, type ModelType } from '@travetto/model';
 import { SQLConnection, type TableContext } from '@travetto/model-sql';
-import { type Class, type UnknownRecord, castTo, JSONUtil, ShutdownManager } from '@travetto/runtime';
+import { type Class, type UnknownRecord, castTo, hasProperty, JSONUtil, ShutdownManager } from '@travetto/runtime';
 
 import type { MysqlModelConfig } from './config.ts';
 import { MysqlDialect } from './dialect.ts';
 
-function isSimplePacket(value: unknown): value is OkPacket | ResultSetHeader {
-  return (
-    value !== null &&
-    value !== undefined &&
-    typeof value === 'object' &&
-    'constructor' in value &&
-    (value.constructor.name === 'OkPacket' || value.constructor.name === 'ResultSetHeader')
-  );
-}
+type QueryResponse = OkPacket | ResultSetHeader;
+
+const hasErrorCode = hasProperty<{ code: string }>('code');
+const hasAffectedRows = hasProperty<QueryResponse>('affectedRows');
+const isSimplePacket = (value: unknown): value is QueryResponse => hasAffectedRows(value) && value.serverStatus !== undefined;
 
 /**
  * MySQL Connection Manager.
@@ -69,7 +65,7 @@ export class MysqlConnection extends SQLConnection<PoolConnection> {
     switch (field.type) {
       case 'JSON':
       case 'BLOB': {
-        if (typeof result === 'string' && result.charAt(0) === '{' && result.charAt(result.length - 1) === '}') {
+        if (typeof result === 'string' && result.at(0) === '{' && result.at(-1) === '}') {
           try {
             return JSONUtil.fromUTF8(result);
           } catch {}
@@ -111,7 +107,7 @@ export class MysqlConnection extends SQLConnection<PoolConnection> {
         return { records, count: records.length };
       }
     } catch (error) {
-      const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
+      const code = hasErrorCode(error) ? error.code : undefined;
       switch (code) {
         case 'ER_DUP_ENTRY': {
           const message = error instanceof Error ? error.message : '';

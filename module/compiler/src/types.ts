@@ -1,5 +1,5 @@
 import type { ChangeEventType, ManifestModule } from '@travetto/manifest';
-import type { UnknownRecord } from '@travetto/runtime';
+import type { UnknownRecord } from '@travetto/transformer';
 
 export type CompilerStateType =
   | 'startup'

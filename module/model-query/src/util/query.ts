@@ -1,5 +1,5 @@
 import { ModelRegistryIndex, type ModelType, NotFoundError } from '@travetto/model';
-import { type Class, castKey, castTo, hasFunction, RuntimeError, TimeUtil } from '@travetto/runtime';
+import { type Class, castKey, castTo, hasFunction, hasProperty, RuntimeError, TimeUtil } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 import type { WhereClause, WhereClauseRaw } from '../model/where-clause.ts';
@@ -91,7 +91,7 @@ export class ModelQueryUtil {
     return where!;
   }
 
-  static has$And = (value: unknown): value is { $and: WhereClause<unknown>[] } => !!value && typeof value === 'object' && '$and' in value;
-  static has$Or = (value: unknown): value is { $or: WhereClause<unknown>[] } => !!value && typeof value === 'object' && '$or' in value;
-  static has$Not = (value: unknown): value is { $not: WhereClause<unknown> } => !!value && typeof value === 'object' && '$not' in value;
+  static has$And = hasProperty<{ $and: WhereClause<unknown>[] }>('$and');
+  static has$Or = hasProperty<{ $or: WhereClause<unknown>[] }>('$or');
+  static has$Not = hasProperty<{ $not: WhereClause<unknown> }>('$not');
 }

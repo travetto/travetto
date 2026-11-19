@@ -1,8 +1,10 @@
 import type { ModelType } from '@travetto/model';
 import type { TextSearchClause } from '@travetto/model-query';
 import { AbstractANSI99Dialect, type ResolvedPathContext, type TableContext, type TextSearchState } from '@travetto/model-sql';
-import { JSONUtil, type UnknownRecord } from '@travetto/runtime';
+import { hasProperty, JSONUtil, type UnknownRecord } from '@travetto/runtime';
 import { SchemaRegistryIndex, type SchemaFieldConfig } from '@travetto/schema';
+
+const hasNotFoundCode = hasProperty<{ code: unknown }>('code', '42P01');
 
 /* cspell:words ILIKE regclass indexdef tablename pkey tsvector tsquery */
 
@@ -358,10 +360,7 @@ ${offset !== undefined ? `OFFSET ${offset}` : ''};`;
   }
 
   isTableNotFoundError(error: unknown): boolean {
-    return (
-      (typeof error === 'object' && error !== null && 'code' in error && error.code === '42P01') ||
-      (error instanceof Error && /does not exist/i.test(error.message))
-    );
+    return hasNotFoundCode(error) || (error instanceof Error && /does not exist/i.test(error.message));
   }
 
   override isPrimaryKeyConstraint(constraint?: string): boolean {

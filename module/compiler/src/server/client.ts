@@ -8,6 +8,8 @@ import { CommonUtil } from '../common.ts';
 import type { CompilerEventPayload, CompilerEventType, CompilerServerInfo, CompilerStateType, CompilerLoggerShape } from '../types.ts';
 import { CompilerUtil } from '../util.ts';
 
+const isConnectionReset = (value: unknown) => typeof value === 'object' && !!value && 'code' in value && value.code === 'ECONNRESET';
+
 type FetchEventsConfig<T> = {
   signal?: AbortSignal;
   until?: (event: T) => boolean;
@@ -127,7 +129,7 @@ export class CompilerClient {
         );
 
         for await (const line of rl.createInterface(response)) {
-          if (line.trim().charAt(0) === '{') {
+          if (line.trim().at(0) === '{') {
             const event: T = JSON.parse(line);
             if (config.until?.(event)) {
               await CommonUtil.queueMacroTask();
@@ -137,7 +139,7 @@ export class CompilerClient {
           }
         }
       } catch (error) {
-        const aborted = controller.signal.aborted || (typeof error === 'object' && error && 'code' in error && error.code === 'ECONNRESET');
+        const aborted = controller.signal.aborted || isConnectionReset(error);
         if (!aborted) {
           throw error;
         }

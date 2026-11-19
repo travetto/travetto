@@ -62,7 +62,7 @@ The index definition specifies:
 
 <h3 id="unique-indexes">Unique Indexes</h3>
 
-A <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L57">uniqueIndex</a> enforces uniqueness constraints on key fields. This is useful for emails, usernames, or any field that should be globally unique.
+A <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L58">uniqueIndex</a> enforces uniqueness constraints on key fields. This is useful for emails, usernames, or any field that should be globally unique.
 
   <figure class="code">
     <figcaption class="code">Creating a Unique Index
@@ -89,7 +89,7 @@ Unique indexes work exactly like keyed indexes, but enforce a uniqueness constra
 
 <h3 id="sorted-indexes">Sorted Indexes</h3>
 
-A <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L80">sortedIndex</a> enables range queries and paginated listing. It requires both a <code class="item field">key</code> for filtering and a <code class="item field">sort</code> field for ordering.
+A <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L82">sortedIndex</a> enables range queries and paginated listing. It requires both a <code class="item field">key</code> for filtering and a <code class="item field">sort</code> field for ordering.
 
   <figure class="code">
     <figcaption class="code">Creating a Sorted Index
@@ -493,6 +493,6 @@ You can access registered indexes via <a target="_blank" class="source-link" hre
 <ul> <li><strong>Plan indexes strategically</strong> — Define indexes for your common query patterns</li>
 <li><strong>Use composite keys</strong> — When filtering by multiple fields, include all of them in a single index</li>
 <li><strong>Leverage sorting</strong> — Use sorted indexes for paginated lists and range queries</li>
-<li><strong>Enforce uniqueness</strong> — Use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L57">uniqueIndex</a> for fields that must be globally unique</li>
+<li><strong>Enforce uniqueness</strong> — Use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L58">uniqueIndex</a> for fields that must be globally unique</li>
 <li><strong>Handle errors gracefully</strong> — Catch <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/error.ts#L6">IndexedFieldError</a> when working with user input</li>
 </ul>

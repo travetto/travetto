@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import * as vscode from 'vscode';
 
-import { AsyncIterableHelper, CodecUtil, Env, ExecUtil, JSONUtil, Util } from '@travetto/runtime';
+import { AsyncIterableHelper, CodecUtil, Env, ExecUtil, hasProperty, JSONUtil, Util } from '@travetto/runtime';
 
 import type {
   CompilerEvent,
@@ -24,6 +24,7 @@ type ProgressState = { previous: number; bar: ProgressBar; cleanup: () => void }
 
 const SCOPE_MAX = 15;
 const SUB_LOG_REGEX = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(.\d{3})?Z?\s+(info|error|debug|warn)\s*/;
+const hasWorksSpace = hasProperty<{ workspace: string }>('workspace');
 
 /**
  * Workspace Compilation Support
@@ -45,7 +46,7 @@ export class CompilerWatchFeature extends BaseFeature {
     const kill = (): void => controller.abort();
     signal.addEventListener('abort', kill);
 
-    const title = type.charAt(0).toUpperCase() + type.substring(1);
+    const title = type.at(0)?.toUpperCase() + type.substring(1);
 
     return (this.#progress[type] = {
       previous: 0,
@@ -125,9 +126,7 @@ export class CompilerWatchFeature extends BaseFeature {
           await AsyncIterableHelper.from(subProcess.stdout!)
             .flatMap(CodecUtil.toLines())
             .flatMap(JSONUtil.fromLines<CompilerEvent>({ ignoreErrors: true }))
-            .filter(
-              ({ payload }) => !(typeof payload === 'object' && payload && 'workspace' in payload && payload.workspace !== Workspace.path)
-            )
+            .filter(({ payload }) => !(hasWorksSpace(payload) && payload.workspace !== Workspace.path))
             .forEach(({ type, payload }) => {
               switch (type) {
                 case 'log':
@@ -238,7 +237,7 @@ export class CompilerWatchFeature extends BaseFeature {
     const module = Workspace.workspaceIndex.findModuleForArbitraryFile(file);
     if (module) {
       const [, relativeFile] = file.split(module.sourceFolder);
-      const outputFile = path.join(Workspace.workspaceIndex.outputRoot, module.outputFolder, relativeFile.replace(/\.(ts|tsx)$/, '.js'));
+      const outputFile = path.join(Workspace.workspaceIndex.outputRoot, module.outputFolder, relativeFile.replace(/\.tsx?$/, '.js'));
       if (existsSync(outputFile)) {
         const doc = await vscode.workspace.openTextDocument(outputFile);
         await vscode.window.showTextDocument(doc);

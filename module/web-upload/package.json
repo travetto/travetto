@@ -30,7 +30,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@fastify/busboy": "^3.2.5",
+    "@fastify/busboy": "^3.2.6",
     "@travetto/config": "^8.1.0-rc.4",
     "@travetto/web": "^8.1.0-rc.4",
     "file-type": "^22.3.0",

@@ -1,4 +1,4 @@
-import { castTo, type Class, hasFunction } from '@travetto/runtime';
+import { castTo, type Class, hasFunction, isRecord } from '@travetto/runtime';
 import { BindUtil, SchemaRegistryIndex } from '@travetto/schema';
 
 import { ModelRegistryIndex } from '../registry/registry-index.ts';
@@ -32,12 +32,13 @@ export class ModelBulkUtil {
   static #mergeBulkResponse<E>(target: BulkResponse<E>, source: BulkResponse<E>, indexOffset: number): void {
     if (indexOffset > 0) {
       for (const error of source.errors) {
-        if (typeof error === 'object' && error !== null) {
-          if ('index' in error && typeof error.index === 'number') {
-            error.index += indexOffset;
+        if (isRecord(error)) {
+          const bulkError: E & { index?: number; idx?: number } = error;
+          if (bulkError.index !== undefined) {
+            bulkError.index += indexOffset;
           }
-          if ('idx' in error && typeof error.idx === 'number') {
-            error.idx += indexOffset;
+          if (bulkError.idx !== undefined) {
+            bulkError.idx += indexOffset;
           }
         }
       }
@@ -181,7 +182,7 @@ export class ModelBulkUtil {
           }
         } catch (error) {
           counts.error += 1;
-          errors.push(typeof error === 'object' && error !== null ? Object.assign(error, { index }) : { index, error });
+          errors.push(isRecord(error) ? Object.assign(error, { index }) : { index, error });
         }
       }
 

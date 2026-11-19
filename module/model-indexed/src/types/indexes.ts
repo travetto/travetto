@@ -51,6 +51,7 @@ export interface KeyedIndex<
   key: K;
   sort: S;
   unique: boolean;
+  indexed: true;
   keyTemplate: TemplatePart<true>[];
   sortTemplate: TemplatePart<1 | -1>[];
 }
@@ -62,6 +63,7 @@ export interface SortedIndex<
 > extends IndexConfig<'indexed:sorted'> {
   key: K;
   sort: S;
+  indexed: true;
   keyTemplate: TemplatePart<true>[];
   sortTemplate: TemplatePart<1 | -1>[];
 }

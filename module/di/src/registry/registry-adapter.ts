@@ -36,7 +36,7 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
     return combineClasses(this.#config, ...data);
   }
 
-  registerFactory(method: string, ...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
+  registerFactory(method: string, ...data: Partial<InjectableCandidate>[]): InjectableCandidate {
     const { candidates } = this.register();
     candidates[method] ??= {
       class: this.#cls,
@@ -48,7 +48,7 @@ export class DependencyRegistryAdapter implements RegistryAdapter<InjectableConf
     return combineInjectableCandidates(candidates[method], ...data);
   }
 
-  registerClass(...data: Partial<InjectableCandidate<unknown>>[]): InjectableCandidate {
+  registerClass(...data: Partial<InjectableCandidate>[]): InjectableCandidate {
     return this.registerFactory(CONSTRUCTOR_PROPERTY, ...data, {
       factory: (...args: unknown[]) => classConstruct(this.#cls, args),
       candidateType: this.#cls

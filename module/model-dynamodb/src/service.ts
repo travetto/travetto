@@ -45,7 +45,7 @@ import {
   type SortedIndex,
   type SortedIndexSelection
 } from '@travetto/model-indexed';
-import { type Class, type UnknownRecord, castTo, JSONUtil, ShutdownManager, TimeUtil } from '@travetto/runtime';
+import { type Class, type UnknownRecord, castTo, isRecord, JSONUtil, ShutdownManager, TimeUtil } from '@travetto/runtime';
 
 import type { DynamoDBModelConfig } from './config.ts';
 import { DynamoDBUtil } from './util.ts';
@@ -56,9 +56,7 @@ const getKey = <T extends ModelType>(computed: ModelIndexedComputedIndex<T>): At
   DynamoDBUtil.toValue(computed.getKey() || 'NULL');
 const getSort = <T extends ModelType>(computed: ModelIndexedComputedIndex<T>): AttributeValue => DynamoDBUtil.toValue(computed.getSort());
 
-function isNotFoundError(error: unknown): boolean {
-  return error instanceof Error && error.name === 'ResourceNotFoundException';
-}
+const isNotFoundError = (error: unknown): boolean => error instanceof Error && error.name === 'ResourceNotFoundException';
 
 /**
  * A model service backed by DynamoDB
@@ -535,7 +533,7 @@ export class DynamoDBModelService
           }
         } catch (error) {
           counts.error += 1;
-          errors.push(typeof error === 'object' && error !== null ? Object.assign(error, { index }) : { index, error });
+          errors.push(isRecord(error) ? Object.assign(error, { index }) : { index, error });
         }
       }
 

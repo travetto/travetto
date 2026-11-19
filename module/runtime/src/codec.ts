@@ -1,6 +1,6 @@
 import { type BinaryArray, type BinaryType, BinaryUtil } from './binary.ts';
 import { RuntimeError } from './error.ts';
-import { castTo } from './types.ts';
+import { castTo, hasProperty } from './types.ts';
 
 type TextInput = string | BinaryArray;
 
@@ -9,6 +9,8 @@ const UTF8_ENCODER = new TextEncoder();
 const DOUBLE_QUOTE = '"'.charCodeAt(0);
 const CARRIAGE_RETURN = '\r'.charCodeAt(0);
 const LINE_FEED = '\n'.charCodeAt(0);
+
+const hasReadableEncoding = hasProperty<{ readableEncoding: string }>('readableEncoding');
 
 /**
  * Utilities for encoding and decoding common formats
@@ -77,7 +79,7 @@ export class CodecUtil {
 
   /** Detect encoding of a binary type, if possible  */
   static detectEncoding(input: BinaryType): string | undefined {
-    if (input && typeof input === 'object' && 'readableEncoding' in input && typeof input.readableEncoding === 'string') {
+    if (hasReadableEncoding(input)) {
       return input.readableEncoding;
     }
   }

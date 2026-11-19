@@ -67,7 +67,17 @@ import {
   type ValidStringFields,
   type WhereClause
 } from '@travetto/model-query';
-import { asConstructable, asFull, type Class, castKey, castTo, JSONUtil, ShutdownManager, TypedObject } from '@travetto/runtime';
+import {
+  asConstructable,
+  asFull,
+  type Class,
+  castKey,
+  castTo,
+  JSONUtil,
+  ShutdownManager,
+  TypedObject,
+  hasProperty
+} from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
 import type { ElasticsearchModelConfig } from './config.ts';
@@ -75,6 +85,9 @@ import { IndexManager } from './index-manager.ts';
 import { ElasticsearchQueryUtil } from './internal/query.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
 import type { EsBulkError } from './internal/types.ts';
+
+const hasErrorField = hasProperty<{ error: unknown }>('error');
+const isDocumentMissingException = hasProperty('type', 'document_missing_exception');
 
 const ELASTICSEARCH_REPLACER = {
   replacer(this: unknown, key: string, value: unknown): unknown {
@@ -93,12 +106,7 @@ function isConflictError(error: unknown): boolean {
 function isNotFoundError(error: unknown): boolean {
   return (
     (error instanceof errors.ResponseError &&
-      (error.statusCode === 404 ||
-        error.body?.result === 'not_found' ||
-        (typeof error.body === 'object' &&
-          error.body !== null &&
-          'error' in error.body &&
-          (error.body as { error?: { type?: string } }).error?.type === 'document_missing_exception'))) ||
+      (error.statusCode === 404 || error.body?.result === 'not_found' || isDocumentMissingException(error.body?.error))) ||
     (error instanceof Error && error.message.includes('document_missing_exception'))
   );
 }
@@ -258,7 +266,7 @@ export class ElasticsearchModelService
       });
       return result;
     } catch (error) {
-      if (error instanceof errors.ResponseError && error.meta.body && typeof error.meta.body === 'object' && 'error' in error.meta.body) {
+      if (error instanceof errors.ResponseError && hasErrorField(error.meta.body)) {
         console.error(error.meta.body.error);
       }
       throw error;

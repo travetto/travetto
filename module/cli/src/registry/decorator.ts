@@ -69,7 +69,7 @@ export function CliFileFlag(config: CliFlagOptions & { fileExtensions: string[] 
  * @kind decorator
  */
 export function CliProfilesFlag(config: CliFlagOptions = {}) {
-  return function <K extends string>(instance: Partial<Record<K, string[]>>, property: K): void {
+  return function (instance: ClassInstance, property: string): void {
     const cls = getConstructor(instance);
     SchemaRegistryIndex.getForRegister(cls).registerField(property, {
       ...CliParseUtil.buildAliases(config, Env.TRV_PROFILES.key),
@@ -87,7 +87,7 @@ export function CliProfilesFlag(config: CliFlagOptions = {}) {
  * @kind decorator
  */
 export function CliModuleFlag(config: CliFlagOptions & { scope?: 'current' | 'command' } = { scope: 'current' }) {
-  return function <K extends string>(instance: Partial<Record<K, string>>, property: K): void {
+  return function (instance: ClassInstance, property: string): void {
     const cls = getConstructor(instance);
     const description = describeFunction(cls) ?? {};
     const commandModule = description.module;
@@ -124,7 +124,7 @@ export function CliModuleFlag(config: CliFlagOptions & { scope?: 'current' | 'co
     });
 
     CliCommandRegistryIndex.registerPreMain<typeof instance>(cls, 5, cmd => {
-      const typed: typeof cmd & { [property]?: string } = castTo(cmd);
+      const typed: typeof cmd & { [property]?: string } = cmd;
       const providedModule = typed[property];
       const runModule = (config.scope === 'command' ? commandModule : providedModule) || Runtime.main.name;
       if (runModule !== Runtime.main.name) {
@@ -140,7 +140,7 @@ export function CliModuleFlag(config: CliFlagOptions & { scope?: 'current' | 'co
  * @kind decorator
  */
 export function CliRestartOnChangeFlag(config: CliFlagOptions = {}) {
-  return function <K extends string, T extends Partial<Record<K, boolean>>>(instance: T, property: K): void {
+  return function (instance: ClassInstance, property: string): void {
     const cls = getConstructor(instance);
     if (Runtime.production) {
       return;
@@ -162,7 +162,7 @@ export function CliRestartOnChangeFlag(config: CliFlagOptions = {}) {
  * @kind decorator
  */
 export function CliDebugIpcFlag(config: CliFlagOptions = {}) {
-  return function <K extends string, T extends Partial<Record<K, boolean>>>(instance: T, property: K): void {
+  return function (instance: ClassInstance, property: string): void {
     if (Runtime.production) {
       return;
     }

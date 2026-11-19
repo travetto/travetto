@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { JSONUtil, RuntimeIndex } from '@travetto/runtime';
+import { hasProperty, JSONUtil, RuntimeIndex } from '@travetto/runtime';
 import { SchemaValidator } from '@travetto/schema';
 
 import { type RecommendationQuery, type SnippetSource, SnippetSourceSchema } from './types.ts';
@@ -11,9 +11,7 @@ function snippetDirectory(): string {
   return path.resolve(mod.sourcePath, 'resources', 'snippets');
 }
 
-function isErrnoException(err: unknown): err is NodeJS.ErrnoException {
-  return typeof err === 'object' && err !== null && 'code' in err;
-}
+const isErrnoException = hasProperty<NodeJS.ErrnoException>('code');
 
 async function loadSnippet(fullPath: string): Promise<SnippetSource> {
   const content = await fs.readFile(fullPath, 'utf8');
@@ -48,7 +46,7 @@ async function loadSnippets(): Promise<SnippetSource[]> {
     const sorted = [...resolvedFiles].sort();
     return Promise.all(sorted.map(file => loadSnippet(path.join(dir, file))));
   } catch (err) {
-    if (isErrnoException(err) && (err.code === 'ENOENT' || err.code === 'ERR_MODULE_NOT_FOUND')) {
+    if (isErrnoException(err) && ['ENOENT', 'ERR_MODULE_NOT_FOUND'].includes(err.code!)) {
       return [];
     }
     throw err;

@@ -1,5 +1,3 @@
-import { isPlainRecord } from '../types/shared.ts';
-
 const REGEX_PATTERN = /[/](.*)[/](i|g|m|s)?/;
 
 export class CoerceUtil {
@@ -89,7 +87,7 @@ export class CoerceUtil {
         }
       }
       case Object: {
-        if (!strict || isPlainRecord(input)) {
+        if (!strict || (typeof input === 'object' && input?.constructor === Object)) {
           return input;
         } else {
           throw new Error('Invalid object type');

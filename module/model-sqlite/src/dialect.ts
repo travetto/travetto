@@ -7,7 +7,7 @@ import {
   type TextSearchState,
   type TransactionStatements
 } from '@travetto/model-sql';
-import { JSONUtil, type UnknownRecord } from '@travetto/runtime';
+import { isRecord, JSONUtil, type UnknownRecord } from '@travetto/runtime';
 import type { SchemaFieldConfig } from '@travetto/schema';
 
 export class SqliteDialect extends AbstractANSI99Dialect {
@@ -132,7 +132,7 @@ EXISTS (
       };
     }
 
-    if (typeof values === 'object' && values !== null) {
+    if (isRecord(values)) {
       return {
         sql: this.#buildArrayElementExists(context, leafExpression => `json_patch(${leafExpression}, ${identifier}) = ${leafExpression}`),
         formatted: JSONUtil.toUTF8(values)

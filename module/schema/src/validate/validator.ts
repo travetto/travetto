@@ -1,4 +1,14 @@
-import { type Class, type ClassInstance, castKey, castTo, isClass, isPlainRecord, isRecord, TypedObject } from '@travetto/runtime';
+import {
+  type Class,
+  type ClassInstance,
+  castKey,
+  castTo,
+  hasProperty,
+  isClass,
+  isPlainRecord,
+  isRecord,
+  TypedObject
+} from '@travetto/runtime';
 
 import { SchemaRegistryIndex } from '../service/registry-index.ts';
 import type { SchemaFieldMap, SchemaInputConfig } from '../service/types.ts';
@@ -9,6 +19,7 @@ import { Messages } from './messages.ts';
 import { CommonRegexToName } from './regex.ts';
 import type { ValidationError, ValidationKindCore, ValidationResult } from './types.ts';
 
+const hasLength = hasProperty<{ length: number }>('length');
 const PrimitiveTypes = new Set<Function>([String, Number, BigInt, Boolean]);
 type NumericComparable = number | bigint | Date;
 
@@ -31,7 +42,7 @@ function isRangeValue(value: unknown): value is NumericComparable {
 }
 
 function isLengthValue(value: unknown): value is { length: number } {
-  return typeof value === 'string' || (typeof value === 'object' && !!value && 'length' in value && typeof value.length === 'number');
+  return typeof value === 'string' || hasLength(value);
 }
 
 /**

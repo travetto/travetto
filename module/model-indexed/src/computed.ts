@@ -1,5 +1,5 @@
 import { ModelRegistryIndex, type ModelType } from '@travetto/model';
-import { type Any, castTo, type Primitive, type SimpleFields } from '@travetto/runtime';
+import { type Any, castTo, isRecord, type Primitive, type SimpleFields } from '@travetto/runtime';
 import { DataUtil, type Point } from '@travetto/schema';
 
 import { IndexedFieldError } from './types/error.ts';
@@ -58,7 +58,7 @@ function buildIndexParts<T extends TemplateValue = TemplateValue>(
     const { found, value } = DataUtil.getPath(body, path);
     let bodyPart: Pick<IndexPart, 'value' | 'state'>;
     if (!found) {
-      bodyPart = typeof value === 'object' && value !== null ? { value: null, state: 'missing' } : { value, state: 'mismatch' };
+      bodyPart = isRecord(value) ? { value: null, state: 'missing' } : { value, state: 'mismatch' };
     } else if (value === null || value === undefined) {
       bodyPart = { value: null, state: 'empty' };
     } else if (checkValueType && !checkValueType(value)) {

@@ -1,5 +1,5 @@
 import { type IndexConfig, ModelRegistryIndex, type ModelType } from '@travetto/model';
-import { type Any, type Class, type ClassInstance, type UnknownRecord, castTo } from '@travetto/runtime';
+import { type Class, type ClassInstance, type UnknownRecord, castTo, hasProperty, isRecord } from '@travetto/runtime';
 
 import type {
   AllIndexes,
@@ -19,7 +19,7 @@ function buildTemplateParts<T extends TemplateValue = TemplateValue>(
   const out: TemplatePart<T>[] = [];
   for (const [key, value] of Object.entries(template)) {
     const path = prefix.length ? [...prefix, key] : [key];
-    if (typeof value === 'object' && value !== null) {
+    if (isRecord(value)) {
       out.push(...buildTemplateParts<T>(part, castTo(value), path));
     } else {
       out.push({ path, value: castTo<T>(value), part });
@@ -41,6 +41,7 @@ export function keyedIndex<T extends ModelType, K extends KeyedIndexSelection<T>
     type: 'indexed:keyed',
     class: cls,
     name,
+    indexed: true,
     unique: false,
     key,
     keyTemplate,
@@ -64,6 +65,7 @@ export function uniqueIndex<T extends ModelType, K extends KeyedIndexSelection<T
     type: 'indexed:keyed',
     class: cls,
     name,
+    indexed: true,
     unique: true,
     key,
     keyTemplate,
@@ -88,6 +90,7 @@ export function sortedIndex<T extends ModelType, K extends KeyedIndexSelection<T
     type: 'indexed:sorted',
     class: cls,
     name,
+    indexed: true,
     key,
     sort,
     keyTemplate,
@@ -97,8 +100,7 @@ export function sortedIndex<T extends ModelType, K extends KeyedIndexSelection<T
   return idx;
 }
 
-export const isModelIndexedIndex = <T extends ModelType>(idx: Any): idx is AllIndexes<T> =>
-  typeof idx === 'object' && idx !== null && 'type' in idx && typeof idx.type === 'string' && idx.type.startsWith('indexed:');
+export const isModelIndexedIndex = hasProperty<AllIndexes<ModelType>>('indexed', true);
 
 export const warnIfIndexedUniqueIndex = (service: ClassInstance, cls: Class<ModelType>, indexes: IndexConfig[]): boolean => {
   let warned = false;

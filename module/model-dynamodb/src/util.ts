@@ -9,7 +9,7 @@ import type {
 
 import { ModelCrudUtil, ModelExpiryUtil, ModelRegistryIndex, type ModelType, NotFoundError } from '@travetto/model';
 import { isModelIndexedIndex, warnIfIndexedUniqueIndex, warnIfNonIndexedIndex } from '@travetto/model-indexed';
-import { type Class, castTo } from '@travetto/runtime';
+import type { Class } from '@travetto/runtime';
 import { SchemaRegistryIndex } from '@travetto/schema';
 
 /**

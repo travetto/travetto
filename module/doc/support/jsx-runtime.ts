@@ -1,4 +1,4 @@
-import { type Class, castTo } from '@travetto/runtime';
+import { type Class, castTo, hasProperty } from '@travetto/runtime';
 
 type JSXChild = JSXElement | number | bigint | boolean | object | string;
 type JSXProps = { children?: JSXChild | JSXChild[] | null };
@@ -54,9 +54,7 @@ createFrag = createFragment;
 export const jsx = createElement;
 export const jsxs = createElement;
 export const Fragment = createFragment;
-export function isJSXElement(value: unknown): value is JSXElement {
-  return value !== undefined && value !== null && typeof value === 'object' && JSXRuntimeTag in value;
-}
+export const isJSXElement = hasProperty<JSXElement>(JSXRuntimeTag);
 
 export namespace JSX {
   export interface Element extends JSXElement {}

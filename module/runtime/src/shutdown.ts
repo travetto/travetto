@@ -2,6 +2,7 @@ import type { ChildProcess } from 'node:child_process';
 
 import { Env } from './env.ts';
 import { TimeUtil } from './time.ts';
+import { hasProperty } from './types.ts';
 import { Util } from './util.ts';
 
 const MAPPING = [
@@ -17,8 +18,7 @@ const CODE_TO_REASON = new Map<number, ShutdownReason>(MAPPING.flatMap(([k, code
 type Handler = (event: Event) => unknown;
 type ShutdownEvent = { reason?: ShutdownReason; mode?: 'exit' | 'interrupt' };
 
-const isShutdownEvent = (event: unknown): event is ShutdownEvent =>
-  typeof event === 'object' && event !== null && 'type' in event && event.type === 'shutdown';
+const isShutdownEvent = hasProperty<ShutdownEvent>('type', 'shutdown');
 
 const wrapped = async (handler: Handler): Promise<void> => {
   try {

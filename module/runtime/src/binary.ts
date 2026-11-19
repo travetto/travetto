@@ -4,7 +4,7 @@ import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
 import { isArrayBuffer, isPromise, isTypedArray, isUint8Array, isUint8ClampedArray, isUint16Array, isUint32Array } from 'node:util/types';
 
-import { castTo, hasFunction, toConcrete } from './types.ts';
+import { castTo, hasFunction, isRecord, toConcrete } from './types.ts';
 
 /**
  * Binary Array
@@ -54,7 +54,7 @@ const isBinaryTypeReference = (value: unknown): boolean =>
 const isReadable = hasFunction<Readable>('pipe');
 const isReadableStream = hasFunction<ReadableStream>('pipeTo');
 const isAsyncIterable = (value: unknown): value is AsyncIterable<unknown> =>
-  !!value && (typeof value === 'object' || typeof value === 'function') && Symbol.asyncIterator in value;
+  (isRecord(value) || typeof value === 'function') && Symbol.asyncIterator in value;
 const isBinaryArray = (value: unknown): value is BinaryArray =>
   isUint8Array(value) || isArrayBuffer(value) || isUint16Array(value) || isUint32Array(value) || isUint8ClampedArray(value);
 const isBinaryStream = (value: unknown): value is BinaryStream => isReadable(value) || isReadableStream(value) || isAsyncIterable(value);

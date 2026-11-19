@@ -3,7 +3,7 @@ import type { ReindexRequest } from '@elastic/elasticsearch/api/types';
 
 import { ModelRegistryIndex, type ModelStorageSupport, ModelStorageUtil, type ModelType } from '@travetto/model';
 import { warnIfIndexedUniqueIndex } from '@travetto/model-indexed';
-import { type Class, JSONUtil } from '@travetto/runtime';
+import { type Class, isRecord, JSONUtil } from '@travetto/runtime';
 
 import type { ElasticsearchModelConfig } from './config.ts';
 import { ElasticsearchSchemaUtil } from './internal/schema.ts';
@@ -11,11 +11,7 @@ import { ElasticsearchSchemaUtil } from './internal/schema.ts';
 function isNotFoundError(error: unknown): boolean {
   return (
     error instanceof errors.ResponseError &&
-    (error.statusCode === 404 ||
-      (typeof error.body === 'object' &&
-        error.body !== null &&
-        'error' in error.body &&
-        (error.body as { error?: { type?: string } }).error?.type === 'index_not_found_exception'))
+    (error.statusCode === 404 || (isRecord(error.body?.error) && error.body.error.type === 'index_not_found_exception'))
   );
 }
 

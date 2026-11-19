@@ -21,7 +21,8 @@ import {
   toConcrete,
   type UnknownRecord,
   isPlainRecord,
-  isClass
+  isClass,
+  isRecord
 } from '@travetto/runtime';
 import { DataUtil, type Point, SchemaRegistryIndex } from '@travetto/schema';
 
@@ -45,7 +46,7 @@ function flattenKeys(obj: UnknownRecord, prefix = ''): Record<string, 1 | -1> {
   const out: Record<string, 1 | -1> = {};
   for (const [key, value] of Object.entries(obj)) {
     const path = prefix ? `${prefix}.${key}` : key;
-    if (typeof value === 'object' && value !== null) {
+    if (isRecord(value)) {
       Object.assign(out, flattenKeys(castTo(value), path));
     } else {
       out[path] = typeof value === 'boolean' ? (value ? 1 : -1) : castTo<-1 | 1>(value);

@@ -6,15 +6,10 @@ const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T>(value: T): K[];
 } & ObjectConstructor = Object;
 
-function isNode(value: unknown): value is ts.Node {
-  return !!value && typeof value === 'object' && 'kind' in value;
-}
-
 const KNOWN_FNS = new Set<unknown>([String, Number, Boolean, Date, RegExp]);
 
-function isKnownFn(value: unknown): value is Function {
-  return KNOWN_FNS.has(value);
-}
+const isNode = (item: unknown): item is ts.Node => typeof item === 'object' && !!item && 'kind' in item;
+const isKnownFn = (value: unknown): value is Function => KNOWN_FNS.has(value);
 
 /**
  * Utilities for dealing with literals
