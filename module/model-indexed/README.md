@@ -53,7 +53,7 @@ The index definition specifies:
    *   `key` — An object where each key path should be included in the index (set to `true`)
 
 ### Unique Indexes
-A [uniqueIndex](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L57) enforces uniqueness constraints on key fields. This is useful for emails, usernames, or any field that should be globally unique.
+A [uniqueIndex](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L58) enforces uniqueness constraints on key fields. This is useful for emails, usernames, or any field that should be globally unique.
 
 **Code: Creating a Unique Index**
 ```typescript
@@ -76,7 +76,7 @@ export const emailUnique = uniqueIndex(User, {
 Unique indexes work exactly like keyed indexes, but enforce a uniqueness constraint. A model service will reject writes that violate the uniqueness guarantee.
 
 ### Sorted Indexes
-A [sortedIndex](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L80) enables range queries and paginated listing. It requires both a `key` for filtering and a `sort` field for ordering.
+A [sortedIndex](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L82) enables range queries and paginated listing. It requires both a `key` for filtering and a `sort` field for ordering.
 
 **Code: Creating a Sorted Index**
 ```typescript
@@ -436,5 +436,5 @@ export function registryAccessExample() {
    *  **Plan indexes strategically** — Define indexes for your common query patterns
    *  **Use composite keys** — When filtering by multiple fields, include all of them in a single index
    *  **Leverage sorting** — Use sorted indexes for paginated lists and range queries
-   *  **Enforce uniqueness** — Use [uniqueIndex](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L57) for fields that must be globally unique
+   *  **Enforce uniqueness** — Use [uniqueIndex](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/indexes.ts#L58) for fields that must be globally unique
    *  **Handle errors gracefully** — Catch [IndexedFieldError](https://github.com/travetto/travetto/tree/main/module/model-indexed/src/types/error.ts#L6) when working with user input

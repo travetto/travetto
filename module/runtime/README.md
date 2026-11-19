@@ -259,7 +259,7 @@ The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/s
 The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L134)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Encoding and Decoding Utilities
-The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16) class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
+The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L18) class provides a variety of static methods for encoding and decoding data. When working with JSON data, it also provide security checks to prevent prototype pollution. The utility supports the following formats:
    *  Hex
    *  Base64
    *  UTF8
@@ -267,7 +267,7 @@ The [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/sr
    *  Base64 Encoded JSON
    *  New Line Delimited UTF8
 
-For processing line-oriented data streams (such as subprocess output or incoming binary/text streams), [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L16) provides stream parsing helpers designed to work seamlessly with async stream operators:
+For processing line-oriented data streams (such as subprocess output or incoming binary/text streams), [CodecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/codec.ts#L18) provides stream parsing helpers designed to work seamlessly with async stream operators:
    *  `toLines(options?)` produces a `flatMap`-compatible chunk-to-line transformer that buffers across arbitrary chunk boundaries, handles carriage returns, and supports configurable trimming and blank line skipping.
    *  `fromCSV(options?)` produces a `flatMap`-compatible line-to-record transformer that parses CSV or TSV lines into structured objects using the header row or provided field names.
    *  `readCSVLine(line, delimiter?)` parses individual CSV lines with support for quoted strings and custom delimiters.
@@ -301,7 +301,7 @@ tpl`{{age:20}} {{name: 'bob'}}</>;
 The [BinaryUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/binary.ts#L68) class provides a unified interface for working with binary data across different formats, especially bridging the gap between Node.js specific types (`Buffer`, `Stream`) and Web Standard types (`Blob`, `ArrayBuffer`). The framework leverages this to allow for seamless handling of binary data, regardless of the source.
 
 ## JSON Utilities
-The [JSONUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/json.ts#L39) class provides a comprehensive set of utilities for working with JSON data, including serialization, deserialization, encoding, and deep cloning capabilities. The utility handles special types like `Date`, `BigInt`, and `Error` objects seamlessly. Key features include:
+The [JSONUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/json.ts#L41) class provides a comprehensive set of utilities for working with JSON data, including serialization, deserialization, encoding, and deep cloning capabilities. The utility handles special types like `Date`, `BigInt`, and `Error` objects seamlessly. Key features include:
    *  `fromUTF8(input, config?)` - Parse JSON from a UTF-8 string
    *  `toUTF8(value, config?)` - Serialize a value to JSON string
    *  `toUTF8Pretty(value)` - Serialize with pretty formatting (2-space indent)
