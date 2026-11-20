@@ -82,8 +82,8 @@ class Logger extends CompilerLogger {
     const emptyCount = Math.max(0, PROGRESS_BAR_WIDTH - filledCount - (partial ? 1 : 0));
 
     const filledPart = filledCount ? chalk.green('█'.repeat(filledCount)) : '';
-    const partialPart = partial ? chalk.green.bgBlackBright(partial) : '';
-    const emptyPart = emptyCount ? chalk.bgBlackBright(' '.repeat(emptyCount)) : '';
+    const partialPart = partial ? chalk.green.bgWhiteBright(partial) : '';
+    const emptyPart = emptyCount ? chalk.bgWhiteBright(' '.repeat(emptyCount)) : '';
     return `${filledPart}${partialPart}${emptyPart}`;
   }
 

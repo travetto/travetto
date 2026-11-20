@@ -1,5 +1,6 @@
 import rl from 'node:readline/promises';
 import { stripVTControlCharacters } from 'node:util';
+
 import chalk from 'chalk';
 
 import { Env } from '@travetto/runtime';
@@ -51,9 +52,7 @@ export class TerminalUtil {
   static #truncateProgressMessage(message: string, prefix: string, maxWidth: number): string {
     const prefixWidth = stripVTControlCharacters(prefix.replace(WAIT_TOKEN, ' ')).length + 1;
     const availableWidth = maxWidth - prefixWidth;
-    return availableWidth > MIN_MESSAGE_WIDTH && message.length > availableWidth
-      ? `${message.slice(0, availableWidth - 1)}…`
-      : message;
+    return availableWidth > MIN_MESSAGE_WIDTH && message.length > availableWidth ? `${message.slice(0, availableWidth - 1)}…` : message;
   }
 
   /** Render a smooth fractional-block progress bar */
@@ -65,8 +64,8 @@ export class TerminalUtil {
     const emptyCount = Math.max(0, PROGRESS_BAR_WIDTH - filledCount - (partial ? 1 : 0));
 
     const filledPart = filledCount ? color('█'.repeat(filledCount)) : '';
-    const partialPart = partial ? chalk.bgBlackBright(color(partial)) : '';
-    const emptyPart = emptyCount ? (incomplete?.(' '.repeat(emptyCount)) ?? chalk.bgBlackBright(' '.repeat(emptyCount))) : '';
+    const partialPart = partial ? chalk.bgWhiteBright(color(partial)) : '';
+    const emptyPart = emptyCount ? (incomplete?.(' '.repeat(emptyCount)) ?? chalk.bgWhiteBright(' '.repeat(emptyCount))) : '';
     return `${filledPart}${partialPart}${emptyPart}`;
   }
   /**
