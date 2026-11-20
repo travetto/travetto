@@ -148,8 +148,11 @@ export class Terminal {
     try {
       await this.#writer.hideCursor().commit();
       for await (const { idx, text } of source) {
-        max = Math.max(idx, max);
-        await this.#writer.write('\n'.repeat(idx)).setPosition({ x: 0 }).write(text).clearLine(1).changePosition({ y: -idx }).commit();
+        if (idx > max) {
+          await this.#writer.write('\n'.repeat(idx)).changePosition({ y: -idx }).commit();
+          max = idx;
+        }
+        await this.#writer.changePosition({ y: idx }).writeFullWidth(text).changePosition({ y: -idx }).commit();
       }
     } finally {
       await this.#writer

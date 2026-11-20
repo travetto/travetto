@@ -1,4 +1,5 @@
 import type tty from 'node:tty';
+import { stripVTControlCharacters } from 'node:util';
 
 import { ShutdownManager } from '@travetto/runtime';
 
@@ -9,6 +10,25 @@ const ESC = '\x1b[';
 const clamp = (input: number, size: number): number => Math.max(Math.min(input + (input < 0 ? size : 0), size - 1), 0);
 const delta = (input: number | undefined, position: string, negative: string): string =>
   !input ? '' : `${ESC}${Math.abs(input)}${input < 0 ? negative : position}`;
+
+const truncateStyledText = (text: string, width: number) => {
+  if (stripVTControlCharacters(text).length <= width) {
+    return text;
+  }
+  const maxVisible = Math.max(0, width - 1);
+  let visible = 0;
+  let output = '';
+  // oxlint-disable-next-line no-control-regex
+  for (const [token] of text.matchAll(/\x1b\[[0-9;]*[A-Za-z]|./gs)) {
+    if (token.startsWith('\x1b[')) {
+      output += token;
+    } else if (visible < maxVisible) {
+      output += token;
+      visible += 1;
+    }
+  }
+  return output.includes('\x1b[') ? '\x1b[0m' : '';
+};
 
 const Codes = {
   SHOW_CURSOR: `${ESC}?25h`,
@@ -128,6 +148,16 @@ export class TerminalWriter {
   /** Write single line */
   writeLine(line: string = ''): this {
     return this.write(`${line}\n`);
+  }
+
+  /** Write text truncated to fit within maxWidth visible columns while preserving ANSI escape sequences */
+  writeTruncated(text: string, maxWidth: number = this.#term.width): this {
+    return this.write(truncateStyledText(text, maxWidth));
+  }
+
+  /** Write full width (start at 0, and ensure rest of line is cleared)  */
+  writeFullWidth(text: string): this {
+    return this.setPosition({ x: 0 }).writeTruncated(text).clearLine(1);
   }
 
   /** Write multiple lines */
