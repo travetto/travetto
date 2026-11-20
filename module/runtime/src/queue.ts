@@ -4,6 +4,7 @@
 export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
   #buffer: X[] = [];
   #done = false;
+  #error?: Error;
   #ready = Promise.withResolvers<void>();
 
   /**
@@ -26,11 +27,19 @@ export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
    * Wait for next event to fire
    */
   async next(): Promise<IteratorResult<X>> {
-    while (!this.#done && !this.#buffer.length) {
+    while (!this.#done && !this.#buffer.length && !this.#error) {
       await this.#ready.promise;
       this.#ready = Promise.withResolvers<void>();
     }
-    return { value: (this.#buffer.length ? this.#buffer.shift() : undefined)!, done: this.#done };
+    if (this.#error) {
+      const error = this.#error;
+      this.#error = undefined;
+      throw error;
+    }
+    if (this.#buffer.length) {
+      return { value: this.#buffer.shift()!, done: false };
+    }
+    return { value: undefined!, done: true };
   }
 
   /**
@@ -55,7 +64,8 @@ export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
    */
   async throw(error?: Error): Promise<IteratorResult<X>> {
     this.#done = true;
-    this.#ready.reject(error);
-    return { value: undefined, done: this.#done };
+    this.#error = error;
+    this.#ready.resolve();
+    return { value: undefined!, done: this.#done };
   }
 }

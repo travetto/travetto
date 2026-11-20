@@ -1,6 +1,7 @@
 export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
   #queue: X[] = [];
   #done = false;
+  #error?: Error;
   #ready = Promise.withResolvers<void>();
 
   constructor(signal?: AbortSignal) {
@@ -15,17 +16,26 @@ export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
   }
 
   async next(): Promise<IteratorResult<X>> {
-    while (!this.#done && !this.#queue.length) {
+    while (!this.#done && !this.#queue.length && !this.#error) {
       await this.#ready.promise;
       this.#ready = Promise.withResolvers<void>();
     }
-    return { value: (this.#queue.length ? this.#queue.shift() : undefined)!, done: this.#done };
+    if (this.#error) {
+      const error = this.#error;
+      this.#error = undefined;
+      throw error;
+    }
+    if (this.#queue.length) {
+      return { value: this.#queue.shift()!, done: false };
+    }
+    return { value: undefined!, done: true };
   }
 
   async throw(error?: Error): Promise<IteratorResult<X>> {
     this.#done = true;
-    this.#ready.reject(error);
-    return { value: undefined, done: this.#done };
+    this.#error = error;
+    this.#ready.resolve();
+    return { value: undefined!, done: this.#done };
   }
 
   has(predicate: (item: X) => boolean): boolean {

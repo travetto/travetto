@@ -109,9 +109,16 @@ export class CompilerUtil {
   static async clearCaches(context: ManifestContext, deleteOutput = false): Promise<void> {
     if (deleteOutput && process.env.TRV_ROLE !== 'test') {
       await Promise.all(
-        [context.build.outputFolder, context.build.typesFolder].map(folder =>
-          fs.rm(path.resolve(context.workspace.path, folder), { recursive: true, force: true })
-        )
+        [context.build.outputFolder, context.build.typesFolder].map(async folder => {
+          const target = path.resolve(context.workspace.path, folder);
+          const staged = `${target}.deleting.${process.pid}.${Date.now()}`;
+          try {
+            await fs.rename(target, staged);
+            void fs.rm(staged, { recursive: true, force: true });
+          } catch {
+            await fs.rm(target, { recursive: true, force: true });
+          }
+        })
       );
     }
     PackageUtil.clearCache();
