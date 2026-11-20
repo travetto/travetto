@@ -34,7 +34,7 @@ class TerminalProgressTests {
       }
     } as unknown as tty.WriteStream;
 
-    process.env.TRV_QUIET = 'false';
+    process.env.TRV_QUIET = '';
 
     const terminal = new Terminal(output, { width: 20, height: 24 });
     async function* events() {
@@ -45,10 +45,9 @@ class TerminalProgressTests {
 
     await terminal.streamList(events());
 
-    const combined = written.join('');
     // Only 1 newline to allocate row 1 + 1 newline from finally cleanup
-    assert.strictEqual(combined.match(/\n/g)?.length, 2);
-    assert(combined.includes('row-1-updated-with-…'));
-    assert(!combined.includes('row-1-updated-with-very-long-text'));
+    assert(written.length === 6);
+    assert(!written.find(x => x.includes('row-1-updated-with-very-long-text')));
+    assert(written.find(x => x.includes('row-1-updated-with-…')));
   }
 }

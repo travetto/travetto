@@ -7,6 +7,8 @@ type State = { output: tty.WriteStream; height: number; width: number };
 type TermCoord = { x: number; y: number };
 
 const ESC = '\x1b[';
+// oxlint-disable-next-line no-control-regex
+const ESC_MATCH = /\x1b\[[0-9;]*[a-z]|./gis;
 const clamp = (input: number, size: number): number => Math.max(Math.min(input + (input < 0 ? size : 0), size - 1), 0);
 const delta = (input: number | undefined, position: string, negative: string): string =>
   !input ? '' : `${ESC}${Math.abs(input)}${input < 0 ? negative : position}`;
@@ -18,16 +20,15 @@ const truncateStyledText = (text: string, width: number) => {
   const maxVisible = Math.max(0, width - 1);
   let visible = 0;
   let output = '';
-  // oxlint-disable-next-line no-control-regex
-  for (const [token] of text.matchAll(/\x1b\[[0-9;]*[A-Za-z]|./gs)) {
-    if (token.startsWith('\x1b[')) {
+  for (const [token] of text.matchAll(ESC_MATCH)) {
+    if (token.startsWith(ESC)) {
       output += token;
     } else if (visible < maxVisible) {
       output += token;
       visible += 1;
     }
   }
-  return output.includes('\x1b[') ? '\x1b[0m' : '';
+  return `${output}…${ESC}0m`;
 };
 
 const Codes = {
