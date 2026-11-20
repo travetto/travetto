@@ -100,4 +100,32 @@ class CompilerLogTests {
     assert.strictEqual(Log.level, 'info');
     assert.strictEqual(Log.disabled, false);
   }
+
+  @Test()
+  async verifyProgressBarRendering() {
+    const originalIsTTY = process.stdout.isTTY;
+    const originalWrite = process.stdout.write.bind(process.stdout);
+    const written: string[] = [];
+
+    try {
+      Object.defineProperty(process.stdout, 'isTTY', { value: true, configurable: true });
+      process.stdout.write = ((chunk: string | Uint8Array): boolean => {
+        written.push(chunk.toString());
+        return true;
+      }) as typeof process.stdout.write;
+
+      Log.disabled = false;
+      Log.onProgressEvent({ idx: 5, total: 10, failures: 0, message: 'module/compiler/src/log.ts', operation: 'compile' });
+      Log.onProgressEvent({ idx: 10, total: 10, failures: 0, message: 'Complete', operation: 'compile', complete: true });
+
+      const progressOutput = written.find(entry => entry.includes('Compiling')) ?? '';
+      assert(progressOutput.includes('50%'));
+      assert(progressOutput.includes('[5/10]'));
+      assert(progressOutput.includes('module/compiler/src/log.ts'));
+      assert(written.at(-1)?.includes('\x1b[1G\x1b[0K'));
+    } finally {
+      Object.defineProperty(process.stdout, 'isTTY', { value: originalIsTTY, configurable: true });
+      process.stdout.write = originalWrite;
+    }
+  }
 }
