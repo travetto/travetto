@@ -120,6 +120,7 @@ export class Compiler {
   async *emit(files: string[]): AsyncIterable<CompileEmitEvent> {
     let i = 0;
     let lastSent = Date.now();
+    let failures = 0;
 
     for await (const result of this.#state.compileAffectedFiles(files)) {
       const nodeModSeparator = 'node_modules/';
@@ -129,6 +130,7 @@ export class Compiler {
       if (result.diagnostics.length) {
         const normalizedFile = path.relative(this.#state.manifest.workspace.path, result.sourceFile);
         for (const diagnostic of result.diagnostics) {
+          failures += 1;
           log.error(`ERROR ${imp}:${diagnostic.line}:${diagnostic.column} -- ${diagnostic.message}`, [], {
             phase: 'error',
             file: normalizedFile
@@ -140,14 +142,21 @@ export class Compiler {
       if (Date.now() - lastSent > 50) {
         // Limit to 1 every 50ms
         lastSent = Date.now();
-        this.#sendEvent('progress', { total: files.length, idx: i, message: imp, operation: 'compile' });
+        this.#sendEvent('progress', { total: files.length, idx: i, failures, message: imp, operation: 'compile' });
       }
       if (this.#shutdownSignal.aborted) {
         break;
       }
     }
 
-    this.#sendEvent('progress', { total: files.length, idx: files.length, message: 'Complete', operation: 'compile', complete: true });
+    this.#sendEvent('progress', {
+      total: files.length,
+      idx: files.length,
+      failures,
+      message: 'Complete',
+      operation: 'compile',
+      complete: true
+    });
 
     await CommonUtil.queueMacroTask();
     log.debug(`Compiled ${i} files`);

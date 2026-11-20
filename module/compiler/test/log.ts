@@ -115,8 +115,8 @@ class CompilerLogTests {
       }) as typeof process.stdout.write;
 
       Log.disabled = false;
-      Log.onProgressEvent({ idx: 5, total: 10, message: 'module/compiler/src/log.ts', operation: 'compile' });
-      Log.onProgressEvent({ idx: 10, total: 10, message: 'Complete', operation: 'compile', complete: true });
+      Log.onProgressEvent({ idx: 5, total: 10, failures: 0, message: 'module/compiler/src/log.ts', operation: 'compile' });
+      Log.onProgressEvent({ idx: 10, total: 10, failures: 0, message: 'Complete', operation: 'compile', complete: true });
 
       const progressOutput = written.find(entry => entry.includes('Compiling')) ?? '';
       assert(progressOutput.includes('50%'));

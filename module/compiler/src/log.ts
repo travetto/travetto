@@ -74,24 +74,23 @@ class Logger extends CompilerLogger {
   }
 
   /** Render a smooth fractional-block progress bar */
-  #renderProgressBar(ratio: number): string {
+  #renderProgressBar(ratio: number, color: (input: string) => string): string {
     const exact = ratio * PROGRESS_BAR_WIDTH;
     const filledCount = Math.floor(exact);
     const partialIndex = Math.floor((exact - filledCount) * PARTIAL_BLOCKS.length);
     const partial = filledCount < PROGRESS_BAR_WIDTH && partialIndex > 0 ? PARTIAL_BLOCKS[partialIndex] : '';
     const emptyCount = Math.max(0, PROGRESS_BAR_WIDTH - filledCount - (partial ? 1 : 0));
 
-    const filledPart = filledCount ? chalk.green('█'.repeat(filledCount)) : '';
-    const partialPart = partial ? chalk.green.bgWhiteBright(partial) : '';
-    const emptyPart = emptyCount ? chalk.bgWhiteBright(' '.repeat(emptyCount)) : '';
-    return `${filledPart}${partialPart}${emptyPart}`;
+    const filledPart = filledCount ? color('█'.repeat(filledCount)) : '';
+    const partialPart = partial ? color(partial) : '';
+    return `${filledPart}${partialPart}${' '.repeat(emptyCount)}`;
   }
 
   /** Format the full progress line, truncating the message to fit the terminal width */
   #layoutProgressLine(event: CompilerProgressEvent): string {
     const ratio = event.total ? Math.min(1, Math.max(0, event.idx / event.total)) : 0;
     const percent = `${Math.trunc(ratio * 100)}`.padStart(3);
-    const bar = this.#renderProgressBar(ratio);
+    const bar = this.#renderProgressBar(ratio, event.failures ? chalk.red : chalk.green);
     const counts = `[${event.idx}/${event.total}]`;
     const prefix = `Compiling ${bar} ${chalk.bold(`${percent}%`)} ${chalk.dim(counts)}`;
     const prefixWidth = stripVTControlCharacters(prefix).length + 1;
