@@ -182,7 +182,8 @@ export class ManifestUtil {
         if (node) {
           node = node.subPaths[subPath];
           value = node?.value ?? value;
-        } else if (validateUnknown && !node && !validateUnknown(inputPath.slice(0, index))) {
+        }
+        if (validateUnknown && !node && !validateUnknown(inputPath.slice(0, index))) {
           value = undefined;
           break;
         }
