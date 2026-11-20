@@ -6,8 +6,6 @@ import { CompilerLogger, type CompilerLogEvent, type CompilerLogLevel, type Comp
 
 const LEVEL_TO_PRIORITY: Record<CompilerLogLevel, number> = { debug: 1, info: 2, warn: 3, error: 4 };
 const SCOPE_MAX = 15;
-const SPINNER_FRAMES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏';
-const SPINNER_INTERVAL_MS = 80;
 const PROGRESS_BAR_WIDTH = 20;
 const DEFAULT_TERMINAL_WIDTH = 120;
 const MIN_MESSAGE_WIDTH = 4;
@@ -75,12 +73,6 @@ class Logger extends CompilerLogger {
     return new Logger({ scope: name }, this);
   }
 
-  /** Compute the current animated spinner frame */
-  #computeSpinnerFrame(): string {
-    const frame = Math.trunc(Date.now() / SPINNER_INTERVAL_MS);
-    return chalk.green(SPINNER_FRAMES[frame % SPINNER_FRAMES.length]);
-  }
-
   /** Render a smooth fractional-block progress bar */
   #renderProgressBar(ratio: number): string {
     const exact = ratio * PROGRESS_BAR_WIDTH;
@@ -99,10 +91,9 @@ class Logger extends CompilerLogger {
   #layoutProgressLine(event: CompilerProgressEvent): string {
     const ratio = event.total ? Math.min(1, Math.max(0, event.idx / event.total)) : 0;
     const percent = `${Math.trunc(ratio * 100)}`.padStart(3);
-    const spinner = this.#computeSpinnerFrame();
     const bar = this.#renderProgressBar(ratio);
     const counts = `[${event.idx}/${event.total}]`;
-    const prefix = `${spinner} Compiling ${bar} ${chalk.bold(`${percent}%`)} ${chalk.dim(counts)}`;
+    const prefix = `Compiling ${bar} ${chalk.bold(`${percent}%`)} ${chalk.dim(counts)}`;
     const prefixWidth = stripVTControlCharacters(prefix).length + 1;
     const availableWidth = (process.stdout.columns || DEFAULT_TERMINAL_WIDTH) - prefixWidth;
     const message =

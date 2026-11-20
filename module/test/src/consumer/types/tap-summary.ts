@@ -107,7 +107,6 @@ export class TapSummaryEmitter implements TestConsumerShape {
         })
         .map(
           TerminalUtil.progressBarUpdater(this.#terminal, {
-            withWaiting: true,
             style: {
               complete: { text: '#e5e5e5', background: '#026020' },
               failed: { text: '#e5e5e5', background: '#8b0000' }
