@@ -520,7 +520,13 @@ export class S3ModelService implements ModelCrudSupport, ModelBulkSupport, Model
     try {
       await this.client.headBucket({ Bucket: this.config.bucket });
     } catch {
-      await this.client.createBucket({ Bucket: this.config.bucket });
+      try {
+        await this.client.createBucket({ Bucket: this.config.bucket });
+      } catch (error) {
+        if (!(error instanceof Error && error.name === 'BucketAlreadyOwnedByYou')) {
+          throw error;
+        }
+      }
     }
   }
 
