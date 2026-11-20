@@ -56,7 +56,7 @@ export class TerminalUtil {
   }
 
   /** Render a smooth fractional-block progress bar */
-  static #renderProgressBar(ratio: number, color: TermStyleFn, incomplete?: TermStyleFn): string {
+  static #renderProgressBar(ratio: number, color: TermStyleFn, background: TermStyleFn): string {
     const exact = ratio * PROGRESS_BAR_WIDTH;
     const filledCount = Math.floor(exact);
     const partialIndex = Math.floor((exact - filledCount) * PARTIAL_BLOCKS.length);
@@ -64,8 +64,8 @@ export class TerminalUtil {
     const emptyCount = Math.max(0, PROGRESS_BAR_WIDTH - filledCount - (partial ? 1 : 0));
 
     const filledPart = filledCount ? color('█'.repeat(filledCount)) : '';
-    const partialPart = partial ? chalk.bgWhiteBright(color(partial)) : '';
-    const emptyPart = emptyCount ? (incomplete?.(' '.repeat(emptyCount)) ?? chalk.bgWhiteBright(' '.repeat(emptyCount))) : '';
+    const partialPart = partial ? background(color(partial)) : '';
+    const emptyPart = emptyCount ? background(' '.repeat(emptyCount)) : '';
     return `${filledPart}${partialPart}${emptyPart}`;
   }
   /**
@@ -102,13 +102,15 @@ export class TerminalUtil {
   ): (event: ProgressEvent<string>) => string {
     const getStyle = this.#resolveProgressStyle(config?.style);
     let countWidth = 0;
+    const isDark = StyleUtil.isBackgroundDark();
+    const defaultBackground = isDark ? chalk.bgBlackBright : chalk.bgWhiteBright;
 
     return event => {
       const progress = event.total ? Math.min(1, Math.max(0, event.completed / event.total)) : 0;
       if (event.total && !countWidth) {
         countWidth = Math.trunc(Math.ceil(Math.log10(event.total)));
       }
-      const { complete, incomplete, failed } = getStyle();
+      const { complete, incomplete = defaultBackground, failed } = getStyle();
       const color = event.failed ? failed : progress >= 1 && !config?.style ? chalk.green : complete;
       const bar = this.#renderProgressBar(progress, color, incomplete);
       const percent = `${Math.trunc(progress * 100)}`.padStart(3);
