@@ -8,7 +8,7 @@ import type { ManifestModule, ManifestModuleCore, ManifestModuleFile, ManifestRo
 
 type DeltaEventType = ChangeEventType | 'missing' | 'dirty';
 type DeltaModule = ManifestModuleCore & { files: Record<string, ManifestModuleFile> };
-export type DeltaEvent = { file: string; type: DeltaEventType; module: string; sourceFile: string };
+export type DeltaEvent = { file: string; type: DeltaEventType; module: string; sourceFile: string; outputFile?: string };
 
 const VALID_SOURCE_FOLDERS = new Set<ManifestModuleFolderType>([
   'bin',
@@ -39,8 +39,8 @@ export class ManifestDeltaUtil {
   static async #deltaModules(ctx: ManifestContext, outputFolder: string, left: DeltaModule): Promise<DeltaEvent[]> {
     const out: DeltaEvent[] = [];
 
-    const add = (file: string, type: DeltaEvent['type']): unknown =>
-      out.push({ file, module: left.name, type, sourceFile: path.resolve(ctx.workspace.path, left.sourceFolder, file) });
+    const add = (file: string, type: DeltaEvent['type'], outputFile?: string): unknown =>
+      out.push({ file, module: left.name, type, sourceFile: path.resolve(ctx.workspace.path, left.sourceFolder, file), outputFile });
 
     const root = path.resolve(ctx.workspace.path, ctx.build.outputFolder, left.outputFolder);
     const right = new Set(
@@ -69,7 +69,7 @@ export class ManifestDeltaUtil {
     }
     // Deleted
     for (const file of right) {
-      add(file, 'delete');
+      add(file, 'delete', `${root}/${file}${ManifestModuleUtil.OUTPUT_EXT}`);
     }
     return out;
   }

@@ -1,8 +1,10 @@
 import assert from 'node:assert';
+import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import winPath from 'node:path/win32';
 
-import { path as path2 } from '@travetto/manifest';
+import { ManifestDeltaUtil, ManifestModuleUtil, type ManifestRoot, ManifestUtil, path as path2 } from '@travetto/manifest';
 import { Suite, Test } from '@travetto/test';
 
 @Suite()
@@ -39,5 +41,84 @@ class PathTests {
     assert(winJoin('C:\\Docs\\Bob', 'orange\\red.png') === 'C:/Docs/Bob/orange/red.png');
     assert(winJoin('C:\\Docs\\Bob', 'orange/red.png') === 'C:/Docs/Bob/orange/red.png');
     assert(winJoin('C:\\Docs\\Bob', '../red.png') === 'C:/Docs/red.png');
+  }
+
+  @Test()
+  verifyFixtureFileTypeAndValidModuleFile() {
+    assert.strictEqual(ManifestModuleUtil.getFileType('test/fixtures/sample.ts'), 'fixture');
+    assert.strictEqual(ManifestModuleUtil.getFileType('/repo/module/foo/test/fixtures/sample.ts'), 'fixture');
+    assert.strictEqual(ManifestModuleUtil.getFileType('/repo/module/foo/support/fixtures/sample.ts'), 'fixture');
+    assert.strictEqual(ManifestModuleUtil.getFileType('/repo/module/foo/support/resources/sample.ts'), 'fixture');
+    assert.strictEqual(ManifestModuleUtil.getFileType('/repo/module/foo/src/sample.ts'), 'ts');
+
+    assert.strictEqual(ManifestModuleUtil.isValidModuleFile('src/sample.ts'), true);
+    assert.strictEqual(ManifestModuleUtil.isValidModuleFile('support/sample.ts'), true);
+    assert.strictEqual(ManifestModuleUtil.isValidModuleFile('__index__.ts'), true);
+    assert.strictEqual(ManifestModuleUtil.isValidModuleFile('test/sample.ts', false), false);
+    assert.strictEqual(ManifestModuleUtil.isValidModuleFile('test/sample.ts', true), true);
+    assert.strictEqual(ManifestModuleUtil.isValidModuleFile('scripts/sample.ts', true), false);
+    assert.strictEqual(ManifestModuleUtil.isValidModuleFile('doc-exec/support/sample.ts', true), false);
+  }
+
+  @Test()
+  async verifyLookupTrieNestedPackageIsolation() {
+    const tempDirectory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'trie-test-'));
+    try {
+      const cliDir = path.join(tempDirectory, 'module', 'cli');
+      const docExecDir = path.join(cliDir, 'doc-exec', 'support');
+      await fs.promises.mkdir(docExecDir, { recursive: true });
+      await fs.promises.writeFile(path.join(cliDir, 'package.json'), '{}');
+      await fs.promises.writeFile(path.join(cliDir, 'doc-exec', 'package.json'), '{}');
+
+      const lookup = ManifestUtil.lookupTrie(
+        [{ name: '@travetto/cli', sourceFolder: 'module/cli' }],
+        item => item.sourceFolder.split('/'),
+        sub => !fs.existsSync(path.resolve(tempDirectory, ...sub, 'package.json'))
+      );
+
+      assert.strictEqual(lookup(['module', 'cli', 'src', 'main.ts'])?.name, '@travetto/cli');
+      assert.strictEqual(lookup(['module', 'cli', 'doc-exec', 'support', 'cli.basic.ts']), undefined);
+    } finally {
+      await fs.promises.rm(tempDirectory, { recursive: true, force: true });
+    }
+  }
+
+  @Test()
+  async verifyProduceDeltaDeleteIncludesOutputFile() {
+    const tempDirectory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'delta-test-'));
+    try {
+      const outputDir = path.join(tempDirectory, '.trv', 'output', 'node_modules', 'test-app', 'src');
+      await fs.promises.mkdir(outputDir, { recursive: true });
+      const orphanOutput = path.join(outputDir, 'removed.js');
+      await fs.promises.writeFile(orphanOutput, 'export {};');
+
+      const manifest: ManifestRoot = {
+        generated: Date.now(),
+        workspace: { name: 'test-app', path: path2.toPosix(tempDirectory), mono: false, manager: 'npm' },
+        build: { compilerUrl: 'http://localhost:20000', outputFolder: '.trv/output', toolFolder: '.trv/tool', typesFolder: '.trv/types' },
+        main: { name: 'test-app', folder: '', version: '1.0.0' },
+        modules: {
+          'test-app': {
+            main: true,
+            name: 'test-app',
+            version: '1.0.0',
+            workspace: true,
+            production: true,
+            sourceFolder: '',
+            outputFolder: 'node_modules/test-app',
+            roles: ['std'],
+            parents: [],
+            files: {}
+          }
+        }
+      };
+
+      const events = await ManifestDeltaUtil.produceDelta(manifest);
+      const deleted = events.find(event => event.type === 'delete' && event.file === 'src/removed');
+      assert.ok(deleted);
+      assert.strictEqual(deleted.outputFile, path2.toPosix(orphanOutput));
+    } finally {
+      await fs.promises.rm(tempDirectory, { recursive: true, force: true });
+    }
   }
 }

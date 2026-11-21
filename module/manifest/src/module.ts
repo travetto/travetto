@@ -33,6 +33,7 @@ const SUPPORT_FILE_MAP: Record<string, ManifestModuleRole> = {
 };
 
 const SUPPORT_FILE_REGEX = new RegExp(`^support[/](?<name>${Object.keys(SUPPORT_FILE_MAP).join('|')})[./]`);
+const FIXTURE_PATH_REGEX = /(^|\/)(support\/fixtures|test\/fixtures|support\/resources)\//;
 
 export class ManifestModuleUtil {
   static TYPINGS_EXT = '.d.ts';
@@ -146,11 +147,7 @@ export class ManifestModuleUtil {
   static getFileType(moduleFile: string): ManifestModuleFileType {
     if (moduleFile.endsWith('package.json')) {
       return 'package-json';
-    } else if (
-      moduleFile.startsWith('support/fixtures/') ||
-      moduleFile.startsWith('test/fixtures/') ||
-      moduleFile.startsWith('support/resources/')
-    ) {
+    } else if (FIXTURE_PATH_REGEX.test(moduleFile)) {
       return 'fixture';
     } else if (this.isTypingsFile(moduleFile)) {
       return 'typings';
@@ -296,5 +293,17 @@ export class ManifestModuleUtil {
       type = this.getFileType(type);
     }
     return type === 'ts' || type === 'package-json' || type === 'js' || type === 'typings';
+  }
+
+  /**
+   * Determine if a relative module file resides in a valid Travetto module folder or root file
+   */
+  static isValidModuleFile(moduleFile: string, full = false): boolean {
+    const slashIndex = moduleFile.indexOf('/');
+    if (slashIndex > 0) {
+      const topFolder = moduleFile.substring(0, slashIndex);
+      return (full ? FULL_TOP_FOLDERS : STD_TOP_FOLDERS).has(topFolder);
+    }
+    return (full ? FULL_TOP_FILES : STD_TOP_FILES).has(moduleFile);
   }
 }
