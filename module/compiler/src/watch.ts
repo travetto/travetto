@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import { watch } from 'node:fs';
+import { existsSync, watch } from 'node:fs';
 import fs from 'node:fs/promises';
 import { promisify } from 'node:util';
 
@@ -51,16 +51,12 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
 
   async #getWatchIgnores(): Promise<string[]> {
     const pkg = PackageUtil.readPackage(this.#root);
-    const patterns = [...(pkg?.travetto?.build?.watchIgnores ?? []), '**/node_modules', '.*/**/node_modules'];
+    const patterns = [...(pkg?.travetto?.build?.watchIgnores ?? []), '**/node_modules', '.*/**/node_modules', '**/.trv', '.*/**/.trv'];
     const ignores = new Set(['node_modules', '.git', this.#state.manifest.build.outputFolder, this.#state.manifest.build.typesFolder]);
     for (const item of patterns) {
       if (item.includes('*')) {
         for await (const sub of fs.glob(item, { cwd: this.#root })) {
-          if (sub.startsWith('node_modules')) {
-            // Continue
-          } else if (sub.endsWith('/node_modules')) {
-            ignores.add(sub.split('/node_modules')[0]);
-          } else {
+          if (!sub.startsWith('node_modules')) {
             ignores.add(sub);
           }
         }
@@ -75,12 +71,13 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
     let entry = this.#state.getBySource(file);
     const module = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(file);
 
-    if (module && action === 'create' && !entry) {
+    if (module && action !== 'delete' && !entry && existsSync(file)) {
       const moduleRoot = module.sourceFolder || this.#root;
       const moduleFile = file.includes(`${moduleRoot}/`) ? file.split(`${moduleRoot}/`)[1] : file;
-      entry = this.#state.registerInput(module, moduleFile);
-    } else if (action === 'delete' && entry) {
-      this.#state.removeSource(entry.sourceFile); // Ensure we remove it
+      if (ManifestModuleUtil.isValidModuleFile(moduleFile, module.main)) {
+        entry = this.#state.registerInput(module, moduleFile);
+        action = 'create';
+      }
     }
 
     return { entry, file: entry?.sourceFile ?? file, action, moduleFile: entry?.moduleFile ?? '' };
@@ -108,17 +105,16 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
   }
 
   #updateManifestInMemory(compilerEvents: CompilerWatchEvent[]): void {
-    const eventsByModule = this.#state.manifestIndex.groupByLineage(
-      compilerEvents.map(event => ({ item: event, module: event.entry.module.name })).filter(x => x.item.action !== 'update')
-    );
-
-    for (const [moduleName, events] of eventsByModule.entries()) {
-      const moduleManifest = this.#state.manifestIndex.resolveDependentManifest(moduleName);
-      for (const { moduleFile, action, entry } of events) {
-        ManifestUtil.updateManifest(moduleManifest, entry.module.name, moduleFile, action);
-      }
-      log.debug('Updating manifest (in memory)', { module: moduleName, changes: events.length });
+    const mutatingEvents = compilerEvents.filter(event => event.action !== 'update');
+    if (!mutatingEvents.length) {
+      return;
     }
+
+    for (const { moduleFile, action, entry } of mutatingEvents) {
+      ManifestUtil.updateManifest(this.#state.manifestIndex.manifest, entry.module.name, moduleFile, action);
+    }
+    this.#state.manifestIndex.init(this.#state.manifestIndex.manifest);
+    log.debug('Updating manifest (in memory)', { changes: mutatingEvents.length });
   }
 
   async writeBatchManifests(compilerEvents: CompilerWatchEvent[]): Promise<void> {
@@ -128,14 +124,16 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
 
     for (const [moduleName, events] of eventsByModule.entries()) {
       const moduleManifest = this.#state.manifestIndex.resolveDependentManifest(moduleName);
+      for (const { moduleFile, action, entry } of events) {
+        ManifestUtil.updateManifest(moduleManifest, entry.module.name, moduleFile, action);
+      }
       log.debug('Updating manifest', [{ module: moduleName, events: events.length }]);
       await ManifestUtil.writeManifest(moduleManifest);
     }
   }
 
   async #listenWorkspace(): Promise<void> {
-    await this.#cleanup.workspace?.();
-
+    const prevCleanup = this.#cleanup.workspace;
     const ignores = await this.#getWatchIgnores();
 
     log.debug('Starting workspace watcher', { root: this.#root });
@@ -174,6 +172,8 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
       pkgListener.close();
       await listener.unsubscribe();
     };
+
+    await prevCleanup?.();
   }
 
   async #listenToolFolder(): Promise<void> {
@@ -249,14 +249,19 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
     const targets = [
       {
         folder: path.resolve(this.#root, gitDirectory),
-        filter: (file?: string | null): boolean => !file || /^(HEAD|packed-refs|refs)/.test(file)
+        filter: (file?: string | null): boolean => !file || /^(HEAD|packed-refs|refs|logs\/HEAD)/.test(path.toPosix(file)),
+        recursive: false
       },
-      { folder: path.resolve(this.#root, commonDirectory, 'refs', 'heads'), filter: (): boolean => true }
+      { folder: path.resolve(this.#root, commonDirectory, 'refs', 'heads'), filter: (): boolean => true, recursive: true }
     ];
 
-    for (const { folder, filter } of targets) {
+    for (const { folder, filter, recursive } of targets) {
       if (await fs.stat(folder, { throwIfNoEntry: false })) {
-        watchers.push(watch(folder, { encoding: 'utf8' }, (_, file) => filter(file) && (isChecking ??= checkChange())));
+        try {
+          watchers.push(watch(folder, { encoding: 'utf8', recursive }, (_, file) => filter(file) && (isChecking ??= checkChange())));
+        } catch {
+          watchers.push(watch(folder, { encoding: 'utf8' }, (_, file) => filter(file) && (isChecking ??= checkChange())));
+        }
       }
     }
 
@@ -290,7 +295,17 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
       throw new CompilerReset('Package or compiler configuration changed', { files: changedConfigurationFiles, soft: true });
     }
 
-    const items = validEvents.map(event => this.#toCandidateEvent(event)).filter(event => this.#isValidEvent(event));
+    const collapsed = new Map<string, CompilerWatchRawEvent>();
+    for (const event of validEvents) {
+      const prev = collapsed.get(event.file);
+      if (prev?.action === 'create' && event.action === 'delete') {
+        collapsed.delete(event.file);
+      } else {
+        collapsed.set(event.file, prev?.action === 'delete' && event.action === 'create' ? { action: 'update', file: event.file } : event);
+      }
+    }
+
+    const items = [...collapsed.values()].map(event => this.#toCandidateEvent(event)).filter(event => this.#isValidEvent(event));
 
     if (items.length > 0) {
       this.#updateManifestInMemory(items);

@@ -118,6 +118,132 @@ class CompilerStateTests {
   }
 
   @Test()
+  async verifyAsyncQueueThrowAndCloseDraining() {
+    // 1. throw() after already-resolved #ready must still throw on next()
+    const queue1 = new AsyncQueue<string>();
+    queue1.add('a');
+    queue1.add('b');
+    const first = await queue1.next();
+    assert.strictEqual(first.value, 'a');
+    queue1.drain();
+    await queue1.throw(new CompilerReset('Reset after drain', { soft: true }));
+    await assert.rejects(
+      async () => queue1.next(),
+      (error: unknown) => error instanceof CompilerReset && error.soft === true
+    );
+
+    // 2. close() must drain buffered items before returning done: true
+    const queue2 = new AsyncQueue<string>();
+    queue2.add('one');
+    queue2.add('two');
+    queue2.close();
+    const collected: string[] = [];
+    for await (const item of queue2) {
+      collected.push(item);
+    }
+    assert.deepStrictEqual(collected, ['one', 'two']);
+  }
+
+  @Test()
+  async verifyIsCompilerFileForTransformerAndIndex() {
+    const manifest: ManifestRoot = {
+      generated: Date.now(),
+      workspace: { name: 'test-app', path: '/test/app', mono: false, manager: 'npm' },
+      build: { compilerUrl: 'http://localhost:20000', outputFolder: '.trv/output', toolFolder: '.trv/tool', typesFolder: '.trv/types' },
+      main: { name: 'test-app', folder: '', version: '1.0.0' },
+      modules: {
+        'test-app': {
+          main: true,
+          name: 'test-app',
+          version: '1.0.0',
+          workspace: true,
+          production: true,
+          sourceFolder: '',
+          outputFolder: 'node_modules/test-app',
+          roles: ['std'],
+          parents: [],
+          files: {
+            $transformer: [['support/transformer.custom.ts', 'ts', 1000, 'compile']],
+            src: [['src/regular.ts', 'ts', 1000]]
+          }
+        }
+      }
+    };
+    const state = await CompilerState.get(new ManifestIndex(manifest));
+    assert.strictEqual(state.isCompilerFile(path.resolve('/test/app/support/transformer.custom.ts')), true);
+    assert.strictEqual(state.isCompilerFile(path.resolve('/test/app/src/regular.ts')), false);
+  }
+
+  @Test()
+  async verifyAtomicSaveCollapsingAndManifestSync() {
+    const tempDirectory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'atomic-watch-test-'));
+    try {
+      const srcDir = path.join(tempDirectory, 'src');
+      const outputDir = path.join(tempDirectory, '.trv/output/node_modules/test-app');
+      await fs.promises.mkdir(srcDir, { recursive: true });
+      await fs.promises.mkdir(outputDir, { recursive: true });
+      const alphaFile = path.join(srcDir, 'alpha.ts');
+      const betaFile = path.join(srcDir, 'beta.ts');
+      const unknownFile = path.join(tempDirectory, 'scripts', 'helper.ts');
+      await fs.promises.mkdir(path.dirname(unknownFile), { recursive: true });
+      await fs.promises.writeFile(path.join(tempDirectory, 'package.json'), JSON.stringify({ name: 'test-app', version: '1.0.0' }), 'utf8');
+      await fs.promises.writeFile(alphaFile, 'export const a = 1;', 'utf8');
+      await fs.promises.writeFile(betaFile, 'export const b = 2;', 'utf8');
+      await fs.promises.writeFile(unknownFile, 'export const x = 3;', 'utf8');
+
+      const manifest: ManifestRoot = {
+        generated: Date.now(),
+        workspace: { name: 'test-app', path: path.toPosix(tempDirectory), mono: false, manager: 'npm' },
+        build: { compilerUrl: 'http://localhost:20000', outputFolder: '.trv/output', toolFolder: '.trv/tool', typesFolder: '.trv/types' },
+        main: { name: 'test-app', folder: '', version: '1.0.0' },
+        modules: {
+          'test-app': {
+            main: true,
+            name: 'test-app',
+            version: '1.0.0',
+            workspace: true,
+            production: true,
+            sourceFolder: '',
+            outputFolder: 'node_modules/test-app',
+            roles: ['std'],
+            parents: [],
+            files: {
+              src: [['src/alpha.ts', 'ts', 1000]],
+              $package: [['package.json', 'package-json', 1000]]
+            }
+          }
+        }
+      };
+
+      await fs.promises.writeFile(path.join(outputDir, 'manifest.json'), JSON.stringify(manifest), 'utf8');
+      const state = await CompilerState.get(new ManifestIndex(manifest));
+      const controller = new AbortController();
+      const watcher = new CompilerWatcher(state, controller.signal);
+
+      // Atomic save (delete + create) on alpha, new file beta, and invalid folder scripts/helper.ts
+      const batch = await watcher.prepareBatch([
+        { action: 'delete', file: path.toPosix(alphaFile) },
+        { action: 'create', file: path.toPosix(alphaFile) },
+        { action: 'create', file: path.toPosix(betaFile) },
+        { action: 'create', file: path.toPosix(unknownFile) }
+      ]);
+
+      assert.strictEqual(batch.length, 2);
+      assert.strictEqual(batch[0].action, 'update');
+      assert.strictEqual(batch[0].entry.sourceFile, path.toPosix(alphaFile));
+      assert.strictEqual(batch[1].action, 'create');
+      assert.strictEqual(batch[1].entry.sourceFile, path.toPosix(betaFile));
+      assert.ok(state.manifestIndex.getEntry(path.toPosix(betaFile)));
+
+      await watcher.writeBatchManifests(batch);
+      const savedManifest: ManifestRoot = JSON.parse(await fs.promises.readFile(path.join(outputDir, 'manifest.json'), 'utf8'));
+      assert.ok(savedManifest.modules['test-app'].files.src?.some(([file]) => file === 'src/beta.ts'));
+    } finally {
+      await fs.promises.rm(tempDirectory, { recursive: true, force: true });
+    }
+  }
+
+  @Test()
   verifyEmittedPathsAndOutputs() {
     assert.deepStrictEqual(CompilerUtil.getEmittedOutputs('/app/dist/index.js'), [
       '/app/dist/index.js',
