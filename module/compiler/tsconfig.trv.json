@@ -17,7 +17,7 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "inlineSourceMap": false,
-    "removeComments": true,
+    "removeComments": false,
     "importHelpers": true,
     "noEmitHelpers": true,
     "outDir": "build/",
