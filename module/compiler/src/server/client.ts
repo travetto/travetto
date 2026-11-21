@@ -77,7 +77,7 @@ export class CompilerClient {
 
   /** Clean the server */
   async clean(): Promise<boolean> {
-    return this.#fetch('/clean', { timeout: 300 }).then(
+    return this.#fetch('/clean', { timeout: 10000 }).then(
       response => response.ok,
       () => false
     );
@@ -191,7 +191,7 @@ export class CompilerClient {
     }
 
     let state: CompilerStateType = info.state;
-    if (state === 'startup' || state === 'init' || state === 'compile-start') {
+    if (state !== 'watch-start' && state !== 'compile-failed') {
       state = await this.waitForState(['watch-start', 'compile-failed'], undefined, signal);
     }
 

@@ -117,7 +117,7 @@ export async function invoke(...input: string[]): Promise<unknown> {
       break;
     }
     case 'clean': {
-      if (!(await client.clean())) {
+      if (!(await client.clean()) && !(await client.info())) {
         await CompilerUtil.clearCaches(ctx, true);
       }
       console.log(`Clean triggered ${ctx.workspace.path}`);
