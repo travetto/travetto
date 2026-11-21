@@ -163,18 +163,21 @@ export class Compiler {
   }
 
   async #onWatchBatch(events: CompilerWatchEvent[]): Promise<void> {
+    this.#sendEvent('state', { state: 'compile-start' });
+
     const deleteEvents = events.filter(event => event.action === 'delete');
     const createOrUpdateEvents = events.filter(event => event.action !== 'delete');
+    const affected = new Set(createOrUpdateEvents.map(event => event.entry.sourceFile));
 
-    if (deleteEvents.length) {
-      for (const deleteEvent of deleteEvents) {
-        if (this.#state.removeSource(deleteEvent.entry.sourceFile)) {
-          log.info(`Removed ${deleteEvent.entry.sourceFile}, ${deleteEvent.entry.outputFile}`);
-        }
+    for (const deleteEvent of deleteEvents) {
+      this.#state.getImporters(deleteEvent.entry.sourceFile).forEach(importer => affected.add(importer));
+      if (this.#state.removeSource(deleteEvent.entry.sourceFile)) {
+        log.info(`Removed ${deleteEvent.entry.sourceFile}, ${deleteEvent.entry.outputFile}`);
       }
     }
+    deleteEvents.forEach(deleteEvent => affected.delete(deleteEvent.entry.sourceFile));
 
-    const changedFiles = createOrUpdateEvents.map(event => event.entry.sourceFile);
+    const changedFiles = [...affected];
     const compiledFiles = new Set<string>();
 
     for await (const result of this.#state.compileAffectedFiles(changedFiles)) {
@@ -210,16 +213,17 @@ export class Compiler {
       });
     }
 
-    for (const event of createOrUpdateEvents) {
-      if (compiledFiles.has(event.entry.sourceFile)) {
-        const normalizedFile = path.relative(this.#state.manifest.workspace.path, event.file);
+    const eventBySource = new Map(createOrUpdateEvents.map(event => [event.entry.sourceFile, event]));
+    for (const sourceFile of compiledFiles) {
+      const entry = this.#state.getBySource(sourceFile);
+      if (entry) {
         this.#sendEvent('change', {
-          action: event.action,
+          action: eventBySource.get(sourceFile)?.action ?? 'update',
           time: Date.now(),
-          file: normalizedFile,
-          import: event.entry.import,
-          output: event.entry.outputFile,
-          module: event.entry.module.name
+          file: path.relative(this.#state.manifest.workspace.path, entry.sourceFile),
+          import: entry.import,
+          output: entry.outputFile,
+          module: entry.module.name
         });
       }
     }
@@ -242,7 +246,10 @@ export class Compiler {
 
     if (deleteEvents.length) {
       for (const deleteEvent of deleteEvents) {
-        if (this.#state.removeSource(deleteEvent.sourceFile)) {
+        if (
+          this.#state.removeSource(deleteEvent.sourceFile) ||
+          (deleteEvent.outputFile && this.#state.removeOutput(deleteEvent.outputFile))
+        ) {
           log.info(`Purging deleted output ${deleteEvent.sourceFile}`);
         }
       }
@@ -270,7 +277,9 @@ export class Compiler {
       } else {
         log.debug('Compilation succeeded');
       }
+    }
 
+    if (changedFiles.length || deleteEvents.length) {
       // Rebuild manifests
       const manifest = await ManifestUtil.buildManifest(this.#state.manifestIndex.manifest);
       await ManifestUtil.writeManifest(manifest);
@@ -295,7 +304,7 @@ export class Compiler {
     }
 
     if (this.#watch && !this.#shutdownSignal.aborted) {
-      await this.#state.getProgram();
+      this.#state.populateDependencies(await this.#state.getProgram());
 
       log.info('Watch is ready');
       this.#sendEvent('state', { state: this.#state.hasErrors() ? 'compile-failed' : 'watch-start' });
