@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import winPath from 'node:path/win32';
 
-import { ManifestUtil, path as path2 } from '@travetto/manifest';
+import { ManifestModuleUtil, ManifestUtil, path as path2 } from '@travetto/manifest';
 import { Suite, Test } from '@travetto/test';
 
 @Suite()
@@ -41,6 +41,17 @@ class PathTests {
     assert(winJoin('C:\\Docs\\Bob', 'orange\\red.png') === 'C:/Docs/Bob/orange/red.png');
     assert(winJoin('C:\\Docs\\Bob', 'orange/red.png') === 'C:/Docs/Bob/orange/red.png');
     assert(winJoin('C:\\Docs\\Bob', '../red.png') === 'C:/Docs/red.png');
+  }
+
+  @Test()
+  verifyIsValidModuleFile() {
+    assert.strictEqual(ManifestModuleUtil.isValidModuleFile('src/sample.ts'), true);
+    assert.strictEqual(ManifestModuleUtil.isValidModuleFile('support/sample.ts'), true);
+    assert.strictEqual(ManifestModuleUtil.isValidModuleFile('__index__.ts'), true);
+    assert.strictEqual(ManifestModuleUtil.isValidModuleFile('test/sample.ts', false), false);
+    assert.strictEqual(ManifestModuleUtil.isValidModuleFile('test/sample.ts', true), true);
+    assert.strictEqual(ManifestModuleUtil.isValidModuleFile('scripts/sample.ts', true), false);
+    assert.strictEqual(ManifestModuleUtil.isValidModuleFile('doc-exec/support/sample.ts', true), false);
   }
 
   @Test()
