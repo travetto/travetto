@@ -117,8 +117,10 @@ export async function invoke(...input: string[]): Promise<unknown> {
       break;
     }
     case 'clean': {
-      if (!(await client.clean()) && !(await client.info())) {
-        await CompilerUtil.clearCaches(ctx, true);
+      if (await client.clean()) {
+        await client.waitForWatchReady(); // Wait for the running watch daemon to finish rebuilding
+      } else if (!(await client.info())) {
+        await CompilerUtil.clearCaches(ctx, true); // No server running; clear caches directly on disk
       }
       console.log(`Clean triggered ${ctx.workspace.path}`);
       break;

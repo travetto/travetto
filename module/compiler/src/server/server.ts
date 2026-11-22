@@ -195,6 +195,10 @@ export class CompilerServer {
 
   async #clean(): Promise<{ clean: boolean }> {
     this.info.messages = {};
+    if (this.watching) {
+      // Transition synchronously before fs.watch delivers the reset event so waitForWatchReady() blocks
+      this.info.state = 'reset';
+    }
     await CompilerUtil.clearCaches(this.#ctx, true);
     return { clean: true };
   }
