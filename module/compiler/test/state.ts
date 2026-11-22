@@ -804,4 +804,86 @@ class CompilerStateTests {
       await fs.promises.rm(tempDirectory, { recursive: true, force: true });
     }
   }
+
+  @Test()
+  async verifyTransitiveBarrelPropagationWhenBarrelCompiledFirst() {
+    const tempDirectory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'barrel-order-test-'));
+    try {
+      const sourceDirectory = path.join(tempDirectory, 'src');
+      await fs.promises.mkdir(sourceDirectory, { recursive: true });
+
+      const leafFile = path.toPosix(path.join(sourceDirectory, 'leaf.ts'));
+      const barrelFile = path.toPosix(path.join(sourceDirectory, 'barrel.ts'));
+      const consumerFile = path.toPosix(path.join(sourceDirectory, 'consumer.ts'));
+
+      await fs.promises.writeFile(
+        path.join(tempDirectory, 'tsconfig.json'),
+        JSON.stringify({
+          compilerOptions: {
+            target: 'ES2022',
+            module: 'NodeNext',
+            moduleResolution: 'NodeNext',
+            declaration: true,
+            strict: true,
+            skipLibCheck: true
+          }
+        }),
+        'utf8'
+      );
+      await fs.promises.writeFile(leafFile, 'export const count: number = 1;', 'utf8');
+      await fs.promises.writeFile(barrelFile, "export * from './leaf.ts';", 'utf8');
+      await fs.promises.writeFile(consumerFile, "import { count } from './barrel.ts';\nexport const total: number = count + 1;", 'utf8');
+
+      const manifest: ManifestRoot = {
+        generated: Date.now(),
+        workspace: { name: 'test-app', path: path.toPosix(tempDirectory), mono: false, manager: 'npm' },
+        build: { compilerUrl: 'http://localhost:20000', outputFolder: '.trv/output', toolFolder: '.trv/tool', typesFolder: '.trv/types' },
+        main: { name: 'test-app', folder: '', version: '1.0.0' },
+        modules: {
+          'test-app': {
+            main: true,
+            name: 'test-app',
+            version: '1.0.0',
+            workspace: true,
+            production: true,
+            sourceFolder: '',
+            outputFolder: 'node_modules/test-app',
+            roles: ['std'],
+            parents: [],
+            files: {
+              src: [
+                ['src/leaf.ts', 'ts', 1000],
+                ['src/barrel.ts', 'ts', 1000],
+                ['src/consumer.ts', 'ts', 1000]
+              ]
+            }
+          }
+        }
+      };
+
+      const state = await CompilerState.get(new ManifestIndex(manifest), true);
+      await state.ensureDependencies();
+
+      // Compile initially so .d.ts files exist
+      for await (const _ of state.compileAffectedFiles([leafFile, barrelFile, consumerFile])) {
+        // Initial compile
+      }
+
+      // Now update leafFile and pass barrelFile BEFORE leafFile in the same batch
+      await fs.promises.writeFile(leafFile, "export const count: string = 'bad';", 'utf8');
+      state.resetSource(leafFile);
+      const compiled: { sourceFile: string; diagnostics: number }[] = [];
+      for await (const result of state.compileAffectedFiles([barrelFile, leafFile])) {
+        compiled.push({ sourceFile: result.sourceFile, diagnostics: result.diagnostics.length });
+      }
+
+      assert.deepStrictEqual(
+        compiled.map(item => item.sourceFile),
+        [barrelFile, leafFile, consumerFile]
+      );
+      assert.ok(compiled.find(item => item.sourceFile === consumerFile)!.diagnostics > 0);
+    } finally {
+      await fs.promises.rm(tempDirectory, { recursive: true, force: true });
+    }
+  }
 }
