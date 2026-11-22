@@ -270,6 +270,10 @@ export class Compiler {
     const isCompilerChanged = createOrUpdateEvents.some(event => this.#state.isCompilerFile(event.sourceFile));
     const changedFiles = isCompilerChanged ? this.#state.getAllFiles() : createOrUpdateEvents.map(event => event.sourceFile);
 
+    if (this.#watch && !this.#shutdownSignal.aborted) {
+      await this.#watcher.start();
+    }
+
     if (changedFiles.length) {
       for await (const event of this.emit(changedFiles)) {
         metrics.push(event);
