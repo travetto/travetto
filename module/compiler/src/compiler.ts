@@ -22,8 +22,9 @@ export class Compiler {
     try {
       const manifest = await ManifestUtil.buildManifest(ctx);
       const delta = await ManifestDeltaUtil.produceDelta(manifest);
-      const state = await CompilerState.get(new ManifestIndex(manifest));
-      await new Compiler(state, delta, process.env.TRV_COMPILER_WATCH === 'true').run();
+      const watch = process.env.TRV_COMPILER_WATCH === 'true';
+      const state = await CompilerState.get(new ManifestIndex(manifest), watch);
+      await new Compiler(state, delta, watch).run();
     } catch (error) {
       log.error('Fatal initialization error in compiler', error, { phase: 'error' });
       EventUtil.sendEvent('state', { workspace: ctx.workspace.path, state: 'compile-failed' });
@@ -163,18 +164,21 @@ export class Compiler {
   }
 
   async #onWatchBatch(events: CompilerWatchEvent[]): Promise<void> {
+    this.#sendEvent('state', { state: 'compile-start' });
+
     const deleteEvents = events.filter(event => event.action === 'delete');
     const createOrUpdateEvents = events.filter(event => event.action !== 'delete');
+    const affected = new Set(createOrUpdateEvents.map(event => event.entry.sourceFile));
 
-    if (deleteEvents.length) {
-      for (const deleteEvent of deleteEvents) {
-        if (this.#state.removeSource(deleteEvent.entry.sourceFile)) {
-          log.info(`Removed ${deleteEvent.entry.sourceFile}, ${deleteEvent.entry.outputFile}`);
-        }
+    for (const deleteEvent of deleteEvents) {
+      this.#state.getImporters(deleteEvent.entry.sourceFile).forEach(importer => affected.add(importer));
+      if (this.#state.removeSource(deleteEvent.entry.sourceFile)) {
+        log.info(`Removed ${deleteEvent.entry.sourceFile}, ${deleteEvent.entry.outputFile}`);
       }
     }
+    deleteEvents.forEach(deleteEvent => affected.delete(deleteEvent.entry.sourceFile));
 
-    const changedFiles = createOrUpdateEvents.map(event => event.entry.sourceFile);
+    const changedFiles = [...affected];
     const compiledFiles = new Set<string>();
 
     for await (const result of this.#state.compileAffectedFiles(changedFiles)) {
@@ -242,7 +246,7 @@ export class Compiler {
 
     if (deleteEvents.length) {
       for (const deleteEvent of deleteEvents) {
-        if (this.#state.removeSource(deleteEvent.sourceFile)) {
+        if (this.#state.removeDelta(deleteEvent)) {
           log.info(`Purging deleted output ${deleteEvent.sourceFile}`);
         }
       }
@@ -270,7 +274,9 @@ export class Compiler {
       } else {
         log.debug('Compilation succeeded');
       }
+    }
 
+    if (changedFiles.length || deleteEvents.length) {
       // Rebuild manifests
       const manifest = await ManifestUtil.buildManifest(this.#state.manifestIndex.manifest);
       await ManifestUtil.writeManifest(manifest);
