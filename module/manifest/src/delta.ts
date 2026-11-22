@@ -45,11 +45,8 @@ export class ManifestDeltaUtil {
     const root = path.resolve(ctx.workspace.path, ctx.build.outputFolder, left.outputFolder);
     const right = new Set(
       (await ManifestModuleUtil.scanFolder(ctx, root, left.main))
-        .filter(file => {
-          const type = ManifestModuleUtil.getFileType(file);
-          return VALID_SOURCE_TYPE.has(type);
-        })
-        .map(file => ManifestModuleUtil.withoutSourceExtension(file.replace(`${root}/`, '')))
+        .filter(file => VALID_SOURCE_TYPE.has(ManifestModuleUtil.getFileType(file)))
+        .map(file => ManifestModuleUtil.withoutSourceExtension(file))
     );
 
     for (const file of Object.keys(left.files)) {

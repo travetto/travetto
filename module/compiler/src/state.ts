@@ -2,7 +2,7 @@ import fs from 'node:fs';
 
 import type { CompilerHost, CompilerOptions, Program, ScriptTarget, SourceFile } from 'typescript';
 
-import { type ManifestIndex, type ManifestModule, ManifestModuleUtil, type ManifestRoot, path } from '@travetto/manifest';
+import { type DeltaEvent, type ManifestIndex, type ManifestModule, ManifestModuleUtil, type ManifestRoot, path } from '@travetto/manifest';
 import type { TransformerManager } from '@travetto/transformer';
 
 import { CommonUtil } from './common.ts';
@@ -11,8 +11,8 @@ import type { CompileStateEntry, CompilerDiagnosticItem } from './types.ts';
 import { CompilerUtil } from './util.ts';
 
 export class CompilerState implements CompilerHost {
-  static async get(idx: ManifestIndex): Promise<CompilerState> {
-    return new CompilerState().init(idx);
+  static async get(idx: ManifestIndex, watch = false): Promise<CompilerState> {
+    return new CompilerState().init(idx, watch);
   }
 
   #failures = new Map<string, number>();
@@ -36,6 +36,7 @@ export class CompilerState implements CompilerHost {
   #transformerManager: TransformerManager;
   #compilerOptions: CompilerOptions;
   #program: Program;
+  #watch = false;
 
   #readFile(sourceFile: string): string | undefined {
     const location = this.#sourceToEntry.get(sourceFile)?.sourceFile ?? sourceFile;
@@ -98,7 +99,8 @@ export class CompilerState implements CompilerHost {
     };
   }
 
-  async init(idx: ManifestIndex): Promise<this> {
+  async init(idx: ManifestIndex, watch = false): Promise<this> {
+    this.#watch = watch;
     this.#manifestIndex = idx;
     this.#manifest = idx.manifest;
     this.#outputPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
@@ -155,6 +157,7 @@ export class CompilerState implements CompilerHost {
 
   async getProgram(force = false): Promise<Program> {
     if (force || !this.#program) {
+      const first = !this.#program;
       await this.initializeTypescript();
       this.#program = ts.createProgram({
         rootNames: this.getAllFiles(),
@@ -163,6 +166,9 @@ export class CompilerState implements CompilerHost {
         oldProgram: this.#program
       });
       this.#transformerManager.init(this.#program.getTypeChecker());
+      if (first && this.#watch) {
+        this.#populateDependencies(this.#program);
+      }
 
       await CommonUtil.queueMacroTask();
     }
@@ -239,9 +245,10 @@ export class CompilerState implements CompilerHost {
   /**
    * Populate dependency graph for all tracked TypeScript source files
    */
-  populateDependencies(program: Program): void {
+  #populateDependencies(program: Program): void {
     for (const sourceFile of this.#sourceFiles) {
-      if (ManifestModuleUtil.getFileType(sourceFile) === 'ts') {
+      const entry = this.#sourceToEntry.get(sourceFile);
+      if (entry && ManifestModuleUtil.getFileType(entry.moduleFile) === 'ts') {
         this.#updateFileDependencies(sourceFile, program);
       }
     }
@@ -260,7 +267,7 @@ export class CompilerState implements CompilerHost {
 
     this.#failures.delete(sourceFile);
 
-    switch (ManifestModuleUtil.getFileType(sourceFile)) {
+    switch (ManifestModuleUtil.getFileType(entry.moduleFile)) {
       case 'package-json': {
         const text = this.readFile(sourceFile)!;
         const finalText = CompilerUtil.rewritePackageJSON(this.#manifest, text);
@@ -347,7 +354,8 @@ export class CompilerState implements CompilerHost {
       processed.add(file);
 
       const start = Date.now();
-      const type = ManifestModuleUtil.getFileType(file);
+      const moduleFile = this.#sourceToEntry.get(file)?.moduleFile ?? file;
+      const type = ManifestModuleUtil.getFileType(moduleFile);
       if (type !== 'ts') {
         const diagnostics = (await this.compileSourceFile(file)) ?? [];
         yield { sourceFile: file, diagnostics, duration: Date.now() - start };
@@ -456,6 +464,15 @@ export class CompilerState implements CompilerHost {
    */
   getImporters(sourceFile: string): string[] {
     return [...(this.#fileToImporters.get(sourceFile) ?? [])];
+  }
+
+  /**
+   * Remove a deleted delta entry from compiler tracking and disk
+   */
+  removeDelta(event: DeltaEvent): boolean {
+    const module = this.#manifestIndex.getModule(event.module);
+    const outputFile = module ? this.resolveOutputFile(`${module.outputFolder}/${event.file}${ManifestModuleUtil.OUTPUT_EXT}`) : undefined;
+    return this.removeSource(event.sourceFile, outputFile);
   }
 
   /**

@@ -127,7 +127,7 @@ export class ManifestModuleUtil {
         const stat = await fs.stat(fullPath);
         if (stat.isFile()) {
           if (depth > 0 || topFiles.has(sub)) {
-            out.push(fullPath);
+            out.push(fullPath.replace(`${folder}/`, ''));
           }
         } else {
           if (depth > 0 || topFolders.has(sub)) {
@@ -233,10 +233,9 @@ export class ManifestModuleUtil {
 
     const files: ManifestModule['files'] = {};
 
-    for (const file of await this.scanFolder(ctx, sourcePath, rest.main)) {
+    for (const moduleFile of await this.scanFolder(ctx, sourcePath, rest.main)) {
       // Group by top folder
-      const moduleFile = file.replace(`${sourcePath}/`, '');
-      const entry = await this.transformFile(moduleFile, file);
+      const entry = await this.transformFile(moduleFile, `${sourcePath}/${moduleFile}`);
       const key = this.getFolderKey(moduleFile);
       (files[key] ??= []).push(entry);
     }
