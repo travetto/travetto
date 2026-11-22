@@ -312,13 +312,17 @@ export class ManifestIndex {
   }
 
   /**
-   * Resolve child manifest relative to current manifest
+   * Resolve child manifest relative to current manifest, building if missing on disk
    */
-  resolveDependentManifest(moduleName: string): ManifestRoot {
+  async resolveDependentManifest(moduleName: string): Promise<ManifestRoot> {
     const moduleRoot = this.getManifestModule(moduleName)!.sourceFolder;
     const moduleContext = ManifestUtil.getModuleContext(this.manifest, moduleRoot);
     const manifestLocation = ManifestUtil.getManifestLocation(moduleContext, moduleName);
-    return ManifestUtil.readManifestSync(manifestLocation);
+    try {
+      return ManifestUtil.readManifestSync(manifestLocation);
+    } catch {
+      return ManifestUtil.buildManifest(moduleContext);
+    }
   }
 
   /** Resolve a package command tied to workspace */
