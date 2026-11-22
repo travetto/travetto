@@ -129,6 +129,9 @@ export class CompilerManager {
       controller.abort();
       if (finalState === 'compile-failed') {
         await this.#failWithBuildErrors(await client.info());
+      } else if (finalState === 'closed') {
+        process.exitCode = 1;
+        throw new Error('Compiler server closed before build completed');
       }
     }
   }
