@@ -9,6 +9,7 @@ import type { CompilerEventPayload, CompilerEventType, CompilerServerInfo, Compi
 import { CompilerUtil } from '../util.ts';
 
 const isConnectionReset = (value: unknown) => typeof value === 'object' && !!value && 'code' in value && value.code === 'ECONNRESET';
+const READY_STATES: CompilerStateType[] = ['watch-start', 'compile-failed'];
 
 type FetchEventsConfig<T> = {
   signal?: AbortSignal;
@@ -191,8 +192,8 @@ export class CompilerClient {
     }
 
     let state: CompilerStateType = info.state;
-    if (state === 'startup' || state === 'init' || state === 'compile-start') {
-      state = await this.waitForState(['watch-start', 'compile-failed'], undefined, signal);
+    if (!READY_STATES.includes(state)) {
+      state = await this.waitForState(READY_STATES, undefined, signal);
     }
 
     return state === 'watch-start';

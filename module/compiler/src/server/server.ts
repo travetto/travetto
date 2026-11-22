@@ -229,12 +229,16 @@ export class CompilerServer {
   }
 
   #clearErrorsForFile(file?: string): void {
-    if (!file || !this.info.messages?.error) {
+    if (!file || !this.info.messages) {
       return;
     }
-    this.info.messages.error = this.info.messages.error.filter(item => item.file !== file);
-    if (this.info.messages.error.length === 0) {
-      delete this.info.messages.error;
+    for (const phase of ['error', 'failure'] as const) {
+      if (this.info.messages[phase]) {
+        this.info.messages[phase] = this.info.messages[phase].filter(item => item.file !== file);
+        if (this.info.messages[phase].length === 0) {
+          delete this.info.messages[phase];
+        }
+      }
     }
   }
 
@@ -300,8 +304,6 @@ export class CompilerServer {
    */
   async processEvents(input: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
     for await (const event of CommonUtil.restartableEvents(input, this.signal, this.isResetEvent, event => this.#handleResetEvent(event))) {
-      this.#emitEvent(event);
-
       switch (event.type) {
         case 'progress':
           await Log.onProgressEvent(event.payload);
@@ -316,6 +318,8 @@ export class CompilerServer {
           await this.#onLogEvent(event.payload);
           break;
       }
+
+      this.#emitEvent(event);
     }
 
     // Terminate, after letting all remaining events emit

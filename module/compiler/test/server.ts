@@ -1,10 +1,12 @@
 import assert from 'node:assert';
+import http from 'node:http';
 
 import type { ManifestContext } from '@travetto/manifest';
 import { Suite, Test } from '@travetto/test';
 
+import { CompilerClient } from '../src/server/client.ts';
 import { CompilerServer } from '../src/server/server.ts';
-import { CompilerReset, type CompilerEvent } from '../src/types.ts';
+import { CompilerReset, type CompilerEvent, type CompilerServerInfo } from '../src/types.ts';
 
 @Suite()
 class CompilerServerTests {
@@ -190,5 +192,54 @@ class CompilerServerTests {
 
     assert.strictEqual(server.info.messages?.error?.length, 1);
     assert.strictEqual(server.info.iteration, initialIteration);
+  }
+
+  @Test()
+  async verifyWaitForWatchReadyWaitsOnResetAndCompileEnd() {
+    for (const initialState of ['reset', 'compile-end'] as const) {
+      let infoState: CompilerServerInfo['state'] = initialState;
+      const server = http.createServer((request, response) => {
+        if (request.url === '/info') {
+          response.setHeader('Content-Type', 'application/json');
+          response.end(
+            JSON.stringify({
+              path: '/test/app',
+              serverProcessId: process.pid,
+              compilerProcessId: process.pid,
+              state: infoState,
+              watching: true,
+              iteration: 1,
+              url: ''
+            })
+          );
+        } else if (request.url === '/event/state') {
+          response.writeHead(200);
+          response.write(`${JSON.stringify({ state: infoState })}\n`);
+          setTimeout(() => {
+            infoState = 'watch-start';
+            response.write(`${JSON.stringify({ state: 'watch-start' })}\n`);
+          }, 30);
+        }
+      });
+
+      await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
+      try {
+        const address = server.address() as { port: number };
+        const context = this.#createContext();
+        context.build.compilerUrl = `http://127.0.0.1:${address.port}`;
+        const client = new CompilerClient(context, {
+          debug: () => {},
+          info: () => {},
+          warn: () => {},
+          error: () => {}
+        });
+
+        const ready = await client.waitForWatchReady();
+        assert.strictEqual(ready, true);
+      } finally {
+        server.closeAllConnections();
+        await new Promise<void>(resolve => server.close(() => resolve()));
+      }
+    }
   }
 }

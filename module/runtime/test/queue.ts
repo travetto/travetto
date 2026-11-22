@@ -19,4 +19,25 @@ export class WorkSetTest {
     }
     itr.close();
   }
+
+  @Test()
+  async closeDrainsAndThrowPropagates() {
+    const queue = new AsyncQueue<string>(['one', 'two']);
+    queue.close();
+    const drained: string[] = [];
+    for await (const item of queue) {
+      drained.push(item);
+    }
+    assert.deepStrictEqual(drained, ['one', 'two']);
+
+    const errorQueue = new AsyncQueue<string>();
+    errorQueue.add('first');
+    errorQueue.add('second');
+    assert.strictEqual((await errorQueue.next()).value, 'first');
+    await errorQueue.throw(new Error('queue error'));
+    await assert.rejects(
+      async () => errorQueue.next(),
+      (error: unknown) => error instanceof Error && error.message === 'queue error'
+    );
+  }
 }
