@@ -310,8 +310,15 @@ export class CompilerState implements CompilerHost {
         break;
       }
       case 'ts': {
-        const program = await this.getProgram(needsNewProgram);
-        const tsSourceFile = program.getSourceFile(sourceFile)!;
+        let program = await this.getProgram(needsNewProgram);
+        let tsSourceFile = program.getSourceFile(sourceFile);
+        if (!tsSourceFile && this.#sourceFiles.has(sourceFile)) {
+          program = await this.getProgram(true);
+          tsSourceFile = program.getSourceFile(sourceFile);
+        }
+        if (!tsSourceFile) {
+          return;
+        }
         program.emit(
           tsSourceFile,
           (fileName, text, writeByteOrderMark) => {
