@@ -162,6 +162,7 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
     );
 
     await this.#cleanup.tool?.();
+    await fs.mkdir(toolRootFolder, { recursive: true });
 
     const listener = watch(toolRootFolder, { encoding: 'utf8' }, async (event, file) => {
       if (!file) {
@@ -278,13 +279,20 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
     return [...collapsed.values()].map(event => this.#toCandidateEvent(event)).filter(event => this.#isValidEvent(event));
   }
 
-  async *[Symbol.asyncIterator](): AsyncIterator<CompilerWatchEvent[]> {
+  /**
+   * Start workspace, tooling, and git watchers idempotently
+   */
+  async start(): Promise<void> {
     if (!this.#cleanup.workspace) {
       await this.#listenWorkspace();
       await this.#listenWorkspaceRotation();
       await this.#listenToolFolder();
       await this.#listenGitChanges();
     }
+  }
+
+  async *[Symbol.asyncIterator](): AsyncIterator<CompilerWatchEvent[]> {
+    await this.start();
 
     for await (const firstEvent of this.#queue) {
       await CommonUtil.nonBlockingTimeout(25);
