@@ -215,7 +215,7 @@ export class CompilerServer {
         out = await this.#clean();
         break;
       case 'stop':
-        out = JSON.stringify({ closing: true });
+        out = { closing: true };
         close = true;
         break;
       default:
