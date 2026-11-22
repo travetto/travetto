@@ -228,16 +228,18 @@ export class Compiler {
       });
     }
 
-    for (const event of createOrUpdateEvents) {
-      if (compiledFiles.has(event.entry.sourceFile)) {
-        const normalizedFile = path.relative(this.#state.manifest.workspace.path, event.file);
+    const actionBySource = new Map(createOrUpdateEvents.map(event => [event.entry.sourceFile, event.action]));
+    for (const sourceFile of compiledFiles) {
+      const entry = this.#state.getBySource(sourceFile);
+      if (entry) {
+        const normalizedFile = path.relative(this.#state.manifest.workspace.path, entry.sourceFile);
         this.#sendEvent('change', {
-          action: event.action,
+          action: actionBySource.get(sourceFile) ?? 'update',
           time: Date.now(),
           file: normalizedFile,
-          import: event.entry.import,
-          output: event.entry.outputFile,
-          module: event.entry.module.name
+          import: entry.import,
+          output: entry.outputFile,
+          module: entry.module.name
         });
       }
     }
