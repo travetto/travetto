@@ -319,16 +319,22 @@ export class CompilerState implements CompilerHost {
         if (!tsSourceFile) {
           return;
         }
-        program.emit(
-          tsSourceFile,
-          (fileName, text, writeByteOrderMark) => {
-            const { outputLocation, typingsLocation } = this.#resolveEmittedFilePath(entry, fileName);
-            this.#writeOutput(outputLocation, text, writeByteOrderMark, typingsLocation, declarationChange);
-          },
-          undefined,
-          false,
-          this.#transformerManager.get()
-        );
+        try {
+          program.emit(
+            tsSourceFile,
+            (fileName, text, writeByteOrderMark) => {
+              const { outputLocation, typingsLocation } = this.#resolveEmittedFilePath(entry, fileName);
+              this.#writeOutput(outputLocation, text, writeByteOrderMark, typingsLocation, declarationChange);
+            },
+            undefined,
+            false,
+            this.#transformerManager.get()
+          );
+        } catch (error) {
+          const message = error instanceof Error ? error.message : `${error}`;
+          this.#failures.set(sourceFile, 1);
+          return [{ line: 1, column: 1, message }];
+        }
         if (this.#watch) {
           this.#updateFileDependencies(sourceFile, program);
         }
