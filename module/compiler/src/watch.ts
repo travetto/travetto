@@ -51,18 +51,12 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
 
   async #getWatchIgnores(): Promise<string[]> {
     const pkg = PackageUtil.readPackage(this.#root);
-    const patterns = [...(pkg?.travetto?.build?.watchIgnores ?? []), '**/node_modules', '.*/**/node_modules'];
+    const patterns = [...(pkg?.travetto?.build?.watchIgnores ?? []), '**/node_modules', '**/.*/'];
     const ignores = new Set(['node_modules', '.git', this.#state.manifest.build.outputFolder, this.#state.manifest.build.typesFolder]);
     for (const item of patterns) {
       if (item.includes('*')) {
-        for await (const sub of fs.glob(item, { cwd: this.#root })) {
-          if (sub.startsWith('node_modules')) {
-            // Continue
-          } else if (sub.endsWith('/node_modules')) {
-            ignores.add(sub.split('/node_modules')[0]);
-          } else {
-            ignores.add(sub);
-          }
+        for await (const sub of fs.glob(item, { cwd: this.#root, exclude: ['**/node_modules/**', '**/.*/**'] })) {
+          ignores.add(sub);
         }
       } else {
         ignores.add(item);
@@ -134,8 +128,7 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
   }
 
   async #listenWorkspace(): Promise<void> {
-    await this.#cleanup.workspace?.();
-
+    const prevCleanup = this.#cleanup.workspace;
     const ignores = await this.#getWatchIgnores();
 
     log.debug('Starting workspace watcher', { root: this.#root });
@@ -174,6 +167,8 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
       pkgListener.close();
       await listener.unsubscribe();
     };
+
+    await prevCleanup?.();
   }
 
   async #listenToolFolder(): Promise<void> {
@@ -249,14 +244,19 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
     const targets = [
       {
         folder: path.resolve(this.#root, gitDirectory),
-        filter: (file?: string | null): boolean => !file || /^(HEAD|packed-refs|refs)/.test(file)
+        filter: (file?: string | null): boolean => !file || /^(HEAD|packed-refs|refs|logs\/HEAD)/.test(path.toPosix(file)),
+        recursive: false
       },
-      { folder: path.resolve(this.#root, commonDirectory, 'refs', 'heads'), filter: (): boolean => true }
+      { folder: path.resolve(this.#root, commonDirectory, 'refs', 'heads'), filter: (): boolean => true, recursive: true }
     ];
 
-    for (const { folder, filter } of targets) {
+    for (const { folder, filter, recursive } of targets) {
       if (await fs.stat(folder, { throwIfNoEntry: false })) {
-        watchers.push(watch(folder, { encoding: 'utf8' }, (_, file) => filter(file) && (isChecking ??= checkChange())));
+        try {
+          watchers.push(watch(folder, { encoding: 'utf8', recursive }, (_, file) => filter(file) && (isChecking ??= checkChange())));
+        } catch {
+          watchers.push(watch(folder, { encoding: 'utf8' }, (_, file) => filter(file) && (isChecking ??= checkChange())));
+        }
       }
     }
 
