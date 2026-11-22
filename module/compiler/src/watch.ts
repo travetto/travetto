@@ -3,7 +3,7 @@ import { watch } from 'node:fs';
 import fs from 'node:fs/promises';
 import { promisify } from 'node:util';
 
-import { ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
+import { ManifestModuleUtil, type ManifestRoot, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
 
 import { CommonUtil } from './common.ts';
 import { IpcLog as log } from './log.ts';
@@ -102,18 +102,20 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
     return true;
   }
 
-  #updateManifestInMemory(compilerEvents: CompilerWatchEvent[]): void {
-    const eventsByModule = this.#state.manifestIndex.groupByLineage(
-      compilerEvents.map(event => ({ item: event, module: event.entry.module.name })).filter(x => x.item.action !== 'update')
-    );
-
-    for (const [moduleName, events] of eventsByModule.entries()) {
-      const moduleManifest = this.#state.manifestIndex.resolveDependentManifest(moduleName);
-      for (const { moduleFile, action, entry } of events) {
-        ManifestUtil.updateManifest(moduleManifest, entry.module.name, moduleFile, action);
-      }
-      log.debug('Updating manifest (in memory)', { module: moduleName, changes: events.length });
+  #applyManifestUpdates(manifest: ManifestRoot, events: CompilerWatchEvent[]): void {
+    for (const { moduleFile, action, entry } of events) {
+      ManifestUtil.updateManifest(manifest, entry.module.name, moduleFile, action);
     }
+  }
+
+  #updateManifestInMemory(compilerEvents: CompilerWatchEvent[]): void {
+    const mutatingEvents = compilerEvents.filter(event => event.action !== 'update');
+    if (!mutatingEvents.length) {
+      return;
+    }
+
+    this.#applyManifestUpdates(this.#state.manifestIndex.manifest, mutatingEvents);
+    this.#state.manifestIndex.init(this.#state.manifestIndex.manifest);
   }
 
   async writeBatchManifests(compilerEvents: CompilerWatchEvent[]): Promise<void> {
@@ -123,6 +125,7 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
 
     for (const [moduleName, events] of eventsByModule.entries()) {
       const moduleManifest = this.#state.manifestIndex.resolveDependentManifest(moduleName);
+      this.#applyManifestUpdates(moduleManifest, events);
       log.debug('Updating manifest', [{ module: moduleName, events: events.length }]);
       await ManifestUtil.writeManifest(moduleManifest);
     }
