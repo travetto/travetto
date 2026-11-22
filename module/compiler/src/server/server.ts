@@ -6,13 +6,14 @@ import { getManifestContext, type ManifestContext } from '@travetto/manifest';
 import { CommonUtil } from '../common.ts';
 import { EventUtil } from '../event.ts';
 import { Log } from '../log.ts';
-import type {
-  CompilerEvent,
-  CompilerEventType,
-  CompilerLogEvent,
-  CompilerProgressEvent,
-  CompilerServerInfo,
-  CompilerStateEvent
+import {
+  type CompilerEvent,
+  type CompilerEventType,
+  type CompilerLogEvent,
+  type CompilerProgressEvent,
+  type CompilerServerInfo,
+  type CompilerStateEvent,
+  READY_STATES
 } from '../types.ts';
 import { CompilerUtil } from '../util.ts';
 import { CompilerClient } from './client.ts';
@@ -30,12 +31,14 @@ export class CompilerServer {
   #listeners: Partial<Record<CompilerEventType, Record<string, http.ServerResponse>>> = {};
   #shutdown = new AbortController();
   #idleTimeoutId?: NodeJS.Timeout;
+  #idleTimeoutMilliseconds: number;
   info: CompilerServerInfo;
   #client: CompilerClient;
   #url: string;
 
-  constructor(ctx: ManifestContext, watching: boolean) {
+  constructor(ctx: ManifestContext, watching: boolean, idleTimeoutMilliseconds = IDLE_TIMEOUT_MILLISECONDS) {
     this.#ctx = ctx;
+    this.#idleTimeoutMilliseconds = idleTimeoutMilliseconds;
     this.#client = new CompilerClient(ctx, Log.scoped('server.client'));
     this.#url = this.#client.url;
 
@@ -110,17 +113,19 @@ export class CompilerServer {
     return output;
   }
 
-  #startIdleTimeout(): void {
-    if (!this.watching) {
+  #startIdleTimeout(restart = false): void {
+    if (restart) {
+      this.#clearIdleTimeout();
+    }
+    if (!this.watching || this.#listenersAll.size > 0 || this.#idleTimeoutId || !READY_STATES.includes(this.info.state)) {
       return;
     }
-    if (this.#listenersAll.size === 0 && !this.#idleTimeoutId) {
-      log.info('No active listeners, starting idle shutdown timer', `${IDLE_TIMEOUT_MILLISECONDS / 1000}s`);
-      this.#idleTimeoutId = setTimeout(() => {
-        log.info('Idle shutdown timer expired with no listeners, closing server');
-        this.close();
-      }, IDLE_TIMEOUT_MILLISECONDS).unref();
-    }
+    log.info('No active listeners, starting idle shutdown timer', `${this.#idleTimeoutMilliseconds / 1000}s`);
+    this.#idleTimeoutId = setTimeout(() => {
+      this.#idleTimeoutId = undefined;
+      log.info('Idle shutdown timer expired with no listeners, closing server');
+      void this.close();
+    }, this.#idleTimeoutMilliseconds).unref();
   }
 
   #clearIdleTimeout(): void {
@@ -219,6 +224,7 @@ export class CompilerServer {
         close = true;
         break;
       default:
+        this.#startIdleTimeout(true);
         out = this.info ?? {};
         break;
     }
@@ -276,6 +282,8 @@ export class CompilerServer {
         this.info.messages = {};
         break;
     }
+
+    this.#startIdleTimeout(true);
   }
 
   // Handle log events, ensuring we are properly storing errors
@@ -304,6 +312,7 @@ export class CompilerServer {
    */
   async processEvents(input: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
     for await (const event of CommonUtil.restartableEvents(input, this.signal, this.isResetEvent, event => this.#handleResetEvent(event))) {
+      this.#startIdleTimeout(true);
       switch (event.type) {
         case 'progress':
           await Log.onProgressEvent(event.payload);

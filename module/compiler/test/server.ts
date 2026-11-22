@@ -242,4 +242,25 @@ class CompilerServerTests {
       }
     }
   }
+
+  @Test()
+  async verifyIdleTimeoutResetsOnActivityAndDefersDuringCompile() {
+    const context = this.#createContext();
+    context.build.compilerUrl = 'http://127.0.0.1:0';
+    const server = new CompilerServer(context, true, 60);
+
+    try {
+      // Wait past the 60ms idle window while compiling; server must NOT close
+      await server.processEvents(async function* () {
+        yield { type: 'state', payload: { state: 'compile-start' } };
+        await new Promise(resolve => setTimeout(resolve, 100));
+        assert.strictEqual(server.signal.aborted, false);
+        yield { type: 'state', payload: { state: 'watch-start' } };
+      });
+    } finally {
+      if (!server.signal.aborted) {
+        await server.close();
+      }
+    }
+  }
 }
