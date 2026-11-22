@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import { watch } from 'node:fs';
+import { existsSync, watch } from 'node:fs';
 import fs from 'node:fs/promises';
 import { promisify } from 'node:util';
 
@@ -69,12 +69,13 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
     let entry = this.#state.getBySource(file);
     const module = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(file);
 
-    if (module && action === 'create' && !entry) {
+    if (module && action !== 'delete' && !entry && existsSync(file)) {
       const moduleRoot = module.sourceFolder || this.#root;
       const moduleFile = file.includes(`${moduleRoot}/`) ? file.split(`${moduleRoot}/`)[1] : file;
-      entry = this.#state.registerInput(module, moduleFile);
-    } else if (action === 'delete' && entry) {
-      this.#state.removeSource(entry.sourceFile); // Ensure we remove it
+      if (ManifestModuleUtil.isValidModuleFile(moduleFile, module.main) && ManifestModuleUtil.isSourceType(moduleFile)) {
+        entry = this.#state.registerInput(module, moduleFile);
+        action = 'create';
+      }
     }
 
     return { entry, file: entry?.sourceFile ?? file, action, moduleFile: entry?.moduleFile ?? '' };
@@ -102,17 +103,16 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
   }
 
   #updateManifestInMemory(compilerEvents: CompilerWatchEvent[]): void {
-    const eventsByModule = this.#state.manifestIndex.groupByLineage(
-      compilerEvents.map(event => ({ item: event, module: event.entry.module.name })).filter(x => x.item.action !== 'update')
-    );
-
-    for (const [moduleName, events] of eventsByModule.entries()) {
-      const moduleManifest = this.#state.manifestIndex.resolveDependentManifest(moduleName);
-      for (const { moduleFile, action, entry } of events) {
-        ManifestUtil.updateManifest(moduleManifest, entry.module.name, moduleFile, action);
-      }
-      log.debug('Updating manifest (in memory)', { module: moduleName, changes: events.length });
+    const mutatingEvents = compilerEvents.filter(event => event.action !== 'update');
+    if (!mutatingEvents.length) {
+      return;
     }
+
+    for (const { moduleFile, action, entry } of mutatingEvents) {
+      ManifestUtil.updateManifest(this.#state.manifestIndex.manifest, entry.module.name, moduleFile, action);
+    }
+    this.#state.manifestIndex.init(this.#state.manifestIndex.manifest);
+    log.debug('Updating manifest (in memory)', { changes: mutatingEvents.length });
   }
 
   async writeBatchManifests(compilerEvents: CompilerWatchEvent[]): Promise<void> {
@@ -122,6 +122,9 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
 
     for (const [moduleName, events] of eventsByModule.entries()) {
       const moduleManifest = this.#state.manifestIndex.resolveDependentManifest(moduleName);
+      for (const { moduleFile, action, entry } of events) {
+        ManifestUtil.updateManifest(moduleManifest, entry.module.name, moduleFile, action);
+      }
       log.debug('Updating manifest', [{ module: moduleName, events: events.length }]);
       await ManifestUtil.writeManifest(moduleManifest);
     }
@@ -290,7 +293,17 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
       throw new CompilerReset('Package or compiler configuration changed', { files: changedConfigurationFiles, soft: true });
     }
 
-    const items = validEvents.map(event => this.#toCandidateEvent(event)).filter(event => this.#isValidEvent(event));
+    const collapsed = new Map<string, CompilerWatchRawEvent>();
+    for (const event of validEvents) {
+      const prev = collapsed.get(event.file);
+      if (prev?.action === 'create' && event.action === 'delete') {
+        collapsed.delete(event.file);
+      } else {
+        collapsed.set(event.file, prev?.action === 'delete' && event.action === 'create' ? { action: 'update', file: event.file } : event);
+      }
+    }
+
+    const items = [...collapsed.values()].map(event => this.#toCandidateEvent(event)).filter(event => this.#isValidEvent(event));
 
     if (items.length > 0) {
       this.#updateManifestInMemory(items);
