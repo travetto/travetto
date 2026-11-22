@@ -1,6 +1,6 @@
 import { setMaxListeners } from 'node:events';
 
-import { type DeltaEvent, getManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil, path } from '@travetto/manifest';
+import { type DeltaEvent, getManifestContext, type ManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil, path } from '@travetto/manifest';
 
 import { CommonUtil } from './common.ts';
 import { EventUtil } from './event.ts';
@@ -17,9 +17,10 @@ export class Compiler {
    * Run compiler as a main entry point
    */
   static async main(): Promise<void> {
-    const ctx = ManifestUtil.getWorkspaceContext(getManifestContext());
+    let ctx: ManifestContext | undefined;
 
     try {
+      ctx = ManifestUtil.getWorkspaceContext(getManifestContext());
       const manifest = await ManifestUtil.buildManifest(ctx);
       const delta = await ManifestDeltaUtil.produceDelta(manifest);
       const watch = process.env.TRV_COMPILER_WATCH === 'true';
@@ -27,7 +28,7 @@ export class Compiler {
       await new Compiler(state, delta, watch).run();
     } catch (error) {
       log.error('Fatal initialization error in compiler', error, { phase: 'error' });
-      EventUtil.sendEvent('state', { workspace: ctx.workspace.path, state: 'compile-failed' });
+      EventUtil.sendEvent('state', { workspace: ctx?.workspace.path, state: 'compile-failed' });
       process.exitCode = 1;
     }
   }
