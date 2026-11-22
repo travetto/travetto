@@ -604,8 +604,10 @@ class CompilerStateTests {
       assert.deepStrictEqual(watchState.getImporters(leafFile), []);
       assert.deepStrictEqual(watchState.getImporters(barrelFile), []);
 
-      // First watch event populates workspace dependencies and skips non-workspace modules
-      await watchState.ensureDependencies();
+      // Background / first watch event populates workspace dependencies and skips non-workspace modules
+      const firstPromise = watchState.ensureDependencies();
+      assert.strictEqual(watchState.ensureDependencies(), firstPromise);
+      await firstPromise;
       assert.deepStrictEqual(watchState.getImporters(leafFile), [barrelFile]);
       assert.deepStrictEqual(watchState.getImporters(barrelFile), [consumerFile]);
       assert.deepStrictEqual(watchState.getImporters(externalInternalFile), []);

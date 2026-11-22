@@ -46,7 +46,7 @@ export class CompilerState implements CompilerHost {
   #compilerOptions: CompilerOptions;
   #program: Program;
   #watch = false;
-  #dependenciesPopulated = false;
+  #dependenciesPromise?: Promise<void>;
 
   #readFile(sourceFile: string): string | undefined {
     const location = this.#sourceToEntry.get(sourceFile)?.sourceFile ?? sourceFile;
@@ -255,13 +255,19 @@ export class CompilerState implements CompilerHost {
   /**
    * Populate dependency graph for tracked workspace TypeScript source files not yet analyzed
    */
-  async ensureDependencies(): Promise<void> {
-    if (this.#dependenciesPopulated) {
-      return;
-    }
-    this.#dependenciesPopulated = true;
+  ensureDependencies(signal?: AbortSignal, defer = false): Promise<void> {
+    return (this.#dependenciesPromise ??= this.#populateDependencies(signal, defer));
+  }
+
+  async #populateDependencies(signal?: AbortSignal, defer = false): Promise<void> {
     const program = await this.getProgram();
+    if (defer) {
+      await CommonUtil.queueMacroTask();
+    }
     for (const sourceFile of this.#sourceFiles) {
+      if (signal?.aborted) {
+        return;
+      }
       if (this.#fileToDependencies.has(sourceFile) || !program.getSourceFile(sourceFile)) {
         continue;
       }

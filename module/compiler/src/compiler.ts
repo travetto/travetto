@@ -312,6 +312,7 @@ export class Compiler {
 
       log.info('Watch is ready');
       this.#sendEvent('state', { state: this.#state.hasErrors() ? 'compile-failed' : 'watch-start' });
+      void this.#state.ensureDependencies(this.#shutdownSignal, true);
 
       try {
         for await (const batch of this.#watcher) {
