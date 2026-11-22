@@ -690,4 +690,26 @@ class CompilerStateTests {
       await fs.promises.rm(tempDirectory, { recursive: true, force: true });
     }
   }
+
+  @Test()
+  async verifyCoalescedCreateDeleteOnTrackedFile() {
+    const baseManifest = this.#createManifest();
+    const state = await CompilerState.get(new ManifestIndex(baseManifest));
+    const alphaSource = path.resolve('/test/app/src/alpha.ts');
+    const untrackedSource = path.resolve('/test/app/src/untracked.ts');
+
+    const controller = new AbortController();
+    const watcher = this.#createWatcher(state, controller.signal);
+
+    const batch = watcher.prepareBatch([
+      { action: 'create', file: alphaSource },
+      { action: 'delete', file: alphaSource },
+      { action: 'create', file: untrackedSource },
+      { action: 'delete', file: untrackedSource }
+    ]);
+
+    assert.strictEqual(batch.length, 1);
+    assert.strictEqual(batch[0].action, 'delete');
+    assert.strictEqual(batch[0].entry.sourceFile, alphaSource);
+  }
 }

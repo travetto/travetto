@@ -269,7 +269,7 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
     const collapsed = new Map<string, CompilerWatchRawEvent>();
     for (const event of validEvents) {
       const prev = collapsed.get(event.file);
-      if (prev?.action === 'create' && event.action === 'delete') {
+      if (prev?.action === 'create' && event.action === 'delete' && !this.#options.getBySource?.(event.file)) {
         collapsed.delete(event.file);
       } else {
         collapsed.set(event.file, prev?.action === 'delete' && event.action === 'create' ? { action: 'update', file: event.file } : event);
