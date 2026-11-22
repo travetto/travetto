@@ -98,7 +98,10 @@ export class Compiler {
     process.removeAllListeners('disconnect');
     process.removeAllListeners('message');
     this.#shutdownController.abort();
-    CommonUtil.nonBlockingTimeout(1000).then(() => process.exit()); // Allow upto 1s to shutdown gracefully
+    if (process.connected) {
+      process.disconnect?.();
+    }
+    CommonUtil.nonBlockingTimeout(50).then(() => process.exit()); // Allow brief grace period for IPC flush
   }
 
   /**
