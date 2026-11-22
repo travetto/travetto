@@ -70,9 +70,12 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
     const module = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(file);
 
     if (module && action === 'create' && !entry) {
-      const moduleRoot = module.sourceFolder || this.#root;
-      const moduleFile = file.includes(`${moduleRoot}/`) ? file.split(`${moduleRoot}/`)[1] : file;
-      entry = this.#state.registerInput(module, moduleFile);
+      const moduleFile = path.relative(path.resolve(this.#root, module.sourceFolder), file);
+      if (ManifestModuleUtil.isValidModuleFile(moduleFile, module.main) && ManifestModuleUtil.isSourceType(moduleFile)) {
+        entry = this.#state.registerInput(module, moduleFile);
+      }
+    } else if (action === 'delete' && entry) {
+      this.#state.removeSource(entry.sourceFile); // Ensure we remove it
     }
 
     return { entry, file: entry?.sourceFile ?? file, action, moduleFile: entry?.moduleFile ?? '' };

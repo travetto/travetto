@@ -168,6 +168,56 @@ class CompilerStateTests {
   }
 
   @Test()
+  async verifyInvalidModuleFilesIgnored() {
+    const tempDirectory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'invalid-module-file-test-'));
+    try {
+      const unknownFile = path.join(tempDirectory, 'scripts', 'helper.ts');
+      const fixtureFile = path.join(tempDirectory, 'test', 'fixtures', 'sample.ts');
+      await fs.promises.mkdir(path.dirname(unknownFile), { recursive: true });
+      await fs.promises.mkdir(path.dirname(fixtureFile), { recursive: true });
+      await fs.promises.writeFile(unknownFile, 'export const x = 1;', 'utf8');
+      await fs.promises.writeFile(fixtureFile, 'export const y = 2;', 'utf8');
+
+      const manifest: ManifestRoot = {
+        generated: Date.now(),
+        workspace: { name: 'test-app', path: path.toPosix(tempDirectory), mono: false, manager: 'npm' },
+        build: { compilerUrl: 'http://localhost:20000', outputFolder: '.trv/output', toolFolder: '.trv/tool', typesFolder: '.trv/types' },
+        main: { name: 'test-app', folder: '', version: '1.0.0' },
+        modules: {
+          'test-app': {
+            main: true,
+            name: 'test-app',
+            version: '1.0.0',
+            workspace: true,
+            production: true,
+            sourceFolder: '',
+            outputFolder: 'node_modules/test-app',
+            roles: ['std'],
+            parents: [],
+            files: {
+              src: [['src/alpha.ts', 'ts', 1000]],
+              $package: [['package.json', 'package-json', 1000]]
+            }
+          }
+        }
+      };
+
+      const state = await CompilerState.get(new ManifestIndex(manifest));
+      const controller = new AbortController();
+      const watcher = new CompilerWatcher(state, controller.signal);
+
+      const batch = await watcher.prepareBatch([
+        { action: 'create', file: path.toPosix(unknownFile) },
+        { action: 'create', file: path.toPosix(fixtureFile) }
+      ]);
+
+      assert.deepStrictEqual(batch, []);
+    } finally {
+      await fs.promises.rm(tempDirectory, { recursive: true, force: true });
+    }
+  }
+
+  @Test()
   verifyEmittedPathsAndOutputs() {
     assert.deepStrictEqual(CompilerUtil.getEmittedOutputs('/app/dist/index.js'), [
       '/app/dist/index.js',

@@ -296,4 +296,12 @@ export class ManifestModuleUtil {
     }
     return type === 'ts' || type === 'package-json' || type === 'js' || type === 'typings';
   }
+
+  /**
+   * Determine if a relative module file resides in a valid Travetto module folder or root file
+   */
+  static isValidModuleFile(moduleFile: string, full = false): boolean {
+    const [top, ...rest] = moduleFile.split('/');
+    return rest.length > 0 ? (full ? FULL_TOP_FOLDERS : STD_TOP_FOLDERS).has(top) : (full ? FULL_TOP_FILES : STD_TOP_FILES).has(top);
+  }
 }
