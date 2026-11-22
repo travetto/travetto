@@ -73,8 +73,6 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
       const moduleRoot = module.sourceFolder || this.#root;
       const moduleFile = file.includes(`${moduleRoot}/`) ? file.split(`${moduleRoot}/`)[1] : file;
       entry = this.#state.registerInput(module, moduleFile);
-    } else if (action === 'delete' && entry) {
-      this.#state.removeSource(entry.sourceFile); // Ensure we remove it
     }
 
     return { entry, file: entry?.sourceFile ?? file, action, moduleFile: entry?.moduleFile ?? '' };
@@ -290,7 +288,17 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
       throw new CompilerReset('Package or compiler configuration changed', { files: changedConfigurationFiles, soft: true });
     }
 
-    const items = validEvents.map(event => this.#toCandidateEvent(event)).filter(event => this.#isValidEvent(event));
+    const collapsed = new Map<string, CompilerWatchRawEvent>();
+    for (const event of validEvents) {
+      const prev = collapsed.get(event.file);
+      if (prev?.action === 'create' && event.action === 'delete') {
+        collapsed.delete(event.file);
+      } else {
+        collapsed.set(event.file, prev?.action === 'delete' && event.action === 'create' ? { action: 'update', file: event.file } : event);
+      }
+    }
+
+    const items = [...collapsed.values()].map(event => this.#toCandidateEvent(event)).filter(event => this.#isValidEvent(event));
 
     if (items.length > 0) {
       this.#updateManifestInMemory(items);
