@@ -28,6 +28,7 @@ export class CompilerState implements CompilerHost {
 
   #fileToDependencies = new Map<string, Set<string>>();
   #fileToImporters = new Map<string, Set<string>>();
+  #fileToReExporters = new Map<string, Set<string>>();
 
   #manifestIndex: ManifestIndex;
   #manifest: ManifestRoot;
@@ -202,11 +203,13 @@ export class CompilerState implements CompilerHost {
     if (previousDependencies) {
       for (const dependency of previousDependencies) {
         this.#fileToImporters.get(dependency)?.delete(sourceFile);
+        this.#fileToReExporters.get(dependency)?.delete(sourceFile);
       }
       this.#fileToDependencies.delete(sourceFile);
     }
     if (!program) {
       this.#fileToImporters.delete(sourceFile);
+      this.#fileToReExporters.delete(sourceFile);
       return;
     }
 
@@ -221,18 +224,27 @@ export class CompilerState implements CompilerHost {
             const resolvedFileName = resolved.resolvedModule?.resolvedFileName;
             if (resolvedFileName && this.#sourceToEntry.has(resolvedFileName) && resolvedFileName !== sourceFile) {
               nextDependencies.add(resolvedFileName);
-              let importers = this.#fileToImporters.get(resolvedFileName);
-              if (!importers) {
-                importers = new Set();
-                this.#fileToImporters.set(resolvedFileName, importers);
+              this.#fileToImporters.getOrInsert(resolvedFileName, new Set()).add(sourceFile);
+              if (ts.isExportDeclaration(statement)) {
+                this.#fileToReExporters.getOrInsert(resolvedFileName, new Set()).add(sourceFile);
               }
-              importers.add(sourceFile);
             }
           }
         }
       }
     }
     this.#fileToDependencies.set(sourceFile, nextDependencies);
+  }
+
+  /**
+   * Populate dependency graph for all tracked TypeScript source files
+   */
+  populateDependencies(program: Program): void {
+    for (const sourceFile of this.#sourceFiles) {
+      if (ManifestModuleUtil.getFileType(sourceFile) === 'ts') {
+        this.#updateFileDependencies(sourceFile, program);
+      }
+    }
   }
 
   async compileSourceFile(
@@ -325,6 +337,7 @@ export class CompilerState implements CompilerHost {
     }
 
     const processed = new Set<string>();
+    const propagatedDeclarationChanges = new Set<string>();
     let needsNewProgram = true;
 
     for (const file of queue) {
@@ -344,13 +357,17 @@ export class CompilerState implements CompilerHost {
         needsNewProgram = false;
         yield { sourceFile: file, diagnostics, duration: Date.now() - start };
 
-        if (declarationChange.changed) {
-          const importers = this.#fileToImporters.get(file);
-          if (importers) {
-            for (const importer of importers) {
-              if (!processed.has(importer)) {
-                queue.add(importer);
-              }
+        if (declarationChange.changed || propagatedDeclarationChanges.has(file)) {
+          for (const importer of this.#fileToImporters.get(file) ?? []) {
+            if (!processed.has(importer)) {
+              queue.add(importer);
+            }
+          }
+          // Barrel re-exports keep identical `.d.ts` text (`export * from ...`), so forward declaration changes through them
+          for (const reExporter of this.#fileToReExporters.get(file) ?? []) {
+            propagatedDeclarationChanges.add(reExporter);
+            if (!processed.has(reExporter)) {
+              queue.add(reExporter);
             }
           }
         }
@@ -382,7 +399,7 @@ export class CompilerState implements CompilerHost {
     const entry = this.getBySource(file);
     const type = entry ? ManifestModuleUtil.getFolderKey(entry.moduleFile) : undefined;
     return (
-      ['src', 'support', 'bin'].includes(type!) &&
+      ['src', 'support', 'bin', '$transformer', '$index'].includes(type!) &&
       ((entry?.moduleFile && ManifestModuleUtil.getFileRole(entry.moduleFile) === 'compile') ||
         entry?.module.roles.includes('compile') ||
         false)
@@ -435,9 +452,16 @@ export class CompilerState implements CompilerHost {
   }
 
   /**
+   * Get direct importers of a source file
+   */
+  getImporters(sourceFile: string): string[] {
+    return [...(this.#fileToImporters.get(sourceFile) ?? [])];
+  }
+
+  /**
    * Remove a source file from compiler tracking and delete its related output files from disk
    */
-  removeSource(sourceFile: string): boolean {
+  removeSource(sourceFile: string, outputFile?: string): boolean {
     this.#failures.delete(sourceFile);
     const entry = this.#sourceToEntry.get(sourceFile);
 
@@ -451,23 +475,25 @@ export class CompilerState implements CompilerHost {
 
     this.#updateFileDependencies(sourceFile);
 
-    if (!entry) {
+    const targetOutput = entry?.outputFile ?? outputFile;
+    if (!targetOutput) {
       return false;
     }
 
-    const outputs = CompilerUtil.getEmittedOutputs(entry.outputFile);
-
-    for (const output of outputs) {
+    let removed = false;
+    for (const output of CompilerUtil.getEmittedOutputs(targetOutput)) {
       if (fs.existsSync(output)) {
         fs.rmSync(output, { force: true });
+        removed = true;
       }
       const typingsOutput = output.replace(this.#outputPath, this.#typingsPath);
       if (fs.existsSync(typingsOutput)) {
         fs.rmSync(typingsOutput, { force: true });
+        removed = true;
       }
     }
 
-    return true;
+    return !!entry || removed;
   }
 
   getAllFiles(): string[] {
