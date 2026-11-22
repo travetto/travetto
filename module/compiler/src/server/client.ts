@@ -51,7 +51,7 @@ export class CompilerClient {
 
     options?.signal?.addEventListener('abort', () => controller.abort());
     timers
-      .setTimeout(options?.timeout ?? 100, undefined, { ref: false, signal: timeoutController.signal })
+      .setTimeout(options?.timeout ?? 1000, undefined, { ref: false, signal: timeoutController.signal })
       .then(() => {
         logTimeout && this.#log.error(`Timeout on request to ${this.#url}${urlPath}`);
         controller.abort('TIMEOUT');
@@ -65,7 +65,7 @@ export class CompilerClient {
 
   /** Get server information, if server is running */
   info(): Promise<CompilerServerInfo | undefined> {
-    return this.#fetch('/info', { timeout: 200 }, false).then(
+    return this.#fetch('/info', { timeout: 2000 }, false).then(
       response => JSON.parse(response.text),
       () => undefined
     );
@@ -78,7 +78,7 @@ export class CompilerClient {
 
   /** Clean the server */
   async clean(): Promise<boolean> {
-    return this.#fetch('/clean', { timeout: 300 }).then(
+    return this.#fetch('/clean', { timeout: 5000 }).then(
       response => response.ok,
       () => false
     );
