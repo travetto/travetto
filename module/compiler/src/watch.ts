@@ -32,6 +32,7 @@ const gitRevParse = async <K extends string>(command: string[], cwd: string, key
 
 const CONFIGURATION_FILE_PATTERN =
   /(^|\/)(package\.json|tsconfig(\..{,30})?\.json|package-lock\.json|yarn\.lock|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/;
+const onWatchError = (error: unknown): void => log.debug('Watcher error', error);
 
 type CompilerWatchEventCandidate = Omit<CompilerWatchEvent, 'entry'> & { entry?: CompileStateEntry };
 
@@ -148,7 +149,7 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
     const pkgListener = watch(packageJsonFile, { encoding: 'utf8' }, () => {
       this.#lastWorkspaceEventTime = Date.now();
       this.#queue.add({ action: 'update', file: packageJsonFile });
-    });
+    }).on('error', onWatchError);
 
     this.#cleanup.workspace = async (): Promise<void> => {
       pkgListener.close();
@@ -181,7 +182,7 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
       if (toolFolders.has(full) && !stat) {
         this.#queue.throw(new CompilerReset('Tooling folder removed', { files: [path.relative(this.#root, full)] }));
       }
-    });
+    }).on('error', onWatchError);
     this.#cleanup.tool = (): void => listener.close();
   }
 
@@ -242,9 +243,9 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
     for (const { folder, filter, recursive } of targets) {
       if (await fs.stat(folder, { throwIfNoEntry: false })) {
         try {
-          watchers.push(watch(folder, { encoding: 'utf8', recursive }, (_, file) => filter(file) && scheduleCheck()));
+          watchers.push(watch(folder, { encoding: 'utf8', recursive }, (_, file) => filter(file) && scheduleCheck()).on('error', onWatchError));
         } catch {
-          watchers.push(watch(folder, { encoding: 'utf8' }, (_, file) => filter(file) && scheduleCheck()));
+          watchers.push(watch(folder, { encoding: 'utf8' }, (_, file) => filter(file) && scheduleCheck()).on('error', onWatchError));
         }
       }
     }
