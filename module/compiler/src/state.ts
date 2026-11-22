@@ -46,6 +46,7 @@ export class CompilerState implements CompilerHost {
   #compilerOptions: CompilerOptions;
   #program: Program;
   #watch = false;
+  #dependenciesPromise?: Promise<void>;
 
   #readFile(sourceFile: string): string | undefined {
     const location = this.#sourceToEntry.get(sourceFile)?.sourceFile ?? sourceFile;
@@ -166,7 +167,6 @@ export class CompilerState implements CompilerHost {
 
   async getProgram(force = false): Promise<Program> {
     if (force || !this.#program) {
-      const first = !this.#program;
       await this.initializeTypescript();
       this.#program = ts.createProgram({
         rootNames: this.getAllFiles(),
@@ -175,9 +175,6 @@ export class CompilerState implements CompilerHost {
         oldProgram: this.#program
       });
       this.#transformerManager.init(this.#program.getTypeChecker());
-      if (first && this.#watch) {
-        this.#populateDependencies(this.#program);
-      }
 
       await CommonUtil.queueMacroTask();
     }
@@ -228,6 +225,10 @@ export class CompilerState implements CompilerHost {
       return;
     }
 
+    if (!this.#sourceToEntry.get(sourceFile)?.module.workspace) {
+      return;
+    }
+
     const nextDependencies = new Set<string>();
     const tsSourceFile = program.getSourceFile(sourceFile);
     if (tsSourceFile) {
@@ -237,7 +238,7 @@ export class CompilerState implements CompilerHost {
           if (specifier && ts.isStringLiteral(specifier)) {
             const resolved = ts.resolveModuleName(specifier.text, sourceFile, this.#compilerOptions, this);
             const resolvedFileName = resolved.resolvedModule?.resolvedFileName;
-            if (resolvedFileName && this.#sourceToEntry.has(resolvedFileName) && resolvedFileName !== sourceFile) {
+            if (resolvedFileName && this.#sourceToEntry.get(resolvedFileName)?.module.workspace && resolvedFileName !== sourceFile) {
               nextDependencies.add(resolvedFileName);
               this.#fileToImporters.getOrInsert(resolvedFileName, new Set()).add(sourceFile);
               if (ts.isExportDeclaration(statement)) {
@@ -252,12 +253,26 @@ export class CompilerState implements CompilerHost {
   }
 
   /**
-   * Populate dependency graph for all tracked TypeScript source files
+   * Populate dependency graph for tracked workspace TypeScript source files not yet analyzed
    */
-  #populateDependencies(program: Program): void {
+  ensureDependencies(signal?: AbortSignal, defer = false): Promise<void> {
+    return (this.#dependenciesPromise ??= this.#populateDependencies(signal, defer));
+  }
+
+  async #populateDependencies(signal?: AbortSignal, defer = false): Promise<void> {
+    const program = await this.getProgram();
+    if (defer) {
+      await CommonUtil.queueMacroTask();
+    }
     for (const sourceFile of this.#sourceFiles) {
+      if (signal?.aborted) {
+        return;
+      }
+      if (this.#fileToDependencies.has(sourceFile) || !program.getSourceFile(sourceFile)) {
+        continue;
+      }
       const entry = this.#sourceToEntry.get(sourceFile);
-      if (entry && ManifestModuleUtil.getFileType(entry.moduleFile) === 'ts') {
+      if (entry?.module.workspace && ManifestModuleUtil.getFileType(entry.moduleFile) === 'ts') {
         this.#updateFileDependencies(sourceFile, program);
       }
     }
@@ -307,7 +322,9 @@ export class CompilerState implements CompilerHost {
           false,
           this.#transformerManager.get()
         );
-        this.#updateFileDependencies(sourceFile, program);
+        if (this.#watch) {
+          this.#updateFileDependencies(sourceFile, program);
+        }
         const diagnostics: CompilerDiagnosticItem[] = [];
         const rawDiagnostics = [
           ...program.getSemanticDiagnostics(tsSourceFile),

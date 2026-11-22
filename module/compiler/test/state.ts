@@ -503,4 +503,130 @@ class CompilerStateTests {
       await fs.promises.rm(tempDirectory, { recursive: true, force: true });
     }
   }
+
+  @Test()
+  async verifyWorkspaceScopedLazyDependencyTracking() {
+    const tempDirectory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'dep-tracking-test-'));
+    try {
+      const applicationSourceDirectory = path.join(tempDirectory, 'src');
+      const librarySourceDirectory = path.join(tempDirectory, 'node_modules', 'ext-lib', 'src');
+      await fs.promises.mkdir(applicationSourceDirectory, { recursive: true });
+      await fs.promises.mkdir(librarySourceDirectory, { recursive: true });
+
+      const leafFile = path.toPosix(path.join(applicationSourceDirectory, 'leaf.ts'));
+      const barrelFile = path.toPosix(path.join(applicationSourceDirectory, 'barrel.ts'));
+      const consumerFile = path.toPosix(path.join(applicationSourceDirectory, 'consumer.ts'));
+      const externalHelperFile = path.toPosix(path.join(librarySourceDirectory, 'helper.ts'));
+      const externalInternalFile = path.toPosix(path.join(librarySourceDirectory, 'internal.ts'));
+
+      await fs.promises.writeFile(
+        path.join(tempDirectory, 'tsconfig.json'),
+        JSON.stringify({
+          compilerOptions: {
+            target: 'ES2022',
+            module: 'NodeNext',
+            moduleResolution: 'NodeNext',
+            declaration: true,
+            strict: true,
+            skipLibCheck: true
+          }
+        }),
+        'utf8'
+      );
+      await fs.promises.writeFile(leafFile, 'export const count: number = 1;', 'utf8');
+      await fs.promises.writeFile(barrelFile, "export * from './leaf.ts';", 'utf8');
+      await fs.promises.writeFile(
+        consumerFile,
+        "import { count } from './barrel.ts';\nimport { ext } from '../node_modules/ext-lib/src/helper.ts';\nexport const total: number = count + ext;",
+        'utf8'
+      );
+      await fs.promises.writeFile(externalInternalFile, 'export const internal = 1;', 'utf8');
+      await fs.promises.writeFile(
+        externalHelperFile,
+        "import { internal } from './internal.ts';\nexport const ext: number = internal;",
+        'utf8'
+      );
+
+      const manifest: ManifestRoot = {
+        generated: Date.now(),
+        workspace: { name: 'test-app', path: path.toPosix(tempDirectory), mono: false, manager: 'npm' },
+        build: { compilerUrl: 'http://localhost:20000', outputFolder: '.trv/output', toolFolder: '.trv/tool', typesFolder: '.trv/types' },
+        main: { name: 'test-app', folder: '', version: '1.0.0' },
+        modules: {
+          'test-app': {
+            main: true,
+            name: 'test-app',
+            version: '1.0.0',
+            workspace: true,
+            production: true,
+            sourceFolder: '',
+            outputFolder: 'node_modules/test-app',
+            roles: ['std'],
+            parents: [],
+            files: {
+              src: [
+                ['src/leaf.ts', 'ts', 1000],
+                ['src/barrel.ts', 'ts', 1000],
+                ['src/consumer.ts', 'ts', 1000]
+              ]
+            }
+          },
+          'ext-lib': {
+            name: 'ext-lib',
+            version: '1.0.0',
+            workspace: false,
+            production: true,
+            sourceFolder: 'node_modules/ext-lib',
+            outputFolder: 'node_modules/ext-lib',
+            roles: ['std'],
+            parents: [],
+            files: {
+              src: [
+                ['src/helper.ts', 'ts', 1000],
+                ['src/internal.ts', 'ts', 1000]
+              ]
+            }
+          }
+        }
+      };
+
+      // Non-watch builds skip dependency tracking completely
+      const buildState = await CompilerState.get(new ManifestIndex(manifest), false);
+      for await (const _ of buildState.compileAffectedFiles([leafFile, barrelFile, consumerFile])) {
+        // Compile
+      }
+      assert.deepStrictEqual(buildState.getImporters(leafFile), []);
+      assert.deepStrictEqual(buildState.getImporters(barrelFile), []);
+
+      // Watch mode warms program without eagerly scanning all uncompiled files
+      const watchState = await CompilerState.get(new ManifestIndex(manifest), true);
+      await watchState.getProgram();
+      assert.deepStrictEqual(watchState.getImporters(leafFile), []);
+      assert.deepStrictEqual(watchState.getImporters(barrelFile), []);
+
+      // Background / first watch event populates workspace dependencies and skips non-workspace modules
+      const firstPromise = watchState.ensureDependencies();
+      assert.strictEqual(watchState.ensureDependencies(), firstPromise);
+      await firstPromise;
+      assert.deepStrictEqual(watchState.getImporters(leafFile), [barrelFile]);
+      assert.deepStrictEqual(watchState.getImporters(barrelFile), [consumerFile]);
+      assert.deepStrictEqual(watchState.getImporters(externalInternalFile), []);
+      assert.deepStrictEqual(watchState.getImporters(externalHelperFile), []);
+
+      // Barrel re-export propagates breaking declaration changes to consumer
+      await fs.promises.writeFile(leafFile, "export const count: string = 'invalid';", 'utf8');
+      watchState.resetSource(leafFile);
+      const compiled: { sourceFile: string; diagnostics: number }[] = [];
+      for await (const result of watchState.compileAffectedFiles([leafFile])) {
+        compiled.push({ sourceFile: result.sourceFile, diagnostics: result.diagnostics.length });
+      }
+      assert.deepStrictEqual(
+        compiled.map(item => item.sourceFile),
+        [leafFile, barrelFile, consumerFile]
+      );
+      assert.ok(compiled.find(item => item.sourceFile === consumerFile)!.diagnostics > 0);
+    } finally {
+      await fs.promises.rm(tempDirectory, { recursive: true, force: true });
+    }
+  }
 }

@@ -177,6 +177,7 @@ export class Compiler {
   async #onWatchBatch(events: CompilerWatchEvent[]): Promise<void> {
     this.#sendEvent('state', { state: 'compile-start' });
     this.#state.updateManifestInMemory(events);
+    await this.#state.ensureDependencies();
 
     const deleteEvents = events.filter(event => event.action === 'delete');
     const createOrUpdateEvents = events.filter(event => event.action !== 'delete');
@@ -311,6 +312,7 @@ export class Compiler {
 
       log.info('Watch is ready');
       this.#sendEvent('state', { state: this.#state.hasErrors() ? 'compile-failed' : 'watch-start' });
+      void this.#state.ensureDependencies(this.#shutdownSignal, true);
 
       try {
         for await (const batch of this.#watcher) {
