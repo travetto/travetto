@@ -210,6 +210,23 @@ export class CompilerState implements CompilerHost {
     }
   }
 
+  #resolveWorkspaceDependency(specifierText: string, sourceFile: string): string | undefined {
+    if (specifierText.startsWith('.')) {
+      const candidate = path.resolve(path.dirname(sourceFile), specifierText);
+      if (this.#sourceToEntry.has(candidate)) {
+        return candidate;
+      }
+    } else {
+      const indexed =
+        this.#manifestIndex.getFromImport(specifierText) ?? this.#manifestIndex.getFromImport(`${specifierText}/__index__`);
+      if (indexed && this.#sourceToEntry.has(indexed.sourceFile)) {
+        return indexed.sourceFile;
+      }
+    }
+    const resolved = ts.resolveModuleName(specifierText, sourceFile, this.#compilerOptions, this);
+    return resolved.resolvedModule?.resolvedFileName;
+  }
+
   #updateFileDependencies(sourceFile: string, program?: Program): void {
     const previousDependencies = this.#fileToDependencies.get(sourceFile);
     if (previousDependencies) {
@@ -220,8 +237,6 @@ export class CompilerState implements CompilerHost {
       this.#fileToDependencies.delete(sourceFile);
     }
     if (!program) {
-      this.#fileToImporters.delete(sourceFile);
-      this.#fileToReExporters.delete(sourceFile);
       return;
     }
 
@@ -236,8 +251,7 @@ export class CompilerState implements CompilerHost {
         if (ts.isImportDeclaration(statement) || ts.isExportDeclaration(statement)) {
           const specifier = statement.moduleSpecifier;
           if (specifier && ts.isStringLiteral(specifier)) {
-            const resolved = ts.resolveModuleName(specifier.text, sourceFile, this.#compilerOptions, this);
-            const resolvedFileName = resolved.resolvedModule?.resolvedFileName;
+            const resolvedFileName = this.#resolveWorkspaceDependency(specifier.text, sourceFile);
             if (resolvedFileName && this.#sourceToEntry.get(resolvedFileName)?.module.workspace && resolvedFileName !== sourceFile) {
               nextDependencies.add(resolvedFileName);
               this.#fileToImporters.getOrInsert(resolvedFileName, new Set()).add(sourceFile);
