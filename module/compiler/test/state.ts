@@ -118,6 +118,56 @@ class CompilerStateTests {
   }
 
   @Test()
+  async verifyAtomicSaveCollapsing() {
+    const tempDirectory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'atomic-save-test-'));
+    try {
+      const srcDir = path.join(tempDirectory, 'src');
+      await fs.promises.mkdir(srcDir, { recursive: true });
+      const alphaFile = path.join(srcDir, 'alpha.ts');
+      await fs.promises.writeFile(alphaFile, 'export const a = 1;', 'utf8');
+
+      const manifest: ManifestRoot = {
+        generated: Date.now(),
+        workspace: { name: 'test-app', path: path.toPosix(tempDirectory), mono: false, manager: 'npm' },
+        build: { compilerUrl: 'http://localhost:20000', outputFolder: '.trv/output', toolFolder: '.trv/tool', typesFolder: '.trv/types' },
+        main: { name: 'test-app', folder: '', version: '1.0.0' },
+        modules: {
+          'test-app': {
+            main: true,
+            name: 'test-app',
+            version: '1.0.0',
+            workspace: true,
+            production: true,
+            sourceFolder: '',
+            outputFolder: 'node_modules/test-app',
+            roles: ['std'],
+            parents: [],
+            files: {
+              src: [['src/alpha.ts', 'ts', 1000]],
+              $package: [['package.json', 'package-json', 1000]]
+            }
+          }
+        }
+      };
+
+      const state = await CompilerState.get(new ManifestIndex(manifest));
+      const controller = new AbortController();
+      const watcher = new CompilerWatcher(state, controller.signal);
+
+      const batch = await watcher.prepareBatch([
+        { action: 'delete', file: path.toPosix(alphaFile) },
+        { action: 'create', file: path.toPosix(alphaFile) }
+      ]);
+
+      assert.strictEqual(batch.length, 1);
+      assert.strictEqual(batch[0].action, 'update');
+      assert.strictEqual(batch[0].entry.sourceFile, path.toPosix(alphaFile));
+    } finally {
+      await fs.promises.rm(tempDirectory, { recursive: true, force: true });
+    }
+  }
+
+  @Test()
   verifyEmittedPathsAndOutputs() {
     assert.deepStrictEqual(CompilerUtil.getEmittedOutputs('/app/dist/index.js'), [
       '/app/dist/index.js',
