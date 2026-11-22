@@ -41,6 +41,21 @@ class CompilerStateTests {
     };
   }
 
+  #createWatcher(state: CompilerState, signal: AbortSignal): CompilerWatcher {
+    return new CompilerWatcher(
+      {
+        root: state.manifest.workspace.path,
+        outputFolder: state.manifest.build.outputFolder,
+        typesFolder: state.manifest.build.typesFolder,
+        isCompilerFile: file => state.isCompilerFile(file),
+        getBySource: file => state.getBySource(file),
+        registerArbitraryFile: file => state.registerArbitraryFile(file),
+        checkIfSourceChanged: file => state.checkIfSourceChanged(file)
+      },
+      signal
+    );
+  }
+
   @Test()
   async verifyRemoveSource() {
     const baseManifest = this.#createManifest();
@@ -152,9 +167,9 @@ class CompilerStateTests {
 
       const state = await CompilerState.get(new ManifestIndex(manifest));
       const controller = new AbortController();
-      const watcher = new CompilerWatcher(state, controller.signal);
+      const watcher = this.#createWatcher(state, controller.signal);
 
-      const batch = await watcher.prepareBatch([
+      const batch = watcher.prepareBatch([
         { action: 'delete', file: path.toPosix(alphaFile) },
         { action: 'create', file: path.toPosix(alphaFile) }
       ]);
@@ -204,9 +219,9 @@ class CompilerStateTests {
 
       const state = await CompilerState.get(new ManifestIndex(manifest));
       const controller = new AbortController();
-      const watcher = new CompilerWatcher(state, controller.signal);
+      const watcher = this.#createWatcher(state, controller.signal);
 
-      const batch = await watcher.prepareBatch([
+      const batch = watcher.prepareBatch([
         { action: 'create', file: path.toPosix(unknownFile) },
         { action: 'create', file: path.toPosix(fixtureFile) }
       ]);
@@ -256,13 +271,14 @@ class CompilerStateTests {
       await fs.promises.writeFile(path.join(outputDir, 'manifest.json'), JSON.stringify(manifest), 'utf8');
       const state = await CompilerState.get(new ManifestIndex(manifest));
       const controller = new AbortController();
-      const watcher = new CompilerWatcher(state, controller.signal);
+      const watcher = this.#createWatcher(state, controller.signal);
 
-      const batch = await watcher.prepareBatch([{ action: 'create', file: path.toPosix(betaFile) }]);
+      const batch = watcher.prepareBatch([{ action: 'create', file: path.toPosix(betaFile) }]);
+      state.updateManifestInMemory(batch);
       assert.strictEqual(batch.length, 1);
       assert.ok(state.manifestIndex.getEntry(path.toPosix(betaFile)));
 
-      await watcher.writeBatchManifests(batch);
+      await state.writeBatchManifests(batch);
       const savedManifest: ManifestRoot = JSON.parse(await fs.promises.readFile(path.join(outputDir, 'manifest.json'), 'utf8'));
       assert.ok(savedManifest.modules['test-app'].files.src?.some(([file]) => file === 'src/beta.ts'));
     } finally {
@@ -310,9 +326,9 @@ class CompilerStateTests {
       await fs.promises.writeFile(path.join(outputDir, 'manifest.json'), JSON.stringify(manifest), 'utf8');
       const state = await CompilerState.get(new ManifestIndex(manifest));
       const controller = new AbortController();
-      const watcher = new CompilerWatcher(state, controller.signal);
+      const watcher = this.#createWatcher(state, controller.signal);
 
-      const batch = await watcher.prepareBatch([
+      const batch = watcher.prepareBatch([
         { action: 'update', file: path.toPosix(betaFile) },
         { action: 'update', file: path.toPosix(missingFile) }
       ]);
@@ -352,49 +368,47 @@ class CompilerStateTests {
   }
 
   @Test()
-  async verifyConfigurationFileChangesTriggerSoftReset() {
-    const baseManifest = this.#createManifest();
-    const state = await CompilerState.get(new ManifestIndex(baseManifest));
+  verifyConfigurationFileChangesTriggerSoftReset() {
     const controller = new AbortController();
-    const watcher = new CompilerWatcher(state, controller.signal);
+    const watcher = new CompilerWatcher({ root: '/test/app', outputFolder: '.trv/output', typesFolder: '.trv/types' }, controller.signal);
 
-    await assert.rejects(
-      async () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/package.json') }]),
+    assert.throws(
+      () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/package.json') }]),
       (error: unknown) => error instanceof CompilerReset && error.soft === true
     );
 
-    await assert.rejects(
-      async () => watcher.prepareBatch([{ action: 'create', file: path.resolve('/test/app/module/sub/package.json') }]),
+    assert.throws(
+      () => watcher.prepareBatch([{ action: 'create', file: path.resolve('/test/app/module/sub/package.json') }]),
       (error: unknown) => error instanceof CompilerReset && error.soft === true
     );
 
-    await assert.rejects(
-      async () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/tsconfig.json') }]),
+    assert.throws(
+      () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/tsconfig.json') }]),
       (error: unknown) => error instanceof CompilerReset && error.soft === true
     );
 
-    await assert.rejects(
-      async () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/yarn.lock') }]),
+    assert.throws(
+      () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/yarn.lock') }]),
       (error: unknown) => error instanceof CompilerReset && error.soft === true
     );
 
-    await assert.rejects(
-      async () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/pnpm-lock.yaml') }]),
+    assert.throws(
+      () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/pnpm-lock.yaml') }]),
       (error: unknown) => error instanceof CompilerReset && error.soft === true
     );
 
-    await assert.rejects(
-      async () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/pnpm-workspace.yaml') }]),
+    assert.throws(
+      () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/pnpm-workspace.yaml') }]),
       (error: unknown) => error instanceof CompilerReset && error.soft === true
     );
 
-    await assert.rejects(
-      async () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/package-lock.json') }]),
+    assert.throws(
+      () => watcher.prepareBatch([{ action: 'update', file: path.resolve('/test/app/package-lock.json') }]),
       (error: unknown) => error instanceof CompilerReset && error.soft === true
     );
 
     // Should NOT reset for changes in separate work folders (.<name>/)
-    const ignoredEvents = await watcher.prepareBatch([
+    const ignoredEvents = watcher.prepareBatch([
       { action: 'update', file: path.resolve('/test/app/.worktrees/branch-a/package.json') },
       { action: 'update', file: path.resolve('/test/app/.worktree/package.json') },
       { action: 'update', file: path.resolve('/test/app/.gemini/scratch/tsconfig.json') },
@@ -452,9 +466,11 @@ class CompilerStateTests {
         }
       };
 
-      const state = await CompilerState.get(new ManifestIndex(manifest));
       const controller = new AbortController();
-      const watcher = new CompilerWatcher(state, controller.signal);
+      const watcher = new CompilerWatcher(
+        { root: tempDirectory, outputFolder: '.trv/output', typesFolder: '.trv/types' },
+        controller.signal
+      );
 
       const iteratorPromise = (async () => {
         try {

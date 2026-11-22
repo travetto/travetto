@@ -38,6 +38,15 @@ export type CompileStateEntry = {
 };
 export type CompilerWatchRawEvent = { action: ChangeEventType; file: string };
 export type CompilerWatchEvent = { action: ChangeEventType; file: string; entry: CompileStateEntry; moduleFile: string };
+export type CompilerWatcherOptions = {
+  root: string;
+  outputFolder: string;
+  typesFolder: string;
+  isCompilerFile?: (file: string) => boolean;
+  getBySource?: (file: string) => CompileStateEntry | undefined;
+  registerArbitraryFile?: (file: string) => CompileStateEntry | undefined;
+  checkIfSourceChanged?: (file: string) => boolean;
+};
 
 type Scoped<T extends {}> = T & { workspace?: string };
 export type CompilerChangeEvent = Scoped<{

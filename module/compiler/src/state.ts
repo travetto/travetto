@@ -2,12 +2,21 @@ import fs from 'node:fs';
 
 import type { CompilerHost, CompilerOptions, Program, ScriptTarget, SourceFile } from 'typescript';
 
-import { type DeltaEvent, type ManifestIndex, type ManifestModule, ManifestModuleUtil, type ManifestRoot, path } from '@travetto/manifest';
+import {
+  type DeltaEvent,
+  type ManifestIndex,
+  type ManifestModule,
+  ManifestModuleUtil,
+  type ManifestRoot,
+  ManifestUtil,
+  path
+} from '@travetto/manifest';
 import type { TransformerManager } from '@travetto/transformer';
 
 import { CommonUtil } from './common.ts';
+import { IpcLog as log } from './log.ts';
 import { tsProxy as ts, tsProxyInit } from './ts-proxy.ts';
-import type { CompileStateEntry, CompilerDiagnosticItem } from './types.ts';
+import type { CompileStateEntry, CompilerDiagnosticItem, CompilerWatchEvent } from './types.ts';
 import { CompilerUtil } from './util.ts';
 
 export class CompilerState implements CompilerHost {
@@ -551,6 +560,70 @@ export class CompilerState implements CompilerHost {
 
   directoryExists(sourceDirectory: string): boolean {
     return this.#sourceDirectory.has(sourceDirectory) || this.#directoryExists(sourceDirectory);
+  }
+
+  /**
+   * Resolve or register an arbitrary workspace source file if it exists in a valid module folder
+   */
+  registerArbitraryFile(file: string): CompileStateEntry | undefined {
+    const existing = this.getBySource(file);
+    if (existing) {
+      return existing;
+    }
+    const module = this.#manifestIndex.findModuleForArbitraryFile(file);
+    if (module && this.#fileExists(file)) {
+      const moduleFile = path.relative(path.resolve(this.#manifest.workspace.path, module.sourceFolder), file);
+      if (ManifestModuleUtil.isValidModuleFile(moduleFile, module.main) && ManifestModuleUtil.isSourceType(moduleFile)) {
+        return this.registerInput(module, moduleFile);
+      }
+    }
+  }
+
+  #applyManifestUpdates(manifest: ManifestRoot, events: CompilerWatchEvent[]): void {
+    for (const { moduleFile, action, entry } of events) {
+      ManifestUtil.updateManifest(manifest, entry.module.name, moduleFile, action);
+    }
+  }
+
+  /**
+   * Apply watch create/delete updates to the in-memory manifest index
+   */
+  updateManifestInMemory(compilerEvents: CompilerWatchEvent[]): void {
+    const mutatingEvents = compilerEvents.filter(event => event.action !== 'update');
+    if (!mutatingEvents.length) {
+      return;
+    }
+
+    this.#applyManifestUpdates(this.#manifestIndex.manifest, mutatingEvents);
+    this.#manifestIndex.init(this.#manifestIndex.manifest);
+  }
+
+  /**
+   * Persist manifest updates on disk for affected dependent modules after a watch batch
+   */
+  async writeBatchManifests(compilerEvents: CompilerWatchEvent[]): Promise<void> {
+    const eventsByModule = this.#manifestIndex.groupByLineage(
+      compilerEvents.map(event => ({ item: event, module: event.entry.module.name })).filter(x => x.item.action !== 'update')
+    );
+
+    for (const [moduleName, events] of eventsByModule.entries()) {
+      const moduleManifest = this.#manifestIndex.resolveDependentManifest(moduleName);
+      this.#applyManifestUpdates(moduleManifest, events);
+      log.debug('Updating manifest', [{ module: moduleName, events: events.length }]);
+      await ManifestUtil.writeManifest(moduleManifest);
+    }
+  }
+
+  /**
+   * Rebuild and write workspace and dependent manifests after initial compilation
+   */
+  async rebuildManifests(reload = false): Promise<void> {
+    const manifest = await ManifestUtil.buildManifest(this.#manifestIndex.manifest);
+    await ManifestUtil.writeManifest(manifest);
+    await ManifestUtil.writeDependentManifests(manifest);
+    if (reload) {
+      this.#manifestIndex.reinitForModule(this.#manifest.main.name);
+    }
   }
 
   writeFile(outputFile: string, text: string, writeByteOrderMark?: boolean): void {

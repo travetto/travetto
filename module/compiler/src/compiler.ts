@@ -47,7 +47,18 @@ export class Compiler {
 
     this.#shutdownController = new AbortController();
     this.#shutdownSignal = this.#shutdownController.signal;
-    this.#watcher = new CompilerWatcher(this.#state, this.#shutdownSignal);
+    this.#watcher = new CompilerWatcher(
+      {
+        root: this.#state.manifest.workspace.path,
+        outputFolder: this.#state.manifest.build.outputFolder,
+        typesFolder: this.#state.manifest.build.typesFolder,
+        isCompilerFile: file => this.#state.isCompilerFile(file),
+        getBySource: file => this.#state.getBySource(file),
+        registerArbitraryFile: file => this.#state.registerArbitraryFile(file),
+        checkIfSourceChanged: file => this.#state.checkIfSourceChanged(file)
+      },
+      this.#shutdownSignal
+    );
     setMaxListeners(1000, this.#shutdownSignal);
     process.once('disconnect', () => this.#shutdown('manual')).on('message', event => event === 'shutdown' && this.#shutdown('manual'));
   }
@@ -165,6 +176,7 @@ export class Compiler {
 
   async #onWatchBatch(events: CompilerWatchEvent[]): Promise<void> {
     this.#sendEvent('state', { state: 'compile-start' });
+    this.#state.updateManifestInMemory(events);
 
     const deleteEvents = events.filter(event => event.action === 'delete');
     const createOrUpdateEvents = events.filter(event => event.action !== 'delete');
@@ -179,6 +191,7 @@ export class Compiler {
     deleteEvents.forEach(deleteEvent => affected.delete(deleteEvent.entry.sourceFile));
 
     const changedFiles = [...affected];
+
     const compiledFiles = new Set<string>();
 
     for await (const result of this.#state.compileAffectedFiles(changedFiles)) {
@@ -200,7 +213,7 @@ export class Compiler {
       }
     }
 
-    await this.#watcher.writeBatchManifests(events);
+    await this.#state.writeBatchManifests(events);
 
     for (const deleteEvent of deleteEvents) {
       const normalizedFile = path.relative(this.#state.manifest.workspace.path, deleteEvent.file);
@@ -277,20 +290,13 @@ export class Compiler {
     }
 
     if (changedFiles.length || deleteEvents.length) {
-      // Rebuild manifests
-      const manifest = await ManifestUtil.buildManifest(this.#state.manifestIndex.manifest);
-      await ManifestUtil.writeManifest(manifest);
-      await ManifestUtil.writeDependentManifests(manifest);
+      await this.#state.rebuildManifests(!!this.#watch && !this.#state.hasErrors());
 
-      if (this.#watch) {
-        if (this.#state.hasErrors()) {
-          this.#sendEvent('state', { state: 'compile-failed' });
-        } else {
-          this.#state.manifestIndex.reinitForModule(this.#state.manifest.main.name); // Reload
-        }
-      } else if (this.#state.hasErrors()) {
+      if (this.#state.hasErrors()) {
         this.#sendEvent('state', { state: 'compile-failed' });
-        return this.#shutdown('error', `Compilation failed with ${this.#state.failureCount} errors`);
+        if (!this.#watch) {
+          return this.#shutdown('error', `Compilation failed with ${this.#state.failureCount} errors`);
+        }
       }
     }
 
