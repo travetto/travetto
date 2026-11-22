@@ -12,6 +12,8 @@ export type CompilerStateType =
   | 'reset'
   | 'closed';
 
+export const READY_STATES: CompilerStateType[] = ['watch-start', 'compile-failed'];
+
 export type CompilerLogPhase = 'failure' | 'error' | 'reset';
 export type CompilerLogLevel = 'info' | 'debug' | 'warn' | 'error';
 

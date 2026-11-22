@@ -5,11 +5,17 @@ import timers from 'node:timers/promises';
 import type { ManifestContext } from '@travetto/manifest';
 
 import { CommonUtil } from '../common.ts';
-import type { CompilerEventPayload, CompilerEventType, CompilerServerInfo, CompilerStateType, CompilerLoggerShape } from '../types.ts';
+import {
+  type CompilerEventPayload,
+  type CompilerEventType,
+  type CompilerLoggerShape,
+  type CompilerServerInfo,
+  type CompilerStateType,
+  READY_STATES
+} from '../types.ts';
 import { CompilerUtil } from '../util.ts';
 
 const isConnectionReset = (value: unknown) => typeof value === 'object' && !!value && 'code' in value && value.code === 'ECONNRESET';
-const READY_STATES: CompilerStateType[] = ['watch-start', 'compile-failed'];
 
 type FetchEventsConfig<T> = {
   signal?: AbortSignal;
