@@ -1,8 +1,10 @@
 import assert from 'node:assert';
+import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import winPath from 'node:path/win32';
 
-import { path as path2 } from '@travetto/manifest';
+import { ManifestUtil, path as path2 } from '@travetto/manifest';
 import { Suite, Test } from '@travetto/test';
 
 @Suite()
@@ -39,5 +41,28 @@ class PathTests {
     assert(winJoin('C:\\Docs\\Bob', 'orange\\red.png') === 'C:/Docs/Bob/orange/red.png');
     assert(winJoin('C:\\Docs\\Bob', 'orange/red.png') === 'C:/Docs/Bob/orange/red.png');
     assert(winJoin('C:\\Docs\\Bob', '../red.png') === 'C:/Docs/red.png');
+  }
+
+  @Test()
+  async verifyLookupTrieNestedPackageIsolation() {
+    const tempDirectory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'trie-test-'));
+    try {
+      const cliDir = path.join(tempDirectory, 'module', 'cli');
+      const docExecDir = path.join(cliDir, 'doc-exec', 'support');
+      await fs.promises.mkdir(docExecDir, { recursive: true });
+      await fs.promises.writeFile(path.join(cliDir, 'package.json'), '{}');
+      await fs.promises.writeFile(path.join(cliDir, 'doc-exec', 'package.json'), '{}');
+
+      const lookup = ManifestUtil.lookupTrie(
+        [{ name: '@travetto/cli', sourceFolder: 'module/cli' }],
+        item => item.sourceFolder.split('/'),
+        sub => !fs.existsSync(path.resolve(tempDirectory, ...sub, 'package.json'))
+      );
+
+      assert.strictEqual(lookup(['module', 'cli', 'src', 'main.ts'])?.name, '@travetto/cli');
+      assert.strictEqual(lookup(['module', 'cli', 'doc-exec', 'support', 'cli.basic.ts']), undefined);
+    } finally {
+      await fs.promises.rm(tempDirectory, { recursive: true, force: true });
+    }
   }
 }
