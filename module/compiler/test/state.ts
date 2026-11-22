@@ -629,4 +629,65 @@ class CompilerStateTests {
       await fs.promises.rm(tempDirectory, { recursive: true, force: true });
     }
   }
+
+  @Test()
+  async verifyTypeScriptEmitExceptionRecovery() {
+    const tempDirectory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'emit-recovery-test-'));
+    try {
+      const srcDir = path.join(tempDirectory, 'src');
+      await fs.promises.mkdir(srcDir, { recursive: true });
+      const alphaFile = path.toPosix(path.join(srcDir, 'alpha.ts'));
+      await fs.promises.writeFile(alphaFile, 'export const a = 1;', 'utf8');
+      await fs.promises.writeFile(path.join(tempDirectory, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2022' } }), 'utf8');
+
+      // Block output directory creation with a regular file so program.emit throws
+      const blockingOutput = path.join(tempDirectory, '.trv/output/node_modules/test-app');
+      await fs.promises.mkdir(path.dirname(blockingOutput), { recursive: true });
+      await fs.promises.writeFile(blockingOutput, 'blocker', 'utf8');
+
+      const manifest: ManifestRoot = {
+        generated: Date.now(),
+        workspace: { name: 'test-app', path: path.toPosix(tempDirectory), mono: false, manager: 'npm' },
+        build: { compilerUrl: 'http://localhost:20000', outputFolder: '.trv/output', toolFolder: '.trv/tool', typesFolder: '.trv/types' },
+        main: { name: 'test-app', folder: '', version: '1.0.0' },
+        modules: {
+          'test-app': {
+            main: true,
+            name: 'test-app',
+            version: '1.0.0',
+            workspace: true,
+            production: true,
+            sourceFolder: '',
+            outputFolder: 'node_modules/test-app',
+            roles: ['std'],
+            parents: [],
+            files: {
+              src: [['src/alpha.ts', 'ts', 1000]]
+            }
+          }
+        }
+      };
+
+      const state = await CompilerState.get(new ManifestIndex(manifest), true);
+      const failedResults: { sourceFile: string; diagnostics: number }[] = [];
+      for await (const result of state.compileAffectedFiles([alphaFile])) {
+        failedResults.push({ sourceFile: result.sourceFile, diagnostics: result.diagnostics.length });
+      }
+      assert.strictEqual(failedResults.length, 1);
+      assert.strictEqual(failedResults[0].diagnostics, 1);
+      assert.strictEqual(state.hasErrors(alphaFile), true);
+
+      // Remove blocker and verify next compile recovers cleanly
+      await fs.promises.rm(blockingOutput, { force: true });
+      const recoveredResults: { sourceFile: string; diagnostics: number }[] = [];
+      for await (const result of state.compileAffectedFiles([alphaFile])) {
+        recoveredResults.push({ sourceFile: result.sourceFile, diagnostics: result.diagnostics.length });
+      }
+      assert.strictEqual(recoveredResults.length, 1);
+      assert.strictEqual(recoveredResults[0].diagnostics, 0);
+      assert.strictEqual(state.hasErrors(alphaFile), false);
+    } finally {
+      await fs.promises.rm(tempDirectory, { recursive: true, force: true });
+    }
+  }
 }
