@@ -271,6 +271,62 @@ class CompilerStateTests {
   }
 
   @Test()
+  async verifyUntrackedUpdateRegistersExistingFile() {
+    const tempDirectory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'untracked-update-test-'));
+    try {
+      const srcDir = path.join(tempDirectory, 'src');
+      const outputDir = path.join(tempDirectory, '.trv/output/node_modules/test-app');
+      await fs.promises.mkdir(srcDir, { recursive: true });
+      await fs.promises.mkdir(outputDir, { recursive: true });
+      await fs.promises.writeFile(path.join(tempDirectory, 'package.json'), JSON.stringify({ name: 'test-app', version: '1.0.0' }), 'utf8');
+      const betaFile = path.join(srcDir, 'beta.ts');
+      const missingFile = path.join(srcDir, 'missing.ts');
+      await fs.promises.writeFile(betaFile, 'export const b = 2;', 'utf8');
+
+      const manifest: ManifestRoot = {
+        generated: Date.now(),
+        workspace: { name: 'test-app', path: path.toPosix(tempDirectory), mono: false, manager: 'npm' },
+        build: { compilerUrl: 'http://localhost:20000', outputFolder: '.trv/output', toolFolder: '.trv/tool', typesFolder: '.trv/types' },
+        main: { name: 'test-app', folder: '', version: '1.0.0' },
+        modules: {
+          'test-app': {
+            main: true,
+            name: 'test-app',
+            version: '1.0.0',
+            workspace: true,
+            production: true,
+            sourceFolder: '',
+            outputFolder: 'node_modules/test-app',
+            roles: ['std'],
+            parents: [],
+            files: {
+              src: [['src/alpha.ts', 'ts', 1000]],
+              $package: [['package.json', 'package-json', 1000]]
+            }
+          }
+        }
+      };
+
+      await fs.promises.writeFile(path.join(outputDir, 'manifest.json'), JSON.stringify(manifest), 'utf8');
+      const state = await CompilerState.get(new ManifestIndex(manifest));
+      const controller = new AbortController();
+      const watcher = new CompilerWatcher(state, controller.signal);
+
+      const batch = await watcher.prepareBatch([
+        { action: 'update', file: path.toPosix(betaFile) },
+        { action: 'update', file: path.toPosix(missingFile) }
+      ]);
+
+      assert.strictEqual(batch.length, 1);
+      assert.strictEqual(batch[0].action, 'create');
+      assert.strictEqual(batch[0].entry.sourceFile, path.toPosix(betaFile));
+      assert.strictEqual(state.getBySource(path.toPosix(missingFile)), undefined);
+    } finally {
+      await fs.promises.rm(tempDirectory, { recursive: true, force: true });
+    }
+  }
+
+  @Test()
   verifyEmittedPathsAndOutputs() {
     assert.deepStrictEqual(CompilerUtil.getEmittedOutputs('/app/dist/index.js'), [
       '/app/dist/index.js',
