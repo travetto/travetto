@@ -263,4 +263,34 @@ class CompilerServerTests {
       }
     }
   }
+
+  @Test()
+  async verifyMultiFileFailuresRetainedAndClearedIndividually() {
+    const context = this.#createContext();
+    const server = new CompilerServer(context, false);
+
+    await server.processEvents(async function* () {
+      yield { type: 'log', payload: { level: 'error', message: 'Compilation failed', phase: 'failure', file: 'src/alpha.ts' } };
+      yield { type: 'log', payload: { level: 'error', message: 'Compilation failed', phase: 'failure', file: 'src/beta.ts' } };
+    });
+
+    assert.strictEqual(server.info.messages?.failure?.length, 2);
+
+    await server.processEvents(async function* () {
+      yield {
+        type: 'change',
+        payload: {
+          action: 'update',
+          file: 'src/alpha.ts',
+          import: 'test-app/src/alpha.ts',
+          output: '.trv/output/src/alpha.js',
+          module: 'test-app',
+          time: Date.now()
+        }
+      };
+    });
+
+    assert.strictEqual(server.info.messages?.failure?.length, 1);
+    assert.strictEqual(server.info.messages?.failure?.[0].file, 'src/beta.ts');
+  }
 }

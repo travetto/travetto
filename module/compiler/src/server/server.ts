@@ -294,7 +294,7 @@ export class CompilerServer {
         if (event.file) {
           this.#clearErrorsForFile(event.file);
         }
-        messages[event.phase] = [event];
+        (messages[event.phase] ??= []).push(event);
         break;
       }
       case 'reset':
