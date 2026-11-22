@@ -177,6 +177,7 @@ export class Compiler {
   async #onWatchBatch(events: CompilerWatchEvent[]): Promise<void> {
     this.#sendEvent('state', { state: 'compile-start' });
     this.#state.updateManifestInMemory(events);
+    await this.#state.ensureDependencies();
 
     const deleteEvents = events.filter(event => event.action === 'delete');
     const createOrUpdateEvents = events.filter(event => event.action !== 'delete');
