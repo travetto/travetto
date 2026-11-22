@@ -651,7 +651,7 @@ export class CompilerState implements CompilerHost {
     );
 
     for (const [moduleName, events] of eventsByModule.entries()) {
-      const moduleManifest = this.#manifestIndex.resolveDependentManifest(moduleName);
+      const moduleManifest = await this.#manifestIndex.resolveDependentManifest(moduleName);
       this.#applyManifestUpdates(moduleManifest, events);
       log.debug('Updating manifest', [{ module: moduleName, events: events.length }]);
       await ManifestUtil.writeManifest(moduleManifest);
