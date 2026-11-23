@@ -1,11 +1,13 @@
 import fs from 'node:fs/promises';
 
-import { type IndexedFile, type ManifestIndex, path } from '@travetto/manifest';
-import { RuntimeIndex } from '@travetto/runtime';
+import type { CompilerChangeEvent } from '@travetto/compiler';
+import { type IndexedFile, type ManifestIndex, ManifestModuleUtil, path } from '@travetto/manifest';
+import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
-import type { TestConsumerShape } from '../consumer/types.ts';
+import type { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
 import { DelegatingConsumer } from '../consumer/types/delegating.ts';
 import type { TestEvent, TestRemoveEvent } from '../model/event.ts';
+import type { TestDiffInput, TestRun } from '../model/test.ts';
 
 const IMPORT_EXPORT_REGEX = /(?:import|export)\s+(?:type\s+)?(?:([^'"`;]*?)\s+from\s+)?['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/g;
 const EXPORT_DECL_REGEX = /export\s+(?:declare\s+)?(?:abstract\s+)?(?:async\s+)?(?:class|function|const|let|var|type|interface|enum)\s+([A-Za-z_$][\w$]*)/g;
@@ -18,6 +20,7 @@ type ImportedSymbolSet = Set<string> | '*';
  */
 export class TestImpactGraph extends DelegatingConsumer {
   #index: ManifestIndex;
+  #target?: CumulativeSummaryConsumer;
   #dependencies = new Map<string, Set<string>>();
   #importers = new Map<string, Set<string>>();
   #exports = new Map<string, Set<string>>();
@@ -26,8 +29,9 @@ export class TestImpactGraph extends DelegatingConsumer {
   #lastFailed = new Map<string, number>();
   #failureSequence = 0;
 
-  constructor(target?: TestConsumerShape, index: ManifestIndex = RuntimeIndex) {
+  constructor(target?: CumulativeSummaryConsumer, index: ManifestIndex = RuntimeIndex) {
     super(target ? [target] : []);
+    this.#target = target;
     this.#index = index;
   }
 
@@ -82,8 +86,64 @@ export class TestImpactGraph extends DelegatingConsumer {
   /**
    * Sort test imports by failure recency (currently failing first, then most recently failed)
    */
-  sortImports(imports: string[]): string[] {
-    return [...imports].sort((a, b) => this.#getFailureRank(b) - this.#getFailureRank(a));
+  onRunTests(imports: string[]): TestRun[] {
+    return [...imports]
+      .sort((a, b) => this.#getFailureRank(b) - this.#getFailureRank(a))
+      .map(targetImport => ({ import: targetImport }));
+  }
+
+  #getImpactedRuns(sourceFile: string, deletedImport?: string): (TestRun | TestDiffInput)[] {
+    const runs: (TestRun | TestDiffInput)[] = [];
+    for (const testEntry of this.getImpactedTests(sourceFile)) {
+      if (testEntry.import === deletedImport) {
+        continue;
+      }
+      runs.push(
+        testEntry.sourceFile === sourceFile && this.#target
+          ? { import: testEntry.import, diffSource: this.#target.produceDiffSource(testEntry.import) }
+          : { import: testEntry.import }
+      );
+    }
+    return runs;
+  }
+
+  #onFileDelete(event: CompilerChangeEvent, sourceFile: string, isTest: boolean): (TestRun | TestDiffInput)[] {
+    const runs = this.#getImpactedRuns(sourceFile, event.import);
+    this.removeFile(sourceFile);
+    if (isTest) {
+      this.clearFailures(event.import);
+      this.#target?.removeTest(event.import);
+    }
+    return runs;
+  }
+
+  async #onFileUpdate(event: CompilerChangeEvent, sourceFile: string, isTest: boolean): Promise<(TestRun | TestDiffInput)[]> {
+    await this.updateFile(sourceFile);
+    const runs = this.#getImpactedRuns(sourceFile);
+    if (runs.length === 0 && (isTest || event.file.includes('/test/'))) {
+      runs.push(
+        this.#target ? { import: event.import, diffSource: this.#target.produceDiffSource(event.import) } : { import: event.import }
+      );
+    }
+    return runs;
+  }
+
+  /**
+   * Handle a compiler change event and return the impacted test runs to queue
+   */
+  async onCompilerChange(event: CompilerChangeEvent): Promise<(TestRun | TestDiffInput)[]> {
+    const fileType = ManifestModuleUtil.getFileType(event.file);
+    if (fileType !== 'ts' && fileType !== 'js') {
+      return [];
+    }
+
+    const entry = this.#index.getFromImport(event.import);
+    const sourceFile = entry?.sourceFile ?? path.resolve(Runtime.workspace.path, event.file);
+    const isTest = entry?.role === 'test';
+
+    return event.action === 'delete'
+      ? this.#onFileDelete(event, sourceFile, isTest)
+      : await this.#onFileUpdate(event, sourceFile, isTest);
   }
 
   /**
