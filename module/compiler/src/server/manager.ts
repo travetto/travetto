@@ -145,19 +145,19 @@ export class CompilerManager {
   ): Promise<{ state: 'already-running' | 'started' | 'compile-failed'; info?: CompilerServerInfo }> {
     const existingInfo = await client.info();
     if (CompilerUtil.isServerRunning(existingInfo)) {
-      const processId = existingInfo.serverProcessId;
+      const finalInfo = await client.waitForReadyState({ info: existingInfo, message: readyMessage });
+      const processId = finalInfo?.serverProcessId ?? existingInfo.serverProcessId;
       if (!quiet) {
         console.log(`Server already running ${ctx.workspace.path}: ${client.url} (PID: ${processId})`);
       }
-      return { state: existingInfo.state === 'compile-failed' ? 'compile-failed' : 'already-running', info: existingInfo };
+      return { state: finalInfo?.state === 'compile-failed' ? 'compile-failed' : 'already-running', info: finalInfo ?? existingInfo };
     }
 
     await this.#spawnProcess(ctx, client);
-    const finalState = await client.waitForState(['watch-start', 'compile-failed'], readyMessage);
-    const updatedInfo = await client.info();
+    const updatedInfo = await client.waitForReadyState({ message: readyMessage });
     const processId = updatedInfo?.serverProcessId;
 
-    if (finalState === 'compile-failed') {
+    if (updatedInfo?.state === 'compile-failed') {
       console.error(`Compiler server started with build errors (PID: ${processId})`);
       process.exitCode = 1;
     } else if (!quiet) {
@@ -165,7 +165,7 @@ export class CompilerManager {
     }
 
     return {
-      state: finalState === 'compile-failed' ? 'compile-failed' : 'started',
+      state: updatedInfo?.state === 'compile-failed' ? 'compile-failed' : 'started',
       info: updatedInfo
     };
   }

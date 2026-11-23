@@ -189,6 +189,21 @@ export class CompilerClient {
   }
 
   /**
+   * Wait for compiler to reach a ready state ('watch-start' or 'compile-failed')
+   */
+  async waitForReadyState(config: {
+    info?: CompilerServerInfo;
+    message?: string;
+    signal?: AbortSignal;
+  } = {}): Promise<CompilerServerInfo | undefined> {
+    if (config.info && READY_STATES.includes(config.info.state)) {
+      return config.info;
+    }
+    await this.waitForState(READY_STATES, config.message, config.signal);
+    return this.info();
+  }
+
+  /**
    * Wait for compiler watch to settle, and return true if in clean 'watch-start' state
    */
   async waitForWatchReady(signal?: AbortSignal): Promise<boolean> {
@@ -197,11 +212,6 @@ export class CompilerClient {
       return false;
     }
 
-    let state: CompilerStateType = info.state;
-    if (!READY_STATES.includes(state)) {
-      state = await this.waitForState(READY_STATES, undefined, signal);
-    }
-
-    return state === 'watch-start';
+    return (await this.waitForReadyState({ info, signal }))?.state === 'watch-start';
   }
 }

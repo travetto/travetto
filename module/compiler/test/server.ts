@@ -7,6 +7,7 @@ import { Suite, Test } from '@travetto/test';
 import { CompilerClient } from '../src/server/client.ts';
 import { CompilerServer } from '../src/server/server.ts';
 import { CompilerReset, type CompilerEvent, type CompilerServerInfo } from '../src/types.ts';
+import { CompilerUtil } from '../src/util.ts';
 
 @Suite()
 class CompilerServerTests {
@@ -262,5 +263,24 @@ class CompilerServerTests {
         await server.close();
       }
     }
+  }
+
+  @Test()
+  verifyIsServerRunningIncludesStartup() {
+    const base: CompilerServerInfo = {
+      path: '/test/app',
+      serverProcessId: 1,
+      compilerProcessId: 2,
+      state: 'startup',
+      watching: true,
+      iteration: 1,
+      url: 'http://127.0.0.1:20000'
+    };
+    assert.strictEqual(CompilerUtil.isServerRunning(undefined), false);
+    assert.strictEqual(CompilerUtil.isServerRunning({ ...base, state: 'closed' }), false);
+    assert.strictEqual(CompilerUtil.isServerRunning({ ...base, state: 'startup' }), true);
+    assert.strictEqual(CompilerUtil.isServerRunning({ ...base, state: 'init' }), true);
+    assert.strictEqual(CompilerUtil.isServerRunning({ ...base, state: 'compile-start' }), true);
+    assert.strictEqual(CompilerUtil.isServerRunning({ ...base, state: 'watch-start' }), true);
   }
 }

@@ -152,6 +152,6 @@ export class CompilerUtil {
    * Is the compiler server running?
    */
   static isServerRunning(info: CompilerServerInfo | undefined): info is CompilerServerInfo {
-    return !!info && info.state !== 'closed' && info.state !== 'startup';
+    return !!info && info.state !== 'closed';
   }
 }
