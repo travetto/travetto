@@ -20,6 +20,8 @@ import { WorkspaceResultsManager } from './workspace.ts';
 @ActivateOn({ module: '@travetto/test', command: 'test' })
 class TestRunnerFeature extends BaseFeature {
   #server: ChildProcess | undefined;
+  #serverReady = false;
+  #pendingImports = new Set<string>();
   #consumer: WorkspaceResultsManager;
   #codeLensUpdated: (event: void) => unknown;
 
@@ -31,6 +33,8 @@ class TestRunnerFeature extends BaseFeature {
     this.log.info('Stopping server');
     this.#server.kill();
     this.#server = undefined;
+    this.#serverReady = false;
+    this.#pendingImports.clear();
     if (force) {
       this.#consumer.resetAll();
     }
@@ -61,6 +65,14 @@ class TestRunnerFeature extends BaseFeature {
       'message',
       (event: TestWatchEvent) => {
         switch (event.type) {
+          case 'ready':
+            this.#serverReady = true;
+            for (const imp of this.#pendingImports) {
+              this.log.info('Requesting test run ', imp);
+              this.#server?.send({ type: 'runTest', import: imp });
+            }
+            this.#pendingImports.clear();
+            return;
           case 'log':
             return this.log.info('[Log  ]', event.message);
           case 'test':
@@ -113,6 +125,11 @@ class TestRunnerFeature extends BaseFeature {
     }
 
     const imp = `${module.name}${file.split(module.sourceFolder)[1]}`;
+    if (!this.#serverReady) {
+      this.log.info('Queueing test run until server is ready ', imp);
+      this.#pendingImports.add(imp);
+      return;
+    }
     this.log.info('Requesting test run ', imp);
     this.#server.send({ type: 'runTest', import: imp });
   }
