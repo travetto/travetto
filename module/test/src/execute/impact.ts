@@ -12,6 +12,7 @@ import type { TestDiffInput, TestRun } from '../model/test.ts';
 const IMPORT_EXPORT_REGEX = /(?:import|export)\s+(?:type\s+)?(?:([^'"`;]*?)\s+from\s+)?['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/g;
 const EXPORT_DECL_REGEX = /export\s+(?:declare\s+)?(?:abstract\s+)?(?:async\s+)?(?:class|function|const|let|var|type|interface|enum)\s+([A-Za-z_$][\w$]*)/g;
 const EXPORT_LIST_REGEX = /export\s+(?:type\s+)?\{([^}]+)\}(?!\s*from)/g;
+const SOURCE_TYPES = new Set(['ts', 'js']);
 
 type ImportedSymbolSet = Set<string> | '*';
 
@@ -19,160 +20,6 @@ type ImportedSymbolSet = Set<string> | '*';
  * Lightweight text-based import graph and delegating test consumer for resolving and prioritizing impacted tests
  */
 export class TestImpactGraph extends DelegatingConsumer {
-  #index: ManifestIndex;
-  #target?: CumulativeSummaryConsumer;
-  #dependencies = new Map<string, Set<string>>();
-  #importers = new Map<string, Set<string>>();
-  #exports = new Map<string, Set<string>>();
-  #importedSymbols = new Map<string, Map<string, ImportedSymbolSet>>();
-  #failingTests = new Map<string, Set<string>>();
-  #lastFailed = new Map<string, number>();
-  #failureSequence = 0;
-
-  constructor(target?: CumulativeSummaryConsumer, index: ManifestIndex = RuntimeIndex) {
-    super(target ? [target] : []);
-    this.#target = target;
-    this.#index = index;
-  }
-
-  transform(event: TestEvent): TestEvent {
-    this.recordTestEvent(event);
-    return event;
-  }
-
-  transformRemove(event: TestRemoveEvent): TestRemoveEvent {
-    if (!event.classId && !event.methodName) {
-      this.clearFailures(event.import);
-    }
-    return event;
-  }
-
-  /**
-   * Record a test event to prioritize recently failing tests
-   */
-  recordTestEvent(event: TestEvent): void {
-    if (event.type !== 'test' || event.phase !== 'after') {
-      return;
-    }
-    const { import: importName, classId, methodName, status } = event.test;
-    const key = `${classId}:${methodName}`;
-    if (status === 'failed' || status === 'errored') {
-      this.#failingTests.getOrInsert(importName, new Set()).add(key);
-      this.#lastFailed.set(importName, (this.#failureSequence += 1));
-    } else {
-      const failing = this.#failingTests.get(importName);
-      if (failing) {
-        failing.delete(key);
-        if (failing.size === 0) {
-          this.#failingTests.delete(importName);
-        }
-      }
-    }
-  }
-
-  /**
-   * Clear recorded failure state for a removed test import
-   */
-  clearFailures(importName: string): void {
-    this.#failingTests.delete(importName);
-    this.#lastFailed.delete(importName);
-  }
-
-  #getFailureRank(importName: string): number {
-    const sequence = this.#lastFailed.get(importName) ?? 0;
-    return (this.#failingTests.get(importName)?.size ? 1_000_000_000 : 0) + sequence;
-  }
-
-  /**
-   * Sort test imports by failure recency (currently failing first, then most recently failed)
-   */
-  onRunTests(imports: string[]): TestRun[] {
-    return [...imports]
-      .sort((a, b) => this.#getFailureRank(b) - this.#getFailureRank(a))
-      .map(targetImport => ({ import: targetImport }));
-  }
-
-  #getImpactedRuns(sourceFile: string, deletedImport?: string): (TestRun | TestDiffInput)[] {
-    const runs: (TestRun | TestDiffInput)[] = [];
-    for (const testEntry of this.getImpactedTests(sourceFile)) {
-      if (testEntry.import === deletedImport) {
-        continue;
-      }
-      runs.push(
-        testEntry.sourceFile === sourceFile && this.#target
-          ? { import: testEntry.import, diffSource: this.#target.produceDiffSource(testEntry.import) }
-          : { import: testEntry.import }
-      );
-    }
-    return runs;
-  }
-
-  #onFileDelete(event: CompilerChangeEvent, sourceFile: string, isTest: boolean): (TestRun | TestDiffInput)[] {
-    const runs = this.#getImpactedRuns(sourceFile, event.import);
-    this.removeFile(sourceFile);
-    if (isTest) {
-      this.clearFailures(event.import);
-      this.#target?.removeTest(event.import);
-    }
-    return runs;
-  }
-
-  async #onFileUpdate(event: CompilerChangeEvent, sourceFile: string, isTest: boolean): Promise<(TestRun | TestDiffInput)[]> {
-    await this.updateFile(sourceFile);
-    const runs = this.#getImpactedRuns(sourceFile);
-    if (runs.length === 0 && (isTest || event.file.includes('/test/'))) {
-      runs.push(
-        this.#target ? { import: event.import, diffSource: this.#target.produceDiffSource(event.import) } : { import: event.import }
-      );
-    }
-    return runs;
-  }
-
-  /**
-   * Handle a compiler change event and return the impacted test runs to queue
-   */
-  async onCompilerChange(event: CompilerChangeEvent): Promise<(TestRun | TestDiffInput)[]> {
-    const fileType = ManifestModuleUtil.getFileType(event.file);
-    if (fileType !== 'ts' && fileType !== 'js') {
-      return [];
-    }
-
-    const entry = this.#index.getFromImport(event.import);
-    const sourceFile = entry?.sourceFile ?? path.resolve(Runtime.workspace.path, event.file);
-    const isTest = entry?.role === 'test';
-
-    return event.action === 'delete'
-      ? this.#onFileDelete(event, sourceFile, isTest)
-      : await this.#onFileUpdate(event, sourceFile, isTest);
-  }
-
-  /**
-   * Extract exported symbol names from source text
-   */
-  static extractExports(content: string): Set<string> {
-    const exported = new Set<string>();
-    for (const match of content.matchAll(EXPORT_DECL_REGEX)) {
-      exported.add(match[1]);
-    }
-    for (const match of content.matchAll(EXPORT_LIST_REGEX)) {
-      for (const part of match[1].split(',')) {
-        const cleaned = part.trim().replace(/^type\s+/, '');
-        if (!cleaned) {
-          continue;
-        }
-        const aliasParts = cleaned.split(/\s+as\s+/);
-        const target = (aliasParts[1] ?? aliasParts[0]).trim();
-        if (target) {
-          exported.add(target);
-        }
-      }
-    }
-    if (/export\s+default\b/.test(content)) {
-      exported.add('default');
-    }
-    return exported;
-  }
-
   static #parseImportedClause(clause?: string): ImportedSymbolSet {
     if (!clause) {
       return '*';
@@ -210,6 +57,33 @@ export class TestImpactGraph extends DelegatingConsumer {
   }
 
   /**
+   * Extract exported symbol names from source text
+   */
+  static extractExports(content: string): Set<string> {
+    const exported = new Set<string>();
+    for (const match of content.matchAll(EXPORT_DECL_REGEX)) {
+      exported.add(match[1]);
+    }
+    for (const match of content.matchAll(EXPORT_LIST_REGEX)) {
+      for (const part of match[1].split(',')) {
+        const cleaned = part.trim().replace(/^type\s+/, '');
+        if (!cleaned) {
+          continue;
+        }
+        const aliasParts = cleaned.split(/\s+as\s+/);
+        const target = (aliasParts[1] ?? aliasParts[0]).trim();
+        if (target) {
+          exported.add(target);
+        }
+      }
+    }
+    if (/export\s+default\b/.test(content)) {
+      exported.add('default');
+    }
+    return exported;
+  }
+
+  /**
    * Extract module specifiers and imported symbol sets from source text
    */
   static extractImports(content: string): Map<string, ImportedSymbolSet> {
@@ -241,6 +115,22 @@ export class TestImpactGraph extends DelegatingConsumer {
     return [...this.extractImports(content).keys()];
   }
 
+  #index: ManifestIndex;
+  #target?: CumulativeSummaryConsumer;
+  #dependencies = new Map<string, Set<string>>();
+  #importers = new Map<string, Set<string>>();
+  #exports = new Map<string, Set<string>>();
+  #importedSymbols = new Map<string, Map<string, ImportedSymbolSet>>();
+  #failingTests = new Map<string, Set<string>>();
+  #lastFailed = new Map<string, number>();
+  #failureSequence = 0;
+
+  constructor(target?: CumulativeSummaryConsumer, index: ManifestIndex = RuntimeIndex) {
+    super(target ? [target] : []);
+    this.#target = target;
+    this.#index = index;
+  }
+
   #resolveSpecifier(specifier: string, fromSourceFile: string): IndexedFile | undefined {
     let entry: IndexedFile | undefined;
     if (specifier.startsWith('.')) {
@@ -262,7 +152,7 @@ export class TestImpactGraph extends DelegatingConsumer {
   }
 
   #isBarrel(sourceFile: string): boolean {
-    return sourceFile.endsWith('/__index__.ts') || sourceFile.endsWith('/__index__.js');
+    return ManifestModuleUtil.withoutSourceExtension(sourceFile).endsWith('/__index__');
   }
 
   #matchesBarrelSymbols(importer: string, barrel: string, barrelSymbols?: Set<string>): boolean {
@@ -281,13 +171,86 @@ export class TestImpactGraph extends DelegatingConsumer {
     return false;
   }
 
+  #getFailureRank(importName: string): number {
+    const sequence = this.#lastFailed.get(importName) ?? 0;
+    return (this.#failingTests.get(importName)?.size ? 1_000_000_000 : 0) + sequence;
+  }
+
+  #clearFailures(importName: string): void {
+    this.#failingTests.delete(importName);
+    this.#lastFailed.delete(importName);
+  }
+
+  #getImpactedRuns(sourceFile: string, deletedImport?: string): (TestRun | TestDiffInput)[] {
+    const runs: (TestRun | TestDiffInput)[] = [];
+    for (const testEntry of this.getImpactedTests(sourceFile)) {
+      if (testEntry.import === deletedImport) {
+        continue;
+      }
+      runs.push(
+        testEntry.sourceFile === sourceFile && this.#target
+          ? { import: testEntry.import, diffSource: this.#target.produceDiffSource(testEntry.import) }
+          : { import: testEntry.import }
+      );
+    }
+    return runs;
+  }
+
+  #onFileDelete(event: CompilerChangeEvent, sourceFile: string, isTest: boolean): (TestRun | TestDiffInput)[] {
+    const runs = this.#getImpactedRuns(sourceFile, event.import);
+    this.removeFile(sourceFile);
+    if (isTest) {
+      this.#clearFailures(event.import);
+      this.#target?.removeTest(event.import);
+    }
+    return runs;
+  }
+
+  async #onFileUpdate(event: CompilerChangeEvent, sourceFile: string, isTest: boolean): Promise<(TestRun | TestDiffInput)[]> {
+    await this.updateFile(sourceFile);
+    const runs = this.#getImpactedRuns(sourceFile);
+    if (runs.length === 0 && (isTest || ManifestModuleUtil.getFileRole(event.file) === 'test' || event.file.includes('/test/'))) {
+      runs.push(
+        this.#target ? { import: event.import, diffSource: this.#target.produceDiffSource(event.import) } : { import: event.import }
+      );
+    }
+    return runs;
+  }
+
+  transform(event: TestEvent): TestEvent {
+    if (event.type === 'test' && event.phase === 'after') {
+      const { import: importName, classId, methodName, status } = event.test;
+      const key = `${classId}:${methodName}`;
+      if (status === 'failed' || status === 'errored') {
+        this.#failingTests.getOrInsert(importName, new Set()).add(key);
+        this.#lastFailed.set(importName, (this.#failureSequence += 1));
+      } else {
+        const failing = this.#failingTests.get(importName);
+        if (failing) {
+          failing.delete(key);
+          if (failing.size === 0) {
+            this.#failingTests.delete(importName);
+          }
+        }
+      }
+    }
+    return event;
+  }
+
+  transformRemove(event: TestRemoveEvent): TestRemoveEvent {
+    if (!event.classId && !event.methodName) {
+      this.#clearFailures(event.import);
+    }
+    return event;
+  }
+
   /**
    * Build the initial import graph for all workspace TypeScript/JavaScript files
    */
   async init(): Promise<void> {
     const files = this.#index.find({
       module: module => !!module.workspace,
-      file: file => file.type === 'ts' || file.type === 'js'
+      file: file => SOURCE_TYPES.has(file.type)
     });
     await Promise.all(files.map(file => this.updateFile(file.sourceFile)));
   }
@@ -356,7 +319,7 @@ export class TestImpactGraph extends DelegatingConsumer {
     while (queue.length > 0) {
       const [current, depth, barrelSymbols] = queue.shift()!;
       const entry = this.#index.getEntry(current);
-      if (entry && entry.role === 'test' && (entry.type === 'ts' || entry.type === 'js')) {
+      if (entry && entry.role === 'test' && SOURCE_TYPES.has(entry.type)) {
         impacted.push({ entry, depth });
       }
 
@@ -381,5 +344,31 @@ export class TestImpactGraph extends DelegatingConsumer {
     return impacted
       .sort((a, b) => a.depth - b.depth || this.#getFailureRank(b.entry.import) - this.#getFailureRank(a.entry.import))
       .map(item => item.entry);
+  }
+
+  /**
+   * Sort test imports by failure recency (currently failing first, then most recently failed)
+   */
+  onRunTests(imports: string[]): TestRun[] {
+    return [...imports]
+      .sort((a, b) => this.#getFailureRank(b) - this.#getFailureRank(a))
+      .map(targetImport => ({ import: targetImport }));
+  }
+
+  /**
+   * Handle a compiler change event and return the impacted test runs to queue
+   */
+  async onCompilerChange(event: CompilerChangeEvent): Promise<(TestRun | TestDiffInput)[]> {
+    if (!SOURCE_TYPES.has(ManifestModuleUtil.getFileType(event.file))) {
+      return [];
+    }
+
+    const entry = this.#index.getFromImport(event.import);
+    const sourceFile = entry?.sourceFile ?? path.resolve(Runtime.workspace.path, event.file);
+    const isTest = entry?.role === 'test';
+
+    return event.action === 'delete'
+      ? this.#onFileDelete(event, sourceFile, isTest)
+      : await this.#onFileUpdate(event, sourceFile, isTest);
   }
 }
