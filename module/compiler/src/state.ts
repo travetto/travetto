@@ -414,13 +414,15 @@ export class CompilerState implements CompilerHost {
       const start = Date.now();
       const moduleFile = this.#sourceToEntry.get(file)?.moduleFile ?? file;
       const type = ManifestModuleUtil.getFileType(moduleFile);
-      if (type !== 'ts') {
+      if (type !== 'ts' && type !== 'typings') {
         const diagnostics = (await this.compileSourceFile(file)) ?? [];
         yield { sourceFile: file, diagnostics, duration: Date.now() - start };
       } else {
         const declarationChange = { changed: false };
-        const diagnostics = (await this.compileSourceFile(file, needsNewProgram, declarationChange)) ?? [];
-        needsNewProgram = false;
+        const diagnostics = (await this.compileSourceFile(file, type === 'ts' && needsNewProgram, declarationChange)) ?? [];
+        if (type === 'ts') {
+          needsNewProgram = false;
+        }
         yield { sourceFile: file, diagnostics, duration: Date.now() - start };
 
         if (declarationChange.changed || propagatedDeclarationChanges.has(file)) {
