@@ -7,12 +7,12 @@ const BACKSLASH = '\\'.charCodeAt(0);
 const EQUALS = '='.charCodeAt(0);
 const COLON = ':'.charCodeAt(0);
 const HASH = '#'.charCodeAt(0);
-const EXCL = '!'.charCodeAt(0);
+const EXCLAMATION = '!'.charCodeAt(0);
 
 @Injectable()
 export class PropertiesConfigParser implements ConfigParser {
   static parseLine(text: string): [key: string, value: string] | undefined {
-    if (text.charCodeAt(0) === HASH || text.charCodeAt(0) === EXCL) {
+    if (text.charCodeAt(0) === HASH || text.charCodeAt(0) === EXCLAMATION) {
       return;
     }
     const key: number[] = [];
