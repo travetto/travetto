@@ -74,7 +74,7 @@ export class TestWatcher {
         }
         for (const testEntry of impacted) {
           if (testEntry.import !== event.import) {
-            queue.add({ import: testEntry.import, diffSource: consumer.produceDiffSource(testEntry.import) }, true);
+            queue.add({ import: testEntry.import }, true);
           }
         }
       } else {
@@ -82,7 +82,12 @@ export class TestWatcher {
         const impacted = impactGraph.getImpactedTests(sourceFile);
         if (impacted.length > 0) {
           for (const testEntry of impacted) {
-            queue.add({ import: testEntry.import, diffSource: consumer.produceDiffSource(testEntry.import) }, true);
+            queue.add(
+              testEntry.sourceFile === sourceFile
+                ? { import: testEntry.import, diffSource: consumer.produceDiffSource(testEntry.import) }
+                : { import: testEntry.import },
+              true
+            );
           }
         } else if (entry?.role === 'test' || event.file.includes('/test/')) {
           queue.add({ import: event.import, diffSource: consumer.produceDiffSource(event.import) }, true);
