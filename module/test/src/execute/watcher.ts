@@ -14,17 +14,10 @@ import { isTestRunEvent, type TestReadyEvent } from '../worker/types.ts';
 import { TestImpactGraph } from './impact.ts';
 import { RunUtil } from './run.ts';
 
-type FailureTracker = {
-  failingTests: Map<string, Set<string>>;
-  lastFailed: Map<string, number>;
-  sequence: number;
-};
-
 type WatchContext = {
   queue: AsyncQueue<TestRun | TestDiffInput>;
   consumer: CumulativeSummaryConsumer;
   impactGraph: TestImpactGraph;
-  failures: FailureTracker;
 };
 
 /**
@@ -33,75 +26,40 @@ type WatchContext = {
  * Runs all tests on startup, and then listens for changes to run tests again
  */
 export class TestWatcher {
-  static #getFailureRank({ failures }: WatchContext, importName: string): number {
-    const sequence = failures.lastFailed.get(importName) ?? 0;
-    return (failures.failingTests.get(importName)?.size ? 1_000_000_000 : 0) + sequence;
-  }
-
-  static #recordTestEvent({ failures }: WatchContext, event: TestEvent): void {
-    if (event.type !== 'test' || event.phase !== 'after') {
-      return;
-    }
-    const { import: importName, classId, methodName, status } = event.test;
-    const key = `${classId}:${methodName}`;
-    if (status === 'failed' || status === 'errored') {
-      failures.failingTests.getOrInsert(importName, new Set()).add(key);
-      failures.lastFailed.set(importName, (failures.sequence += 1));
-    } else {
-      const failing = failures.failingTests.get(importName);
-      if (failing) {
-        failing.delete(key);
-        if (failing.size === 0) {
-          failures.failingTests.delete(importName);
-        }
-      }
-    }
-  }
-
-  static #clearFailures({ failures }: WatchContext, importName: string): void {
-    failures.failingTests.delete(importName);
-    failures.lastFailed.delete(importName);
-  }
-
-  static #createTrackingConsumer(context: WatchContext): TestConsumerShape {
+  static #createTrackingConsumer({ consumer, impactGraph }: WatchContext): TestConsumerShape {
     return {
       onEvent: (event: TestEvent): void => {
-        this.#recordTestEvent(context, event);
-        context.consumer.onEvent(event);
+        impactGraph.recordTestEvent(event);
+        consumer.onEvent(event);
       },
       onRemoveEvent: (event: TestRemoveEvent): void => {
         if (!event.classId && !event.methodName) {
-          this.#clearFailures(context, event.import);
+          impactGraph.clearFailures(event.import);
         }
-        context.consumer.onRemoveEvent(event);
+        consumer.onRemoveEvent(event);
       }
     };
   }
 
-  static #queueImpactedTests(context: WatchContext, sourceFile: string, deletedImport?: string): number {
-    const impacted = context.impactGraph
-      .getImpactedTests(sourceFile)
-      .sort((a, b) => a.depth - b.depth || this.#getFailureRank(context, b.import) - this.#getFailureRank(context, a.import));
-
+  static #queueImpactedTests({ queue, consumer, impactGraph }: WatchContext, sourceFile: string, deletedImport?: string): number {
+    const impacted = impactGraph.getImpactedTests(sourceFile);
     for (const testEntry of impacted) {
       if (testEntry.import === deletedImport) {
         continue;
       }
-      context.queue.add(
+      queue.add(
         testEntry.sourceFile === sourceFile
-          ? { import: testEntry.import, diffSource: context.consumer.produceDiffSource(testEntry.import) }
+          ? { import: testEntry.import, diffSource: consumer.produceDiffSource(testEntry.import) }
           : { import: testEntry.import },
         true
       );
     }
-
     return impacted.length;
   }
 
-  static #onRunTestsEvent(context: WatchContext, imports: string[]): void {
-    const ordered = [...imports].sort((a, b) => this.#getFailureRank(context, b) - this.#getFailureRank(context, a));
-    for (const targetImport of ordered) {
-      context.queue.add({ import: targetImport }, true);
+  static #onRunTestsEvent({ queue, impactGraph }: WatchContext, imports: string[]): void {
+    for (const targetImport of impactGraph.sortImports(imports)) {
+      queue.add({ import: targetImport }, true);
     }
   }
 
@@ -109,7 +67,7 @@ export class TestWatcher {
     this.#queueImpactedTests(context, sourceFile, event.import);
     context.impactGraph.removeFile(sourceFile);
     if (isTest) {
-      this.#clearFailures(context, event.import);
+      context.impactGraph.clearFailures(event.import);
       context.consumer.removeTest(event.import);
     }
   }
@@ -158,12 +116,7 @@ export class TestWatcher {
 
     const queue = new AsyncQueue(events);
     const consumer = new CumulativeSummaryConsumer(await TestConsumerRegistryIndex.getInstance({ consumer: format }));
-    const context: WatchContext = {
-      queue,
-      consumer,
-      impactGraph,
-      failures: { failingTests: new Map(), lastFailed: new Map(), sequence: 0 }
-    };
+    const context: WatchContext = { queue, consumer, impactGraph };
     const trackingConsumer = this.#createTrackingConsumer(context);
 
     process.on('message', event => isTestRunEvent(event) && this.#onRunTestsEvent(context, event.imports));

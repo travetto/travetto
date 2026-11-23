@@ -3,6 +3,8 @@ import fs from 'node:fs/promises';
 import { type IndexedFile, type ManifestIndex, path } from '@travetto/manifest';
 import { RuntimeIndex } from '@travetto/runtime';
 
+import type { TestEvent } from '../model/event.ts';
+
 const IMPORT_EXPORT_REGEX = /(?:import|export)\s+(?:type\s+)?(?:([^'"`;]*?)\s+from\s+)?['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/g;
 const EXPORT_DECL_REGEX = /export\s+(?:declare\s+)?(?:abstract\s+)?(?:async\s+)?(?:class|function|const|let|var|type|interface|enum)\s+([A-Za-z_$][\w$]*)/g;
 const EXPORT_LIST_REGEX = /export\s+(?:type\s+)?\{([^}]+)\}(?!\s*from)/g;
@@ -18,9 +20,55 @@ export class TestImpactGraph {
   #importers = new Map<string, Set<string>>();
   #exports = new Map<string, Set<string>>();
   #importedSymbols = new Map<string, Map<string, ImportedSymbolSet>>();
+  #failingTests = new Map<string, Set<string>>();
+  #lastFailed = new Map<string, number>();
+  #failureSequence = 0;
 
   constructor(index: ManifestIndex = RuntimeIndex) {
     this.#index = index;
+  }
+
+  /**
+   * Record a test event to prioritize recently failing tests
+   */
+  recordTestEvent(event: TestEvent): void {
+    if (event.type !== 'test' || event.phase !== 'after') {
+      return;
+    }
+    const { import: importName, classId, methodName, status } = event.test;
+    const key = `${classId}:${methodName}`;
+    if (status === 'failed' || status === 'errored') {
+      this.#failingTests.getOrInsert(importName, new Set()).add(key);
+      this.#lastFailed.set(importName, (this.#failureSequence += 1));
+    } else {
+      const failing = this.#failingTests.get(importName);
+      if (failing) {
+        failing.delete(key);
+        if (failing.size === 0) {
+          this.#failingTests.delete(importName);
+        }
+      }
+    }
+  }
+
+  /**
+   * Clear recorded failure state for a removed test import
+   */
+  clearFailures(importName: string): void {
+    this.#failingTests.delete(importName);
+    this.#lastFailed.delete(importName);
+  }
+
+  #getFailureRank(importName: string): number {
+    const sequence = this.#lastFailed.get(importName) ?? 0;
+    return (this.#failingTests.get(importName)?.size ? 1_000_000_000 : 0) + sequence;
+  }
+
+  /**
+   * Sort test imports by failure recency (currently failing first, then most recently failed)
+   */
+  sortImports(imports: string[]): string[] {
+    return [...imports].sort((a, b) => this.#getFailureRank(b) - this.#getFailureRank(a));
   }
 
   /**
@@ -223,18 +271,18 @@ export class TestImpactGraph {
   }
 
   /**
-   * Find all test files that could be impacted by a change to sourceFile within maxDepth hops (ordered by depth)
+   * Find all test files that could be impacted by a change to sourceFile within maxDepth hops, ordered by depth then failure recency
    */
-  getImpactedTests(sourceFile: string, maxDepth = 3): (IndexedFile & { depth: number })[] {
+  getImpactedTests(sourceFile: string, maxDepth = 3): IndexedFile[] {
     const visited = new Set<string>([sourceFile]);
     const queue: [file: string, depth: number, barrelSymbols?: Set<string>][] = [[sourceFile, 0]];
-    const impacted: (IndexedFile & { depth: number })[] = [];
+    const impacted: { entry: IndexedFile; depth: number }[] = [];
 
     while (queue.length > 0) {
       const [current, depth, barrelSymbols] = queue.shift()!;
       const entry = this.#index.getEntry(current);
       if (entry && entry.role === 'test' && (entry.type === 'ts' || entry.type === 'js')) {
-        impacted.push({ ...entry, depth });
+        impacted.push({ entry, depth });
       }
 
       if (depth >= maxDepth) {
@@ -255,6 +303,8 @@ export class TestImpactGraph {
       }
     }
 
-    return impacted;
+    return impacted
+      .sort((a, b) => a.depth - b.depth || this.#getFailureRank(b.entry.import) - this.#getFailureRank(a.entry.import))
+      .map(item => item.entry);
   }
 }
