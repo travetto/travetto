@@ -3,7 +3,9 @@ import fs from 'node:fs/promises';
 import { type IndexedFile, type ManifestIndex, path } from '@travetto/manifest';
 import { RuntimeIndex } from '@travetto/runtime';
 
-import type { TestEvent } from '../model/event.ts';
+import type { TestConsumerShape } from '../consumer/types.ts';
+import { DelegatingConsumer } from '../consumer/types/delegating.ts';
+import type { TestEvent, TestRemoveEvent } from '../model/event.ts';
 
 const IMPORT_EXPORT_REGEX = /(?:import|export)\s+(?:type\s+)?(?:([^'"`;]*?)\s+from\s+)?['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/g;
 const EXPORT_DECL_REGEX = /export\s+(?:declare\s+)?(?:abstract\s+)?(?:async\s+)?(?:class|function|const|let|var|type|interface|enum)\s+([A-Za-z_$][\w$]*)/g;
@@ -12,9 +14,9 @@ const EXPORT_LIST_REGEX = /export\s+(?:type\s+)?\{([^}]+)\}(?!\s*from)/g;
 type ImportedSymbolSet = Set<string> | '*';
 
 /**
- * Lightweight text-based import graph for resolving potentially impacted tests on file changes
+ * Lightweight text-based import graph and delegating test consumer for resolving and prioritizing impacted tests
  */
-export class TestImpactGraph {
+export class TestImpactGraph extends DelegatingConsumer {
   #index: ManifestIndex;
   #dependencies = new Map<string, Set<string>>();
   #importers = new Map<string, Set<string>>();
@@ -24,8 +26,21 @@ export class TestImpactGraph {
   #lastFailed = new Map<string, number>();
   #failureSequence = 0;
 
-  constructor(index: ManifestIndex = RuntimeIndex) {
+  constructor(target?: TestConsumerShape, index: ManifestIndex = RuntimeIndex) {
+    super(target ? [target] : []);
     this.#index = index;
+  }
+
+  transform(event: TestEvent): TestEvent {
+    this.recordTestEvent(event);
+    return event;
+  }
+
+  transformRemove(event: TestRemoveEvent): TestRemoveEvent {
+    if (!event.classId && !event.methodName) {
+      this.clearFailures(event.import);
+    }
+    return event;
   }
 
   /**

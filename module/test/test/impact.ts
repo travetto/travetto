@@ -69,7 +69,7 @@ class TestImpactGraphSuite {
         }
       };
 
-      const graph = new TestImpactGraph(new ManifestIndex(manifest));
+      const graph = new TestImpactGraph(undefined, new ManifestIndex(manifest));
       await graph.init();
 
       assert.deepStrictEqual(
@@ -150,7 +150,7 @@ class TestImpactGraphSuite {
         }
       };
 
-      const graph = new TestImpactGraph(new ManifestIndex(manifest));
+      const graph = new TestImpactGraph(undefined, new ManifestIndex(manifest));
       await graph.init();
 
       assert.deepStrictEqual(
