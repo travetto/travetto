@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import { promisify } from 'node:util';
 
-import { ManifestIndex, type ManifestRoot, path } from '@travetto/manifest';
+import { ManifestIndex, ManifestModuleUtil, type ManifestRoot, path } from '@travetto/manifest';
 import { Suite, Test } from '@travetto/test';
 
 import { AsyncQueue } from '../src/queue.ts';
@@ -882,6 +882,89 @@ class CompilerStateTests {
         [barrelFile, leafFile, consumerFile]
       );
       assert.ok(compiled.find(item => item.sourceFile === consumerFile)!.diagnostics > 0);
+    } finally {
+      await fs.promises.rm(tempDirectory, { recursive: true, force: true });
+    }
+  }
+
+  @Test()
+  async verifyTransitiveTestImporters() {
+    const tempDirectory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'transitive-test-importers-'));
+    try {
+      const sourceDirectory = path.join(tempDirectory, 'src');
+      const testDirectory = path.join(tempDirectory, 'test');
+      const fixtureDirectory = path.join(testDirectory, 'fixtures');
+      await fs.promises.mkdir(sourceDirectory, { recursive: true });
+      await fs.promises.mkdir(fixtureDirectory, { recursive: true });
+
+      const leafFile = path.toPosix(path.join(sourceDirectory, 'leaf.ts'));
+      const middleFile = path.toPosix(path.join(sourceDirectory, 'middle.ts'));
+      const directTestFile = path.toPosix(path.join(testDirectory, 'leaf.ts'));
+      const transitiveTestFile = path.toPosix(path.join(testDirectory, 'middle.ts'));
+      const fixtureFile = path.toPosix(path.join(fixtureDirectory, 'helper.ts'));
+
+      await fs.promises.writeFile(
+        path.join(tempDirectory, 'tsconfig.json'),
+        JSON.stringify({
+          compilerOptions: {
+            target: 'ES2022',
+            module: 'NodeNext',
+            moduleResolution: 'NodeNext',
+            declaration: true,
+            strict: true,
+            skipLibCheck: true
+          }
+        }),
+        'utf8'
+      );
+      await fs.promises.writeFile(leafFile, "import { helper } from './middle.ts';\nexport const leafValue = helper();", 'utf8');
+      await fs.promises.writeFile(middleFile, "export * from './leaf.ts';\nexport const helper = (): number => 1;", 'utf8');
+      await fs.promises.writeFile(directTestFile, "import { leafValue } from '../src/leaf.ts';\nexport const testOne = leafValue;", 'utf8');
+      await fs.promises.writeFile(transitiveTestFile, "import { helper } from '../src/middle.ts';\nexport const testTwo = helper();", 'utf8');
+      await fs.promises.writeFile(fixtureFile, "import { leafValue } from '../../src/leaf.ts';\nexport const fixtureValue = leafValue;", 'utf8');
+
+      const manifest: ManifestRoot = {
+        generated: Date.now(),
+        workspace: { name: 'test-app', path: path.toPosix(tempDirectory), mono: false, manager: 'npm' },
+        build: { compilerUrl: 'http://localhost:20000', outputFolder: '.trv/output', toolFolder: '.trv/tool', typesFolder: '.trv/types' },
+        main: { name: 'test-app', folder: '', version: '1.0.0' },
+        modules: {
+          'test-app': {
+            main: true,
+            name: 'test-app',
+            version: '1.0.0',
+            workspace: true,
+            production: true,
+            sourceFolder: '',
+            outputFolder: 'node_modules/test-app',
+            roles: ['std', 'test'],
+            parents: [],
+            files: {
+              src: [
+                ['src/leaf.ts', 'ts', 1000],
+                ['src/middle.ts', 'ts', 1000]
+              ],
+              test: [
+                ['test/leaf.ts', 'ts', 1000],
+                ['test/middle.ts', 'ts', 1000]
+              ],
+              'test/fixtures': [['test/fixtures/helper.ts', 'fixture', 1000]]
+            }
+          }
+        }
+      };
+
+      const state = await CompilerState.get(new ManifestIndex(manifest), true);
+      await state.ensureDependencies();
+
+      const downstreamTests = state
+        .getTransitiveImporters(
+          [leafFile],
+          entry => ManifestModuleUtil.getFileRole(entry.moduleFile) === 'test' && ManifestModuleUtil.getFileType(entry.moduleFile) !== 'fixture'
+        )
+        .sort();
+
+      assert.deepStrictEqual(downstreamTests, [directTestFile, transitiveTestFile].sort());
     } finally {
       await fs.promises.rm(tempDirectory, { recursive: true, force: true });
     }

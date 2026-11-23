@@ -1,6 +1,15 @@
 import { setMaxListeners } from 'node:events';
 
-import { type DeltaEvent, getManifestContext, type ManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil, path } from '@travetto/manifest';
+import {
+  type DeltaEvent,
+  getManifestContext,
+  type ManifestContext,
+  ManifestDeltaUtil,
+  ManifestIndex,
+  ManifestModuleUtil,
+  ManifestUtil,
+  path
+} from '@travetto/manifest';
 
 import { CommonUtil } from './common.ts';
 import { EventUtil } from './event.ts';
@@ -232,8 +241,19 @@ export class Compiler {
       });
     }
 
+    const emittedFiles = new Set(compiledFiles);
+    const downstreamTestFiles = this.#state.getTransitiveImporters(
+      compiledFiles,
+      entry => ManifestModuleUtil.getFileRole(entry.moduleFile) === 'test' && ManifestModuleUtil.getFileType(entry.moduleFile) !== 'fixture'
+    );
+    for (const testFile of downstreamTestFiles) {
+      if (!this.#state.hasErrors(testFile)) {
+        emittedFiles.add(testFile);
+      }
+    }
+
     const actionBySource = new Map(createOrUpdateEvents.map(event => [event.entry.sourceFile, event.action]));
-    for (const sourceFile of compiledFiles) {
+    for (const sourceFile of emittedFiles) {
       const entry = this.#state.getBySource(sourceFile);
       if (entry) {
         const normalizedFile = path.relative(this.#state.manifest.workspace.path, entry.sourceFile);

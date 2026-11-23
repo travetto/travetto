@@ -534,6 +534,32 @@ export class CompilerState implements CompilerHost {
   }
 
   /**
+   * Get transitive importers of one or more source files, optionally filtered by entry
+   */
+  getTransitiveImporters(sourceFiles: Iterable<string>, filter?: (entry: CompileStateEntry) => boolean): string[] {
+    const visited = new Set<string>(sourceFiles);
+    const queue = [...visited];
+    const results: string[] = [];
+
+    while (queue.length) {
+      const current = queue.shift()!;
+      for (const importer of this.#fileToImporters.get(current) ?? []) {
+        if (visited.has(importer)) {
+          continue;
+        }
+        visited.add(importer);
+        queue.push(importer);
+        const entry = this.#sourceToEntry.get(importer);
+        if (entry && (!filter || filter(entry))) {
+          results.push(importer);
+        }
+      }
+    }
+
+    return results;
+  }
+
+  /**
    * Remove a deleted delta entry from compiler tracking and disk
    */
   removeDelta(event: DeltaEvent): boolean {
