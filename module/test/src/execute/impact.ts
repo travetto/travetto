@@ -100,24 +100,28 @@ export class TestImpactGraph {
   }
 
   /**
-   * Find all test files that could be impacted by a change to sourceFile
+   * Find all test files that could be impacted by a change to sourceFile within maxDepth hops
    */
-  getImpactedTests(sourceFile: string): IndexedFile[] {
+  getImpactedTests(sourceFile: string, maxDepth = 3): IndexedFile[] {
     const visited = new Set<string>([sourceFile]);
-    const queue = [sourceFile];
+    const queue: [file: string, depth: number][] = [[sourceFile, 0]];
     const impacted: IndexedFile[] = [];
 
     while (queue.length > 0) {
-      const current = queue.shift()!;
+      const [current, depth] = queue.shift()!;
       const entry = this.#index.getEntry(current);
       if (entry && entry.role === 'test' && (entry.type === 'ts' || entry.type === 'js')) {
         impacted.push(entry);
       }
 
+      if (depth >= maxDepth) {
+        continue;
+      }
+
       for (const importer of this.#importers.get(current) ?? []) {
         if (!visited.has(importer)) {
           visited.add(importer);
-          queue.push(importer);
+          queue.push([importer, depth + 1]);
         }
       }
     }

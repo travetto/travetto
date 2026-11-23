@@ -76,6 +76,10 @@ class TestImpactGraphSuite {
         graph.getImpactedTests(leafFile).map(entry => entry.sourceFile).sort(),
         [directTestFile, transitiveTestFile].sort()
       );
+      assert.deepStrictEqual(
+        graph.getImpactedTests(leafFile, 1).map(entry => entry.sourceFile),
+        [directTestFile]
+      );
       assert.deepStrictEqual(graph.getImpactedTests(unusedFile), []);
       assert.deepStrictEqual(
         graph.getImpactedTests(directTestFile).map(entry => entry.sourceFile),
