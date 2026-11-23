@@ -132,7 +132,7 @@ class TestRunnerFeature extends BaseFeature {
       return;
     }
     this.log.info('Requesting test run ', imp);
-    this.#server.send({ type: 'runTest', import: imp });
+    this.#server.send({ type: 'runTests', imports: [imp] });
   }
 
   #runDocument(document: vscode.TextDocument): void {

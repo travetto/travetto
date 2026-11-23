@@ -39,13 +39,9 @@ export class TestWatcher {
 
     process.on('message', event => {
       if (isTestRunEvent(event)) {
-        if (event.type === 'runTests') {
-          const ordered = [...event.imports].sort((a, b) => consumer.getFailureRank(b) - consumer.getFailureRank(a));
-          for (const imp of ordered) {
-            queue.add({ import: imp }, true);
-          }
-        } else {
-          queue.add(event, true);
+        const ordered = [...event.imports].sort((a, b) => consumer.getFailureRank(b) - consumer.getFailureRank(a));
+        for (const imp of ordered) {
+          queue.add({ import: imp }, true);
         }
       }
     });
