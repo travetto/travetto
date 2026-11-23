@@ -223,18 +223,18 @@ export class TestImpactGraph {
   }
 
   /**
-   * Find all test files that could be impacted by a change to sourceFile within maxDepth hops
+   * Find all test files that could be impacted by a change to sourceFile within maxDepth hops (ordered by depth)
    */
-  getImpactedTests(sourceFile: string, maxDepth = 3): IndexedFile[] {
+  getImpactedTests(sourceFile: string, maxDepth = 3): (IndexedFile & { depth: number })[] {
     const visited = new Set<string>([sourceFile]);
     const queue: [file: string, depth: number, barrelSymbols?: Set<string>][] = [[sourceFile, 0]];
-    const impacted: IndexedFile[] = [];
+    const impacted: (IndexedFile & { depth: number })[] = [];
 
     while (queue.length > 0) {
       const [current, depth, barrelSymbols] = queue.shift()!;
       const entry = this.#index.getEntry(current);
       if (entry && entry.role === 'test' && (entry.type === 'ts' || entry.type === 'js')) {
-        impacted.push(entry);
+        impacted.push({ ...entry, depth });
       }
 
       if (depth >= maxDepth) {

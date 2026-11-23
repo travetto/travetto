@@ -70,7 +70,7 @@ export class TestWatcher {
       if (event.action === 'delete') {
         const impacted = impactGraph
           .getImpactedTests(sourceFile)
-          .sort((a, b) => consumer.getFailureRank(b.import) - consumer.getFailureRank(a.import));
+          .sort((a, b) => a.depth - b.depth || consumer.getFailureRank(b.import) - consumer.getFailureRank(a.import));
         impactGraph.removeFile(sourceFile);
         if (entry?.role === 'test') {
           consumer.removeTest(event.import);
@@ -84,7 +84,7 @@ export class TestWatcher {
         await impactGraph.updateFile(sourceFile);
         const impacted = impactGraph
           .getImpactedTests(sourceFile)
-          .sort((a, b) => consumer.getFailureRank(b.import) - consumer.getFailureRank(a.import));
+          .sort((a, b) => a.depth - b.depth || consumer.getFailureRank(b.import) - consumer.getFailureRank(a.import));
         if (impacted.length > 0) {
           for (const testEntry of impacted) {
             queue.add(
