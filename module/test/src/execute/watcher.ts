@@ -40,7 +40,8 @@ export class TestWatcher {
     process.on('message', event => {
       if (isTestRunEvent(event)) {
         if (event.type === 'runTests') {
-          for (const imp of event.imports) {
+          const ordered = [...event.imports].sort((a, b) => consumer.getFailureRank(b) - consumer.getFailureRank(a));
+          for (const imp of ordered) {
             queue.add({ import: imp }, true);
           }
         } else {
@@ -67,7 +68,9 @@ export class TestWatcher {
       const sourceFile = entry?.sourceFile ?? path.resolve(Runtime.workspace.path, event.file);
 
       if (event.action === 'delete') {
-        const impacted = impactGraph.getImpactedTests(sourceFile);
+        const impacted = impactGraph
+          .getImpactedTests(sourceFile)
+          .sort((a, b) => consumer.getFailureRank(b.import) - consumer.getFailureRank(a.import));
         impactGraph.removeFile(sourceFile);
         if (entry?.role === 'test') {
           consumer.removeTest(event.import);
@@ -79,7 +82,9 @@ export class TestWatcher {
         }
       } else {
         await impactGraph.updateFile(sourceFile);
-        const impacted = impactGraph.getImpactedTests(sourceFile);
+        const impacted = impactGraph
+          .getImpactedTests(sourceFile)
+          .sort((a, b) => consumer.getFailureRank(b.import) - consumer.getFailureRank(a.import));
         if (impacted.length > 0) {
           for (const testEntry of impacted) {
             queue.add(

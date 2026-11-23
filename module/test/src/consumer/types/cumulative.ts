@@ -22,6 +22,9 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
    * Total state of all tests run so far
    */
   #state: Record<ImportName, Record<ClassId, CumulativeSuiteResult>> = {};
+  #failing = new Set<ImportName>();
+  #lastFailed = new Map<ImportName, number>();
+  #failureSequence = 0;
 
   constructor(target: TestConsumerShape) {
     super([target]);
@@ -44,6 +47,10 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
   onTestAfter(result: TestResult): TestResult {
     const test = this.getSuite(result).tests[result.methodName];
     Object.assign(test, { status: result.status, duration: result.duration });
+    if (result.status === 'failed' || result.status === 'errored') {
+      this.#failing.add(result.import);
+      this.#lastFailed.set(result.import, (this.#failureSequence += 1));
+    }
     return result;
   }
 
@@ -58,7 +65,24 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
     const suite = this.getSuite(result);
     const results = TestModelUtil.buildSummary();
     TestModelUtil.countTestResult(results, Object.values(suite.tests));
+    const hasFailures = Object.values(this.#state[result.import] ?? {}).some(entry =>
+      Object.values(entry.tests).some(test => test.status === 'failed' || test.status === 'errored')
+    );
+    if (!hasFailures) {
+      this.#failing.delete(result.import);
+    }
     return { ...result, ...results, status: TestModelUtil.computeTestStatus(results) };
+  }
+
+  /**
+   * Rank import by failure recency (currently failing first, then most recently failed)
+   */
+  getFailureRank(importName: string): number {
+    const sequence = this.#lastFailed.get(importName) ?? 0;
+    if (this.#failing.has(importName)) {
+      return 1_000_000_000 + sequence;
+    }
+    return sequence;
   }
 
   removeTest(importName: string, classId?: string, methodName?: string): void {
@@ -68,6 +92,8 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
       delete this.#state[importName][classId];
     } else if (importName) {
       delete this.#state[importName];
+      this.#failing.delete(importName);
+      this.#lastFailed.delete(importName);
     }
   }
 
