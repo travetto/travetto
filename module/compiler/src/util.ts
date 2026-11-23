@@ -7,7 +7,6 @@ import {
   ManifestModuleUtil,
   type ManifestRoot,
   type Package,
-  PackageUtil,
   path
 } from '@travetto/manifest';
 
@@ -104,7 +103,7 @@ export class CompilerUtil {
   }
 
   /**
-   * Clear package and module scan caches, with optional deletion of compiler output data
+   * Clear compiler output data
    */
   static async clearCaches(context: ManifestContext, deleteOutput = false): Promise<void> {
     if (deleteOutput && process.env.TRV_ROLE !== 'test') {
@@ -121,8 +120,6 @@ export class CompilerUtil {
         })
       );
     }
-    PackageUtil.clearCache();
-    ManifestModuleUtil.clearScanCache();
   }
 
   /**
