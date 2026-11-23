@@ -33,26 +33,6 @@ export class TestImpactGraph extends DelegatingConsumer {
     this.#index = index;
   }
 
-  #resolveSpecifier(specifier: string, fromSourceFile: string): IndexedFile | undefined {
-    let entry: IndexedFile | undefined;
-    if (specifier.startsWith('.')) {
-      const resolved = path.resolve(path.dirname(fromSourceFile), specifier);
-      entry =
-        this.#index.getEntry(resolved) ??
-        this.#index.getEntry(`${resolved}.ts`) ??
-        this.#index.getEntry(`${resolved}/__index__.ts`);
-    } else {
-      entry = this.#index.getFromImport(specifier) ?? this.#index.getFromImport(`${specifier}/__index__`);
-    }
-
-    if (!entry || entry.sourceFile === fromSourceFile) {
-      return undefined;
-    }
-
-    const module = this.#index.getModule(entry.module);
-    return module?.workspace ? entry : undefined;
-  }
-
   #matchesBarrelSymbols(importer: string, barrel: string, barrelSymbols?: Set<string>): boolean {
     if (!barrelSymbols || barrelSymbols.size === 0) {
       return true;
@@ -186,7 +166,7 @@ export class TestImpactGraph extends DelegatingConsumer {
     const next = new Set<string>();
 
     for (const [specifier, symbols] of TestImpactUtil.extractImports(content)) {
-      const resolved = this.#resolveSpecifier(specifier, sourceFile);
+      const resolved = TestImpactUtil.resolveSpecifier(this.#index, specifier, sourceFile);
       if (resolved) {
         next.add(resolved.sourceFile);
         this.#importers.getOrInsert(resolved.sourceFile, new Set()).add(sourceFile);

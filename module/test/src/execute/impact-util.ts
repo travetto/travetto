@@ -1,4 +1,4 @@
-import { ManifestModuleUtil } from '@travetto/manifest';
+import { type IndexedFile, type ManifestIndex, ManifestModuleUtil, path } from '@travetto/manifest';
 
 const IMPORT_EXPORT_REGEX = /(?:import|export)\s+(?:type\s+)?(?:([^'"`;]*?)\s+from\s+)?['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/g;
 const EXPORT_DECL_REGEX = /export\s+(?:declare\s+)?(?:abstract\s+)?(?:async\s+)?(?:class|function|const|let|var|type|interface|enum)\s+([A-Za-z_$][\w$]*)/g;
@@ -15,6 +15,26 @@ export class TestImpactUtil {
    */
   static isBarrel(sourceFile: string): boolean {
     return ManifestModuleUtil.withoutSourceExtension(sourceFile).endsWith('/__index__');
+  }
+
+  /**
+   * Resolve an import/export specifier to a workspace IndexedFile
+   */
+  static resolveSpecifier(index: ManifestIndex, specifier: string, fromSourceFile: string): IndexedFile | undefined {
+    let entry: IndexedFile | undefined;
+    if (specifier.startsWith('.')) {
+      const resolved = path.resolve(path.dirname(fromSourceFile), specifier);
+      entry = index.getEntry(resolved) ?? index.getEntry(`${resolved}.ts`) ?? index.getEntry(`${resolved}/__index__.ts`);
+    } else {
+      entry = index.getFromImport(specifier) ?? index.getFromImport(`${specifier}/__index__`);
+    }
+
+    if (!entry || entry.sourceFile === fromSourceFile) {
+      return undefined;
+    }
+
+    const module = index.getModule(entry.module);
+    return module?.workspace ? entry : undefined;
   }
   static #parseImportedClause(clause?: string): ImportedSymbolSet {
     if (!clause) {
