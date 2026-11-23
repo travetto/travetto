@@ -12,6 +12,7 @@ import { ActivateOn } from '../../../core/activation.ts';
 import { RunUtil } from '../../../core/run.ts';
 import { Workspace } from '../../../core/workspace.ts';
 import { BaseFeature } from '../../base.ts';
+import { TestImpactResolver } from './impact.ts';
 import { WorkspaceResultsManager } from './workspace.ts';
 
 /**
@@ -22,6 +23,8 @@ class TestRunnerFeature extends BaseFeature {
   #server: ChildProcess | undefined;
   #consumer: WorkspaceResultsManager;
   #codeLensUpdated: (event: void) => unknown;
+  #impactResolver = new TestImpactResolver();
+  #pendingTestFiles = new Set<string>();
 
   #stopServer(force = false): void {
     if (!this.#server) {
@@ -196,8 +199,49 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   async onCloseTextDocument(document: vscode.TextDocument): Promise<void> {
+    this.#impactResolver.clear(document);
     const stillExists = existsSync(document.fileName);
     this.#consumer.reset(document, !stillExists);
+  }
+
+  async onSaveTextDocument(document: vscode.TextDocument): Promise<void> {
+    if (Workspace.compilerState === 'closed' || Workspace.compilerState === 'compile-failed') {
+      return;
+    }
+    if (this.#getTestModule(document.fileName)) {
+      return;
+    }
+    const [module, entry] = Workspace.resolveManifestIndexFileFromFile(document.fileName) ?? [];
+    if (!module || !entry || (entry.type !== 'ts' && entry.type !== 'js')) {
+      return;
+    }
+
+    const impacted = await this.#impactResolver.findImpactedTests(
+      document,
+      file => !!this.#getTestModule(file),
+      file => !!Workspace.resolveManifestIndexFileFromFile(file)
+    );
+
+    if (impacted.length === 0) {
+      return;
+    }
+
+    this.log.info('LSP impacted tests for', document.fileName, impacted);
+    for (const file of impacted) {
+      this.#pendingTestFiles.add(file);
+    }
+    this.#flushPendingTests();
+  }
+
+  #flushPendingTests(): void {
+    if (Workspace.compilerState !== 'watch-start' || this.#pendingTestFiles.size === 0) {
+      return;
+    }
+    this.#startServer();
+    for (const file of this.#pendingTestFiles) {
+      this.#runFile(file);
+    }
+    this.#pendingTestFiles.clear();
   }
 
   async renameFiles(files: vscode.FileRenameEvent['files']): Promise<void> {
@@ -229,9 +273,16 @@ class TestRunnerFeature extends BaseFeature {
     this.register('restart', () => this.#restartServer());
     this.register('rerun', () => this.#rerunActive());
 
-    Workspace.onCompilerState(state =>
-      state === 'watch-start' ? this.onChangedActiveEditor(vscode.window.activeTextEditor) : this.#stopServer()
-    );
+    Workspace.onCompilerState(state => {
+      if (state === 'watch-start') {
+        void this.onChangedActiveEditor(vscode.window.activeTextEditor);
+        this.#flushPendingTests();
+      } else {
+        this.#stopServer();
+      }
+    });
+    vscode.workspace.onDidChangeTextDocument(event => this.#impactResolver.recordChange(event), null, context.subscriptions);
+    vscode.workspace.onDidSaveTextDocument(document => this.onSaveTextDocument(document), null, context.subscriptions);
     vscode.workspace.onDidOpenTextDocument(document => this.onOpenTextDocument(document), null, context.subscriptions);
     vscode.workspace.onDidCloseTextDocument(document => this.onCloseTextDocument(document), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(editor => this.onChangedActiveEditor(editor), null, context.subscriptions);
