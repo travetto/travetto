@@ -46,7 +46,8 @@ export class ManifestModuleUtil {
   static TYPINGS_EXT_REGEX = /[.]d[.][cm]?ts$/;
   static TYPINGS_WITH_MAP_EXT_REGEX = /[.]d[.][cm]?ts([.]map)?$/;
 
-  static #scanCache: Record<string, string[]> = {};
+  static #scanCache = new Map<string, Promise<string[]>>();
+  static #describeCache = new Map<string, Promise<ManifestModule['files']>>();
 
   /**
    * Determine if a file path is a declaration file (.d.ts, .d.mts, .d.cts)
@@ -66,7 +67,8 @@ export class ManifestModuleUtil {
    * Clear scan cache
    */
   static clearScanCache(): void {
-    this.#scanCache = {};
+    this.#scanCache.clear();
+    this.#describeCache.clear();
   }
 
   static #getNewest(stat: { mtimeMs: number; ctimeMs: number }): number {
@@ -80,15 +82,7 @@ export class ManifestModuleUtil {
     return sourceFile.replace(ManifestModuleUtil.SOURCE_EXT_REGEX, ext);
   }
 
-  /**
-   * Simple file scanning
-   */
-  static async scanFolder(ctx: ManifestContext, folder: string, full = false): Promise<string[]> {
-    const key = `${folder}|${full}`;
-    if (key in this.#scanCache) {
-      return this.#scanCache[key];
-    }
-
+  static async #scanFolder(ctx: ManifestContext, folder: string, full: boolean): Promise<string[]> {
     if (!(await fs.stat(folder, { throwIfNoEntry: false }))) {
       return [];
     }
@@ -124,7 +118,10 @@ export class ManifestModuleUtil {
           continue;
         }
         const fullPath = `${top}/${sub}`;
-        const stat = await fs.stat(fullPath);
+        const stat = await fs.stat(fullPath, { throwIfNoEntry: false });
+        if (!stat) {
+          continue;
+        }
         if (stat.isFile()) {
           if (depth > 0 || topFiles.has(sub)) {
             out.push(fullPath.replace(`${folder}/`, ''));
@@ -137,7 +134,14 @@ export class ManifestModuleUtil {
       }
     }
 
-    return (this.#scanCache[key] = out);
+    return out;
+  }
+
+  /**
+   * Simple file scanning
+   */
+  static scanFolder(ctx: ManifestContext, folder: string, full = false): Promise<string[]> {
+    return this.#scanCache.getOrInsertComputed(`${folder}|${full}`, () => this.#scanFolder(ctx, folder, full));
   }
 
   /**
@@ -224,21 +228,33 @@ export class ManifestModuleUtil {
     return role ? [...moduleFileTuple, role] : moduleFileTuple;
   }
 
+  static async #describeModuleFiles(ctx: ManifestContext, sourcePath: string, full: boolean): Promise<ManifestModule['files']> {
+    const files: ManifestModule['files'] = {};
+    const scanned = await this.scanFolder(ctx, sourcePath, full);
+    const entries = await Promise.all(
+      scanned.map(async moduleFile => ({
+        key: this.getFolderKey(moduleFile),
+        entry: await this.transformFile(moduleFile, `${sourcePath}/${moduleFile}`)
+      }))
+    );
+    for (const { key, entry } of entries) {
+      (files[key] ??= []).push(entry);
+    }
+    return files;
+  }
+
   /**
    * Visit a module and describe files, and metadata
    */
   static async describeModule(ctx: ManifestContext, module: PackageModule): Promise<ManifestModule> {
     const { state, ...rest } = module;
     const sourcePath = path.resolve(ctx.workspace.path, rest.sourceFolder);
-
-    const files: ManifestModule['files'] = {};
-
-    for (const moduleFile of await this.scanFolder(ctx, sourcePath, rest.main)) {
-      // Group by top folder
-      const entry = await this.transformFile(moduleFile, `${sourcePath}/${moduleFile}`);
-      const key = this.getFolderKey(moduleFile);
-      (files[key] ??= []).push(entry);
-    }
+    const cachedFiles = await this.#describeCache.getOrInsertComputed(`${sourcePath}|${!!rest.main}`, () =>
+      this.#describeModuleFiles(ctx, sourcePath, !!rest.main)
+    );
+    const files: ManifestModule['files'] = Object.fromEntries(
+      Object.entries(cachedFiles).map(([key, list]) => [key, list ? [...list] : []])
+    );
 
     return {
       ...rest,
