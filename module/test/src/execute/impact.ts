@@ -17,9 +17,9 @@ const SOURCE_TYPES = new Set(['ts', 'js']);
 type ImportedSymbolSet = Set<string> | '*';
 
 /**
- * Lightweight text-based import graph and delegating test consumer for resolving and prioritizing impacted tests
+ * Utilities for extracting static import/export metadata from source text
  */
-export class TestImpactGraph extends DelegatingConsumer {
+export class TestImpactUtil {
   static #parseImportedClause(clause?: string): ImportedSymbolSet {
     if (!clause) {
       return '*';
@@ -114,6 +114,12 @@ export class TestImpactGraph extends DelegatingConsumer {
   static extractSpecifiers(content: string): string[] {
     return [...this.extractImports(content).keys()];
   }
+}
+
+/**
+ * Lightweight text-based import graph and delegating test consumer for resolving and prioritizing impacted tests
+ */
+export class TestImpactGraph extends DelegatingConsumer {
 
   #index: ManifestIndex;
   #target?: CumulativeSummaryConsumer;
@@ -283,11 +289,11 @@ export class TestImpactGraph extends DelegatingConsumer {
       return;
     }
 
-    this.#exports.set(sourceFile, TestImpactGraph.extractExports(content));
+    this.#exports.set(sourceFile, TestImpactUtil.extractExports(content));
     const symbolMap = new Map<string, ImportedSymbolSet>();
     const next = new Set<string>();
 
-    for (const [specifier, symbols] of TestImpactGraph.extractImports(content)) {
+    for (const [specifier, symbols] of TestImpactUtil.extractImports(content)) {
       const resolved = this.#resolveSpecifier(specifier, sourceFile);
       if (resolved) {
         next.add(resolved.sourceFile);
