@@ -246,9 +246,13 @@ class TestRunnerFeature extends BaseFeature {
     this.register('restart', () => this.#restartServer());
     this.register('rerun', () => this.#rerunActive());
 
-    Workspace.onCompilerState(state =>
-      state === 'watch-start' ? this.onChangedActiveEditor(vscode.window.activeTextEditor) : this.#stopServer()
-    );
+    Workspace.onCompilerState(state => {
+      if (state === 'watch-start') {
+        void this.onChangedActiveEditor(vscode.window.activeTextEditor);
+      } else if (state === 'closed' || state === 'reset') {
+        this.#stopServer();
+      }
+    });
     vscode.workspace.onDidOpenTextDocument(document => this.onOpenTextDocument(document), null, context.subscriptions);
     vscode.workspace.onDidCloseTextDocument(document => this.onCloseTextDocument(document), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(editor => this.onChangedActiveEditor(editor), null, context.subscriptions);
