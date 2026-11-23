@@ -1,6 +1,6 @@
-import { ManifestModuleUtil } from '@travetto/manifest';
+import { ManifestModuleUtil, path } from '@travetto/manifest';
 import { Registry } from '@travetto/registry';
-import { AsyncQueue, TimeUtil, WatchUtil } from '@travetto/runtime';
+import { AsyncQueue, Runtime, RuntimeIndex, TimeUtil, WatchUtil } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
 
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
@@ -8,6 +8,7 @@ import { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
 import type { TestDiffInput, TestRun } from '../model/test.ts';
 import { buildStandardTestManager } from '../worker/standard.ts';
 import { isTestRunEvent, type TestReadyEvent } from '../worker/types.ts';
+import { TestImpactGraph } from './impact.ts';
 import { RunUtil } from './run.ts';
 
 /**
@@ -23,6 +24,9 @@ export class TestWatcher {
     console.debug('Listening for changes');
 
     await Registry.init();
+
+    const impactGraph = new TestImpactGraph();
+    await impactGraph.init();
 
     const events: (TestRun | TestDiffInput)[] = [];
 
@@ -47,14 +51,35 @@ export class TestWatcher {
       max: WorkPool.DEFAULT_SIZE
     });
 
-    await WatchUtil.watchCompilerEvents('change', event => {
+    await WatchUtil.watchCompilerEvents('change', async event => {
       const fileType = ManifestModuleUtil.getFileType(event.file);
-      if (fileType === 'ts' || fileType === 'js') {
-        if (event.action === 'delete') {
+      if (fileType !== 'ts' && fileType !== 'js') {
+        return;
+      }
+
+      const entry = RuntimeIndex.getFromImport(event.import);
+      const sourceFile = entry?.sourceFile ?? path.resolve(Runtime.workspace.path, event.file);
+
+      if (event.action === 'delete') {
+        const impacted = impactGraph.getImpactedTests(sourceFile);
+        impactGraph.removeFile(sourceFile);
+        if (entry?.role === 'test') {
           consumer.removeTest(event.import);
-        } else {
-          const diffSource = consumer.produceDiffSource(event.import);
-          queue.add({ import: event.import, diffSource }, true);
+        }
+        for (const testEntry of impacted) {
+          if (testEntry.import !== event.import) {
+            queue.add({ import: testEntry.import, diffSource: consumer.produceDiffSource(testEntry.import) }, true);
+          }
+        }
+      } else {
+        await impactGraph.updateFile(sourceFile);
+        const impacted = impactGraph.getImpactedTests(sourceFile);
+        if (impacted.length > 0) {
+          for (const testEntry of impacted) {
+            queue.add({ import: testEntry.import, diffSource: consumer.produceDiffSource(testEntry.import) }, true);
+          }
+        } else if (entry?.role === 'test' || event.file.includes('/test/')) {
+          queue.add({ import: event.import, diffSource: consumer.produceDiffSource(event.import) }, true);
         }
       }
     });
