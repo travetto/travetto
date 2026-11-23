@@ -148,7 +148,12 @@ export class CompilerState implements CompilerHost {
   }
 
   get manifest(): ManifestRoot {
-    return this.#manifest;
+    return this.#manifestIndex.manifest;
+  }
+
+  hasManifestOnDisk(): boolean {
+    const manifestLocation = ManifestUtil.getManifestLocation(this.manifest, this.manifest.main.name);
+    return fs.existsSync(path.resolve(manifestLocation, 'manifest.json'));
   }
 
   get manifestIndex(): ManifestIndex {
@@ -666,7 +671,8 @@ export class CompilerState implements CompilerHost {
     await ManifestUtil.writeManifest(manifest);
     await ManifestUtil.writeDependentManifests(manifest);
     if (reload) {
-      this.#manifestIndex.reinitForModule(this.#manifest.main.name);
+      this.#manifestIndex.reinitForModule(this.manifest.main.name);
+      this.#manifest = this.#manifestIndex.manifest;
     }
   }
 

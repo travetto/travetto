@@ -761,4 +761,47 @@ class CompilerStateTests {
       await fs.promises.rm(tempDirectory, { recursive: true, force: true });
     }
   }
+
+  @Test()
+  async verifyHasManifestOnDisk() {
+    const tempDirectory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'has-manifest-test-'));
+    try {
+      const srcDir = path.join(tempDirectory, 'src');
+      await fs.promises.mkdir(srcDir, { recursive: true });
+      await fs.promises.writeFile(path.join(tempDirectory, 'package.json'), JSON.stringify({ name: 'test-app', version: '1.0.0' }), 'utf8');
+      await fs.promises.writeFile(path.join(srcDir, 'beta.ts'), 'export const b = 2;', 'utf8');
+
+      const manifest: ManifestRoot = {
+        generated: Date.now(),
+        workspace: { name: 'test-app', path: path.toPosix(tempDirectory), mono: false, manager: 'npm' },
+        build: { compilerUrl: 'http://localhost:20000', outputFolder: '.trv/output', toolFolder: '.trv/tool', typesFolder: '.trv/types' },
+        main: { name: 'test-app', folder: '', version: '1.0.0' },
+        modules: {
+          'test-app': {
+            main: true,
+            name: 'test-app',
+            version: '1.0.0',
+            workspace: true,
+            production: true,
+            sourceFolder: '',
+            outputFolder: 'node_modules/test-app',
+            roles: ['std'],
+            parents: [],
+            files: {
+              src: [['src/alpha.ts', 'ts', 1000]],
+              $package: [['package.json', 'package-json', 1000]]
+            }
+          }
+        }
+      };
+
+      const state = await CompilerState.get(new ManifestIndex(manifest));
+      assert.strictEqual(state.hasManifestOnDisk(), false);
+      await state.rebuildManifests(true);
+      assert.strictEqual(state.hasManifestOnDisk(), true);
+      assert.strictEqual(state.manifest, state.manifestIndex.manifest);
+    } finally {
+      await fs.promises.rm(tempDirectory, { recursive: true, force: true });
+    }
+  }
 }

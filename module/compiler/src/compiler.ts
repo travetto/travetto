@@ -300,7 +300,7 @@ export class Compiler {
       }
     }
 
-    if (changedFiles.length || deleteEvents.length) {
+    if (changedFiles.length || deleteEvents.length || !this.#state.hasManifestOnDisk()) {
       await this.#state.rebuildManifests(!!this.#watch && !this.#state.hasErrors());
 
       if (this.#state.hasErrors()) {
