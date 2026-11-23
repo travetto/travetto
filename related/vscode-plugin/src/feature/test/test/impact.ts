@@ -13,43 +13,16 @@ const MAX_LSP_QUERIES = 50;
  * Resolves downstream impacted test files using VS Code's Language Server (DocumentSymbol + ReferenceProvider)
  */
 export class TestImpactResolver {
-  #changedRanges = new Map<string, vscode.Range[]>();
-
-  /**
-   * Record dirty line ranges for a document so saves only query modified symbols
-   */
-  recordChange(event: vscode.TextDocumentChangeEvent): void {
-    if (event.contentChanges.length === 0) {
-      return;
-    }
-    const key = event.document.uri.toString();
-    const existing = this.#changedRanges.get(key) ?? [];
-    for (const change of event.contentChanges) {
-      const endLine = change.range.start.line + change.text.split('\n').length - 1;
-      existing.push(new vscode.Range(change.range.start.line, 0, Math.max(change.range.end.line, endLine), Number.MAX_SAFE_INTEGER));
-    }
-    this.#changedRanges.set(key, existing);
-  }
-
-  /**
-   * Clear tracked dirty ranges for a document
-   */
-  clear(document: vscode.TextDocument): void {
-    this.#changedRanges.delete(document.uri.toString());
-  }
-
   async #getSymbols(uri: vscode.Uri): Promise<vscode.DocumentSymbol[]> {
     return (await vscode.commands.executeCommand<vscode.DocumentSymbol[]>('vscode.executeDocumentSymbolProvider', uri)) ?? [];
   }
 
-  #collectTargetSymbols(symbols: vscode.DocumentSymbol[], ranges?: vscode.Range[]): vscode.DocumentSymbol[] {
+  #collectTargetSymbols(symbols: vscode.DocumentSymbol[]): vscode.DocumentSymbol[] {
     const collected: vscode.DocumentSymbol[] = [];
     const visit = (symbol: vscode.DocumentSymbol): void => {
       const isContainer = symbol.kind === vscode.SymbolKind.Class || symbol.kind === vscode.SymbolKind.Namespace || symbol.kind === vscode.SymbolKind.Module;
-      if (!ranges || ranges.some(range => !!symbol.range.intersection(range))) {
-        if (!isContainer || symbol.children.length === 0) {
-          collected.push(symbol);
-        }
+      if (!isContainer || symbol.children.length === 0) {
+        collected.push(symbol);
       }
       if (isContainer) {
         for (const child of symbol.children) {
@@ -72,7 +45,7 @@ export class TestImpactResolver {
   }
 
   /**
-   * Find test files impacted by the modified symbols in a saved document
+   * Find test files impacted by symbols in a changed document
    */
   async findImpactedTests(
     document: vscode.TextDocument,
@@ -80,11 +53,8 @@ export class TestImpactResolver {
     isWorkspaceFile: (file: string) => boolean
   ): Promise<string[]> {
     const key = document.uri.toString();
-    const changedRanges = this.#changedRanges.get(key);
-    this.#changedRanges.delete(key);
-
     const rootSymbols = await this.#getSymbols(document.uri);
-    const targetSymbols = this.#collectTargetSymbols(rootSymbols, changedRanges);
+    const targetSymbols = this.#collectTargetSymbols(rootSymbols);
     if (targetSymbols.length === 0) {
       return [];
     }

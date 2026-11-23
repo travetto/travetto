@@ -200,7 +200,6 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   async onCloseTextDocument(document: vscode.TextDocument): Promise<void> {
-    this.#impactResolver.clear(document);
     const stillExists = existsSync(document.fileName);
     this.#consumer.reset(document, !stillExists);
   }
@@ -285,7 +284,6 @@ class TestRunnerFeature extends BaseFeature {
       }
     });
     Workspace.onCompilerChange(event => this.onCompilerChange(event));
-    vscode.workspace.onDidChangeTextDocument(event => this.#impactResolver.recordChange(event), null, context.subscriptions);
     vscode.workspace.onDidOpenTextDocument(document => this.onOpenTextDocument(document), null, context.subscriptions);
     vscode.workspace.onDidCloseTextDocument(document => this.onCloseTextDocument(document), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(editor => this.onChangedActiveEditor(editor), null, context.subscriptions);
