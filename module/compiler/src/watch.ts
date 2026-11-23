@@ -204,21 +204,21 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
 
     log.debug('Starting git canary in', gitDirectory);
     let currentHead = await gitRevParse(['HEAD'], this.#root, ['hash']);
-    let isChecking: Promise<void> | undefined;
+    let checkTimer: NodeJS.Timeout | undefined;
 
     const checkChange = async (): Promise<void> => {
-      try {
-        await CommonUtil.nonBlockingTimeout(50);
-        const nextHead = await gitRevParse(['HEAD'], this.#root, ['hash']);
-        if (nextHead && (!currentHead || nextHead.hash !== currentHead.hash)) {
-          const from = currentHead ? currentHead.hash : 'empty';
-          const to = nextHead.hash;
-          currentHead = nextHead;
-          this.#queue.throw(new CompilerReset(`Git branch or commit change detected: ${from}=>${to}`, { soft: true }));
-        }
-      } finally {
-        isChecking = undefined;
+      const nextHead = await gitRevParse(['HEAD'], this.#root, ['hash']);
+      if (nextHead && (!currentHead || nextHead.hash !== currentHead.hash)) {
+        const from = currentHead ? currentHead.hash : 'empty';
+        const to = nextHead.hash;
+        currentHead = nextHead;
+        this.#queue.throw(new CompilerReset(`Git branch or commit change detected: ${from}=>${to}`, { soft: true }));
       }
+    };
+
+    const scheduleCheck = (): void => {
+      clearTimeout(checkTimer);
+      checkTimer = setTimeout(() => void checkChange(), 50).unref();
     };
 
     const watchers: { close(): void }[] = [];
@@ -234,14 +234,15 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
     for (const { folder, filter, recursive } of targets) {
       if (await fs.stat(folder, { throwIfNoEntry: false })) {
         try {
-          watchers.push(watch(folder, { encoding: 'utf8', recursive }, (_, file) => filter(file) && (isChecking ??= checkChange())));
+          watchers.push(watch(folder, { encoding: 'utf8', recursive }, (_, file) => filter(file) && scheduleCheck()));
         } catch {
-          watchers.push(watch(folder, { encoding: 'utf8' }, (_, file) => filter(file) && (isChecking ??= checkChange())));
+          watchers.push(watch(folder, { encoding: 'utf8' }, (_, file) => filter(file) && scheduleCheck()));
         }
       }
     }
 
     this.#cleanup.git = (): void => {
+      clearTimeout(checkTimer);
       watchers.forEach(watcher => watcher.close());
     };
   }
