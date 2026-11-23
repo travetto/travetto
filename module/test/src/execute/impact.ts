@@ -53,10 +53,6 @@ export class TestImpactGraph extends DelegatingConsumer {
     return module?.workspace ? entry : undefined;
   }
 
-  #isBarrel(sourceFile: string): boolean {
-    return ManifestModuleUtil.withoutSourceExtension(sourceFile).endsWith('/__index__');
-  }
-
   #matchesBarrelSymbols(importer: string, barrel: string, barrelSymbols?: Set<string>): boolean {
     if (!barrelSymbols || barrelSymbols.size === 0) {
       return true;
@@ -229,7 +225,7 @@ export class TestImpactGraph extends DelegatingConsumer {
         continue;
       }
 
-      const currentIsBarrel = this.#isBarrel(current);
+      const currentIsBarrel = TestImpactUtil.isBarrel(current);
       for (const importer of this.#importers.get(current) ?? []) {
         if (visited.has(importer)) {
           continue;
@@ -238,7 +234,7 @@ export class TestImpactGraph extends DelegatingConsumer {
           continue;
         }
         visited.add(importer);
-        const nextBarrelSymbols = this.#isBarrel(importer) ? this.#exports.get(current) : undefined;
+        const nextBarrelSymbols = TestImpactUtil.isBarrel(importer) ? this.#exports.get(current) : undefined;
         queue.push([importer, depth + 1, nextBarrelSymbols]);
       }
     }

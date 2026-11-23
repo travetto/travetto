@@ -1,3 +1,5 @@
+import { ManifestModuleUtil } from '@travetto/manifest';
+
 const IMPORT_EXPORT_REGEX = /(?:import|export)\s+(?:type\s+)?(?:([^'"`;]*?)\s+from\s+)?['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/g;
 const EXPORT_DECL_REGEX = /export\s+(?:declare\s+)?(?:abstract\s+)?(?:async\s+)?(?:class|function|const|let|var|type|interface|enum)\s+([A-Za-z_$][\w$]*)/g;
 const EXPORT_LIST_REGEX = /export\s+(?:type\s+)?\{([^}]+)\}(?!\s*from)/g;
@@ -8,6 +10,12 @@ export type ImportedSymbolSet = Set<string> | '*';
  * Utilities for extracting static import/export metadata from source text
  */
 export class TestImpactUtil {
+  /**
+   * Determine if a source file is a barrel index file
+   */
+  static isBarrel(sourceFile: string): boolean {
+    return ManifestModuleUtil.withoutSourceExtension(sourceFile).endsWith('/__index__');
+  }
   static #parseImportedClause(clause?: string): ImportedSymbolSet {
     if (!clause) {
       return '*';
