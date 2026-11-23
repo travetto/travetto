@@ -426,16 +426,23 @@ export class CompilerState implements CompilerHost {
         yield { sourceFile: file, diagnostics, duration: Date.now() - start };
 
         if (declarationChange.changed || propagatedDeclarationChanges.has(file)) {
-          for (const importer of this.#fileToImporters.get(file) ?? []) {
-            if (!processed.has(importer)) {
-              queue.add(importer);
+          const propagationQueue = [file];
+          while (propagationQueue.length) {
+            const current = propagationQueue.shift()!;
+            for (const importer of this.#fileToImporters.get(current) ?? []) {
+              if (!processed.has(importer)) {
+                queue.add(importer);
+              }
             }
-          }
-          // Barrel re-exports keep identical `.d.ts` text (`export * from ...`), so forward declaration changes through them
-          for (const reExporter of this.#fileToReExporters.get(file) ?? []) {
-            propagatedDeclarationChanges.add(reExporter);
-            if (!processed.has(reExporter)) {
-              queue.add(reExporter);
+            // Barrel re-exports keep identical `.d.ts` text (`export * from ...`), so forward declaration changes through them
+            for (const reExporter of this.#fileToReExporters.get(current) ?? []) {
+              if (!propagatedDeclarationChanges.has(reExporter)) {
+                propagatedDeclarationChanges.add(reExporter);
+                propagationQueue.push(reExporter);
+              }
+              if (!processed.has(reExporter)) {
+                queue.add(reExporter);
+              }
             }
           }
         }
