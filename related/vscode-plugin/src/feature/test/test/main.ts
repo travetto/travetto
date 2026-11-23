@@ -67,11 +67,12 @@ class TestRunnerFeature extends BaseFeature {
         switch (event.type) {
           case 'ready':
             this.#serverReady = true;
-            for (const imp of this.#pendingImports) {
-              this.log.info('Requesting test run ', imp);
-              this.#server?.send({ type: 'runTest', import: imp });
+            if (this.#pendingImports.size > 0) {
+              const imports = [...this.#pendingImports];
+              this.#pendingImports.clear();
+              this.log.info('Requesting test runs ', imports);
+              this.#server?.send({ type: 'runTests', imports });
             }
-            this.#pendingImports.clear();
             return;
           case 'log':
             return this.log.info('[Log  ]', event.message);

@@ -39,7 +39,13 @@ export class TestWatcher {
 
     process.on('message', event => {
       if (isTestRunEvent(event)) {
-        queue.add(event, true);
+        if (event.type === 'runTests') {
+          for (const imp of event.imports) {
+            queue.add({ import: imp }, true);
+          }
+        } else {
+          queue.add(event, true);
+        }
       }
     });
 
