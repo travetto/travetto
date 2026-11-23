@@ -4,7 +4,8 @@ import path from 'node:path';
 
 import * as vscode from 'vscode';
 
-import type { IndexedModule, ManifestModule } from '@travetto/manifest';
+import type { CompilerChangeEvent } from '@travetto/compiler/src/types.ts';
+import { type IndexedModule, type ManifestModule, ManifestModuleUtil } from '@travetto/manifest';
 import { AsyncIterableHelper, CodecUtil, Env } from '@travetto/runtime';
 import type { TestWatchEvent } from '@travetto/test';
 
@@ -204,18 +205,20 @@ class TestRunnerFeature extends BaseFeature {
     this.#consumer.reset(document, !stillExists);
   }
 
-  async onSaveTextDocument(document: vscode.TextDocument): Promise<void> {
-    if (Workspace.compilerState === 'closed' || Workspace.compilerState === 'compile-failed') {
+  async onCompilerChange(event: CompilerChangeEvent): Promise<void> {
+    if (event.action === 'delete') {
       return;
     }
-    if (this.#getTestModule(document.fileName)) {
+    const fileType = ManifestModuleUtil.getFileType(event.file);
+    if (fileType !== 'ts' && fileType !== 'js') {
       return;
     }
-    const [module, entry] = Workspace.resolveManifestIndexFileFromFile(document.fileName) ?? [];
-    if (!module || !entry || (entry.type !== 'ts' && entry.type !== 'js')) {
+    const fullPath = path.resolve(Workspace.path, event.file);
+    if (this.#getTestModule(fullPath)) {
       return;
     }
 
+    const document = await vscode.workspace.openTextDocument(vscode.Uri.file(fullPath));
     const impacted = await this.#impactResolver.findImpactedTests(
       document,
       file => !!this.#getTestModule(file),
@@ -226,7 +229,7 @@ class TestRunnerFeature extends BaseFeature {
       return;
     }
 
-    this.log.info('LSP impacted tests for', document.fileName, impacted);
+    this.log.info('LSP impacted tests for', fullPath, impacted);
     for (const file of impacted) {
       this.#pendingTestFiles.add(file);
     }
@@ -281,8 +284,8 @@ class TestRunnerFeature extends BaseFeature {
         this.#stopServer();
       }
     });
+    Workspace.onCompilerChange(event => this.onCompilerChange(event));
     vscode.workspace.onDidChangeTextDocument(event => this.#impactResolver.recordChange(event), null, context.subscriptions);
-    vscode.workspace.onDidSaveTextDocument(document => this.onSaveTextDocument(document), null, context.subscriptions);
     vscode.workspace.onDidOpenTextDocument(document => this.onOpenTextDocument(document), null, context.subscriptions);
     vscode.workspace.onDidCloseTextDocument(document => this.onCloseTextDocument(document), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(editor => this.onChangedActiveEditor(editor), null, context.subscriptions);

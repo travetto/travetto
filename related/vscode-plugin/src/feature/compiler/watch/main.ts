@@ -138,6 +138,9 @@ export class CompilerWatchFeature extends BaseFeature {
                 case 'progress':
                   this.#onProgressEvent(payload, controller.signal);
                   break;
+                case 'change':
+                  Workspace.emitCompilerChange(payload);
+                  break;
               }
             });
         }

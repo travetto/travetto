@@ -16,7 +16,7 @@ import {
 } from '@travetto/manifest';
 import { hasProperty } from '@travetto/runtime';
 
-import type { CompilerStateType } from '@travetto/compiler/src/types.ts';
+import type { CompilerChangeEvent, CompilerStateType } from '@travetto/compiler/src/types.ts';
 
 const SUFFIXES = ['.ts', '.js', '.tsx', '.jsx', '.d.ts'];
 
@@ -29,9 +29,20 @@ export class Workspace {
   static #workspaceIndex: ManifestIndex;
   static #compilerState: CompilerStateType = 'closed';
   static #compilerStateListeners: ((event: CompilerStateType) => void)[] = [];
+  static #compilerChangeListeners: ((event: CompilerChangeEvent) => void)[] = [];
   static #importToFile: Record<string, string | undefined> = {};
 
   static readonly folder: vscode.WorkspaceFolder;
+
+  static onCompilerChange(handler: (event: CompilerChangeEvent) => void): void {
+    this.#compilerChangeListeners.push(handler);
+  }
+
+  static emitCompilerChange(event: CompilerChangeEvent): void {
+    for (const listener of this.#compilerChangeListeners) {
+      listener(event);
+    }
+  }
 
   static onCompilerState(handler: (event: CompilerStateType) => void): void {
     this.#compilerStateListeners.push(handler);
