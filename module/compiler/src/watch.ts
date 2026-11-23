@@ -45,10 +45,12 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
   #watchRotationFrequency = 30; // 30 seconds
   #root: string;
   #queue: AsyncQueue<CompilerWatchRawEvent>;
+  #signal: AbortSignal;
 
   constructor(options: CompilerWatcherOptions, signal: AbortSignal) {
     this.#options = { ...options, checkIfSourceChanged: options.checkIfSourceChanged ?? (() => false) };
     this.#root = options.root;
+    this.#signal = signal;
     this.#queue = new AsyncQueue(signal);
     signal.addEventListener('abort', () =>
       Object.values(this.#cleanup).forEach(fn => {
@@ -135,6 +137,12 @@ export class CompilerWatcher implements AsyncIterable<CompilerWatchEvent[]> {
       },
       { ignore: ignores }
     );
+
+    // Shutdown can abort while subscribe() is awaiting; unsubscribed native handles keep the process alive
+    if (this.#signal.aborted) {
+      await listener.unsubscribe();
+      return;
+    }
 
     const packageJsonFile = path.resolve(this.#root, 'package.json');
     const pkgListener = watch(packageJsonFile, { encoding: 'utf8' }, () => {
