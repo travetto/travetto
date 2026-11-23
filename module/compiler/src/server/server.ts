@@ -82,13 +82,21 @@ export class CompilerServer {
   }
 
   async #tryListen(attempt = 0): Promise<'ok' | 'running'> {
-    const output = await new Promise<'ok' | 'running' | 'retry'>((resolve, reject) => {
+    const output = await new Promise<'ok' | 'running' | 'starting' | 'not-running'>((resolve, reject) => {
       this.#server
-        .on('listening', () => resolve('ok'))
-        .on('error', async error => {
+        .removeAllListeners('listening')
+        .removeAllListeners('error')
+        .once('listening', () => resolve('ok'))
+        .once('error', async error => {
           if ('code' in error && error.code === 'EADDRINUSE') {
             const info = await this.#client.info();
-            resolve(info && !info.watching && this.watching ? 'retry' : 'running');
+            if (!info) {
+              resolve('not-running');
+            } else if (!info.watching && this.watching) {
+              resolve('starting');
+            } else {
+              resolve('running');
+            }
           } else {
             log.warn('Failed in running server', [error]);
             reject(error);
@@ -100,13 +108,16 @@ export class CompilerServer {
       CommonUtil.queueMacroTask().then(() => this.#server.listen(+url.port, url.hostname)); // Run async
     });
 
-    if (output === 'retry') {
+    if (output === 'starting' || output === 'not-running') {
       if (attempt >= 5) {
         throw new Error('Unable to verify compilation server');
       }
       log.info('Waiting for build to finish, before retrying');
-      // Let the server finish
-      await this.#client.waitForState(['closed'], 'Server closed', this.signal);
+      if (output === 'starting') {
+        await this.#client.waitForState(['closed'], 'Server closed', this.signal);
+      } else {
+        await CommonUtil.blockingTimeout(50);
+      }
       return this.#tryListen(attempt + 1);
     }
 
