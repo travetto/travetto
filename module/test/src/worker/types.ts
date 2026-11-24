@@ -13,10 +13,9 @@ export const TestWorkerEvents = {
   READY: 'ready'
 };
 
-export type TestRunEvent = { type: 'runTest'; import: string } | { type: 'runTests'; imports: string[] };
+export type TestRunEvent = { type: 'runTests'; imports: string[] };
 
-export const isTestRunEvent = (value: unknown): value is TestRunEvent =>
-  hasProperty<TestRunEvent>('type', 'runTest')(value) || hasProperty<TestRunEvent>('type', 'runTests')(value);
+export const isTestRunEvent = hasProperty<TestRunEvent>('type', 'runTests');
 
 export type TestReadyEvent = { type: 'ready' };
 export type TestLogEvent = { type: 'log'; message: string };
