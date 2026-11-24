@@ -5,7 +5,7 @@ import os from 'node:os';
 import { ManifestIndex, type ManifestRoot, path } from '@travetto/manifest';
 import { Suite, Test } from '@travetto/test';
 
-import { TestImpactGraph } from '../src/execute/impact.ts';
+import { TestImpactGraph } from '../src/watch/impact.ts';
 
 @Suite()
 class TestImpactGraphSuite {

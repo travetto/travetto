@@ -8,7 +8,7 @@ import type { TestDiffInput, TestRun } from '../model/test.ts';
 import { buildStandardTestManager } from '../worker/standard.ts';
 import { isTestRunEvent, type TestReadyEvent } from '../worker/types.ts';
 import { TestImpactGraph } from './impact.ts';
-import { RunUtil } from './run.ts';
+import { RunUtil } from '../execute/run.ts';
 
 /**
  * Test Watcher.
