@@ -37,7 +37,8 @@ export class TestWatcher {
 
     process.on('message', event => {
       if (isTestRunEvent(event)) {
-        for (const run of impact.onRunTests(event.imports)) {
+        const imports = event.type === 'runTests' ? event.imports : [event.import];
+        for (const run of impact.onRunTests(imports)) {
           queue.add(run, true);
         }
       }

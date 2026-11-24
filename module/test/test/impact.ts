@@ -166,6 +166,18 @@ class TestImpactGraphSuite {
         graph.getImpactedTests(jsonFile).map(entry => entry.sourceFile),
         [jsonTestFile]
       );
+      assert.deepStrictEqual(
+        await graph.onCompilerChange({
+          action: 'update',
+          file: 'test/env.ts',
+          import: 'test-app/test/env.ts',
+          output: '',
+          module: 'test-app',
+          time: Date.now()
+        }),
+        [{ import: 'test-app/test/env.ts' }]
+      );
+      assert.deepStrictEqual(graph.onRunTests(['test-app/test/env.ts']), [{ import: 'test-app/test/env.ts' }]);
     } finally {
       await fs.rm(tempDirectory, { recursive: true, force: true });
     }
