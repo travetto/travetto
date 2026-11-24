@@ -112,12 +112,16 @@ class TestImpactGraphSuite {
       const jsonFile = path.toPosix(path.join(sourceDirectory, 'json.ts'));
       const envTestFile = path.toPosix(path.join(testDirectory, 'env.ts'));
       const jsonTestFile = path.toPosix(path.join(testDirectory, 'json.ts'));
+      const docDirectory = path.join(tempDirectory, 'doc');
+      const docTestFile = path.toPosix(path.join(docDirectory, 'env.ts'));
 
+      await fs.mkdir(docDirectory, { recursive: true });
       await fs.writeFile(barrelFile, "export * from './src/env.ts';\nexport * from './src/json.ts';", 'utf8');
       await fs.writeFile(envFile, 'export class EnvProp {}', 'utf8');
       await fs.writeFile(jsonFile, 'export class JSONUtil {}', 'utf8');
       await fs.writeFile(envTestFile, "import { EnvProp } from 'test-app';\nexport const a = new EnvProp();", 'utf8');
       await fs.writeFile(jsonTestFile, "import { JSONUtil } from 'test-app';\nexport const b = new JSONUtil();", 'utf8');
+      await fs.writeFile(docTestFile, "import { EnvProp } from 'test-app';\nexport const docSample = new EnvProp();", 'utf8');
 
       const manifest: ManifestRoot = {
         generated: Date.now(),
@@ -144,7 +148,8 @@ class TestImpactGraphSuite {
               test: [
                 ['test/env.ts', 'ts', 1000, 'test'],
                 ['test/json.ts', 'ts', 1000, 'test']
-              ]
+              ],
+              doc: [['doc/env.ts', 'ts', 1000, 'doc']]
             }
           }
         }

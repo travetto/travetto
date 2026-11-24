@@ -87,7 +87,8 @@ export class TestImpactGraph extends DelegatingConsumer {
   async #onFileUpdate(event: CompilerChangeEvent, sourceFile: string, isTest: boolean): Promise<(TestRun | TestDiffInput)[]> {
     await this.updateFile(sourceFile);
     const runs = this.#getImpactedRuns(sourceFile);
-    if (runs.length === 0 && (isTest || ManifestModuleUtil.getFileRole(event.file) === 'test' || event.file.includes('/test/'))) {
+    const isDoc = event.file.startsWith('doc/') || event.file.includes('/doc/');
+    if (runs.length === 0 && !isDoc && (isTest || ManifestModuleUtil.getFileRole(event.file) === 'test' || event.file.includes('/test/'))) {
       runs.push(
         this.#target ? { import: event.import, diffSource: this.#target.produceDiffSource(event.import) } : { import: event.import }
       );
@@ -128,7 +129,8 @@ export class TestImpactGraph extends DelegatingConsumer {
   async init(): Promise<void> {
     const files = this.#index.find({
       module: module => !!module.workspace,
-      file: file => SOURCE_TYPES.has(file.type)
+      folder: folder => folder !== 'doc',
+      file: file => SOURCE_TYPES.has(file.type) && file.role !== 'doc'
     });
     await Promise.all(files.map(file => this.updateFile(file.sourceFile)));
   }
@@ -242,6 +244,10 @@ export class TestImpactGraph extends DelegatingConsumer {
     }
 
     const entry = this.#index.getFromImport(event.import);
+    if (entry?.role === 'doc' || event.file.startsWith('doc/') || event.file.includes('/doc/')) {
+      return [];
+    }
+
     const sourceFile = entry?.sourceFile ?? path.resolve(Runtime.workspace.path, event.file);
     const isTest = entry?.role === 'test';
 
