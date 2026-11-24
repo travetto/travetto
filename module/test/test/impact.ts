@@ -73,12 +73,12 @@ class TestImpactGraphSuite {
       await graph.init();
 
       assert.deepStrictEqual(
-        graph.getImpactedTests(leafFile).map(entry => entry.sourceFile).sort(),
-        [directTestFile, transitiveTestFile].sort()
+        graph.getImpactedTests(leafFile).map(entry => entry.sourceFile),
+        [directTestFile]
       );
       assert.deepStrictEqual(
-        graph.getImpactedTests(leafFile, 1).map(entry => entry.sourceFile),
-        [directTestFile]
+        graph.getImpactedTests(middleFile).map(entry => entry.sourceFile),
+        [transitiveTestFile]
       );
       assert.deepStrictEqual(graph.getImpactedTests(unusedFile), []);
       assert.deepStrictEqual(
@@ -89,10 +89,7 @@ class TestImpactGraphSuite {
       // Update file text to drop import and verify realtime graph update
       await fs.writeFile(directTestFile, 'export const testOne = 123;', 'utf8');
       await graph.updateFile(directTestFile);
-      assert.deepStrictEqual(
-        graph.getImpactedTests(leafFile).map(entry => entry.sourceFile),
-        [transitiveTestFile]
-      );
+      assert.deepStrictEqual(graph.getImpactedTests(leafFile), []);
     } finally {
       await fs.rm(tempDirectory, { recursive: true, force: true });
     }

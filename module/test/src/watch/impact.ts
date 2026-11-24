@@ -189,9 +189,9 @@ export class TestImpactGraph extends DelegatingConsumer {
   }
 
   /**
-   * Find all test files that could be impacted by a change to sourceFile within maxDepth hops, ordered by depth then failure recency
+   * Find test files directly importing sourceFile or its barrel exports, ordered by depth then failure recency
    */
-  getImpactedTests(sourceFile: string, maxDepth = 3): IndexedFile[] {
+  getImpactedTests(sourceFile: string): IndexedFile[] {
     const visited = new Set<string>([sourceFile]);
     const queue: [file: string, depth: number, barrelSymbols?: Set<string>][] = [[sourceFile, 0]];
     const impacted: { entry: IndexedFile; depth: number }[] = [];
@@ -203,11 +203,11 @@ export class TestImpactGraph extends DelegatingConsumer {
         impacted.push({ entry, depth });
       }
 
-      if (depth >= maxDepth) {
+      const currentIsBarrel = TestImpactUtil.isBarrel(current);
+      if (depth >= 1 && !currentIsBarrel) {
         continue;
       }
 
-      const currentIsBarrel = TestImpactUtil.isBarrel(current);
       for (const importer of this.#importers.get(current) ?? []) {
         if (visited.has(importer)) {
           continue;
@@ -216,8 +216,9 @@ export class TestImpactGraph extends DelegatingConsumer {
           continue;
         }
         visited.add(importer);
-        const nextBarrelSymbols = TestImpactUtil.isBarrel(importer) ? this.#exports.get(current) : undefined;
-        queue.push([importer, depth + 1, nextBarrelSymbols]);
+        const importerIsBarrel = TestImpactUtil.isBarrel(importer);
+        const nextBarrelSymbols = importerIsBarrel ? this.#exports.get(current) : undefined;
+        queue.push([importer, importerIsBarrel ? depth : depth + 1, nextBarrelSymbols]);
       }
     }
 
