@@ -123,11 +123,4 @@ export class TestImpactUtil {
     }
     return imports;
   }
-
-  /**
-   * Extract module specifiers from source text without invoking the TypeScript compiler
-   */
-  static extractSpecifiers(content: string): string[] {
-    return [...this.extractImports(content).keys()];
-  }
 }

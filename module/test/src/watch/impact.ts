@@ -1,3 +1,4 @@
+import fsSync from 'node:fs';
 import fs from 'node:fs/promises';
 
 import type { CompilerChangeEvent } from '@travetto/compiler';
@@ -16,13 +17,12 @@ const SOURCE_TYPES = new Set(['ts', 'js']);
  * Lightweight text-based import graph and delegating test consumer for resolving and prioritizing impacted tests
  */
 export class TestImpactGraph extends DelegatingConsumer {
-
   #index: ManifestIndex;
   #target?: CumulativeSummaryConsumer;
-  #dependencies = new Map<string, Set<string>>();
-  #importers = new Map<string, Set<string>>();
-  #exports = new Map<string, Set<string>>();
-  #importedSymbols = new Map<string, Map<string, ImportedSymbolSet>>();
+  #watchedDependencies = new Map<string, Set<string>>();
+  #fileToTests = new Map<string, Set<string>>();
+  #fileToBarrels = new Map<string, Set<string>>();
+  #barrelToTests = new Map<string, Map<string, ImportedSymbolSet>>();
   #failingTests = new Map<string, Set<string>>();
   #lastFailed = new Map<string, number>();
   #failureSequence = 0;
@@ -33,16 +33,12 @@ export class TestImpactGraph extends DelegatingConsumer {
     this.#index = index;
   }
 
-  #matchesBarrelSymbols(importer: string, barrel: string, barrelSymbols?: Set<string>): boolean {
-    if (!barrelSymbols || barrelSymbols.size === 0) {
-      return true;
-    }
-    const imported = this.#importedSymbols.get(importer)?.get(barrel);
-    if (!imported || imported === '*') {
+  #matchesBarrelSymbols(imported: ImportedSymbolSet | undefined, exportedSymbols: Set<string>): boolean {
+    if (exportedSymbols.size === 0 || !imported || imported === '*') {
       return true;
     }
     for (const symbol of imported) {
-      if (barrelSymbols.has(symbol)) {
+      if (exportedSymbols.has(symbol)) {
         return true;
       }
     }
@@ -59,9 +55,17 @@ export class TestImpactGraph extends DelegatingConsumer {
     this.#lastFailed.delete(importName);
   }
 
-  #getImpactedRuns(sourceFile: string, deletedImport?: string): (TestRun | TestDiffInput)[] {
+  #readExportedSymbols(sourceFile: string): Set<string> {
+    try {
+      return TestImpactUtil.extractExports(fsSync.readFileSync(sourceFile, 'utf8'));
+    } catch {
+      return new Set();
+    }
+  }
+
+  #getImpactedRuns(sourceFile: string, exportedSymbols?: Set<string>, deletedImport?: string): (TestRun | TestDiffInput)[] {
     const runs: (TestRun | TestDiffInput)[] = [];
-    for (const testEntry of this.getImpactedTests(sourceFile)) {
+    for (const testEntry of this.getImpactedTests(sourceFile, exportedSymbols)) {
       if (testEntry.import === deletedImport) {
         continue;
       }
@@ -75,7 +79,7 @@ export class TestImpactGraph extends DelegatingConsumer {
   }
 
   #onFileDelete(event: CompilerChangeEvent, sourceFile: string, isTest: boolean): (TestRun | TestDiffInput)[] {
-    const runs = this.#getImpactedRuns(sourceFile, event.import);
+    const runs = this.#getImpactedRuns(sourceFile, new Set(), event.import);
     this.removeFile(sourceFile);
     if (isTest) {
       this.#clearFailures(event.import);
@@ -85,8 +89,19 @@ export class TestImpactGraph extends DelegatingConsumer {
   }
 
   async #onFileUpdate(event: CompilerChangeEvent, sourceFile: string, isTest: boolean): Promise<(TestRun | TestDiffInput)[]> {
-    await this.updateFile(sourceFile);
-    const runs = this.#getImpactedRuns(sourceFile);
+    const isBarrel = TestImpactUtil.isBarrel(sourceFile);
+    let exportedSymbols: Set<string> | undefined;
+    if (isTest || isBarrel) {
+      await this.updateFile(sourceFile);
+    } else {
+      try {
+        exportedSymbols = TestImpactUtil.extractExports(await fs.readFile(sourceFile, 'utf8'));
+      } catch {
+        exportedSymbols = new Set();
+      }
+    }
+
+    const runs = this.#getImpactedRuns(sourceFile, exportedSymbols);
     const isDoc = event.file.startsWith('doc/') || event.file.includes('/doc/');
     if (runs.length === 0 && !isDoc && (isTest || ManifestModuleUtil.getFileRole(event.file) === 'test' || event.file.includes('/test/'))) {
       runs.push(
@@ -94,6 +109,16 @@ export class TestImpactGraph extends DelegatingConsumer {
       );
     }
     return runs;
+  }
+
+  #refreshIndexIfNeeded(event: CompilerChangeEvent): void {
+    if (event.action === 'create' || (event.action === 'update' && !this.#index.getFromImport(event.import))) {
+      try {
+        this.#index.reinitForModule(this.#index.manifest.main.name);
+      } catch {
+        // Ignore in-memory test manifests without a disk file
+      }
+    }
   }
 
   transform(event: TestEvent): TestEvent {
@@ -124,34 +149,34 @@ export class TestImpactGraph extends DelegatingConsumer {
   }
 
   /**
-   * Build the initial import graph for all workspace TypeScript/JavaScript files
+   * Build the initial import map for workspace test and barrel files only
    */
   async init(): Promise<void> {
     const files = this.#index.find({
       module: module => !!module.workspace,
-      folder: folder => folder !== 'doc',
-      file: file => SOURCE_TYPES.has(file.type) && file.role !== 'doc'
+      folder: folder => folder === '$index' || folder === 'test',
+      file: file => SOURCE_TYPES.has(file.type) && (file.role === 'test' || TestImpactUtil.isBarrel(file.sourceFile))
     });
     await Promise.all(files.map(file => this.updateFile(file.sourceFile)));
   }
 
   /**
-   * Remove a source file and its outgoing dependency edges from the graph
+   * Remove a test or barrel file and its tracked outgoing edges
    */
   removeFile(sourceFile: string): void {
-    const previous = this.#dependencies.get(sourceFile);
+    const previous = this.#watchedDependencies.get(sourceFile);
     if (previous) {
       for (const dependency of previous) {
-        this.#importers.get(dependency)?.delete(sourceFile);
+        this.#fileToTests.get(dependency)?.delete(sourceFile);
+        this.#fileToBarrels.get(dependency)?.delete(sourceFile);
+        this.#barrelToTests.get(dependency)?.delete(sourceFile);
       }
-      this.#dependencies.delete(sourceFile);
+      this.#watchedDependencies.delete(sourceFile);
     }
-    this.#exports.delete(sourceFile);
-    this.#importedSymbols.delete(sourceFile);
   }
 
   /**
-   * Re-read a source file's text and refresh its dependency edges
+   * Re-read a test or barrel file and refresh its dependency edges
    */
   async updateFile(sourceFile: string): Promise<void> {
     this.removeFile(sourceFile);
@@ -163,66 +188,73 @@ export class TestImpactGraph extends DelegatingConsumer {
       return;
     }
 
-    this.#exports.set(sourceFile, TestImpactUtil.extractExports(content));
-    const symbolMap = new Map<string, ImportedSymbolSet>();
+    const isBarrel = TestImpactUtil.isBarrel(sourceFile);
     const next = new Set<string>();
 
     for (const [specifier, symbols] of TestImpactUtil.extractImports(content)) {
       const resolved = TestImpactUtil.resolveSpecifier(this.#index, specifier, sourceFile);
-      if (resolved) {
-        next.add(resolved.sourceFile);
-        this.#importers.getOrInsert(resolved.sourceFile, new Set()).add(sourceFile);
-        const existing = symbolMap.get(resolved.sourceFile);
+      if (!resolved) {
+        continue;
+      }
+      next.add(resolved.sourceFile);
+
+      if (isBarrel) {
+        this.#fileToBarrels.getOrInsert(resolved.sourceFile, new Set()).add(sourceFile);
+      } else if (TestImpactUtil.isBarrel(resolved.sourceFile)) {
+        const testImports = this.#barrelToTests.getOrInsert(resolved.sourceFile, new Map());
+        const existing = testImports.get(sourceFile);
         if (existing === '*' || symbols === '*') {
-          symbolMap.set(resolved.sourceFile, '*');
+          testImports.set(sourceFile, '*');
         } else if (existing) {
           for (const symbol of symbols) {
             existing.add(symbol);
           }
         } else {
-          symbolMap.set(resolved.sourceFile, new Set(symbols));
+          testImports.set(sourceFile, new Set(symbols));
         }
+      } else {
+        this.#fileToTests.getOrInsert(resolved.sourceFile, new Set()).add(sourceFile);
       }
     }
-    this.#dependencies.set(sourceFile, next);
-    this.#importedSymbols.set(sourceFile, symbolMap);
+
+    this.#watchedDependencies.set(sourceFile, next);
   }
 
   /**
-   * Find test files directly importing sourceFile or its barrel exports, ordered by depth then failure recency
+   * Find test files directly importing sourceFile or importing matching symbols from its barrel
    */
-  getImpactedTests(sourceFile: string): IndexedFile[] {
-    const visited = new Set<string>([sourceFile]);
-    const queue: [file: string, depth: number, barrelSymbols?: Set<string>][] = [[sourceFile, 0]];
-    const impacted: { entry: IndexedFile; depth: number }[] = [];
+  getImpactedTests(sourceFile: string, exportedSymbols?: Set<string>): IndexedFile[] {
+    const impacted = new Map<string, { entry: IndexedFile; depth: number }>();
 
-    while (queue.length > 0) {
-      const [current, depth, barrelSymbols] = queue.shift()!;
-      const entry = this.#index.getEntry(current);
+    const addIfTest = (file: string, depth: number): void => {
+      if (impacted.has(file)) {
+        return;
+      }
+      const entry = this.#index.getEntry(file);
       if (entry && entry.role === 'test' && SOURCE_TYPES.has(entry.type)) {
-        impacted.push({ entry, depth });
+        impacted.set(file, { entry, depth });
       }
+    };
 
-      const currentIsBarrel = TestImpactUtil.isBarrel(current);
-      if (depth >= 1 && !currentIsBarrel) {
-        continue;
-      }
+    addIfTest(sourceFile, 0);
 
-      for (const importer of this.#importers.get(current) ?? []) {
-        if (visited.has(importer)) {
-          continue;
+    for (const testFile of this.#fileToTests.get(sourceFile) ?? []) {
+      addIfTest(testFile, 1);
+    }
+
+    const barrels = this.#fileToBarrels.get(sourceFile);
+    if (barrels?.size) {
+      const symbols = exportedSymbols ?? this.#readExportedSymbols(sourceFile);
+      for (const barrelFile of barrels) {
+        for (const [testFile, importedSymbols] of this.#barrelToTests.get(barrelFile) ?? []) {
+          if (this.#matchesBarrelSymbols(importedSymbols, symbols)) {
+            addIfTest(testFile, 1);
+          }
         }
-        if (currentIsBarrel && !this.#matchesBarrelSymbols(importer, current, barrelSymbols)) {
-          continue;
-        }
-        visited.add(importer);
-        const importerIsBarrel = TestImpactUtil.isBarrel(importer);
-        const nextBarrelSymbols = importerIsBarrel ? this.#exports.get(current) : undefined;
-        queue.push([importer, importerIsBarrel ? depth : depth + 1, nextBarrelSymbols]);
       }
     }
 
-    return impacted
+    return [...impacted.values()]
       .sort((a, b) => a.depth - b.depth || this.#getFailureRank(b.entry.import) - this.#getFailureRank(a.entry.import))
       .map(item => item.entry);
   }
@@ -234,16 +266,6 @@ export class TestImpactGraph extends DelegatingConsumer {
     return [...imports]
       .sort((a, b) => this.#getFailureRank(b) - this.#getFailureRank(a))
       .map(targetImport => ({ import: targetImport }));
-  }
-
-  #refreshIndexIfNeeded(event: CompilerChangeEvent): void {
-    if (event.action === 'create' || (event.action === 'update' && !this.#index.getFromImport(event.import))) {
-      try {
-        this.#index.reinitForModule(this.#index.manifest.main.name);
-      } catch {
-        // Ignore in-memory test manifests without a disk file
-      }
-    }
   }
 
   /**
