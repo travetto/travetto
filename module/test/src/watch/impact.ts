@@ -236,6 +236,16 @@ export class TestImpactGraph extends DelegatingConsumer {
       .map(targetImport => ({ import: targetImport }));
   }
 
+  #refreshIndexIfNeeded(event: CompilerChangeEvent): void {
+    if (event.action === 'create' || (event.action === 'update' && !this.#index.getFromImport(event.import))) {
+      try {
+        this.#index.reinitForModule(this.#index.manifest.main.name);
+      } catch {
+        // Ignore in-memory test manifests without a disk file
+      }
+    }
+  }
+
   /**
    * Handle a compiler change event and return the impacted test runs to queue
    */
@@ -244,6 +254,7 @@ export class TestImpactGraph extends DelegatingConsumer {
       return [];
     }
 
+    this.#refreshIndexIfNeeded(event);
     const entry = this.#index.getFromImport(event.import);
     if (entry?.role === 'doc' || event.file.startsWith('doc/') || event.file.includes('/doc/')) {
       return [];
