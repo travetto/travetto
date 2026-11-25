@@ -31,7 +31,7 @@ export class TestImpactGraph extends DelegatingConsumer {
   #keyMetadata = new Map<TestKey, TrackedTestMetadata>();
   #keyToSources = new Map<TestKey, Set<string>>();
   #sourceToKeys = new Map<string, Set<TestKey>>();
-  #warmedModules = new Set<string>();
+  #warmedImports = new Set<string>();
   #failingByImport = new Map<string, Set<TestKey>>();
   #lastFailed = new Map<string, number>();
   #failureSequence = 0;
@@ -54,8 +54,8 @@ export class TestImpactGraph extends DelegatingConsumer {
     }
     const workspacePath = this.#index.manifest.workspace.path;
     const moduleName = payload.module ?? testEntry.module;
-    if (moduleName) {
-      this.#warmedModules.add(moduleName);
+    if (Object.keys(payload.tests).length > 0) {
+      this.#warmedImports.add(payload.import);
     }
 
     for (const [keyString, entry] of TypedObject.entries(payload.tests)) {
@@ -134,6 +134,7 @@ export class TestImpactGraph extends DelegatingConsumer {
       }
     }
     if (!classId) {
+      this.#warmedImports.delete(importName);
       this.#failingByImport.delete(importName);
       this.#lastFailed.delete(importName);
       const traceFile = TestExecutionTracer.getTraceFile(this.#index, importName);
@@ -196,15 +197,14 @@ export class TestImpactGraph extends DelegatingConsumer {
       });
     }
 
-    if (changedModule && !hasSameModuleRun && !this.#warmedModules.has(changedModule)) {
-      this.#warmedModules.add(changedModule);
+    if (changedModule && !hasSameModuleRun) {
       const moduleTests = this.#index.find({
         module: module => module.name === changedModule,
         folder: folder => folder === 'test',
         file: file => file.role === 'test' && SOURCE_TYPES.has(file.type)
       });
       for (const testEntry of moduleTests) {
-        if (testEntry.import !== deletedImport && testEntry.import !== selfTestImport) {
+        if (testEntry.import !== deletedImport && testEntry.import !== selfTestImport && !this.#warmedImports.has(testEntry.import)) {
           rankedRuns.push({ depth: 1, run: { import: testEntry.import } });
         }
       }

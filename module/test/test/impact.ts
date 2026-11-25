@@ -138,6 +138,29 @@ class TestImpactGraphSuite {
       });
       assert.deepStrictEqual(coldRuns, [{ import: 'test-app/test/parser.ts' }, { import: 'test-app/test/other.ts' }]);
 
+      // If only test/other.ts is warmed (for yaml.ts), editing properties.ts must still fall back to untraced test/parser.ts
+      await tracer.saveImportTrace('test-app/test/other.ts', [
+        {
+          classId: 'test-app:test/other#OtherSuite',
+          methodName: 'verifyOther',
+          status: 'passed',
+          coveredFiles: [yamlSource]
+        }
+      ]);
+      graph.onEvent(makeSuiteAfterEvent('test-app/test/other.ts', 'test-app:test/other#OtherSuite'));
+
+      assert.deepStrictEqual(
+        await graph.onCompilerChange({
+          action: 'update',
+          file: 'module/app/src/properties.ts',
+          import: 'test-app/src/properties.ts',
+          output: '',
+          module: 'test-app',
+          time: Date.now()
+        }),
+        [{ import: 'test-app/test/parser.ts' }]
+      );
+
       // Worker persists per-import trace files, and watcher loads them on suite 'after'
       await tracer.saveImportTrace('test-app/test/parser.ts', [
         {
@@ -220,6 +243,11 @@ class TestImpactGraphSuite {
       const index = new ManifestIndex(buildManifest(workspacePath));
       const tracer = new TestExecutionTracer(undefined, index);
       const graph = new TestImpactGraph(undefined, index);
+
+      await tracer.saveImportTrace('test-app/test/other.ts', [
+        { classId: 'test-app:test/other#OtherSuite', methodName: 'verifyOther', status: 'passed', coveredFiles: [] }
+      ]);
+      graph.onEvent(makeSuiteAfterEvent('test-app/test/other.ts', 'test-app:test/other#OtherSuite'));
 
       // Initial passing run covers both properties.ts and yaml.ts
       await tracer.saveImportTrace('test-app/test/parser.ts', [
@@ -334,6 +362,10 @@ class TestImpactGraphSuite {
       const propertiesSource = path.resolve(workspacePath, 'module/app/src/properties.ts');
       const yamlSource = path.resolve(workspacePath, 'module/app/src/yaml.ts');
       const tracer = new TestExecutionTracer(undefined, new ManifestIndex(buildManifest(workspacePath)));
+
+      await tracer.saveImportTrace('test-app/test/other.ts', [
+        { classId: 'test-app:test/other#OtherSuite', methodName: 'verifyOther', status: 'passed', coveredFiles: [] }
+      ]);
 
       await tracer.saveImportTrace('test-app/test/parser.ts', [
         {
