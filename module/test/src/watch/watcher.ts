@@ -26,11 +26,11 @@ export class TestWatcher {
     Env.TRV_TEST_TRACE.set(true);
     await Registry.init();
 
-    const cacheFile = path.resolve(RuntimeIndex.outputRoot, 'test-impact.json');
+    const cacheDir = path.resolve(RuntimeIndex.outputRoot, 'test-impact');
     const impact = new TestImpactGraph(
       new CumulativeSummaryConsumer(await TestConsumerRegistryIndex.getInstance({ consumer: format })),
       RuntimeIndex,
-      cacheFile
+      cacheDir
     );
     await impact.loadCache();
 
@@ -66,6 +66,5 @@ export class TestWatcher {
 
     // Cleanup
     await queueProcessor;
-    await impact.flushCache();
   }
 }

@@ -9,7 +9,7 @@ import type { SuiteConfig, SuiteResult } from '../model/suite.ts';
 import type { TestConfig, TestResult, TestRun } from '../model/test.ts';
 import { TestModelUtil } from '../model/util.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
-import { TestExecutionTracer } from '../watch/tracer.ts';
+import { TestExecutionTracer, type TestMethodTrace } from '../watch/tracer.ts';
 import { Barrier } from './barrier.ts';
 import { ConsoleCapture } from './console.ts';
 import { TestPhaseManager } from './phase.ts';
@@ -56,13 +56,7 @@ export class TestExecutor {
   /**
    * Execute the test, capture output, assertions and promises
    */
-  async executeTest(
-    instance: unknown,
-    test: TestConfig,
-    suite: SuiteConfig,
-    override?: Partial<TestResult>,
-    collectCoveredFiles?: () => Promise<string[]>
-  ): Promise<TestResult> {
+  async executeTest(instance: unknown, test: TestConfig, suite: SuiteConfig, override?: Partial<TestResult>): Promise<TestResult> {
     const result = TestModelUtil.createTestResult(suite, test, override);
 
     // Mark test start
@@ -97,9 +91,6 @@ export class TestExecutor {
 
     result.output = consoleCapture.end();
     result.assertions = getAssertions();
-    if (collectCoveredFiles) {
-      result.coveredFiles = await collectCoveredFiles();
-    }
 
     // Mark completion
     this.#consumer.onEvent({ type: 'test', phase: 'after', test: result });
@@ -146,6 +137,7 @@ export class TestExecutor {
     this.#consumer.onEvent({ phase: 'before', type: 'suite', suite: { ...suite, tests: testConfigs } });
 
     const tracer = Env.TRV_TEST_TRACE.isTrue ? await TestExecutionTracer.create() : undefined;
+    const methodTraces: TestMethodTrace[] = [];
     try {
       await tracer?.resetDelta();
       try {
@@ -183,13 +175,15 @@ export class TestExecutor {
         }
 
         // Run test
-        const testResult = await this.executeTest(
-          instance,
-          test,
-          suite,
-          testResultOverride,
-          tracer ? async (): Promise<string[]> => [...new Set([...sharedSuiteFiles, ...(await tracer.collectDelta(suite.import))])] : undefined
-        );
+        const testResult = await this.executeTest(instance, test, suite, testResultOverride);
+        if (tracer) {
+          methodTraces.push({
+            classId: suite.classId,
+            methodName: test.methodName,
+            status: testResult.status,
+            coveredFiles: [...new Set([...sharedSuiteFiles, ...(await tracer.collectDelta(suite.import))])]
+          });
+        }
 
         // Handle after each
         try {
@@ -215,6 +209,8 @@ export class TestExecutor {
         }
         console.error('Failed to properly shutdown test', suiteError.message);
       }
+
+      await tracer?.saveImportTrace(suite.import, methodTraces);
     } finally {
       await tracer?.stop();
     }

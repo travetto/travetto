@@ -1,3 +1,4 @@
+import fsSync from 'node:fs';
 import fs from 'node:fs/promises';
 
 import type { CompilerChangeEvent } from '@travetto/compiler';
@@ -7,10 +8,10 @@ import { JSONUtil, Runtime, RuntimeIndex, TypedObject } from '@travetto/runtime'
 import type { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
 import { DelegatingConsumer } from '../consumer/types/delegating.ts';
 import type { TestEvent, TestRemoveEvent } from '../model/event.ts';
-import type { TestDiffInput, TestResult, TestRun } from '../model/test.ts';
+import type { TestDiffInput, TestRun } from '../model/test.ts';
+import { type PersistedImportTrace, TestExecutionTracer } from './tracer.ts';
 
 const SOURCE_TYPES = new Set(['ts', 'js']);
-const FLUSH_DEBOUNCE_MILLIS = 250;
 
 type TestKey = `${string}#${string}`;
 
@@ -21,21 +22,13 @@ type TrackedTestMetadata = {
   module?: string;
 };
 
-type PersistedImpactCache = {
-  version: 1;
-  files: string[];
-  warmedModules: string[];
-  tests: Record<TestKey, TrackedTestMetadata & { sources: number[] }>;
-};
-
 /**
  * Per-test-key runtime coverage cache and delegating test consumer for resolving impacted tests
  */
 export class TestImpactGraph extends DelegatingConsumer {
   #index: ManifestIndex;
   #target?: CumulativeSummaryConsumer;
-  #cacheFile?: string;
-  #flushTimer?: ReturnType<typeof setTimeout>;
+  #cacheDir?: string;
   #keyMetadata = new Map<TestKey, TrackedTestMetadata>();
   #keyToSources = new Map<TestKey, Set<string>>();
   #sourceToKeys = new Map<string, Set<TestKey>>();
@@ -44,25 +37,11 @@ export class TestImpactGraph extends DelegatingConsumer {
   #lastFailed = new Map<string, number>();
   #failureSequence = 0;
 
-  constructor(target?: CumulativeSummaryConsumer, index: ManifestIndex = RuntimeIndex, cacheFile?: string) {
+  constructor(target?: CumulativeSummaryConsumer, index: ManifestIndex = RuntimeIndex, cacheDir?: string) {
     super(target ? [target] : []);
     this.#target = target;
     this.#index = index;
-    this.#cacheFile = cacheFile;
-  }
-
-  #scheduleFlush(): void {
-    if (!this.#cacheFile) {
-      return;
-    }
-    if (this.#flushTimer) {
-      clearTimeout(this.#flushTimer);
-    }
-    this.#flushTimer = setTimeout(() => {
-      this.#flushTimer = undefined;
-      void this.flushCache();
-    }, FLUSH_DEBOUNCE_MILLIS);
-    this.#flushTimer.unref();
+    this.#cacheDir = cacheDir;
   }
 
   #getFailureRank(importName: string): number {
@@ -70,42 +49,57 @@ export class TestImpactGraph extends DelegatingConsumer {
     return (this.#failingByImport.get(importName)?.size ? 1_000_000_000 : 0) + sequence;
   }
 
-  #recordTrace(test: TestResult, coveredFiles: string[]): void {
-    const key: TestKey = `${test.classId}#${test.methodName}`;
-    const entry = this.#index.getFromImport(test.import);
-    const moduleName = entry?.module ?? this.#index.findModuleForArbitraryImport(test.import)?.name;
-
-    this.#keyMetadata.set(key, {
-      import: test.import,
-      classId: test.classId,
-      methodName: test.methodName,
-      module: moduleName
-    });
-
+  #applyImportTrace(payload: PersistedImportTrace): void {
+    const testEntry = this.#index.getFromImport(payload.import);
+    if (!testEntry) {
+      return;
+    }
+    const workspacePath = this.#index.manifest.workspace.path;
+    const moduleName = payload.module ?? testEntry.module;
     if (moduleName) {
       this.#warmedModules.add(moduleName);
     }
 
-    if (test.status === 'passed') {
+    for (const [keyString, entry] of TypedObject.entries(payload.tests)) {
+      const key = keyString as TestKey;
       const previous = this.#keyToSources.get(key);
       if (previous) {
         for (const sourceFile of previous) {
           this.#sourceToKeys.get(sourceFile)?.delete(key);
         }
       }
-      const next = new Set(coveredFiles);
-      this.#keyToSources.set(key, next);
-      for (const sourceFile of next) {
-        this.#sourceToKeys.getOrInsert(sourceFile, new Set()).add(key);
+
+      const validSources = new Set<string>();
+      for (const relativeSource of entry.sources) {
+        const absoluteSource = path.resolve(workspacePath, relativeSource);
+        if (this.#index.getEntry(absoluteSource)) {
+          validSources.add(absoluteSource);
+          this.#sourceToKeys.getOrInsert(absoluteSource, new Set()).add(key);
+        }
       }
-      this.#scheduleFlush();
-    } else if (test.status === 'failed' || test.status === 'errored') {
-      const existing = this.#keyToSources.getOrInsert(key, new Set());
-      for (const sourceFile of coveredFiles) {
-        existing.add(sourceFile);
-        this.#sourceToKeys.getOrInsert(sourceFile, new Set()).add(key);
+
+      this.#keyMetadata.set(key, {
+        import: payload.import,
+        classId: entry.classId,
+        methodName: entry.methodName,
+        module: moduleName
+      });
+      this.#keyToSources.set(key, validSources);
+    }
+  }
+
+  #loadImportCache(importName: string): void {
+    if (!this.#cacheDir) {
+      return;
+    }
+    const traceFile = TestExecutionTracer.getTraceFile(this.#cacheDir, importName);
+    try {
+      const parsed = JSONUtil.fromUTF8<PersistedImportTrace>(fsSync.readFileSync(traceFile, 'utf8'));
+      if (parsed?.version === 1 && parsed.tests) {
+        this.#applyImportTrace(parsed);
       }
-      this.#scheduleFlush();
+    } catch {
+      // No trace file on disk yet
     }
   }
 
@@ -134,7 +128,6 @@ export class TestImpactGraph extends DelegatingConsumer {
   #clearTests(importName: string, classId?: string, methodName?: string): void {
     if (classId && methodName) {
       this.#removeKey(`${classId}#${methodName}`);
-      this.#scheduleFlush();
       return;
     }
     for (const [key, metadata] of this.#keyMetadata.entries()) {
@@ -145,8 +138,10 @@ export class TestImpactGraph extends DelegatingConsumer {
     if (!classId) {
       this.#failingByImport.delete(importName);
       this.#lastFailed.delete(importName);
+      if (this.#cacheDir) {
+        void fs.rm(TestExecutionTracer.getTraceFile(this.#cacheDir, importName), { force: true }).catch(() => {});
+      }
     }
-    this.#scheduleFlush();
   }
 
   #removeSourceFile(sourceFile: string): void {
@@ -156,7 +151,6 @@ export class TestImpactGraph extends DelegatingConsumer {
         this.#keyToSources.get(key)?.delete(sourceFile);
       }
       this.#sourceToKeys.delete(sourceFile);
-      this.#scheduleFlush();
     }
   }
 
@@ -205,7 +199,6 @@ export class TestImpactGraph extends DelegatingConsumer {
 
     if (changedModule && !hasSameModuleRun && !this.#warmedModules.has(changedModule)) {
       this.#warmedModules.add(changedModule);
-      this.#scheduleFlush();
       const moduleTests = this.#index.find({
         module: module => module.name === changedModule,
         folder: folder => folder === 'test',
@@ -255,136 +248,53 @@ export class TestImpactGraph extends DelegatingConsumer {
   }
 
   /**
-   * Load persisted test-impact callgraph from disk, pruning missing files and tests
+   * Load all persisted per-import trace files from cacheDir, pruning missing files and tests
    */
   async loadCache(): Promise<void> {
-    if (!this.#cacheFile) {
+    if (!this.#cacheDir) {
       return;
     }
-    let parsed: PersistedImpactCache;
+    let files: string[];
     try {
-      parsed = JSONUtil.fromUTF8<PersistedImpactCache>(await fs.readFile(this.#cacheFile, 'utf8'));
+      files = await fs.readdir(this.#cacheDir);
     } catch {
       return;
     }
 
-    if (parsed?.version !== 1 || !Array.isArray(parsed.files) || !parsed.tests) {
-      return;
-    }
-
-    const workspacePath = this.#index.manifest.workspace.path;
-    const resolvedFiles = parsed.files.map(relativeFile => {
-      const absoluteFile = path.resolve(workspacePath, relativeFile);
-      return this.#index.getEntry(absoluteFile) ? absoluteFile : undefined;
-    });
-
-    for (const moduleName of parsed.warmedModules ?? []) {
-      if (this.#index.getModule(moduleName)?.workspace) {
-        this.#warmedModules.add(moduleName);
-      }
-    }
-
-    for (const [key, entry] of TypedObject.entries(parsed.tests)) {
-      const testEntry = this.#index.getFromImport(entry.import);
-      if (!testEntry) {
-        continue;
-      }
-      const validSources = new Set<string>();
-      for (const fileIndex of entry.sources) {
-        const resolved = resolvedFiles[fileIndex];
-        if (resolved) {
-          validSources.add(resolved);
-        }
-      }
-      this.#keyMetadata.set(key, {
-        import: entry.import,
-        classId: entry.classId,
-        methodName: entry.methodName,
-        module: entry.module ?? testEntry.module
-      });
-      this.#keyToSources.set(key, validSources);
-      for (const sourceFile of validSources) {
-        this.#sourceToKeys.getOrInsert(sourceFile, new Set()).add(key);
-      }
-    }
-  }
-
-  /**
-   * Atomically persist the current test-impact callgraph to disk
-   */
-  async flushCache(): Promise<void> {
-    if (this.#flushTimer) {
-      clearTimeout(this.#flushTimer);
-      this.#flushTimer = undefined;
-    }
-    if (!this.#cacheFile) {
-      return;
-    }
-
-    const workspacePath = this.#index.manifest.workspace.path;
-    const fileIndexBySource = new Map<string, number>();
-    const files: string[] = [];
-    const tests: PersistedImpactCache['tests'] = {};
-
-    for (const [key, metadata] of this.#keyMetadata.entries()) {
-      const sourceSet = this.#keyToSources.get(key);
-      if (!sourceSet) {
-        continue;
-      }
-      const sourceIndices: number[] = [];
-      for (const sourceFile of sourceSet) {
-        let index = fileIndexBySource.get(sourceFile);
-        if (index === undefined) {
-          index = files.length;
-          files.push(path.relative(workspacePath, sourceFile));
-          fileIndexBySource.set(sourceFile, index);
-        }
-        sourceIndices.push(index);
-      }
-      tests[key] = { ...metadata, sources: sourceIndices };
-    }
-
-    const payload: PersistedImpactCache = {
-      version: 1,
-      files,
-      warmedModules: [...this.#warmedModules],
-      tests
-    };
-
-    const tempFile = `${this.#cacheFile}.${process.pid}.tmp`;
-    try {
-      await fs.mkdir(path.dirname(this.#cacheFile), { recursive: true });
-      await fs.writeFile(tempFile, JSONUtil.toUTF8(payload), 'utf8');
-      await fs.rename(tempFile, this.#cacheFile);
-    } catch {
-      try {
-        await fs.rm(tempFile, { force: true });
-      } catch {
-        // Ignore cleanup failure
-      }
-    }
+    await Promise.all(
+      files
+        .filter(file => file.endsWith('.json'))
+        .map(async file => {
+          try {
+            const parsed = JSONUtil.fromUTF8<PersistedImportTrace>(await fs.readFile(path.join(this.#cacheDir!, file), 'utf8'));
+            if (parsed?.version === 1 && parsed.tests) {
+              this.#applyImportTrace(parsed);
+            }
+          } catch {
+            // Ignore malformed trace file
+          }
+        })
+    );
   }
 
   transform(event: TestEvent): TestEvent {
     if (event.type === 'test' && event.phase === 'after') {
-      const { coveredFiles, ...cleanTest } = event.test;
-      const key: TestKey = `${cleanTest.classId}#${cleanTest.methodName}`;
-      if (cleanTest.status === 'failed' || cleanTest.status === 'errored') {
-        this.#failingByImport.getOrInsert(cleanTest.import, new Set()).add(key);
-        this.#lastFailed.set(cleanTest.import, (this.#failureSequence += 1));
+      const { import: importName, classId, methodName, status } = event.test;
+      const key: TestKey = `${classId}#${methodName}`;
+      if (status === 'failed' || status === 'errored') {
+        this.#failingByImport.getOrInsert(importName, new Set()).add(key);
+        this.#lastFailed.set(importName, (this.#failureSequence += 1));
       } else {
-        const failing = this.#failingByImport.get(cleanTest.import);
+        const failing = this.#failingByImport.get(importName);
         if (failing) {
           failing.delete(key);
           if (failing.size === 0) {
-            this.#failingByImport.delete(cleanTest.import);
+            this.#failingByImport.delete(importName);
           }
         }
       }
-      if (coveredFiles) {
-        this.#recordTrace(cleanTest, coveredFiles);
-      }
-      return { ...event, test: cleanTest };
+    } else if (event.type === 'suite' && event.phase === 'after') {
+      this.#loadImportCache(event.suite.import);
     }
     return event;
   }

@@ -1,27 +1,57 @@
+import fs from 'node:fs/promises';
 import inspector from 'node:inspector/promises';
 import { fileURLToPath } from 'node:url';
 
-import type { ManifestIndex } from '@travetto/manifest';
-import { RuntimeIndex } from '@travetto/runtime';
+import { type ManifestIndex, path } from '@travetto/manifest';
+import { JSONUtil, RuntimeIndex } from '@travetto/runtime';
+
+import type { TestStatus } from '../model/test.ts';
 
 const IGNORED_FUNCTION_NAMES = new Set(['', '<instance_members_initializer>', '<computed>']);
 
+export type TestMethodTrace = {
+  classId: string;
+  methodName: string;
+  status: TestStatus;
+  coveredFiles: string[];
+};
+
+export type PersistedImportTrace = {
+  version: 1;
+  import: string;
+  module?: string;
+  tests: Record<
+    string,
+    {
+      classId: string;
+      methodName: string;
+      sources: string[];
+    }
+  >;
+};
+
 /**
- * Captures per-test executed workspace source files via V8 Precise Coverage
+ * Captures per-test executed workspace source files via V8 Precise Coverage and persists per-import traces
  */
 export class TestExecutionTracer {
-  static async create(index: ManifestIndex = RuntimeIndex): Promise<TestExecutionTracer> {
-    const tracer = new TestExecutionTracer(index);
+  static getTraceFile(cacheDir: string, importName: string): string {
+    return path.resolve(cacheDir, `${encodeURIComponent(importName)}.json`);
+  }
+
+  static async create(index: ManifestIndex = RuntimeIndex, cacheDir?: string): Promise<TestExecutionTracer> {
+    const tracer = new TestExecutionTracer(index, cacheDir);
     await tracer.start();
     return tracer;
   }
 
   #index: ManifestIndex;
+  #cacheDir: string;
   #session = new inspector.Session();
   #active = false;
 
-  constructor(index: ManifestIndex = RuntimeIndex) {
+  constructor(index: ManifestIndex = RuntimeIndex, cacheDir = path.resolve(index.outputRoot, 'test-impact')) {
     this.#index = index;
+    this.#cacheDir = cacheDir;
   }
 
   async start(): Promise<void> {
@@ -82,6 +112,68 @@ export class TestExecutionTracer {
     }
 
     return [...sources];
+  }
+
+  /**
+   * Merge and persist per-method traces for a test import file
+   */
+  async saveImportTrace(importName: string, traces: TestMethodTrace[]): Promise<void> {
+    if (traces.length === 0) {
+      return;
+    }
+
+    const traceFile = TestExecutionTracer.getTraceFile(this.#cacheDir, importName);
+    const workspacePath = this.#index.manifest.workspace.path;
+    const moduleName =
+      this.#index.getFromImport(importName)?.module ?? this.#index.findModuleForArbitraryImport(importName)?.name;
+
+    let payload: PersistedImportTrace = {
+      version: 1,
+      import: importName,
+      module: moduleName,
+      tests: {}
+    };
+
+    try {
+      const existing = JSONUtil.fromUTF8<PersistedImportTrace>(await fs.readFile(traceFile, 'utf8'));
+      if (existing?.version === 1 && existing.tests) {
+        payload = existing;
+      }
+    } catch {
+      // No prior trace file
+    }
+
+    for (const trace of traces) {
+      const key = `${trace.classId}#${trace.methodName}`;
+      const relativeSources = trace.coveredFiles.map(sourceFile => path.relative(workspacePath, sourceFile));
+      if (trace.status === 'passed') {
+        payload.tests[key] = {
+          classId: trace.classId,
+          methodName: trace.methodName,
+          sources: [...new Set(relativeSources)]
+        };
+      } else if (trace.status === 'failed' || trace.status === 'errored') {
+        const previous = payload.tests[key]?.sources ?? [];
+        payload.tests[key] = {
+          classId: trace.classId,
+          methodName: trace.methodName,
+          sources: [...new Set([...previous, ...relativeSources])]
+        };
+      }
+    }
+
+    const tempFile = `${traceFile}.${process.pid}.tmp`;
+    try {
+      await fs.mkdir(this.#cacheDir, { recursive: true });
+      await fs.writeFile(tempFile, JSONUtil.toUTF8(payload), 'utf8');
+      await fs.rename(tempFile, traceFile);
+    } catch {
+      try {
+        await fs.rm(tempFile, { force: true });
+      } catch {
+        // Ignore cleanup failure
+      }
+    }
   }
 
   async stop(): Promise<void> {

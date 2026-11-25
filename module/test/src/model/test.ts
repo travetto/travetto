@@ -123,10 +123,6 @@ export interface TestResult extends TestCore {
    * Know where the suite started for this test
    */
   suiteLineStart: number;
-  /**
-   * Workspace source files executed during this test when tracing is active
-   */
-  coveredFiles?: string[];
 }
 
 /**
