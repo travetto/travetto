@@ -217,12 +217,8 @@ export class RunUtil {
    */
   static async runTests(consumerConfig: TestConsumerConfig, input: TestRunInput): Promise<boolean | undefined> {
     const { runs, removes } = await this.resolveInput(input);
-    const trackCovered = consumerConfig.trackCovered ?? runs[0].trackCovered;
 
-    let targetConsumer = await TestConsumerRegistryIndex.getInstance(consumerConfig);
-    if (runs.length === 1 && trackCovered) {
-      targetConsumer = new TestExecutionTracer(targetConsumer);
-    }
+    const targetConsumer = await TestConsumerRegistryIndex.getInstance(consumerConfig);
 
     const consumer = await this.getRunnableConsumer(targetConsumer, runs);
 
@@ -233,10 +229,17 @@ export class RunUtil {
     }
 
     if (runs.length === 1) {
+      if (consumerConfig.trackCovered ?? runs[0].trackCovered) {
+        consumer.addConsumer(new TestExecutionTracer(targetConsumer));
+      }
       await new TestExecutor(consumer).execute(runs[0], true);
     } else {
       await WorkPool.run(
-        run => buildStandardTestManager(consumer, trackCovered ? { ...run, trackCovered: true } : run),
+        run =>
+          buildStandardTestManager(consumer, {
+            ...run,
+            trackCovered: consumerConfig.trackCovered ?? run.trackCovered
+          }),
         runs.toSorted(() => (Math.random() < 0.5 ? -1 : 1)),
         {
           idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),
