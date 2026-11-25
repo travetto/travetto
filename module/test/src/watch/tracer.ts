@@ -124,6 +124,11 @@ export class TestExecutionTracer extends DelegatingConsumer {
   }
 
   override async onStart(state: TestRunState): Promise<void> {
+    this.#ensureStarted();
+    await super.onStart(state);
+  }
+
+  #ensureStarted(): void {
     if (!this.#session) {
       const session = new inspector.Session();
       session.connect();
@@ -131,12 +136,12 @@ export class TestExecutionTracer extends DelegatingConsumer {
       session.post('Profiler.startPreciseCoverage', { callCount: true, detailed: false });
       this.#session = session;
     }
-    await super.onStart(state);
   }
 
   override transform(event: TestEvent): TestEvent {
     if (event.type === 'suite') {
       if (event.phase === 'before') {
+        this.#ensureStarted();
         this.#sharedSuiteFiles = undefined;
         this.#methodTraces = [];
         this.#resetDelta();
@@ -166,10 +171,7 @@ export class TestExecutionTracer extends DelegatingConsumer {
     return event;
   }
 
-  override async summarize(summary?: SuitesSummary): Promise<void> {
-    if (summary) {
-      await super.summarize(summary);
-    }
+  async onSummary(): Promise<void> {
     await this.flush();
   }
 
@@ -238,7 +240,6 @@ export class TestExecutionTracer extends DelegatingConsumer {
    * Wait for any pending trace file writes and stop the inspector session
    */
   async flush(): Promise<void> {
-    super.summarize();
     this.#stop();
     await Promise.all(this.#pendingSaves);
     this.#pendingSaves = [];
