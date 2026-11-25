@@ -239,7 +239,7 @@ class TestRunnerFeature extends BaseFeature {
    * On feature activate
    */
   async activate(context: vscode.ExtensionContext): Promise<void> {
-    this.#consumer = new WorkspaceResultsManager(this.log, vscode.window);
+    this.#consumer = new WorkspaceResultsManager(this.log);
 
     this.register('line', (line?: number) => this.#launchTestDebugger(line));
     this.register('stop', () => this.#stopServer(true));
