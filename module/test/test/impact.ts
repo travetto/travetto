@@ -27,12 +27,12 @@ class TestImpactGraphSuite {
       const fixtureFile = path.toPosix(path.join(fixtureDirectory, 'helper.ts'));
 
       await fs.writeFile(leafFile, "import { helper } from './middle.ts';\nexport const leafValue = helper();", 'utf8');
-      await fs.writeFile(middleFile, "export * from './leaf.ts';\nexport const helper = (): number => 1;", 'utf8');
+      await fs.writeFile(middleFile, 'export const helper = (): number => 1;', 'utf8');
       await fs.writeFile(unusedFile, 'export const untouched = 42;', 'utf8');
-      await fs.writeFile(directTestFile, "import { leafValue } from '../src/leaf.ts';\nexport const testOne = leafValue;", 'utf8');
+      await fs.writeFile(directTestFile, "@Suite()\nclass LeafSuite {\n  // @ts-ignore\n  test = () => leafValue;\n}\nimport { leafValue } from '../src/leaf.ts';", 'utf8');
       await fs.writeFile(
         transitiveTestFile,
-        "export async function run() { const mod = await import('../src/middle.ts'); return mod.helper(); }",
+        "@Suite()\nclass MiddleSuite {\n  async run() { const mod = await import('../src/middle.ts'); return mod.helper(); }\n}",
         'utf8'
       );
       await fs.writeFile(fixtureFile, "import { leafValue } from '../../src/leaf.ts';\nexport const fixtureValue = leafValue;", 'utf8');
@@ -78,7 +78,7 @@ class TestImpactGraphSuite {
       );
       assert.deepStrictEqual(
         graph.getImpactedTests(middleFile).map(entry => entry.sourceFile),
-        [transitiveTestFile]
+        [transitiveTestFile, directTestFile]
       );
       assert.deepStrictEqual(graph.getImpactedTests(unusedFile), []);
       assert.deepStrictEqual(
@@ -116,8 +116,8 @@ class TestImpactGraphSuite {
       await fs.writeFile(barrelFile, "export * from './src/env.ts';\nexport * from './src/json.ts';", 'utf8');
       await fs.writeFile(envFile, 'export class EnvProp {}', 'utf8');
       await fs.writeFile(jsonFile, 'export class JSONUtil {}', 'utf8');
-      await fs.writeFile(envTestFile, "import { EnvProp } from 'test-app';\nexport const a = new EnvProp();", 'utf8');
-      await fs.writeFile(jsonTestFile, "import { JSONUtil } from 'test-app';\nexport const b = new JSONUtil();", 'utf8');
+      await fs.writeFile(envTestFile, "@Suite()\nclass EnvSuite {}\nimport { EnvProp } from 'test-app';\nexport const a = new EnvProp();", 'utf8');
+      await fs.writeFile(jsonTestFile, "@Suite()\nclass JsonSuite {}\nimport { JSONUtil } from 'test-app';\nexport const b = new JSONUtil();", 'utf8');
       await fs.writeFile(docTestFile, "import { EnvProp } from 'test-app';\nexport const docSample = new EnvProp();", 'utf8');
 
       const manifest: ManifestRoot = {

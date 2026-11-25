@@ -21,8 +21,10 @@ export class TestImpactGraph extends DelegatingConsumer {
   #target?: CumulativeSummaryConsumer;
   #watchedDependencies = new Map<string, Set<string>>();
   #fileToTests = new Map<string, Set<string>>();
+  #fileToNonTests = new Map<string, Set<string>>();
   #fileToBarrels = new Map<string, Set<string>>();
   #barrelToTests = new Map<string, Map<string, ImportedSymbolSet>>();
+  #barrelToNonTests = new Map<string, Map<string, ImportedSymbolSet>>();
   #failingTests = new Map<string, Set<string>>();
   #lastFailed = new Map<string, number>();
   #failureSequence = 0;
@@ -89,19 +91,8 @@ export class TestImpactGraph extends DelegatingConsumer {
   }
 
   async #onFileUpdate(event: CompilerChangeEvent, sourceFile: string, isTest: boolean): Promise<(TestRun | TestDiffInput)[]> {
-    const isBarrel = TestImpactUtil.isBarrel(sourceFile);
-    let exportedSymbols: Set<string> | undefined;
-    if (isTest || isBarrel) {
-      await this.updateFile(sourceFile);
-    } else {
-      try {
-        exportedSymbols = TestImpactUtil.extractExports(await fs.readFile(sourceFile, 'utf8'));
-      } catch {
-        exportedSymbols = new Set();
-      }
-    }
-
-    const runs = this.#getImpactedRuns(sourceFile, exportedSymbols);
+    await this.updateFile(sourceFile);
+    const runs = this.#getImpactedRuns(sourceFile);
     const isDoc = event.file.startsWith('doc/') || event.file.includes('/doc/');
     if (runs.length === 0 && !isDoc && (isTest || ManifestModuleUtil.getFileRole(event.file) === 'test' || event.file.includes('/test/'))) {
       runs.push(
@@ -149,34 +140,50 @@ export class TestImpactGraph extends DelegatingConsumer {
   }
 
   /**
-   * Build the initial import map for workspace test and barrel files only
+   * Build the initial import map for workspace source, test, and barrel files
    */
   async init(): Promise<void> {
     const files = this.#index.find({
       module: module => !!module.workspace,
-      folder: folder => folder === '$index' || folder === 'test',
-      file: file => SOURCE_TYPES.has(file.type) && (file.role === 'test' || TestImpactUtil.isBarrel(file.sourceFile))
+      folder: folder => folder !== 'doc',
+      file: file => SOURCE_TYPES.has(file.type) && file.role !== 'doc'
     });
     await Promise.all(files.map(file => this.updateFile(file.sourceFile)));
   }
 
   /**
-   * Remove a test or barrel file and its tracked outgoing edges
+   * Remove a file and its tracked outgoing edges
    */
   removeFile(sourceFile: string): void {
     const previous = this.#watchedDependencies.get(sourceFile);
     if (previous) {
       for (const dependency of previous) {
         this.#fileToTests.get(dependency)?.delete(sourceFile);
+        this.#fileToNonTests.get(dependency)?.delete(sourceFile);
         this.#fileToBarrels.get(dependency)?.delete(sourceFile);
         this.#barrelToTests.get(dependency)?.delete(sourceFile);
+        this.#barrelToNonTests.get(dependency)?.delete(sourceFile);
       }
       this.#watchedDependencies.delete(sourceFile);
     }
   }
 
+  #recordBarrelImport(barrelMap: Map<string, Map<string, ImportedSymbolSet>>, barrel: string, consumer: string, symbols: ImportedSymbolSet): void {
+    const consumerImports = barrelMap.getOrInsert(barrel, new Map());
+    const existing = consumerImports.get(consumer);
+    if (existing === '*' || symbols === '*') {
+      consumerImports.set(consumer, '*');
+    } else if (existing) {
+      for (const symbol of symbols) {
+        existing.add(symbol);
+      }
+    } else {
+      consumerImports.set(consumer, new Set(symbols));
+    }
+  }
+
   /**
-   * Re-read a test or barrel file and refresh its dependency edges
+   * Re-read a file and refresh its dependency edges
    */
   async updateFile(sourceFile: string): Promise<void> {
     this.removeFile(sourceFile);
@@ -189,6 +196,8 @@ export class TestImpactGraph extends DelegatingConsumer {
     }
 
     const isBarrel = TestImpactUtil.isBarrel(sourceFile);
+    const entry = this.#index.getEntry(sourceFile);
+    const isTestSuite = entry?.role === 'test' && /@Suite\s*\(/.test(content);
     const next = new Set<string>();
 
     for (const [specifier, symbols] of TestImpactUtil.extractImports(content)) {
@@ -201,19 +210,9 @@ export class TestImpactGraph extends DelegatingConsumer {
       if (isBarrel) {
         this.#fileToBarrels.getOrInsert(resolved.sourceFile, new Set()).add(sourceFile);
       } else if (TestImpactUtil.isBarrel(resolved.sourceFile)) {
-        const testImports = this.#barrelToTests.getOrInsert(resolved.sourceFile, new Map());
-        const existing = testImports.get(sourceFile);
-        if (existing === '*' || symbols === '*') {
-          testImports.set(sourceFile, '*');
-        } else if (existing) {
-          for (const symbol of symbols) {
-            existing.add(symbol);
-          }
-        } else {
-          testImports.set(sourceFile, new Set(symbols));
-        }
+        this.#recordBarrelImport(isTestSuite ? this.#barrelToTests : this.#barrelToNonTests, resolved.sourceFile, sourceFile, symbols);
       } else {
-        this.#fileToTests.getOrInsert(resolved.sourceFile, new Set()).add(sourceFile);
+        (isTestSuite ? this.#fileToTests : this.#fileToNonTests).getOrInsert(resolved.sourceFile, new Set()).add(sourceFile);
       }
     }
 
@@ -221,10 +220,12 @@ export class TestImpactGraph extends DelegatingConsumer {
   }
 
   /**
-   * Find test files directly importing sourceFile or importing matching symbols from its barrel
+   * Find test files directly importing sourceFile, importing matching symbols from its barrel,
+   * or belonging to a module whose non-test file consumes sourceFile
    */
   getImpactedTests(sourceFile: string, exportedSymbols?: Set<string>): IndexedFile[] {
     const impacted = new Map<string, { entry: IndexedFile; depth: number }>();
+    const impactedModules = new Set<string>();
 
     const addIfTest = (file: string, depth: number): void => {
       if (impacted.has(file)) {
@@ -236,10 +237,20 @@ export class TestImpactGraph extends DelegatingConsumer {
       }
     };
 
+    const addModuleForNonTest = (file: string): void => {
+      const entry = this.#index.getEntry(file);
+      if (entry) {
+        impactedModules.add(entry.module);
+      }
+    };
+
     addIfTest(sourceFile, 0);
 
     for (const testFile of this.#fileToTests.get(sourceFile) ?? []) {
       addIfTest(testFile, 1);
+    }
+    for (const nonTestFile of this.#fileToNonTests.get(sourceFile) ?? []) {
+      addModuleForNonTest(nonTestFile);
     }
 
     const barrels = this.#fileToBarrels.get(sourceFile);
@@ -251,6 +262,22 @@ export class TestImpactGraph extends DelegatingConsumer {
             addIfTest(testFile, 1);
           }
         }
+        for (const [nonTestFile, importedSymbols] of this.#barrelToNonTests.get(barrelFile) ?? []) {
+          if (this.#matchesBarrelSymbols(importedSymbols, symbols)) {
+            addModuleForNonTest(nonTestFile);
+          }
+        }
+      }
+    }
+
+    if (impactedModules.size > 0) {
+      const moduleTests = this.#index.find({
+        module: module => impactedModules.has(module.name),
+        folder: folder => folder === 'test',
+        file: file => file.role === 'test' && SOURCE_TYPES.has(file.type)
+      });
+      for (const testEntry of moduleTests) {
+        addIfTest(testEntry.sourceFile, 2);
       }
     }
 
