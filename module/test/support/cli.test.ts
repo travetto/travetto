@@ -35,6 +35,11 @@ export class TestCommand implements CliCommandShape {
    */
   formatOptions?: string[];
 
+  /**
+   * Track executed files per test into the watch impact cache
+   */
+  trackCovered?: boolean;
+
   finalize(): void {
     EventEmitter.defaultMaxListeners = 1000;
     Env.TRV_ROLE.set('test');
@@ -52,7 +57,8 @@ export class TestCommand implements CliCommandShape {
       {
         concurrency: this.concurrency,
         consumer: this.format,
-        consumerOptions: CliUtil.readExtendedOptions(this.formatOptions)
+        consumerOptions: CliUtil.readExtendedOptions(this.formatOptions),
+        trackCovered: this.trackCovered
       },
       importPath
         ? {

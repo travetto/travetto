@@ -13,6 +13,7 @@ import { RunnableTestConsumer } from '../consumer/types/runnable.ts';
 import type { TestRemoveEvent } from '../model/event.ts';
 import type { TestConfig, TestDiffInput, TestGlobInput, TestRun, TestRunInput } from '../model/test.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
+import { TestImpactGraph } from '../watch/impact.ts';
 import { buildStandardTestManager } from '../worker/standard.ts';
 import { TestExecutor } from './executor.ts';
 import type { TestConsumerConfig } from './types.ts';
@@ -190,8 +191,8 @@ export class RunUtil {
   /**
    * Build test consumer that wraps a given targeted consumer, and the tests to be run
    */
-  static async getRunnableConsumer(target: TestConsumerShape, testRuns: TestRun[]): Promise<RunnableTestConsumer> {
-    const consumer = new RunnableTestConsumer(target);
+  static async getRunnableConsumer(target: TestConsumerShape | TestConsumerShape[], testRuns: TestRun[]): Promise<RunnableTestConsumer> {
+    const consumer = new RunnableTestConsumer(...(Array.isArray(target) ? target : [target]));
     const testCount = testRuns.reduce((acc, cur) => acc + (cur.methodNames ? cur.methodNames.length : 0), 0);
 
     await consumer.onStart({ testCount });
@@ -215,10 +216,20 @@ export class RunUtil {
    * Run tests
    */
   static async runTests(consumerConfig: TestConsumerConfig, input: TestRunInput): Promise<boolean | undefined> {
+    if (consumerConfig.trackCovered) {
+      Env.TRV_TEST_TRACE.set(true);
+    }
+
     const { runs, removes } = await this.resolveInput(input);
 
     const targetConsumer = await TestConsumerRegistryIndex.getInstance(consumerConfig);
-    const consumer = await this.getRunnableConsumer(targetConsumer, runs);
+    let impact: TestImpactGraph | undefined;
+    if (consumerConfig.trackCovered) {
+      impact = new TestImpactGraph(undefined, RuntimeIndex, path.resolve(RuntimeIndex.outputRoot, 'test-impact.json'));
+      await impact.loadCache();
+    }
+
+    const consumer = await this.getRunnableConsumer(impact ? [targetConsumer, impact] : targetConsumer, runs);
 
     await this.reinitManifestIfNeeded(runs);
 
@@ -240,6 +251,7 @@ export class RunUtil {
       );
     }
 
+    await impact?.flushCache();
     return consumer.summarizeAsBoolean();
   }
 }
