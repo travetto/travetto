@@ -9,6 +9,7 @@ import type { SuiteConfig, SuiteResult } from '../model/suite.ts';
 import type { TestConfig, TestResult, TestRun } from '../model/test.ts';
 import { TestModelUtil } from '../model/util.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
+import { TestExecutionTracer } from '../watch/tracer.ts';
 import { Barrier } from './barrier.ts';
 import { ConsoleCapture } from './console.ts';
 import { TestPhaseManager } from './phase.ts';
@@ -55,7 +56,13 @@ export class TestExecutor {
   /**
    * Execute the test, capture output, assertions and promises
    */
-  async executeTest(instance: unknown, test: TestConfig, suite: SuiteConfig, override?: Partial<TestResult>): Promise<TestResult> {
+  async executeTest(
+    instance: unknown,
+    test: TestConfig,
+    suite: SuiteConfig,
+    override?: Partial<TestResult>,
+    collectCoveredFiles?: () => Promise<string[]>
+  ): Promise<TestResult> {
     const result = TestModelUtil.createTestResult(suite, test, override);
 
     // Mark test start
@@ -90,6 +97,9 @@ export class TestExecutor {
 
     result.output = consoleCapture.end();
     result.assertions = getAssertions();
+    if (collectCoveredFiles) {
+      result.coveredFiles = await collectCoveredFiles();
+    }
 
     // Mark completion
     this.#consumer.onEvent({ type: 'test', phase: 'after', test: result });
@@ -135,64 +145,78 @@ export class TestExecutor {
     // Mark suite start
     this.#consumer.onEvent({ phase: 'before', type: 'suite', suite: { ...suite, tests: testConfigs } });
 
+    const tracer = Env.TRV_TEST_TRACE.isTrue ? await TestExecutionTracer.create() : undefined;
     try {
-      // Handle the BeforeAll calls
-      await manager.startPhase('all');
-    } catch (someError) {
-      const suiteError = await manager.onError('all', someError);
-      for (const method of validTestMethodNames) {
-        testResultOverrides[method] ??= { status: 'errored', error: suiteError };
-      }
-    }
-
-    const suiteEnv = { ...process.env };
-
-    for (const test of tests) {
-      // Reset env before each test
-      process.env = { ...suiteEnv };
-
-      const testStart = Date.now();
-      const testResultOverride = (testResultOverrides[test.methodName] ??= {});
-
-      if (await this.#shouldSkip(test, instance)) {
-        testResultOverride.status = 'skipped';
-      }
-
+      await tracer?.resetDelta();
       try {
-        // Handle BeforeEach
-        testResultOverride.status || (await manager.startPhase('each'));
+        // Handle the BeforeAll calls
+        await manager.startPhase('all');
       } catch (someError) {
-        const testError = await manager.onError('each', someError);
-        testResultOverride.error = testError;
-        testResultOverride.status = 'errored';
-      }
-
-      // Run test
-      const testResult = await this.executeTest(instance, test, suite, testResultOverride);
-
-      // Handle after each
-      try {
-        testResultOverride.status || (await manager.endPhase('each'));
-      } catch (testError) {
-        if (!(testError instanceof Error)) {
-          throw testError;
+        const suiteError = await manager.onError('all', someError);
+        for (const method of validTestMethodNames) {
+          testResultOverrides[method] ??= { status: 'errored', error: suiteError };
         }
-        console.error('Failed to properly shutdown test', testError.message);
+      }
+      const sharedSuiteFiles = tracer ? await tracer.collectDelta(suite.import) : [];
+
+      const suiteEnv = { ...process.env };
+
+      for (const test of tests) {
+        // Reset env before each test
+        process.env = { ...suiteEnv };
+
+        const testStart = Date.now();
+        const testResultOverride = (testResultOverrides[test.methodName] ??= {});
+
+        if (await this.#shouldSkip(test, instance)) {
+          testResultOverride.status = 'skipped';
+        }
+
+        await tracer?.resetDelta();
+        try {
+          // Handle BeforeEach
+          testResultOverride.status || (await manager.startPhase('each'));
+        } catch (someError) {
+          const testError = await manager.onError('each', someError);
+          testResultOverride.error = testError;
+          testResultOverride.status = 'errored';
+        }
+
+        // Run test
+        const testResult = await this.executeTest(
+          instance,
+          test,
+          suite,
+          testResultOverride,
+          tracer ? async (): Promise<string[]> => [...new Set([...sharedSuiteFiles, ...(await tracer.collectDelta(suite.import))])] : undefined
+        );
+
+        // Handle after each
+        try {
+          testResultOverride.status || (await manager.endPhase('each'));
+        } catch (testError) {
+          if (!(testError instanceof Error)) {
+            throw testError;
+          }
+          console.error('Failed to properly shutdown test', testError.message);
+        }
+
+        result.tests[testResult.methodName] = testResult;
+        testResult.duration = Date.now() - testStart;
+        TestModelUtil.countTestResult(result, [testResult]);
       }
 
-      result.tests[testResult.methodName] = testResult;
-      testResult.duration = Date.now() - testStart;
-      TestModelUtil.countTestResult(result, [testResult]);
-    }
-
-    try {
-      // Handle after all
-      await manager.endPhase('all');
-    } catch (suiteError) {
-      if (!(suiteError instanceof Error)) {
-        throw suiteError;
+      try {
+        // Handle after all
+        await manager.endPhase('all');
+      } catch (suiteError) {
+        if (!(suiteError instanceof Error)) {
+          throw suiteError;
+        }
+        console.error('Failed to properly shutdown test', suiteError.message);
       }
-      console.error('Failed to properly shutdown test', suiteError.message);
+    } finally {
+      await tracer?.stop();
     }
 
     // Restore env

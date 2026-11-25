@@ -16,5 +16,9 @@ declare module '@travetto/runtime' {
      * The tags to include or exclude during testing
      */
     TRV_TEST_TAGS: string[];
+    /**
+     * Enable V8 execution tracing per test method in watch mode
+     */
+    TRV_TEST_TRACE: boolean;
   }
 }
