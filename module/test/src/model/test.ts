@@ -149,6 +149,10 @@ export type TestRun = {
    * unique id for the run
    */
   runId?: string;
+  /**
+   * Whether to record per-test execution coverage traces
+   */
+  trackCovered?: boolean;
 };
 
 /**
@@ -167,6 +171,10 @@ export type TestDiffInput = {
    * Test run metadata
    */
   metadata?: UnknownRecord;
+  /**
+   * Whether to record per-test execution coverage traces
+   */
+  trackCovered?: boolean;
 };
 
 /**
@@ -185,6 +193,10 @@ export type TestGlobInput = {
    * Test run metadata
    */
   metadata?: UnknownRecord;
+  /**
+   * Whether to record per-test execution coverage traces
+   */
+  trackCovered?: boolean;
 };
 
 export type TestRunInput = TestRun | TestDiffInput | TestGlobInput;

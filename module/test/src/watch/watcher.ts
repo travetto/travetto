@@ -1,6 +1,6 @@
 import { path } from '@travetto/manifest';
 import { Registry } from '@travetto/registry';
-import { AsyncQueue, Env, RuntimeIndex, TimeUtil, WatchUtil } from '@travetto/runtime';
+import { AsyncQueue, RuntimeIndex, TimeUtil, WatchUtil } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
 
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
@@ -23,7 +23,6 @@ export class TestWatcher {
   static async watch(format: string, runAllOnStart = true): Promise<void> {
     console.debug('Listening for changes');
 
-    Env.TRV_TEST_TRACE.set(true);
     await Registry.init();
 
     const cacheDir = path.resolve(RuntimeIndex.outputRoot, 'test-impact');
@@ -37,7 +36,7 @@ export class TestWatcher {
     const events: (TestRun | TestDiffInput)[] = [];
 
     if (runAllOnStart) {
-      events.push(...(await RunUtil.resolveGlobInput({ globs: [] })));
+      events.push(...(await RunUtil.resolveGlobInput({ globs: [] })).map(run => ({ ...run, trackCovered: true })));
     }
 
     const queue = new AsyncQueue(events);
@@ -45,7 +44,7 @@ export class TestWatcher {
     process.on('message', event => {
       if (isTestRunEvent(event)) {
         for (const run of impact.onRunTests(event.imports)) {
-          queue.add(run, true);
+          queue.add({ ...run, trackCovered: true }, true);
         }
       }
     });
@@ -60,7 +59,7 @@ export class TestWatcher {
 
     await WatchUtil.watchCompilerEvents('change', async event => {
       for (const run of await impact.onCompilerChange(event)) {
-        queue.add(run, true);
+        queue.add({ ...run, trackCovered: true }, true);
       }
     });
 

@@ -21,9 +21,11 @@ const TEST_TIMEOUT = TimeUtil.duration(Env.TRV_TEST_TIMEOUT.value || 5000, 'ms')
  */
 export class TestExecutor {
   #consumer: TestConsumerShape;
+  #trackCovered: boolean;
 
-  constructor(consumer: TestConsumerShape) {
+  constructor(consumer: TestConsumerShape, trackCovered = false) {
     this.#consumer = consumer;
+    this.#trackCovered = trackCovered;
   }
 
   /**
@@ -136,7 +138,7 @@ export class TestExecutor {
     // Mark suite start
     this.#consumer.onEvent({ phase: 'before', type: 'suite', suite: { ...suite, tests: testConfigs } });
 
-    const tracer = Env.TRV_TEST_TRACE.isTrue ? await TestExecutionTracer.create() : undefined;
+    const tracer = this.#trackCovered ? await TestExecutionTracer.create() : undefined;
     const methodTraces: TestMethodTrace[] = [];
     try {
       await tracer?.resetDelta();

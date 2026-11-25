@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 
 import { ManifestIndex, type ManifestRoot, path } from '@travetto/manifest';
-import { Env, JSONUtil, RuntimeIndex } from '@travetto/runtime';
+import { JSONUtil, RuntimeIndex } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 import { TestExecutor } from '../src/execute/executor.ts';
@@ -305,18 +305,12 @@ class TestImpactGraphSuite {
 
   @Test()
   async verifyLiveInspectorTracerInExecutorWritesPerImportFile() {
-    const previousTrace = Env.TRV_TEST_TRACE.isSet ? Env.TRV_TEST_TRACE.isTrue : undefined;
-    Env.TRV_TEST_TRACE.set(true);
-    try {
-      const executor = new TestExecutor({ onEvent: () => {} });
-      await executor.execute({
-        import: '@travetto/test/test/impact.ts',
-        classId: TracedHelperSuite.Ⲑid,
-        methodNames: ['runSampleMethodOne', 'runSampleMethodTwo']
-      });
-    } finally {
-      Env.TRV_TEST_TRACE.set(previousTrace);
-    }
+    const executor = new TestExecutor({ onEvent: () => {} }, true);
+    await executor.execute({
+      import: '@travetto/test/test/impact.ts',
+      classId: TracedHelperSuite.Ⲑid,
+      methodNames: ['runSampleMethodOne', 'runSampleMethodTwo']
+    });
 
     const traceFile = TestExecutionTracer.getTraceFile(
       path.resolve(RuntimeIndex.outputRoot, 'test-impact'),

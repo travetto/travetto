@@ -215,10 +215,7 @@ export class RunUtil {
    * Run tests
    */
   static async runTests(consumerConfig: TestConsumerConfig, input: TestRunInput): Promise<boolean | undefined> {
-    if (consumerConfig.trackCovered) {
-      Env.TRV_TEST_TRACE.set(true);
-    }
-
+    const trackCovered = !!(consumerConfig.trackCovered || ('trackCovered' in input && input.trackCovered));
     const { runs, removes } = await this.resolveInput(input);
 
     const targetConsumer = await TestConsumerRegistryIndex.getInstance(consumerConfig);
@@ -231,10 +228,10 @@ export class RunUtil {
     }
 
     if (runs.length === 1) {
-      await new TestExecutor(consumer).execute(runs[0], true);
+      await new TestExecutor(consumer, trackCovered || !!runs[0].trackCovered).execute(runs[0], true);
     } else {
       await WorkPool.run(
-        run => buildStandardTestManager(consumer, run),
+        run => buildStandardTestManager(consumer, trackCovered ? { ...run, trackCovered: true } : run),
         runs.toSorted(() => (Math.random() < 0.5 ? -1 : 1)),
         {
           idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),
