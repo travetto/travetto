@@ -78,7 +78,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
     console.debug('Running', { import: run.import });
 
     try {
-      await RunUtil.runTests({ consumer: 'exec', trackCovered: run.trackCovered }, run);
+      await RunUtil.runTests({ consumer: 'exec' }, run);
     } finally {
       this.#done.resolve();
     }
