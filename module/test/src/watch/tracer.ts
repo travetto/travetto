@@ -92,7 +92,7 @@ export class TestExecutionTracer extends DelegatingConsumer {
       }
 
       const entry = this.#index.getEntry(outputPath);
-      if (!entry || entry.role === 'doc' || entry.import === '@travetto/test/src/watch/tracer.ts') {
+      if (!entry || entry.role === 'doc' || entry.import === suiteImport || entry.import === '@travetto/test/src/watch/tracer.ts') {
         continue;
       }
       if (entry.module === '@travetto/test' && suiteModule !== '@travetto/test') {

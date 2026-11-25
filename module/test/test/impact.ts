@@ -322,6 +322,7 @@ class TestImpactGraphSuite {
     const keyTwo = `${TracedHelperSuite.Ⲑid}#runSampleMethodTwo`;
     assert(persisted.tests[keyOne]?.sources.some(source => source.endsWith('module/runtime/src/json.ts')));
     assert(persisted.tests[keyTwo]?.sources.some(source => source.endsWith('module/runtime/src/json.ts')));
+    assert(!persisted.tests[keyOne]?.sources.some(source => source.endsWith('module/test/test/impact.ts')));
     assert(!persisted.tests[keyOne]?.sources.some(source => source.endsWith('module/test/src/watch/tracer.ts')));
   }
 
