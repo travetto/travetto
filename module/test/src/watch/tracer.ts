@@ -44,6 +44,7 @@ export class TestExecutionTracer extends DelegatingConsumer {
 
   #index: ManifestIndex;
   #session?: inspector.Session;
+  #importFiles?: string[];
   #sharedSuiteFiles?: string[];
   #methodTraces: TestMethodTrace[] = [];
   #pendingSaves: Promise<void>[] = [];
@@ -140,6 +141,9 @@ export class TestExecutionTracer extends DelegatingConsumer {
   override transform(event: TestEvent): TestEvent {
     if (event.type === 'suite') {
       if (event.phase === 'before') {
+        if (this.#importFiles === undefined) {
+          this.#importFiles = this.#session ? this.#collectDelta(event.suite.import) : [];
+        }
         this.#ensureStarted();
         this.#sharedSuiteFiles = undefined;
         this.#methodTraces = [];
@@ -153,7 +157,7 @@ export class TestExecutionTracer extends DelegatingConsumer {
     } else if (event.type === 'test') {
       if (event.phase === 'before') {
         if (this.#sharedSuiteFiles === undefined) {
-          this.#sharedSuiteFiles = this.#collectDelta(event.test.import);
+          this.#sharedSuiteFiles = [...new Set([...(this.#importFiles ?? []), ...this.#collectDelta(event.test.import)])];
         } else {
           this.#resetDelta();
         }

@@ -230,7 +230,9 @@ export class RunUtil {
 
     if (runs.length === 1) {
       if (consumerConfig.trackCovered ?? runs[0].trackCovered) {
-        consumer.addConsumer(new TestExecutionTracer());
+        const tracer = new TestExecutionTracer();
+        consumer.addConsumer(tracer);
+        await tracer.onStart({ testCount: 0 });
       }
       await new TestExecutor(consumer).execute(runs[0], true);
     } else {

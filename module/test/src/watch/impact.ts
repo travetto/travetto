@@ -154,15 +154,41 @@ export class TestImpactGraph extends DelegatingConsumer {
     }
   }
 
+  #getModuleDepths(rootModule?: string): Map<string, number> {
+    const depths = new Map<string, number>();
+    if (!rootModule) {
+      return depths;
+    }
+    const queue: [string, number][] = [[rootModule, 1]];
+    while (queue.length > 0) {
+      const [moduleName, depth] = queue.shift()!;
+      if (depths.has(moduleName)) {
+        continue;
+      }
+      depths.set(moduleName, depth);
+      const module = this.#index.getModule(moduleName);
+      if (module) {
+        for (const dependent of module.parents) {
+          if (!depths.has(dependent)) {
+            queue.push([dependent, depth + 1]);
+          }
+        }
+      }
+    }
+    return depths;
+  }
+
   #getImpactedRuns(sourceFile: string, changedModule?: string, deletedImport?: string): (TestRun | TestDiffInput)[] {
-    const rankedRuns: { run: TestRun | TestDiffInput; depth: number }[] = [];
+    const rankedRuns: { run: TestRun | TestDiffInput; depth: number; traced: boolean }[] = [];
     const entry = this.#index.getEntry(sourceFile);
     const isSelfTest = entry?.role === 'test' && SOURCE_TYPES.has(entry.type);
     const selfTestImport = isSelfTest ? entry.import : undefined;
+    const moduleDepths = this.#getModuleDepths(changedModule);
 
     if (selfTestImport && selfTestImport !== deletedImport) {
       rankedRuns.push({
         depth: 0,
+        traced: true,
         run: this.#target
           ? { import: selfTestImport, diffSource: this.#target.produceDiffSource(selfTestImport) }
           : { import: selfTestImport }
@@ -176,7 +202,7 @@ export class TestImpactGraph extends DelegatingConsumer {
         continue;
       }
       const suiteKey = `${metadata.import}::${metadata.classId}`;
-      const depth = changedModule && metadata.module === changedModule ? 1 : 2;
+      const depth = (metadata.module ? moduleDepths.get(metadata.module) : undefined) ?? Number.MAX_SAFE_INTEGER;
       const group = groupedBySuite.getOrInsert(suiteKey, {
         import: metadata.import,
         classId: metadata.classId,
@@ -186,32 +212,45 @@ export class TestImpactGraph extends DelegatingConsumer {
       group.methods.add(metadata.methodName);
     }
 
-    let hasSameModuleRun = isSelfTest;
     for (const group of groupedBySuite.values()) {
-      if (group.depth === 1) {
-        hasSameModuleRun = true;
-      }
       rankedRuns.push({
         depth: group.depth,
+        traced: true,
         run: { import: group.import, classId: group.classId, methodNames: [...group.methods] }
       });
     }
 
-    if (changedModule && !hasSameModuleRun) {
-      const moduleTests = this.#index.find({
-        module: module => module.name === changedModule,
-        folder: folder => folder === 'test',
-        file: file => file.role === 'test' && SOURCE_TYPES.has(file.type)
-      });
-      for (const testEntry of moduleTests) {
-        if (testEntry.import !== deletedImport && testEntry.import !== selfTestImport && !this.#warmedImports.has(testEntry.import)) {
-          rankedRuns.push({ depth: 1, run: { import: testEntry.import } });
+    if (changedModule && !isSelfTest) {
+      for (const [moduleName, depth] of moduleDepths.entries()) {
+        const moduleTests = this.#index.find({
+          module: module => module.name === moduleName,
+          folder: folder => folder === 'test',
+          file: file => file.role === 'test' && SOURCE_TYPES.has(file.type)
+        });
+        for (const testEntry of moduleTests) {
+          if (testEntry.import !== deletedImport && testEntry.import !== selfTestImport && !this.#warmedImports.has(testEntry.import)) {
+            rankedRuns.push({ depth, traced: false, run: { import: testEntry.import } });
+          }
         }
       }
     }
 
-    return rankedRuns
-      .sort((a, b) => a.depth - b.depth || this.#getFailureRank(b.run.import) - this.#getFailureRank(a.run.import))
+    const sorted = rankedRuns.sort(
+      (a, b) =>
+        a.depth - b.depth ||
+        this.#getFailureRank(b.run.import) - this.#getFailureRank(a.run.import) ||
+        a.run.import.localeCompare(b.run.import)
+    );
+
+    const immediateAndTraced = sorted.filter(item => item.depth < 2 || item.traced);
+    const unwarmedDownstream = sorted.filter(item => item.depth >= 2 && !item.traced).slice(0, 10);
+    return [...immediateAndTraced, ...unwarmedDownstream]
+      .sort(
+        (a, b) =>
+          a.depth - b.depth ||
+          this.#getFailureRank(b.run.import) - this.#getFailureRank(a.run.import) ||
+          a.run.import.localeCompare(b.run.import)
+      )
       .map(item => item.run);
   }
 

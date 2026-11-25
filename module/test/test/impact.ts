@@ -28,7 +28,7 @@ function buildManifest(workspacePath: string): ManifestRoot {
         sourceFolder: 'module/app',
         outputFolder: 'node_modules/test-app',
         roles: ['std', 'test'],
-        parents: [],
+        parents: ['ext-mod'],
         files: {
           src: [
             ['src/properties.ts', 'ts', 1000],
@@ -50,7 +50,7 @@ function buildManifest(workspacePath: string): ManifestRoot {
         sourceFolder: 'module/ext',
         outputFolder: 'node_modules/ext-mod',
         roles: ['std', 'test'],
-        parents: ['test-app'],
+        parents: [],
         files: {
           test: [['test/ext.ts', 'ts', 1000, 'test']]
         }
@@ -127,7 +127,7 @@ class TestImpactGraphSuite {
 
       const graph = new TestImpactGraph(undefined, index);
 
-      // Cold module fallback before any test has executed
+      // Cold module fallback before any test has executed (depth 1 sorted by name, then depth 2)
       const coldRuns = await graph.onCompilerChange({
         action: 'update',
         file: 'module/app/src/properties.ts',
@@ -136,9 +136,13 @@ class TestImpactGraphSuite {
         module: 'test-app',
         time: Date.now()
       });
-      assert.deepStrictEqual(coldRuns, [{ import: 'test-app/test/parser.ts' }, { import: 'test-app/test/other.ts' }]);
+      assert.deepStrictEqual(coldRuns, [
+        { import: 'test-app/test/other.ts' },
+        { import: 'test-app/test/parser.ts' },
+        { import: 'ext-mod/test/ext.ts' }
+      ]);
 
-      // If only test/other.ts is warmed (for yaml.ts), editing properties.ts must still fall back to untraced test/parser.ts
+      // If only test/other.ts is warmed (for yaml.ts), editing properties.ts must still fall back to untraced test/parser.ts and ext-mod/test/ext.ts
       await tracer.saveImportTrace('test-app/test/other.ts', [
         {
           classId: 'test-app:test/other#OtherSuite',
@@ -158,8 +162,46 @@ class TestImpactGraphSuite {
           module: 'test-app',
           time: Date.now()
         }),
-        [{ import: 'test-app/test/parser.ts' }]
+        [{ import: 'test-app/test/parser.ts' }, { import: 'ext-mod/test/ext.ts' }]
       );
+
+      // Even if test/other.ts IS warmed for properties.ts, unwarmed test/parser.ts and ext-mod/test/ext.ts must still run
+      await tracer.saveImportTrace('test-app/test/other.ts', [
+        {
+          classId: 'test-app:test/other#OtherSuite',
+          methodName: 'verifyOther',
+          status: 'passed',
+          coveredFiles: [propertiesSource]
+        }
+      ]);
+      graph.onEvent(makeSuiteAfterEvent('test-app/test/other.ts', 'test-app:test/other#OtherSuite'));
+
+      assert.deepStrictEqual(
+        await graph.onCompilerChange({
+          action: 'update',
+          file: 'module/app/src/properties.ts',
+          import: 'test-app/src/properties.ts',
+          output: '',
+          module: 'test-app',
+          time: Date.now()
+        }),
+        [
+          { import: 'test-app/test/other.ts', classId: 'test-app:test/other#OtherSuite', methodNames: ['verifyOther'] },
+          { import: 'test-app/test/parser.ts' },
+          { import: 'ext-mod/test/ext.ts' }
+        ]
+      );
+
+      // Restore test/other.ts to yamlSource before verifying parser.ts + ext.ts warmRuns
+      await tracer.saveImportTrace('test-app/test/other.ts', [
+        {
+          classId: 'test-app:test/other#OtherSuite',
+          methodName: 'verifyOther',
+          status: 'passed',
+          coveredFiles: [yamlSource]
+        }
+      ]);
+      graph.onEvent(makeSuiteAfterEvent('test-app/test/other.ts', 'test-app:test/other#OtherSuite'));
 
       // Worker persists per-import trace files, and watcher loads them on suite 'after'
       await tracer.saveImportTrace('test-app/test/parser.ts', [
@@ -248,6 +290,10 @@ class TestImpactGraphSuite {
         { classId: 'test-app:test/other#OtherSuite', methodName: 'verifyOther', status: 'passed', coveredFiles: [] }
       ]);
       graph.onEvent(makeSuiteAfterEvent('test-app/test/other.ts', 'test-app:test/other#OtherSuite'));
+      await tracer.saveImportTrace('ext-mod/test/ext.ts', [
+        { classId: 'ext-mod:test/ext#ExtSuite', methodName: 'verifyIntegration', status: 'passed', coveredFiles: [] }
+      ]);
+      graph.onEvent(makeSuiteAfterEvent('ext-mod/test/ext.ts', 'ext-mod:test/ext#ExtSuite'));
 
       // Initial passing run covers both properties.ts and yaml.ts
       await tracer.saveImportTrace('test-app/test/parser.ts', [
@@ -417,6 +463,84 @@ class TestImpactGraphSuite {
         }),
         []
       );
+    } finally {
+      await fs.rm(tempDirectory, { recursive: true, force: true });
+    }
+  }
+
+  @Test()
+  async verifyDepthLimitCapsDownstreamAtTenSortedByDepthAndName() {
+    const tempDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'test-impact-depth-'));
+    try {
+      const workspacePath = path.toPosix(tempDirectory);
+      const manifest = buildManifest(workspacePath);
+      manifest.modules['ext-mod'].parents = ['deep-mod'];
+      manifest.modules['deep-mod'] = {
+        main: false,
+        name: 'deep-mod',
+        version: '1.0.0',
+        workspace: true,
+        production: true,
+        sourceFolder: 'module/deep',
+        outputFolder: 'node_modules/deep-mod',
+        roles: ['std', 'test'],
+        parents: [],
+        files: {
+          test: [['test/deep.ts', 'ts', 1000, 'test']]
+        }
+      };
+      manifest.modules['ext-mod'].files.test = Array.from({ length: 11 }, (_, i) => [
+        `test/ext-${String(i).padStart(2, '0')}.ts`,
+        'ts',
+        1000,
+        'test'
+      ]);
+
+      const graph = new TestImpactGraph(undefined, new ManifestIndex(manifest));
+      const runs = await graph.onCompilerChange({
+        action: 'update',
+        file: 'module/app/src/properties.ts',
+        import: 'test-app/src/properties.ts',
+        output: '',
+        module: 'test-app',
+        time: Date.now()
+      });
+
+      // All depth < 2 (2 tests in test-app) + next 10 unwarmed downstream (depth 2 sorted by name; depth 3 deep.ts and ext-10.ts capped)
+      assert.strictEqual(runs.length, 12);
+      assert.deepStrictEqual(
+        runs.slice(0, 2).map(run => run.import),
+        ['test-app/test/other.ts', 'test-app/test/parser.ts']
+      );
+      assert.deepStrictEqual(
+        runs.slice(2).map(run => run.import),
+        Array.from({ length: 10 }, (_, i) => `ext-mod/test/ext-${String(i).padStart(2, '0')}.ts`)
+      );
+
+      // If deep-mod/test/deep.ts IS warmed and covers properties.ts, it is NOT crowded out by the 10 unwarmed depth-2 tests
+      const propertiesSource = path.resolve(workspacePath, 'module/app/src/properties.ts');
+      const index = new ManifestIndex(manifest);
+      const tracer = new TestExecutionTracer(undefined, index);
+      await tracer.saveImportTrace('deep-mod/test/deep.ts', [
+        {
+          classId: 'deep-mod:test/deep#DeepSuite',
+          methodName: 'verifyDeep',
+          status: 'passed',
+          coveredFiles: [propertiesSource]
+        }
+      ]);
+      const warmedGraph = new TestImpactGraph(undefined, index);
+      await warmedGraph.loadCache();
+      const runsWithDeepTraced = await warmedGraph.onCompilerChange({
+        action: 'update',
+        file: 'module/app/src/properties.ts',
+        import: 'test-app/src/properties.ts',
+        output: '',
+        module: 'test-app',
+        time: Date.now()
+      });
+      assert.strictEqual(runsWithDeepTraced.length, 13);
+      assert(runsWithDeepTraced.some(run => run.import === 'deep-mod/test/deep.ts'));
     } finally {
       await fs.rm(tempDirectory, { recursive: true, force: true });
     }
