@@ -48,19 +48,10 @@ export class TestExecutionTracer extends DelegatingConsumer {
   #methodTraces: TestMethodTrace[] = [];
   #pendingSaves: Promise<void>[] = [];
 
-  onSummary?: (summary: SuitesSummary) => Promise<void> | void;
-
-  constructor(
-    target?: TestConsumerShape,
-    index: ManifestIndex = RuntimeIndex,
-    cacheDir = path.resolve(index.outputRoot, 'test-impact')
-  ) {
+  constructor(target?: TestConsumerShape, index: ManifestIndex = RuntimeIndex, cacheDir = path.resolve(index.outputRoot, 'test-impact')) {
     super(target ? [target] : []);
     this.#index = index;
     this.#cacheDir = cacheDir;
-    if (target?.onSummary) {
-      this.onSummary = (summary: SuitesSummary): Promise<void> | void => target.onSummary?.(summary);
-    }
   }
 
   #resetDelta(): void {
@@ -79,8 +70,7 @@ export class TestExecutionTracer extends DelegatingConsumer {
       }
     });
 
-    const suiteModule =
-      this.#index.getFromImport(suiteImport)?.module ?? this.#index.findModuleForArbitraryImport(suiteImport)?.name;
+    const suiteModule = this.#index.getFromImport(suiteImport)?.module ?? this.#index.findModuleForArbitraryImport(suiteImport)?.name;
     const sources = new Set<string>();
 
     for (const script of result) {
@@ -176,6 +166,13 @@ export class TestExecutionTracer extends DelegatingConsumer {
     return event;
   }
 
+  override async summarize(summary?: SuitesSummary): Promise<void> {
+    if (summary) {
+      await super.summarize(summary);
+    }
+    await this.flush();
+  }
+
   /**
    * Merge and persist per-method traces for a test import file
    */
@@ -186,8 +183,7 @@ export class TestExecutionTracer extends DelegatingConsumer {
 
     const traceFile = TestExecutionTracer.getTraceFile(this.#cacheDir, importName);
     const workspacePath = this.#index.manifest.workspace.path;
-    const moduleName =
-      this.#index.getFromImport(importName)?.module ?? this.#index.findModuleForArbitraryImport(importName)?.name;
+    const moduleName = this.#index.getFromImport(importName)?.module ?? this.#index.findModuleForArbitraryImport(importName)?.name;
 
     let payload: PersistedImportTrace = {
       version: 1,
@@ -242,6 +238,7 @@ export class TestExecutionTracer extends DelegatingConsumer {
    * Wait for any pending trace file writes and stop the inspector session
    */
   async flush(): Promise<void> {
+    super.summarize();
     this.#stop();
     await Promise.all(this.#pendingSaves);
     this.#pendingSaves = [];

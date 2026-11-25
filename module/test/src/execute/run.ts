@@ -216,12 +216,15 @@ export class RunUtil {
    * Run tests
    */
   static async runTests(consumerConfig: TestConsumerConfig, input: TestRunInput): Promise<boolean | undefined> {
-    const trackCovered = !!(consumerConfig.trackCovered || ('trackCovered' in input && input.trackCovered));
     const { runs, removes } = await this.resolveInput(input);
+    const trackCovered = consumerConfig.trackCovered ?? runs[0].trackCovered;
 
-    const targetConsumer = await TestConsumerRegistryIndex.getInstance(consumerConfig);
-    const tracer = runs.length === 1 && (trackCovered || runs[0].trackCovered) ? new TestExecutionTracer(targetConsumer) : undefined;
-    const consumer = await this.getRunnableConsumer(tracer ?? targetConsumer, runs);
+    let targetConsumer = await TestConsumerRegistryIndex.getInstance(consumerConfig);
+    if (runs.length === 1 && trackCovered) {
+      targetConsumer = new TestExecutionTracer(targetConsumer);
+    }
+
+    const consumer = await this.getRunnableConsumer(targetConsumer, runs);
 
     await this.reinitManifestIfNeeded(runs);
 
@@ -229,22 +232,18 @@ export class RunUtil {
       consumer.onRemoveEvent(item);
     }
 
-    try {
-      if (runs.length === 1) {
-        await new TestExecutor(consumer).execute(runs[0], true);
-      } else {
-        await WorkPool.run(
-          run => buildStandardTestManager(consumer, trackCovered ? { ...run, trackCovered: true } : run),
-          runs.toSorted(() => (Math.random() < 0.5 ? -1 : 1)),
-          {
-            idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),
-            min: 1,
-            max: consumerConfig.concurrency
-          }
-        );
-      }
-    } finally {
-      await tracer?.flush();
+    if (runs.length === 1) {
+      await new TestExecutor(consumer).execute(runs[0], true);
+    } else {
+      await WorkPool.run(
+        run => buildStandardTestManager(consumer, trackCovered ? { ...run, trackCovered: true } : run),
+        runs.toSorted(() => (Math.random() < 0.5 ? -1 : 1)),
+        {
+          idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),
+          min: 1,
+          max: consumerConfig.concurrency
+        }
+      );
     }
 
     return consumer.summarizeAsBoolean();
