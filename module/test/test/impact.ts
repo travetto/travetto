@@ -1,4 +1,6 @@
 import assert from 'node:assert';
+import fs from 'node:fs/promises';
+import os from 'node:os';
 
 import { ManifestIndex, type ManifestRoot, path } from '@travetto/manifest';
 import { Env, JSONUtil, RuntimeIndex } from '@travetto/runtime';
@@ -295,5 +297,73 @@ class TestImpactGraphSuite {
     assert(captured[0].coveredFiles?.includes(jsonSource));
     assert(captured[1].coveredFiles?.includes(jsonSource));
     assert(!captured[0].coveredFiles?.includes(tracerSource!));
+  }
+
+  @Test()
+  async verifyCachePersistenceAndStaleEntryPruning() {
+    const tempDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'test-impact-cache-'));
+    try {
+      const cacheFile = path.join(tempDirectory, 'test-impact.json');
+      const workspacePath = path.toPosix(tempDirectory);
+      const propertiesSource = path.resolve(workspacePath, 'module/app/src/properties.ts');
+      const yamlSource = path.resolve(workspacePath, 'module/app/src/yaml.ts');
+
+      const writerGraph = new TestImpactGraph(undefined, new ManifestIndex(buildManifest(workspacePath)), cacheFile);
+      writerGraph.onEvent(
+        makeAfterEvent({
+          import: 'test-app/test/parser.ts',
+          classId: 'test-app:test/parser#ParserSuite',
+          methodName: 'verifyProperties',
+          status: 'passed',
+          coveredFiles: [propertiesSource, yamlSource]
+        })
+      );
+      writerGraph.onEvent(
+        makeAfterEvent({
+          import: 'ext-mod/test/ext.ts',
+          classId: 'ext-mod:test/ext#ExtSuite',
+          methodName: 'verifyIntegration',
+          status: 'passed',
+          coveredFiles: [propertiesSource]
+        })
+      );
+      await writerGraph.flushCache();
+
+      // Simulate restart where yaml.ts and ext-mod/test/ext.ts were deleted while offline
+      const prunedManifest = buildManifest(workspacePath);
+      prunedManifest.modules['test-app'].files.src = [['src/properties.ts', 'ts', 1000]];
+      prunedManifest.modules['ext-mod'].files.test = [];
+
+      const readerGraph = new TestImpactGraph(undefined, new ManifestIndex(prunedManifest), cacheFile);
+      await readerGraph.loadCache();
+
+      // Warmed from disk: properties.ts hits ParserSuite#verifyProperties immediately (and deleted ExtSuite was pruned)
+      assert.deepStrictEqual(
+        await readerGraph.onCompilerChange({
+          action: 'update',
+          file: 'module/app/src/properties.ts',
+          import: 'test-app/src/properties.ts',
+          output: '',
+          module: 'test-app',
+          time: Date.now()
+        }),
+        [{ import: 'test-app/test/parser.ts', classId: 'test-app:test/parser#ParserSuite', methodNames: ['verifyProperties'] }]
+      );
+
+      // Deleted yaml.ts was pruned on load
+      assert.deepStrictEqual(
+        await readerGraph.onCompilerChange({
+          action: 'update',
+          file: 'module/app/src/yaml.ts',
+          import: 'test-app/src/yaml.ts',
+          output: '',
+          module: 'test-app',
+          time: Date.now()
+        }),
+        []
+      );
+    } finally {
+      await fs.rm(tempDirectory, { recursive: true, force: true });
+    }
   }
 }
