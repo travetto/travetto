@@ -1,6 +1,5 @@
-import { path } from '@travetto/manifest';
 import { Registry } from '@travetto/registry';
-import { AsyncQueue, RuntimeIndex, TimeUtil, WatchUtil } from '@travetto/runtime';
+import { AsyncQueue, TimeUtil, WatchUtil } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
 
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
@@ -25,11 +24,8 @@ export class TestWatcher {
 
     await Registry.init();
 
-    const cacheDir = path.resolve(RuntimeIndex.outputRoot, 'test-impact');
     const impact = new TestImpactGraph(
-      new CumulativeSummaryConsumer(await TestConsumerRegistryIndex.getInstance({ consumer: format })),
-      RuntimeIndex,
-      cacheDir
+      new CumulativeSummaryConsumer(await TestConsumerRegistryIndex.getInstance({ consumer: format }))
     );
     await impact.loadCache();
 

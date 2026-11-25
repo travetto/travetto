@@ -37,21 +37,20 @@ export type PersistedImportTrace = {
  * Delegating consumer that captures per-test executed workspace source files via V8 Precise Coverage
  */
 export class TestExecutionTracer extends DelegatingConsumer {
-  static getTraceFile(cacheDir: string, importName: string): string {
-    return path.resolve(cacheDir, `${encodeURIComponent(importName)}.json`);
+  static getTraceFile(index: ManifestIndex, importName: string): string | undefined {
+    const outputFile = index.getFromImport(importName)?.outputFile;
+    return outputFile ? outputFile.replace(/\.js$/, '.impact.json') : undefined;
   }
 
   #index: ManifestIndex;
-  #cacheDir: string;
   #session?: inspector.Session;
   #sharedSuiteFiles?: string[];
   #methodTraces: TestMethodTrace[] = [];
   #pendingSaves: Promise<void>[] = [];
 
-  constructor(target?: TestConsumerShape, index: ManifestIndex = RuntimeIndex, cacheDir = path.resolve(index.outputRoot, 'test-impact')) {
+  constructor(target?: TestConsumerShape, index: ManifestIndex = RuntimeIndex) {
     super(target ? [target] : []);
     this.#index = index;
-    this.#cacheDir = cacheDir;
   }
 
   #resetDelta(): void {
@@ -183,7 +182,10 @@ export class TestExecutionTracer extends DelegatingConsumer {
       return;
     }
 
-    const traceFile = TestExecutionTracer.getTraceFile(this.#cacheDir, importName);
+    const traceFile = TestExecutionTracer.getTraceFile(this.#index, importName);
+    if (!traceFile) {
+      return;
+    }
     const workspacePath = this.#index.manifest.workspace.path;
     const moduleName = this.#index.getFromImport(importName)?.module ?? this.#index.findModuleForArbitraryImport(importName)?.name;
 
@@ -224,7 +226,7 @@ export class TestExecutionTracer extends DelegatingConsumer {
 
     const tempFile = `${traceFile}.${process.pid}.tmp`;
     try {
-      await fs.mkdir(this.#cacheDir, { recursive: true });
+      await fs.mkdir(path.dirname(traceFile), { recursive: true });
       await fs.writeFile(tempFile, JSONUtil.toUTF8(payload), 'utf8');
       await fs.rename(tempFile, traceFile);
     } catch {

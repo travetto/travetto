@@ -28,7 +28,6 @@ type TrackedTestMetadata = {
 export class TestImpactGraph extends DelegatingConsumer {
   #index: ManifestIndex;
   #target?: CumulativeSummaryConsumer;
-  #cacheDir?: string;
   #keyMetadata = new Map<TestKey, TrackedTestMetadata>();
   #keyToSources = new Map<TestKey, Set<string>>();
   #sourceToKeys = new Map<string, Set<TestKey>>();
@@ -37,11 +36,10 @@ export class TestImpactGraph extends DelegatingConsumer {
   #lastFailed = new Map<string, number>();
   #failureSequence = 0;
 
-  constructor(target?: CumulativeSummaryConsumer, index: ManifestIndex = RuntimeIndex, cacheDir?: string) {
+  constructor(target?: CumulativeSummaryConsumer, index: ManifestIndex = RuntimeIndex) {
     super(target ? [target] : []);
     this.#target = target;
     this.#index = index;
-    this.#cacheDir = cacheDir;
   }
 
   #getFailureRank(importName: string): number {
@@ -89,10 +87,10 @@ export class TestImpactGraph extends DelegatingConsumer {
   }
 
   #loadImportCache(importName: string): void {
-    if (!this.#cacheDir) {
+    const traceFile = TestExecutionTracer.getTraceFile(this.#index, importName);
+    if (!traceFile) {
       return;
     }
-    const traceFile = TestExecutionTracer.getTraceFile(this.#cacheDir, importName);
     try {
       const parsed = JSONUtil.fromUTF8<PersistedImportTrace>(fsSync.readFileSync(traceFile, 'utf8'));
       if (parsed?.version === 1 && parsed.tests) {
@@ -138,8 +136,9 @@ export class TestImpactGraph extends DelegatingConsumer {
     if (!classId) {
       this.#failingByImport.delete(importName);
       this.#lastFailed.delete(importName);
-      if (this.#cacheDir) {
-        void fs.rm(TestExecutionTracer.getTraceFile(this.#cacheDir, importName), { force: true }).catch(() => {});
+      const traceFile = TestExecutionTracer.getTraceFile(this.#index, importName);
+      if (traceFile) {
+        void fs.rm(traceFile, { force: true }).catch(() => {});
       }
     }
   }
@@ -248,32 +247,30 @@ export class TestImpactGraph extends DelegatingConsumer {
   }
 
   /**
-   * Load all persisted per-import trace files from cacheDir, pruning missing files and tests
+   * Load all persisted per-import trace files inline with test output files
    */
   async loadCache(): Promise<void> {
-    if (!this.#cacheDir) {
-      return;
-    }
-    let files: string[];
-    try {
-      files = await fs.readdir(this.#cacheDir);
-    } catch {
-      return;
-    }
+    const testEntries = this.#index.find({
+      module: module => !!module.workspace,
+      folder: folder => folder === 'test',
+      file: file => file.role === 'test' && SOURCE_TYPES.has(file.type)
+    });
 
     await Promise.all(
-      files
-        .filter(file => file.endsWith('.json'))
-        .map(async file => {
-          try {
-            const parsed = JSONUtil.fromUTF8<PersistedImportTrace>(await fs.readFile(path.join(this.#cacheDir!, file), 'utf8'));
-            if (parsed?.version === 1 && parsed.tests) {
-              this.#applyImportTrace(parsed);
-            }
-          } catch {
-            // Ignore malformed trace file
+      testEntries.map(async testEntry => {
+        const traceFile = TestExecutionTracer.getTraceFile(this.#index, testEntry.import);
+        if (!traceFile) {
+          return;
+        }
+        try {
+          const parsed = JSONUtil.fromUTF8<PersistedImportTrace>(await fs.readFile(traceFile, 'utf8'));
+          if (parsed?.version === 1 && parsed.tests) {
+            this.#applyImportTrace(parsed);
           }
-        })
+        } catch {
+          // No trace file on disk yet
+        }
+      })
     );
   }
 

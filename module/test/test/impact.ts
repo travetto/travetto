@@ -120,13 +120,12 @@ class TestImpactGraphSuite {
     const tempDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'test-impact-cold-'));
     try {
       const workspacePath = path.toPosix(tempDirectory);
-      const cacheDir = path.join(tempDirectory, 'test-impact');
       const propertiesSource = path.resolve(workspacePath, 'module/app/src/properties.ts');
       const yamlSource = path.resolve(workspacePath, 'module/app/src/yaml.ts');
       const index = new ManifestIndex(buildManifest(workspacePath));
-      const tracer = new TestExecutionTracer(undefined, index, cacheDir);
+      const tracer = new TestExecutionTracer(undefined, index);
 
-      const graph = new TestImpactGraph(undefined, index, cacheDir);
+      const graph = new TestImpactGraph(undefined, index);
 
       // Cold module fallback before any test has executed
       const coldRuns = await graph.onCompilerChange({
@@ -216,12 +215,11 @@ class TestImpactGraphSuite {
     const tempDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'test-impact-prune-'));
     try {
       const workspacePath = path.toPosix(tempDirectory);
-      const cacheDir = path.join(tempDirectory, 'test-impact');
       const propertiesSource = path.resolve(workspacePath, 'module/app/src/properties.ts');
       const yamlSource = path.resolve(workspacePath, 'module/app/src/yaml.ts');
       const index = new ManifestIndex(buildManifest(workspacePath));
-      const tracer = new TestExecutionTracer(undefined, index, cacheDir);
-      const graph = new TestImpactGraph(undefined, index, cacheDir);
+      const tracer = new TestExecutionTracer(undefined, index);
+      const graph = new TestImpactGraph(undefined, index);
 
       // Initial passing run covers both properties.ts and yaml.ts
       await tracer.saveImportTrace('test-app/test/parser.ts', [
@@ -318,10 +316,7 @@ class TestImpactGraphSuite {
       await tracer.flush();
     }
 
-    const traceFile = TestExecutionTracer.getTraceFile(
-      path.resolve(RuntimeIndex.outputRoot, 'test-impact'),
-      '@travetto/test/test/impact.ts'
-    );
+    const traceFile = TestExecutionTracer.getTraceFile(RuntimeIndex, '@travetto/test/test/impact.ts')!;
     const persisted = JSONUtil.fromUTF8<PersistedImportTrace>(await fs.readFile(traceFile, 'utf8'));
     const keyOne = `${TracedHelperSuite.Ⲑid}#runSampleMethodOne`;
     const keyTwo = `${TracedHelperSuite.Ⲑid}#runSampleMethodTwo`;
@@ -334,11 +329,10 @@ class TestImpactGraphSuite {
   async verifyCachePersistenceAndStaleEntryPruning() {
     const tempDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'test-impact-cache-'));
     try {
-      const cacheDir = path.join(tempDirectory, 'test-impact');
       const workspacePath = path.toPosix(tempDirectory);
       const propertiesSource = path.resolve(workspacePath, 'module/app/src/properties.ts');
       const yamlSource = path.resolve(workspacePath, 'module/app/src/yaml.ts');
-      const tracer = new TestExecutionTracer(undefined, new ManifestIndex(buildManifest(workspacePath)), cacheDir);
+      const tracer = new TestExecutionTracer(undefined, new ManifestIndex(buildManifest(workspacePath)));
 
       await tracer.saveImportTrace('test-app/test/parser.ts', [
         {
@@ -362,7 +356,7 @@ class TestImpactGraphSuite {
       prunedManifest.modules['test-app'].files.src = [['src/properties.ts', 'ts', 1000]];
       prunedManifest.modules['ext-mod'].files.test = [];
 
-      const readerGraph = new TestImpactGraph(undefined, new ManifestIndex(prunedManifest), cacheDir);
+      const readerGraph = new TestImpactGraph(undefined, new ManifestIndex(prunedManifest));
       await readerGraph.loadCache();
 
       // Warmed from disk: properties.ts hits ParserSuite#verifyProperties immediately (and deleted ExtSuite was pruned)
