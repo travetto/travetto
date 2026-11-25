@@ -185,9 +185,7 @@ export class BinaryUtil {
     return Buffer.alloc(size, fill);
   }
 
-  /**
-   * Convert an inbound binary type or factory into a synchronous binary type
-   */
+  /** Convert an inbound binary type or factory into a synchronous binary type */
   static toSynchronous(input: BinaryType | (() => BinaryType | Promise<BinaryType>)): BinaryType {
     const value = typeof input === 'function' ? input() : input;
     if (isPromise(value)) {
