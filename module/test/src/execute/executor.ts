@@ -9,7 +9,6 @@ import type { SuiteConfig, SuiteResult } from '../model/suite.ts';
 import type { TestConfig, TestResult, TestRun } from '../model/test.ts';
 import { TestModelUtil } from '../model/util.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
-import { TestExecutionTracer, type TestMethodTrace } from '../watch/tracer.ts';
 import { Barrier } from './barrier.ts';
 import { ConsoleCapture } from './console.ts';
 import { TestPhaseManager } from './phase.ts';
@@ -21,11 +20,9 @@ const TEST_TIMEOUT = TimeUtil.duration(Env.TRV_TEST_TIMEOUT.value || 5000, 'ms')
  */
 export class TestExecutor {
   #consumer: TestConsumerShape;
-  #trackCovered: boolean;
 
-  constructor(consumer: TestConsumerShape, trackCovered = false) {
+  constructor(consumer: TestConsumerShape) {
     this.#consumer = consumer;
-    this.#trackCovered = trackCovered;
   }
 
   /**
@@ -138,83 +135,64 @@ export class TestExecutor {
     // Mark suite start
     this.#consumer.onEvent({ phase: 'before', type: 'suite', suite: { ...suite, tests: testConfigs } });
 
-    const tracer = this.#trackCovered ? await TestExecutionTracer.create() : undefined;
-    const methodTraces: TestMethodTrace[] = [];
     try {
-      await tracer?.resetDelta();
+      // Handle the BeforeAll calls
+      await manager.startPhase('all');
+    } catch (someError) {
+      const suiteError = await manager.onError('all', someError);
+      for (const method of validTestMethodNames) {
+        testResultOverrides[method] ??= { status: 'errored', error: suiteError };
+      }
+    }
+
+    const suiteEnv = { ...process.env };
+
+    for (const test of tests) {
+      // Reset env before each test
+      process.env = { ...suiteEnv };
+
+      const testStart = Date.now();
+      const testResultOverride = (testResultOverrides[test.methodName] ??= {});
+
+      if (await this.#shouldSkip(test, instance)) {
+        testResultOverride.status = 'skipped';
+      }
+
       try {
-        // Handle the BeforeAll calls
-        await manager.startPhase('all');
+        // Handle BeforeEach
+        testResultOverride.status || (await manager.startPhase('each'));
       } catch (someError) {
-        const suiteError = await manager.onError('all', someError);
-        for (const method of validTestMethodNames) {
-          testResultOverrides[method] ??= { status: 'errored', error: suiteError };
-        }
-      }
-      const sharedSuiteFiles = tracer ? await tracer.collectDelta(suite.import) : [];
-
-      const suiteEnv = { ...process.env };
-
-      for (const test of tests) {
-        // Reset env before each test
-        process.env = { ...suiteEnv };
-
-        const testStart = Date.now();
-        const testResultOverride = (testResultOverrides[test.methodName] ??= {});
-
-        if (await this.#shouldSkip(test, instance)) {
-          testResultOverride.status = 'skipped';
-        }
-
-        await tracer?.resetDelta();
-        try {
-          // Handle BeforeEach
-          testResultOverride.status || (await manager.startPhase('each'));
-        } catch (someError) {
-          const testError = await manager.onError('each', someError);
-          testResultOverride.error = testError;
-          testResultOverride.status = 'errored';
-        }
-
-        // Run test
-        const testResult = await this.executeTest(instance, test, suite, testResultOverride);
-        if (tracer) {
-          methodTraces.push({
-            classId: suite.classId,
-            methodName: test.methodName,
-            status: testResult.status,
-            coveredFiles: [...new Set([...sharedSuiteFiles, ...(await tracer.collectDelta(suite.import))])]
-          });
-        }
-
-        // Handle after each
-        try {
-          testResultOverride.status || (await manager.endPhase('each'));
-        } catch (testError) {
-          if (!(testError instanceof Error)) {
-            throw testError;
-          }
-          console.error('Failed to properly shutdown test', testError.message);
-        }
-
-        result.tests[testResult.methodName] = testResult;
-        testResult.duration = Date.now() - testStart;
-        TestModelUtil.countTestResult(result, [testResult]);
+        const testError = await manager.onError('each', someError);
+        testResultOverride.error = testError;
+        testResultOverride.status = 'errored';
       }
 
+      // Run test
+      const testResult = await this.executeTest(instance, test, suite, testResultOverride);
+
+      // Handle after each
       try {
-        // Handle after all
-        await manager.endPhase('all');
-      } catch (suiteError) {
-        if (!(suiteError instanceof Error)) {
-          throw suiteError;
+        testResultOverride.status || (await manager.endPhase('each'));
+      } catch (testError) {
+        if (!(testError instanceof Error)) {
+          throw testError;
         }
-        console.error('Failed to properly shutdown test', suiteError.message);
+        console.error('Failed to properly shutdown test', testError.message);
       }
 
-      await tracer?.saveImportTrace(suite.import, methodTraces);
-    } finally {
-      await tracer?.stop();
+      result.tests[testResult.methodName] = testResult;
+      testResult.duration = Date.now() - testStart;
+      TestModelUtil.countTestResult(result, [testResult]);
+    }
+
+    try {
+      // Handle after all
+      await manager.endPhase('all');
+    } catch (suiteError) {
+      if (!(suiteError instanceof Error)) {
+        throw suiteError;
+      }
+      console.error('Failed to properly shutdown test', suiteError.message);
     }
 
     // Restore env

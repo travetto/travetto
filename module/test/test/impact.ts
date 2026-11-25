@@ -124,7 +124,7 @@ class TestImpactGraphSuite {
       const propertiesSource = path.resolve(workspacePath, 'module/app/src/properties.ts');
       const yamlSource = path.resolve(workspacePath, 'module/app/src/yaml.ts');
       const index = new ManifestIndex(buildManifest(workspacePath));
-      const tracer = new TestExecutionTracer(index, cacheDir);
+      const tracer = new TestExecutionTracer(undefined, index, cacheDir);
 
       const graph = new TestImpactGraph(undefined, index, cacheDir);
 
@@ -220,7 +220,7 @@ class TestImpactGraphSuite {
       const propertiesSource = path.resolve(workspacePath, 'module/app/src/properties.ts');
       const yamlSource = path.resolve(workspacePath, 'module/app/src/yaml.ts');
       const index = new ManifestIndex(buildManifest(workspacePath));
-      const tracer = new TestExecutionTracer(index, cacheDir);
+      const tracer = new TestExecutionTracer(undefined, index, cacheDir);
       const graph = new TestImpactGraph(undefined, index, cacheDir);
 
       // Initial passing run covers both properties.ts and yaml.ts
@@ -305,12 +305,18 @@ class TestImpactGraphSuite {
 
   @Test()
   async verifyLiveInspectorTracerInExecutorWritesPerImportFile() {
-    const executor = new TestExecutor({ onEvent: () => {} }, true);
-    await executor.execute({
-      import: '@travetto/test/test/impact.ts',
-      classId: TracedHelperSuite.Ⲑid,
-      methodNames: ['runSampleMethodOne', 'runSampleMethodTwo']
-    });
+    const tracer = new TestExecutionTracer({ onEvent: () => {} });
+    await tracer.onStart({});
+    try {
+      const executor = new TestExecutor(tracer);
+      await executor.execute({
+        import: '@travetto/test/test/impact.ts',
+        classId: TracedHelperSuite.Ⲑid,
+        methodNames: ['runSampleMethodOne', 'runSampleMethodTwo']
+      });
+    } finally {
+      await tracer.flush();
+    }
 
     const traceFile = TestExecutionTracer.getTraceFile(
       path.resolve(RuntimeIndex.outputRoot, 'test-impact'),
@@ -332,7 +338,7 @@ class TestImpactGraphSuite {
       const workspacePath = path.toPosix(tempDirectory);
       const propertiesSource = path.resolve(workspacePath, 'module/app/src/properties.ts');
       const yamlSource = path.resolve(workspacePath, 'module/app/src/yaml.ts');
-      const tracer = new TestExecutionTracer(new ManifestIndex(buildManifest(workspacePath)), cacheDir);
+      const tracer = new TestExecutionTracer(undefined, new ManifestIndex(buildManifest(workspacePath)), cacheDir);
 
       await tracer.saveImportTrace('test-app/test/parser.ts', [
         {

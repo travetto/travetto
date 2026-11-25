@@ -1,10 +1,13 @@
 import fs from 'node:fs/promises';
-import inspector from 'node:inspector/promises';
+import inspector from 'node:inspector';
 import { fileURLToPath } from 'node:url';
 
 import { type ManifestIndex, path } from '@travetto/manifest';
 import { JSONUtil, RuntimeIndex } from '@travetto/runtime';
 
+import type { SuitesSummary, TestConsumerShape, TestRunState } from '../consumer/types.ts';
+import { DelegatingConsumer } from '../consumer/types/delegating.ts';
+import type { TestEvent } from '../model/event.ts';
 import type { TestStatus } from '../model/test.ts';
 
 const IGNORED_FUNCTION_NAMES = new Set(['', '<instance_members_initializer>', '<computed>']);
@@ -31,51 +34,51 @@ export type PersistedImportTrace = {
 };
 
 /**
- * Captures per-test executed workspace source files via V8 Precise Coverage and persists per-import traces
+ * Delegating consumer that captures per-test executed workspace source files via V8 Precise Coverage
  */
-export class TestExecutionTracer {
+export class TestExecutionTracer extends DelegatingConsumer {
   static getTraceFile(cacheDir: string, importName: string): string {
     return path.resolve(cacheDir, `${encodeURIComponent(importName)}.json`);
   }
 
-  static async create(index: ManifestIndex = RuntimeIndex, cacheDir?: string): Promise<TestExecutionTracer> {
-    const tracer = new TestExecutionTracer(index, cacheDir);
-    await tracer.start();
-    return tracer;
-  }
-
   #index: ManifestIndex;
   #cacheDir: string;
-  #session = new inspector.Session();
-  #active = false;
+  #session?: inspector.Session;
+  #sharedSuiteFiles?: string[];
+  #methodTraces: TestMethodTrace[] = [];
+  #pendingSaves: Promise<void>[] = [];
 
-  constructor(index: ManifestIndex = RuntimeIndex, cacheDir = path.resolve(index.outputRoot, 'test-impact')) {
+  onSummary?: (summary: SuitesSummary) => Promise<void> | void;
+
+  constructor(
+    target?: TestConsumerShape,
+    index: ManifestIndex = RuntimeIndex,
+    cacheDir = path.resolve(index.outputRoot, 'test-impact')
+  ) {
+    super(target ? [target] : []);
     this.#index = index;
     this.#cacheDir = cacheDir;
-  }
-
-  async start(): Promise<void> {
-    if (this.#active) {
-      return;
-    }
-    this.#session.connect();
-    await this.#session.post('Profiler.enable');
-    await this.#session.post('Profiler.startPreciseCoverage', { callCount: true, detailed: false });
-    this.#active = true;
-  }
-
-  async resetDelta(): Promise<void> {
-    if (this.#active) {
-      await this.#session.post('Profiler.takePreciseCoverage');
+    if (target?.onSummary) {
+      this.onSummary = (summary: SuitesSummary): Promise<void> | void => target.onSummary?.(summary);
     }
   }
 
-  async collectDelta(suiteImport: string): Promise<string[]> {
-    if (!this.#active) {
+  #resetDelta(): void {
+    this.#session?.post('Profiler.takePreciseCoverage');
+  }
+
+  #collectDelta(suiteImport: string): string[] {
+    if (!this.#session) {
       return [];
     }
 
-    const { result } = await this.#session.post('Profiler.takePreciseCoverage');
+    let result: inspector.Profiler.ScriptCoverage[] = [];
+    this.#session.post('Profiler.takePreciseCoverage', (error, response) => {
+      if (!error && response) {
+        result = response.result;
+      }
+    });
+
     const suiteModule =
       this.#index.getFromImport(suiteImport)?.module ?? this.#index.findModuleForArbitraryImport(suiteImport)?.name;
     const sources = new Set<string>();
@@ -112,6 +115,65 @@ export class TestExecutionTracer {
     }
 
     return [...sources];
+  }
+
+  #stop(): void {
+    const session = this.#session;
+    if (!session) {
+      return;
+    }
+    this.#session = undefined;
+    try {
+      session.post('Profiler.stopPreciseCoverage');
+      session.post('Profiler.disable');
+    } catch {
+      // Ignore inspector shutdown errors
+    } finally {
+      session.disconnect();
+    }
+  }
+
+  override async onStart(state: TestRunState): Promise<void> {
+    if (!this.#session) {
+      const session = new inspector.Session();
+      session.connect();
+      session.post('Profiler.enable');
+      session.post('Profiler.startPreciseCoverage', { callCount: true, detailed: false });
+      this.#session = session;
+    }
+    await super.onStart(state);
+  }
+
+  override transform(event: TestEvent): TestEvent {
+    if (event.type === 'suite') {
+      if (event.phase === 'before') {
+        this.#sharedSuiteFiles = undefined;
+        this.#methodTraces = [];
+        this.#resetDelta();
+      } else if (event.phase === 'after') {
+        if (this.#methodTraces.length > 0) {
+          this.#pendingSaves.push(this.saveImportTrace(event.suite.import, this.#methodTraces));
+        }
+        this.#stop();
+      }
+    } else if (event.type === 'test') {
+      if (event.phase === 'before') {
+        if (this.#sharedSuiteFiles === undefined) {
+          this.#sharedSuiteFiles = this.#collectDelta(event.test.import);
+        } else {
+          this.#resetDelta();
+        }
+      } else if (event.phase === 'after') {
+        const coveredFiles = [...new Set([...(this.#sharedSuiteFiles ?? []), ...this.#collectDelta(event.test.import)])];
+        this.#methodTraces.push({
+          classId: event.test.classId,
+          methodName: event.test.methodName,
+          status: event.test.status,
+          coveredFiles
+        });
+      }
+    }
+    return event;
   }
 
   /**
@@ -176,18 +238,12 @@ export class TestExecutionTracer {
     }
   }
 
-  async stop(): Promise<void> {
-    if (!this.#active) {
-      return;
-    }
-    this.#active = false;
-    try {
-      await this.#session.post('Profiler.stopPreciseCoverage');
-      await this.#session.post('Profiler.disable');
-    } catch {
-      // Ignore inspector shutdown errors
-    } finally {
-      this.#session.disconnect();
-    }
+  /**
+   * Wait for any pending trace file writes and stop the inspector session
+   */
+  async flush(): Promise<void> {
+    this.#stop();
+    await Promise.all(this.#pendingSaves);
+    this.#pendingSaves = [];
   }
 }

@@ -13,6 +13,7 @@ import { RunnableTestConsumer } from '../consumer/types/runnable.ts';
 import type { TestRemoveEvent } from '../model/event.ts';
 import type { TestConfig, TestDiffInput, TestGlobInput, TestRun, TestRunInput } from '../model/test.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
+import { TestExecutionTracer } from '../watch/tracer.ts';
 import { buildStandardTestManager } from '../worker/standard.ts';
 import { TestExecutor } from './executor.ts';
 import type { TestConsumerConfig } from './types.ts';
@@ -219,7 +220,8 @@ export class RunUtil {
     const { runs, removes } = await this.resolveInput(input);
 
     const targetConsumer = await TestConsumerRegistryIndex.getInstance(consumerConfig);
-    const consumer = await this.getRunnableConsumer(targetConsumer, runs);
+    const tracer = runs.length === 1 && (trackCovered || runs[0].trackCovered) ? new TestExecutionTracer(targetConsumer) : undefined;
+    const consumer = await this.getRunnableConsumer(tracer ?? targetConsumer, runs);
 
     await this.reinitManifestIfNeeded(runs);
 
@@ -227,18 +229,22 @@ export class RunUtil {
       consumer.onRemoveEvent(item);
     }
 
-    if (runs.length === 1) {
-      await new TestExecutor(consumer, trackCovered || !!runs[0].trackCovered).execute(runs[0], true);
-    } else {
-      await WorkPool.run(
-        run => buildStandardTestManager(consumer, trackCovered ? { ...run, trackCovered: true } : run),
-        runs.toSorted(() => (Math.random() < 0.5 ? -1 : 1)),
-        {
-          idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),
-          min: 1,
-          max: consumerConfig.concurrency
-        }
-      );
+    try {
+      if (runs.length === 1) {
+        await new TestExecutor(consumer).execute(runs[0], true);
+      } else {
+        await WorkPool.run(
+          run => buildStandardTestManager(consumer, trackCovered ? { ...run, trackCovered: true } : run),
+          runs.toSorted(() => (Math.random() < 0.5 ? -1 : 1)),
+          {
+            idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),
+            min: 1,
+            max: consumerConfig.concurrency
+          }
+        );
+      }
+    } finally {
+      await tracer?.flush();
     }
 
     return consumer.summarizeAsBoolean();
