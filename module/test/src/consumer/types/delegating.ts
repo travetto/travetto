@@ -5,13 +5,17 @@ import type { SuitesSummary, TestConsumerShape, TestRunState } from '../types.ts
  * Delegating event consumer
  */
 export abstract class DelegatingConsumer implements TestConsumerShape {
-  #consumers: TestConsumerShape[];
+  #consumers: TestConsumerShape[] = [];
 
   constructor(consumers: TestConsumerShape[]) {
-    this.#consumers = consumers;
     for (const consumer of consumers) {
-      consumer.onEvent = consumer.onEvent.bind(consumer);
+      this.addConsumer(consumer);
     }
+  }
+
+  addConsumer(consumer: TestConsumerShape) {
+    this.#consumers.push(consumer);
+    consumer.onEvent = consumer.onEvent.bind(consumer);
   }
 
   async onStart(state: TestRunState): Promise<void> {

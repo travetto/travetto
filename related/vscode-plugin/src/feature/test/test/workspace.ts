@@ -18,9 +18,9 @@ export class WorkspaceResultsManager {
   #diagnostics: DiagnosticManager;
   #active?: [vscode.TextEditor, vscode.TextDocument];
 
-  constructor(log: Log, window: typeof vscode.window) {
+  constructor(log: Log) {
     this.#log = log;
-    this.#diagnostics = new DiagnosticManager(window);
+    this.#diagnostics = new DiagnosticManager();
   }
 
   refreshAll(rebuildDecorations = false) {

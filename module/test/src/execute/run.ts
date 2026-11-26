@@ -13,6 +13,7 @@ import { RunnableTestConsumer } from '../consumer/types/runnable.ts';
 import type { TestRemoveEvent } from '../model/event.ts';
 import type { TestConfig, TestDiffInput, TestGlobInput, TestRun, TestRunInput } from '../model/test.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
+import { TestExecutionTracer } from '../watch/tracer.ts';
 import { buildStandardTestManager } from '../worker/standard.ts';
 import { TestExecutor } from './executor.ts';
 import type { TestConsumerConfig } from './types.ts';
@@ -218,6 +219,7 @@ export class RunUtil {
     const { runs, removes } = await this.resolveInput(input);
 
     const targetConsumer = await TestConsumerRegistryIndex.getInstance(consumerConfig);
+
     const consumer = await this.getRunnableConsumer(targetConsumer, runs);
 
     await this.reinitManifestIfNeeded(runs);
@@ -227,10 +229,19 @@ export class RunUtil {
     }
 
     if (runs.length === 1) {
+      if (consumerConfig.trackCovered ?? runs[0].trackCovered) {
+        const tracer = new TestExecutionTracer();
+        consumer.addConsumer(tracer);
+        await tracer.onStart({ testCount: 0 });
+      }
       await new TestExecutor(consumer).execute(runs[0], true);
     } else {
       await WorkPool.run(
-        run => buildStandardTestManager(consumer, run),
+        run =>
+          buildStandardTestManager(consumer, {
+            ...run,
+            trackCovered: consumerConfig.trackCovered ?? run.trackCovered
+          }),
         runs.toSorted(() => (Math.random() < 0.5 ? -1 : 1)),
         {
           idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),

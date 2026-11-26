@@ -16,4 +16,8 @@ export interface TestConsumerConfig {
    * Number of test suites to run concurrently, when mode is not single
    */
   concurrency?: number;
+  /**
+   * Record executed files per test key into the watch impact cache
+   */
+  trackCovered?: boolean;
 }
