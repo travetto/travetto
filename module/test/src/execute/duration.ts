@@ -67,7 +67,7 @@ export class TestDurationCache implements TestConsumerShape {
     return runs
       .map(run => {
         const duration = this.get(run.import) ?? 0;
-        const bias = Math.min(0.8, Math.log2(1 + duration / 500) * 0.35);
+        const bias = duration > 100 ? Math.min(0.8, Math.log2(duration / 100) * 0.25) : 0;
         return { run, score: Math.random() + bias };
       })
       .sort((a, b) => b.score - a.score)
