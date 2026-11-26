@@ -36,7 +36,7 @@ export class TestWatcher {
     const events: (TestRun | TestDiffInput)[] = [];
 
     if (runAllOnStart) {
-      events.push(...durations.sortSlowestFirst(await RunUtil.resolveGlobInput({ globs: [] })));
+      events.push(...durations.orderRuns(await RunUtil.resolveGlobInput({ globs: [] })));
     }
 
     const queue = new AsyncQueue(events);
