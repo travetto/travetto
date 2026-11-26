@@ -263,12 +263,12 @@ class TestImpactGraphSuite {
         });
       };
 
-      // Slow same-module test (depth 1) must still run; slow downstream test (depth 2) is skipped
+      // Slow same-module test (depth 1) must still run; slow downstream test (depth 2, >= 100ms) is skipped
       recordDuration('test-app/test/parser.ts', 2500);
       recordDuration('test-app/test/other.ts', 50);
-      recordDuration('ext-mod/test/ext-fast.ts', 120);
-      recordDuration('ext-mod/test/ext-slow.ts', 1500);
-      recordDuration('deep-mod/test/deep.ts', 200);
+      recordDuration('ext-mod/test/ext-fast.ts', 40);
+      recordDuration('ext-mod/test/ext-slow.ts', 150);
+      recordDuration('deep-mod/test/deep.ts', 80);
 
       const runs = await graph.onCompilerChange({
         action: 'update',

@@ -11,7 +11,7 @@ import type { TestEvent } from '../model/event.ts';
 import type { TestDiffInput, TestRun } from '../model/test.ts';
 
 const SOURCE_TYPES = new Set(['ts', 'js']);
-const SLOW_DOWNSTREAM_THRESHOLD_MILLISECONDS = 1000;
+const SLOW_DOWNSTREAM_THRESHOLD_MILLISECONDS = 100;
 const IMPORT_REGEX = /(?:^|\n)\s*(?:import|export)\s+(?:[^'"]*?\s+from\s+)?['"]([^'"]+)['"]|\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
 
 type TestKey = `${string}#${string}`;
