@@ -14,6 +14,7 @@ import type { TestRemoveEvent } from '../model/event.ts';
 import type { TestConfig, TestDiffInput, TestGlobInput, TestRun, TestRunInput } from '../model/test.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 import { buildStandardTestManager } from '../worker/standard.ts';
+import { TestDurationCache } from './duration.ts';
 import { TestExecutor } from './executor.ts';
 import type { TestConsumerConfig } from './types.ts';
 
@@ -190,8 +191,12 @@ export class RunUtil {
   /**
    * Build test consumer that wraps a given targeted consumer, and the tests to be run
    */
-  static async getRunnableConsumer(target: TestConsumerShape, testRuns: TestRun[]): Promise<RunnableTestConsumer> {
-    const consumer = new RunnableTestConsumer(target);
+  static async getRunnableConsumer(
+    target: TestConsumerShape,
+    testRuns: TestRun[],
+    ...extra: TestConsumerShape[]
+  ): Promise<RunnableTestConsumer> {
+    const consumer = new RunnableTestConsumer(target, ...extra);
     const testCount = testRuns.reduce((acc, cur) => acc + (cur.methodNames ? cur.methodNames.length : 0), 0);
 
     await consumer.onStart({ testCount });
@@ -218,7 +223,8 @@ export class RunUtil {
     const { runs, removes } = await this.resolveInput(input);
 
     const targetConsumer = await TestConsumerRegistryIndex.getInstance(consumerConfig);
-    const consumer = await this.getRunnableConsumer(targetConsumer, runs);
+    const durations = runs.length > 1 ? await new TestDurationCache().load() : undefined;
+    const consumer = await this.getRunnableConsumer(targetConsumer, runs, ...(durations ? [durations] : []));
 
     await this.reinitManifestIfNeeded(runs);
 
@@ -231,7 +237,7 @@ export class RunUtil {
     } else {
       await WorkPool.run(
         run => buildStandardTestManager(consumer, run),
-        runs.toSorted(() => (Math.random() < 0.5 ? -1 : 1)),
+        durations?.sortSlowestFirst(runs) ?? runs,
         {
           idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),
           min: 1,
