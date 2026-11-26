@@ -219,12 +219,12 @@ class TestImpactGraphSuite {
   }
 
   @Test()
-  async verifyDepthLimitCapsDownstreamAtTenSortedByDepthAndName() {
+  async verifyDepthLimitCapsDownstreamAtFiftySortedByDepthAndName() {
     const tempDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'test-impact-depth-'));
     try {
       const workspacePath = path.toPosix(tempDirectory);
       const manifest = buildManifest(workspacePath);
-      manifest.modules['ext-mod'].files.test = Array.from({ length: 11 }, (_, i) => [
+      manifest.modules['ext-mod'].files.test = Array.from({ length: 51 }, (_, i) => [
         `test/ext-${String(i).padStart(2, '0')}.ts`,
         'ts',
         1000,
@@ -236,7 +236,7 @@ class TestImpactGraphSuite {
       await writeCompiled(index, 'test-app/test/parser.ts', "import { prop } from '../src/properties.js';\n");
       await writeCompiled(index, 'test-app/test/other.ts', "import { prop } from '../src/properties.js';\n");
       await writeCompiled(index, 'deep-mod/test/deep.ts', "import { prop } from 'test-app/src/properties.js';\n");
-      for (let i = 0; i < 11; i += 1) {
+      for (let i = 0; i < 51; i += 1) {
         await writeCompiled(index, `ext-mod/test/ext-${String(i).padStart(2, '0')}.ts`, "import { prop } from 'test-app/src/properties.js';\n");
       }
 
@@ -252,14 +252,14 @@ class TestImpactGraphSuite {
         time: Date.now()
       });
 
-      assert.strictEqual(runs.length, 12);
+      assert.strictEqual(runs.length, 52);
       assert.deepStrictEqual(
         runs.slice(0, 2).map(run => run.import),
         ['test-app/test/other.ts', 'test-app/test/parser.ts']
       );
       assert.deepStrictEqual(
         runs.slice(2).map(run => run.import),
-        Array.from({ length: 10 }, (_, i) => `ext-mod/test/ext-${String(i).padStart(2, '0')}.ts`)
+        Array.from({ length: 50 }, (_, i) => `ext-mod/test/ext-${String(i).padStart(2, '0')}.ts`)
       );
     } finally {
       await fs.rm(tempDirectory, { recursive: true, force: true });
