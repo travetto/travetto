@@ -61,14 +61,14 @@ export class TestDurationCache implements TestConsumerShape {
   }
 
   /**
-   * Order test runs with weighted randomization so slower suites are skewed toward the first half of the run
+   * Order test runs uniformly with a gentle logarithmic front-bias for slower suites
    */
   orderRuns<T extends Pick<TestRun, 'import'>>(runs: T[]): T[] {
     return runs
       .map(run => {
         const duration = this.get(run.import) ?? 0;
-        const weight = Math.max(1, duration / 250);
-        return { run, score: Math.random() ** (1 / weight) };
+        const bias = Math.min(0.4, Math.log10(1 + duration / 1000) * 0.25);
+        return { run, score: Math.random() + bias };
       })
       .sort((a, b) => b.score - a.score)
       .map(item => item.run);

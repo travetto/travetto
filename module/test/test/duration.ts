@@ -90,21 +90,26 @@ class TestDurationCacheSuite {
       assert.strictEqual(reloaded.get('test-app/test/slow.ts'), 1300);
       assert.strictEqual(reloaded.get('test-app/test/medium.ts'), undefined);
 
-      // Weighted ordering skews slow files strongly toward the first 50% while preserving mixing
+      // Gentle front-bias spreads slow files across the run while leaning toward the front vs the end
       const input = [
         { import: 'test-app/test/unknown.ts' },
         { import: 'test-app/test/fast.ts' },
         ...Array.from({ length: 17 }, (_, i) => ({ import: `test-app/test/extra-${i}.ts` })),
         { import: 'test-app/test/slow.ts' }
       ];
-      let firstHalfHits = 0;
-      for (let i = 0; i < 200; i += 1) {
+      let indexSum = 0;
+      let spreadBeyondTopTenPercent = 0;
+      for (let i = 0; i < 400; i += 1) {
         const ordered = reloaded.orderRuns(input);
-        if (ordered.findIndex(run => run.import === 'test-app/test/slow.ts') < input.length / 2) {
-          firstHalfHits += 1;
+        const indexOfSlow = ordered.findIndex(run => run.import === 'test-app/test/slow.ts');
+        indexSum += indexOfSlow;
+        if (indexOfSlow >= 2) {
+          spreadBeyondTopTenPercent += 1;
         }
       }
-      assert(firstHalfHits >= 175, `Expected slow test in first half >= 175/200 times, got ${firstHalfHits}`);
+      const averageIndex = indexSum / 400;
+      assert(averageIndex < input.length * 0.45, `Expected average index < ${input.length * 0.45}, got ${averageIndex}`);
+      assert(spreadBeyondTopTenPercent >= 50, `Expected slow test spread beyond top 10%, got ${spreadBeyondTopTenPercent}/400`);
     } finally {
       await fs.rm(tempDirectory, { recursive: true, force: true });
     }
