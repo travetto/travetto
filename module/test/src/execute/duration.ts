@@ -8,13 +8,14 @@ import type { TestEvent } from '../model/event.ts';
 import type { TestRun } from '../model/test.ts';
 
 const FLUSH_INTERVAL_MILLISECONDS = 30_000;
+const PREVIOUS_WEIGHT = 0.7;
 
 /**
- * Shared persistent cache of suite execution durations (.trv/tool/test-durations.json)
+ * Shared persistent cache of per-suite execution durations (.trv/tool/test-durations.json)
  */
 export class TestDurationCache implements TestConsumerShape {
   #index: ManifestIndex;
-  #durations = new Map<string, number>();
+  #durations = new Map<string, Map<string, number>>();
   #flushTimer?: ReturnType<typeof setTimeout>;
   #dirty = false;
 
@@ -38,8 +39,19 @@ export class TestDurationCache implements TestConsumerShape {
     this.#flushTimer.unref?.();
   }
 
+  /**
+   * Sum stored suite durations for a test file import
+   */
   get(importName: string): number | undefined {
-    return this.#durations.get(importName);
+    const suites = this.#durations.get(importName);
+    if (!suites || suites.size === 0) {
+      return undefined;
+    }
+    let total = 0;
+    for (const duration of suites.values()) {
+      total += duration;
+    }
+    return total;
   }
 
   delete(importName: string): void {
@@ -49,12 +61,12 @@ export class TestDurationCache implements TestConsumerShape {
   }
 
   /**
-   * Sort test runs slowest-first so long-running suites start early in WorkPool execution
+   * Sort test runs slowest-first so long-running files start early in WorkPool execution
    */
   sortSlowestFirst<T extends Pick<TestRun, 'import'>>(runs: T[]): T[] {
     return [...runs].sort((a, b) => {
-      const durationA = this.#durations.get(a.import);
-      const durationB = this.#durations.get(b.import);
+      const durationA = this.get(a.import);
+      const durationB = this.get(b.import);
       if (durationA !== undefined && durationB !== undefined) {
         return durationB - durationA;
       }
@@ -70,7 +82,13 @@ export class TestDurationCache implements TestConsumerShape {
 
   onEvent(event: TestEvent): void {
     if (event.type === 'suite' && event.phase === 'after') {
-      this.#durations.set(event.suite.import, event.suite.duration);
+      const suites = this.#durations.getOrInsert(event.suite.import, new Map());
+      const previous = suites.get(event.suite.classId);
+      const next =
+        previous === undefined
+          ? event.suite.duration
+          : Math.round(previous * PREVIOUS_WEIGHT + event.suite.duration * (1 - PREVIOUS_WEIGHT));
+      suites.set(event.suite.classId, next);
       this.#scheduleSave();
     }
   }
@@ -82,14 +100,23 @@ export class TestDurationCache implements TestConsumerShape {
   }
 
   /**
-   * Load cached suite durations from disk
+   * Load cached per-suite durations from disk
    */
   async load(): Promise<this> {
     try {
-      const parsed = JSONUtil.fromUTF8<Record<string, number>>(await fs.readFile(this.#getCacheFile(), 'utf8'));
-      for (const [importName, duration] of Object.entries(parsed ?? {})) {
-        if (typeof duration === 'number' && this.#index.getFromImport(importName)) {
-          this.#durations.set(importName, duration);
+      const parsed = JSONUtil.fromUTF8<Record<string, Record<string, number>>>(await fs.readFile(this.#getCacheFile(), 'utf8'));
+      for (const [importName, suiteMap] of Object.entries(parsed ?? {})) {
+        if (!suiteMap || typeof suiteMap !== 'object' || !this.#index.getFromImport(importName)) {
+          continue;
+        }
+        const suites = new Map<string, number>();
+        for (const [classId, duration] of Object.entries(suiteMap)) {
+          if (typeof duration === 'number') {
+            suites.set(classId, duration);
+          }
+        }
+        if (suites.size > 0) {
+          this.#durations.set(importName, suites);
         }
       }
     } catch {
@@ -99,7 +126,7 @@ export class TestDurationCache implements TestConsumerShape {
   }
 
   /**
-   * Persist cached suite durations to disk
+   * Persist cached per-suite durations to disk
    */
   async save(): Promise<void> {
     if (this.#flushTimer) {
@@ -110,7 +137,8 @@ export class TestDurationCache implements TestConsumerShape {
     const cacheFile = this.#getCacheFile();
     try {
       await fs.mkdir(path.dirname(cacheFile), { recursive: true });
-      await fs.writeFile(cacheFile, JSONUtil.toUTF8(Object.fromEntries(this.#durations)), 'utf8');
+      const payload = Object.fromEntries([...this.#durations.entries()].map(([importName, suites]) => [importName, Object.fromEntries(suites)]));
+      await fs.writeFile(cacheFile, JSONUtil.toUTF8(payload), 'utf8');
     } catch {
       // Ignore cache write errors
     }

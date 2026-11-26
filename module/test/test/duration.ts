@@ -38,13 +38,13 @@ function buildManifest(workspacePath: string): ManifestRoot {
   };
 }
 
-function makeSuiteAfterEvent(importName: string, duration: number): TestEvent {
+function makeSuiteAfterEvent(importName: string, duration: number, className = 'Suite'): TestEvent {
   return {
     type: 'suite',
     phase: 'after',
     suite: {
       import: importName,
-      classId: `${importName}#Suite`,
+      classId: `${importName}#${className}`,
       lineStart: 1,
       lineEnd: 5,
       duration,
@@ -64,7 +64,7 @@ function makeSuiteAfterEvent(importName: string, duration: number): TestEvent {
 @Suite()
 class TestDurationCacheSuite {
   @Test()
-  async verifyPersistencePruningAndSlowestFirstSorting() {
+  async verifyPerSuitePersistenceTrendSmoothingAndSlowestFirstSorting() {
     const tempDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'test-duration-cache-'));
     try {
       const workspacePath = path.toPosix(tempDirectory);
@@ -72,9 +72,12 @@ class TestDurationCacheSuite {
       const index = new ManifestIndex(manifest);
       const cache = new TestDurationCache(index);
 
-      cache.onEvent(makeSuiteAfterEvent('test-app/test/fast.ts', 50));
+      // Multiple suites in fast.ts sum together; repeated runs smooth via EMA (0.7 * 1000 + 0.3 * 2000 = 1300)
+      cache.onEvent(makeSuiteAfterEvent('test-app/test/fast.ts', 30, 'SuiteA'));
+      cache.onEvent(makeSuiteAfterEvent('test-app/test/fast.ts', 40, 'SuiteB'));
       cache.onEvent(makeSuiteAfterEvent('test-app/test/medium.ts', 400));
-      cache.onEvent(makeSuiteAfterEvent('test-app/test/slow.ts', 2500));
+      cache.onEvent(makeSuiteAfterEvent('test-app/test/slow.ts', 1000));
+      cache.onEvent(makeSuiteAfterEvent('test-app/test/slow.ts', 2000));
       await cache.onSummary();
 
       // Reload into a fresh instance with medium.ts removed from manifest
@@ -83,11 +86,11 @@ class TestDurationCacheSuite {
       );
       const reloaded = await new TestDurationCache(new ManifestIndex(manifest)).load();
 
-      assert.strictEqual(reloaded.get('test-app/test/fast.ts'), 50);
-      assert.strictEqual(reloaded.get('test-app/test/slow.ts'), 2500);
+      assert.strictEqual(reloaded.get('test-app/test/fast.ts'), 70);
+      assert.strictEqual(reloaded.get('test-app/test/slow.ts'), 1300);
       assert.strictEqual(reloaded.get('test-app/test/medium.ts'), undefined);
 
-      // Slowest known tests come first, followed by unknown tests
+      // Slowest known files come first, followed by unknown files
       const sorted = reloaded.sortSlowestFirst([
         { import: 'test-app/test/unknown.ts' },
         { import: 'test-app/test/fast.ts' },
