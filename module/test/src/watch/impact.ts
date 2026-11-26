@@ -10,6 +10,7 @@ import type { TestEvent } from '../model/event.ts';
 import type { TestDiffInput, TestRun } from '../model/test.ts';
 
 const SOURCE_TYPES = new Set(['ts', 'js']);
+const SLOW_DOWNSTREAM_THRESHOLD_MILLISECONDS = 1000;
 const IMPORT_REGEX = /(?:^|\n)\s*(?:import|export)\s+(?:[^'"]*?\s+from\s+)?['"]([^'"]+)['"]|\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
 
 type TestKey = `${string}#${string}`;
@@ -24,6 +25,7 @@ export class TestImpactGraph extends DelegatingConsumer {
   #importersByFile = new Map<string, Set<string>>();
   #failingByImport = new Map<string, Set<TestKey>>();
   #lastFailed = new Map<string, number>();
+  #durationByImport = new Map<string, number>();
   #failureSequence = 0;
 
   constructor(target?: CumulativeSummaryConsumer, index: ManifestIndex = RuntimeIndex) {
@@ -162,16 +164,19 @@ export class TestImpactGraph extends DelegatingConsumer {
       }
     }
 
-    const sorted = rankedRuns.sort(
-      (a, b) =>
-        a.depth - b.depth ||
-        this.#getFailureRank(b.run.import) - this.#getFailureRank(a.run.import) ||
-        a.run.import.localeCompare(b.run.import)
-    );
-
-    const immediate = sorted.filter(item => item.depth < 2);
-    const downstream = sorted.filter(item => item.depth >= 2).slice(0, 10);
-    return [...immediate, ...downstream].map(item => item.run);
+    return rankedRuns
+      .filter(
+        item =>
+          item.depth < 2 || (this.#durationByImport.get(item.run.import) ?? 0) < SLOW_DOWNSTREAM_THRESHOLD_MILLISECONDS
+      )
+      .sort(
+        (a, b) =>
+          a.depth - b.depth ||
+          this.#getFailureRank(b.run.import) - this.#getFailureRank(a.run.import) ||
+          (this.#durationByImport.get(a.run.import) ?? 0) - (this.#durationByImport.get(b.run.import) ?? 0) ||
+          a.run.import.localeCompare(b.run.import)
+      )
+      .map(item => item.run);
   }
 
   #refreshIndexIfNeeded(event: CompilerChangeEvent): void {
@@ -211,6 +216,11 @@ export class TestImpactGraph extends DelegatingConsumer {
           }
         }
       }
+    } else if (event.type === 'suite' && event.phase === 'after') {
+      this.#durationByImport.set(
+        event.suite.import,
+        Math.max(this.#durationByImport.get(event.suite.import) ?? 0, event.suite.duration)
+      );
     }
     return event;
   }
@@ -247,6 +257,7 @@ export class TestImpactGraph extends DelegatingConsumer {
       if (entry?.role === 'test') {
         this.#failingByImport.delete(event.import);
         this.#lastFailed.delete(event.import);
+        this.#durationByImport.delete(event.import);
         this.#target?.removeTest(event.import);
       }
       return runs;

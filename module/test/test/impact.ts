@@ -219,29 +219,56 @@ class TestImpactGraphSuite {
   }
 
   @Test()
-  async verifyDepthLimitCapsDownstreamAtTenSortedByDepthAndName() {
-    const tempDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'test-impact-depth-'));
+  async verifySlowDownstreamTestsAreSkippedWhileImmediateAndFastRun() {
+    const tempDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'test-impact-duration-'));
     try {
       const workspacePath = path.toPosix(tempDirectory);
       const manifest = buildManifest(workspacePath);
-      manifest.modules['ext-mod'].files.test = Array.from({ length: 11 }, (_, i) => [
-        `test/ext-${String(i).padStart(2, '0')}.ts`,
-        'ts',
-        1000,
-        'test'
-      ]);
+      manifest.modules['ext-mod'].files.test = [
+        ['test/ext-fast.ts', 'ts', 1000, 'test'],
+        ['test/ext-slow.ts', 'ts', 1000, 'test']
+      ];
 
       const index = new ManifestIndex(manifest);
       await writeCompiled(index, 'test-app/src/properties.ts', 'export const prop = 1;\n');
       await writeCompiled(index, 'test-app/test/parser.ts', "import { prop } from '../src/properties.js';\n");
       await writeCompiled(index, 'test-app/test/other.ts', "import { prop } from '../src/properties.js';\n");
+      await writeCompiled(index, 'ext-mod/test/ext-fast.ts', "import { prop } from 'test-app/src/properties.js';\n");
+      await writeCompiled(index, 'ext-mod/test/ext-slow.ts', "import { prop } from 'test-app/src/properties.js';\n");
       await writeCompiled(index, 'deep-mod/test/deep.ts', "import { prop } from 'test-app/src/properties.js';\n");
-      for (let i = 0; i < 11; i += 1) {
-        await writeCompiled(index, `ext-mod/test/ext-${String(i).padStart(2, '0')}.ts`, "import { prop } from 'test-app/src/properties.js';\n");
-      }
 
       const graph = new TestImpactGraph(undefined, index);
       await graph.loadCache();
+
+      const recordDuration = (importName: string, duration: number): void => {
+        graph.onEvent({
+          type: 'suite',
+          phase: 'after',
+          suite: {
+            import: importName,
+            classId: `${importName}#Suite`,
+            lineStart: 1,
+            lineEnd: 5,
+            duration,
+            selfDuration: duration,
+            status: 'passed',
+            passed: 1,
+            failed: 0,
+            errored: 0,
+            skipped: 0,
+            unknown: 0,
+            total: 1,
+            tests: {}
+          }
+        });
+      };
+
+      // Slow same-module test (depth 1) must still run; slow downstream test (depth 2) is skipped
+      recordDuration('test-app/test/parser.ts', 2500);
+      recordDuration('test-app/test/other.ts', 50);
+      recordDuration('ext-mod/test/ext-fast.ts', 120);
+      recordDuration('ext-mod/test/ext-slow.ts', 1500);
+      recordDuration('deep-mod/test/deep.ts', 200);
 
       const runs = await graph.onCompilerChange({
         action: 'update',
@@ -252,15 +279,12 @@ class TestImpactGraphSuite {
         time: Date.now()
       });
 
-      assert.strictEqual(runs.length, 12);
-      assert.deepStrictEqual(
-        runs.slice(0, 2).map(run => run.import),
-        ['test-app/test/other.ts', 'test-app/test/parser.ts']
-      );
-      assert.deepStrictEqual(
-        runs.slice(2).map(run => run.import),
-        Array.from({ length: 10 }, (_, i) => `ext-mod/test/ext-${String(i).padStart(2, '0')}.ts`)
-      );
+      assert.deepStrictEqual(runs, [
+        { import: 'test-app/test/other.ts' },
+        { import: 'test-app/test/parser.ts' },
+        { import: 'ext-mod/test/ext-fast.ts' },
+        { import: 'deep-mod/test/deep.ts' }
+      ]);
     } finally {
       await fs.rm(tempDirectory, { recursive: true, force: true });
     }
