@@ -108,8 +108,8 @@ class TestDurationCacheSuite {
         }
       }
       const averageIndex = indexSum / 400;
-      assert(averageIndex < input.length * 0.45, `Expected average index < ${input.length * 0.45}, got ${averageIndex}`);
-      assert(spreadBeyondTopTenPercent >= 50, `Expected slow test spread beyond top 10%, got ${spreadBeyondTopTenPercent}/400`);
+      assert(averageIndex < input.length * 0.3, `Expected average index < ${input.length * 0.3}, got ${averageIndex}`);
+      assert(spreadBeyondTopTenPercent >= 30, `Expected slow test spread beyond top 10%, got ${spreadBeyondTopTenPercent}/400`);
     } finally {
       await fs.rm(tempDirectory, { recursive: true, force: true });
     }
