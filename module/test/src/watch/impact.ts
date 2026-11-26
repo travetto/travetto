@@ -170,7 +170,7 @@ export class TestImpactGraph extends DelegatingConsumer {
     );
 
     const immediate = sorted.filter(item => item.depth < 2);
-    const downstream = sorted.filter(item => item.depth >= 2).slice(0, 50);
+    const downstream = sorted.filter(item => item.depth >= 2).slice(0, 10);
     return [...immediate, ...downstream].map(item => item.run);
   }
 
