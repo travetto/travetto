@@ -229,14 +229,12 @@ export class RunUtil {
 
     if (runs.length === 1) {
       await new TestExecutor(consumer).execute(runs[0], true);
-    } else {
-      const durations = runs.length > 1 ? await new TestDurationCache().load() : undefined;
-      if (durations) {
-        consumer.addConsumer(durations);
-      }
+    } else if (runs.length > 1) {
+      const durations = await new TestDurationCache().load();
+      consumer.addConsumer(durations);
       await WorkPool.run(
         run => buildStandardTestManager(consumer, run),
-        durations?.sortSlowestFirst(runs) ?? runs,
+        durations.sortSlowestFirst(runs),
         {
           idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),
           min: 1,
