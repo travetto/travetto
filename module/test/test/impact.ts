@@ -7,6 +7,7 @@ import { Suite, Test } from '@travetto/test';
 
 import type { TestEvent } from '../src/model/event.ts';
 import type { TestResult } from '../src/model/test.ts';
+import { TestDurationCache } from '../src/execute/duration.ts';
 import { TestImpactGraph } from '../src/watch/impact.ts';
 
 function buildManifest(workspacePath: string): ManifestRoot {
@@ -306,6 +307,19 @@ class TestImpactGraphSuite {
         { import: 'ext-mod/test/ext-fast.ts' },
         { import: 'deep-mod/test/deep.ts' }
       ]);
+
+      // Shared TestDurationCache sorts slowest-first for full-suite runs
+      const durationCache = await new TestDurationCache(index).load();
+      assert.deepStrictEqual(
+        durationCache
+          .sortSlowestFirst([
+            { import: 'test-app/test/other.ts' },
+            { import: 'ext-mod/test/ext-slow.ts' },
+            { import: 'test-app/test/parser.ts' }
+          ])
+          .map(run => run.import),
+        ['test-app/test/parser.ts', 'ext-mod/test/ext-slow.ts', 'test-app/test/other.ts']
+      );
     } finally {
       await fs.rm(tempDirectory, { recursive: true, force: true });
     }

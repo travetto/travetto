@@ -4,6 +4,7 @@ import { WorkPool } from '@travetto/worker';
 
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
+import { TestDurationCache } from '../execute/duration.ts';
 import { RunUtil } from '../execute/run.ts';
 import type { TestDiffInput, TestRun } from '../model/test.ts';
 import { buildStandardTestManager } from '../worker/standard.ts';
@@ -24,15 +25,18 @@ export class TestWatcher {
 
     await Registry.init();
 
+    const durations = await new TestDurationCache().load();
     const impact = new TestImpactGraph(
-      new CumulativeSummaryConsumer(await TestConsumerRegistryIndex.getInstance({ consumer: format }))
+      new CumulativeSummaryConsumer(await TestConsumerRegistryIndex.getInstance({ consumer: format })),
+      undefined,
+      durations
     );
     await impact.loadCache();
 
     const events: (TestRun | TestDiffInput)[] = [];
 
     if (runAllOnStart) {
-      events.push(...(await RunUtil.resolveGlobInput({ globs: [] })));
+      events.push(...durations.sortSlowestFirst(await RunUtil.resolveGlobInput({ globs: [] })));
     }
 
     const queue = new AsyncQueue(events);
