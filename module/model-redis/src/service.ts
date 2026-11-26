@@ -242,15 +242,26 @@ export class RedisModelService implements ModelCrudSupport, ModelBulkSupport, Mo
     }
 
     // Set expiry
-    if (action === 'write' && config.expiresAt) {
-      const expiry = ModelExpiryUtil.getExpiryState(cls, item);
-      if (expiry.expiresAt !== undefined) {
-        if (expiry.expiresAt) {
-          await this.client.pExpireAt(this.#resolveKey(cls, id), expiry.expiresAt.getTime());
-        } else {
-          await this.client.persist(this.#resolveKey(cls, id));
-        }
-      }
+    if (action === 'write') {
+      await this.#applyExpiry(this.client, cls, item, this.#resolveKey(cls, id), config.expiresAt);
+    }
+  }
+
+  #applyExpiry<T extends ModelType>(
+    target: Pick<RedisClient, 'pExpire' | 'persist'> | Pick<RedisMulti, 'pExpire' | 'persist'>,
+    cls: Class<T>,
+    item: T,
+    key: string,
+    expiresAtField?: string
+  ): unknown {
+    if (!expiresAtField) {
+      return;
+    }
+    const expiry = ModelExpiryUtil.getExpiryState(cls, item);
+    if (expiry.expiresAt !== undefined) {
+      return expiry.expiresAt
+        ? target.pExpire(key, Math.max(1, expiry.expiresAt.getTime() - Date.now()))
+        : target.persist(key);
     }
   }
 
@@ -421,16 +432,7 @@ export class RedisModelService implements ModelCrudSupport, ModelBulkSupport, Mo
             }
             multi.set(key, JSONUtil.toUTF8(operation.insert));
             this.#addIndices(cls, castTo<T>(operation.insert), multi);
-            if (config.expiresAt) {
-              const expiry = ModelExpiryUtil.getExpiryState(cls, castTo<T>(operation.insert));
-              if (expiry.expiresAt !== undefined) {
-                if (expiry.expiresAt) {
-                  multi.pExpireAt(key, expiry.expiresAt.getTime());
-                } else {
-                  multi.persist(key);
-                }
-              }
-            }
+            this.#applyExpiry(multi, cls, castTo<T>(operation.insert), key, config.expiresAt);
             counts.insert += 1;
             insertedIds.set(index, idSource.get(operation.insert));
           } else if ('update' in operation && operation.update) {
@@ -440,16 +442,7 @@ export class RedisModelService implements ModelCrudSupport, ModelBulkSupport, Mo
             this.#removeIndices(cls, existing, multi);
             multi.set(key, JSONUtil.toUTF8(operation.update));
             this.#addIndices(cls, operation.update, multi);
-            if (config.expiresAt) {
-              const expiry = ModelExpiryUtil.getExpiryState(cls, operation.update);
-              if (expiry.expiresAt !== undefined) {
-                if (expiry.expiresAt) {
-                  multi.pExpireAt(key, expiry.expiresAt.getTime());
-                } else {
-                  multi.persist(key);
-                }
-              }
-            }
+            this.#applyExpiry(multi, cls, operation.update, key, config.expiresAt);
             counts.update += 1;
           } else if ('upsert' in operation && operation.upsert) {
             if (existing) {
@@ -457,16 +450,7 @@ export class RedisModelService implements ModelCrudSupport, ModelBulkSupport, Mo
             }
             multi.set(key, JSONUtil.toUTF8(operation.upsert));
             this.#addIndices(cls, castTo<T>(operation.upsert), multi);
-            if (config.expiresAt) {
-              const expiry = ModelExpiryUtil.getExpiryState(cls, castTo<T>(operation.upsert));
-              if (expiry.expiresAt !== undefined) {
-                if (expiry.expiresAt) {
-                  multi.pExpireAt(key, expiry.expiresAt.getTime());
-                } else {
-                  multi.persist(key);
-                }
-              }
-            }
+            this.#applyExpiry(multi, cls, castTo<T>(operation.upsert), key, config.expiresAt);
             if (!existing) {
               insertedIds.set(index, idSource.get(operation.upsert));
             }

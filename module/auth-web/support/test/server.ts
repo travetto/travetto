@@ -344,7 +344,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
 
     const used = Date.now() - start;
     assert(used < 1000);
-    await timers.setTimeout((2000 - used) / 2);
+    await timers.setTimeout(Math.max(0, 1100 - used));
 
     const {
       headers: selfHeadersRenew,

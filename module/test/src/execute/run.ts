@@ -14,6 +14,7 @@ import type { TestRemoveEvent } from '../model/event.ts';
 import type { TestConfig, TestDiffInput, TestGlobInput, TestRun, TestRunInput } from '../model/test.ts';
 import { SuiteRegistryIndex } from '../registry/registry-index.ts';
 import { buildStandardTestManager } from '../worker/standard.ts';
+import { TestDurationCache } from './duration.ts';
 import { TestExecutor } from './executor.ts';
 import type { TestConsumerConfig } from './types.ts';
 
@@ -228,10 +229,12 @@ export class RunUtil {
 
     if (runs.length === 1) {
       await new TestExecutor(consumer).execute(runs[0], true);
-    } else {
+    } else if (runs.length > 1) {
+      const durations = await new TestDurationCache().load();
+      consumer.addConsumer(durations);
       await WorkPool.run(
         run => buildStandardTestManager(consumer, run),
-        runs.toSorted(() => (Math.random() < 0.5 ? -1 : 1)),
+        durations.orderRuns(runs),
         {
           idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),
           min: 1,
