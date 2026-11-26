@@ -191,12 +191,8 @@ export class RunUtil {
   /**
    * Build test consumer that wraps a given targeted consumer, and the tests to be run
    */
-  static async getRunnableConsumer(
-    target: TestConsumerShape,
-    testRuns: TestRun[],
-    ...extra: TestConsumerShape[]
-  ): Promise<RunnableTestConsumer> {
-    const consumer = new RunnableTestConsumer(target, ...extra);
+  static async getRunnableConsumer(target: TestConsumerShape, testRuns: TestRun[]): Promise<RunnableTestConsumer> {
+    const consumer = new RunnableTestConsumer(target);
     const testCount = testRuns.reduce((acc, cur) => acc + (cur.methodNames ? cur.methodNames.length : 0), 0);
 
     await consumer.onStart({ testCount });
@@ -223,8 +219,7 @@ export class RunUtil {
     const { runs, removes } = await this.resolveInput(input);
 
     const targetConsumer = await TestConsumerRegistryIndex.getInstance(consumerConfig);
-    const durations = runs.length > 1 ? await new TestDurationCache().load() : undefined;
-    const consumer = await this.getRunnableConsumer(targetConsumer, runs, ...(durations ? [durations] : []));
+    const consumer = await this.getRunnableConsumer(targetConsumer, runs);
 
     await this.reinitManifestIfNeeded(runs);
 
@@ -235,6 +230,10 @@ export class RunUtil {
     if (runs.length === 1) {
       await new TestExecutor(consumer).execute(runs[0], true);
     } else {
+      const durations = runs.length > 1 ? await new TestDurationCache().load() : undefined;
+      if (durations) {
+        consumer.addConsumer(durations);
+      }
       await WorkPool.run(
         run => buildStandardTestManager(consumer, run),
         durations?.sortSlowestFirst(runs) ?? runs,
