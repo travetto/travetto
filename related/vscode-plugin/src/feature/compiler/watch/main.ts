@@ -175,7 +175,9 @@ export class CompilerWatchFeature extends BaseFeature {
         status = '$(flame) Initializing';
         break;
       case 'compile-start':
-        status = '$(flame) Compiling';
+        if (Workspace.compilerState !== 'watch-start') {
+          status = '$(flame) Compiling';
+        }
         break;
       case 'watch-start':
         status = '$(pass-filled) Ready';
