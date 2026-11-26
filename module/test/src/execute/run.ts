@@ -234,7 +234,7 @@ export class RunUtil {
       consumer.addConsumer(durations);
       await WorkPool.run(
         run => buildStandardTestManager(consumer, run),
-        durations.sortSlowestFirst(runs),
+        durations.orderRuns(runs),
         {
           idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),
           min: 1,

@@ -61,23 +61,17 @@ export class TestDurationCache implements TestConsumerShape {
   }
 
   /**
-   * Sort test runs slowest-first so long-running files start early in WorkPool execution
+   * Order test runs with weighted randomization so slower suites are skewed toward the first half of the run
    */
-  sortSlowestFirst<T extends Pick<TestRun, 'import'>>(runs: T[]): T[] {
-    return [...runs].sort((a, b) => {
-      const durationA = this.get(a.import);
-      const durationB = this.get(b.import);
-      if (durationA !== undefined && durationB !== undefined) {
-        return durationB - durationA;
-      }
-      if (durationA !== undefined) {
-        return -1;
-      }
-      if (durationB !== undefined) {
-        return 1;
-      }
-      return Math.random() < 0.5 ? -1 : 1;
-    });
+  orderRuns<T extends Pick<TestRun, 'import'>>(runs: T[]): T[] {
+    return runs
+      .map(run => {
+        const duration = this.get(run.import) ?? 0;
+        const weight = Math.max(1, duration / 250);
+        return { run, score: Math.random() ** (1 / weight) };
+      })
+      .sort((a, b) => b.score - a.score)
+      .map(item => item.run);
   }
 
   onEvent(event: TestEvent): void {

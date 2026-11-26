@@ -90,16 +90,21 @@ class TestDurationCacheSuite {
       assert.strictEqual(reloaded.get('test-app/test/slow.ts'), 1300);
       assert.strictEqual(reloaded.get('test-app/test/medium.ts'), undefined);
 
-      // Slowest known files come first, followed by unknown files
-      const sorted = reloaded.sortSlowestFirst([
+      // Weighted ordering skews slow files strongly toward the first 50% while preserving mixing
+      const input = [
         { import: 'test-app/test/unknown.ts' },
         { import: 'test-app/test/fast.ts' },
+        ...Array.from({ length: 17 }, (_, i) => ({ import: `test-app/test/extra-${i}.ts` })),
         { import: 'test-app/test/slow.ts' }
-      ]);
-      assert.deepStrictEqual(
-        sorted.map(run => run.import),
-        ['test-app/test/slow.ts', 'test-app/test/fast.ts', 'test-app/test/unknown.ts']
-      );
+      ];
+      let firstHalfHits = 0;
+      for (let i = 0; i < 200; i += 1) {
+        const ordered = reloaded.orderRuns(input);
+        if (ordered.findIndex(run => run.import === 'test-app/test/slow.ts') < input.length / 2) {
+          firstHalfHits += 1;
+        }
+      }
+      assert(firstHalfHits >= 175, `Expected slow test in first half >= 175/200 times, got ${firstHalfHits}`);
     } finally {
       await fs.rm(tempDirectory, { recursive: true, force: true });
     }
