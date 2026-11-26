@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 
 import type { CompilerChangeEvent } from '@travetto/compiler';
 import { type IndexedFile, type ManifestIndex, ManifestModuleUtil, path } from '@travetto/manifest';
-import { Runtime, RuntimeIndex } from '@travetto/runtime';
+import { JSONUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import type { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
 import { DelegatingConsumer } from '../consumer/types/delegating.ts';
@@ -11,6 +11,7 @@ import type { TestDiffInput, TestRun } from '../model/test.ts';
 
 const SOURCE_TYPES = new Set(['ts', 'js']);
 const SLOW_DOWNSTREAM_THRESHOLD_MILLISECONDS = 1000;
+const DURATION_FLUSH_INTERVAL_MILLISECONDS = 30_000;
 const IMPORT_REGEX = /(?:^|\n)\s*(?:import|export)\s+(?:[^'"]*?\s+from\s+)?['"]([^'"]+)['"]|\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
 
 type TestKey = `${string}#${string}`;
@@ -26,6 +27,7 @@ export class TestImpactGraph extends DelegatingConsumer {
   #failingByImport = new Map<string, Set<TestKey>>();
   #lastFailed = new Map<string, number>();
   #durationByImport = new Map<string, number>();
+  #durationFlushTimer?: ReturnType<typeof setTimeout>;
   #failureSequence = 0;
 
   constructor(target?: CumulativeSummaryConsumer, index: ManifestIndex = RuntimeIndex) {
@@ -189,15 +191,59 @@ export class TestImpactGraph extends DelegatingConsumer {
     }
   }
 
+  #getDurationCacheFile(): string {
+    return path.resolve(this.#index.manifest.workspace.path, this.#index.manifest.build.toolFolder, 'test-durations.json');
+  }
+
+  #scheduleDurationSave(): void {
+    if (this.#durationFlushTimer) {
+      return;
+    }
+    this.#durationFlushTimer = setTimeout(() => {
+      this.#durationFlushTimer = undefined;
+      void this.saveDurationCache();
+    }, DURATION_FLUSH_INTERVAL_MILLISECONDS);
+    this.#durationFlushTimer.unref?.();
+  }
+
   /**
-   * Index all compiled workspace JS files into the static reverse-import graph
+   * Persist cached suite durations to the workspace tool folder
+   */
+  async saveDurationCache(): Promise<void> {
+    if (this.#durationFlushTimer) {
+      clearTimeout(this.#durationFlushTimer);
+      this.#durationFlushTimer = undefined;
+    }
+    const cacheFile = this.#getDurationCacheFile();
+    try {
+      await fs.mkdir(path.dirname(cacheFile), { recursive: true });
+      await fs.writeFile(cacheFile, JSONUtil.toUTF8(Object.fromEntries(this.#durationByImport)), 'utf8');
+    } catch {
+      // Ignore cache write errors
+    }
+  }
+
+  /**
+   * Index all compiled workspace JS files and load cached suite durations
    */
   async loadCache(): Promise<void> {
     const entries = this.#index.find({
       module: module => !!module.workspace,
       file: file => file.role !== 'doc' && SOURCE_TYPES.has(file.type)
     });
-    await Promise.all(entries.map(file => this.#indexOutputFile(file.sourceFile, file.outputFile)));
+    const loadDurations = async (): Promise<void> => {
+      try {
+        const parsed = JSONUtil.fromUTF8<Record<string, number>>(await fs.readFile(this.#getDurationCacheFile(), 'utf8'));
+        for (const [importName, duration] of Object.entries(parsed ?? {})) {
+          if (typeof duration === 'number' && this.#index.getFromImport(importName)) {
+            this.#durationByImport.set(importName, duration);
+          }
+        }
+      } catch {
+        // No cached durations on disk yet
+      }
+    };
+    await Promise.all([loadDurations(), ...entries.map(file => this.#indexOutputFile(file.sourceFile, file.outputFile))]);
   }
 
   transform(event: TestEvent): TestEvent {
@@ -217,10 +263,8 @@ export class TestImpactGraph extends DelegatingConsumer {
         }
       }
     } else if (event.type === 'suite' && event.phase === 'after') {
-      this.#durationByImport.set(
-        event.suite.import,
-        Math.max(this.#durationByImport.get(event.suite.import) ?? 0, event.suite.duration)
-      );
+      this.#durationByImport.set(event.suite.import, event.suite.duration);
+      this.#scheduleDurationSave();
     }
     return event;
   }
@@ -257,7 +301,9 @@ export class TestImpactGraph extends DelegatingConsumer {
       if (entry?.role === 'test') {
         this.#failingByImport.delete(event.import);
         this.#lastFailed.delete(event.import);
-        this.#durationByImport.delete(event.import);
+        if (this.#durationByImport.delete(event.import)) {
+          this.#scheduleDurationSave();
+        }
         this.#target?.removeTest(event.import);
       }
       return runs;

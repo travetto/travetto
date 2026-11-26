@@ -285,6 +285,27 @@ class TestImpactGraphSuite {
         { import: 'ext-mod/test/ext-fast.ts' },
         { import: 'deep-mod/test/deep.ts' }
       ]);
+
+      // Persist durations and verify a fresh TestImpactGraph skips slow downstream tests immediately on startup
+      await graph.saveDurationCache();
+      const reloadedGraph = new TestImpactGraph(undefined, index);
+      await reloadedGraph.loadCache();
+
+      const reloadedRuns = await reloadedGraph.onCompilerChange({
+        action: 'update',
+        file: 'module/app/src/properties.ts',
+        import: 'test-app/src/properties.ts',
+        output: '',
+        module: 'test-app',
+        time: Date.now()
+      });
+
+      assert.deepStrictEqual(reloadedRuns, [
+        { import: 'test-app/test/other.ts' },
+        { import: 'test-app/test/parser.ts' },
+        { import: 'ext-mod/test/ext-fast.ts' },
+        { import: 'deep-mod/test/deep.ts' }
+      ]);
     } finally {
       await fs.rm(tempDirectory, { recursive: true, force: true });
     }
