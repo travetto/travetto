@@ -6,6 +6,7 @@ import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
 import { TestDurationCache } from '../execute/duration.ts';
 import { RunUtil } from '../execute/run.ts';
+import type { TestDiffInput, TestRun } from '../model/test.ts';
 import { buildStandardTestManager } from '../worker/standard.ts';
 import { isTestRunEvent, type TestReadyEvent } from '../worker/types.ts';
 import { TestImpactGraph } from './impact.ts';
@@ -24,13 +25,18 @@ export class TestWatcher {
 
     await Registry.init();
 
+    const events: (TestRun | TestDiffInput)[] = [];
+
     const durations = await TestDurationCache.load();
+
+    if (runAllOnStart) {
+      events.push(...durations.orderRuns(await RunUtil.resolveGlobInput({ globs: [] })));
+    }
+
+    const queue = new AsyncQueue(events);
     const consumer = new CumulativeSummaryConsumer(await TestConsumerRegistryIndex.getInstance({ consumer: format }));
     consumer.addConsumer(durations);
     const impact = new TestImpactGraph(consumer, undefined, durations);
-
-    const events = runAllOnStart ? durations.orderRuns(await RunUtil.resolveGlobInput({ globs: [] })) : [];
-    const queue = new AsyncQueue(events);
 
     process.on('message', event => {
       if (isTestRunEvent(event)) {
