@@ -20,6 +20,8 @@ import { WorkspaceResultsManager } from './workspace.ts';
 @ActivateOn({ module: '@travetto/test', command: 'test' })
 class TestRunnerFeature extends BaseFeature {
   #server: ChildProcess | undefined;
+  #serverReady = false;
+  #pendingImports = new Set<string>();
   #consumer: WorkspaceResultsManager;
   #codeLensUpdated: (event: void) => unknown;
 
@@ -31,6 +33,8 @@ class TestRunnerFeature extends BaseFeature {
     this.log.info('Stopping server');
     this.#server.kill();
     this.#server = undefined;
+    this.#serverReady = false;
+    this.#pendingImports.clear();
     if (force) {
       this.#consumer.resetAll();
     }
@@ -61,6 +65,17 @@ class TestRunnerFeature extends BaseFeature {
       'message',
       (event: TestWatchEvent) => {
         switch (event.type) {
+          case 'ready':
+            this.#serverReady = true;
+            if (this.#pendingImports.size > 0) {
+              const imports = [...this.#pendingImports];
+              this.#pendingImports.clear();
+              this.log.info('Requesting test runs ', imports);
+              for (const importName of imports) {
+                this.#server?.send({ type: 'runTest', import: importName });
+              }
+            }
+            return;
           case 'log':
             return this.log.info('[Log  ]', event.message);
           case 'test':
@@ -113,6 +128,11 @@ class TestRunnerFeature extends BaseFeature {
     }
 
     const imp = `${module.name}${file.split(module.sourceFolder)[1]}`;
+    if (!this.#serverReady) {
+      this.log.info('Queueing test run until server is ready ', imp);
+      this.#pendingImports.add(imp);
+      return;
+    }
     this.log.info('Requesting test run ', imp);
     this.#server.send({ type: 'runTest', import: imp });
   }
@@ -221,7 +241,7 @@ class TestRunnerFeature extends BaseFeature {
    * On feature activate
    */
   async activate(context: vscode.ExtensionContext): Promise<void> {
-    this.#consumer = new WorkspaceResultsManager(this.log, vscode.window);
+    this.#consumer = new WorkspaceResultsManager(this.log);
 
     this.register('line', (line?: number) => this.#launchTestDebugger(line));
     this.register('stop', () => this.#stopServer(true));
@@ -229,9 +249,13 @@ class TestRunnerFeature extends BaseFeature {
     this.register('restart', () => this.#restartServer());
     this.register('rerun', () => this.#rerunActive());
 
-    Workspace.onCompilerState(state =>
-      state === 'watch-start' ? this.onChangedActiveEditor(vscode.window.activeTextEditor) : this.#stopServer()
-    );
+    Workspace.onCompilerState(state => {
+      if (state === 'watch-start') {
+        void this.onChangedActiveEditor(vscode.window.activeTextEditor);
+      } else if (state === 'closed' || state === 'reset') {
+        this.#stopServer();
+      }
+    });
     vscode.workspace.onDidOpenTextDocument(document => this.onOpenTextDocument(document), null, context.subscriptions);
     vscode.workspace.onDidCloseTextDocument(document => this.onCloseTextDocument(document), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(editor => this.onChangedActiveEditor(editor), null, context.subscriptions);
