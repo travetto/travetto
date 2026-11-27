@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import readline from 'node:readline/promises';
 
+import type { IndexedFile } from '@travetto/manifest';
 import { Registry } from '@travetto/registry';
 import { describeFunction, Env, ExecUtil, JSONUtil, Runtime, RuntimeIndex, TimeUtil, Util } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
@@ -23,25 +24,45 @@ type RunState = {
   removes?: TestRemoveEvent[];
 };
 
+const SOURCE_TYPES = new Set(['ts', 'js']);
+
 /**
  * Test Utilities for Running
  */
 export class RunUtil {
+  static #testLookupCache = new Map<string, Promise<boolean>>();
+
+  static resetFile(file: string): void {
+    this.#testLookupCache.delete(file);
+  }
+
   /**
    * Determine if a given file path is a valid test file
    */
   static async isTestFile(file: string): Promise<boolean> {
-    const reader = readline.createInterface({ input: createReadStream(file) });
-    const state = { imp: false, suite: false };
-    for await (const line of reader) {
-      state.imp ||= line.includes('@travetto/test');
-      state.suite ||= line.includes('Suite'); // Decorator or name
-      if (state.imp && state.suite) {
-        reader.close();
-        return true;
+    return this.#testLookupCache.getOrInsertComputed(file, async () => {
+      const reader = readline.createInterface({ input: createReadStream(file) });
+      const state = { imp: false, suite: false };
+      for await (const line of reader) {
+        state.imp ||= line.includes('@travetto/test');
+        state.suite ||= line.includes('Suite'); // Decorator or name
+        if (state.imp && state.suite) {
+          reader.close();
+          return true;
+        }
       }
+      return false;
+    });
+  }
+
+  /**
+   * Determine if a given entry is a valid test entry
+   */
+  static async isTestEntry(entry?: IndexedFile): Promise<boolean> {
+    if (!entry || entry.role !== 'test' || !entry.relativeFile.startsWith('test/') || !SOURCE_TYPES.has(entry.type)) {
+      return false;
     }
-    return false;
+    return this.isTestFile(entry.sourceFile);
   }
 
   /**
@@ -232,15 +253,11 @@ export class RunUtil {
     } else if (runs.length > 1) {
       const durations = await new TestDurationCache().load();
       consumer.addConsumer(durations);
-      await WorkPool.run(
-        run => buildStandardTestManager(consumer, run),
-        durations.orderRuns(runs),
-        {
-          idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),
-          min: 1,
-          max: consumerConfig.concurrency
-        }
-      );
+      await WorkPool.run(run => buildStandardTestManager(consumer, run), durations.orderRuns(runs), {
+        idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),
+        min: 1,
+        max: consumerConfig.concurrency
+      });
     }
 
     return consumer.summarizeAsBoolean();
