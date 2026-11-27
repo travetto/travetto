@@ -26,9 +26,9 @@ export class TestWatcher {
     await Registry.init();
 
     const durations = await new TestDurationCache().load();
-    const summary = new CumulativeSummaryConsumer(await TestConsumerRegistryIndex.getInstance({ consumer: format }));
-    summary.addConsumer(durations);
-    const impact = new TestImpactGraph(summary, undefined, durations);
+    const consumer = new CumulativeSummaryConsumer(await TestConsumerRegistryIndex.getInstance({ consumer: format }));
+    consumer.addConsumer(durations);
+    const impact = new TestImpactGraph(consumer, undefined, durations);
 
     const events = runAllOnStart ? durations.orderRuns(await RunUtil.resolveGlobInput({ globs: [] })) : [];
     const queue = new AsyncQueue(events);
@@ -41,7 +41,7 @@ export class TestWatcher {
 
     process.send?.({ type: 'ready' } satisfies TestReadyEvent);
 
-    const queueProcessor = WorkPool.run(buildStandardTestManager.bind(null, summary), queue, {
+    const queueProcessor = WorkPool.run(buildStandardTestManager.bind(null, consumer), queue, {
       idleTimeoutMillis: TimeUtil.duration('2m', 'ms'),
       min: 2,
       max: WorkPool.DEFAULT_SIZE
