@@ -54,6 +54,14 @@ export class ManifestIndex {
     this.init(`${this.outputRoot}/node_modules/${module}`);
   }
 
+  /**
+   * **WARNING**: This is a destructive operation, and should only be called before loading any code
+   * @private
+   */
+  reinit(): void {
+    this.reinitForModule(this.manifest.main.name);
+  }
+
   #moduleFiles(module: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
     return files.map(([file, type, _ts, role = 'std']) => {
       const isSource = type === 'ts' || type === 'js';

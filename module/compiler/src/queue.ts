@@ -47,8 +47,8 @@ export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
     return items;
   }
 
-  add(item: X): void {
-    this.#queue.push(item);
+  add(item: X | X[]): void {
+    this.#queue.push(...(Array.isArray(item) ? item : [item]));
     this.#ready.resolve();
   }
 

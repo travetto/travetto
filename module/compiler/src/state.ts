@@ -222,8 +222,7 @@ export class CompilerState implements CompilerHost {
         return candidate;
       }
     } else {
-      const indexed =
-        this.#manifestIndex.getFromImport(specifierText) ?? this.#manifestIndex.getFromImport(`${specifierText}/__index__`);
+      const indexed = this.#manifestIndex.getFromImport(specifierText) ?? this.#manifestIndex.getFromImport(`${specifierText}/__index__`);
       if (indexed && this.#sourceToEntry.has(indexed.sourceFile)) {
         return indexed.sourceFile;
       }
@@ -680,7 +679,7 @@ export class CompilerState implements CompilerHost {
     await ManifestUtil.writeManifest(manifest);
     await ManifestUtil.writeDependentManifests(manifest);
     if (reload) {
-      this.#manifestIndex.reinitForModule(this.manifest.main.name);
+      this.#manifestIndex.reinit();
       this.#manifest = this.#manifestIndex.manifest;
     }
   }

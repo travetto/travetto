@@ -46,8 +46,9 @@ export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
    * Queue next event to fire
    * @param {boolean} immediate Determines if item(s) should be append or prepended to the queue
    */
-  add(item: X, immediate = false): void {
-    this.#buffer[immediate ? 'unshift' : 'push'](item);
+  add(item: X | X[], immediate = false): void {
+    const items = Array.isArray(item) ? item : [item];
+    this.#buffer[immediate ? 'unshift' : 'push'].apply(this.#buffer, items);
     this.#ready.resolve();
   }
 
