@@ -41,15 +41,19 @@ export class RunUtil {
    */
   static async isTestFile(file: string): Promise<boolean> {
     return this.#testLookupCache.getOrInsertComputed(file, async () => {
-      const reader = readline.createInterface({ input: createReadStream(file) });
-      const state = { imp: false, suite: false };
-      for await (const line of reader) {
-        state.imp ||= line.includes('@travetto/test');
-        state.suite ||= line.includes('Suite'); // Decorator or name
-        if (state.imp && state.suite) {
-          reader.close();
-          return true;
+      try {
+        const reader = readline.createInterface({ input: createReadStream(file) });
+        const state = { imp: false, suite: false };
+        for await (const line of reader) {
+          state.imp ||= line.includes('@travetto/test');
+          state.suite ||= line.includes('Suite'); // Decorator or name
+          if (state.imp && state.suite) {
+            reader.close();
+            return true;
+          }
         }
+      } catch {
+        // Ignore missing or unreadable files
       }
       return false;
     });
@@ -251,7 +255,7 @@ export class RunUtil {
     if (runs.length === 1) {
       await new TestExecutor(consumer).execute(runs[0], true);
     } else if (runs.length > 1) {
-      const durations = await new TestDurationCache().load();
+      const durations = await TestDurationCache.load();
       consumer.addConsumer(durations);
       await WorkPool.run(run => buildStandardTestManager(consumer, run), durations.orderRuns(runs), {
         idleTimeoutMillis: TimeUtil.duration('10s', 'ms'),
