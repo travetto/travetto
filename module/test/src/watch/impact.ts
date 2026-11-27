@@ -24,30 +24,11 @@ export class TestImpactGraph {
   #summary?: CumulativeSummaryConsumer;
   #durations: TestDurationCache;
   #importsByModule = new Map<string, Map<string, Set<string>>>();
-  #runnableSuiteCache = new Map<string, boolean>();
 
   constructor(summary?: CumulativeSummaryConsumer, index: ManifestIndex = RuntimeIndex, durations = new TestDurationCache(index)) {
     this.#summary = summary;
     this.#index = index;
     this.#durations = durations;
-  }
-
-  async #isRunnableSuite(entry?: IndexedFile): Promise<boolean> {
-    if (!entry || entry.role !== 'test' || !entry.relativeFile.startsWith('test/') || !SOURCE_TYPES.has(entry.type)) {
-      return false;
-    }
-    const cached = this.#runnableSuiteCache.get(entry.sourceFile);
-    if (cached !== undefined) {
-      return cached;
-    }
-    let runnable = false;
-    try {
-      runnable = await RunUtil.isTestFile(entry.sourceFile);
-    } catch {
-      runnable = false;
-    }
-    this.#runnableSuiteCache.set(entry.sourceFile, runnable);
-    return runnable;
   }
 
   #resolveSameModuleTarget(moduleName: string, outputFile: string, specifier: string): IndexedFile | undefined {
@@ -109,8 +90,8 @@ export class TestImpactGraph {
           visited.add(candidateFile);
           queue.push(candidateFile);
           const entry = this.#index.getEntry(candidateFile);
-          if (entry && entry.import !== excludedImport && (await this.#isRunnableSuite(entry))) {
-            impacted.add(entry.import);
+          if (entry?.import !== excludedImport && (await RunUtil.isTestEntry(entry))) {
+            impacted.add(entry!.import);
           }
         }
       }
@@ -130,13 +111,15 @@ export class TestImpactGraph {
       return [];
     }
     const directParents = new Set(root.parents);
-    const dependents = this.#index.getDependentModules(moduleName, 'parents').filter(module => module.name !== moduleName && module.workspace);
+    const dependents = this.#index
+      .getDependentModules(moduleName, 'parents')
+      .filter(module => module.name !== moduleName && module.workspace);
     const candidates: DownstreamCandidate[] = [];
 
     for (const dependent of dependents) {
       const tier = directParents.has(dependent.name) ? 1 : 2;
       for (const suite of dependent.files.test ?? []) {
-        if (suite.import !== excludedImport && (await this.#isRunnableSuite(suite))) {
+        if (excludedImport !== suite.import && (await RunUtil.isTestEntry(suite))) {
           candidates.push({
             importName: suite.import,
             tier,
@@ -197,7 +180,7 @@ export class TestImpactGraph {
     }
 
     await this.#ensureModuleIndexed(moduleName);
-    this.#runnableSuiteCache.delete(sourceFile);
+    RunUtil.resetFile(sourceFile);
 
     if (event.action !== 'delete') {
       await this.#indexOutputFile(
@@ -207,7 +190,7 @@ export class TestImpactGraph {
       );
     }
 
-    const isRunnable = await this.#isRunnableSuite(entry);
+    const isRunnable = await RunUtil.isTestEntry(entry);
     const isTestFolder = entry ? entry.relativeFile.startsWith('test/') : event.file.startsWith('test/') || event.file.includes('/test/');
     const isSupportTest = entry
       ? entry.relativeFile.startsWith('support/test/')
@@ -215,16 +198,22 @@ export class TestImpactGraph {
 
     const runs: (TestRun | TestDiffInput)[] = [];
     if (isRunnable && event.action !== 'delete') {
-      runs.push(this.#summary ? { import: entry!.import, diffSource: this.#summary.produceDiffSource(entry!.import) } : { import: entry!.import });
+      runs.push(
+        this.#summary ? { import: entry!.import, diffSource: this.#summary.produceDiffSource(entry!.import) } : { import: entry!.import }
+      );
     }
 
-    const sameModule = await this.#getSameModuleImpacted(moduleName, sourceFile, isRunnable || event.action === 'delete' ? event.import : undefined);
+    const sameModule = await this.#getSameModuleImpacted(
+      moduleName,
+      sourceFile,
+      isRunnable || event.action === 'delete' ? event.import : undefined
+    );
     runs.push(...sameModule.map(importName => ({ import: importName })));
 
     if (!isRunnable && !isTestFolder) {
       let ownSuiteCount = 0;
       for (const file of this.#index.getModule(moduleName)?.files.test ?? []) {
-        if (file.import !== event.import && (await this.#isRunnableSuite(file))) {
+        if (event.import !== file.import && (await RunUtil.isTestEntry(file))) {
           ownSuiteCount += 1;
         }
       }
