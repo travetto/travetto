@@ -81,10 +81,8 @@ class TestDurationCacheSuite {
       await cache.onSummary();
 
       // Reload into a fresh instance with medium.ts removed from manifest
-      manifest.modules['test-app'].files.test = manifest.modules['test-app'].files.test!.filter(
-        entry => entry[0] !== 'test/medium.ts'
-      );
-      const reloaded = await new TestDurationCache(new ManifestIndex(manifest)).load();
+      manifest.modules['test-app'].files.test = manifest.modules['test-app'].files.test!.filter(entry => entry[0] !== 'test/medium.ts');
+      const reloaded = await TestDurationCache.load(new ManifestIndex(manifest));
 
       assert.strictEqual(reloaded.get('test-app/test/fast.ts'), 70);
       assert.strictEqual(reloaded.get('test-app/test/slow.ts'), 1300);

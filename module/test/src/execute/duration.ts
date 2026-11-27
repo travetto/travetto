@@ -14,6 +14,10 @@ const PREVIOUS_WEIGHT = 0.7;
  * Shared persistent cache of per-suite execution durations (.trv/tool/test-durations.json)
  */
 export class TestDurationCache implements TestConsumerShape {
+  static load(index: ManifestIndex = RuntimeIndex): Promise<TestDurationCache> {
+    return new TestDurationCache(index).#load();
+  }
+
   #index: ManifestIndex;
   #durations = new Map<string, Map<string, number>>();
   #flushTimer?: ReturnType<typeof setTimeout>;
@@ -37,6 +41,32 @@ export class TestDurationCache implements TestConsumerShape {
       void this.save();
     }, FLUSH_INTERVAL_MILLISECONDS);
     this.#flushTimer.unref?.();
+  }
+
+  /**
+   * Load cached per-suite durations from disk
+   */
+  async #load(): Promise<this> {
+    try {
+      const parsed = JSONUtil.fromUTF8<Record<string, Record<string, number>>>(await fs.readFile(this.#getCacheFile(), 'utf8'));
+      for (const [importName, suiteMap] of Object.entries(parsed ?? {})) {
+        if (!suiteMap || typeof suiteMap !== 'object' || !this.#index.getFromImport(importName)) {
+          continue;
+        }
+        const suites = new Map<string, number>();
+        for (const [classId, duration] of Object.entries(suiteMap)) {
+          if (typeof duration === 'number') {
+            suites.set(classId, duration);
+          }
+        }
+        if (suites.size > 0) {
+          this.#durations.set(importName, suites);
+        }
+      }
+    } catch {
+      // No cached durations on disk yet
+    }
+    return this;
   }
 
   /**
@@ -94,32 +124,6 @@ export class TestDurationCache implements TestConsumerShape {
   }
 
   /**
-   * Load cached per-suite durations from disk
-   */
-  async load(): Promise<this> {
-    try {
-      const parsed = JSONUtil.fromUTF8<Record<string, Record<string, number>>>(await fs.readFile(this.#getCacheFile(), 'utf8'));
-      for (const [importName, suiteMap] of Object.entries(parsed ?? {})) {
-        if (!suiteMap || typeof suiteMap !== 'object' || !this.#index.getFromImport(importName)) {
-          continue;
-        }
-        const suites = new Map<string, number>();
-        for (const [classId, duration] of Object.entries(suiteMap)) {
-          if (typeof duration === 'number') {
-            suites.set(classId, duration);
-          }
-        }
-        if (suites.size > 0) {
-          this.#durations.set(importName, suites);
-        }
-      }
-    } catch {
-      // No cached durations on disk yet
-    }
-    return this;
-  }
-
-  /**
    * Persist cached per-suite durations to disk
    */
   async save(): Promise<void> {
@@ -131,7 +135,9 @@ export class TestDurationCache implements TestConsumerShape {
     const cacheFile = this.#getCacheFile();
     try {
       await fs.mkdir(path.dirname(cacheFile), { recursive: true });
-      const payload = Object.fromEntries([...this.#durations.entries()].map(([importName, suites]) => [importName, Object.fromEntries(suites)]));
+      const payload = Object.fromEntries(
+        [...this.#durations.entries()].map(([importName, suites]) => [importName, Object.fromEntries(suites)])
+      );
       await fs.writeFile(cacheFile, JSONUtil.toUTF8(payload), 'utf8');
     } catch {
       // Ignore cache write errors
