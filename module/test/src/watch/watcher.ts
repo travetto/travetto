@@ -1,14 +1,15 @@
-import { ManifestModuleUtil } from '@travetto/manifest';
 import { Registry } from '@travetto/registry';
 import { AsyncQueue, TimeUtil, WatchUtil } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
 
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
+import { TestDurationCache } from '../execute/duration.ts';
+import { RunUtil } from '../execute/run.ts';
 import type { TestDiffInput, TestRun } from '../model/test.ts';
 import { buildStandardTestManager } from '../worker/standard.ts';
 import { isTestRunEvent, type TestReadyEvent } from '../worker/types.ts';
-import { RunUtil } from './run.ts';
+import { TestImpactGraph } from './impact.ts';
 
 /**
  * Test Watcher.
@@ -24,14 +25,18 @@ export class TestWatcher {
 
     await Registry.init();
 
-    const events: (TestRun | TestDiffInput)[] = [];
+    const durations = await new TestDurationCache().load();
+    const summary = new CumulativeSummaryConsumer(await TestConsumerRegistryIndex.getInstance({ consumer: format }));
+    summary.addConsumer(durations);
+    const impact = new TestImpactGraph(summary, undefined, durations);
 
-    if (runAllOnStart) {
-      events.push(...(await RunUtil.resolveGlobInput({ globs: [] })));
-    }
-
-    const queue = new AsyncQueue(events);
-    const consumer = new CumulativeSummaryConsumer(await TestConsumerRegistryIndex.getInstance({ consumer: format }));
+    const events = runAllOnStart ? durations.orderRuns(await RunUtil.resolveGlobInput({ globs: [] })) : [];
+    const queue = new AsyncQueue<TestRun | TestDiffInput>(events);
+    const prependRuns = (runs: (TestRun | TestDiffInput)[]): void => {
+      for (const run of runs.toReversed()) {
+        queue.add(run, true);
+      }
+    };
 
     process.on('message', event => {
       if (isTestRunEvent(event)) {
@@ -41,22 +46,14 @@ export class TestWatcher {
 
     process.send?.({ type: 'ready' } satisfies TestReadyEvent);
 
-    const queueProcessor = WorkPool.run(buildStandardTestManager.bind(null, consumer), queue, {
+    const queueProcessor = WorkPool.run(buildStandardTestManager.bind(null, summary), queue, {
       idleTimeoutMillis: TimeUtil.duration('2m', 'ms'),
       min: 2,
       max: WorkPool.DEFAULT_SIZE
     });
 
-    await WatchUtil.watchCompilerEvents('change', event => {
-      const fileType = ManifestModuleUtil.getFileType(event.file);
-      if (fileType === 'ts' || fileType === 'js') {
-        if (event.action === 'delete') {
-          consumer.removeTest(event.import);
-        } else {
-          const diffSource = consumer.produceDiffSource(event.import);
-          queue.add({ import: event.import, diffSource }, true);
-        }
-      }
+    await WatchUtil.watchCompilerEvents('change', async event => {
+      prependRuns(await impact.onCompilerChange(event));
     });
 
     // Cleanup

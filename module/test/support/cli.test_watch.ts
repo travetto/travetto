@@ -20,7 +20,7 @@ export class TestWatcherCommand {
     Env.TRV_ROLE.set('test');
 
     try {
-      const { TestWatcher } = await import('../src/execute/watcher.ts');
+      const { TestWatcher } = await import('../src/watch/watcher.ts');
       await TestWatcher.watch(this.format, this.mode === 'all');
     } catch (error) {
       console.error(error);
