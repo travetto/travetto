@@ -31,12 +31,7 @@ export class TestWatcher {
     const impact = new TestImpactGraph(summary, undefined, durations);
 
     const events = runAllOnStart ? durations.orderRuns(await RunUtil.resolveGlobInput({ globs: [] })) : [];
-    const queue = new AsyncQueue<TestRun | TestDiffInput>(events);
-    const prependRuns = (runs: (TestRun | TestDiffInput)[]): void => {
-      for (const run of runs.toReversed()) {
-        queue.add(run, true);
-      }
-    };
+    const queue = new AsyncQueue(events);
 
     process.on('message', event => {
       if (isTestRunEvent(event)) {
@@ -53,7 +48,7 @@ export class TestWatcher {
     });
 
     await WatchUtil.watchCompilerEvents('change', async event => {
-      prependRuns(await impact.onCompilerChange(event));
+      queue.add(await impact.onCompilerChange(event), true);
     });
 
     // Cleanup
