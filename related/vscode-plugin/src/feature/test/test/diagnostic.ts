@@ -1,10 +1,9 @@
 import * as vscode from 'vscode';
 
-import type { TestRemoveEvent, TestResult, TestStatus, TestWatchEvent } from '@travetto/test';
+import type { TestRemoveEvent, TestResult, TestWatchEvent } from '@travetto/test';
 
 import { Workspace } from '../../../core/workspace.ts';
-import { Decorations, Style } from './decoration.ts';
-import { TestModelUtil } from './util.ts';
+import { Decorations } from './decoration.ts';
 
 export const testDiagnostics = vscode.languages.createDiagnosticCollection('Travetto');
 
@@ -23,15 +22,7 @@ export class DiagnosticManager {
     return item;
   }
 
-  #status: vscode.StatusBarItem;
   #tracked = new Map<string, Map<string, Map<string, TestResult>>>();
-  #window: typeof vscode.window;
-
-  constructor(window: typeof vscode.window) {
-    this.#window = window;
-    this.#status = this.#window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-    this.#status.command = 'workbench.action.showErrorsWarnings';
-  }
 
   #buildTestDiagnostics(file: string, test: TestResult): vscode.Diagnostic[] {
     const results: vscode.Diagnostic[] = [];
@@ -56,7 +47,7 @@ export class DiagnosticManager {
     return results;
   }
 
-  #setDiagnostics(file: string) {
+  #setDiagnostics(file: string): void {
     const classes = this.#tracked.get(file);
 
     const diagnostics = [...(classes?.values() ?? [])]
@@ -65,16 +56,6 @@ export class DiagnosticManager {
       .flatMap(test => this.#buildTestDiagnostics(file, test));
 
     testDiagnostics.set(vscode.Uri.file(file), diagnostics);
-  }
-
-  refreshStatus(): void {
-    const summary = TestModelUtil.buildSummary();
-    const tests = [...this.#tracked.values()].flatMap(file => [...file.values()]).flatMap(suite => [...suite.values()]);
-
-    TestModelUtil.countTestResult(summary, tests);
-
-    const status = TestModelUtil.computeTestStatus(summary);
-    this.setStatus(`Tests $(pass-filled) ${summary.passed} $(alert) ${summary.failed + summary.errored}`, status);
   }
 
   afterTest(test: TestResult): void {
@@ -96,9 +77,7 @@ export class DiagnosticManager {
   }
 
   onEvent(event: TestWatchEvent): void {
-    if (event.type === 'suite' && event.phase === 'after') {
-      this.refreshStatus();
-    } else if (event.type === 'test' && event.phase === 'after') {
+    if (event.type === 'test' && event.phase === 'after') {
       this.afterTest(event.test);
     } else if (event.type === 'removeTest') {
       this.onTestRemove(event);
@@ -108,42 +87,10 @@ export class DiagnosticManager {
   resetFile(file: string): void {
     this.#tracked.delete(file);
     this.#setDiagnostics(file);
-    this.refreshStatus();
   }
 
   reset(): void {
     testDiagnostics.clear();
-    this.setStatus('', 'unknown');
     this.#tracked.clear();
-  }
-
-  /**
-   * Set overall status
-   * @param message
-   * @param status
-   */
-  setStatus(message: string, status: TestStatus): void {
-    if (!message) {
-      this.#status.hide();
-      return;
-    }
-
-    switch (status) {
-      case 'passed':
-        this.#status.backgroundColor = undefined;
-        this.#status.color = Style.COLORS.passed;
-        break;
-      case 'errored':
-      case 'failed':
-        this.#status.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
-        this.#status.color = new vscode.ThemeColor('statusBarItem.errorForeground');
-        break;
-      default:
-        this.#status.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
-        this.#status.color = new vscode.ThemeColor('statusBarItem.warningForeground');
-        break;
-    }
-    this.#status.text = message;
-    this.#status.show();
   }
 }
