@@ -54,6 +54,7 @@ export class TestWatcher {
 
     await WatchUtil.watchCompilerEvents('change', async event => {
       if (event.action === 'create' || (event.action === 'update' && !RuntimeIndex.getFromImport(event.import))) {
+        RunUtil.resetFile(event.file);
         RuntimeIndex.reinit();
       }
 

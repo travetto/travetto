@@ -6,7 +6,7 @@ import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { TestDurationCache } from '../execute/duration.ts';
 import { RunUtil } from '../execute/run.ts';
-import type { TestDiffInput, TestRun } from '../model/test.ts';
+import type { TestRun } from '../model/test.ts';
 
 const SOURCE_TYPES = new Set(['ts', 'js']);
 const SLOW_DOWNSTREAM_THRESHOLD_MILLISECONDS = 100;
@@ -14,6 +14,14 @@ const MAX_DOWNSTREAM_TESTS = 10;
 const IMPORT_REGEX = /(?:^|\n)\s*(?:import|export)\s+(?:[^'"]*?\s+from\s+)?['"]([^'"]+)['"]|\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
 
 type DownstreamCandidate = { importName: string; tier: number; duration?: number; failing: boolean };
+type EventClassification = {
+  moduleName: string;
+  sourceFile: string;
+  isSupportTest: boolean;
+  isTestFolder: boolean;
+  isRunnable: boolean;
+  outputFile: string | undefined;
+};
 
 /**
  * Lazy same-module ESM reverse-import graph and bounded downstream test impact resolver
@@ -43,9 +51,9 @@ export class TestImpactGraph {
     return target?.module === moduleName ? target : undefined;
   }
 
-  async #indexOutputFile(moduleName: string, sourceFile: string, outputFile?: string): Promise<void> {
+  async #indexOutputFile(moduleName: string, sourceFile: string, outputFile: string): Promise<void> {
     const moduleImports = this.#importsByModule.get(moduleName);
-    if (!outputFile || !moduleImports) {
+    if (!moduleImports) {
       return;
     }
     try {
@@ -146,53 +154,55 @@ export class TestImpactGraph {
     return [...failing, ...nonFailing].map(candidate => candidate.importName);
   }
 
-  isValidEvent(event: CompilerChangeEvent): { moduleName: string; entry?: IndexedFile; sourceFile: string } | undefined {
-    if (!SOURCE_TYPES.has(ManifestModuleUtil.getFileType(event.file))) {
-      return;
-    }
-
+  async classifyEvent(event: CompilerChangeEvent): Promise<EventClassification | undefined> {
     const entry = this.#index.getFromImport(event.import);
-    if (entry?.role === 'doc' || event.file.startsWith('doc/') || event.file.includes('/doc/')) {
-      return;
-    }
-
-    const sourceFile = entry?.sourceFile ?? path.resolve(Runtime.workspace.path, event.file);
     const moduleName = entry?.module ?? this.#index.findModuleForArbitraryImport(event.import)?.name;
     if (!moduleName) {
       return;
     }
 
-    return { entry, moduleName, sourceFile };
+    const relativeFile =
+      entry?.relativeFile ?? (event.import.startsWith(`${moduleName}/`) ? event.import.slice(moduleName.length + 1) : '');
+    if (!relativeFile || !ManifestModuleUtil.isValidModuleFile(relativeFile, true)) {
+      return;
+    }
+
+    if (!SOURCE_TYPES.has(ManifestModuleUtil.getFileType(relativeFile))) {
+      return;
+    }
+
+    const role = entry?.role ?? ManifestModuleUtil.getFileRole(relativeFile);
+    if (role === 'doc') {
+      return;
+    }
+
+    const folder = ManifestModuleUtil.getFolderKey(relativeFile);
+    const sourceFile = entry?.sourceFile ?? path.resolve(Runtime.workspace.path, event.file);
+    const isTestFolder = folder === 'test';
+    const isSupportTest = folder === 'support' && role === 'test';
+    const isRunnable = await RunUtil.isTestEntry(entry);
+    const outputFile = entry?.outputFile ?? (event.output ? path.resolve(Runtime.workspace.path, event.output) : undefined);
+
+    return { moduleName, sourceFile, outputFile, isSupportTest, isTestFolder, isRunnable };
   }
 
   /**
    * Handle a compiler change event and return the prioritized impacted test runs to queue
    */
-  async onCompilerChange(event: CompilerChangeEvent): Promise<(TestRun | TestDiffInput)[]> {
-    const result = this.isValidEvent(event);
+  async onCompilerChange(event: CompilerChangeEvent): Promise<TestRun[]> {
+    const result = await this.classifyEvent(event);
     if (!result) {
       return [];
     }
 
-    const { moduleName, sourceFile, entry } = result;
+    const { moduleName, sourceFile, outputFile, isSupportTest, isTestFolder, isRunnable } = result;
     await this.#ensureModuleIndexed(moduleName);
-    RunUtil.resetFile(sourceFile);
 
-    if (event.action !== 'delete') {
-      await this.#indexOutputFile(
-        moduleName,
-        sourceFile,
-        entry?.outputFile ?? (event.output ? path.resolve(Runtime.workspace.path, event.output) : undefined)
-      );
+    if (event.action !== 'delete' && outputFile) {
+      await this.#indexOutputFile(moduleName, sourceFile, outputFile);
     }
 
-    const isRunnable = await RunUtil.isTestEntry(entry);
-    const isTestFolder = entry ? entry.relativeFile.startsWith('test/') : event.file.startsWith('test/') || event.file.includes('/test/');
-    const isSupportTest = entry
-      ? entry.relativeFile.startsWith('support/test/')
-      : event.file.startsWith('support/test/') || event.file.includes('/support/test/');
-
-    const runs: (TestRun | TestDiffInput)[] = [];
+    const runs: TestRun[] = [];
 
     const sameModule = await this.#getSameModuleImpacted(
       moduleName,
