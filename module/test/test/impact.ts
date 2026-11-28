@@ -2,6 +2,7 @@ import assert from 'node:assert';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 
+import type { CompilerChangeEvent } from '@travetto/compiler';
 import { ManifestIndex, type ManifestRoot, path } from '@travetto/manifest';
 import { AsyncQueue } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
@@ -144,14 +145,19 @@ function recordSuite(summary: CumulativeSummaryConsumer, importName: string, sta
   });
 }
 
-const change = (action: 'update' | 'delete', importName: string, file: string, module: string) => ({
-  action,
-  file,
-  import: importName,
-  output: '',
-  module,
-  time: Date.now()
-});
+const change = (index: ManifestIndex, action: 'update' | 'delete', importName: string): CompilerChangeEvent => {
+  const entry = index.getFromImport(importName)!;
+  const workspacePath = index.manifest.workspace.path;
+  return {
+    action,
+    file: path.relative(workspacePath, entry.sourceFile),
+    relativeFile: entry.relativeFile,
+    import: importName,
+    output: path.relative(workspacePath, entry.outputFile),
+    module: entry.module,
+    time: Date.now()
+  };
+};
 
 @Suite()
 class TestImpactGraphSuite {
@@ -204,45 +210,32 @@ class TestImpactGraphSuite {
         index
       );
 
-      assert.deepStrictEqual(
-        await graph.onCompilerChange(change('update', 'test-app/src/properties.ts', 'module/app/src/properties.ts', 'test-app')),
-        [
-          { import: 'test-app/test/parser.ts' },
-          { import: 'ext-mod/test/ext-failing.ts' },
-          { import: 'ext-mod/test/ext-fast.ts' },
-          { import: 'deep-mod/test/deep-fast.ts' }
-        ]
-      );
-      assert.deepStrictEqual(
-        await graph.onCompilerChange(change('update', 'test-app/doc/sample.ts', 'module/app/doc/sample.ts', 'test-app')),
-        []
-      );
+      assert.deepStrictEqual(await graph.onCompilerChange(change(index, 'update', 'test-app/src/properties.ts')), [
+        { import: 'test-app/test/parser.ts' },
+        { import: 'ext-mod/test/ext-failing.ts' },
+        { import: 'ext-mod/test/ext-fast.ts' },
+        { import: 'deep-mod/test/deep-fast.ts' }
+      ]);
+      assert.deepStrictEqual(await graph.onCompilerChange(change(index, 'update', 'test-app/doc/sample.ts')), []);
 
       await writeFilePair(index, 'test-app/test/other.ts', SUITE_SOURCE, "import './shared.js';\nimport '../src/properties.js';\n");
       recordSuite(summary, 'test-app/test/other.ts', 'passed', 20);
-      assert.deepStrictEqual(
-        await graph.onCompilerChange(change('update', 'test-app/test/other.ts', 'module/app/test/other.ts', 'test-app')),
-        []
-      );
-      assert.deepStrictEqual(
-        await graph.onCompilerChange(change('update', 'test-app/test/shared.ts', 'module/app/test/shared.ts', 'test-app')),
-        [{ import: 'test-app/test/other.ts' }]
-      );
+      assert.deepStrictEqual(await graph.onCompilerChange(change(index, 'update', 'test-app/test/other.ts')), []);
+      assert.deepStrictEqual(await graph.onCompilerChange(change(index, 'update', 'test-app/test/shared.ts')), [
+        { import: 'test-app/test/other.ts' }
+      ]);
 
-      await graph.onCompilerChange(change('delete', 'test-app/src/helper.ts', 'module/app/src/helper.ts', 'test-app'));
-      assert.deepStrictEqual(
-        await graph.onCompilerChange(change('update', 'test-app/src/properties.ts', 'module/app/src/properties.ts', 'test-app')),
-        [
-          { import: 'test-app/test/other.ts' },
-          { import: 'test-app/test/parser.ts' },
-          { import: 'ext-mod/test/ext-failing.ts' },
-          { import: 'ext-mod/test/ext-fast.ts' },
-          { import: 'deep-mod/test/deep-fast.ts' }
-        ]
-      );
+      await graph.onCompilerChange(change(index, 'delete', 'test-app/src/helper.ts'));
+      assert.deepStrictEqual(await graph.onCompilerChange(change(index, 'update', 'test-app/src/properties.ts')), [
+        { import: 'test-app/test/other.ts' },
+        { import: 'test-app/test/parser.ts' },
+        { import: 'ext-mod/test/ext-failing.ts' },
+        { import: 'ext-mod/test/ext-fast.ts' },
+        { import: 'deep-mod/test/deep-fast.ts' }
+      ]);
 
       recordSuite(summary, 'test-app/test/other.ts', 'failed', 55);
-      await graph.onCompilerChange(change('delete', 'test-app/test/other.ts', 'module/app/test/other.ts', 'test-app'));
+      await graph.onCompilerChange(change(index, 'delete', 'test-app/test/other.ts'));
       assert.strictEqual(summary.isFailing('test-app/test/parser.ts'), false);
       assert.strictEqual(durations.get('test-app/test/parser.ts'), undefined);
     } finally {
@@ -295,7 +288,7 @@ class TestImpactGraphSuite {
           failing: summary.isFailing(importName)
         }),
         index
-      ).onCompilerChange(change('update', 'test-app/src/properties.ts', 'module/app/src/properties.ts', 'test-app'));
+      ).onCompilerChange(change(index, 'update', 'test-app/src/properties.ts'));
       assert.strictEqual(standardRuns.length, 11);
       assert.strictEqual(standardRuns[0].import, 'test-app/test/parser.ts');
       assert.strictEqual(standardRuns[10].import, 'ext-mod/test/fast-09.ts');
@@ -305,6 +298,7 @@ class TestImpactGraphSuite {
         ['test/ext-slow.ts', 'ts', 1000, 'test'],
         ['test/ext-unknown.ts', 'ts', 1000, 'test']
       ];
+      const fallbackIndex = new ManifestIndex(manifest);
       const fallbackGraph = new TestImpactGraph(
         (importName, tier) => ({
           importName,
@@ -312,7 +306,7 @@ class TestImpactGraphSuite {
           duration: durations.get(importName),
           failing: summary.isFailing(importName)
         }),
-        new ManifestIndex(manifest)
+        fallbackIndex
       );
       const expectedFallback = [
         { import: 'ext-mod/test/fast-00.ts' },
@@ -321,13 +315,11 @@ class TestImpactGraphSuite {
         { import: 'deep-mod/test/deep-fast.ts' }
       ];
       assert.deepStrictEqual(
-        await fallbackGraph.onCompilerChange(
-          change('update', 'test-app/support/test/base.ts', 'module/app/support/test/base.ts', 'test-app')
-        ),
+        await fallbackGraph.onCompilerChange(change(fallbackIndex, 'update', 'test-app/support/test/base.ts')),
         expectedFallback
       );
       assert.deepStrictEqual(
-        await fallbackGraph.onCompilerChange(change('update', 'zero-mod/src/service.ts', 'module/zero/src/service.ts', 'zero-mod')),
+        await fallbackGraph.onCompilerChange(change(fallbackIndex, 'update', 'zero-mod/src/service.ts')),
         expectedFallback
       );
 

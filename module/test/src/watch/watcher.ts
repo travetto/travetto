@@ -58,8 +58,8 @@ export class TestWatcher {
     });
 
     await WatchUtil.watchCompilerEvents('change', async event => {
+      RunUtil.resetFile(event.file);
       if (event.action === 'create' || (event.action === 'update' && !RuntimeIndex.getFromImport(event.import))) {
-        RunUtil.resetFile(event.file);
         RuntimeIndex.reinit();
       }
 
@@ -69,7 +69,7 @@ export class TestWatcher {
         durations.delete(event.import);
         consumer.removeTest(event.import);
         RuntimeIndex.reinit();
-      } else if (await RunUtil.isTestFile(event.file)) {
+      } else if (await RunUtil.isTestEntry(RuntimeIndex.getFromImport(event.import))) {
         // Put at the top
         const diffSource = consumer.produceDiffSource(event.import);
         queue.add({ import: event.import, diffSource }, true);

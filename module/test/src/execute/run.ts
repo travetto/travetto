@@ -34,6 +34,7 @@ export class RunUtil {
 
   static resetFile(file: string): void {
     this.#testLookupCache.delete(file);
+    this.#testLookupCache.delete(path.resolve(Runtime.workspace.path, file));
   }
 
   /**
