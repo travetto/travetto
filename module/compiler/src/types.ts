@@ -53,6 +53,7 @@ export type CompilerWatcherOptions = {
 type Scoped<T extends {}> = T & { workspace?: string };
 export type CompilerChangeEvent = Scoped<{
   file: string;
+  relativeFile: string;
   action: ChangeEventType;
   output: string;
   module: string;

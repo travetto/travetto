@@ -87,6 +87,7 @@ class CompilerServerTests {
         payload: {
           action: 'update',
           file: 'src/beta.ts',
+          relativeFile: 'src/beta.ts',
           import: 'test-app/src/beta.ts',
           output: '.trv/output/src/beta.js',
           module: 'test-app',
