@@ -65,7 +65,8 @@ export class TestWatcher {
         RuntimeIndex.reinit();
       } else if (await RunUtil.isTestFile(event.file)) {
         // Put at the top
-        queue.add({ import: event.import, diffSource: consumer.produceDiffSource(event.import) }, true);
+        const diffSource = consumer.produceDiffSource(event.import);
+        queue.add({ import: event.import, diffSource }, true);
       }
     });
 
