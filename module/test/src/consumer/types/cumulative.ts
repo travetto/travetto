@@ -101,6 +101,20 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
   }
 
   /**
+   * Check whether any tracked test in the given import is currently failing or errored
+   */
+  isFailing(importName: string): boolean {
+    for (const suite of Object.values(this.#state[importName] ?? {})) {
+      for (const test of Object.values(suite.tests)) {
+        if (test.status === 'failed' || test.status === 'errored') {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
    * Produce diff source for import file
    */
   produceDiffSource(importName: string): TestDiffSource {

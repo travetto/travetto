@@ -1,14 +1,15 @@
-import { ManifestModuleUtil } from '@travetto/manifest';
 import { Registry } from '@travetto/registry';
-import { AsyncQueue, TimeUtil, WatchUtil } from '@travetto/runtime';
+import { AsyncQueue, RuntimeIndex, TimeUtil, WatchUtil } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
 
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
+import { TestDurationCache } from '../execute/duration.ts';
+import { RunUtil } from '../execute/run.ts';
 import type { TestDiffInput, TestRun } from '../model/test.ts';
 import { buildStandardTestManager } from '../worker/standard.ts';
 import { isTestRunEvent, type TestReadyEvent } from '../worker/types.ts';
-import { RunUtil } from './run.ts';
+import { TestImpactGraph } from './impact.ts';
 
 /**
  * Test Watcher.
@@ -26,12 +27,21 @@ export class TestWatcher {
 
     const events: (TestRun | TestDiffInput)[] = [];
 
+    const durations = await TestDurationCache.load();
+
     if (runAllOnStart) {
-      events.push(...(await RunUtil.resolveGlobInput({ globs: [] })));
+      events.push(...durations.orderRuns(await RunUtil.resolveGlobInput({ globs: [] })));
     }
 
     const queue = new AsyncQueue(events);
     const consumer = new CumulativeSummaryConsumer(await TestConsumerRegistryIndex.getInstance({ consumer: format }));
+    consumer.addConsumer(durations);
+    const impact = new TestImpactGraph((importName, tier) => ({
+      importName,
+      tier,
+      duration: durations.get(importName),
+      failing: consumer.isFailing(importName)
+    }));
 
     process.on('message', event => {
       if (isTestRunEvent(event)) {
@@ -47,15 +57,21 @@ export class TestWatcher {
       max: WorkPool.DEFAULT_SIZE
     });
 
-    await WatchUtil.watchCompilerEvents('change', event => {
-      const fileType = ManifestModuleUtil.getFileType(event.file);
-      if (fileType === 'ts' || fileType === 'js') {
-        if (event.action === 'delete') {
-          consumer.removeTest(event.import);
-        } else {
-          const diffSource = consumer.produceDiffSource(event.import);
-          queue.add({ import: event.import, diffSource }, true);
-        }
+    await WatchUtil.watchCompilerEvents('change', async event => {
+      if (event.action === 'create' || (event.action === 'update' && !RuntimeIndex.getFromImport(event.import))) {
+        RuntimeIndex.reinit();
+      }
+
+      queue.add(await impact.onCompilerChange(event), true);
+
+      if (event.action === 'delete') {
+        durations.delete(event.import);
+        consumer.removeTest(event.import);
+        RuntimeIndex.reinit();
+      } else if (await RunUtil.isTestEntry(RuntimeIndex.getFromImport(event.import))) {
+        // Put at the top
+        const diffSource = consumer.produceDiffSource(event.import);
+        queue.add({ import: event.import, diffSource }, true);
       }
     });
 
