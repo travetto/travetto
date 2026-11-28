@@ -1,6 +1,14 @@
 import { setMaxListeners } from 'node:events';
 
-import { type DeltaEvent, getManifestContext, type ManifestContext, ManifestDeltaUtil, ManifestIndex, ManifestUtil, path } from '@travetto/manifest';
+import {
+  type DeltaEvent,
+  getManifestContext,
+  type ManifestContext,
+  ManifestDeltaUtil,
+  ManifestIndex,
+  ManifestUtil,
+  path
+} from '@travetto/manifest';
 
 import { CommonUtil } from './common.ts';
 import { EventUtil } from './event.ts';
@@ -222,12 +230,14 @@ export class Compiler {
 
     for (const deleteEvent of deleteEvents) {
       const normalizedFile = path.relative(this.#state.manifest.workspace.path, deleteEvent.file);
+      const normalizedOutput = path.relative(this.#state.manifest.workspace.path, deleteEvent.entry.outputFile);
       this.#sendEvent('change', {
         action: deleteEvent.action,
         time: Date.now(),
         file: normalizedFile,
+        relativeFile: deleteEvent.entry.moduleFile,
         import: deleteEvent.entry.import,
-        output: deleteEvent.entry.outputFile,
+        output: normalizedOutput,
         module: deleteEvent.entry.module.name
       });
     }
@@ -237,12 +247,14 @@ export class Compiler {
       const entry = this.#state.getBySource(sourceFile);
       if (entry) {
         const normalizedFile = path.relative(this.#state.manifest.workspace.path, entry.sourceFile);
+        const normalizedOutput = path.relative(this.#state.manifest.workspace.path, entry.outputFile);
         this.#sendEvent('change', {
           action: actionBySource.get(sourceFile) ?? 'update',
           time: Date.now(),
           file: normalizedFile,
+          relativeFile: entry.moduleFile,
           import: entry.import,
-          output: entry.outputFile,
+          output: normalizedOutput,
           module: entry.module.name
         });
       }
