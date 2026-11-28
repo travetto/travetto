@@ -194,7 +194,15 @@ class TestImpactGraphSuite {
       recordSuite(summary, 'deep-mod/test/deep-fast.ts', 'passed', 30);
       recordSuite(summary, 'deep-mod/test/deep-slow.ts', 'passed', 200);
 
-      const graph = new TestImpactGraph(summary.isFailing, index, durations);
+      const graph = new TestImpactGraph(
+        (importName, tier) => ({
+          importName,
+          tier,
+          duration: durations.get(importName),
+          failing: summary.isFailing(importName)
+        }),
+        index
+      );
 
       assert.deepStrictEqual(
         await graph.onCompilerChange(change('update', 'test-app/src/properties.ts', 'module/app/src/properties.ts', 'test-app')),
@@ -279,9 +287,15 @@ class TestImpactGraphSuite {
       recordSuite(summary, 'deep-mod/test/deep-fast.ts', 'passed', 25);
       recordSuite(summary, 'deep-mod/test/deep-slow.ts', 'passed', 300);
 
-      const standardRuns = await new TestImpactGraph(summary.isFailing, index, durations).onCompilerChange(
-        change('update', 'test-app/src/properties.ts', 'module/app/src/properties.ts', 'test-app')
-      );
+      const standardRuns = await new TestImpactGraph(
+        (importName, tier) => ({
+          importName,
+          tier,
+          duration: durations.get(importName),
+          failing: summary.isFailing(importName)
+        }),
+        index
+      ).onCompilerChange(change('update', 'test-app/src/properties.ts', 'module/app/src/properties.ts', 'test-app'));
       assert.strictEqual(standardRuns.length, 11);
       assert.strictEqual(standardRuns[0].import, 'test-app/test/parser.ts');
       assert.strictEqual(standardRuns[10].import, 'ext-mod/test/fast-09.ts');
@@ -291,7 +305,15 @@ class TestImpactGraphSuite {
         ['test/ext-slow.ts', 'ts', 1000, 'test'],
         ['test/ext-unknown.ts', 'ts', 1000, 'test']
       ];
-      const fallbackGraph = new TestImpactGraph(summary.isFailing, new ManifestIndex(manifest), durations);
+      const fallbackGraph = new TestImpactGraph(
+        (importName, tier) => ({
+          importName,
+          tier,
+          duration: durations.get(importName),
+          failing: summary.isFailing(importName)
+        }),
+        new ManifestIndex(manifest)
+      );
       const expectedFallback = [
         { import: 'ext-mod/test/fast-00.ts' },
         { import: 'ext-mod/test/ext-slow.ts' },

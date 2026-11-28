@@ -36,7 +36,12 @@ export class TestWatcher {
     const queue = new AsyncQueue(events);
     const consumer = new CumulativeSummaryConsumer(await TestConsumerRegistryIndex.getInstance({ consumer: format }));
     consumer.addConsumer(durations);
-    const impact = new TestImpactGraph(consumer.isFailing, undefined, durations);
+    const impact = new TestImpactGraph((importName, tier) => ({
+      importName,
+      tier,
+      duration: durations.get(importName),
+      failing: consumer.isFailing(importName)
+    }));
 
     process.on('message', event => {
       if (isTestRunEvent(event)) {

@@ -4,7 +4,6 @@ import type { CompilerChangeEvent } from '@travetto/compiler';
 import { type IndexedFile, type ManifestIndex, ManifestModuleUtil, path } from '@travetto/manifest';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
-import { TestDurationCache } from '../execute/duration.ts';
 import { RunUtil } from '../execute/run.ts';
 import type { TestRun } from '../model/test.ts';
 
@@ -14,6 +13,7 @@ const MAX_DOWNSTREAM_TESTS = 10;
 const IMPORT_REGEX = /(?:^|\n)\s*(?:import|export)\s+(?:[^'"]*?\s+from\s+)?['"]([^'"]+)['"]|\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
 
 type ImpactedCandidate = { importName: string; tier: number; duration?: number; failing: boolean };
+type ImpactCandidateProvider = (importName: string, tier: number) => ImpactedCandidate;
 type EventClassification = {
   moduleName: string;
   sourceFile: string;
@@ -37,14 +37,12 @@ const compareCandidates = (left: ImpactedCandidate, right: ImpactedCandidate): n
  */
 export class TestImpactGraph {
   #index: ManifestIndex;
-  #isFailing: (suite: string) => boolean;
-  #durations: TestDurationCache;
+  #toCandidate: ImpactCandidateProvider;
   #importsByModule = new Map<string, Map<string, Set<string>>>();
 
-  constructor(isFailing: (suite: string) => boolean, index: ManifestIndex = RuntimeIndex, durations = new TestDurationCache(index)) {
-    this.#isFailing = isFailing;
+  constructor(toCandidate: ImpactCandidateProvider, index: ManifestIndex = RuntimeIndex) {
+    this.#toCandidate = toCandidate;
     this.#index = index;
-    this.#durations = durations;
   }
 
   #resolveSameModuleTarget(moduleName: string, outputFile: string, specifier: string): IndexedFile | undefined {
@@ -117,15 +115,6 @@ export class TestImpactGraph {
       .map(importName => this.#toCandidate(importName, 0))
       .sort(compareCandidates)
       .map(candidate => candidate.importName);
-  }
-
-  #toCandidate(importName: string, tier: number): ImpactedCandidate {
-    return {
-      importName,
-      tier,
-      duration: this.#durations.get(importName),
-      failing: this.#isFailing(importName)
-    };
   }
 
   async #getDownstreamImpacted(moduleName: string, allowDirectParentFallback: boolean, excludedImport?: string): Promise<string[]> {
