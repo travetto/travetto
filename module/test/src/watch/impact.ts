@@ -4,7 +4,6 @@ import type { CompilerChangeEvent } from '@travetto/compiler';
 import { type IndexedFile, type ManifestIndex, ManifestModuleUtil, path } from '@travetto/manifest';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
-import type { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
 import { TestDurationCache } from '../execute/duration.ts';
 import { RunUtil } from '../execute/run.ts';
 import type { TestDiffInput, TestRun } from '../model/test.ts';
@@ -21,12 +20,12 @@ type DownstreamCandidate = { importName: string; tier: number; duration?: number
  */
 export class TestImpactGraph {
   #index: ManifestIndex;
-  #summary?: CumulativeSummaryConsumer;
+  #isFailing: (suite: string) => boolean;
   #durations: TestDurationCache;
   #importsByModule = new Map<string, Map<string, Set<string>>>();
 
-  constructor(summary?: CumulativeSummaryConsumer, index: ManifestIndex = RuntimeIndex, durations = new TestDurationCache(index)) {
-    this.#summary = summary;
+  constructor(isFailing: (suite: string) => boolean, index: ManifestIndex = RuntimeIndex, durations = new TestDurationCache(index)) {
+    this.#isFailing = isFailing;
     this.#index = index;
     this.#durations = durations;
   }
@@ -99,7 +98,7 @@ export class TestImpactGraph {
 
     return [...impacted].sort(
       (left, right) =>
-        +(this.#summary?.isFailing(right) ?? false) - +(this.#summary?.isFailing(left) ?? false) ||
+        +this.#isFailing(right) - +this.#isFailing(left) ||
         (this.#durations.get(left) ?? 0) - (this.#durations.get(right) ?? 0) ||
         left.localeCompare(right)
     );
@@ -124,7 +123,7 @@ export class TestImpactGraph {
             importName: suite.import,
             tier,
             duration: this.#durations.get(suite.import),
-            failing: this.#summary?.isFailing(suite.import) ?? false
+            failing: this.#isFailing(suite.import)
           });
         }
       }
@@ -147,38 +146,35 @@ export class TestImpactGraph {
     return [...failing, ...nonFailing].map(candidate => candidate.importName);
   }
 
-  #refreshIndexIfNeeded(event: CompilerChangeEvent): void {
-    if (event.action === 'create' || event.action === 'delete' || (event.action === 'update' && !this.#index.getFromImport(event.import))) {
-      try {
-        this.#index.reinitForModule(this.#index.manifest.main.name);
-      } catch {
-        // Ignore in-memory test manifests without a disk file
-      }
+  isValidEvent(event: CompilerChangeEvent): { moduleName: string; entry?: IndexedFile; sourceFile: string } | undefined {
+    if (!SOURCE_TYPES.has(ManifestModuleUtil.getFileType(event.file))) {
+      return;
     }
+
+    const entry = this.#index.getFromImport(event.import);
+    if (entry?.role === 'doc' || event.file.startsWith('doc/') || event.file.includes('/doc/')) {
+      return;
+    }
+
+    const sourceFile = entry?.sourceFile ?? path.resolve(Runtime.workspace.path, event.file);
+    const moduleName = entry?.module ?? this.#index.findModuleForArbitraryImport(event.import)?.name;
+    if (!moduleName) {
+      return;
+    }
+
+    return { entry, moduleName, sourceFile };
   }
 
   /**
    * Handle a compiler change event and return the prioritized impacted test runs to queue
    */
   async onCompilerChange(event: CompilerChangeEvent): Promise<(TestRun | TestDiffInput)[]> {
-    if (!SOURCE_TYPES.has(ManifestModuleUtil.getFileType(event.file))) {
-      return [];
-    }
-    if (event.action !== 'delete') {
-      this.#refreshIndexIfNeeded(event);
-    }
-
-    const entry = this.#index.getFromImport(event.import);
-    if (entry?.role === 'doc' || event.file.startsWith('doc/') || event.file.includes('/doc/')) {
+    const result = this.isValidEvent(event);
+    if (!result) {
       return [];
     }
 
-    const sourceFile = entry?.sourceFile ?? path.resolve(Runtime.workspace.path, event.file);
-    const moduleName = entry?.module ?? this.#index.findModuleForArbitraryImport(event.import)?.name;
-    if (!moduleName) {
-      return [];
-    }
-
+    const { moduleName, sourceFile, entry } = result;
     await this.#ensureModuleIndexed(moduleName);
     RunUtil.resetFile(sourceFile);
 
@@ -197,11 +193,6 @@ export class TestImpactGraph {
       : event.file.startsWith('support/test/') || event.file.includes('/support/test/');
 
     const runs: (TestRun | TestDiffInput)[] = [];
-    if (isRunnable && event.action !== 'delete') {
-      runs.push(
-        this.#summary ? { import: entry!.import, diffSource: this.#summary.produceDiffSource(entry!.import) } : { import: entry!.import }
-      );
-    }
 
     const sameModule = await this.#getSameModuleImpacted(
       moduleName,
@@ -223,15 +214,6 @@ export class TestImpactGraph {
         event.action === 'delete' ? event.import : undefined
       );
       runs.push(...downstream.map(importName => ({ import: importName })));
-    }
-
-    if (event.action === 'delete') {
-      this.#importsByModule.get(moduleName)?.delete(sourceFile);
-      if (isRunnable) {
-        this.#durations.delete(event.import);
-        this.#summary?.removeTest(event.import);
-      }
-      this.#refreshIndexIfNeeded(event);
     }
 
     return runs;

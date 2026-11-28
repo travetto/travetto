@@ -1,5 +1,5 @@
 import { Registry } from '@travetto/registry';
-import { AsyncQueue, TimeUtil, WatchUtil } from '@travetto/runtime';
+import { AsyncQueue, RuntimeIndex, TimeUtil, WatchUtil } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
 
 import { TestConsumerRegistryIndex } from '../consumer/registry-index.ts';
@@ -36,7 +36,7 @@ export class TestWatcher {
     const queue = new AsyncQueue(events);
     const consumer = new CumulativeSummaryConsumer(await TestConsumerRegistryIndex.getInstance({ consumer: format }));
     consumer.addConsumer(durations);
-    const impact = new TestImpactGraph(consumer, undefined, durations);
+    const impact = new TestImpactGraph(consumer.isFailing, undefined, durations);
 
     process.on('message', event => {
       if (isTestRunEvent(event)) {
@@ -53,7 +53,20 @@ export class TestWatcher {
     });
 
     await WatchUtil.watchCompilerEvents('change', async event => {
+      if (event.action === 'create' || (event.action === 'update' && !RuntimeIndex.getFromImport(event.import))) {
+        RuntimeIndex.reinit();
+      }
+
       queue.add(await impact.onCompilerChange(event), true);
+
+      if (event.action === 'delete') {
+        durations.delete(event.import);
+        consumer.removeTest(event.import);
+        RuntimeIndex.reinit();
+      } else if (await RunUtil.isTestFile(event.file)) {
+        // Put at the top
+        queue.add({ import: event.import, diffSource: consumer.produceDiffSource(event.import) }, true);
+      }
     });
 
     // Cleanup

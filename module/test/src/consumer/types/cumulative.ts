@@ -25,6 +25,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
 
   constructor(target: TestConsumerShape) {
     super([target]);
+    this.isFailing = this.isFailing.bind(this);
   }
 
   getSuite(core: Pick<SuiteCore, 'import' | 'classId'>): CumulativeSuiteResult {
