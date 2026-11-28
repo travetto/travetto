@@ -13,7 +13,7 @@ const SLOW_DOWNSTREAM_THRESHOLD_MILLISECONDS = 100;
 const MAX_DOWNSTREAM_TESTS = 10;
 const IMPORT_REGEX = /(?:^|\n)\s*(?:import|export)\s+(?:[^'"]*?\s+from\s+)?['"]([^'"]+)['"]|\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
 
-type DownstreamCandidate = { importName: string; tier: number; duration?: number; failing: boolean };
+type ImpactedCandidate = { importName: string; tier: number; duration?: number; failing: boolean };
 type EventClassification = {
   moduleName: string;
   sourceFile: string;
@@ -22,6 +22,15 @@ type EventClassification = {
   isRunnable: boolean;
   outputFile: string | undefined;
 };
+
+const isFastCandidate = (candidate: ImpactedCandidate): boolean =>
+  candidate.duration !== undefined && candidate.duration < SLOW_DOWNSTREAM_THRESHOLD_MILLISECONDS;
+
+const compareCandidates = (left: ImpactedCandidate, right: ImpactedCandidate): number =>
+  +right.failing - +left.failing ||
+  left.tier - right.tier ||
+  (left.duration ?? Number.MAX_SAFE_INTEGER) - (right.duration ?? Number.MAX_SAFE_INTEGER) ||
+  left.importName.localeCompare(right.importName);
 
 /**
  * Lazy same-module ESM reverse-import graph and bounded downstream test impact resolver
@@ -104,12 +113,19 @@ export class TestImpactGraph {
       }
     }
 
-    return [...impacted].sort(
-      (left, right) =>
-        +this.#isFailing(right) - +this.#isFailing(left) ||
-        (this.#durations.get(left) ?? 0) - (this.#durations.get(right) ?? 0) ||
-        left.localeCompare(right)
-    );
+    return [...impacted]
+      .map(importName => this.#toCandidate(importName, 0))
+      .sort(compareCandidates)
+      .map(candidate => candidate.importName);
+  }
+
+  #toCandidate(importName: string, tier: number): ImpactedCandidate {
+    return {
+      importName,
+      tier,
+      duration: this.#durations.get(importName),
+      failing: this.#isFailing(importName)
+    };
   }
 
   async #getDownstreamImpacted(moduleName: string, allowDirectParentFallback: boolean, excludedImport?: string): Promise<string[]> {
@@ -121,37 +137,23 @@ export class TestImpactGraph {
     const dependents = this.#index
       .getDependentModules(moduleName, 'parents')
       .filter(module => module.name !== moduleName && module.workspace);
-    const candidates: DownstreamCandidate[] = [];
+    const candidates: ImpactedCandidate[] = [];
 
     for (const dependent of dependents) {
       const tier = directParents.has(dependent.name) ? 1 : 2;
       for (const suite of dependent.files.test ?? []) {
         if (excludedImport !== suite.import && (await RunUtil.isTestEntry(suite))) {
-          candidates.push({
-            importName: suite.import,
-            tier,
-            duration: this.#durations.get(suite.import),
-            failing: this.#isFailing(suite.import)
-          });
+          candidates.push(this.#toCandidate(suite.import, tier));
         }
       }
     }
 
-    const isFast = (candidate: DownstreamCandidate): boolean =>
-      candidate.duration !== undefined && candidate.duration < SLOW_DOWNSTREAM_THRESHOLD_MILLISECONDS;
-    const rank = (candidate: DownstreamCandidate): number => (candidate.tier === 1 ? (isFast(candidate) ? 0 : 1) : 2);
-    const compare = (left: DownstreamCandidate, right: DownstreamCandidate): number =>
-      (allowDirectParentFallback ? rank(left) - rank(right) : left.tier - right.tier) ||
-      (left.duration ?? Number.MAX_SAFE_INTEGER) - (right.duration ?? Number.MAX_SAFE_INTEGER) ||
-      left.importName.localeCompare(right.importName);
-
-    const failing = candidates.filter(candidate => candidate.failing).sort(compare);
-    const nonFailing = candidates
-      .filter(candidate => !candidate.failing && (isFast(candidate) || (allowDirectParentFallback && candidate.tier === 1)))
-      .sort(compare)
-      .slice(0, MAX_DOWNSTREAM_TESTS);
-
-    return [...failing, ...nonFailing].map(candidate => candidate.importName);
+    let nonFailingCount = 0;
+    return candidates
+      .filter(candidate => candidate.failing || isFastCandidate(candidate) || (allowDirectParentFallback && candidate.tier === 1))
+      .sort(compareCandidates)
+      .filter(candidate => candidate.failing || ++nonFailingCount <= MAX_DOWNSTREAM_TESTS)
+      .map(candidate => candidate.importName);
   }
 
   async classifyEvent(event: CompilerChangeEvent): Promise<EventClassification | undefined> {

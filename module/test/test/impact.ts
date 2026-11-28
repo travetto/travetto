@@ -225,8 +225,8 @@ class TestImpactGraphSuite {
       assert.deepStrictEqual(
         await graph.onCompilerChange(change('update', 'test-app/src/properties.ts', 'module/app/src/properties.ts', 'test-app')),
         [
-          { import: 'test-app/test/parser.ts' },
           { import: 'test-app/test/other.ts' },
+          { import: 'test-app/test/parser.ts' },
           { import: 'ext-mod/test/ext-failing.ts' },
           { import: 'ext-mod/test/ext-fast.ts' },
           { import: 'deep-mod/test/deep-fast.ts' }
