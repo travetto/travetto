@@ -152,12 +152,12 @@ export class TestImpactGraph {
 
     const workspacePath = this.#index.manifest.workspace.path;
     const sourceFile = path.resolve(workspacePath, event.file);
+    const outputFile = path.resolve(workspacePath, event.output);
 
     await this.#ensureModuleIndexed(moduleName);
     RunUtil.resetFile(sourceFile);
 
     if (event.action !== 'delete' && event.output) {
-      const outputFile = path.resolve(workspacePath, event.output);
       await this.#indexOutputFile(moduleName, sourceFile, outputFile);
     }
 
