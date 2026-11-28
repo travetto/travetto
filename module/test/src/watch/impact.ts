@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 
 import type { CompilerChangeEvent } from '@travetto/compiler';
 import { type IndexedFile, type ManifestIndex, ManifestModuleUtil, path } from '@travetto/manifest';
-import { Runtime, RuntimeIndex } from '@travetto/runtime';
+import { RuntimeIndex } from '@travetto/runtime';
 
 import { RunUtil } from '../execute/run.ts';
 import type { TestRun } from '../model/test.ts';
@@ -14,14 +14,6 @@ const IMPORT_REGEX = /(?:^|\n)\s*(?:import|export)\s+(?:[^'"]*?\s+from\s+)?['"](
 
 type ImpactedCandidate = { importName: string; tier: number; duration?: number; failing: boolean };
 type ImpactCandidateProvider = (importName: string, tier: number) => ImpactedCandidate;
-type EventClassification = {
-  moduleName: string;
-  sourceFile: string;
-  isSupportTest: boolean;
-  isTestFolder: boolean;
-  isRunnable: boolean;
-  outputFile: string | undefined;
-};
 
 const isFastCandidate = (candidate: ImpactedCandidate): boolean =>
   candidate.duration !== undefined && candidate.duration < SLOW_DOWNSTREAM_THRESHOLD_MILLISECONDS;
@@ -145,64 +137,42 @@ export class TestImpactGraph {
       .map(candidate => candidate.importName);
   }
 
-  async classifyEvent(event: CompilerChangeEvent): Promise<EventClassification | undefined> {
-    const entry = this.#index.getFromImport(event.import);
-    const moduleName = entry?.module ?? this.#index.findModuleForArbitraryImport(event.import)?.name;
-    if (!moduleName) {
-      return;
-    }
-
-    const relativeFile =
-      entry?.relativeFile ?? (event.import.startsWith(`${moduleName}/`) ? event.import.slice(moduleName.length + 1) : '');
-    if (!relativeFile || !ManifestModuleUtil.isValidModuleFile(relativeFile, true)) {
-      return;
-    }
-
-    if (!SOURCE_TYPES.has(ManifestModuleUtil.getFileType(relativeFile))) {
-      return;
-    }
-
-    const role = entry?.role ?? ManifestModuleUtil.getFileRole(relativeFile);
-    if (role === 'doc') {
-      return;
-    }
-
-    const folder = ManifestModuleUtil.getFolderKey(relativeFile);
-    const sourceFile = entry?.sourceFile ?? path.resolve(Runtime.workspace.path, event.file);
-    const isTestFolder = folder === 'test';
-    const isSupportTest = folder === 'support' && role === 'test';
-    const isRunnable = await RunUtil.isTestEntry(entry);
-    const outputFile = entry?.outputFile ?? (event.output ? path.resolve(Runtime.workspace.path, event.output) : undefined);
-
-    return { moduleName, sourceFile, outputFile, isSupportTest, isTestFolder, isRunnable };
-  }
-
   /**
    * Handle a compiler change event and return the prioritized impacted test runs to queue
    */
   async onCompilerChange(event: CompilerChangeEvent): Promise<TestRun[]> {
-    const result = await this.classifyEvent(event);
-    if (!result) {
+    const { module: moduleName, relativeFile } = event;
+    if (
+      !relativeFile ||
+      !SOURCE_TYPES.has(ManifestModuleUtil.getFileType(relativeFile)) ||
+      ManifestModuleUtil.getFileRole(relativeFile) === 'doc'
+    ) {
       return [];
     }
 
-    const { moduleName, sourceFile, outputFile, isSupportTest, isTestFolder, isRunnable } = result;
-    await this.#ensureModuleIndexed(moduleName);
+    const workspacePath = this.#index.manifest.workspace.path;
+    const sourceFile = path.resolve(workspacePath, event.file);
 
-    if (event.action !== 'delete' && outputFile) {
+    await this.#ensureModuleIndexed(moduleName);
+    RunUtil.resetFile(sourceFile);
+
+    if (event.action !== 'delete' && event.output) {
+      const outputFile = path.resolve(workspacePath, event.output);
       await this.#indexOutputFile(moduleName, sourceFile, outputFile);
     }
 
-    const runs: TestRun[] = [];
-
+    const folder = ManifestModuleUtil.getFolderKey(relativeFile);
+    const role = ManifestModuleUtil.getFileRole(relativeFile);
+    const isRunnable = folder === 'test' && (await RunUtil.isTestFile(sourceFile));
     const sameModule = await this.#getSameModuleImpacted(
       moduleName,
       sourceFile,
       isRunnable || event.action === 'delete' ? event.import : undefined
     );
-    runs.push(...sameModule.map(importName => ({ import: importName })));
 
-    if (!isRunnable && !isTestFolder) {
+    const runs: TestRun[] = [...sameModule.map(importName => ({ import: importName }))];
+
+    if (folder !== 'test') {
       let ownSuiteCount = 0;
       for (const file of this.#index.getModule(moduleName)?.files.test ?? []) {
         if (event.import !== file.import && (await RunUtil.isTestEntry(file))) {
@@ -211,7 +181,7 @@ export class TestImpactGraph {
       }
       const downstream = await this.#getDownstreamImpacted(
         moduleName,
-        isSupportTest || ownSuiteCount === 0,
+        (folder === 'support' && role === 'test') || ownSuiteCount === 0,
         event.action === 'delete' ? event.import : undefined
       );
       runs.push(...downstream.map(importName => ({ import: importName })));
