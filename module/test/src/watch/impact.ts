@@ -13,7 +13,7 @@ const MAX_DOWNSTREAM_TESTS = 10;
 const IMPORT_REGEX = /(?:^|\n)\s*(?:import|export)\s+(?:[^'"]*?\s+from\s+)?['"]([^'"]+)['"]|\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
 
 type ImpactedCandidate = { importName: string; tier: number; duration?: number; failing: boolean };
-type ImpactCandidateProvider = (importName: string, tier: number) => ImpactedCandidate;
+type ImpactCandidateProvider = (importName: string) => Omit<ImpactedCandidate, 'tier' | 'importName'>;
 
 const isFastCandidate = (candidate: ImpactedCandidate): boolean =>
   candidate.duration !== undefined && candidate.duration < SLOW_DOWNSTREAM_THRESHOLD_MILLISECONDS;
@@ -104,7 +104,7 @@ export class TestImpactGraph {
     }
 
     return [...impacted]
-      .map(importName => this.#toCandidate(importName, 0))
+      .map(importName => ({ importName, tier: 0, ...this.#toCandidate(importName) }))
       .sort(compareCandidates)
       .map(candidate => candidate.importName);
   }
@@ -124,7 +124,7 @@ export class TestImpactGraph {
       const tier = directParents.has(dependent.name) ? 1 : 2;
       for (const suite of dependent.files.test ?? []) {
         if (excludedImport !== suite.import && (await RunUtil.isTestEntry(suite))) {
-          candidates.push(this.#toCandidate(suite.import, tier));
+          candidates.push({ importName: suite.import, tier, ...this.#toCandidate(suite.import) });
         }
       }
     }

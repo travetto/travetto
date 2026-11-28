@@ -201,9 +201,7 @@ class TestImpactGraphSuite {
       recordSuite(summary, 'deep-mod/test/deep-slow.ts', 'passed', 200);
 
       const graph = new TestImpactGraph(
-        (importName, tier) => ({
-          importName,
-          tier,
+        importName => ({
           duration: durations.get(importName),
           failing: summary.isFailing(importName)
         }),
@@ -281,9 +279,7 @@ class TestImpactGraphSuite {
       recordSuite(summary, 'deep-mod/test/deep-slow.ts', 'passed', 300);
 
       const standardRuns = await new TestImpactGraph(
-        (importName, tier) => ({
-          importName,
-          tier,
+        importName => ({
           duration: durations.get(importName),
           failing: summary.isFailing(importName)
         }),
@@ -300,9 +296,7 @@ class TestImpactGraphSuite {
       ];
       const fallbackIndex = new ManifestIndex(manifest);
       const fallbackGraph = new TestImpactGraph(
-        (importName, tier) => ({
-          importName,
-          tier,
+        importName => ({
           duration: durations.get(importName),
           failing: summary.isFailing(importName)
         }),
